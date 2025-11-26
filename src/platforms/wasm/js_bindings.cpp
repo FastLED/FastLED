@@ -29,7 +29,6 @@
 #include <emscripten/html5.h>
 #include <cfloat> // ok include
 #include <string>
-#include <cstring> // ok include
 
 #include "js_bindings.h"
 
@@ -37,6 +36,8 @@
 #include "platforms/wasm/js.h"
 #include "fl/dbg.h"
 #include "ftl/math.h"
+#include "ftl/malloc.h"
+#include "ftl/cstring.h"
 #include "fl/screenmap.h"
 #include "fl/json.h"
 #include "ftl/stdio.h"
@@ -70,8 +71,8 @@ EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
     fl::Str json_str = active_strips.infoJsonString();
     
     // Allocate and return data pointer
-    char* buffer = (char*)malloc(json_str.length() + 1);
-    strcpy(buffer, json_str.c_str());
+    char* buffer = (char*)fl::malloc(json_str.length() + 1);
+    fl::strcpy(buffer, json_str.c_str());
     *dataSize = json_str.length();
     
     return buffer;
@@ -185,8 +186,8 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     fl::Str json_str = root.to_string();
 
     // Allocate and return data pointer
-    char* buffer = (char*)malloc(json_str.length() + 1);
-    strcpy(buffer, json_str.c_str());
+    char* buffer = (char*)fl::malloc(json_str.length() + 1);
+    fl::strcpy(buffer, json_str.c_str());
     *dataSize = json_str.length();
 
     return buffer;
@@ -198,7 +199,7 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
  */
 EMSCRIPTEN_KEEPALIVE void freeFrameData(void* data) {
     if (data) {
-        free(data);
+        fl::free(data);
     }
 }
 
@@ -257,8 +258,8 @@ EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     fl::Str jsonBuffer = doc.to_string();
 
     // Allocate and return data pointer
-    char* buffer = (char*)malloc(jsonBuffer.length() + 1);
-    strcpy(buffer, jsonBuffer.c_str());
+    char* buffer = (char*)fl::malloc(jsonBuffer.length() + 1);
+    fl::strcpy(buffer, jsonBuffer.c_str());
     *dataSize = jsonBuffer.length();
 
     return buffer;
@@ -286,8 +287,8 @@ EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     fl::Str jsonBuffer = doc.to_string();
 
     // Allocate and return data pointer
-    char* buffer = (char*)malloc(jsonBuffer.length() + 1);
-    strcpy(buffer, jsonBuffer.c_str());
+    char* buffer = (char*)fl::malloc(jsonBuffer.length() + 1);
+    fl::strcpy(buffer, jsonBuffer.c_str());
     *dataSize = jsonBuffer.length();
 
     return buffer;

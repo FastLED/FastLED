@@ -9,27 +9,29 @@
 
 namespace fl {
 
-/// Static storage for registered instances (moved to .cpp to avoid __cxa_guard conflicts)
-static fl::vector<fl::shared_ptr<SpiHw16>>& getRegistry() {
-    static fl::vector<fl::shared_ptr<SpiHw16>> instances;
-    return instances;
+namespace {
+    /// Static registry of all registered instances
+    fl::vector<fl::shared_ptr<SpiHw16>>& getRegistrySpiHw16() {
+        static fl::vector<fl::shared_ptr<SpiHw16>> registry;
+        return registry;
+    }
 }
 
 /// Get all available 16-lane hardware SPI devices on this platform
 const fl::vector<fl::shared_ptr<SpiHw16>>& SpiHw16::getAll() {
-    return getRegistry();
+    return getRegistrySpiHw16();
 }
 
 /// Register a platform-specific instance
 void SpiHw16::registerInstance(fl::shared_ptr<SpiHw16> instance) {
     if (instance) {
-        getRegistry().push_back(instance);
+        getRegistrySpiHw16().push_back(instance);
     }
 }
 
 /// Remove a registered instance
 bool SpiHw16::removeInstance(const fl::shared_ptr<SpiHw16>& instance) {
-    auto& registry = getRegistry();
+    auto& registry = getRegistrySpiHw16();
     for (size_t i = 0; i < registry.size(); ++i) {
         if (registry[i] == instance) {
             registry.erase(registry.begin() + i);
@@ -41,7 +43,7 @@ bool SpiHw16::removeInstance(const fl::shared_ptr<SpiHw16>& instance) {
 
 /// Clear all registered instances (primarily for testing)
 void SpiHw16::clearInstances() {
-    getRegistry().clear();
+    getRegistrySpiHw16().clear();
 }
 
 }  // namespace fl

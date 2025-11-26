@@ -11,7 +11,7 @@ namespace fl {
 
 namespace {
     /// Static registry of all registered instances
-    fl::vector<fl::shared_ptr<SpiHw2>>& getRegistry() {
+    fl::vector<fl::shared_ptr<SpiHw2>>& getRegistrySpiHw2() {
         static fl::vector<fl::shared_ptr<SpiHw2>> registry;
         return registry;
     }
@@ -21,13 +21,13 @@ namespace {
 /// Called by platform implementations during static initialization
 void SpiHw2::registerInstance(fl::shared_ptr<SpiHw2> instance) {
     if (instance) {
-        getRegistry().push_back(instance);
+        getRegistrySpiHw2().push_back(instance);
     }
 }
 
 /// Remove a registered instance
 bool SpiHw2::removeInstance(const fl::shared_ptr<SpiHw2>& instance) {
-    auto& registry = getRegistry();
+    auto& registry = getRegistrySpiHw2();
     for (size_t i = 0; i < registry.size(); ++i) {
         if (registry[i] == instance) {
             registry.erase(registry.begin() + i);
@@ -39,13 +39,13 @@ bool SpiHw2::removeInstance(const fl::shared_ptr<SpiHw2>& instance) {
 
 /// Clear all registered instances (primarily for testing)
 void SpiHw2::clearInstances() {
-    getRegistry().clear();
+    getRegistrySpiHw2().clear();
 }
 
 /// Get all registered instances
 /// Implementation moved to cpp to avoid Teensy 3.x __cxa_guard linkage issues
 const fl::vector<fl::shared_ptr<SpiHw2>>& SpiHw2::getAll() {
-    return getRegistry();
+    return getRegistrySpiHw2();
 }
 
 }  // namespace fl

@@ -58,8 +58,11 @@ COMPILE_PCH_WRAPPER = PROJECT_ROOT / "ci" / "compile_pch.py"
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
 OBJECTS_DIR = BUILD_DIR / "objects"
 DEPS_DIR = BUILD_DIR / "deps"
+LTO_CACHE_DIR = BUILD_DIR / "lto_cache"
+UNITY_DIR = BUILD_DIR / "unity"
 LIBRARY_OUTPUT = BUILD_DIR / "libfastled.a"
 LIBRARY_METADATA = BUILD_DIR / "library_metadata.json"
+UNITY_METADATA = UNITY_DIR / "unity_metadata.json"
 PCH_OUTPUT = BUILD_DIR / "wasm_pch.h.pch"
 
 
@@ -204,10 +207,26 @@ def compute_flags_hash(flags: dict[str, list[str]]) -> str:
     return hashlib.sha256(flags_str.encode()).hexdigest()
 
 
-def get_source_files() -> list[Path]:
-    """Get all .cpp source files from src/ directory (with caching)."""
-    # Use native Python glob instead of subprocess call for speed
-    # This is 10-100x faster than spawning a subprocess
+def get_source_files(unity_chunks: int = 0) -> list[Path]:
+    """
+    Get all .cpp source files from src/ directory.
+
+    Args:
+        unity_chunks: If > 0, return unity build files instead of individual sources
+
+    Returns:
+        List of source files to compile (either individual .cpp or unity*.cpp)
+    """
+    if unity_chunks > 0:
+        # Unity build mode: Return generated unity files
+        unity_files = []
+        for i in range(unity_chunks):
+            unity_file = UNITY_DIR / f"unity{i}.cpp"
+            if unity_file.exists():
+                unity_files.append(unity_file)
+        return sorted(unity_files)
+
+    # Normal mode: Return individual source files
     src_dir = PROJECT_ROOT / "src"
     sources = []
     for cpp_file in src_dir.rglob("*.cpp"):
@@ -444,6 +463,45 @@ def ensure_pch_built(build_mode: str, verbose: bool = False) -> int:
     return 0
 
 
+def ensure_unity_files_generated(unity_chunks: int, verbose: bool = False) -> int:
+    """
+    Ensure unity build files are generated and up-to-date.
+
+    Args:
+        unity_chunks: Number of unity chunks to generate
+        verbose: Enable verbose output
+
+    Returns:
+        Exit code (0 = success)
+    """
+    if unity_chunks <= 0:
+        return 0  # Unity builds disabled
+
+    print(f"Generating unity build files ({unity_chunks} chunks)...")
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        str(PROJECT_ROOT / "ci" / "wasm_unity_generator.py"),
+        "--chunks",
+        str(unity_chunks),
+        "--output",
+        str(UNITY_DIR),
+    ]
+
+    if verbose:
+        cmd.append("--verbose")
+
+    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+
+    if result.returncode != 0:
+        print(f"✗ Unity file generation failed with return code {result.returncode}")
+        return result.returncode
+
+    return 0
+
+
 def create_thin_archive(
     emar: Path,
     object_files: list[Path],
@@ -578,6 +636,7 @@ def build_library(
     force: bool = False,
     verbose: bool = False,
     parallel: int | None = None,
+    unity_chunks: int = 0,
 ) -> int:
     """
     Build the FastLED static library.
@@ -587,6 +646,7 @@ def build_library(
         force: Force rebuild all objects
         verbose: Enable verbose output
         parallel: Number of parallel jobs (None = CPU count)
+        unity_chunks: Number of unity build chunks (0 = disabled, >0 = enabled)
 
     Returns:
         Exit code (0 = success)
@@ -596,21 +656,39 @@ def build_library(
 
         start_time = time.time()
 
-        print(f"Building FastLED library (mode: {build_mode})...")
+        unity_mode = unity_chunks > 0
+        if unity_mode:
+            print(
+                f"Building FastLED library (mode: {build_mode}, UNITY: {unity_chunks} chunks)..."
+            )
+        else:
+            print(f"Building FastLED library (mode: {build_mode})...")
 
-        # Step 1: Ensure PCH is built
+        # Step 1: Create build directories (including LTO cache and unity)
+        BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        LTO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        if unity_mode:
+            UNITY_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Step 2: Ensure PCH is built
         pch_result = ensure_pch_built(build_mode, verbose)
         if pch_result != 0:
             return pch_result
 
-        # Step 2: Find compiler and archiver
+        # Step 2b: Generate unity build files (if enabled)
+        if unity_mode:
+            unity_result = ensure_unity_files_generated(unity_chunks, verbose)
+            if unity_result != 0:
+                return unity_result
+
+        # Step 3: Find compiler and archiver
         emcc = find_emscripten()
         emar = find_emar()
         if verbose:
             print(f"Using emscripten: {emcc}")
             print(f"Using archiver: {emar}")
 
-        # Step 3: Load build flags
+        # Step 4: Load build flags
         flags = load_build_flags(build_mode)
         flags_hash = compute_flags_hash(flags)
         if verbose:
@@ -618,15 +696,20 @@ def build_library(
                 f"Loaded {len(flags['defines'])} defines, {len(flags['compiler_flags'])} compiler flags"
             )
 
-        # Step 4: Load metadata from previous build
+        # Step 5: Load metadata from previous build
         metadata = load_metadata()
 
-        # Step 5: Discover all source files
-        print("Discovering source files...")
-        sources = get_source_files()
-        print(f"Found {len(sources)} source files")
+        # Step 6: Discover all source files (or unity files if enabled)
+        if unity_mode:
+            print(f"Using unity build files ({unity_chunks} chunks)...")
+            sources = get_source_files(unity_chunks=unity_chunks)
+            print(f"Found {len(sources)} unity build files")
+        else:
+            print("Discovering source files...")
+            sources = get_source_files()
+            print(f"Found {len(sources)} source files")
 
-        # Step 6: Fast-path check - if flags haven't changed, PCH is same, and archive exists, we're done
+        # Step 7: Fast-path check - if flags haven't changed, PCH is same, and archive exists, we're done
         if (
             not force
             and LIBRARY_OUTPUT.exists()
@@ -648,7 +731,7 @@ def build_library(
                     print(f"  Objects: {len(sources)} files")
                     return 0
 
-        # Step 6: Determine which sources need compilation (detailed check)
+        # Step 8: Determine which sources need compilation (detailed check)
         print("Checking which sources need compilation...")
         sources_to_compile = []
         up_to_date_count = 0
@@ -656,9 +739,14 @@ def build_library(
         for source in sources:
             # Compute object and depfile paths
             # Keep directory structure under objects/ for organization
-            rel_path = source.relative_to(PROJECT_ROOT / "src")
-            object_path = OBJECTS_DIR / rel_path.with_suffix(".o")
-            depfile_path = DEPS_DIR / rel_path.with_suffix(".d")
+            if unity_mode:
+                # Unity files are in build/wasm/unity/, use basename only
+                rel_path = source.name
+            else:
+                # Normal sources are in src/, preserve directory structure
+                rel_path = source.relative_to(PROJECT_ROOT / "src")
+            object_path = OBJECTS_DIR / Path(rel_path).with_suffix(".o")
+            depfile_path = DEPS_DIR / Path(rel_path).with_suffix(".d")
 
             rebuild_needed, reason = needs_rebuild(
                 source,
@@ -691,7 +779,7 @@ def build_library(
             print(f"  Objects: {len(sources)} files")
             return 0
 
-        # Step 7: Compile sources in parallel
+        # Step 9: Compile sources in parallel
         if sources_to_compile:
             print(
                 f"Compiling {len(sources_to_compile)} sources (parallel: {parallel or 'auto'})..."
@@ -745,12 +833,17 @@ def build_library(
         else:
             print("✓ All sources are up-to-date, skipping compilation")
 
-        # Step 8: Collect all object files
+        # Step 10: Collect all object files
         print("Collecting object files...")
         all_objects = []
         for source in sources:
-            rel_path = source.relative_to(PROJECT_ROOT / "src")
-            object_path = OBJECTS_DIR / rel_path.with_suffix(".o")
+            if unity_mode:
+                # Unity files: use basename only
+                rel_path = source.name
+            else:
+                # Normal sources: preserve directory structure
+                rel_path = source.relative_to(PROJECT_ROOT / "src")
+            object_path = OBJECTS_DIR / Path(rel_path).with_suffix(".o")
             if object_path.exists():
                 all_objects.append(object_path)
 
@@ -760,7 +853,7 @@ def build_library(
 
         print(f"Found {len(all_objects)} object files")
 
-        # Step 9: Partial linking optimization (combine all objects into one)
+        # Step 11: Partial linking optimization (combine all objects into one)
         # This dramatically speeds up final linking by reducing file I/O
         partial_object = BUILD_DIR / "libfastled_partial.o"
         needs_partial_relink = force
@@ -824,14 +917,14 @@ def build_library(
         else:
             print(f"✓ Partial object is up-to-date")
 
-        # Step 10: Create thin archive from partial object (single file, much faster)
+        # Step 12: Create thin archive from partial object (single file, much faster)
         archive_result = create_thin_archive(
             emar, [partial_object], LIBRARY_OUTPUT, verbose
         )
         if archive_result != 0:
             return archive_result
 
-        # Step 11: Save metadata for future builds
+        # Step 13: Save metadata for future builds
         metadata = {
             "flags_hash": flags_hash,
             "build_mode": build_mode,
@@ -893,6 +986,13 @@ def main() -> int:
         metavar="N",
         help="Number of parallel jobs (default: CPU count)",
     )
+    parser.add_argument(
+        "--unity-chunks",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Enable unity builds with N chunks (default: 0 = disabled)",
+    )
 
     args = parser.parse_args()
 
@@ -902,7 +1002,9 @@ def main() -> int:
             return clean_library()
 
         # Build library
-        return build_library(args.mode, args.force, args.verbose, args.parallel)
+        return build_library(
+            args.mode, args.force, args.verbose, args.parallel, args.unity_chunks
+        )
 
     except KeyboardInterrupt:
         print("\n✗ Build interrupted by user")

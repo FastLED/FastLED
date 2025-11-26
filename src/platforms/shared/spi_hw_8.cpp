@@ -11,7 +11,7 @@ namespace fl {
 
 namespace {
     /// Static registry of all registered instances
-    fl::vector<fl::shared_ptr<SpiHw8>>& getRegistry() {
+    fl::vector<fl::shared_ptr<SpiHw8>>& getRegistrySpiHw8() {
         static fl::vector<fl::shared_ptr<SpiHw8>> registry;
         return registry;
     }
@@ -21,13 +21,13 @@ namespace {
 /// Called by platform implementations during static initialization
 void SpiHw8::registerInstance(fl::shared_ptr<SpiHw8> instance) {
     if (instance) {
-        getRegistry().push_back(instance);
+        getRegistrySpiHw8().push_back(instance);
     }
 }
 
 /// Remove a registered instance
 bool SpiHw8::removeInstance(const fl::shared_ptr<SpiHw8>& instance) {
-    auto& registry = getRegistry();
+    auto& registry = getRegistrySpiHw8();
     for (size_t i = 0; i < registry.size(); ++i) {
         if (registry[i] == instance) {
             registry.erase(registry.begin() + i);
@@ -39,13 +39,13 @@ bool SpiHw8::removeInstance(const fl::shared_ptr<SpiHw8>& instance) {
 
 /// Clear all registered instances (primarily for testing)
 void SpiHw8::clearInstances() {
-    getRegistry().clear();
+    getRegistrySpiHw8().clear();
 }
 
 /// Get all registered instances
 /// This is moved out of the header to avoid __cxa_guard conflicts on some platforms
 const fl::vector<fl::shared_ptr<SpiHw8>>& SpiHw8::getAll() {
-    return getRegistry();
+    return getRegistrySpiHw8();
 }
 
 }  // namespace fl

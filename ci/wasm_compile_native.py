@@ -32,6 +32,7 @@ BUILD_FLAGS_TOML = (
     PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
 )
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
+LTO_CACHE_DIR = BUILD_DIR / "lto_cache"
 ENTRY_POINT_CPP = PROJECT_ROOT / "src" / "platforms" / "wasm" / "entry_point.cpp"
 
 
@@ -129,7 +130,10 @@ def load_build_flags(
 
 
 def ensure_library_built(
-    build_mode: str, verbose: bool = False, force: bool = False
+    build_mode: str,
+    verbose: bool = False,
+    force: bool = False,
+    unity_chunks: int = 0,
 ) -> bool:
     """
     Ensure libfastled.a is up-to-date by calling wasm_build_library.py.
@@ -138,6 +142,7 @@ def ensure_library_built(
         build_mode: Build mode to pass to library build
         verbose: Enable verbose output
         force: Force rebuild of library
+        unity_chunks: Number of unity build chunks (0 = disabled)
 
     Returns:
         True if successful
@@ -155,6 +160,8 @@ def ensure_library_built(
         cmd.append("--verbose")
     if force:
         cmd.append("--force")
+    if unity_chunks > 0:
+        cmd.extend(["--unity-chunks", str(unity_chunks)])
 
     result = subprocess.run(cmd, cwd=PROJECT_ROOT)
     return result.returncode == 0
@@ -312,6 +319,7 @@ def compile_wasm(
     build_mode: str = "quick",
     verbose: bool = False,
     force: bool = False,
+    unity_chunks: int = 0,
 ) -> int:
     """
     Compile a FastLED sketch to WebAssembly using incremental compilation.
@@ -329,6 +337,7 @@ def compile_wasm(
         build_mode: Build mode (debug, fast_debug, quick, release)
         verbose: Enable verbose output
         force: Force rebuild of all components
+        unity_chunks: Number of unity build chunks (0 = disabled)
 
     Returns:
         Exit code (0 = success)
@@ -342,12 +351,13 @@ def compile_wasm(
         if verbose:
             print(f"Using emscripten: {emcc}")
 
-        # Create build directory
+        # Create build directories
         BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        LTO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
         # Phase 1 & 2: Ensure library is up-to-date (also ensures PCH is up-to-date)
         phase2_start = time.time()
-        if not ensure_library_built(build_mode, verbose, force):
+        if not ensure_library_built(build_mode, verbose, force, unity_chunks):
             print("✗ Library build failed")
             return 1
         phase2_time = time.time() - phase2_start
@@ -492,6 +502,13 @@ def main() -> int:
     parser.add_argument(
         "--force", action="store_true", help="Force rebuild of all components"
     )
+    parser.add_argument(
+        "--unity-chunks",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Enable unity builds with N chunks (default: 0 = disabled)",
+    )
 
     args = parser.parse_args()
 
@@ -513,7 +530,12 @@ def main() -> int:
 
     try:
         return compile_wasm(
-            source_file, output_file, args.mode, args.verbose, args.force
+            source_file,
+            output_file,
+            args.mode,
+            args.verbose,
+            args.force,
+            args.unity_chunks,
         )
     except KeyboardInterrupt:
         print("\n✗ Build interrupted by user")
