@@ -40,6 +40,7 @@
  * @property {number} averageFrameTime - Average frame time in ms
  * @property {Object|null} externFunctions - External functions
  * @property {Object|null} wasmFunctions - WASM functions
+ * @property {Function|null} processUiInput - UI input processing function
  */
 
 /**
@@ -63,7 +64,8 @@ const workerState = {
 
   // Function references
   externFunctions: null,
-  wasmFunctions: null
+  wasmFunctions: null,
+  processUiInput: null
 };
 
 /**
@@ -148,6 +150,10 @@ self.onmessage = async function(event) {
 
       case 'get_performance_stats':
         response = getPerformanceStats();
+        break;
+
+      case 'ui_changes':
+        response = handleUiChanges(payload);
         break;
 
       default:
@@ -393,17 +399,17 @@ async function handleStart(_payload) {
   }
 
   try {
-    // Bind async extern functions if not already bound
+    // Bind synchronous extern functions if not already bound (Asyncify removed)
     if (!workerState.externFunctions) {
       const Module = workerState.fastledModule;
       workerState.externFunctions = {
-        externSetup: Module.cwrap('extern_setup', 'number', [], { async: true }),
-        externLoop: Module.cwrap('extern_loop', 'number', [], { async: true })
+        externSetup: Module.cwrap('extern_setup', 'number', []),
+        externLoop: Module.cwrap('extern_loop', 'number', [])
       };
     }
 
-    // Call FastLED setup function
-    await workerState.externFunctions.externSetup();
+    // Call FastLED setup function (synchronous - worker thread allows blocking)
+    workerState.externFunctions.externSetup();
     workerLog('LOG', 'BACKGROUND_WORKER', 'FastLED setup completed');
 
     // Start animation loop
@@ -503,6 +509,43 @@ function handleUpdateFrameRate(payload) {
 }
 
 /**
+ * Handles UI changes from main thread and passes them to C++ WASM
+ * @param {Object} payload - UI changes data
+ * @returns {Object} Processing result
+ */
+function handleUiChanges(payload) {
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Processing UI changes from main thread', payload);
+
+  try {
+    const Module = workerState.fastledModule;
+
+    if (!Module || !Module.cwrap) {
+      throw new Error('WASM module not available for UI processing');
+    }
+
+    // Bind processUiInput if not already bound
+    if (!workerState.processUiInput) {
+      workerState.processUiInput = Module.cwrap('processUiInput', null, ['string']);
+    }
+
+    // Convert changes to JSON string and send to C++
+    const jsonString = JSON.stringify(payload.changes);
+    workerState.processUiInput(jsonString);
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'UI changes processed successfully');
+
+    return {
+      success: true,
+      changesProcessed: Object.keys(payload.changes || {}).length
+    };
+
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to process UI changes', error);
+    throw error;
+  }
+}
+
+/**
  * Starts the animation loop in worker context
  */
 function startAnimationLoop() {
@@ -544,15 +587,15 @@ async function executeFrameLoop(currentTime) {
   try {
     workerState.frameCount++;
 
-    // Call FastLED loop function using the bound async function
+    // Call FastLED loop function synchronously (Asyncify removed - worker thread allows blocking)
     if (!workerState.externFunctions) {
       const Module = workerState.fastledModule;
       workerState.externFunctions = {
-        externSetup: Module.cwrap('extern_setup', 'number', [], { async: true }),
-        externLoop: Module.cwrap('extern_loop', 'number', [], { async: true })
+        externSetup: Module.cwrap('extern_setup', 'number', []),
+        externLoop: Module.cwrap('extern_loop', 'number', [])
       };
     }
-    await workerState.externFunctions.externLoop();
+    workerState.externFunctions.externLoop();
 
     // Get frame data from WASM
     const frameData = extractFrameData();

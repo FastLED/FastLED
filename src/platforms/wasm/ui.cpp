@@ -127,39 +127,31 @@ void ensureWasmUiSystemInitialized() {
     if (!getUiSystemInitialized() || !getUpdateEngineState()) {
         FL_WARN("*** ASYNC WASM INITIALIZING UI SYSTEM ***");
         
-        // Create async-aware UI update handler with error handling via early return
+        // Create UI update handler that posts message to main thread
+        // In PROXY_TO_PTHREAD mode, C++ runs in worker thread, UI manager runs on main thread
         JsonUiUpdateOutput updateJsHandler = [](const char* jsonStr) {
             if (!jsonStr) {
-                FL_WARN("*** ASYNC UI UPDATE HANDLER ERROR: Received null jsonStr");
+                FL_WARN("*** UI UPDATE HANDLER ERROR: Received null jsonStr");
                 return; // Early return on error
             }
-            
-            // Route UI updates to JavaScript addUiElements
-            // The array may contain all elements (new components) or just changed elements
-            //FL_WARN("*** ROUTING UI UPDATES TO JavaScript addUiElements");
 
+            // Post message to main thread with UI JSON
+            // Main thread will call uiManager.addUiElements()
             EM_ASM({
                 try {
                     const jsonStr = UTF8ToString($0);
                     const uiElements = JSON.parse(jsonStr);
 
-                    // Log the inbound event to the inspector if available
-                    // Use globalThis for compatibility with both main thread and Web Workers
-                    if (globalThis.jsonInspector) {
-                        globalThis.jsonInspector.logInboundEvent(uiElements, 'C++ → JS');
-                    }
-
-                    // Route to UI manager - will update existing elements or create new ones
-                    // Use globalThis for compatibility with both main thread and Web Workers
-                    if (globalThis.uiManager && typeof globalThis.uiManager.addUiElements === 'function') {
-                        globalThis.uiManager.addUiElements(uiElements);
-                        //console.log('UI elements processed:', uiElements.length, 'elements');
-                    } else {
-                        console.warn('UI Manager not available');
-                    }
-
+                    // Post message to main thread for UI processing
+                    // Worker context: postMessage sends to main thread
+                    postMessage({
+                        type: 'ui_elements_add',
+                        payload: {
+                            elements: uiElements
+                        }
+                    });
                 } catch (error) {
-                    console.error('Error in UI element routing:', error);
+                    console.error('Error posting UI message from worker:', error);
                 }
             }, jsonStr);
         };

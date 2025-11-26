@@ -135,6 +135,11 @@ const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
 /** Force beautiful 3D renderer when gfx=1 URL parameter is present */
 const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
 
+console.log('🔍 GFX Parameter Debug:');
+console.log('  URL gfx param value:', urlParams.get('gfx'));
+console.log('  FORCE_FAST_RENDERER:', FORCE_FAST_RENDERER);
+console.log('  FORCE_THREEJS_RENDERER:', FORCE_THREEJS_RENDERER);
+
 /** Maximum number of lines to keep in stdout output display */
 const MAX_STDOUT_LINES = 50;
 
@@ -918,7 +923,7 @@ async function localLoadFastLed(options) {
     // Initialize JSON Inspector
     new JsonInspector();
 
-    // Expose UI manager globally for debug functions and C++ module
+    // Expose UI manager globally for debug functions (main thread only)
     window.uiManager = uiManager;
     window.uiManagerInstance = uiManager;
 
@@ -1068,7 +1073,7 @@ window.startFastLED = startFastLED;
 window.stopFastLED = stopFastLED;
 window.toggleFastLED = toggleFastLED;
 
-// Expose rendering function globally
+// Expose rendering function globally (main thread only)
 window.updateCanvas = updateCanvas;
 
 // Set up global error handlers
@@ -1113,12 +1118,10 @@ function initializeVideoRecorder() {
         throw new Error('Canvas not ready yet');
       }
 
-      console.log('Video recorder initializing - canvas and graphics ready');
       actuallyInitializeVideoRecorder(canvas, recordButton);
     } catch (error) {
       retryCount++;
       if (retryCount < maxRetries) {
-        console.log(`Canvas/Graphics not ready yet (attempt ${retryCount}/${maxRetries}), retrying in 200ms...`);
         setTimeout(tryInitialize, 200);
       } else {
         console.warn('Failed to initialize video recorder - canvas/graphics not ready after maximum retries');

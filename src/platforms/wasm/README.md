@@ -7,14 +7,16 @@ WebAssembly/browser platform with C++ ↔ JavaScript bridges and a pure data‑e
 - `entry_point.cpp`, `timer.cpp`, `ui.cpp`, `js.cpp`, `fs_wasm.*`, `fastspi_wasm.*`: WASM platform runtime and I/O.
 - `compiler/`: Browser launcher and JS modules (async controller, events, graphics, UI, audio). Also includes `build_flags.toml` for WASM builds.
 
-## Asyncify and exported function contract
+## Threading Architecture (Worker Thread Mode)
+
+**FastLED WASM uses dedicated Web Workers** (PROXY_TO_PTHREAD) for background execution. Asyncify was removed in 2025-01 to reduce binary size (44.4% reduction) and fix audio reactive mode issues.
 
 When adding or modifying C++ ↔ JS bridge functions:
 
-- Use Asyncify.handleAsync on the JavaScript side for any operation that can yield (I/O, timers, UI waits). Avoid callback chains; prefer async/await for clarity and correctness.
-- Keep exported C functions stable. Treat names and parameter/return types as a strict ABI with the JS loader. If a signature must change, update both C++ and `compiler/modules/` consumers together.
-- Prefer a data-export pattern: allocate in C++, return ownership/size to JS, and provide matching free functions (e.g., `getFrameData`/`freeFrameData`). Do not embed JS in C++; centralize browser logic under `compiler/modules/`.
-- Match official Emscripten header prototypes exactly for any externs (for example, `extern "C" void emscripten_sleep(unsigned int ms);`).
+- **Synchronous execution**: All C++ ↔ JS bridge functions execute synchronously in the worker thread. No Asyncify.handleAsync or async/await needed for WASM calls.
+- **Keep exported C functions stable**: Treat names and parameter/return types as a strict ABI with the JS loader. If a signature must change, update both C++ and `compiler/modules/` consumers together.
+- **Prefer a data-export pattern**: Allocate in C++, return ownership/size to JS, and provide matching free functions (e.g., `getFrameData`/`freeFrameData`). Do not embed JS in C++; centralize browser logic under `compiler/modules/`.
+- **Worker thread benefits**: True background threading without blocking UI. No manual yielding needed - OS scheduler handles thread scheduling naturally.
 
 Recommended exported patterns:
 

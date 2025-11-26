@@ -117,7 +117,7 @@ globalThis.FastLED_onFrame = async function (frameData) {
       };
     }
 
-    // Render to canvas using existing graphics manager
+    // Render to canvas using existing graphics manager (main thread)
     if (window.updateCanvas) {
       if (shouldLog) {
         FASTLED_DEBUG_LOG('CALLBACKS', 'Calling window.updateCanvas...');
@@ -153,6 +153,7 @@ globalThis.FastLED_onFrame = async function (frameData) {
  */
 globalThis.FastLED_processUiUpdates = async function () {
   try {
+    // UI manager lives on main thread (window object)
     if (window.uiManager && typeof window.uiManager.processUiChanges === 'function') {
       const changes = window.uiManager.processUiChanges();
       return changes ? JSON.stringify(changes) : '{}';
@@ -246,7 +247,7 @@ globalThis.FastLED_onStripAdded = async function (stripId, numLeds) {
       output.textContent += `Strip added: ID ${stripId}, length ${numLeds}\n`;
     }
 
-    // Notify UI manager if available
+    // Notify UI manager if available (main thread)
     if (window.uiManager && typeof window.uiManager.onStripAdded === 'function') {
       window.uiManager.onStripAdded(stripId, numLeds);
     }
@@ -277,7 +278,9 @@ globalThis.FastLED_onUiElementsAdded = async function (uiData) {
       window.jsonInspector.logInboundEvent(uiData);
     }
 
-    // Add UI elements using UI manager
+    // NOTE: This callback is deprecated when using worker mode
+    // UI elements are now sent via message passing (worker → main thread)
+    // This callback remains for backward compatibility with non-worker mode
     if (window.uiManager && typeof window.uiManager.addUiElements === 'function') {
       window.uiManager.addUiElements(uiData);
     } else {

@@ -136,10 +136,10 @@ int main() {
     while (true) {
         // Platform pump for async operations - update all async tasks
         fl::async_run();
-        
-        // Yield control to the browser more frequently for responsive async processing
-        // Use 1ms sleep to maintain responsiveness while allowing other threads to work
-        emscripten_sleep(1); // 1ms - frequent yielding for async pump
+
+        // Note: No emscripten_sleep needed in worker thread mode (PROXY_TO_PTHREAD).
+        // The OS scheduler naturally handles yielding, and the browser UI remains responsive
+        // since we're running on a dedicated background thread, not the main thread.
     }
     
     return 0; // Never reached

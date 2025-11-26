@@ -62,9 +62,9 @@ void delay(int ms) {
         if (millis() >= end) {
             break;
         }
-        
-        // Sleep for 1ms using Emscripten's sleep
-        emscripten_sleep(1);
+
+        // In worker thread mode (PROXY_TO_PTHREAD), busy-wait is acceptable
+        // since we're not blocking the browser's main thread or UI
     }
 }
 

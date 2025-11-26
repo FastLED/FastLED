@@ -387,34 +387,22 @@ export class FastLEDWorkerManager {
    */
   handleWorkerMessage(event) {
     const { data } = event;
-    console.log('🔧 handleWorkerMessage: Received message, type:', data.type, 'id:', data.id);
-    console.log('🔧 handleWorkerMessage: Full message data:', JSON.stringify(data).substring(0, 200));
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'handleWorkerMessage', 'ENTER', { messageType: data.type });
 
     try {
       // Handle response to pending callback
-      console.log('🔧 handleWorkerMessage: Checking pending callbacks, count:', this.pendingCallbacks.size);
-      console.log('🔧 handleWorkerMessage: Pending callback IDs:', Array.from(this.pendingCallbacks.keys()));
-      console.log('🔧 handleWorkerMessage: Message data.id:', data.id, 'type:', typeof data.id);
-
       if (data.id && this.pendingCallbacks.has(data.id)) {
-        console.log('🔧 handleWorkerMessage: Found matching callback for id:', data.id);
         const callback = this.pendingCallbacks.get(data.id);
         callback(data.payload || data);
-        console.log('🔧 handleWorkerMessage: Callback invoked');
         return;
       }
-      console.log('🔧 handleWorkerMessage: No exact match by ID');
 
       // Check for response-type messages (with _response suffix)
       if (data.type && data.type.endsWith('_response') && data.id) {
-        console.log('🔧 handleWorkerMessage: Message type ends with _response');
         // Try to find callback by ID even if not exact match
         if (this.pendingCallbacks.has(data.id)) {
-          console.log('🔧 handleWorkerMessage: Found callback for _response message');
           const callback = this.pendingCallbacks.get(data.id);
           callback(data.payload || data);
-          console.log('🔧 handleWorkerMessage: Callback invoked');
           return;
         }
       }
@@ -448,6 +436,11 @@ export class FastLEDWorkerManager {
         case 'animation_started':
         case 'animation_stopped':
           FASTLED_DEBUG_LOG('WORKER_MANAGER', `Worker animation ${data.type.replace('animation_', '')}`, data.payload);
+          break;
+
+        case 'ui_elements_add':
+          // Handle UI elements from C++ worker thread - call uiManager on main thread
+          this.handleUiElementsAdd(data.payload);
           break;
 
         default:
@@ -488,6 +481,42 @@ export class FastLEDWorkerManager {
       source: 'background_worker',
       ...payload
     });
+  }
+
+  /**
+   * Handles UI elements from worker thread - forwards to main thread UI manager
+   * @param {Object} payload - UI elements data
+   */
+  handleUiElementsAdd(payload) {
+    FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Received UI elements from worker', payload);
+
+    try {
+      if (!payload || !payload.elements) {
+        FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Invalid UI elements payload', payload);
+        return;
+      }
+
+      // Log the inbound event to the inspector if available
+      if (window.jsonInspector) {
+        window.jsonInspector.logInboundEvent(payload.elements, 'Worker → Main');
+      }
+
+      // Call UI manager on main thread to add/update UI elements
+      if (window.uiManager && typeof window.uiManager.addUiElements === 'function') {
+        window.uiManager.addUiElements(payload.elements);
+        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'UI elements processed by uiManager');
+      } else {
+        console.warn('UI Manager not available on main thread');
+      }
+
+      // Emit event for external listeners
+      if (window.fastLEDEvents) {
+        window.fastLEDEvents.emitUiUpdate(payload.elements);
+      }
+
+    } catch (error) {
+      FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Error handling UI elements from worker', error);
+    }
   }
 
   /**

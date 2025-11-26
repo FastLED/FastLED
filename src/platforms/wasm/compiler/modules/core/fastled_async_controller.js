@@ -120,11 +120,11 @@ class FastLEDAsyncController {
       throw error;
     }
 
-    // NOTE: externSetup and externLoop are now bound in setup() method with async flag
-    // due to ASYNCIFY_EXPORTS requirement
+    // NOTE: externSetup and externLoop are now bound in setup() method as synchronous functions
+    // Worker thread mode (PROXY_TO_PTHREAD) allows blocking calls without freezing the UI
 
     console.log('C++ functions bound successfully via cwrap');
-    FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'C++ functions bound successfully via cwrap (async extern functions bound in setup)');
+    FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'C++ functions bound successfully via cwrap (synchronous extern functions bound in setup)');
 
     // Verify all functions are available (extern functions will be bound in setup())
     const functionStatus = {
@@ -181,9 +181,9 @@ class FastLEDAsyncController {
       // We only need to bind extern functions for JavaScript control
       console.log('🔄 PROXY_TO_PTHREAD MODE: main() runs automatically on pthread, binding extern functions only');
 
-      // Bind extern functions as ASYNC - they are in ASYNCIFY_EXPORTS list
-      this.externSetup = this.module.cwrap('extern_setup', 'number', [], { async: true });
-      this.externLoop = this.module.cwrap('extern_loop', 'number', [], { async: true });
+      // Bind extern functions as synchronous (Asyncify removed - using pure worker thread mode)
+      this.externSetup = this.module.cwrap('extern_setup', 'number', []);
+      this.externLoop = this.module.cwrap('extern_loop', 'number', []);
       this.getFrameData = this.module.cwrap('getFrameData', 'number', ['number']);
       this.getScreenMapData = this.module.cwrap('getScreenMapData', 'number', ['number']);
       this.getStripPixelData = this.module.cwrap('getStripPixelData', 'number', ['number', 'number']);
@@ -200,10 +200,10 @@ class FastLEDAsyncController {
       // - main() is automatically called by Emscripten on a pthread
       // - Socket proxy functionality is handled automatically
       // - We control FastLED via extern_setup() and extern_loop() calls
-      // - extern functions are async due to ASYNCIFY_EXPORTS
+      // - extern functions are synchronous (worker thread allows blocking calls without UI freeze)
 
-      console.log('✅ PROXY_TO_PTHREAD setup complete - main() pthread ready, async extern functions bound');
-      FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'PROXY_TO_PTHREAD setup complete - ready for async extern function calls');
+      console.log('✅ PROXY_TO_PTHREAD setup complete - main() pthread ready, synchronous extern functions bound');
+      FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'PROXY_TO_PTHREAD setup complete - ready for synchronous extern function calls');
 
       // Mark setup as completed
       this.setupCompleted = true;
@@ -250,10 +250,10 @@ class FastLEDAsyncController {
   }
 
   /**
-     * Main animation loop function - handles async extern_loop calls
+     * Main animation loop function - handles synchronous extern_loop calls
      * @param {number} currentTime - Current timestamp from requestAnimationFrame
      */
-  async loop(currentTime) {
+  loop(currentTime) {
     // Only log every 60 frames to avoid spam
     const shouldLog = this.frameCount % 60 === 0;
 
@@ -289,10 +289,10 @@ class FastLEDAsyncController {
       // Call extern_setup() once if it hasn't been called yet
       if (!this.fastledSetupCalled) {
         if (shouldLog) {
-          console.log('🔧 Calling extern_setup() for first-time initialization (async)');
-          FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_setup() for first-time initialization (async)...');
+          console.log('🔧 Calling extern_setup() for first-time initialization (synchronous)');
+          FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_setup() for first-time initialization (synchronous)...');
         }
-        await this.externSetup(); // Now async call
+        this.externSetup(); // Synchronous call - worker thread allows blocking
         this.fastledSetupCalled = true;
         console.log('✅ extern_setup() completed - FastLED initialized');
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'extern_setup() completed successfully');
@@ -300,14 +300,14 @@ class FastLEDAsyncController {
 
       // Call extern_loop() to run one iteration of the FastLED loop
       if (shouldLog) {
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop (async)...');
+        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop (synchronous)...');
       }
 
       // Step 1: Call extern_loop() to run one FastLED loop iteration
-      await this.externLoop(); // Now async call
+      this.externLoop(); // Synchronous call - worker thread allows blocking
 
-      // Step 2: Process the resulting frame data
-      await this.processFrame();
+      // Step 2: Process the resulting frame data (may still be async for rendering)
+      this.processFrame();
 
       this.frameCount++;
       this.lastFrameTime = currentTime;
@@ -436,16 +436,33 @@ class FastLEDAsyncController {
 
   /**
      * Process UI updates using pure JavaScript data exchange
+     * Main thread checks for UI changes and sends them to worker thread
      * @returns {Promise<void>} Promise that resolves when UI updates are processed
      */
   async processUiUpdates() {
-    // Get UI updates from user function
-    if (globalThis.FastLED_processUiUpdates) {
-      const uiJson = await globalThis.FastLED_processUiUpdates();
-      if (uiJson && uiJson !== '[]' && uiJson !== '{}' && uiJson.trim() !== '') {
-        // Only send non-empty, meaningful UI updates to C++
-        // Skip empty arrays, empty objects, and blank strings
-        this.processUiInput(uiJson);
+    // Get UI updates from UI manager on main thread
+    if (window.uiManager && typeof window.uiManager.processUiChanges === 'function') {
+      const changes = window.uiManager.processUiChanges();
+
+      if (changes && Object.keys(changes).length > 0) {
+        // Send UI changes to worker thread via worker manager
+        if (fastLEDWorkerManager && fastLEDWorkerManager.isWorkerActive) {
+          const message = {
+            type: 'ui_changes',
+            payload: {
+              changes: changes
+            }
+          };
+
+          // Send to worker (fire and forget, no response needed)
+          fastLEDWorkerManager.worker.postMessage(message);
+        } else {
+          // Fallback for non-worker mode: call C++ directly
+          if (this.processUiInput) {
+            const uiJson = JSON.stringify(changes);
+            this.processUiInput(uiJson);
+          }
+        }
       }
     }
   }

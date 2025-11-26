@@ -68,11 +68,12 @@ void async_run() {
 void async_yield() {
     // Always pump all async tasks first
     async_run();
-    
+
     // Platform-specific yielding behavior
 #ifdef __EMSCRIPTEN__
-    // WASM: Use emscripten_sleep to yield control to browser event loop
-    emscripten_sleep(1); // Sleep for 1ms to yield to browser
+    // WASM worker thread mode (PROXY_TO_PTHREAD): No explicit sleep needed.
+    // The OS scheduler naturally handles thread yielding. Busy-waiting here
+    // doesn't block the browser UI since we're on a background thread.
 #endif
     for (int i = 0; i < 5; ++i) {
         async_run(); // Give other async tasks a chance
