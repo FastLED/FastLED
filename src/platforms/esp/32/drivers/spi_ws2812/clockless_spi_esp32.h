@@ -45,7 +45,7 @@ protected:
                 "mLedStrip->numPixels() (" << mLedStrip->numPixels() << ") != pixels.size() (" << iterator.size() << ")");
         }
         auto output_iterator = mLedStrip->outputIterator();
-        iterator.writeWS2812(output_iterator);
+        iterator.writeWS2812(&output_iterator);
         output_iterator.finish();
         mLedStrip->drawAsync();
     }

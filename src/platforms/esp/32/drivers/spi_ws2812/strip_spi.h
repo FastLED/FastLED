@@ -28,6 +28,7 @@ class ISpiStripWs2812 {
 
         void flush();
         void operator()(uint8_t value);
+        void push_back(uint8_t value) { (*this)(value); }  // Adapter for writeWS2812 compatibility
         void finish();  // Must call this at the end.
 
         uint32_t mPosition = 0;
