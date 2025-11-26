@@ -2,9 +2,11 @@
 """
 Native WASM compilation using clang-tool-chain's emscripten.
 
-This script compiles FastLED sketches to WebAssembly using the emscripten
-toolchain bundled with clang-tool-chain, avoiding Docker overhead for
-significantly faster builds (~60-90s vs several minutes).
+This script compiles FastLED sketches to WebAssembly using incremental compilation:
+  Phase 1: PCH (precompiled header) - cached
+  Phase 2: Library (libfastled.a) - incremental compilation of 251 sources
+  Phase 3: Sketch compilation (sketch.cpp + entry_point.cpp -> object files)
+  Phase 4: Linking (sketch.o + entry_point.o + libfastled.a -> wasm)
 
 The script reads compilation flags from:
   src/platforms/wasm/compiler/build_flags.toml
@@ -17,6 +19,7 @@ Usage:
 import argparse
 import subprocess
 import sys
+import time
 import tomllib
 from pathlib import Path
 
@@ -28,6 +31,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 BUILD_FLAGS_TOML = (
     PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
 )
+BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
+ENTRY_POINT_CPP = PROJECT_ROOT / "src" / "platforms" / "wasm" / "entry_point.cpp"
 
 
 def find_emscripten() -> Path:
@@ -79,12 +84,15 @@ def find_emscripten() -> Path:
     )
 
 
-def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
+def load_build_flags(
+    build_mode: str = "quick", target: str = "sketch"
+) -> dict[str, list[str]]:
     """
     Load and parse build flags from build_flags.toml.
 
     Args:
         build_mode: Build mode (debug, fast_debug, quick, release)
+        target: Target type ('sketch' for sketch compilation, 'link' for linking)
 
     Returns:
         Dictionary with 'defines', 'compiler_flags', 'link_flags' lists
@@ -99,15 +107,16 @@ def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
     defines = config.get("all", {}).get("defines", [])
     compiler_flags = config.get("all", {}).get("compiler_flags", [])
 
-    # Add sketch-specific flags (not library flags)
-    defines.extend(config.get("sketch", {}).get("defines", []))
-    compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
+    if target == "sketch":
+        # Add sketch-specific flags (not library flags)
+        defines.extend(config.get("sketch", {}).get("defines", []))
+        compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
 
     # Add build mode-specific flags
     build_mode_config = config.get("build_modes", {}).get(build_mode, {})
     compiler_flags.extend(build_mode_config.get("flags", []))
 
-    # Get linking flags
+    # Get linking flags (used only during linking phase)
     link_flags = config.get("linking", {}).get("base", {}).get("flags", [])
     link_flags.extend(config.get("linking", {}).get("sketch", {}).get("flags", []))
     link_flags.extend(build_mode_config.get("link_flags", []))
@@ -119,23 +128,36 @@ def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
     }
 
 
-def get_source_files() -> list[str]:
-    """Get all .cpp source files from src/"""
-    result = subprocess.run(
-        [
-            "uv",
-            "run",
-            "python",
-            str(PROJECT_ROOT / "ci" / "meson" / "rglob.py"),
-            "src",
-            "*.cpp",
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-        cwd=PROJECT_ROOT,
-    )
-    return [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
+def ensure_library_built(
+    build_mode: str, verbose: bool = False, force: bool = False
+) -> bool:
+    """
+    Ensure libfastled.a is up-to-date by calling wasm_build_library.py.
+
+    Args:
+        build_mode: Build mode to pass to library build
+        verbose: Enable verbose output
+        force: Force rebuild of library
+
+    Returns:
+        True if successful
+    """
+    print("Checking library build...")
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        str(PROJECT_ROOT / "ci" / "wasm_build_library.py"),
+        "--mode",
+        build_mode,
+    ]
+    if verbose:
+        cmd.append("--verbose")
+    if force:
+        cmd.append("--force")
+
+    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    return result.returncode == 0
 
 
 def create_wrapper_for_example(example_name: str, output_path: Path) -> Path:
@@ -158,66 +180,162 @@ def create_wrapper_for_example(example_name: str, output_path: Path) -> Path:
     return output_path
 
 
+def compile_object(
+    source_file: Path,
+    output_object: Path,
+    emcc: Path,
+    flags: dict[str, list[str]],
+    verbose: bool = False,
+) -> bool:
+    """
+    Compile a single source file to an object file using PCH.
+
+    Args:
+        source_file: Source .cpp file to compile
+        output_object: Output .o file path
+        emcc: Path to em++ compiler
+        flags: Build flags dictionary
+        verbose: Enable verbose output
+
+    Returns:
+        True if successful
+    """
+    # Build includes
+    includes = [
+        "-Isrc",
+        "-Isrc/platforms/wasm",
+        "-Isrc/platforms/wasm/compiler",
+    ]
+
+    # PCH path
+    pch_file = BUILD_DIR / "wasm_pch.h.pch"
+
+    # Build compilation command
+    cmd = (
+        [
+            str(emcc),
+            "-c",
+            str(source_file),
+            "-o",
+            str(output_object),
+            f"-include-pch",
+            str(pch_file),
+        ]
+        + includes
+        + flags["defines"]
+        + flags["compiler_flags"]
+    )
+
+    if verbose:
+        print(f"Compiling {source_file.name}...")
+        print(f"Command: {subprocess.list2cmdline(cmd)}")
+
+    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    return result.returncode == 0
+
+
 def compile_wasm(
     source_file: Path,
     output_file: Path,
     build_mode: str = "quick",
     verbose: bool = False,
+    force: bool = False,
 ) -> int:
     """
-    Compile a FastLED sketch to WebAssembly.
+    Compile a FastLED sketch to WebAssembly using incremental compilation.
+
+    Build phases:
+      1. Ensure PCH is up-to-date (via wasm_build_library.py dependency)
+      2. Ensure library is up-to-date (calls wasm_build_library.py)
+      3. Compile sketch wrapper to object file (always rebuild)
+      4. Compile entry_point.cpp to object file (always rebuild)
+      5. Link sketch.o + entry_point.o + libfastled.a -> wasm
 
     Args:
         source_file: Path to wrapper .cpp file or example name
         output_file: Output .js file path
         build_mode: Build mode (debug, fast_debug, quick, release)
         verbose: Enable verbose output
+        force: Force rebuild of all components
 
     Returns:
         Exit code (0 = success)
     """
     try:
+        start_time = time.time()
         print(f"Building FastLED sketch to WASM (mode: {build_mode})...")
 
         # Find emscripten compiler
         emcc = find_emscripten()
-        print(f"Using emscripten: {emcc}")
+        if verbose:
+            print(f"Using emscripten: {emcc}")
 
-        # Load build flags from TOML
-        flags = load_build_flags(build_mode)
-        print(
-            f"Loaded {len(flags['defines'])} defines, {len(flags['compiler_flags'])} compiler flags, {len(flags['link_flags'])} link flags"
-        )
+        # Create build directory
+        BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
-        # Get all source files
-        sources = get_source_files()
-        print(f"Found {len(sources)} FastLED source files")
+        # Phase 1 & 2: Ensure library is up-to-date (also ensures PCH is up-to-date)
+        phase2_start = time.time()
+        if not ensure_library_built(build_mode, verbose, force):
+            print("✗ Library build failed")
+            return 1
+        phase2_time = time.time() - phase2_start
+        if verbose:
+            print(f"Library build phase: {phase2_time:.2f}s")
 
-        # Create response file for sources
-        response_file = PROJECT_ROOT / "build" / "wasm_sources.rsp"
-        response_file.parent.mkdir(exist_ok=True)
+        # Load build flags for sketch compilation
+        flags = load_build_flags(build_mode, target="sketch")
+        if verbose:
+            print(
+                f"Loaded {len(flags['defines'])} defines, {len(flags['compiler_flags'])} compiler flags, {len(flags['link_flags'])} link flags"
+            )
 
-        with open(response_file, "w") as f:
-            for src in sources:
-                f.write(f'"{src}"\n')
-            f.write(f'"{source_file}"\n')
+        # Phase 3: Compile sketch wrapper to object file
+        phase3_start = time.time()
+        sketch_object = BUILD_DIR / "sketch.o"
+        print(f"Compiling sketch: {source_file.name}")
+        if not compile_object(source_file, sketch_object, emcc, flags, verbose):
+            print("✗ Sketch compilation failed")
+            return 1
+        phase3_time = time.time() - phase3_start
+        if verbose:
+            print(f"Sketch compilation: {phase3_time:.2f}s")
 
-        # Build includes
+        # Phase 3b: Compile entry_point.cpp to object file
+        entry_point_object = BUILD_DIR / "entry_point.o"
+        print(f"Compiling entry point: {ENTRY_POINT_CPP.name}")
+        if not compile_object(
+            ENTRY_POINT_CPP, entry_point_object, emcc, flags, verbose
+        ):
+            print("✗ Entry point compilation failed")
+            return 1
+        phase3_time += time.time() - phase3_start
+
+        # Phase 4: Link everything together
+        phase4_start = time.time()
+        print("Linking final WASM module...")
+        library_archive = BUILD_DIR / "libfastled.a"
+
+        if not library_archive.exists():
+            print(f"✗ Library not found: {library_archive}")
+            return 1
+
+        # Build includes for linking
         includes = [
             "-Isrc",
             "-Isrc/platforms/wasm",
             "-Isrc/platforms/wasm/compiler",
         ]
 
-        # Build command
-        cmd = (
+        # Link command: sketch.o + entry_point.o + libfastled.a -> output
+        link_cmd = (
             [
                 str(emcc),
-                f"@{response_file}",
+                str(sketch_object),
+                str(entry_point_object),
+                str(library_archive),
             ]
             + includes
             + flags["defines"]
-            + flags["compiler_flags"]
             + [
                 "-o",
                 str(output_file),
@@ -226,28 +344,35 @@ def compile_wasm(
         )
 
         if verbose:
-            print(
-                f"Command: {subprocess.list2cmdline(cmd[:10])}... (see response file for full source list)"
-            )
+            print(f"Link command: {subprocess.list2cmdline(link_cmd)}")
 
-        print("Compiling...")
-        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        result = subprocess.run(link_cmd, cwd=PROJECT_ROOT)
+        phase4_time = time.time() - phase4_start
 
         if result.returncode == 0:
+            total_time = time.time() - start_time
             print("✓ Build successful!")
             print(f"  - {output_file}")
             wasm_file = output_file.with_suffix(".wasm")
             if wasm_file.exists():
                 print(f"  - {wasm_file}")
+            print(f"\nBuild times:")
+            print(f"  Library:  {phase2_time:.2f}s")
+            print(f"  Sketch:   {phase3_time:.2f}s")
+            print(f"  Linking:  {phase4_time:.2f}s")
+            print(f"  Total:    {total_time:.2f}s")
             return 0
         else:
-            print(f"✗ Build failed with return code {result.returncode}")
+            print(f"✗ Linking failed with return code {result.returncode}")
             return result.returncode
 
     except KeyboardInterrupt:
         raise
     except Exception as e:
         print(f"✗ Build failed with exception: {e}", file=sys.stderr)
+        import traceback
+
+        traceback.print_exc()
         return 1
 
 
@@ -265,6 +390,9 @@ def main() -> int:
         help="Build mode (default: quick)",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--force", action="store_true", help="Force rebuild of all components"
+    )
 
     args = parser.parse_args()
 
@@ -285,7 +413,9 @@ def main() -> int:
     output_file = Path(args.output)
 
     try:
-        return compile_wasm(source_file, output_file, args.mode, args.verbose)
+        return compile_wasm(
+            source_file, output_file, args.mode, args.verbose, args.force
+        )
     except KeyboardInterrupt:
         print("\n✗ Build interrupted by user")
         return 130

@@ -53,3 +53,156 @@ def get_example_error_message(project_root: Path, example: str) -> str:
         return f"Example directory not found: {example}"
     else:
         return f"Example not found: {project_root / 'examples' / example}"
+
+
+# ============================================================================
+# WASM Build Utilities (Shared across wasm_compile_pch.py, wasm_build_library.py)
+# ============================================================================
+
+
+def compute_content_hash(file_path: Path) -> str:
+    """Compute SHA256 hash of file content.
+
+    Args:
+        file_path: Path to file to hash
+
+    Returns:
+        SHA256 hex digest string, or empty string if file doesn't exist
+    """
+    import hashlib
+
+    if not file_path.exists():
+        return ""
+
+    sha256 = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        sha256.update(f.read())
+    return sha256.hexdigest()
+
+
+def compute_flags_hash(flags: dict[str, list[str]]) -> str:
+    """Compute hash of compilation flags for change detection.
+
+    Args:
+        flags: Dictionary with 'defines' and 'compiler_flags' keys
+
+    Returns:
+        SHA256 hex digest of sorted flags string
+    """
+    import hashlib
+
+    # Combine all flags into a single sorted string for consistent hashing
+    all_flags = sorted(flags["defines"] + flags["compiler_flags"])
+    flags_str = " ".join(all_flags)
+    return hashlib.sha256(flags_str.encode()).hexdigest()
+
+
+def load_json_metadata(path: Path) -> dict[str, str]:
+    """Load metadata from JSON file with error handling.
+
+    Args:
+        path: Path to JSON metadata file
+
+    Returns:
+        Dictionary of metadata, or empty dict if file doesn't exist or is invalid
+    """
+    import json
+
+    if not path.exists():
+        return {}
+
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load metadata from {path}: {e}")
+        return {}
+
+
+def save_json_metadata(path: Path, metadata: dict[str, str]) -> None:
+    """Save metadata to JSON file.
+
+    Args:
+        path: Path to JSON metadata file
+        metadata: Dictionary of metadata to save
+    """
+    import json
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(metadata, f, indent=2)
+
+
+def parse_depfile(depfile_path: Path) -> list[Path]:
+    """Parse Makefile-style dependency file to extract header dependencies.
+
+    Format:
+        target: dep1 dep2 dep3 \\
+                dep4 dep5
+
+    Args:
+        depfile_path: Path to .d dependency file
+
+    Returns:
+        List of dependency paths (excluding target)
+    """
+    if not depfile_path.exists():
+        return []
+
+    try:
+        with open(depfile_path) as f:
+            content = f.read()
+
+        # Remove line continuations
+        content = content.replace("\\\n", " ").replace("\\\r\n", " ")
+
+        # Split on colon to separate target from dependencies
+        if ":" not in content:
+            return []
+
+        deps_part = content.split(":", 1)[1]
+
+        # Split on whitespace and filter out empty strings
+        deps = [d.strip() for d in deps_part.split() if d.strip()]
+
+        # Convert to Path objects
+        return [Path(d) for d in deps]
+
+    except Exception as e:
+        print(f"Warning: Could not parse dependency file {depfile_path}: {e}")
+        return []
+
+
+def get_latest_mtime(paths: list[Path]) -> float:
+    """Get the latest modification time from a list of paths.
+
+    Args:
+        paths: List of file paths to check
+
+    Returns:
+        Latest modification time in seconds since epoch, or 0.0 if no paths exist
+    """
+    max_mtime = 0.0
+    for p in paths:
+        if p.exists():
+            mtime = p.stat().st_mtime
+            if mtime > max_mtime:
+                max_mtime = mtime
+    return max_mtime
+
+
+def write_response_file(path: Path, items: list[Path]) -> None:
+    """Write linker/archiver response file.
+
+    Response files allow passing large lists of files to tools without
+    hitting command-line length limits.
+
+    Args:
+        path: Path to response file to write
+        items: List of file paths to include
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        for item in items:
+            # Use forward slashes for cross-platform compatibility
+            f.write(f"{item.as_posix()}\n")
