@@ -297,13 +297,41 @@ export class GraphicsManagerThreeJS {
     }
 
     const { screenMap } = frameData;
-    const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
-    const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
+    let screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
+    let screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
+
+    // Defensive: Ensure non-zero dimensions (for simple examples with 1 LED or no XY mapping)
+    const MIN_DIMENSION = 1; // Minimum 1 pixel dimension
+    if (screenMapWidth <= 0) {
+      console.warn('_setupCanvasAndDimensions: screenMapWidth is <= 0, using MIN_DIMENSION', {
+        screenMapWidth,
+        screenMap
+      });
+      screenMapWidth = MIN_DIMENSION;
+    }
+    if (screenMapHeight <= 0) {
+      console.warn('_setupCanvasAndDimensions: screenMapHeight is <= 0, using MIN_DIMENSION', {
+        screenMapHeight,
+        screenMap
+      });
+      screenMapHeight = MIN_DIMENSION;
+    }
 
     // Always set width to 640px and scale height proportionally
     const targetWidth = MAX_WIDTH;
     const aspectRatio = screenMapWidth / screenMapHeight;
     const targetHeight = Math.round(targetWidth / aspectRatio);
+
+    // Defensive: Ensure targetHeight is a valid positive integer
+    if (!Number.isFinite(targetHeight) || targetHeight <= 0) {
+      console.error('_setupCanvasAndDimensions: Invalid targetHeight calculated', {
+        targetHeight,
+        aspectRatio,
+        screenMapWidth,
+        screenMapHeight
+      });
+      throw new Error(`Invalid canvas height: ${targetHeight}. Check screen mapping dimensions.`);
+    }
 
     // Set the rendering resolution (2x the display size)
     this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;

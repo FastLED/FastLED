@@ -638,8 +638,12 @@ class FastLEDAsyncController {
       console.log('🔧 [ITERATION_12] fastLEDWorkerManager.isWorkerActive:', fastLEDWorkerManager.isWorkerActive);
 
       if (success) {
+        // Set workerMode flag to indicate controller is using worker mode
+        this.workerMode = true;
+
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker mode initialized', {
           workerActive: fastLEDWorkerManager.isWorkerActive,
+          workerMode: this.workerMode,
           capabilities: fastLEDWorkerManager.capabilities
         });
 

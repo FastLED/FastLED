@@ -26,7 +26,8 @@
 // CRITICAL FIX: Workers don't support import maps, but Three.js jsm files use bare "three" imports.
 // Solution: Use local vendor files with patched relative imports to three.module.js
 
-import { VideoRecorder } from '../recording/video_recorder.js';
+// VideoRecorder import removed - recording now happens on main thread with mirror canvas
+// Worker only captures and transfers frames as ImageBitmap for main thread MediaRecorder
 
 /**
  * Loads ThreeJS modules for 3D rendering in worker context
@@ -86,7 +87,6 @@ async function loadThreeJSModules() {
  * @property {OffscreenCanvas|null} canvas - OffscreenCanvas instance
  * @property {Object|null} fastledModule - WASM module instance
  * @property {Object|null} graphicsManager - Graphics rendering manager
- * @property {VideoRecorder|null} videoRecorder - Video recorder instance
  * @property {boolean} running - Animation loop status
  * @property {number} frameRate - Target frame rate
  * @property {Object} capabilities - Worker capabilities
@@ -100,6 +100,9 @@ async function loadThreeJSModules() {
  * @property {Object|null} wasmFunctions - WASM functions
  * @property {Function|null} processUiInput - UI input processing function
  * @property {Object} urlParams - URL parameters from main thread
+ * @property {boolean} isCapturingFrames - Frame capture enabled for main-thread recording
+ * @property {number} frameCaptureInterval - Milliseconds between frame captures
+ * @property {number} lastFrameCaptureTime - Timestamp of last frame capture
  */
 
 /**
@@ -111,7 +114,6 @@ const workerState = {
   canvas: null,
   fastledModule: null,
   graphicsManager: null,
-  videoRecorder: null,
   running: false,
   frameRate: 60,
   capabilities: null,
@@ -128,7 +130,12 @@ const workerState = {
   processUiInput: null,
 
   // URL parameters passed from main thread
-  urlParams: {}
+  urlParams: {},
+
+  // Frame capture for main-thread recording (MediaRecorder runs on main thread)
+  isCapturingFrames: false,
+  frameCaptureInterval: 16.67, // Default 60 FPS
+  lastFrameCaptureTime: 0
 };
 
 /**
@@ -665,138 +672,109 @@ function handleUiChanges(payload) {
 }
 
 /**
- * Handles start_recording message to begin video capture
+ * Captures current frame as ImageBitmap and sends to main thread for recording
+ * Called after each render when recording is active
+ * Uses zero-copy transferable ImageBitmap for efficient frame transfer
+ */
+async function captureAndTransferFrame() {
+  if (!workerState.isCapturingFrames || !workerState.canvas) {
+    return;
+  }
+
+  try {
+    const now = performance.now();
+    const elapsed = now - workerState.lastFrameCaptureTime;
+
+    // Throttle based on configured FPS to avoid overwhelming main thread
+    if (elapsed < workerState.frameCaptureInterval) {
+      return;
+    }
+
+    // Create ImageBitmap from OffscreenCanvas (hardware-accelerated, async)
+    const bitmap = await createImageBitmap(workerState.canvas);
+
+    // Transfer to main thread (zero-copy transfer via transferables)
+    postMessage({
+      type: 'frame_update',
+      payload: {
+        bitmap: bitmap,
+        timestamp: now,
+        frameNumber: workerState.frameCount,
+        width: workerState.canvas.width,
+        height: workerState.canvas.height
+      }
+    }, /** @type {*} */ ([bitmap])); // Transfer bitmap ownership to main thread
+
+    workerState.lastFrameCaptureTime = now;
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Frame capture failed', error);
+    // Don't stop the loop on capture failure, just log the error
+  }
+}
+
+/**
+ * Handles start_recording message to begin frame capture for main-thread recording
  * @param {Object} payload - Recording configuration
  * @returns {Promise<Object>} Recording start confirmation
  */
 async function handleStartRecording(payload) {
-  workerLog('LOG', 'BACKGROUND_WORKER', 'Starting video recording', payload);
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Starting frame capture for main-thread recording', payload);
 
   try {
     // Check if canvas is available
     if (!workerState.canvas) {
-      throw new Error('Canvas not available for video recording');
+      throw new Error('Canvas not available for frame capture');
     }
 
-    // Check if already recording
-    if (workerState.videoRecorder && workerState.videoRecorder.isRecording) {
-      throw new Error('Video recording already in progress');
+    // Check if already capturing
+    if (workerState.isCapturingFrames) {
+      throw new Error('Frame capture already in progress');
     }
 
-    // Create video recorder if it doesn't exist
-    if (!workerState.videoRecorder) {
-      workerLog('LOG', 'BACKGROUND_WORKER', 'Creating VideoRecorder instance');
+    // Configure frame capture based on requested FPS
+    const fps = payload.fps || 60;
+    workerState.frameCaptureInterval = 1000 / fps;
+    workerState.isCapturingFrames = true;
+    workerState.lastFrameCaptureTime = performance.now();
 
-      workerState.videoRecorder = new VideoRecorder({
-        // @ts-ignore - VideoRecorder types expect HTMLCanvasElement but OffscreenCanvas also works
-        canvas: workerState.canvas,
-        audioContext: null, // No audio in worker context
-        fps: payload.fps || 60,
-        settings: payload.settings || {},
-        onStateChange: (isRecording) => {
-          // Notify main thread of state changes
-          postMessage({
-            type: 'recording_state_changed',
-            payload: { isRecording }
-          });
-        }
-      });
-    }
-
-    // Start recording
-    await workerState.videoRecorder.startRecording();
-
-    workerLog('LOG', 'BACKGROUND_WORKER', 'Video recording started successfully');
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Frame capture enabled', {
+      fps,
+      interval: workerState.frameCaptureInterval
+    });
 
     return {
       success: true,
-      codec: workerState.videoRecorder.selectedMimeType
+      fps: fps,
+      canvasDimensions: {
+        width: workerState.canvas.width,
+        height: workerState.canvas.height
+      }
     };
-
   } catch (error) {
-    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to start video recording', error);
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to start frame capture', error);
     throw error;
   }
 }
 
 /**
- * Handles stop_recording message to end video capture and return blob
+ * Handles stop_recording message to disable frame capture
  * @param {Object} _payload - Unused payload
- * @returns {Promise<Object>} Recording blob and metadata
+ * @returns {Promise<Object>} Stop confirmation
  */
 async function handleStopRecording(_payload) {
-  workerLog('LOG', 'BACKGROUND_WORKER', 'Stopping video recording');
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Stopping frame capture');
 
   try {
-    if (!workerState.videoRecorder) {
-      throw new Error('No video recorder instance');
-    }
+    // Disable frame capture
+    workerState.isCapturingFrames = false;
 
-    if (!workerState.videoRecorder.isRecording) {
-      throw new Error('Not currently recording');
-    }
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Frame capture stopped');
 
-    // Stop the media recorder and wait for blob to be ready
-    const blob = await new Promise((resolve, reject) => {
-      const recorder = workerState.videoRecorder;
-
-      // Override the onstop handler to capture the blob
-      const originalOnStop = recorder.mediaRecorder.onstop;
-      recorder.mediaRecorder.onstop = () => {
-        try {
-          // Create blob from recorded chunks
-          const recordedBlob = new Blob(recorder.recordedChunks, {
-            type: recorder.selectedMimeType || 'video/webm',
-          });
-
-          workerLog('LOG', 'BACKGROUND_WORKER', 'Blob created from chunks', {
-            chunks: recorder.recordedChunks.length,
-            size: recordedBlob.size
-          });
-
-          // Call original handler if needed (note: may fail in worker context)
-          if (originalOnStop && typeof originalOnStop === 'function') {
-            try {
-              // @ts-ignore - onstop event handler, ignoring potential errors
-              originalOnStop();
-            } catch (e) {
-              // Ignore errors from original handler (download will fail in worker)
-              workerLog('LOG', 'BACKGROUND_WORKER', 'Original onstop handler error (expected in worker)', e);
-            }
-          }
-
-          resolve(recordedBlob);
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      // Stop recording
-      recorder.isRecording = false;
-      recorder.mediaRecorder.stop();
-
-      // Notify state change
-      if (recorder.onStateChange) {
-        recorder.onStateChange(false);
-      }
-    });
-
-    workerLog('LOG', 'BACKGROUND_WORKER', 'Video recording stopped successfully', {
-      blobSize: blob.size,
-      blobType: blob.type
-    });
-
-    // Return blob to main thread
     return {
-      success: true,
-      blob: blob,
-      mimeType: blob.type,
-      size: blob.size,
-      preferredFormat: workerState.videoRecorder.preferredFormat
+      success: true
     };
-
   } catch (error) {
-    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to stop video recording', error);
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to stop frame capture', error);
     throw error;
   }
 }
@@ -859,6 +837,13 @@ async function executeFrameLoop(currentTime) {
     if (frameData) {
       // Render frame to OffscreenCanvas (automatically syncs to main thread canvas)
       workerState.graphicsManager.updateCanvas(frameData);
+
+      // Capture frame for main-thread recording if enabled
+      if (workerState.isCapturingFrames) {
+        captureAndTransferFrame().catch((err) => {
+          workerLog('ERROR', 'BACKGROUND_WORKER', 'Frame capture error', err);
+        });
+      }
 
       // Send lightweight performance telemetry to main thread
       postMessage({
