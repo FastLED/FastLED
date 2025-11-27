@@ -135,9 +135,8 @@ flags = [
     # Debug Information Generation
     "-g3",                                     # Maximum debug info (includes macros and preprocessor info)
     "-gsource-map",                           # Generate source maps for browser debugging
-    "--profiling-funcs",                     # Enable function profiling in debug builds
     # Note: -ffile-prefix-map flag is generated dynamically from [dwarf] config for path mapping
-    
+
     # Optimization Control
     "-fno-inline",                           # Disable function inlining for clearer debugging
     "-O0",                                   # No optimization (fastest compilation, clearest debugging)
@@ -146,6 +145,7 @@ flags = [
 # Debug-specific linking flags (applied only during final linking in debug mode)
 link_flags = [
     # Debug Info and Error Detection
+    "--profiling-funcs",                     # Enable function profiling in debug builds
     "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf", # Separate DWARF debug info file
     "-sSTACK_OVERFLOW_CHECK=2",              # Maximum stack overflow detection
     "-sASSERTIONS=1",                        # Enable runtime assertions
@@ -200,7 +200,6 @@ flags = [
     # Optimization Control - Optimized for build speed
     "-O1",                                   # Light optimization (faster than O0 with better performance)
     "-g0",                                   # No debug info (fastest compilation, smallest size)
-    "--profiling-funcs",                     # Enable function profiling in quick builds
 
     # Aggressive Build Speed Optimizations
     "-fno-inline-functions",                 # Disable function inlining
@@ -226,6 +225,9 @@ link_flags = [
     # Per LLVM docs: https://clang.llvm.org/docs/ThinLTO.html
     # Cache directory stores optimized bitcode per module - unchanged modules skip re-optimization
     "-Wl,--thinlto-cache-dir=build/wasm/lto_cache",  # Persistent LTO cache for incremental builds
+
+    # Profiling Support
+    "--profiling-funcs",                     # Enable function profiling in quick builds
 
     # Reduce memory for faster startup (override base setting)
     "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
