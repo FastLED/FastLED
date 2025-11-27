@@ -398,6 +398,9 @@ async function initializeFastLEDModule() {
     // @ts-ignore - fastled is loaded dynamically
     workerState.fastledModule = await self.fastled({
       canvas: workerState.canvas,
+      // Fix pthread worker creation: Tell Emscripten to use fastled.js for pthread workers,
+      // not the current worker script (fastled_background_worker.js)
+      mainScriptUrlOrBlob: new URL('../../fastled.js', self.location.href).href,
       // Pass URL parameters to WASM module via environment
       // This allows C++ code to access them through getenv() or similar
       preRun: [(Module) => {
