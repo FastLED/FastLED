@@ -335,7 +335,7 @@ class BitsetInlined {
   private:
     // Either store a fixed Bitset<N> or a dynamic Bitset
     using fixed_bitset = BitsetFixed<N>;
-    Variant<fixed_bitset, bitset_dynamic> _storage;
+    variant<fixed_bitset, bitset_dynamic> _storage;
 
   public:
     struct Proxy {

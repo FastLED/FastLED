@@ -86,7 +86,7 @@ class Corkscrew {
   public:
     
     // Pixel storage variants - can hold either external span or owned vector
-    using PixelStorage = fl::Variant<fl::span<CRGB>, fl::vector<CRGB, fl::allocator_psram<CRGB>>>;
+    using PixelStorage = fl::variant<fl::span<CRGB>, fl::vector<CRGB, fl::allocator_psram<CRGB>>>;
 
     // Iterator class moved from CorkscrewState
     class iterator {

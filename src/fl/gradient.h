@@ -36,7 +36,7 @@ class Gradient {
 
   private:
     using GradientVariant =
-        Variant<const CRGBPalette16 *, const CRGBPalette32 *,
+        variant<const CRGBPalette16 *, const CRGBPalette32 *,
                 const CRGBPalette256 *, GradientFunction>;
     GradientVariant mVariant;
 };
@@ -45,7 +45,7 @@ class GradientInlined {
   public:
     using GradientFunction = fl::function<CRGB(u8 index)>;
     using GradientVariant =
-        Variant<CRGBPalette16, CRGBPalette32, CRGBPalette256, GradientFunction>;
+        variant<CRGBPalette16, CRGBPalette32, CRGBPalette256, GradientFunction>;
     GradientInlined() = default;
 
     template <typename T> GradientInlined(const T &palette) { set(palette); }

@@ -233,8 +233,8 @@ private:
         }
     };
 
-    // Variant to store any of our callable types inline (with heap fallback for large lambdas)
-    using Storage = Variant<fl::shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
+    // variant to store any of our callable types inline (with heap fallback for large lambdas)
+    using Storage = variant<fl::shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
     Storage storage_;
 
     // Helper function to handle default return value for void and non-void types
@@ -253,10 +253,10 @@ private:
 public:
     function() = default;
     
-    // Copy constructor - properly handle Variant alignment
+    // Copy constructor - properly handle variant alignment
     function(const function& other) : storage_(other.storage_) {}
     
-    // Move constructor - properly handle Variant alignment  
+    // Move constructor - properly handle variant alignment  
     function(function&& other) noexcept : storage_(fl::move(other.storage_)) {}
     
     // Copy assignment

@@ -9,34 +9,34 @@ namespace fl {
 
 // A variant that can hold any of N different types
 template <typename... Types>
-class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
+class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
   public:
     using Tag = u8;
     static constexpr Tag Empty = 0;
 
     // –– ctors/dtors/assign as before …
 
-    Variant() noexcept : _tag(Empty) {}
+    variant() noexcept : _tag(Empty) {}
 
     template <typename T, typename = typename fl::enable_if<
                               contains_type<T, Types...>::value>::type>
-    Variant(const T &value) : _tag(Empty) {
+    variant(const T &value) : _tag(Empty) {
         construct<T>(value);
     }
 
     template <typename T, typename = typename fl::enable_if<
                               contains_type<T, Types...>::value>::type>
-    Variant(T &&value) : _tag(Empty) {
+    variant(T &&value) : _tag(Empty) {
         construct<T>(fl::move(value));
     }
 
-    Variant(const Variant &other) : _tag(Empty) {
+    variant(const variant &other) : _tag(Empty) {
         if (!other.empty()) {
             copy_construct_from(other);
         }
     }
 
-    Variant(Variant &&other) noexcept : _tag(Empty) {
+    variant(variant &&other) noexcept : _tag(Empty) {
         if (!other.empty()) {
             move_construct_from(other);
             // After moving, mark other as empty to prevent destructor calls on moved-from objects
@@ -44,9 +44,9 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
         }
     }
 
-    ~Variant() { reset(); }
+    ~variant() { reset(); }
 
-    Variant &operator=(const Variant &other) {
+    variant &operator=(const variant &other) {
         if (this != &other) {
             reset();
             if (!other.empty()) {
@@ -56,7 +56,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
         return *this;
     }
 
-    Variant &operator=(Variant &&other) noexcept {
+    variant &operator=(variant &&other) noexcept {
         if (this != &other) {
             reset();
             if (!other.empty()) {
@@ -70,7 +70,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
 
     template <typename T, typename = typename fl::enable_if<
                               contains_type<T, Types...>::value>::type>
-    Variant &operator=(const T &value) {
+    variant &operator=(const T &value) {
         reset();
         construct<T>(value);
         return *this;
@@ -78,7 +78,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
 
     template <typename T, typename = typename fl::enable_if<
                               contains_type<T, Types...>::value>::type>
-    Variant &operator=(T &&value) {
+    variant &operator=(T &&value) {
         reset();
         construct<T>(fl::move(value));
         return *this;
@@ -163,7 +163,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
         // Each thunk casts the storage back to the right T* and calls
         // visitor.accept
         static constexpr Fn table[] = {
-            &Variant::template visit_fn<Types, Visitor>...};
+            &variant::template visit_fn<Types, Visitor>...};
 
         // _tag is 1-based, so dispatch in O(1) via one indirect call:
         // Check bounds to prevent out-of-bounds access
@@ -182,7 +182,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
 
         // Build a constexpr array of one thunk per type in Types...
         static constexpr Fn table[] = {
-            &Variant::template visit_fn_const<Types, Visitor>...};
+            &variant::template visit_fn_const<Types, Visitor>...};
 
         // _tag is 1-based, so dispatch in O(1) via one indirect call:
         // Check bounds to prevent out-of-bounds access
@@ -213,7 +213,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
     // –– destroy via table
     void destroy_current() noexcept {
         using Fn = void (*)(void *);
-        static constexpr Fn table[] = {&Variant::template destroy_fn<Types>...};
+        static constexpr Fn table[] = {&variant::template destroy_fn<Types>...};
         if (_tag != Empty) {
             table[_tag - 1](&_storage);
         }
@@ -227,15 +227,15 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
     }
 
     // –– copy‐construct via table
-    void copy_construct_from(const Variant &other) {
-        using Fn = void (*)(void *, const Variant &);
-        static constexpr Fn table[] = {&Variant::template copy_fn<Types>...};
+    void copy_construct_from(const variant &other) {
+        using Fn = void (*)(void *, const variant &);
+        static constexpr Fn table[] = {&variant::template copy_fn<Types>...};
         table[other._tag - 1](&_storage, other);
         _tag = other._tag;
     }
 
     template <typename T>
-    static void copy_fn(void *storage, const Variant &other) {
+    static void copy_fn(void *storage, const variant &other) {
         // Use bit_cast_ptr for safe type-punning on properly aligned storage
         // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
         const T* source_ptr = fl::bit_cast_ptr<const T>(&other._storage[0]);
@@ -243,15 +243,15 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
     }
 
     // –– move‐construct via table
-    void move_construct_from(Variant &other) noexcept {
-        using Fn = void (*)(void *, Variant &);
-        static constexpr Fn table[] = {&Variant::template move_fn<Types>...};
+    void move_construct_from(variant &other) noexcept {
+        using Fn = void (*)(void *, variant &);
+        static constexpr Fn table[] = {&variant::template move_fn<Types>...};
         table[other._tag - 1](&_storage, other);
         _tag = other._tag;
         other.reset();
     }
 
-    template <typename T> static void move_fn(void *storage, Variant &other) {
+    template <typename T> static void move_fn(void *storage, variant &other) {
         // Use bit_cast_ptr for safe type-punning on properly aligned storage
         // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
         T* source_ptr = fl::bit_cast_ptr<T>(&other._storage[0]);

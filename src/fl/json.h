@@ -209,7 +209,7 @@ struct DefaultValueVisitor {
 
     DefaultValueVisitor(const T& fb) : fallback(fb) {}
 
-    // This is the method that fl::Variant expects
+    // This is the method that fl::variant expects
     template<typename U>
     void accept(const U& value) {
         // Dispatch to the correct operator() overload
@@ -660,7 +660,7 @@ struct JsonValue {
     
     
     // The variant holds exactly one of these alternatives
-    using variant_t = fl::Variant<
+    using variant_t = fl::variant<
         fl::nullptr_t,   // null
         bool,            // true/false
         int64_t,         // integer
@@ -804,7 +804,7 @@ struct JsonValue {
         return data.visit(fl::forward<Visitor>(visitor));
     }
 
-    // Type queries - using is<T>() instead of index() for fl::Variant
+    // Type queries - using is<T>() instead of index() for fl::variant
     bool is_null() const noexcept { 
         //FASTLED_WARN("is_null called, tag=" << data.tag());
         return data.is<fl::nullptr_t>(); 

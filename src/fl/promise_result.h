@@ -16,7 +16,7 @@ namespace fl {
 /// @tparam T The success value type
 /// 
 /// result provides a clean API for handling success/error results from
-/// async operations. It wraps a Variant<T, Error> but provides more ergonomic
+/// async operations. It wraps a variant<T, Error> but provides more ergonomic
 /// access patterns with ok() checking and automatic assertions.
 ///
 /// @section Usage
@@ -116,12 +116,12 @@ public:
     
     /// @brief Access the underlying variant (for advanced usage)
     /// @return Reference to the internal variant
-    const fl::Variant<T, Error>& variant() const {
+    const fl::variant<T, Error>& variant() const {
         return mResult;
     }
 
 private:
-    fl::Variant<T, Error> mResult;
+    fl::variant<T, Error> mResult;
 };
 
 /// @brief Helper function to create a successful result

@@ -334,8 +334,8 @@ TEST_CASE("fl::Optional - equality operators") {
 }
 
 TEST_CASE("fl::Optional - swap") {
-    // Note: swap requires Variant to have swap() method
-    // If Variant doesn't support swap, these tests may not work
+    // Note: swap requires variant to have swap() method
+    // If variant doesn't support swap, these tests may not work
 
     SUBCASE("manual swap via move") {
         Optional<int> opt1(10);

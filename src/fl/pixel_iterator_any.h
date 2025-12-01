@@ -68,7 +68,7 @@ class PixelIteratorAny {
             fl::Optional<PixelIterator>* pixelIteratorPtr;
             Rgbw rgbw;
 
-            // Need concrete overloads for each type in the Variant
+            // Need concrete overloads for each type in the variant
             void accept(PixelController<RGB>& controller) {
                 pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
             }
@@ -96,7 +96,7 @@ class PixelIteratorAny {
     }
 
   private:
-    fl::Variant<PixelController<RGB>, PixelController<RBG>,
+    fl::variant<PixelController<RGB>, PixelController<RBG>,
                 PixelController<GRB>, PixelController<GBR>,
                 PixelController<BRG>, PixelController<BGR>>
         mAnyController;

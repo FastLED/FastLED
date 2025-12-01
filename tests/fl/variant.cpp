@@ -73,11 +73,11 @@ TEST_CASE("Variant move semantics and RAII") {
     
     // Test 1: Verify moved-from variant is empty
     {
-        fl::Variant<int, TrackedObject> source(TrackedObject(42));
+        fl::variant<int, TrackedObject> source(TrackedObject(42));
         CHECK(source.is<TrackedObject>());
         
         // Move construct - this is where the bug was
-        fl::Variant<int, TrackedObject> destination(fl::move(source));
+        fl::variant<int, TrackedObject> destination(fl::move(source));
         
         // Critical test: source should be empty after move
         CHECK(source.empty());
@@ -93,8 +93,8 @@ TEST_CASE("Variant move semantics and RAII") {
     
     // Test 2: Verify moved-from variant via assignment is empty
     {
-        fl::Variant<int, TrackedObject> source(TrackedObject(100));
-        fl::Variant<int, TrackedObject> destination;
+        fl::variant<int, TrackedObject> source(TrackedObject(100));
+        fl::variant<int, TrackedObject> destination;
         
         CHECK(source.is<TrackedObject>());
         CHECK(destination.empty());
@@ -128,11 +128,11 @@ TEST_CASE("Variant move semantics and RAII") {
         };
         
         // Store in variant (like WasmFetchCallbackManager did)
-        fl::Variant<int, MockCallback> callback_variant(fl::move(callback));
+        fl::variant<int, MockCallback> callback_variant(fl::move(callback));
         CHECK(callback_variant.is<MockCallback>());
         
         // Extract via move (like takeCallback did) - this was causing heap-use-after-free
-        fl::Variant<int, MockCallback> extracted_callback(fl::move(callback_variant));
+        fl::variant<int, MockCallback> extracted_callback(fl::move(callback_variant));
         
         // Original variant should be empty - this is the key fix
         CHECK(callback_variant.empty());
@@ -199,7 +199,7 @@ TEST_CASE("HashMap iterator-based erase") {
 // Test the original test cases
 TEST_CASE("Variant tests") {
     // 1) Default is empty
-    fl::Variant<int, fl::string> v;
+    fl::variant<int, fl::string> v;
     REQUIRE(v.empty());
     REQUIRE(!v.is<int>());
     REQUIRE(!v.is<fl::string>());
@@ -223,7 +223,7 @@ TEST_CASE("Variant tests") {
 
 
     // 5) Copy‐construct preserves the U
-    fl::Variant<int, fl::string> v2(v);
+    fl::variant<int, fl::string> v2(v);
     REQUIRE(v2.is<fl::string>());
 
     fl::string* str_ptr = v2.ptr<fl::string>();
@@ -237,13 +237,13 @@ TEST_CASE("Variant tests") {
 
 #if 0
     // 6) Move‐construct leaves source empty
-    fl::Variant<int, fl::string> v3(std::move(v2));
+    fl::variant<int, fl::string> v3(std::move(v2));
     REQUIRE(v3.is<fl::string>());
     REQUIRE_EQ(v3.getU(), fl::string("hello"));
     REQUIRE(v2.isEmpty());
 
     // 7) Copy‐assign
-    fl::Variant<int, fl::string> v4;
+    fl::variant<int, fl::string> v4;
     v4 = v3;
     REQUIRE(v4.is<fl::string>());
     REQUIRE_EQ(v4.getU(), fl::string("hello"));
@@ -261,28 +261,28 @@ TEST_CASE("Variant tests") {
 
 TEST_CASE("Variant") {
     // 1) Default is empty
-    fl::Variant<int, fl::string, double> v;
+    fl::variant<int, fl::string, double> v;
     REQUIRE(v.empty());
     REQUIRE(!v.is<int>());
     REQUIRE(!v.is<fl::string>());
     REQUIRE(!v.is<double>());
 
     // 2) Construct with a value
-    fl::Variant<int, fl::string, double> v1(123);
+    fl::variant<int, fl::string, double> v1(123);
     REQUIRE(v1.is<int>());
     REQUIRE(!v1.is<fl::string>());
     REQUIRE(!v1.is<double>());
     REQUIRE_EQ(*v1.ptr<int>(), 123);
 
     // 3) Construct with a different type
-    fl::Variant<int, fl::string, double> v2(fl::string("hello"));
+    fl::variant<int, fl::string, double> v2(fl::string("hello"));
     REQUIRE(!v2.is<int>());
     REQUIRE(v2.is<fl::string>());
     REQUIRE(!v2.is<double>());
     REQUIRE_EQ(*v2.ptr<fl::string>(), fl::string("hello"));
 
     // 4) Copy construction
-    fl::Variant<int, fl::string, double> v3(v2);
+    fl::variant<int, fl::string, double> v3(v2);
     REQUIRE(v3.is<fl::string>());
     REQUIRE(v3.equals(fl::string("hello")));
 

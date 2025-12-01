@@ -140,7 +140,7 @@ namespace TeensyI2S {
 }
 
 
-class AudioConfig : public fl::Variant<AudioConfigI2S, AudioConfigPdm> {
+class AudioConfig : public fl::variant<AudioConfigI2S, AudioConfigPdm> {
 public:
     // The most common microphone on Amazon as of 2025-September.
     static AudioConfig CreateInmp441(int pin_ws, int pin_sd, int pin_clk, AudioChannel channel, u16 sample_rate = 44100ul, int i2s_num = 0) {
@@ -171,8 +171,8 @@ public:
         return AudioConfig(config);
     }
 
-    AudioConfig(const AudioConfigI2S& config) : fl::Variant<AudioConfigI2S, AudioConfigPdm>(config) {}
-    AudioConfig(const AudioConfigPdm& config) : fl::Variant<AudioConfigI2S, AudioConfigPdm>(config) {}
+    AudioConfig(const AudioConfigI2S& config) : fl::variant<AudioConfigI2S, AudioConfigPdm>(config) {}
+    AudioConfig(const AudioConfigPdm& config) : fl::variant<AudioConfigI2S, AudioConfigPdm>(config) {}
 };
 
 class IAudioInput {

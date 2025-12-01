@@ -100,7 +100,7 @@ template <typename T> class Optional {
     const T* operator->() const { return ptr(); }
 
     template <typename TT, typename UU>
-    bool operator==(const Variant<TT, UU> &other) const {
+    bool operator==(const variant<TT, UU> &other) const {
         if (!other.template holdsTypeOf<T>()) {
             return false;
         }
@@ -120,7 +120,7 @@ template <typename T> class Optional {
     }
 
   private:
-    fl::Variant<T, Empty> mValue;
+    fl::variant<T, Empty> mValue;
 };
 
 // Helper function to create optionals

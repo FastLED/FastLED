@@ -64,7 +64,7 @@
 // expressions as compile-time constants. Use __attribute__ syntax instead.
 // For GCC < 5.0, use conservative fixed alignment; for modern compilers, use computed value.
 //
-// Usage: class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {};
+// Usage: class FL_ALIGN_AS_T(max_align<Types...>::value) variant {};
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
     // GCC 4.x has alignas() bug with template-dependent expressions
     #if defined(__AVR__)
