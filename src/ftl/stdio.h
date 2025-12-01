@@ -4,7 +4,7 @@
 #include "ftl/type_traits.h"
 #include "fl/str.h"
 #include "fl/int.h"
-#include "fl/io.h"  // For fl::print and fl::println
+#include "ftl/cstdio.h"  // For fl::print and fl::println
 
 namespace fl {
 

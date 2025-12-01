@@ -2,7 +2,7 @@
 
 #include "ftl/strstream.h"
 
-// Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
+// Forward declaration to avoid pulling in ftl/cstdio.h and causing ftl/cstdio.cpp to be compiled
 namespace fl {
     void println(const char* str);
 }

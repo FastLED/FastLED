@@ -1,7 +1,7 @@
 #include "doctest.h"
 #include "ftl/stdio.h"
 #include "ftl/strstream.h"
-#include "fl/io.h"
+#include "ftl/cstdio.h"
 #include "ftl/string.h"
 #include "fl/compiler_control.h"
 #include <iostream>

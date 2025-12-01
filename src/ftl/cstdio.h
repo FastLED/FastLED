@@ -1,6 +1,6 @@
 #pragma once
 
-#define FL_IO_H_INCLUDED
+#define FTL_CSTDIO_H_INCLUDED
 
 #ifdef FASTLED_TESTING
 #include "ftl/function.h"

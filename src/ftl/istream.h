@@ -7,8 +7,8 @@
 #include "fl/sketch_macros.h"
 #include "fl/int.h"
 
-// Forward declarations to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
-#ifndef FL_IO_H_INCLUDED
+// Forward declarations to avoid pulling in ftl/cstdio.h and causing ftl/cstdio.cpp to be compiled
+#ifndef FTL_CSTDIO_H_INCLUDED
 namespace fl {
     int available();
     int read();
