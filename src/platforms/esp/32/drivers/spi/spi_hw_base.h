@@ -34,10 +34,11 @@
 #endif
 
 // ESP-IDF 3.3 compatibility: SPI_DMA_CH_AUTO was added in IDF 4.0
-// On older versions, use DMA channel 1 as default
+// The correct value is 3 (from spi_common_dma_t enum: SPI_DMA_CH_AUTO = 3)
+// This matches the ESP-IDF definition: SPI_DMA_DISABLED=0, SPI_DMA_CH1=1, SPI_DMA_CH2=2, SPI_DMA_CH_AUTO=3
 // Note: Only define if not already defined by ESP-IDF headers
 #ifndef SPI_DMA_CH_AUTO
-    #define SPI_DMA_CH_AUTO 1
+    #define SPI_DMA_CH_AUTO 3
 #endif
 
 // ESP-IDF compatibility: Ensure SPI host constants are defined
