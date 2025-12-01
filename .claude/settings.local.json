@@ -6,7 +6,10 @@
       "Bash(git show:*)",
       "Bash(git log:*)",
       "SlashCommand(/git-historian screenmap getScreenMapData extractFrameData --paths src/platforms/wasm)",
-      "SlashCommand(/git-historian screenmap absMin absMax bounds --paths src/platforms/wasm examples)"
+      "SlashCommand(/git-historian screenmap absMin absMax bounds --paths src/platforms/wasm examples)",
+      "SlashCommand(/git-historian wasm function names debug source-map --paths ci examples)",
+      "SlashCommand(/git-historian emscripten -g profiling ASSERTIONS --paths ci examples)",
+      "SlashCommand(/git-historian DWARF symbols demangle --paths ci)"
     ],
     "deny": [],
     "ask": []

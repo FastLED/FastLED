@@ -242,7 +242,9 @@ self.onmessage = async function(event) {
         break;
 
       case 'screenmap_update':
+        console.log('[WORKER] Received screenmap_update message, payload:', payload);
         response = handleScreenMapUpdate(payload);
+        console.log('[WORKER] handleScreenMapUpdate completed, response:', response);
         break;
 
       default:
@@ -555,6 +557,51 @@ async function handleStart(_payload) {
     // Call FastLED setup function (synchronous - worker thread allows blocking)
     workerState.externFunctions.externSetup();
     workerLog('LOG', 'BACKGROUND_WORKER', 'FastLED setup completed');
+
+    // Poll for screenmap data after setup (C++ setup() has registered screenmaps)
+    // EM_JS push mechanism has linking issues, so we use polling instead
+    try {
+      const Module = workerState.fastledModule;
+
+      // Bind getScreenMapData if not already bound
+      if (!workerState.wasmFunctions) {
+        workerState.wasmFunctions = {
+          getFrameData: Module.cwrap('getFrameData', 'number', ['number']),
+          getScreenMapData: Module.cwrap('getScreenMapData', 'number', ['number']),
+          getStripPixelData: Module.cwrap('getStripPixelData', 'number', ['number', 'number']),
+          freeFrameData: Module.cwrap('freeFrameData', null, ['number'])
+        };
+      }
+
+      // Fetch screenmap data from C++
+      const screenMapSizePtr = Module._malloc(4);
+      const screenMapDataPtr = workerState.wasmFunctions.getScreenMapData(screenMapSizePtr);
+
+      if (screenMapDataPtr !== 0) {
+        const screenMapSize = Module.getValue(screenMapSizePtr, 'i32');
+        const screenMapJson = Module.UTF8ToString(screenMapDataPtr, screenMapSize);
+        const screenMapData = JSON.parse(screenMapJson);
+
+        // Update worker state and notify graphics manager
+        workerState.screenMaps = screenMapData;
+        if (workerState.graphicsManager && workerState.graphicsManager.updateScreenMap) {
+          workerState.graphicsManager.updateScreenMap(screenMapData);
+          workerLog('LOG', 'BACKGROUND_WORKER', 'ScreenMaps fetched and sent to graphics manager', {
+            screenMapCount: Object.keys(screenMapData).length
+          });
+        }
+
+        // Free the allocated memory
+        workerState.wasmFunctions.freeFrameData(screenMapDataPtr);
+      } else {
+        workerLog('WARN', 'BACKGROUND_WORKER', 'No screenmap data available after setup');
+      }
+
+      Module._free(screenMapSizePtr);
+    } catch (error) {
+      workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to fetch screenmap data', error);
+      // Non-fatal - continue with animation
+    }
 
     // Start animation loop
     workerState.running = true;

@@ -43,7 +43,7 @@ const DISABLE_MERGE_GEOMETRIES = false;
  */
 function makePositionCalculators(screenMap, screenWidth, screenHeight) {
   // Compute bounds from screenMap if not already present
-  const bounds = screenMap.absMin && screenMap.absMax
+  const bounds = (screenMap && screenMap.absMin && screenMap.absMax)
     ? { absMin: screenMap.absMin, absMax: screenMap.absMax }
     : computeScreenMapBounds(screenMap);
 
@@ -678,7 +678,6 @@ export class GraphicsManagerThreeJS {
     normalizedScale,
   ) {
     const { THREE } = this.threeJsModules;
-    const { screenMap } = frameData;
 
     // If BufferGeometryUtils is not available, fall back to individual LEDs
     const { BufferGeometryUtils } = this.threeJsModules;
@@ -706,7 +705,17 @@ export class GraphicsManagerThreeJS {
 
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
+
+      // Get screenmap for this specific strip from cached screenMaps
+      const screenMap = this.screenMaps[stripId];
+      if (!screenMap) {
+        console.warn(`[GraphicsManagerThreeJS] No screenMap found for strip ${stripId} in _createLedObjects`);
+        return;
+      }
+
+      // Look up strip data in its screenmap
       if (!(stripId in screenMap.strips)) {
+        console.warn(`[GraphicsManagerThreeJS] Strip ${stripId} not found in its screenMap in _createLedObjects`);
         return;
       }
 

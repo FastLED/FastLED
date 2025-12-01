@@ -46,13 +46,9 @@
 // This allows C++ to notify JavaScript when screenmap data changes
 // JavaScript can then cache the data and avoid per-frame polling
 EM_JS(void, js_notify_screenmap_update, (const char* jsonData), {
-    // Post message to worker (if in worker context) or handle directly (if main thread)
     if (typeof self !== 'undefined' && self.postMessage) {
-        // Worker context - post message to self (will be caught by worker's onmessage)
         const data = UTF8ToString(jsonData);
         const parsedData = JSON.parse(data);
-
-        // Post to worker's message handler
         self.postMessage({
             type: 'screenmap_update',
             payload: {
@@ -60,7 +56,6 @@ EM_JS(void, js_notify_screenmap_update, (const char* jsonData), {
             }
         });
     } else if (typeof window !== 'undefined') {
-        // Main thread context - could post to worker or handle directly
         console.log('[C++] Screenmap update:', UTF8ToString(jsonData));
     }
 });
@@ -110,13 +105,17 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
     const auto& screenMaps = active_strips.getScreenMaps();
 
-    // Create screenMap JSON with expected structure
+    // Create dictionary of screenmaps (stripId → screenmap object)
+    // Same format as _jsSetCanvasSize() to match JavaScript expectations
     fl::Json root = fl::Json::object();
-    fl::Json stripsObj = fl::Json::object();
 
-    // Get screenMap data
+    // Build a separate screenmap object for each strip
     for (const auto &[stripIndex, screenMap] : screenMaps) {
-        // Create strip object
+        // Create this strip's screenmap object
+        fl::Json screenMapObj = fl::Json::object();
+
+        // Create strips object containing only this strip
+        fl::Json stripsObj = fl::Json::object();
         fl::Json stripMapObj = fl::Json::object();
 
         fl::Json mapObj = fl::Json::object();
@@ -138,10 +137,15 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
         // Add diameter
         stripMapObj.set("diameter", screenMap.getDiameter());
 
+        // Add this strip to the strips object
         stripsObj.set(fl::to_string(stripIndex), stripMapObj);
-    }
 
-    root.set("strips", stripsObj);
+        // Set strips object
+        screenMapObj.set("strips", stripsObj);
+
+        // Add this screenmap to the root dictionary
+        root.set(fl::to_string(stripIndex), screenMapObj);
+    }
 
     // Serialize to JSON
     fl::Str json_str = root.to_string();
@@ -314,9 +318,9 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
 
     // Push the complete screenmap data to JavaScript
     // JavaScript worker will cache this and avoid per-frame polling
-    js_notify_screenmap_update(jsonBuffer.c_str());
-
-    FL_DBG("Pushed screenmap update to JavaScript: " << jsonBuffer.c_str());
+    // NOTE: EM_JS has linking issues with partial linking - use polling approach instead
+    // Worker will call getScreenMapData() during initialization to fetch this data
+    FL_DBG("Screenmap update available (worker will poll via getScreenMapData): " << jsonBuffer.c_str());
 }
 
 EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {

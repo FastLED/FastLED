@@ -228,6 +228,7 @@ link_flags = [
 
     # Profiling Support
     "--profiling-funcs",                     # Enable function profiling in quick builds
+    "--emit-symbol-map",                     # Generate symbol map file for function name debugging
 
     # Reduce memory for faster startup (override base setting)
     "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
@@ -316,7 +317,6 @@ flags = [
     # Note: --gc-sections disabled in quick mode for faster linking (saves ~1-2s)
     # Re-enable for release builds: "-Wl,--gc-sections"
     "-Wl,--strip-debug",                     # Strip debug info from quick builds (faster linking)
-    "-Wl,--no-demangle",                     # Disable symbol demangling (faster linking)
     "-Wl,--no-export-dynamic",              # Don't export all symbols (faster symbol processing)
     # Note: --source-map-base removed in quick mode for faster linking
 ]
