@@ -324,15 +324,18 @@ struct TIMING_SM16824E {
 // Medium-Speed Chipsets (400kHz - 600kHz range)
 // ============================================================================
 
-/// WS2811 RGB controller @ 400 kHz (slower variant)
-/// Four-phase: TH0=800ns, TH1=1600ns, TL0=1700ns, TL1=900ns
+/// WS2811 @ 400kHz (standard mode, datasheet specification)
+/// @see WS2811 400kHz: T0H=500ns, T0L=2000ns, T1H=1200ns, T1L=1300ns (datasheet spec)
+/// @see Conversion: T1=T0H=500, T2=(T1H-T0H)=700, T3=T1L=1300
+/// @see Actual frequency: 2500ns cycle = 400kHz
+/// @note WS2811 supports both 400kHz and 800kHz modes (configurable via pins 7&8)
 /// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_400KHZ {
     enum : uint32_t {
-        T1 = 800,
-        T2 = 800,
-        T3 = 900,
-        RESET = 280
+        T1 = 500,   // T0H: 500ns (datasheet: 500ns ±150ns)
+        T2 = 700,   // T1H - T0H: 700ns (T1H=1200ns per datasheet)
+        T3 = 1300,  // T1L: 1300ns (datasheet: 1300ns ±150ns)
+        RESET = 280 // Reset time: 280µs (>50µs per datasheet)
     };
 };
 
@@ -407,16 +410,18 @@ struct TIMING_UCS1912 {
 // Legacy/Special Chipsets
 // ============================================================================
 
-/// WS2811 RGB controller @ 800 kHz (fast variant)
-/// Four-phase: TH0=500ns, TH1=2500ns, TL0=4000ns, TL1=2000ns
-/// @note Legacy definition
+/// WS2811 @ 800kHz (fast mode, half the timing of 400kHz mode)
+/// @see WS2811 800kHz: T0H=250ns, T0L=1000ns, T1H=600ns, T1L=650ns (half of 400kHz spec)
+/// @see Conversion: T1=T0H=250, T2=(T1H-T0H)=350, T3=T1L=650
+/// @see Actual frequency: 1250ns cycle = 800kHz
+/// @note WS2811 supports both 400kHz and 800kHz modes (configurable via pins 7&8)
 /// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_800KHZ_LEGACY {
     enum : uint32_t {
-        T1 = 500,
-        T2 = 2000,
-        T3 = 2000,
-        RESET = 280
+        T1 = 250,   // T0H: 250ns (half of 500ns @ 400kHz)
+        T2 = 350,   // T1H - T0H: 350ns (T1H=600ns, half of 1200ns @ 400kHz)
+        T3 = 650,   // T1L: 650ns (half of 1300ns @ 400kHz)
+        RESET = 280 // Reset time: 280µs (>50µs per datasheet)
     };
 };
 

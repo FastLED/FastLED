@@ -453,8 +453,9 @@ using UCS7604Controller16bit1600 = fl::UCS7604Controller16bit1600T<DATA_PIN, RGB
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1809_800KHZ, RGB_ORDER> {};
 
-/// WS2811 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2811_800KHZ_LEGACY
-/// @see fl::TIMING_WS2811_800KHZ_LEGACY in fl::chipsets::led_timing.h (500, 2000, 2000 ns)
+/// WS2811 controller @ 800kHz (fast mode)
+/// @see fl::TIMING_WS2811_800KHZ_LEGACY in fl/chipsets/led_timing.h (250, 350, 650 ns = 1250ns cycle = 800kHz)
+/// @note WS2811 supports both 400kHz and 800kHz modes (pins 7&8 configure speed)
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_800KHZ_LEGACY, RGB_ORDER> {};
 
@@ -484,8 +485,9 @@ class WS2812BMiniV3Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl:
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812BV5Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812B_V5, RGB_ORDER> {};
 
-/// WS2811 controller @ 400 kHz - references centralized timing from fl::TIMING_WS2811_400KHZ
-/// @see fl::TIMING_WS2811_400KHZ in chipsets::led_timing.h (800, 800, 900 ns)
+/// WS2811 controller @ 400 kHz (slow mode, datasheet standard)
+/// @see fl::TIMING_WS2811_400KHZ in fl/chipsets/led_timing.h (800, 800, 900 ns = 2500ns cycle = 400kHz)
+/// @note This is the conservative/standard WS2811 mode. For 800kHz mode, use WS2811Controller800Khz.
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_400KHZ, RGB_ORDER> {};
 
