@@ -14,6 +14,11 @@
 
 namespace fl {
 
+// Forward declaration of internal screenmap update function from js_bindings.cpp
+// This is not part of the public API - it's an internal implementation detail
+// used by the WASM-specific listener to push screenmap updates to JavaScript
+void _jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap);
+
 // Note: Having trouble getting this into a cpp file.
 void EngineListener::Init() { Singleton<EngineListener>::instance(); }
 
@@ -34,10 +39,11 @@ void EngineListener::onStripAdded(CLEDController *strip, uint32_t num_leds) {
 
 void EngineListener::onCanvasUiSet(CLEDController *strip,
                                    const ScreenMap &screenmap) {
-    // Use ActiveStripData's IdTracker for consistent ID management
+    // WASM-specific listener: Push screenmap updates to JavaScript
+    // This eliminates the need for per-frame polling on the JS side
     ActiveStripData &active_strips = ActiveStripData::Instance();
     int controller_id = active_strips.getIdTracker().getOrCreateId(strip);
-    jsSetCanvasSize(controller_id, screenmap);
+    _jsSetCanvasSize(controller_id, screenmap);
 }
 
 } // namespace fl

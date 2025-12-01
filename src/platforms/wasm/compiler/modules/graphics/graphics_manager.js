@@ -130,8 +130,8 @@ export class GraphicsManager {
     /** @type {Uint8Array|null} */
     this.texData = null;
 
-    /** @type {ScreenMapData} */
-    this.screenMap = null;
+    /** @type {Object} Dictionary of screenmaps (stripId → screenmap object) */
+    this.screenMaps = {};
 
     /** @type {Object} */
     this.args = { usePixelatedRendering };
@@ -178,6 +178,18 @@ export class GraphicsManager {
     }
 
     return this.initWebGL();
+  }
+
+  /**
+   * Updates the screenMaps data when it changes (event-driven)
+   * Called directly from worker's handleScreenMapUpdate()
+   * @param {Object} screenMapsData - Dictionary of screenmaps (stripId → screenmap object)
+   */
+  updateScreenMap(screenMapsData) {
+    this.screenMaps = screenMapsData;
+    console.log('[GraphicsManager] ScreenMaps updated', {
+      screenMapCount: Object.keys(screenMapsData || {}).length
+    });
   }
 
   /**
@@ -378,17 +390,28 @@ export class GraphicsManager {
       return;
     }
 
-    // Update screenMap from frameData if available
-    if (frameData.screenMap) {
-      this.screenMap = frameData.screenMap;
-    }
+    // ScreenMap is updated via push notifications (updateScreenMap() method)
+    // frameData now only contains pixel data, no screenMap property
 
     if (!this.gl) this.initWebGL();
 
-    // Update canvas size based on screenMap dimensions
-    if (this.screenMap && this.canvas) {
-      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0];
-      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1];
+    // Update canvas size based on composite screenMap dimensions
+    if (Object.keys(this.screenMaps).length > 0 && this.canvas) {
+      // Calculate composite bounds across all screenmaps
+      let globalMinX = Infinity, globalMinY = Infinity;
+      let globalMaxX = -Infinity, globalMaxY = -Infinity;
+
+      for (const screenMap of Object.values(this.screenMaps)) {
+        if (screenMap.absMin && screenMap.absMax) {
+          globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
+          globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
+          globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
+          globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
+        }
+      }
+
+      const screenWidth = globalMaxX - globalMinX;
+      const screenHeight = globalMaxY - globalMinY;
 
       // Only update canvas size if it's different from current size
       if (this.canvas.width !== screenWidth || this.canvas.height !== screenHeight) {
@@ -439,12 +462,10 @@ export class GraphicsManager {
       console.log(`WebGL texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
     }
 
-    if (!this.screenMap) {
-      console.warn('No screenMap found, skipping update');
+    if (Object.keys(this.screenMaps).length === 0) {
+      console.warn('No screenMaps found, skipping update');
       return;
     }
-
-    const { screenMap } = this;
 
     // Clear the texture data
     this.texData.fill(0);
@@ -463,10 +484,20 @@ export class GraphicsManager {
       }
 
       const { strip_id } = strip;
-      if (!(strip_id in screenMap.strips)) {
-        console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+
+      // Get screenmap for this specific strip
+      const screenMap = this.screenMaps[strip_id];
+      if (!screenMap) {
+        console.warn(`No screenMap found for strip ${strip_id}`);
         continue;
       }
+
+      // Look up strip data in its screenmap
+      if (!(strip_id in screenMap.strips)) {
+        console.warn(`Strip ${strip_id} not found in its screenMap`);
+        continue;
+      }
+
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
       const { map } = stripData;

@@ -16,7 +16,6 @@
 // Will BREAK JavaScript code that calls these functions and cause SILENT RUNTIME FAILURES!
 //
 // Key async functions declared here that are called from JavaScript:
-// - jsSetCanvasSize() - Canvas/screen mapping setup (now async-aware)
 // - jsOnFrame() - Frame rendering callbacks (now async-aware)
 // - jsOnStripAdded() - LED strip initialization (now async-aware)
 // - updateJs() - UI update notifications (now async-aware)
@@ -40,17 +39,6 @@ namespace fl {
 class ScreenMap;
 class ActiveStripData;
 
-/**
- * Async-aware canvas size setter
- * Sets up screen mapping for LED strips with async JavaScript callback support
- * 
- * @param cledcontoller_id Controller ID for the LED strip
- * @param screenmap Screen mapping configuration
- * 
- * Note: This function calls async JavaScript callbacks that may return Promises.
- * When Asyncify is enabled, Promise returns will be properly awaited.
- */
-void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap);
 
 /**
  * Async-aware frame processing function

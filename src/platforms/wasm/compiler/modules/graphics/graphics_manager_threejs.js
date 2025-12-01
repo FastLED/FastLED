@@ -36,13 +36,12 @@ const DISABLE_MERGE_GEOMETRIES = false;
 
 /**
  * Creates position calculator functions for mapping LED coordinates to 3D space
- * @param {Object} frameData - Frame data containing screen mapping information
+ * @param {Object} screenMap - Screen mapping data
  * @param {number} screenWidth - Width of the screen coordinate system
  * @param {number} screenHeight - Height of the screen coordinate system
  * @returns {Object} Object with calcXPosition and calcYPosition functions
  */
-function makePositionCalculators(frameData, screenWidth, screenHeight) {
-  const { screenMap } = frameData;
+function makePositionCalculators(screenMap, screenWidth, screenHeight) {
   const width = screenMap.absMax[0] - screenMap.absMin[0];
   const height = screenMap.absMax[1] - screenMap.absMin[1];
 
@@ -172,6 +171,12 @@ export class GraphicsManagerThreeJS {
 
     /** @type {HTMLCanvasElement|OffscreenCanvas|null} Stored canvas reference */
     this.canvas = null;
+
+    /** @type {Object} Dictionary of screenmaps (stripId → screenmap object) */
+    this.screenMaps = {};
+
+    /** @type {boolean} Flag to trigger scene rebuild when screenMaps change */
+    this.needsRebuild = false;
   }
 
   /**
@@ -219,6 +224,25 @@ export class GraphicsManagerThreeJS {
       // to prevent Three.js from trying to set canvas.style.width/height
       const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && this.canvas instanceof OffscreenCanvas;
       this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, !isOffscreenCanvas);
+    }
+  }
+
+  /**
+   * Updates the screenMaps data when it changes (event-driven)
+   * Called directly from worker's handleScreenMapUpdate()
+   * Triggers scene rebuild on next frame if scene already exists
+   * @param {Object} screenMapsData - Dictionary of screenmaps (stripId → screenmap object)
+   */
+  updateScreenMap(screenMapsData) {
+    this.screenMaps = screenMapsData;
+
+    if (this.scene) {
+      // Scene exists - trigger rebuild on next updateCanvas() call
+      this.needsRebuild = true;
+      console.log('[GraphicsManagerThreeJS] ScreenMaps updated, scene will rebuild');
+    } else {
+      // Scene doesn't exist yet - screenMaps will be used during first initThreeJS()
+      console.log('[GraphicsManagerThreeJS] ScreenMaps received before scene initialization');
     }
   }
 
@@ -280,9 +304,9 @@ export class GraphicsManagerThreeJS {
   /**
    * Sets up canvas dimensions and display properties
    * @private
-   * @param {Object} frameData - Frame data containing screen mapping
+   * @param {Object} _frameData - Frame data (unused, kept for API compatibility)
    */
-  _setupCanvasAndDimensions(frameData) {
+  _setupCanvasAndDimensions(_frameData) {
     const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
     const MAX_WIDTH = 640; // Max pixels width on browser
 
@@ -296,23 +320,36 @@ export class GraphicsManagerThreeJS {
       throw new Error('Canvas reference is undefined in _setupCanvasAndDimensions');
     }
 
-    const { screenMap } = frameData;
-    let screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
-    let screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
+    // Calculate composite bounds across all screenmaps
+    let globalMinX = Infinity, globalMinY = Infinity;
+    let globalMaxX = -Infinity, globalMaxY = -Infinity;
+
+    for (const screenMap of Object.values(this.screenMaps)) {
+      if (screenMap.absMin && screenMap.absMax) {
+        globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
+        globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
+        globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
+        globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
+      }
+    }
+
+    // Calculate composite dimensions
+    let screenMapWidth = globalMaxX - globalMinX;
+    let screenMapHeight = globalMaxY - globalMinY;
 
     // Defensive: Ensure non-zero dimensions (for simple examples with 1 LED or no XY mapping)
     const MIN_DIMENSION = 1; // Minimum 1 pixel dimension
-    if (screenMapWidth <= 0) {
-      console.warn('_setupCanvasAndDimensions: screenMapWidth is <= 0, using MIN_DIMENSION', {
+    if (screenMapWidth <= 0 || !Number.isFinite(screenMapWidth)) {
+      console.warn('_setupCanvasAndDimensions: screenMapWidth is <= 0 or invalid, using MIN_DIMENSION', {
         screenMapWidth,
-        screenMap
+        screenMapsCount: Object.keys(this.screenMaps).length
       });
       screenMapWidth = MIN_DIMENSION;
     }
-    if (screenMapHeight <= 0) {
-      console.warn('_setupCanvasAndDimensions: screenMapHeight is <= 0, using MIN_DIMENSION', {
+    if (screenMapHeight <= 0 || !Number.isFinite(screenMapHeight)) {
+      console.warn('_setupCanvasAndDimensions: screenMapHeight is <= 0 or invalid, using MIN_DIMENSION', {
         screenMapHeight,
-        screenMap
+        screenMapsCount: Object.keys(this.screenMaps).length
       });
       screenMapHeight = MIN_DIMENSION;
     }
@@ -350,14 +387,14 @@ export class GraphicsManagerThreeJS {
       this.canvas.style.maxHeight = `${targetHeight}px`;
     }
 
-    // Store the bounds for orthographic camera calculations
+    // Store the composite bounds for orthographic camera calculations
     this.screenBounds = {
       width: screenMapWidth,
       height: screenMapHeight,
-      minX: screenMap.absMin[0],
-      minY: screenMap.absMin[1],
-      maxX: screenMap.absMax[0],
-      maxY: screenMap.absMax[1],
+      minX: globalMinX,
+      minY: globalMinY,
+      maxX: globalMaxX,
+      maxY: globalMaxY,
     };
   }
 
@@ -472,19 +509,44 @@ export class GraphicsManagerThreeJS {
 
     // Collect LED positions and calculate layout properties
     const ledPositions = this._collectLedPositions(frameData);
-    const { screenMap } = frameData;
-    const width = screenMap.absMax[0] - screenMap.absMin[0];
-    const height = screenMap.absMax[1] - screenMap.absMin[1];
 
-    // Get position calculators from utility function
+    // Calculate composite bounds across all screenmaps
+    let globalMinX = Infinity, globalMinY = Infinity;
+    let globalMaxX = -Infinity, globalMaxY = -Infinity;
+
+    for (const screenMap of Object.values(this.screenMaps)) {
+      if (screenMap.absMin && screenMap.absMax) {
+        globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
+        globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
+        globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
+        globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
+      }
+    }
+
+    const width = globalMaxX - globalMinX;
+    const height = globalMaxY - globalMinY;
+
+    // Create composite screenMap-like object for position calculators
+    const compositeScreenMap = {
+      absMin: [globalMinX, globalMinY],
+      absMax: [globalMaxX, globalMaxY]
+    };
+
+    // Get position calculators using composite bounds
     const { calcXPosition, calcYPosition } = makePositionCalculators(
-      frameData,
+      compositeScreenMap,
       this.SCREEN_WIDTH,
       this.SCREEN_HEIGHT,
     );
 
-    // Determine if we have a dense grid layout
-    const isDenseScreenMap = isDenseGrid(frameData);
+    // Calculate global density: all screenmaps must be dense for global density
+    let isDenseScreenMap = true;
+    for (const screenMap of Object.values(this.screenMaps)) {
+      if (!isDenseGrid(screenMap)) {
+        isDenseScreenMap = false;
+        break;
+      }
+    }
 
     // Calculate dot sizes
     const { defaultDotSize, normalizedScale } = this._calculateDotSizes(
@@ -527,19 +589,30 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _collectLedPositions(frameData) {
-    const { screenMap } = frameData;
     const ledPositions = [];
 
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
-      if (stripId in screenMap.strips) {
-        const stripMap = screenMap.strips[stripId];
-        const x_array = stripMap.map.x;
-        const y_array = stripMap.map.y;
 
-        for (let i = 0; i < x_array.length; i++) {
-          ledPositions.push([x_array[i], y_array[i]]);
-        }
+      // Get screenmap for this specific strip
+      const screenMap = this.screenMaps[stripId];
+      if (!screenMap) {
+        console.warn(`[GraphicsManagerThreeJS] No screenMap found for strip ${stripId}`);
+        return;
+      }
+
+      // Look up strip data in its screenmap
+      if (!(stripId in screenMap.strips)) {
+        console.warn(`[GraphicsManagerThreeJS] Strip ${stripId} not found in its screenMap`);
+        return;
+      }
+
+      const stripMap = screenMap.strips[stripId];
+      const x_array = stripMap.map.x;
+      const y_array = stripMap.map.y;
+
+      for (let i = 0; i < x_array.length; i++) {
+        ledPositions.push([x_array[i], y_array[i]]);
       }
     });
 
@@ -551,7 +624,6 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _calculateDotSizes(frameData, ledPositions, width, height, calcXPosition, isDenseScreenMap) {
-    const { screenMap } = frameData;
     const screenArea = width * height;
     let pixelDensityDefault;
 
@@ -567,9 +639,16 @@ export class GraphicsManagerThreeJS {
       Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4,
     );
 
-    // Get average diameter from strip data
-    const stripDotSizes = Object.values(screenMap.strips).map((strip) => strip.diameter);
-    const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
+    // Get average diameter from all strips across all screenmaps
+    const stripDotSizes = [];
+    for (const screenMap of Object.values(this.screenMaps)) {
+      for (const strip of Object.values(screenMap.strips)) {
+        stripDotSizes.push(strip.diameter);
+      }
+    }
+    const avgPointDiameter = stripDotSizes.length > 0
+      ? stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length
+      : 0.5; // Default diameter if no strips
 
     // Use pixel density for dense grids, otherwise calculate based on area
     let defaultDotSize = defaultDotSizeScale * avgPointDiameter;
@@ -796,11 +875,10 @@ export class GraphicsManagerThreeJS {
     }
 
     // Update LED visuals
-    const screenMap = (/** @type {any} */ (frameData)).screenMap;
-    if (screenMap) {
+    if (Object.keys(this.screenMaps).length > 0) {
       this._updateLedVisuals(positionMap);
     } else {
-      console.warn('No screenMap available for LED visual updates');
+      console.warn('No screenMaps available for LED visual updates');
     }
 
     // Render the scene
@@ -892,13 +970,14 @@ export class GraphicsManagerThreeJS {
       0,
     );
 
-    // Initialize scene if it doesn't exist or if LED count changed
-    if (!this.scene || totalPixels !== this.previousTotalLeds) {
+    // Initialize scene if it doesn't exist, LED count changed, or needsRebuild flag is set
+    if (!this.scene || totalPixels !== this.previousTotalLeds || this.needsRebuild) {
       if (this.scene) {
         this.reset(); // Clear existing scene if LED count changed
       }
       this.initThreeJS(frameData);
       this.previousTotalLeds = totalPixels;
+      this.needsRebuild = false; // Clear rebuild flag
     }
   }
 
@@ -908,12 +987,11 @@ export class GraphicsManagerThreeJS {
    * @returns {Map} - Map of LED positions to color data
    */
   _collectLedColorData(frameData) {
-    // Handle frameData as array or object with screenMap
+    // frameData is an array of strip data (pixel colors only)
     const dataArray = Array.isArray(frameData) ? frameData : (frameData.data || []);
-    const screenMap = (/** @type {any} */ (frameData)).screenMap;
 
-    if (!screenMap) {
-      console.warn('No screenMap found in frameData:', frameData);
+    if (Object.keys(this.screenMaps).length === 0) {
+      console.warn('No screenMaps available');
       return new Map();
     }
 
@@ -928,8 +1006,17 @@ export class GraphicsManagerThreeJS {
       }
 
       const { strip_id } = strip;
+
+      // Get screenmap for this specific strip
+      const screenMap = this.screenMaps[strip_id];
+      if (!screenMap) {
+        console.warn(`No screenMap found for strip ${strip_id}`);
+        return;
+      }
+
+      // Look up strip data in its screenmap
       if (!screenMap.strips || !(strip_id in screenMap.strips)) {
-        console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+        console.warn(`Strip ${strip_id} not found in its screenMap`);
         return;
       }
 

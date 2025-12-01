@@ -103,6 +103,7 @@ async function loadThreeJSModules() {
  * @property {boolean} isCapturingFrames - Frame capture enabled for main-thread recording
  * @property {number} frameCaptureInterval - Milliseconds between frame captures
  * @property {number} lastFrameCaptureTime - Timestamp of last frame capture
+ * @property {Object} screenMaps - Dictionary of screenmaps (stripId → screenmap, push-based from C++)
  */
 
 /**
@@ -135,7 +136,13 @@ const workerState = {
   // Frame capture for main-thread recording (MediaRecorder runs on main thread)
   isCapturingFrames: false,
   frameCaptureInterval: 16.67, // Default 60 FPS
-  lastFrameCaptureTime: 0
+  lastFrameCaptureTime: 0,
+
+  // Screenmap caching - updated via push notifications from C++ when screenmaps change
+  // C++ calls js_notify_screenmap_update() → handleScreenMapUpdate() → cache update
+  // Zero polling overhead - completely event-driven
+  // Dictionary format: { "0": {strips: {...}, absMin: [...], absMax: [...]}, "1": {...} }
+  screenMaps: {}
 };
 
 /**
@@ -232,6 +239,10 @@ self.onmessage = async function(event) {
 
       case 'stop_recording':
         response = await handleStopRecording(payload);
+        break;
+
+      case 'screenmap_update':
+        response = handleScreenMapUpdate(payload);
         break;
 
       default:
@@ -500,6 +511,13 @@ async function initializeGraphicsManager() {
         height: workerState.canvas.height
       }
     });
+
+    // Initialization order handling: If screenMaps arrived before graphics manager was ready,
+    // push them now to ensure graphics manager has the data for first render
+    if (Object.keys(workerState.screenMaps).length > 0 && workerState.graphicsManager.updateScreenMap) {
+      workerState.graphicsManager.updateScreenMap(workerState.screenMaps);
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Pushed cached screenMaps to newly initialized graphics manager');
+    }
 
   } catch (error) {
     workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to initialize graphics manager', error);
@@ -780,6 +798,44 @@ async function handleStopRecording(_payload) {
 }
 
 /**
+ * Handles screenmap_update message from C++ via event system
+ * Caches the screenmap data (dictionary format) to avoid per-frame fetching
+ * @param {Object} payload - Screenmap update data (dictionary: stripId → screenmap)
+ * @returns {Object} Update confirmation
+ */
+function handleScreenMapUpdate(payload) {
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Screenmap update received', payload);
+
+  try {
+    // Cache the screenmap data (dictionary format)
+    // This is sent from C++ only when screenmaps change (strip added, layout updated)
+    workerState.screenMaps = payload.screenMapData;
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Screenmap cache updated', {
+      screenMapCount: Object.keys(workerState.screenMaps || {}).length
+    });
+
+    // NEW: Directly notify graphics manager (event-driven architecture)
+    // Graphics manager will rebuild scene/recalculate dimensions on next frame
+    if (workerState.graphicsManager && workerState.graphicsManager.updateScreenMap) {
+      workerState.graphicsManager.updateScreenMap(payload.screenMapData);
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Graphics manager notified of screenMap update');
+    } else {
+      workerLog('WARN', 'BACKGROUND_WORKER', 'Graphics manager not ready, screenMap will be applied during initialization');
+    }
+
+    return {
+      success: true,
+      cached: true,
+      graphicsManagerNotified: !!workerState.graphicsManager
+    };
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to update screenmap cache', error);
+    throw error;
+  }
+}
+
+/**
  * Starts the animation loop in worker context
  */
 function startAnimationLoop() {
@@ -915,20 +971,9 @@ function extractFrameData() {
     const frameDataJson = Module.UTF8ToString(frameDataPtr, dataSize);
     const frameData = JSON.parse(frameDataJson);
 
-    // Get screen map data
-    const screenMapSizePtr = Module._malloc(4);
-    const screenMapPtr = funcs.getScreenMapData(screenMapSizePtr);
-    let screenMap = null;
-
-    if (screenMapPtr) {
-      const screenMapSize = Module.getValue(screenMapSizePtr, 'i32');
-      const screenMapJson = Module.UTF8ToString(screenMapPtr, screenMapSize);
-      screenMap = JSON.parse(screenMapJson);
-      funcs.freeFrameData(screenMapPtr);
-    }
-    Module._free(screenMapSizePtr);
-
     // Process each strip's pixel data
+    // NOTE: screenMap is NOT attached to frameData - it's pushed directly to graphics manager
+    // via handleScreenMapUpdate() when it changes (event-driven architecture)
     for (const stripData of frameData) {
       const pixelSizePtr = Module._malloc(4);
       const pixelDataPtr = funcs.getStripPixelData(stripData.strip_id, pixelSizePtr);
@@ -943,11 +988,6 @@ function extractFrameData() {
       }
 
       Module._free(pixelSizePtr);
-    }
-
-    // Add screenMap to frameData
-    if (screenMap) {
-      frameData.screenMap = screenMap;
     }
 
     // Clean up

@@ -4,7 +4,8 @@
       "WebSearch",
       "Bash(find:*)",
       "Bash(git show:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "SlashCommand(/git-historian screenmap getScreenMapData extractFrameData --paths src/platforms/wasm)"
     ],
     "deny": [],
     "ask": []
