@@ -21,14 +21,70 @@
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {number[]} absMax - Maximum coordinates array
- * @property {number[]} absMin - Minimum coordinates array
+ * @property {number[]} [absMax] - Maximum coordinates array (computed on-demand)
+ * @property {number[]} [absMin] - Minimum coordinates array (computed on-demand)
  * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
 /**
  * @typedef {Array & {screenMap?: ScreenMapData}} FrameData
  */
+
+/**
+ * Computes bounding box (absMin/absMax) from screenMap coordinate arrays
+ * @param {ScreenMapData} screenMap - The screen mapping data with strips containing x/y arrays
+ * @returns {{absMin: number[], absMax: number[]}} Bounding box with [minX, minY] and [maxX, maxY]
+ */
+export function computeScreenMapBounds(screenMap) {
+  // Defensive programming: ensure screenMap exists and has expected structure
+  if (!screenMap || typeof screenMap !== 'object' || !screenMap.strips) {
+    console.warn('computeScreenMapBounds: Invalid screenMap structure');
+    return { absMin: [0, 0], absMax: [0, 0] };
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let hasData = false;
+
+  // Iterate through all strips and find global min/max
+  for (const stripId in screenMap.strips) {
+    if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
+    const strip = screenMap.strips[stripId];
+
+    if (!strip || !strip.map || !strip.map.x || !strip.map.y) {
+      continue;
+    }
+
+    const xArray = strip.map.x;
+    const yArray = strip.map.y;
+    const len = Math.min(xArray.length, yArray.length);
+
+    for (let i = 0; i < len; i++) {
+      const x = xArray[i];
+      const y = yArray[i];
+
+      if (typeof x === 'number' && typeof y === 'number' && !Number.isNaN(x) && !Number.isNaN(y)) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+        hasData = true;
+      }
+    }
+  }
+
+  // Return computed bounds or default [0,0] if no valid data
+  if (!hasData) {
+    return { absMin: [0, 0], absMax: [0, 0] };
+  }
+
+  return {
+    absMin: [minX, minY],
+    absMax: [maxX, maxY],
+  };
+}
 
 /**
  * Determines if the LED layout represents a dense grid
@@ -79,16 +135,10 @@ export function isDenseGrid(screenMap) {
     }
   }
 
-  // Defensive programming: ensure absMax and absMin exist
-  if (!screenMap.absMax || !screenMap.absMin
-      || !Array.isArray(screenMap.absMax) || !Array.isArray(screenMap.absMin)
-      || screenMap.absMax.length < 2 || screenMap.absMin.length < 2) {
-    console.warn('isDenseGrid: screenMap missing absMax/absMin arrays');
-    return false;
-  }
-
-  const width = 1 + (screenMap.absMax[0] - screenMap.absMin[0]);
-  const height = 1 + (screenMap.absMax[1] - screenMap.absMin[1]);
+  // Compute bounds from x/y coordinate arrays
+  const bounds = computeScreenMapBounds(screenMap);
+  const width = 1 + (bounds.absMax[0] - bounds.absMin[0]);
+  const height = 1 + (bounds.absMax[1] - bounds.absMin[1]);
   const screenArea = width * height;
 
   // Avoid division by zero

@@ -30,8 +30,8 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './f
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {number[]} absMax - Maximum coordinates array
- * @property {number[]} absMin - Minimum coordinates array
+ * @property {number[]} [absMax] - Maximum coordinates array (computed on-demand)
+ * @property {number[]} [absMin] - Minimum coordinates array (computed on-demand)
  * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
@@ -112,8 +112,6 @@ globalThis.FastLED_onFrame = async function (frameData) {
       console.warn('FastLED_onFrame: screenMap exists but has invalid structure, using fallback:', frameData.screenMap);
       frameData.screenMap = {
         strips: {},
-        absMin: [0, 0],
-        absMax: [0, 0],
       };
     }
 

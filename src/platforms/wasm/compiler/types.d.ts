@@ -22,10 +22,11 @@ interface FrameData {
 
 /**
  * Screen mapping data for LED strips
+ * Note: absMin/absMax are computed on-demand from strip coordinate arrays
  */
 interface ScreenMapData {
-  absMax: number[];
-  absMin: number[];
+  absMax?: number[];
+  absMin?: number[];
   strips: { [stripId: string]: any };
   [key: string]: any;
 }

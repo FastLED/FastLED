@@ -110,27 +110,18 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
     const auto& screenMaps = active_strips.getScreenMaps();
 
-    // Create screenMap JSON with expected structure (legacy-compatible)
+    // Create screenMap JSON with expected structure
     fl::Json root = fl::Json::object();
     fl::Json stripsObj = fl::Json::object();
 
-    // Track global bounds for absMax/absMin calculation
-    float globalMinX = FL_FLT_MAX, globalMinY = FL_FLT_MAX;
-    float globalMaxX = -FL_FLT_MAX, globalMaxY = -FL_FLT_MAX;
-    bool hasData = false;
-
     // Get screenMap data
     for (const auto &[stripIndex, screenMap] : screenMaps) {
-        // Create strip object with expected structure (legacy-compatible)
+        // Create strip object
         fl::Json stripMapObj = fl::Json::object();
 
         fl::Json mapObj = fl::Json::object();
         fl::Json xArray = fl::Json::array();
         fl::Json yArray = fl::Json::array();
-
-        // Track strip-specific bounds for min/max arrays
-        float stripMinX = FL_FLT_MAX, stripMinY = FL_FLT_MAX;
-        float stripMaxX = -FL_FLT_MAX, stripMaxY = -FL_FLT_MAX;
 
         for (uint32_t i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
@@ -138,38 +129,11 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
 
             xArray.push_back(fl::Json(x));
             yArray.push_back(fl::Json(y));
-
-            // Update strip bounds
-            if (x < stripMinX) stripMinX = x;
-            if (x > stripMaxX) stripMaxX = x;
-            if (y < stripMinY) stripMinY = y;
-            if (y > stripMaxY) stripMaxY = y;
-
-            // Update global bounds
-            if (x < globalMinX) globalMinX = x;
-            if (x > globalMaxX) globalMaxX = x;
-            if (y < globalMinY) globalMinY = y;
-            if (y > globalMaxY) globalMaxY = y;
-            hasData = true;
         }
 
         mapObj.set("x", xArray);
         mapObj.set("y", yArray);
         stripMapObj.set("map", mapObj);
-
-        // Add legacy-compatible min/max arrays for this strip
-        if (screenMap.getLength() > 0) {
-            fl::Json minArray = fl::Json::array();
-            fl::Json maxArray = fl::Json::array();
-
-            minArray.push_back(fl::Json(stripMinX));
-            minArray.push_back(fl::Json(stripMinY));
-            maxArray.push_back(fl::Json(stripMaxX));
-            maxArray.push_back(fl::Json(stripMaxY));
-
-            stripMapObj.set("min", minArray);
-            stripMapObj.set("max", maxArray);
-        }
 
         // Add diameter
         stripMapObj.set("diameter", screenMap.getDiameter());
@@ -178,32 +142,6 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     }
 
     root.set("strips", stripsObj);
-
-    // Add global absMin and absMax arrays if we have data
-    if (hasData) {
-        fl::Json absMinArray = fl::Json::array();
-        fl::Json absMaxArray = fl::Json::array();
-
-        absMinArray.push_back(fl::Json(globalMinX));
-        absMinArray.push_back(fl::Json(globalMinY));
-        absMaxArray.push_back(fl::Json(globalMaxX));
-        absMaxArray.push_back(fl::Json(globalMaxY));
-
-        root.set("absMin", absMinArray);
-        root.set("absMax", absMaxArray);
-    } else {
-        // Provide default bounds if no data
-        fl::Json absMinArray = fl::Json::array();
-        fl::Json absMaxArray = fl::Json::array();
-
-        absMinArray.push_back(fl::Json(0.0f));
-        absMinArray.push_back(fl::Json(0.0f));
-        absMaxArray.push_back(fl::Json(0.0f));
-        absMaxArray.push_back(fl::Json(0.0f));
-
-        root.set("absMin", absMinArray);
-        root.set("absMax", absMaxArray);
-    }
 
     // Serialize to JSON
     fl::Str json_str = root.to_string();
@@ -333,13 +271,6 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     // Create dictionary of screenmaps (stripId → screenmap object)
     fl::Json root = fl::Json::object();
 
-    // Track coordinate scales for validation
-    struct ScreenMapBounds {
-        float minX, minY, maxX, maxY;
-        float rangeX, rangeY;
-    };
-    fl::vector<ScreenMapBounds> allBounds;
-
     // Build a separate screenmap object for each strip
     for (const auto &[stripIndex, screenMap] : screenMaps) {
         // Create this strip's screenmap object
@@ -353,58 +284,17 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
         fl::Json xArray = fl::Json::array();
         fl::Json yArray = fl::Json::array();
 
-        // Track strip-specific bounds
-        float stripMinX = FL_FLT_MAX, stripMinY = FL_FLT_MAX;
-        float stripMaxX = -FL_FLT_MAX, stripMaxY = -FL_FLT_MAX;
-        bool hasData = false;
-
         for (uint32_t i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
 
             xArray.push_back(fl::Json(x));
             yArray.push_back(fl::Json(y));
-
-            // Update strip bounds
-            if (x < stripMinX) stripMinX = x;
-            if (x > stripMaxX) stripMaxX = x;
-            if (y < stripMinY) stripMinY = y;
-            if (y > stripMaxY) stripMaxY = y;
-            hasData = true;
         }
 
         mapObj.set("x", xArray);
         mapObj.set("y", yArray);
         stripMapObj.set("map", mapObj);
-
-        // Add min/max arrays for this strip
-        if (hasData) {
-            fl::Json minArray = fl::Json::array();
-            fl::Json maxArray = fl::Json::array();
-
-            minArray.push_back(fl::Json(stripMinX));
-            minArray.push_back(fl::Json(stripMinY));
-            maxArray.push_back(fl::Json(stripMaxX));
-            maxArray.push_back(fl::Json(stripMaxY));
-
-            stripMapObj.set("min", minArray);
-            stripMapObj.set("max", maxArray);
-
-            // Track bounds for validation
-            float rangeX = stripMaxX - stripMinX;
-            float rangeY = stripMaxY - stripMinY;
-            allBounds.push_back({stripMinX, stripMinY, stripMaxX, stripMaxY, rangeX, rangeY});
-        } else {
-            // Default bounds for empty strips
-            fl::Json minArray = fl::Json::array();
-            fl::Json maxArray = fl::Json::array();
-            minArray.push_back(fl::Json(0.0f));
-            minArray.push_back(fl::Json(0.0f));
-            maxArray.push_back(fl::Json(0.0f));
-            maxArray.push_back(fl::Json(0.0f));
-            stripMapObj.set("min", minArray);
-            stripMapObj.set("max", maxArray);
-        }
 
         // Add diameter
         stripMapObj.set("diameter", screenMap.getDiameter());
@@ -415,58 +305,8 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
         // Set strips object
         screenMapObj.set("strips", stripsObj);
 
-        // Add absMin and absMax for this screenmap (same as strip bounds for 1:1 mapping)
-        if (hasData) {
-            fl::Json absMinArray = fl::Json::array();
-            fl::Json absMaxArray = fl::Json::array();
-
-            absMinArray.push_back(fl::Json(stripMinX));
-            absMinArray.push_back(fl::Json(stripMinY));
-            absMaxArray.push_back(fl::Json(stripMaxX));
-            absMaxArray.push_back(fl::Json(stripMaxY));
-
-            screenMapObj.set("absMin", absMinArray);
-            screenMapObj.set("absMax", absMaxArray);
-        } else {
-            // Default bounds
-            fl::Json absMinArray = fl::Json::array();
-            fl::Json absMaxArray = fl::Json::array();
-            absMinArray.push_back(fl::Json(0.0f));
-            absMinArray.push_back(fl::Json(0.0f));
-            absMaxArray.push_back(fl::Json(0.0f));
-            absMaxArray.push_back(fl::Json(0.0f));
-            screenMapObj.set("absMin", absMinArray);
-            screenMapObj.set("absMax", absMaxArray);
-        }
-
         // Add this screenmap to the root dictionary
         root.set(fl::to_string(stripIndex), screenMapObj);
-    }
-
-    // Coordinate scale validation: warn if screenmaps have vastly different ranges
-    if (allBounds.size() > 1) {
-        float maxRangeX = -FL_FLT_MAX, minRangeX = FL_FLT_MAX;
-        float maxRangeY = -FL_FLT_MAX, minRangeY = FL_FLT_MAX;
-
-        for (const auto& bounds : allBounds) {
-            if (bounds.rangeX > maxRangeX) maxRangeX = bounds.rangeX;
-            if (bounds.rangeX < minRangeX && bounds.rangeX > 0.0f) minRangeX = bounds.rangeX;
-            if (bounds.rangeY > maxRangeY) maxRangeY = bounds.rangeY;
-            if (bounds.rangeY < minRangeY && bounds.rangeY > 0.0f) minRangeY = bounds.rangeY;
-        }
-
-        // Warn if one screenmap is 10x larger than another (indicates different coordinate systems)
-        const float SCALE_WARNING_THRESHOLD = 10.0f;
-        if (minRangeX > 0.0f && maxRangeX / minRangeX > SCALE_WARNING_THRESHOLD) {
-            FL_WARN("ScreenMap coordinate scale mismatch: X ranges vary by "
-                    << (maxRangeX / minRangeX) << "x (" << minRangeX << " to "
-                    << maxRangeX << "). Ensure all screenmaps use the same coordinate system.");
-        }
-        if (minRangeY > 0.0f && maxRangeY / minRangeY > SCALE_WARNING_THRESHOLD) {
-            FL_WARN("ScreenMap coordinate scale mismatch: Y ranges vary by "
-                    << (maxRangeY / minRangeY) << "x (" << minRangeY << " to "
-                    << maxRangeY << "). Ensure all screenmaps use the same coordinate system.");
-        }
     }
 
     // Serialize to JSON

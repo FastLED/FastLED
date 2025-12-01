@@ -26,7 +26,7 @@
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
-import { isDenseGrid } from './graphics_utils.js';
+import { isDenseGrid, computeScreenMapBounds } from './graphics_utils.js';
 
 // Declare THREE as global namespace for type checking
 /* global THREE */
@@ -42,14 +42,19 @@ const DISABLE_MERGE_GEOMETRIES = false;
  * @returns {Object} Object with calcXPosition and calcYPosition functions
  */
 function makePositionCalculators(screenMap, screenWidth, screenHeight) {
-  const width = screenMap.absMax[0] - screenMap.absMin[0];
-  const height = screenMap.absMax[1] - screenMap.absMin[1];
+  // Compute bounds from screenMap if not already present
+  const bounds = screenMap.absMin && screenMap.absMax
+    ? { absMin: screenMap.absMin, absMax: screenMap.absMax }
+    : computeScreenMapBounds(screenMap);
+
+  const width = bounds.absMax[0] - bounds.absMin[0];
+  const height = bounds.absMax[1] - bounds.absMin[1];
 
   // Validate screenmap bounds - allow width=0 for Nx1 or height=0 for 1xN strips
   if (Number.isNaN(width) || Number.isNaN(height) || (width === 0 && height === 0)) {
     console.error('Invalid screenmap bounds detected:');
-    console.error(`  absMin: [${screenMap.absMin[0]}, ${screenMap.absMin[1]}]`);
-    console.error(`  absMax: [${screenMap.absMax[0]}, ${screenMap.absMax[1]}]`);
+    console.error(`  absMin: [${bounds.absMin[0]}, ${bounds.absMin[1]}]`);
+    console.error(`  absMax: [${bounds.absMax[0]}, ${bounds.absMax[1]}]`);
     console.error(`  width: ${width}, height: ${height}`);
     console.error('This indicates the screenmap was not properly set up.');
     console.error('Make sure to call .setScreenMap() on your LED controller in setup().');
@@ -63,7 +68,7 @@ function makePositionCalculators(screenMap, screenWidth, screenHeight) {
      */
     calcXPosition: (x) => {
       if (width === 0) return 0; // Handle Nx1 case
-      return (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
+      return (((x - bounds.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
     },
     /**
      * Calculates Y position in 3D space from screen coordinates
@@ -72,7 +77,7 @@ function makePositionCalculators(screenMap, screenWidth, screenHeight) {
      */
     calcYPosition: (y) => {
       if (height === 0) return 0; // Handle 1xN case
-      const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
+      const negY = (((y - bounds.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
       return negY; // Remove negative sign to fix Y-axis orientation
     },
   };
@@ -325,12 +330,11 @@ export class GraphicsManagerThreeJS {
     let globalMaxX = -Infinity, globalMaxY = -Infinity;
 
     for (const screenMap of Object.values(this.screenMaps)) {
-      if (screenMap.absMin && screenMap.absMax) {
-        globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
-        globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
-        globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
-        globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
-      }
+      const bounds = computeScreenMapBounds(screenMap);
+      globalMinX = Math.min(globalMinX, bounds.absMin[0]);
+      globalMinY = Math.min(globalMinY, bounds.absMin[1]);
+      globalMaxX = Math.max(globalMaxX, bounds.absMax[0]);
+      globalMaxY = Math.max(globalMaxY, bounds.absMax[1]);
     }
 
     // Calculate composite dimensions
@@ -515,12 +519,11 @@ export class GraphicsManagerThreeJS {
     let globalMaxX = -Infinity, globalMaxY = -Infinity;
 
     for (const screenMap of Object.values(this.screenMaps)) {
-      if (screenMap.absMin && screenMap.absMax) {
-        globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
-        globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
-        globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
-        globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
-      }
+      const bounds = computeScreenMapBounds(screenMap);
+      globalMinX = Math.min(globalMinX, bounds.absMin[0]);
+      globalMinY = Math.min(globalMinY, bounds.absMin[1]);
+      globalMaxX = Math.max(globalMaxX, bounds.absMax[0]);
+      globalMaxY = Math.max(globalMaxY, bounds.absMax[1]);
     }
 
     const width = globalMaxX - globalMinX;

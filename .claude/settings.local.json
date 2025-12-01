@@ -5,7 +5,8 @@
       "Bash(find:*)",
       "Bash(git show:*)",
       "Bash(git log:*)",
-      "SlashCommand(/git-historian screenmap getScreenMapData extractFrameData --paths src/platforms/wasm)"
+      "SlashCommand(/git-historian screenmap getScreenMapData extractFrameData --paths src/platforms/wasm)",
+      "SlashCommand(/git-historian screenmap absMin absMax bounds --paths src/platforms/wasm examples)"
     ],
     "deny": [],
     "ask": []

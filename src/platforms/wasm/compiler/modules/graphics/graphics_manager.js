@@ -17,6 +17,8 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
 
+import { computeScreenMapBounds } from './graphics_utils.js';
+
 /**
  * @typedef {Object} StripData
  * @property {number} strip_id - Unique identifier for the LED strip
@@ -26,8 +28,8 @@
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {number[]} absMax - Maximum coordinates array
- * @property {number[]} absMin - Minimum coordinates array
+ * @property {number[]} [absMax] - Maximum coordinates array (computed on-demand)
+ * @property {number[]} [absMin] - Minimum coordinates array (computed on-demand)
  * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
@@ -402,12 +404,11 @@ export class GraphicsManager {
       let globalMaxX = -Infinity, globalMaxY = -Infinity;
 
       for (const screenMap of Object.values(this.screenMaps)) {
-        if (screenMap.absMin && screenMap.absMax) {
-          globalMinX = Math.min(globalMinX, screenMap.absMin[0]);
-          globalMinY = Math.min(globalMinY, screenMap.absMin[1]);
-          globalMaxX = Math.max(globalMaxX, screenMap.absMax[0]);
-          globalMaxY = Math.max(globalMaxY, screenMap.absMax[1]);
-        }
+        const bounds = computeScreenMapBounds(screenMap);
+        globalMinX = Math.min(globalMinX, bounds.absMin[0]);
+        globalMinY = Math.min(globalMinY, bounds.absMin[1]);
+        globalMaxX = Math.max(globalMaxX, bounds.absMax[0]);
+        globalMaxY = Math.max(globalMaxY, bounds.absMax[1]);
       }
 
       const screenWidth = globalMaxX - globalMinX;
@@ -501,8 +502,9 @@ export class GraphicsManager {
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
       const { map } = stripData;
-      const min_x = screenMap.absMin[0];
-      const min_y = screenMap.absMin[1];
+      const bounds = computeScreenMapBounds(screenMap);
+      const min_x = bounds.absMin[0];
+      const min_y = bounds.absMin[1];
       const x_array = map.x;
       const y_array = map.y;
       const len = Math.min(x_array.length, y_array.length);

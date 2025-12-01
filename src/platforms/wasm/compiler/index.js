@@ -55,8 +55,8 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './m
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {number[]} absMax - Maximum coordinates array
- * @property {number[]} absMin - Minimum coordinates array
+ * @property {number[]} [absMax] - Maximum coordinates array (computed on-demand)
+ * @property {number[]} [absMin] - Minimum coordinates array (computed on-demand)
  * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
