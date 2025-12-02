@@ -61,8 +61,8 @@ class GradientInlined {
     CRGB colorAt(u8 index) const;
     void fill(span<const u8> input, span<CRGB> output) const;
 
-    GradientVariant &variant() { return mVariant; }
-    const GradientVariant &variant() const { return mVariant; }
+    GradientVariant &getVariant() { return mVariant; }
+    const GradientVariant &getVariant() const { return mVariant; }
 
   private:
     GradientVariant mVariant;

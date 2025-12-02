@@ -141,7 +141,7 @@ Gradient::Gradient(const GradientInlined &other) {
         Gradient &mOwner;
     };
     Copy copy_to_self(*this);
-    other.variant().visit(copy_to_self);
+    other.getVariant().visit(copy_to_self);
 }
 
 } // namespace fl
