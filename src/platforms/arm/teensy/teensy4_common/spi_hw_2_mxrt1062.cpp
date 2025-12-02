@@ -425,7 +425,6 @@ namespace {
     }
 }
 FL_INIT(init_spi_hw_2_mxrt1062);
-}
 
 }  // namespace fl
 
