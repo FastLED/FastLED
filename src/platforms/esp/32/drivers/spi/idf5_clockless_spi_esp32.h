@@ -58,7 +58,7 @@ protected:
             // Warn every second if still waiting (possible deadlock or hardware issue)
             uint32_t elapsed = millis() - startTime;
             if (elapsed > 1000 && (millis() - lastWarnTime) >= 1000) {
-                FL_WARN("ClocklessSPI: Waiting " << elapsed << "ms for buffer release - possible deadlock or slow hardware");
+                FL_WARN("ClocklessSPI: Buffer still busy after " << elapsed << "ms total - possible deadlock or slow hardware");
                 lastWarnTime = millis();
             }
         }

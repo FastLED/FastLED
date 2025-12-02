@@ -146,19 +146,13 @@ void ChannelEngineSpi::enqueue(ChannelDataPtr channelData) {
         return;
     }
 
-    FL_DBG("ChannelEngineSpi: Enqueuing channel for pin "
-           << channelData->getPin());
     mEnqueuedChannels.push_back(channelData);
 }
 
 void ChannelEngineSpi::show() {
     if (mEnqueuedChannels.empty()) {
-        FL_DBG("ChannelEngineSpi: show() called with no enqueued channels");
         return;
     }
-
-    FL_DBG("ChannelEngineSpi: show() - starting transmission of "
-           << mEnqueuedChannels.size() << " channels");
 
     // Move enqueued channels to transmitting list
     mTransmittingChannels = fl::move(mEnqueuedChannels);
@@ -186,8 +180,6 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
 
         if (streaming_complete && !channel.transmissionComplete) {
             // All encoding and transmission done
-            FL_DBG("ChannelEngineSpi: Streaming complete for pin "
-                   << channel.pin);
             channel.transmissionComplete = true;
 
             // Clear in-use flag on source data
@@ -217,8 +209,6 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
 
     // All channels complete - clear transmitting list
     if (!mTransmittingChannels.empty()) {
-        FL_DBG("ChannelEngineSpi: All transmissions complete, clearing "
-               << mTransmittingChannels.size() << " channels");
         mTransmittingChannels.clear();
     }
 
@@ -227,9 +217,6 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
 
 void ChannelEngineSpi::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) {
-    FL_DBG("ChannelEngineSpi: beginTransmission called with "
-           << channelData.size() << " channels");
-
     for (const auto &data : channelData) {
         gpio_num_t pin = static_cast<gpio_num_t>(data->getPin());
 
@@ -271,9 +258,6 @@ void ChannelEngineSpi::beginTransmission(
         // Kick-start the timer ISR by setting hasNewData flag
         // The timer ISR will start encoding chunks and posting transactions
         channel->hasNewData = true;
-
-        FL_DBG("ChannelEngineSpi: Streaming initialized for pin "
-               << channel->pin << ", " << ledData.size() << " LED bytes");
     }
 }
 
@@ -284,7 +268,6 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
     // Try to find existing idle channel with matching pin and timing
     for (auto &channel : mChannels) {
         if (!channel.inUse && channel.pin == pin && channel.timing == timing) {
-            FL_DBG("ChannelEngineSpi: Reusing channel for pin " << pin);
             channel.inUse = true;
             channel.transmissionComplete = false;
             channel.hasNewData = false;
@@ -345,7 +328,6 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
 
 void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
     if (channel) {
-        FL_DBG("ChannelEngineSpi: Releasing channel for pin " << channel->pin);
         channel->inUse = false;
         channel->transmissionComplete = false;
         channel->hasNewData = false;
@@ -543,10 +525,6 @@ bool ChannelEngineSpi::encodeLedData(const fl::span<const uint8_t> &ledData,
                                            output_bit_offset);
     }
 
-    FL_DBG("ChannelEngineSpi: Encoded " << ledData.size() << " LED bytes to "
-                                        << spiSize << " SPI bytes ("
-                                        << output_bit_offset << " bits)");
-
     return true;
 }
 
@@ -689,10 +667,6 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     const uint32_t t2_ns = chipsetTiming.t2_ns;
     const uint32_t t3_ns = chipsetTiming.t3_ns;
 
-    FL_DBG("ChannelEngineSpi: Chipset 3-phase timing - T1="
-           << t1_ns << "ns, T2=" << t2_ns << "ns, T3=" << t3_ns
-           << "ns (period=" << (t1_ns + t2_ns + t3_ns) << "ns)");
-
     // Find GCD of original timings to get the optimal time quantum
     // This provides best memory efficiency while maintaining perfect timing
     // accuracy
@@ -757,15 +731,6 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     const uint32_t achieved_t1l_ns =
         t3_quanta * ns_per_bit; // Bit '1' low time = T3
 
-    FL_DBG("ChannelEngineSpi: Calculated SPI timing - freq="
-           << spi_freq_hz << " Hz, "
-           << "bits_per_led_bit=" << bits_per_led_bit);
-    FL_DBG("ChannelEngineSpi: Bit patterns - bit0=" << bit0_pattern << ", bit1="
-                                                    << bit1_pattern);
-    FL_DBG("ChannelEngineSpi: Achieved timing - T0H="
-           << achieved_t0h_ns << "ns, T0L=" << achieved_t0l_ns << "ns, T1H="
-           << achieved_t1h_ns << "ns, T1L=" << achieved_t1l_ns << "ns");
-
     // Construct SpiTimingConfig
     SpiTimingConfig config;
     config.protocol = SpiTimingConfig::CUSTOM;
@@ -790,10 +755,6 @@ ChannelEngineSpi::getSpiTimingFromChannel(const ChannelDataPtr &data) {
 
     // Calculate optimal SPI timing from chipset specification
     SpiTimingConfig spiTiming = calculateSpiTiming(chipsetTiming);
-
-    FL_DBG("ChannelEngineSpi: Using calculated SPI timing - clock="
-           << spiTiming.clock_hz << " Hz, reset=" << spiTiming.reset_time_us
-           << " μs");
 
     return spiTiming;
 }
@@ -831,10 +792,6 @@ void ChannelEngineSpi::processPendingChannels() {
 
         // Kick-start the timer ISR
         channel->hasNewData = true;
-
-        FL_DBG("ChannelEngineSpi: Streaming initialized for pending channel on "
-               "pin "
-               << pin);
     }
 
     // Replace pending list with those that couldn't be processed
@@ -874,8 +831,9 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     // Check if there's data left to encode
     if (channel->ledBytesRemaining == 0) {
         channel->hasNewData = false;
-        channel->transmissionComplete = true;
-        return; // All done
+        // NOTE: Do NOT set transmissionComplete here - the poll() function will
+        // detect completion when ledBytesRemaining==0 AND all transactions finish.
+        return; // All encoding done
     }
 
     // CRITICAL: Validate currentStaging pointer before use
@@ -953,8 +911,12 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     channel->ledSource += bytes_to_encode;
     channel->ledBytesRemaining -= bytes_to_encode;
 
-    // Check if staging buffer is full or this is the last chunk
-    bool buffer_full = (channel->stagingOffset >= channel->stagingCapacity);
+    // Check if staging buffer is full or nearly full or this is the last chunk
+    // CRITICAL: Use threshold instead of exact capacity to prevent edge case where
+    // buffer has a few spare bytes but not enough for next chunk (causing deadlock).
+    // With 10x expansion, typical chunk is ~150 bytes, so 200-byte margin is safe.
+    const size_t buffer_threshold = channel->stagingCapacity - 200;
+    bool buffer_full = (channel->stagingOffset >= buffer_threshold);
     bool last_chunk = (channel->ledBytesRemaining == 0);
 
     if (buffer_full || last_chunk) {
