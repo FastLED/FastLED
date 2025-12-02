@@ -234,6 +234,7 @@ def run_qemu_tests(args: TestArgs) -> None:
             # Build the example for the specified platform with merged binary for QEMU
             ts_print(f"Building {example} for {platform} with merged binary...")
             # Use Docker compilation on Windows to avoid toolchain issues
+            # IMPORTANT: Use --local on GitHub Actions to avoid pulling Docker images
             build_cmd = [
                 "uv",
                 "run",
@@ -247,7 +248,12 @@ def run_qemu_tests(args: TestArgs) -> None:
                 "--defines",
                 "FASTLED_ESP32_IS_QEMU",
             ]
-            if sys.platform == "win32":
+            # Force --local on GitHub Actions to avoid pulling Docker images
+            from ci.util.github_env import is_github_actions
+
+            if is_github_actions():
+                build_cmd.append("--local")
+            elif sys.platform == "win32":
                 build_cmd.append("--docker")
             build_proc = RunningProcess(
                 build_cmd,

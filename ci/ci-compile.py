@@ -267,6 +267,7 @@ def main() -> int:
 
     # Auto-detect Docker availability if neither --docker nor --local is specified
     # and not already running inside Docker
+    # IMPORTANT: Force --local on GitHub Actions to avoid pulling Docker images
     if (
         config.workflow == WorkflowType.NATIVE
         and not config.force_local
@@ -274,22 +275,23 @@ def main() -> int:
         and config.boards
         and len(config.boards) == 1
     ):
-        board_name = config.boards[0].board_name
-        use_docker, reason = should_use_docker_for_board(board_name, verbose=False)
-        if use_docker:
+        # Check if we're on GitHub Actions - if so, force local compilation
+        from ci.util.github_env import is_github_actions
+
+        if is_github_actions():
             print(
-                green_text(
-                    f"🐳 Docker detected and will be used for faster compilation"
+                yellow_text(
+                    f"ℹ️  GitHub Actions detected - using --local (native compilation)"
                 )
             )
-            print("   Use --local to force native compilation instead")
-            # Update workflow to Docker
+            print("   This avoids pulling Docker images on CI runners")
+            # Force local compilation by setting force_local=True
             from ci.compiler.argument_parser import CompilationConfig
 
             config = CompilationConfig(
                 boards=config.boards,
                 examples=config.examples,
-                workflow=WorkflowType.DOCKER,
+                workflow=WorkflowType.NATIVE,
                 defines=config.defines,
                 extra_packages=config.extra_packages,
                 verbose=config.verbose,
@@ -299,11 +301,43 @@ def main() -> int:
                 log_failures=config.log_failures,
                 max_failures=config.max_failures,
                 docker_build=config.docker_build,
-                force_local=config.force_local,
+                force_local=True,  # Force local on GitHub Actions
                 wasm_run=config.wasm_run,
                 global_cache_dir=config.global_cache_dir,
                 skip_filters=config.skip_filters,
             )
+        else:
+            # Normal Docker auto-detection for non-CI environments
+            board_name = config.boards[0].board_name
+            use_docker, reason = should_use_docker_for_board(board_name, verbose=False)
+            if use_docker:
+                print(
+                    green_text(
+                        f"🐳 Docker detected and will be used for faster compilation"
+                    )
+                )
+                print("   Use --local to force native compilation instead")
+                # Update workflow to Docker
+                from ci.compiler.argument_parser import CompilationConfig
+
+                config = CompilationConfig(
+                    boards=config.boards,
+                    examples=config.examples,
+                    workflow=WorkflowType.DOCKER,
+                    defines=config.defines,
+                    extra_packages=config.extra_packages,
+                    verbose=config.verbose,
+                    enable_cache=config.enable_cache,
+                    output_path=config.output_path,
+                    merged_bin=config.merged_bin,
+                    log_failures=config.log_failures,
+                    max_failures=config.max_failures,
+                    docker_build=config.docker_build,
+                    force_local=config.force_local,
+                    wasm_run=config.wasm_run,
+                    global_cache_dir=config.global_cache_dir,
+                    skip_filters=config.skip_filters,
+                )
 
     # Handle Docker compilation mode
     # Skip if already running inside Docker (FASTLED_DOCKER env var is set)
