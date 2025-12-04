@@ -7,6 +7,7 @@
 #pragma once
 
 #include "fl/compiler_control.h"
+
 #ifdef ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -202,9 +203,21 @@ public:
     EngineState poll() override;
 
 private:
+    /// @brief Begin LED data transmission with internal batching (internal helper)
+    /// @param channelData Span of channel data to transmit
+    ///
+    /// Groups channels by timing compatibility and batches them when N > K,
+    /// where N = number of channels with compatible timings and K = available lanes.
+    void beginBatchedTransmission(fl::span<const ChannelDataPtr> channelData);
+
     /// @brief Begin LED data transmission for all channels (internal helper)
     /// @param channelData Span of channel data to transmit
     void beginTransmission(fl::span<const ChannelDataPtr> channelData);
+
+    /// @brief Determine maximum parallel transmission capacity
+    /// @param channels Channels in a timing group (unused, for future extension)
+    /// @return Number of SPI hosts available (2 for ESP32/S2/S3/P4, 1 for ESP32-C3)
+    uint8_t determineLaneCapacity(fl::span<const ChannelDataPtr> channels);
     /// @brief SPI channel state (per-pin tracking)
     struct SpiChannelState {
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)

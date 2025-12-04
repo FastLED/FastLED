@@ -10,6 +10,7 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "fl/dbg.h"
+#include "fl/delay.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
 #include "ftl/time.h"
@@ -158,9 +159,8 @@ void ChannelEngineSpi::show() {
     mTransmittingChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
 
-    // Begin transmission of all channels
-    beginTransmission(fl::span<const ChannelDataPtr>(
-        mTransmittingChannels.data(), mTransmittingChannels.size()));
+    // Begin batched transmission (groups by timing, batches when N > K)
+    beginBatchedTransmission(mTransmittingChannels);
 }
 
 IChannelEngine::EngineState ChannelEngineSpi::poll() {
@@ -213,6 +213,159 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
     }
 
     return EngineState::READY;
+}
+
+void ChannelEngineSpi::beginBatchedTransmission(
+    fl::span<const ChannelDataPtr> channels) {
+
+    // Safety check: Pending queue should be empty before starting new batches
+    // If pending channels exist, it indicates incomplete transmission from previous frame
+    // or hardware saturation, which would interfere with batching logic.
+    if (!mPendingChannels.empty()) {
+        FL_WARN("ChannelEngineSpi: Pending queue not empty at batch start ("
+                << mPendingChannels.size() << " channels pending). "
+                << "This may indicate hardware saturation or incomplete previous frame.");
+    }
+
+    // ============================================================================
+    // PHASE 1: Group channels by timing compatibility
+    // ============================================================================
+    // Why: SPI hardware requires all lanes to use the same clock rate and timing.
+    //      We can only batch channels with identical timing requirements together.
+    //
+    // Example: If you have 4 WS2812 strips and 4 SK6812 strips, they form 2 groups:
+    //   - Group 1 (WS2812): 4 channels with 2.5MHz clock, 100/110 bit patterns
+    //   - Group 2 (SK6812): 4 channels with different clock/patterns
+    //
+    // Hash map key: SpiTimingConfig (clock_hz, bits_per_led_bit, protocol, reset_time_us)
+    // Hash map value: Vector of channels with matching timing
+    fl::hash_map<SpiTimingConfig, fl::vector<ChannelDataPtr>, TimingHash, TimingEqual> timingGroups;
+
+    for (const auto& channel : channels) {
+        SpiTimingConfig timing = getSpiTimingFromChannel(channel);
+        timingGroups[timing].push_back(channel);
+    }
+
+    FL_DBG("ChannelEngineSpi: Grouped " << channels.size()
+           << " channels into " << timingGroups.size() << " timing groups");
+
+    // ============================================================================
+    // PHASE 2: Process each timing group with batching
+    // ============================================================================
+    // Why: Each timing group can be batched independently. Batches within a group
+    //      transmit sequentially (Batch 1, then Batch 2, etc.).
+    //
+    // Example: 8 WS2812 channels, 4-lane hardware capacity:
+    //   - N = 8 (total channels in group)
+    //   - K = 4 (available hardware lanes)
+    //   - numBatches = ceil(8/4) = 2
+    //   - Batch 1: Channels 0-3 (4 channels)
+    //   - Batch 2: Channels 4-7 (4 channels)
+    //
+    // Performance: Without batching = 8 sequential transmissions
+    //              With batching = 2 sequential batches (4x speedup potential)
+    for (const auto& [timing, groupChannels] : timingGroups) {
+        // Determine lane capacity (K) for this timing group
+        // K = max number of channels that can transmit simultaneously
+        uint8_t K = determineLaneCapacity(groupChannels);
+        size_t N = groupChannels.size();
+        size_t numBatches = (N + K - 1) / K;  // ceil(N/K)
+
+        FL_DBG("ChannelEngineSpi: Timing group with " << N << " channels, "
+               << static_cast<int>(K) << " lanes → " << numBatches << " batches");
+
+        // ========================================================================
+        // PHASE 3: Transmit each batch sequentially (blocking)
+        // ========================================================================
+        // Why: Batches must complete before the next batch starts to avoid
+        //      hardware conflicts and maintain data integrity.
+        //
+        // Blocking behavior: show() remains blocking as expected by users.
+        //   - Start batch transmission
+        //   - Poll until READY (all channels in batch complete)
+        //   - Move to next batch
+        //
+        // State transitions per batch:
+        //   READY → beginTransmission() → BUSY → DRAINING → READY
+        for (size_t batchIdx = 0; batchIdx < numBatches; batchIdx++) {
+            size_t batchStart = batchIdx * K;
+            size_t batchEnd = fl_min(batchStart + K, N);
+
+
+            // Create span for this batch (subset of groupChannels)
+            fl::span<const ChannelDataPtr> batch(
+                groupChannels.data() + batchStart,
+                batchEnd - batchStart
+            );
+
+            // Start batch transmission (calls beginTransmission for this batch)
+            beginTransmission(batch);
+
+            // Wait for batch to complete (blocking)
+            // Must wait for READY state (not just BUSY):
+            //   - BUSY: Channels actively transmitting
+            //   - DRAINING: Pending channels waiting for hardware
+            //   - READY: All channels complete, hardware idle
+            //
+            // Critical: Early versions only checked BUSY, missing DRAINING state.
+            //           This caused batches to overlap incorrectly.
+            EngineState state;
+            while ((state = poll()) != EngineState::READY) {
+                if (state == EngineState::ERROR) {
+                    FL_WARN("ChannelEngineSpi: Error during batch transmission");
+                    break;
+                }
+                // Yield CPU to allow ISR timer and other tasks to run (prevents LED flickering)
+                taskYIELD();
+            }
+
+            // Insert reset delay between batches (critical for LED protocol compliance)
+            // LEDs require a reset pulse (low signal) to latch data and prepare for next frame.
+            // Without this delay, LEDs interpret the next batch as frame continuation,
+            // causing alternating black/color frames (protocol violation).
+            if (batchIdx + 1 < numBatches) {
+                FL_DBG("ChannelEngineSpi: Inserting reset delay ("
+                       << timing.reset_time_us << " μs) between batches");
+                fl::delayMicroseconds(timing.reset_time_us);
+            }
+        }
+    }
+}
+
+uint8_t ChannelEngineSpi::determineLaneCapacity(
+    fl::span<const ChannelDataPtr> channels) {
+
+    // Determine the maximum number of channels that can transmit in parallel (K).
+    //
+    // ESP32 SPI Hardware Limitation:
+    //   - Each SPI host (SPI2_HOST, SPI3_HOST) can only have ONE bus configuration
+    //   - Each host uses one set of pins, so only ONE channel per host
+    //   - See acquireSpiHost() at line 756: "if (tracking->refCount == 0)"
+    //
+    // Platform Capacity:
+    //   - ESP32/S2/S3/P4: 2 SPI hosts → K=2 (parallel transmission)
+    //   - ESP32-C3: 1 SPI host → K=1 (sequential transmission)
+    //   - (SPI1_HOST exists but is flash-reserved, unreliable for LEDs)
+    //
+    // By returning the actual SPI host count, we enable:
+    //   - If N <= K: Single batch, all channels submit together (hardware queues excess)
+    //   - If N > K: Multiple batches, but minimal batching overhead
+    //
+    // Note: The pending queue mechanism (mPendingChannels) handles excess channels
+    // when hardware is saturated, so we want K to match actual parallel capacity,
+    // not the theoretical maximum.
+
+#if defined(SPI2_HOST) && defined(SPI3_HOST)
+    constexpr uint8_t PARALLEL_SPI_HOSTS = 2;  // ESP32/S2/S3/P4
+#elif defined(SPI2_HOST)
+    constexpr uint8_t PARALLEL_SPI_HOSTS = 1;  // ESP32-C3
+#else
+    constexpr uint8_t PARALLEL_SPI_HOSTS = 0;  // No SPI available
+#endif
+
+    FL_DBG("ChannelEngineSpi: Determined lane capacity: "
+           << static_cast<int>(PARALLEL_SPI_HOSTS) << " SPI hosts");
+    return PARALLEL_SPI_HOSTS;
 }
 
 void ChannelEngineSpi::beginTransmission(
@@ -328,11 +481,23 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
 
 void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
     if (channel) {
+        // Clear usage flags
         channel->inUse = false;
         channel->transmissionComplete = false;
         channel->hasNewData = false;
+
+        // Reset streaming state (prevents stale data corruption on reuse)
+        channel->ledSource = nullptr;
         channel->ledBytesRemaining = 0;
-        channel->sourceData = nullptr; // Release reference to ChannelData
+        channel->stagingOffset = 0;
+        channel->currentStaging = channel->stagingA; // Reset to buffer A
+
+        // Clear transaction flags
+        channel->transAInFlight = false;
+        channel->transBInFlight = false;
+
+        // Release reference to source data
+        channel->sourceData = nullptr;
     }
 }
 
