@@ -8,6 +8,7 @@
 #if FASTLED_RMT5
 
 #include "ftl/stdint.h"
+#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"  // For RmtSymbol typedef
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_common.h"
@@ -118,7 +119,7 @@ public:
      * Decoding stops at first reset pulse or end of symbol array.
      * Returns false if error_count exceeds 10% of symbol_count.
      */
-    bool decode(const rmt_symbol_word_t* symbols,
+    bool decode(const RmtSymbol* symbols,
                 size_t symbol_count,
                 uint8_t* bytes_out,
                 size_t* bytes_decoded);
@@ -128,7 +129,7 @@ public:
      * @param symbol RMT symbol to check
      * @return true if symbol is reset pulse (long low duration)
      */
-    bool isResetPulse(const rmt_symbol_word_t& symbol) const;
+    bool isResetPulse(RmtSymbol symbol) const;
 
     /**
      * @brief Decode single symbol to bit value
@@ -138,7 +139,7 @@ public:
      * Checks high time and low time against timing thresholds.
      * Returns -1 if timing doesn't match either bit pattern.
      */
-    int decodeBit(const rmt_symbol_word_t& symbol) const;
+    int decodeBit(RmtSymbol symbol) const;
 
     /**
      * @brief Get decode error count

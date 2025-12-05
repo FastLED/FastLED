@@ -1,26 +1,18 @@
 #pragma once
 
-#include "fl/compiler_control.h"
-#ifdef ESP32
-
-#include "platforms/esp/32/feature_flags/enabled.h"
-
-#if FASTLED_RMT5
-
 #include "ftl/stdint.h"
+#include "ftl/shared_ptr.h"
 
-FL_EXTERN_C_BEGIN
-#include "driver/rmt_rx.h"
-#include "driver/rmt_common.h"
-#include "driver/gpio.h"
-#include "esp_attr.h"
-FL_EXTERN_C_END
+// RMT symbol is a 32-bit value (union with duration0/level0/duration1/level1 bitfields)
+// We expose uint32_t in the interface to avoid ESP-IDF header dependencies
+// Implementation will cast between uint32_t and rmt_symbol_word_t (static_assert size match)
+using RmtSymbol = uint32_t;
 
 namespace fl {
 namespace esp32 {
 
 /**
- * @brief RMT RX Channel Wrapper
+ * @brief RMT RX Channel Interface
  *
  * Provides RAII-based management of RMT receive channels.
  * Follows FastLED conventions:
@@ -31,36 +23,37 @@ namespace esp32 {
  *
  * Example usage:
  * @code
- * RmtRxChannel rx(GPIO_NUM_6, 40000000);  // 40MHz resolution
- * if (!rx.begin()) {
+ * auto rx = RmtRxChannel::create(6, 40000000);  // GPIO 6, 40MHz resolution
+ * if (!rx->begin()) {
  *     FL_WARN("RX channel init failed");
  *     return;
  * }
  *
  * rmt_symbol_word_t symbols[1024];
- * rx.startReceive(symbols, 1024);
+ * rx->startReceive(symbols, 1024);
  *
- * while (!rx.isReceiveDone()) {
+ * while (!rx->isReceiveDone()) {
  *     delayMicroseconds(10);
  * }
  *
- * size_t count = rx.getReceivedSymbols();
+ * size_t count = rx->getReceivedSymbols();
  * FL_DBG("Received " << count << " symbols");
  * @endcode
  */
 class RmtRxChannel {
 public:
     /**
-     * @brief Construct RX channel (does not initialize hardware)
-     * @param pin GPIO pin for receiving signals
+     * @brief Create RX channel instance (does not initialize hardware)
+     * @param pin GPIO pin number for receiving signals
      * @param resolution_hz RMT clock resolution (default 40MHz for 25ns ticks)
+     * @return Shared pointer to RmtRxChannel interface
      */
-    RmtRxChannel(gpio_num_t pin, uint32_t resolution_hz = 40000000);
+    static fl::shared_ptr<RmtRxChannel> create(int pin, uint32_t resolution_hz = 40000000);
 
     /**
-     * @brief Destructor - releases RMT channel
+     * @brief Virtual destructor
      */
-    ~RmtRxChannel();
+    virtual ~RmtRxChannel() = default;
 
     /**
      * @brief Initialize RMT RX channel
@@ -69,7 +62,7 @@ public:
      * Creates RMT RX channel and registers ISR callback.
      * Must be called before startReceive().
      */
-    bool begin();
+    virtual bool begin() = 0;
 
     /**
      * @brief Start receiving RMT symbols
@@ -85,24 +78,24 @@ public:
      * - For 100 LEDs: 2400 symbols minimum
      * - Recommended: Add 20% margin for reset pulses and overhead
      */
-    bool startReceive(rmt_symbol_word_t* buffer, size_t buffer_size);
+    virtual bool startReceive(RmtSymbol* buffer, size_t buffer_size) = 0;
 
     /**
      * @brief Check if receive operation is complete
      * @return true if receive finished, false if still in progress
      */
-    bool isReceiveDone() const { return receive_done_; }
+    virtual bool isReceiveDone() const = 0;
 
     /**
      * @brief Get number of symbols received
      * @return Symbol count (valid after isReceiveDone() returns true)
      */
-    size_t getReceivedSymbols() const { return symbols_received_; }
+    virtual size_t getReceivedSymbols() const = 0;
 
     /**
      * @brief Reset receive state (call before starting new receive)
      */
-    void reset();
+    virtual void reset() = 0;
 
     /**
      * @brief Re-enable RMT RX channel after receive completion
@@ -112,30 +105,11 @@ public:
      * is automatically disabled by the ESP-IDF RMT driver. This method
      * re-enables it for the next receive operation.
      */
-    bool enable();
+    virtual bool enable() = 0;
 
-private:
-    /**
-     * @brief ISR callback for receive completion
-     * @param channel RMT channel handle
-     * @param data Event data (contains received symbols)
-     * @param user_data Pointer to RmtRxChannel instance
-     * @return true if higher-priority task awakened
-     */
-    static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
-                                         const rmt_rx_done_event_data_t* data,
-                                         void* user_data);
-
-    rmt_channel_handle_t channel_;      ///< RMT channel handle
-    gpio_num_t pin_;                    ///< GPIO pin for RX
-    uint32_t resolution_hz_;            ///< Clock resolution in Hz
-    volatile bool receive_done_;        ///< Set by ISR when receive complete
-    volatile size_t symbols_received_;  ///< Number of symbols received (set by ISR)
+protected:
+    RmtRxChannel() = default;
 };
 
 } // namespace esp32
 } // namespace fl
-
-#endif // FASTLED_RMT5
-
-#endif // ESP32

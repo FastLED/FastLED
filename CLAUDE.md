@@ -126,6 +126,11 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Platform dispatch headers**: FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
+- **Platform-specific headers (`src/platforms/**`)**: Header files typically do NOT need platform guards (e.g., `#ifdef ESP32`). Only the `.cpp` implementation files require guards. When the `.cpp` file is guarded from compilation, the header won't be included. This approach provides better IDE code assistance and IntelliSense support.
+  - ✅ Correct pattern:
+    - `header.h`: No platform guards (clean interface)
+    - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
+  - ❌ Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
 - **Automatic span conversion**: `fl::span<T>` has implicit conversion constructors - you don't need explicit `fl::span<T>(...)` wrapping in function calls. Example:
   - ✅ Correct: `verifyPixels8bit(output, leds)` (implicit conversion)
   - ❌ Verbose: `verifyPixels8bit(output, fl::span<const CRGB>(leds, 3))` (unnecessary explicit wrapping)

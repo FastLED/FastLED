@@ -9,6 +9,10 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 
+FL_EXTERN_C_BEGIN
+#include "driver/rmt_common.h"
+FL_EXTERN_C_END
+
 namespace fl {
 namespace esp32 {
 
@@ -34,7 +38,7 @@ RmtRxDecoder::RmtRxDecoder(const ChipsetTimingRx& timing, uint32_t resolution_hz
 // Public Methods
 // ============================================================================
 
-bool RmtRxDecoder::decode(const rmt_symbol_word_t* symbols,
+bool RmtRxDecoder::decode(const RmtSymbol* symbols,
                           size_t symbol_count,
                           uint8_t* bytes_out,
                           size_t* bytes_decoded)
@@ -59,6 +63,9 @@ bool RmtRxDecoder::decode(const rmt_symbol_word_t* symbols,
 
     FL_DBG("RmtRxDecoder: decoding " << symbol_count << " symbols");
 
+    // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
+    const auto* rmt_symbols = reinterpret_cast<const rmt_symbol_word_t*>(symbols);
+
     for (size_t i = 0; i < symbol_count; i++) {
         // Check for reset pulse (frame boundary)
         if (isResetPulse(symbols[i])) {
@@ -81,8 +88,8 @@ bool RmtRxDecoder::decode(const rmt_symbol_word_t* symbols,
         if (bit < 0) {
             error_count_++;
             FL_DBG("RmtRxDecoder: invalid symbol at index " << i
-                  << " (duration0=" << symbols[i].duration0
-                  << ", duration1=" << symbols[i].duration1 << ")");
+                  << " (duration0=" << rmt_symbols[i].duration0
+                  << ", duration1=" << rmt_symbols[i].duration1 << ")");
             continue;  // Skip invalid symbol
         }
 
@@ -124,40 +131,46 @@ bool RmtRxDecoder::decode(const rmt_symbol_word_t* symbols,
     return success;
 }
 
-bool RmtRxDecoder::isResetPulse(const rmt_symbol_word_t& symbol) const
+bool RmtRxDecoder::isResetPulse(RmtSymbol symbol) const
 {
+    // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
+    const auto& rmt_sym = reinterpret_cast<const rmt_symbol_word_t&>(symbol);
+
     // Reset pulse characteristics:
     // - Long low duration (>50us)
     // - Either duration0 or duration1 can be the low period
 
     // Convert durations to nanoseconds
-    uint32_t duration0_ns = ticksToNs(symbol.duration0);
-    uint32_t duration1_ns = ticksToNs(symbol.duration1);
+    uint32_t duration0_ns = ticksToNs(rmt_sym.duration0);
+    uint32_t duration1_ns = ticksToNs(rmt_sym.duration1);
 
     // Check if either duration exceeds reset threshold
     uint32_t reset_min_ns = timing_.reset_min_us * 1000;
 
     // Reset pulse should have level=0 (low) for the long duration
     // Check duration0 with level0=0, or duration1 with level1=0
-    if (symbol.level0 == 0 && duration0_ns >= reset_min_ns) {
+    if (rmt_sym.level0 == 0 && duration0_ns >= reset_min_ns) {
         return true;
     }
-    if (symbol.level1 == 0 && duration1_ns >= reset_min_ns) {
+    if (rmt_sym.level1 == 0 && duration1_ns >= reset_min_ns) {
         return true;
     }
 
     return false;
 }
 
-int RmtRxDecoder::decodeBit(const rmt_symbol_word_t& symbol) const
+int RmtRxDecoder::decodeBit(RmtSymbol symbol) const
 {
+    // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
+    const auto& rmt_sym = reinterpret_cast<const rmt_symbol_word_t&>(symbol);
+
     // Convert tick durations to nanoseconds
-    uint32_t high_ns = ticksToNs(symbol.duration0);
-    uint32_t low_ns = ticksToNs(symbol.duration1);
+    uint32_t high_ns = ticksToNs(rmt_sym.duration0);
+    uint32_t low_ns = ticksToNs(rmt_sym.duration1);
 
     // WS2812B protocol: first duration is high, second is low
     // Check if levels match expected pattern (high=1, low=0)
-    if (symbol.level0 != 1 || symbol.level1 != 0) {
+    if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
         // Unexpected level pattern - possibly inverted signal or noise
         return -1;
     }
