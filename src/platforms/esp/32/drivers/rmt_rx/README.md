@@ -12,54 +12,45 @@ This driver provides RMT (Remote Control) receive functionality for ESP32 platfo
 GPIO Pin → RMT RX Peripheral → Symbol Buffer → Decoder → Byte Array
 ```
 
-The driver consists of two main components:
+The driver provides:
 
-1. **RmtRxChannel** - Low-level RX channel wrapper
+1. **RmtRxChannel** - RX channel with integrated decoder
    - Hardware configuration and lifecycle management
-   - Non-blocking receive operations
+   - Non-blocking receive operations with `wait()`
    - ISR-based completion notification
-
-2. **RmtRxDecoder** - Symbol-to-byte decoder (coming in Agent 3)
-   - Timing threshold detection
-   - Bit reconstruction from timing pairs
-   - Protocol-specific decoding (WS2812B, APA102, etc.)
+   - Built-in symbol-to-byte decoding via `decode()` method
+   - Timing threshold detection for protocol-specific decoding (WS2812B, etc.)
 
 ## Quick Start
 
-### Basic Usage
+### Basic Usage (Recommended API)
 
 ```cpp
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 
-// Create RX channel (GPIO 6, 40MHz resolution)
-fl::esp32::RmtRxChannel rx(GPIO_NUM_6, 40000000);
+// Create RX channel (GPIO 6, 40MHz resolution, 1024 symbol buffer)
+auto rx = fl::esp32::RmtRxChannel::create(6, 40000000, 1024);
 
 // Initialize hardware
-if (!rx.begin()) {
+if (!rx->begin()) {
     FL_WARN("RX channel init failed");
     return;
 }
 
-// Allocate symbol buffer (1024 symbols = ~42 LEDs @ 24 symbols/LED)
-rmt_symbol_word_t symbols[1024];
+// Wait for data (50ms timeout)
+if (rx->wait(50) == fl::esp32::RmtRxWaitResult::SUCCESS) {
+    // Access received symbols
+    auto symbols = rx->getReceivedSymbols();
+    FL_DBG("Received " << symbols.size() << " symbols");
 
-// Start non-blocking receive
-if (!rx.startReceive(symbols, 1024)) {
-    FL_WARN("Failed to start receive");
-    return;
+    // Decode to bytes
+    fl::HeapVector<uint8_t> bytes;
+    auto result = rx->decode(fl::esp32::CHIPSET_TIMING_WS2812B_RX,
+                             fl::back_inserter(bytes));
+    if (result.ok()) {
+        FL_DBG("Decoded " << result.value() << " bytes");
+    }
 }
-
-// Poll for completion
-while (!rx.isReceiveDone()) {
-    delayMicroseconds(10);
-}
-
-// Process received data
-size_t count = rx.getReceivedSymbols();
-FL_DBG("Received " << count << " symbols");
-
-// Decode symbols to bytes (see RmtRxDecoder documentation)
-// ...
 ```
 
 ### Loopback Validation Example
@@ -67,31 +58,34 @@ FL_DBG("Received " << count << " symbols");
 ```cpp
 // TX setup (existing FastLED)
 #define TX_PIN 5
-#define RX_PIN 6
 CRGB leds[10];
 FastLED.addLeds<WS2812B, TX_PIN, GRB>(leds, 10);
 
-// RX setup
-fl::esp32::RmtRxChannel rx(GPIO_NUM_6);
-rx.begin();
+// RX setup (use same pin with io_loop_back)
+auto rx = fl::esp32::RmtRxChannel::create(TX_PIN, 40000000, 1024);
+rx->begin();
 
 // Test pattern
 fill_solid(leds, 10, CRGB::Red);
 
-// Start RX before TX (critical timing!)
-rmt_symbol_word_t symbols[1024];
-rx.startReceive(symbols, 1024);
+// Manual control API (for precise timing)
+RmtSymbol rx_symbols[1024];
+rx->clear();
+rx->startReceive(rx_symbols, 1024);
 
 // Transmit
 FastLED.show();
 
 // Wait for RX completion
-while (!rx.isReceiveDone()) {
+while (!rx->finished()) {
     delayMicroseconds(10);
 }
 
-// Validate (requires decoder - see examples/Validation/)
-// ...
+// Decode and validate
+fl::HeapVector<uint8_t> bytes;
+auto result = rx->decode(fl::esp32::CHIPSET_TIMING_WS2812B_RX,
+                         fl::back_inserter(bytes));
+// Compare bytes against expected values...
 ```
 
 ## Hardware Requirements
@@ -352,12 +346,17 @@ The destructor automatically releases the RMT channel:
 
 ## Future Enhancements
 
-### Planned for Agent 3 (RmtRxDecoder)
+### Implemented in Agent 3 (decodeRmtSymbols)
 
-- Symbol-to-byte decoder with timing threshold detection
-- Support for multiple LED protocols (WS2812B, APA102, SK6812, etc.)
-- Error counting and quality metrics
-- Reset pulse detection for frame boundaries
+- ✅ Symbol-to-byte decoder with timing threshold detection
+- ✅ Support for WS2812B LED protocol
+- ✅ Error counting and quality metrics
+- ✅ Reset pulse detection for frame boundaries
+
+### Planned for Future Agents
+
+- Support for additional LED protocols (APA102, SK6812, etc.)
+- Automatic protocol detection based on timing analysis
 
 ### Planned for Agent 6 (Integration)
 
@@ -381,10 +380,10 @@ The destructor automatically releases the RMT channel:
 - Basic error handling
 - Platform compatibility (ESP32/S2/S3/C3/C6/H2/P4)
 
-**Upcoming (Agent 3)** - Decoder implementation
-- RmtRxDecoder class
+**v2.0 (Agent 3)** - Decoder implementation
+- decodeRmtSymbols() function-based decoder
 - WS2812B timing thresholds
-- Symbol-to-byte conversion
+- Symbol-to-byte conversion with error reporting
 
 ## License
 
