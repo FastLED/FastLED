@@ -10,10 +10,6 @@
 #include "ftl/stdint.h"
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"  // For RmtSymbol typedef
 
-FL_EXTERN_C_BEGIN
-#include "driver/rmt_common.h"
-FL_EXTERN_C_END
-
 namespace fl {
 namespace esp32 {
 
