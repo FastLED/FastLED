@@ -14,7 +14,7 @@ void on_startup() {
 
 #endif  // ESP32
 
-// Testing PARLIO driver on ESP32-C6
-// Simple Blink test for WS2812 LEDs via PARLIO
+// Testing RMT RX Validation with GPIO Loopback
+// Multi-LED validation test using io_loop_back (no jumper wire needed)
 
-#include "../examples/AnimartrixRing/AnimartrixRing.ino"
+#include "../examples/Validation/Validation.ino"
