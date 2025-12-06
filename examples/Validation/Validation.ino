@@ -151,8 +151,8 @@ void loop() {
         FL_WARN("Status: SOME TESTS FAILED ✗");
     }
 
-    FL_WARN("\nWaiting 10 seconds before restart...\n");
-    delay(10000);
+    FL_WARN("\nWaiting 1 seconds before restart...\n");
+    delay(1000);
 }
 
 void runTest(const char* test_name, int& total, int& passed) {
