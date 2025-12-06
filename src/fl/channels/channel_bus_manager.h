@@ -80,24 +80,25 @@ private:
         int priority;
         fl::shared_ptr<IChannelEngine> engine;
 
-        /// @brief Sort by priority descending (highest first)
+        /// @brief Sort by priority descending (higher numbers first)
+        /// @note Higher priority values = higher precedence (e.g., 50 > 10)
         bool operator<(const EngineEntry& other) const {
-            return priority > other.priority;  // Reverse: higher priority = earlier
+            return priority > other.priority;  // Sort descending: higher values first
         }
     };
 
     /// @brief Select engine for current operation
     /// @return Pointer to selected engine, or nullptr if none available
-    /// @note Selects highest priority engine from registry
+    /// @note Selects highest priority engine from registry (highest priority value)
     IChannelEngine* selectEngine();
 
     /// @brief Get next lower priority engine for fallback
     /// @return Pointer to next engine, or nullptr if none available
-    /// @note Searches for engine with priority lower than current active engine
+    /// @note Searches for engine with lower priority value than current active engine
     IChannelEngine* getNextLowerPriorityEngine();
 
-    /// @brief Shared engines sorted by priority descending
-    /// @note Each entry contains priority and shared_ptr to engine
+    /// @brief Shared engines sorted by priority descending (higher values first)
+    /// @note Each entry contains priority value and shared_ptr to engine
     fl::vector<EngineEntry> mEngines;
 
     /// @brief Currently active engine (cached for performance)

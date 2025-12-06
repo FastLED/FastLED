@@ -40,6 +40,9 @@
 CRGB leds[NUM_LEDS];
 uint8_t rx_buffer[4096];
 
+// RMT RX channel (persistent across loop iterations)
+fl::shared_ptr<fl::RmtRxChannel> rx_channel;
+
 void runTest(const char* test_name, int& total, int& passed);
 
 void setup() {
@@ -52,6 +55,12 @@ void setup() {
 
     FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
+
+    // Create RMT RX channel (persistent for all tests)
+    rx_channel = fl::RmtRxChannel::create(PIN_DATA, 40000000);
+    if (!rx_channel) {
+        FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
+    }
 
     FL_WARN("Initialization complete");
     FL_WARN("Starting validation tests...\n");
@@ -119,7 +128,7 @@ void runTest(const char* test_name, int& total, int& passed) {
     total++;
     FL_WARN("\n=== " << test_name << " ===");
 
-    size_t bytes_captured = capture(rx_buffer, PIN_DATA);
+    size_t bytes_captured = capture(rx_channel, rx_buffer);
     if (bytes_captured == 0) {
         FL_WARN("Result: FAIL ✗ (capture failed)");
         return;

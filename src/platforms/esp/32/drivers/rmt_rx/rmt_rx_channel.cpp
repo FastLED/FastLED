@@ -25,7 +25,6 @@ FL_EXTERN_C_END
 #include <type_traits>
 
 namespace fl {
-namespace esp32 {
 
 // Ensure RmtSymbol (uint32_t) and rmt_symbol_word_t have the same size
 static_assert(sizeof(RmtSymbol) == sizeof(rmt_symbol_word_t),
@@ -412,10 +411,16 @@ public:
 
         FL_DBG("wait(): buffer_size=" << buffer_size_ << ", timeout_ms=" << timeout_ms);
 
-        // Allocate buffer and arm receiver
-        if (!allocateAndArm()) {
-            FL_WARN("wait(): failed to allocate and arm");
-            return RmtRxWaitResult::TIMEOUT;  // Treat as timeout
+        // Only allocate and arm if not already receiving (begin() wasn't called)
+        // Check if internal_buffer_ is empty to determine if we need to arm
+        if (internal_buffer_.empty()) {
+            // Allocate buffer and arm receiver
+            if (!allocateAndArm()) {
+                FL_WARN("wait(): failed to allocate and arm");
+                return RmtRxWaitResult::TIMEOUT;  // Treat as timeout
+            }
+        } else {
+            FL_DBG("wait(): receiver already armed, using existing buffer");
         }
 
         // Convert timeout to microseconds for comparison
@@ -448,6 +453,19 @@ public:
 
     uint32_t getResolutionHz() const override {
         return resolution_hz_;
+    }
+
+    fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
+                                               fl::span<uint8_t> out) override {
+        // Get received symbols from last receive operation
+        fl::span<const RmtSymbol> symbols = getReceivedSymbols();
+
+        if (symbols.empty()) {
+            return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        }
+
+        // Use the span-based decoder directly
+        return decodeRmtSymbols(timing, resolution_hz_, symbols, out);
     }
 
 private:
@@ -609,31 +627,6 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin, uint32_t resolution_h
     return fl::make_shared<RmtRxChannelImpl>(static_cast<gpio_num_t>(pin), resolution_hz, max_buffer_size);
 }
 
-// RmtRxChannel::decode() template method implementation
-// This is defined here (not in header) to keep the decodeRmtSymbols() implementation private
-template<typename OutputIteratorUint8>
-fl::Result<uint32_t, DecodeError> RmtRxChannel::decode(const ChipsetTimingRx &timing,
-                                                         OutputIteratorUint8 out) {
-    // Get received symbols from last receive operation
-    fl::span<const RmtSymbol> symbols = getReceivedSymbols();
-
-    if (symbols.empty()) {
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
-    }
-
-    // Use channel's resolution
-    uint32_t resolution_hz = getResolutionHz();
-
-    // Use the iterator-based decoder directly
-    return decodeRmtSymbols(timing, resolution_hz, symbols, out);
-}
-
-// Explicit template instantiations for common output iterators
-template fl::Result<uint32_t, DecodeError> RmtRxChannel::decode(
-    const ChipsetTimingRx &timing,
-    fl::back_insert_iterator<fl::HeapVector<uint8_t>> out);
-
-} // namespace esp32
 } // namespace fl
 
 #endif // FASTLED_RMT5

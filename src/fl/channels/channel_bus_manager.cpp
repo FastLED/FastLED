@@ -35,7 +35,8 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
     mEngines.push_back({priority, engine});
     FL_DBG("ChannelBusManager: Added engine (priority " << priority << ")");
 
-    // Sort engines by priority descending (highest first) after each insertion
+    // Sort engines by priority descending (higher values first) after each insertion
+    // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
     // Only 1-4 engines expected, so sorting on insert is negligible
     fl::sort(mEngines.begin(), mEngines.end());
 }
@@ -127,7 +128,8 @@ IChannelEngine* ChannelBusManager::selectEngine() {
         return nullptr;
     }
 
-    // Engines are already sorted by priority descending, so first is highest priority
+    // Engines are already sorted by priority descending (higher values first)
+    // First element has highest priority value
     EngineEntry& entry = mEngines[0];
     mActiveEngine = entry.engine.get();
     mActiveEnginePriority = entry.priority;

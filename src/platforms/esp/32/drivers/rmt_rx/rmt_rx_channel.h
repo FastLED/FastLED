@@ -14,7 +14,6 @@
 using RmtSymbol = uint32_t;
 
 namespace fl {
-namespace esp32 {
 
 /**
  * @brief Error codes for RMT decoder operations
@@ -193,16 +192,14 @@ public:
     virtual uint32_t getResolutionHz() const = 0;
 
     /**
-     * @brief Decode received RMT symbols to bytes (convenience method)
-     * @tparam OutputIteratorUint8 Output iterator type (e.g., fl::back_inserter)
+     * @brief Decode received RMT symbols to bytes into a span
      * @param timing Chipset timing thresholds for bit detection
-     * @param out Output iterator for decoded bytes
+     * @param out Output span to write decoded bytes
      * @return Result with total bytes decoded, or error
      *
-     * This is a high-level convenience wrapper that:
-     * - Uses the channel's internal resolution_hz automatically
-     * - Decodes the received symbols from the last receive operation
-     * - Decodes all received symbols until end or reset pulse
+     * This method writes directly to a span.
+     * Returns the number of bytes written, which may be less than the span size
+     * if the decoded data is smaller than the buffer.
      *
      * Example:
      * @code
@@ -211,19 +208,16 @@ public:
      *
      * // Wait for symbols
      * if (rx->wait(50) == RmtRxWaitResult::SUCCESS) {
-     *     // Decode to vector
-     *     fl::HeapVector<uint8_t> bytes;
-     *     auto result = rx->decode(CHIPSET_TIMING_WS2812B_RX,
-     *                              fl::back_inserter(bytes));
+     *     uint8_t buffer[256];
+     *     auto result = rx->decode(CHIPSET_TIMING_WS2812B_RX, buffer);
      *     if (result.ok()) {
      *         FL_DBG("Decoded " << result.value() << " bytes");
      *     }
      * }
      * @endcode
      */
-    template<typename OutputIteratorUint8>
-    fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
-                                              OutputIteratorUint8 out);
+    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
+                                                       fl::span<uint8_t> out) = 0;
 
 protected:
     RmtRxChannel() = default;
@@ -235,5 +229,4 @@ protected:
     virtual fl::span<const RmtSymbol> getReceivedSymbols() const = 0;
 };
 
-} // namespace esp32
 } // namespace fl

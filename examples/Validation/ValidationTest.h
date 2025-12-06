@@ -6,21 +6,19 @@
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 
 // Capture transmitted LED data via RX loopback
+// - rx_channel: Shared pointer to RMT RX channel (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
-// - pin: GPIO pin to use for RX
 // Returns number of bytes captured, or 0 on error
-inline size_t capture(fl::span<uint8_t> rx_buffer, uint8_t pin) {
-    // Create RX channel
-    auto rx_channel = fl::RmtRxChannel::create(pin, 40000000);
+inline size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx_buffer) {
     if (!rx_channel) {
-        FL_WARN("ERROR: Failed to create RX channel");
+        FL_WARN("ERROR: RX channel is null");
         return 0;
     }
 
     // Clear RX buffer
     fl::memset(rx_buffer.data(), 0, rx_buffer.size());
 
-    // Arm RX receiver
+    // Arm RX receiver (re-arms if already initialized)
     if (!rx_channel->begin()) {
         FL_WARN("ERROR: Failed to arm RX receiver");
         return 0;
