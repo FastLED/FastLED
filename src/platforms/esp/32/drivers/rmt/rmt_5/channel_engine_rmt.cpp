@@ -225,13 +225,13 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
 
 ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
-    // Note: DMA channels are not reused (checked via !ch.useDMA below)
+    // This applies to both DMA and non-DMA channels
     FL_LOG_RMT("acquireChannel: Finding channel with matching pin " << static_cast<int>(pin));
     for (auto& ch : mChannels) {
-        if (!ch.inUse && ch.channel && ch.pin == pin && !ch.useDMA) {
+        if (!ch.inUse && ch.channel && ch.pin == pin) {
             ch.inUse = true;
             configureChannel(&ch, pin, timing, dataSize);
-            FL_LOG_RMT("Reusing non-DMA channel for pin " << static_cast<int>(pin));
+            FL_LOG_RMT("Reusing " << (ch.useDMA ? "DMA" : "non-DMA") << " channel for pin " << static_cast<int>(pin));
             return &ch;
         }
     }
