@@ -1016,3 +1016,94 @@ TEST_CASE("StrStream and FakeStrStream - operator chaining compatibility") {
         CHECK(true);
     }
 }
+
+TEST_CASE("StrStream hex formatting") {
+    SUBCASE("hex manipulator for unsigned integers") {
+        fl::StrStream s;
+        s << fl::hex << fl::u32(255);
+        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+    }
+
+    SUBCASE("hex manipulator for signed integers") {
+        fl::StrStream s;
+        s << fl::hex << fl::i32(255);
+        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+    }
+
+    SUBCASE("hex manipulator with multiple values") {
+        fl::StrStream s;
+        s << fl::hex << fl::u32(16) << " " << fl::u32(255) << " " << fl::u32(4096);
+        CHECK(fl::strcmp(s.str().c_str(), "10 ff 1000") == 0);
+    }
+
+    SUBCASE("switching between dec and hex") {
+        fl::StrStream s;
+        s << fl::u32(255);  // decimal by default
+        s << " " << fl::hex << fl::u32(255);  // switch to hex
+        s << " " << fl::dec << fl::u32(255);  // switch back to decimal
+        CHECK(fl::strcmp(s.str().c_str(), "255 ff 255") == 0);
+    }
+
+    SUBCASE("hex with 8-bit values") {
+        fl::StrStream s;
+        s << fl::hex << fl::u8(255);
+        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+    }
+
+    SUBCASE("hex with 16-bit values") {
+        fl::StrStream s;
+        s << fl::hex << fl::u16(0xABCD);
+        CHECK(fl::strcmp(s.str().c_str(), "abcd") == 0);
+    }
+
+    SUBCASE("hex with 64-bit values") {
+        fl::StrStream s;
+        s << fl::hex << fl::u64(0xDEADBEEF);
+        CHECK(fl::strcmp(s.str().c_str(), "deadbeef") == 0);
+    }
+
+    SUBCASE("hex persists across multiple insertions") {
+        fl::StrStream s;
+        s << fl::hex;
+        s << fl::u32(10);
+        s << " ";
+        s << fl::u32(20);
+        s << " ";
+        s << fl::u32(30);
+        CHECK(fl::strcmp(s.str().c_str(), "a 14 1e") == 0);
+    }
+
+    SUBCASE("getBase returns correct value") {
+        fl::StrStream s;
+        CHECK(s.getBase() == 10);  // default is decimal
+        s << fl::hex;
+        CHECK(s.getBase() == 16);
+        s << fl::oct;
+        CHECK(s.getBase() == 8);
+        s << fl::dec;
+        CHECK(s.getBase() == 10);
+    }
+}
+
+TEST_CASE("StrStream octal formatting") {
+    SUBCASE("oct manipulator for unsigned integers") {
+        fl::StrStream s;
+        s << fl::oct << fl::u32(64);
+        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
+    }
+
+    SUBCASE("oct manipulator with multiple values") {
+        fl::StrStream s;
+        s << fl::oct << fl::u32(8) << " " << fl::u32(64) << " " << fl::u32(512);
+        CHECK(fl::strcmp(s.str().c_str(), "10 100 1000") == 0);
+    }
+
+    SUBCASE("switching between dec, hex, and oct") {
+        fl::StrStream s;
+        s << fl::u32(64);  // decimal by default
+        s << " " << fl::hex << fl::u32(64);  // switch to hex
+        s << " " << fl::oct << fl::u32(64);  // switch to octal
+        s << " " << fl::dec << fl::u32(64);  // switch back to decimal
+        CHECK(fl::strcmp(s.str().c_str(), "64 40 100 64") == 0);
+    }
+}

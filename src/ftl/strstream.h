@@ -66,7 +66,7 @@ namespace strstream_detail {
         StrStream& \
     >::type operator<<(T n) { \
         using target_t = typename strstream_detail::cast_target<TYPE>::type; \
-        mStr.append(static_cast<target_t>(n)); \
+        appendFormatted(static_cast<target_t>(n)); \
         return *this; \
     }
 
@@ -188,13 +188,13 @@ class StrStream {
     // Non-template overloads for signed/unsigned char to avoid template resolution issues
     StrStream &operator<<(signed char n) {
         using target_t = typename strstream_detail::cast_target<signed char>::type;
-        mStr.append(static_cast<target_t>(n));
+        appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
     StrStream &operator<<(unsigned char n) {
         using target_t = typename strstream_detail::cast_target<unsigned char>::type;
-        mStr.append(static_cast<target_t>(n));
+        appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
@@ -351,6 +351,15 @@ class StrStream {
     string mStr;
     bool mTreatCharAsInt = false;  // Default to ASCII mode for readable text output
     int mBase = 10;  // Default to decimal
+
+    // Helper methods to format integers based on current base
+    void appendFormatted(fl::i8 val);
+    void appendFormatted(fl::i16 val);
+    void appendFormatted(fl::i32 val);
+    void appendFormatted(fl::i64 val);
+    void appendFormatted(fl::u16 val);
+    void appendFormatted(fl::u32 val);
+    void appendFormatted(fl::u64 val);
 };
 
 class FakeStrStream {

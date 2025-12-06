@@ -3,6 +3,7 @@
 #include "fl/tile2x2.h"
 #include "fl/fft.h"
 #include "fl/str.h"
+#include "ftl/ios.h"
 
 namespace fl {
 
@@ -54,6 +55,67 @@ StrStream& operator<<(StrStream& ss, const dec_t&) {
 StrStream& operator<<(StrStream& ss, const oct_t&) {
     ss.mBase = 8;
     return ss;
+}
+
+// Helper method implementations for formatted integer output
+void StrStream::appendFormatted(fl::i8 val) {
+    appendFormatted(fl::i16(val));
+}
+
+void StrStream::appendFormatted(fl::i16 val) {
+    appendFormatted(fl::i32(val));
+}
+
+void StrStream::appendFormatted(fl::i32 val) {
+    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
+    if (mBase == 16) {
+        fl::StringFormatter::appendHex(val, &temp);
+    } else if (mBase == 8) {
+        fl::StringFormatter::appendOct(val, &temp);
+    } else {
+        fl::StringFormatter::append(val, &temp);
+    }
+    mStr.append(temp.c_str(), temp.size());
+}
+
+void StrStream::appendFormatted(fl::i64 val) {
+    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
+    if (mBase == 16) {
+        fl::StringFormatter::appendHex(static_cast<uint64_t>(val), &temp);
+    } else if (mBase == 8) {
+        fl::StringFormatter::appendOct(static_cast<uint64_t>(val), &temp);
+    } else {
+        fl::StringFormatter::append(static_cast<uint64_t>(val), &temp);
+    }
+    mStr.append(temp.c_str(), temp.size());
+}
+
+void StrStream::appendFormatted(fl::u16 val) {
+    appendFormatted(fl::u32(val));
+}
+
+void StrStream::appendFormatted(fl::u32 val) {
+    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
+    if (mBase == 16) {
+        fl::StringFormatter::appendHex(val, &temp);
+    } else if (mBase == 8) {
+        fl::StringFormatter::appendOct(val, &temp);
+    } else {
+        fl::StringFormatter::append(val, &temp);
+    }
+    mStr.append(temp.c_str(), temp.size());
+}
+
+void StrStream::appendFormatted(fl::u64 val) {
+    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
+    if (mBase == 16) {
+        fl::StringFormatter::appendHex(val, &temp);
+    } else if (mBase == 8) {
+        fl::StringFormatter::appendOct(val, &temp);
+    } else {
+        fl::StringFormatter::append(val, &temp);
+    }
+    mStr.append(temp.c_str(), temp.size());
 }
 
 } // namespace fl
