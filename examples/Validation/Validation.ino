@@ -77,6 +77,16 @@ void setup() {
     FL_WARN("   → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
     FL_WARN("");
 
+    // Create RMT RX channel FIRST (before FastLED init to avoid pin conflicts)
+    rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000);
+    if (!rx_channel) {
+        FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
+        FL_WARN("       Check that RMT peripheral is available and not in use");
+    }
+
+    // Note: Toggle test removed - validated in Iteration 5 that RMT RX works correctly
+    // Skipping toggle test to avoid GPIO ownership conflicts with SPI MOSI
+
     FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
 
@@ -85,13 +95,6 @@ void setup() {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     FL_WARN("TX engine pre-initialized");
-
-    // Create RMT RX channel (persistent for all tests)
-    rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000);
-    if (!rx_channel) {
-        FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
-        FL_WARN("       Check that RMT peripheral is available and not in use");
-    }
 
     FL_WARN("Initialization complete");
     FL_WARN("Starting validation tests...\n");

@@ -575,8 +575,8 @@ private:
 
         // Configure receive parameters
         rmt_receive_config_t rx_params = {};
-        rx_params.signal_range_min_ns = 100;      // Min pulse width: 100ns
-        rx_params.signal_range_max_ns = 800000;    // Max pulse width: 800µs (below 819µs HW limit)
+        rx_params.signal_range_min_ns = 100;         // Min pulse width: 100ns (filter glitches)
+        rx_params.signal_range_max_ns = 100000;      // Idle threshold: 100μs (end-of-frame, below 819μs HW limit)
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
         auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
