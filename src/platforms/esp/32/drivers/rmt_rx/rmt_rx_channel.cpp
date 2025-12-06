@@ -9,6 +9,7 @@
 
 #include "fl/dbg.h"
 #include "fl/warn.h"
+#include "ftl/iterator.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_rx.h"

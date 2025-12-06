@@ -5,6 +5,7 @@
 #include "ftl/span.h"
 #include "ftl/vector.h"
 #include "ftl/array.h"
+#include "ftl/iterator.h"
 #include "fl/result.h"
 
 // RMT symbol is a 32-bit value (union with duration0/level0/duration1/level1 bitfields)
