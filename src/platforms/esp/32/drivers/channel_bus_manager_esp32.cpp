@@ -37,11 +37,12 @@
 namespace fl {
 
 /// @brief Engine priority constants for ESP32
+/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
 /// @note These are defined here (not in header) to avoid exposing platform-specific details
 namespace {
-    constexpr int PRIORITY_PARLIO = 100;  ///< Highest (PARLIO engine - ESP32-P4/C6/H2/C5)
-    constexpr int PRIORITY_SPI = 50;      ///< Medium (SPI engine)
-    constexpr int PRIORITY_RMT = 10;      ///< Lowest (Fallback RMT engine - all ESP32 variants)
+    constexpr int PRIORITY_PARLIO = 100;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
+    constexpr int PRIORITY_SPI = 50;      ///< Medium priority value (SPI engine)
+    constexpr int PRIORITY_RMT = 10;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
 }
 
 /// @brief Initialize ESP32 channel bus manager with platform-specific engines
