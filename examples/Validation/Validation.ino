@@ -27,229 +27,148 @@
 //
 
 #include <FastLED.h>
-#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
-
-// ============================================================================
-// Configuration
-// ============================================================================
+#include "ValidationTest.h"
 
 #ifndef PIN_DATA
-#define PIN_DATA 5           // Default data pin (can be overridden by platformio.ini)
+#define PIN_DATA 5
 #endif
 
-#define SPI_DATA_PIN PIN_DATA  // SPI MOSI → LED Strip
-#define RMT_RX_PIN PIN_DATA    // RMT RX input (same pin via io_loop_back)
-#define NUM_LEDS 10            // Test with 10 LEDs
-#define CHIPSET WS2812B        // LED chipset
-#define COLOR_ORDER RGB        // Color ordering, don't change.
+#define NUM_LEDS 10
+#define CHIPSET WS2812B
+#define COLOR_ORDER RGB  // No reordering needed.
 
-// ============================================================================
-// Global State
-// ============================================================================
+CRGB leds[NUM_LEDS];
+uint8_t rx_buffer[4096];
 
-// TX buffer (what we send to LED strip)
-CRGB leds_tx[NUM_LEDS];
-
-// RX buffer (what we receive back via RMT)
-CRGB leds_rx[NUM_LEDS];
-
-// RX infrastructure
-fl::shared_ptr<fl::esp32::RmtRxChannel> rx_channel;  // Pointer to interface (initialized in setup)
-
-// Test statistics
-int total_tests = 0;
-int passed_tests = 0;
-
-// Forward declaration
-void runTest(const char* test_name, void (*pattern_fn)());
-
-// ============================================================================
-// Setup
-// ============================================================================
+void runTest(const char* test_name, int& total, int& passed);
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial && millis() < 3000);  // Wait for serial or timeout
+    while (!Serial && millis() < 3000);
 
-    Serial.println("\n=== FastLED RMT RX Validation Sketch ===");
-    Serial.println("Hardware: ESP32 (any variant)");
-    Serial.printf("GPIO Pin: %d (TX and RX via io_loop_back - no jumper needed)\n\n", PIN_DATA);
+    FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
+    FL_WARN("Hardware: ESP32 (any variant)");
+    FL_WARN("GPIO Pin: " << PIN_DATA << " (TX and RX via io_loop_back)");
 
-    // Initialize TX (FastLED SPI driver)
-    FastLED.addLeds<CHIPSET, SPI_DATA_PIN, COLOR_ORDER>(leds_tx, NUM_LEDS);
-    FastLED.setBrightness(255);  // 50% brightness for stability
+    FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.setBrightness(255);
 
-    // Initialize RX channel using factory method
-    rx_channel = fl::esp32::RmtRxChannel::create(RMT_RX_PIN, 40000000);
-    if (!rx_channel || !rx_channel->begin()) {
-        Serial.println("FATAL: RX channel init failed");
-        Serial.println("Check GPIO pin availability and ESP-IDF RMT5 support");
-        while (1) { delay(1000); }
-    }
-
-    Serial.println("Initialization complete");
-    Serial.println("Starting validation tests...\n");
+    FL_WARN("Initialization complete");
+    FL_WARN("Starting validation tests...\n");
 }
-
-// ============================================================================
-// Main Loop - Test Suite
-// ============================================================================
 
 void loop() {
     EVERY_N_MILLISECONDS(1000) { FL_WARN("LOOP VALIDATION"); }
 
-    total_tests = 0;
-    passed_tests = 0;
+    int total_tests = 0;
+    int passed_tests = 0;
 
     // Test 1: Solid red
-    runTest("Solid Red", []() {
-        fill_solid(leds_tx, NUM_LEDS, CRGB::Red);
-    });
+    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    runTest("Test 1: Solid Red", total_tests, passed_tests);
 
     // Test 2: Solid green
-    runTest("Solid Green", []() {
-        fill_solid(leds_tx, NUM_LEDS, CRGB::Green);
-    });
+    fill_solid(leds, NUM_LEDS, CRGB::Green);
+    runTest("Test 2: Solid Green", total_tests, passed_tests);
 
     // Test 3: Solid blue
-    runTest("Solid Blue", []() {
-        fill_solid(leds_tx, NUM_LEDS, CRGB::Blue);
-    });
+    fill_solid(leds, NUM_LEDS, CRGB::Blue);
+    runTest("Test 3: Solid Blue", total_tests, passed_tests);
 
     // Test 4: Rainbow gradient
-    runTest("Rainbow Gradient", []() {
-        fill_rainbow(leds_tx, NUM_LEDS, 0, 255 / NUM_LEDS);
-    });
+    fill_rainbow(leds, NUM_LEDS, 0, 255 / NUM_LEDS);
+    runTest("Test 4: Rainbow Gradient", total_tests, passed_tests);
 
     // Test 5: Alternating pattern
-    runTest("Alternating R/B", []() {
-        for (int i = 0; i < NUM_LEDS; i++) {
-            leds_tx[i] = (i % 2) ? CRGB::Blue : CRGB::Red;
-        }
-    });
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = (i % 2) ? CRGB::Blue : CRGB::Red;
+    }
+    runTest("Test 5: Alternating R/B", total_tests, passed_tests);
 
     // Test 6: All off (black)
-    runTest("All Off", []() {
-        fill_solid(leds_tx, NUM_LEDS, CRGB::Black);
-    });
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    runTest("Test 6: All Off", total_tests, passed_tests);
 
     // Test 7: White (all channels max)
-    runTest("White", []() {
-        fill_solid(leds_tx, NUM_LEDS, CRGB::White);
-    });
+    fill_solid(leds, NUM_LEDS, CRGB::White);
+    runTest("Test 7: White", total_tests, passed_tests);
 
     // Test 8: Gradient red→blue
-    runTest("Gradient R→B", []() {
-        for (int i = 0; i < NUM_LEDS; i++) {
-            uint8_t ratio = (i * 255) / (NUM_LEDS - 1);
-            leds_tx[i] = CRGB(255 - ratio, 0, ratio);
-        }
-    });
+    for (int i = 0; i < NUM_LEDS; i++) {
+        uint8_t ratio = (i * 255) / (NUM_LEDS - 1);
+        leds[i] = CRGB(255 - ratio, 0, ratio);
+    }
+    runTest("Test 8: Gradient R→B", total_tests, passed_tests);
 
-    // Summary
-    Serial.println("\n=== Test Suite Complete ===");
-    Serial.printf("Results: %d/%d tests passed (%.1f%%)\n",
-        passed_tests, total_tests,
-        100.0 * passed_tests / total_tests);
+    // Print summary
+    FL_WARN("\n=== Test Suite Complete ===");
+    FL_WARN("Results: " << passed_tests << "/" << total_tests << " tests passed ("
+            << (100.0 * passed_tests / total_tests) << "%)");
 
     if (passed_tests == total_tests) {
-        Serial.println("Status: ALL TESTS PASSED ✓✓✓");
+        FL_WARN("Status: ALL TESTS PASSED ✓✓✓");
     } else {
-        Serial.println("Status: SOME TESTS FAILED ✗");
+        FL_WARN("Status: SOME TESTS FAILED ✗");
     }
 
-    Serial.println("\nWaiting 10 seconds before restart...\n");
+    FL_WARN("\nWaiting 10 seconds before restart...\n");
     delay(10000);
 }
 
-// ============================================================================
-// Test Execution
-// ============================================================================
+void runTest(const char* test_name, int& total, int& passed) {
+    total++;
+    FL_WARN("\n=== " << test_name << " ===");
 
-void runTest(const char* test_name, void (*pattern_fn)()) {
-    total_tests++;
-    Serial.printf("\n=== Test %d: %s ===\n", total_tests, test_name);
-
-    // 1. Generate test pattern
-    pattern_fn();
-
-    // 2. Clear RX buffer
-    fl::memset(leds_rx, 0, sizeof(leds_rx));
-
-    // 3. Re-arm the RX receiver by calling begin() (clears state and starts new receive)
-    if (!rx_channel->begin()) {
-        Serial.println("ERROR: Failed to begin/arm RX receiver");
+    size_t bytes_captured = capture(rx_buffer, PIN_DATA);
+    if (bytes_captured == 0) {
+        FL_WARN("Result: FAIL ✗ (capture failed)");
         return;
     }
 
-    // 4. Small delay to ensure receiver is fully armed
-    delayMicroseconds(100);
-
-    // 5. Transmit TX data (while RX is armed and listening)
-    uint32_t tx_start = micros();
-    FastLED.show();
-    uint32_t tx_duration = micros() - tx_start;
-
-    // 6. Wait for RX completion (timeout after 100ms)
-    uint32_t timeout = millis() + 100;
-    while (!rx_channel->finished() && millis() < timeout) {
-        delayMicroseconds(10);
+    size_t bytes_expected = NUM_LEDS * 3;
+    if (bytes_captured > bytes_expected) {
+        FL_WARN("Info: Captured " << bytes_captured << " bytes (" << bytes_expected
+                << " LED data + " << (bytes_captured - bytes_expected) << " RESET)");
     }
 
-    if (!rx_channel->finished()) {
-        Serial.println("ERROR: RX timeout (no signal received)");
-        Serial.println("Check: io_loop_back enabled and same pin used for TX/RX");
-        return;
-    }
-
-    // 7. Decode symbols to bytes using convenience decode() method
-    fl::HeapVector<uint8_t> decoded_bytes;
-    auto decode_result = rx_channel->decode(fl::esp32::CHIPSET_TIMING_WS2812B_RX,
-                                             fl::back_inserter(decoded_bytes));
-
-    if (!decode_result.ok()) {
-        Serial.printf("ERROR: Decode failed (error code: %d)\n",
-            static_cast<int>(decode_result.error()));
-        return;
-    }
-
-    // Copy decoded bytes to leds_rx (limit to expected size to avoid buffer overflow)
-    size_t bytes_decoded = decode_result.value();
-    size_t bytes_expected = NUM_LEDS * 3;  // 3 bytes per LED (GRB for WS2812B)
-    size_t bytes_to_copy = bytes_decoded < bytes_expected ? bytes_decoded : bytes_expected;
-
-    fl::memcpy(leds_rx, decoded_bytes.data(), bytes_to_copy);
-
-    // If we decoded more bytes than expected (due to RESET code), that's OK - just ignore the extra bytes
-    if (bytes_decoded > bytes_expected) {
-        Serial.printf("Note: Decoded %zu bytes, but only copying first %zu bytes to avoid buffer overflow\n",
-                      bytes_decoded, bytes_expected);
-    }
-
-    // 8. Validate TX vs RX
+    // Validate: byte-level comparison (COLOR_ORDER is RGB, so no reordering)
     int mismatches = 0;
-    for (int i = 0; i < NUM_LEDS; i++) {
-        if (leds_tx[i] != leds_rx[i]) {
-            Serial.printf("ERROR: Mismatch on LED[%d], expected RGB(%3d,%3d,%3d) but got RGB(%3d,%3d,%3d)\n",
-                i,
-                leds_tx[i].r, leds_tx[i].g, leds_tx[i].b,
-                leds_rx[i].r, leds_rx[i].g, leds_rx[i].b);
+    size_t bytes_to_check = bytes_captured < bytes_expected ? bytes_captured : bytes_expected;
+
+    for (size_t i = 0; i < NUM_LEDS; i++) {
+        size_t byte_offset = i * 3;
+        if (byte_offset + 2 >= bytes_to_check) {
+            FL_WARN("WARNING: Incomplete data for LED[" << static_cast<int>(i)
+                    << "] (only " << bytes_captured << " bytes captured)");
+            break;
+        }
+
+        uint8_t expected_r = leds[i].r;
+        uint8_t expected_g = leds[i].g;
+        uint8_t expected_b = leds[i].b;
+
+        uint8_t actual_r = rx_buffer[byte_offset + 0];
+        uint8_t actual_g = rx_buffer[byte_offset + 1];
+        uint8_t actual_b = rx_buffer[byte_offset + 2];
+
+        if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
+            FL_WARN("ERROR: Mismatch on LED[" << static_cast<int>(i)
+                    << "], expected RGB(" << static_cast<int>(expected_r) << ","
+                    << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
+                    << ") but got RGB(" << static_cast<int>(actual_r) << ","
+                    << static_cast<int>(actual_g) << "," << static_cast<int>(actual_b) << ")");
             mismatches++;
         }
     }
 
-    // 9. Report results
-    Serial.printf("TX Duration: %u us\n", tx_duration);
-    Serial.printf("Bytes Decoded: %zu (expected: %d)\n", bytes_decoded, NUM_LEDS * 3);
-    Serial.printf("Accuracy: %.1f%% (%d/%d LEDs match)\n",
-        100.0 * (NUM_LEDS - mismatches) / NUM_LEDS,
-        NUM_LEDS - mismatches,
-        NUM_LEDS);
+    FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << bytes_expected << ")");
+    FL_WARN("Accuracy: " << (100.0 * (NUM_LEDS - mismatches) / NUM_LEDS) << "% ("
+            << (NUM_LEDS - mismatches) << "/" << NUM_LEDS << " LEDs match)");
 
     if (mismatches == 0) {
-        Serial.println("Result: PASS ✓");
-        passed_tests++;
+        FL_WARN("Result: PASS ✓");
+        passed++;
     } else {
-        Serial.println("Result: FAIL ✗");
+        FL_WARN("Result: FAIL ✗");
     }
 }
