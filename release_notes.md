@@ -67,6 +67,28 @@ FastLED 3.10.5 (unreleased)
 
 FastLED 3.10.4 (unreleased)
 ==============
+  * **NEW: Runtime Driver Control for Channel Bus Manager**: Dynamic enable/disable of LED drivers at runtime
+    * **Driver State Management**: Control multiple LED drivers (RMT, SPI, PARLIO) without recompiling
+    * **Named Drivers**: Each driver can be registered with a human-readable name for easy identification
+    * **Query API**: Inspect registered drivers, their priorities, and enabled states
+    * **Use Cases**:
+      * Switch between drivers based on runtime conditions (e.g., Wi-Fi activity, power modes)
+      * Debug/test different drivers without code changes
+      * Implement fallback strategies when preferred driver fails
+    * **API Methods**:
+      * `setDriverEnabled(name, enabled)` - Enable/disable driver by name
+      * `isDriverEnabled(name)` - Check if driver is currently enabled
+      * `getDriverCount()` - Get total number of registered drivers
+      * `getDriverInfo()` - Get full state of all drivers (priority, enabled state)
+    * **Example**: Disable SPI driver to test RMT fallback:
+      ```cpp
+      auto& manager = ChannelBusManagerSingleton::instance();
+      manager.setDriverEnabled("SPI", false);  // Force RMT driver usage
+      ```
+    * **Zero-allocation queries**: `getDriverInfo()` returns `fl::span` with cached results
+    * **Immediate effect**: Changes apply on next `enqueue()` call (no frame boundary required)
+    * **ESP32 integration**: Named drivers pre-configured ("RMT", "SPI", "PARLIO" on supported platforms)
+    * Tested with comprehensive unit test suite (18 new test cases)
   * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects
     * 20 components (3 core + 17 detectors): Beat, Tempo, Frequency Bands, Energy, Transient, Note, Downbeat, Dynamics, Pitch, Silence, Vocal, Percussion, Chord, Key, Mood, Buildup, Drop
     * AudioContext pattern: FFT computed once and shared across all detectors with lazy evaluation

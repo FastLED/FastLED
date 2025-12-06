@@ -26,19 +26,81 @@ ChannelBusManager::~ChannelBusManager() {
     // Shared engines automatically cleaned up by shared_ptr destructors
 }
 
-void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine) {
+void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine, const char* name) {
     if (!engine) {
         FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
         return;
     }
 
-    mEngines.push_back({priority, engine});
-    FL_DBG("ChannelBusManager: Added engine (priority " << priority << ")");
+    fl::string engineName = name ? name : "";
+    mEngines.push_back({priority, engine, engineName, true});  // enabled=true by default
+
+    if (!engineName.empty()) {
+        FL_DBG("ChannelBusManager: Added engine '" << engineName.c_str() << "' (priority " << priority << ")");
+    } else {
+        FL_DBG("ChannelBusManager: Added unnamed engine (priority " << priority << ")");
+    }
 
     // Sort engines by priority descending (higher values first) after each insertion
     // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
     // Only 1-4 engines expected, so sorting on insert is negligible
     fl::sort(mEngines.begin(), mEngines.end());
+}
+
+void ChannelBusManager::setDriverEnabled(const char* name, bool enabled) {
+    if (!name) {
+        return;  // Null name = no-op
+    }
+
+    bool found = false;
+    for (auto& entry : mEngines) {
+        if (entry.name == name) {
+            entry.enabled = enabled;
+            found = true;
+            FL_DBG("ChannelBusManager: Driver '" << name << "' " << (enabled ? "enabled" : "disabled"));
+        }
+    }
+
+    if (found) {
+        // Reset active engine to force re-selection on next enqueue
+        // This allows the change to take effect immediately
+        mActiveEngine = nullptr;
+        mActiveEnginePriority = -1;
+    }
+}
+
+bool ChannelBusManager::isDriverEnabled(const char* name) const {
+    if (!name) {
+        return false;  // Null name = not enabled
+    }
+
+    for (const auto& entry : mEngines) {
+        if (entry.name == name) {
+            return entry.enabled;
+        }
+    }
+    return false;  // Not found = not enabled
+}
+
+fl::size ChannelBusManager::getDriverCount() const {
+    return mEngines.size();
+}
+
+fl::span<const ChannelBusManager::DriverInfo> ChannelBusManager::getDriverInfo() const {
+    // Update cache with current engine state
+    mCachedDriverInfo.clear();
+    mCachedDriverInfo.reserve(mEngines.size());
+
+    for (const auto& entry : mEngines) {
+        // fl::string copy is cheap (shared pointer internally, no heap allocation)
+        mCachedDriverInfo.push_back({
+            entry.name,
+            entry.priority,
+            entry.enabled
+        });
+    }
+
+    return fl::span<const DriverInfo>(mCachedDriverInfo.data(), mCachedDriverInfo.size());
 }
 
 // IChannelEngine interface implementation
@@ -128,13 +190,25 @@ IChannelEngine* ChannelBusManager::selectEngine() {
         return nullptr;
     }
 
-    // Engines are already sorted by priority descending (higher values first)
-    // First element has highest priority value
-    EngineEntry& entry = mEngines[0];
-    mActiveEngine = entry.engine.get();
-    mActiveEnginePriority = entry.priority;
+    // Engines are already sorted by priority descending
+    // Select first enabled engine (highest priority)
+    for (auto& entry : mEngines) {
+        if (entry.enabled) {
+            mActiveEngine = entry.engine.get();
+            mActiveEnginePriority = entry.priority;
 
-    return mActiveEngine;
+            if (!entry.name.empty()) {
+                FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
+            } else {
+                FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
+            }
+            return mActiveEngine;
+        }
+    }
+
+    // No enabled engines found
+    FL_WARN("ChannelBusManager::selectEngine() - No enabled engines available");
+    return nullptr;
 }
 
 IChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {

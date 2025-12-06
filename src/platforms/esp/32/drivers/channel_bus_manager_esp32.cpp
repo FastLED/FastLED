@@ -54,7 +54,7 @@ static void initializeChannelBusManager() {
 
     auto& manager = ChannelBusManagerSingleton::instance();
 
-    // Add engines (automatically sorted by priority on each insertion)
+    // Add engines with string names (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO
     #if defined(CONFIG_IDF_TARGET_ESP32C6)
     // PARLIO has clock gating bug on ESP32-C6 (ESP-IDF ≤ v5.4.1)
@@ -65,7 +65,7 @@ static void initializeChannelBusManager() {
     FL_WARN("ESP32-C6: PARLIO driver disabled due to clock initialization bug (ESP-IDF ≤v5.4.1)");
     FL_WARN("ESP32-C6: Falling back to RMT driver for LED control");
     #else
-    manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>());
+    manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>(), "PARLIO");
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
     #endif
@@ -77,7 +77,7 @@ static void initializeChannelBusManager() {
     // Note: SPI0/SPI1 are reserved for flash operations and cannot be used.
     FL_DBG("ESP32-C6: SPI engine not enabled (only 1 SPI host available, RMT5 preferred)");
     #else
-    manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
+    manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>(), "SPI");
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
     #endif
@@ -85,13 +85,13 @@ static void initializeChannelBusManager() {
     // ESP32-C6, C5, P4, H2 only support RMT5 - force RMT5 even if flag is 0
     #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
         defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
-    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>());
+    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>(), "RMT");
     FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ") [forced for RMT5-only chip]");
     #elif FASTLED_RMT5
-    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>());
+    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>(), "RMT");
     FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ")");
     #else
-    manager.addEngine(PRIORITY_RMT, ChannelEngineRMT4::create());
+    manager.addEngine(PRIORITY_RMT, ChannelEngineRMT4::create(), "RMT");
     FL_DBG("ESP32: Added RMT4 engine (priority " << PRIORITY_RMT << ")");
     #endif
 

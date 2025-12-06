@@ -279,4 +279,297 @@ TEST_CASE("ChannelBusManager - Empty show() does nothing") {
     CHECK(engine->getTransmitCount() == 0);
 }
 
+TEST_CASE("ChannelBusManager - Driver enable/disable") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // By default, all engines should be enabled
+    CHECK(manager.isDriverEnabled("RMT") == true);
+    CHECK(manager.isDriverEnabled("SPI") == true);
+
+    // SPI should be selected (higher priority)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(spiEngine->getTransmitCount() == 1);
+    CHECK(rmtEngine->getTransmitCount() == 0);
+
+    // Reset for next test
+    spiEngine->reset();
+    rmtEngine->reset();
+    manager.onEndFrame();
+
+    // Disable SPI - should fall back to RMT
+    manager.setDriverEnabled("SPI", false);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+    CHECK(manager.isDriverEnabled("RMT") == true);
+
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+    CHECK(spiEngine->getTransmitCount() == 0);
+
+    // Reset for next test
+    spiEngine->reset();
+    rmtEngine->reset();
+    manager.onEndFrame();
+
+    // Re-enable SPI - should go back to SPI
+    manager.setDriverEnabled("SPI", true);
+    CHECK(manager.isDriverEnabled("SPI") == true);
+
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(spiEngine->getTransmitCount() == 1);
+    CHECK(rmtEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - Disable all drivers") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // Disable both engines
+    manager.setDriverEnabled("RMT", false);
+    manager.setDriverEnabled("SPI", false);
+
+    // Try to transmit - should handle gracefully
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+
+    // Neither engine should be used
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 0);
+
+    // Should still be in READY state (no crash)
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+}
+
+TEST_CASE("ChannelBusManager - Multiple engines with same name") {
+    ChannelBusManager manager;
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+
+    manager.addEngine(100, rmt1, "RMT");
+    manager.addEngine(50, rmt2, "RMT");
+
+    // Disable RMT name - should disable BOTH engines with that name
+    manager.setDriverEnabled("RMT", false);
+
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+
+    CHECK(rmt1->getTransmitCount() == 0);
+    CHECK(rmt2->getTransmitCount() == 0);
+
+    // Re-enable RMT - should use highest priority RMT engine
+    manager.setDriverEnabled("RMT", true);
+
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+
+    CHECK(rmt1->getTransmitCount() == 1);  // Higher priority
+    CHECK(rmt2->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - Query non-existent driver name") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+
+    // Query PARLIO when only RMT is registered
+    CHECK(manager.isDriverEnabled("PARLIO") == false);
+
+    // Disable PARLIO (even though it doesn't exist) - should not crash
+    manager.setDriverEnabled("PARLIO", false);
+
+    // RMT should still work
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+}
+
+TEST_CASE("ChannelBusManager - Immediate effect of setDriverEnabled") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // First transmission - should use SPI
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(spiEngine->getTransmitCount() == 1);
+
+    spiEngine->reset();
+    rmtEngine->reset();
+
+    // Disable SPI mid-frame (without calling onEndFrame)
+    manager.setDriverEnabled("SPI", false);
+
+    // Next transmission should immediately use RMT (no onEndFrame needed)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+    CHECK(spiEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - Query driver info") {
+    ChannelBusManager manager;
+
+    // Empty manager
+    CHECK(manager.getDriverCount() == 0);
+    auto emptyInfo = manager.getDriverInfo();
+    CHECK(emptyInfo.size() == 0);
+
+    // Add named engines
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+    auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(100, parlioEngine, "PARLIO");
+
+    // Check count
+    CHECK(manager.getDriverCount() == 3);
+
+    // Get info (returns span, no allocation!)
+    auto info = manager.getDriverInfo();
+    CHECK(info.size() == 3);
+
+    // Verify all names are present (sorted by priority descending)
+    bool hasRMT = false;
+    bool hasSPI = false;
+    bool hasPARLIO = false;
+
+    for (const auto& p : info) {
+        if (p.name == "RMT") hasRMT = true;
+        if (p.name == "SPI") hasSPI = true;
+        if (p.name == "PARLIO") hasPARLIO = true;
+    }
+
+    CHECK(hasRMT == true);
+    CHECK(hasSPI == true);
+    CHECK(hasPARLIO == true);
+}
+
+TEST_CASE("ChannelBusManager - Query with unnamed engines") {
+    ChannelBusManager manager;
+
+    auto namedEngine = fl::make_shared<FakeEngine>("Named");
+    auto unnamedEngine = fl::make_shared<FakeEngine>("Unnamed");
+
+    manager.addEngine(10, namedEngine, "Named");
+    manager.addEngine(20, unnamedEngine, nullptr);  // Unnamed
+
+    // Count includes both
+    CHECK(manager.getDriverCount() == 2);
+
+    // Info includes both (unnamed has empty string)
+    auto info = manager.getDriverInfo();
+    CHECK(info.size() == 2);
+
+    // Higher priority first (20 > 10)
+    CHECK(info[0].priority == 20);
+    CHECK(info[0].name == "");  // Unnamed
+
+    CHECK(info[1].priority == 10);
+    CHECK(info[1].name == "Named");
+}
+
+TEST_CASE("ChannelBusManager - Query with duplicate names") {
+    ChannelBusManager manager;
+
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+
+    manager.addEngine(100, rmt1, "RMT");
+    manager.addEngine(50, rmt2, "RMT");
+
+    // Count should be 2 (two engines)
+    CHECK(manager.getDriverCount() == 2);
+
+    // Info should include both "RMT" entries (duplicates allowed)
+    auto info = manager.getDriverInfo();
+    CHECK(info.size() == 2);
+    CHECK(info[0].name == "RMT");
+    CHECK(info[0].priority == 100);
+    CHECK(info[1].name == "RMT");
+    CHECK(info[1].priority == 50);
+}
+
+TEST_CASE("ChannelBusManager - Query full driver state") {
+    ChannelBusManager manager;
+
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+    auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(100, parlioEngine, "PARLIO");
+
+    // Get full info (span, no allocation!)
+    auto info = manager.getDriverInfo();
+    CHECK(info.size() == 3);
+
+    // Should be sorted by priority descending (PARLIO=100, SPI=50, RMT=10)
+    CHECK(info[0].name == "PARLIO");
+    CHECK(info[0].priority == 100);
+    CHECK(info[0].enabled == true);
+
+    CHECK(info[1].name == "SPI");
+    CHECK(info[1].priority == 50);
+    CHECK(info[1].enabled == true);
+
+    CHECK(info[2].name == "RMT");
+    CHECK(info[2].priority == 10);
+    CHECK(info[2].enabled == true);
+
+    // Disable SPI and check state
+    manager.setDriverEnabled("SPI", false);
+    info = manager.getDriverInfo();
+
+    CHECK(info[0].enabled == true);   // PARLIO still enabled
+    CHECK(info[1].enabled == false);  // SPI disabled
+    CHECK(info[2].enabled == true);   // RMT still enabled
+}
+
+TEST_CASE("ChannelBusManager - Span validity") {
+    ChannelBusManager manager;
+
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // Get span (no allocation)
+    auto info = manager.getDriverInfo();
+    CHECK(info.size() == 2);
+
+    // Verify we can iterate multiple times (span is stable)
+    int count = 0;
+    for (const auto& p : info) {
+        count++;
+        CHECK(p.priority > 0);
+    }
+    CHECK(count == 2);
+
+    // Get span again - should work fine
+    auto info2 = manager.getDriverInfo();
+    CHECK(info2.size() == 2);
+    CHECK(info2[0].name == "SPI");  // Higher priority
+    CHECK(info2[1].name == "RMT");
+}
+
 } // namespace channel_bus_manager_test
