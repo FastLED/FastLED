@@ -351,7 +351,7 @@ public:
         // Additional flags
         rx_config.flags.invert_in = false;  // No signal inversion
         rx_config.flags.with_dma = false;   // Start with non-DMA (universal compatibility)
-        rx_config.flags.io_loop_back = true;  // Enable internal GPIO loopback (same pin TX+RX)
+        // io_loop_back is deprecated and removed in ESP-IDF 6 - use physical jumper wire instead
 
         // Create RX channel
         esp_err_t err = rmt_new_rx_channel(&rx_config, &channel_);
