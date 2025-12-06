@@ -12,9 +12,19 @@
 // to ready back the LED's recieved to verify that the timing is correct.
 //
 // Hardware Setup:
-//   - No jumper wire needed! Uses io_loop_back for internal GPIO loopback
-//   - TX and RX both use the same GPIO pin (software loopback)
-//   - Optionally connect an LED strip for visual confirmation
+//   ⚠️ IMPORTANT: Physical jumper wire required for non-RMT TX → RMT RX loopback
+//
+//   When non-RMT peripherals are used for TX (e.g., SPI, ParallelIO):
+//   - Connect GPIO PIN_DATA to itself with a physical jumper wire
+//   - Internal loopback (io_loop_back flag) only works for RMT TX → RMT RX
+//   - ESP32 GPIO matrix cannot route other peripheral outputs internally to RMT input
+//
+//   When RMT is used for TX (lower peripheral priority or disable other peripherals):
+//   - No jumper wire needed - io_loop_back works for RMT TX → RMT RX
+//
+//   Alternative: Connect an LED strip between TX pin and ground, then connect
+//   RX pin to LED data line to capture actual LED protocol timing (requires
+//   two separate GPIO pins for TX and RX).
 //
 // Platform Support:
 //   - ESP32 (classic)
@@ -51,7 +61,14 @@ void setup() {
 
     FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
     FL_WARN("Hardware: ESP32 (any variant)");
-    FL_WARN("GPIO Pin: " << PIN_DATA << " (TX and RX via io_loop_back)");
+    FL_WARN("GPIO Pin: " << PIN_DATA);
+    FL_WARN("");
+    FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
+    FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
+    FL_WARN("   → Connect GPIO " << PIN_DATA << " to itself with a physical jumper wire");
+    FL_WARN("   → Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
+    FL_WARN("   → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
+    FL_WARN("");
 
     FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
@@ -60,6 +77,7 @@ void setup() {
     rx_channel = fl::RmtRxChannel::create(PIN_DATA, 40000000);
     if (!rx_channel) {
         FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
+        FL_WARN("       Check that RMT peripheral is available and not in use");
     }
 
     FL_WARN("Initialization complete");

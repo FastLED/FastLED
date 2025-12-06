@@ -32,8 +32,14 @@ inline size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
     if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
-        FL_WARN("ERROR: RX wait failed");
-        FL_WARN("Check: io_loop_back enabled and same pin used for TX/RX");
+        FL_WARN("ERROR: RX wait failed (timeout or no data received)");
+        FL_WARN("");
+        FL_WARN("⚠️  TROUBLESHOOTING:");
+        FL_WARN("   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from GPIO to itself");
+        FL_WARN("   2. Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
+        FL_WARN("   3. ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
+        FL_WARN("   4. Check that TX and RX use the same GPIO pin number");
+        FL_WARN("");
         return 0;
     }
 
