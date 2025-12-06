@@ -989,7 +989,7 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     // CRITICAL: Validate channel pointer (should never be NULL, but check for
     // corruption)
     if (!channel) {
-        FL_WARN("ChannelEngineSpi ISR: NULL channel pointer!");
+        // Silently return - cannot log in ISR context
         return;
     }
 
@@ -1008,10 +1008,8 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
 
     // CRITICAL: Validate currentStaging pointer before use
     if (!channel->currentStaging) {
-        FL_WARN("ChannelEngineSpi ISR: NULL currentStaging pointer! stagingA="
-                << (void *)channel->stagingA
-                << " stagingB=" << (void *)channel->stagingB);
-        channel->hasNewData = false; // Disarm to prevent repeated warnings
+        // Silently disarm - cannot log in ISR context
+        channel->hasNewData = false;
         return;
     }
 
@@ -1019,11 +1017,7 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     // staging buffers
     if (channel->currentStaging != channel->stagingA &&
         channel->currentStaging != channel->stagingB) {
-        FL_WARN("ChannelEngineSpi ISR: Corrupted currentStaging pointer! "
-                << "currentStaging=" << (void *)channel->currentStaging
-                << " stagingA=" << (void *)channel->stagingA
-                << " stagingB=" << (void *)channel->stagingB);
-        // Attempt recovery: reset to stagingA
+        // Attempt recovery: reset to stagingA (silently - cannot log in ISR context)
         channel->currentStaging = channel->stagingA;
         channel->stagingOffset = 0;
         channel->hasNewData = false;
@@ -1056,12 +1050,8 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
             (available_space * 8) / bits_per_led_byte;
         bytes_to_encode = fl_min(bytes_to_encode, max_input_bytes);
 
-        if (bytes_to_encode == 0) {
-            // Buffer full - trigger transmission without encoding more data
-            FL_WARN("ChannelEngineSpi ISR: Staging buffer full at offset "
-                    << channel->stagingOffset << "/" << channel->stagingCapacity
-                    << ", triggering early transmission");
-        }
+        // If buffer is full, encoding will proceed with 0 bytes (no-op)
+        // Cannot log in ISR context
     }
 
     // Encode into staging buffer at current offset
