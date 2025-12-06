@@ -43,6 +43,8 @@
 #define PIN_DATA 5
 #endif
 
+#define PIN_RX 2
+
 #define NUM_LEDS 10
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
@@ -74,7 +76,7 @@ void setup() {
     FastLED.setBrightness(255);
 
     // Create RMT RX channel (persistent for all tests)
-    rx_channel = fl::RmtRxChannel::create(PIN_DATA, 40000000);
+    rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000);
     if (!rx_channel) {
         FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
         FL_WARN("       Check that RMT peripheral is available and not in use");
