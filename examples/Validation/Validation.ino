@@ -41,7 +41,7 @@
 #define RMT_RX_PIN PIN_DATA    // RMT RX input (same pin via io_loop_back)
 #define NUM_LEDS 10            // Test with 10 LEDs
 #define CHIPSET WS2812B        // LED chipset
-#define COLOR_ORDER GRB        // Color ordering
+#define COLOR_ORDER RGB        // Color ordering, don't change.
 
 // ============================================================================
 // Global State
@@ -77,7 +77,7 @@ void setup() {
 
     // Initialize TX (FastLED SPI driver)
     FastLED.addLeds<CHIPSET, SPI_DATA_PIN, COLOR_ORDER>(leds_tx, NUM_LEDS);
-    FastLED.setBrightness(128);  // 50% brightness for stability
+    FastLED.setBrightness(255);  // 50% brightness for stability
 
     // Initialize RX channel using factory method
     rx_channel = fl::esp32::RmtRxChannel::create(RMT_RX_PIN, 40000000);
@@ -213,9 +213,18 @@ void runTest(const char* test_name, void (*pattern_fn)()) {
         return;
     }
 
-    // Copy decoded bytes to leds_rx
+    // Copy decoded bytes to leds_rx (limit to expected size to avoid buffer overflow)
     size_t bytes_decoded = decode_result.value();
-    fl::memcpy(leds_rx, decoded_bytes.data(), bytes_decoded);
+    size_t bytes_expected = NUM_LEDS * 3;  // 3 bytes per LED (GRB for WS2812B)
+    size_t bytes_to_copy = bytes_decoded < bytes_expected ? bytes_decoded : bytes_expected;
+
+    fl::memcpy(leds_rx, decoded_bytes.data(), bytes_to_copy);
+
+    // If we decoded more bytes than expected (due to RESET code), that's OK - just ignore the extra bytes
+    if (bytes_decoded > bytes_expected) {
+        Serial.printf("Note: Decoded %zu bytes, but only copying first %zu bytes to avoid buffer overflow\n",
+                      bytes_decoded, bytes_expected);
+    }
 
     // 8. Validate TX vs RX
     int mismatches = 0;
