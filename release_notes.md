@@ -1,7 +1,7 @@
 
 
 
-FastLED 3.10.5 (unreleased)
+FastLED 3.10.4 (Next Release)
 ==============
   * **NEW: WS2812B-V5 and WS2812B-Mini-V3 Chipset Support**: Added support for newer WS2812B variants with tighter timing specifications
     * **WS2812B-V5**: Newer variant with 220/580ns timing (T0H: 220-380ns, T1H: 580-1000ns)
@@ -64,9 +64,6 @@ FastLED 3.10.5 (unreleased)
       * Platform-specific bulk implementations removed (OFLED, RMT, I2S, LCD_I80, PARLIO)
     * **Legacy Code**: If you were using BulkClockless, you will need to migrate to the Channel API
     * Built on ObjectFLED by Kurt Funderburg, inspired by OctoWS2811 architecture
-
-FastLED 3.10.4 (unreleased)
-==============
   * **NEW: Runtime Driver Control for Channel Bus Manager**: Dynamic enable/disable of LED drivers at runtime
     * **Driver State Management**: Control multiple LED drivers (RMT, SPI, PARLIO) without recompiling
     * **Named Drivers**: Each driver can be registered with a human-readable name for easy identification
