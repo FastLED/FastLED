@@ -195,7 +195,34 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTimingRx &timing
             FL_DBG("decodeRmtSymbols: invalid symbol at index "
                    << i << " (duration0=" << rmt_symbols[i].duration0
                    << ", duration1=" << rmt_symbols[i].duration1 << ")");
-            continue; // Skip invalid symbol
+
+            // Special handling for last symbol with duration1=0 (idle threshold truncation)
+            // This occurs when the RMT RX idle threshold is exceeded, truncating the low period
+            // We can still decode the bit using only the high period (duration0)
+            if (i == symbols.size() - 1 && rmt_symbols[i].duration1 == 0 && rmt_symbols[i].level0 == 1) {
+                uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
+
+                // Check if high period matches bit 0 pattern
+                if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+                    bit = 0;
+                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, decoded as bit 0 from high period (" << high_ns << "ns)");
+                }
+                // Check if high period matches bit 1 pattern
+                else if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+                    bit = 1;
+                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, decoded as bit 1 from high period (" << high_ns << "ns)");
+                }
+
+                // If we successfully decoded the bit, don't skip it
+                if (bit >= 0) {
+                    error_count--; // Undo the error count increment
+                    // Fall through to bit accumulation below
+                } else {
+                    continue; // Still invalid, skip it
+                }
+            } else {
+                continue; // Skip invalid symbol
+            }
         }
 
         // Accumulate bit into byte (MSB first)
