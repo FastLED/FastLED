@@ -63,17 +63,28 @@ void setup() {
 
     FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
     FL_WARN("Hardware: ESP32 (any variant)");
-    FL_WARN("GPIO Pin: " << PIN_DATA);
+    FL_WARN("TX Pin (MOSI): GPIO " << PIN_DATA << " (ESP32-S3: use GPIO 11 for IO_MUX)");
+    FL_WARN("RX Pin: GPIO " << PIN_RX);
     FL_WARN("");
     FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
     FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
-    FL_WARN("   → Connect GPIO " << PIN_DATA << " to itself with a physical jumper wire");
+    FL_WARN("   → Connect GPIO " << PIN_DATA << " to GPIO " << PIN_RX << " with a physical jumper wire");
     FL_WARN("   → Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
     FL_WARN("   → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
+    FL_WARN("");
+    FL_WARN("   ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance");
+    FL_WARN("   → GPIO 11 is SPI2 IO_MUX pin (bypasses GPIO matrix for 80MHz speed)");
+    FL_WARN("   → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
     FL_WARN("");
 
     FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
+
+    // Pre-initialize the TX engine (SPI/RMT) to avoid first-call setup delays
+    // This ensures the engine is ready before RX capture attempts
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+    FL_WARN("TX engine pre-initialized");
 
     // Create RMT RX channel (persistent for all tests)
     rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000);

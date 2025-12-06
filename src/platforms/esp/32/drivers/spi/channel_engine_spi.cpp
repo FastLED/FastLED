@@ -529,7 +529,12 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     bus_config.mosi_io_num = pin; // Data0 (always present)
     bus_config.miso_io_num =
         state->data1_pin;        // Data1 for dual/quad mode (-1 if unused)
-    bus_config.sclk_io_num = -1; // Not used (data-only mode)
+    // CRITICAL: SPI peripheral requires a clock signal for MOSI timing
+    // Clock pin must be specified even though we don't physically connect it to LEDs
+    // The clock determines the timing of MOSI bit transitions
+    // For ESP32-S3, use GPIO 1 as internal clock (not connected to LED strip)
+    // Note: GPIO 3 is a strapping pin (JTAG select) and should be avoided
+    bus_config.sclk_io_num = 1;  // Internal clock pin (required for SPI timing)
     bus_config.quadwp_io_num =
         state->data2_pin; // Data2 for quad mode (-1 if unused)
     bus_config.quadhd_io_num =
