@@ -28,19 +28,20 @@ The validation sketch tests the entire LED data transmission pipeline:
 ### Minimal Setup (Validation Only)
 
 ```
-ESP32 DevKit
-┌─────────────────────────────────────┐
-│                                     │
-│  GPIO 5 (SPI TX) ───────┐          │
-│                          │          │
-│                          │  Jumper  │
-│                          └──────────┼──> Short wire
-│                                     │
-│  GPIO 6 (RMT RX) ───────────────────┘
-│                                     │
-│  USB ────────────── Computer        │
-│                                     │
-└─────────────────────────────────────┘
+
+                 ESP32 DevKit
+        ┌────────────────────────────────┐
+        │                                │
+        │   GPIO 5  (SPI TX) ●──────┐    │
+        │                           │    │
+        │                           │ Jumper
+        │                           │ (short wire)
+        │   GPIO 6  (RMT RX) ●──────┘    │
+        │                                │
+        │   USB ─────────────────→ Computer
+        │                                │
+        └────────────────────────────────┘
+
 ```
 
 **Steps:**
