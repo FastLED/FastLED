@@ -106,6 +106,9 @@ FL_IRAM size_t expandByteToWaveforms(
     size_t output_size
 ) {
     // Validate inputs
+    if (!b0_waveform || !b1_waveform || !output) {
+        return 0;  // Null pointer check
+    }
     if (b0_waveform_size_max != b1_waveform_size_max || b0_waveform_size_max == 0) {
         return 0;
     }
