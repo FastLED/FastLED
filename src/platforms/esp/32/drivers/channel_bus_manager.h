@@ -17,12 +17,16 @@
 namespace fl {
 
 /// @brief ESP32-specific singleton type for ChannelBusManager
+/// @note The singleton is automatically initialized before main() via FL_INIT
+/// @note Access via ChannelBusManagerSingleton::instance() or channelBusManager()
 using ChannelBusManagerSingleton = Singleton<ChannelBusManager>;
 
-/// @brief Get the initialized ChannelBusManager singleton for ESP32
-/// @return Reference to the ChannelBusManager singleton
-/// @note First call initializes the manager with ESP32 engines
-ChannelBusManager& getChannelBusManager();
+/// @brief Convenience function to get the ChannelBusManager singleton
+/// @return Reference to the global ChannelBusManager instance
+/// @note Shorthand for ChannelBusManagerSingleton::instance()
+inline ChannelBusManager& channelBusManager() {
+    return ChannelBusManagerSingleton::instance();
+}
 
 } // namespace fl
 

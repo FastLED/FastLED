@@ -93,7 +93,7 @@ void setup() {
     FastLED.setBrightness(255);
 
     // Phase 2: Enable RMT mode for basic functionality test (disable SPI first!)
-    fl::ChannelBusManager& manager = fl::getChannelBusManager();
+    fl::ChannelBusManager& manager = fl::channelBusManager();
     manager.setDriverEnabled("SPI", false);  // CRITICAL: Disable SPI first
     manager.setDriverEnabled("RMT", true);   // Then enable RMT
     FL_WARN("RMT driver enabled (SPI disabled) - testing @ 255 LEDs");

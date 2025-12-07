@@ -35,7 +35,7 @@ private:
 
 public:
     ClocklessIdf5()
-        : mEngine(&getChannelBusManager())
+        : mEngine(&ChannelBusManagerSingleton::instance())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();

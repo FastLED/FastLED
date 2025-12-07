@@ -36,20 +36,20 @@
 
 namespace fl {
 
-/// @brief Engine priority constants for ESP32
-/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
-/// @note These are defined here (not in header) to avoid exposing platform-specific details
-namespace {
+/// @brief Initialize ESP32 channel bus manager with platform-specific engines
+///
+/// This function is called automatically during C++ static initialization (before main())
+/// to configure the ChannelBusManager singleton with ESP32-specific engines.
+namespace detail {
+void initializeChannelBusManager() {
+
+    /// @brief Engine priority constants for ESP32
+    /// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
+    /// @note These are defined here (not in header) to avoid exposing platform-specific details
     constexpr int PRIORITY_PARLIO = 100;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
     constexpr int PRIORITY_SPI = 50;      ///< Medium priority value (SPI engine)
     constexpr int PRIORITY_RMT = 10;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
-}
 
-/// @brief Initialize ESP32 channel bus manager with platform-specific engines
-///
-/// This function is called once on first access to configure the ChannelBusManager
-/// singleton with ESP32-specific engines.
-static void initializeChannelBusManager() {
     FL_DBG("ESP32: Initializing ChannelBusManager with platform engines");
 
     auto& manager = ChannelBusManagerSingleton::instance();
@@ -97,19 +97,10 @@ static void initializeChannelBusManager() {
 
     FL_DBG("ESP32: ChannelBusManager initialization complete");
 }
+} // namespace detail
 
-/// @brief Get the initialized ChannelBusManager singleton for ESP32
-/// @return Reference to the ChannelBusManager singleton
-/// @note First call initializes the manager with ESP32 engines
-ChannelBusManager& getChannelBusManager() {
-    // Use a static bool to ensure initialization happens exactly once
-    static bool initialized = false;
-    if (!initialized) {
-        initializeChannelBusManager();
-        initialized = true;
-    }
-    return ChannelBusManagerSingleton::instance();
-}
+// Register initialization function to run before main()
+FL_INIT(detail::initializeChannelBusManager);
 
 } // namespace fl
 
