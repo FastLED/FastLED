@@ -40,9 +40,9 @@ namespace fl {
 //=============================================================================
 
 // WS2812 timing requirements with PARLIO
-// Clock: 8.0 MHz (125ns per tick) - Testing ESP32-C6 compatibility
+// Clock: 8.0 MHz (125ns per tick)
+// Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
 // Each LED bit is encoded as 10 clock ticks (1.25μs total)
-// Divides evenly from 80MHz (80/10) and 40MHz (40/5)
 static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000;  // 8.0 MHz
 
 // Default GPIO pins for PARLIO output (can be customized later)
@@ -614,10 +614,13 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Step 4: Configure PARLIO TX unit
     parlio_tx_unit_config_t config = {};
     config.clk_src = PARLIO_CLK_SRC_DEFAULT;
+    config.clk_in_gpio_num = static_cast<gpio_num_t>(-1);  // Use internal clock, not external
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
     config.data_width = mState.data_width;  // Runtime parameter
     config.trans_queue_depth = 2;  // Support ping-pong buffering
     config.max_transfer_size = 65535;
+    config.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;  // WS2812 expects MSB-first
+    config.sample_edge = PARLIO_SAMPLE_EDGE_NEG;  // Sample on falling edge (TX standard)
 
     // Assign GPIO pins for data_width lanes
     for (size_t i = 0; i < mState.data_width; i++) {

@@ -727,7 +727,8 @@ ESP32_C5_DEVKITC_1 = Board(
 ESP32_C6_DEVKITC_1 = Board(
     board_name="esp32c6",
     real_board_name="esp32-c6-devkitc-1",
-    platform=ESP32_IDF_5_3_PIOARDUINO,
+    platform=ESP32_IDF_5_5_PIOARDUINO,
+    board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
 )
 
 ESP32_S3_DEVKITC_1 = Board(

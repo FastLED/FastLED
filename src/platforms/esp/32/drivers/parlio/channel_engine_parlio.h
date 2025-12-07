@@ -175,8 +175,14 @@ inline size_t selectDataWidth(size_t channel_count) {
 /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
 /// @return Bytes per LED after waveform expansion
 inline size_t calculateBytesPerLed(size_t data_width) {
-    // Formula: 3 colors × 32 ticks × (data_width / 8)
-    return 3 * 32 * (data_width / 8);
+    // Formula: 3 colors × 8 bits/color × 32 ticks/bit = 768 total ticks per LED
+    // For data_width < 8: ticks are packed into bytes (768 bits / 8 = 96 bytes)
+    // For data_width >= 8: each tick uses (data_width / 8) bytes (e.g., 16-bit width = 2 bytes/tick)
+    if (data_width < 8) {
+        return 96;  // 768 bits / 8 bits per byte
+    } else {
+        return 3 * 32 * (data_width / 8);
+    }
 }
 
 /// @brief Calculate optimal chunk size for given data width
