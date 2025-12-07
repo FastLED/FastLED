@@ -436,25 +436,13 @@ private:
     }
 
     /**
-     * @brief Check if idle timeout has elapsed since first edge
-     * @param current_time_us Current time in microseconds
-     * @return true if timeout elapsed, false otherwise
-     *
-     * Uses signal_range_max_ns_ to determine idle detection threshold.
-     * Idle detection triggers when no edges received for signal_range_max_ns_.
-     *
-     * IRAM_ATTR for ISR context
-     */
-    inline bool IRAM_ATTR hasTimeoutElapsed(int64_t current_time_us) const {
-        // Idle timeout = signal_range_max_ns converted to microseconds
-        int64_t timeout_us = static_cast<int64_t>(signal_range_max_ns_ / 1000);
-        return (current_time_us - start_time_us_) >= timeout_us;
-    }
-
-    /**
      * @brief Disarm the ISR (stop capturing edges)
      *
      * IRAM_ATTR for ISR context
+     *
+     * NOTE: This function is no longer used as the ISR has been optimized
+     * to call gpio_intr_disable() directly inline for better performance.
+     * Kept for potential future use.
      */
     inline void IRAM_ATTR disarmISR() {
         // Disable GPIO interrupt
@@ -462,9 +450,17 @@ private:
     }
 
     /**
-     * @brief GPIO ISR handler (static wrapper)
+     * @brief GPIO ISR handler (static wrapper) - HEAVILY OPTIMIZED
      *
      * IRAM_ATTR for ISR context
+     *
+     * Optimizations applied:
+     * - Cached volatile variable reads (single read per variable)
+     * - Inlined timeout check (eliminated function call)
+     * - Unified noise filtering logic (eliminated duplicate code path)
+     * - Streamlined skip counter handling
+     * - Optimized buffer full detection with pre-increment
+     * - Reduced branching in critical path
      */
     static void IRAM_ATTR gpioIsrHandler(void* arg) {
         GpioIsrRxImpl* self = static_cast<GpioIsrRxImpl*>(arg);
@@ -472,80 +468,73 @@ private:
             return;
         }
 
+        // Cache volatile reads - single read per variable
+        size_t edges_captured = self->edges_captured_;
+        int64_t start_time_us = self->start_time_us_;
+        uint32_t last_edge_time_ns = self->last_edge_time_ns_;
+        uint32_t skip_counter = self->skip_counter_;
+
         // Get current timestamp
         int64_t now_us = esp_timer_get_time();
 
-        // Check if this is the first edge (start_time_us_ would be 0 or very old)
-        // If edges_captured_ is 0, this is the first edge, so update start time
-        if (self->edges_captured_ == 0) {
+        // First edge: initialize start time
+        if (edges_captured == 0) {
             self->start_time_us_ = now_us;
+            start_time_us = now_us;
         }
 
-        // Check timeout (50µs elapsed since first edge)
-        if (self->hasTimeoutElapsed(now_us)) {
-            self->disarmISR();
+        // Inline timeout check - avoid function call overhead
+        // Idle timeout = signal_range_max_ns converted to microseconds
+        int64_t timeout_us = static_cast<int64_t>(self->signal_range_max_ns_ / 1000);
+        if ((now_us - start_time_us) >= timeout_us) {
+            gpio_intr_disable(self->pin_);
             self->receive_done_ = true;
             return;
         }
 
         // Calculate relative timestamp in nanoseconds
-        int64_t relative_time_ns = (now_us - self->start_time_us_) * 1000;
+        int64_t relative_time_ns = (now_us - start_time_us) * 1000;
         uint32_t current_time_ns = static_cast<uint32_t>(relative_time_ns);
 
-        // Check if we need to skip this edge (do this before noise filtering)
-        if (self->skip_counter_ > 0) {
-            // Noise filtering still applies during skip phase
-            if (self->last_edge_time_ns_ > 0) {
-                uint32_t pulse_width_ns = current_time_ns - self->last_edge_time_ns_;
+        // Unified noise filtering (applies to both skip and capture phases)
+        if (last_edge_time_ns > 0) {
+            uint32_t pulse_width_ns = current_time_ns - last_edge_time_ns;
 
-                // If pulse is shorter than minimum threshold, discard it (noise)
-                if (pulse_width_ns < self->signal_range_min_ns_) {
-                    // Ignore this edge - it's too short (likely noise/glitch)
-                    return;
-                }
-            }
-
-            // Update last edge time for next pulse width calculation
-            self->last_edge_time_ns_ = current_time_ns;
-
-            // Decrement skip counter
-            self->skip_counter_--;
-            return;  // Skip this edge, don't store it
-        }
-
-        // Noise filtering for captured edges
-        if (self->last_edge_time_ns_ > 0) {
-            uint32_t pulse_width_ns = current_time_ns - self->last_edge_time_ns_;
-
-            // If pulse is shorter than minimum threshold, discard it (noise)
+            // Reject noise/glitches shorter than minimum threshold
             if (pulse_width_ns < self->signal_range_min_ns_) {
-                // Ignore this edge - it's too short (likely noise/glitch)
                 return;
             }
         }
 
-        // Update last edge time for next pulse width calculation
+        // Update last edge time (shared by skip and capture)
         self->last_edge_time_ns_ = current_time_ns;
 
-        // Capture edge if buffer has space
-        if (self->edges_captured_ < self->buffer_size_) {
-            // Read GPIO level
-            int level = gpio_get_level(self->pin_);
+        // Handle skip counter
+        if (skip_counter > 0) {
+            self->skip_counter_ = skip_counter - 1;
+            return;
+        }
 
-            // Store edge timestamp
-            size_t current_index = self->edges_captured_;
-            self->edge_buffer_[current_index].time_ns = current_time_ns;
-            self->edge_buffer_[current_index].level = static_cast<uint8_t>(level);
-            self->edges_captured_ = current_index + 1;
+        // Fast path: check buffer full condition early
+        if (edges_captured >= self->buffer_size_) {
+            gpio_intr_disable(self->pin_);
+            self->receive_done_ = true;
+            return;
+        }
 
-            // Check if buffer is now full
-            if (self->edges_captured_ >= self->buffer_size_) {
-                self->disarmISR();
-                self->receive_done_ = true;
-            }
-        } else {
-            // Buffer overflow (shouldn't happen, but handle it)
-            self->disarmISR();
+        // Capture edge: read GPIO level and store
+        int level = gpio_get_level(self->pin_);
+
+        // Direct buffer write using cached index
+        self->edge_buffer_[edges_captured].time_ns = current_time_ns;
+        self->edge_buffer_[edges_captured].level = static_cast<uint8_t>(level);
+
+        // Pre-increment and check if buffer now full
+        size_t next_index = edges_captured + 1;
+        self->edges_captured_ = next_index;
+
+        if (next_index >= self->buffer_size_) {
+            gpio_intr_disable(self->pin_);
             self->receive_done_ = true;
         }
     }
