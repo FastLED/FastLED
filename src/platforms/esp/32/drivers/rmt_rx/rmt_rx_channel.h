@@ -96,7 +96,9 @@ enum class RmtRxWaitResult : uint8_t {
  * Recommended API with wait() and decode():
  * @code
  * auto rx = RmtRxChannel::create(6, 40000000, 1024);  // GPIO 6, 40MHz, 1024 symbols
- * if (!rx->begin()) {
+ *
+ * // Initialize with custom signal range (optional - defaults to 100ns/100μs)
+ * if (!rx->begin(100, 100000)) {  // min=100ns, max=100μs
  *     FL_WARN("RX channel init failed");
  *     return;
  * }
@@ -130,6 +132,8 @@ public:
 
     /**
      * @brief Initialize (or re-arm) RMT RX channel
+     * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns, filters glitches)
+     * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns = 100μs, idle threshold)
      * @return true on success, false on failure
      *
      * First call: Creates RMT RX channel, registers ISR callback, and arms receiver
@@ -137,8 +141,17 @@ public:
      *
      * The receiver is automatically armed and ready to capture after begin() returns.
      * This allows loopback validation: call begin(), then transmit, then poll finished().
+     *
+     * Signal Range Parameters:
+     * - signal_range_min_ns: Pulses shorter than this are ignored (noise filtering)
+     * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection)
+     *
+     * Example values:
+     * - WS2812B: min=100ns, max=100000ns (100μs) - catches reset pulse (~280μs)
+     * - SK6812: min=100ns, max=100000ns (100μs)
+     * - APA102: min=50ns, max=50000ns (50μs) - faster clock signals
      */
-    virtual bool begin() = 0;
+    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) = 0;
 
     /**
      * @brief Check if receive operation is complete
@@ -173,7 +186,7 @@ public:
      * Example:
      * @code
      * auto rx = RmtRxChannel::create(6, 40000000, 1000);
-     * rx->begin();
+     * rx->begin(100, 100000);  // min=100ns, max=100μs (or use defaults)
      *
      * // Wait up to 50ms
      * if (rx->wait(50) == RmtRxWaitResult::SUCCESS) {
@@ -204,7 +217,7 @@ public:
      * Example:
      * @code
      * auto rx = RmtRxChannel::create(6, 40000000, 1024);
-     * rx->begin();
+     * rx->begin(100, 100000);  // min=100ns, max=100μs
      *
      * // Wait for symbols
      * if (rx->wait(50) == RmtRxWaitResult::SUCCESS) {

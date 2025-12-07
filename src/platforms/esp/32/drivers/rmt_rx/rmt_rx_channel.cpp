@@ -331,6 +331,8 @@ public:
         , buffer_size_(max_buffer_size > 0 ? static_cast<size_t>(max_buffer_size) : 4096)
         , receive_done_(false)
         , symbols_received_(0)
+        , signal_range_min_ns_(100)
+        , signal_range_max_ns_(100000)
         , internal_buffer_()
     {
         FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(pin_)
@@ -346,7 +348,14 @@ public:
         }
     }
 
-    bool begin() override {
+    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) override {
+        // Store signal range parameters
+        signal_range_min_ns_ = signal_range_min_ns;
+        signal_range_max_ns_ = signal_range_max_ns;
+
+        FL_DBG("RX begin: signal_range_min=" << signal_range_min_ns_
+               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns");
+
         // If already initialized, just re-arm the receiver for a new capture
         if (channel_) {
             FL_DBG("RX channel already initialized, re-arming receiver");
@@ -600,10 +609,10 @@ private:
         receive_done_ = false;
         symbols_received_ = 0;
 
-        // Configure receive parameters
+        // Configure receive parameters (use values from begin())
         rmt_receive_config_t rx_params = {};
-        rx_params.signal_range_min_ns = 100;         // Min pulse width: 100ns (filter glitches)
-        rx_params.signal_range_max_ns = 100000;      // Idle threshold: 100μs (end-of-frame, below 819μs HW limit)
+        rx_params.signal_range_min_ns = signal_range_min_ns_;
+        rx_params.signal_range_max_ns = signal_range_max_ns_;
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
         auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
@@ -646,6 +655,8 @@ private:
     size_t buffer_size_;                          ///< Internal buffer size in symbols
     volatile bool receive_done_;                  ///< Set by ISR when receive complete
     volatile size_t symbols_received_;            ///< Number of symbols received (set by ISR)
+    uint32_t signal_range_min_ns_;                ///< Minimum pulse width (noise filtering)
+    uint32_t signal_range_max_ns_;                ///< Maximum pulse width (idle detection)
     fl::HeapVector<RmtSymbol> internal_buffer_;   ///< Internal buffer for all receive operations
 };
 
