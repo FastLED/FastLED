@@ -87,6 +87,7 @@ public:
      * @brief Initialize (or re-arm) GPIO ISR RX channel
      * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns, filters glitches)
      * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns = 100μs, idle threshold)
+     * @param skip_signals Number of edges to skip before capturing (default: 0, capture all)
      * @return true on success, false on failure
      *
      * First call: Configures GPIO, installs ISR service, and arms receiver
@@ -99,11 +100,22 @@ public:
      *   ISR-level filtering discards edges that create pulses shorter than this threshold.
      * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection)
      *   When no edges are received for this duration, the receiver automatically stops.
+     * - skip_signals: Number of edges to skip before capturing (useful for memory-constrained environments)
+     *   When skip_signals > 0, the ISR will discard the first N edges, then begin writing
+     *   to the buffer starting with edge N+1.
      *
      * These parameters control noise filtering and idle detection behavior, allowing
      * tuning for different LED protocols and signal characteristics.
+     *
+     * Example with skip_signals:
+     * @code
+     * auto rx = GpioIsrRx::create(6, 100);  // 100 edge buffer
+     * rx->begin(100, 100000, 900);  // Skip first 900 edges
+     * // Transmit 1000 edges
+     * // Result: Only last 100 edges captured in buffer
+     * @endcode
      */
-    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) = 0;
+    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) = 0;
 
     /**
      * @brief Check if receive operation is complete

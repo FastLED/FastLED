@@ -267,6 +267,7 @@ public:
         , isr_installed_(false)
         , signal_range_min_ns_(100)
         , signal_range_max_ns_(100000)
+        , skip_counter_(0)
     {
         FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(pin_)
                << " buffer_size=" << buffer_size_);
@@ -280,13 +281,14 @@ public:
         }
     }
 
-    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) override {
+    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
         // Store signal range parameters for noise filtering and idle detection
         signal_range_min_ns_ = signal_range_min_ns;
         signal_range_max_ns_ = signal_range_max_ns;
+        skip_counter_ = skip_signals;
 
         FL_DBG("GPIO ISR RX begin: signal_range_min=" << signal_range_min_ns_
-               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns");
+               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns, skip_signals=" << skip_signals);
 
         // If already initialized, just re-arm the receiver for a new capture
         if (isr_installed_) {
@@ -428,6 +430,7 @@ private:
         receive_done_ = false;
         edges_captured_ = 0;
         last_edge_time_ns_ = 0;
+        // skip_counter_ is set in begin(), not here
         start_time_us_ = esp_timer_get_time();
         FL_DBG("GPIO ISR RX state cleared");
     }
@@ -485,15 +488,14 @@ private:
             return;
         }
 
-        // Capture edge if buffer has space
-        if (self->edges_captured_ < self->buffer_size_) {
-            // Calculate relative timestamp in nanoseconds
-            int64_t relative_time_ns = (now_us - self->start_time_us_) * 1000;
-            uint32_t current_time_ns = static_cast<uint32_t>(relative_time_ns);
+        // Calculate relative timestamp in nanoseconds
+        int64_t relative_time_ns = (now_us - self->start_time_us_) * 1000;
+        uint32_t current_time_ns = static_cast<uint32_t>(relative_time_ns);
 
-            // Noise filtering: check if pulse width meets minimum threshold
-            // (Skip this check for the first edge since we have no previous edge to compare)
-            if (self->edges_captured_ > 0) {
+        // Check if we need to skip this edge (do this before noise filtering)
+        if (self->skip_counter_ > 0) {
+            // Noise filtering still applies during skip phase
+            if (self->last_edge_time_ns_ > 0) {
                 uint32_t pulse_width_ns = current_time_ns - self->last_edge_time_ns_;
 
                 // If pulse is shorter than minimum threshold, discard it (noise)
@@ -503,6 +505,30 @@ private:
                 }
             }
 
+            // Update last edge time for next pulse width calculation
+            self->last_edge_time_ns_ = current_time_ns;
+
+            // Decrement skip counter
+            self->skip_counter_--;
+            return;  // Skip this edge, don't store it
+        }
+
+        // Noise filtering for captured edges
+        if (self->last_edge_time_ns_ > 0) {
+            uint32_t pulse_width_ns = current_time_ns - self->last_edge_time_ns_;
+
+            // If pulse is shorter than minimum threshold, discard it (noise)
+            if (pulse_width_ns < self->signal_range_min_ns_) {
+                // Ignore this edge - it's too short (likely noise/glitch)
+                return;
+            }
+        }
+
+        // Update last edge time for next pulse width calculation
+        self->last_edge_time_ns_ = current_time_ns;
+
+        // Capture edge if buffer has space
+        if (self->edges_captured_ < self->buffer_size_) {
             // Read GPIO level
             int level = gpio_get_level(self->pin_);
 
@@ -511,9 +537,6 @@ private:
             self->edge_buffer_[current_index].time_ns = current_time_ns;
             self->edge_buffer_[current_index].level = static_cast<uint8_t>(level);
             self->edges_captured_ = current_index + 1;
-
-            // Update last edge time for next pulse width calculation
-            self->last_edge_time_ns_ = current_time_ns;
 
             // Check if buffer is now full
             if (self->edges_captured_ >= self->buffer_size_) {
@@ -537,6 +560,7 @@ private:
     bool isr_installed_;                          ///< True if ISR handler is installed
     uint32_t signal_range_min_ns_;                ///< Minimum pulse width (noise filtering)
     uint32_t signal_range_max_ns_;                ///< Maximum pulse width (idle detection)
+    uint32_t skip_counter_;                       ///< Runtime counter for skipping (decremented in ISR)
 };
 
 // Factory method implementation

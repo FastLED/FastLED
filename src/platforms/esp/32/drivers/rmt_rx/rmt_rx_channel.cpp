@@ -333,6 +333,7 @@ public:
         , symbols_received_(0)
         , signal_range_min_ns_(100)
         , signal_range_max_ns_(100000)
+        , skip_counter_(0)
         , internal_buffer_()
     {
         FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(pin_)
@@ -348,22 +349,30 @@ public:
         }
     }
 
-    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) override {
+    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
         // Store signal range parameters
         signal_range_min_ns_ = signal_range_min_ns;
         signal_range_max_ns_ = signal_range_max_ns;
+        skip_counter_ = skip_signals;
 
         FL_DBG("RX begin: signal_range_min=" << signal_range_min_ns_
-               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns");
+               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns"
+               << ", skip_signals=" << skip_signals);
 
         // If already initialized, just re-arm the receiver for a new capture
         if (channel_) {
             FL_DBG("RX channel already initialized, re-arming receiver");
 
-            // Clear receive state
+            // Clear receive state (resets skip_counter_ to skip_signals_)
             clear();
 
-            // Allocate buffer and arm receiver
+            // Handle skip phase using small discard buffer
+            if (!handleSkipPhase()) {
+                FL_WARN("Failed to handle skip phase in begin()");
+                return false;
+            }
+
+            // Allocate buffer and arm receiver for actual capture
             if (!allocateAndArm()) {
                 FL_WARN("Failed to re-arm receiver in begin()");
                 return false;
@@ -423,7 +432,15 @@ public:
 
         FL_DBG("RX channel enabled");
 
-        // Allocate buffer and arm receiver
+        // Handle skip phase using small discard buffer
+        if (!handleSkipPhase()) {
+            FL_WARN("Failed to handle skip phase in begin()");
+            rmt_del_channel(channel_);
+            channel_ = nullptr;
+            return false;
+        }
+
+        // Allocate buffer and arm receiver for actual capture
         if (!allocateAndArm()) {
             FL_WARN("Failed to arm receiver in begin()");
             rmt_del_channel(channel_);
@@ -506,6 +523,76 @@ public:
 
 private:
     /**
+     * @brief Handle skip phase by discarding symbols until skip_counter_ reaches 0
+     * @return true on success, false on failure
+     *
+     * Uses a small discard buffer to receive and discard symbols without
+     * allocating the full buffer. This ensures we don't buffer unwanted symbols.
+     * Only allocates memory temporarily during the skip phase.
+     */
+    bool handleSkipPhase() {
+        if (skip_counter_ == 0) {
+            FL_DBG("No symbols to skip, skip phase complete");
+            return true;
+        }
+
+        FL_DBG("Entering skip phase: skipping " << skip_counter_ << " symbols");
+
+        // Use a small discard buffer (64 symbols = 256 bytes)
+        constexpr size_t DISCARD_BUFFER_SIZE = 64;
+        fl::HeapVector<RmtSymbol> discard_buffer;
+        discard_buffer.reserve(DISCARD_BUFFER_SIZE);
+        for (size_t i = 0; i < DISCARD_BUFFER_SIZE; i++) {
+            discard_buffer.push_back(0);
+        }
+
+        // Skip symbols in chunks until skip_counter_ reaches 0
+        while (skip_counter_ > 0) {
+            size_t chunk_size = (skip_counter_ < DISCARD_BUFFER_SIZE)
+                ? skip_counter_ : DISCARD_BUFFER_SIZE;
+
+            FL_DBG("Skip phase: receiving chunk of " << chunk_size
+                   << " symbols (remaining: " << skip_counter_ << ")");
+
+            // Enable channel for this receive operation
+            if (!enable()) {
+                FL_WARN("handleSkipPhase(): failed to enable channel");
+                return false;
+            }
+
+            // Start receive with discard buffer
+            if (!startReceive(discard_buffer.data(), chunk_size)) {
+                FL_WARN("handleSkipPhase(): failed to start receive");
+                return false;
+            }
+
+            // Wait for receive to complete (with timeout)
+            constexpr uint32_t SKIP_TIMEOUT_MS = 5000;  // 5 second timeout per chunk
+            int64_t start_time_us = esp_timer_get_time();
+            int64_t timeout_us = SKIP_TIMEOUT_MS * 1000;
+
+            while (!receive_done_) {
+                int64_t elapsed_us = esp_timer_get_time() - start_time_us;
+                if (elapsed_us >= timeout_us) {
+                    FL_WARN("handleSkipPhase(): timeout waiting for symbols");
+                    return false;
+                }
+                taskYIELD();
+            }
+
+            // Check if ISR properly decremented skip_counter_
+            // (ISR callback handles decrementing skip_counter_)
+            FL_DBG("Skip phase chunk complete, skip_counter_ now: " << skip_counter_);
+
+            // Reset receive_done_ for next iteration
+            receive_done_ = false;
+        }
+
+        FL_DBG("Skip phase complete");
+        return true;
+    }
+
+    /**
      * @brief Allocate buffer and arm receiver (internal helper)
      * @return true on success, false on failure
      *
@@ -585,6 +672,7 @@ private:
     void clear() {
         receive_done_ = false;
         symbols_received_ = 0;
+        // skip_counter_ is set in begin(), not here
         FL_DBG("RX state cleared");
     }
 
@@ -632,6 +720,10 @@ private:
      * @brief ISR callback for receive completion
      *
      * IRAM_ATTR specified on definition only (not declaration) to avoid warnings.
+     *
+     * Skip logic: When skip_counter_ > 0, we're in skip phase (called from handleSkipPhase).
+     * Decrement skip_counter_ and discard symbols. When skip_counter_ == 0, we're in
+     * capture phase - store the received symbols normally.
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t* data,
@@ -641,8 +733,24 @@ private:
             return false;
         }
 
-        // Update receive state
-        self->symbols_received_ = data->num_symbols;
+        size_t received_count = data->num_symbols;
+
+        // Check if we're in skip phase
+        if (self->skip_counter_ > 0) {
+            // Discard received symbols and decrement skip counter
+            if (self->skip_counter_ >= received_count) {
+                self->skip_counter_ -= received_count;
+            } else {
+                self->skip_counter_ = 0;
+            }
+
+            self->symbols_received_ = 0;
+            self->receive_done_ = true;  // Signal completion for skip phase
+            return false;
+        }
+
+        // Capture phase - store received symbols
+        self->symbols_received_ = received_count;
         self->receive_done_ = true;
 
         // No higher-priority task awakened
@@ -657,6 +765,7 @@ private:
     volatile size_t symbols_received_;            ///< Number of symbols received (set by ISR)
     uint32_t signal_range_min_ns_;                ///< Minimum pulse width (noise filtering)
     uint32_t signal_range_max_ns_;                ///< Maximum pulse width (idle detection)
+    uint32_t skip_counter_;                       ///< Runtime counter for skipping (decremented in ISR)
     fl::HeapVector<RmtSymbol> internal_buffer_;   ///< Internal buffer for all receive operations
 };
 

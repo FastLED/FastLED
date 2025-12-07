@@ -134,6 +134,7 @@ public:
      * @brief Initialize (or re-arm) RMT RX channel
      * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns, filters glitches)
      * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns = 100μs, idle threshold)
+     * @param skip_signals Number of symbols to skip before capturing (default: 0, capture all)
      * @return true on success, false on failure
      *
      * First call: Creates RMT RX channel, registers ISR callback, and arms receiver
@@ -145,13 +146,24 @@ public:
      * Signal Range Parameters:
      * - signal_range_min_ns: Pulses shorter than this are ignored (noise filtering)
      * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection)
+     * - skip_signals: Number of symbols to skip before capturing (useful for memory-constrained environments)
+     *   When skip_signals > 0, the ISR will discard the first N symbols, then begin writing
+     *   to the buffer starting with symbol N+1.
      *
      * Example values:
      * - WS2812B: min=100ns, max=100000ns (100μs) - catches reset pulse (~280μs)
      * - SK6812: min=100ns, max=100000ns (100μs)
      * - APA102: min=50ns, max=50000ns (50μs) - faster clock signals
+     *
+     * Example with skip_signals:
+     * @code
+     * auto rx = RmtRxChannel::create(6, 40000000, 100);  // 100 symbol buffer
+     * rx->begin(100, 100000, 900);  // Skip first 900 symbols
+     * // Transmit 1000 symbols
+     * // Result: Only last 100 symbols captured in buffer
+     * @endcode
      */
-    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000) = 0;
+    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) = 0;
 
     /**
      * @brief Check if receive operation is complete

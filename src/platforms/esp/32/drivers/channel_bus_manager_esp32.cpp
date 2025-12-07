@@ -97,10 +97,12 @@ void initializeChannelBusManager() {
 
     FL_DBG("ESP32: ChannelBusManager initialization complete");
 }
-} // namespace detail
 
 // Register initialization function to run before main()
-FL_INIT(detail::initializeChannelBusManager);
+FL_INIT(initializeChannelBusManager);
+
+} // namespace detail
+
 
 } // namespace fl
 
