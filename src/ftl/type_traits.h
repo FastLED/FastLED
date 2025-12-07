@@ -203,6 +203,15 @@ template <typename T> struct is_lvalue_reference<T &> {
     enum : bool { value = true };
 };
 
+// Define is_rvalue_reference trait
+template <typename T> struct is_rvalue_reference {
+    enum : bool { value = false };
+};
+
+template <typename T> struct is_rvalue_reference<T &&> {
+    enum : bool { value = true };
+};
+
 // Define is_void trait
 template <typename T> struct is_void {
     enum : bool { value = false };

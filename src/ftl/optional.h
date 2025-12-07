@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ftl/variant.h"
+#include "ftl/type_traits.h"
 
 namespace fl {
 
@@ -121,6 +122,85 @@ template <typename T> class Optional {
 
   private:
     fl::variant<T, Empty> mValue;
+};
+
+// Specialization for rvalue references Optional<T&&>
+// This allows optionals to hold and forward rvalue references properly
+template <typename T> class Optional<T&&> {
+  public:
+    Optional() : mPtr(nullptr) {}
+    Optional(nullopt_t) : mPtr(nullptr) {}
+
+    // Construct from rvalue reference
+    Optional(T&& value) : mPtr(&value) {}
+
+    // Copy constructor deleted - rvalue references cannot be copied
+    Optional(const Optional&) = delete;
+
+    // Move constructor - transfers the reference
+    Optional(Optional&& other) noexcept : mPtr(other.mPtr) {
+        other.mPtr = nullptr;
+    }
+
+    ~Optional() { reset(); }
+
+    bool empty() const { return mPtr == nullptr; }
+    bool has_value() const { return !empty(); }
+    T* ptr() { return mPtr; }
+    const T* ptr() const { return mPtr; }
+
+    void reset() { mPtr = nullptr; }
+
+    // Copy assignment deleted - rvalue references cannot be copied
+    Optional& operator=(const Optional&) = delete;
+
+    // Move assignment
+    Optional& operator=(Optional&& other) noexcept {
+        if (this != &other) {
+            mPtr = other.mPtr;
+            other.mPtr = nullptr;
+        }
+        return *this;
+    }
+
+    Optional& operator=(nullopt_t) {
+        reset();
+        return *this;
+    }
+
+    bool operator()() const { return !empty(); }
+    bool operator!() const { return empty(); }
+
+    // Explicit conversion to bool
+    explicit operator bool() const { return !empty(); }
+
+    bool operator==(const Optional& other) const {
+        if (empty() && other.empty()) {
+            return true;
+        }
+        if (empty() || other.empty()) {
+            return false;
+        }
+        return *mPtr == *other.mPtr;
+    }
+
+    bool operator!=(const Optional& other) const { return !(*this == other); }
+
+    bool operator==(nullopt_t) const { return empty(); }
+    bool operator!=(nullopt_t) const { return !empty(); }
+
+    // Dereference operators - returns rvalue reference to forward the value
+    T&& operator*() { return fl::forward<T>(*mPtr); }
+    const T& operator*() const { return *mPtr; }
+    T&& get() { return fl::forward<T>(*mPtr); }
+    const T& get() const { return *mPtr; }
+
+    // Arrow operator - returns pointer for member access
+    T* operator->() { return mPtr; }
+    const T* operator->() const { return mPtr; }
+
+  private:
+    T* mPtr;  // Pointer to the rvalue reference (only valid during the lifetime of the temporary)
 };
 
 // Helper function to create optionals

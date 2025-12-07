@@ -441,3 +441,209 @@ TEST_CASE("fl::Optional - type alias") {
         CHECK(opt == opt2);
     }
 }
+
+TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
+    SUBCASE("default construction creates empty optional") {
+        Optional<int&&> opt;
+        CHECK(opt.empty());
+        CHECK(!opt.has_value());
+        CHECK(!opt);
+        CHECK(opt == nullopt);
+    }
+
+    SUBCASE("nullopt constructor creates empty optional") {
+        Optional<int&&> opt(nullopt);
+        CHECK(opt.empty());
+        CHECK(!opt.has_value());
+        CHECK(opt == nullopt);
+    }
+
+    SUBCASE("construct with rvalue reference") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+        CHECK(!opt.empty());
+        CHECK(opt.has_value());
+        CHECK(opt);
+        CHECK(opt != nullopt);
+        // Verify the reference points to the original value
+        CHECK(opt.ptr() == &value);
+    }
+
+    SUBCASE("move construction transfers reference") {
+        int value = 100;
+        Optional<int&&> opt1(fl::move(value));
+        CHECK(opt1.has_value());
+        CHECK(opt1.ptr() == &value);
+
+        Optional<int&&> opt2(fl::move(opt1));
+        CHECK(opt2.has_value());
+        CHECK(opt2.ptr() == &value);
+        CHECK(opt1.empty());  // Original is now empty
+    }
+
+    SUBCASE("move assignment transfers reference") {
+        int value1 = 42;
+        int value2 = 100;
+        Optional<int&&> opt1(fl::move(value1));
+        Optional<int&&> opt2(fl::move(value2));
+
+        CHECK(opt1.ptr() == &value1);
+        CHECK(opt2.ptr() == &value2);
+
+        opt1 = fl::move(opt2);
+        CHECK(opt1.ptr() == &value2);
+        CHECK(opt2.empty());
+    }
+
+    SUBCASE("assign nullopt clears reference") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+        CHECK(opt.has_value());
+
+        opt = nullopt;
+        CHECK(opt.empty());
+        CHECK(opt == nullopt);
+    }
+
+    SUBCASE("reset clears reference") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+        CHECK(opt.has_value());
+
+        opt.reset();
+        CHECK(opt.empty());
+    }
+
+    SUBCASE("dereference operator forwards rvalue reference") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+
+        // Get rvalue reference and verify it can be moved
+        int&& ref = *opt;
+        int moved_value = fl::move(ref);
+        CHECK(moved_value == 42);
+    }
+
+    SUBCASE("get method forwards rvalue reference") {
+        int value = 99;
+        Optional<int&&> opt(fl::move(value));
+
+        int&& ref = opt.get();
+        CHECK(ref == 99);
+    }
+
+    SUBCASE("arrow operator provides member access") {
+        struct Point {
+            int x, y;
+            Point(int x_, int y_) : x(x_), y(y_) {}
+        };
+
+        Point p(10, 20);
+        Optional<Point&&> opt(fl::move(p));
+
+        CHECK(opt->x == 10);
+        CHECK(opt->y == 20);
+    }
+
+    SUBCASE("boolean operators work correctly") {
+        int value = 42;
+        Optional<int&&> opt_empty;
+        Optional<int&&> opt_full(fl::move(value));
+
+        CHECK(opt_empty.operator!());
+        CHECK(!opt_empty.operator()());
+        CHECK(!static_cast<bool>(opt_empty));
+
+        CHECK(!opt_full.operator!());
+        CHECK(opt_full.operator()());
+        CHECK(static_cast<bool>(opt_full));
+    }
+
+    SUBCASE("equality operators") {
+        int value1 = 42;
+        int value2 = 42;
+        int value3 = 99;
+
+        Optional<int&&> opt_empty1;
+        Optional<int&&> opt_empty2;
+        Optional<int&&> opt1(fl::move(value1));
+        Optional<int&&> opt2(fl::move(value2));
+        Optional<int&&> opt3(fl::move(value3));
+
+        // Two empty optionals are equal
+        CHECK(opt_empty1 == opt_empty2);
+
+        // Empty and non-empty are not equal
+        CHECK(opt_empty1 != opt1);
+
+        // Two optionals with same value are equal
+        CHECK(opt1 == opt2);
+
+        // Two optionals with different values are not equal
+        CHECK(opt1 != opt3);
+    }
+
+    SUBCASE("ptr method returns correct pointer") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+
+        int* p = opt.ptr();
+        CHECK(p == &value);
+        CHECK(*p == 42);
+    }
+
+    SUBCASE("forwarding to function consuming rvalue reference") {
+        struct Widget {
+            int value;
+            bool moved = false;
+            Widget(int v) : value(v) {}
+            Widget(Widget&& other) : value(other.value), moved(true) {
+                other.value = 0;
+            }
+        };
+
+        auto consume = [](Widget&& w) -> int {
+            Widget local = fl::move(w);
+            return local.value;
+        };
+
+        Widget w(42);
+        Optional<Widget&&> opt(fl::move(w));
+
+        // Forward the rvalue reference to the consuming function
+        int result = consume(*opt);
+        CHECK(result == 42);
+    }
+
+    SUBCASE("lifetime semantics - reference validity") {
+        // This test verifies that the optional correctly holds a reference
+        // to an existing object and doesn't try to manage its lifetime
+        int value = 100;
+        Optional<int&&> opt(fl::move(value));
+
+        // Modify through the optional
+        *opt.ptr() = 200;
+
+        // Verify the original value changed
+        CHECK(value == 200);
+    }
+
+    SUBCASE("move from optional into new variable") {
+        struct MoveOnly {
+            int value;
+            MoveOnly(int v) : value(v) {}
+            MoveOnly(const MoveOnly&) = delete;
+            MoveOnly(MoveOnly&& other) : value(other.value) {
+                other.value = -1;
+            }
+        };
+
+        MoveOnly obj(42);
+        Optional<MoveOnly&&> opt(fl::move(obj));
+
+        // Move construct from the dereferenced optional
+        MoveOnly new_obj(fl::move(*opt));
+        CHECK(new_obj.value == 42);
+        CHECK(obj.value == -1);  // Original was moved from
+    }
+}

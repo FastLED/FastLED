@@ -64,6 +64,19 @@ template <typename T> struct StringMaker<fl::optional<T>> {
     }
 };
 
+// Specialization for optional<T&&> which cannot be copied
+template <typename T> struct StringMaker<fl::Optional<T&&>> {
+    static String convert(const fl::Optional<T&&> &value) {
+        if (!value.has_value()) {
+            return "nullopt";
+        }
+        fl::string out = "optional(";
+        out += *value;
+        out += ")";
+        return out.c_str();
+    }
+};
+
 template <typename T> struct StringMaker<fl::vec2<T>> {
     static String convert(const fl::vec2<T> &value) {
         fl::string out;
