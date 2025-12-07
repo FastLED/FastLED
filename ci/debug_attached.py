@@ -8,9 +8,9 @@ Phase 1: Compile
     - Validates code compiles without errors
 
 Phase 2: Upload (with self-healing)
-    - Kills lingering monitor processes that may lock the serial port
+    - Kills lingering esptool/pio upload/monitor processes that may lock files or ports
     - Uploads firmware to the attached device
-    - Handles port conflicts automatically
+    - Handles port and file lock conflicts automatically
 
 Phase 3: Monitor
     - Attaches to serial monitor and displays real-time output
@@ -33,6 +33,7 @@ Usage:
 """
 
 import argparse
+import os
 import re
 import sys
 import time
@@ -99,37 +100,88 @@ def parse_timeout(timeout_str: str) -> int:
     return max(1, int(seconds))
 
 
-def kill_lingering_monitors() -> int:
-    """Kill any lingering 'pio device monitor' or 'pio run -t monitor' processes.
+def kill_lingering_processes() -> int:
+    """Kill lingering processes that may lock build files or serial ports.
 
-    This is the self-healing step to ensure the serial port is not locked
-    by a previous monitor session.
+    This self-healing step kills processes in the following order:
+    1. esptool processes (firmware upload tool that locks .bin files)
+    2. pio monitor processes (serial monitor that locks COM ports)
+    3. pio upload processes (may lock .bin files during upload)
+
+    SAFETY: We do NOT kill arbitrary python.exe processes to avoid killing
+    the current agent/script instance.
 
     Returns:
         Number of processes killed.
     """
     killed_count = 0
+    current_pid = os.getpid()
+
+    # Phase 1: Kill esptool processes (highest priority - locks .bin files)
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
             cmdline = proc.info.get("cmdline", [])
             if not cmdline:
                 continue
 
-            # Check if this is a pio monitor process
-            cmdline_str = " ".join(cmdline)
-            if "pio" in cmdline_str and "monitor" in cmdline_str:
+            cmdline_str = " ".join(cmdline).lower()
+            proc_name = proc.info.get("name", "").lower()
+
+            # Kill esptool processes
+            if "esptool" in cmdline_str or "esptool.exe" in proc_name:
                 print(
-                    f"Killing lingering monitor process (PID {proc.pid}): {' '.join(cmdline[:3])}..."
+                    f"Killing esptool process (PID {proc.pid}): {' '.join(cmdline[:5])}..."
                 )
                 proc.kill()
                 killed_count += 1
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            # Process already gone or we can't access it
+            pass
+
+    # Phase 2: Kill pio monitor processes (locks serial ports)
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            cmdline = proc.info.get("cmdline", [])
+            if not cmdline:
+                continue
+
+            cmdline_str = " ".join(cmdline).lower()
+
+            # Check if this is a pio monitor process
+            if "pio" in cmdline_str and "monitor" in cmdline_str:
+                print(
+                    f"Killing pio monitor process (PID {proc.pid}): {' '.join(cmdline[:3])}..."
+                )
+                proc.kill()
+                killed_count += 1
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+
+    # Phase 3: Kill pio upload processes (may lock .bin files)
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            # Skip ourselves (current process)
+            if proc.pid == current_pid:
+                continue
+
+            cmdline = proc.info.get("cmdline", [])
+            if not cmdline:
+                continue
+
+            cmdline_str = " ".join(cmdline).lower()
+
+            # Check if this is a pio upload process
+            if "pio" in cmdline_str and "upload" in cmdline_str:
+                print(
+                    f"Killing pio upload process (PID {proc.pid}): {' '.join(cmdline[:5])}..."
+                )
+                proc.kill()
+                killed_count += 1
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
 
     if killed_count > 0:
-        time.sleep(1)  # Give OS time to release ports
-        print(f"Killed {killed_count} lingering monitor process(es)\n")
+        time.sleep(2)  # Give OS time to release file locks and ports
+        print(f"Killed {killed_count} lingering process(es)\n")
 
     return killed_count
 
@@ -199,8 +251,8 @@ def run_upload(
 ) -> bool:
     """Upload firmware to device.
 
-    This function includes self-healing logic to kill lingering monitor
-    processes before attempting upload.
+    This function includes self-healing logic to kill lingering processes
+    that may lock build files or serial ports before attempting upload.
 
     Args:
         build_dir: Project directory containing platformio.ini
@@ -211,8 +263,8 @@ def run_upload(
     Returns:
         True if upload succeeded, False otherwise.
     """
-    # Self-healing: Kill lingering monitors before upload
-    kill_lingering_monitors()
+    # Self-healing: Kill lingering processes before upload
+    kill_lingering_processes()
 
     cmd = [
         "pio",
