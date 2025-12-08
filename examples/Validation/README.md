@@ -1,6 +1,6 @@
 # FastLED RMT RX Validation Example
 
-This example validates SPI LED output by reading back timing values using the ESP32's RMT (Remote Control) peripheral in receive mode. It performs TX→RX loopback testing to verify that transmitted LED data matches received data.
+This example validates SPI/RMT/Parlio/Other LED output by reading back timing values using the ESP32's RMT (Remote Control) peripheral in receive mode. It performs TX→RX loopback testing to verify that transmitted LED data matches received data.
 
 ## Overview
 
