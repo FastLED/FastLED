@@ -221,14 +221,16 @@
 // FL_INIT: Convenient macro for static initialization functions
 // Registers a function to run during C++ static initialization (before main())
 // Usage:
-//   namespace { void init_my_feature() { /* code */ } }
-//   FL_INIT(init_my_feature);
+//   namespace detail { void init_my_feature() { /* code */ } }
+//   FL_INIT(detail::init_my_feature);
+// Generates unique constructor function names based on line number to support
+// namespaced functions (e.g., detail::func, myns::impl::func)
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 #define FL_INIT(func) \
   namespace { \
     FL_CONSTRUCTOR \
-    void __fl_init_##func() { func(); } \
+    void __fl_init_at_line_##__LINE__() { func(); } \
   }
 FL_DISABLE_WARNING_POP
 
