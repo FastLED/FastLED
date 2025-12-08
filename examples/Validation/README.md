@@ -2,6 +2,13 @@
 
 This example validates SPI/RMT/Parlio/Other LED output by reading back timing values using the ESP32's RMT (Remote Control) peripheral in receive mode. It performs TX→RX loopback testing to verify that transmitted LED data matches received data.
 
+The process is simply this:
+  * LED controller -> TX pin
+  * TX pin -> Connected too via jumper -> RX Pin
+  * RX pin read by rmt,
+    * If signal decoded matches signal sent -> SUCCESS
+    * else -> ERROR
+
 ## Overview
 
 The validation sketch tests the entire LED data transmission pipeline:
