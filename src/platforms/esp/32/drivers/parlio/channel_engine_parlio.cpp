@@ -25,6 +25,7 @@
 #include "ftl/algorithm.h"
 #include "ftl/assert.h"
 #include "ftl/time.h"
+#include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
@@ -50,37 +51,36 @@ static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
 static volatile uint32_t g_parlio_isr_callback_count = 0;
 
 //=============================================================================
-// TODO: DEFAULT PARLIO PINS NEED TO BE UPDATED FOR VALIDATION
+// Pin Validation Using FastLED's _FL_PIN_VALID System
 //=============================================================================
-// ⚠️ CRITICAL: These default PARLIO pins were originally chosen for testing
-// purposes only. They need to be changed to use "forbidden" pins instead to
-// properly validate pin configuration functionality.
+// PARLIO no longer uses default pins. Instead, pins are extracted from
+// ChannelData objects and validated using the FastLED pin validation system
+// defined in platforms/esp/32/core/fastpin_esp32.h.
 //
-// Current pin selection strategy:
-// - ESP32-C6: Uses "safe" pins that avoid strapping/reserved pins
-// - Generic ESP32: Uses simple sequential pin mapping
+// The _FL_PIN_VALID macro checks against:
+// 1. SOC_GPIO_VALID_OUTPUT_GPIO_MASK (ESP-IDF's valid output pins)
+// 2. FASTLED_UNUSABLE_PIN_MASK (platform-specific forbidden pins)
 //
-// Required changes:
-// 1. Replace these with pins that are typically forbidden/problematic
-// 2. This will allow validation that the pin configuration system correctly
-//    handles and rejects invalid pin assignments
-// 3. Ensure the validation logic properly catches and reports forbidden pins
-//
-// Do NOT use these default pins in production - they are only for testing!
+// Pins are provided by user via FastLED.addLeds<WS2812, PIN>() API.
 //=============================================================================
 
-// Default GPIO pins for PARLIO output (can be customized later)
-// These are platform-specific safe pins that avoid strapping/reserved pins
-#if defined(CONFIG_IDF_TARGET_ESP32C6)
-// ESP32-C6: Use safe, non-strapping pins
-// Avoid: GPIO 4,5,8,9,15 (strapping), GPIO 24-30 (SPI Flash), GPIO 12-13 (USB-JTAG)
-static constexpr int DEFAULT_PARLIO_PINS[] = {6, 7, 16, 17, 18, 19, 20, 21,
-                                              22, 23, 0, 1, 2, 3, 14, 10};
-#else
-// Generic ESP32: Default pin mapping
-static constexpr int DEFAULT_PARLIO_PINS[] = {1, 2,  3,  4,  5,  6,  7,  8,
-                                              9, 10, 11, 12, 13, 14, 15, 16};
+// Import pin validation mask from fastpin_esp32.h
+// This is defined per-platform in src/platforms/esp/32/core/fastpin_esp32.h
+#ifndef _FL_VALID_PIN_MASK
+#error "Pin validation system not available - check fastpin_esp32.h is included"
 #endif
+
+/// @brief Validate a GPIO pin for PARLIO use
+/// @param pin GPIO pin number to validate
+/// @return true if pin is valid for PARLIO output, false otherwise
+static inline bool isParlioPinValid(int pin) {
+    if (pin < 0 || pin >= 64) {
+        return false;
+    }
+    // Use FastLED's pin validation system
+    uint64_t pin_mask = (1ULL << pin);
+    return (_FL_VALID_PIN_MASK & pin_mask) != 0;
+}
 
 //=============================================================================
 // Helper Functions
@@ -556,6 +556,29 @@ void ChannelEnginePARLIOImpl::beginTransmission(
                                        << ")");
     }
 
+    // Extract and validate GPIO pins from channel data
+    mState.pins.clear();
+    for (size_t i = 0; i < channel_count; i++) {
+        int pin = channelData[i]->getPin();
+
+        // Validate pin using FastLED's pin validation system
+        if (!isParlioPinValid(pin)) {
+            FL_WARN("PARLIO: Invalid pin " << pin << " for channel " << i);
+            FL_WARN("  This pin is either forbidden (SPI flash, strapping, etc.)");
+            FL_WARN("  or not a valid output pin for this ESP32 variant.");
+            FL_WARN("  See FASTLED_UNUSABLE_PIN_MASK in fastpin_esp32.h for details.");
+            return;
+        }
+
+        mState.pins.push_back(pin);
+        FL_LOG_PARLIO("PARLIO: Channel " << i << " using GPIO " << pin);
+    }
+
+    // Fill remaining pins with -1 for dummy lanes (unused)
+    for (size_t i = channel_count; i < mState.data_width; i++) {
+        mState.pins.push_back(-1);
+    }
+
     // Ensure PARLIO peripheral is initialized
     initializeIfNeeded();
 
@@ -770,15 +793,17 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
                                         << " pulses/bit = " << bytes_per_led_calc
                                         << " bytes/LED)");
 
-    // Step 3: Configure GPIO pins for data_width lanes
-    // Note: actual_channels will be set later in beginTransmission()
-    // For now, allocate pins for full data_width
-    mState.pins.clear();
-    for (size_t i = 0; i < mState.data_width; i++) {
-        mState.pins.push_back(DEFAULT_PARLIO_PINS[i]);
+    // Step 3: Validate GPIO pins were provided by beginTransmission()
+    // Pins are extracted from ChannelData and validated before initialization
+    if (mState.pins.size() != mState.data_width) {
+        FL_WARN("PARLIO: Pin configuration error - expected "
+                << mState.data_width << " pins, got " << mState.pins.size());
+        FL_WARN("  Pins must be provided via FastLED.addLeds<WS2812, PIN>() API");
+        mInitialized = false;
+        return;
     }
 
-    FL_LOG_PARLIO("PARLIO: Configured " << mState.data_width << " GPIO pins");
+    FL_LOG_PARLIO("PARLIO: Using " << mState.data_width << " GPIO pins from user configuration");
 
     // Step 4: Configure PARLIO TX unit
     parlio_tx_unit_config_t config = {};
