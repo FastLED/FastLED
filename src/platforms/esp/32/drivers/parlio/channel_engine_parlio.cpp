@@ -175,6 +175,12 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
         mState.buffer_b = nullptr;
     }
 
+    // Free waveform expansion buffer
+    if (mState.waveform_expansion_buffer != nullptr) {
+        heap_caps_free(mState.waveform_expansion_buffer);
+        mState.waveform_expansion_buffer = nullptr;
+    }
+
     // Clear state
     mState.pins.clear();
     mState.scratch_padded_buffer.clear();
@@ -238,15 +244,41 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     // Get the next buffer to fill
     uint8_t* nextBuffer = const_cast<uint8_t*>(mState.fill_buffer);
 
-    // Temporary waveform buffers for each lane (stack-allocated for ISR safety)
-    // Each byte expands to 8 bits × pulses_per_bit (typically 4) = 32 bytes
-    // Allocate for maximum width (16 lanes) - only use first mState.data_width entries
-    uint8_t laneWaveforms[16][32];
+    // DEBUG: Validate buffer pointer before use
+    if (nextBuffer == nullptr) {
+        // FL_WARN("PARLIO: BUG - fill_buffer is NULL! (buffer_a=" << (void*)mState.buffer_a
+        //         << ", buffer_b=" << (void*)mState.buffer_b
+        //         << ", active_buffer=" << (void*)mState.active_buffer << ")");
+        return false;
+    }
+
+    // FL_LOG_PARLIO("PARLIO: Transposing chunk (LED " << mState.current_led << "-"
+    //               << (mState.current_led + ledsThisChunk - 1) << " of " << mState.total_leds
+    //               << ", buffer=" << (void*)nextBuffer << ")");
+
+    // Use pre-allocated waveform expansion buffer to avoid heap alloc in IRAM
+    // Buffer was allocated during initialization in initializeIfNeeded()
+    // Each byte expands to 8 bits × pulses_per_bit
+    // For WS2812 at 8MHz: 10 pulses/bit → 8 bits × 10 = 80 bytes per lane
+    const size_t max_pulses_per_bit = 16; // Conservative max (10MHz / 800kHz = 12.5, rounded up)
+    const size_t bytes_per_lane = 8 * max_pulses_per_bit; // 128 bytes per lane
+    const size_t waveform_buffer_size = mState.data_width * bytes_per_lane; // 16 lanes * 128 = 2048 bytes
+
+    // Validate pre-allocated buffer exists and is large enough
+    if (mState.waveform_expansion_buffer == nullptr || mState.waveform_expansion_buffer_size < waveform_buffer_size) {
+        // Cannot use FL_WARN in IRAM function - just fail silently
+        mState.error_occurred = true;
+        return false;
+    }
+
+    uint8_t *laneWaveforms = mState.waveform_expansion_buffer;
 
     // Precomputed waveform pointers
     const uint8_t* bit0_wave = mState.bit0_waveform.data();
     const uint8_t* bit1_wave = mState.bit1_waveform.data();
     size_t waveform_size = mState.pulses_per_bit;
+
+    // NOTE: Cannot use FL_DBG in IRAM function - it allocates heap memory via StrStream
 
     size_t outputIdx = 0;
 
@@ -260,16 +292,24 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
             // Step 1: Expand each lane's byte to waveform using generic function
             for (size_t lane = 0; lane < mState.data_width; lane++) {
+                uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane); // Pointer to this lane's waveform buffer
+
                 if (lane < mState.actual_channels) {
                     // Real channel - expand waveform from scratch buffer
                     const uint8_t* laneData = mState.scratch_padded_buffer.data() + (lane * mState.lane_stride);
                     uint8_t byte = laneData[byteOffset];
 
                     // Use generic waveform expansion
-                    fl::expandByteToWaveforms(byte, bit0_wave, waveform_size, bit1_wave, waveform_size, laneWaveforms[lane], 32);
+                    size_t expanded = fl::expandByteToWaveforms(byte, bit0_wave, waveform_size, bit1_wave, waveform_size, laneWaveform, bytes_per_lane);
+                    if (expanded == 0) {
+                        // Waveform expansion failed - abort
+                        mState.error_occurred = true;
+                        heap_caps_free(laneWaveforms);
+                        return false;
+                    }
                 } else {
                     // Dummy lane - zero waveform (keeps GPIO LOW)
-                    fl::memset(laneWaveforms[lane], 0x00, 32);
+                    fl::memset(laneWaveform, 0x00, bytes_per_lane);
                 }
             }
 
@@ -284,7 +324,8 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
                     // Extract one pulse from each lane and pack into bits
                     for (size_t lane = 0; lane < mState.data_width; lane++) {
-                        uint8_t pulse = laneWaveforms[lane][tick];
+                        uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                        uint8_t pulse = laneWaveform[tick];
                         uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
                         outputByte |= (bit << (mState.data_width - 1 - lane));
                     }
@@ -298,7 +339,8 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
                     // Extract one pulse from each lane and pack into bits
                     for (size_t lane = 0; lane < 16; lane++) {
-                        uint8_t pulse = laneWaveforms[lane][tick];
+                        uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                        uint8_t pulse = laneWaveform[tick];
                         uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
                         outputWord |= (bit << (15 - lane));
                     }
@@ -326,16 +368,24 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
     if (err != ESP_OK) {
         mState.error_occurred = true;
+        heap_caps_free(laneWaveforms);
         return false;
     }
 
     // Update state
     mState.current_led += ledsThisChunk;
 
-    // Swap buffer pointers for next iteration
-    uint8_t* temp = const_cast<uint8_t*>(mState.active_buffer);
+    // Swap buffer pointers for ping-pong buffering
+    // After first transmission: active=buffer_a, fill=buffer_b
+    // After second transmission: active=buffer_b, fill=buffer_a
     mState.active_buffer = mState.fill_buffer;
-    mState.fill_buffer = temp;
+    if (mState.fill_buffer == mState.buffer_a) {
+        mState.fill_buffer = mState.buffer_b;
+    } else {
+        mState.fill_buffer = mState.buffer_a;
+    }
+
+    // Note: laneWaveforms points to pre-allocated buffer - no free needed
 
     return true;
 }
@@ -693,8 +743,21 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Step 8: Allocate double buffers for ping-pong streaming
     // Use DMA-capable memory (required for PARLIO/GDMA)
     // Buffer size depends on data_width
+
+    // Diagnostic: Check DMA memory availability BEFORE allocation
+    size_t dma_free = heap_caps_get_free_size(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    size_t dma_largest = heap_caps_get_largest_free_block(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    size_t total_free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    size_t total_largest = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+
+    FL_WARN("PARLIO: Memory diagnostics BEFORE buffer allocation:");
+    FL_WARN("  DMA-capable: " << dma_free << " bytes free, largest block: " << dma_largest);
+    FL_WARN("  Total heap: " << total_free << " bytes free, largest block: " << total_largest);
+
     size_t bytes_per_led = calculateBytesPerLed(mState.data_width);
     size_t bufferSize = mState.leds_per_chunk * bytes_per_led;
+
+    FL_WARN("PARLIO: Requesting 2 buffers × " << bufferSize << " bytes = " << (bufferSize * 2) << " bytes total");
 
     mState.buffer_a = static_cast<uint8_t*>(
         heap_caps_malloc(bufferSize, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
@@ -734,6 +797,42 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     FL_LOG_PARLIO("PARLIO: DMA-capable double buffers allocated (2 × " << bufferSize << " = "
             << (bufferSize * 2) << " bytes total)");
+
+    // Step 9: Allocate waveform expansion buffer (avoids heap_caps_malloc in IRAM)
+    // Calculate buffer size: 16 lanes (max) × 8 bits × 16 pulses (max) = 2048 bytes
+    const size_t max_pulses_per_bit = 16;
+    const size_t bytes_per_lane = 8 * max_pulses_per_bit;  // 128 bytes per lane
+    const size_t waveform_buffer_size = mState.data_width * bytes_per_lane;
+
+    mState.waveform_expansion_buffer = static_cast<uint8_t*>(
+        heap_caps_malloc(waveform_buffer_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
+    );
+
+    if (mState.waveform_expansion_buffer == nullptr) {
+        FL_WARN("PARLIO: Failed to allocate waveform expansion buffer (" << waveform_buffer_size << " bytes)");
+
+        // Clean up allocated buffers
+        heap_caps_free(mState.buffer_a);
+        heap_caps_free(mState.buffer_b);
+        mState.buffer_a = nullptr;
+        mState.buffer_b = nullptr;
+
+        // Clean up TX unit
+        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
+        if (disable_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to disable TX unit during waveform buffer cleanup: " << disable_err);
+        }
+        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
+        if (del_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to delete TX unit during waveform buffer cleanup: " << del_err);
+        }
+        mState.tx_unit = nullptr;
+        mInitialized = false;
+        return;
+    }
+
+    mState.waveform_expansion_buffer_size = waveform_buffer_size;
+    FL_LOG_PARLIO("PARLIO: Waveform expansion buffer allocated (" << waveform_buffer_size << " bytes)");
 
     // Initialize streaming state
     mState.transmitting = false;
@@ -805,40 +904,55 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
 }
 
 void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
+    FL_DBG("ChannelEnginePARLIO::enqueue() - channel=" << (void*)channelData.get());
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
+        FL_DBG("ChannelEnginePARLIO::enqueue() - Added to queue (total=" << mEnqueuedChannels.size() << ")");
     }
 }
 
 void ChannelEnginePARLIO::show() {
+    FL_DBG("ChannelEnginePARLIO::show() - START (enqueued=" << mEnqueuedChannels.size() << ")");
+
     if (!mEnqueuedChannels.empty()) {
+        FL_DBG("ChannelEnginePARLIO::show() - Moving channels to transmitting list");
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
         mEnqueuedChannels.clear();
 
+        FL_DBG("ChannelEnginePARLIO::show() - Calling beginTransmission with " << mTransmittingChannels.size() << " channels");
         // Begin transmission (selects engine and delegates)
         beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+        FL_DBG("ChannelEnginePARLIO::show() - beginTransmission returned");
     }
+
+    FL_DBG("ChannelEnginePARLIO::show() - COMPLETE");
 }
 
 IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
     // Poll the active engine if one is selected
     if (mActiveEngine) {
+        FL_DBG("ChannelEnginePARLIO::poll() - Calling poll() on active sub-engine");
         EngineState state = mActiveEngine->poll();
+        FL_DBG("ChannelEnginePARLIO::poll() - Sub-engine returned state=" << (int)state);
 
         // Clear transmitting channels when READY
         if (state == EngineState::READY && !mTransmittingChannels.empty()) {
+            FL_DBG("ChannelEnginePARLIO::poll() - Clearing transmitting channels");
             mTransmittingChannels.clear();
         }
 
+        FL_DBG("ChannelEnginePARLIO::poll() - COMPLETE (state=" << (int)state << ")");
         return state;
     }
 
-    // No active engine = ready state
+    // No active engine = ready state (no debug output to reduce noise when engine is disabled)
     return EngineState::READY;
 }
 
 void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - START (channels=" << channelData.size() << ")");
+
     // Validate channel data
     if (channelData.size() == 0) {
         FL_LOG_PARLIO("PARLIO: No channels to transmit");
@@ -854,40 +968,47 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
     }
 
     // Select optimal engine based on channel count using selectDataWidth() helper
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Selecting data width for " << channel_count << " channels");
     size_t optimal_width = selectDataWidth(channel_count);
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Optimal width=" << optimal_width);
 
     switch (optimal_width) {
         case 1:
             mActiveEngine = mEngine1Bit;
-            FL_LOG_PARLIO("PARLIO: Selected 1-bit engine for " << channel_count << " channel(s)");
+            FL_LOG_PARLIO("PARLIO: Selected 1-bit engine for " << channel_count << " channel(s), ptr=" << (void*)mActiveEngine);
             break;
         case 2:
             mActiveEngine = mEngine2Bit;
-            FL_LOG_PARLIO("PARLIO: Selected 2-bit engine for " << channel_count << " channel(s)");
+            FL_LOG_PARLIO("PARLIO: Selected 2-bit engine for " << channel_count << " channel(s), ptr=" << (void*)mActiveEngine);
             break;
         case 4:
             mActiveEngine = mEngine4Bit;
-            FL_LOG_PARLIO("PARLIO: Selected 4-bit engine for " << channel_count << " channel(s)");
+            FL_LOG_PARLIO("PARLIO: Selected 4-bit engine for " << channel_count << " channel(s), ptr=" << (void*)mActiveEngine);
             break;
         case 8:
             mActiveEngine = mEngine8Bit;
-            FL_LOG_PARLIO("PARLIO: Selected 8-bit engine for " << channel_count << " channel(s)");
+            FL_LOG_PARLIO("PARLIO: Selected 8-bit engine for " << channel_count << " channel(s), ptr=" << (void*)mActiveEngine);
             break;
         case 16:
             mActiveEngine = mEngine16Bit;
-            FL_LOG_PARLIO("PARLIO: Selected 16-bit engine for " << channel_count << " channel(s)");
+            FL_LOG_PARLIO("PARLIO: Selected 16-bit engine for " << channel_count << " channel(s), ptr=" << (void*)mActiveEngine);
             break;
         default:
             FL_WARN("PARLIO: Invalid data width " << optimal_width << " for " << channel_count << " channel(s)");
             return;
     }
 
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Enqueueing " << channel_count << " channels to sub-engine");
     // Delegate transmission to selected engine
     // We need to enqueue the data and call show() on the sub-engine
     for (const auto& channel : channelData) {
+        FL_DBG("ChannelEnginePARLIO::beginTransmission() - Enqueueing channel to sub-engine");
         mActiveEngine->enqueue(channel);
     }
+
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Calling show() on sub-engine");
     mActiveEngine->show();
+    FL_DBG("ChannelEnginePARLIO::beginTransmission() - COMPLETE");
 }
 
 //=============================================================================

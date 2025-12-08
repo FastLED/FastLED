@@ -189,10 +189,11 @@ inline size_t calculateBytesPerLed(size_t data_width) {
 
 /// @brief Calculate optimal chunk size for given data width
 /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
-/// @return LEDs per chunk (optimized for ~10KB buffer size)
+/// @return LEDs per chunk (optimized for ~2KB buffer size for DMA memory constraint testing)
 inline size_t calculateChunkSize(size_t data_width) {
-    // Target: ~10 KB per buffer for all widths
-    constexpr size_t target_buffer_size = 10240;
+    // Target: ~2 KB per buffer (reduced from 10KB to test DMA memory exhaustion hypothesis)
+    // If this works, indicates DMA-capable memory pool is smaller than expected
+    constexpr size_t target_buffer_size = 2048;  // 2KB instead of 10KB
     size_t bytes_per_led = calculateBytesPerLed(data_width);
     size_t chunk_size = target_buffer_size / bytes_per_led;
 
@@ -277,6 +278,10 @@ private:
         fl::array<uint8_t, 16> bit1_waveform;      ///< Waveform pattern for bit 1 (up to 16 pulses)
         size_t pulses_per_bit;                     ///< Number of pulses per bit (varies by clock frequency)
 
+        // Pre-allocated waveform expansion buffer (avoids heap alloc in IRAM)
+        uint8_t* waveform_expansion_buffer;        ///< Pre-allocated buffer for transposeAndQueueNextChunk (DMA-capable)
+        size_t waveform_expansion_buffer_size;     ///< Size of waveform expansion buffer in bytes
+
         ParlioState(size_t width)
             : tx_unit(nullptr)
             , transmitting(false)
@@ -296,6 +301,8 @@ private:
             , stream_complete(false)
             , error_occurred(false)
             , pulses_per_bit(0)
+            , waveform_expansion_buffer(nullptr)
+            , waveform_expansion_buffer_size(0)
         {}
     };
 

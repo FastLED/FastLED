@@ -392,6 +392,7 @@ public:
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
         rx_config.resolution_hz = resolution_hz_;
         rx_config.mem_block_symbols = 64;  // Use 64 symbols per memory block
+        rx_config.intr_priority = 3;  // Match the priority level used in testing
 
         // Additional flags
         rx_config.flags.invert_in = false;  // No signal inversion
