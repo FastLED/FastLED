@@ -563,6 +563,17 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     FL_LOG_PARLIO("PARLIO: Starting initialization (data_width=" << mState.data_width << ")");
 
+    // Version compatibility check for ESP32-C6
+    // PARLIO driver has a bug in IDF versions < 5.5 on ESP32-C6
+#if defined(CONFIG_IDF_TARGET_ESP32C6)
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0)
+    FL_WARN("PARLIO: ESP32-C6 requires ESP-IDF 5.5.0 or later (current version: "
+            << ESP_IDF_VERSION_MAJOR << "." << ESP_IDF_VERSION_MINOR << "." << ESP_IDF_VERSION_PATCH
+            << "). Earlier versions have a known bug in the PARLIO driver. "
+            << "Initialization may fail or produce incorrect output.");
+#endif
+#endif
+
     // Step 1: Calculate width-adaptive streaming chunk size
     mState.leds_per_chunk = calculateChunkSize(mState.data_width);
     FL_LOG_PARLIO("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs (optimized for " << mState.data_width << "-bit width)");

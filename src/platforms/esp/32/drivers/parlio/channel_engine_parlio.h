@@ -8,6 +8,7 @@
 /// - ESP32-P4, ESP32-C6, ESP32-H2, or ESP32-C5 (only variants with PARLIO peripheral)
 /// - 1-16 WS2812/WS2812B LED strips (power-of-2 widths: 1, 2, 4, 8, 16)
 /// - Configurable GPIO pins (default: GPIO 1-16)
+/// - **ESP32-C6**: Requires ESP-IDF 5.5.0 or later (earlier versions have a known PARLIO driver bug)
 ///
 /// ## Features
 /// - **Multi-Channel Support**: Drive 1-16 LED strips simultaneously
@@ -124,6 +125,7 @@
 ///
 /// ## Limitations
 /// - **Platform-Specific**: Only available on ESP32-P4, ESP32-C6, ESP32-H2, ESP32-C5 with PARLIO peripheral
+/// - **ESP32-C6 Version Requirement**: ESP-IDF 5.5.0+ required (earlier versions have PARLIO driver bug)
 /// - **Channel Count**: 1-16 channels supported
 /// - **Fixed Pins**: Uses default GPIO 1-16 (future: user-configurable)
 ///
