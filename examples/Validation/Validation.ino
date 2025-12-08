@@ -92,11 +92,10 @@ void setup() {
     FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
 
-    // Phase 2: Enable RMT mode for basic functionality test (disable SPI first!)
+    // Phase 2: Enable RMT mode exclusively for basic functionality test
     fl::ChannelBusManager& manager = fl::channelBusManager();
-    manager.setDriverEnabled("SPI", false);  // CRITICAL: Disable SPI first
-    manager.setDriverEnabled("RMT", true);   // Then enable RMT
-    FL_WARN("RMT driver enabled (SPI disabled) - testing @ 255 LEDs");
+    manager.setExclusiveDriver("RMT");  // Enable only RMT, disable all others (forward-compatible!)
+    FL_WARN("RMT driver enabled exclusively - testing @ 255 LEDs");
 
     // Pre-initialize the TX engine (SPI/RMT) to avoid first-call setup delays
     // This ensures the engine is ready before RX capture attempts

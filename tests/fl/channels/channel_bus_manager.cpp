@@ -572,4 +572,223 @@ TEST_CASE("ChannelBusManager - Span validity") {
     CHECK(info2[1].name == "RMT");
 }
 
+TEST_CASE("ChannelBusManager - setExclusiveDriver with valid name") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+    auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(100, parlioEngine, "PARLIO");
+
+    // All drivers should be enabled by default
+    CHECK(manager.isDriverEnabled("RMT") == true);
+    CHECK(manager.isDriverEnabled("SPI") == true);
+    CHECK(manager.isDriverEnabled("PARLIO") == true);
+
+    // Set SPI as exclusive driver
+    bool result = manager.setExclusiveDriver("SPI");
+    CHECK(result == true);
+
+    // Only SPI should be enabled
+    CHECK(manager.isDriverEnabled("SPI") == true);
+    CHECK(manager.isDriverEnabled("RMT") == false);
+    CHECK(manager.isDriverEnabled("PARLIO") == false);
+
+    // Verify SPI is actually used
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(spiEngine->getTransmitCount() == 1);
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(parlioEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver with invalid name") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // Try to set non-existent driver as exclusive
+    bool result = manager.setExclusiveDriver("NONEXISTENT");
+    CHECK(result == false);
+
+    // All drivers should be disabled (defensive behavior)
+    CHECK(manager.isDriverEnabled("RMT") == false);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+
+    // No transmission should occur
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver with nullptr") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // nullptr should disable all drivers
+    bool result = manager.setExclusiveDriver(nullptr);
+    CHECK(result == false);
+
+    // All drivers should be disabled
+    CHECK(manager.isDriverEnabled("RMT") == false);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+
+    // No transmission should occur
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver with empty string") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // Empty string should disable all drivers
+    bool result = manager.setExclusiveDriver("");
+    CHECK(result == false);
+
+    // All drivers should be disabled
+    CHECK(manager.isDriverEnabled("RMT") == false);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver forward compatibility") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // Set RMT as exclusive
+    manager.setExclusiveDriver("RMT");
+    CHECK(manager.isDriverEnabled("RMT") == true);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+
+    // Simulate adding a new driver (future scenario)
+    auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
+    manager.addEngine(100, parlioEngine, "PARLIO");
+
+    // New driver should be auto-disabled (not matching "RMT")
+    CHECK(manager.isDriverEnabled("PARLIO") == false);
+    CHECK(manager.isDriverEnabled("RMT") == true);
+
+    // Only RMT should be used (not the new higher-priority PARLIO)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+    CHECK(spiEngine->getTransmitCount() == 0);
+    CHECK(parlioEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+
+    // First transmission - should use SPI (higher priority)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(spiEngine->getTransmitCount() == 1);
+
+    spiEngine->reset();
+    rmtEngine->reset();
+
+    // Set RMT as exclusive mid-frame (without calling onEndFrame)
+    manager.setExclusiveDriver("RMT");
+
+    // Next transmission should immediately use RMT (no onEndFrame needed)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+    CHECK(spiEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver with duplicate names") {
+    ChannelBusManager manager;
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+
+    manager.addEngine(100, rmt1, "RMT");
+    manager.addEngine(50, rmt2, "RMT");
+    manager.addEngine(25, spiEngine, "SPI");
+
+    // Set RMT as exclusive - should enable BOTH engines with name "RMT"
+    manager.setExclusiveDriver("RMT");
+
+    CHECK(manager.isDriverEnabled("RMT") == true);
+    CHECK(manager.isDriverEnabled("SPI") == false);
+
+    // Should use highest priority RMT engine (priority 100)
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmt1->getTransmitCount() == 1);
+    CHECK(rmt2->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 0);
+}
+
+TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
+    ChannelBusManager manager;
+    auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
+    auto spiEngine = fl::make_shared<FakeEngine>("SPI");
+    auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
+
+    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(100, parlioEngine, "PARLIO");
+
+    // Test 1: Set RMT exclusive
+    manager.setExclusiveDriver("RMT");
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 1);
+    CHECK(spiEngine->getTransmitCount() == 0);
+    CHECK(parlioEngine->getTransmitCount() == 0);
+
+    // Reset counters
+    rmtEngine->reset();
+    spiEngine->reset();
+    parlioEngine->reset();
+
+    // Test 2: Switch to SPI exclusive
+    manager.setExclusiveDriver("SPI");
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 1);
+    CHECK(parlioEngine->getTransmitCount() == 0);
+
+    // Reset counters
+    rmtEngine->reset();
+    spiEngine->reset();
+    parlioEngine->reset();
+
+    // Test 3: Switch to PARLIO exclusive
+    manager.setExclusiveDriver("PARLIO");
+    manager.enqueue(createDummyChannelData());
+    manager.show();
+    CHECK(rmtEngine->getTransmitCount() == 0);
+    CHECK(spiEngine->getTransmitCount() == 0);
+    CHECK(parlioEngine->getTransmitCount() == 1);
+}
+
 } // namespace channel_bus_manager_test

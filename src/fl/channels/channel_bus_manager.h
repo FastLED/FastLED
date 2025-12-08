@@ -62,6 +62,17 @@ public:
     /// @note If name is not found, this is a no-op (does not warn)
     void setDriverEnabled(const char* name, bool enabled);
 
+    /// @brief Enable only one driver exclusively (disables all others)
+    /// @param name Driver name to enable exclusively (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
+    /// @return true if driver was found and set as exclusive, false if name not found
+    /// @note Atomically disables all drivers, then enables the specified one
+    /// @note Changes take effect immediately on next enqueue()
+    /// @note If name is not found, all drivers remain disabled (defensive behavior)
+    /// @note Use nullptr or empty string to disable all drivers (returns false)
+    /// @warning This will disable ALL other registered drivers, including future additions
+    /// @warning This ensures forward compatibility - new drivers are automatically excluded
+    bool setExclusiveDriver(const char* name);
+
     /// @brief Check if a driver is enabled by name
     /// @param name Driver name to query (case-sensitive)
     /// @return true if enabled, false if disabled or not registered
@@ -152,6 +163,10 @@ private:
     /// @brief Cached driver info for getDriverInfo() to avoid allocations
     /// @note Marked mutable to allow caching in const method
     mutable fl::vector<DriverInfo> mCachedDriverInfo;
+
+    /// @brief Exclusive driver name (empty if no exclusive mode)
+    /// @note When non-empty, new engines are auto-disabled if name doesn't match
+    fl::string mExclusiveDriver;
 
     // Non-copyable, non-movable
     ChannelBusManager(const ChannelBusManager&) = delete;

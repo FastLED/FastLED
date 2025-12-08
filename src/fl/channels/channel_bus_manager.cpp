@@ -34,7 +34,14 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
     }
 
     fl::string engineName = name ? name : "";
-    mEngines.push_back({priority, engine, engineName, true});  // enabled=true by default
+
+    // Respect exclusive driver mode: auto-disable if name doesn't match exclusive driver
+    bool enabled = true;  // Default: enabled
+    if (!mExclusiveDriver.empty()) {
+        enabled = (engineName == mExclusiveDriver);  // Only enable if matches exclusive driver
+    }
+
+    mEngines.push_back({priority, engine, engineName, enabled});
 
     if (!engineName.empty()) {
         FL_DBG("ChannelBusManager: Added engine '" << engineName.c_str() << "' (priority " << priority << ")");
@@ -68,6 +75,26 @@ void ChannelBusManager::setDriverEnabled(const char* name, bool enabled) {
         mActiveEngine = nullptr;
         mActiveEnginePriority = -1;
     }
+}
+
+bool ChannelBusManager::setExclusiveDriver(const char* name) {
+    // Store exclusive driver name for forward compatibility
+    // When non-empty, addEngine() will auto-disable non-matching engines
+    mExclusiveDriver = (name && name[0]) ? name : "";
+
+    // Single-pass: enable only engines matching the given name
+    // Handles nullptr, empty string, not found, and found cases naturally
+    bool found = false;
+    for (auto& entry : mEngines) {
+        entry.enabled = (name && name[0] && entry.name == name);
+        found = found || entry.enabled;
+    }
+
+    // Reset active engine to force re-selection on next enqueue
+    mActiveEngine = nullptr;
+    mActiveEnginePriority = -1;
+
+    return found;
 }
 
 bool ChannelBusManager::isDriverEnabled(const char* name) const {
