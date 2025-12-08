@@ -293,11 +293,11 @@ class SortedHeapMap {
     // Value comparison class for std::map compatibility
     class value_compare {
         friend class SortedHeapMap;
-        Less comp_;
-        value_compare(Less c) : comp_(c) {}
+        Less mComp;
+        value_compare(Less c) : mComp(c) {}
     public:
         bool operator()(const value_type& x, const value_type& y) const {
-            return comp_(x.first, y.first);
+            return mComp(x.first, y.first);
         }
     };
 

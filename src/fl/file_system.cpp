@@ -38,29 +38,29 @@ namespace fl {
 // Adapter to convert FileHandle to ByteStream for codec input
 class ByteStreamFileHandle : public ByteStream {
 private:
-    FileHandlePtr fileHandle_;
+    FileHandlePtr mFileHandle;
 
 public:
-    explicit ByteStreamFileHandle(FileHandlePtr handle) : fileHandle_(handle) {}
+    explicit ByteStreamFileHandle(FileHandlePtr handle) : mFileHandle(handle) {}
 
     bool available(fl::size bytesRequested) const override {
-        if (!fileHandle_) return false;
-        return fileHandle_->available() && fileHandle_->bytesLeft() >= bytesRequested;
+        if (!mFileHandle) return false;
+        return mFileHandle->available() && mFileHandle->bytesLeft() >= bytesRequested;
     }
 
     fl::size read(fl::u8* dst, fl::size bytesToRead) override {
-        if (!fileHandle_) return 0;
-        return fileHandle_->read(dst, bytesToRead);
+        if (!mFileHandle) return 0;
+        return mFileHandle->read(dst, bytesToRead);
     }
 
     const char* path() const override {
-        if (!fileHandle_) return "INVALID_HANDLE";
-        return fileHandle_->path();
+        if (!mFileHandle) return "INVALID_HANDLE";
+        return mFileHandle->path();
     }
 
     void close() override {
-        if (fileHandle_) {
-            fileHandle_->close();
+        if (mFileHandle) {
+            mFileHandle->close();
         }
     }
 };
@@ -68,27 +68,27 @@ public:
 // Custom ByteStream that wraps MPEG1 decoder for seamless integration with Video system
 class Mpeg1ByteStream : public ByteStream {
 private:
-    IDecoderPtr decoder_;
-    fl::shared_ptr<Frame> currentFrame_;
-    fl::size frameSize_;
-    fl::size currentPos_;
-    fl::string path_;
-    bool hasValidFrame_;
+    IDecoderPtr mDecoder;
+    fl::shared_ptr<Frame> mCurrentFrame;
+    fl::size mFrameSize;
+    fl::size mCurrentPos;
+    fl::string mPath;
+    bool mHasValidFrame;
 
 public:
     Mpeg1ByteStream(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
-        : decoder_(decoder), currentFrame_(nullptr), frameSize_(pixelsPerFrame * 3), currentPos_(0),
-          path_(path), hasValidFrame_(false) {
+        : mDecoder(decoder), mCurrentFrame(nullptr), mFrameSize(pixelsPerFrame * 3), mCurrentPos(0),
+          mPath(path), mHasValidFrame(false) {
         // Try to decode the first frame
         decodeNextFrameIfNeeded();
     }
 
     bool available(fl::size bytesRequested) const override {
-        if (!decoder_ || !hasValidFrame_) {
+        if (!mDecoder || !mHasValidFrame) {
             return false;
         }
         // Check if we have enough bytes remaining in current frame
-        fl::size bytesAvailableInCurrentFrame = (currentPos_ < frameSize_) ? (frameSize_ - currentPos_) : 0;
+        fl::size bytesAvailableInCurrentFrame = (mCurrentPos < mFrameSize) ? (mFrameSize - mCurrentPos) : 0;
 
         // If we have enough in current frame, return true
         if (bytesAvailableInCurrentFrame >= bytesRequested) {
@@ -96,32 +96,32 @@ public:
         }
 
         // If not enough in current frame, check if we can get more frames
-        // (simplified check - we know each frame has frameSize_ bytes)
-        return decoder_->hasMoreFrames();
+        // (simplified check - we know each frame has mFrameSize bytes)
+        return mDecoder->hasMoreFrames();
     }
 
     fl::size read(fl::u8* dst, fl::size bytesToRead) override {
-        if (!decoder_ || !hasValidFrame_) {
+        if (!mDecoder || !mHasValidFrame) {
             return 0;
         }
 
         fl::size totalRead = 0;
 
-        while (bytesToRead > 0 && hasValidFrame_) {
-            fl::size remainingInFrame = frameSize_ - currentPos_;
+        while (bytesToRead > 0 && mHasValidFrame) {
+            fl::size remainingInFrame = mFrameSize - mCurrentPos;
 
             if (remainingInFrame == 0) {
                 // Need next frame
                 if (!decodeNextFrameIfNeeded()) {
                     break;
                 }
-                remainingInFrame = frameSize_ - currentPos_;
+                remainingInFrame = mFrameSize - mCurrentPos;
             }
 
             fl::size toRead = fl::fl_min(bytesToRead, remainingInFrame);
-            if (toRead > 0 && currentFrame_ && currentFrame_->rgb()) {
-                fl::memcpy(dst + totalRead, (fl::u8*)currentFrame_->rgb() + currentPos_, toRead);
-                currentPos_ += toRead;
+            if (toRead > 0 && mCurrentFrame && mCurrentFrame->rgb()) {
+                fl::memcpy(dst + totalRead, (fl::u8*)mCurrentFrame->rgb() + mCurrentPos, toRead);
+                mCurrentPos += toRead;
                 totalRead += toRead;
                 bytesToRead -= toRead;
             } else {
@@ -133,37 +133,37 @@ public:
     }
 
     const char* path() const override {
-        return path_.c_str();
+        return mPath.c_str();
     }
 
     void close() override {
-        if (decoder_) {
-            decoder_->end();
+        if (mDecoder) {
+            mDecoder->end();
         }
     }
 
 private:
     bool decodeNextFrameIfNeeded() {
-        if (currentPos_ >= frameSize_ || !hasValidFrame_) {
+        if (mCurrentPos >= mFrameSize || !mHasValidFrame) {
             // Need to decode next frame
-            if (!decoder_->hasMoreFrames()) {
-                hasValidFrame_ = false;
+            if (!mDecoder->hasMoreFrames()) {
+                mHasValidFrame = false;
                 return false;
             }
 
-            DecodeResult result = decoder_->decode();
+            DecodeResult result = mDecoder->decode();
             if (result == DecodeResult::Success) {
-                Frame decodedFrame = decoder_->getCurrentFrame();
-                currentFrame_ = fl::make_shared<Frame>(decodedFrame);
-                currentPos_ = 0;
-                hasValidFrame_ = true;
+                Frame decodedFrame = mDecoder->getCurrentFrame();
+                mCurrentFrame = fl::make_shared<Frame>(decodedFrame);
+                mCurrentPos = 0;
+                mHasValidFrame = true;
                 return true;
             } else {
-                hasValidFrame_ = false;
+                mHasValidFrame = false;
                 return false;
             }
         }
-        return hasValidFrame_;
+        return mHasValidFrame;
     }
 };
 

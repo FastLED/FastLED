@@ -26,10 +26,10 @@ namespace fl {
 class istream_real {
 private:
     static const fl::size BUFFER_SIZE = 256;
-    char buffer_[BUFFER_SIZE];
-    fl::size buffer_len_ = 0;
-    fl::size pos_ = 0;
-    bool failed_ = false;
+    char mBuffer[BUFFER_SIZE];
+    fl::size mBufferLen = 0;
+    fl::size mPos = 0;
+    bool mFailed = false;
     
     // Helper to read a line from input
     bool readLine();
@@ -44,12 +44,12 @@ public:
     istream_real() = default;
     
     // Check if stream is in good state
-    bool good() const { return !failed_; }
-    bool fail() const { return failed_; }
-    bool eof() const { return pos_ >= buffer_len_ && fl::available() == 0; }
+    bool good() const { return !mFailed; }
+    bool fail() const { return mFailed; }
+    bool eof() const { return mPos >= mBufferLen && fl::available() == 0; }
     
     // Clear error state
-    void clear() { failed_ = false; }
+    void clear() { mFailed = false; }
     
     // Stream input operators
     istream_real& operator>>(string& str);
@@ -91,7 +91,7 @@ istream_real& cin_real();
 class istream {
 private:
 #if SKETCH_HAS_LOTS_OF_MEMORY
-    istream_real real_stream_;
+    istream_real mRealStream;
 #endif
     
 public:
@@ -100,7 +100,7 @@ public:
     // Check if stream is in good state
     bool good() const { 
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        return real_stream_.good();
+        return mRealStream.good();
 #else
         return true; // Always good on memory-constrained platforms
 #endif
@@ -108,7 +108,7 @@ public:
     
     bool fail() const { 
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        return real_stream_.fail();
+        return mRealStream.fail();
 #else
         return false; // Never fail on memory-constrained platforms
 #endif
@@ -116,7 +116,7 @@ public:
     
     bool eof() const { 
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        return real_stream_.eof();
+        return mRealStream.eof();
 #else
         return true; // Always EOF on memory-constrained platforms
 #endif
@@ -125,14 +125,14 @@ public:
     // Clear error state
     void clear() { 
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_.clear();
+        mRealStream.clear();
 #endif
     }
     
     // Stream input operators
     istream& operator>>(string& str) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> str;
+        mRealStream >> str;
 #else
         // No-op on memory-constrained platforms
         str.clear();
@@ -142,7 +142,7 @@ public:
     
     istream& operator>>(char& c) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> c;
+        mRealStream >> c;
 #else
         // No-op on memory-constrained platforms
         c = '\0';
@@ -152,7 +152,7 @@ public:
     
     istream& operator>>(fl::i8& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -162,7 +162,7 @@ public:
     
     istream& operator>>(fl::u8& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -172,7 +172,7 @@ public:
     
     istream& operator>>(fl::i16& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -182,7 +182,7 @@ public:
     
     istream& operator>>(fl::i32& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -192,7 +192,7 @@ public:
     
     istream& operator>>(fl::u32& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -202,7 +202,7 @@ public:
     
     istream& operator>>(float& f) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> f;
+        mRealStream >> f;
 #else
         // No-op on memory-constrained platforms
         f = 0.0f;
@@ -212,7 +212,7 @@ public:
     
     istream& operator>>(double& d) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> d;
+        mRealStream >> d;
 #else
         // No-op on memory-constrained platforms
         d = 0.0;
@@ -228,7 +228,7 @@ public:
         istream&
     >::type operator>>(T& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
+        mRealStream >> n;
 #else
         // No-op on memory-constrained platforms
         n = 0;
@@ -239,7 +239,7 @@ public:
     // Get a line from input
     istream& getline(string& str) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_.getline(str);
+        mRealStream.getline(str);
 #else
         // No-op on memory-constrained platforms
         str.clear();
@@ -250,7 +250,7 @@ public:
     // Get next character
     int get() {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        return real_stream_.get();
+        return mRealStream.get();
 #else
         // No-op on memory-constrained platforms
         return -1;
@@ -260,7 +260,7 @@ public:
     // Put back a character
     istream& putback(char c) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_.putback(c);
+        mRealStream.putback(c);
 #endif
         return *this;
     }
@@ -268,7 +268,7 @@ public:
     // Peek at next character without consuming it
     int peek() {
 #if SKETCH_HAS_LOTS_OF_MEMORY
-        return real_stream_.peek();
+        return mRealStream.peek();
 #else
         // No-op on memory-constrained platforms
         return -1;

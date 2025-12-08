@@ -34,51 +34,51 @@ template <typename T, fl::size N> class array {
     using const_iterator = const_pointer;
 
     // Data member - public to allow aggregate initialization
-    T data_[N];
+    T mData[N];
 
     // Element access
     T &at(fl::size pos) {
         if (pos >= N) {
             return error_value();
         }
-        return data_[pos];
+        return mData[pos];
     }
 
     const T &at(fl::size pos) const {
         if (pos >= N) {
             return error_value();
         }
-        return data_[pos];
+        return mData[pos];
     }
 
-    T &operator[](fl::size pos) { return data_[pos]; }
+    T &operator[](fl::size pos) { return mData[pos]; }
 
-    const_reference operator[](fl::size pos) const { return data_[pos]; }
+    const_reference operator[](fl::size pos) const { return mData[pos]; }
 
-    T &front() { return data_[0]; }
+    T &front() { return mData[0]; }
 
-    const T &front() const { return data_[0]; }
+    const T &front() const { return mData[0]; }
 
-    T &back() { return data_[N - 1]; }
+    T &back() { return mData[N - 1]; }
 
-    const T &back() const { return data_[N - 1]; }
+    const T &back() const { return mData[N - 1]; }
 
-    pointer data() noexcept { return data_; }
+    pointer data() noexcept { return mData; }
 
-    const_pointer data() const noexcept { return data_; }
+    const_pointer data() const noexcept { return mData; }
 
     // Iterators
-    iterator begin() noexcept { return data_; }
+    iterator begin() noexcept { return mData; }
 
-    const_iterator begin() const noexcept { return data_; }
+    const_iterator begin() const noexcept { return mData; }
 
-    const_iterator cbegin() const noexcept { return data_; }
+    const_iterator cbegin() const noexcept { return mData; }
 
-    iterator end() noexcept { return data_ + N; }
+    iterator end() noexcept { return mData + N; }
 
-    const_iterator end() const noexcept { return data_ + N; }
+    const_iterator end() const noexcept { return mData + N; }
 
-    const_iterator cend() const noexcept { return data_ + N; }
+    const_iterator cend() const noexcept { return mData + N; }
 
     // Capacity
     bool empty() const noexcept { return N == 0; }
@@ -90,13 +90,13 @@ template <typename T, fl::size N> class array {
     // Operations
     void fill(const T &value) {
         for (fl::size i = 0; i < N; ++i) {
-            data_[i] = value;
+            mData[i] = value;
         }
     }
 
     void swap(array &other) {
         for (fl::size i = 0; i < N; ++i) {
-            fl::swap(data_[i], other.data_[i]);
+            fl::swap(mData[i], other.mData[i]);
         }
     }
 

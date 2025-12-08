@@ -16,7 +16,7 @@ class unordered_set {
     class iterator {
     private:
         using map_iterator = typename fl::unordered_map<Key, bool>::iterator;
-        map_iterator it_;
+        map_iterator mIt;
     
     public:
         using value_type = Key;
@@ -24,16 +24,16 @@ class unordered_set {
         using pointer = const Key*;
         
         iterator() = default;
-        explicit iterator(map_iterator it) : it_(it) {}
+        explicit iterator(map_iterator it) : mIt(it) {}
         
-        reference operator*() const { return it_->first; }
-        pointer operator->() const { return &(it_->first); }
+        reference operator*() const { return mIt->first; }
+        pointer operator->() const { return &(mIt->first); }
         
-        iterator& operator++() { ++it_; return *this; }
-        iterator operator++(int) { iterator tmp = *this; ++it_; return tmp; }
+        iterator& operator++() { ++mIt; return *this; }
+        iterator operator++(int) { iterator tmp = *this; ++mIt; return tmp; }
         
-        bool operator==(const iterator& other) const { return it_ == other.it_; }
-        bool operator!=(const iterator& other) const { return it_ != other.it_; }
+        bool operator==(const iterator& other) const { return mIt == other.mIt; }
+        bool operator!=(const iterator& other) const { return mIt != other.mIt; }
         
         friend class unordered_set;
     };
@@ -41,7 +41,7 @@ class unordered_set {
     class const_iterator {
     private:
         using map_const_iterator = typename fl::unordered_map<Key, bool>::const_iterator;
-        map_const_iterator it_;
+        map_const_iterator mIt;
     
     public:
         using value_type = Key;
@@ -49,17 +49,17 @@ class unordered_set {
         using pointer = const Key*;
         
         const_iterator() = default;
-        explicit const_iterator(map_const_iterator it) : it_(it) {}
-        const_iterator(const iterator& other) : it_(static_cast<map_const_iterator>(other.it_)) {}
+        explicit const_iterator(map_const_iterator it) : mIt(it) {}
+        const_iterator(const iterator& other) : mIt(static_cast<map_const_iterator>(other.mIt)) {}
         
-        reference operator*() const { return it_->first; }
-        pointer operator->() const { return &(it_->first); }
+        reference operator*() const { return mIt->first; }
+        pointer operator->() const { return &(mIt->first); }
         
-        const_iterator& operator++() { ++it_; return *this; }
-        const_iterator operator++(int) { const_iterator tmp = *this; ++it_; return tmp; }
+        const_iterator& operator++() { ++mIt; return *this; }
+        const_iterator operator++(int) { const_iterator tmp = *this; ++mIt; return tmp; }
         
-        bool operator==(const const_iterator& other) const { return it_ == other.it_; }
-        bool operator!=(const const_iterator& other) const { return it_ != other.it_; }
+        bool operator==(const const_iterator& other) const { return mIt == other.mIt; }
+        bool operator!=(const const_iterator& other) const { return mIt != other.mIt; }
     };
 
     unordered_set() = default;

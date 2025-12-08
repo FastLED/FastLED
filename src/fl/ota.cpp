@@ -10,8 +10,8 @@ namespace fl {
 // OTA Wrapper Implementation
 // ============================================================================
 
-OTA::OTA() : impl_(nullptr) {
-    // Lazy initialization - impl_ will be created on first method call
+OTA::OTA() : mImpl(nullptr) {
+    // Lazy initialization - mImpl will be created on first method call
 }
 
 OTA::~OTA() {
@@ -20,73 +20,73 @@ OTA::~OTA() {
 
 bool OTA::beginWiFi(const char* hostname, const char* password,
                     const char* ssid, const char* wifi_pass) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    return impl_->beginWiFi(hostname, password, ssid, wifi_pass);
+    return mImpl->beginWiFi(hostname, password, ssid, wifi_pass);
 }
 
 bool OTA::begin(const char* hostname, const char* password) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    return impl_->begin(hostname, password);
+    return mImpl->begin(hostname, password);
 }
 
 bool OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    return impl_->enableApFallback(ap_ssid, ap_pass);
+    return mImpl->enableApFallback(ap_ssid, ap_pass);
 }
 
 void OTA::onProgress(ProgressCallback callback) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    impl_->onProgress(callback);
+    mImpl->onProgress(callback);
 }
 
 void OTA::onError(ErrorCallback callback) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    impl_->onError(callback);
+    mImpl->onError(callback);
 }
 
 void OTA::onState(StateCallback callback) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    impl_->onState(callback);
+    mImpl->onState(callback);
 }
 
 void OTA::onBeforeReboot(void (*callback)()) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    impl_->onBeforeReboot(callback);
+    mImpl->onBeforeReboot(callback);
 }
 
 void OTA::poll() {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
     }
-    impl_->poll();
+    mImpl->poll();
 }
 
 bool OTA::isConnected() const {
-    if (!impl_) {
+    if (!mImpl) {
         return false;
     }
-    return impl_->isConnected();
+    return mImpl->isConnected();
 }
 
 uint8_t OTA::getFailedServices() const {
-    if (!impl_) {
+    if (!mImpl) {
         return 0;
     }
-    return impl_->getFailedServices();
+    return mImpl->getFailedServices();
 }
 
 }  // namespace fl

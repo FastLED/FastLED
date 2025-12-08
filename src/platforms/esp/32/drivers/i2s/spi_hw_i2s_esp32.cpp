@@ -28,14 +28,14 @@ namespace fl {
 // ============================================================================
 
 SpiHwI2SESP32::SpiHwI2SESP32(int bus_id)
-    : interleaved_buffer_(nullptr),
-      buffer_size_(0),
-      clock_pin_(-1),
-      clock_speed_hz_(0),
-      num_strips_(0),
-      num_leds_per_strip_(0),
-      bus_id_(bus_id),
-      is_initialized_(false) {
+    : mInterleavedBuffer(nullptr),
+      mBufferSize(0),
+      mClockPin(-1),
+      mClockSpeedHz(0),
+      mNumStrips(0),
+      mNumLedsPerStrip(0),
+      mBusId(bus_id),
+      mIsInitialized(false) {
     // Initialization happens in begin()
 }
 
@@ -49,77 +49,77 @@ SpiHwI2SESP32::~SpiHwI2SESP32() {
 
 bool SpiHwI2SESP32::begin(const Config& config) {
     // Step 1: Extract data pins from config
-    data_pins_ = extract_data_pins(config);
-    num_strips_ = static_cast<int>(data_pins_.size());
-    clock_pin_ = config.clock_pin;
-    clock_speed_hz_ = config.clock_speed_hz;
+    mDataPins = extract_data_pins(config);
+    mNumStrips = static_cast<int>(mDataPins.size());
+    mClockPin = config.clock_pin;
+    mClockSpeedHz = config.clock_speed_hz;
 
     // Step 2: Validate pin configuration
-    if (!validate_pins(clock_pin_, data_pins_)) {
+    if (!validate_pins(mClockPin, mDataPins)) {
         FL_WARN("SpiHwI2SESP32: Invalid pin configuration");
         return false;
     }
 
     // Step 3: Validate lane count (1-16)
-    if (num_strips_ < 1 || num_strips_ > 16) {
-        FL_WARN("SpiHwI2SESP32: Invalid lane count " << num_strips_ << " (must be 1-16)");
+    if (mNumStrips < 1 || mNumStrips > 16) {
+        FL_WARN("SpiHwI2SESP32: Invalid lane count " << mNumStrips << " (must be 1-16)");
         return false;
     }
 
     // Step 4: Calculate clock dividers
-    int clock_mhz = calculate_clock_mhz(clock_speed_hz_);
+    int clock_mhz = calculate_clock_mhz(mClockSpeedHz);
     if (clock_mhz < 1 || clock_mhz > 40) {
-        FL_WARN("SpiHwI2SESP32: Invalid clock speed " << clock_speed_hz_ << " Hz (must be 1-40 MHz)");
+        FL_WARN("SpiHwI2SESP32: Invalid clock speed " << mClockSpeedHz << " Hz (must be 1-40 MHz)");
         return false;
     }
 
     // Step 5: Allocate initial buffer (size will be adjusted on first write)
     // Initial size: 1000 LEDs per strip × 3 bytes RGB × num_strips
     const size_t initial_leds = 1000;
-    buffer_size_ = initial_leds * 3 * num_strips_;  // RGB only (driver adds APA102 frames)
-    interleaved_buffer_ = allocate_dma_buffer(buffer_size_);
+    mBufferSize = initial_leds * 3 * mNumStrips;  // RGB only (driver adds APA102 frames)
+    mInterleavedBuffer = allocate_dma_buffer(mBufferSize);
 
-    if (interleaved_buffer_ == nullptr) {
-        FL_WARN("SpiHwI2SESP32: Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
+    if (mInterleavedBuffer == nullptr) {
+        FL_WARN("SpiHwI2SESP32: Failed to allocate DMA buffer (" << mBufferSize << " bytes)");
         return false;
     }
 
     // Step 6: Initialize Yves driver
     // Note: Yves driver expects interleaved buffer pointer, pin arrays, clock pin, etc.
     // The driver will allocate its own internal DMA buffers for transposed data
-    driver_.initled(
-        interleaved_buffer_,         // LED data buffer (will be updated on each write)
-        data_pins_.data(),            // Data pin array
-        clock_pin_,                   // Clock pin
-        num_strips_,                  // Number of strips
+    mDriver.initled(
+        mInterleavedBuffer,         // LED data buffer (will be updated on each write)
+        mDataPins.data(),            // Data pin array
+        mClockPin,                   // Clock pin
+        mNumStrips,                  // Number of strips
         static_cast<int>(initial_leds),  // Initial LEDs per strip (will be updated on write)
         clock_mhz                     // Clock speed in MHz
     );
 
     // Initialization complete
-    is_initialized_ = true;
+    mIsInitialized = true;
     return true;
 }
 
 void SpiHwI2SESP32::end() {
     // Wait for any pending transmission to complete
-    if (is_initialized_) {
+    if (mIsInitialized) {
         waitComplete(5000);  // 5 second timeout
     }
 
     // Free interleaved buffer
-    if (interleaved_buffer_ != nullptr) {
-        heap_caps_free(interleaved_buffer_);
-        interleaved_buffer_ = nullptr;
+    if (mInterleavedBuffer != nullptr) {
+        heap_caps_free(mInterleavedBuffer);
+        mInterleavedBuffer = nullptr;
     }
 
-    is_initialized_ = false;
+    mIsInitialized = false;
 
     // Note: Yves driver destructor will clean up its own resources
 }
 
 DMABuffer SpiHwI2SESP32::acquireDMABuffer(size_t bytes_per_lane) {
-    if (!is_initialized_) {
+    if (!mIsInitialized) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
@@ -133,10 +133,10 @@ DMABuffer SpiHwI2SESP32::acquireDMABuffer(size_t bytes_per_lane) {
 
     // Step 2: Calculate required buffer size
     // Format: interleaved [strip0_byte0, strip1_byte0, ..., strip0_byte1, ...]
-    size_t required_size = bytes_per_lane * num_strips_;
+    size_t required_size = bytes_per_lane * mNumStrips;
 
     // Step 3: Check if buffer needs resizing
-    if (required_size > buffer_size_) {
+    if (required_size > mBufferSize) {
         // Need to reallocate larger buffer
         uint8_t* new_buffer = allocate_dma_buffer(required_size);
         if (new_buffer == nullptr) {
@@ -145,42 +145,42 @@ DMABuffer SpiHwI2SESP32::acquireDMABuffer(size_t bytes_per_lane) {
         }
 
         // Free old buffer
-        if (interleaved_buffer_ != nullptr) {
-            heap_caps_free(interleaved_buffer_);
+        if (mInterleavedBuffer != nullptr) {
+            heap_caps_free(mInterleavedBuffer);
         }
 
-        interleaved_buffer_ = new_buffer;
-        buffer_size_ = required_size;
-        driver_.leds = interleaved_buffer_;  // Update driver's pointer
+        mInterleavedBuffer = new_buffer;
+        mBufferSize = required_size;
+        mDriver.leds = mInterleavedBuffer;  // Update driver's pointer
     }
 
     // Step 4: Update LED count if changed
     size_t num_leds = bytes_per_lane / 3;  // Assume RGB format (3 bytes per LED)
-    if (static_cast<int>(num_leds) != num_leds_per_strip_) {
-        num_leds_per_strip_ = static_cast<int>(num_leds);
-        driver_.num_led_per_strip = num_leds_per_strip_;
+    if (static_cast<int>(num_leds) != mNumLedsPerStrip) {
+        mNumLedsPerStrip = static_cast<int>(num_leds);
+        mDriver.num_led_per_strip = mNumLedsPerStrip;
     }
 
     // Step 5: Return DMABuffer that SPIBusManager will write to
     // SPIBusManager will call SPITransposer::transpose16() to fill this buffer
-    // We store this buffer and will copy its data to interleaved_buffer_ in transmit()
-    current_buffer_ = DMABuffer(required_size);
-    return current_buffer_;
+    // We store this buffer and will copy its data to mInterleavedBuffer in transmit()
+    mCurrentBuffer = DMABuffer(required_size);
+    return mCurrentBuffer;
 }
 
 bool SpiHwI2SESP32::transmit(TransmitMode mode) {
     (void)mode;  // Async mode only for now
 
-    if (!is_initialized_) {
+    if (!mIsInitialized) {
         return false;
     }
 
-    // Copy data from current_buffer_ to interleaved_buffer_
-    // SPIBusManager writes to current_buffer_, but Yves driver reads from interleaved_buffer_
-    if (current_buffer_.ok()) {
-        fl::span<uint8_t> src = current_buffer_.data();
-        if (src.size() <= buffer_size_) {
-            fl::memcpy(interleaved_buffer_, src.data(), src.size());
+    // Copy data from mCurrentBuffer to mInterleavedBuffer
+    // SPIBusManager writes to mCurrentBuffer, but Yves driver reads from mInterleavedBuffer
+    if (mCurrentBuffer.ok()) {
+        fl::span<uint8_t> src = mCurrentBuffer.data();
+        if (src.size() <= mBufferSize) {
+            fl::memcpy(mInterleavedBuffer, src.data(), src.size());
         } else {
             FL_WARN("SpiHwI2SESP32: Buffer size mismatch in transmit()");
             return false;
@@ -191,19 +191,19 @@ bool SpiHwI2SESP32::transmit(TransmitMode mode) {
     }
 
     // Trigger I2S DMA transmission (async)
-    // Data is now in interleaved_buffer_ (Yves driver will read from this)
-    driver_.showPixels();
+    // Data is now in mInterleavedBuffer (Yves driver will read from this)
+    mDriver.showPixels();
 
     return true;
 }
 
 bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
-    if (!is_initialized_) {
+    if (!mIsInitialized) {
         return false;
     }
 
     // Check if transmission in progress
-    if (!driver_.isDisplaying) {
+    if (!mDriver.isDisplaying) {
         return true;  // Nothing to wait for
     }
 
@@ -215,7 +215,7 @@ bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
     TickType_t start_ticks = xTaskGetTickCount();
     TickType_t timeout_ticks = pdMS_TO_TICKS(timeout_ms);
 
-    while (driver_.isDisplaying) {
+    while (mDriver.isDisplaying) {
         vTaskDelay(pdMS_TO_TICKS(1));  // Check every 1ms
 
         if (timeout_ms != UINT32_MAX) {  // Check for infinite timeout
@@ -230,15 +230,15 @@ bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
 }
 
 bool SpiHwI2SESP32::isBusy() const {
-    return is_initialized_ && driver_.isDisplaying;
+    return mIsInitialized && mDriver.isDisplaying;
 }
 
 bool SpiHwI2SESP32::isInitialized() const {
-    return is_initialized_;
+    return mIsInitialized;
 }
 
 int SpiHwI2SESP32::getBusId() const {
-    return bus_id_;
+    return mBusId;
 }
 
 const char* SpiHwI2SESP32::getName() const {

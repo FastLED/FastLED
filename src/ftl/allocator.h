@@ -462,8 +462,8 @@ private:
     };
 
     Slab* slabs_;
-    fl::size total_allocated_;
-    fl::size total_deallocated_;
+    fl::size mTotalAllocated;
+    fl::size mTotalDeallocated;
 
     Slab* createSlab() {
         Slab* slab = static_cast<Slab*>(Malloc(sizeof(Slab)));
@@ -530,7 +530,7 @@ private:
                 slab->allocated_blocks.set(static_cast<fl::u32>(start + i), true);
             }
             slab->allocated_count += n;
-            total_allocated_ += n;
+            mTotalAllocated += n;
             
             // Return pointer to the first block
             return slab->memory + static_cast<fl::size>(start) * SLAB_BLOCK_SIZE;
@@ -561,7 +561,7 @@ private:
                 }
                 
                 slab->allocated_count -= n;
-                total_deallocated_ += n;
+                mTotalDeallocated += n;
                 break;
             }
         }
@@ -569,7 +569,7 @@ private:
 
 public:
     // Constructor
-    SlabAllocator() : slabs_(nullptr), total_allocated_(0), total_deallocated_(0) {}
+    SlabAllocator() : slabs_(nullptr), mTotalAllocated(0), mTotalDeallocated(0) {}
     
     // Destructor
     ~SlabAllocator() {
@@ -582,21 +582,21 @@ public:
     
     // Movable
     SlabAllocator(SlabAllocator&& other) noexcept 
-        : slabs_(other.slabs_), total_allocated_(other.total_allocated_), total_deallocated_(other.total_deallocated_) {
+        : slabs_(other.slabs_), mTotalAllocated(other.mTotalAllocated), mTotalDeallocated(other.mTotalDeallocated) {
         other.slabs_ = nullptr;
-        other.total_allocated_ = 0;
-        other.total_deallocated_ = 0;
+        other.mTotalAllocated = 0;
+        other.mTotalDeallocated = 0;
     }
     
     SlabAllocator& operator=(SlabAllocator&& other) noexcept {
         if (this != &other) {
             cleanup();
             slabs_ = other.slabs_;
-            total_allocated_ = other.total_allocated_;
-            total_deallocated_ = other.total_deallocated_;
+            mTotalAllocated = other.mTotalAllocated;
+            mTotalDeallocated = other.mTotalDeallocated;
             other.slabs_ = nullptr;
-            other.total_allocated_ = 0;
-            other.total_deallocated_ = 0;
+            other.mTotalAllocated = 0;
+            other.mTotalDeallocated = 0;
         }
         return *this;
     }
@@ -647,9 +647,9 @@ public:
     }
 
     // Get allocation statistics
-    fl::size getTotalAllocated() const { return total_allocated_; }
-    fl::size getTotalDeallocated() const { return total_deallocated_; }
-    fl::size getActiveAllocations() const { return total_allocated_ - total_deallocated_; }
+    fl::size getTotalAllocated() const { return mTotalAllocated; }
+    fl::size getTotalDeallocated() const { return mTotalDeallocated; }
+    fl::size getActiveAllocations() const { return mTotalAllocated - mTotalDeallocated; }
     
     // Get number of slabs
     fl::size getSlabCount() const {
@@ -668,8 +668,8 @@ public:
             Free(slabs_);
             slabs_ = next;
         }
-        total_allocated_ = 0;
-        total_deallocated_ = 0;
+        mTotalAllocated = 0;
+        mTotalDeallocated = 0;
     }
 };
 

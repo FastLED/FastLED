@@ -20,13 +20,13 @@ namespace fl {
 class fl_random {
 private:
     /// The current seed state for this instance
-    u16 seed_;
+    u16 mSeed;
 
     /// Generate next 16-bit random number using this instance's seed
     /// @returns The next 16-bit random number
     u16 next_random16() {
-        seed_ = APPLY_FASTLED_RAND16_2053(seed_) + FASTLED_RAND16_13849;
-        return seed_;
+        mSeed = APPLY_FASTLED_RAND16_2053(mSeed) + FASTLED_RAND16_13849;
+        return mSeed;
     }
 
     /// Generate next 32-bit random number using this instance's seed
@@ -42,11 +42,11 @@ public:
     typedef u32 result_type;
 
     /// Default constructor - uses current global random seed
-    fl_random() : seed_(random16_get_seed()) {}
+    fl_random() : mSeed(random16_get_seed()) {}
 
     /// Constructor with explicit seed
     /// @param seed The seed value for the random number generator
-    explicit fl_random(u16 seed) : seed_(seed) {}
+    explicit fl_random(u16 seed) : mSeed(seed) {}
 
     /// Generate a random number
     /// @returns A random 32-bit unsigned integer
@@ -77,19 +77,19 @@ public:
     /// Set the seed for this random number generator instance
     /// @param seed The new seed value
     void set_seed(u16 seed) {
-        seed_ = seed;
+        mSeed = seed;
     }
 
     /// Get the current seed value for this instance
     /// @returns The current seed value
     u16 get_seed() const {
-        return seed_;
+        return mSeed;
     }
 
     /// Add entropy to this random number generator instance
     /// @param entropy The entropy value to add
     void add_entropy(u16 entropy) {
-        seed_ += entropy;
+        mSeed += entropy;
     }
 
     /// Get the minimum value this generator can produce

@@ -257,48 +257,48 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTimingRx &ti
 class GpioIsrRxImpl : public GpioIsrRx {
 public:
     GpioIsrRxImpl(gpio_num_t pin, size_t buffer_size)
-        : pin_(pin)
-        , buffer_size_(buffer_size)
-        , receive_done_(false)
-        , edges_captured_(0)
-        , start_time_us_(0)
-        , last_edge_time_ns_(0)
-        , edge_buffer_()
-        , isr_installed_(false)
-        , signal_range_min_ns_(100)
-        , signal_range_max_ns_(100000)
-        , skip_counter_(0)
+        : mPin(pin)
+        , mBufferSize(buffer_size)
+        , mReceiveDone(false)
+        , mEdgesCaptured(0)
+        , mStartTimeUs(0)
+        , mLastEdgeTimeNs(0)
+        , mEdgeBuffer()
+        , mIsrInstalled(false)
+        , mSignalRangeMinNs(100)
+        , mSignalRangeMaxNs(100000)
+        , mSkipCounter(0)
     {
-        FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(pin_)
-               << " buffer_size=" << buffer_size_);
+        FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(mPin)
+               << " buffer_size=" << mBufferSize);
     }
 
     ~GpioIsrRxImpl() override {
-        if (isr_installed_) {
+        if (mIsrInstalled) {
             FL_DBG("Removing GPIO ISR handler");
-            gpio_isr_handler_remove(pin_);
-            isr_installed_ = false;
+            gpio_isr_handler_remove(mPin);
+            mIsrInstalled = false;
         }
     }
 
     bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
         // Store signal range parameters for noise filtering and idle detection
-        signal_range_min_ns_ = signal_range_min_ns;
-        signal_range_max_ns_ = signal_range_max_ns;
-        skip_counter_ = skip_signals;
+        mSignalRangeMinNs = signal_range_min_ns;
+        mSignalRangeMaxNs = signal_range_max_ns;
+        mSkipCounter = skip_signals;
 
-        FL_DBG("GPIO ISR RX begin: signal_range_min=" << signal_range_min_ns_
-               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns, skip_signals=" << skip_signals);
+        FL_DBG("GPIO ISR RX begin: signal_range_min=" << mSignalRangeMinNs
+               << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns, skip_signals=" << skip_signals);
 
         // If already initialized, just re-arm the receiver for a new capture
-        if (isr_installed_) {
+        if (mIsrInstalled) {
             FL_DBG("GPIO ISR already initialized, re-arming receiver");
 
             // Clear receive state
             clear();
 
             // Re-enable GPIO interrupt
-            gpio_intr_enable(pin_);
+            gpio_intr_enable(mPin);
 
             FL_DBG("GPIO ISR receiver re-armed and ready");
             return true;
@@ -310,7 +310,7 @@ public:
 
         // Configure GPIO
         gpio_config_t io_conf = {};
-        io_conf.pin_bit_mask = (1ULL << pin_);
+        io_conf.pin_bit_mask = (1ULL << mPin);
         io_conf.mode = GPIO_MODE_INPUT;
         io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
         io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
@@ -339,40 +339,40 @@ public:
         }
 
         // Allocate edge buffer
-        edge_buffer_.clear();
-        edge_buffer_.reserve(buffer_size_);
-        for (size_t i = 0; i < buffer_size_; i++) {
-            edge_buffer_.push_back({0, 0});
+        mEdgeBuffer.clear();
+        mEdgeBuffer.reserve(mBufferSize);
+        for (size_t i = 0; i < mBufferSize; i++) {
+            mEdgeBuffer.push_back({0, 0});
         }
 
         // Add ISR handler for specific GPIO pin
-        err = gpio_isr_handler_add(pin_, gpioIsrHandler, this);
+        err = gpio_isr_handler_add(mPin, gpioIsrHandler, this);
         if (err != ESP_OK) {
             FL_WARN("Failed to add GPIO ISR handler: " << static_cast<int>(err));
             return false;
         }
 
-        isr_installed_ = true;
+        mIsrInstalled = true;
         FL_DBG("GPIO ISR handler added successfully");
 
         // Record start time for relative timestamps
-        start_time_us_ = esp_timer_get_time();
+        mStartTimeUs = esp_timer_get_time();
 
         FL_DBG("GPIO ISR receiver armed and ready");
         return true;
     }
 
     bool finished() const override {
-        return receive_done_;
+        return mReceiveDone;
     }
 
     GpioIsrRxWaitResult wait(uint32_t timeout_ms) override {
-        if (!isr_installed_) {
+        if (!mIsrInstalled) {
             FL_WARN("wait(): GPIO ISR not initialized");
             return GpioIsrRxWaitResult::TIMEOUT;
         }
 
-        FL_DBG("wait(): buffer_size=" << buffer_size_ << ", timeout_ms=" << timeout_ms);
+        FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
 
         // Convert timeout to microseconds for comparison
         int64_t timeout_us = static_cast<int64_t>(timeout_ms) * 1000;
@@ -383,14 +383,14 @@ public:
             int64_t elapsed_us = esp_timer_get_time() - wait_start_us;
 
             // Check if buffer filled (success condition)
-            if (edges_captured_ >= buffer_size_) {
-                FL_DBG("wait(): buffer filled (" << edges_captured_ << ")");
+            if (mEdgesCaptured >= mBufferSize) {
+                FL_DBG("wait(): buffer filled (" << mEdgesCaptured << ")");
                 return GpioIsrRxWaitResult::SUCCESS;
             }
 
             // Check wait timeout
             if (elapsed_us >= timeout_us) {
-                FL_WARN("wait(): timeout after " << elapsed_us << "us, captured " << edges_captured_ << " edges");
+                FL_WARN("wait(): timeout after " << elapsed_us << "us, captured " << mEdgesCaptured << " edges");
                 return GpioIsrRxWaitResult::TIMEOUT;
             }
 
@@ -398,15 +398,15 @@ public:
         }
 
         // Receive completed (50µs timeout)
-        FL_DBG("wait(): receive done, count=" << edges_captured_);
+        FL_DBG("wait(): receive done, count=" << mEdgesCaptured);
         return GpioIsrRxWaitResult::SUCCESS;
     }
 
     fl::span<const EdgeTimestamp> getEdges() const override {
-        if (edge_buffer_.empty()) {
+        if (mEdgeBuffer.empty()) {
             return fl::span<const EdgeTimestamp>();
         }
-        return fl::span<const EdgeTimestamp>(edge_buffer_.data(), edges_captured_);
+        return fl::span<const EdgeTimestamp>(mEdgeBuffer.data(), mEdgesCaptured);
     }
 
     fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
@@ -427,11 +427,11 @@ private:
      * @brief Clear receive state (internal method)
      */
     void clear() {
-        receive_done_ = false;
-        edges_captured_ = 0;
-        last_edge_time_ns_ = 0;
-        // skip_counter_ is set in begin(), not here
-        start_time_us_ = esp_timer_get_time();
+        mReceiveDone = false;
+        mEdgesCaptured = 0;
+        mLastEdgeTimeNs = 0;
+        // mSkipCounter is set in begin(), not here
+        mStartTimeUs = esp_timer_get_time();
         FL_DBG("GPIO ISR RX state cleared");
     }
 
@@ -446,7 +446,7 @@ private:
      */
     inline void IRAM_ATTR disarmISR() {
         // Disable GPIO interrupt
-        gpio_intr_disable(pin_);
+        gpio_intr_disable(mPin);
     }
 
     /**
@@ -469,26 +469,26 @@ private:
         }
 
         // Cache volatile reads - single read per variable
-        size_t edges_captured = self->edges_captured_;
-        int64_t start_time_us = self->start_time_us_;
-        uint32_t last_edge_time_ns = self->last_edge_time_ns_;
-        uint32_t skip_counter = self->skip_counter_;
+        size_t edges_captured = self->mEdgesCaptured;
+        int64_t start_time_us = self->mStartTimeUs;
+        uint32_t last_edge_time_ns = self->mLastEdgeTimeNs;
+        uint32_t skip_counter = self->mSkipCounter;
 
         // Get current timestamp
         int64_t now_us = esp_timer_get_time();
 
         // First edge: initialize start time
         if (edges_captured == 0) {
-            self->start_time_us_ = now_us;
+            self->mStartTimeUs = now_us;
             start_time_us = now_us;
         }
 
         // Inline timeout check - avoid function call overhead
         // Idle timeout = signal_range_max_ns converted to microseconds
-        int64_t timeout_us = static_cast<int64_t>(self->signal_range_max_ns_ / 1000);
+        int64_t timeout_us = static_cast<int64_t>(self->mSignalRangeMaxNs / 1000);
         if ((now_us - start_time_us) >= timeout_us) {
-            gpio_intr_disable(self->pin_);
-            self->receive_done_ = true;
+            gpio_intr_disable(self->mPin);
+            self->mReceiveDone = true;
             return;
         }
 
@@ -501,55 +501,55 @@ private:
             uint32_t pulse_width_ns = current_time_ns - last_edge_time_ns;
 
             // Reject noise/glitches shorter than minimum threshold
-            if (pulse_width_ns < self->signal_range_min_ns_) {
+            if (pulse_width_ns < self->mSignalRangeMinNs) {
                 return;
             }
         }
 
         // Update last edge time (shared by skip and capture)
-        self->last_edge_time_ns_ = current_time_ns;
+        self->mLastEdgeTimeNs = current_time_ns;
 
         // Handle skip counter
         if (skip_counter > 0) {
-            self->skip_counter_ = skip_counter - 1;
+            self->mSkipCounter = skip_counter - 1;
             return;
         }
 
         // Fast path: check buffer full condition early
-        if (edges_captured >= self->buffer_size_) {
-            gpio_intr_disable(self->pin_);
-            self->receive_done_ = true;
+        if (edges_captured >= self->mBufferSize) {
+            gpio_intr_disable(self->mPin);
+            self->mReceiveDone = true;
             return;
         }
 
         // Capture edge: read GPIO level and store
-        int level = gpio_get_level(self->pin_);
+        int level = gpio_get_level(self->mPin);
 
         // Direct buffer write using cached index
-        self->edge_buffer_[edges_captured].time_ns = current_time_ns;
-        self->edge_buffer_[edges_captured].level = static_cast<uint8_t>(level);
+        self->mEdgeBuffer[edges_captured].time_ns = current_time_ns;
+        self->mEdgeBuffer[edges_captured].level = static_cast<uint8_t>(level);
 
         // Pre-increment and check if buffer now full
         size_t next_index = edges_captured + 1;
-        self->edges_captured_ = next_index;
+        self->mEdgesCaptured = next_index;
 
-        if (next_index >= self->buffer_size_) {
-            gpio_intr_disable(self->pin_);
-            self->receive_done_ = true;
+        if (next_index >= self->mBufferSize) {
+            gpio_intr_disable(self->mPin);
+            self->mReceiveDone = true;
         }
     }
 
-    gpio_num_t pin_;                              ///< GPIO pin for RX
-    size_t buffer_size_;                          ///< Buffer size for edge timestamps
-    volatile bool receive_done_;                  ///< Set by ISR when receive complete
-    volatile size_t edges_captured_;              ///< Number of edges captured (set by ISR)
-    volatile int64_t start_time_us_;              ///< Start time in microseconds (for relative timestamps)
-    volatile uint32_t last_edge_time_ns_;         ///< Last edge timestamp for pulse width calculation
-    fl::HeapVector<EdgeTimestamp> edge_buffer_;   ///< Pre-allocated edge buffer
-    bool isr_installed_;                          ///< True if ISR handler is installed
-    uint32_t signal_range_min_ns_;                ///< Minimum pulse width (noise filtering)
-    uint32_t signal_range_max_ns_;                ///< Maximum pulse width (idle detection)
-    uint32_t skip_counter_;                       ///< Runtime counter for skipping (decremented in ISR)
+    gpio_num_t mPin;                              ///< GPIO pin for RX
+    size_t mBufferSize;                          ///< Buffer size for edge timestamps
+    volatile bool mReceiveDone;                  ///< Set by ISR when receive complete
+    volatile size_t mEdgesCaptured;              ///< Number of edges captured (set by ISR)
+    volatile int64_t mStartTimeUs;              ///< Start time in microseconds (for relative timestamps)
+    volatile uint32_t mLastEdgeTimeNs;         ///< Last edge timestamp for pulse width calculation
+    fl::HeapVector<EdgeTimestamp> mEdgeBuffer;   ///< Pre-allocated edge buffer
+    bool mIsrInstalled;                          ///< True if ISR handler is installed
+    uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
+    uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
+    uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
 };
 
 // Factory method implementation

@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 // ============================================================================
 // PRECOMPILED HEADER FOR WASM BUILDS
 // ============================================================================
@@ -32,7 +34,7 @@
 // and platform abstractions. This is used by virtually 100% of builds.
 // FastLED.h already includes most commonly used headers, so we primarily
 // need this and emscripten-specific headers.
-#include "FastLED.h"
+#include "FastLED.h"  // ok include
 
 // ============================================================================
 // EMSCRIPTEN RUNTIME
@@ -52,8 +54,8 @@
 
 // Standard library headers used throughout FastLED
 #include <cstdio>      // printf, FILE operations
-#include <cstring>     // memcpy, memset, strlen
-#include <cstdlib>     // malloc, free, abs
+#include "ftl/cstring.h"     // memcpy, memset, strlen
+#include "ftl/cstdlib.h"     // malloc, free, abs
 
 // FastLED utility headers commonly used across the codebase
 #include "ftl/span.h"        // fl::span (non-owning array view)

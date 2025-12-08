@@ -450,7 +450,7 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
 
 // Iterator implementation
 vec2f Corkscrew::iterator::operator*() const {
-    return corkscrew_->at_no_wrap(static_cast<fl::u16>(position_));
+    return mCorkscrew->at_no_wrap(static_cast<fl::u16>(mPosition));
 }
 
 fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {

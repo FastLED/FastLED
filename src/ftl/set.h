@@ -299,7 +299,7 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
 template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set {
   private:
     using TreeType = fl::SetRedBlackTree<Key, fl::less<Key>, Allocator>;
-    TreeType tree_;
+    TreeType mTree;
     
   public:
     // Standard set typedefs
@@ -324,55 +324,55 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     set& operator=(set&& other) = default;
     
     // Iterators
-    const_iterator begin() const { return tree_.begin(); }
-    const_iterator end() const { return tree_.end(); }
-    const_iterator cbegin() const { return tree_.cbegin(); }
-    const_iterator cend() const { return tree_.cend(); }
+    const_iterator begin() const { return mTree.begin(); }
+    const_iterator end() const { return mTree.end(); }
+    const_iterator cbegin() const { return mTree.cbegin(); }
+    const_iterator cend() const { return mTree.cend(); }
     
     // Capacity
-    bool empty() const { return tree_.empty(); }
-    size_type size() const { return tree_.size(); }
-    size_type max_size() const { return tree_.max_size(); }
+    bool empty() const { return mTree.empty(); }
+    size_type size() const { return mTree.size(); }
+    size_type max_size() const { return mTree.max_size(); }
     
     // Modifiers
-    void clear() { tree_.clear(); }
+    void clear() { mTree.clear(); }
     
     fl::pair<const_iterator, bool> insert(const Key& key) {
-        return tree_.insert(key);
+        return mTree.insert(key);
     }
     
     fl::pair<const_iterator, bool> insert(Key&& key) {
-        return tree_.insert(fl::move(key));
+        return mTree.insert(fl::move(key));
     }
     
     template<typename... Args>
     fl::pair<const_iterator, bool> emplace(Args&&... args) {
-        return tree_.emplace(fl::forward<Args>(args)...);
+        return mTree.emplace(fl::forward<Args>(args)...);
     }
     
     const_iterator erase(const_iterator pos) {
-        return tree_.erase(pos);
+        return mTree.erase(pos);
     }
     
     size_type erase(const Key& key) {
-        return tree_.erase(key);
+        return mTree.erase(key);
     }
     
     void swap(set& other) {
-        tree_.swap(other.tree_);
+        mTree.swap(other.mTree);
     }
     
     // Lookup
     size_type count(const Key& key) const {
-        return tree_.count(key);
+        return mTree.count(key);
     }
     
     const_iterator find(const Key& key) const {
-        return tree_.find(key);
+        return mTree.find(key);
     }
     
     bool contains(const Key& key) const {
-        return tree_.contains(key);
+        return mTree.contains(key);
     }
     
     bool has(const Key& key) const {
@@ -380,15 +380,15 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     }
     
     fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
-        return tree_.equal_range(key);
+        return mTree.equal_range(key);
     }
     
     const_iterator lower_bound(const Key& key) const {
-        return tree_.lower_bound(key);
+        return mTree.lower_bound(key);
     }
     
     const_iterator upper_bound(const Key& key) const {
-        return tree_.upper_bound(key);
+        return mTree.upper_bound(key);
     }
 };
 

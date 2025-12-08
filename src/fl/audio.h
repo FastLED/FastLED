@@ -77,30 +77,30 @@ class SoundLevelMeter {
     }
 
     /// @returns most recent block's level in dBFS (≤ 0)
-    double getDBFS() const { return current_dbfs_; }
+    double getDBFS() const { return mCurrentDbfs; }
 
     /// @returns calibrated estimate in dB SPL
-    double getSPL() const { return current_spl_; }
+    double getSPL() const { return mCurrentSpl; }
 
     /// change your known noise-floor SPL at runtime
     void setFloorSPL(double spl_floor) {
-        spl_floor_ = spl_floor;
-        offset_ = spl_floor_ - dbfs_floor_global_;
+        mSplFloor = spl_floor;
+        mOffset = mSplFloor - mDbfsFloorGlobal;
     }
 
     /// reset so the next quiet block will re-initialize your floor
     void resetFloor() {
-        dbfs_floor_global_ = FL_INFINITY_DOUBLE; // infinity<double>
-        offset_ = 0.0;
+        mDbfsFloorGlobal = FL_INFINITY_DOUBLE; // infinity<double>
+        mOffset = 0.0;
     }
 
   private:
-    double spl_floor_;         // e.g. 33.0 dB SPL
-    double smoothing_alpha_;   // 0 = pure min, >0 = slow adapt
-    double dbfs_floor_global_; // lowest dBFS seen so far
-    double offset_;            // spl_floor_ − dbfs_floor_global_
-    double current_dbfs_;      // last block's dBFS
-    double current_spl_;       // last block's estimated SPL
+    double mSplFloor;         // e.g. 33.0 dB SPL
+    double mSmoothingAlpha;   // 0 = pure min, >0 = slow adapt
+    double mDbfsFloorGlobal; // lowest dBFS seen so far
+    double mOffset;            // mSplFloor − mDbfsFloorGlobal
+    double mCurrentDbfs;      // last block's dBFS
+    double mCurrentSpl;       // last block's estimated SPL
 };
 
 // Implementation details.

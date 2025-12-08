@@ -21,92 +21,92 @@ namespace fl {
 
 class StubFileHandle : public FileHandle {
 private:
-    std::ifstream file_;
-    std::string path_;
-    std::size_t size_;
-    std::size_t pos_;
+    std::ifstream mFile;
+    std::string mPath;
+    std::size_t mSize;
+    std::size_t mPos;
 
 public:
-    StubFileHandle(const std::string& path) : path_(path), pos_(0) {
-        file_.open(path, std::ios::binary | std::ios::ate);
-        if (file_.is_open()) {
-            size_ = file_.tellg();
-            file_.seekg(0, std::ios::beg);
+    StubFileHandle(const std::string& path) : mPath(path), mPos(0) {
+        mFile.open(path, std::ios::binary | std::ios::ate);
+        if (mFile.is_open()) {
+            mSize = mFile.tellg();
+            mFile.seekg(0, std::ios::beg);
         } else {
-            size_ = 0;
+            mSize = 0;
         }
     }
 
     ~StubFileHandle() override {
-        if (file_.is_open()) {
-            file_.close();
+        if (mFile.is_open()) {
+            mFile.close();
         }
     }
 
     bool available() const override {
-        return file_.is_open() && pos_ < size_;
+        return mFile.is_open() && mPos < mSize;
     }
 
     fl::size size() const override {
-        return size_;
+        return mSize;
     }
 
     fl::size read(u8 *dst, fl::size bytesToRead) override {
-        if (!file_.is_open() || pos_ >= size_) {
+        if (!mFile.is_open() || mPos >= mSize) {
             return 0;
         }
 
-        fl::size bytesAvailable = size_ - pos_;
+        fl::size bytesAvailable = mSize - mPos;
         fl::size bytesToActuallyRead = (bytesToRead < bytesAvailable) ? bytesToRead : bytesAvailable;
 
-        file_.read(reinterpret_cast<char*>(dst), bytesToActuallyRead);
-        fl::size bytesActuallyRead = file_.gcount();
-        pos_ += bytesActuallyRead;
+        mFile.read(reinterpret_cast<char*>(dst), bytesToActuallyRead);
+        fl::size bytesActuallyRead = mFile.gcount();
+        mPos += bytesActuallyRead;
 
         return bytesActuallyRead;
     }
 
     fl::size pos() const override {
-        return pos_;
+        return mPos;
     }
 
     const char* path() const override {
-        return path_.c_str();
+        return mPath.c_str();
     }
 
     bool seek(fl::size pos) override {
-        if (!file_.is_open() || pos > size_) {
+        if (!mFile.is_open() || pos > mSize) {
             return false;
         }
-        file_.seekg(pos, std::ios::beg);
-        pos_ = pos;
+        mFile.seekg(pos, std::ios::beg);
+        mPos = pos;
         return true;
     }
 
     void close() override {
-        if (file_.is_open()) {
-            file_.close();
+        if (mFile.is_open()) {
+            mFile.close();
         }
     }
 
     bool valid() const override {
-        return file_.is_open();
+        return mFile.is_open();
     }
 };
 
 class StubFileSystem : public FsImpl {
 private:
-    std::string root_path_;
+    std::string mRootPath;
 
 public:
     StubFileSystem() = default;
     ~StubFileSystem() override = default;
 
     void setRootPath(const std::string& path) {
-        root_path_ = path;
+        mRootPath = path;
         // Ensure the path ends with a directory separator
-        if (!root_path_.empty() && root_path_.back() != '/' && root_path_.back() != '\\') {
-            root_path_.append("/");
+        if (!mRootPath.empty() && mRootPath.back() != '/' && mRootPath.back() != '\\') {
+            mRootPath.append("/");
         }
     }
 
@@ -156,7 +156,7 @@ public:
     }
 
     FileHandlePtr openRead(const char* path) override {
-        std::string full_path = root_path_;
+        std::string full_path = mRootPath;
         full_path.append(path);
 
         // Convert forward slashes to platform-appropriate separators

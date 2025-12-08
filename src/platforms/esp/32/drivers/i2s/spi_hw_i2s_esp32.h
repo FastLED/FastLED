@@ -196,17 +196,17 @@ private:
     // Member Variables
     // ========================================================================
 
-    I2SClockBasedLedDriver driver_;      ///< Yves' I2S driver instance
-    uint8_t* interleaved_buffer_;        ///< Interleaved buffer for Yves driver
-    size_t buffer_size_;                 ///< Size of interleaved buffer in bytes
-    DMABuffer current_buffer_;           ///< Current DMABuffer from acquireDMABuffer() (data copied to interleaved_buffer_ in transmit())
-    fl::vector<int> data_pins_;          ///< Copy of data pin numbers
-    int clock_pin_;                      ///< Clock pin number
-    uint32_t clock_speed_hz_;            ///< Clock speed in Hz
-    int num_strips_;                     ///< Number of strips (lane count)
-    int num_leds_per_strip_;             ///< Number of LEDs per strip (0 until first write)
-    int bus_id_;                         ///< Bus ID (always 0 for I2S0)
-    bool is_initialized_;                ///< True if initialization succeeded
+    I2SClockBasedLedDriver mDriver;      ///< Yves' I2S driver instance
+    uint8_t* mInterleavedBuffer;        ///< Interleaved buffer for Yves driver
+    size_t mBufferSize;                 ///< Size of interleaved buffer in bytes
+    DMABuffer mCurrentBuffer;           ///< Current DMABuffer from acquireDMABuffer() (data copied to mInterleavedBuffer in transmit())
+    fl::vector<int> mDataPins;          ///< Copy of data pin numbers
+    int mClockPin;                      ///< Clock pin number
+    uint32_t mClockSpeedHz;            ///< Clock speed in Hz
+    int mNumStrips;                     ///< Number of strips (lane count)
+    int mNumLedsPerStrip;             ///< Number of LEDs per strip (0 until first write)
+    int mBusId;                         ///< Bus ID (always 0 for I2S0)
+    bool mIsInitialized;                ///< True if initialization succeeded
 };
 
 } // namespace fl

@@ -96,7 +96,7 @@ public:
 
 private:
     class Impl;
-    fl::unique_ptr<Impl> impl_;
+    fl::unique_ptr<Impl> mImpl;
 };
 
 // Main JPEG codec interface

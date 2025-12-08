@@ -134,9 +134,9 @@ float AudioSample::rms() const {
 }
 
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
-    : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
-      dbfs_floor_global_(FL_INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
-      current_spl_(spl_floor) {}
+    : mSplFloor(spl_floor), mSmoothingAlpha(smoothing_alpha),
+      mDbfsFloorGlobal(FL_INFINITY_DOUBLE), mOffset(0.0), mCurrentDbfs(0.0),
+      mCurrentSpl(spl_floor) {}
 
 void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::size count) {
     // 1) compute block power → dBFS
@@ -147,21 +147,21 @@ void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::size count) {
     }
     double p = sum_sq / count; // mean power
     double dbfs = 10.0 * log10(p + 1e-12);
-    current_dbfs_ = dbfs;
+    mCurrentDbfs = dbfs;
 
     // 2) update global floor (with optional smoothing)
-    if (dbfs < dbfs_floor_global_) {
-        if (smoothing_alpha_ <= 0.0) {
-            dbfs_floor_global_ = dbfs;
+    if (dbfs < mDbfsFloorGlobal) {
+        if (mSmoothingAlpha <= 0.0) {
+            mDbfsFloorGlobal = dbfs;
         } else {
-            dbfs_floor_global_ = smoothing_alpha_ * dbfs +
-                                 (1.0 - smoothing_alpha_) * dbfs_floor_global_;
+            mDbfsFloorGlobal = mSmoothingAlpha * dbfs +
+                                 (1.0 - mSmoothingAlpha) * mDbfsFloorGlobal;
         }
-        offset_ = spl_floor_ - dbfs_floor_global_;
+        mOffset = mSplFloor - mDbfsFloorGlobal;
     }
 
     // 3) estimate SPL
-    current_spl_ = dbfs + offset_;
+    mCurrentSpl = dbfs + mOffset;
 }
 
 void AudioSample::fft(FFTBins *out) const {

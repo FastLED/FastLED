@@ -112,18 +112,18 @@ struct ControlBlock : public ControlBlockBase {
 template<typename T>
 class shared_ptr {
 private:
-    T* ptr_;
+    T* mPtr;
     detail::ControlBlockBase* control_block_;
     
     // Internal constructor for make_shared and weak_ptr conversion
     shared_ptr(T* ptr, detail::ControlBlockBase* control_block, detail::make_shared_tag) 
-        : ptr_(ptr), control_block_(control_block) {
+        : mPtr(ptr), control_block_(control_block) {
         // Control block was created with reference count 1, no need to increment
     }
     
     // Internal constructor for no-tracking
     shared_ptr(T* ptr, detail::ControlBlockBase* control_block, detail::no_tracking_tag) 
-        : ptr_(ptr), control_block_(control_block) {
+        : mPtr(ptr), control_block_(control_block) {
         // Control block created with no_tracking=true, no reference increment needed
     }
         
@@ -149,32 +149,32 @@ public:
     using weak_type = weak_ptr<T>;
     
     // Default constructor
-    shared_ptr() noexcept : ptr_(nullptr), control_block_(nullptr) {}
-    shared_ptr(fl::nullptr_t) noexcept : ptr_(nullptr), control_block_(nullptr) {}
+    shared_ptr() noexcept : mPtr(nullptr), control_block_(nullptr) {}
+    shared_ptr(fl::nullptr_t) noexcept : mPtr(nullptr), control_block_(nullptr) {}
     
 
     
     // Copy constructor
-    shared_ptr(const shared_ptr& other) : ptr_(other.ptr_), control_block_(other.control_block_) {
+    shared_ptr(const shared_ptr& other) : mPtr(other.mPtr), control_block_(other.control_block_) {
         acquire();
     }
     
     // Converting copy constructor (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
     template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
-    shared_ptr(const shared_ptr<Y>& other) : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
+    shared_ptr(const shared_ptr<Y>& other) : mPtr(static_cast<T*>(other.mPtr)), control_block_(other.control_block_) {
         acquire();
     }
     
     // Move constructor
-    shared_ptr(shared_ptr&& other) noexcept : ptr_(other.ptr_), control_block_(other.control_block_) {
-        other.ptr_ = nullptr;
+    shared_ptr(shared_ptr&& other) noexcept : mPtr(other.mPtr), control_block_(other.control_block_) {
+        other.mPtr = nullptr;
         other.control_block_ = nullptr;
     }
     
     // Converting move constructor (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
     template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
-    shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
-        other.ptr_ = nullptr;
+    shared_ptr(shared_ptr<Y>&& other) noexcept : mPtr(static_cast<T*>(other.mPtr)), control_block_(other.control_block_) {
+        other.mPtr = nullptr;
         other.control_block_ = nullptr;
     }
     
@@ -184,7 +184,7 @@ public:
     
     // Destructor
     ~shared_ptr() {
-        //FASTLED_WARN("shared_ptr destructor called, ptr_=" << ptr_ 
+        //FASTLED_WARN("shared_ptr destructor called, mPtr=" << mPtr 
         //          << ", control_block_=" << control_block_);
         reset();
     }
@@ -193,7 +193,7 @@ public:
     shared_ptr& operator=(const shared_ptr& other) {
         if (this != &other) {
             reset();
-            ptr_ = other.ptr_;
+            mPtr = other.mPtr;
             control_block_ = other.control_block_;
             acquire();
         }
@@ -204,7 +204,7 @@ public:
     template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
     shared_ptr& operator=(const shared_ptr<Y>& other) {
         reset();
-        ptr_ = static_cast<T*>(other.ptr_);
+        mPtr = static_cast<T*>(other.mPtr);
         control_block_ = other.control_block_;
         acquire();
         return *this;
@@ -223,9 +223,9 @@ public:
     shared_ptr& operator=(shared_ptr<Y>&& other) noexcept {
         if (static_cast<void*>(this) != static_cast<void*>(&other)) {
             reset();
-            ptr_ = static_cast<T*>(other.ptr_);
+            mPtr = static_cast<T*>(other.mPtr);
             control_block_ = other.control_block_;
-            other.ptr_ = nullptr;
+            other.mPtr = nullptr;
             other.control_block_ = nullptr;
         }
         return *this;
@@ -233,7 +233,7 @@ public:
     
     // Modifiers
     void reset() noexcept {
-        //FASTLED_WARN("shared_ptr::reset() called: ptr_=" << ptr_ 
+        //FASTLED_WARN("shared_ptr::reset() called: mPtr=" << mPtr 
         //          << ", control_block_=" << control_block_);
         if (control_block_) {
             //FASTLED_WARN("control_block exists, calling remove_shared_ref()");
@@ -246,7 +246,7 @@ public:
                 }
             }
         }
-        ptr_ = nullptr;
+        mPtr = nullptr;
         control_block_ = nullptr;
     }
 
@@ -256,12 +256,12 @@ public:
     }
 
     void swap(shared_ptr& other) noexcept {
-        fl::swap(ptr_, other.ptr_);
+        fl::swap(mPtr, other.mPtr);
         fl::swap(control_block_, other.control_block_);
     }
 
     void swap(shared_ptr&& other) noexcept {
-        fl::swap(ptr_, other.ptr_);
+        fl::swap(mPtr, other.mPtr);
         fl::swap(control_block_, other.control_block_);
     }
 
@@ -280,12 +280,12 @@ public:
 
     
     // Observers
-    T* get() const noexcept { return ptr_; }
+    T* get() const noexcept { return mPtr; }
     
-    T& operator*() const noexcept { return *ptr_; }
-    T* operator->() const noexcept { return ptr_; }
+    T& operator*() const noexcept { return *mPtr; }
+    T* operator->() const noexcept { return mPtr; }
     
-    T& operator[](ptrdiff_t idx) const { return ptr_[idx]; }
+    T& operator[](ptrdiff_t idx) const { return mPtr[idx]; }
     
     // NEW: use_count returns 0 for no-tracking shared_ptrs
     long use_count() const noexcept {
@@ -298,7 +298,7 @@ public:
     
     bool unique() const noexcept { return use_count() == 1; }
     
-    explicit operator bool() const noexcept { return ptr_ != nullptr; }
+    explicit operator bool() const noexcept { return mPtr != nullptr; }
     
     // NEW: Check if this is a no-tracking shared_ptr
     bool is_no_tracking() const noexcept {
@@ -308,19 +308,19 @@ public:
     // Comparison operators for nullptr only (to avoid ambiguity with non-member operators)
     
     bool operator==(fl::nullptr_t) const noexcept {
-        return ptr_ == nullptr;
+        return mPtr == nullptr;
     }
     
     bool operator!=(fl::nullptr_t) const noexcept {
-        return ptr_ != nullptr;
+        return mPtr != nullptr;
     }
 
 private:
 
     // Constructor from raw pointer with default deleter
     template<typename Y>
-    explicit shared_ptr(Y* ptr) : ptr_(ptr) {
-        if (ptr_) {
+    explicit shared_ptr(Y* ptr) : mPtr(ptr) {
+        if (mPtr) {
             control_block_ = new detail::ControlBlock<Y>(ptr, detail::default_delete<Y>{});
         } else {
             control_block_ = nullptr;
@@ -329,9 +329,9 @@ private:
     
     // Constructor from raw pointer with custom deleter
     template<typename Y, typename Deleter>
-    shared_ptr(Y* ptr, Deleter d) : ptr_(ptr) {
-        if (ptr_) {
-            control_block_ = new detail::ControlBlock<Y, Deleter>(ptr_, d);
+    shared_ptr(Y* ptr, Deleter d) : mPtr(ptr) {
+        if (mPtr) {
+            control_block_ = new detail::ControlBlock<Y, Deleter>(mPtr, d);
         } else {
             control_block_ = nullptr;
         }

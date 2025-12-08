@@ -235,7 +235,7 @@ private:
 
     // variant to store any of our callable types inline (with heap fallback for large lambdas)
     using Storage = variant<fl::shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
-    Storage storage_;
+    Storage mStorage;
 
     // Helper function to handle default return value for void and non-void types
     template<typename ReturnType>
@@ -254,15 +254,15 @@ public:
     function() = default;
     
     // Copy constructor - properly handle variant alignment
-    function(const function& other) : storage_(other.storage_) {}
+    function(const function& other) : mStorage(other.mStorage) {}
     
     // Move constructor - properly handle variant alignment  
-    function(function&& other) noexcept : storage_(fl::move(other.storage_)) {}
+    function(function&& other) noexcept : mStorage(fl::move(other.mStorage)) {}
     
     // Copy assignment
     function& operator=(const function& other) {
         if (this != &other) {
-            storage_ = other.storage_;
+            mStorage = other.mStorage;
         }
         return *this;
     }
@@ -270,14 +270,14 @@ public:
     // Move assignment
     function& operator=(function&& other) noexcept {
         if (this != &other) {
-            storage_ = fl::move(other.storage_);
+            mStorage = fl::move(other.mStorage);
         }
         return *this;
     }
     
     // 1) Free function constructor - stored inline!
     function(R (*fp)(Args...)) {
-        storage_ = FreeFunctionCallable(fp);
+        mStorage = FreeFunctionCallable(fp);
     }
     
     // 2) Lambda/functor constructor - inline if small, heap if large
@@ -290,26 +290,26 @@ public:
     // 3) non‑const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...), C* obj) {
-        storage_ = NonConstMemberCallable(obj, mf);
+        mStorage = NonConstMemberCallable(obj, mf);
     }
     
     // 4) const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...) const, const C* obj) {
-        storage_ = ConstMemberCallable(obj, mf);
+        mStorage = ConstMemberCallable(obj, mf);
     }
     
     R operator()(Args... args) const {
         // Direct dispatch using type checking - efficient and simple
-        if (auto* heap_callable = storage_.template ptr<fl::shared_ptr<CallableBase>>()) {
+        if (auto* heap_callable = mStorage.template ptr<fl::shared_ptr<CallableBase>>()) {
             return (*heap_callable)->invoke(args...);
-        } else if (auto* free_func = storage_.template ptr<FreeFunctionCallable>()) {
+        } else if (auto* free_func = mStorage.template ptr<FreeFunctionCallable>()) {
             return free_func->invoke(args...);
-        } else if (auto* inlined_lambda = storage_.template ptr<InlinedLambda>()) {
+        } else if (auto* inlined_lambda = mStorage.template ptr<InlinedLambda>()) {
             return inlined_lambda->invoke(args...);
-        } else if (auto* nonconst_member = storage_.template ptr<NonConstMemberCallable>()) {
+        } else if (auto* nonconst_member = mStorage.template ptr<NonConstMemberCallable>()) {
             return nonconst_member->invoke(args...);
-        } else if (auto* const_member = storage_.template ptr<ConstMemberCallable>()) {
+        } else if (auto* const_member = mStorage.template ptr<ConstMemberCallable>()) {
             return const_member->invoke(args...);
         }
         // This should never happen if the function is properly constructed
@@ -317,17 +317,17 @@ public:
     }
     
     explicit operator bool() const {
-        return !storage_.empty();
+        return !mStorage.empty();
     }
     
     void clear() {
-        storage_ = Storage{};  // Reset to empty variant
+        mStorage = Storage{};  // Reset to empty variant
     }
     
     bool operator==(const function& o) const {
         // For simplicity, just check if both are empty or both are non-empty
         // Full equality would require more complex comparison logic
-        return storage_.empty() == o.storage_.empty();
+        return mStorage.empty() == o.mStorage.empty();
     }
     
     bool operator!=(const function& o) const {
@@ -338,13 +338,13 @@ private:
     // Helper for small lambdas/functors - inline storage
     template <typename F>
     void construct_lambda_or_functor(F f, true_type /* small */) {
-        storage_ = InlinedLambda(fl::move(f));
+        mStorage = InlinedLambda(fl::move(f));
     }
     
     // Helper for large lambdas/functors - heap storage
     template <typename F>
     void construct_lambda_or_functor(F f, false_type /* large */) {
-        storage_ = fl::shared_ptr<CallableBase>(fl::make_shared<Callable<F>>(fl::move(f)));
+        mStorage = fl::shared_ptr<CallableBase>(fl::make_shared<Callable<F>>(fl::move(f)));
     }
 };
 
@@ -374,8 +374,8 @@ class function_list<void(Args...)> {
         FunctionType fn;
 
         FunctionEntry() : id(0), priority(0), fn() {}
-        FunctionEntry(int id_, int priority_, FunctionType fn_)
-            : id(id_), priority(priority_), fn(fn_) {}
+        FunctionEntry(int idParam, int priorityParam, FunctionType fnParam)
+            : id(idParam), priority(priorityParam), fn(fnParam) {}
     };
 
     using FunctionVector = fl::vector<FunctionEntry>;

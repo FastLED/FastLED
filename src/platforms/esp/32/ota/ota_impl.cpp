@@ -621,14 +621,14 @@ httpd_handle_t startHttpServer(OTAHttpContext* ctx) {
 class ESP32OTA : public IOTA {
 public:
     ESP32OTA()
-        : ap_fallback_enabled_(false)
-        , http_server_(nullptr)
-        , failed_services_(0)
+        : mApFallbackEnabled(false)
+        , mHttpServer(nullptr)
+        , mFailedServices(0)
     {
-        http_context_.password = nullptr;
-        http_context_.progress_cb = &progress_cb_;
-        http_context_.error_cb = &error_cb_;
-        http_context_.before_reboot_cb = &before_reboot_cb_;
+        mHttpContext.password = nullptr;
+        mHttpContext.progress_cb = &mProgressCb;
+        mHttpContext.error_cb = &mErrorCb;
+        mHttpContext.before_reboot_cb = &mBeforeRebootCb;
     }
 
     ~ESP32OTA() override {
@@ -641,35 +641,35 @@ public:
         stopHttpServer();
 
         // Reset failure tracking
-        failed_services_ = 0;
+        mFailedServices = 0;
 
         // Store configuration strings safely
-        hostname_ = hostname ? hostname : "";
-        password_ = password ? password : "";
-        http_context_.password = password_.c_str();
+        mHostname = hostname ? hostname : "";
+        mPassword = password ? password : "";
+        mHttpContext.password = mPassword.c_str();
 
         // Connect to Wi-Fi using Arduino WiFi library (async mode)
         WiFi.mode(WIFI_STA);
-        WiFi.setHostname(hostname_.c_str());
+        WiFi.setHostname(mHostname.c_str());
         WiFi.begin(ssid, wifi_pass);
 
         // Async mode: Return immediately, user polls isConnected()
         // Note: We initialize services even if not connected yet
 
         // Initialize mDNS
-        if (!initMDNS(hostname_.c_str())) {
-            FL_WARN("mDNS init failed - device won't be discoverable at " << hostname_.c_str() << ".local");
-            failed_services_ |= (uint8_t)fl::OTAService::MDNS_FAILED;
+        if (!initMDNS(mHostname.c_str())) {
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
+            mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup ArduinoOTA
         setupArduinoOTA();
 
         // Start HTTP server for Web OTA
-        http_server_ = startHttpServer(&http_context_);
-        if (!http_server_) {
+        mHttpServer = startHttpServer(&mHttpContext);
+        if (!mHttpServer) {
             FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
-            failed_services_ |= (uint8_t)fl::OTAService::HTTP_FAILED;
+            mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
@@ -680,30 +680,30 @@ public:
         stopHttpServer();
 
         // Reset failure tracking
-        failed_services_ = 0;
+        mFailedServices = 0;
 
         // Store configuration strings safely
-        hostname_ = hostname ? hostname : "";
-        password_ = password ? password : "";
-        http_context_.password = password_.c_str();
+        mHostname = hostname ? hostname : "";
+        mPassword = password ? password : "";
+        mHttpContext.password = mPassword.c_str();
 
         // Assume network is already configured
         // Just start OTA services
 
         // Initialize mDNS
-        if (!initMDNS(hostname_.c_str())) {
-            FL_WARN("mDNS init failed - device won't be discoverable at " << hostname_.c_str() << ".local");
-            failed_services_ |= (uint8_t)fl::OTAService::MDNS_FAILED;
+        if (!initMDNS(mHostname.c_str())) {
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
+            mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup ArduinoOTA
         setupArduinoOTA();
 
         // Start HTTP server for Web OTA
-        http_server_ = startHttpServer(&http_context_);
-        if (!http_server_) {
+        mHttpServer = startHttpServer(&mHttpContext);
+        if (!mHttpServer) {
             FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
-            failed_services_ |= (uint8_t)fl::OTAService::HTTP_FAILED;
+            mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
@@ -722,26 +722,26 @@ public:
             return false;
         }
 
-        ap_fallback_enabled_ = true;
-        ap_ssid_ = ap_ssid;
-        ap_pass_ = ap_pass ? ap_pass : "";
+        mApFallbackEnabled = true;
+        mApSsid = ap_ssid;
+        mApPass = ap_pass ? ap_pass : "";
         return true;
     }
 
     void onProgress(fl::function<void(size_t, size_t)> callback) override {
-        progress_cb_ = callback;
+        mProgressCb = callback;
     }
 
     void onError(fl::function<void(const char*)> callback) override {
-        error_cb_ = callback;
+        mErrorCb = callback;
     }
 
     void onState(fl::function<void(uint8_t)> callback) override {
-        state_cb_ = callback;
+        mStateCb = callback;
     }
 
     void onBeforeReboot(void (*callback)()) override {
-        before_reboot_cb_ = callback;
+        mBeforeRebootCb = callback;
     }
 
     void poll() override {
@@ -755,34 +755,34 @@ public:
     }
 
     uint8_t getFailedServices() const override {
-        return failed_services_;
+        return mFailedServices;
     }
 
 private:
     void setupArduinoOTA() {
-        ArduinoOTA.setHostname(hostname_.c_str());
-        ArduinoOTA.setPassword(password_.c_str());
+        ArduinoOTA.setHostname(mHostname.c_str());
+        ArduinoOTA.setPassword(mPassword.c_str());
 
         ArduinoOTA.onStart([this]() {
-            if (state_cb_) {
-                state_cb_(1);  // State: Start
+            if (mStateCb) {
+                mStateCb(1);  // State: Start
             }
         });
 
         ArduinoOTA.onEnd([this]() {
-            if (state_cb_) {
-                state_cb_(2);  // State: End
+            if (mStateCb) {
+                mStateCb(2);  // State: End
             }
         });
 
         ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
-            if (progress_cb_) {
-                progress_cb_(progress, total);
+            if (mProgressCb) {
+                mProgressCb(progress, total);
             }
         });
 
         ArduinoOTA.onError([this](ota_error_t error) {
-            if (error_cb_) {
+            if (mErrorCb) {
                 const char* msg = "Unknown error";
                 switch (error) {
                     case OTA_AUTH_ERROR: msg = "Auth Failed"; break;
@@ -791,7 +791,7 @@ private:
                     case OTA_RECEIVE_ERROR: msg = "Receive Failed"; break;
                     case OTA_END_ERROR: msg = "End Failed"; break;
                 }
-                error_cb_(msg);
+                mErrorCb(msg);
             }
         });
 
@@ -799,9 +799,9 @@ private:
     }
 
     void stopHttpServer() {
-        if (http_server_) {
-            httpd_stop(http_server_);
-            http_server_ = nullptr;
+        if (mHttpServer) {
+            httpd_stop(mHttpServer);
+            mHttpServer = nullptr;
         }
     }
 
@@ -811,26 +811,26 @@ private:
     }
 
     // Configuration - using StrN for safe string storage
-    fl::StrN<64> hostname_;
-    fl::StrN<64> password_;
-    fl::StrN<32> ap_ssid_;
-    fl::StrN<64> ap_pass_;
-    bool ap_fallback_enabled_;
+    fl::StrN<64> mHostname;
+    fl::StrN<64> mPassword;
+    fl::StrN<32> mApSsid;
+    fl::StrN<64> mApPass;
+    bool mApFallbackEnabled;
 
     // Callbacks
-    fl::function<void(size_t, size_t)> progress_cb_;
-    fl::function<void(const char*)> error_cb_;
-    fl::function<void(uint8_t)> state_cb_;
-    void (*before_reboot_cb_)() = nullptr;
+    fl::function<void(size_t, size_t)> mProgressCb;
+    fl::function<void(const char*)> mErrorCb;
+    fl::function<void(uint8_t)> mStateCb;
+    void (*mBeforeRebootCb)() = nullptr;
 
     // HTTP server handle
-    httpd_handle_t http_server_;
+    httpd_handle_t mHttpServer;
 
     // HTTP context (shared with handlers)
-    OTAHttpContext http_context_;
+    OTAHttpContext mHttpContext;
 
     // Service initialization status
-    uint8_t failed_services_;
+    uint8_t mFailedServices;
 };
 
 // ============================================================================

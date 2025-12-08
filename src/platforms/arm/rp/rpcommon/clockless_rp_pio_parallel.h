@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file clockless_rp_pio_parallel.h
+/// @file clockless_rp_mPioparallel.h
 /// @brief Parallel clockless LED output controller for RP2040/RP2350 using PIO
 ///
 /// This file provides a high-performance parallel LED strip driver that can control
@@ -102,31 +102,31 @@ private:
         bool enabled;
     };
 
-    StripInfo strips_[NUM_LANES];
-    u16 max_leds_;
+    StripInfo mStrips[NUM_LANES];
+    u16 mMaxLeds;
 
     // Hardware state
-    PIO pio_;
-    u32 sm_;
-    i32 dma_chan_;
-    u8* transpose_buffer_;
-    u32 buffer_size_;
+    PIO mPio;
+    u32 mSm;
+    i32 mDmaChan;
+    u8* mTransposeBuffer;
+    u32 mBufferSize;
 
     // Timing
     CMinWait<WAIT_TIME + ((T1_NS + T2_NS + T3_NS) * 32 * 4) / 1000> mWait;
 
 public:
     ParallelClocklessController()
-        : pio_(nullptr), sm_(-1), dma_chan_(-1),
-          transpose_buffer_(nullptr), buffer_size_(0), max_leds_(0)
+        : mPio(nullptr), mSm(-1), mDmaChan(-1),
+          mTransposeBuffer(nullptr), mBufferSize(0), mMaxLeds(0)
     {
-        fl::memset(strips_, 0, sizeof(strips_));
+        fl::memset(mStrips, 0, sizeof(mStrips));
     }
 
     /// @brief Check if the controller was successfully initialized
     /// @return true if initialization successful
     bool isInitialized() const {
-        return (pio_ != nullptr && dma_chan_ != -1 && transpose_buffer_ != nullptr);
+        return (mPio != nullptr && mDmaChan != -1 && mTransposeBuffer != nullptr);
     }
 
     ~ParallelClocklessController() {
@@ -142,52 +142,52 @@ public:
         if (lane >= NUM_LANES || leds == nullptr) {
             return false;
         }
-        strips_[lane].leds = leds;
-        strips_[lane].num_leds = num_leds;
-        strips_[lane].enabled = true;
-        if (num_leds > max_leds_) {
-            max_leds_ = num_leds;
+        mStrips[lane].leds = leds;
+        mStrips[lane].num_leds = num_leds;
+        mStrips[lane].enabled = true;
+        if (num_leds > mMaxLeds) {
+            mMaxLeds = num_leds;
         }
         return true;
     }
 
     /// @brief Initialize PIO, DMA, and buffers
     virtual void init() override {
-        if (max_leds_ == 0) {
+        if (mMaxLeds == 0) {
             return;
         }
 
         // Allocate transposition buffer
-        buffer_size_ = max_leds_ * 24;
-        transpose_buffer_ = reinterpret_cast<u8*>(malloc(buffer_size_));
-        if (transpose_buffer_ == nullptr) {
+        mBufferSize = mMaxLeds * 24;
+        mTransposeBuffer = reinterpret_cast<u8*>(malloc(mBufferSize));
+        if (mTransposeBuffer == nullptr) {
             return;
         }
 
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
         // Initialize GPIO pins
         for (int i = 0; i < NUM_LANES; i++) {
-            gpio_init(BASE_PIN + i);
-            gpio_set_dir(BASE_PIN + i, GPIO_OUT);
+            gmPioinit(BASE_PIN + i);
+            gmPioset_dir(BASE_PIN + i, GPIO_OUT);
         }
 
         // Try to claim PIO and DMA on actual hardware
         #if defined(PICO_RP2040)
-            pio_ = pio0;  // Simplified: just use pio0
+            mPio = pio0;  // Simplified: just use pio0
         #elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
-            pio_ = pio0;  // Simplified: just use pio0
+            mPio = pio0;  // Simplified: just use pio0
         #endif
 
-        sm_ = pio_claim_unused_sm(pio_, false);
-        if (sm_ == -1) {
-            free(transpose_buffer_);
+        mSm = mPioclaim_unused_sm(mPio, false);
+        if (mSm == -1) {
+            free(mTransposeBuffer);
             return;
         }
 
-        dma_chan_ = dma_claim_unused_channel(false);
-        if (dma_chan_ == -1) {
-            pio_sm_unclaim(pio_, sm_);
-            free(transpose_buffer_);
+        mDmaChan = dma_claim_unused_channel(false);
+        if (mDmaChan == -1) {
+            mPiomSmunclaim(mPio, mSm);
+            free(mTransposeBuffer);
             return;
         }
 #endif
@@ -196,7 +196,7 @@ public:
     /// @brief Output LED data to all strips
     /// @param pixels FastLED PixelController
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override {
-        if (pio_ == nullptr || transpose_buffer_ == nullptr) {
+        if (mPio == nullptr || mTransposeBuffer == nullptr) {
             return;
         }
 
@@ -221,7 +221,7 @@ private:
     /// @brief Prepare bit-transposed data from LED buffers
     void prepareTransposedData() {
         // Allocate temporary buffer for padded RGB data
-        u32 padded_size = max_leds_ * 3 * NUM_LANES;
+        u32 padded_size = mMaxLeds * 3 * NUM_LANES;
         u8* padded_rgb = reinterpret_cast<u8*>(malloc(padded_size));
         if (padded_rgb == nullptr) {
             return;
@@ -232,10 +232,10 @@ private:
 
         // Copy LED data from each strip
         for (u8 strip = 0; strip < NUM_LANES; strip++) {
-            if (strips_[strip].enabled && strips_[strip].leds) {
-                u8* dest = padded_rgb + (strip * max_leds_ * 3);
-                const u8* src = reinterpret_cast<const u8*>(strips_[strip].leds);
-                u32 copy_bytes = strips_[strip].num_leds * 3;
+            if (mStrips[strip].enabled && mStrips[strip].leds) {
+                u8* dest = padded_rgb + (strip * mMaxLeds * 3);
+                const u8* src = reinterpret_cast<const u8*>(mStrips[strip].leds);
+                u32 copy_bytes = mStrips[strip].num_leds * 3;
                 fl::memcpy(dest, src, copy_bytes);
             }
         }
@@ -243,7 +243,7 @@ private:
         // Build array of pointers for transpose function
         const u8* strip_ptrs[NUM_LANES];
         for (u8 i = 0; i < NUM_LANES; i++) {
-            strip_ptrs[i] = padded_rgb + (i * max_leds_ * 3);
+            strip_ptrs[i] = padded_rgb + (i * mMaxLeds * 3);
         }
 
         // Transpose based on strip count
@@ -251,19 +251,19 @@ private:
             case 8:
                 transpose_8strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_, 3
+                    mTransposeBuffer, mMaxLeds, 3
                 );
                 break;
             case 4:
                 transpose_4strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_, 3
+                    mTransposeBuffer, mMaxLeds, 3
                 );
                 break;
             case 2:
                 transpose_2strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_, 3
+                    mTransposeBuffer, mMaxLeds, 3
                 );
                 break;
         }
@@ -274,19 +274,19 @@ private:
     /// @brief Clean up resources
     void cleanup() {
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
-        if (dma_chan_ != -1) {
-            dma_channel_unclaim(dma_chan_);
-            dma_chan_ = -1;
+        if (mDmaChan != -1) {
+            dma_channel_unclaim(mDmaChan);
+            mDmaChan = -1;
         }
-        if (sm_ != -1 && pio_ != nullptr) {
-            pio_sm_set_enabled(pio_, sm_, false);
-            pio_sm_unclaim(pio_, sm_);
-            sm_ = -1;
+        if (mSm != -1 && mPio != nullptr) {
+            mPiomSmset_enabled(mPio, mSm, false);
+            mPiomSmunclaim(mPio, mSm);
+            mSm = -1;
         }
 #endif
-        if (transpose_buffer_ != nullptr) {
-            free(transpose_buffer_);
-            transpose_buffer_ = nullptr;
+        if (mTransposeBuffer != nullptr) {
+            free(mTransposeBuffer);
+            mTransposeBuffer = nullptr;
         }
     }
 };

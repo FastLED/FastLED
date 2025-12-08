@@ -202,7 +202,7 @@ public:
 private:
     // Platform-specific implementation (lazy initialized via shared_ptr)
     // Using shared_ptr for proper lifetime management and lazy initialization
-    fl::shared_ptr<fl::platforms::IOTA> impl_;
+    fl::shared_ptr<fl::platforms::IOTA> mImpl;
 };
 
 }  // namespace fl

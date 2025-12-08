@@ -23,11 +23,11 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
   public:
     FASTLED_DEPRECATED_CLASS("Use fl::vector<T, fl::allocator_psram<T>> instead");
     // Constructor
-    explicit scoped_array(T *arr = nullptr) : arr_(arr) {}
-    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {}
+    explicit scoped_array(T *arr = nullptr) : mArr(arr) {}
+    scoped_array(T *arr, Deleter deleter) : mArr(arr), mDeleter(deleter) {}
 
     // Destructor
-    ~scoped_array() { deleter_(arr_); }
+    ~scoped_array() { mDeleter(mArr); }
 
     // Disable copy semantics (no copying allowed)
     scoped_array(const scoped_array &) = delete;
@@ -35,58 +35,58 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
 
     // Move constructor
     scoped_array(scoped_array &&other) noexcept
-        : arr_(other.arr_), deleter_(other.deleter_) {
-        other.arr_ = nullptr;
-        other.deleter_ = {};
+        : mArr(other.mArr), mDeleter(other.mDeleter) {
+        other.mArr = nullptr;
+        other.mDeleter = {};
     }
 
     // Move assignment operator
     scoped_array &operator=(scoped_array &&other) noexcept {
         if (this != &other) {
-            reset(other.arr_);
-            other.arr_ = nullptr;
+            reset(other.mArr);
+            other.mArr = nullptr;
         }
         return *this;
     }
 
     // Array subscript operator
-    T &operator[](fl::size_t i) const { return arr_[i]; }
+    T &operator[](fl::size_t i) const { return mArr[i]; }
 
     // Get the raw pointer
-    T *get() const { return arr_; }
+    T *get() const { return mArr; }
 
     // Boolean conversion operator
-    explicit operator bool() const noexcept { return arr_ != nullptr; }
+    explicit operator bool() const noexcept { return mArr != nullptr; }
 
     // Logical NOT operator
-    bool operator!() const noexcept { return arr_ == nullptr; }
+    bool operator!() const noexcept { return mArr == nullptr; }
 
     // Release the managed array and reset the pointer
     void reset(T *arr = nullptr) {
-        if (arr_ == arr) {
+        if (mArr == arr) {
             return;
         }
-        deleter_(arr_);
-        arr_ = arr;
+        mDeleter(mArr);
+        mArr = arr;
     }
 
     void clear() { reset(); }
 
     T *release() {
-        T *tmp = arr_;
-        arr_ = nullptr;
+        T *tmp = mArr;
+        mArr = nullptr;
         return tmp;
     }
 
     void swap(scoped_array &other) noexcept {
-        T *tmp = arr_;
-        arr_ = other.arr_;
-        other.arr_ = tmp;
+        T *tmp = mArr;
+        mArr = other.mArr;
+        other.mArr = tmp;
     }
 
   private:
-    T *arr_; // Managed array pointer
-    Deleter deleter_ = {};
+    T *mArr; // Managed array pointer
+    Deleter mDeleter = {};
 };
 
 // A variant of scoped_ptr where allocation is done completly via a fl::allocator.
@@ -96,24 +96,24 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     Alloc mAlloc; // Allocator instance to manage memory allocation
     // Constructor
     explicit scoped_array2(fl::size_t size = 0)
-        : arr_(nullptr), size_(size) {
+        : mArr(nullptr), mSize(size) {
         if (size > 0) {
-            arr_ = mAlloc.allocate(size);
+            mArr = mAlloc.allocate(size);
             // Default initialize each element
             for (fl::size_t i = 0; i < size; ++i) {
-                mAlloc.construct(&arr_[i]);
+                mAlloc.construct(&mArr[i]);
             }
         }
     }
 
     // Destructor
     ~scoped_array2() {
-        if (arr_) {
+        if (mArr) {
             // Call destructor on each element
-            for (fl::size_t i = 0; i < size_; ++i) {
-                mAlloc.destroy(&arr_[i]);
+            for (fl::size_t i = 0; i < mSize; ++i) {
+                mAlloc.destroy(&mArr[i]);
             }
-            mAlloc.deallocate(arr_, size_);
+            mAlloc.deallocate(mArr, mSize);
         }
     }
 
@@ -123,85 +123,85 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
 
     // Move constructor
     scoped_array2(scoped_array2 &&other) noexcept
-        : arr_(other.arr_), size_(other.size_) {
-        other.arr_ = nullptr;
-        other.size_ = 0;
+        : mArr(other.mArr), mSize(other.mSize) {
+        other.mArr = nullptr;
+        other.mSize = 0;
     }
 
     // Move assignment operator
     scoped_array2 &operator=(scoped_array2 &&other) noexcept {
         if (this != &other) {
             reset();
-            arr_ = other.arr_;
-            size_ = other.size_;
-            other.arr_ = nullptr;
-            other.size_ = 0;
+            mArr = other.mArr;
+            mSize = other.mSize;
+            other.mArr = nullptr;
+            other.mSize = 0;
         }
         return *this;
     }
 
     // Array subscript operator
-    T &operator[](fl::size_t i) const { return arr_[i]; }
+    T &operator[](fl::size_t i) const { return mArr[i]; }
 
     // Get the raw pointer
-    T *get() const { return arr_; }
+    T *get() const { return mArr; }
 
     // Get the size of the array
-    fl::size_t size() const { return size_; }
+    fl::size_t size() const { return mSize; }
 
     // Boolean conversion operator
-    explicit operator bool() const noexcept { return arr_ != nullptr; }
+    explicit operator bool() const noexcept { return mArr != nullptr; }
 
     // Logical NOT operator
-    bool operator!() const noexcept { return arr_ == nullptr; }
+    bool operator!() const noexcept { return mArr == nullptr; }
 
     // Release the managed array and reset the pointer
     void reset(fl::size_t new_size = 0) {
-        if (arr_) {
+        if (mArr) {
             // Call destructor on each element
-            for (fl::size_t i = 0; i < size_; ++i) {
-                // arr_[i].~T();
-                mAlloc.destroy(&arr_[i]);
+            for (fl::size_t i = 0; i < mSize; ++i) {
+                // mArr[i].~T();
+                mAlloc.destroy(&mArr[i]);
             }
-            // ::operator delete(arr_);
-            mAlloc.deallocate(arr_, size_);
-            arr_ = nullptr;
+            // ::operator delete(mArr);
+            mAlloc.deallocate(mArr, mSize);
+            mArr = nullptr;
         }
         
-        size_ = new_size;
+        mSize = new_size;
         if (new_size > 0) {
-            // arr_ = static_cast<T*>(::operator new(new_size * sizeof(T)));
-            arr_ = mAlloc.allocate(new_size);
+            // mArr = static_cast<T*>(::operator new(new_size * sizeof(T)));
+            mArr = mAlloc.allocate(new_size);
             // Default initialize each element
             for (fl::size_t i = 0; i < new_size; ++i) {
-                // new (&arr_[i]) T();
-                mAlloc.construct(&arr_[i]);
+                // new (&mArr[i]) T();
+                mAlloc.construct(&mArr[i]);
             }
         }
     }
 
     // Release ownership of the array
     T *release() {
-        T *tmp = arr_;
-        arr_ = nullptr;
-        size_ = 0;
+        T *tmp = mArr;
+        mArr = nullptr;
+        mSize = 0;
         return tmp;
     }
 
     void swap(scoped_array2 &other) noexcept {
-        T *tmp_arr = arr_;
-        fl::size_t tmp_size = size_;
+        T *tmp_arr = mArr;
+        fl::size_t tmp_size = mSize;
         
-        arr_ = other.arr_;
-        size_ = other.size_;
+        mArr = other.mArr;
+        mSize = other.mSize;
         
-        other.arr_ = tmp_arr;
-        other.size_ = tmp_size;
+        other.mArr = tmp_arr;
+        other.mSize = tmp_size;
     }
 
   private:
-    T *arr_ = nullptr;     // Managed array pointer
-    fl::size_t size_ = 0;      // Size of the array
+    T *mArr = nullptr;     // Managed array pointer
+    fl::size_t mSize = 0;      // Size of the array
 };
 
 // Helper function to create scoped_array (similar to make_unique)

@@ -53,9 +53,9 @@ private:
     using NodeAllocator = typename Allocator::template rebind<RBNode>::other;
 
     RBNode* root_;
-    fl::size size_;
-    Compare comp_;
-    NodeAllocator alloc_;
+    fl::size mSize;
+    Compare mComp;
+    NodeAllocator mAlloc;
 
     // Helper methods
     void rotateLeft(RBNode* x) {
@@ -221,9 +221,9 @@ private:
     RBNode* findNode(const value_type& value) const {
         RBNode* current = root_;
         while (current != nullptr) {
-            if (comp_(value, current->data)) {
+            if (mComp(value, current->data)) {
                 current = current->left;
-            } else if (comp_(current->data, value)) {
+            } else if (mComp(current->data, value)) {
                 current = current->right;
             } else {
                 return current;
@@ -236,20 +236,20 @@ private:
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
-            alloc_.destroy(node);
-            alloc_.deallocate(node, 1);
+            mAlloc.destroy(node);
+            mAlloc.deallocate(node, 1);
         }
     }
 
     RBNode* copyTree(RBNode* node, RBNode* parent = nullptr) {
         if (node == nullptr) return nullptr;
-        
-        RBNode* newNode = alloc_.allocate(1);
+
+        RBNode* newNode = mAlloc.allocate(1);
         if (newNode == nullptr) {
             return nullptr;
         }
-        
-        alloc_.construct(newNode, node->data, node->color, parent);
+
+        mAlloc.construct(newNode, node->data, node->color, parent);
         newNode->left = copyTree(node->left, newNode);
         newNode->right = copyTree(node->right, newNode);
         return newNode;
@@ -263,32 +263,32 @@ private:
         
         while (current != nullptr) {
             parent = current;
-            if (comp_(value, current->data)) {
+            if (mComp(value, current->data)) {
                 current = current->left;
-            } else if (comp_(current->data, value)) {
+            } else if (mComp(current->data, value)) {
                 current = current->right;
             } else {
                 return fl::pair<iterator, bool>(iterator(current, this), false);
             }
         }
         
-        RBNode* newNode = alloc_.allocate(1);
+        RBNode* newNode = mAlloc.allocate(1);
         if (newNode == nullptr) {
             return fl::pair<iterator, bool>(iterator(nullptr, this), false);
         }
-        
-        alloc_.construct(newNode, fl::forward<U>(value), Color::kRed, parent);
+
+        mAlloc.construct(newNode, fl::forward<U>(value), Color::kRed, parent);
         
         if (parent == nullptr) {
             root_ = newNode;
-        } else if (comp_(newNode->data, parent->data)) {
+        } else if (mComp(newNode->data, parent->data)) {
             parent->left = newNode;
         } else {
             parent->right = newNode;
         }
         
         insertFixup(newNode);
-        ++size_;
+        ++mSize;
         
         return fl::pair<iterator, bool>(iterator(newNode, this), true);
     }
@@ -298,7 +298,7 @@ private:
         RBNode* current = root_;
         RBNode* result = nullptr;
         while (current != nullptr) {
-            if (!comp_(current->data, value)) {
+            if (!mComp(current->data, value)) {
                 result = current;
                 current = current->left;
             } else {
@@ -312,7 +312,7 @@ private:
         RBNode* current = root_;
         RBNode* result = nullptr;
         while (current != nullptr) {
-            if (comp_(value, current->data)) {
+            if (mComp(value, current->data)) {
                 result = current;
                 current = current->left;
             } else {
@@ -330,7 +330,7 @@ public:
     public:
         using value_type = T;
     private:
-        RBNode* node_;
+        RBNode* mNode;
         const RedBlackTree* mTree;
 
         RBNode* successor(RBNode* x) const {
@@ -360,21 +360,21 @@ public:
         }
 
     public:
-        iterator() : node_(nullptr), mTree(nullptr) {}
-        iterator(RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
+        iterator() : mNode(nullptr), mTree(nullptr) {}
+        iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
 
         value_type& operator*() const { 
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
-            return node_->data; 
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
+            return mNode->data; 
         }
         value_type* operator->() const { 
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
-            return &(node_->data); 
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
+            return &(mNode->data); 
         }
 
         iterator& operator++() {
-            if (node_) {
-                node_ = successor(node_);
+            if (mNode) {
+                mNode = successor(mNode);
             }
             return *this;
         }
@@ -386,10 +386,10 @@ public:
         }
 
         iterator& operator--() {
-            if (node_) {
-                node_ = predecessor(node_);
+            if (mNode) {
+                mNode = predecessor(mNode);
             } else if (mTree && mTree->root_) {
-                node_ = mTree->maximum(mTree->root_);
+                mNode = mTree->maximum(mTree->root_);
             }
             return *this;
         }
@@ -401,11 +401,11 @@ public:
         }
 
         bool operator==(const iterator& other) const {
-            return node_ == other.node_;
+            return mNode == other.mNode;
         }
 
         bool operator!=(const iterator& other) const {
-            return node_ != other.node_;
+            return mNode != other.mNode;
         }
     };
 
@@ -413,7 +413,7 @@ public:
         friend class RedBlackTree;
         friend class iterator;
     private:
-        const RBNode* node_;
+        const RBNode* mNode;
         const RedBlackTree* mTree;
 
         const RBNode* successor(const RBNode* x) const {
@@ -443,22 +443,22 @@ public:
         }
 
     public:
-        const_iterator() : node_(nullptr), mTree(nullptr) {}
-        const_iterator(const RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
-        const_iterator(const iterator& it) : node_(it.node_), mTree(it.mTree) {}
+        const_iterator() : mNode(nullptr), mTree(nullptr) {}
+        const_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
+        const_iterator(const iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
 
         const value_type& operator*() const { 
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
-            return node_->data; 
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
+            return mNode->data; 
         }
         const value_type* operator->() const { 
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
-            return &(node_->data); 
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
+            return &(mNode->data); 
         }
 
         const_iterator& operator++() {
-            if (node_) {
-                node_ = successor(node_);
+            if (mNode) {
+                mNode = successor(mNode);
             }
             return *this;
         }
@@ -470,11 +470,11 @@ public:
         }
 
         const_iterator& operator--() {
-            if (node_) {
-                node_ = predecessor(node_);
+            if (mNode) {
+                mNode = predecessor(mNode);
             } else if (mTree && mTree->root_) {
                 // Decrementing from end() should give us the maximum element
-                node_ = mTree->maximum(mTree->root_);
+                mNode = mTree->maximum(mTree->root_);
             }
             return *this;
         }
@@ -486,29 +486,29 @@ public:
         }
 
         bool operator==(const const_iterator& other) const {
-            return node_ == other.node_;
+            return mNode == other.mNode;
         }
 
         bool operator!=(const const_iterator& other) const {
-            return node_ != other.node_;
+            return mNode != other.mNode;
         }
 
         // Cross-type comparison: const_iterator with iterator
         bool operator==(const iterator& other) const {
-            return node_ == other.node_;
+            return mNode == other.mNode;
         }
 
         bool operator!=(const iterator& other) const {
-            return node_ != other.node_;
+            return mNode != other.mNode;
         }
 
         // Friend functions for cross-type comparison (iterator with const_iterator)
         friend bool operator==(const iterator& lhs, const const_iterator& rhs) {
-            return lhs.node_ == rhs.node_;
+            return lhs.mNode == rhs.mNode;
         }
 
         friend bool operator!=(const iterator& lhs, const const_iterator& rhs) {
-            return lhs.node_ != rhs.node_;
+            return lhs.mNode != rhs.mNode;
         }
     };
 
@@ -517,7 +517,7 @@ public:
         friend class RedBlackTree;
         friend class const_reverse_iterator;
     private:
-        RBNode* node_;
+        RBNode* mNode;
         const RedBlackTree* mTree;
 
         RBNode* successor(RBNode* x) const {
@@ -547,22 +547,22 @@ public:
         }
 
     public:
-        reverse_iterator() : node_(nullptr), mTree(nullptr) {}
-        reverse_iterator(RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
+        reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
+        reverse_iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
 
         value_type& operator*() const {
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
-            return node_->data;
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
+            return mNode->data;
         }
         value_type* operator->() const {
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
-            return &(node_->data);
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
+            return &(mNode->data);
         }
 
         // Increment goes backward (predecessor)
         reverse_iterator& operator++() {
-            if (node_) {
-                node_ = predecessor(node_);
+            if (mNode) {
+                mNode = predecessor(mNode);
             }
             return *this;
         }
@@ -575,11 +575,11 @@ public:
 
         // Decrement goes forward (successor)
         reverse_iterator& operator--() {
-            if (node_) {
-                node_ = successor(node_);
+            if (mNode) {
+                mNode = successor(mNode);
             } else if (mTree && mTree->root_) {
                 // Decrementing from rend() should give us the minimum element
-                node_ = mTree->minimum(mTree->root_);
+                mNode = mTree->minimum(mTree->root_);
             }
             return *this;
         }
@@ -591,11 +591,11 @@ public:
         }
 
         bool operator==(const reverse_iterator& other) const {
-            return node_ == other.node_;
+            return mNode == other.mNode;
         }
 
         bool operator!=(const reverse_iterator& other) const {
-            return node_ != other.node_;
+            return mNode != other.mNode;
         }
     };
 
@@ -603,7 +603,7 @@ public:
         friend class RedBlackTree;
         friend class reverse_iterator;
     private:
-        const RBNode* node_;
+        const RBNode* mNode;
         const RedBlackTree* mTree;
 
         const RBNode* successor(const RBNode* x) const {
@@ -633,23 +633,23 @@ public:
         }
 
     public:
-        const_reverse_iterator() : node_(nullptr), mTree(nullptr) {}
-        const_reverse_iterator(const RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
-        const_reverse_iterator(const reverse_iterator& it) : node_(it.node_), mTree(it.mTree) {}
+        const_reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
+        const_reverse_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
+        const_reverse_iterator(const reverse_iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
 
         const value_type& operator*() const {
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
-            return node_->data;
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
+            return mNode->data;
         }
         const value_type* operator->() const {
-            FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
-            return &(node_->data);
+            FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
+            return &(mNode->data);
         }
 
         // Increment goes backward (predecessor)
         const_reverse_iterator& operator++() {
-            if (node_) {
-                node_ = predecessor(node_);
+            if (mNode) {
+                mNode = predecessor(mNode);
             }
             return *this;
         }
@@ -662,11 +662,11 @@ public:
 
         // Decrement goes forward (successor)
         const_reverse_iterator& operator--() {
-            if (node_) {
-                node_ = successor(node_);
+            if (mNode) {
+                mNode = successor(mNode);
             } else if (mTree && mTree->root_) {
                 // Decrementing from rend() should give us the minimum element
-                node_ = mTree->minimum(mTree->root_);
+                mNode = mTree->minimum(mTree->root_);
             }
             return *this;
         }
@@ -678,20 +678,20 @@ public:
         }
 
         bool operator==(const const_reverse_iterator& other) const {
-            return node_ == other.node_;
+            return mNode == other.mNode;
         }
 
         bool operator!=(const const_reverse_iterator& other) const {
-            return node_ != other.node_;
+            return mNode != other.mNode;
         }
     };
 
     // Constructors and destructor
-    RedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
-        : root_(nullptr), size_(0), comp_(comp), alloc_(alloc) {}
+    RedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
+        : root_(nullptr), mSize(0), mComp(comp), mAlloc(alloc) {}
 
-    RedBlackTree(const RedBlackTree& other) 
-        : root_(nullptr), size_(other.size_), comp_(other.comp_), alloc_(other.alloc_) {
+    RedBlackTree(const RedBlackTree& other)
+        : root_(nullptr), mSize(other.mSize), mComp(other.mComp), mAlloc(other.mAlloc) {
         if (other.root_) {
             root_ = copyTree(other.root_);
         }
@@ -700,9 +700,9 @@ public:
     RedBlackTree& operator=(const RedBlackTree& other) {
         if (this != &other) {
             clear();
-            size_ = other.size_;
-            comp_ = other.comp_;
-            alloc_ = other.alloc_;
+            mSize = other.mSize;
+            mComp = other.mComp;
+            mAlloc = other.mAlloc;
             if (other.root_) {
                 root_ = copyTree(other.root_);
             }
@@ -712,9 +712,9 @@ public:
 
     // Move constructor
     RedBlackTree(RedBlackTree&& other)
-        : root_(other.root_), size_(other.size_), comp_(fl::move(other.comp_)), alloc_(fl::move(other.alloc_)) {
+        : root_(other.root_), mSize(other.mSize), mComp(fl::move(other.mComp)), mAlloc(fl::move(other.mAlloc)) {
         other.root_ = nullptr;
-        other.size_ = 0;
+        other.mSize = 0;
     }
 
     // Move assignment operator
@@ -722,11 +722,11 @@ public:
         if (this != &other) {
             clear();
             root_ = other.root_;
-            size_ = other.size_;
-            comp_ = fl::move(other.comp_);
-            alloc_ = fl::move(other.alloc_);
+            mSize = other.mSize;
+            mComp = fl::move(other.mComp);
+            mAlloc = fl::move(other.mAlloc);
             other.root_ = nullptr;
-            other.size_ = 0;
+            other.mSize = 0;
         }
         return *this;
     }
@@ -790,15 +790,15 @@ public:
     }
 
     // Capacity
-    bool empty() const { return size_ == 0; }
-    fl::size size() const { return size_; }
+    bool empty() const { return mSize == 0; }
+    fl::size size() const { return mSize; }
     fl::size max_size() const { return fl::size(-1); }
 
     // Modifiers
     void clear() {
         destroyTree(root_);
         root_ = nullptr;
-        size_ = 0;
+        mSize = 0;
     }
 
     fl::pair<iterator, bool> insert(const value_type& value) {
@@ -816,9 +816,9 @@ public:
     }
 
     iterator erase(const_iterator pos) {
-        if (pos.node_ == nullptr) return end();
+        if (pos.mNode == nullptr) return end();
         
-        RBNode* nodeToDelete = const_cast<RBNode*>(pos.node_);
+        RBNode* nodeToDelete = const_cast<RBNode*>(pos.mNode);
         RBNode* successor = nullptr;
         
         if (nodeToDelete->right != nullptr) {
@@ -866,9 +866,9 @@ public:
             y->color = nodeToDelete->color;
         }
         
-        alloc_.destroy(nodeToDelete);
-        alloc_.deallocate(nodeToDelete, 1);
-        --size_;
+        mAlloc.destroy(nodeToDelete);
+        mAlloc.deallocate(nodeToDelete, 1);
+        --mSize;
         
         if (originalColor == Color::kBlack) {
             deleteFixup(x, xParent);
@@ -887,9 +887,9 @@ public:
 
     void swap(RedBlackTree& other) {
         fl::swap(root_, other.root_);
-        fl::swap(size_, other.size_);
-        fl::swap(comp_, other.comp_);
-        fl::swap(alloc_, other.alloc_);
+        fl::swap(mSize, other.mSize);
+        fl::swap(mComp, other.mComp);
+        fl::swap(mAlloc, other.mAlloc);
     }
 
     // Lookup
@@ -945,24 +945,24 @@ public:
 
     // Observers
     compare_type value_comp() const {
-        return comp_;
+        return mComp;
     }
 
     // Returns a copy of the allocator object associated with the tree
     allocator_type get_allocator() const {
-        return allocator_type(alloc_);
+        return allocator_type(mAlloc);
     }
 
     // Comparison operators
     bool operator==(const RedBlackTree& other) const {
-        if (size_ != other.size_) return false;
+        if (mSize != other.mSize) return false;
         
         const_iterator it1 = begin();
         const_iterator it2 = other.begin();
         
         while (it1 != end() && it2 != other.end()) {
             // Two values are equal if neither is less than the other
-            if (comp_(*it1, *it2) || comp_(*it2, *it1)) {
+            if (mComp(*it1, *it2) || mComp(*it2, *it1)) {
                 return false;
             }
             ++it1;
@@ -996,12 +996,12 @@ public:
 private:
     // Comparator for pairs that compares only the key
     struct PairCompare {
-        Compare comp_;
+        Compare mComp;
 
-        PairCompare(const Compare& comp = Compare()) : comp_(comp) {}
+        PairCompare(const Compare& comp = Compare()) : mComp(comp) {}
 
         bool operator()(const value_type& a, const value_type& b) const {
-            return comp_(a.first, b.first);
+            return mComp(a.first, b.first);
         }
     };
 
@@ -1012,11 +1012,11 @@ public:
     // Value comparison class for std::map compatibility
     class value_compare {
         friend class MapRedBlackTree;
-        Compare comp_;
-        value_compare(Compare c) : comp_(c) {}
+        Compare mComp;
+        value_compare(Compare c) : mComp(c) {}
     public:
         bool operator()(const value_type& x, const value_type& y) const {
-            return comp_(x.first, y.first);
+            return mComp(x.first, y.first);
         }
     };
 
@@ -1360,7 +1360,7 @@ public:
 
     // Observers
     key_compare key_comp() const {
-        return mTree.value_comp().comp_;
+        return mTree.value_comp().mComp;
     }
 
     value_compare value_comp() const {

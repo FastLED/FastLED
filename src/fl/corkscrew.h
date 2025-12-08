@@ -97,48 +97,48 @@ class Corkscrew {
         using reference = vec2f &;
 
         iterator(const Corkscrew *corkscrew, fl::size position)
-            : corkscrew_(corkscrew), position_(position) {}
+            : mCorkscrew(corkscrew), mPosition(position) {}
 
         vec2f operator*() const;
 
         iterator &operator++() {
-            ++position_;
+            ++mPosition;
             return *this;
         }
 
         iterator operator++(int) {
             iterator temp = *this;
-            ++position_;
+            ++mPosition;
             return temp;
         }
 
         iterator &operator--() {
-            --position_;
+            --mPosition;
             return *this;
         }
 
         iterator operator--(int) {
             iterator temp = *this;
-            --position_;
+            --mPosition;
             return temp;
         }
 
         bool operator==(const iterator &other) const {
-            return position_ == other.position_;
+            return mPosition == other.mPosition;
         }
 
         bool operator!=(const iterator &other) const {
-            return position_ != other.position_;
+            return mPosition != other.mPosition;
         }
 
         difference_type operator-(const iterator &other) const {
-            return static_cast<difference_type>(position_) -
-                   static_cast<difference_type>(other.position_);
+            return static_cast<difference_type>(mPosition) -
+                   static_cast<difference_type>(other.mPosition);
         }
 
       private:
-        const Corkscrew *corkscrew_;
-        fl::size position_;
+        const Corkscrew *mCorkscrew;
+        fl::size mPosition;
     };
 
     // Constructors that integrate input parameters directly

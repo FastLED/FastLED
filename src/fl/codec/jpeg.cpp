@@ -33,22 +33,22 @@ JpegConfig::JpegConfig(Quality q, PixelFormat fmt)
 
 class JpegDecoder::Impl {
 private:
-    fl::third_party::TJpgInstanceDecoderPtr driver_;
-    JpegConfig config_;
-    ProgressiveConfig progressive_config_;
-    JpegDecoder::State state_;
-    float progress_;
-    fl::string error_message_;
-    bool has_error_;
+    fl::third_party::TJpgInstanceDecoderPtr mDriver;
+    JpegConfig mConfig;
+    ProgressiveConfig progressive_mConfig;
+    JpegDecoder::State mState;
+    float mProgress;
+    fl::string mErrorMessage;
+    bool mHasError;
 
     void setError(const fl::string& message) {
-        has_error_ = true;
-        error_message_ = message;
-        state_ = JpegDecoder::State::Error;
+        mHasError = true;
+        mErrorMessage = message;
+        mState = JpegDecoder::State::Error;
     }
 
     fl::u8 getScale() const {
-        switch (config_.quality) {
+        switch (mConfig.quality) {
             case JpegConfig::Quality::Low: return 3;     // 1/8 scale
             case JpegConfig::Quality::Medium: return 2;  // 1/4 scale
             case JpegConfig::Quality::High: return 0;    // Full scale (1:1)
@@ -58,36 +58,36 @@ private:
 
 public:
     explicit Impl(const JpegConfig& config)
-        : config_(config), state_(JpegDecoder::State::NotStarted)
-        , progress_(0.0f), has_error_(false) {
-        driver_ = fl::third_party::createTJpgInstanceDecoder();
+        : mConfig(config), mState(JpegDecoder::State::NotStarted)
+        , mProgress(0.0f), mHasError(false) {
+        mDriver = fl::third_party::createTJpgInstanceDecoder();
     }
 
     ~Impl() = default;
 
     bool begin(fl::ByteStreamPtr stream) {
-        if (!driver_) {
+        if (!mDriver) {
             setError("Driver not initialized");
             return false;
         }
 
-        state_ = JpegDecoder::State::NotStarted;
-        has_error_ = false;
-        error_message_.clear();
-        progress_ = 0.0f;
+        mState = JpegDecoder::State::NotStarted;
+        mHasError = false;
+        mErrorMessage.clear();
+        mProgress = 0.0f;
 
         // Configure progressive settings
-        fl::third_party::TJpgProgressiveConfig driver_config;
-        driver_config.max_mcus_per_tick = progressive_config_.max_mcus_per_tick;
-        driver_config.max_time_per_tick_ms = progressive_config_.max_time_per_tick_ms;
-        driver_->setProgressiveConfig(driver_config);
+        fl::third_party::TJpgProgressiveConfig mDriverconfig;
+        mDriverconfig.max_mcus_per_tick = progressive_mConfig.max_mcus_per_tick;
+        mDriverconfig.max_time_per_tick_ms = progressive_mConfig.max_time_per_tick_ms;
+        mDriver->setProgressiveConfig(mDriverconfig);
 
         // Set scale based on quality setting
-        driver_->setScale(getScale());
+        mDriver->setScale(getScale());
 
-        if (!driver_->beginDecodingStream(stream, config_.format)) {
+        if (!mDriver->beginDecodingStream(stream, mConfig.format)) {
             fl::string err;
-            if (driver_->hasError(&err)) {
+            if (mDriver->hasError(&err)) {
                 setError(err);
             } else {
                 setError("Failed to begin JPEG decoding");
@@ -95,94 +95,94 @@ public:
             return false;
         }
 
-        state_ = JpegDecoder::State::HeaderParsed;
+        mState = JpegDecoder::State::HeaderParsed;
         return true;
     }
 
     void end() {
-        if (driver_) {
-            driver_->endDecoding();
+        if (mDriver) {
+            mDriver->endDecoding();
         }
-        state_ = JpegDecoder::State::NotStarted;
+        mState = JpegDecoder::State::NotStarted;
     }
 
     bool isReady() const {
-        return state_ == JpegDecoder::State::HeaderParsed ||
-               state_ == JpegDecoder::State::Decoding;
+        return mState == JpegDecoder::State::HeaderParsed ||
+               mState == JpegDecoder::State::Decoding;
     }
 
     bool hasError(fl::string* msg = nullptr) const {
-        if (msg && has_error_) {
-            *msg = error_message_;
+        if (msg && mHasError) {
+            *msg = mErrorMessage;
         }
-        return has_error_;
+        return mHasError;
     }
 
     DecodeResult decode(fl::optional<fl::function<bool()>> should_yield) {
-        if (state_ == JpegDecoder::State::Error) {
+        if (mState == JpegDecoder::State::Error) {
             return DecodeResult::Error;
         }
 
-        if (state_ == JpegDecoder::State::Complete) {
+        if (mState == JpegDecoder::State::Complete) {
             return DecodeResult::Success;
         }
 
         while (processChunk()) {
             if (should_yield && (*should_yield)()) {
                 // Caller requested yield - return current state
-                return (state_ == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::NeedsMoreData;
+                return (mState == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::NeedsMoreData;
             }
         }
 
-        return (state_ == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::Error;
+        return (mState == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::Error;
     }
 
     Frame getCurrentFrame() {
-        return driver_ ? driver_->getCurrentFrame() : Frame(0);
+        return mDriver ? mDriver->getCurrentFrame() : Frame(0);
     }
 
     bool hasMoreFrames() const { return false; } // JPEG is single frame
 
     void setProgressiveConfig(const ProgressiveConfig& config) {
-        progressive_config_ = config;
-        if (driver_) {
-            fl::third_party::TJpgProgressiveConfig driver_config;
-            driver_config.max_mcus_per_tick = config.max_mcus_per_tick;
-            driver_config.max_time_per_tick_ms = config.max_time_per_tick_ms;
-            driver_->setProgressiveConfig(driver_config);
+        progressive_mConfig = config;
+        if (mDriver) {
+            fl::third_party::TJpgProgressiveConfig mDriverconfig;
+            mDriverconfig.max_mcus_per_tick = config.max_mcus_per_tick;
+            mDriverconfig.max_time_per_tick_ms = config.max_time_per_tick_ms;
+            mDriver->setProgressiveConfig(mDriverconfig);
         }
     }
 
     bool processChunk() {
-        if (state_ == JpegDecoder::State::Error || state_ == JpegDecoder::State::Complete) {
+        if (mState == JpegDecoder::State::Error || mState == JpegDecoder::State::Complete) {
             return false;
         }
 
-        if (state_ == JpegDecoder::State::NotStarted || state_ == JpegDecoder::State::HeaderParsed) {
-            state_ = JpegDecoder::State::Decoding;
+        if (mState == JpegDecoder::State::NotStarted || mState == JpegDecoder::State::HeaderParsed) {
+            mState = JpegDecoder::State::Decoding;
         }
 
-        if (!driver_) {
+        if (!mDriver) {
             setError("Driver not available");
             return false;
         }
 
-        bool more_work = driver_->processChunk();
+        bool more_work = mDriver->processChunk();
 
-        auto driver_state = driver_->getState();
-        switch (driver_state) {
+        auto mDriverstate = mDriver->getState();
+        switch (mDriverstate) {
             case fl::third_party::TJpgInstanceDecoder::State::NotStarted:
             case fl::third_party::TJpgInstanceDecoder::State::HeaderParsed:
             case fl::third_party::TJpgInstanceDecoder::State::Decoding:
-                progress_ = driver_->getProgress();
+                mProgress = mDriver->getProgress();
                 break;
             case fl::third_party::TJpgInstanceDecoder::State::Complete:
-                state_ = JpegDecoder::State::Complete;
-                progress_ = 1.0f;
+                mState = JpegDecoder::State::Complete;
+                mProgress = 1.0f;
                 return false;
             case fl::third_party::TJpgInstanceDecoder::State::Error: {
                 fl::string err;
-                if (driver_->hasError(&err)) {
+                if (mDriver->hasError(&err)) {
                     setError(err);
                 } else {
                     setError("JPEG decoding failed");
@@ -194,15 +194,15 @@ public:
         return more_work;
     }
 
-    float getProgress() const { return progress_; }
-    bool hasPartialImage() const { return driver_ ? driver_->hasPartialImage() : false; }
-    Frame getPartialFrame() { return driver_ ? driver_->getPartialFrame() : Frame(0); }
-    fl::u16 getDecodedRows() const { return driver_ ? driver_->getDecodedRows() : 0; }
+    float getProgress() const { return mProgress; }
+    bool hasPartialImage() const { return mDriver ? mDriver->hasPartialImage() : false; }
+    Frame getPartialFrame() { return mDriver ? mDriver->getPartialFrame() : Frame(0); }
+    fl::u16 getDecodedRows() const { return mDriver ? mDriver->getDecodedRows() : 0; }
     bool feedData(fl::span<const fl::u8> data) { (void)data; return false; } // Not implemented
     bool needsMoreData() const { return false; } // Not implemented
-    fl::size getBytesProcessed() const { return driver_ ? driver_->getBytesProcessed() : 0; }
-    JpegDecoder::State getState() const { return state_; }
-    ProgressiveConfig getProgressiveConfig() const { return progressive_config_; }
+    fl::size getBytesProcessed() const { return mDriver ? mDriver->getBytesProcessed() : 0; }
+    JpegDecoder::State getState() const { return mState; }
+    ProgressiveConfig getProgressiveConfig() const { return progressive_mConfig; }
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -210,80 +210,80 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 JpegDecoder::JpegDecoder(const JpegConfig& config)
-    : impl_(fl::make_unique<Impl>(config)) {}
+    : mImpl(fl::make_unique<Impl>(config)) {}
 
 JpegDecoder::~JpegDecoder() = default;
 
 bool JpegDecoder::begin(fl::ByteStreamPtr stream) {
-    return impl_->begin(stream);
+    return mImpl->begin(stream);
 }
 
 void JpegDecoder::end() {
-    impl_->end();
+    mImpl->end();
 }
 
 bool JpegDecoder::isReady() const {
-    return impl_->isReady();
+    return mImpl->isReady();
 }
 
 bool JpegDecoder::hasError(fl::string* msg) const {
-    return impl_->hasError(msg);
+    return mImpl->hasError(msg);
 }
 
 DecodeResult JpegDecoder::decode() {
-    return impl_->decode(fl::nullopt); // No callback - process to completion
+    return mImpl->decode(fl::nullopt); // No callback - process to completion
 }
 
 DecodeResult JpegDecoder::decode(fl::optional<fl::function<bool()>> should_yield) {
-    return impl_->decode(should_yield);
+    return mImpl->decode(should_yield);
 }
 
 Frame JpegDecoder::getCurrentFrame() {
-    return impl_->getCurrentFrame();
+    return mImpl->getCurrentFrame();
 }
 
 bool JpegDecoder::hasMoreFrames() const {
-    return impl_->hasMoreFrames();
+    return mImpl->hasMoreFrames();
 }
 
 void JpegDecoder::setProgressiveConfig(const ProgressiveConfig& config) {
-    impl_->setProgressiveConfig(config);
+    mImpl->setProgressiveConfig(config);
 }
 
 ProgressiveConfig JpegDecoder::getProgressiveConfig() const {
-    return impl_->getProgressiveConfig();
+    return mImpl->getProgressiveConfig();
 }
 
 float JpegDecoder::getProgress() const {
-    return impl_->getProgress();
+    return mImpl->getProgress();
 }
 
 bool JpegDecoder::hasPartialImage() const {
-    return impl_->hasPartialImage();
+    return mImpl->hasPartialImage();
 }
 
 Frame JpegDecoder::getPartialFrame() {
-    return impl_->getPartialFrame();
+    return mImpl->getPartialFrame();
 }
 
 fl::u16 JpegDecoder::getDecodedRows() const {
-    return impl_->getDecodedRows();
+    return mImpl->getDecodedRows();
 }
 
 bool JpegDecoder::feedData(fl::span<const fl::u8> data) {
-    return impl_->feedData(data);
+    return mImpl->feedData(data);
 }
 
 bool JpegDecoder::needsMoreData() const {
-    return impl_->needsMoreData();
+    return mImpl->needsMoreData();
 }
 
 fl::size JpegDecoder::getBytesProcessed() const {
-    return impl_->getBytesProcessed();
+    return mImpl->getBytesProcessed();
 }
 
 JpegDecoder::State JpegDecoder::getState() const {
-    return impl_->getState();
+    return mImpl->getState();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ bool Jpeg::decodeWithTimeout(
     fl::span<const fl::u8> data,
     Frame* frame,
     fl::u32 timeout_ms,
-    float* progress_out,
+    float* mProgressout,
     fl::string* error_message) {
 
     if (!frame) {
@@ -405,8 +405,8 @@ bool Jpeg::decodeWithTimeout(
 
     // Use callback-based decode with time budget check
     DecodeResult result = decoder->decode(fl::function<bool()>([&]() {
-        if (progress_out) {
-            *progress_out = decoder->getProgress();
+        if (mProgressout) {
+            *mProgressout = decoder->getProgress();
         }
         return fl::time() >= deadline; // Yield if time budget exceeded
     }));
@@ -431,8 +431,8 @@ bool Jpeg::decodeWithTimeout(
     }
 
     // Partial completion due to timeout
-    if (progress_out) {
-        *progress_out = decoder->getProgress();
+    if (mProgressout) {
+        *mProgressout = decoder->getProgress();
     }
     return false; // Not complete yet
 }
@@ -442,7 +442,7 @@ bool Jpeg::decodeStream(
     fl::ByteStreamPtr input_stream,
     Frame* frame,
     fl::u32 max_time_per_chunk_ms,
-    fl::function<bool(float)> progress_callback) {
+    fl::function<bool(float)> mProgresscallback) {
 
     if (!frame || !input_stream) {
         return false;
@@ -460,10 +460,10 @@ bool Jpeg::decodeStream(
 
     // Use callback-based decode with progress notifications
     fl::optional<fl::function<bool()>> yield_func;
-    if (progress_callback) {
+    if (mProgresscallback) {
         yield_func = fl::function<bool()>([&]() {
             float progress = decoder->getProgress();
-            return !progress_callback(progress); // Yield if callback returns false
+            return !mProgresscallback(progress); // Yield if callback returns false
         });
     }
     DecodeResult result = decoder->decode(yield_func);
