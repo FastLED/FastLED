@@ -26,7 +26,7 @@ def format_cmdline(cmdline: list[str] | None, max_length: int = 80) -> str:
     full = " ".join(cmdline)
     if len(full) <= max_length:
         return full
-    return full[:max_length - 3] + "..."
+    return full[: max_length - 3] + "..."
 
 
 def get_process_tree(proc: psutil.Process) -> list[psutil.Process]:
@@ -87,15 +87,32 @@ def check_matches_kill_patterns(
 
     # Check kill_process_using_port patterns
     serial_exes = [
-        "python.exe", "python3.exe", "python", "pio.exe", "pio",
-        "esptool.exe", "esptool.py", "esptool", "platformio.exe", "platformio",
-        "miniterm.exe", "miniterm.py", "miniterm", "putty.exe", "putty",
-        "teraterm.exe", "teraterm",
+        "python.exe",
+        "python3.exe",
+        "python",
+        "pio.exe",
+        "pio",
+        "esptool.exe",
+        "esptool.py",
+        "esptool",
+        "platformio.exe",
+        "platformio",
+        "miniterm.exe",
+        "miniterm.py",
+        "miniterm",
+        "putty.exe",
+        "putty",
+        "teraterm.exe",
+        "teraterm",
     ]
 
     cmdline_patterns = [
-        "pio monitor", "pio device monitor", "device monitor",
-        "miniterm", "esptool", port_name.lower(),
+        "pio monitor",
+        "pio device monitor",
+        "device monitor",
+        "miniterm",
+        "esptool",
+        port_name.lower(),
     ]
 
     if any(exe in proc_name_lower for exe in serial_exes):
@@ -107,7 +124,9 @@ def check_matches_kill_patterns(
     return len(matches) > 0, matches
 
 
-def find_processes_with_open_files(port_name: str) -> list[tuple[psutil.Process, list[str]]]:
+def find_processes_with_open_files(
+    port_name: str,
+) -> list[tuple[psutil.Process, list[str]]]:
     """Find processes with the specific port open as a file handle.
 
     Note: On Windows, this function skips the open_files() check because it's
@@ -121,15 +140,18 @@ def find_processes_with_open_files(port_name: str) -> list[tuple[psutil.Process,
 
     # Skip on Windows - open_files() is too slow and COM ports don't show as files
     import platform
+
     if platform.system() == "Windows":
         return results
 
     port_lower = port_name.lower()
 
-    for proc in psutil.process_iter(['pid', 'name']):
+    for proc in psutil.process_iter(["pid", "name"]):
         try:
             open_files = proc.open_files()
-            matching_files = [f.path for f in open_files if port_lower in f.path.lower()]
+            matching_files = [
+                f.path for f in open_files if port_lower in f.path.lower()
+            ]
             if matching_files:
                 results.append((proc, matching_files))
         except (psutil.NoSuchProcess, psutil.AccessDenied, AttributeError):
@@ -154,14 +176,14 @@ def diagnose_port(port_name: str) -> None:
     if processes_with_files:
         for proc, files in processes_with_files:
             try:
-                proc_info = proc.as_dict(attrs=['pid', 'name', 'cmdline'])
+                proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
                 print(f"  PID {proc_info['pid']}: {proc_info['name']}")
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
                 print(f"    Open files: {', '.join(files)}")
 
                 # Check if it matches kill patterns
                 matches, patterns = check_matches_kill_patterns(
-                    proc_info['name'], proc_info['cmdline'], port_name
+                    proc_info["name"], proc_info["cmdline"], port_name
                 )
                 if matches:
                     print(f"    ✅ Would be killed by: {', '.join(patterns)}")
@@ -180,16 +202,18 @@ def diagnose_port(port_name: str) -> None:
     print("-" * 80)
 
     found_any = False
-    for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'ppid']):
+    for proc in psutil.process_iter(["pid", "name", "cmdline", "ppid"]):
         try:
-            proc_info = proc.as_dict(attrs=['pid', 'name', 'cmdline', 'ppid'])
+            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"])
             matches, patterns = check_matches_kill_patterns(
-                proc_info['name'], proc_info['cmdline'], port_name
+                proc_info["name"], proc_info["cmdline"], port_name
             )
 
             if matches:
                 found_any = True
-                print(f"  PID {proc_info['pid']}: {proc_info['name']} (Parent: {proc_info['ppid']})")
+                print(
+                    f"  PID {proc_info['pid']}: {proc_info['name']} (Parent: {proc_info['ppid']})"
+                )
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
                 print(f"    Patterns: {', '.join(patterns)}")
 
@@ -200,8 +224,10 @@ def diagnose_port(port_name: str) -> None:
                     for i, ancestor in enumerate(reversed(tree)):
                         try:
                             indent = "      " + "  " * i
-                            ancestor_info = ancestor.as_dict(attrs=['pid', 'name'])
-                            print(f"{indent}└─ PID {ancestor_info['pid']}: {ancestor_info['name']}")
+                            ancestor_info = ancestor.as_dict(attrs=["pid", "name"])
+                            print(
+                                f"{indent}└─ PID {ancestor_info['pid']}: {ancestor_info['name']}"
+                            )
                         except (psutil.NoSuchProcess, psutil.AccessDenied):
                             pass
                 print()
@@ -217,15 +243,24 @@ def diagnose_port(port_name: str) -> None:
     print("-" * 80)
 
     serial_keywords = [
-        "python", "pio", "esptool", "platformio", "miniterm",
-        "putty", "teraterm", "serial", "monitor", "com", "tty"
+        "python",
+        "pio",
+        "esptool",
+        "platformio",
+        "miniterm",
+        "putty",
+        "teraterm",
+        "serial",
+        "monitor",
+        "com",
+        "tty",
     ]
 
     found_any = False
-    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            proc_info = proc.as_dict(attrs=['pid', 'name', 'cmdline'])
-            proc_name_lower = proc_info['name'].lower()
+            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
+            proc_name_lower = proc_info["name"].lower()
 
             if any(keyword in proc_name_lower for keyword in serial_keywords):
                 found_any = True
@@ -234,7 +269,7 @@ def diagnose_port(port_name: str) -> None:
 
                 # Check if it matches kill patterns
                 matches, patterns = check_matches_kill_patterns(
-                    proc_info['name'], proc_info['cmdline'], port_name
+                    proc_info["name"], proc_info["cmdline"], port_name
                 )
                 if matches:
                     print(f"    ✅ Would be killed by: {', '.join(patterns)}")
@@ -280,11 +315,10 @@ def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Diagnose serial port locking issues",
-        epilog="Example: uv run python ci/debug/port_diagnostic.py COM4"
+        epilog="Example: uv run python ci/debug/port_diagnostic.py COM4",
     )
     parser.add_argument(
-        "port",
-        help="Serial port to diagnose (e.g., COM4, /dev/ttyUSB0)"
+        "port", help="Serial port to diagnose (e.g., COM4, /dev/ttyUSB0)"
     )
 
     args = parser.parse_args()
@@ -295,6 +329,7 @@ def main() -> int:
     except Exception as e:
         print(f"❌ Error during diagnosis: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return 1
 

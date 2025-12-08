@@ -22,7 +22,7 @@ FL_EXTERN_C_BEGIN
 #include "freertos/task.h"  // For taskYIELD()
 FL_EXTERN_C_END
 
-#include <type_traits>
+#include "ftl/type_traits.h"
 
 namespace fl {
 
@@ -325,45 +325,45 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTimingRx &timing
 class RmtRxChannelImpl : public RmtRxChannel {
 public:
     RmtRxChannelImpl(gpio_num_t pin, uint32_t resolution_hz, int32_t max_buffer_size)
-        : channel_(nullptr)
-        , pin_(pin)
-        , resolution_hz_(resolution_hz)
-        , buffer_size_(max_buffer_size > 0 ? static_cast<size_t>(max_buffer_size) : 4096)
-        , receive_done_(false)
-        , symbols_received_(0)
-        , signal_range_min_ns_(100)
-        , signal_range_max_ns_(100000)
-        , skip_counter_(0)
-        , internal_buffer_()
+        : mChannel(nullptr)
+        , mPin(pin)
+        , mResolutionHz(resolution_hz)
+        , mBufferSize(max_buffer_size > 0 ? static_cast<size_t>(max_buffer_size) : 4096)
+        , mReceiveDone(false)
+        , mSymbolsReceived(0)
+        , mSignalRangeMinNs(100)
+        , mSignalRangeMaxNs(100000)
+        , mSkipCounter(0)
+        , mInternalBuffer()
     {
-        FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(pin_)
-               << " resolution=" << resolution_hz_ << "Hz"
-               << " max_buffer_size=" << buffer_size_);
+        FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(mPin)
+               << " resolution=" << mResolutionHz << "Hz"
+               << " max_buffer_size=" << mBufferSize);
     }
 
     ~RmtRxChannelImpl() override {
-        if (channel_) {
+        if (mChannel) {
             FL_DBG("Deleting RMT RX channel");
-            rmt_del_channel(channel_);
-            channel_ = nullptr;
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
         }
     }
 
     bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
         // Store signal range parameters
-        signal_range_min_ns_ = signal_range_min_ns;
-        signal_range_max_ns_ = signal_range_max_ns;
-        skip_counter_ = skip_signals;
+        mSignalRangeMinNs = signal_range_min_ns;
+        mSignalRangeMaxNs = signal_range_max_ns;
+        mSkipCounter = skip_signals;
 
-        FL_DBG("RX begin: signal_range_min=" << signal_range_min_ns_
-               << "ns, signal_range_max=" << signal_range_max_ns_ << "ns"
+        FL_DBG("RX begin: signal_range_min=" << mSignalRangeMinNs
+               << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << skip_signals);
 
         // If already initialized, just re-arm the receiver for a new capture
-        if (channel_) {
+        if (mChannel) {
             FL_DBG("RX channel already initialized, re-arming receiver");
 
-            // Clear receive state (resets skip_counter_ to skip_signals_)
+            // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
 
             // Handle skip phase using small discard buffer
@@ -387,10 +387,10 @@ public:
         clear();
 
         // Configure RX channel
-        rmt_rx_channel_config_t rx_config = {};
-        rx_config.gpio_num = pin_;
+        rmt_rx_mChannelconfig_t rx_config = {};
+        rx_config.gpio_num = mPin;
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
-        rx_config.resolution_hz = resolution_hz_;
+        rx_config.resolution_hz = mResolutionHz;
         rx_config.mem_block_symbols = 64;  // Use 64 symbols per memory block
         rx_config.intr_priority = 3;  // Match the priority level used in testing
 
@@ -400,7 +400,7 @@ public:
         // io_loop_back is deprecated and removed in ESP-IDF 6 - use physical jumper wire instead
 
         // Create RX channel
-        esp_err_t err = rmt_new_rx_channel(&rx_config, &channel_);
+        esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
         if (err != ESP_OK) {
             FL_WARN("Failed to create RX channel: " << static_cast<int>(err));
             return false;
@@ -412,22 +412,22 @@ public:
         rmt_rx_event_callbacks_t callbacks = {};
         callbacks.on_recv_done = rxDoneCallback;
 
-        err = rmt_rx_register_event_callbacks(channel_, &callbacks, this);
+        err = rmt_rx_register_event_callbacks(mChannel, &callbacks, this);
         if (err != ESP_OK) {
             FL_WARN("Failed to register RX callbacks: " << static_cast<int>(err));
-            rmt_del_channel(channel_);
-            channel_ = nullptr;
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
             return false;
         }
 
         FL_DBG("RX callbacks registered successfully");
 
         // Enable RX channel
-        err = rmt_enable(channel_);
+        err = rmt_enable(mChannel);
         if (err != ESP_OK) {
             FL_WARN("Failed to enable RX channel: " << static_cast<int>(err));
-            rmt_del_channel(channel_);
-            channel_ = nullptr;
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
             return false;
         }
 
@@ -436,16 +436,16 @@ public:
         // Handle skip phase using small discard buffer
         if (!handleSkipPhase()) {
             FL_WARN("Failed to handle skip phase in begin()");
-            rmt_del_channel(channel_);
-            channel_ = nullptr;
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
             return false;
         }
 
         // Allocate buffer and arm receiver for actual capture
         if (!allocateAndArm()) {
             FL_WARN("Failed to arm receiver in begin()");
-            rmt_del_channel(channel_);
-            channel_ = nullptr;
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
             return false;
         }
 
@@ -454,20 +454,20 @@ public:
     }
 
     bool finished() const override {
-        return receive_done_;
+        return mReceiveDone;
     }
 
     RmtRxWaitResult wait(uint32_t timeout_ms) override {
-        if (!channel_) {
+        if (!mChannel) {
             FL_WARN("wait(): channel not initialized");
             return RmtRxWaitResult::TIMEOUT;  // Treat as timeout
         }
 
-        FL_DBG("wait(): buffer_size=" << buffer_size_ << ", timeout_ms=" << timeout_ms);
+        FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
 
         // Only allocate and arm if not already receiving (begin() wasn't called)
-        // Check if internal_buffer_ is empty to determine if we need to arm
-        if (internal_buffer_.empty()) {
+        // Check if mInternalBuffer is empty to determine if we need to arm
+        if (mInternalBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
                 FL_WARN("wait(): failed to allocate and arm");
@@ -486,14 +486,14 @@ public:
             int64_t elapsed_us = esp_timer_get_time() - start_time_us;
 
             // Check if buffer filled (success condition)
-            if (symbols_received_ >= buffer_size_) {
-                FL_DBG("wait(): buffer filled (" << symbols_received_ << ")");
+            if (mSymbolsReceived >= mBufferSize) {
+                FL_DBG("wait(): buffer filled (" << mSymbolsReceived << ")");
                 return RmtRxWaitResult::SUCCESS;
             }
 
             // Check timeout
             if (elapsed_us >= timeout_us) {
-                FL_WARN("wait(): timeout after " << elapsed_us << "us, received " << symbols_received_ << " symbols");
+                FL_WARN("wait(): timeout after " << elapsed_us << "us, received " << mSymbolsReceived << " symbols");
                 return RmtRxWaitResult::TIMEOUT;
             }
 
@@ -501,12 +501,12 @@ public:
         }
 
         // Receive completed naturally
-        FL_DBG("wait(): receive done, count=" << symbols_received_);
+        FL_DBG("wait(): receive done, count=" << mSymbolsReceived);
         return RmtRxWaitResult::SUCCESS;
     }
 
     uint32_t getResolutionHz() const override {
-        return resolution_hz_;
+        return mResolutionHz;
     }
 
     fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
@@ -519,12 +519,12 @@ public:
         }
 
         // Use the span-based decoder directly
-        return decodeRmtSymbols(timing, resolution_hz_, symbols, out);
+        return decodeRmtSymbols(timing, mResolutionHz, symbols, out);
     }
 
 private:
     /**
-     * @brief Handle skip phase by discarding symbols until skip_counter_ reaches 0
+     * @brief Handle skip phase by discarding symbols until mSkipCounter reaches 0
      * @return true on success, false on failure
      *
      * Uses a small discard buffer to receive and discard symbols without
@@ -532,12 +532,12 @@ private:
      * Only allocates memory temporarily during the skip phase.
      */
     bool handleSkipPhase() {
-        if (skip_counter_ == 0) {
+        if (mSkipCounter == 0) {
             FL_DBG("No symbols to skip, skip phase complete");
             return true;
         }
 
-        FL_DBG("Entering skip phase: skipping " << skip_counter_ << " symbols");
+        FL_DBG("Entering skip phase: skipping " << mSkipCounter << " symbols");
 
         // Use a small discard buffer (64 symbols = 256 bytes)
         constexpr size_t DISCARD_BUFFER_SIZE = 64;
@@ -547,13 +547,13 @@ private:
             discard_buffer.push_back(0);
         }
 
-        // Skip symbols in chunks until skip_counter_ reaches 0
-        while (skip_counter_ > 0) {
-            size_t chunk_size = (skip_counter_ < DISCARD_BUFFER_SIZE)
-                ? skip_counter_ : DISCARD_BUFFER_SIZE;
+        // Skip symbols in chunks until mSkipCounter reaches 0
+        while (mSkipCounter > 0) {
+            size_t chunk_size = (mSkipCounter < DISCARD_BUFFER_SIZE)
+                ? mSkipCounter : DISCARD_BUFFER_SIZE;
 
             FL_DBG("Skip phase: receiving chunk of " << chunk_size
-                   << " symbols (remaining: " << skip_counter_ << ")");
+                   << " symbols (remaining: " << mSkipCounter << ")");
 
             // Enable channel for this receive operation
             if (!enable()) {
@@ -572,7 +572,7 @@ private:
             int64_t start_time_us = esp_timer_get_time();
             int64_t timeout_us = SKIP_TIMEOUT_MS * 1000;
 
-            while (!receive_done_) {
+            while (!mReceiveDone) {
                 int64_t elapsed_us = esp_timer_get_time() - start_time_us;
                 if (elapsed_us >= timeout_us) {
                     FL_WARN("handleSkipPhase(): timeout waiting for symbols");
@@ -581,12 +581,12 @@ private:
                 taskYIELD();
             }
 
-            // Check if ISR properly decremented skip_counter_
-            // (ISR callback handles decrementing skip_counter_)
-            FL_DBG("Skip phase chunk complete, skip_counter_ now: " << skip_counter_);
+            // Check if ISR properly decremented mSkipCounter
+            // (ISR callback handles decrementing mSkipCounter)
+            FL_DBG("Skip phase chunk complete, mSkipCounter now: " << mSkipCounter);
 
-            // Reset receive_done_ for next iteration
-            receive_done_ = false;
+            // Reset mReceiveDone for next iteration
+            mReceiveDone = false;
         }
 
         FL_DBG("Skip phase complete");
@@ -602,10 +602,10 @@ private:
      */
     bool allocateAndArm() {
         // Allocate internal buffer
-        internal_buffer_.clear();
-        internal_buffer_.reserve(buffer_size_);
-        for (size_t i = 0; i < buffer_size_; i++) {
-            internal_buffer_.push_back(0);
+        mInternalBuffer.clear();
+        mInternalBuffer.reserve(mBufferSize);
+        for (size_t i = 0; i < mBufferSize; i++) {
+            mInternalBuffer.push_back(0);
         }
 
         // Enable channel (may be disabled after previous receive)
@@ -615,7 +615,7 @@ private:
         }
 
         // Start receive operation
-        if (!startReceive(internal_buffer_.data(), buffer_size_)) {
+        if (!startReceive(mInternalBuffer.data(), mBufferSize)) {
             FL_WARN("allocateAndArm(): failed to start receive");
             return false;
         }
@@ -632,21 +632,21 @@ private:
      * re-enables it for the next receive operation.
      */
     bool enable() {
-        if (!channel_) {
+        if (!mChannel) {
             FL_WARN("enable(): RX channel not initialized");
             return false;
         }
 
         // Disable first to avoid ESP_ERR_INVALID_STATE (259) if already enabled
         // This is safe to call even if already disabled
-        esp_err_t err = rmt_disable(channel_);
+        esp_err_t err = rmt_disable(mChannel);
         if (err != ESP_OK) {
             FL_DBG("rmt_disable returned: " << static_cast<int>(err) << " (ignoring)");
             // Continue anyway - may already be disabled
         }
 
         // Now enable the channel
-        err = rmt_enable(channel_);
+        err = rmt_enable(mChannel);
         if (err != ESP_OK) {
             FL_WARN("Failed to enable RX channel: " << static_cast<int>(err));
             return false;
@@ -661,19 +661,19 @@ private:
      * @return Span of const RmtSymbol containing received data
      */
     fl::span<const RmtSymbol> getReceivedSymbols() const {
-        if (internal_buffer_.empty()) {
+        if (mInternalBuffer.empty()) {
             return fl::span<const RmtSymbol>();
         }
-        return fl::span<const RmtSymbol>(internal_buffer_.data(), symbols_received_);
+        return fl::span<const RmtSymbol>(mInternalBuffer.data(), mSymbolsReceived);
     }
 
     /**
      * @brief Clear receive state (internal method)
      */
     void clear() {
-        receive_done_ = false;
-        symbols_received_ = 0;
-        // skip_counter_ is set in begin(), not here
+        mReceiveDone = false;
+        mSymbolsReceived = 0;
+        // mSkipCounter is set in begin(), not here
         FL_DBG("RX state cleared");
     }
 
@@ -684,7 +684,7 @@ private:
      * @return true if receive started, false on error
      */
     bool startReceive(RmtSymbol* buffer, size_t buffer_size) {
-        if (!channel_) {
+        if (!mChannel) {
             FL_WARN("RX channel not initialized (call begin() first)");
             return false;
         }
@@ -695,19 +695,19 @@ private:
         }
 
         // Reset state
-        receive_done_ = false;
-        symbols_received_ = 0;
+        mReceiveDone = false;
+        mSymbolsReceived = 0;
 
         // Configure receive parameters (use values from begin())
         rmt_receive_config_t rx_params = {};
-        rx_params.signal_range_min_ns = signal_range_min_ns_;
-        rx_params.signal_range_max_ns = signal_range_max_ns_;
+        rx_params.signal_range_min_ns = mSignalRangeMinNs;
+        rx_params.signal_range_max_ns = mSignalRangeMaxNs;
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
         auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
 
         // Start receiving
-        esp_err_t err = rmt_receive(channel_, rmt_buffer, buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
+        esp_err_t err = rmt_receive(mChannel, rmt_buffer, buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
         if (err != ESP_OK) {
             FL_WARN("Failed to start RX receive: " << static_cast<int>(err));
             return false;
@@ -722,11 +722,11 @@ private:
      *
      * IRAM_ATTR specified on definition only (not declaration) to avoid warnings.
      *
-     * Skip logic: When skip_counter_ > 0, we're in skip phase (called from handleSkipPhase).
-     * Decrement skip_counter_ and discard symbols. When skip_counter_ == 0, we're in
+     * Skip logic: When mSkipCounter > 0, we're in skip phase (called from handleSkipPhase).
+     * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
      * capture phase - store the received symbols normally.
      */
-    static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
+    static bool IRAM_ATTR rxDoneCallback(rmt_mChannelhandle_t channel,
                                          const rmt_rx_done_event_data_t* data,
                                          void* user_data) {
         RmtRxChannelImpl* self = static_cast<RmtRxChannelImpl*>(user_data);
@@ -737,37 +737,37 @@ private:
         size_t received_count = data->num_symbols;
 
         // Check if we're in skip phase
-        if (self->skip_counter_ > 0) {
+        if (self->mSkipCounter > 0) {
             // Discard received symbols and decrement skip counter
-            if (self->skip_counter_ >= received_count) {
-                self->skip_counter_ -= received_count;
+            if (self->mSkipCounter >= received_count) {
+                self->mSkipCounter -= received_count;
             } else {
-                self->skip_counter_ = 0;
+                self->mSkipCounter = 0;
             }
 
-            self->symbols_received_ = 0;
-            self->receive_done_ = true;  // Signal completion for skip phase
+            self->mSymbolsReceived = 0;
+            self->mReceiveDone = true;  // Signal completion for skip phase
             return false;
         }
 
         // Capture phase - store received symbols
-        self->symbols_received_ = received_count;
-        self->receive_done_ = true;
+        self->mSymbolsReceived = received_count;
+        self->mReceiveDone = true;
 
         // No higher-priority task awakened
         return false;
     }
 
-    rmt_channel_handle_t channel_;                ///< RMT channel handle
-    gpio_num_t pin_;                              ///< GPIO pin for RX
-    uint32_t resolution_hz_;                      ///< Clock resolution in Hz
-    size_t buffer_size_;                          ///< Internal buffer size in symbols
-    volatile bool receive_done_;                  ///< Set by ISR when receive complete
-    volatile size_t symbols_received_;            ///< Number of symbols received (set by ISR)
-    uint32_t signal_range_min_ns_;                ///< Minimum pulse width (noise filtering)
-    uint32_t signal_range_max_ns_;                ///< Maximum pulse width (idle detection)
-    uint32_t skip_counter_;                       ///< Runtime counter for skipping (decremented in ISR)
-    fl::HeapVector<RmtSymbol> internal_buffer_;   ///< Internal buffer for all receive operations
+    rmt_mChannelhandle_t mChannel;                ///< RMT channel handle
+    gpio_num_t mPin;                              ///< GPIO pin for RX
+    uint32_t mResolutionHz;                      ///< Clock resolution in Hz
+    size_t mBufferSize;                          ///< Internal buffer size in symbols
+    volatile bool mReceiveDone;                  ///< Set by ISR when receive complete
+    volatile size_t mSymbolsReceived;            ///< Number of symbols received (set by ISR)
+    uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
+    uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
+    uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
+    fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< Internal buffer for all receive operations
 };
 
 // Factory method implementation

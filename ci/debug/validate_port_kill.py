@@ -48,7 +48,11 @@ def check_port_status(port_name: str) -> bool:
         return False
     except serial.SerialException as e:
         error_msg = str(e)
-        if "PermissionError" in error_msg or "Access is denied" in error_msg or "in use" in error_msg.lower():
+        if (
+            "PermissionError" in error_msg
+            or "Access is denied" in error_msg
+            or "in use" in error_msg.lower()
+        ):
             print(f"🔒 {port_name}: LOCKED")
             print(f"   Error: {error_msg}")
             return True
@@ -61,7 +65,9 @@ def main():
     """Main validation function."""
     parser = argparse.ArgumentParser(description="Validate port killing functionality")
     parser.add_argument("port", nargs="?", help="Specific port to check (e.g., COM3)")
-    parser.add_argument("--kill", action="store_true", help="Kill process using the port")
+    parser.add_argument(
+        "--kill", action="store_true", help="Kill process using the port"
+    )
     parser.add_argument("--auto", action="store_true", help="Auto-detect port")
     args = parser.parse_args()
 

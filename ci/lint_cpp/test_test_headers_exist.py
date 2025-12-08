@@ -37,6 +37,7 @@ EXCLUDED_TEST_FILES = {
     "doctest_main.cpp",  # Test framework entry point
     "sketch_runner_demo.cpp",  # Demo file, not a real test
     "sketch_runner.cpp",  # Self-contained test for sketch runner functionality
+    "test_spi_batching_logic.cpp",  # Self-contained algorithm validation test
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)

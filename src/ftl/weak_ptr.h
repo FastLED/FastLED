@@ -10,48 +10,48 @@ template<typename T>
 class weak_ptr {
 private:
     T* mPtr;
-    detail::ControlBlockBase* control_block_;
+    detail::ControlBlockBase* mControlBlock;
 
 public:
     using element_type = T;
     
     // Default constructor
-    weak_ptr() noexcept : mPtr(nullptr), control_block_(nullptr) {}
+    weak_ptr() noexcept : mPtr(nullptr), mControlBlock(nullptr) {}
     
     // Copy constructor
-    weak_ptr(const weak_ptr& other) noexcept : mPtr(other.mPtr), control_block_(other.control_block_) {
-        if (control_block_) {
-            ++control_block_->weak_count;
+    weak_ptr(const weak_ptr& other) noexcept : mPtr(other.mPtr), mControlBlock(other.mControlBlock) {
+        if (mControlBlock) {
+            ++mControlBlock->weak_count;
         }
     }
     
     // Converting copy constructor
     template<typename Y>
-    weak_ptr(const weak_ptr<Y>& other) noexcept : mPtr(other.mPtr), control_block_(other.control_block_) {
-        if (control_block_) {
-            ++control_block_->weak_count;
+    weak_ptr(const weak_ptr<Y>& other) noexcept : mPtr(other.mPtr), mControlBlock(other.mControlBlock) {
+        if (mControlBlock) {
+            ++mControlBlock->weak_count;
         }
     }
     
     // Constructor from shared_ptr
     template<typename Y>
-    weak_ptr(const shared_ptr<Y>& shared) noexcept : mPtr(shared.mPtr), control_block_(shared.control_block_) {
-        if (control_block_) {
-            ++control_block_->weak_count;
+    weak_ptr(const shared_ptr<Y>& shared) noexcept : mPtr(shared.mPtr), mControlBlock(shared.mControlBlock) {
+        if (mControlBlock) {
+            ++mControlBlock->weak_count;
         }
     }
     
     // Move constructor
-    weak_ptr(weak_ptr&& other) noexcept : mPtr(other.mPtr), control_block_(other.control_block_) {
+    weak_ptr(weak_ptr&& other) noexcept : mPtr(other.mPtr), mControlBlock(other.mControlBlock) {
         other.mPtr = nullptr;
-        other.control_block_ = nullptr;
+        other.mControlBlock = nullptr;
     }
     
     // Converting move constructor
     template<typename Y>
-    weak_ptr(weak_ptr<Y>&& other) noexcept : mPtr(other.mPtr), control_block_(other.control_block_) {
+    weak_ptr(weak_ptr<Y>&& other) noexcept : mPtr(other.mPtr), mControlBlock(other.mControlBlock) {
         other.mPtr = nullptr;
-        other.control_block_ = nullptr;
+        other.mControlBlock = nullptr;
     }
     
     // Destructor
@@ -64,9 +64,9 @@ public:
         if (this != &other) {
             release();
             mPtr = other.mPtr;
-            control_block_ = other.control_block_;
-            if (control_block_) {
-                ++control_block_->weak_count;
+            mControlBlock = other.mControlBlock;
+            if (mControlBlock) {
+                ++mControlBlock->weak_count;
             }
         }
         return *this;
@@ -76,9 +76,9 @@ public:
     weak_ptr& operator=(const weak_ptr<Y>& other) noexcept {
         release();
         mPtr = other.mPtr;
-        control_block_ = other.control_block_;
-        if (control_block_) {
-            ++control_block_->weak_count;
+        mControlBlock = other.mControlBlock;
+        if (mControlBlock) {
+            ++mControlBlock->weak_count;
         }
         return *this;
     }
@@ -87,9 +87,9 @@ public:
     weak_ptr& operator=(const shared_ptr<Y>& shared) noexcept {
         release();
         mPtr = shared.mPtr;
-        control_block_ = shared.control_block_;
-        if (control_block_) {
-            ++control_block_->weak_count;
+        mControlBlock = shared.mControlBlock;
+        if (mControlBlock) {
+            ++mControlBlock->weak_count;
         }
         return *this;
     }
@@ -98,9 +98,9 @@ public:
         if (this != &other) {
             release();
             mPtr = other.mPtr;
-            control_block_ = other.control_block_;
+            mControlBlock = other.mControlBlock;
             other.mPtr = nullptr;
-            other.control_block_ = nullptr;
+            other.mControlBlock = nullptr;
         }
         return *this;
     }
@@ -109,9 +109,9 @@ public:
     weak_ptr& operator=(weak_ptr<Y>&& other) noexcept {
         release();
         mPtr = other.mPtr;
-        control_block_ = other.control_block_;
+        mControlBlock = other.mControlBlock;
         other.mPtr = nullptr;
-        other.control_block_ = nullptr;
+        other.mControlBlock = nullptr;
         return *this;
     }
     
@@ -119,17 +119,17 @@ public:
     void reset() noexcept {
         release();
         mPtr = nullptr;
-        control_block_ = nullptr;
+        mControlBlock = nullptr;
     }
     
     void swap(weak_ptr& other) noexcept {
         fl::swap(mPtr, other.mPtr);
-        fl::swap(control_block_, other.control_block_);
+        fl::swap(mControlBlock, other.mControlBlock);
     }
     
     // Observers
     long use_count() const noexcept {
-        return control_block_ ? static_cast<long>(control_block_->shared_count) : 0;
+        return mControlBlock ? static_cast<long>(mControlBlock->shared_count) : 0;
     }
     
     bool expired() const noexcept { 
@@ -142,9 +142,9 @@ public:
         }
         
         // Try to acquire the shared pointer atomically
-        if (control_block_ && control_block_->shared_count > 0) {
-            ++control_block_->shared_count;
-            return shared_ptr<T>(mPtr, control_block_, detail::make_shared_tag{});
+        if (mControlBlock && mControlBlock->shared_count > 0) {
+            ++mControlBlock->shared_count;
+            return shared_ptr<T>(mPtr, mControlBlock, detail::make_shared_tag{});
         }
         return shared_ptr<T>();
     }
@@ -152,17 +152,17 @@ public:
     // Ownership (similar to shared_ptr interface)
     template<typename Y>
     bool owner_before(const weak_ptr<Y>& other) const noexcept {
-        return control_block_ < other.control_block_;
+        return mControlBlock < other.mControlBlock;
     }
     
     template<typename Y>
     bool owner_before(const shared_ptr<Y>& other) const noexcept {
-        return control_block_ < other.control_block_;
+        return mControlBlock < other.mControlBlock;
     }
     
     // Comparison operators (for compatibility with VectorSet)
     bool operator==(const weak_ptr& other) const noexcept {
-        return mPtr == other.mPtr && control_block_ == other.control_block_;
+        return mPtr == other.mPtr && mControlBlock == other.mControlBlock;
     }
     
     bool operator!=(const weak_ptr& other) const noexcept {
@@ -171,7 +171,7 @@ public:
     
     template<typename Y>
     bool operator==(const weak_ptr<Y>& other) const noexcept {
-        return mPtr == other.mPtr && control_block_ == other.control_block_;
+        return mPtr == other.mPtr && mControlBlock == other.mControlBlock;
     }
     
     template<typename Y>
@@ -181,9 +181,9 @@ public:
 
 private:
     void release() {
-        if (control_block_) {
-            if (--control_block_->weak_count == 0 && control_block_->shared_count == 0) {
-                control_block_->destroy_control_block();
+        if (mControlBlock) {
+            if (--mControlBlock->weak_count == 0 && mControlBlock->shared_count == 0) {
+                mControlBlock->destroy_control_block();
             }
         }
     }
@@ -205,12 +205,12 @@ namespace fl {
 
 template<typename T>
 template<typename Y>
-shared_ptr<T>::shared_ptr(const weak_ptr<Y>& weak) : mPtr(nullptr), control_block_(nullptr) {
+shared_ptr<T>::shared_ptr(const weak_ptr<Y>& weak) : mPtr(nullptr), mControlBlock(nullptr) {
     if (!weak.expired()) {
-        if (weak.control_block_ && weak.control_block_->shared_count > 0) {
-            ++weak.control_block_->shared_count;
+        if (weak.mControlBlock && weak.mControlBlock->shared_count > 0) {
+            ++weak.mControlBlock->shared_count;
             mPtr = weak.mPtr;
-            control_block_ = weak.control_block_;
+            mControlBlock = weak.mControlBlock;
         }
     }
     if (!mPtr) {
