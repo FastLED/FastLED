@@ -56,18 +56,10 @@ void initializeChannelBusManager() {
 
     // Add engines with string names (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO
-    #if defined(CONFIG_IDF_TARGET_ESP32C6)
-    // PARLIO has clock gating bug on ESP32-C6 (ESP-IDF ≤ v5.4.1)
-    // TX clock domain must be enabled BEFORE querying frequency, but driver
-    // queries frequency first, causing ALL clock sources/frequencies to fail
-    // with ESP_ERR_NOT_SUPPORTED (error 258).
-    // Disabling PARLIO on C6 until ESP-IDF driver is fixed.
-    FL_WARN("ESP32-C6: PARLIO driver disabled due to clock initialization bug (ESP-IDF ≤v5.4.1)");
-    FL_WARN("ESP32-C6: Falling back to RMT driver for LED control");
-    #else
+    // ESP32-C6: Fixed by explicitly setting clk_in_gpio_num = -1 (Iteration 2)
+    // This tells the driver to use internal clock source instead of external GPIO 0
     manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>(), "PARLIO");
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
-    #endif
     #endif
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
@@ -102,7 +94,6 @@ void initializeChannelBusManager() {
 FL_INIT(initializeChannelBusManager);
 
 } // namespace detail
-
 
 } // namespace fl
 

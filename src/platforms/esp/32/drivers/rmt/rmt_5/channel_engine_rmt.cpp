@@ -308,6 +308,28 @@ void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
 }
 
 bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
+    // ============================================================================
+    // TODO: CRITICAL - RMT5 MEMORY MANAGEMENT NEEDS IMPROVEMENT
+    // ============================================================================
+    // The previous RMT4 driver used DOUBLE BUFFERING (2× 48 words = 96 words).
+    // This RMT5 implementation now uses QUAD BUFFERING (4× 48 words = 192 words)
+    // for single-channel scenarios to maximize performance and WiFi resistance.
+    //
+    // PROBLEM: Quad buffering wastes precious on-chip RAM when:
+    //   1. Multiple LED strips are active (fragments the 192-word pool)
+    //   2. Small LED strips don't need the extra buffering overhead
+    //   3. DMA is available (negates the need for large internal buffers)
+    //
+    // PROPOSED IMPROVEMENTS:
+    //   - Adaptive buffering: Choose buffer size based on LED count and active channels
+    //   - Opportunistic pooling: Share released buffers instead of per-channel allocation
+    //   - DMA-first strategy: More aggressive DMA usage to reduce internal RAM pressure
+    //   - Runtime profiling: Measure actual buffer utilization and adjust dynamically
+    //
+    // IMPACT: Better memory efficiency = support for more simultaneous strips and
+    //         larger LED counts without hitting RMT memory limits.
+    // ============================================================================
+
     // Runtime DMA detection: Try DMA first if hardware availability is unknown or confirmed
     // Only allow DMA if no DMA channels currently in use (hardware limit: 1 DMA channel)
     bool tryDMA = false;
@@ -382,15 +404,22 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         // One DMA channel active → all 192 words available for this non-DMA channel
         // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
         mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+        // CRITICAL: Cap at hardware limit for platform compatibility
+        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;
+        }
         FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
-                   << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
+                   << " symbols (capped at hardware limit)");
     } else if (mChannels.empty()) {
         // First non-DMA channel: Use quad-buffering (192 words) for maximum performance
         // This configuration matches RMT4 driver performance and provides optimal WiFi resistance
-        // Tested on ESP32-C6 and ESP32-S3 - both support full 192-word allocation
-        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+        // CRITICAL: Must cap at hardware limit - ESP32-C3/C6/H2 have lower limits than ESP32-S3
+        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192 on S3
+        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;  // ESP32-C3/C6/H2: cap at platform limit
+        }
         FL_LOG_RMT("First non-DMA channel: QUAD-BUFFERING with " << mem_block_symbols
-                   << " symbols (4× normal - maximum WiFi resistance)");
+                   << " symbols (capped at hardware limit)");
     } else {
         // Multiple non-DMA channels → use standard double-buffer size
         // ESP32-S3: 96 words (2× 48), ESP32-C6: 48 words max (hardware limit)

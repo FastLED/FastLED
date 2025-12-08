@@ -5,6 +5,7 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/engine_events.h"
+#include "fl/delay.h"
 #include "ftl/algorithm.h"
 #include "ftl/move.h"
 
@@ -151,7 +152,10 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
 }
 
 void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+    FL_DBG("ChannelBusManager::beginTransmission() - START (channelData.size=" << channelData.size() << ")");
+
     if (channelData.size() == 0) {
+        FL_DBG("ChannelBusManager::beginTransmission() - No channel data, returning");
         return;
     }
 
@@ -161,16 +165,27 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
         return;
     }
 
+    FL_DBG("ChannelBusManager::beginTransmission() - Calling poll() on active engine (ptr=" << (void*)mActiveEngine << ")");
+
     // Forward channel data to active engine by enqueueing and showing
     // Poll in a loop until engine is ready for new data
     while (mActiveEngine->poll() != EngineState::READY) {
-        // Keep polling until previous transmission completes
+        FL_DBG("ChannelBusManager::beginTransmission() - Engine not ready, polling again...");
+        // Yield to watchdog task to prevent watchdog timeout
+        delayMicroseconds(100);
     }
 
+    FL_DBG("ChannelBusManager::beginTransmission() - Engine ready, enqueueing " << channelData.size() << " channels");
+
     for (const auto& channel : channelData) {
+        FL_DBG("ChannelBusManager::beginTransmission() - Enqueueing channel " << (void*)channel.get());
         mActiveEngine->enqueue(channel);
     }
+
+    FL_DBG("ChannelBusManager::beginTransmission() - Calling show() on active engine");
     mActiveEngine->show();
+
+    FL_DBG("ChannelBusManager::beginTransmission() - COMPLETE");
     mLastError.clear();  // Success - clear any previous errors
 }
 
