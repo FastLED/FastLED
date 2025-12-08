@@ -51,23 +51,6 @@ The validation sketch tests the entire LED data transmission pipeline:
 
 ### Full Setup (With LED Strip)
 
-```
-ESP32 DevKit                      WS2812B LED Strip
-┌─────────────────────────┐       ┌──────────────────┐
-│                         │       │                  │
-│  GPIO 5 (SPI TX) ───────┼───────┤ DIN (Data In)    │
-│                         │   │   │                  │
-│                         │   │   │ DOUT (Data Out) ─┼─┐
-│  GPIO 6 (RMT RX) ───────┼───┘   │                  │ │
-│                         │       │ GND ─────────────┼─┼──> GND
-│  GND ───────────────────┼───────┤                  │ │
-│                         │       │ 5V ──────────────┼─┼──> 5V PSU
-│  USB ───── Computer     │       │                  │ │
-│                         │       └──────────────────┘ │
-└─────────────────────────┘                            │
-                                                       │
-       Loopback wire ──────────────────────────────────┘
-```
 
 **Steps:**
 1. Connect GPIO 5 to LED strip Data In
