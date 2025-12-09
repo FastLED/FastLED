@@ -102,7 +102,31 @@ RmtMemoryManager& RmtMemoryManager::instance() {
     return instance;
 }
 
-Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, bool use_dma) {
+size_t RmtMemoryManager::calculateMemoryBlocks(bool wifiActive) {
+    // Calculate if platform has enough TX memory for triple-buffering (3× blocks)
+    // Triple-buffering one channel requires: 3 × SOC_RMT_MEM_WORDS_PER_CHANNEL words
+    // Total TX memory available: SOC_RMT_TX_CANDIDATES_PER_GROUP × SOC_RMT_MEM_WORDS_PER_CHANNEL
+    //
+    // Example calculations:
+    // - C3/C6/H2/C5: 2 × 48 = 96 words < 3 × 48 = 144 words → Cannot triple buffer
+    // - ESP32-S3: 4 × 48 = 192 words >= 3 × 48 = 144 words → Can triple buffer
+    // - ESP32: 8 × 64 = 512 words >= 3 × 64 = 192 words → Can triple buffer
+    // - ESP32-S2: 4 × 64 = 256 words >= 3 × 64 = 192 words → Can triple buffer
+#if SOC_RMT_TX_CANDIDATES_PER_GROUP < 3
+    // Insufficient TX memory for triple-buffering (platforms with < 3 TX channels)
+    (void)wifiActive;  // Suppress unused parameter warning
+    return FASTLED_RMT_MEM_BLOCKS;  // Always 2 (cannot support 3×)
+#else
+    // Sufficient TX memory for WiFi-aware allocation
+    if (wifiActive) {
+        return FASTLED_RMT_MEM_BLOCKS_WIFI_MODE;  // Default: 3 (triple-buffer for WiFi)
+    } else {
+        return FASTLED_RMT_MEM_BLOCKS;  // Default: 2 (double-buffer for idle)
+    }
+#endif
+}
+
+Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, bool use_dma, bool wifiActive) {
     // Check if channel already allocated
     if (findAllocation(channel_id, true) != nullptr) {
         FL_WARN("RMT TX channel " << static_cast<int>(channel_id) << " already allocated");
@@ -117,8 +141,9 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
         return Result<size_t, RmtMemoryError>::success(0);
     }
 
-    // Calculate double-buffer size (2× base channel size)
-    size_t words_needed = 2 * SOC_RMT_MEM_WORDS_PER_CHANNEL;
+    // Calculate adaptive buffer size based on WiFi state
+    size_t mem_blocks = calculateMemoryBlocks(wifiActive);
+    size_t words_needed = mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL;
 
     // Check memory availability based on pool architecture
     if (mLedger.is_global_pool) {
@@ -136,7 +161,8 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
         mLedger.allocations.push_back(ChannelAllocation(channel_id, words_needed, true, false));
 
         FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
-                   << " allocated: " << words_needed << " words (double-buffer)"
+                   << " allocated: " << words_needed << " words (" << mem_blocks << "× buffer"
+                   << (wifiActive ? ", WiFi mode" : "") << ")"
                    << " | Total GLOBAL: " << mLedger.allocated_words << "/" << mLedger.total_words);
     } else {
         // Dedicated pools: check TX pool only
@@ -153,7 +179,8 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
         mLedger.allocations.push_back(ChannelAllocation(channel_id, words_needed, true, false));
 
         FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
-                   << " allocated: " << words_needed << " words (double-buffer)"
+                   << " allocated: " << words_needed << " words (" << mem_blocks << "× buffer"
+                   << (wifiActive ? ", WiFi mode" : "") << ")"
                    << " | Total TX: " << mLedger.allocated_tx_words << "/" << mLedger.total_tx_words);
     }
 
@@ -280,11 +307,12 @@ size_t RmtMemoryManager::availableRxWords() const {
     }
 }
 
-bool RmtMemoryManager::canAllocateTx(bool use_dma) const {
+bool RmtMemoryManager::canAllocateTx(bool use_dma, bool wifiActive) const {
     if (use_dma) {
         return true;  // DMA always succeeds (bypasses on-chip memory)
     }
-    size_t words_needed = 2 * SOC_RMT_MEM_WORDS_PER_CHANNEL;
+    size_t mem_blocks = calculateMemoryBlocks(wifiActive);
+    size_t words_needed = mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL;
 
     if (mLedger.is_global_pool) {
         return (mLedger.allocated_words + words_needed) <= mLedger.total_words;

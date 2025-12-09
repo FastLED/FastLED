@@ -18,6 +18,7 @@
 #include "rmt5_encoder.h"
 #include "rmt_memory_manager.h"
 #include "common.h"
+#include "wifi_detector.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/chipsets/led_timing.h"
@@ -48,6 +49,7 @@ namespace fl {
 ChannelEngineRMT::ChannelEngineRMT()
     : mDMAChannelsInUse(0)
     , mAllocationFailed(false)
+    , mLastKnownWiFiState(false)
 {
     // Suppress ESP-IDF RMT "no free channels" errors (expected during time-multiplexing)
     // Only show critical RMT errors (ESP_LOG_ERROR and above)
@@ -192,6 +194,12 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
     }
     FL_LOG_RMT("ChannelEngineRMT::beginTransmission() is running");
 
+    // WiFi-aware channel reconfiguration (once per frame)
+    #if FASTLED_RMT_WIFI_REDUCE_CHANNELS
+        bool wifiActive = WiFiDetector::isWiFiActive();
+        reconfigureForWiFi(wifiActive);
+    #endif
+
     // Reset allocation failure flag at start of each frame to allow retry
     if (mAllocationFailed) {
         FL_LOG_RMT("Resetting allocation failure flag (retry at start of frame)");
@@ -332,6 +340,9 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     // Get memory manager reference
     auto& memMgr = RmtMemoryManager::instance();
 
+    // Get current WiFi state for memory allocation
+    bool wifiActive = WiFiDetector::isWiFiActive();
+
     // ============================================================================
     // DMA ALLOCATION POLICY - ESP32-S3 First Channel Only (TX or RX)
     // ============================================================================
@@ -368,7 +379,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     // STEP 1: Try DMA channel creation (first channel only on ESP32-S3)
     if (tryDMA && dataSize > 0) {
         // Allocate memory from memory manager (DMA bypasses on-chip memory)
-        auto alloc_result = memMgr.allocateTx(state->memoryChannelId, true);  // true = use DMA
+        auto alloc_result = memMgr.allocateTx(state->memoryChannelId, true, wifiActive);  // true = use DMA
         if (!alloc_result.ok()) {
             FL_WARN("Memory manager TX allocation failed for DMA channel " << static_cast<int>(state->memoryChannelId));
             return false;
@@ -381,6 +392,16 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         FL_LOG_RMT("DMA allocation: " << dma_mem_block_symbols << " symbols for "
                    << dataSize << " bytes (" << (dataSize/3) << " LEDs)");
 
+        // Select interrupt priority based on WiFi state
+        // WiFi interrupts run at level 4 - boost RMT to level 5 on supported platforms
+        int intr_priority = FL_RMT5_INTERRUPT_LEVEL;
+#if FASTLED_RMT_WIFI_PRIORITY_BOOST
+        if (wifiActive) {
+            intr_priority = FL_RMT5_INTERRUPT_LEVEL_WIFI_MODE;
+            FL_LOG_RMT("WiFi active: Boosting RMT interrupt priority to level " << intr_priority);
+        }
+#endif
+
         rmt_tx_channel_config_t dma_config = {};
         dma_config.gpio_num = pin;
         dma_config.clk_src = RMT_CLK_SRC_DEFAULT;
@@ -389,7 +410,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         dma_config.trans_queue_depth = 1;
         dma_config.flags.invert_out = 0;
         dma_config.flags.with_dma = 1;  // Enable DMA
-        dma_config.intr_priority = 3;
+        dma_config.intr_priority = intr_priority;
 
         esp_err_t dma_err = rmt_new_tx_channel(&dma_config, &state->channel);
         if (dma_err == ESP_OK) {
@@ -435,7 +456,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
 
     // STEP 2: Create non-DMA channel (either DMA not attempted, failed, or disabled)
     // Allocate memory from memory manager (double-buffer policy)
-    auto alloc_result = memMgr.allocateTx(state->memoryChannelId, false);  // false = non-DMA
+    auto alloc_result = memMgr.allocateTx(state->memoryChannelId, false, wifiActive);  // false = non-DMA
     if (!alloc_result.ok()) {
         FL_WARN("Memory manager TX allocation failed for channel " << static_cast<int>(state->memoryChannelId)
                 << " - insufficient on-chip memory");
@@ -454,6 +475,16 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
                    << " words) - No DMA support on platform");
     }
 
+    // Select interrupt priority based on WiFi state
+    // WiFi interrupts run at level 4 - boost RMT to level 5 on supported platforms
+    int intr_priority = FL_RMT5_INTERRUPT_LEVEL;
+#if FASTLED_RMT_WIFI_PRIORITY_BOOST
+    if (wifiActive) {
+        intr_priority = FL_RMT5_INTERRUPT_LEVEL_WIFI_MODE;
+        FL_LOG_RMT("WiFi active: Boosting RMT interrupt priority to level " << intr_priority);
+    }
+#endif
+
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
@@ -462,9 +493,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = 0;
     tx_config.flags.with_dma = 0;  // Non-DMA
-    // ESP32-C6 Priority Limit: Testing revealed priority 0-3 work, 4+ fail (ISR callbacks don't fire)
-    // Priority 3 is OPTIMAL for ESP32-C6 - highest working level for best latency
-    tx_config.intr_priority = 3;
+    tx_config.intr_priority = intr_priority;
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
@@ -586,6 +615,203 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
     // Update timing - encoder is already created in createChannel()
     state->timing = timing;
     state->transmissionComplete = false;
+}
+
+//=============================================================================
+// WiFi-Aware Channel Destruction Helpers
+//=============================================================================
+
+void ChannelEngineRMT::destroyChannel(ChannelState* state) {
+    FL_ASSERT(state != nullptr, "destroyChannel called with nullptr");
+
+    if (!state->channel) {
+        return;  // Already destroyed
+    }
+
+    // Wait for transmission to complete (should already be done if !inUse)
+    esp_err_t wait_result = rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
+    if (wait_result != ESP_OK) {
+        FL_WARN("destroyChannel: rmt_tx_wait_all_done timeout for pin " << static_cast<int>(state->pin));
+    }
+
+    // Delete encoder
+    if (state->encoder) {
+        esp_err_t enc_err = rmt_del_encoder(state->encoder);
+        if (enc_err != ESP_OK) {
+            FL_WARN("destroyChannel: Failed to delete encoder: " << esp_err_to_name(enc_err));
+        }
+        state->encoder = nullptr;
+    }
+
+    // Delete channel
+    esp_err_t del_err = rmt_del_channel(state->channel);
+    if (del_err != ESP_OK) {
+        FL_WARN("destroyChannel: Failed to delete channel: " << esp_err_to_name(del_err));
+    }
+    state->channel = nullptr;
+
+    // Free memory resources
+    auto& memMgr = RmtMemoryManager::instance();
+    if (state->useDMA) {
+        memMgr.freeDMA(state->memoryChannelId, true);  // true = TX channel
+        mDMAChannelsInUse--;
+    }
+    memMgr.free(state->memoryChannelId, true);  // true = TX channel
+
+    state->useDMA = false;
+
+    FL_LOG_RMT("Destroyed channel on pin " << static_cast<int>(state->pin)
+               << " (memoryChannelId: " << static_cast<int>(state->memoryChannelId) << ")");
+}
+
+void ChannelEngineRMT::destroyLeastUsedChannels(size_t count) {
+    if (count == 0) {
+        return;
+    }
+
+    FL_LOG_RMT("Destroying " << count << " least-used channels");
+
+    // Destroy channels from end of vector (FIFO - oldest channels at end)
+    // NOTE: Future enhancement could track lastUsedTimestamp for true LRU behavior
+    size_t destroyed = 0;
+    while (destroyed < count && !mChannels.empty()) {
+        auto& state = mChannels.back();
+
+        // Only destroy if not in use
+        if (!state.inUse) {
+            destroyChannel(&state);
+            mChannels.pop_back();
+            destroyed++;
+        } else {
+            // Cannot destroy in-use channel - skip for now
+            // This could happen if WiFi activates during transmission
+            FL_WARN("destroyLeastUsedChannels: Cannot destroy in-use channel on pin "
+                    << static_cast<int>(state.pin) << ", skipping");
+            break;
+        }
+    }
+
+    FL_LOG_RMT("Destroyed " << destroyed << " channels (requested: " << count << ")");
+}
+
+size_t ChannelEngineRMT::calculateTargetChannelCount(bool wifiActive) {
+    if (!wifiActive) {
+        // No WiFi: Use maximum channels for platform (2× memory blocks)
+        #if defined(CONFIG_IDF_TARGET_ESP32)
+            return 4;  // 512 words ÷ 128 = 4 channels
+        #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+            return 2;  // 256 words ÷ 128 = 2 channels
+        #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+            return 3;  // 1 DMA + 2 on-chip (192 ÷ 96 = 2)
+        #elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+              defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
+            return 1;  // C3/C6/H2/C5: Only 96 words
+        #else
+            return 1;  // Unknown platform: conservative default
+        #endif
+    } else {
+        // WiFi active: Reduce channels to allow 3× buffering (except C3/C6/H2/C5)
+        #if defined(CONFIG_IDF_TARGET_ESP32)
+            return 2;  // 512 words ÷ 192 = 2 channels (3× buffering)
+        #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+            return 1;  // 256 words ÷ 192 = 1 channel (3× buffering)
+        #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+            return 2;  // 1 DMA + 1 on-chip (192 words ÷ 144 = 1 on-chip with 3×)
+        #elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+              defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
+            return 1;  // C3/C6/H2/C5: Cannot use 3× (insufficient memory), keep 1 channel
+        #else
+            return 1;  // Unknown platform: conservative default
+        #endif
+    }
+}
+
+void ChannelEngineRMT::reconfigureForWiFi(bool wifiActive) {
+    // Check if WiFi state changed
+    if (wifiActive == mLastKnownWiFiState) {
+        return;  // No change - nothing to do
+    }
+
+    FL_DBG("WiFi state changed: " << (wifiActive ? "ACTIVE" : "INACTIVE")
+           << " (was: " << (mLastKnownWiFiState ? "ACTIVE" : "INACTIVE") << ")");
+
+    // Calculate target channel count for new WiFi state
+    size_t targetChannels = calculateTargetChannelCount(wifiActive);
+    FL_DBG("Target channel count: " << targetChannels << " (current: " << mChannels.size() << ")");
+
+    // PHASE 1: Destroy excess channels if WiFi activated and we exceed target
+    if (wifiActive && mChannels.size() > targetChannels) {
+        size_t channelsToDestroy = mChannels.size() - targetChannels;
+        FL_DBG("WiFi activated - destroying " << channelsToDestroy << " excess channels");
+        destroyLeastUsedChannels(channelsToDestroy);
+    }
+
+    // PHASE 2: Reconfigure remaining idle channels with new memory allocation
+    // This ensures existing channels use WiFi-appropriate memory (2× vs 3× blocks)
+    auto& memMgr = RmtMemoryManager::instance();
+    size_t reconfigured = 0;
+
+    for (size_t i = 0; i < mChannels.size(); ++i) {
+        ChannelState& state = mChannels[i];
+
+        // Skip channels that are in use or already destroyed
+        if (state.inUse || !state.channel) {
+            continue;
+        }
+
+        // Destroy the channel and its encoder
+        FL_DBG("Reconfiguring idle channel " << i << " (pin: " << static_cast<int>(state.pin) << ")");
+
+        // Delete encoder first
+        if (state.encoder) {
+            rmt_del_encoder(state.encoder);
+            state.encoder = nullptr;
+        }
+
+        // Delete channel
+        if (state.channel) {
+            rmt_tx_wait_all_done(state.channel, pdMS_TO_TICKS(100));
+            rmt_del_channel(state.channel);
+            state.channel = nullptr;
+        }
+
+        // Free DMA if this channel was using it
+        if (state.useDMA) {
+            memMgr.freeDMA(state.memoryChannelId, true);  // true = TX channel
+            mDMAChannelsInUse--;
+            state.useDMA = false;
+        }
+
+        // Free memory allocation
+        memMgr.free(state.memoryChannelId, true);  // true = TX channel
+
+        // Recreate channel with WiFi-appropriate memory allocation
+        // Note: createChannel() will call memMgr.allocateTx() with current WiFi state
+        if (createChannel(&state, state.pin, state.timing, 0)) {
+            // Re-register callback for the recreated channel
+            if (!registerChannelCallback(&state)) {
+                FL_WARN("Failed to re-register callback for reconfigured channel " << i);
+                // Channel creation succeeded but callback failed - destroy it
+                if (state.channel) {
+                    rmt_del_channel(state.channel);
+                    state.channel = nullptr;
+                }
+                if (state.encoder) {
+                    rmt_del_encoder(state.encoder);
+                    state.encoder = nullptr;
+                }
+            } else {
+                reconfigured++;
+                FL_DBG("Successfully reconfigured channel " << i);
+            }
+        } else {
+            FL_WARN("Failed to recreate channel " << i << " during WiFi reconfiguration");
+        }
+    }
+
+    // Update last known state
+    mLastKnownWiFiState = wifiActive;
+    FL_DBG("WiFi reconfiguration complete - " << reconfigured << " channels reconfigured");
 }
 
 //=============================================================================
