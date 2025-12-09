@@ -8,34 +8,29 @@
 
 #include "fl/compiler_control.h"
 
-// Platform detection - WiFi-capable platforms
-// Note: ESP32-C2 doesn't have WiFi, so we exclude it
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32S3) ||                                      \
-    defined(CONFIG_IDF_TARGET_ESP32C3) ||                                      \
-    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
-#define FASTLED_RMT_WIFI_CAPABLE_PLATFORM 1
-#else
-#define FASTLED_RMT_WIFI_CAPABLE_PLATFORM 0
+// Use ESP-IDF SoC capability macros to detect hardware features
+// These are defined in soc/soc_caps.h for each chip variant
+FL_EXTERN_C_BEGIN
+#include "soc/soc_caps.h"
+FL_EXTERN_C_END
+
+// Platform capability detection using SoC macros
+#ifndef SOC_WIFI_SUPPORTED
+#define SOC_WIFI_SUPPORTED 0
 #endif
 
-// Platform detection - Ethernet-capable platforms
-// ESP32 and ESP32-C6 have Ethernet MAC (requires external PHY)
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32C6)
-#define FASTLED_RMT_ETHERNET_CAPABLE_PLATFORM 1
-#else
-#define FASTLED_RMT_ETHERNET_CAPABLE_PLATFORM 0
+#ifndef SOC_EMAC_SUPPORTED
+#define SOC_EMAC_SUPPORTED 0
 #endif
 
-// Platform detection - Bluetooth-capable platforms
-// All except ESP32-S2 support Bluetooth
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32C3) ||                                      \
-    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
-#define FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM 1
-#else
-#define FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM 0
+#ifndef SOC_BT_SUPPORTED
+#define SOC_BT_SUPPORTED 0
 #endif
+
+// Map SoC capabilities to FastLED feature flags
+#define FASTLED_RMT_WIFI_CAPABLE_PLATFORM SOC_WIFI_SUPPORTED
+#define FASTLED_RMT_ETHERNET_CAPABLE_PLATFORM SOC_EMAC_SUPPORTED
+#define FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM SOC_BT_SUPPORTED
 
 //=============================================================================
 // ESP-IDF Includes (Platform-Specific)
