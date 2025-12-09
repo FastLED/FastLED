@@ -12,8 +12,59 @@
 
 FL_EXTERN_C_BEGIN
 #include "soc/rmt_struct.h"
+#include "soc/soc_caps.h"
 #include "esp_attr.h"
 FL_EXTERN_C_END
+
+// ============================================================================
+// RMT DMA Platform Support Detection
+// ============================================================================
+
+/// @brief Compile-time DMA support detection for RMT peripheral
+///
+/// Platform DMA Support Matrix (based on SOC_RMT_SUPPORT_DMA):
+/// - ESP32:     No DMA support
+/// - ESP32-S2:  No DMA support
+/// - ESP32-S3:  **YES** - DMA support available (1 channel only)
+/// - ESP32-C3:  No DMA support
+/// - ESP32-C6:  No DMA support
+/// - ESP32-H2:  No DMA support
+///
+/// CRITICAL DMA ALLOCATION POLICY (ESP32-S3):
+/// ==========================================
+/// On ESP32-S3, the RMT peripheral has ONLY ONE DMA channel available.
+/// This means:
+/// - **FIRST channel created**: Uses DMA (if data size warrants it)
+/// - **ALL subsequent channels**: MUST use non-DMA (on-chip memory)
+///
+/// The hardware limitation is enforced by tracking `mDMAChannelsInUse`:
+/// - When mDMAChannelsInUse == 0: First channel can attempt DMA
+/// - When mDMAChannelsInUse >= 1: All channels must use non-DMA
+///
+/// This is NOT a software limitation - it's a hardware constraint of the
+/// ESP32-S3 RMT peripheral. Attempting to create multiple DMA channels
+/// will fail at the ESP-IDF driver level.
+///
+/// Usage:
+/// @code
+/// #if FASTLED_RMT5_DMA_SUPPORTED
+///     // Platform supports RMT DMA (currently only ESP32-S3)
+///     if (mDMAChannelsInUse == 0) {
+///         // First channel - can use DMA
+///     } else {
+///         // Subsequent channels - must use non-DMA
+///     }
+/// #else
+///     // Platform does not support RMT DMA
+/// #endif
+/// @endcode
+#ifdef SOC_RMT_SUPPORT_DMA
+    #define FASTLED_RMT5_DMA_SUPPORTED 1
+    #define FASTLED_RMT5_MAX_DMA_CHANNELS 1  ///< ESP32-S3 hardware limit: only 1 DMA channel
+#else
+    #define FASTLED_RMT5_DMA_SUPPORTED 0
+    #define FASTLED_RMT5_MAX_DMA_CHANNELS 0  ///< No DMA support on this platform
+#endif
 
 
 // #define FASTLED_RMT5_PRESET_LEGACY

@@ -27,13 +27,6 @@ FL_EXTERN_C_END
 
 namespace fl {
 
-/// @brief DMA availability state (learned at runtime)
-enum class DMAState {
-    UNKNOWN,      ///< Haven't attempted DMA channel creation yet
-    AVAILABLE,    ///< DMA successfully created (ESP32-S3)
-    UNAVAILABLE   ///< DMA creation failed - hardware limitation (ESP32-C3/C6/H2)
-};
-
 /// @brief RMT5-based IChannelEngine implementation
 ///
 /// Consolidates all RMT functionality:
@@ -76,6 +69,7 @@ private:
         bool useDMA;  // Whether this channel uses DMA
         uint32_t reset_us;
         fl::span<uint8_t> pooledBuffer;  // Buffer acquired from pool (must be released on complete)
+        uint8_t memoryChannelId;  // Virtual channel ID for memory manager accounting (vector index)
     };
 
     /// @brief Pending channel data to be transmitted when HW channels become available
@@ -131,14 +125,18 @@ private:
     /// @brief Buffer pool for PSRAM -> DRAM/DMA memory transfer
     RMTBufferPool mBufferPool;
 
-    /// @brief Track DMA channel usage (only 1 allowed on ESP32-S3)
+    /// @brief Track DMA channel usage
+    ///
+    /// ESP32-S3 Hardware Limitation: Only 1 RMT DMA channel available
+    /// - mDMAChannelsInUse == 0: DMA available (first channel)
+    /// - mDMAChannelsInUse >= 1: DMA exhausted (all subsequent channels use non-DMA)
+    ///
+    /// This counter is incremented when a DMA channel is successfully created
+    /// and decremented when a DMA channel is destroyed.
     int mDMAChannelsInUse;
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
-
-    /// @brief Runtime DMA availability state (shared across all instances, learned on first attempt - lazy)
-    static DMAState sDMAAvailability;
 };
 
 } // namespace fl

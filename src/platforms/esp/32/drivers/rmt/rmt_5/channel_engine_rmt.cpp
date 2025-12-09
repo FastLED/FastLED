@@ -16,6 +16,7 @@
 
 #include "channel_engine_rmt.h"
 #include "rmt5_encoder.h"
+#include "rmt_memory_manager.h"
 #include "common.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
@@ -38,8 +39,7 @@ namespace fl {
 //=============================================================================
 // Static member initialization
 //=============================================================================
-
-DMAState ChannelEngineRMT::sDMAAvailability = DMAState::UNKNOWN;
+// (None required)
 
 //=============================================================================
 // Constructor / Destructor
@@ -62,6 +62,9 @@ ChannelEngineRMT::~ChannelEngineRMT() {
         fl::delayMicroseconds(100);
     }
 
+    // Get memory manager reference
+    auto& memMgr = RmtMemoryManager::instance();
+
     // Destroy all channels
     for (auto& ch : mChannels) {
         if (ch.channel) {
@@ -69,11 +72,14 @@ ChannelEngineRMT::~ChannelEngineRMT() {
             rmt_disable(ch.channel);
             rmt_del_channel(ch.channel);
 
-            // Track DMA cleanup
+            // Free DMA if this channel was using it
             if (ch.useDMA) {
+                memMgr.freeDMA(ch.memoryChannelId, true);  // true = TX channel
                 mDMAChannelsInUse--;
-                FL_LOG_RMT("Released DMA channel (remaining: " << mDMAChannelsInUse << ")");
             }
+
+            // Free memory from memory manager
+            memMgr.free(ch.memoryChannelId, true);  // true = TX channel
         }
 
         // Delete per-channel encoder
@@ -309,47 +315,70 @@ void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
 
 bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // ============================================================================
-    // TODO: CRITICAL - RMT5 MEMORY MANAGEMENT NEEDS IMPROVEMENT
+    // RMT5 MEMORY MANAGEMENT - Now using centralized RmtMemoryManager
     // ============================================================================
-    // The previous RMT4 driver used DOUBLE BUFFERING (2× 48 words = 96 words).
-    // This RMT5 implementation now uses QUAD BUFFERING (4× 48 words = 192 words)
-    // for single-channel scenarios to maximize performance and WiFi resistance.
+    // Memory allocation policy:
+    // - TX channels: Always double-buffer (2× SOC_RMT_MEM_WORDS_PER_CHANNEL)
+    // - DMA channels: Bypass on-chip memory (allocated from DRAM instead)
+    // - RX channels: User-specified size (managed separately in RmtRxChannel)
     //
-    // PROBLEM: Quad buffering wastes precious on-chip RAM when:
-    //   1. Multiple LED strips are active (fragments the 192-word pool)
-    //   2. Small LED strips don't need the extra buffering overhead
-    //   3. DMA is available (negates the need for large internal buffers)
-    //
-    // PROPOSED IMPROVEMENTS:
-    //   - Adaptive buffering: Choose buffer size based on LED count and active channels
-    //   - Opportunistic pooling: Share released buffers instead of per-channel allocation
-    //   - DMA-first strategy: More aggressive DMA usage to reduce internal RAM pressure
-    //   - Runtime profiling: Measure actual buffer utilization and adjust dynamically
-    //
-    // IMPACT: Better memory efficiency = support for more simultaneous strips and
-    //         larger LED counts without hitting RMT memory limits.
+    // The RmtMemoryManager tracks all allocations to prevent over-allocation and
+    // coordinates memory usage between TX and RX channels.
     // ============================================================================
 
-    // Runtime DMA detection: Try DMA first if hardware availability is unknown or confirmed
-    // Only allow DMA if no DMA channels currently in use (hardware limit: 1 DMA channel)
+    // Set memory channel ID (will be the index in mChannels vector after push_back)
+    state->memoryChannelId = static_cast<uint8_t>(mChannels.size());
+
+    // Get memory manager reference
+    auto& memMgr = RmtMemoryManager::instance();
+
+    // ============================================================================
+    // DMA ALLOCATION POLICY - ESP32-S3 First Channel Only (TX or RX)
+    // ============================================================================
+    // ESP32-S3 has ONLY ONE RMT DMA channel (hardware limitation).
+    // This DMA channel is SHARED between TX and RX channels.
+    //
+    // Allocation priority:
+    //   1. FIRST channel created (TX or RX): Uses DMA (if data size > 0)
+    //   2. ALL subsequent channels: Use non-DMA (on-chip double-buffer)
+    //
+    // DMA allocation is managed centrally by RmtMemoryManager to coordinate
+    // between TX (ChannelEngineRMT) and RX (RmtRxChannel) drivers.
+    // ============================================================================
     bool tryDMA = false;
-    if (mDMAChannelsInUse == 0 && sDMAAvailability != DMAState::UNAVAILABLE) {
+#if FASTLED_RMT5_DMA_SUPPORTED
+    // Platform supports DMA (ESP32-S3 only)
+    // Check with memory manager if DMA is available (shared TX/RX resource)
+    if (memMgr.isDMAAvailable()) {
+        // DMA slot available - first channel across TX/RX
         tryDMA = true;
-        FL_LOG_RMT("Attempting DMA channel creation for pin " << static_cast<int>(pin)
-                   << " (state: " << (sDMAAvailability == DMAState::UNKNOWN ? "unknown" : "available") << ")");
-    } else if (mDMAChannelsInUse > 0) {
-        FL_LOG_RMT("DMA already in use by another channel, using non-DMA for pin " << static_cast<int>(pin));
+        FL_LOG_RMT("TX Channel #" << (mChannels.size() + 1) << ": DMA slot available for pin "
+                   << static_cast<int>(pin) << " (data size: " << dataSize << " bytes)");
     } else {
-        FL_LOG_RMT("DMA known to be unavailable on this platform, using non-DMA for pin " << static_cast<int>(pin));
+        // DMA exhausted (could be taken by TX or RX channel)
+        FL_LOG_RMT("TX Channel #" << (mChannels.size() + 1) << ": DMA slot taken (limit: "
+                   << FASTLED_RMT5_MAX_DMA_CHANNELS << "), using non-DMA for pin " << static_cast<int>(pin));
     }
+#else
+    // Platform does not support RMT DMA (ESP32, S2, C3, C6, H2)
+    FL_LOG_RMT("TX Channel #" << (mChannels.size() + 1) << ": Platform does not support RMT DMA, using non-DMA for pin "
+               << static_cast<int>(pin));
+#endif
 
-    // STEP 1: Try DMA channel creation if enabled
+    // STEP 1: Try DMA channel creation (first channel only on ESP32-S3)
     if (tryDMA && dataSize > 0) {
+        // Allocate memory from memory manager (DMA bypasses on-chip memory)
+        auto alloc_result = memMgr.allocateTx(state->memoryChannelId, true);  // true = use DMA
+        if (!alloc_result.ok()) {
+            FL_WARN("Memory manager TX allocation failed for DMA channel " << static_cast<int>(state->memoryChannelId));
+            return false;
+        }
+
         // DMA mode: allocate enough symbols for the entire LED strip
         // Each byte needs 8 RMT symbols (1 symbol per bit)
         // Add extra space for reset pulse (typically 1 symbol, but use 16 for safety)
         fl::size dma_mem_block_symbols = (dataSize * 8) + 16;
-        FL_LOG_RMT("Attempting DMA buffer allocation: " << dma_mem_block_symbols << " symbols for "
+        FL_LOG_RMT("DMA allocation: " << dma_mem_block_symbols << " symbols for "
                    << dataSize << " bytes (" << (dataSize/3) << " LEDs)");
 
         rmt_tx_channel_config_t dma_config = {};
@@ -360,14 +389,19 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         dma_config.trans_queue_depth = 1;
         dma_config.flags.invert_out = 0;
         dma_config.flags.with_dma = 1;  // Enable DMA
-        // ESP32-C6 Priority Limit: Testing revealed priority 0-3 work, 4+ fail (ISR callbacks don't fire)
-        // Priority 3 is OPTIMAL for ESP32-C6 - highest working level for best latency
         dma_config.intr_priority = 3;
 
         esp_err_t dma_err = rmt_new_tx_channel(&dma_config, &state->channel);
         if (dma_err == ESP_OK) {
-            // DMA SUCCESS - mark as available and track usage
-            sDMAAvailability = DMAState::AVAILABLE;
+            // DMA SUCCESS - claim DMA slot in memory manager
+            if (!memMgr.allocateDMA(state->memoryChannelId, true)) {  // true = TX channel
+                FL_WARN("DMA hardware creation succeeded but memory manager allocation failed");
+                rmt_del_channel(state->channel);
+                state->channel = nullptr;
+                memMgr.free(state->memoryChannelId, true);
+                return false;
+            }
+
             mDMAChannelsInUse++;
             state->pin = pin;
             state->timing = timing;
@@ -381,54 +415,43 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
                 rmt_del_channel(state->channel);
                 state->channel = nullptr;
                 mDMAChannelsInUse--;
-                sDMAAvailability = DMAState::UNAVAILABLE;
+                // Free DMA and memory allocation
+                memMgr.freeDMA(state->memoryChannelId, true);
+                memMgr.free(state->memoryChannelId, true);
                 return false;
             }
 
-            FL_LOG_RMT("DMA channel created successfully on GPIO " << static_cast<int>(pin)
-                       << " (" << dma_mem_block_symbols << " symbols, DMA channels in use: " << mDMAChannelsInUse << ") with dedicated encoder");
+            FL_LOG_RMT("✓ TX Channel #" << (mChannels.size() + 1) << ": DMA enabled on GPIO " << static_cast<int>(pin)
+                       << " (" << dma_mem_block_symbols << " symbols)");
             return true;
         } else {
-            // DMA FAILED - mark as unavailable and fall through to non-DMA
-            sDMAAvailability = DMAState::UNAVAILABLE;
-            FL_LOG_RMT("DMA channel creation failed: " << esp_err_to_name(dma_err)
-                       << " - platform does not support DMA (ESP32-C3/C6/H2?), falling back to non-DMA");
+            // DMA FAILED - free memory and fall through to non-DMA
+            // Free memory allocation
+            memMgr.free(state->memoryChannelId, true);
+            FL_WARN("DMA channel creation failed: " << esp_err_to_name(dma_err)
+                    << " - unexpected failure on DMA-capable platform, falling back to non-DMA");
         }
     }
 
     // STEP 2: Create non-DMA channel (either DMA not attempted, failed, or disabled)
-    // Calculate optimal buffer size based on channel count
-    // ESP32-S3: 192 total words available
-    fl::size mem_block_symbols;
-    if (mDMAChannelsInUse > 0) {
-        // One DMA channel active → all 192 words available for this non-DMA channel
-        // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
-        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
-        // CRITICAL: Cap at hardware limit for platform compatibility
-        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;
-        }
-        FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
-                   << " symbols (capped at hardware limit)");
-    } else if (mChannels.empty()) {
-        // First non-DMA channel: Use quad-buffering (192 words) for maximum performance
-        // This configuration matches RMT4 driver performance and provides optimal WiFi resistance
-        // CRITICAL: Must cap at hardware limit - ESP32-C3/C6/H2 have lower limits than ESP32-S3
-        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192 on S3
-        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;  // ESP32-C3/C6/H2: cap at platform limit
-        }
-        FL_LOG_RMT("First non-DMA channel: QUAD-BUFFERING with " << mem_block_symbols
-                   << " symbols (capped at hardware limit)");
+    // Allocate memory from memory manager (double-buffer policy)
+    auto alloc_result = memMgr.allocateTx(state->memoryChannelId, false);  // false = non-DMA
+    if (!alloc_result.ok()) {
+        FL_WARN("Memory manager TX allocation failed for channel " << static_cast<int>(state->memoryChannelId)
+                << " - insufficient on-chip memory");
+        return false;
+    }
+
+    fl::size mem_block_symbols = alloc_result.value();
+
+    // Log channel number and allocation type
+    size_t channel_num = mChannels.size() + 1;
+    if (memMgr.getDMAChannelsInUse() > 0) {
+        FL_LOG_RMT("✓ TX Channel #" << channel_num << ": Non-DMA (double-buffer: " << mem_block_symbols
+                   << " words) - DMA slot taken by another channel");
     } else {
-        // Multiple non-DMA channels → use standard double-buffer size
-        // ESP32-S3: 96 words (2× 48), ESP32-C6: 48 words max (hardware limit)
-        mem_block_symbols = FASTLED_RMT5_MAX_PULSES;  // 48 * 2 = 96 on S3, limited below
-        // CRITICAL: Cap at hardware limit for ESP32-C6 compatibility
-        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;  // ESP32-C6: 48 max
-        }
-        FL_LOG_RMT("Non-DMA channels: " << mem_block_symbols << " symbols (hardware limit)");
+        FL_LOG_RMT("✓ TX Channel #" << channel_num << ": Non-DMA (double-buffer: " << mem_block_symbols
+                   << " words) - No DMA support on platform");
     }
 
     rmt_tx_channel_config_t tx_config = {};
@@ -449,6 +472,8 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         FL_LOG_RMT("Failed to create non-DMA RMT channel on pin " << static_cast<int>(pin)
                 << ": " << esp_err_to_name(err));
         state->channel = nullptr;
+        // Free memory allocation
+        memMgr.free(state->memoryChannelId, true);
         return false;
     }
 
@@ -466,6 +491,8 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         FL_WARN("Failed to create encoder for channel: " << esp_err_to_name(enc_err));
         rmt_del_channel(state->channel);
         state->channel = nullptr;
+        // Free memory allocation
+        memMgr.free(state->memoryChannelId, true);
         return false;
     }
 
@@ -507,16 +534,19 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
             state->encoder = nullptr;
         }
 
-        // Track DMA cleanup before deleting
-        if (state->useDMA) {
-            mDMAChannelsInUse--;
-            FL_LOG_RMT("Released DMA channel during reconfiguration (remaining: " << mDMAChannelsInUse << ")");
-        }
-
         // Delete channel directly - no need to disable since we're deleting
         // (rmt_del_channel handles cleanup internally)
         rmt_del_channel(state->channel);
         state->channel = nullptr;
+
+        // Free DMA and memory allocation
+        auto& memMgr = RmtMemoryManager::instance();
+        if (state->useDMA) {
+            memMgr.freeDMA(state->memoryChannelId, true);  // true = TX channel
+            mDMAChannelsInUse--;
+        }
+        memMgr.free(state->memoryChannelId, true);
+
         state->useDMA = false;
     }
 
@@ -539,6 +569,15 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
             }
             rmt_del_channel(state->channel);
             state->channel = nullptr;
+
+            // Free DMA and memory allocation
+            auto& memMgr = RmtMemoryManager::instance();
+            if (state->useDMA) {
+                memMgr.freeDMA(state->memoryChannelId, true);  // true = TX channel
+                mDMAChannelsInUse--;
+            }
+            memMgr.free(state->memoryChannelId, true);
+
             state->useDMA = false;
             return;
         }
