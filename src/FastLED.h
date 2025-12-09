@@ -1138,6 +1138,7 @@ extern CFastLED FastLED;
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
 #include "ftl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
+#include "ftl/sstream.h"  // fl::sstream for string stream operations
 
 // provides:
 //   fl::vector<T> - Standard heap vector
