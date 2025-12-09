@@ -844,6 +844,7 @@ def run_monitor(
     )
 
     output_lines = []
+    failing_lines = []  # Track all lines containing fail keywords
     start_time = time.time()
     keyword_found = False
     matched_keyword = None
@@ -871,16 +872,21 @@ def run_monitor(
                     print(line)  # Real-time output
 
                     # Check for fail keywords
-                    if fail_keywords and not keyword_found:
+                    if fail_keywords:
                         for keyword in fail_keywords:
                             if keyword in line:
-                                keyword_found = True
-                                matched_keyword = keyword
-                                matched_line = line
-                                print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
-                                print(f"   Matched line: {line}")
-                                print("   Terminating monitor...\n")
-                                proc.terminate()
+                                # Track this failing line
+                                failing_lines.append((keyword, line))
+
+                                if not keyword_found:
+                                    # First failure - set flags and terminate
+                                    keyword_found = True
+                                    matched_keyword = keyword
+                                    matched_line = line
+                                    print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
+                                    print(f"   Matched line: {line}")
+                                    print("   Terminating monitor...\n")
+                                    proc.terminate()
                                 break
 
                     if keyword_found:
@@ -909,23 +915,29 @@ def run_monitor(
         # Process exited on its own - use actual return code
         success = proc.returncode == 0
 
-    # Display first 100 and last 100 lines summary
+    # Display first 50 and last 100 lines summary
     print("\n" + "=" * 60)
     print("OUTPUT SUMMARY")
     print("=" * 60)
 
     if len(output_lines) > 0:
-        first_100 = output_lines[:100]
+        first_50 = output_lines[:50]
         last_100 = output_lines[-100:]
 
-        print(f"\n--- FIRST {len(first_100)} LINES ---")
-        for line in first_100:
+        print(f"\n--- FIRST {len(first_50)} LINES ---")
+        for line in first_50:
             print(line)
 
-        if len(output_lines) > 100:
+        if len(output_lines) > 50:
             print(f"\n--- LAST {len(last_100)} LINES ---")
             for line in last_100:
                 print(line)
+
+        # Display all failing lines if any were detected
+        if failing_lines:
+            print(f"\n--- FAILING LINES ({len(failing_lines)} total) ---")
+            for keyword, line in failing_lines:
+                print(f"[{keyword}] {line}")
 
         print(f"\nTotal output lines: {len(output_lines)}")
     else:
