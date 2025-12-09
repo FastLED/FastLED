@@ -1,5 +1,6 @@
 #include "test.h"
 #include "ftl/array.h"
+#include "fl/slice.h"  // For fl::span
 
 using namespace fl;
 
@@ -385,5 +386,71 @@ TEST_CASE("fl::array - Const correctness") {
             sum += val;
         }
         CHECK_EQ(sum, 6);
+    }
+}
+
+TEST_CASE("fl::array - to_array() helper function from span") {
+    SUBCASE("from C array via dynamic span") {
+        int source_data[] = {10, 20, 30, 40, 50};
+        fl::span<const int> s(source_data, 5);
+
+        // Convert span to array using to_array helper
+        fl::array<int, 5> arr = fl::to_array<5>(s);
+
+        CHECK_EQ(arr.size(), 5);
+        CHECK_EQ(arr[0], 10);
+        CHECK_EQ(arr[1], 20);
+        CHECK_EQ(arr[2], 30);
+        CHECK_EQ(arr[3], 40);
+        CHECK_EQ(arr[4], 50);
+
+        // Verify it's a copy
+        arr[0] = 99;
+        CHECK_EQ(source_data[0], 10);
+    }
+
+    SUBCASE("from C array via static extent span") {
+        int source_data[] = {100, 200, 300};
+        fl::span<const int, 3> s(source_data, 3);
+
+        // Convert static extent span to array using to_array helper
+        fl::array<int, 3> arr = fl::to_array(s);
+
+        CHECK_EQ(arr.size(), 3);
+        CHECK_EQ(arr[0], 100);
+        CHECK_EQ(arr[1], 200);
+        CHECK_EQ(arr[2], 300);
+    }
+
+    SUBCASE("from HeapVector via span") {
+        fl::HeapVector<int> heap_vec;
+        heap_vec.push_back(1);
+        heap_vec.push_back(2);
+        heap_vec.push_back(3);
+        heap_vec.push_back(4);
+
+        fl::span<const int> s(heap_vec);
+        fl::array<int, 4> arr = fl::to_array<4>(s);
+
+        CHECK_EQ(arr.size(), 4);
+        CHECK_EQ(arr[0], 1);
+        CHECK_EQ(arr[1], 2);
+        CHECK_EQ(arr[2], 3);
+        CHECK_EQ(arr[3], 4);
+    }
+
+    SUBCASE("from FixedVector via span") {
+        fl::FixedVector<int, 10> fixed_vec;
+        fixed_vec.push_back(5);
+        fixed_vec.push_back(6);
+        fixed_vec.push_back(7);
+
+        fl::span<const int> s(fixed_vec);
+        fl::array<int, 3> arr = fl::to_array<3>(s);
+
+        CHECK_EQ(arr.size(), 3);
+        CHECK_EQ(arr[0], 5);
+        CHECK_EQ(arr[1], 6);
+        CHECK_EQ(arr[2], 7);
     }
 }

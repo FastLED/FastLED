@@ -5,6 +5,7 @@
 #include "test.h"
 #include "ftl/vector.h"
 #include "ftl/initializer_list.h"
+#include "fl/slice.h"  // For fl::span
 
 
 
@@ -237,6 +238,57 @@ TEST_CASE("fl::FixedVector construction and destruction") {
     }
 }
 
+TEST_CASE("Fixed vector implicit copy constructor from span") {
+    SUBCASE("from C array via span") {
+        int source_data[] = {10, 20, 30, 40, 50};
+        fl::span<const int> s(source_data, 5);
+
+        // Implicit conversion from span to FixedVector
+        fl::FixedVector<int, 10> vec = s;  // N=10, span has 5 elements
+
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+        CHECK(vec[3] == 40);
+        CHECK(vec[4] == 50);
+
+        // Verify it's a copy
+        vec[0] = 99;
+        CHECK(source_data[0] == 10);
+    }
+
+    SUBCASE("from span larger than capacity") {
+        int source_data[] = {1, 2, 3, 4, 5, 6, 7, 8};
+        fl::span<const int> s(source_data, 8);
+
+        // FixedVector with capacity 5 should only copy first 5 elements
+        fl::FixedVector<int, 5> vec = s;
+
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+        CHECK(vec[3] == 4);
+        CHECK(vec[4] == 5);
+    }
+
+    SUBCASE("from HeapVector via span") {
+        fl::HeapVector<int> heap_vec;
+        heap_vec.push_back(100);
+        heap_vec.push_back(200);
+        heap_vec.push_back(300);
+
+        fl::span<const int> s(heap_vec);
+        fl::FixedVector<int, 10> fixed_vec = s;
+
+        CHECK(fixed_vec.size() == 3);
+        CHECK(fixed_vec[0] == 100);
+        CHECK(fixed_vec[1] == 200);
+        CHECK(fixed_vec[2] == 300);
+    }
+}
+
 TEST_CASE("Fixed vector advanced") {
     fl::FixedVector<int, 5> vec;
 
@@ -416,6 +468,57 @@ TEST_CASE("HeapVector") {
         for (int i = 0; i < 5; ++i) {
             CHECK_EQ(0, vec[i]);
         }
+    }
+
+    SUBCASE("implicit copy constructor from span") {
+        // Create a source array
+        int source_data[] = {10, 20, 30, 40, 50};
+
+        // Create a span from the array (implicit conversion)
+        fl::span<const int> s(source_data, 5);
+
+        // Test implicit conversion from span to HeapVector
+        fl::HeapVector<int> vec = s;  // This should work with the implicit constructor
+
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+        CHECK(vec[3] == 40);
+        CHECK(vec[4] == 50);
+
+        // Verify it's a copy (modifying vec doesn't affect source)
+        vec[0] = 99;
+        CHECK(source_data[0] == 10);  // Original unchanged
+        CHECK(vec[0] == 99);           // Copy modified
+    }
+
+    SUBCASE("copy constructor from span of different containers") {
+        // Test with FixedVector
+        fl::FixedVector<int, 5> fixed_vec;
+        fixed_vec.push_back(1);
+        fixed_vec.push_back(2);
+        fixed_vec.push_back(3);
+
+        fl::span<const int> fixed_span(fixed_vec);
+        fl::HeapVector<int> from_fixed = fixed_span;
+
+        CHECK(from_fixed.size() == 3);
+        CHECK(from_fixed[0] == 1);
+        CHECK(from_fixed[1] == 2);
+        CHECK(from_fixed[2] == 3);
+
+        // Test with another HeapVector
+        fl::HeapVector<int> heap_vec;
+        heap_vec.push_back(100);
+        heap_vec.push_back(200);
+
+        fl::span<const int> heap_span(heap_vec);
+        fl::HeapVector<int> from_heap = heap_span;
+
+        CHECK(from_heap.size() == 2);
+        CHECK(from_heap[0] == 100);
+        CHECK(from_heap[1] == 200);
     }
 }
 

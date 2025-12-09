@@ -16,6 +16,9 @@
 
 namespace fl {
 
+// Forward declaration for span (defined in fl/slice.h)
+template <typename T, fl::size Extent> class span;
+
 // Aligned memory block for inlined data structures.
 template <typename T, fl::size N> 
 struct FL_ALIGN InlinedMemoryBlock {
@@ -116,6 +119,15 @@ class FL_ALIGN FixedVector {
             for (const auto& value : init) {
                 push_back(value);
             }
+        }
+    }
+
+    // Implicit copy constructor from span (dynamic extent)
+    // Only copies up to N elements from the span
+    FixedVector(fl::span<const T, fl::size(-1)> s) : current_size(0) {
+        fl::size count = s.size() < N ? s.size() : N;
+        for (fl::size i = 0; i < count; ++i) {
+            push_back(s[i]);
         }
     }
 
@@ -448,6 +460,13 @@ class FL_ALIGN HeapVector {
     template <typename InputIterator>
     HeapVector(InputIterator first, InputIterator last) {
         assign(first, last);
+    }
+
+    // Implicit copy constructor from span
+    // Note: dynamic_extent is defined as fl::size(-1) in fl/slice.h
+    HeapVector(fl::span<const T, fl::size(-1)> s) {
+        reserve(s.size());
+        assign(s.begin(), s.end());
     }
 
     // Destructor

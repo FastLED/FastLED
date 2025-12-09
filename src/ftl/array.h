@@ -11,6 +11,9 @@
 
 namespace fl {
 
+// Forward declaration for span (defined in fl/slice.h)
+template <typename T, fl::size Extent> class span;
+
 /**
  * @brief A fixed-size array implementation similar to std::array
  *
@@ -128,6 +131,27 @@ template <typename T, fl::size N>
 void swap(array<T, N> &lhs,
           array<T, N> &rhs) noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
+}
+
+// Helper function to create array from span (dynamic extent)
+// Copies exactly N elements from span (span must have at least N elements)
+template <fl::size N, typename T>
+array<T, N> to_array(fl::span<const T, fl::size(-1)> s) {
+    array<T, N> result;
+    for (fl::size i = 0; i < N; ++i) {
+        result.mData[i] = s[i];
+    }
+    return result;
+}
+
+// Helper function to create array from span (static extent)
+template <typename T, fl::size N>
+array<T, N> to_array(fl::span<const T, N> s) {
+    array<T, N> result;
+    for (fl::size i = 0; i < N; ++i) {
+        result.mData[i] = s[i];
+    }
+    return result;
 }
 
 } // namespace fl
