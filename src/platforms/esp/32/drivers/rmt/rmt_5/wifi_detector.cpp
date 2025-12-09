@@ -26,6 +26,11 @@ FL_EXTERN_C_BEGIN
 #include "esp_err.h"
 #include "esp_wifi.h"
 FL_EXTERN_C_END
+#endif
+
+namespace fl {
+
+#if FASTLED_RMT_WIFI_CAPABLE_PLATFORM
 
 // Weak symbol declarations for WiFi functions
 // These allow compilation even if WiFi component is not linked
@@ -96,5 +101,7 @@ bool WiFiDetector::isWiFiConnected() {
 }
 
 #endif // FASTLED_RMT_WIFI_CAPABLE_PLATFORM
+
+} // namespace fl
 
 #endif // FASTLED_RMT5

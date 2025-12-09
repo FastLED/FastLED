@@ -19,15 +19,16 @@ Phase 3: Monitor
     - Provides output summary (first/last 100 lines)
 
 Usage:
-    uv run ci/debug_attached.py                          # Auto-detect environment
+    uv run ci/debug_attached.py                          # Auto-detect (default: 20s timeout, fails on "ERROR")
     uv run ci/debug_attached.py esp32dev                 # Specific environment
     uv run ci/debug_attached.py --verbose                # Verbose mode
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
     uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
-    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found
+    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found (replaces default "ERROR")
     uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
+    uv run ci/debug_attached.py --no-fail-on             # Disable all failure keywords
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
     uv run ci/debug_attached.py esp32dev --verbose --upload-port COM3
 """
@@ -800,8 +801,8 @@ def run_monitor(
         environment: PlatformIO environment to monitor (None = default)
         monitor_port: Serial port to monitor (None = auto-detect)
         verbose: Enable verbose output
-        timeout: Maximum time to monitor in seconds (default: 80)
-        fail_keywords: List of keywords that trigger exit code 1 if found
+        timeout: Maximum time to monitor in seconds (default: 20)
+        fail_keywords: List of keywords that trigger exit code 1 if found (default: ["ERROR"])
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
 
     Returns:
@@ -954,15 +955,16 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Auto-detect environment
+  %(prog)s                          # Auto-detect (default: 20s timeout, fails on "ERROR")
   %(prog)s esp32dev                 # Specific environment
   %(prog)s --verbose                # Verbose mode
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
-  %(prog)s --timeout 120            # Monitor for 120 seconds
+  %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
-  %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found in output
+  %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found (replaces default "ERROR")
   %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
+  %(prog)s --no-fail-on             # Disable all failure keywords
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
   %(prog)s esp32dev --verbose --upload-port COM3
         """,
@@ -988,8 +990,8 @@ Examples:
         "--timeout",
         "-t",
         type=str,
-        default="80",
-        help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 80)",
+        default="20",
+        help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 20)",
     )
     parser.add_argument(
         "--project-dir",
@@ -1003,7 +1005,12 @@ Examples:
         "-f",
         action="append",
         dest="fail_keywords",
-        help="Keyword that triggers exit code 1 if found in monitor output (can be specified multiple times)",
+        help="Keyword that triggers exit code 1 if found in monitor output (can be specified multiple times). Default: 'ERROR'",
+    )
+    parser.add_argument(
+        "--no-fail-on",
+        action="store_true",
+        help="Disable all --fail-on keywords (including default 'ERROR')",
     )
     parser.add_argument(
         "--stream",
@@ -1026,6 +1033,19 @@ def main() -> int:
         print(f"❌ Error: platformio.ini not found in {build_dir}")
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
+
+    # Validate --fail-on and --no-fail-on conflict
+    if args.no_fail_on and args.fail_keywords:
+        print("❌ Error: Cannot specify both --fail-on and --no-fail-on")
+        return 1
+
+    # Set default fail keywords (unless --no-fail-on is specified)
+    if args.no_fail_on:
+        fail_keywords = []
+    elif args.fail_keywords is None:
+        fail_keywords = ["ERROR"]
+    else:
+        fail_keywords = args.fail_keywords
 
     # Parse timeout string with suffix support
     try:
@@ -1060,7 +1080,7 @@ def main() -> int:
             args.upload_port,  # Use same port for monitoring
             args.verbose,
             timeout_seconds,
-            args.fail_keywords,
+            fail_keywords,
             args.stream,
         )
 

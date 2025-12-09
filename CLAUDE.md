@@ -81,14 +81,14 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Phase 3: Monitor** - Attach to serial monitor, capture output, detect failure keywords
 
 **Usage:**
-- `bash debug` - Auto-detect environment
+- `bash debug` - Auto-detect environment (default: 20s timeout, fails on "ERROR")
 - `bash debug esp32dev` - Specific environment
 - `bash debug --upload-port COM3` - Specific serial port
-- `bash debug --timeout 120` - Monitor timeout in seconds (default: 80s)
+- `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
 - `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --timeout 5000ms` - Monitor timeout in milliseconds (5 seconds)
-- `bash debug --fail-on PANIC` - Exit 1 if keyword found in output
+- `bash debug --fail-on PANIC` - Exit 1 if keyword found (default: "ERROR")
 - `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords
+- `bash debug --no-fail-on` - Disable all failure keywords (including default)
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
@@ -101,7 +101,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - 1: Failure (compile/upload error, process crash, or keyword match)
 - 130: User interrupt (Ctrl+C)
 
-**Note:** Normal timeout is considered success (exit 0). Only keyword matches (`--fail-on`) or actual failures cause exit 1.
+**Note:** Default behavior fails on "ERROR" keyword. Normal timeout is success (exit 0). Using both `--fail-on` and `--no-fail-on` causes error.
 
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes

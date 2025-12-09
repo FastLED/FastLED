@@ -10,6 +10,8 @@
 
 #include "ftl/stdint.h"
 
+namespace fl {
+
 /// @brief WiFi state detector for adaptive RMT channel management
 ///
 /// This class provides runtime detection of WiFi activity to enable
@@ -68,5 +70,7 @@ class WiFiDetector {
     WiFiDetector(const WiFiDetector &) = delete;
     WiFiDetector &operator=(const WiFiDetector &) = delete;
 };
+
+} // namespace fl
 
 #endif // FASTLED_RMT5
