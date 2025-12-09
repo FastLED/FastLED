@@ -5,6 +5,9 @@
 #include "fl/compiler_control.h"
 #include "fl/export.h"
 #include "fl/int.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/channel_config.h"
+#include "fl/channels/channel_bus_manager.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -400,12 +403,10 @@ void delay_at_max_brightness_for_power(uint16_t ms)
 }
 
 // ============================================================================
-// Channel Bus Manager Controls (ESP32 only)
+// Channel Bus Manager Controls
 // ============================================================================
 
 #ifdef ESP32
-#include "platforms/esp/32/drivers/channel_bus_manager.h"
-
 void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	manager.setDriverEnabled(name, enabled);
@@ -426,29 +427,22 @@ fl::size CFastLED::getDriverCount() const {
 	return manager.getDriverCount();
 }
 
-fl::span<const CFastLED::DriverInfo> CFastLED::getDriverInfo() const {
+fl::span<const fl::DriverInfo> CFastLED::getDriverInfo() const {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
-	// Get the ChannelBusManager's DriverInfo span
-	fl::span<const fl::ChannelBusManager::DriverInfo> managerInfo = manager.getDriverInfo();
-
-	// Reinterpret cast is safe because CFastLED::DriverInfo has identical layout to
-	// fl::ChannelBusManager::DriverInfo (both have: fl::string name, int priority, bool enabled)
-	// This avoids copying data while maintaining API separation
-	static_assert(sizeof(CFastLED::DriverInfo) == sizeof(fl::ChannelBusManager::DriverInfo),
-	              "CFastLED::DriverInfo must match fl::ChannelBusManager::DriverInfo layout");
-	static_assert(offsetof(CFastLED::DriverInfo, name) == offsetof(fl::ChannelBusManager::DriverInfo, name),
-	              "CFastLED::DriverInfo::name offset must match");
-	static_assert(offsetof(CFastLED::DriverInfo, priority) == offsetof(fl::ChannelBusManager::DriverInfo, priority),
-	              "CFastLED::DriverInfo::priority offset must match");
-	static_assert(offsetof(CFastLED::DriverInfo, enabled) == offsetof(fl::ChannelBusManager::DriverInfo, enabled),
-	              "CFastLED::DriverInfo::enabled offset must match");
-
-	return fl::span<const CFastLED::DriverInfo>(
-		reinterpret_cast<const CFastLED::DriverInfo*>(managerInfo.data()),
-		managerInfo.size()
-	);
+	return manager.getDriverInfo();
 }
-#endif // ESP32
+#endif
+
+// ============================================================================
+// Runtime Channel API Implementation
+// ============================================================================
+
+fl::ChannelPtr CFastLED::addChannel(const fl::ChannelConfig& config) {
+    fl::ChannelBusManager& manager = fl::channelBusManager();
+    FL_ASSERT(manager.getDriverCount() > 0,
+              "No channel drivers available - channel API requires at least one registered driver");
+    return fl::Channel::create(config, &manager);
+}
 
 // ============================================================================
 

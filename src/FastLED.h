@@ -102,6 +102,7 @@
 #include "fl/fastled.h"
 
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_bus_manager.h"
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
@@ -507,6 +508,35 @@ public:
 		return channel;
 	}
 
+	/// @name Runtime LED Channel Management
+	/// @{
+
+	/// Add LED channel with runtime configuration
+	///
+	/// Creates a Channel-based LED controller with runtime-configurable timing.
+	/// Unlike the template-based addLeds<>() which uses static storage, this
+	/// function returns a shared_ptr that allows the controller to be destroyed
+	/// and recreated with different configurations.
+	///
+	/// @param config Channel configuration (pin, timing, leds, rgb order, settings)
+	/// @returns Shared pointer to Channel (extends CLEDController), or nullptr if unsupported
+	/// @note Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4
+	/// @note Controller auto-registers on creation, auto-removes on destruction
+	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// fl::ChannelConfig config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+	/// auto channel = FastLED.addChannel(config);
+	/// fill_solid(leds, NUM_LEDS, CRGB::Red);
+	/// FastLED.show();
+	/// channel.reset();  // Destroy controller
+	/// @endcode
+	FL_NODISCARD static fl::ChannelPtr addChannel(const fl::ChannelConfig& config);
+
+	/// @}
+
 	/// @name Adding SPI-based controllers
 	/// Add an SPI based CLEDController instance to the world.
 	///
@@ -904,14 +934,6 @@ public:
 	/// Configure platform-specific channel bus drivers
 	/// @{
 
-	/// @brief Driver state information structure
-	/// @note This is a copy of fl::ChannelBusManager::DriverInfo for public API
-	struct DriverInfo {
-		fl::string name;  ///< Driver name (empty for unnamed engines)
-		int priority;     ///< Engine priority (higher = preferred)
-		bool enabled;     ///< Whether driver is currently enabled
-	};
-
 #ifdef ESP32
 	/// @platform ESP32
 	/// @note These methods control driver selection for RMT, SPI, and PARLIO engines
@@ -943,7 +965,7 @@ public:
 	/// Get full state of all registered channel drivers
 	/// @return Span of driver info (sorted by priority descending)
 	/// @note Returned span is valid until next call to any non-const method
-	fl::span<const DriverInfo> getDriverInfo() const;
+	fl::span<const fl::DriverInfo> getDriverInfo() const;
 #else
 	/// @platform Non-ESP32
 	/// @warning These methods are no-op stubs on non-ESP32 platforms
@@ -986,10 +1008,9 @@ public:
 	/// No-op stub: Get full state of all registered channel drivers
 	/// @return Empty span (no engines)
 	/// @note Non-ESP32: Always returns empty span
-	fl::span<const DriverInfo> getDriverInfo() const {
+	fl::span<const fl::DriverInfo> getDriverInfo() const {
 		// No-op: Only ESP32 has multi-engine architecture
-		static const DriverInfo empty[1] = {};  // Empty array
-		return fl::span<const DriverInfo>(empty, 0);  // Empty span
+		return fl::span<const fl::DriverInfo>(nullptr, 0);  // Empty span
 	}
 #endif
 

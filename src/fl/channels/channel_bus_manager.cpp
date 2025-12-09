@@ -2,6 +2,7 @@
 /// @brief Implementation of unified channel bus manager
 
 #include "channel_bus_manager.h"
+#include "fl/singleton.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/engine_events.h"
@@ -10,6 +11,10 @@
 #include "ftl/move.h"
 
 namespace fl {
+
+ChannelBusManager& ChannelBusManager::instance() {
+    return Singleton<ChannelBusManager>::instance();
+}
 
 ChannelBusManager::ChannelBusManager() {
     FL_DBG("ChannelBusManager: Initializing");
@@ -114,7 +119,7 @@ fl::size ChannelBusManager::getDriverCount() const {
     return mEngines.size();
 }
 
-fl::span<const ChannelBusManager::DriverInfo> ChannelBusManager::getDriverInfo() const {
+fl::span<const DriverInfo> ChannelBusManager::getDriverInfo() const {
     // Update cache with current engine state
     mCachedDriverInfo.clear();
     mCachedDriverInfo.reserve(mEngines.size());
@@ -272,6 +277,10 @@ IChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {
 
     // No lower priority engine found
     return nullptr;
+}
+
+ChannelBusManager& channelBusManager() {
+    return ChannelBusManager::instance();
 }
 
 } // namespace fl

@@ -50,7 +50,7 @@ public:
 
     /// @brief Create a new channel with runtime engine instance
     /// @param config Channel configuration
-    /// @param engine Channel engine this channel belongs to
+    /// @param engine Channel engine this channel belongs to (singleton pointer, not owned)
     /// @return Shared pointer to the channel
     static ChannelPtr create(const ChannelConfig& config, IChannelEngine* engine);
 
@@ -74,7 +74,7 @@ public:
     IChannelEngine* getChannelEngine() const { return mEngine; }
 
     /// @brief Set the channel engine this channel belongs to
-    /// @param engine Pointer to the IChannelEngine
+    /// @param engine Pointer to the IChannelEngine (singleton, not owned)
     void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
 
 private:
@@ -101,9 +101,14 @@ private:
     const int mPin;
     const ChipsetTimingConfig mTiming;
     const EOrder mRgbOrder;
-    IChannelEngine* mEngine;
+    IChannelEngine* mEngine;  // Singleton pointer, not owned
     const int32_t mId;
     ChannelDataPtr mChannelData;
 };
+
+/// @brief Get stub channel engine for testing or unsupported platforms
+/// @return Pointer to singleton stub engine instance
+/// @note Returns a no-op engine that allows code to compile/run on all platforms
+IChannelEngine* getStubChannelEngine();
 
 }  // namespace fl

@@ -8,8 +8,24 @@
 // RMT peripheral in receive mode. It performs TX→RX loopback testing to verify
 // that transmitted LED data matches received data.
 //
+// DEMONSTRATES:
+// 1. Runtime Channel API (FastLED.addChannel) for iterating through all available
+//    drivers (RMT, SPI, PARLIO) and testing multiple chipset timings dynamically
+//    by creating and destroying controllers for each driver.
+// 2. Multi-channel validation support: Pass span<const ChannelConfig> to validate
+//    multiple LED strips/channels simultaneously. Each channel is independently
+//    validated with its own RX loopback channel.
+//
 // Use case: When developing a FastLED driver for a new peripheral, it is useful
-// to ready back the LED's recieved to verify that the timing is correct.
+// to read back the LED's received data to verify that the timing is correct.
+//
+// MULTI-CHANNEL MODE:
+// - Single-channel: Pass one ChannelConfig - uses shared RX channel on PIN_RX
+// - Multi-channel: Pass multiple ChannelConfigs - creates dynamic RX channels
+//   on each TX pin for independent loopback validation
+// - Each channel in the span is validated sequentially with its own RX channel
+// - For RMT: Uses internal loopback (no jumper needed)
+// - For SPI/PARLIO: Requires physical jumper from each TX pin to itself
 //
 // Hardware Setup:
 //   ⚠️ IMPORTANT: Physical jumper wire required for non-RMT TX → RMT RX loopback
@@ -33,7 +49,27 @@
 //   - ESP32-C6 (RISC-V)
 //
 // Expected Output:
-//   Serial monitor will show test results with PASS/FAIL status
+//   Serial monitor will show:
+//   - List of discovered drivers (RMT, SPI, PARLIO - availability depends on platform)
+//   - Test results for each driver with PASS/FAIL status for each chipset timing
+//   - Each driver is tested independently by creating/destroying channels
+//   - In multi-channel mode: Separate validation results for each channel/pin
+//
+// MULTI-CHANNEL EXAMPLE:
+//   ```cpp
+//   // Create multiple LED arrays
+//   CRGB leds1[100], leds2[100], leds3[100];
+//
+//   // Create channel configs for each strip on different pins
+//   fl::ChannelConfig configs[] = {
+//       fl::ChannelConfig(5, timing, fl::span<CRGB>(leds1, 100), RGB),
+//       fl::ChannelConfig(6, timing, fl::span<CRGB>(leds2, 100), RGB),
+//       fl::ChannelConfig(7, timing, fl::span<CRGB>(leds3, 100), RGB)
+//   };
+//
+//   // Validate all 3 channels (each gets its own RX loopback)
+//   validateChipsetTiming(timing, "WS2812", fl::span(configs, 3), nullptr, buffer);
+//   ```
 //
 
 #include <FastLED.h>
@@ -54,8 +90,6 @@ uint8_t rx_buffer[8192];  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 fo
 
 // RMT RX channel (persistent across loop iterations)
 fl::shared_ptr<fl::RmtRxChannel> rx_channel;
-
-void runTest(const char* test_name, int& total, int& passed);
 
 void setup() {
     Serial.begin(115200);
@@ -83,134 +117,25 @@ void setup() {
     if (!rx_channel) {
         FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
         FL_WARN("       Check that RMT peripheral is available and not in use");
+        return;
     }
 
     // Note: Toggle test removed - validated in Iteration 5 that RMT RX works correctly
     // Skipping toggle test to avoid GPIO ownership conflicts with SPI MOSI
 
-    FastLED.addLeds<CHIPSET, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS);
-    FastLED.setBrightness(255);
-
-    // Phase 2: Enable RMT mode exclusively for basic functionality test
-    FastLED.setExclusiveDriver("RMT");  // Enable only RMT, disable all others (forward-compatible!)
-    FL_WARN("RMT driver enabled exclusively - testing @ 255 LEDs");
-
-    // Pre-initialize the TX engine (SPI/RMT) to avoid first-call setup delays
-    // This ensures the engine is ready before RX capture attempts
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
-    FastLED.show();
-    FL_WARN("TX engine pre-initialized");
-
-    FL_WARN("Initialization complete");
-    FL_WARN("Starting validation tests...\n");
+    // Run all validation tests (driver discovery, iteration, testing)
+    runAllValidationTests(PIN_DATA, PIN_RX, fl::span<CRGB>(leds, NUM_LEDS),
+                         rx_channel, fl::span<uint8_t>(rx_buffer, 8192), COLOR_ORDER);
 }
 
 void loop() {
-    static uint32_t refresh_count = 0;
-    static uint32_t last_report = 0;
-    static uint32_t test_start_time = millis();
-    static bool test_completed = false;
+    // All validation tests completed in setup()
+    // Device now idle - reset to run tests again
+    delay(1000);
 
-    // Phase 3: RMT @ 255 LEDs full-scale test
-    if (!test_completed) {
-        // Cycle through different patterns
-        uint8_t pattern = (refresh_count / 100) % 4;
-        switch (pattern) {
-            case 0: fill_solid(leds, NUM_LEDS, CRGB::Red); break;
-            case 1: fill_solid(leds, NUM_LEDS, CRGB::Green); break;
-            case 2: fill_solid(leds, NUM_LEDS, CRGB::Blue); break;
-            case 3: fill_rainbow(leds, NUM_LEDS, refresh_count % 256, 255 / NUM_LEDS); break;
-        }
-
-        // Update LEDs at default rate
-        FastLED.show();
-        refresh_count++;
-
-        // Report every 500 refreshes
-        if (refresh_count - last_report >= 500) {
-            FL_WARN("[RUNNING] Refresh count: " << refresh_count
-                    << " (elapsed: " << (millis() - test_start_time) << "ms)");
-            last_report = refresh_count;
-        }
-
-        // Test duration: 60 seconds minimum
-        if (millis() - test_start_time >= 60000) {
-            test_completed = true;
-            FL_WARN("\n[TEST_START] RMT @ 255 LEDs");
-            FL_WARN("[INIT] Buffer allocated: " << (NUM_LEDS * 3) << " bytes");
-            FL_WARN("[INIT] RMT channels initialized");
-            FL_WARN("[VALIDATION] Total refreshes: " << refresh_count);
-            FL_WARN("[VALIDATION] Elapsed time: " << (millis() - test_start_time) << "ms");
-            FL_WARN("[VALIDATION] Average refresh rate: "
-                    << (refresh_count * 1000.0 / (millis() - test_start_time)) << " Hz");
-            FL_WARN("[VALIDATION] No timing errors detected");
-            FL_WARN("[TEST_PASS] RMT @ 255 LEDs");
-            FL_WARN("\nTest completed successfully. Device will idle.");
-        }
-
-        // Default delay for stability
-        delay(10);
-    } else {
-        // Test completed - idle
-        delay(1000);
-        FL_WARN("Test idle - waiting for reset/reprogramming");
-    }
-}
-
-void runTest(const char* test_name, int& total, int& passed) {
-    total++;
-    FL_WARN("\n=== " << test_name << " ===");
-
-    size_t bytes_captured = capture(rx_channel, rx_buffer);
-    if (bytes_captured == 0) {
-        FL_WARN("Result: FAIL ✗ (capture failed)");
-        return;
-    }
-
-    size_t bytes_expected = NUM_LEDS * 3;
-    if (bytes_captured > bytes_expected) {
-        FL_WARN("Info: Captured " << bytes_captured << " bytes (" << bytes_expected
-                << " LED data + " << (bytes_captured - bytes_expected) << " RESET)");
-    }
-
-    // Validate: byte-level comparison (COLOR_ORDER is RGB, so no reordering)
-    int mismatches = 0;
-    size_t bytes_to_check = bytes_captured < bytes_expected ? bytes_captured : bytes_expected;
-
-    for (size_t i = 0; i < NUM_LEDS; i++) {
-        size_t byte_offset = i * 3;
-        if (byte_offset + 2 >= bytes_to_check) {
-            FL_WARN("WARNING: Incomplete data for LED[" << static_cast<int>(i)
-                    << "] (only " << bytes_captured << " bytes captured)");
-            break;
-        }
-
-        uint8_t expected_r = leds[i].r;
-        uint8_t expected_g = leds[i].g;
-        uint8_t expected_b = leds[i].b;
-
-        uint8_t actual_r = rx_buffer[byte_offset + 0];
-        uint8_t actual_g = rx_buffer[byte_offset + 1];
-        uint8_t actual_b = rx_buffer[byte_offset + 2];
-
-        if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
-            FL_WARN("ERROR: Mismatch on LED[" << static_cast<int>(i)
-                    << "], expected RGB(" << static_cast<int>(expected_r) << ","
-                    << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
-                    << ") but got RGB(" << static_cast<int>(actual_r) << ","
-                    << static_cast<int>(actual_g) << "," << static_cast<int>(actual_b) << ")");
-            mismatches++;
-        }
-    }
-
-    FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << bytes_expected << ")");
-    FL_WARN("Accuracy: " << (100.0 * (NUM_LEDS - mismatches) / NUM_LEDS) << "% ("
-            << (NUM_LEDS - mismatches) << "/" << NUM_LEDS << " LEDs match)");
-
-    if (mismatches == 0) {
-        FL_WARN("Result: PASS ✓");
-        passed++;
-    } else {
-        FL_WARN("Result: FAIL ✗");
+    static bool once = true;
+    if (once) {
+        once = false;
+        FL_WARN("\nAll validation tests complete. Reset to run again.");
     }
 }

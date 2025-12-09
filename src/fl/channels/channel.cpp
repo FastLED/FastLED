@@ -19,7 +19,7 @@ int32_t Channel::nextId() {
     return gNextChannelId.fetch_add(1);
 }
 
-ChannelPtr Channel::create(const ChannelConfig &config, IChannelEngine *engine) {
+ChannelPtr Channel::create(const ChannelConfig &config, IChannelEngine* engine) {
     return fl::make_shared<Channel>(config.pin, config.timing, config.mLeds,
                                      config.rgb_order, engine, config.settings);
 }
@@ -68,11 +68,44 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     pixelIterator.writeWS2812(&data);
 
     // Enqueue for transmission (will be sent when engine->show() is called)
-    mEngine->enqueue(mChannelData);
+    if (mEngine) {
+        mEngine->enqueue(mChannelData);
+    }
 }
 
 void Channel::init() {
     // TODO: Implement initialization
+}
+
+// Stub engine - provides no-op implementation for testing or unsupported platforms
+namespace {
+class StubChannelEngine : public IChannelEngine {
+public:
+    virtual ~StubChannelEngine() = default;
+
+    virtual void enqueue(ChannelDataPtr /*channelData*/) override {
+        // No-op: stub engine does nothing
+        static bool warned = false;
+        if (!warned) {
+            FL_DBG("StubChannelEngine: No-op enqueue (use for testing or unsupported platforms)");
+            warned = true;
+        }
+    }
+
+    virtual void show() override {
+        // No-op: no hardware to drive
+    }
+
+    virtual EngineState poll() override {
+        return EngineState::READY;  // Always "ready" (does nothing)
+    }
+};
+
+} // anonymous namespace
+
+IChannelEngine* getStubChannelEngine() {
+    static StubChannelEngine instance;
+    return &instance;
 }
 
 } // namespace fl

@@ -30,6 +30,13 @@
 
 namespace fl {
 
+/// @brief Driver state information for channel bus manager
+struct DriverInfo {
+    fl::string name;  ///< Driver name (empty for unnamed engines)
+    int priority;     ///< Engine priority (higher = preferred)
+    bool enabled;     ///< Whether driver is currently enabled
+};
+
 /// @brief Unified channel bus manager with priority-based engine selection
 ///
 /// This manager inherits from IChannelEngine and acts as a transparent proxy
@@ -39,6 +46,11 @@ namespace fl {
 /// Platform-specific code registers engines during static initialization.
 class ChannelBusManager : public IChannelEngine, public EngineEvents::Listener {
 public:
+    /// @brief Get the global singleton instance
+    /// @return Reference to the singleton ChannelBusManager
+    /// @note Thread-safe singleton initialization
+    static ChannelBusManager& instance();
+
     /// @brief Constructor
     ChannelBusManager();
 
@@ -81,13 +93,6 @@ public:
     /// @brief Get count of registered drivers (including unnamed ones)
     /// @return Total number of registered engines
     fl::size getDriverCount() const;
-
-    /// @brief Driver state information
-    struct DriverInfo {
-        fl::string name;  ///< Driver name (empty for unnamed engines)
-        int priority;     ///< Engine priority (higher = preferred)
-        bool enabled;     ///< Whether driver is currently enabled
-    };
 
     /// @brief Get full state of all registered drivers
     /// @return Span of driver info (sorted by priority descending)
@@ -174,5 +179,11 @@ private:
     ChannelBusManager(ChannelBusManager&&) = delete;
     ChannelBusManager& operator=(ChannelBusManager&&) = delete;
 };
+
+/// @brief Get the global ChannelBusManager singleton instance
+/// @return Reference to the singleton ChannelBusManager
+/// @note Available on all platforms (has 0 drivers on non-ESP32)
+/// @note On ESP32, platform code registers drivers during static initialization
+ChannelBusManager& channelBusManager();
 
 } // namespace fl
