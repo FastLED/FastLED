@@ -9,17 +9,27 @@
 namespace fl {
 
 /// @brief Configuration for driver-agnostic validation testing
+/// Contains all input parameters needed for validation (excludes output parameters)
 struct ValidationConfig {
-    /// Driver name for logging (e.g., "RMT", "SPI", "PARLIO")
-    /// This should match the driver name returned by FastLED.getDriverInfo()
-    const char* driver_name;
+    const fl::ChipsetTimingConfig& timing;       ///< Chipset timing configuration to test
+    const char* timing_name;                     ///< Timing name for logging (e.g., "WS2812B-V5")
+    fl::span<fl::ChannelConfig> tx_configs;      ///< TX channel configurations to validate (mutable for LED manipulation)
+    const char* driver_name;                     ///< Driver name for logging (e.g., "RMT", "SPI", "PARLIO")
+    fl::shared_ptr<fl::RmtRxChannel> rx_channel; ///< RX channel for loopback capture (created in .ino, passed in)
+    fl::span<uint8_t> rx_buffer;                 ///< Buffer to store received bytes
 
-    /// RX pin for shared RX channel (single-channel mode only, -1 for multi-channel auto-create)
-    int rx_pin;
-
-    ValidationConfig(const char* name, int rx = -1)
-        : driver_name(name)
-        , rx_pin(rx) {}
+    ValidationConfig(const fl::ChipsetTimingConfig& timing_,
+                     const char* timing_name_,
+                     fl::span<fl::ChannelConfig> tx_configs_,
+                     const char* driver_name_,
+                     fl::shared_ptr<fl::RmtRxChannel> rx_channel_,
+                     fl::span<uint8_t> rx_buffer_)
+        : timing(timing_)
+        , timing_name(timing_name_)
+        , tx_configs(tx_configs_)
+        , driver_name(driver_name_)
+        , rx_channel(rx_channel_)
+        , rx_buffer(rx_buffer_) {}
 };
 
 /// @brief Driver test result tracking
@@ -51,24 +61,19 @@ struct DriverTestResult {
 size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx_buffer);
 
 // Generic driver-agnostic validation test runner
-// Validates all channels in tx_configs using the specified driver configuration
+// Validates all channels using the specified configuration
+// @param test_name Test name for logging (e.g., "Solid Red", "Solid Green")
+// @param config All validation configuration (timing, channels, driver, RX, buffer) - non-const for LED manipulation
+// @param total Output parameter - total tests run (incremented)
+// @param passed Output parameter - tests passed (incremented)
 void runTest(const char* test_name,
-             fl::span<fl::ChannelConfig> tx_configs,
-             const fl::ValidationConfig& config,
-             fl::shared_ptr<fl::RmtRxChannel> shared_rx_channel,
-             fl::span<uint8_t> rx_buffer,
+             fl::ValidationConfig& config,
              int& total, int& passed);
 
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
-// @param chipset_name Chipset timing name (e.g., "WS2812 Standard", "WS2812B-V5", "SK6812")
-//                     Used for logging and test identification only
+// @param config All validation configuration (timing, channels, driver, RX, buffer) - non-const for LED manipulation
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)
-void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
-                           const char* chipset_name,
-                           fl::span<fl::ChannelConfig> tx_configs,
-                           const fl::ValidationConfig& config,
-                           fl::shared_ptr<fl::RmtRxChannel> rx_channel,
-                           fl::span<uint8_t> rx_buffer,
+void validateChipsetTiming(fl::ValidationConfig& config,
                            int& total, int& passed);

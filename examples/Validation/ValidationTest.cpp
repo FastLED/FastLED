@@ -54,57 +54,31 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
 }
 
 // Generic driver-agnostic validation test runner
-// Validates all channels in tx_configs using the specified driver configuration
+// Validates all channels using the specified configuration
 void runTest(const char* test_name,
-             fl::span<fl::ChannelConfig> tx_configs,
-             const fl::ValidationConfig& config,
-             fl::shared_ptr<fl::RmtRxChannel> shared_rx_channel,
-             fl::span<uint8_t> rx_buffer,
+             fl::ValidationConfig& config,
              int& total, int& passed) {
     // Validate all configs in the span
-    for (size_t config_idx = 0; config_idx < tx_configs.size(); config_idx++) {
+    for (size_t config_idx = 0; config_idx < config.tx_configs.size(); config_idx++) {
         total++;
-        FL_WARN("\n=== " << test_name << " [Channel " << (config_idx + 1) << "/" << tx_configs.size()
-                << ", Pin " << tx_configs[config_idx].pin << "] ===");
+        FL_WARN("\n=== " << test_name << " [Channel " << (config_idx + 1) << "/" << config.tx_configs.size()
+                << ", Pin " << config.tx_configs[config_idx].pin << "] ===");
 
-        // For multi-channel mode: Create RX channel dynamically on the TX pin for loopback validation
-        // For single-channel mode: Use the provided shared_rx_channel
-        fl::shared_ptr<fl::RmtRxChannel> current_rx_channel;
-        bool dynamic_rx = false;
-
-        if (tx_configs.size() > 1 || !shared_rx_channel) {
-            // Multi-channel mode or no shared RX: Create RX channel on TX pin for loopback
-            FL_WARN("[INFO] " << config.driver_name << ": Creating RX channel on TX pin "
-                    << tx_configs[config_idx].pin << " for loopback validation");
-            FL_WARN("[HARDWARE] " << config.driver_name << ": Ensure physical jumper connects TX pin "
-                    << tx_configs[config_idx].pin << " to itself");
-
-            current_rx_channel = fl::RmtRxChannel::create(tx_configs[config_idx].pin, 40000000, 8192);
-            dynamic_rx = true;
-
-            if (!current_rx_channel) {
-                FL_WARN("[ERROR] Failed to create RX channel on pin " << tx_configs[config_idx].pin);
-                FL_WARN("Result: FAIL ✗ (RX channel creation failed)");
-                continue;
-            }
-        } else {
-            // Single-channel mode: Use shared RX channel
-            current_rx_channel = shared_rx_channel;
+        // Use RX channel provided via config (created in .ino file, never created dynamically here)
+        if (!config.rx_channel) {
+            FL_WARN("[ERROR] RX channel is null - must be created in .ino and passed via ValidationConfig");
+            FL_WARN("Result: FAIL ✗ (RX channel not provided)");
+            continue;
         }
 
-        size_t bytes_captured = capture(current_rx_channel, rx_buffer);
-
-        // Clean up dynamic RX channel
-        if (dynamic_rx) {
-            current_rx_channel.reset();
-        }
+        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer);
 
         if (bytes_captured == 0) {
             FL_WARN("Result: FAIL ✗ (capture failed)");
             continue;
         }
 
-        const auto& leds = tx_configs[config_idx].mLeds;
+        const auto& leds = config.tx_configs[config_idx].mLeds;
         size_t num_leds = leds.size();
         size_t bytes_expected = num_leds * 3;
 
@@ -129,9 +103,9 @@ void runTest(const char* test_name,
             uint8_t expected_g = leds[i].g;
             uint8_t expected_b = leds[i].b;
 
-            uint8_t actual_r = rx_buffer[byte_offset + 0];
-            uint8_t actual_g = rx_buffer[byte_offset + 1];
-            uint8_t actual_b = rx_buffer[byte_offset + 2];
+            uint8_t actual_r = config.rx_buffer[byte_offset + 0];
+            uint8_t actual_g = config.rx_buffer[byte_offset + 1];
+            uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
             if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
                 FL_WARN("ERROR: Mismatch on LED[" << static_cast<int>(i)
@@ -158,33 +132,26 @@ void runTest(const char* test_name,
 
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
-// @param chipset_name Chipset timing name (e.g., "WS2812 Standard", "WS2812B-V5", "SK6812")
-//                     Used for logging and test identification only
-void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
-                           const char* chipset_name,
-                           fl::span<fl::ChannelConfig> tx_configs,
-                           const fl::ValidationConfig& config,
-                           fl::shared_ptr<fl::RmtRxChannel> rx_channel,
-                           fl::span<uint8_t> rx_buffer,
+void validateChipsetTiming(fl::ValidationConfig& config,
                            int& driver_total, int& driver_passed) {
     FL_WARN("\n========================================");
-    FL_WARN("Testing: " << chipset_name);
-    FL_WARN("  T0H: " << timing.t1_ns << "ns");
-    FL_WARN("  T1H: " << (timing.t1_ns + timing.t2_ns) << "ns");
-    FL_WARN("  T0L: " << timing.t3_ns << "ns");
-    FL_WARN("  RESET: " << timing.reset_us << "us");
-    FL_WARN("  Channels: " << tx_configs.size());
+    FL_WARN("Testing: " << config.timing_name);
+    FL_WARN("  T0H: " << config.timing.t1_ns << "ns");
+    FL_WARN("  T1H: " << (config.timing.t1_ns + config.timing.t2_ns) << "ns");
+    FL_WARN("  T0L: " << config.timing.t3_ns << "ns");
+    FL_WARN("  RESET: " << config.timing.reset_us << "us");
+    FL_WARN("  Channels: " << config.tx_configs.size());
     FL_WARN("========================================");
 
     // Create ALL channels from tx_configs (multi-channel support)
     fl::vector<fl::shared_ptr<fl::Channel>> channels;
-    for (size_t i = 0; i < tx_configs.size(); i++) {
+    for (size_t i = 0; i < config.tx_configs.size(); i++) {
         // Create channel config with runtime timing
-        fl::ChannelConfig channel_config(tx_configs[i].pin, timing, tx_configs[i].mLeds, tx_configs[i].rgb_order);
+        fl::ChannelConfig channel_config(config.tx_configs[i].pin, config.timing, config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order);
 
         auto channel = FastLED.addChannel(channel_config);
         if (!channel) {
-            FL_WARN("[ERROR] Failed to create channel " << i << " (pin " << tx_configs[i].pin << ") - platform not supported");
+            FL_WARN("[ERROR] Failed to create channel " << i << " (pin " << config.tx_configs[i].pin << ") - platform not supported");
             // Clean up previously created channels
             for (auto& ch : channels) {
                 ch.reset();
@@ -192,47 +159,47 @@ void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
             return;
         }
         channels.push_back(channel);
-        FL_WARN("[INFO] Created channel " << i << " on pin " << tx_configs[i].pin);
+        FL_WARN("[INFO] Created channel " << i << " on pin " << config.tx_configs[i].pin);
     }
 
     FastLED.setBrightness(255);
 
     // Pre-initialize the TX engine to avoid first-call setup delays
-    for (size_t i = 0; i < tx_configs.size(); i++) {
-        fill_solid(tx_configs[i].mLeds.data(), tx_configs[i].mLeds.size(), CRGB::Black);
+    for (size_t i = 0; i < config.tx_configs.size(); i++) {
+        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Black);
     }
     FastLED.show();
-    FL_WARN("[INFO] TX engine pre-initialized for " << chipset_name);
+    FL_WARN("[INFO] TX engine pre-initialized for " << config.timing_name);
 
     // Run test patterns
     int total = 0;
     int passed = 0;
 
     // Test 1: Solid Red
-    for (size_t i = 0; i < tx_configs.size(); i++) {
-        fill_solid(tx_configs[i].mLeds.data(), tx_configs[i].mLeds.size(), CRGB::Red);
+    for (size_t i = 0; i < config.tx_configs.size(); i++) {
+        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Red);
     }
-    runTest("Solid Red", tx_configs, config, rx_channel, rx_buffer, total, passed);
+    runTest("Solid Red", config, total, passed);
 
     // Test 2: Solid Green
-    for (size_t i = 0; i < tx_configs.size(); i++) {
-        fill_solid(tx_configs[i].mLeds.data(), tx_configs[i].mLeds.size(), CRGB::Green);
+    for (size_t i = 0; i < config.tx_configs.size(); i++) {
+        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Green);
     }
-    runTest("Solid Green", tx_configs, config, rx_channel, rx_buffer, total, passed);
+    runTest("Solid Green", config, total, passed);
 
     // Test 3: Solid Blue
-    for (size_t i = 0; i < tx_configs.size(); i++) {
-        fill_solid(tx_configs[i].mLeds.data(), tx_configs[i].mLeds.size(), CRGB::Blue);
+    for (size_t i = 0; i < config.tx_configs.size(); i++) {
+        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Blue);
     }
-    runTest("Solid Blue", tx_configs, config, rx_channel, rx_buffer, total, passed);
+    runTest("Solid Blue", config, total, passed);
 
     // Report results
-    FL_WARN("\nResults for " << chipset_name << ": " << passed << "/" << total << " tests passed");
+    FL_WARN("\nResults for " << config.timing_name << ": " << passed << "/" << total << " tests passed");
 
     if (passed == total) {
-        FL_WARN("[PASS] " << chipset_name << " validation successful");
+        FL_WARN("[PASS] " << config.timing_name << " validation successful");
     } else {
-        FL_WARN("[ERROR] " << chipset_name << " validation failed");
+        FL_WARN("[ERROR] " << config.timing_name << " validation failed");
     }
 
     // Accumulate results for driver-level tracking
@@ -243,7 +210,7 @@ void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
     for (auto& ch : channels) {
         ch.reset();
     }
-    FL_WARN("[INFO] All " << channels.size() << " channel(s) destroyed for " << chipset_name);
+    FL_WARN("[INFO] All " << channels.size() << " channel(s) destroyed for " << config.timing_name);
 
     delay(1000);
 }

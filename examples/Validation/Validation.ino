@@ -20,7 +20,7 @@
 // to read back the LED's received data to verify that the timing is correct.
 //
 // MULTI-CHANNEL MODE:
-// - Single-channel: Pass one ChannelConfig - uses shared RX channel on PIN_RX
+// - Single-channel: Pass one ChannelConfig - uses shared RX channel object (created in setup())
 // - Multi-channel: Pass multiple ChannelConfigs - creates dynamic RX channels
 //   on each TX pin for independent loopback validation
 // - Each channel in the span is validated sequentially with its own RX channel
@@ -107,17 +107,87 @@
 #define PIN_DATA 5
 #endif
 
-#define PIN_RX 2
+#define PIN_RX 0
 
 #define NUM_LEDS 255
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-CRGB leds[NUM_LEDS];
-uint8_t rx_buffer[8192];  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
+#define RX_BUFFER_SIZE 8192  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
 
-// RMT RX channel (persistent across loop iterations)
+CRGB leds[NUM_LEDS];
+uint8_t rx_buffer[RX_BUFFER_SIZE];  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
+
+// ⚠️ CRITICAL: RMT RX channel - MUST persist across ALL loop iterations
+// Created ONCE in setup(), reused for all driver tests
+// DO NOT reset, destroy, or recreate this channel in loop()
 fl::shared_ptr<fl::RmtRxChannel> rx_channel;
+
+/// @brief Validate that expected engines are available for this platform
+/// Prints ERROR if any expected engines are missing
+void validateExpectedEngines() {
+    // Define expected engines based on platform
+    fl::vector<const char*> expected_engines;
+
+#if defined(FL_IS_ESP_32C6)
+    // ESP32-C6 should have: SPI, PARLIO, RMT
+    expected_engines.push_back("SPI");
+    expected_engines.push_back("PARLIO");
+    expected_engines.push_back("RMT");
+    FL_WARN("\n[VALIDATION] Platform: ESP32-C6");
+#elif defined(FL_IS_ESP_32S3)
+    // ESP32-S3 should have: SPI, PARLIO, RMT
+    expected_engines.push_back("SPI");
+    expected_engines.push_back("RMT");
+    FL_WARN("\n[VALIDATION] Platform: ESP32-S3");
+#elif defined(FL_IS_ESP_32C3)
+    // ESP32-C3 should have: SPI, RMT (no PARLIO)
+    expected_engines.push_back("RMT");
+    FL_WARN("\n[VALIDATION] Platform: ESP32-C3");
+#elif defined(FL_IS_ESP_32DEV)
+    // Original ESP32 should have: SPI, RMT, I2S (no PARLIO)
+    expected_engines.push_back("SPI");
+    expected_engines.push_back("RMT");
+    // expected_engines.push_back("I2S");
+    FL_WARN("\n[VALIDATION] Platform: ESP32 (classic)");
+#else
+    FL_WARN("\n[VALIDATION] Platform: Unknown ESP32 variant - skipping engine validation");
+    return;
+#endif
+
+    FL_WARN("[VALIDATION] Expected engines: " << expected_engines.size());
+    for (fl::size i = 0; i < expected_engines.size(); i++) {
+        FL_WARN("  - " << expected_engines[i]);
+    }
+
+    // Get available drivers
+    auto drivers = FastLED.getDriverInfo();
+
+    // Check if all expected engines are available
+    bool all_present = true;
+    for (fl::size i = 0; i < expected_engines.size(); i++) {
+        const char* expected = expected_engines[i];
+        bool found = false;
+
+        for (fl::size j = 0; j < drivers.size(); j++) {
+            if (fl::strcmp(drivers[j].name.c_str(), expected) == 0) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            FL_WARN("ERROR: Expected engine '" << expected << "' is MISSING from available drivers!");
+            all_present = false;
+        }
+    }
+
+    if (all_present) {
+        FL_WARN("[VALIDATION] ✓ All expected engines are available");
+    } else {
+        FL_WARN("ERROR: Engine validation FAILED - some expected engines are missing!");
+    }
+}
 
 void setup() {
     Serial.begin(115200);
@@ -140,30 +210,45 @@ void setup() {
     FL_WARN("");
 
     // Create RMT RX channel FIRST (before FastLED init to avoid pin conflicts)
+    // ⚠️ CRITICAL: RX channel is created ONCE in setup() and must PERSIST across all loop iterations
+    // This shared RX channel is reused for all driver tests to avoid resource conflicts
     // Buffer size: 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
-    rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000, 8192);
     if (!rx_channel) {
-        FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
-        FL_WARN("       Check that RMT peripheral is available and not in use");
-        return;
+        FL_WARN("Creating persistent RX channel (will be reused across all tests)...");
+        rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000, RX_BUFFER_SIZE);
+        if (!rx_channel) {
+            FL_WARN("ERROR: Failed to create RX channel - validation tests will fail");
+            FL_WARN("       Check that RMT peripheral is available and not in use");
+            return;
+        }
+        FL_WARN("RX channel created successfully on GPIO " << PIN_RX);
+    } else {
+        FL_WARN("RX channel already exists (reusing from previous setup)");
     }
 
     // Note: Toggle test removed - validated in Iteration 5 that RMT RX works correctly
     // Skipping toggle test to avoid GPIO ownership conflicts with SPI MOSI
 
+    // List all available drivers
+    FL_WARN("\nDiscovering available drivers...");
+    auto drivers = FastLED.getDriverInfo();
+    FL_WARN("Found " << drivers.size() << " driver(s) available:");
+    for (fl::size i = 0; i < drivers.size(); i++) {
+        FL_WARN("  " << (i+1) << ". " << drivers[i].name.c_str()
+                << " (priority: " << drivers[i].priority
+                << ", enabled: " << (drivers[i].enabled ? "yes" : "no") << ")");
+    }
+
+    // Validate that expected engines are available for this platform
+    validateExpectedEngines();
+
     FL_WARN("\nStarting continuous validation test loop...");
+    delay(2000);
 }
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/// @brief Create validation configuration for a specific driver
-/// @param driver_name Driver name (e.g., "RMT", "SPI", "PARLIO")
-/// @return Validation configuration with jumper requirements
-fl::ValidationConfig createValidationConfig(const char* driver_name) {
-    return fl::ValidationConfig(driver_name, PIN_RX);
-}
 
 /// @brief Test a specific driver with given timing configuration
 /// @param driver_name Driver name to test
@@ -183,21 +268,25 @@ void testDriver(const char* driver_name,
     }
     FL_WARN(driver_name << " driver enabled exclusively\n");
 
-    // Create driver-specific validation configuration
-    fl::ValidationConfig validation_config = createValidationConfig(driver_name);
-
-    FL_WARN("[CONFIG] Driver: " << validation_config.driver_name << " (physical jumper required)\n");
+    FL_WARN("[CONFIG] Driver: " << driver_name << " (physical jumper required)\n");
 
     // Create TX configuration for validation tests
     fl::ChannelConfig tx_config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), COLOR_ORDER);
 
     FL_WARN("[INFO] Testing " << timing_name << " timing\n");
 
+    // Create validation configuration with all input parameters
+    fl::ValidationConfig validation_config(
+        timing,
+        timing_name,
+        fl::span<fl::ChannelConfig>(&tx_config, 1),
+        driver_name,
+        rx_channel,
+        fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
+    );
+
     // Validate the chipset timing
-    validateChipsetTiming(timing, timing_name,
-                          fl::span<fl::ChannelConfig>(&tx_config, 1), validation_config,
-                          rx_channel, fl::span<uint8_t>(rx_buffer, 8192),
-                          result.total_tests, result.passed_tests);
+    validateChipsetTiming(validation_config, result.total_tests, result.passed_tests);
 
     FL_WARN("\n[INFO] All timing tests complete for " << driver_name << " driver");
 }
@@ -282,18 +371,12 @@ void discardFirstFrame(const char* driver_name) {
 
 void loop() {
     FL_WARN("=== Using Runtime Channel API for Dynamic Driver Testing ===\n");
-    FL_WARN("Discovering available drivers...\n");
 
     // Get all available drivers for this platform
     auto drivers = FastLED.getDriverInfo();
-    FL_WARN("Found " << drivers.size() << " driver(s) available:");
-    for (fl::size i = 0; i < drivers.size(); i++) {
-        FL_WARN("  " << (i+1) << ". " << drivers[i].name.c_str()
-                << " (priority: " << drivers[i].priority
-                << ", enabled: " << (drivers[i].enabled ? "yes" : "no") << ")");
-    }
 
-    FL_WARN("\nStarting validation tests for each driver...\n");
+    FL_WARN("Starting validation tests for each driver...\n");
+    FL_WARN("(Using persistent RX channel from setup() - not recreated)\n");
 
     // Track driver-level test results
     fl::vector<fl::DriverTestResult> driver_results;
