@@ -64,28 +64,49 @@ FastLED 3.10.4 (Next Release)
       * Platform-specific bulk implementations removed (OFLED, RMT, I2S, LCD_I80, PARLIO)
     * **Legacy Code**: If you were using BulkClockless, you will need to migrate to the Channel API
     * Built on ObjectFLED by Kurt Funderburg, inspired by OctoWS2811 architecture
-  * **NEW: Runtime Driver Control for Channel Bus Manager**: Dynamic enable/disable of LED drivers at runtime
+  * **NEW: Runtime Driver Control via FastLED API (ESP32)**: Dynamic control of LED hardware drivers through the global FastLED object
+    * **FastLED-Integrated API**: Control drivers using familiar `FastLED.setXXX()` pattern - no need to access internal managers
     * **Driver State Management**: Control multiple LED drivers (RMT, SPI, PARLIO) without recompiling
-    * **Named Drivers**: Each driver can be registered with a human-readable name for easy identification
-    * **Query API**: Inspect registered drivers, their priorities, and enabled states
+    * **Named Drivers**: Each driver is registered with a human-readable name for easy identification ("RMT", "SPI", "PARLIO")
     * **Use Cases**:
       * Switch between drivers based on runtime conditions (e.g., Wi-Fi activity, power modes)
       * Debug/test different drivers without code changes
       * Implement fallback strategies when preferred driver fails
-    * **API Methods**:
-      * `setDriverEnabled(name, enabled)` - Enable/disable driver by name
-      * `isDriverEnabled(name)` - Check if driver is currently enabled
-      * `getDriverCount()` - Get total number of registered drivers
-      * `getDriverInfo()` - Get full state of all drivers (priority, enabled state)
-    * **Example**: Disable SPI driver to test RMT fallback:
+      * Optimize for specific scenarios (RMT for flexibility, SPI for speed, PARLIO for maximum throughput)
+    * **API Methods** (accessed via global `FastLED` object, **full functionality ESP32-only**, safe no-op stubs on other platforms):
+      * `FastLED.setDriverEnabled(name, enabled)` - Enable/disable specific driver by name
+      * `FastLED.setExclusiveDriver(name)` - Enable only one driver, disable all others (forward-compatible)
+      * `FastLED.isDriverEnabled(name)` - Query if a driver is currently enabled
+      * `FastLED.getDriverCount()` - Get total number of registered drivers
+      * `FastLED.getDriverInfo()` - Get full state of all drivers (name, priority, enabled state)
+    * **Complete Example**:
       ```cpp
-      auto& manager = ChannelBusManagerSingleton::instance();
-      manager.setDriverEnabled("SPI", false);  // Force RMT driver usage
+      // Force RMT driver only (disables SPI, PARLIO, and any future drivers)
+      FastLED.setExclusiveDriver("RMT");
+
+      // Or selectively enable/disable
+      FastLED.setDriverEnabled("SPI", false);    // Disable SPI
+      FastLED.setDriverEnabled("PARLIO", true);  // Enable PARLIO
+
+      // Query driver state
+      if (FastLED.isDriverEnabled("RMT")) {
+          Serial.println("RMT driver is active");
+      }
+
+      // Inspect all registered drivers
+      auto drivers = FastLED.getDriverInfo();
+      for (const auto& driver : drivers) {
+          FL_WARN(driver.name << ": priority=" << driver.priority
+                  << " enabled=" << (driver.enabled ? "YES" : "NO"));
+      }
       ```
-    * **Zero-allocation queries**: `getDriverInfo()` returns `fl::span` with cached results
-    * **Immediate effect**: Changes apply on next `enqueue()` call (no frame boundary required)
-    * **ESP32 integration**: Named drivers pre-configured ("RMT", "SPI", "PARLIO" on supported platforms)
-    * Tested with comprehensive unit test suite (18 new test cases)
+    * **Zero-allocation queries**: `getDriverInfo()` returns `fl::span` with cached results (no heap allocations)
+    * **Immediate effect**: Changes apply on next LED update (no frame boundary required)
+    * **Forward-compatible**: `setExclusiveDriver()` automatically disables future drivers, ensuring predictable behavior
+    * **Automatic fallback**: If highest-priority driver fails, manager automatically tries next priority
+    * **ESP32 integration**: Drivers auto-register with names during platform initialization
+    * **Example Sketch**: See `examples/Validation/Validation.ino` for usage with `FastLED.setExclusiveDriver("RMT")`
+    * Unit tested with comprehensive test suite (18 test cases covering priority, fallback, runtime control)
   * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects
     * 20 components (3 core + 17 detectors): Beat, Tempo, Frequency Bands, Energy, Transient, Note, Downbeat, Dynamics, Pitch, Silence, Vocal, Percussion, Chord, Key, Mood, Buildup, Drop
     * AudioContext pattern: FFT computed once and shared across all detectors with lazy evaluation

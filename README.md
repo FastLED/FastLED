@@ -173,6 +173,48 @@ Tracks compilation speed and performance of FastLED header files across differen
 
 ## 🆕 Latest Features
 
+## **FastLED 3.10.4: Runtime Driver Control**
+
+**Dynamically control LED hardware drivers at runtime** through the familiar `FastLED` API. Switch between RMT, SPI, and PARLIO drivers without recompiling - perfect for debugging, optimization, and adapting to runtime conditions.
+
+> **Platform Support**: API is available on all platforms for code compatibility. Full functionality (multi-engine switching) is **ESP32-only**. Non-ESP32 platforms have safe no-op implementations.
+
+```cpp
+// Force RMT driver exclusively (disables SPI, PARLIO, and future drivers)
+FastLED.setExclusiveDriver("RMT");
+
+// Or selectively enable/disable
+FastLED.setDriverEnabled("SPI", false);    // Disable SPI
+FastLED.setDriverEnabled("PARLIO", true);  // Enable PARLIO
+
+// Query driver state
+if (FastLED.isDriverEnabled("RMT")) {
+    Serial.println("RMT driver is active");
+}
+
+// Inspect all registered drivers
+auto drivers = FastLED.getDriverInfo();
+for (const auto& driver : drivers) {
+    FL_WARN(driver.name << ": priority=" << driver.priority
+            << " enabled=" << (driver.enabled ? "YES" : "NO"));
+}
+```
+
+**Key Features**:
+- 🎛️ **Runtime switching** - Change drivers on-the-fly without recompiling
+- 🔍 **Driver inspection** - Query available drivers, priorities, and states
+- 🔮 **Forward-compatible** - `setExclusiveDriver()` automatically handles future drivers
+- ⚡ **Immediate effect** - Changes apply on next `FastLED.show()` call
+- 🔄 **Automatic fallback** - If a driver fails, automatically tries next priority
+
+**Use Cases**:
+- Debug driver-specific issues by isolating to one driver
+- Optimize for Wi-Fi performance (RMT handles interrupts better)
+- Dynamically switch based on runtime conditions (Wi-Fi status, power modes)
+- Test new drivers without code changes
+
+**Documentation**: [ESP32 Runtime Driver Control](#%EF%B8%8F-runtime-driver-control) • [Release Notes](release_notes.md#new-runtime-driver-control-via-fastled-api-esp32) • [Example: Validation.ino](examples/Validation/Validation.ino)
+
 ## **FastLED 3.10.3: UCS7604 RGBW Chipset Support (BETA)**
 
 **New 16-bit RGBW LED chipset support** for ARM M0/M0+ platforms (SAMD21/SAMD51). The UCS7604 is a high-resolution 4-channel LED driver with configurable bit depth (8/12/14/16-bit) and dual data rates (800kHz/1.6MHz).
@@ -726,6 +768,119 @@ build_flags =
 **⚠️ Critical:** RMT4 and RMT5 drivers cannot coexist in the same sketch. Espressif's ESP-IDF will cause a boot crash if it detects both drivers attempting to initialize. You must choose one or the other at compile time.
 
 **Note:** Using RMT4 is strongly recommended if you experience flickering with Wi-Fi enabled or need maximum LED performance. RMT4 uses ESP-IDF's legacy RMT APIs which are still maintained for backward compatibility in ESP-IDF 5.x, though marked as deprecated.
+
+</details>
+
+<details>
+<summary><b>🎛️ Runtime Driver Control</b> - NEW! Dynamically switch and query LED drivers at runtime</summary>
+
+### Overview
+
+ESP32 FastLED now supports **runtime control of hardware LED drivers** through the global `FastLED` object. This allows you to dynamically enable/disable drivers (RMT, SPI, PARLIO) without recompiling, making it easy to debug, optimize, and adapt to runtime conditions.
+
+### Available Drivers
+
+ESP32 platforms support multiple hardware drivers with automatic priority-based selection:
+
+| **Driver** | **Priority** | **Best For** | **Availability** |
+|------------|--------------|--------------|------------------|
+| **PARLIO** | 50 (highest) | Maximum throughput, parallel strips | ESP32-S3, P4, C5, C6 |
+| **SPI** | 40 | High speed, stable timing | All ESP32 variants |
+| **RMT** | 30 | Flexibility, per-strip timing | All ESP32 variants |
+
+By default, FastLED automatically selects the highest-priority available driver. If that driver fails (e.g., out of channels), it automatically falls back to the next priority.
+
+### API Methods
+
+All methods are accessed via the global `FastLED` object (ESP32 only):
+
+```cpp
+// Enable/disable specific drivers
+FastLED.setDriverEnabled("RMT", true);      // Enable RMT driver
+FastLED.setDriverEnabled("SPI", false);     // Disable SPI driver
+
+// Enable only one driver (disables all others, including future drivers)
+FastLED.setExclusiveDriver("RMT");          // Use only RMT
+
+// Query driver state
+bool rmtEnabled = FastLED.isDriverEnabled("RMT");
+int driverCount = FastLED.getDriverCount();
+
+// Get detailed info about all drivers
+auto drivers = FastLED.getDriverInfo();
+for (const auto& driver : drivers) {
+    Serial.print(driver.name);              // "RMT", "SPI", "PARLIO"
+    Serial.print(": priority=");
+    Serial.print(driver.priority);          // Higher = preferred
+    Serial.print(" enabled=");
+    Serial.println(driver.enabled);         // true/false
+}
+```
+
+### Use Cases
+
+**1. Debugging Driver Issues**
+```cpp
+void setup() {
+    // Test with only RMT to isolate driver issues
+    FastLED.setExclusiveDriver("RMT");
+    FastLED.addLeds<WS2812, PIN, GRB>(leds, NUM_LEDS);
+}
+```
+
+**2. Optimize for Wi-Fi Performance**
+```cpp
+void setup() {
+    // Disable SPI if it conflicts with Wi-Fi on your board
+    FastLED.setDriverEnabled("SPI", false);
+    // RMT or PARLIO will be used instead
+}
+```
+
+**3. Dynamic Switching Based on Conditions**
+```cpp
+void loop() {
+    if (WiFi.status() == WL_CONNECTED) {
+        // Use RMT when Wi-Fi is active (more interrupt-tolerant)
+        FastLED.setExclusiveDriver("RMT");
+    } else {
+        // Use faster SPI when Wi-Fi is off
+        FastLED.setExclusiveDriver("SPI");
+    }
+
+    // Your LED code...
+    FastLED.show();
+}
+```
+
+**4. Inspect Available Drivers**
+```cpp
+void setup() {
+    Serial.begin(115200);
+
+    // List all registered drivers
+    Serial.println("Available LED drivers:");
+    auto drivers = FastLED.getDriverInfo();
+    for (const auto& driver : drivers) {
+        Serial.printf("  %s: priority=%d enabled=%s\n",
+            driver.name.c_str(),
+            driver.priority,
+            driver.enabled ? "YES" : "NO");
+    }
+}
+```
+
+### Important Notes
+
+- **Changes take effect immediately** on the next `FastLED.show()` call
+- **Zero allocations**: All query methods use stack memory and cached results
+- **Forward-compatible**: `setExclusiveDriver()` automatically disables future drivers added in newer FastLED versions
+- **Automatic fallback**: If the active driver fails, FastLED automatically tries the next priority driver
+- **No recompilation needed**: Switch drivers at runtime without changing code or build flags
+
+### Example Sketch
+
+See the complete example in [`examples/Validation/Validation.ino`](examples/Validation/Validation.ino) which demonstrates exclusive driver selection for testing.
 
 </details>
 

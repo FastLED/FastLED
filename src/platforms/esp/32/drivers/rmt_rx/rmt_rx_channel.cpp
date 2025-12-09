@@ -10,7 +10,6 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "ftl/iterator.h"
-#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_rx.h"
@@ -30,7 +29,7 @@ namespace fl {
 // Ensure RmtSymbol (uint32_t) and rmt_symbol_word_t have the same size
 static_assert(sizeof(RmtSymbol) == sizeof(rmt_symbol_word_t),
               "RmtSymbol must be the same size as rmt_symbol_word_t (32 bits)");
-static_assert(std::is_trivially_copyable<rmt_symbol_word_t>::value,
+static_assert(fl::is_trivially_copyable<rmt_symbol_word_t>::value,
               "rmt_symbol_word_t must be trivially copyable for safe casting");
 
 // ============================================================================
@@ -336,20 +335,10 @@ public:
         , mSignalRangeMaxNs(100000)
         , mSkipCounter(0)
         , mInternalBuffer()
-        , mMemoryChannelId(nextChannelId())
-        , mMemoryAllocated(false)
-        , mUseDMA(false)
     {
         FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(mPin)
                << " resolution=" << mResolutionHz << "Hz"
-               << " max_buffer_size=" << mBufferSize
-               << " channel_id=" << static_cast<int>(mMemoryChannelId));
-    }
-
-    /// @brief Get next unique channel ID for RX channels
-    static uint8_t nextChannelId() {
-        static uint8_t sNextId = 0;
-        return sNextId++;
+               << " max_buffer_size=" << mBufferSize);
     }
 
     ~RmtRxChannelImpl() override {
@@ -357,17 +346,6 @@ public:
             FL_DBG("Deleting RMT RX channel");
             rmt_del_channel(mChannel);
             mChannel = nullptr;
-
-            // Free DMA and memory allocation if allocated
-            if (mMemoryAllocated) {
-                auto& memMgr = RmtMemoryManager::instance();
-                // Free DMA slot if this channel was using it
-                if (mUseDMA) {
-                    memMgr.freeDMA(mMemoryChannelId, false);  // false = RX channel
-                }
-                memMgr.free(mMemoryChannelId, false);  // false = RX channel
-                mMemoryAllocated = false;
-            }
         }
     }
 
@@ -408,101 +386,27 @@ public:
         // Clear receive state
         clear();
 
-        // Note: We don't allocate on-chip memory yet - will be done after DMA attempt
-        // (DMA bypasses on-chip memory, so we only allocate if non-DMA is used)
-        auto& memMgr = RmtMemoryManager::instance();
+        // Configure RX channel
+        rmt_rx_channel_config_t rx_config = {};
+        rx_config.gpio_num = mPin;
+        rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
+        rx_config.resolution_hz = mResolutionHz;
+        rx_config.mem_block_symbols = 64;  // Use 64 symbols per memory block
+        rx_config.intr_priority = 3;  // Match the priority level used in testing
 
-        // ====================================================================
-        // DMA ALLOCATION - Check if DMA slot available (shared with TX)
-        // ====================================================================
-        // ESP32-S3 has 1 DMA channel shared between TX and RX.
-        // Check with memory manager if DMA is available.
-        // ====================================================================
-        bool tryDMA = false;
-        bool useDMA = false;
-#if FASTLED_RMT5_DMA_SUPPORTED
-        if (memMgr.isDMAAvailable()) {
-            tryDMA = true;
-            FL_DBG("RX Channel: DMA slot available, attempting DMA allocation");
-        } else {
-            FL_DBG("RX Channel: DMA slot taken by another channel, using non-DMA");
-        }
-#else
-        FL_DBG("RX Channel: Platform does not support RMT DMA, using non-DMA");
-#endif
+        // Additional flags
+        rx_config.flags.invert_in = false;  // No signal inversion
+        rx_config.flags.with_dma = false;   // Start with non-DMA (universal compatibility)
+        // io_loop_back is deprecated and removed in ESP-IDF 6 - use physical jumper wire instead
 
-        // Try DMA first if available
-        if (tryDMA) {
-            rmt_rx_channel_config_t dma_config = {};
-            dma_config.gpio_num = mPin;
-            dma_config.clk_src = RMT_CLK_SRC_DEFAULT;
-            dma_config.resolution_hz = mResolutionHz;
-            dma_config.mem_block_symbols = mBufferSize;  // DMA can handle full buffer
-            dma_config.intr_priority = 3;
-            dma_config.flags.invert_in = false;
-            dma_config.flags.with_dma = true;  // Enable DMA
-
-            esp_err_t dma_err = rmt_new_rx_channel(&dma_config, &mChannel);
-            if (dma_err == ESP_OK) {
-                // DMA SUCCESS - allocate from memory manager (bypasses on-chip memory)
-                auto alloc_result = memMgr.allocateRx(mMemoryChannelId, mBufferSize, true);  // true = DMA
-                if (!alloc_result.ok()) {
-                    FL_WARN("RX memory manager allocation failed (unexpected for DMA)");
-                    rmt_del_channel(mChannel);
-                    mChannel = nullptr;
-                } else if (!memMgr.allocateDMA(mMemoryChannelId, false)) {  // Claim DMA slot
-                    FL_WARN("RX DMA slot allocation failed");
-                    rmt_del_channel(mChannel);
-                    mChannel = nullptr;
-                    memMgr.free(mMemoryChannelId, false);
-                } else {
-                    // DMA fully allocated
-                    useDMA = true;
-                    mMemoryAllocated = true;
-                    FL_DBG("✓ RX Channel: DMA enabled (" << mBufferSize
-                           << " symbols in DRAM, bypasses RMT on-chip memory)");
-                }
-            } else {
-                FL_DBG("RX DMA channel creation failed: " << static_cast<int>(dma_err)
-                       << ", falling back to non-DMA");
-            }
+        // Create RX channel
+        esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
+        if (err != ESP_OK) {
+            FL_WARN("Failed to create RX channel: " << static_cast<int>(err));
+            return false;
         }
 
-        // Create non-DMA channel if DMA failed or not attempted
-        if (!mChannel) {
-            // Allocate on-chip RMT memory for non-DMA channel
-            auto alloc_result = memMgr.allocateRx(mMemoryChannelId, mBufferSize, false);  // false = non-DMA
-            if (!alloc_result.ok()) {
-                FL_WARN("Memory manager RX allocation failed for channel " << static_cast<int>(mMemoryChannelId)
-                        << " - insufficient on-chip memory (requested " << mBufferSize << " symbols)");
-                return false;
-            }
-            mMemoryAllocated = true;
-            FL_DBG("RX memory allocated: " << alloc_result.value() << " words from on-chip RMT memory");
-
-            rmt_rx_channel_config_t rx_config = {};
-            rx_config.gpio_num = mPin;
-            rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
-            rx_config.resolution_hz = mResolutionHz;
-            rx_config.mem_block_symbols = 64;  // Use 64 symbols per memory block
-            rx_config.intr_priority = 3;
-            rx_config.flags.invert_in = false;
-            rx_config.flags.with_dma = false;  // Non-DMA
-
-            esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
-            if (err != ESP_OK) {
-                FL_WARN("Failed to create RX channel: " << static_cast<int>(err));
-                // Free memory allocation
-                memMgr.free(mMemoryChannelId, false);
-                mMemoryAllocated = false;
-                return false;
-            }
-
-            FL_DBG("✓ RX Channel: Non-DMA enabled (64 symbols per block, on-chip RMT memory)");
-        }
-
-        // Store DMA status for cleanup
-        mUseDMA = useDMA;
+        FL_DBG("RX channel created successfully");
 
         // Register ISR callback
         rmt_rx_event_callbacks_t callbacks = {};
@@ -513,9 +417,6 @@ public:
             FL_WARN("Failed to register RX callbacks: " << static_cast<int>(err));
             rmt_del_channel(mChannel);
             mChannel = nullptr;
-            // Free memory allocation
-            memMgr.free(mMemoryChannelId, false);
-            mMemoryAllocated = false;
             return false;
         }
 
@@ -527,9 +428,6 @@ public:
             FL_WARN("Failed to enable RX channel: " << static_cast<int>(err));
             rmt_del_channel(mChannel);
             mChannel = nullptr;
-            // Free memory allocation
-            memMgr.free(mMemoryChannelId, false);
-            mMemoryAllocated = false;
             return false;
         }
 
@@ -540,9 +438,6 @@ public:
             FL_WARN("Failed to handle skip phase in begin()");
             rmt_del_channel(mChannel);
             mChannel = nullptr;
-            // Free memory allocation
-            memMgr.free(mMemoryChannelId, false);
-            mMemoryAllocated = false;
             return false;
         }
 
@@ -831,7 +726,7 @@ private:
      * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
      * capture phase - store the received symbols normally.
      */
-    static bool IRAM_ATTR rxDoneCallback(rmt_mChannelhandle_t channel,
+    static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t* data,
                                          void* user_data) {
         RmtRxChannelImpl* self = static_cast<RmtRxChannelImpl*>(user_data);
@@ -863,7 +758,7 @@ private:
         return false;
     }
 
-    rmt_mChannelhandle_t mChannel;                ///< RMT channel handle
+    rmt_channel_handle_t mChannel;                ///< RMT channel handle
     gpio_num_t mPin;                              ///< GPIO pin for RX
     uint32_t mResolutionHz;                      ///< Clock resolution in Hz
     size_t mBufferSize;                          ///< Internal buffer size in symbols
@@ -873,9 +768,6 @@ private:
     uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
     fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< Internal buffer for all receive operations
-    uint8_t mMemoryChannelId;                   ///< Virtual channel ID for memory manager accounting
-    bool mMemoryAllocated;                      ///< Track if memory manager has allocated for this channel
-    bool mUseDMA;                               ///< Track if this channel is using DMA
 };
 
 // Factory method implementation
