@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "fl/compiler_control.h"
 
+namespace fl {
 namespace detail {
 
 /// Initialize debug settings before main() runs
@@ -25,7 +26,8 @@ void fastled_debug_init() {
 }
 
 }  // namespace detail
+}  // namespace fl
 
-FL_INIT(detail::fastled_debug_init);
+FL_INIT(fl::detail::fastled_debug_init);
 
 #endif  // defined(ESP32) && defined(FASTLED_DEBUG)

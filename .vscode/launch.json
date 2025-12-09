@@ -157,38 +157,6 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
-        {
-            "type": "platformio-debug",
-            "request": "launch",
-            "name": "PlatformIO: Debug",
-            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
-            "projectEnvName": "dev",
-            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
-            "internalConsoleOptions": "openOnSessionStart",
-            "preLaunchTask": {
-                "type": "PlatformIO",
-                "task": "Pre-Debug"
-            }
-        },
-        {
-            "type": "platformio-debug",
-            "request": "launch",
-            "name": "PlatformIO: Debug (skip Pre-Debug)",
-            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
-            "projectEnvName": "dev",
-            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "type": "platformio-debug",
-            "request": "launch",
-            "name": "PlatformIO: Debug (without uploading)",
-            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
-            "projectEnvName": "dev",
-            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
-            "internalConsoleOptions": "openOnSessionStart",
-            "loadMode": "manual"
-        }
     ]
 }
      

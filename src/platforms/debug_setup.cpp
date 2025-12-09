@@ -4,6 +4,8 @@
 /// This file routes to platform-specific debug setup implementations.
 /// Currently only ESP32 platforms are supported.
 
+// ok no namespace fl
+
 #if defined(FASTLED_DEBUG)
     #if defined(ESP32)
         // ESP32 platforms have debug setup implementation

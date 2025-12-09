@@ -194,6 +194,63 @@ if [ -z "$FASTLED_DOCKER" ]; then
         echo "⚠️  Warning: Auto Debug extension file not found at .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
         echo "      Please ensure the extension file is in the correct location."
     fi
+
+    # Install clangd extension from marketplace
+    echo ""
+    echo "Installing clangd extension for C++ IntelliSense..."
+    clangd_installed_count=0
+
+    # Try installing on VSCode
+    if command -v code &> /dev/null; then
+        echo "Installing clangd extension on VSCode..."
+        if timeout 10 code --install-extension llvm-vs-code-extensions.vscode-clangd 2>/dev/null; then
+            echo "✅ clangd extension installed successfully on VSCode!"
+            clangd_installed_count=$((clangd_installed_count + 1))
+        else
+            echo "⚠️  clangd extension installation via CLI may have failed."
+            echo "      This is normal if VSCode wasn't running."
+        fi
+    else
+        echo "ℹ️  VSCode not found (code command not available)."
+    fi
+
+    # Try installing on Cursor
+    if command -v cursor &> /dev/null; then
+        echo "Installing clangd extension on Cursor..."
+        if timeout 10 cursor --install-extension llvm-vs-code-extensions.vscode-clangd 2>/dev/null; then
+            echo "✅ clangd extension installed successfully on Cursor!"
+            clangd_installed_count=$((clangd_installed_count + 1))
+        else
+            echo "⚠️  clangd extension installation on Cursor may have failed."
+        fi
+    fi
+
+    # Report results
+    if [ $clangd_installed_count -eq 0 ]; then
+        echo ""
+        echo "📋 CLANGD EXTENSION INSTALLATION GUIDE"
+        echo "======================================"
+        echo "The clangd extension needs to be installed manually:"
+        echo ""
+        echo "1. Open VSCode with this workspace:"
+        echo "   code ."
+        echo ""
+        echo "2. Install the extension:"
+        echo "   - Go to Extensions (Ctrl+Shift+X)"
+        echo "   - Search for 'clangd'"
+        echo "   - Install the extension by LLVM Extensions"
+        echo ""
+        echo "3. Disable the C/C++ extension if installed (it conflicts with clangd):"
+        echo "   - Search for 'C/C++' in Extensions"
+        echo "   - Click 'Disable' on the Microsoft C/C++ extension"
+        echo ""
+        echo "ℹ️  After installing, clangd will provide IntelliSense using compile_commands.json!"
+        echo ""
+    elif [ $clangd_installed_count -eq 1 ]; then
+        echo "✅ clangd extension installed on 1 editor."
+    else
+        echo "✅ clangd extension installed on $clangd_installed_count editors!"
+    fi
 else
     echo "ℹ️  Skipping VSCode extensions setup (running in Docker)"
 fi

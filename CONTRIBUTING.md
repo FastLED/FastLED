@@ -114,7 +114,24 @@ Future platforms may include additional ESP32 variants as QEMU support expands.
 
 ## VSCode
 
-We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
+We support VSCode with powerful IntelliSense auto-completion via the [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension.
+
+### Setup
+
+Run the installation script to automatically install the clangd extension and generate IntelliSense configuration:
+
+```bash
+bash install
+```
+
+This will:
+- Auto-install the clangd extension for VSCode/Cursor
+- Generate `compile_commands.json` for IntelliSense
+- Set up debugging capabilities
+
+### Alternative: PlatformIO
+
+You can also use the [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension for compilation:
 
  * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
  * Click the compile button.
