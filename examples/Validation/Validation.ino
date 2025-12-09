@@ -101,7 +101,13 @@
 // ============================================================================
 
 #include <FastLED.h>
+#include "Common.h"
 #include "ValidationTest.h"
+#include "ValidationHelpers.h"
+
+// ============================================================================
+// Configuration
+// ============================================================================
 
 #ifndef PIN_DATA
 #define PIN_DATA 5
@@ -114,6 +120,15 @@
 #define COLOR_ORDER RGB  // No reordering needed.
 
 #define RX_BUFFER_SIZE 8192  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
+
+// ============================================================================
+// Engine Filtering (Debug/Development)
+// ============================================================================
+// Uncomment to test ONLY a specific engine (reduces console spam)
+// Valid values: "RMT", "SPI", "PARLIO", "I2S"
+// #define TEST_ONLY_ENGINE "RMT"
+// #define TEST_ONLY_ENGINE "PARLIO"
+// #define TEST_ONLY_ENGINE "SPI"
 
 CRGB leds[NUM_LEDS];
 uint8_t rx_buffer[RX_BUFFER_SIZE];  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
@@ -135,185 +150,19 @@ bool error_sanity_check = false;
 // Alias for clarity in toggle test
 #define PIN_TX PIN_DATA
 
-// Driver failure tracking with detailed error information
-namespace fl {
-struct DriverFailureInfo {
-    fl::string driver_name;
-    fl::string failure_details;  // e.g., "Byte mismatch at offset 5: expected 0xFF, got 0x00"
-
-    DriverFailureInfo(const char* name, const char* details)
-        : driver_name(name), failure_details(details) {}
-};
-} // namespace fl
-
-// Failed drivers - track driver names and failure reasons
-fl::vector<fl::DriverFailureInfo> failed_drivers;
-
 // ============================================================================
-// Helper Functions
+// Global Driver State
 // ============================================================================
 
-/// @brief Check if a driver has already failed in previous iterations
-/// @param driver_name Driver name to check
-/// @return Pointer to DriverFailureInfo if found, nullptr otherwise
-const fl::DriverFailureInfo* getDriverFailure(const char* driver_name) {
-    for (fl::size i = 0; i < failed_drivers.size(); i++) {
-        if (failed_drivers[i].driver_name == driver_name) {
-            return &failed_drivers[i];
-        }
-    }
-    return nullptr;
-}
+// Available drivers discovered in setup()
+fl::vector<fl::DriverInfo> drivers_available;
 
-/// @brief Sanity check helper: Toggle PIN_TX manually and verify RX captures it
-/// @param rx_channel RX channel for capture
-/// @return true if toggle test passes, false otherwise
-bool togglePinAndCapture(fl::shared_ptr<fl::RmtRxChannel> rx_channel) {
-    FL_WARN("[SANITY CHECK] Testing RX channel with manual GPIO toggle on PIN " << PIN_TX);
+// Failed drivers - track driver names, failure reasons, and frame number
+fl::vector<fl::DriverFailureInfo> drivers_failed;
 
-    // Configure PIN_TX as output (temporarily take ownership from FastLED)
-    pinMode(PIN_TX, OUTPUT);
-    digitalWrite(PIN_TX, LOW);  // Start LOW
+// Frame counter - tracks which iteration of loop() we're on
+uint32_t frame_counter = 0;
 
-    // Generate fast toggles (RMT max signal_range is ~819 μs, so use 100 μs pulses)
-    const int num_toggles = 10;
-    const int toggle_delay_us = 100;  // 100 μs pulses = 5 kHz square wave
-
-    // Initialize RX channel with signal range for fast GPIO toggles
-    // RMT peripheral max is ~819 μs, so use 200 μs (2x our pulse width for safety)
-    if (!rx_channel->begin(100, 200000)) {  // min=100ns, max=200μs
-        FL_WARN("ERROR [SANITY CHECK]: Failed to begin RX channel");
-        pinMode(PIN_TX, INPUT);  // Release pin
-        return false;
-    }
-    delayMicroseconds(50);  // Let RX stabilize
-
-    // Generate toggle pattern: HIGH -> LOW -> HIGH -> LOW ...
-    for (int i = 0; i < num_toggles; i++) {
-        digitalWrite(PIN_TX, HIGH);
-        delayMicroseconds(toggle_delay_us);
-        digitalWrite(PIN_TX, LOW);
-        delayMicroseconds(toggle_delay_us);
-    }
-
-    // Wait for RX to finish capturing (timeout = total toggle time + headroom)
-    uint32_t timeout_ms = 100;  // 10 toggles * 200μs = 2ms, use 100ms for safety
-    fl::RmtRxWaitResult wait_result = rx_channel->wait(timeout_ms);
-
-    // Release PIN_TX for FastLED use
-    pinMode(PIN_TX, INPUT);
-
-    // Check if we successfully captured data
-    if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
-        FL_WARN("ERROR [SANITY CHECK]: RX channel wait failed (result: " << static_cast<int>(wait_result) << ")");
-        FL_WARN("ERROR [SANITY CHECK]: RX may not be working - check PIN_RX (" << PIN_RX << ") and RMT peripheral");
-        FL_WARN("ERROR [SANITY CHECK]: If using non-RMT TX, ensure physical jumper from PIN " << PIN_TX << " to PIN " << PIN_RX);
-        return false;
-    }
-
-    FL_WARN("[SANITY CHECK] ✓ RX channel captured data from " << num_toggles << " toggles");
-    FL_WARN("[SANITY CHECK] ✓ RX channel is functioning correctly");
-
-    return true;
-}
-
-/// @brief Create RMT RX channel and verify it works with sanity check
-/// @return Shared pointer to validated RX channel, or nullptr if creation/test fails
-/// @note Sets global error_sanity_check flag on failure
-fl::shared_ptr<fl::RmtRxChannel> createAndTestRxChannel() {
-    FL_WARN("\n[RX SETUP] Creating RMT RX channel on PIN " << PIN_RX << "...");
-
-    // Create RX channel
-    // Buffer size: 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
-    auto rx_channel = fl::RmtRxChannel::create(PIN_RX, 40000000, RX_BUFFER_SIZE);
-
-    if (!rx_channel) {
-        FL_WARN("ERROR [RX SETUP]: Failed to create RX channel");
-        FL_WARN("ERROR [RX SETUP]: Check that RMT peripheral is available and not in use");
-        error_sanity_check = true;
-        return nullptr;
-    }
-
-    FL_WARN("[RX SETUP] ✓ RX channel created successfully");
-
-    // Run sanity check: manual GPIO toggle test
-    FL_WARN("\n[RX SETUP] Running pre-test sanity check...");
-    if (!togglePinAndCapture(rx_channel)) {
-        FL_WARN("ERROR [RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
-        FL_WARN("ERROR [RX SETUP]: Main validation tests will be skipped");
-        error_sanity_check = true;
-        return nullptr;
-    }
-
-    FL_WARN("[RX SETUP] ✓ Sanity check PASSED - RX channel is ready\n");
-    return rx_channel;
-}
-
-/// @brief Validate that expected engines are available for this platform
-/// Prints ERROR if any expected engines are missing
-void validateExpectedEngines() {
-    // Define expected engines based on platform
-    fl::vector<const char*> expected_engines;
-
-#if defined(FL_IS_ESP_32C6)
-    // ESP32-C6 should have: SPI, PARLIO, RMT
-    expected_engines.push_back("SPI");
-    expected_engines.push_back("PARLIO");
-    expected_engines.push_back("RMT");
-    FL_WARN("\n[VALIDATION] Platform: ESP32-C6");
-#elif defined(FL_IS_ESP_32S3)
-    // ESP32-S3 should have: SPI, PARLIO, RMT
-    expected_engines.push_back("SPI");
-    expected_engines.push_back("RMT");
-    FL_WARN("\n[VALIDATION] Platform: ESP32-S3");
-#elif defined(FL_IS_ESP_32C3)
-    // ESP32-C3 should have: SPI, RMT (no PARLIO)
-    expected_engines.push_back("RMT");
-    FL_WARN("\n[VALIDATION] Platform: ESP32-C3");
-#elif defined(FL_IS_ESP_32DEV)
-    // Original ESP32 should have: SPI, RMT, I2S (no PARLIO)
-    expected_engines.push_back("SPI");
-    expected_engines.push_back("RMT");
-    // expected_engines.push_back("I2S");
-    FL_WARN("\n[VALIDATION] Platform: ESP32 (classic)");
-#else
-    FL_WARN("\n[VALIDATION] Platform: Unknown ESP32 variant - skipping engine validation");
-    return;
-#endif
-
-    FL_WARN("[VALIDATION] Expected engines: " << expected_engines.size());
-    for (fl::size i = 0; i < expected_engines.size(); i++) {
-        FL_WARN("  - " << expected_engines[i]);
-    }
-
-    // Get available drivers
-    auto drivers = FastLED.getDriverInfo();
-
-    // Check if all expected engines are available
-    bool all_present = true;
-    for (fl::size i = 0; i < expected_engines.size(); i++) {
-        const char* expected = expected_engines[i];
-        bool found = false;
-
-        for (fl::size j = 0; j < drivers.size(); j++) {
-            if (fl::strcmp(drivers[j].name.c_str(), expected) == 0) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            FL_WARN("ERROR: Expected engine '" << expected << "' is MISSING from available drivers!");
-            all_present = false;
-        }
-    }
-
-    if (all_present) {
-        FL_WARN("[VALIDATION] ✓ All expected engines are available");
-    } else {
-        FL_WARN("ERROR: Engine validation FAILED - some expected engines are missing!");
-    }
-}
 
 void setup() {
     Serial.begin(115200);
@@ -335,26 +184,61 @@ void setup() {
     FL_WARN("   → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
     FL_WARN("");
 
-    // Create RMT RX channel with sanity check pre-test
-    // ⚠️ CRITICAL: This function validates RX works before main tests run
-    // Sets error_sanity_check=true on failure
-    rx_channel = createAndTestRxChannel();
+    // ========================================================================
+    // RX Channel Setup with Sanity Check
+    // ========================================================================
+    // ⚠️ CRITICAL: Must validate RX works before main tests run
 
-    if (!rx_channel || error_sanity_check) {
-        FL_WARN("ERROR: RX channel setup failed - cannot run validation tests");
-        FL_WARN("ERROR: Check serial output above for details");
-        FL_WARN("ERROR: loop() will continuously report this error");
-        return;  // Exit setup early - loop() will print error and delay
+    FL_WARN("\n[RX SETUP] Starting RX channel setup and validation");
+
+    // Step 1: Create sanity check RX channel (lower precision for GPIO toggles)
+    FL_WARN("\n[RX SETUP] Step 1: Creating sanity check RX channel");
+    auto sanity_rx_channel = createRxChannel(PIN_RX, 20000000, 256);  // 20MHz, 256 symbols
+
+    if (!sanity_rx_channel) {
+        FL_WARN("ERROR [RX SETUP]: Failed to create sanity check RX channel");
+        FL_WARN("ERROR [RX SETUP]: Check that RMT peripheral is available and not in use");
+        error_sanity_check = true;
+        return;
     }
 
-    // List all available drivers
+    // Step 2: Test the sanity check RX channel
+    FL_WARN("\n[RX SETUP] Step 2: Running sanity check test");
+    if (!testRxChannel(sanity_rx_channel, PIN_TX, PIN_RX)) {
+        FL_WARN("ERROR [RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
+        FL_WARN("ERROR [RX SETUP]: Main validation tests will be skipped");
+        error_sanity_check = true;
+        return;
+    }
+
+    FL_WARN("[RX SETUP] ✓ Sanity check PASSED");
+
+    // Step 3: Reset sanity check RX channel (release resources)
+    FL_WARN("\n[RX SETUP] Step 3: Releasing sanity check RX channel");
+    sanity_rx_channel.reset();
+    FL_WARN("[RX SETUP] ✓ Sanity check RX channel destroyed");
+
+    // Step 4: Create high-precision RX channel for main LED validation
+    FL_WARN("\n[RX SETUP] Step 4: Creating high-precision RX channel for LED validation");
+    rx_channel = createRxChannel(PIN_RX, 40000000, RX_BUFFER_SIZE);  // 40MHz, RX_BUFFER_SIZE symbols
+
+    if (!rx_channel) {
+        FL_WARN("ERROR [RX SETUP]: Failed to create high-precision RX channel");
+        FL_WARN("ERROR [RX SETUP]: Check that RMT peripheral is available and not in use");
+        error_sanity_check = true;
+        return;
+    }
+
+    FL_WARN("[RX SETUP] ✓ RX channel is ready for LED validation\n");
+
+    // List all available drivers and store globally
     FL_WARN("\nDiscovering available drivers...");
-    auto drivers = FastLED.getDriverInfo();
-    FL_WARN("Found " << drivers.size() << " driver(s) available:");
-    for (fl::size i = 0; i < drivers.size(); i++) {
-        FL_WARN("  " << (i+1) << ". " << drivers[i].name.c_str()
-                << " (priority: " << drivers[i].priority
-                << ", enabled: " << (drivers[i].enabled ? "yes" : "no") << ")");
+    drivers_available = FastLED.getDriverInfo();
+    FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
+    for (fl::size i = 0; i < drivers_available.size(); i++) {
+        FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()
+                << " (priority: " << drivers_available[i].priority
+                << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")");
     }
 
     // Validate that expected engines are available for this platform
@@ -365,129 +249,13 @@ void setup() {
 }
 
 // ============================================================================
-// Helper Functions
-// ============================================================================
-
-/// @brief Test a specific driver with given timing configuration
-/// @param driver_name Driver name to test
-/// @param timing Chipset timing configuration
-/// @param timing_name Timing name for logging (e.g., "WS2812B-V5")
-/// @param result Driver test result tracker (modified)
-void testDriver(const char* driver_name,
-                const fl::ChipsetTimingConfig& timing,
-                const char* timing_name,
-                fl::DriverTestResult& result) {
-
-    // Set this driver as exclusive for testing
-    if (!FastLED.setExclusiveDriver(driver_name)) {
-        FL_WARN("[ERROR] Failed to set " << driver_name << " as exclusive driver");
-        result.skipped = true;
-        return;
-    }
-    FL_WARN(driver_name << " driver enabled exclusively\n");
-
-    FL_WARN("[CONFIG] Driver: " << driver_name << " (physical jumper required)\n");
-
-    // Create TX configuration for validation tests
-    fl::ChannelConfig tx_config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), COLOR_ORDER);
-
-    FL_WARN("[INFO] Testing " << timing_name << " timing\n");
-
-    // Create validation configuration with all input parameters
-    fl::ValidationConfig validation_config(
-        timing,
-        timing_name,
-        fl::span<fl::ChannelConfig>(&tx_config, 1),
-        driver_name,
-        rx_channel,
-        fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
-    );
-
-    // Validate the chipset timing
-    validateChipsetTiming(validation_config, result.total_tests, result.passed_tests);
-
-    FL_WARN("\n[INFO] All timing tests complete for " << driver_name << " driver");
-}
-
-/// @brief Print driver validation summary table
-/// @param driver_results Vector of driver test results
-void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ DRIVER VALIDATION SUMMARY                                      ║");
-    FL_WARN("╠════════════════════════════════════════════════════════════════╣");
-    FL_WARN("║ Driver       │ Status      │ Tests Passed │ Total Tests       ║");
-    FL_WARN("╠══════════════╪═════════════╪══════════════╪═══════════════════╣");
-
-    for (fl::size i = 0; i < driver_results.size(); i++) {
-        const auto& result = driver_results[i];
-        const char* status;
-        if (result.skipped) {
-            status = "SKIPPED    ";
-        } else if (result.allPassed()) {
-            status = "PASS ✓     ";
-        } else if (result.anyFailed()) {
-            status = "FAIL ✗     ";
-        } else {
-            status = "NO TESTS   ";
-        }
-
-        // Build table row using sstream
-        fl::sstream row;
-        row << "║ ";
-
-        // Driver name (12 chars, left-aligned)
-        fl::string driver_name = result.driver_name;
-        if (driver_name.length() > 12) {
-            driver_name = driver_name.substr(0, 12);
-        }
-        row << driver_name;
-        for (size_t i = driver_name.length(); i < 12; i++) {
-            row << " ";
-        }
-        row << " │ " << status << " │ ";
-
-        // Tests passed (12 chars, left-aligned)
-        if (result.skipped) {
-            row << "-";
-            for (int i = 1; i < 12; i++) row << " ";
-        } else {
-            fl::string passed = fl::to_string(result.passed_tests);
-            row << passed;
-            for (size_t i = passed.length(); i < 12; i++) row << " ";
-        }
-        row << " │ ";
-
-        // Total tests (17 chars, left-aligned)
-        if (result.skipped) {
-            row << "-";
-            for (int i = 1; i < 17; i++) row << " ";
-        } else {
-            fl::string total = fl::to_string(result.total_tests);
-            row << total;
-            for (size_t i = total.length(); i < 17; i++) row << " ";
-        }
-        row << " ║";
-
-        FL_WARN(row.str().c_str());
-    }
-
-    FL_WARN("╚══════════════╧═════════════╧══════════════╧═══════════════════╝");
-}
-
-/// @brief Discard first frame (has timing issues)
-/// @param driver_name Driver name for logging
-void discardFirstFrame(const char* driver_name) {
-    FL_WARN("[INFO] Discarding first frame for " << driver_name << " (timing warm-up)");
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
-    FastLED.show();
-    delay(100);
-}
-
-// ============================================================================
 // Main Loop
 // ============================================================================
 
 void loop() {
+    // Increment frame counter
+    frame_counter++;
+
     // If sanity check failed, print error continuously and delay
     if (error_sanity_check) {
         FL_WARN("ERROR: Sanity check failed - RX channel is not working");
@@ -495,60 +263,83 @@ void loop() {
         return;
     }
 
-    FL_WARN("=== Using Runtime Channel API for Dynamic Driver Testing ===\n");
+    // Check if any drivers failed in previous iterations
+    if (!drivers_failed.empty()) {
+        FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+        FL_WARN("║ DRIVER FAILURES DETECTED - CANNOT CONTINUE                     ║");
+        FL_WARN("╚════════════════════════════════════════════════════════════════╝");
 
-    // Get all available drivers for this platform
-    auto drivers = FastLED.getDriverInfo();
+        for (fl::size i = 0; i < drivers_failed.size(); i++) {
+            const auto& failure = drivers_failed[i];
+            FL_WARN("ERROR: Driver '" << failure.driver_name.c_str() << "' failed on frame " << failure.frame_number);
+            FL_WARN("ERROR: " << failure.failure_details.c_str());
+        }
 
-    FL_WARN("Starting validation tests for each driver...\n");
+        FL_WARN("\nFix the above errors before continuing. Retrying in 5 seconds...");
+        delay(5000);
+        return;  // Exit early - don't run tests again
+    }
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ FRAME " << frame_counter << " - Runtime Channel API Driver Testing");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
+
+#ifdef TEST_ONLY_ENGINE
+    FL_WARN("⚠️  ENGINE FILTER ACTIVE: Testing ONLY '" << TEST_ONLY_ENGINE << "' driver");
+    FL_WARN("    (Uncomment #define TEST_ONLY_ENGINE in source to disable)\n");
+#endif
+
+    FL_WARN("Starting validation tests for each driver...");
     FL_WARN("(Using persistent RX channel from setup() - not recreated)\n");
 
     // Track driver-level test results
     fl::vector<fl::DriverTestResult> driver_results;
 
-    // Iterate through all drivers and test each one
-    for (fl::size i = 0; i < drivers.size(); i++) {
-        const auto& driver = drivers[i];
+    // Iterate through all available drivers and test each one
+    for (fl::size i = 0; i < drivers_available.size(); i++) {
+        const auto& driver = drivers_available[i];
 
-        // Check if driver has failed in previous iterations
-        const fl::DriverFailureInfo* failure = getDriverFailure(driver.name.c_str());
-        if (failure) {
-            FL_WARN("ERROR: Driver " << failure->driver_name.c_str() << " failed previously");
-            FL_WARN("ERROR: " << failure->failure_details.c_str());
-            delay(2000);
-
-            // Mark as skipped in results
-            fl::DriverTestResult result(driver.name.c_str());
-            result.skipped = true;
-            driver_results.push_back(result);
-            continue;  // Skip to next driver
+#ifdef TEST_ONLY_ENGINE
+        // Filter: Only test the specified engine
+        if (fl::strcmp(driver.name.c_str(), TEST_ONLY_ENGINE) != 0) {
+            FL_WARN("[FILTER] Skipping driver '" << driver.name.c_str() << "' (TEST_ONLY_ENGINE=" << TEST_ONLY_ENGINE << ")");
+            continue;
         }
+#endif
 
         fl::DriverTestResult result(driver.name.c_str());
 
         FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-        FL_WARN("║ TESTING DRIVER " << (i+1) << "/" << drivers.size() << ": " << driver.name.c_str() << " (priority: " << driver.priority << ")");
+        FL_WARN("║ TESTING DRIVER " << (i+1) << "/" << drivers_available.size() << ": " << driver.name.c_str() << " (priority: " << driver.priority << ")");
         FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
 
-        // Discard first frame (timing warm-up)
-        discardFirstFrame(driver.name.c_str());
-
         // Test driver with WS2812B-V5 timing (filtered for focused debugging)
+        // Note: testDriver() now handles first-frame discard internally
         FL_WARN("[FILTER] Testing only WS2812B-V5 timing (skipping WS2812 Standard and SK6812)\n");
+        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
         testDriver(driver.name.c_str(),
-                   fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
-                   "WS2812B-V5",
+                   timing_config,
+                   PIN_DATA,
+                   NUM_LEDS,
+                   leds,
+                   COLOR_ORDER,
+                   rx_channel,
+                   fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE),
                    result);
 
-        // If driver test failed, add to failed_drivers list with details
+        // If driver test failed, add to drivers_failed list with details
         if (result.anyFailed()) {
             // Build failure details message
             fl::sstream failure_msg;
             failure_msg << "Validation failed: " << result.passed_tests << "/" << result.total_tests << " tests passed";
 
-            failed_drivers.push_back(fl::DriverFailureInfo(driver.name.c_str(), failure_msg.str().c_str()));
+            drivers_failed.push_back(fl::DriverFailureInfo(
+                driver.name.c_str(),
+                failure_msg.str().c_str(),
+                frame_counter
+            ));
 
-            FL_WARN("ERROR: Driver " << driver.name.c_str() << " FAILED - adding to failed list");
+            FL_WARN("ERROR: Driver " << driver.name.c_str() << " FAILED on frame " << frame_counter);
             FL_WARN("ERROR: " << failure_msg.str().c_str());
         }
 
