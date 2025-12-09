@@ -26,6 +26,26 @@ struct ValidationConfig {
         , rx_pin(rx) {}
 };
 
+/// @brief Driver test result tracking
+struct DriverTestResult {
+    fl::string driver_name;  ///< Driver name (e.g., "RMT", "SPI", "PARLIO")
+    int total_tests;         ///< Total test count across all chipset timings
+    int passed_tests;        ///< Passed test count across all chipset timings
+    bool skipped;            ///< True if driver was skipped (e.g., failed to set exclusive)
+
+    DriverTestResult(const char* name)
+        : driver_name(name)
+        , total_tests(0)
+        , passed_tests(0)
+        , skipped(false) {}
+
+    /// @brief Check if all tests passed
+    bool allPassed() const { return !skipped && total_tests > 0 && passed_tests == total_tests; }
+
+    /// @brief Check if any tests failed
+    bool anyFailed() const { return !skipped && total_tests > 0 && passed_tests < total_tests; }
+};
+
 } // namespace fl
 
 // Capture transmitted LED data via RX loopback
@@ -37,7 +57,7 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
 // Generic driver-agnostic validation test runner
 // Validates all channels in tx_configs using the specified driver configuration
 void runTest(const char* test_name,
-             fl::span<const fl::ChannelConfig> tx_configs,
+             fl::span<fl::ChannelConfig> tx_configs,
              const fl::ValidationConfig& config,
              fl::shared_ptr<fl::RmtRxChannel> shared_rx_channel,
              fl::span<uint8_t> rx_buffer,
@@ -47,12 +67,15 @@ void runTest(const char* test_name,
 // Creates channels, runs tests, destroys channels
 // @param chipset_name Chipset timing name (e.g., "WS2812 Standard", "WS2812B-V5", "SK6812")
 //                     Used for logging and test identification only
+// @param total Output parameter - total tests run (incremented)
+// @param passed Output parameter - tests passed (incremented)
 void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
                            const char* chipset_name,
-                           fl::span<const fl::ChannelConfig> tx_configs,
+                           fl::span<fl::ChannelConfig> tx_configs,
                            const fl::ValidationConfig& config,
                            fl::shared_ptr<fl::RmtRxChannel> rx_channel,
-                           fl::span<uint8_t> rx_buffer);
+                           fl::span<uint8_t> rx_buffer,
+                           int& total, int& passed);
 
 // Main validation test orchestrator
 // Discovers drivers, iterates through them, and runs all chipset timing tests

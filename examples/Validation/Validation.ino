@@ -123,19 +123,14 @@ void setup() {
     // Note: Toggle test removed - validated in Iteration 5 that RMT RX works correctly
     // Skipping toggle test to avoid GPIO ownership conflicts with SPI MOSI
 
-    // Run all validation tests (driver discovery, iteration, testing)
-    runAllValidationTests(PIN_DATA, PIN_RX, fl::span<CRGB>(leds, NUM_LEDS),
-                         rx_channel, fl::span<uint8_t>(rx_buffer, 8192), COLOR_ORDER);
+    FL_WARN("\nStarting continuous validation test loop...");
 }
 
 void loop() {
-    // All validation tests completed in setup()
-    // Device now idle - reset to run tests again
-    delay(1000);
+    // Run all validation tests continuously until timeout
+    runAllValidationTests(PIN_DATA, PIN_RX, fl::span<CRGB>(leds, NUM_LEDS),
+                         rx_channel, fl::span<uint8_t>(rx_buffer, 8192), COLOR_ORDER);
 
-    static bool once = true;
-    if (once) {
-        once = false;
-        FL_WARN("\nAll validation tests complete. Reset to run again.");
-    }
+    FL_WARN("\n========== TEST ITERATION COMPLETE - RESTARTING ==========\n");
+    delay(1000);
 }
