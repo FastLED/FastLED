@@ -113,14 +113,14 @@ private:
     /// @param count Number of channels to destroy (from end of mChannels vector)
     void destroyLeastUsedChannels(size_t count);
 
-    /// @brief Calculate target channel count based on WiFi state and platform
-    /// @param wifiActive Whether WiFi is currently active
+    /// @brief Calculate target channel count based on network state and platform
+    /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active
     /// @return Target number of channels for current state
-    size_t calculateTargetChannelCount(bool wifiActive);
+    size_t calculateTargetChannelCount(bool networkActive);
 
-    /// @brief Reconfigure channels for WiFi state change (destroy/recreate as needed)
-    /// @param wifiActive Whether WiFi is currently active
-    void reconfigureForWiFi(bool wifiActive);
+    /// @brief Reconfigure channels for network state change (destroy/recreate as needed)
+    /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active
+    void reconfigureForNetwork(bool networkActive);
 
     /// @brief ISR callback for transmission completion
     static bool IRAM_ATTR transmitDoneCallback(rmt_channel_handle_t channel,
@@ -155,8 +155,8 @@ private:
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
 
-    /// @brief Track last known WiFi state for change detection
-    bool mLastKnownWiFiState;
+    /// @brief Track last known network state for change detection
+    bool mLastKnownNetworkState;
 };
 
 } // namespace fl

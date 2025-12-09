@@ -102,7 +102,7 @@ public:
     /// @brief Allocate memory for TX channel with adaptive buffering policy
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
     /// @param use_dma Whether this channel uses DMA (bypasses on-chip memory)
-    /// @param wifiActive Whether WiFi is currently active (affects buffer size)
+    /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active (affects buffer size)
     /// @return Number of words allocated, or error if insufficient memory
     ///
     /// **DMA vs Non-DMA Memory Usage:**
@@ -110,13 +110,13 @@ public:
     /// - Non-DMA: N× SOC_RMT_MEM_WORDS_PER_CHANNEL where N = calculateMemoryBlocks()
     ///
     /// **Memory Block Calculation:**
-    /// - WiFi OFF: Uses FASTLED_RMT_MEM_BLOCKS (default 2)
-    /// - WiFi ON: Uses FASTLED_RMT_MEM_BLOCKS_WIFI_MODE (default 3)
+    /// - Network OFF: Uses FASTLED_RMT_MEM_BLOCKS (default 2)
+    /// - Network ON: Uses FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE (default 3)
     /// - C3/C6/H2: Always capped at 2× (insufficient memory for 3×)
     ///
     /// When with_dma=true in rmt_tx_channel_config_t, mem_block_symbols controls
     /// the DRAM buffer size, NOT on-chip RMT memory.
-    Result<size_t, RmtMemoryError> allocateTx(uint8_t channel_id, bool use_dma, bool wifiActive = false);
+    Result<size_t, RmtMemoryError> allocateTx(uint8_t channel_id, bool use_dma, bool networkActive = false);
 
     /// @brief Allocate memory for RX channel with user-specified size
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
@@ -147,9 +147,9 @@ public:
 
     /// @brief Check if TX allocation would succeed
     /// @param use_dma Whether DMA would be used (always succeeds)
-    /// @param wifiActive Whether WiFi is currently active (affects buffer size)
+    /// @param networkActive Whether any network is currently active (affects buffer size)
     /// @return true if allocation would succeed, false otherwise
-    bool canAllocateTx(bool use_dma, bool wifiActive = false) const;
+    bool canAllocateTx(bool use_dma, bool networkActive = false) const;
 
     /// @brief Check if RX allocation would succeed
     /// @param symbols Number of symbols requested
@@ -165,18 +165,18 @@ public:
     /// @brief Reset all allocations (for testing or error recovery)
     void reset();
 
-    /// @brief Calculate adaptive memory blocks based on WiFi state
-    /// @param wifiActive Whether WiFi is currently active
+    /// @brief Calculate adaptive memory blocks based on network state
+    /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active
     /// @return Number of memory blocks to allocate (2 or 3)
     ///
     /// **Memory Block Strategy:**
-    /// - WiFi OFF: Return FASTLED_RMT_MEM_BLOCKS (default 2)
-    /// - WiFi ON: Return FASTLED_RMT_MEM_BLOCKS_WIFI_MODE (default 3)
+    /// - Network OFF: Return FASTLED_RMT_MEM_BLOCKS (default 2)
+    /// - Network ON: Return FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE (default 3)
     /// - C3/C6/H2/C5 platforms: Always return 2 (insufficient memory for 3×)
     ///
     /// C3/C6/H2/C5 platforms have only 96 words (2 channels × 48 words) of TX memory.
     /// Triple-buffering would require 144 words (3 × 48), which exceeds capacity.
-    static size_t calculateMemoryBlocks(bool wifiActive);
+    static size_t calculateMemoryBlocks(bool networkActive);
 
     // ========================================================================
     // DMA Channel Management (ESP32-S3 only - 1 DMA channel shared TX/RX)

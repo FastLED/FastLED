@@ -148,19 +148,19 @@ FL_EXTERN_C_END
 #define FASTLED_RMT_MEM_BLOCKS 2  // 2x as much memory for increased stability vs wifi jitter.
 #endif
 
-// WiFi-aware memory allocation
-// When WiFi is active, use triple-buffering (3× memory blocks) for improved stability
-// This helps compensate for increased interrupt latency caused by WiFi operations
-#ifndef FASTLED_RMT_MEM_BLOCKS_WIFI_MODE
-#define FASTLED_RMT_MEM_BLOCKS_WIFI_MODE 3  // Triple-buffer for WiFi
+// Network-aware memory allocation
+// When network is active (WiFi, Ethernet, or Bluetooth), use triple-buffering (3× memory blocks) for improved stability
+// This helps compensate for increased interrupt latency caused by network operations
+#ifndef FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE
+#define FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE 3  // Triple-buffer for network activity
 #endif
 
-// Enable/disable WiFi-aware dynamic channel reduction
+// Enable/disable Network-aware dynamic channel reduction
 // When enabled, the RMT driver will automatically reduce the number of active
-// channels when WiFi is detected, freeing up memory for the remaining channels
-// to use triple-buffering. This prevents visual glitches during WiFi activity.
-#ifndef FASTLED_RMT_WIFI_REDUCE_CHANNELS
-#define FASTLED_RMT_WIFI_REDUCE_CHANNELS 1  // Default: enabled
+// channels when network is detected (WiFi, Ethernet, or Bluetooth), freeing up memory
+// for the remaining channels to use triple-buffering. This prevents visual glitches during network activity.
+#ifndef FASTLED_RMT_NETWORK_REDUCE_CHANNELS
+#define FASTLED_RMT_NETWORK_REDUCE_CHANNELS 1  // Default: enabled
 #endif
 
 // Buffer size calculations
@@ -181,7 +181,7 @@ FL_EXTERN_C_END
 // === Interrupt Priority Configuration ===
 //
 // RMT interrupts use level 3 on all platforms.
-// WiFi interrupts typically run at level 4, but the RMT5 driver uses ESP-IDF's
+// Network interrupts (WiFi, Ethernet, Bluetooth) typically run at level 4, but the RMT5 driver uses ESP-IDF's
 // interrupt handling (rmt_tx_register_event_callbacks), which only supports up
 // to level 3 for C-based callbacks. Higher levels require assembly ISR handlers
 // that are not exposed by the ESP-IDF RMT API.
@@ -193,18 +193,18 @@ FL_EXTERN_C_END
     #define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3
 #endif
 
-// WiFi-aware interrupt priority (same as normal - level 3)
+// Network-aware interrupt priority (same as normal - level 3)
 // Currently no boost is possible without assembly ISR handlers
 // This macro is kept for future expansion if needed
-#ifndef FL_RMT5_INTERRUPT_LEVEL_WIFI_MODE
-    #define FL_RMT5_INTERRUPT_LEVEL_WIFI_MODE ESP_INTR_FLAG_LEVEL3
+#ifndef FL_RMT5_INTERRUPT_LEVEL_NETWORK_MODE
+    #define FL_RMT5_INTERRUPT_LEVEL_NETWORK_MODE ESP_INTR_FLAG_LEVEL3
 #endif
 
-// WiFi priority boost feature flag
+// Network priority boost feature flag
 // Currently disabled on all platforms (both priorities are level 3)
-// Kept for potential future use with alternative WiFi mitigation strategies
-#ifndef FASTLED_RMT_WIFI_PRIORITY_BOOST
-    #define FASTLED_RMT_WIFI_PRIORITY_BOOST 0  // Disabled - no platforms support >level3
+// Kept for potential future use with alternative network interference mitigation strategies
+#ifndef FASTLED_RMT_NETWORK_PRIORITY_BOOST
+    #define FASTLED_RMT_NETWORK_PRIORITY_BOOST 0  // Disabled - no platforms support >level3
 #endif
 
 
