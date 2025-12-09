@@ -18,9 +18,8 @@
 #include "ftl/shared_ptr.h"
 
 // Include concrete engine implementations
-// ESP32-C6, C5, P4, H2 only support RMT5 (new driver) - force RMT5 even if flag is 0
-#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
-    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
+// RMT5-only platforms must use new driver architecture
+#if FASTLED_ESP32_RMT5_ONLY_PLATFORM
 #include "rmt/rmt_5/channel_engine_rmt.h"
 #elif FASTLED_RMT5
 #include "rmt/rmt_5/channel_engine_rmt.h"
@@ -74,9 +73,8 @@ void initializeChannelBusManager() {
     #endif
     #endif
 
-    // ESP32-C6, C5, P4, H2 only support RMT5 - force RMT5 even if flag is 0
-    #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
-        defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    // RMT5-only platforms must use new driver architecture
+    #if FASTLED_ESP32_RMT5_ONLY_PLATFORM
     manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>(), "RMT");
     FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ") [forced for RMT5-only chip]");
     #elif FASTLED_RMT5
