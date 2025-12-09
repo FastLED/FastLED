@@ -106,7 +106,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
     // Check if channel already allocated
     if (findAllocation(channel_id, true) != nullptr) {
         FL_WARN("RMT TX channel " << static_cast<int>(channel_id) << " already allocated");
-        return Result<size_t, RmtMemoryError>::error(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
+        return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
     }
 
     // DMA channels bypass on-chip memory
@@ -114,7 +114,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
         mLedger.allocations.push_back(ChannelAllocation(channel_id, 0, true, true));
         FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
                    << " allocated (DMA, bypasses on-chip memory)");
-        return Result<size_t, RmtMemoryError>::ok(0);
+        return Result<size_t, RmtMemoryError>::success(0);
     }
 
     // Calculate double-buffer size (2× base channel size)
@@ -128,7 +128,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
                     << " words, only " << (mLedger.total_words - mLedger.allocated_words)
                     << " available (allocated: " << mLedger.allocated_words
                     << "/" << mLedger.total_words << ")");
-            return Result<size_t, RmtMemoryError>::error(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+            return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
         }
 
         // Allocate from global pool
@@ -145,7 +145,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
                     << " words, only " << (mLedger.total_tx_words - mLedger.allocated_tx_words)
                     << " available (allocated: " << mLedger.allocated_tx_words
                     << "/" << mLedger.total_tx_words << ")");
-            return Result<size_t, RmtMemoryError>::error(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+            return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
         }
 
         // Allocate from TX pool
@@ -157,14 +157,14 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
                    << " | Total TX: " << mLedger.allocated_tx_words << "/" << mLedger.total_tx_words);
     }
 
-    return Result<size_t, RmtMemoryError>::ok(words_needed);
+    return Result<size_t, RmtMemoryError>::success(words_needed);
 }
 
 Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, size_t symbols, bool use_dma) {
     // Check if channel already allocated
     if (findAllocation(channel_id, false) != nullptr) {
         FL_WARN("RMT RX channel " << static_cast<int>(channel_id) << " already allocated");
-        return Result<size_t, RmtMemoryError>::error(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
+        return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
     }
 
     // DMA channels bypass on-chip memory (use DRAM instead)
@@ -172,7 +172,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
         mLedger.allocations.push_back(ChannelAllocation(channel_id, 0, false, true));
         FL_LOG_RMT("RMT RX channel " << static_cast<int>(channel_id)
                    << " allocated (DMA, bypasses on-chip memory, uses DRAM buffer)");
-        return Result<size_t, RmtMemoryError>::ok(0);
+        return Result<size_t, RmtMemoryError>::success(0);
     }
 
     // RX symbols = words (1 symbol = 1 word = 4 bytes)
@@ -186,7 +186,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
                     << " words, only " << (mLedger.total_words - mLedger.allocated_words)
                     << " available (allocated: " << mLedger.allocated_words
                     << "/" << mLedger.total_words << ")");
-            return Result<size_t, RmtMemoryError>::error(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
+            return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
         }
 
         // Allocate from global pool
@@ -203,7 +203,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
                     << " words, only " << (mLedger.total_rx_words - mLedger.allocated_rx_words)
                     << " available (allocated: " << mLedger.allocated_rx_words
                     << "/" << mLedger.total_rx_words << ")");
-            return Result<size_t, RmtMemoryError>::error(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
+            return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
         }
 
         // Allocate from RX pool
@@ -215,7 +215,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
                    << " | Total RX: " << mLedger.allocated_rx_words << "/" << mLedger.total_rx_words);
     }
 
-    return Result<size_t, RmtMemoryError>::ok(words_needed);
+    return Result<size_t, RmtMemoryError>::success(words_needed);
 }
 
 void RmtMemoryManager::free(uint8_t channel_id, bool is_tx) {
