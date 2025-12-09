@@ -72,6 +72,34 @@
 //   ```
 //
 
+// ============================================================================
+// AGENT INSTRUCTIONS
+// ============================================================================
+// This sketch is a validation test that uses the "ERROR" keyword in FL_WARN
+// statements to signal test failures. The `bash debug` command monitors for
+// the "ERROR" keyword and fails the test when detected (exit code 1).
+//
+// 🚫 DO NOT "CHEAT" THE TEST:
+//    - DO NOT change "ERROR" to "FAIL", "WARNING", "FAILURE", or any other
+//      keyword to avoid test detection
+//    - DO NOT modify FL_WARN statements unless explicitly requested by the user
+//    - The "ERROR" keyword is INTENTIONAL and part of the validation contract
+//
+// ✅ VALID MODIFICATIONS (only if explicitly requested):
+//    - User asks: "Change the error message format"
+//    - User asks: "Use a different warning macro"
+//    - User asks: "Remove the ERROR prefix"
+//
+// ❌ INVALID MODIFICATIONS (considered "cheating"):
+//    - Changing "ERROR" to avoid `bash debug --fail-on ERROR` detection
+//    - Renaming to bypass automated test failure detection
+//    - Any modification that circumvents the validation contract
+//
+// If the test is failing, investigate and FIX THE ACTUAL BUG that causes
+// the "ERROR" message to be printed. Do not hide the symptom by changing
+// the error message keyword.
+// ============================================================================
+
 #include <FastLED.h>
 #include "ValidationTest.h"
 
