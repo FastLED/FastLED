@@ -190,14 +190,14 @@ FL_EXTERN_C_END
 
 // RMT interrupt priority (level 3 for all platforms)
 #ifndef FL_RMT5_INTERRUPT_LEVEL
-    #define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3
+    #define FL_RMT5_INTERRUPT_LEVEL 3  // Use numeric value, not flag (ESP_INTR_FLAG_LEVEL3=8)
 #endif
 
 // Network-aware interrupt priority (same as normal - level 3)
 // Currently no boost is possible without assembly ISR handlers
 // This macro is kept for future expansion if needed
 #ifndef FL_RMT5_INTERRUPT_LEVEL_NETWORK_MODE
-    #define FL_RMT5_INTERRUPT_LEVEL_NETWORK_MODE ESP_INTR_FLAG_LEVEL3
+    #define FL_RMT5_INTERRUPT_LEVEL_NETWORK_MODE 3  // Use numeric value, not flag
 #endif
 
 // Network priority boost feature flag

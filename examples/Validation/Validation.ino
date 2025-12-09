@@ -126,7 +126,7 @@
 // ============================================================================
 // Uncomment to test ONLY a specific engine (reduces console spam)
 // Valid values: "RMT", "SPI", "PARLIO", "I2S"
-// #define TEST_ONLY_ENGINE "RMT"
+#define TEST_ONLY_ENGINE "RMT"
 // #define TEST_ONLY_ENGINE "PARLIO"
 // #define TEST_ONLY_ENGINE "SPI"
 
