@@ -834,15 +834,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.valid_gpio_num = static_cast<gpio_num_t>(-1);
 
     // Step 5: Create TX unit
-    // ITERATION 4: Heap check BEFORE parlio_new_tx_unit()
-    FL_WARN("ITERATION 4: Heap check BEFORE parlio_new_tx_unit()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED BEFORE parlio_new_tx_unit()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK before parlio_new_tx_unit()");
-
     esp_err_t err = parlio_new_tx_unit(&config, &mState.tx_unit);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to create TX unit: " << err);
@@ -852,24 +843,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     FL_LOG_PARLIO("PARLIO: TX unit created");
 
-    // ITERATION 4: Heap check AFTER parlio_new_tx_unit()
-    FL_WARN("ITERATION 4: Heap check AFTER parlio_new_tx_unit()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED AFTER parlio_new_tx_unit()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK after parlio_new_tx_unit()");
-
     // Step 6: Enable TX unit
-    FL_WARN("ITERATION 4: Heap check BEFORE parlio_tx_unit_enable()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED BEFORE parlio_tx_unit_enable()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK before parlio_tx_unit_enable()");
-
     err = parlio_tx_unit_enable(mState.tx_unit);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to enable TX unit: " << err);
@@ -881,26 +855,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     FL_LOG_PARLIO("PARLIO: TX unit enabled");
 
-    // ITERATION 4: Heap check AFTER parlio_tx_unit_enable()
-    FL_WARN("ITERATION 4: Heap check AFTER parlio_tx_unit_enable()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED AFTER parlio_tx_unit_enable()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK after parlio_tx_unit_enable()");
-
     // Step 7: Register ISR callback for streaming
-    FL_WARN("ITERATION 4: Heap check BEFORE "
-            "parlio_tx_unit_register_event_callbacks()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED BEFORE "
-                "parlio_tx_unit_register_event_callbacks()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK before parlio_tx_unit_register_event_callbacks()");
-
     parlio_tx_event_callbacks_t callbacks = {};
     callbacks.on_trans_done =
         reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
@@ -927,17 +882,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     FL_LOG_PARLIO("PARLIO: ISR callbacks registered");
 
-    // ITERATION 4: Heap check AFTER parlio_tx_unit_register_event_callbacks()
-    FL_WARN("ITERATION 4: Heap check AFTER "
-            "parlio_tx_unit_register_event_callbacks()");
-    if (!heap_caps_check_integrity_all(true)) {
-        FL_WARN("❌ HEAP CORRUPTION DETECTED AFTER "
-                "parlio_tx_unit_register_event_callbacks()!");
-        mInitialized = false;
-        return;
-    }
-    FL_WARN("✓ Heap OK after parlio_tx_unit_register_event_callbacks()");
-
     // Step 8: Allocate double buffers for ping-pong streaming
     // CRITICAL REQUIREMENTS:
     // 1. MUST be DMA-capable memory (MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
@@ -946,20 +890,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // asynchronously
     // 3. Buffer size depends on data_width and actual pulses_per_bit
     // (calculated at runtime)
-
-    // Diagnostic: Check DMA memory availability BEFORE allocation
-    size_t dma_free =
-        heap_caps_get_free_size(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-    size_t dma_largest =
-        heap_caps_get_largest_free_block(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-    size_t total_free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    size_t total_largest = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
-
-    FL_WARN("PARLIO: Memory diagnostics BEFORE buffer allocation:");
-    FL_WARN("  DMA-capable: " << dma_free
-                              << " bytes free, largest block: " << dma_largest);
-    FL_WARN("  Total heap: " << total_free << " bytes free, largest block: "
-                             << total_largest);
 
     // ITERATION 2: CRITICAL FIX - Match transpose logic exactly!
     // The transposeAndQueueNextChunk() function writes:
@@ -980,14 +910,14 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     }
     size_t bufferSize = mState.leds_per_chunk * bytes_per_led;
 
-    FL_WARN("PARLIO: Buffer size calculation:");
-    FL_WARN("  pulses_per_bit: " << mState.pulses_per_bit);
-    FL_WARN("  bytes_per_led: " << bytes_per_led);
-    FL_WARN("  leds_per_chunk: " << mState.leds_per_chunk);
-    FL_WARN("  buffer_size: " << bufferSize << " bytes");
-    FL_WARN("PARLIO: Requesting 2 buffers × "
+    FL_LOG_PARLIO("PARLIO: Buffer size calculation:");
+    FL_LOG_PARLIO("  pulses_per_bit: " << mState.pulses_per_bit);
+    FL_LOG_PARLIO("  bytes_per_led: " << bytes_per_led);
+    FL_LOG_PARLIO("  leds_per_chunk: " << mState.leds_per_chunk);
+    FL_LOG_PARLIO("  buffer_size: " << bufferSize << " bytes");
+    FL_LOG_PARLIO("PARLIO: Requesting 2 buffers × "
             << bufferSize << " bytes = " << (bufferSize * 2) << " bytes total");
-    FL_WARN("PARLIO: Allocating DMA buffers from heap");
+    FL_LOG_PARLIO("PARLIO: Allocating DMA buffers from heap");
 
     // Allocate DMA-capable buffers from heap using fl::unique_ptr with custom
     // deleter
@@ -1001,7 +931,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     if (!mState.buffer_a || !mState.buffer_b) {
         FL_WARN("PARLIO: Failed to allocate DMA buffers (requested "
                 << bufferSize << " bytes each)");
-        FL_WARN("  DMA-capable memory: " << dma_free << " bytes available");
 
         // Clean up partial allocation (fl::unique_ptr will auto-free on reset)
         mState.buffer_a.reset();
@@ -1024,12 +953,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     }
 
     mState.buffer_size = bufferSize;
-
-    FL_WARN("PARLIO: Successfully allocated DMA buffers");
-    FL_WARN("  buffer_a: " << (void *)mState.buffer_a.get() << " ("
-                           << bufferSize << " bytes)");
-    FL_WARN("  buffer_b: " << (void *)mState.buffer_b.get() << " ("
-                           << bufferSize << " bytes)");
 
     FL_LOG_PARLIO("PARLIO: DMA-capable double buffers allocated (2 × "
                   << bufferSize << " = " << (bufferSize * 2)
@@ -1153,55 +1076,33 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
 }
 
 void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
-    FL_DBG("ChannelEnginePARLIO::enqueue() - channel="
-           << (void *)channelData.get());
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
-        FL_DBG("ChannelEnginePARLIO::enqueue() - Added to queue (total="
-               << mEnqueuedChannels.size() << ")");
     }
 }
 
 void ChannelEnginePARLIO::show() {
-    FL_DBG("ChannelEnginePARLIO::show() - START (enqueued="
-           << mEnqueuedChannels.size() << ")");
-
     if (!mEnqueuedChannels.empty()) {
-        FL_DBG("ChannelEnginePARLIO::show() - Moving channels to transmitting "
-               "list");
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
         mEnqueuedChannels.clear();
 
-        FL_DBG("ChannelEnginePARLIO::show() - Calling beginTransmission with "
-               << mTransmittingChannels.size() << " channels");
         // Begin transmission (selects engine and delegates)
         beginTransmission(fl::span<const ChannelDataPtr>(
             mTransmittingChannels.data(), mTransmittingChannels.size()));
-        FL_DBG("ChannelEnginePARLIO::show() - beginTransmission returned");
     }
-
-    FL_DBG("ChannelEnginePARLIO::show() - COMPLETE");
 }
 
 IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
     // Poll the active engine if one is selected
     if (mActiveEngine) {
-        FL_DBG("ChannelEnginePARLIO::poll() - Calling poll() on active "
-               "sub-engine");
         EngineState state = mActiveEngine->poll();
-        FL_DBG("ChannelEnginePARLIO::poll() - Sub-engine returned state="
-               << (int)state);
 
         // Clear transmitting channels when READY
         if (state == EngineState::READY && !mTransmittingChannels.empty()) {
-            FL_DBG(
-                "ChannelEnginePARLIO::poll() - Clearing transmitting channels");
             mTransmittingChannels.clear();
         }
 
-        FL_DBG("ChannelEnginePARLIO::poll() - COMPLETE (state=" << (int)state
-                                                                << ")");
         return state;
     }
 
@@ -1212,9 +1113,6 @@ IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
 
 void ChannelEnginePARLIO::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) {
-    FL_DBG("ChannelEnginePARLIO::beginTransmission() - START (channels="
-           << channelData.size() << ")");
-
     // Validate channel data
     if (channelData.size() == 0) {
         FL_LOG_PARLIO("PARLIO: No channels to transmit");
@@ -1232,12 +1130,7 @@ void ChannelEnginePARLIO::beginTransmission(
 
     // Select optimal engine based on channel count using selectDataWidth()
     // helper
-    FL_DBG(
-        "ChannelEnginePARLIO::beginTransmission() - Selecting data width for "
-        << channel_count << " channels");
     size_t optimal_width = selectDataWidth(channel_count);
-    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Optimal width="
-           << optimal_width);
 
     switch (optimal_width) {
     case 1:
@@ -1276,20 +1169,13 @@ void ChannelEnginePARLIO::beginTransmission(
         return;
     }
 
-    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Enqueueing "
-           << channel_count << " channels to sub-engine");
     // Delegate transmission to selected engine
     // We need to enqueue the data and call show() on the sub-engine
     for (const auto &channel : channelData) {
-        FL_DBG("ChannelEnginePARLIO::beginTransmission() - Enqueueing channel "
-               "to sub-engine");
         mActiveEngine->enqueue(channel);
     }
 
-    FL_DBG("ChannelEnginePARLIO::beginTransmission() - Calling show() on "
-           "sub-engine");
     mActiveEngine->show();
-    FL_DBG("ChannelEnginePARLIO::beginTransmission() - COMPLETE");
 }
 
 //=============================================================================
