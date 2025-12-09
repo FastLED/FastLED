@@ -4,6 +4,7 @@ This module provides clean abstraction layers for Docker operations including
 container lifecycle management, image building, and compilation orchestration.
 """
 
+import hashlib
 import os
 import subprocess
 import sys
@@ -40,6 +41,32 @@ class DockerConfig:
     mount_target: str = "//host"  # Git-bash compatible path
     stop_timeout: int = 300
     output_dir: Optional[Path] = None  # Optional host directory for build artifacts
+    platform_type: str = ""  # Platform family (e.g., "avr", "esp-32s3") for GC
+
+    def calculate_config_hash(self) -> str:
+        """Calculate hash of container configuration for reuse detection.
+
+        Hash is based on:
+        - project_root path
+        - output_dir path (if set)
+        - image_name
+        - mount_target
+
+        Returns:
+            SHA256 hash (first 16 chars) of configuration
+        """
+        hash_components = [
+            str(self.project_root.resolve()),
+            str(self.output_dir.resolve()) if self.output_dir else "",
+            self.image_name,
+            self.mount_target,
+        ]
+
+        hash_input = "|".join(hash_components)
+        full_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+
+        # Return first 16 characters for shorter container names
+        return full_hash[:16]
 
     @staticmethod
     def _validate_output_dir(output_dir: Path, project_root: Path) -> Path:
@@ -135,14 +162,9 @@ class DockerConfig:
             )
             image_name = f"niteris/fastled-compiler-{board_name}:latest"
 
-        # Container name matches the platform naming
-        # Grouped platforms: one container for multiple boards (e.g., fastled-compiler-avr)
-        # Flat platforms: one container per board (e.g., fastled-compiler-esp-32s3)
-        if platform:
-            container_name = f"fastled-compiler-{platform}"
-        else:
-            # Fallback for unmapped boards
-            container_name = f"fastled-compiler-{board_name}"
+        # Determine platform_type for garbage collection
+        # This is the same as platform, but stored separately for GC tracking
+        platform_type_value = platform if platform else board_name
 
         # Use git-bash compatible mount target on Windows
         mount_target = "//host" if sys.platform == "win32" else "/host"
@@ -152,6 +174,29 @@ class DockerConfig:
         if output_dir is not None:
             validated_output_dir = cls._validate_output_dir(output_dir, project_root)
 
+        # Create temporary config to calculate hash
+        temp_config = cls(
+            board_name=board_name,
+            image_name=image_name,
+            project_root=project_root,
+            container_name="",  # Will be set below
+            mount_target=mount_target,
+            output_dir=validated_output_dir,
+            platform_type=platform_type_value,
+        )
+
+        # Calculate configuration hash
+        config_hash = temp_config.calculate_config_hash()
+
+        # Container name includes hash suffix for unique identification
+        # Format: fastled-compiler-{platform}-{hash[:8]}
+        # This allows multiple containers with different configurations
+        if platform:
+            container_name = f"fastled-compiler-{platform}-{config_hash[:8]}"
+        else:
+            # Fallback for unmapped boards
+            container_name = f"fastled-compiler-{board_name}-{config_hash[:8]}"
+
         return cls(
             board_name=board_name,
             image_name=image_name,
@@ -159,6 +204,7 @@ class DockerConfig:
             container_name=container_name,
             mount_target=mount_target,
             output_dir=validated_output_dir,
+            platform_type=platform_type_value,
         )
 
 
@@ -239,7 +285,8 @@ class DockerContainerManager:
         cmd = [
             get_docker_command(),
             "create",
-            "--rm",  # Auto-remove container when stopped to ensure fresh bind mounts
+            # NOTE: Removed --rm flag to enable container reuse
+            # Containers are now managed via database and garbage collection
             "--name",
             self.config.container_name,
             "-v",
@@ -283,23 +330,84 @@ class DockerContainerManager:
     def transition_to_running(self) -> bool:
         """Ensure container is in running state using database tracking.
 
-        This method uses the prepare_container function to:
-        1. Check for existing container registrations
-        2. Verify owner PID is not alive (prevent concurrent usage)
-        3. Clean up orphaned containers from dead processes
-        4. Create fresh container with database tracking
-        5. Register container ownership by current PID
+        This method implements container reuse strategy:
+        1. Calculate config_hash from current configuration
+        2. Check for existing containers with matching config_hash
+        3. Reuse container if found and owner PID is dead
+        4. Run garbage collection before creating new containers
+        5. Create fresh container with database tracking
+        6. Register container ownership by current PID
 
         Returns:
             True if container is running, False on failure
         """
         try:
+            # Calculate configuration hash for reuse detection
+            config_hash = self.config.calculate_config_hash()
+
+            # Check if we have a container with matching config_hash (container reuse)
+            existing_by_hash = self._db.get_by_config_hash(config_hash)
+            if existing_by_hash:
+                # Container with matching config exists - check if we can reuse it
+                from ci.docker.container_db import (
+                    docker_container_exists,
+                    process_exists,
+                )
+
+                if not process_exists(existing_by_hash.owner_pid):
+                    # Owner is dead - we can reuse this container
+                    actual_container_id = docker_container_exists(
+                        existing_by_hash.container_name
+                    )
+                    if actual_container_id:
+                        print(
+                            f"♻️  Reusing existing container: {existing_by_hash.container_name}"
+                        )
+                        print(f"   Config hash: {config_hash}")
+
+                        # Update ownership in database
+                        self._db.delete_by_id(existing_by_hash.container_id)
+                        self._db.insert(
+                            actual_container_id,
+                            existing_by_hash.container_name,
+                            self._get_image_name(),
+                            os.getpid(),
+                            config_hash,
+                            self.config.platform_type,
+                        )
+
+                        # Start the container if it's stopped
+                        start_result = subprocess.run(
+                            [get_docker_command(), "start", actual_container_id],
+                            capture_output=True,
+                            text=True,
+                            timeout=30,
+                        )
+                        if start_result.returncode != 0:
+                            print(
+                                f"⚠️  Failed to start existing container, will create new one"
+                            )
+                        else:
+                            self._container_id = actual_container_id
+                            return True
+
+            # No reusable container found - run garbage collection before creating new one
+            from ci.docker.container_db import garbage_collect_platform_containers
+
+            cleaned = garbage_collect_platform_containers(
+                self.config.platform_type, max_containers=2, db=self._db
+            )
+            if cleaned > 0:
+                print(f"♻️  Garbage collected {cleaned} old container(s)")
+
             # Use prepare_container to handle all the lifecycle management
             container_id, was_cleaned = prepare_container(
                 container_name=self.config.container_name,
                 image_name=self._get_image_name(),
                 create_container_fn=self._create_container_internal,
                 db=self._db,
+                config_hash=config_hash,
+                platform_type=self.config.platform_type,
             )
 
             self._container_id = container_id
@@ -310,6 +418,7 @@ class DockerContainerManager:
                 )
             else:
                 print(f"✓ Fresh container created: {self.config.container_name}")
+            print(f"   Config hash: {config_hash}")
 
             return True
         except RuntimeError as e:

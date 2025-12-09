@@ -31,6 +31,8 @@ class ContainerRecord:
     image_name: str
     owner_pid: int
     created_at: int
+    config_hash: str = ""  # Hash of container configuration (path + params)
+    platform_type: str = ""  # Platform family (e.g., "avr", "esp-32s3") for GC
 
 
 class ContainerDatabase:
@@ -56,6 +58,8 @@ class ContainerDatabase:
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.cursor()
+
+            # Create base table structure (without new columns for backward compat)
             cursor.execute(
                 """
                 CREATE TABLE IF NOT EXISTS containers (
@@ -67,12 +71,35 @@ class ContainerDatabase:
                 )
                 """
             )
+
+            # Migrate existing tables: add config_hash and platform_type columns if missing
+            cursor.execute("PRAGMA table_info(containers)")
+            columns = [row[1] for row in cursor.fetchall()]
+
+            if "config_hash" not in columns:
+                cursor.execute(
+                    "ALTER TABLE containers ADD COLUMN config_hash TEXT DEFAULT ''"
+                )
+
+            if "platform_type" not in columns:
+                cursor.execute(
+                    "ALTER TABLE containers ADD COLUMN platform_type TEXT DEFAULT ''"
+                )
+
+            # Create indices AFTER ensuring columns exist
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_owner_pid ON containers(owner_pid)"
             )
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_container_name ON containers(container_name)"
             )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_config_hash ON containers(config_hash)"
+            )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_platform_type ON containers(platform_type)"
+            )
+
             conn.commit()
         finally:
             conn.close()
@@ -94,7 +121,7 @@ class ContainerDatabase:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT container_id, container_name, image_name, owner_pid, created_at FROM containers WHERE container_name = ?",
+                "SELECT container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type FROM containers WHERE container_name = ?",
                 (container_name,),
             )
             row = cursor.fetchone()
@@ -105,6 +132,8 @@ class ContainerDatabase:
                     image_name=row[2],
                     owner_pid=row[3],
                     created_at=row[4],
+                    config_hash=row[5] if len(row) > 5 else "",
+                    platform_type=row[6] if len(row) > 6 else "",
                 )
             return None
         finally:
@@ -123,7 +152,7 @@ class ContainerDatabase:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT container_id, container_name, image_name, owner_pid, created_at FROM containers WHERE container_id = ?",
+                "SELECT container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type FROM containers WHERE container_id = ?",
                 (container_id,),
             )
             row = cursor.fetchone()
@@ -134,6 +163,8 @@ class ContainerDatabase:
                     image_name=row[2],
                     owner_pid=row[3],
                     created_at=row[4],
+                    config_hash=row[5] if len(row) > 5 else "",
+                    platform_type=row[6] if len(row) > 6 else "",
                 )
             return None
         finally:
@@ -145,6 +176,8 @@ class ContainerDatabase:
         container_name: str,
         image_name: str,
         owner_pid: int,
+        config_hash: str = "",
+        platform_type: str = "",
     ) -> None:
         """Insert a new container record.
 
@@ -153,16 +186,26 @@ class ContainerDatabase:
             container_name: Container name
             image_name: Docker image name
             owner_pid: Process ID of owner
+            config_hash: Hash of container configuration
+            platform_type: Platform family (e.g., "avr", "esp-32s3")
         """
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO containers (container_id, container_name, image_name, owner_pid, created_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO containers (container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (container_id, container_name, image_name, owner_pid, int(time.time())),
+                (
+                    container_id,
+                    container_name,
+                    image_name,
+                    owner_pid,
+                    int(time.time()),
+                    config_hash,
+                    platform_type,
+                ),
             )
             conn.commit()
         finally:
@@ -210,7 +253,7 @@ class ContainerDatabase:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT container_id, container_name, image_name, owner_pid, created_at FROM containers"
+                "SELECT container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type FROM containers"
             )
             rows = cursor.fetchall()
             return [
@@ -220,6 +263,75 @@ class ContainerDatabase:
                     image_name=row[2],
                     owner_pid=row[3],
                     created_at=row[4],
+                    config_hash=row[5] if len(row) > 5 else "",
+                    platform_type=row[6] if len(row) > 6 else "",
+                )
+                for row in rows
+            ]
+        finally:
+            conn.close()
+
+    def get_by_config_hash(self, config_hash: str) -> Optional[ContainerRecord]:
+        """Get container record by configuration hash.
+
+        Args:
+            config_hash: Configuration hash to look up
+
+        Returns:
+            ContainerRecord if found, None otherwise
+        """
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type FROM containers WHERE config_hash = ?",
+                (config_hash,),
+            )
+            row = cursor.fetchone()
+            if row:
+                return ContainerRecord(
+                    container_id=row[0],
+                    container_name=row[1],
+                    image_name=row[2],
+                    owner_pid=row[3],
+                    created_at=row[4],
+                    config_hash=row[5] if len(row) > 5 else "",
+                    platform_type=row[6] if len(row) > 6 else "",
+                )
+            return None
+        finally:
+            conn.close()
+
+    def get_by_platform_type(
+        self, platform_type: str, order_by_created_at: bool = True
+    ) -> list[ContainerRecord]:
+        """Get all containers for a specific platform type.
+
+        Args:
+            platform_type: Platform family (e.g., "avr", "esp-32s3")
+            order_by_created_at: If True, order by creation time (oldest first)
+
+        Returns:
+            List of ContainerRecord objects
+        """
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            order_clause = "ORDER BY created_at ASC" if order_by_created_at else ""
+            cursor.execute(
+                f"SELECT container_id, container_name, image_name, owner_pid, created_at, config_hash, platform_type FROM containers WHERE platform_type = ? {order_clause}",
+                (platform_type,),
+            )
+            rows = cursor.fetchall()
+            return [
+                ContainerRecord(
+                    container_id=row[0],
+                    container_name=row[1],
+                    image_name=row[2],
+                    owner_pid=row[3],
+                    created_at=row[4],
+                    config_hash=row[5] if len(row) > 5 else "",
+                    platform_type=row[6] if len(row) > 6 else "",
                 )
                 for row in rows
             ]
@@ -380,6 +492,8 @@ def prepare_container(
     image_name: str,
     create_container_fn: Callable[[], str],
     db: Optional[ContainerDatabase] = None,
+    config_hash: str = "",
+    platform_type: str = "",
 ) -> tuple[str, bool]:
     """Prepare a container for use, ensuring clean state.
 
@@ -450,8 +564,15 @@ def prepare_container(
     # Create fresh container using provided function
     container_id = create_container_fn()
 
-    # Register in DB
-    db.insert(container_id, container_name, image_name, current_pid)
+    # Register in DB with config_hash and platform_type
+    db.insert(
+        container_id,
+        container_name,
+        image_name,
+        current_pid,
+        config_hash,
+        platform_type,
+    )
 
     return container_id, was_cleaned
 
@@ -519,5 +640,58 @@ def cleanup_orphaned_containers(db: Optional[ContainerDatabase] = None) -> int:
             # Remove from DB (even if container removal failed)
             db.delete_by_id(container.container_id)
             cleaned_count += 1
+
+    return cleaned_count
+
+
+def garbage_collect_platform_containers(
+    platform_type: str, max_containers: int = 2, db: Optional[ContainerDatabase] = None
+) -> int:
+    """Garbage collect old containers for a platform type, keeping only the newest ones.
+
+    This function:
+    - Retrieves all containers for the specified platform_type
+    - Keeps the newest max_containers containers
+    - Removes older containers (stops and deletes them)
+
+    Args:
+        platform_type: Platform family (e.g., "avr", "esp-32s3")
+        max_containers: Maximum number of containers to keep (default: 2)
+        db: Database instance (creates new if None)
+
+    Returns:
+        Number of containers cleaned up
+    """
+    if db is None:
+        db = ContainerDatabase()
+
+    # Get all containers for this platform, ordered by creation time (oldest first)
+    all_containers = db.get_by_platform_type(platform_type, order_by_created_at=True)
+
+    # Calculate how many to remove
+    containers_to_remove = len(all_containers) - max_containers
+
+    if containers_to_remove <= 0:
+        return 0  # Nothing to clean up
+
+    cleaned_count = 0
+
+    # Remove oldest containers
+    for container in all_containers[:containers_to_remove]:
+        print(
+            f"Garbage collecting old container {container.container_id} (platform: {platform_type})"
+        )
+
+        # Force remove the container with retry logic
+        success, error_msg = docker_force_remove_container(container.container_id)
+        if not success:
+            print(
+                f"⚠️  Warning: Failed to remove container {container.container_id}: {error_msg}"
+            )
+            print(f"   Database record will still be cleaned up")
+
+        # Remove from DB (even if container removal failed)
+        db.delete_by_id(container.container_id)
+        cleaned_count += 1
 
     return cleaned_count
