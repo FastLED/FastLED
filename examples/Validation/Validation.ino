@@ -233,7 +233,8 @@ void setup() {
 
     // List all available drivers and store globally
     FL_WARN("\nDiscovering available drivers...");
-    drivers_available = FastLED.getDriverInfo();
+    auto driver_info = FastLED.getDriverInfo();
+    drivers_available.assign(driver_info.begin(), driver_info.end());
     FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
     for (fl::size i = 0; i < drivers_available.size(); i++) {
         FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()

@@ -344,6 +344,9 @@ public:
     ~RmtRxChannelImpl() override {
         if (mChannel) {
             FL_DBG("Deleting RMT RX channel");
+            // Disable channel before deletion (required by ESP-IDF)
+            // Channel must be in "init" state (disabled) before rmt_del_channel()
+            rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
         }
