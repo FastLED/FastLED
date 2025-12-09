@@ -14,15 +14,11 @@ struct ValidationConfig {
     /// This should match the driver name returned by FastLED.getDriverInfo()
     const char* driver_name;
 
-    /// Whether physical jumper wires are required
-    bool requires_physical_jumper;
-
     /// RX pin for shared RX channel (single-channel mode only, -1 for multi-channel auto-create)
     int rx_pin;
 
-    ValidationConfig(const char* name, bool needs_jumper, int rx = -1)
+    ValidationConfig(const char* name, int rx = -1)
         : driver_name(name)
-        , requires_physical_jumper(needs_jumper)
         , rx_pin(rx) {}
 };
 
@@ -76,12 +72,3 @@ void validateChipsetTiming(const fl::ChipsetTimingConfig& timing,
                            fl::shared_ptr<fl::RmtRxChannel> rx_channel,
                            fl::span<uint8_t> rx_buffer,
                            int& total, int& passed);
-
-// Main validation test orchestrator
-// Discovers drivers, iterates through them, and runs all chipset timing tests
-void runAllValidationTests(int pin_data,
-                           int pin_rx,
-                           fl::span<CRGB> leds,
-                           fl::shared_ptr<fl::RmtRxChannel> rx_channel,
-                           fl::span<uint8_t> rx_buffer,
-                           int color_order = RGB);

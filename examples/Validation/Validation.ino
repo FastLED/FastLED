@@ -154,10 +154,178 @@ void setup() {
     FL_WARN("\nStarting continuous validation test loop...");
 }
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/// @brief Create validation configuration for a specific driver
+/// @param driver_name Driver name (e.g., "RMT", "SPI", "PARLIO")
+/// @return Validation configuration with jumper requirements
+fl::ValidationConfig createValidationConfig(const char* driver_name) {
+    return fl::ValidationConfig(driver_name, PIN_RX);
+}
+
+/// @brief Test a specific driver with given timing configuration
+/// @param driver_name Driver name to test
+/// @param timing Chipset timing configuration
+/// @param timing_name Timing name for logging (e.g., "WS2812B-V5")
+/// @param result Driver test result tracker (modified)
+void testDriver(const char* driver_name,
+                const fl::ChipsetTimingConfig& timing,
+                const char* timing_name,
+                fl::DriverTestResult& result) {
+
+    // Set this driver as exclusive for testing
+    if (!FastLED.setExclusiveDriver(driver_name)) {
+        FL_WARN("[ERROR] Failed to set " << driver_name << " as exclusive driver");
+        result.skipped = true;
+        return;
+    }
+    FL_WARN(driver_name << " driver enabled exclusively\n");
+
+    // Create driver-specific validation configuration
+    fl::ValidationConfig validation_config = createValidationConfig(driver_name);
+
+    FL_WARN("[CONFIG] Driver: " << validation_config.driver_name << " (physical jumper required)\n");
+
+    // Create TX configuration for validation tests
+    fl::ChannelConfig tx_config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), COLOR_ORDER);
+
+    FL_WARN("[INFO] Testing " << timing_name << " timing\n");
+
+    // Validate the chipset timing
+    validateChipsetTiming(timing, timing_name,
+                          fl::span<fl::ChannelConfig>(&tx_config, 1), validation_config,
+                          rx_channel, fl::span<uint8_t>(rx_buffer, 8192),
+                          result.total_tests, result.passed_tests);
+
+    FL_WARN("\n[INFO] All timing tests complete for " << driver_name << " driver");
+}
+
+/// @brief Print driver validation summary table
+/// @param driver_results Vector of driver test results
+void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ DRIVER VALIDATION SUMMARY                                      ║");
+    FL_WARN("╠════════════════════════════════════════════════════════════════╣");
+    FL_WARN("║ Driver       │ Status      │ Tests Passed │ Total Tests       ║");
+    FL_WARN("╠══════════════╪═════════════╪══════════════╪═══════════════════╣");
+
+    for (fl::size i = 0; i < driver_results.size(); i++) {
+        const auto& result = driver_results[i];
+        const char* status;
+        if (result.skipped) {
+            status = "SKIPPED    ";
+        } else if (result.allPassed()) {
+            status = "PASS ✓     ";
+        } else if (result.anyFailed()) {
+            status = "FAIL ✗     ";
+        } else {
+            status = "NO TESTS   ";
+        }
+
+        // Build table row using sstream
+        fl::sstream row;
+        row << "║ ";
+
+        // Driver name (12 chars, left-aligned)
+        fl::string driver_name = result.driver_name;
+        if (driver_name.length() > 12) {
+            driver_name = driver_name.substr(0, 12);
+        }
+        row << driver_name;
+        for (size_t i = driver_name.length(); i < 12; i++) {
+            row << " ";
+        }
+        row << " │ " << status << " │ ";
+
+        // Tests passed (12 chars, left-aligned)
+        if (result.skipped) {
+            row << "-";
+            for (int i = 1; i < 12; i++) row << " ";
+        } else {
+            fl::string passed = fl::to_string(result.passed_tests);
+            row << passed;
+            for (size_t i = passed.length(); i < 12; i++) row << " ";
+        }
+        row << " │ ";
+
+        // Total tests (17 chars, left-aligned)
+        if (result.skipped) {
+            row << "-";
+            for (int i = 1; i < 17; i++) row << " ";
+        } else {
+            fl::string total = fl::to_string(result.total_tests);
+            row << total;
+            for (size_t i = total.length(); i < 17; i++) row << " ";
+        }
+        row << " ║";
+
+        FL_WARN(row.str().c_str());
+    }
+
+    FL_WARN("╚══════════════╧═════════════╧══════════════╧═══════════════════╝");
+}
+
+/// @brief Discard first frame (has timing issues)
+/// @param driver_name Driver name for logging
+void discardFirstFrame(const char* driver_name) {
+    FL_WARN("[INFO] Discarding first frame for " << driver_name << " (timing warm-up)");
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+    delay(100);
+}
+
+// ============================================================================
+// Main Loop
+// ============================================================================
+
 void loop() {
-    // Run all validation tests continuously until timeout
-    runAllValidationTests(PIN_DATA, PIN_RX, fl::span<CRGB>(leds, NUM_LEDS),
-                         rx_channel, fl::span<uint8_t>(rx_buffer, 8192), COLOR_ORDER);
+    FL_WARN("=== Using Runtime Channel API for Dynamic Driver Testing ===\n");
+    FL_WARN("Discovering available drivers...\n");
+
+    // Get all available drivers for this platform
+    auto drivers = FastLED.getDriverInfo();
+    FL_WARN("Found " << drivers.size() << " driver(s) available:");
+    for (fl::size i = 0; i < drivers.size(); i++) {
+        FL_WARN("  " << (i+1) << ". " << drivers[i].name.c_str()
+                << " (priority: " << drivers[i].priority
+                << ", enabled: " << (drivers[i].enabled ? "yes" : "no") << ")");
+    }
+
+    FL_WARN("\nStarting validation tests for each driver...\n");
+
+    // Track driver-level test results
+    fl::vector<fl::DriverTestResult> driver_results;
+
+    // Iterate through all drivers and test each one
+    for (fl::size i = 0; i < drivers.size(); i++) {
+        const auto& driver = drivers[i];
+        fl::DriverTestResult result(driver.name.c_str());
+
+        FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+        FL_WARN("║ TESTING DRIVER " << (i+1) << "/" << drivers.size() << ": " << driver.name.c_str() << " (priority: " << driver.priority << ")");
+        FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
+
+        // Discard first frame (timing warm-up)
+        discardFirstFrame(driver.name.c_str());
+
+        // Test driver with WS2812B-V5 timing (filtered for focused debugging)
+        FL_WARN("[FILTER] Testing only WS2812B-V5 timing (skipping WS2812 Standard and SK6812)\n");
+        testDriver(driver.name.c_str(),
+                   fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+                   "WS2812B-V5",
+                   result);
+
+        driver_results.push_back(result);
+    }
+
+    // Print summary table
+    printSummaryTable(driver_results);
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ ALL VALIDATION TESTS COMPLETE                                  ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
 
     FL_WARN("\n========== TEST ITERATION COMPLETE - RESTARTING ==========\n");
     delay(1000);
