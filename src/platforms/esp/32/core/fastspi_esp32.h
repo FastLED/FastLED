@@ -8,7 +8,7 @@
 // Architecture:
 // - fastspi_esp32.h (this file) - Dispatch/trampoline header
 // - fastspi_esp32_arduino.h - Arduino framework SPI implementation
-// - fastspi_esp32_idf.h - ESP-IDF stub (future: native SPI using driver/spi_master.h)
+// - fastspi_esp32_idf.h - Native ESP-IDF SPI implementation (driver/spi_master.h)
 
 // ok no namespace fl
 
@@ -23,9 +23,11 @@
 #endif
 
 // Dispatch to platform-specific implementation
-#if defined(ARDUINO)
+
+#if defined(ARDUINO) && !defined(FL_NO_ARDUINO)
+    // Arduino framework build - use Arduino SPI implementation
     #include "fastspi_esp32_arduino.h"
 #else
-    // Pure ESP-IDF build - use stub implementation (future: native SPI)
+    // Pure ESP-IDF build or NO_ARDUINO override - use native SPI
     #include "fastspi_esp32_idf.h"
 #endif
