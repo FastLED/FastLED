@@ -153,9 +153,24 @@ void loop() {
                         << " " << edge_buffer[i].ns << "ns (" << (edge_buffer[i].ns / 1000) << "us)");
             }
 
+            // Validate edge alternation
+            bool alternation_valid = true;
+            for (size_t i = 1; i < edge_count; i++) {
+                if (edge_buffer[i].high == edge_buffer[i-1].high) {
+                    FL_WARN("ERROR: Sequential " << (edge_buffer[i].high ? "HIGH" : "LOW")
+                            << " values at indices " << (i-1) << " and " << i
+                            << " - edges should alternate HIGH/LOW");
+                    alternation_valid = false;
+                }
+            }
+
             // Validate results
-            if (edge_count >= 5) {
-                FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges");
+            if (!alternation_valid) {
+                FL_WARN("[TEST] ✗ FAIL: Edge timings are not properly alternating");
+                FL_WARN("[TEST] ✗ Expected pattern: HIGH, LOW, HIGH, LOW, ...");
+                FL_WARN("[TEST] ✗ Actual pattern contains sequential identical states");
+            } else if (edge_count >= 5) {
+                FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges with proper alternation");
                 FL_WARN("[TEST] ✓ GPIO ISR RX device working correctly!");
             } else {
                 FL_WARN("WARNING: Only captured " << edge_count << " edges (expected >=5)");

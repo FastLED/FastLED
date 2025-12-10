@@ -272,6 +272,7 @@ public:
         , mSignalRangeMaxNs(100000)
         , mSkipCounter(0)
         , mStartLow(true)
+        , mCurrentLevel(0)
     {
         FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(mPin)
                << " buffer_size=" << mBufferSize);
@@ -439,6 +440,8 @@ private:
         mLastEdgeTimeNs = 0;
         // mSkipCounter is set in begin(), not here
         mStartTimeUs = esp_timer_get_time();
+        // Initialize current level based on start_low setting
+        mCurrentLevel = mStartLow ? 0 : 1;
         FL_DBG("GPIO ISR RX state cleared");
     }
 
@@ -522,19 +525,24 @@ private:
             return;
         }
 
-        // Capture edge: read GPIO level
-        int level = gpio_get_level(self->mPin);
+        // Toggle state - each interrupt represents a state change
+        // mCurrentLevel stores the PREVIOUS state before this edge
+        uint8_t previous_level = self->mCurrentLevel;
+        uint8_t new_level = previous_level ^ 1;  // Toggle: 0->1 or 1->0
 
         // Edge detection: Filter spurious idle-state edges (ISR-safe, no logging)
-        // For start_low=true (WS2812B): Skip LOW edges until first HIGH edge
-        // For start_low=false (inverted): Skip HIGH edges until first LOW edge
+        // For start_low=true (WS2812B): First edge should transition TO HIGH (new_level==1)
+        // For start_low=false (inverted): First edge should transition TO LOW (new_level==0)
         if (edges_captured == 0) {
-            bool is_valid_start = (self->mStartLow && level == 1) || (!self->mStartLow && level == 0);
+            bool is_valid_start = (self->mStartLow && new_level == 1) || (!self->mStartLow && new_level == 0);
             if (!is_valid_start) {
                 // Skip spurious idle-state edge - DO NOT store in buffer
                 return;
             }
         }
+
+        // Update tracked level for next interrupt
+        self->mCurrentLevel = new_level;
 
         // Fast path: check buffer full condition early
         if (edges_captured >= self->mBufferSize) {
@@ -545,7 +553,7 @@ private:
 
         // Direct buffer write using cached index
         self->mEdgeBuffer[edges_captured].time_ns = current_time_ns;
-        self->mEdgeBuffer[edges_captured].level = static_cast<uint8_t>(level);
+        self->mEdgeBuffer[edges_captured].level = new_level;
 
         // Pre-increment and check if buffer now full
         size_t next_index = edges_captured + 1;
@@ -559,29 +567,40 @@ private:
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
         // Convert EdgeTimestamp entries to EdgeTime entries
-        size_t count = (mEdgesCaptured < out.size()) ? mEdgesCaptured : out.size();
+        // EdgeTimestamp has: time_ns (absolute), level (pin state AFTER transition)
+        // EdgeTime needs: ns (duration), high (pin state DURING this period)
 
-        for (size_t i = 0; i < count; i++) {
-            // EdgeTimestamp has: time_ns (absolute), level (0 or 1)
-            // EdgeTime needs: ns (duration), high (bool)
-
-            // Calculate duration from consecutive edges
-            uint32_t duration_ns;
-            if (i == 0) {
-                // First edge: use time from start
-                duration_ns = mEdgeBuffer[0].time_ns;
-            } else {
-                // Subsequent edges: time difference from previous edge
-                duration_ns = mEdgeBuffer[i].time_ns - mEdgeBuffer[i-1].time_ns;
-            }
-
-            // Convert level (0/1) to high boolean
-            bool high = (mEdgeBuffer[i].level != 0);
-
-            out[i] = EdgeTime(high, duration_ns);
+        if (mEdgesCaptured == 0) {
+            return 0;
         }
 
-        return count;
+        size_t out_index = 0;
+
+        // Process edges: accumulate time when consecutive edges have same state
+        for (size_t i = 0; i < mEdgesCaptured && out_index < out.size(); ) {
+            // Current edge: level = state AFTER transition
+            uint8_t current_state = mEdgeBuffer[i].level;
+            uint32_t state_start_ns = (i == 0) ? 0 : mEdgeBuffer[i-1].time_ns;
+            uint32_t accumulated_ns = mEdgeBuffer[i].time_ns - state_start_ns;
+
+            // Look ahead: if next edges have the same state (glitch/noise), accumulate their time
+            size_t next_i = i + 1;
+            while (next_i < mEdgesCaptured && mEdgeBuffer[next_i].level == current_state) {
+                accumulated_ns = mEdgeBuffer[next_i].time_ns - state_start_ns;
+                next_i++;
+            }
+
+            // Filter out transitions shorter than minimum threshold
+            if (accumulated_ns >= mSignalRangeMinNs) {
+                // Emit accumulated duration for this state
+                out[out_index] = EdgeTime(current_state == 1, accumulated_ns);
+                out_index++;
+            }
+
+            i = next_i;
+        }
+
+        return out_index;
     }
 
     const char* name() const override {
@@ -600,6 +619,7 @@ private:
     uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
+    volatile uint8_t mCurrentLevel;              ///< Current tracked pin level (toggled on each edge)
 };
 
 // Factory method implementation
