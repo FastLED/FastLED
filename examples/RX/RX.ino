@@ -29,7 +29,7 @@
 // ============================================================================
 
 #define PIN_TX 0
-#define PIN_RX PIN_TX  // Same pin for loopback test
+#define PIN_RX 17  // Connect these two pins together for loopback test.
 #define EDGE_BUFFER_SIZE 100
 #define WAIT_TIMEOUT_MS 100
 
@@ -164,13 +164,65 @@ void loop() {
                 }
             }
 
+            // Validate timing accuracy against TEST_PATTERN
+            bool timing_valid = true;
+            const uint32_t TOLERANCE_PERCENT = 15;  // ±15% tolerance for timing jitter
+            FL_WARN("[TEST] Validating timing accuracy (±" << TOLERANCE_PERCENT << "% tolerance):");
+
+            size_t expected_edge_count = TEST_PATTERN.size();
+            if (edge_count != expected_edge_count) {
+                FL_WARN("WARNING: Edge count mismatch - expected " << expected_edge_count
+                        << ", got " << edge_count);
+                timing_valid = false;
+            }
+
+            size_t compare_count = edge_count < expected_edge_count ? edge_count : expected_edge_count;
+            for (size_t i = 0; i < compare_count; i++) {
+                uint32_t expected_us = TEST_PATTERN[i].delay_us;
+                uint32_t actual_us = edge_buffer[i].ns / 1000;
+                bool expected_high = TEST_PATTERN[i].is_high;
+                bool actual_high = edge_buffer[i].high;
+
+                // Calculate tolerance range
+                uint32_t tolerance_us = (expected_us * TOLERANCE_PERCENT) / 100;
+                uint32_t min_us = expected_us - tolerance_us;
+                uint32_t max_us = expected_us + tolerance_us;
+
+                // Validate timing and level
+                bool timing_ok = (actual_us >= min_us) && (actual_us <= max_us);
+                bool level_ok = (expected_high == actual_high);
+
+                if (timing_ok && level_ok) {
+                    FL_WARN("  [" << i << "] ✓ " << (actual_high ? "HIGH" : "LOW ")
+                            << " " << actual_us << "us (expected " << expected_us
+                            << "us ±" << tolerance_us << "us)");
+                } else {
+                    if (!level_ok) {
+                        FL_WARN("  [" << i << "] ✗ Level mismatch: expected "
+                                << (expected_high ? "HIGH" : "LOW") << ", got "
+                                << (actual_high ? "HIGH" : "LOW"));
+                        timing_valid = false;
+                    }
+                    if (!timing_ok) {
+                        FL_WARN("  [" << i << "] ✗ Timing out of range: " << actual_us
+                                << "us (expected " << expected_us << "us ±" << tolerance_us
+                                << "us, range: " << min_us << "-" << max_us << "us)");
+                        timing_valid = false;
+                    }
+                }
+            }
+
             // Validate results
             if (!alternation_valid) {
-                FL_WARN("[TEST] ✗ FAIL: Edge timings are not properly alternating");
-                FL_WARN("[TEST] ✗ Expected pattern: HIGH, LOW, HIGH, LOW, ...");
-                FL_WARN("[TEST] ✗ Actual pattern contains sequential identical states");
+                FL_WARN("ERROR: Edge timings are not properly alternating");
+                FL_WARN("ERROR: Expected pattern: HIGH, LOW, HIGH, LOW, ...");
+                FL_WARN("ERROR: Actual pattern contains sequential identical states");
+            } else if (!timing_valid) {
+                FL_WARN("ERROR: Captured edge timings do not match expected pattern");
+                FL_WARN("ERROR: Check timing accuracy and tolerance settings");
             } else if (edge_count >= 5) {
                 FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges with proper alternation");
+                FL_WARN("[TEST] ✓ PASS: All timing values match expected pattern within tolerance");
                 FL_WARN("[TEST] ✓ GPIO ISR RX device working correctly!");
             } else {
                 FL_WARN("WARNING: Only captured " << edge_count << " edges (expected >=5)");

@@ -11,11 +11,17 @@ namespace fl {
 /**
  * @brief Edge timestamp captured by GPIO ISR
  *
- * Stores the timestamp (in nanoseconds relative to capture start)
+ * Stores the timestamp in nanoseconds (relative to capture start)
  * and the GPIO level at the time of the edge.
+ *
+ * Note: ISR writes raw CPU cycles, main thread converts to nanoseconds
+ * via getEdges(). This avoids slow time conversions in ISR.
  */
 struct EdgeTimestamp {
-    uint32_t time_ns;    ///< Timestamp in nanoseconds (relative to capture start)
+    union {
+        uint32_t time_ns;    ///< Timestamp in nanoseconds (after conversion)
+        uint32_t cycles;     ///< CPU cycles (during ISR capture)
+    };
     uint8_t level;       ///< GPIO level (0 or 1)
 };
 
