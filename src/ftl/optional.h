@@ -100,6 +100,10 @@ template <typename T> class Optional {
     T* operator->() { return ptr(); }
     const T* operator->() const { return ptr(); }
 
+    // value() method for std::optional compatibility
+    T& value() { return *ptr(); }
+    const T& value() const { return *ptr(); }
+
     template <typename TT, typename UU>
     bool operator==(const variant<TT, UU> &other) const {
         if (!other.template holdsTypeOf<T>()) {
@@ -198,6 +202,10 @@ template <typename T> class Optional<T&&> {
     // Arrow operator - returns pointer for member access
     T* operator->() { return mPtr; }
     const T* operator->() const { return mPtr; }
+
+    // value() method for std::optional compatibility
+    T&& value() { return fl::forward<T>(*mPtr); }
+    const T& value() const { return *mPtr; }
 
   private:
     T* mPtr;  // Pointer to the rvalue reference (only valid during the lifetime of the temporary)

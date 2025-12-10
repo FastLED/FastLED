@@ -374,6 +374,39 @@ TEST_CASE("fl::make_optional helper functions") {
     }
 }
 
+TEST_CASE("fl::Optional - value() method") {
+    SUBCASE("value() on non-empty optional") {
+        Optional<int> opt(42);
+        CHECK(opt.value() == 42);
+        opt.value() = 100;
+        CHECK(opt.value() == 100);
+    }
+
+    SUBCASE("value() const on non-empty optional") {
+        const Optional<int> opt(42);
+        CHECK(opt.value() == 42);
+    }
+
+    SUBCASE("value() with struct") {
+        struct Point {
+            int x, y;
+            Point(int x_, int y_) : x(x_), y(y_) {}
+        };
+
+        Optional<Point> opt(Point(10, 20));
+        CHECK(opt.value().x == 10);
+        CHECK(opt.value().y == 20);
+        opt.value().x = 30;
+        CHECK(opt.value().x == 30);
+    }
+
+    SUBCASE("value() is compatible with operator*") {
+        Optional<int> opt(42);
+        CHECK(opt.value() == *opt);
+        CHECK(&opt.value() == &(*opt));
+    }
+}
+
 TEST_CASE("fl::Optional - edge cases") {
     SUBCASE("optional of bool") {
         Optional<bool> opt_false(false);
@@ -645,5 +678,29 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         MoveOnly new_obj(fl::move(*opt));
         CHECK(new_obj.value == 42);
         CHECK(obj.value == -1);  // Original was moved from
+    }
+
+    SUBCASE("value() method forwards rvalue reference") {
+        int value = 42;
+        Optional<int&&> opt(fl::move(value));
+
+        // Get rvalue reference using value() and verify it can be moved
+        int&& ref = opt.value();
+        int moved_value = fl::move(ref);
+        CHECK(moved_value == 42);
+    }
+
+    SUBCASE("value() is compatible with operator* and get()") {
+        int value = 99;
+        Optional<int&&> opt(fl::move(value));
+
+        // All three should return the same reference
+        int&& ref1 = opt.value();
+        int&& ref2 = *opt;
+        int&& ref3 = opt.get();
+
+        CHECK(&ref1 == &value);
+        CHECK(&ref2 == &value);
+        CHECK(&ref3 == &value);
     }
 }
