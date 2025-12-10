@@ -75,13 +75,13 @@ void initializeChannelBusManager() {
 
     // RMT5-only platforms must use new driver architecture
     #if FASTLED_ESP32_RMT5_ONLY_PLATFORM
-    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>(), "RMT");
+    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT::create(), "RMT");
     FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ") [forced for RMT5-only chip]");
     #elif FASTLED_RMT5
-    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>(), "RMT");
+    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT::create(), "RMT");
     FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ")");
     #else
-    manager.addEngine(PRIORITY_RMT, ChannelEngineRMT4::create(), "RMT");
+    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT4::create(), "RMT");
     FL_DBG("ESP32: Added RMT4 engine (priority " << PRIORITY_RMT << ")");
     #endif
 
