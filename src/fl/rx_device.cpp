@@ -6,6 +6,11 @@
 #include "fl/chipsets/led_timing.h"
 #include <cstring>
 
+#ifdef ESP32
+#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
+#include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h"
+#endif
+
 namespace fl {
 
 // Implementation of make4PhaseTiming function
@@ -43,9 +48,6 @@ ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
 #ifdef ESP32
 
 // ESP32-specific implementation
-#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
-#include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h"
-
 namespace fl {
 
 // Factory implementation for ESP32
