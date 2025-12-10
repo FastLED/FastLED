@@ -220,10 +220,7 @@ public:
      * @endcode
      */
     template <RxDeviceType TYPE>
-    static fl::shared_ptr<RxDevice> create() {
-        // Explicit template specializations on the platform will override this
-        return RxDevice::createDummy();
-    }
+    static fl::shared_ptr<RxDevice> create();
 
     /**
      * @brief Initialize (or re-arm) RX channel with configuration

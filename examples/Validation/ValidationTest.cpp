@@ -5,10 +5,10 @@
 #include <FastLED.h>
 
 // Capture transmitted LED data via RX loopback
-// - rx_channel: Shared pointer to RMT RX channel (persistent across calls)
+// - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx_buffer) {
+size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer) {
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;

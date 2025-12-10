@@ -5,6 +5,7 @@
 
 #include "fl/rx_device.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "ftl/assert.h"
 #include "ftl/vector.h"
 
@@ -64,7 +65,7 @@ public:
 private:
     void warnOnce() const {
         if (!mWarned) {
-            FL_WARN("RxDevice not available: " << mReason);
+            FL_ERROR("RxDevice not available: " << mReason << ", falling back to DummyRxDevice");
             mWarned = true;
         }
     }

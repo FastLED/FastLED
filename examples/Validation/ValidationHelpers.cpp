@@ -2,31 +2,8 @@
 
 #include "ValidationHelpers.h"
 
-fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
-    int pin_rx,
-    uint32_t hz,
-    size_t buffer_size) {
-    FL_WARN("[RX CREATE] Creating RX channel on PIN " << pin_rx
-            << " (" << (hz / 1000000) << "MHz, " << buffer_size << " symbols)");
-
-    auto rx_channel = fl::RmtRxChannel::create();
-
-    if (!rx_channel) {
-        FL_ERROR("[RX CREATE]: Failed to create RX channel");
-        return nullptr;
-    }
-
-    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
-    FL_WARN("[RX CREATE] Hardware params: pin=" << pin_rx << ", hz=" << hz << ", buffer_size=" << buffer_size);
-
-    // Note: The caller must call begin() with RxConfig that includes these hardware params
-    // This function just creates the device instance, initialization happens in begin()
-
-    return rx_channel;
-}
-
 bool testRxChannel(
-    fl::shared_ptr<fl::RmtRxChannel> rx_channel,
+    fl::shared_ptr<fl::RxDevice> rx_channel,
     int pin_tx,
     int pin_rx,
     uint32_t hz,
@@ -158,7 +135,7 @@ void testDriver(
     size_t num_leds,
     CRGB* leds,
     EOrder color_order,
-    fl::shared_ptr<fl::RmtRxChannel> rx_channel,
+    fl::shared_ptr<fl::RxDevice> rx_channel,
     fl::span<uint8_t> rx_buffer,
     fl::DriverTestResult& result) {
 

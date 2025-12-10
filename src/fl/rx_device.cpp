@@ -21,6 +21,13 @@ fl::shared_ptr<RxDevice> RxDevice::createDummy() {
     return dummy;
 }
 
+// Generic template implementation (fallback for unsupported platforms)
+template <RxDeviceType TYPE>
+fl::shared_ptr<RxDevice> RxDevice::create() {
+    // Explicit template specializations on the platform will override this
+    return RxDevice::createDummy();
+}
+
 
 
 // Implementation of make4PhaseTiming function
@@ -80,9 +87,10 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
     return device;
 }
 
+// Explicit template instantiations (required for linking)
+template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>();
+template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>();
+
 } // namespace fl
-
-
-
 
 #endif // ESP32

@@ -6,17 +6,7 @@
 #include <FastLED.h>
 #include "Common.h"
 #include "ValidationTest.h"
-#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
-
-/// @brief Create RMT RX channel with specified parameters
-/// @param pin_rx RX pin number
-/// @param hz Sampling frequency in Hz (e.g., 20000000 for 20MHz)
-/// @param buffer_size Size of RX buffer in symbols
-/// @return Shared pointer to RX channel, or nullptr if creation fails
-fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
-    int pin_rx,
-    uint32_t hz,
-    size_t buffer_size);
+#include "fl/rx_device.h"
 
 /// @brief Test RX channel with manual GPIO toggle
 /// @param rx_channel RX channel to test
@@ -26,7 +16,7 @@ fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
 /// @param buffer_size Size of RX buffer in symbols
 /// @return true if test passes, false otherwise
 bool testRxChannel(
-    fl::shared_ptr<fl::RmtRxChannel> rx_channel,
+    fl::shared_ptr<fl::RxDevice> rx_channel,
     int pin_tx,
     int pin_rx,
     uint32_t hz,
@@ -54,7 +44,7 @@ void testDriver(
     size_t num_leds,
     CRGB* leds,
     EOrder color_order,
-    fl::shared_ptr<fl::RmtRxChannel> rx_channel,
+    fl::shared_ptr<fl::RxDevice> rx_channel,
     fl::span<uint8_t> rx_buffer,
     fl::DriverTestResult& result);
 

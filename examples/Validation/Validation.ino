@@ -31,7 +31,7 @@
 //   ⚠️ IMPORTANT: Physical jumper wire required for non-RMT TX → RMT RX loopback
 //
 //   When non-RMT peripherals are used for TX (e.g., SPI, ParallelIO):
-//   - Connect GPIO PIN_DATA to itself with a physical jumper wire
+//   - Connect GPIO PIN_TX to itself with a physical jumper wire
 //   - Internal loopback (io_loop_back flag) only works for RMT TX → RMT RX
 //   - ESP32 GPIO matrix cannot route other peripheral outputs internally to RMT input
 //
@@ -109,11 +109,10 @@
 // Configuration
 // ============================================================================
 
-#ifndef PIN_DATA
-#define PIN_DATA 5
-#endif
+const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 
-#define PIN_RX 0
+#define PIN_TX 0
+#define PIN_RX 1
 
 #define NUM_LEDS 255
 #define CHIPSET WS2812B
@@ -136,7 +135,7 @@ uint8_t rx_buffer[RX_BUFFER_SIZE];  // 255 LEDs × 24 bits/LED = 6120 symbols, u
 // ⚠️ CRITICAL: RMT RX channel - MUST persist across ALL loop iterations
 // Created ONCE in setup(), reused for all driver tests
 // DO NOT reset, destroy, or recreate this channel in loop()
-fl::shared_ptr<fl::RmtRxChannel> rx_channel;
+fl::shared_ptr<fl::RxDevice> rx_channel;
 
 // ============================================================================
 // Global Error Tracking
@@ -147,8 +146,6 @@ fl::shared_ptr<fl::RmtRxChannel> rx_channel;
 // Sanity check failure - if true, print error and delay in loop()
 bool error_sanity_check = false;
 
-// Alias for clarity in toggle test
-#define PIN_TX PIN_DATA
 
 // ============================================================================
 // Global Driver State
@@ -170,13 +167,12 @@ void setup() {
 
     FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
     FL_WARN("Hardware: ESP32 (any variant)");
-    FL_WARN("TX Pin (MOSI): GPIO " << PIN_DATA << " (ESP32-S3: use GPIO 11 for IO_MUX)");
+    FL_WARN("TX Pin (MOSI): GPIO " << PIN_TX << " (ESP32-S3: use GPIO 11 for IO_MUX)");
     FL_WARN("RX Pin: GPIO " << PIN_RX);
     FL_WARN("");
     FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
     FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
-    FL_WARN("   → Connect GPIO " << PIN_DATA << " to GPIO " << PIN_RX << " with a physical jumper wire");
-    FL_WARN("   → Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
+    FL_WARN("   → Connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a physical jumper wire");
     FL_WARN("   → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
     FL_WARN("");
     FL_WARN("   ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance");
@@ -193,7 +189,10 @@ void setup() {
 
     // Step 1: Create sanity check RX channel (lower precision for GPIO toggles)
     FL_WARN("\n[RX SETUP] Step 1: Creating sanity check RX channel");
-    auto sanity_rx_channel = createRxChannel(PIN_RX, 20000000, 256);  // 20MHz, 256 symbols
+    FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
+            << " (" << (20000000 / 1000000) << "MHz, " << 256 << " symbols)");
+
+    auto sanity_rx_channel = fl::RxDevice::create<RX_TYPE>();
 
     if (!sanity_rx_channel) {
         FL_ERROR("[RX SETUP]: Failed to create sanity check RX channel");
@@ -201,6 +200,9 @@ void setup() {
         error_sanity_check = true;
         return;
     }
+
+    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
+    FL_WARN("[RX CREATE] Hardware params: pin=" << PIN_RX << ", hz=" << 20000000 << ", buffer_size=" << 256);
 
     // Step 2: Test the sanity check RX channel
     FL_WARN("\n[RX SETUP] Step 2: Running sanity check test");
@@ -220,7 +222,10 @@ void setup() {
 
     // Step 4: Create high-precision RX channel for main LED validation
     FL_WARN("\n[RX SETUP] Step 4: Creating high-precision RX channel for LED validation");
-    rx_channel = createRxChannel(PIN_RX, 40000000, RX_BUFFER_SIZE);  // 40MHz, RX_BUFFER_SIZE symbols
+    FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
+            << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)");
+
+    rx_channel = fl::RxDevice::create<RX_TYPE>();
 
     if (!rx_channel) {
         FL_ERROR("[RX SETUP]: Failed to create high-precision RX channel");
@@ -229,6 +234,8 @@ void setup() {
         return;
     }
 
+    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
+    FL_WARN("[RX CREATE] Hardware params: pin=" << PIN_RX << ", hz=" << 40000000 << ", buffer_size=" << RX_BUFFER_SIZE);
     FL_WARN("[RX SETUP] ✓ RX channel is ready for LED validation\n");
 
     // List all available drivers and store globally
@@ -320,7 +327,7 @@ void loop() {
         fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
         testDriver(driver.name.c_str(),
                    timing_config,
-                   PIN_DATA,
+                   PIN_TX,
                    NUM_LEDS,
                    leds,
                    COLOR_ORDER,
