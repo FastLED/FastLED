@@ -89,6 +89,8 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug --fail-on PANIC` - Exit 1 if keyword found (default: "ERROR")
 - `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords
 - `bash debug --no-fail-on` - Disable all failure keywords (including default)
+- `bash debug --expect "SUCCESS"` - Exit 0 when keyword found (success condition)
+- `bash debug --expect "PASS" --expect "OK"` - Multiple success keywords
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
