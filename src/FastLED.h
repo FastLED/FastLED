@@ -1018,6 +1018,12 @@ public:
 
 	/// @} Channel Bus Manager Controls
 
+	/// Wait for all channel bus transmissions to complete
+	/// @note Polls the channel bus manager until it returns READY state
+	/// @note Uses delayMicroseconds(100) between polls to prevent watchdog timeout
+	/// @note Safe to call on all platforms (no-op on platforms without channel bus)
+	void wait();
+
 	/// Set the maximum power to be used, given in volts and milliamps.
 	/// @param volts how many volts the leds are being driven at (usually 5)
 	/// @param milliamps the maximum milliamps of power draw you want

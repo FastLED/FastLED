@@ -434,6 +434,19 @@ fl::span<const fl::DriverInfo> CFastLED::getDriverInfo() const {
 #endif
 
 // ============================================================================
+// Wait for channel bus transmissions
+// ============================================================================
+
+void CFastLED::wait() {
+	fl::ChannelBusManager& manager = fl::channelBusManager();
+	// Poll until the channel bus manager reports READY state
+	// Use delayMicroseconds to prevent watchdog timeout
+	while (manager.poll() != fl::IChannelEngine::EngineState::READY) {
+		fl::delayMicroseconds(100);
+	}
+}
+
+// ============================================================================
 // Runtime Channel API Implementation
 // ============================================================================
 

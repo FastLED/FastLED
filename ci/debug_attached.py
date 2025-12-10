@@ -994,7 +994,9 @@ def run_monitor(
                                     found_expect_keywords.add(keyword)
                                     print(f"\n✅ EXPECT KEYWORD DETECTED: '{keyword}'")
                                     print(f"   Matched line: {line}")
-                                    print(f"   (Continuing to monitor - need all {len(expect_keywords)} keywords)\n")
+                                    print(
+                                        f"   (Continuing to monitor - need all {len(expect_keywords)} keywords)\n"
+                                    )
 
                     # Check for fail keywords - TERMINATE IMMEDIATELY
                     if fail_keywords and not fail_keyword_found:
@@ -1090,30 +1092,34 @@ def run_monitor(
         missing_keywords = set(expect_keywords) - found_expect_keywords
         if missing_keywords:
             print(f"❌ Monitor failed - not all expect keywords found")
-            print(f"   Expected {len(expect_keywords)} keywords, found {len(found_expect_keywords)}")
+            print(
+                f"   Expected {len(expect_keywords)} keywords, found {len(found_expect_keywords)}"
+            )
             # Display missing keywords clearly
             if len(missing_keywords) == 1:
-                print(f"   Missing keyword: \"{list(missing_keywords)[0]}\"")
+                print(f'   Missing keyword: "{list(missing_keywords)[0]}"')
             else:
                 print(f"   Missing keywords:")
                 for keyword in sorted(missing_keywords):
-                    print(f"     - \"{keyword}\"")
+                    print(f'     - "{keyword}"')
             # Display found keywords if any
             if found_expect_keywords:
                 if len(found_expect_keywords) == 1:
-                    print(f"   Found keyword: \"{list(found_expect_keywords)[0]}\"")
+                    print(f'   Found keyword: "{list(found_expect_keywords)[0]}"')
                 else:
                     print(f"   Found keywords:")
                     for keyword in sorted(found_expect_keywords):
-                        print(f"     - \"{keyword}\"")
+                        print(f'     - "{keyword}"')
         else:
-            print(f"✅ Monitor succeeded - all {len(expect_keywords)} expect keywords found")
+            print(
+                f"✅ Monitor succeeded - all {len(expect_keywords)} expect keywords found"
+            )
             if len(expect_keywords) == 1:
-                print(f"   Keyword: \"{expect_keywords[0]}\"")
+                print(f'   Keyword: "{expect_keywords[0]}"')
             else:
                 print(f"   Keywords:")
                 for keyword in sorted(expect_keywords):
-                    print(f"     - \"{keyword}\"")
+                    print(f'     - "{keyword}"')
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
     elif stream and success:
