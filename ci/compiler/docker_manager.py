@@ -297,6 +297,10 @@ class DockerContainerManager:
         if self.config.output_dir is not None:
             cmd.extend(["-v", f"{self.config.output_dir}:/fastled/output:rw"])
 
+        # Add anonymous volume for PlatformIO build cache
+        # Cache persists during container lifetime, auto-cleaned when container is garbage collected
+        cmd.extend(["-v", "/fastled/.pio/build_cache"])
+
         cmd.extend(
             [
                 "--stop-timeout",
@@ -432,13 +436,20 @@ class DockerContainerManager:
             return False
 
     def cleanup(self) -> None:
-        """Clean up container registration but keep container alive for debugging.
+        """Release container ownership while keeping it tracked for reuse.
 
-        This method removes the container from the database tracking but leaves
-        it running so users can inspect it for debugging purposes.
+        This method keeps the container in the database tracking (for reuse on next build)
+        and leaves it running for debugging. The next build will reuse this container
+        if the owner process is dead, preserving the PlatformIO build cache.
         """
+        # Don't remove from database - keep tracked for reuse
+        # The container reuse logic (lines 352-396) will handle reusing
+        # containers from dead processes on the next build
         if self._container_id:
-            cleanup_container(self._container_id, self._db)
+            print(
+                f"Container {self._container_id[:12]} released. "
+                f"Container will be reused on next build to preserve build cache."
+            )
             self._container_id = None
 
     def pause(self) -> bool:
@@ -482,6 +493,7 @@ if command -v rsync &> /dev/null; then
     echo "Syncing directories from host..."
 
     # Define rsync exclude patterns for build artifacts
+    # Note: .pio/build_cache is on an anonymous Docker volume (persists per container lifetime)
     RSYNC_EXCLUDES="--exclude=**/__pycache__ --exclude=.build/ --exclude=.pio/ --exclude=*.pyc"
 
     # rsync flags:
