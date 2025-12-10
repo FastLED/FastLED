@@ -390,9 +390,9 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
  */
 class RmtRxChannelImpl : public RmtRxChannel {
 public:
-    RmtRxChannelImpl()
+    RmtRxChannelImpl(int pin)
         : mChannel(nullptr)
-        , mPin(GPIO_NUM_NC)
+        , mPin(static_cast<gpio_num_t>(pin))
         , mResolutionHz(0)
         , mBufferSize(0)
         , mReceiveDone(false)
@@ -403,7 +403,7 @@ public:
         , mStartLow(true)
         , mInternalBuffer()
     {
-        FL_DBG("RmtRxChannel constructed (hardware params will be set in begin())");
+        FL_DBG("RmtRxChannel constructed with pin=" << pin << " (other hardware params will be set in begin())");
     }
 
     ~RmtRxChannelImpl() override {
@@ -421,20 +421,15 @@ public:
         // Validate and extract hardware parameters on first call
         if (!mChannel) {
             // First-time initialization - extract hardware parameters from config
-            if (config.pin < 0) {
-                FL_WARN("RX begin: Invalid pin in config (pin=" << config.pin << ")");
-                return false;
-            }
             if (config.buffer_size == 0) {
                 FL_WARN("RX begin: Invalid buffer_size in config (buffer_size=0)");
                 return false;
             }
 
-            mPin = static_cast<gpio_num_t>(config.pin);
             mBufferSize = config.buffer_size;
             mResolutionHz = config.hz.has_value() ? config.hz.value() : 40000000;  // Default: 40MHz
 
-            FL_DBG("RX first-time init: pin=" << config.pin
+            FL_DBG("RX first-time init: pin=" << static_cast<int>(mPin)
                    << ", buffer_size=" << mBufferSize
                    << ", resolution_hz=" << mResolutionHz);
         }
@@ -947,8 +942,8 @@ private:
 };
 
 // Factory method implementation
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create() {
-    return fl::make_shared<RmtRxChannelImpl>();
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) {
+    return fl::make_shared<RmtRxChannelImpl>(pin);
 }
 
 } // namespace fl

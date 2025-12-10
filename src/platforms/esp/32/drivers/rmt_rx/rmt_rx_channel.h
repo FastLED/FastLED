@@ -60,21 +60,21 @@ class RmtRxChannel : public RxDevice {
 public:
     /**
      * @brief Create RX channel instance (does not initialize hardware)
+     * @param pin GPIO pin number for receiving signals
      * @return Shared pointer to RmtRxChannel interface
      *
-     * Hardware parameters (pin, resolution_hz, buffer_size) are now passed via RxConfig in begin().
+     * Hardware parameters (resolution_hz, buffer_size) are passed via RxConfig in begin().
      *
      * Example:
      * @code
-     * auto rx = RmtRxChannel::create();
+     * auto rx = RmtRxChannel::create(6);  // GPIO 6
      * RxConfig config;
-     * config.pin = 6;
      * config.buffer_size = 1024;
      * config.hz = 40000000;  // Optional: 40MHz clock
      * rx->begin(config);
      * @endcode
      */
-    static fl::shared_ptr<RmtRxChannel> create();
+    static fl::shared_ptr<RmtRxChannel> create(int pin);
 
     /**
      * @brief Virtual destructor
@@ -213,9 +213,8 @@ public:
      *
      * Example:
      * @code
-     * auto rx = RmtRxChannel::create();
+     * auto rx = RmtRxChannel::create(6);  // GPIO 6
      * RxConfig config;
-     * config.pin = 6;
      * config.buffer_size = 512;
      * config.hz = 40000000;
      * rx->begin(config);

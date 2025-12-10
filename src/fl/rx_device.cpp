@@ -62,8 +62,8 @@ namespace fl {
 
 // RMT device specialization for ESP32
 template <>
-fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>() {
-    auto device = RmtRxChannel::create();
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
+    auto device = RmtRxChannel::create(pin);
     if (!device) {
         return fl::make_shared<DummyRxDevice>("RMT RX channel creation failed");
     }
@@ -72,8 +72,8 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>() {
 
 // ISR device specialization for ESP32
 template <>
-fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
-    auto device = GpioIsrRx::create();
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
+    auto device = GpioIsrRx::create(pin);
     if (!device) {
         return fl::make_shared<DummyRxDevice>("GPIO ISR RX creation failed");
     }
@@ -84,19 +84,18 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
 
 // RMT device specialization (dummy for non-ESP32)
 template <>
-fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>() {
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
+    (void)pin;  // Suppress unused parameter warning
     return RxDevice::createDummy();
 }
 
 // ISR device specialization (dummy for non-ESP32)
 template <>
-fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
+    (void)pin;  // Suppress unused parameter warning
     return RxDevice::createDummy();
 }
 
 #endif // ESP32
-// Explicit template instantiations (required for linking)
-template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>();
-template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>();
 
 } // namespace fl

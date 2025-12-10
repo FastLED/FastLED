@@ -292,9 +292,9 @@ struct alignas(64) IsrContext {
  */
 class GpioIsrRxImpl : public GpioIsrRx {
 public:
-    GpioIsrRxImpl()
+    GpioIsrRxImpl(int pin)
         : mIsrCtx{}
-        , mPin(GPIO_NUM_NC)
+        , mPin(static_cast<gpio_num_t>(pin))
         , mBufferSize(0)
         , mEdgeBuffer()
         , mIsrInstalled(false)
@@ -303,14 +303,16 @@ public:
         , mSignalRangeMaxNs(100000)
         , mStartLow(true)
     {
-        FL_DBG("GpioIsrRx constructed (hardware params will be set in begin())");
+        FL_DBG("GpioIsrRx constructed with pin=" << pin << " (other hardware params will be set in begin())");
 
         // Initialize ISR context in optimal order (matching struct layout)
         // Hot path variables
         mIsrCtx.writePtr = nullptr;
         mIsrCtx.endPtr = nullptr;
-        mIsrCtx.gpioInRegAddr = 0;  // Will be set in begin()
-        mIsrCtx.gpioBitMask = 0;    // Will be set in begin()
+        // Set pin-specific values early (will be validated in begin())
+        mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
+        uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
+        mIsrCtx.gpioBitMask = (1U << pin_bit);
 
         // Medium-hot path
         mIsrCtx.startCycles = 0;
@@ -325,7 +327,7 @@ public:
         mIsrCtx.edgesCounter = 0;
 
         // Config values
-        mIsrCtx.pin = GPIO_NUM_NC;  // Will be set in begin()
+        mIsrCtx.pin = mPin;
         mIsrCtx.hwTimer = nullptr;
         mIsrCtx.timerStarted = false;
 
@@ -354,19 +356,12 @@ public:
         // Validate and extract hardware parameters on first call
         if (mIsrCtx.hwTimer == nullptr) {
             // First-time initialization - extract hardware parameters from config
-            if (config.pin < 0) {
-                FL_WARN("GPIO ISR RX begin: Invalid pin in config (pin=" << config.pin << ")");
-                return false;
-            }
             if (config.buffer_size == 0) {
                 FL_WARN("GPIO ISR RX begin: Invalid buffer_size in config (buffer_size=0)");
                 return false;
             }
 
-            mPin = static_cast<gpio_num_t>(config.pin);
-            mBufferSize = config.buffer_size;
-
-            // Validate pin
+            // Validate pin (set in constructor)
             if (!isValidGpioPin(static_cast<int>(mPin))) {
                 FL_ERROR("GPIO ISR RX: Invalid pin " << static_cast<int>(mPin)
                          << " - pin is reserved for UART, flash, or other system use. "
@@ -374,13 +369,9 @@ public:
                 return false;
             }
 
-            // Set pin-specific ISR context values
-            mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
-            uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
-            mIsrCtx.gpioBitMask = (1U << pin_bit);
-            mIsrCtx.pin = mPin;
+            mBufferSize = config.buffer_size;
 
-            FL_DBG("GPIO ISR RX first-time init: pin=" << config.pin
+            FL_DBG("GPIO ISR RX first-time init: pin=" << static_cast<int>(mPin)
                    << ", buffer_size=" << mBufferSize);
         }
 
@@ -815,8 +806,8 @@ private:
 };
 
 // Factory method implementation
-fl::shared_ptr<GpioIsrRx> GpioIsrRx::create() {
-    return fl::make_shared<GpioIsrRxImpl>();
+fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) {
+    return fl::make_shared<GpioIsrRxImpl>(pin);
 }
 
 } // namespace fl

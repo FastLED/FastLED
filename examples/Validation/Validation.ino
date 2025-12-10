@@ -192,7 +192,7 @@ void setup() {
     FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
             << " (" << (20000000 / 1000000) << "MHz, " << 256 << " symbols)");
 
-    auto sanity_rx_channel = fl::RxDevice::create<RX_TYPE>();
+    auto sanity_rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
 
     if (!sanity_rx_channel) {
         FL_ERROR("[RX SETUP]: Failed to create sanity check RX channel");
@@ -225,7 +225,7 @@ void setup() {
     FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
             << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)");
 
-    rx_channel = fl::RxDevice::create<RX_TYPE>();
+    rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
 
     if (!rx_channel) {
         FL_ERROR("[RX SETUP]: Failed to create high-precision RX channel");

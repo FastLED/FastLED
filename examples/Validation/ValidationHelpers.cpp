@@ -21,7 +21,6 @@ bool testRxChannel(
     // Initialize RX channel with signal range for fast GPIO toggles
     // RMT peripheral max is ~819 μs, so use 200 μs (2x our pulse width for safety)
     fl::RxConfig rx_config;
-    rx_config.pin = pin_rx;
     rx_config.buffer_size = buffer_size;
     rx_config.hz = hz;
     rx_config.signal_range_min_ns = 100;    // min=100ns

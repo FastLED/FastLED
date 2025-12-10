@@ -10,7 +10,7 @@ using namespace fl;
 
 TEST_CASE("RxDevice - default template returns dummy device") {
     // On non-ESP32 platforms, default template returns dummy
-    auto device = RxDevice::create<RxDeviceType::RMT>();
+    auto device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
 
     REQUIRE(device != nullptr);
 #ifndef ESP32
@@ -20,12 +20,11 @@ TEST_CASE("RxDevice - default template returns dummy device") {
 
 TEST_CASE("RxDevice - dummy device returns failures") {
     // On non-ESP32 platforms, create() returns dummy device
-    auto device = RxDevice::create<RxDeviceType::RMT>();
+    auto device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
     REQUIRE(device != nullptr);
 
     // begin() should return false
     RxConfig config;
-    config.pin = 6;
     config.buffer_size = 512;
     CHECK(device->begin(config) == false);
 
@@ -50,8 +49,8 @@ TEST_CASE("RxDevice - dummy device returns failures") {
 
 TEST_CASE("RxDevice - template factory creates devices by type") {
     // Template-based factory should work with enum
-    auto rmt_device = RxDevice::create<RxDeviceType::RMT>();
-    auto isr_device = RxDevice::create<RxDeviceType::ISR>();
+    auto rmt_device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
+    auto isr_device = RxDevice::create<RxDeviceType::ISR>(7);  // GPIO 7
 
     REQUIRE(rmt_device != nullptr);
     REQUIRE(isr_device != nullptr);
@@ -70,8 +69,8 @@ TEST_CASE("RxDevice - template factory creates devices by type") {
 
 TEST_CASE("RxDevice - createDummy returns shared singleton instance") {
     // createDummy should return same instance each time (via create template default)
-    auto dummy1 = RxDevice::create<RxDeviceType::RMT>();
-    auto dummy2 = RxDevice::create<RxDeviceType::ISR>();
+    auto dummy1 = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
+    auto dummy2 = RxDevice::create<RxDeviceType::ISR>(7);  // GPIO 7
 
     REQUIRE(dummy1 != nullptr);
     REQUIRE(dummy2 != nullptr);

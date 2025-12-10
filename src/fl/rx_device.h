@@ -146,7 +146,6 @@ enum class RxDeviceType : uint8_t {
  * Struct-based configuration allows future extensibility without breaking API compatibility.
  *
  * Hardware Parameters:
- * - pin: GPIO pin number for receiving signals
  * - buffer_size: Buffer size (symbols for RMT, edges for ISR)
  * - hz: Optional clock frequency (only used for RMT, defaults to platform default: 40MHz on ESP32)
  *
@@ -159,7 +158,6 @@ enum class RxDeviceType : uint8_t {
  * Example:
  * @code
  * RxConfig config;
- * config.pin = 6;                     // GPIO pin
  * config.buffer_size = 512;           // Buffer size
  * config.hz = 1000000;                // Optional: 1MHz clock (RMT only)
  * config.signal_range_min_ns = 100;
@@ -170,8 +168,7 @@ enum class RxDeviceType : uint8_t {
  * @endcode
  */
 struct RxConfig {
-    // Hardware parameters (required at initialization)
-    int pin = -1;                           ///< GPIO pin number (-1 = not set, will cause error)
+    // Hardware parameters
     size_t buffer_size = 512;               ///< Buffer size in symbols/edges (default: 512)
     fl::optional<uint32_t> hz = fl::nullopt; ///< Optional clock frequency (RMT only, default: 40MHz)
 
@@ -200,26 +197,26 @@ public:
     /**
      * @brief Template factory method to create RX device by type
      * @tparam TYPE Device type from RxDeviceType enum
+     * @param pin GPIO pin number for receiving signals
      * @return Shared pointer to RxDevice
      *
      * Platform-specific implementations (e.g., ESP32) provide explicit
      * template specializations for ISR and RMT types in rx_device.cpp.
      * On unsupported platforms, returns a DummyRxDevice.
      *
-     * Hardware parameters (pin, buffer_size, hz) are passed via RxConfig in begin().
+     * Hardware parameters (buffer_size, hz) are passed via RxConfig in begin().
      *
      * Example:
      * @code
-     * auto rx = RxDevice::create<RxDeviceType::RMT>();
+     * auto rx = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
      * RxConfig config;
-     * config.pin = 6;
      * config.buffer_size = 512;
      * config.hz = 1000000;  // Optional: 1MHz clock
      * rx->begin(config);
      * @endcode
      */
     template <RxDeviceType TYPE>
-    static fl::shared_ptr<RxDevice> create();
+    static fl::shared_ptr<RxDevice> create(int pin);
 
     /**
      * @brief Initialize (or re-arm) RX channel with configuration
@@ -282,9 +279,8 @@ public:
      *
      * Example:
      * @code
-     * auto rx = RxDevice::create("RMT");
+     * auto rx = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
      * RxConfig config;
-     * config.pin = 6;
      * config.buffer_size = 512;
      * rx->begin(config);
      * rx->wait(100);
