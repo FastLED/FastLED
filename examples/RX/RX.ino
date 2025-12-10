@@ -28,8 +28,12 @@
 // Configuration
 // ============================================================================
 
-#define PIN_TX 0
-#define PIN_RX 17  // Connect these two pins together for loopback test.
+// ⚠️  DO NOT CHANGE THESE PIN ASSIGNMENTS - NO EXCEPTIONS! ⚠️
+// These specific pins are required for hardware testing infrastructure.
+// Changing PIN_TX or PIN_RX will break automated testing equipment.
+// PHYSICALLY CONNECT GPIO 0 TO GPIO 19 WITH A WIRE FOR THIS TEST.
+#define PIN_TX 0   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
+#define PIN_RX 19  // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
 #define EDGE_BUFFER_SIZE 100
 #define WAIT_TIMEOUT_MS 100
 
@@ -59,6 +63,50 @@ const fl::array<PinToggle, 6> TEST_PATTERN = {{
 fl::shared_ptr<fl::RxDevice> g_rx_device;
 
 // ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * @brief Test pin loopback connection with digitalWrite/digitalRead
+ * @return true if loopback test passes, false otherwise
+ */
+bool testPinLoopback() {
+    FL_WARN("Testing pin loopback connection...");
+
+    // Configure pins
+    pinMode(PIN_TX, OUTPUT);
+    pinMode(PIN_RX, INPUT);
+
+    // Test LOW state
+    digitalWrite(PIN_TX, LOW);
+    delayMicroseconds(10);  // Allow signal to settle
+    bool low_read = digitalRead(PIN_RX);
+
+    // Test HIGH state
+    digitalWrite(PIN_TX, HIGH);
+    delayMicroseconds(10);  // Allow signal to settle
+    bool high_read = digitalRead(PIN_RX);
+
+    // Reset to LOW
+    digitalWrite(PIN_TX, LOW);
+
+    // Validate results
+    if (!low_read && high_read) {
+        FL_WARN("✓ Pin loopback test PASSED");
+        FL_WARN("  LOW: TX=0 -> RX=" << (low_read ? "1" : "0") << " ✓");
+        FL_WARN("  HIGH: TX=1 -> RX=" << (high_read ? "1" : "0") << " ✓");
+        return true;
+    } else {
+        FL_WARN("ERROR: Pin loopback test FAILED");
+        FL_WARN("  LOW: TX=0 -> RX=" << (low_read ? "1 (expected 0)" : "0 ✓"));
+        FL_WARN("  HIGH: TX=1 -> RX=" << (high_read ? "1 ✓" : "0 (expected 1)"));
+        FL_WARN("");
+        FL_WARN("Please connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a wire.");
+        return false;
+    }
+}
+
+// ============================================================================
 // Arduino Setup & Loop
 // ============================================================================
 
@@ -68,12 +116,15 @@ void setup() {
 
     FL_WARN("\n=== FastLED GPIO ISR RX Device Test ===");
     FL_WARN("Platform: ESP32");
-    FL_WARN("Pin: GPIO " << PIN_TX << " (TX/RX loopback)");
+    FL_WARN("TX Pin: GPIO " << PIN_TX);
+    FL_WARN("RX Pin: GPIO " << PIN_RX);
     FL_WARN("");
 
-    // Configure TX pin
-    pinMode(PIN_TX, OUTPUT);
-    digitalWrite(PIN_TX, LOW);
+    // Test pin loopback connection
+    if (!testPinLoopback()) {
+        while (1) delay(1000);  // Halt on failure
+    }
+    FL_WARN("");
 
     // Create RX device
     FL_WARN("Creating GPIO ISR RX device...");
@@ -86,11 +137,6 @@ void setup() {
 
     delay(1000);
 }
-
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
 
 void executeToggles(fl::RxDevice& rx,
                     const fl::RxConfig& config,

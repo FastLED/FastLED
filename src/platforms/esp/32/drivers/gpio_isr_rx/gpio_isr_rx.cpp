@@ -9,9 +9,11 @@
 
 #include "fl/dbg.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "ftl/vector.h"
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
+#include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
@@ -24,6 +26,27 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 namespace fl {
+
+// ============================================================================
+// Pin Validation Helper
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Check if GPIO pin is valid for use
+ * @param pin GPIO pin number to check
+ * @return true if pin is valid and usable, false otherwise
+ */
+inline bool isValidGpioPin(int pin) {
+    if (pin < 0 || pin >= 64) {
+        return false;
+    }
+    // Check against the valid pin mask (excludes unusable pins like UART, flash, etc.)
+    return (_FL_VALID_PIN_MASK & (1ULL << pin)) != 0;
+}
+
+} // anonymous namespace
 
 // ============================================================================
 // Edge Timestamp Decoder Implementation (private to this file)
@@ -310,6 +333,14 @@ public:
         , mSignalRangeMaxNs(100000)
         , mStartLow(true)
     {
+        // Validate pin before initialization
+        if (!isValidGpioPin(static_cast<int>(pin))) {
+            FL_ERROR("GPIO ISR RX: Invalid pin " << static_cast<int>(pin)
+                     << " - pin is reserved for UART, flash, or other system use. "
+                     << "Please choose a different GPIO pin.");
+            // Note: Constructor completes but begin() will fail
+        }
+
         // Initialize ISR context
         mIsrCtx.writePtr = nullptr;
         mIsrCtx.endPtr = nullptr;
