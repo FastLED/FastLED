@@ -5,6 +5,7 @@
 #include "ui_manager.h"
 #include "fl/compiler_control.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "ftl/assert.h"
 #include "ftl/string.h"
 

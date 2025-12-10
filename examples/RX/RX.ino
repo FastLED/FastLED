@@ -23,7 +23,6 @@
 
 #include <FastLED.h>
 #include "fl/rx_device.h"
-#include "fl/error.h"
 
 // ============================================================================
 // Configuration
@@ -37,6 +36,7 @@
 #define PIN_RX 19  // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
 #define EDGE_BUFFER_SIZE 100
 #define WAIT_TIMEOUT_MS 100
+#define RX_TYPE "ISR"
 
 // ============================================================================
 // Pin Toggle Pattern
@@ -129,7 +129,7 @@ void setup() {
 
     // Create RX device
     FL_WARN("Creating GPIO ISR RX device...");
-    g_rx_device = fl::RxDevice::create("ISR", PIN_RX, EDGE_BUFFER_SIZE);
+    g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE);
     if (!g_rx_device) {
         FL_ERROR("Failed to create GPIO ISR RX device");
         while (1) delay(1000);  // Halt
