@@ -4,6 +4,7 @@
 #include "channel_data.h"
 #include "ftl/algorithm.h"
 #include "ftl/cstring.h"
+#include "fl/log.h"
 
 namespace fl {
 

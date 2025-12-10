@@ -9,6 +9,7 @@
 
 #include "ftl/stdint.h"
 #include "common.h"
+#include "fl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_encoder.h"
@@ -55,6 +56,18 @@ public:
      */
     bool isInitialized() const { return mEncoder != nullptr; }
 
+#ifdef 0  // Debug buffer disabled
+    /**
+     * Get debug buffer for encoder output inspection
+     * @param[out] size Number of symbols written to buffer (up to 24)
+     * @return Pointer to debug buffer (24 symbols)
+     */
+    const rmt_symbol_word_t* getDebugBuffer(size_t& size) const {
+        size = mDebugBufferWriteIndex;
+        return mDebugBuffer;
+    }
+#endif
+
     // Friend declaration for factory function
     friend esp_err_t fastled_rmt_new_encoder(const ChipsetTiming& timing,
                                               uint32_t resolution_hz,
@@ -81,22 +94,29 @@ private:
     uint32_t mBit1LowTicks;
     uint32_t mResetTicks;
 
+#ifdef 0  // Debug buffer disabled
+    // Debug buffer for encoder output inspection (24 symbols = 1 CRGB)
+    // This allows Validation.ino to directly inspect encoder output
+    rmt_symbol_word_t mDebugBuffer[24];
+    size_t mDebugBufferWriteIndex;
+#endif
+
     // Static callbacks for rmt_encoder_t interface (run in ISR context)
-    static size_t IRAM_ATTR encodeCallback(rmt_encoder_t *encoder,
+    static size_t FL_IRAM encodeCallback(rmt_encoder_t *encoder,
                                             rmt_channel_handle_t channel,
                                             const void *primary_data, size_t data_size,
                                             rmt_encode_state_t *ret_state);
 
-    static esp_err_t IRAM_ATTR resetCallback(rmt_encoder_t *encoder);
+    static esp_err_t FL_IRAM resetCallback(rmt_encoder_t *encoder);
     static esp_err_t delCallback(rmt_encoder_t *encoder);
 
     // Instance method called by static callback (runs in ISR context)
-    size_t IRAM_ATTR encode(rmt_channel_handle_t channel,
+    size_t FL_IRAM encode(rmt_channel_handle_t channel,
                             const void *primary_data, size_t data_size,
                             rmt_encode_state_t *ret_state);
 
     // Helper: reset encoder state (runs in ISR context)
-    esp_err_t IRAM_ATTR reset();
+    esp_err_t FL_IRAM reset();
 
     // Helper: delete encoder and free resources
     esp_err_t del();

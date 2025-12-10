@@ -967,7 +967,7 @@ public:
 	/// Get full state of all registered channel drivers
 	/// @return Span of driver info (sorted by priority descending)
 	/// @note Returned span is valid until next call to any non-const method
-	fl::span<const fl::DriverInfo> getDriverInfo() const;
+	fl::span<const fl::DriverInfo> getDriverInfos() const;
 #else
 	/// @platform Non-ESP32
 	/// @warning These methods are no-op stubs on non-ESP32 platforms
@@ -1010,7 +1010,7 @@ public:
 	/// No-op stub: Get full state of all registered channel drivers
 	/// @return Empty span (no engines)
 	/// @note Non-ESP32: Always returns empty span
-	fl::span<const fl::DriverInfo> getDriverInfo() const {
+	fl::span<const fl::DriverInfo> getDriverInfos() const {
 		// No-op: Only ESP32 has multi-engine architecture
 		return fl::span<const fl::DriverInfo>(nullptr, 0);  // Empty span
 	}

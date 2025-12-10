@@ -427,7 +427,7 @@ TEST_CASE("ChannelBusManager - Query driver info") {
 
     // Empty manager
     CHECK(manager.getDriverCount() == 0);
-    auto emptyInfo = manager.getDriverInfo();
+    auto emptyInfo = manager.getDriverInfos();
     CHECK(emptyInfo.size() == 0);
 
     // Add named engines
@@ -443,7 +443,7 @@ TEST_CASE("ChannelBusManager - Query driver info") {
     CHECK(manager.getDriverCount() == 3);
 
     // Get info (returns span, no allocation!)
-    auto info = manager.getDriverInfo();
+    auto info = manager.getDriverInfos();
     CHECK(info.size() == 3);
 
     // Verify all names are present (sorted by priority descending)
@@ -475,7 +475,7 @@ TEST_CASE("ChannelBusManager - Query with unnamed engines") {
     CHECK(manager.getDriverCount() == 2);
 
     // Info includes both (unnamed has empty string)
-    auto info = manager.getDriverInfo();
+    auto info = manager.getDriverInfos();
     CHECK(info.size() == 2);
 
     // Higher priority first (20 > 10)
@@ -499,7 +499,7 @@ TEST_CASE("ChannelBusManager - Query with duplicate names") {
     CHECK(manager.getDriverCount() == 2);
 
     // Info should include both "RMT" entries (duplicates allowed)
-    auto info = manager.getDriverInfo();
+    auto info = manager.getDriverInfos();
     CHECK(info.size() == 2);
     CHECK(info[0].name == "RMT");
     CHECK(info[0].priority == 100);
@@ -519,7 +519,7 @@ TEST_CASE("ChannelBusManager - Query full driver state") {
     manager.addEngine(100, parlioEngine, "PARLIO");
 
     // Get full info (span, no allocation!)
-    auto info = manager.getDriverInfo();
+    auto info = manager.getDriverInfos();
     CHECK(info.size() == 3);
 
     // Should be sorted by priority descending (PARLIO=100, SPI=50, RMT=10)
@@ -537,7 +537,7 @@ TEST_CASE("ChannelBusManager - Query full driver state") {
 
     // Disable SPI and check state
     manager.setDriverEnabled("SPI", false);
-    info = manager.getDriverInfo();
+    info = manager.getDriverInfos();
 
     CHECK(info[0].enabled == true);   // PARLIO still enabled
     CHECK(info[1].enabled == false);  // SPI disabled
@@ -554,7 +554,7 @@ TEST_CASE("ChannelBusManager - Span validity") {
     manager.addEngine(50, spiEngine, "SPI");
 
     // Get span (no allocation)
-    auto info = manager.getDriverInfo();
+    auto info = manager.getDriverInfos();
     CHECK(info.size() == 2);
 
     // Verify we can iterate multiple times (span is stable)
@@ -566,7 +566,7 @@ TEST_CASE("ChannelBusManager - Span validity") {
     CHECK(count == 2);
 
     // Get span again - should work fine
-    auto info2 = manager.getDriverInfo();
+    auto info2 = manager.getDriverInfos();
     CHECK(info2.size() == 2);
     CHECK(info2[0].name == "SPI");  // Higher priority
     CHECK(info2[1].name == "RMT");

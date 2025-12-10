@@ -18,6 +18,7 @@
 #include "fl/channels/channel_engine.h"
 #include "platforms/esp/32/drivers/channel_bus_manager.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/log.h"
 
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>

@@ -99,7 +99,7 @@ public:
     /// @note Returned span is valid until next call to any non-const method
     /// @note This method updates an internal cache - not thread-safe
     /// @note fl::string copies are cheap (shared pointer internally, no heap allocation)
-    fl::span<const DriverInfo> getDriverInfo() const;
+    fl::span<const DriverInfo> getDriverInfos() const;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
@@ -112,6 +112,10 @@ public:
     /// @brief Query engine state and perform maintenance
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
     EngineState poll() override;
+
+    /// @brief Poll engines before frame starts to clear previous frame state
+    /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
+    void onBeginFrame() override;
 
     /// @brief Reset to highest priority engine for next frame
     /// @note Called at frame boundaries to allow engine re-evaluation
@@ -165,7 +169,7 @@ private:
     /// @brief Error message storage
     fl::string mLastError;
 
-    /// @brief Cached driver info for getDriverInfo() to avoid allocations
+    /// @brief Cached driver info for getDriverInfos() to avoid allocations
     /// @note Marked mutable to allow caching in const method
     mutable fl::vector<DriverInfo> mCachedDriverInfo;
 

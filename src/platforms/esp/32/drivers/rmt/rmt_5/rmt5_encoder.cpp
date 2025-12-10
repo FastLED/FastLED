@@ -41,11 +41,19 @@ FastLEDRmtEncoder::FastLEDRmtEncoder()
     , mBit1HighTicks(0)
     , mBit1LowTicks(0)
     , mResetTicks(0)
+#ifdef 0  // Debug buffer disabled
+    , mDebugBufferWriteIndex(0)
+#endif
 {
     mResetCode.duration0 = 0;
     mResetCode.level0 = 0;
     mResetCode.duration1 = 0;
     mResetCode.level1 = 0;
+
+#ifdef 0  // Debug buffer disabled
+    // Initialize debug buffer
+    fl::memset(mDebugBuffer, 0, sizeof(mDebugBuffer));
+#endif
 }
 
 FastLEDRmtEncoder::~FastLEDRmtEncoder() {
@@ -73,27 +81,33 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     mBit1LowTicks = (timing.T3 + ns_per_tick / 2) / ns_per_tick;
     mResetTicks = (timing.RESET * 1000ULL + ns_per_tick / 2) / ns_per_tick;  // RESET is in microseconds
 
-    FL_LOG_RMT("FastLEDRmtEncoder: Timing (ticks @ " << resolution_hz << " Hz):");
-    FL_LOG_RMT("  Bit0: " << mBit0HighTicks << "H + " << mBit0LowTicks << "L = " << (mBit0HighTicks + mBit0LowTicks) << " ticks");
-    FL_LOG_RMT("  Bit1: " << mBit1HighTicks << "H + " << mBit1LowTicks << "L = " << (mBit1HighTicks + mBit1LowTicks) << " ticks");
-    FL_LOG_RMT("  Reset: " << mResetTicks << " ticks (" << timing.RESET << " us)");
-
     // Create bytes encoder for pixel data
     // WS2812/similar protocols send MSB first: each byte becomes 8 RMT pulses
     rmt_bytes_encoder_config_t bytes_config = {};
-    bytes_config.bit0.duration0 = mBit0HighTicks;
     bytes_config.bit0.level0 = 1;
-    bytes_config.bit0.duration1 = mBit0LowTicks;
+    bytes_config.bit0.duration0 = mBit0HighTicks;  // Short HIGH for data bit 0
     bytes_config.bit0.level1 = 0;
-    bytes_config.bit1.duration0 = mBit1HighTicks;
+    bytes_config.bit0.duration1 = mBit0LowTicks;   // Long LOW for data bit 0
     bytes_config.bit1.level0 = 1;
-    bytes_config.bit1.duration1 = mBit1LowTicks;
+    bytes_config.bit1.duration0 = mBit1HighTicks;  // Long HIGH for data bit 1
     bytes_config.bit1.level1 = 0;
-    bytes_config.flags.msb_first = 1;  // WS2812 sends MSB first
+    bytes_config.bit1.duration1 = mBit1LowTicks;   // Short LOW for data bit 1
+    bytes_config.flags.msb_first = 0;
+
+#ifdef 0  // Debug logging disabled
+    FL_LOG_RMT("FastLEDRmtEncoder::initialize: Configuring bytes encoder:");
+    FL_LOG_RMT("  bit0: level0=" << bytes_config.bit0.level0 << " duration0=" << bytes_config.bit0.duration0
+               << " (" << (bytes_config.bit0.duration0 * ns_per_tick) << "ns)"
+               << ", level1=" << bytes_config.bit0.level1 << " duration1=" << bytes_config.bit0.duration1
+               << " (" << (bytes_config.bit0.duration1 * ns_per_tick) << "ns)");
+    FL_LOG_RMT("  bit1: level0=" << bytes_config.bit1.level0 << " duration0=" << bytes_config.bit1.duration0
+               << " (" << (bytes_config.bit1.duration0 * ns_per_tick) << "ns)"
+               << ", level1=" << bytes_config.bit1.level1 << " duration1=" << bytes_config.bit1.duration1
+               << " (" << (bytes_config.bit1.duration1 * ns_per_tick) << "ns)");
+#endif
 
     esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
     if (ret != ESP_OK) {
-        FL_WARN("FastLEDRmtEncoder: Failed to create bytes encoder: " << esp_err_to_name(ret));
         return ret;
     }
 
@@ -102,7 +116,6 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     rmt_copy_encoder_config_t copy_config = {};
     ret = rmt_new_copy_encoder(&copy_config, &mCopyEncoder);
     if (ret != ESP_OK) {
-        FL_WARN("FastLEDRmtEncoder: Failed to create copy encoder: " << esp_err_to_name(ret));
         rmt_del_encoder(mBytesEncoder);
         mBytesEncoder = nullptr;
         return ret;
@@ -114,11 +127,17 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     mResetCode.duration1 = 0;
     mResetCode.level1 = 0;
 
+#ifdef 0  // Debug buffer disabled
+    // Reset debug buffer on initialization
+    mDebugBufferWriteIndex = 0;
+    fl::memset(mDebugBuffer, 0, sizeof(mDebugBuffer));
+#endif
+
     FL_LOG_RMT("FastLEDRmtEncoder: Initialized successfully");
     return ESP_OK;
 }
 
-size_t IRAM_ATTR FastLEDRmtEncoder::encode(rmt_channel_handle_t channel,
+size_t FL_IRAM FastLEDRmtEncoder::encode(rmt_channel_handle_t channel,
                                            const void *primary_data, size_t data_size,
                                            rmt_encode_state_t *ret_state) {
     // CRITICAL: Use separate variables for session state and accumulated state
@@ -166,7 +185,7 @@ out:
     return encoded_symbols;
 }
 
-esp_err_t IRAM_ATTR FastLEDRmtEncoder::reset() {
+esp_err_t FL_IRAM FastLEDRmtEncoder::reset() {
     mState = 0;
     if (mBytesEncoder) {
         mBytesEncoder->reset(mBytesEncoder);
@@ -193,7 +212,7 @@ esp_err_t FastLEDRmtEncoder::del() {
 // Static Callbacks (C linkage for rmt_encoder_t interface)
 //=============================================================================
 
-size_t IRAM_ATTR FastLEDRmtEncoder::encodeCallback(rmt_encoder_t *encoder,
+size_t FL_IRAM FastLEDRmtEncoder::encodeCallback(rmt_encoder_t *encoder,
                                                     rmt_channel_handle_t channel,
                                                     const void *primary_data, size_t data_size,
                                                     rmt_encode_state_t *ret_state) {
@@ -201,7 +220,7 @@ size_t IRAM_ATTR FastLEDRmtEncoder::encodeCallback(rmt_encoder_t *encoder,
     return wrapper->instance->encode(channel, primary_data, data_size, ret_state);
 }
 
-esp_err_t IRAM_ATTR FastLEDRmtEncoder::resetCallback(rmt_encoder_t *encoder) {
+esp_err_t FL_IRAM FastLEDRmtEncoder::resetCallback(rmt_encoder_t *encoder) {
     fastled_encoder_wrapper_t *wrapper = reinterpret_cast<fastled_encoder_wrapper_t*>(encoder);
     return wrapper->instance->reset();
 }
@@ -228,14 +247,12 @@ esp_err_t fastled_rmt_new_encoder(const ChipsetTiming& timing,
     fastled_encoder_wrapper_t *wrapper =
         static_cast<fastled_encoder_wrapper_t*>(fl::malloc(sizeof(fastled_encoder_wrapper_t)));
     if (wrapper == nullptr) {
-        FL_WARN("fastled_rmt_new_encoder: Failed to allocate wrapper");
         return ESP_ERR_NO_MEM;
     }
 
     // Create C++ instance
     FastLEDRmtEncoder *instance = new FastLEDRmtEncoder();
     if (instance == nullptr) {
-        FL_WARN("fastled_rmt_new_encoder: Failed to create encoder instance");
         fl::free(wrapper);
         return ESP_ERR_NO_MEM;
     }

@@ -17,17 +17,22 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // Clear RX buffer
     fl::memset(rx_buffer.data(), 0, rx_buffer.size());
 
-    // Arm RX receiver (re-arms if already initialized)
+    // Prepare RX config (but don't arm yet to avoid locking TX resources)
     fl::RxConfig rx_config;  // Use default WS2812B-compatible settings
+    rx_config.hz = 40000000; // 40MHz for high-precision LED timing capture
+    // Calculate buffer size needed: For WS2812B, each LED requires 24 bits = 24 symbols
+    // rx_buffer holds decoded bytes (3 bytes per LED), so buffer_size = rx_buffer.size() * 8 symbols
+    rx_config.buffer_size = rx_buffer.size() * 8;  // Convert bytes to symbols (1 byte = 8 bits = 8 symbols)
+
+    // Immediately arm RX to capture the transmission (TX is already started)
     if (!rx_channel->begin(rx_config)) {
         FL_ERROR("Failed to arm RX receiver");
         return 0;
     }
 
-    delayMicroseconds(100);
-
-    // Transmit
     FastLED.show();
+
+
 
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
@@ -35,13 +40,85 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_ERROR("RX wait failed (timeout or no data received)");
         FL_WARN("");
         FL_WARN("⚠️  TROUBLESHOOTING:");
-        FL_WARN("   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from GPIO to itself");
+        FL_WARN("   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin());
         FL_WARN("   2. Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
         FL_WARN("   3. ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
-        FL_WARN("   4. Check that TX and RX use the same GPIO pin number");
+        FL_WARN("   4. Check that TX and RX use the same GPIO pin number (RX pin: " << rx_channel->getPin() << ")");
         FL_WARN("");
         return 0;
     }
+
+    // ========================================================================
+    // RAW EDGE TIMING INSPECTION (Debug: Validate encoder output)
+    // ========================================================================
+    // This inspection helps determine if the RMT encoder is producing correct
+    // symbols or if it's outputting constant timing (which would decode to all zeros)
+
+    FL_WARN("\n[RAW EDGE TIMING] Inspecting first 32 edge transitions:");
+
+    fl::EdgeTime edges[32];  // Capture first 32 edges (enough for ~2 WS2812B bits)
+    size_t edge_count = rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges, 32));
+
+    if (edge_count == 0) {
+        FL_WARN("[RAW EDGE TIMING] WARNING: No edge data captured!");
+    } else {
+        FL_WARN("[RAW EDGE TIMING] Captured " << edge_count << " edges:");
+
+        // Display first few edges with their timing
+        size_t display_limit = edge_count < 16 ? edge_count : 16;
+        for (size_t i = 0; i < display_limit; i++) {
+            const char* level = edges[i].high ? "HIGH" : "LOW ";
+            FL_WARN("  Edge[" << i << "]: " << level << " " << edges[i].ns << "ns");
+        }
+
+        if (edge_count > display_limit) {
+            FL_WARN("  ... (" << (edge_count - display_limit) << " more edges not shown)");
+        }
+
+        // Analyze timing patterns to detect if encoder is working
+        // For WS2812B: Bit 0 = ~400ns HIGH + ~850ns LOW, Bit 1 = ~800ns HIGH + ~450ns LOW
+        // If we see all edges with identical timing, the encoder is broken
+        // If we see varying timings around expected values, encoder is working
+
+        bool has_short_high = false;  // ~400ns (bit 0)
+        bool has_long_high = false;   // ~800ns (bit 1)
+        bool has_short_low = false;   // ~450ns (bit 1)
+        bool has_long_low = false;    // ~850ns (bit 0)
+
+        for (size_t i = 0; i < edge_count; i++) {
+            uint32_t ns = edges[i].ns;
+            if (edges[i].high) {
+                // High pulse
+                if (ns >= 250 && ns <= 550) has_short_high = true;  // Bit 0 high (~400ns ±150ns)
+                if (ns >= 650 && ns <= 950) has_long_high = true;   // Bit 1 high (~800ns ±150ns)
+            } else {
+                // Low pulse
+                if (ns >= 300 && ns <= 600) has_short_low = true;   // Bit 1 low (~450ns ±150ns)
+                if (ns >= 700 && ns <= 1000) has_long_low = true;   // Bit 0 low (~850ns ±150ns)
+            }
+        }
+
+        FL_WARN("\n[RAW EDGE TIMING] Pattern Analysis:");
+        FL_WARN("  Short HIGH (~400ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long HIGH  (~800ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Short LOW  (~450ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long LOW   (~850ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
+
+        if (has_short_high && has_long_high && has_short_low && has_long_low) {
+            FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
+        } else if (!has_short_high && !has_long_high) {
+            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!");
+            FL_ERROR("[RAW EDGE TIMING]   Possible causes:");
+            FL_ERROR("[RAW EDGE TIMING]   1. Encoder not reading pixel buffer data");
+            FL_ERROR("[RAW EDGE TIMING]   2. Bytes encoder state machine stuck");
+            FL_ERROR("[RAW EDGE TIMING]   3. Data pointer not passed correctly to encoder");
+        } else if (!has_short_low && !has_long_low) {
+            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
+        } else {
+            FL_WARN("[RAW EDGE TIMING] ⚠ Partial pattern match - encoder may have issues");
+        }
+    }
+    FL_WARN("");
 
     // Decode received data directly into rx_buffer
     // Create 4-phase RX timing from WS2812B 3-phase TX timing

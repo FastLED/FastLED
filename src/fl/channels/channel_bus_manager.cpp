@@ -119,7 +119,7 @@ fl::size ChannelBusManager::getDriverCount() const {
     return mEngines.size();
 }
 
-fl::span<const DriverInfo> ChannelBusManager::getDriverInfo() const {
+fl::span<const DriverInfo> ChannelBusManager::getDriverInfos() const {
     // Update cache with current engine state
     mCachedDriverInfo.clear();
     mCachedDriverInfo.reserve(mEngines.size());
@@ -181,6 +181,17 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
     }
 
     return anyBusy ? EngineState::BUSY : EngineState::READY;
+}
+
+void ChannelBusManager::onBeginFrame() {
+    // CRITICAL: Poll engines before the frame starts to release buffers from previous frame
+    // This ensures that ChannelData::mInUse flags are cleared before Channel::showPixels() is called
+    // Sequence:
+    //   1. Frame N transmission completes (ISR sets transmissionComplete)
+    //   2. onBeginFrame() called (this method)
+    //   3. poll() clears mInUse flags via ChannelEngineRMT::poll()
+    //   4. Channel::showPixels() called for Frame N+1 (can now encode safely)
+    poll();
 }
 
 void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {

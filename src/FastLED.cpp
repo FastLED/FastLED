@@ -427,9 +427,9 @@ fl::size CFastLED::getDriverCount() const {
 	return manager.getDriverCount();
 }
 
-fl::span<const fl::DriverInfo> CFastLED::getDriverInfo() const {
+fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
-	return manager.getDriverInfo();
+	return manager.getDriverInfos();
 }
 #endif
 

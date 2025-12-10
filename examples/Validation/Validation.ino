@@ -114,11 +114,11 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 #define PIN_TX 0
 #define PIN_RX 1
 
-#define NUM_LEDS 255
+#define NUM_LEDS 10
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-#define RX_BUFFER_SIZE 8192  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
+#define RX_BUFFER_SIZE NUM_LEDS * 32 + 10  // symbol expansion is 32:1 + headroom.
 
 // ============================================================================
 // Engine Filtering (Debug/Development)
@@ -164,11 +164,15 @@ uint32_t frame_counter = 0;
 void setup() {
     Serial.begin(115200);
     while (!Serial && millis() < 3000);
+    const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
     FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
-    FL_WARN("Hardware: ESP32 (any variant)");
-    FL_WARN("TX Pin (MOSI): GPIO " << PIN_TX << " (ESP32-S3: use GPIO 11 for IO_MUX)");
-    FL_WARN("RX Pin: GPIO " << PIN_RX);
+    FL_WARN("TX Pin: " << PIN_TX);
+    FL_WARN("RX Pin: " << PIN_RX);
+    FL_WARN("RX Device: " << (RX_TYPE == fl::RxDeviceType::RMT ? "RMT" : "ISR"));
+    FL_WARN("LOOP BACK MODE: " << loop_back_mode);
+    FL_WARN("NUM_LEDS: " << NUM_LEDS);
+    FL_WARN("COLOR ORDER: " << COLOR_ORDER);
     FL_WARN("");
     FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
     FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
@@ -181,67 +185,28 @@ void setup() {
     FL_WARN("");
 
     // ========================================================================
-    // RX Channel Setup with Sanity Check
+    // RX Channel Setup
     // ========================================================================
-    // ⚠️ CRITICAL: Must validate RX works before main tests run
 
-    FL_WARN("\n[RX SETUP] Starting RX channel setup and validation");
-
-    // Step 1: Create sanity check RX channel (lower precision for GPIO toggles)
-    FL_WARN("\n[RX SETUP] Step 1: Creating sanity check RX channel");
-    FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
-            << " (" << (20000000 / 1000000) << "MHz, " << 256 << " symbols)");
-
-    auto sanity_rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
-
-    if (!sanity_rx_channel) {
-        FL_ERROR("[RX SETUP]: Failed to create sanity check RX channel");
-        FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
-        error_sanity_check = true;
-        return;
-    }
-
-    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
-    FL_WARN("[RX CREATE] Hardware params: pin=" << PIN_RX << ", hz=" << 20000000 << ", buffer_size=" << 256);
-
-    // Step 2: Test the sanity check RX channel
-    FL_WARN("\n[RX SETUP] Step 2: Running sanity check test");
-    if (!testRxChannel(sanity_rx_channel, PIN_TX, PIN_RX, 20000000, 256)) {  // 20MHz, 256 symbols
-        FL_ERROR("[RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
-        FL_ERROR("[RX SETUP]: Main validation tests will be skipped");
-        error_sanity_check = true;
-        return;
-    }
-
-    FL_WARN("[RX SETUP] ✓ Sanity check PASSED");
-
-    // Step 3: Reset sanity check RX channel (release resources)
-    FL_WARN("\n[RX SETUP] Step 3: Releasing sanity check RX channel");
-    sanity_rx_channel.reset();
-    FL_WARN("[RX SETUP] ✓ Sanity check RX channel destroyed");
-
-    // Step 4: Create high-precision RX channel for main LED validation
-    FL_WARN("\n[RX SETUP] Step 4: Creating high-precision RX channel for LED validation");
+    FL_WARN("\n[RX SETUP] Creating RX channel for LED validation");
     FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
             << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)");
 
     rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
 
     if (!rx_channel) {
-        FL_ERROR("[RX SETUP]: Failed to create high-precision RX channel");
+        FL_ERROR("[RX SETUP]: Failed to create RX channel");
         FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
         error_sanity_check = true;
         return;
     }
 
     FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
-    FL_WARN("[RX CREATE] Hardware params: pin=" << PIN_RX << ", hz=" << 40000000 << ", buffer_size=" << RX_BUFFER_SIZE);
-    FL_WARN("[RX SETUP] ✓ RX channel is ready for LED validation\n");
+    FL_WARN("[RX SETUP] ✓ RX channel ready for LED validation\n");
 
     // List all available drivers and store globally
     FL_WARN("\nDiscovering available drivers...");
-    auto driver_info = FastLED.getDriverInfo();
-    drivers_available.assign(driver_info.begin(), driver_info.end());
+    drivers_available = FastLED.getDriverInfos();
     FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
     for (fl::size i = 0; i < drivers_available.size(); i++) {
         FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()
@@ -266,16 +231,16 @@ void loop() {
 
     // If sanity check failed, print error continuously and delay
     if (error_sanity_check) {
-        FL_ERROR("Sanity check failed - RX channel is not working");
-        delay(2000);
+        SKETCH_HALT("Sanity check failed - RX channel is not working");
         return;
     }
 
     // Check if any drivers failed in previous iterations
     if (!drivers_failed.empty()) {
-        FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-        FL_WARN("║ DRIVER FAILURES DETECTED - CANNOT CONTINUE                     ║");
-        FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+        // FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+        // FL_WARN("║ DRIVER FAILURES DETECTED - CANNOT CONTINUE                     ║");
+        // FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+        SKETCH_HALT("Driver failures detected - cannot continue");
 
         for (fl::size i = 0; i < drivers_failed.size(); i++) {
             const auto& failure = drivers_failed[i];

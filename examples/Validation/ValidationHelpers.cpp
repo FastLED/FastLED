@@ -99,7 +99,7 @@ void validateExpectedEngines() {
     }
 
     // Get available drivers
-    auto drivers = FastLED.getDriverInfo();
+    auto drivers = FastLED.getDriverInfos();
 
     // Check if all expected engines are available
     bool all_present = true;

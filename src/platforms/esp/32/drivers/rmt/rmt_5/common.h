@@ -135,6 +135,8 @@ FL_EXTERN_C_END
 
 // RMT clock frequency configuration
 // This can be overridden before including FastLED.h if different frequency is needed
+// NOTE: RX can run at different (faster) frequency than TX - this is NOT a mismatch
+// RX at 40MHz provides higher timing resolution for validation, TX at 10MHz is adequate for LED protocols
 #ifndef FASTLED_RMT5_CLOCK_HZ
 #define FASTLED_RMT5_CLOCK_HZ 10000000  // 10MHz (100ns resolution)
 #endif

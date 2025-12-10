@@ -155,6 +155,9 @@ ChannelEngineRMT::EngineState ChannelEngineRMT::poll() {
             FL_LOG_RMT("Releasing channel " << ch.pin);
             releaseChannel(&ch);
 
+            // Decrement activeCount since we just released this channel
+            activeCount--;
+
             // Try to start pending channels
             processPendingChannels();
         } else {
@@ -167,7 +170,11 @@ ChannelEngineRMT::EngineState ChannelEngineRMT::poll() {
         anyActive = true;
         FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
     } else if (activeCount > 0) {
+        anyActive = true;
         FL_LOG_RMT("No pending channels, but " << activeCount << " active channels (" << completedCount << " completed)");
+    } else {
+        // No active channels and no pending channels
+        anyActive = false;
     }
 
     // When transmission completes (READY or ERROR), clear the "in use" flags
@@ -551,6 +558,13 @@ bool ChannelEngineRMT::registerChannelCallback(ChannelState* state) {
 }
 
 void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
+    // Check if timing changed - if so, encoder must be recreated
+    bool timingChanged = state->channel &&
+                          (state->timing.T1 != timing.T1 ||
+                           state->timing.T2 != timing.T2 ||
+                           state->timing.T3 != timing.T3 ||
+                           state->timing.RESET != timing.RESET);
+
     // If pin changed, destroy and recreate channel
     if (state->channel && state->pin != pin) {
         FL_LOG_RMT("Pin changed from " << static_cast<int>(state->pin)
@@ -579,6 +593,44 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         memMgr.free(state->memoryChannelId, true);
 
         state->useDMA = false;
+    }
+
+    // If timing changed but channel exists, recreate encoder
+    if (timingChanged) {
+        FL_LOG_RMT("Timing changed for pin " << static_cast<int>(pin) << ", recreating encoder");
+        FL_LOG_RMT("  Old: T1=" << state->timing.T1 << " T2=" << state->timing.T2 << " T3=" << state->timing.T3);
+        FL_LOG_RMT("  New: T1=" << timing.T1 << " T2=" << timing.T2 << " T3=" << timing.T3);
+
+        // Wait for any pending transmission to complete
+        rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
+
+        // Delete old encoder
+        if (state->encoder) {
+            rmt_del_encoder(state->encoder);
+            state->encoder = nullptr;
+        }
+
+        // Create new encoder with updated timing
+        esp_err_t enc_err = fastled_rmt_new_encoder(timing, FASTLED_RMT5_CLOCK_HZ, &state->encoder);
+        if (enc_err != ESP_OK) {
+            FL_WARN("Failed to recreate encoder with new timing: " << esp_err_to_name(enc_err));
+            // Channel is still valid but encoder is broken - mark channel as unusable
+            rmt_del_channel(state->channel);
+            state->channel = nullptr;
+
+            // Free DMA and memory allocation
+            auto& memMgr = RmtMemoryManager::instance();
+            if (state->useDMA) {
+                memMgr.freeDMA(state->memoryChannelId, true);
+                mDMAChannelsInUse--;
+            }
+            memMgr.free(state->memoryChannelId, true);
+
+            state->useDMA = false;
+            return;
+        }
+
+        FL_LOG_RMT("Encoder recreated successfully with new timing");
     }
 
     // Create channel if needed
@@ -614,7 +666,7 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         }
     }
 
-    // Update timing - encoder is already created in createChannel()
+    // Update timing
     state->timing = timing;
     state->transmissionComplete = false;
 }
