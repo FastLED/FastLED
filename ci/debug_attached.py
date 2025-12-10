@@ -135,7 +135,9 @@ def resolve_sketch_path(sketch_arg: str, project_dir: Path) -> str:
         print(f"   Searched in: {examples_dir}")
         sys.exit(1)
     elif len(matches) > 1:
-        print(f"❌ Error: Ambiguous sketch name '{sketch_arg}'. Multiple matches found:")
+        print(
+            f"❌ Error: Ambiguous sketch name '{sketch_arg}'. Multiple matches found:"
+        )
         for match in matches:
             rel_path = match.relative_to(project_dir)
             print(f"   - {rel_path}")

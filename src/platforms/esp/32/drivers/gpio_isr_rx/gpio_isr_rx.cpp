@@ -557,6 +557,37 @@ private:
         }
     }
 
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+        // Convert EdgeTimestamp entries to EdgeTime entries
+        size_t count = (mEdgesCaptured < out.size()) ? mEdgesCaptured : out.size();
+
+        for (size_t i = 0; i < count; i++) {
+            // EdgeTimestamp has: time_ns (absolute), level (0 or 1)
+            // EdgeTime needs: ns (duration), high (bool)
+
+            // Calculate duration from consecutive edges
+            uint32_t duration_ns;
+            if (i == 0) {
+                // First edge: use time from start
+                duration_ns = mEdgeBuffer[0].time_ns;
+            } else {
+                // Subsequent edges: time difference from previous edge
+                duration_ns = mEdgeBuffer[i].time_ns - mEdgeBuffer[i-1].time_ns;
+            }
+
+            // Convert level (0/1) to high boolean
+            bool high = (mEdgeBuffer[i].level != 0);
+
+            out[i] = EdgeTime(high, duration_ns);
+        }
+
+        return count;
+    }
+
+    const char* name() const override {
+        return "ISR";
+    }
+
     gpio_num_t mPin;                              ///< GPIO pin for RX
     size_t mBufferSize;                          ///< Buffer size for edge timestamps
     volatile bool mReceiveDone;                  ///< Set by ISR when receive complete
