@@ -39,7 +39,7 @@ namespace {
  * Checks high time and low time against timing thresholds.
  * Returns -1 if timing doesn't match either bit pattern.
  */
-inline int decodePulseBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTimingRx &timing) {
+inline int decodePulseBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTiming4Phase &timing) {
     // Decision logic: check if timing matches bit 0 pattern
     bool t0h_match = (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
     bool t0l_match = (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
@@ -66,7 +66,7 @@ inline int decodePulseBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTiming
  * @param timing Timing thresholds
  * @return true if pulse is reset pulse (long low duration)
  */
-inline bool isResetPulse(uint32_t duration_ns, const ChipsetTimingRx &timing) {
+inline bool isResetPulse(uint32_t duration_ns, const ChipsetTiming4Phase &timing) {
     uint32_t reset_min_ns = timing.reset_min_us * 1000;
     return duration_ns >= reset_min_ns;
 }
@@ -75,7 +75,7 @@ inline bool isResetPulse(uint32_t duration_ns, const ChipsetTimingRx &timing) {
  * @brief Decode edge timestamps to bytes (span-based implementation)
  * Internal implementation - not exposed in public header
  */
-fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTimingRx &timing,
+fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &timing,
                                                          fl::span<const EdgeTimestamp> edges,
                                                          fl::span<uint8_t> bytes_out) {
     if (edges.empty()) {
@@ -366,10 +366,10 @@ public:
         return mReceiveDone;
     }
 
-    GpioIsrRxWaitResult wait(uint32_t timeout_ms) override {
+    RxWaitResult wait(uint32_t timeout_ms) override {
         if (!mIsrInstalled) {
             FL_WARN("wait(): GPIO ISR not initialized");
-            return GpioIsrRxWaitResult::TIMEOUT;
+            return RxWaitResult::TIMEOUT;
         }
 
         FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
@@ -385,13 +385,13 @@ public:
             // Check if buffer filled (success condition)
             if (mEdgesCaptured >= mBufferSize) {
                 FL_DBG("wait(): buffer filled (" << mEdgesCaptured << ")");
-                return GpioIsrRxWaitResult::SUCCESS;
+                return RxWaitResult::SUCCESS;
             }
 
             // Check wait timeout
             if (elapsed_us >= timeout_us) {
                 FL_WARN("wait(): timeout after " << elapsed_us << "us, captured " << mEdgesCaptured << " edges");
-                return GpioIsrRxWaitResult::TIMEOUT;
+                return RxWaitResult::TIMEOUT;
             }
 
             taskYIELD();  // Allow other tasks to run
@@ -399,7 +399,7 @@ public:
 
         // Receive completed (50µs timeout)
         FL_DBG("wait(): receive done, count=" << mEdgesCaptured);
-        return GpioIsrRxWaitResult::SUCCESS;
+        return RxWaitResult::SUCCESS;
     }
 
     fl::span<const EdgeTimestamp> getEdges() const override {
@@ -409,7 +409,7 @@ public:
         return fl::span<const EdgeTimestamp>(mEdgeBuffer.data(), mEdgesCaptured);
     }
 
-    fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
+    fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                fl::span<uint8_t> out) override {
         // Get captured edges from last receive operation
         fl::span<const EdgeTimestamp> edges = getEdges();

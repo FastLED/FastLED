@@ -1,0 +1,167 @@
+/// @file rx_device.h
+/// @brief Common interface for RX devices (cross-platform)
+
+#pragma once
+
+#include "fl/compiler_control.h"
+#include "ftl/stdint.h"
+#include "ftl/shared_ptr.h"
+#include "ftl/span.h"
+#include "ftl/optional.h"
+#include "fl/result.h"
+
+// Forward declarations
+namespace fl {
+    struct ChipsetTiming;
+}
+
+namespace fl {
+
+/**
+ * @brief Error codes for RX decoder operations
+ */
+enum class DecodeError : uint8_t {
+    OK = 0,                  ///< No error (not typically used)
+    HIGH_ERROR_RATE,         ///< Symbol decode error rate too high (>10%)
+    BUFFER_OVERFLOW,         ///< Output buffer overflow
+    INVALID_ARGUMENT         ///< Invalid input arguments
+};
+
+/**
+ * @brief 4-phase RX timing thresholds for chipset detection
+ *
+ * Defines acceptable timing ranges for decoding symbols back to bits.
+ * Uses min/max ranges to tolerate signal jitter and hardware variations.
+ *
+ * Thresholds should be ±150ns wider than nominal TX timing to account for:
+ * - Clock drift between TX and RX
+ * - Signal propagation delays
+ * - LED capacitance effects
+ * - GPIO sampling jitter
+ */
+struct ChipsetTiming4Phase {
+    // Bit 0 timing thresholds
+    uint32_t t0h_min_ns; ///< Bit 0 high time minimum (e.g., 250ns)
+    uint32_t t0h_max_ns; ///< Bit 0 high time maximum (e.g., 550ns)
+    uint32_t t0l_min_ns; ///< Bit 0 low time minimum (e.g., 700ns)
+    uint32_t t0l_max_ns; ///< Bit 0 low time maximum (e.g., 1000ns)
+
+    // Bit 1 timing thresholds
+    uint32_t t1h_min_ns; ///< Bit 1 high time minimum (e.g., 650ns)
+    uint32_t t1h_max_ns; ///< Bit 1 high time maximum (e.g., 950ns)
+    uint32_t t1l_min_ns; ///< Bit 1 low time minimum (e.g., 300ns)
+    uint32_t t1l_max_ns; ///< Bit 1 low time maximum (e.g., 600ns)
+
+    // Reset pulse threshold
+    uint32_t reset_min_us; ///< Reset pulse minimum duration (e.g., 50us)
+};
+
+/**
+ * @brief Create 4-phase RX timing from 3-phase chipset timing with tolerance
+ *
+ * Converts FastLED's 3-phase timing (T1, T2, T3) to 4-phase RX timing with
+ * configurable tolerance for signal variations.
+ *
+ * 3-phase encoding (FastLED chipset timing):
+ * - T1: High time for bit 0
+ * - T2: Additional high time for bit 1 (T1H = T1 + T2)
+ * - T3: Low time for bit 1 (T1L = T3)
+ * Note: Bit 0 low time is derived as T0L = T2 + T3
+ *
+ * 4-phase decoding (actual encoder output):
+ * - Bit 0: T0H (T1 high) + T0L ((T2+T3) low)
+ * - Bit 1: T1H ((T1+T2) high) + T1L (T3 low)
+ *
+ * 4-phase decoding thresholds with tolerance:
+ * - T0H: [T1 - tolerance_ns, T1 + tolerance_ns]
+ * - T0L: [(T2+T3) - tolerance_ns, (T2+T3) + tolerance_ns]
+ * - T1H: [(T1+T2) - tolerance_ns, (T1+T2) + tolerance_ns]
+ * - T1L: [T3 - tolerance_ns, T3 + tolerance_ns]
+ *
+ * @param timing_3phase 3-phase chipset timing configuration
+ * @param tolerance_ns Tolerance for all timings (default: 150ns, accounts for jitter/drift)
+ * @return ChipsetTiming4Phase 4-phase RX timing structure
+ *
+ * Example:
+ * @code
+ * ChipsetTiming ws2812b_tx{250, 625, 375, 280, "WS2812B"};
+ * auto rx_timing = make4PhaseTiming(ws2812b_tx, 150);
+ * // Results in:
+ * // T0H: [100ns, 400ns], T0L: [850ns, 1150ns]
+ * // T1H: [725ns, 1025ns], T1L: [225ns, 525ns]
+ * @endcode
+ */
+ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
+                                      uint32_t tolerance_ns = 150);
+
+/**
+ * @brief Result codes for RX wait() operations
+ */
+enum class RxWaitResult : uint8_t {
+    SUCCESS = 0,             ///< Operation completed successfully
+    TIMEOUT = 1,             ///< Operation timed out
+    BUFFER_OVERFLOW = 2      ///< Buffer overflow
+};
+
+/**
+ * @brief Common interface for RX devices
+ *
+ * Provides a unified interface for platform-specific receivers:
+ * - ESP32: RMT and GPIO ISR-based receivers
+ * - Other platforms: Future implementations
+ */
+class RxDevice {
+public:
+    virtual ~RxDevice() = default;
+
+    /**
+     * @brief Initialize (or re-arm) RX channel
+     * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns)
+     * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns)
+     * @param skip_signals Number of signals to skip before capturing (default: 0)
+     * @return true on success, false on failure
+     */
+    virtual bool begin(uint32_t signal_range_min_ns = 100,
+                      uint32_t signal_range_max_ns = 100000,
+                      uint32_t skip_signals = 0) = 0;
+
+    /**
+     * @brief Check if receive operation is complete
+     * @return true if receive finished, false if still in progress
+     */
+    virtual bool finished() const = 0;
+
+    /**
+     * @brief Wait for data with timeout
+     * @param timeout_ms Timeout in milliseconds
+     * @return RxWaitResult - SUCCESS, TIMEOUT, or BUFFER_OVERFLOW
+     */
+    virtual RxWaitResult wait(uint32_t timeout_ms) = 0;
+
+    /**
+     * @brief Decode captured data to bytes into a span
+     * @param timing Chipset timing thresholds for bit detection
+     * @param out Output span to write decoded bytes
+     * @return Result with total bytes decoded, or error
+     */
+    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                                       fl::span<uint8_t> out) = 0;
+
+    /**
+     * @brief Factory method to create RX device by type
+     * @param type Device type: "RMT" or "ISR" (ESP32 only)
+     * @param pin GPIO pin number
+     * @param buffer_size Buffer size (symbols for RMT, edges for ISR)
+     * @param hz Optional clock frequency (only used for RMT, defaults to platform default: 40MHz on ESP32)
+     * @return Shared pointer to RxDevice, or nullptr on failure
+     */
+    static fl::shared_ptr<RxDevice> create(const char* type,
+                                            int pin,
+                                            size_t buffer_size,
+                                            fl::optional<uint32_t> hz = fl::nullopt);
+
+protected:
+    RxDevice() = default;
+};
+
+} // namespace fl

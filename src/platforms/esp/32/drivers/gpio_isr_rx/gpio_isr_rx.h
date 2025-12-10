@@ -4,12 +4,7 @@
 #include "ftl/shared_ptr.h"
 #include "ftl/span.h"
 #include "fl/result.h"
-
-// Forward declare types from rmt_rx_channel.h to avoid circular dependency
-namespace fl {
-    enum class DecodeError : uint8_t;
-    struct ChipsetTimingRx;
-}
+#include "fl/rx_device.h"
 
 namespace fl {
 
@@ -22,15 +17,6 @@ namespace fl {
 struct EdgeTimestamp {
     uint32_t time_ns;    ///< Timestamp in nanoseconds (relative to capture start)
     uint8_t level;       ///< GPIO level (0 or 1)
-};
-
-/**
- * @brief Result codes for GPIO ISR RX wait() operations
- */
-enum class GpioIsrRxWaitResult : uint8_t {
-    SUCCESS = 0,             ///< Operation completed successfully
-    TIMEOUT = 1,             ///< Operation timed out
-    BUFFER_OVERFLOW = 2      ///< Buffer overflow
 };
 
 /**
@@ -61,14 +47,14 @@ enum class GpioIsrRxWaitResult : uint8_t {
  * }
  *
  * // Wait for data with 100ms timeout
- * if (rx->wait(100) == GpioIsrRxWaitResult::SUCCESS) {
+ * if (rx->wait(100) == RxWaitResult::SUCCESS) {
  *     // Get captured edges
  *     fl::span<const EdgeTimestamp> edges = rx->getEdges();
  *     FL_DBG("Captured " << edges.size() << " edges");
  * }
  * @endcode
  */
-class GpioIsrRx {
+class GpioIsrRx : public RxDevice {
 public:
     /**
      * @brief Create GPIO ISR RX instance (does not initialize hardware)
@@ -115,18 +101,18 @@ public:
      * // Result: Only last 100 edges captured in buffer
      * @endcode
      */
-    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) = 0;
+    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override = 0;
 
     /**
      * @brief Check if receive operation is complete
      * @return true if receive finished, false if still in progress
      */
-    virtual bool finished() const = 0;
+    virtual bool finished() const override = 0;
 
     /**
      * @brief Wait for edge timestamps with timeout
      * @param timeout_ms Timeout in milliseconds
-     * @return GpioIsrRxWaitResult - SUCCESS, TIMEOUT, or BUFFER_OVERFLOW
+     * @return RxWaitResult - SUCCESS, TIMEOUT, or BUFFER_OVERFLOW
      *
      * Behavior:
      * - Uses internal buffer size specified in create()
@@ -140,7 +126,7 @@ public:
      * 1. Buffer filled (reached buffer_size edges)
      * 2. Idle timeout elapsed since first edge (signal_range_max_ns from begin())
      */
-    virtual GpioIsrRxWaitResult wait(uint32_t timeout_ms) = 0;
+    virtual RxWaitResult wait(uint32_t timeout_ms) override = 0;
 
     /**
      * @brief Get captured edge timestamps as a span
@@ -166,17 +152,18 @@ public:
      * rx->begin(100, 100000);  // min=100ns, max=100μs (or use defaults)
      *
      * // Wait for edges
-     * if (rx->wait(50) == GpioIsrRxWaitResult::SUCCESS) {
+     * if (rx->wait(50) == RxWaitResult::SUCCESS) {
      *     uint8_t buffer[256];
-     *     auto result = rx->decode(CHIPSET_TIMING_WS2812B_RX, buffer);
+     *     auto rx_timing = makeRxTiming(TIMING_WS2812_800KHZ);
+     *     auto result = rx->decode(rx_timing, buffer);
      *     if (result.ok()) {
      *         FL_DBG("Decoded " << result.value() << " bytes");
      *     }
      * }
      * @endcode
      */
-    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTimingRx &timing,
-                                                       fl::span<uint8_t> out) = 0;
+    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                                       fl::span<uint8_t> out) override = 0;
 
 protected:
     GpioIsrRx() = default;
