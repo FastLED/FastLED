@@ -15,8 +15,8 @@ Phase 2: Upload (with self-healing)
 
 Phase 3: Monitor
     - Attaches to serial monitor and displays real-time output
-    - Captures output for analysis
-    - Exits with code 1 if any fail keyword is detected (--fail-on)
+    - --expect: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
+    - --fail-on: Terminates immediately on match, exits 1
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
@@ -36,11 +36,11 @@ Usage:
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
     uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
-    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found (replaces default "ERROR")
-    uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
+    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 immediately if "PANIC" found (replaces default "ERROR")
+    uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
     uv run ci/debug_attached.py --no-fail-on             # Disable all failure keywords
-    uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 when "SUCCESS" found
-    uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Multiple success keywords
+    uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
+    uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
     uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
 """
@@ -895,14 +895,19 @@ def run_monitor(
 ) -> tuple[bool, list[str]]:
     """Attach to serial monitor and capture output.
 
+    Keyword Behavior:
+        --expect: Monitors until timeout, then checks if ALL keywords were found.
+                  Exit 0 if all found, exit 1 if any missing.
+        --fail-on: Terminates immediately when ANY keyword is found, exits 1.
+
     Args:
         build_dir: Project directory containing platformio.ini
         environment: PlatformIO environment to monitor (None = default)
         monitor_port: Serial port to monitor (None = auto-detect)
         verbose: Enable verbose output
         timeout: Maximum time to monitor in seconds (default: 20)
-        fail_keywords: List of keywords that trigger exit code 1 if found (default: ["ERROR"])
-        expect_keywords: List of keywords that trigger exit code 0 (success) if found
+        fail_keywords: List of keywords that trigger immediate termination + exit 1 (default: ["ERROR"])
+        expect_keywords: List of keywords that must ALL be found by timeout for exit 0
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
 
     Returns:
@@ -950,11 +955,11 @@ def run_monitor(
     output_lines = []
     failing_lines = []  # Track all lines containing fail keywords
     expect_lines = []  # Track all lines containing expect keywords
+    found_expect_keywords = set()  # Track which expect keywords have been found
     start_time = time.time()
     fail_keyword_found = False
-    expect_keyword_found = False
-    matched_keyword = None
-    matched_line = None
+    matched_fail_keyword = None
+    matched_fail_line = None
     timeout_reached = False
 
     try:
@@ -977,44 +982,37 @@ def run_monitor(
                     output_lines.append(line)
                     print(line)  # Real-time output
 
-                    # Check for expect keywords first (success condition)
-                    if expect_keywords and not expect_keyword_found:
+                    # Check for expect keywords (track but don't terminate)
+                    if expect_keywords:
                         for keyword in expect_keywords:
                             if keyword in line:
                                 # Track this expected line
                                 expect_lines.append((keyword, line))
 
-                                if not expect_keyword_found:
-                                    # First match - set flags and terminate
-                                    expect_keyword_found = True
-                                    matched_keyword = keyword
-                                    matched_line = line
+                                # Mark this keyword as found
+                                if keyword not in found_expect_keywords:
+                                    found_expect_keywords.add(keyword)
                                     print(f"\n✅ EXPECT KEYWORD DETECTED: '{keyword}'")
                                     print(f"   Matched line: {line}")
-                                    print("   Terminating monitor (will drain remaining output)...\n")
-                                    proc.terminate()
-                                break
+                                    print(f"   (Continuing to monitor - need all {len(expect_keywords)} keywords)\n")
 
-                    # Check for fail keywords (if expect not already found)
-                    if fail_keywords and not expect_keyword_found:
+                    # Check for fail keywords - TERMINATE IMMEDIATELY
+                    if fail_keywords and not fail_keyword_found:
                         for keyword in fail_keywords:
                             if keyword in line:
                                 # Track this failing line
                                 failing_lines.append((keyword, line))
 
                                 if not fail_keyword_found:
-                                    # First failure - set flags and terminate
+                                    # First failure - terminate immediately
                                     fail_keyword_found = True
-                                    matched_keyword = keyword
-                                    matched_line = line
+                                    matched_fail_keyword = keyword
+                                    matched_fail_line = line
                                     print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
                                     print(f"   Matched line: {line}")
-                                    print("   Terminating monitor (will drain remaining output)...\n")
+                                    print(f"   Terminating monitor immediately...\n")
                                     proc.terminate()
                                 break
-
-                    # Continue reading even after terminate to drain buffered output
-                    # Breaking immediately would discard any remaining output in the process buffer
 
             except TimeoutError:
                 # No output within 30 seconds - continue waiting (check overall timeout on next loop)
@@ -1029,12 +1027,18 @@ def run_monitor(
     proc.wait()
 
     # Determine success based on exit conditions
-    if expect_keyword_found:
-        # Expect keyword match always means success
-        success = True
-    elif fail_keyword_found:
+    if fail_keyword_found:
         # Fail keyword match always means failure
         success = False
+    elif expect_keywords:
+        # If expect keywords were specified, ALL must be found for success
+        missing_keywords = set(expect_keywords) - found_expect_keywords
+        if missing_keywords:
+            # Not all expect keywords found - failure
+            success = False
+        else:
+            # All expect keywords found - success
+            success = True
     elif timeout_reached:
         # Normal timeout is considered success (exit 0)
         success = True
@@ -1078,12 +1082,21 @@ def run_monitor(
 
     print("\n" + "=" * 60)
 
-    if expect_keyword_found:
-        print(f"✅ Monitor succeeded - expect keyword '{matched_keyword}' detected")
-        print(f"   Matched line: {matched_line}")
-    elif fail_keyword_found:
-        print(f"❌ Monitor failed - fail keyword '{matched_keyword}' detected")
-        print(f"   Matched line: {matched_line}")
+    if fail_keyword_found:
+        print(f"❌ Monitor failed - fail keyword '{matched_fail_keyword}' detected")
+        print(f"   Matched line: {matched_fail_line}")
+    elif expect_keywords:
+        # Check if all expect keywords were found
+        missing_keywords = set(expect_keywords) - found_expect_keywords
+        if missing_keywords:
+            print(f"❌ Monitor failed - not all expect keywords found")
+            print(f"   Expected {len(expect_keywords)} keywords, found {len(found_expect_keywords)}")
+            print(f"   Missing keywords: {', '.join(sorted(missing_keywords))}")
+            if found_expect_keywords:
+                print(f"   Found keywords: {', '.join(sorted(found_expect_keywords))}")
+        else:
+            print(f"✅ Monitor succeeded - all {len(expect_keywords)} expect keywords found")
+            print(f"   Keywords: {', '.join(sorted(expect_keywords))}")
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
     elif stream and success:
@@ -1113,11 +1126,11 @@ Examples:
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
-  %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found (replaces default "ERROR")
-  %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
+  %(prog)s --fail-on PANIC          # Exit 1 immediately if "PANIC" found (replaces default "ERROR")
+  %(prog)s --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
   %(prog)s --no-fail-on             # Disable all failure keywords
-  %(prog)s --expect "SUCCESS"       # Exit 0 when "SUCCESS" found
-  %(prog)s --expect "PASS" --expect "OK"  # Multiple success keywords
+  %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
+  %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
   %(prog)s RX --env esp32dev --verbose --upload-port COM3
         """,
@@ -1165,7 +1178,7 @@ Examples:
         "-f",
         action="append",
         dest="fail_keywords",
-        help="Keyword that triggers exit code 1 if found in monitor output (can be specified multiple times). Default: 'ERROR'",
+        help="Keyword that triggers immediate termination + exit 1 if found (can be specified multiple times). Default: 'ERROR'",
     )
     parser.add_argument(
         "--no-fail-on",
@@ -1177,7 +1190,7 @@ Examples:
         "-x",
         action="append",
         dest="expect_keywords",
-        help="Keyword that triggers exit code 0 (success) if found in monitor output (can be specified multiple times). Takes priority over --fail-on.",
+        help="Keyword that must be found by timeout for exit 0. ALL keywords must be found (can be specified multiple times). Monitor runs until timeout to find all.",
     )
     parser.add_argument(
         "--stream",

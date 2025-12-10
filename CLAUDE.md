@@ -78,7 +78,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 **Phase 1: Compile** - Build PlatformIO project for target environment
 **Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
-**Phase 3: Monitor** - Attach to serial monitor, capture output, detect failure keywords
+**Phase 3: Monitor** - Attach to serial monitor, capture output, detect keywords
 
 **Usage:**
 - `bash debug` - Auto-detect environment (default: 20s timeout, fails on "ERROR")
@@ -86,11 +86,11 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug --upload-port COM3` - Specific serial port
 - `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
 - `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --fail-on PANIC` - Exit 1 if keyword found (default: "ERROR")
-- `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords
+- `bash debug --fail-on PANIC` - Exit 1 immediately if keyword found (default: "ERROR")
+- `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords (exits on any)
 - `bash debug --no-fail-on` - Disable all failure keywords (including default)
-- `bash debug --expect "SUCCESS"` - Exit 0 when keyword found (success condition)
-- `bash debug --expect "PASS" --expect "OK"` - Multiple success keywords
+- `bash debug --expect "SUCCESS"` - Exit 0 only if keyword found by timeout
+- `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL keywords found by timeout
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
@@ -98,12 +98,17 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - Minutes: `2m`
 - Milliseconds: `5000ms`
 
+**Keyword Behavior:**
+- `--fail-on`: Terminates monitor immediately on match, exits 1
+- `--expect`: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
+- Default: Fails on "ERROR" keyword (immediate termination)
+
 **Exit Codes:**
-- 0: Success (normal timeout or clean exit)
-- 1: Failure (compile/upload error, process crash, or keyword match)
+- 0: Success (normal timeout, clean exit, or all expect keywords found)
+- 1: Failure (compile/upload error, fail keyword found, or missing expect keywords)
 - 130: User interrupt (Ctrl+C)
 
-**Note:** Default behavior fails on "ERROR" keyword. Normal timeout is success (exit 0). Using both `--fail-on` and `--no-fail-on` causes error.
+**Note:** Using both `--fail-on` and `--no-fail-on` causes error.
 
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes
