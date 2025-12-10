@@ -23,6 +23,7 @@
 
 #include <FastLED.h>
 #include "fl/rx_device.h"
+#include "fl/sketch_macros.h"
 
 // ============================================================================
 // Configuration
@@ -123,7 +124,7 @@ void setup() {
 
     // Test pin loopback connection
     if (!testPinLoopback()) {
-        while (1) delay(1000);  // Halt on failure
+        SKETCH_HALT("Pin loopback test failed - connect GPIO 0 to GPIO 19");
     }
     FL_WARN("");
 
@@ -131,8 +132,7 @@ void setup() {
     FL_WARN("Creating GPIO ISR RX device...");
     g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE);
     if (!g_rx_device) {
-        FL_ERROR("Failed to create GPIO ISR RX device");
-        while (1) delay(1000);  // Halt
+        SKETCH_HALT("Failed to create GPIO ISR RX device");
     }
     FL_WARN("✓ GPIO ISR RX device created\n");
 
