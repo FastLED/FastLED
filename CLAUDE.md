@@ -110,6 +110,27 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 **Note:** Using both `--fail-on` and `--no-fail-on` causes error.
 
+### Package Installation Daemon Management
+`bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
+
+**Commands:**
+- `bash daemon status` - Show daemon status and health
+- `bash daemon stop` - Stop the daemon gracefully
+- `bash daemon logs` - View daemon log file (last 50 lines)
+- `bash daemon logs-tail` - Follow daemon logs in real-time (Ctrl+C to exit)
+- `bash daemon start` - Start the daemon (usually automatic)
+- `bash daemon restart` - Stop and start the daemon
+- `bash daemon clean` - Remove all daemon state (force fresh start)
+
+**What is the daemon:**
+The package installation daemon is a singleton background process that ensures PlatformIO package installations complete atomically, even if an agent is interrupted mid-download. It prevents package corruption by:
+- Surviving agent termination (daemon continues independently)
+- Preventing concurrent package installations system-wide
+- Providing progress feedback to waiting clients
+- Auto-shutting down after 5 minutes of inactivity
+
+**Note:** The daemon starts automatically when needed by `bash debug` or other commands that require package installation. Manual management is typically not required.
+
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes
   - Reviews src/, examples/, and ci/ changes against project standards

@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-"""Three-phase device workflow: Compile → Upload → Monitor.
+"""Three-phase device workflow: Package Install → Compile+Upload+Monitor.
 
 This script orchestrates a complete device development workflow in three distinct phases:
 
-Phase 1: Compile
+Phase 0: Package Installation (GLOBAL SINGLETON LOCK via daemon)
+    - Ensures PlatformIO packages are installed using `pio pkg install -e <environment>`
+    - Uses singleton daemon to serialize package installations globally
+    - Lock scope: System-wide (~/.platformio/packages/ shared by all projects)
+    - Daemon survives agent termination and completes installation atomically
+    - Fast path: ~3.8s validation when packages already installed
+    - Prevents corruption from concurrent package downloads
+
+Phase 1: Compile (NO LOCK - parallelizable)
     - Builds the PlatformIO project for the target environment
-    - Validates code compiles without errors
-    - May trigger global package installations
+    - Uses `pio run -e <environment>` (normal compilation)
+    - No lock needed: Each project has isolated build directory
+    - Packages already installed, so no downloads triggered
+    - Multiple agents can compile different projects simultaneously
 
 Phase 2: Upload (with self-healing)
     - Kills lingering esptool/pio upload/monitor processes that may lock files or ports
-    - Uploads firmware to the attached device
+    - Uploads firmware to the attached device using `pio run -t upload`
+    - PlatformIO's incremental build system only rebuilds if source files changed
     - Handles port and file lock conflicts automatically
 
 Phase 3: Monitor
@@ -20,11 +31,16 @@ Phase 3: Monitor
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
-    - Uses a file-based lock (~/.fastled/locks/device_debug.lock) for all three phases
+    - Uses a file-based lock (~/.fastled/locks/device_debug.lock) for upload and monitor phases
     - Prevents multiple agents from interfering with device operations
-    - Lock is system-wide (device is a global resource, not project-specific)
+    - Lock scope: System-wide (device is a global resource, not project-specific)
     - Lock timeout: 600 seconds (10 minutes)
-    - Supports stale lock detection and automatic cleanup
+    - Prevents port conflicts between multiple agents
+
+Locking Architecture:
+    - Phase 0: Daemon provides implicit global lock (singleton + sequential processing)
+    - Phase 1: NO LOCK (compilation is project-local, fully parallelizable)
+    - Phase 2-3: Device lock (~/.fastled/locks/device_debug.lock, system-wide)
 
 Usage:
     uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, fails on "ERROR")
@@ -685,8 +701,12 @@ def run_upload(
 ) -> bool:
     """Upload firmware to device.
 
-    This function includes self-healing logic to kill lingering processes
-    that may lock build files or serial ports before attempting upload.
+    This function uses `pio run -t upload` which will upload the firmware.
+    PlatformIO's incremental build system only rebuilds if source files changed
+    since the last compilation, making this fast when nothing changed.
+
+    Includes self-healing logic to kill lingering processes that may lock
+    serial ports before attempting upload.
 
     On Windows, serial ports may remain locked at the driver level even after
     all processes are killed. This function retries up to 3 times with
@@ -1278,11 +1298,38 @@ def main() -> int:
     print()
 
     try:
-        # Acquire device debug lock for all three phases
-        # (compile can trigger global package installs, upload/monitor use serial port)
-        # Use global lock (use_global=True) since device is a system-wide resource
+        # ============================================================
+        # PHASE 0: Package Installation (GLOBAL LOCK via daemon)
+        # ============================================================
+        # The daemon acts as a global singleton lock for package installations.
+        # No explicit lock needed here - daemon serializes all pio pkg install.
+        print("=" * 60)
+        print("PHASE 0: ENSURING PACKAGES INSTALLED")
+        print("=" * 60)
+
+        from ci.util.pio_package_client import ensure_packages_installed
+
+        if not ensure_packages_installed(build_dir, args.environment, timeout=1800):
+            print("\n❌ Package installation failed or timed out")
+            return 1
+
+        print()
+
+        # ============================================================
+        # PHASE 1: Compile (NO LOCK - parallelizable)
+        # ============================================================
+        # No lock needed: each project has isolated build directory.
+        # Multiple agents can compile different projects simultaneously.
+        if not run_compile(build_dir, args.environment, args.verbose):
+            return 1
+
+        # ============================================================
+        # PHASES 2-3: Upload + Monitor (DEVICE LOCK)
+        # ============================================================
+        # Acquire device lock for upload and monitor phases.
+        # Lock ensures only one agent accesses the device at a time.
         lock = BuildLock(lock_name="device_debug", use_global=True)
-        if not lock.acquire(timeout=5.0):
+        if not lock.acquire(timeout=600.0):  # 10 minute timeout
             print(
                 "\n❌ Another agent is currently using the device for debug operations."
             )
@@ -1291,11 +1338,7 @@ def main() -> int:
             return 1
 
         try:
-            # Phase 1: Compile
-            if not run_compile(build_dir, args.environment, args.verbose):
-                return 1
-
-            # Phase 2: Upload (includes self-healing port cleanup)
+            # Phase 2: Upload firmware (with incremental rebuild if needed)
             if not run_upload(
                 build_dir, args.environment, args.upload_port, args.verbose
             ):
@@ -1320,7 +1363,7 @@ def main() -> int:
             return 0
 
         finally:
-            # Always release the lock
+            # Always release the device lock
             lock.release()
 
     except KeyboardInterrupt:
