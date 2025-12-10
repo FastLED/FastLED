@@ -5,7 +5,7 @@
 #include <random>
 #include <algorithm>
 #include <climits>
-#include "fl/rbtree.h"
+#include "ftl/detail/rbtree.h"
 #include "ftl/string.h"
 
 namespace {

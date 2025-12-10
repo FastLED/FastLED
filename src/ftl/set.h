@@ -4,7 +4,7 @@
 
 #include "ftl/vector.h"
 #include "ftl/map.h"
-#include "fl/rbtree.h"
+#include "ftl/detail/rbtree.h"
 #include "ftl/allocator.h"
 #include "ftl/pair.h"
 

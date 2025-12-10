@@ -9,7 +9,7 @@
 #include "ftl/type_traits.h"
 #include "ftl/type_traits.h"
 #include "ftl/vector.h"
-#include "fl/rbtree.h"
+#include "ftl/detail/rbtree.h"
 #include "ftl/allocator.h"
 
 namespace fl {
