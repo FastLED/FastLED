@@ -10,7 +10,7 @@
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx_buffer) {
     if (!rx_channel) {
-        FL_WARN("ERROR: RX channel is null");
+        FL_ERROR("RX channel is null");
         return 0;
     }
 
@@ -19,7 +19,7 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
 
     // Arm RX receiver (re-arms if already initialized)
     if (!rx_channel->begin()) {
-        FL_WARN("ERROR: Failed to arm RX receiver");
+        FL_ERROR("Failed to arm RX receiver");
         return 0;
     }
 
@@ -31,7 +31,7 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
     if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
-        FL_WARN("ERROR: RX wait failed (timeout or no data received)");
+        FL_ERROR("RX wait failed (timeout or no data received)");
         FL_WARN("");
         FL_WARN("⚠️  TROUBLESHOOTING:");
         FL_WARN("   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from GPIO to itself");
@@ -46,7 +46,7 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
     auto decode_result = rx_channel->decode(fl::CHIPSET_TIMING_WS2812B_RX, rx_buffer);
 
     if (!decode_result.ok()) {
-        FL_WARN("ERROR: Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
+        FL_ERROR("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
         return 0;
     }
 
@@ -66,7 +66,7 @@ void runTest(const char* test_name,
 
         // Use RX channel provided via config (created in .ino file, never created dynamically here)
         if (!config.rx_channel) {
-            FL_WARN("[ERROR] RX channel is null - must be created in .ino and passed via ValidationConfig");
+            FL_ERROR("RX channel is null - must be created in .ino and passed via ValidationConfig");
             FL_WARN("Result: FAIL ✗ (RX channel not provided)");
             continue;
         }
@@ -108,7 +108,7 @@ void runTest(const char* test_name,
             uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
             if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
-                FL_WARN("ERROR: Mismatch on LED[" << static_cast<int>(i)
+                FL_ERROR("Mismatch on LED[" << static_cast<int>(i)
                         << "], expected RGB(" << static_cast<int>(expected_r) << ","
                         << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
                         << ") but got RGB(" << static_cast<int>(actual_r) << ","
@@ -151,7 +151,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
 
         auto channel = FastLED.addChannel(channel_config);
         if (!channel) {
-            FL_WARN("[ERROR] Failed to create channel " << i << " (pin " << config.tx_configs[i].pin << ") - platform not supported");
+            FL_ERROR("Failed to create channel " << i << " (pin " << config.tx_configs[i].pin << ") - platform not supported");
             // Clean up previously created channels
             for (auto& ch : channels) {
                 ch.reset();
@@ -199,7 +199,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     if (passed == total) {
         FL_WARN("[PASS] " << config.timing_name << " validation successful");
     } else {
-        FL_WARN("[ERROR] " << config.timing_name << " validation failed");
+        FL_ERROR(config.timing_name << " validation failed");
     }
 
     // Accumulate results for driver-level tracking

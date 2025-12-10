@@ -402,7 +402,7 @@ public:
 
             // Check if ISR is still armed from previous capture (error condition)
             if (!mIsrCtx.receiveDone) {
-                FL_WARN("ERROR: GPIO ISR is still armed from previous capture - call wait() or check finished() before calling begin() again");
+                FL_ERROR("GPIO ISR is still armed from previous capture - call wait() or check finished() before calling begin() again");
                 return false;
             }
 

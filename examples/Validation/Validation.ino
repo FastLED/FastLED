@@ -196,8 +196,8 @@ void setup() {
     auto sanity_rx_channel = createRxChannel(PIN_RX, 20000000, 256);  // 20MHz, 256 symbols
 
     if (!sanity_rx_channel) {
-        FL_WARN("ERROR [RX SETUP]: Failed to create sanity check RX channel");
-        FL_WARN("ERROR [RX SETUP]: Check that RMT peripheral is available and not in use");
+        FL_ERROR("[RX SETUP]: Failed to create sanity check RX channel");
+        FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
         error_sanity_check = true;
         return;
     }
@@ -205,8 +205,8 @@ void setup() {
     // Step 2: Test the sanity check RX channel
     FL_WARN("\n[RX SETUP] Step 2: Running sanity check test");
     if (!testRxChannel(sanity_rx_channel, PIN_TX, PIN_RX)) {
-        FL_WARN("ERROR [RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
-        FL_WARN("ERROR [RX SETUP]: Main validation tests will be skipped");
+        FL_ERROR("[RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
+        FL_ERROR("[RX SETUP]: Main validation tests will be skipped");
         error_sanity_check = true;
         return;
     }
@@ -223,8 +223,8 @@ void setup() {
     rx_channel = createRxChannel(PIN_RX, 40000000, RX_BUFFER_SIZE);  // 40MHz, RX_BUFFER_SIZE symbols
 
     if (!rx_channel) {
-        FL_WARN("ERROR [RX SETUP]: Failed to create high-precision RX channel");
-        FL_WARN("ERROR [RX SETUP]: Check that RMT peripheral is available and not in use");
+        FL_ERROR("[RX SETUP]: Failed to create high-precision RX channel");
+        FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
         error_sanity_check = true;
         return;
     }
@@ -259,7 +259,7 @@ void loop() {
 
     // If sanity check failed, print error continuously and delay
     if (error_sanity_check) {
-        FL_WARN("ERROR: Sanity check failed - RX channel is not working");
+        FL_ERROR("Sanity check failed - RX channel is not working");
         delay(2000);
         return;
     }
@@ -272,8 +272,8 @@ void loop() {
 
         for (fl::size i = 0; i < drivers_failed.size(); i++) {
             const auto& failure = drivers_failed[i];
-            FL_WARN("ERROR: Driver '" << failure.driver_name.c_str() << "' failed on frame " << failure.frame_number);
-            FL_WARN("ERROR: " << failure.failure_details.c_str());
+            FL_ERROR("Driver '" << failure.driver_name.c_str() << "' failed on frame " << failure.frame_number);
+            FL_ERROR(failure.failure_details.c_str());
         }
 
         FL_WARN("\nFix the above errors before continuing. Retrying in 5 seconds...");
@@ -340,8 +340,8 @@ void loop() {
                 frame_counter
             ));
 
-            FL_WARN("ERROR: Driver " << driver.name.c_str() << " FAILED on frame " << frame_counter);
-            FL_WARN("ERROR: " << failure_msg.str().c_str());
+            FL_ERROR("Driver " << driver.name.c_str() << " FAILED on frame " << frame_counter);
+            FL_ERROR(failure_msg.str().c_str());
         }
 
         driver_results.push_back(result);

@@ -178,7 +178,7 @@ void loop() {
     auto wait_result = g_rx_device->wait(WAIT_TIMEOUT_MS);
 
     if (wait_result == fl::RxWaitResult::TIMEOUT) {
-        FL_WARN("ERROR: Timeout waiting for data");
+        FL_ERROR("Timeout waiting for data");
     } else if (wait_result == fl::RxWaitResult::BUFFER_OVERFLOW) {
         FL_WARN("WARNING: Buffer overflow during capture");
     } else {
@@ -191,7 +191,7 @@ void loop() {
         FL_WARN("[TEST] Captured " << edge_count << " edges");
 
         if (edge_count == 0) {
-            FL_WARN("ERROR: No edges captured!");
+            FL_ERROR("No edges captured!");
         } else {
             // Print edge timings
             FL_WARN("[TEST] Edge timings:");
@@ -204,7 +204,7 @@ void loop() {
             bool alternation_valid = true;
             for (size_t i = 1; i < edge_count; i++) {
                 if (edge_buffer[i].high == edge_buffer[i-1].high) {
-                    FL_WARN("ERROR: Sequential " << (edge_buffer[i].high ? "HIGH" : "LOW")
+                    FL_ERROR("Sequential " << (edge_buffer[i].high ? "HIGH" : "LOW")
                             << " values at indices " << (i-1) << " and " << i
                             << " - edges should alternate HIGH/LOW");
                     alternation_valid = false;
@@ -261,12 +261,12 @@ void loop() {
 
             // Validate results
             if (!alternation_valid) {
-                FL_WARN("ERROR: Edge timings are not properly alternating");
-                FL_WARN("ERROR: Expected pattern: HIGH, LOW, HIGH, LOW, ...");
-                FL_WARN("ERROR: Actual pattern contains sequential identical states");
+                FL_ERROR("Edge timings are not properly alternating");
+                FL_ERROR("Expected pattern: HIGH, LOW, HIGH, LOW, ...");
+                FL_ERROR("Actual pattern contains sequential identical states");
             } else if (!timing_valid) {
-                FL_WARN("ERROR: Captured edge timings do not match expected pattern");
-                FL_WARN("ERROR: Check timing accuracy and tolerance settings");
+                FL_ERROR("Captured edge timings do not match expected pattern");
+                FL_ERROR("Check timing accuracy and tolerance settings");
             } else if (edge_count >= 5) {
                 FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges with proper alternation");
                 FL_WARN("[TEST] ✓ PASS: All timing values match expected pattern within tolerance");

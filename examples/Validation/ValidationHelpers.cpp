@@ -12,7 +12,7 @@ fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
     auto rx_channel = fl::RmtRxChannel::create(pin_rx, hz, buffer_size);
 
     if (!rx_channel) {
-        FL_WARN("ERROR [RX CREATE]: Failed to create RX channel");
+        FL_ERROR("[RX CREATE]: Failed to create RX channel");
         return nullptr;
     }
 
@@ -37,7 +37,7 @@ bool testRxChannel(
     // Initialize RX channel with signal range for fast GPIO toggles
     // RMT peripheral max is ~819 μs, so use 200 μs (2x our pulse width for safety)
     if (!rx_channel->begin(100, 200000)) {  // min=100ns, max=200μs
-        FL_WARN("ERROR [RX TEST]: Failed to begin RX channel");
+        FL_ERROR("[RX TEST]: Failed to begin RX channel");
         pinMode(pin_tx, INPUT);  // Release pin
         return false;
     }
@@ -60,9 +60,9 @@ bool testRxChannel(
 
     // Check if we successfully captured data
     if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
-        FL_WARN("ERROR [RX TEST]: RX channel wait failed (result: " << static_cast<int>(wait_result) << ")");
-        FL_WARN("ERROR [RX TEST]: RX may not be working - check PIN_RX (" << pin_rx << ") and RMT peripheral");
-        FL_WARN("ERROR [RX TEST]: If using non-RMT TX, ensure physical jumper from PIN " << pin_tx << " to PIN " << pin_rx);
+        FL_ERROR("[RX TEST]: RX channel wait failed (result: " << static_cast<int>(wait_result) << ")");
+        FL_ERROR("[RX TEST]: RX may not be working - check PIN_RX (" << pin_rx << ") and RMT peripheral");
+        FL_ERROR("[RX TEST]: If using non-RMT TX, ensure physical jumper from PIN " << pin_tx << " to PIN " << pin_rx);
         return false;
     }
 
@@ -124,7 +124,7 @@ void validateExpectedEngines() {
         }
 
         if (!found) {
-            FL_WARN("ERROR: Expected engine '" << expected << "' is MISSING from available drivers!");
+            FL_ERROR("Expected engine '" << expected << "' is MISSING from available drivers!");
             all_present = false;
         }
     }
@@ -132,7 +132,7 @@ void validateExpectedEngines() {
     if (all_present) {
         FL_WARN("[VALIDATION] ✓ All expected engines are available");
     } else {
-        FL_WARN("ERROR: Engine validation FAILED - some expected engines are missing!");
+        FL_ERROR("Engine validation FAILED - some expected engines are missing!");
     }
 }
 
@@ -149,7 +149,7 @@ void testDriver(
 
     // Set this driver as exclusive for testing
     if (!FastLED.setExclusiveDriver(driver_name)) {
-        FL_WARN("[ERROR] Failed to set " << driver_name << " as exclusive driver");
+        FL_ERROR("Failed to set " << driver_name << " as exclusive driver");
         result.skipped = true;
         return;
     }

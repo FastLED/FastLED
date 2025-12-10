@@ -1137,6 +1137,7 @@ extern CFastLED FastLED;
 #include "fl/clamp.h"  // fl::clamp(value, min, max)
 #include "fl/map_range.h"  // fl::map_range(value, in_min, in_max, out_min, out_max)
 
+#include "fl/error.h"
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
 #include "ftl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.

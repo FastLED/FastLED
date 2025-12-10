@@ -187,7 +187,7 @@ void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
                 component->updateInternal(v);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
-                FL_WARN("*** ERROR: could not find component with ID or name: " << id_or_name);
+                FL_ERROR("could not find component with ID or name: " << id_or_name);
             }
         }
     } else {
