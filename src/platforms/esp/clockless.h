@@ -34,11 +34,9 @@ namespace fl {
   // RMT is preferred default for ESP32 (best performance, most features)
   // Use ClocklessIdf4 (ESP-IDF 4.x) or ClocklessIdf5 (ESP-IDF 5.x) based on FASTLED_RMT5
   #if FASTLED_RMT5
-    #pragma message "ESP32: Using ClocklessIdf5 (RMT5/ESP-IDF 5.x) as default ClocklessController"
     template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
     using ClocklessController = ClocklessIdf5<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
   #else
-    #pragma message "ESP32: Using ClocklessIdf4 (RMT4/ESP-IDF 4.x) as default ClocklessController"
     template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
     using ClocklessController = ClocklessIdf4<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
   #endif
