@@ -9,21 +9,28 @@ fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
     FL_WARN("[RX CREATE] Creating RX channel on PIN " << pin_rx
             << " (" << (hz / 1000000) << "MHz, " << buffer_size << " symbols)");
 
-    auto rx_channel = fl::RmtRxChannel::create(pin_rx, hz, buffer_size);
+    auto rx_channel = fl::RmtRxChannel::create();
 
     if (!rx_channel) {
         FL_ERROR("[RX CREATE]: Failed to create RX channel");
         return nullptr;
     }
 
-    FL_WARN("[RX CREATE] ✓ RX channel created successfully");
+    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
+    FL_WARN("[RX CREATE] Hardware params: pin=" << pin_rx << ", hz=" << hz << ", buffer_size=" << buffer_size);
+
+    // Note: The caller must call begin() with RxConfig that includes these hardware params
+    // This function just creates the device instance, initialization happens in begin()
+
     return rx_channel;
 }
 
 bool testRxChannel(
     fl::shared_ptr<fl::RmtRxChannel> rx_channel,
     int pin_tx,
-    int pin_rx) {
+    int pin_rx,
+    uint32_t hz,
+    size_t buffer_size) {
     FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN " << pin_tx);
 
     // Configure PIN_TX as output (temporarily take ownership from FastLED)
@@ -36,7 +43,14 @@ bool testRxChannel(
 
     // Initialize RX channel with signal range for fast GPIO toggles
     // RMT peripheral max is ~819 μs, so use 200 μs (2x our pulse width for safety)
-    fl::RxConfig rx_config(100, 200000);  // min=100ns, max=200μs
+    fl::RxConfig rx_config;
+    rx_config.pin = pin_rx;
+    rx_config.buffer_size = buffer_size;
+    rx_config.hz = hz;
+    rx_config.signal_range_min_ns = 100;    // min=100ns
+    rx_config.signal_range_max_ns = 200000;  // max=200μs
+    rx_config.start_low = true;
+
     if (!rx_channel->begin(rx_config)) {
         FL_ERROR("[RX TEST]: Failed to begin RX channel");
         pinMode(pin_tx, INPUT);  // Release pin

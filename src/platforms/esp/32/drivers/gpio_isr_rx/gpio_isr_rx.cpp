@@ -292,10 +292,10 @@ struct alignas(64) IsrContext {
  */
 class GpioIsrRxImpl : public GpioIsrRx {
 public:
-    GpioIsrRxImpl(gpio_num_t pin, size_t buffer_size)
+    GpioIsrRxImpl()
         : mIsrCtx{}
-        , mPin(pin)
-        , mBufferSize(buffer_size)
+        , mPin(GPIO_NUM_NC)
+        , mBufferSize(0)
         , mEdgeBuffer()
         , mIsrInstalled(false)
         , mNeedsConversion(false)
@@ -303,21 +303,14 @@ public:
         , mSignalRangeMaxNs(100000)
         , mStartLow(true)
     {
-        // Validate pin before initialization
-        if (!isValidGpioPin(static_cast<int>(pin))) {
-            FL_ERROR("GPIO ISR RX: Invalid pin " << static_cast<int>(pin)
-                     << " - pin is reserved for UART, flash, or other system use. "
-                     << "Please choose a different GPIO pin.");
-            // Note: Constructor completes but begin() will fail
-        }
+        FL_DBG("GpioIsrRx constructed (hardware params will be set in begin())");
 
         // Initialize ISR context in optimal order (matching struct layout)
         // Hot path variables
         mIsrCtx.writePtr = nullptr;
         mIsrCtx.endPtr = nullptr;
-        mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
-        uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
-        mIsrCtx.gpioBitMask = (1U << pin_bit);
+        mIsrCtx.gpioInRegAddr = 0;  // Will be set in begin()
+        mIsrCtx.gpioBitMask = 0;    // Will be set in begin()
 
         // Medium-hot path
         mIsrCtx.startCycles = 0;
@@ -332,7 +325,7 @@ public:
         mIsrCtx.edgesCounter = 0;
 
         // Config values
-        mIsrCtx.pin = mPin;
+        mIsrCtx.pin = GPIO_NUM_NC;  // Will be set in begin()
         mIsrCtx.hwTimer = nullptr;
         mIsrCtx.timerStarted = false;
 
@@ -340,9 +333,6 @@ public:
         rtc_cpu_freq_config_t freq_config;
         rtc_clk_cpu_freq_get_config(&freq_config);
         mIsrCtx.cpuFreqMhz = freq_config.freq_mhz;
-
-        FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(mPin)
-               << " buffer_size=" << mBufferSize);
     }
 
     ~GpioIsrRxImpl() override {
@@ -361,6 +351,39 @@ public:
     }
 
     bool begin(const RxConfig& config) override {
+        // Validate and extract hardware parameters on first call
+        if (mIsrCtx.hwTimer == nullptr) {
+            // First-time initialization - extract hardware parameters from config
+            if (config.pin < 0) {
+                FL_WARN("GPIO ISR RX begin: Invalid pin in config (pin=" << config.pin << ")");
+                return false;
+            }
+            if (config.buffer_size == 0) {
+                FL_WARN("GPIO ISR RX begin: Invalid buffer_size in config (buffer_size=0)");
+                return false;
+            }
+
+            mPin = static_cast<gpio_num_t>(config.pin);
+            mBufferSize = config.buffer_size;
+
+            // Validate pin
+            if (!isValidGpioPin(static_cast<int>(mPin))) {
+                FL_ERROR("GPIO ISR RX: Invalid pin " << static_cast<int>(mPin)
+                         << " - pin is reserved for UART, flash, or other system use. "
+                         << "Please choose a different GPIO pin.");
+                return false;
+            }
+
+            // Set pin-specific ISR context values
+            mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
+            uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
+            mIsrCtx.gpioBitMask = (1U << pin_bit);
+            mIsrCtx.pin = mPin;
+
+            FL_DBG("GPIO ISR RX first-time init: pin=" << config.pin
+                   << ", buffer_size=" << mBufferSize);
+        }
+
         // Store configuration parameters
         mSignalRangeMinNs = config.signal_range_min_ns;
         mSignalRangeMaxNs = config.signal_range_max_ns;
@@ -722,7 +745,7 @@ private:
         return false;
     }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
         // Ensure conversion from cycles to nanoseconds has happened
         fl::span<const EdgeTimestamp> edges = getEdges();
 
@@ -792,8 +815,8 @@ private:
 };
 
 // Factory method implementation
-fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin, size_t buffer_size) {
-    return fl::make_shared<GpioIsrRxImpl>(static_cast<gpio_num_t>(pin), buffer_size);
+fl::shared_ptr<GpioIsrRx> GpioIsrRx::create() {
+    return fl::make_shared<GpioIsrRxImpl>();
 }
 
 } // namespace fl

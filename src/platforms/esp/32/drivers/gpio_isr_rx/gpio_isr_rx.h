@@ -74,11 +74,20 @@ class GpioIsrRx : public RxDevice {
 public:
     /**
      * @brief Create GPIO ISR RX instance (does not initialize hardware)
-     * @param pin GPIO pin number for receiving signals
-     * @param buffer_size Buffer size for edge timestamps (default 1024)
      * @return Shared pointer to GpioIsrRx interface
+     *
+     * Hardware parameters (pin, buffer_size) are now passed via RxConfig in begin().
+     *
+     * Example:
+     * @code
+     * auto rx = GpioIsrRx::create();
+     * RxConfig config;
+     * config.pin = 6;
+     * config.buffer_size = 1024;
+     * rx->begin(config);
+     * @endcode
      */
-    static fl::shared_ptr<GpioIsrRx> create(int pin, size_t buffer_size = 1024);
+    static fl::shared_ptr<GpioIsrRx> create();
 
     /**
      * @brief Virtual destructor

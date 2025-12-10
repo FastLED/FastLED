@@ -390,11 +390,11 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
  */
 class RmtRxChannelImpl : public RmtRxChannel {
 public:
-    RmtRxChannelImpl(gpio_num_t pin, uint32_t resolution_hz, int32_t max_buffer_size)
+    RmtRxChannelImpl()
         : mChannel(nullptr)
-        , mPin(pin)
-        , mResolutionHz(resolution_hz)
-        , mBufferSize(max_buffer_size > 0 ? static_cast<size_t>(max_buffer_size) : 4096)
+        , mPin(GPIO_NUM_NC)
+        , mResolutionHz(0)
+        , mBufferSize(0)
         , mReceiveDone(false)
         , mSymbolsReceived(0)
         , mSignalRangeMinNs(100)
@@ -403,9 +403,7 @@ public:
         , mStartLow(true)
         , mInternalBuffer()
     {
-        FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(mPin)
-               << " resolution=" << mResolutionHz << "Hz"
-               << " max_buffer_size=" << mBufferSize);
+        FL_DBG("RmtRxChannel constructed (hardware params will be set in begin())");
     }
 
     ~RmtRxChannelImpl() override {
@@ -420,6 +418,27 @@ public:
     }
 
     bool begin(const RxConfig& config) override {
+        // Validate and extract hardware parameters on first call
+        if (!mChannel) {
+            // First-time initialization - extract hardware parameters from config
+            if (config.pin < 0) {
+                FL_WARN("RX begin: Invalid pin in config (pin=" << config.pin << ")");
+                return false;
+            }
+            if (config.buffer_size == 0) {
+                FL_WARN("RX begin: Invalid buffer_size in config (buffer_size=0)");
+                return false;
+            }
+
+            mPin = static_cast<gpio_num_t>(config.pin);
+            mBufferSize = config.buffer_size;
+            mResolutionHz = config.hz.has_value() ? config.hz.value() : 40000000;  // Default: 40MHz
+
+            FL_DBG("RX first-time init: pin=" << config.pin
+                   << ", buffer_size=" << mBufferSize
+                   << ", resolution_hz=" << mResolutionHz);
+        }
+
         // Store configuration parameters
         mSignalRangeMinNs = config.signal_range_min_ns;
         mSignalRangeMaxNs = config.signal_range_max_ns;
@@ -625,7 +644,7 @@ public:
         return static_cast<int>(mPin);
     }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -928,8 +947,8 @@ private:
 };
 
 // Factory method implementation
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin, uint32_t resolution_hz, int32_t max_buffer_size) {
-    return fl::make_shared<RmtRxChannelImpl>(static_cast<gpio_num_t>(pin), resolution_hz, max_buffer_size);
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create() {
+    return fl::make_shared<RmtRxChannelImpl>();
 }
 
 } // namespace fl

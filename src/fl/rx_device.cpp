@@ -52,21 +52,16 @@ namespace fl {
 
 // Factory implementation for ESP32
 // Both RmtRxChannel and GpioIsrRx inherit from RxDevice, so no adapters needed
-fl::shared_ptr<RxDevice> RxDevice::create(const char* type,
-                                           int pin,
-                                           size_t buffer_size,
-                                           fl::optional<uint32_t> hz) {
+fl::shared_ptr<RxDevice> RxDevice::create(const char* type) {
     if (fl::strcmp(type, "RMT") == 0) {
-        // Use platform default (40MHz) if not specified
-        uint32_t resolution_hz = hz.has_value() ? hz.value() : 40000000;
-        auto device = RmtRxChannel::create(pin, resolution_hz, buffer_size);
+        auto device = RmtRxChannel::create();
         if (!device) {
             return fl::make_shared<DummyRxDevice>("RMT RX channel creation failed");
         }
         return device;
     }
     else if (fl::strcmp(type, "ISR") == 0) {
-        auto device = GpioIsrRx::create(pin, buffer_size);
+        auto device = GpioIsrRx::create();
         if (!device) {
             return fl::make_shared<DummyRxDevice>("GPIO ISR RX creation failed");
         }
@@ -84,14 +79,8 @@ fl::shared_ptr<RxDevice> RxDevice::create(const char* type,
 // Stub implementation for non-ESP32 platforms
 namespace fl {
 
-fl::shared_ptr<RxDevice> RxDevice::create(const char* type,
-                                           int pin,
-                                           size_t buffer_size,
-                                           fl::optional<uint32_t> hz) {
+fl::shared_ptr<RxDevice> RxDevice::create(const char* type) {
     (void)type;
-    (void)pin;
-    (void)buffer_size;
-    (void)hz;
     return fl::make_shared<DummyRxDevice>("RX devices not supported on this platform");
 }
 

@@ -47,7 +47,7 @@ public:
         return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
         (void)out;
         warnOnce();
         return 0;

@@ -92,9 +92,22 @@ void setup() {
     // Create RX device for testing
     // Use 1MHz resolution for better timing accuracy (1us per tick)
     FL_WARN("Creating RX device for testing...");
-    auto rx_test = fl::RxDevice::create(RX_TYPE, PIN_RX, 10, 1000000);
+    auto rx_test = fl::RxDevice::create(RX_TYPE);
     if (!rx_test) {
         SKETCH_HALT("Failed to create RX device for testing");
+    }
+
+    // Initialize test RX device with config
+    fl::RxConfig test_config;
+    test_config.pin = PIN_RX;
+    test_config.buffer_size = 10;
+    test_config.hz = 1000000;  // 1MHz resolution for better timing accuracy
+    test_config.signal_range_min_ns = 100;
+    test_config.signal_range_max_ns = 10000000;
+    test_config.start_low = true;
+
+    if (!rx_test->begin(test_config)) {
+        SKETCH_HALT("Failed to initialize test RX device");
     }
 
     // Test RX device functionality
@@ -106,7 +119,7 @@ void setup() {
     // Create main RX device for the loop
     // Use 1MHz resolution to allow longer timeouts (40MHz = ~819us max, 1MHz = ~32ms max)
     FL_WARN("Creating main RX device...");
-    g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE, 1000000);
+    g_rx_device = fl::RxDevice::create(RX_TYPE);
     if (!g_rx_device) {
         SKETCH_HALT("Failed to create main RX device");
     }
@@ -122,6 +135,9 @@ void loop() {
 
     // Configure RX device
     fl::RxConfig config;
+    config.pin = PIN_RX;
+    config.buffer_size = EDGE_BUFFER_SIZE;
+    config.hz = 1000000;                     // 1MHz resolution (allows up to ~32ms timeout)
     config.signal_range_min_ns = 100;       // 100ns glitch filter
     config.signal_range_max_ns = 10000000;  // 10ms idle timeout (1MHz RMT allows up to ~32ms)
     config.start_low = true;                 // Pin starts LOW

@@ -21,12 +21,16 @@ fl::shared_ptr<fl::RmtRxChannel> createRxChannel(
 /// @brief Test RX channel with manual GPIO toggle
 /// @param rx_channel RX channel to test
 /// @param pin_tx GPIO pin to toggle
-/// @param pin_rx GPIO pin for RX (for logging)
+/// @param pin_rx GPIO pin for RX
+/// @param hz Sampling frequency in Hz
+/// @param buffer_size Size of RX buffer in symbols
 /// @return true if test passes, false otherwise
 bool testRxChannel(
     fl::shared_ptr<fl::RmtRxChannel> rx_channel,
     int pin_tx,
-    int pin_rx);
+    int pin_rx,
+    uint32_t hz,
+    size_t buffer_size);
 
 /// @brief Validate that expected engines are available for this platform
 /// Prints ERROR if any expected engines are missing

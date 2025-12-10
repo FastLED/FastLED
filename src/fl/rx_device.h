@@ -135,6 +135,11 @@ enum class RxWaitResult : uint8_t {
  *
  * Struct-based configuration allows future extensibility without breaking API compatibility.
  *
+ * Hardware Parameters:
+ * - pin: GPIO pin number for receiving signals
+ * - buffer_size: Buffer size (symbols for RMT, edges for ISR)
+ * - hz: Optional clock frequency (only used for RMT, defaults to platform default: 40MHz on ESP32)
+ *
  * Edge Detection:
  * The edge detection feature solves the "spurious LOW capture" problem where RX devices
  * capture the idle pin state (LOW) before TX starts transmitting. By detecting the first
@@ -144,6 +149,9 @@ enum class RxWaitResult : uint8_t {
  * Example:
  * @code
  * RxConfig config;
+ * config.pin = 6;                     // GPIO pin
+ * config.buffer_size = 512;           // Buffer size
+ * config.hz = 1000000;                // Optional: 1MHz clock (RMT only)
  * config.signal_range_min_ns = 100;
  * config.signal_range_max_ns = 100000;
  * config.skip_signals = 0;
@@ -152,6 +160,12 @@ enum class RxWaitResult : uint8_t {
  * @endcode
  */
 struct RxConfig {
+    // Hardware parameters (required at initialization)
+    int pin = -1;                           ///< GPIO pin number (-1 = not set, will cause error)
+    size_t buffer_size = 512;               ///< Buffer size in symbols/edges (default: 512)
+    fl::optional<uint32_t> hz = fl::nullopt; ///< Optional clock frequency (RMT only, default: 40MHz)
+
+    // Signal detection parameters
     uint32_t signal_range_min_ns = 100;     ///< Minimum pulse width (glitch filter, default: 100ns)
     uint32_t signal_range_max_ns = 100000;  ///< Maximum pulse width (idle threshold, default: 100μs)
     uint32_t skip_signals = 0;              ///< Number of signals to skip before capturing (default: 0)
@@ -159,13 +173,6 @@ struct RxConfig {
 
     /// Default constructor with common WS2812B defaults
     constexpr RxConfig() = default;
-
-    /// Construct with custom parameters
-    constexpr RxConfig(uint32_t min_ns, uint32_t max_ns, uint32_t skip = 0, bool low = true)
-        : signal_range_min_ns(min_ns)
-        , signal_range_max_ns(max_ns)
-        , skip_signals(skip)
-        , start_low(low) {}
 };
 
 /**
@@ -177,6 +184,26 @@ struct RxConfig {
  */
 class RxDevice {
 public:
+
+    /**
+     * @brief Factory method to create RX device by type
+     * @param type Device type: "RMT" or "ISR" (ESP32 only)
+     * @return Shared pointer to RxDevice, or nullptr on failure
+     *
+     * Hardware parameters (pin, buffer_size, hz) are now passed via RxConfig in begin().
+     *
+     * Example:
+     * @code
+     * auto rx = RxDevice::create("RMT");
+     * RxConfig config;
+     * config.pin = 6;
+     * config.buffer_size = 512;
+     * config.hz = 1000000;  // Optional: 1MHz clock
+     * rx->begin(config);
+     * @endcode
+     */
+    static fl::shared_ptr<RxDevice> create(const char* type);
+
     virtual ~RxDevice() = default;
 
     /**
@@ -205,15 +232,6 @@ public:
      */
     virtual bool begin(const RxConfig& config) = 0;
 
-    /**
-     * @brief Initialize (or re-arm) RX channel with default configuration
-     * @return true on success, false on failure
-     *
-     * Convenience overload using default RxConfig (WS2812B-compatible defaults).
-     */
-    virtual bool begin() {
-        return begin(RxConfig{});
-    }
 
     /**
      * @brief Check if receive operation is complete
@@ -249,8 +267,11 @@ public:
      *
      * Example:
      * @code
-     * auto rx = RxDevice::create("RMT", 6, 512);
-     * rx->begin();
+     * auto rx = RxDevice::create("RMT");
+     * RxConfig config;
+     * config.pin = 6;
+     * config.buffer_size = 512;
+     * rx->begin(config);
      * rx->wait(100);
      *
      * // Stack allocation
@@ -266,7 +287,7 @@ public:
      * edges.resize(count);  // Trim to actual size
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) const = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) = 0;
 
     /**
      * @brief Get device type name
@@ -280,18 +301,7 @@ public:
      */
     virtual int getPin() const = 0;
 
-    /**
-     * @brief Factory method to create RX device by type
-     * @param type Device type: "RMT" or "ISR" (ESP32 only)
-     * @param pin GPIO pin number
-     * @param buffer_size Buffer size (symbols for RMT, edges for ISR)
-     * @param hz Optional clock frequency (only used for RMT, defaults to platform default: 40MHz on ESP32)
-     * @return Shared pointer to RxDevice, or nullptr on failure
-     */
-    static fl::shared_ptr<RxDevice> create(const char* type,
-                                            int pin,
-                                            size_t buffer_size,
-                                            fl::optional<uint32_t> hz = fl::nullopt);
+
 
 protected:
     RxDevice() = default;

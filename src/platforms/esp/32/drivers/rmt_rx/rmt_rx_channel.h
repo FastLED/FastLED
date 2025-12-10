@@ -60,12 +60,21 @@ class RmtRxChannel : public RxDevice {
 public:
     /**
      * @brief Create RX channel instance (does not initialize hardware)
-     * @param pin GPIO pin number for receiving signals
-     * @param resolution_hz RMT clock resolution (default 40MHz for 25ns ticks)
-     * @param max_buffer_size Internal buffer size in symbols (default 1024, -1 for no limit)
      * @return Shared pointer to RmtRxChannel interface
+     *
+     * Hardware parameters (pin, resolution_hz, buffer_size) are now passed via RxConfig in begin().
+     *
+     * Example:
+     * @code
+     * auto rx = RmtRxChannel::create();
+     * RxConfig config;
+     * config.pin = 6;
+     * config.buffer_size = 1024;
+     * config.hz = 40000000;  // Optional: 40MHz clock
+     * rx->begin(config);
+     * @endcode
      */
-    static fl::shared_ptr<RmtRxChannel> create(int pin, uint32_t resolution_hz = 40000000, int32_t max_buffer_size = 1024);
+    static fl::shared_ptr<RmtRxChannel> create();
 
     /**
      * @brief Virtual destructor
@@ -204,8 +213,12 @@ public:
      *
      * Example:
      * @code
-     * auto rx = RmtRxChannel::create(6, 40000000, 512);
-     * rx->begin();
+     * auto rx = RmtRxChannel::create();
+     * RxConfig config;
+     * config.pin = 6;
+     * config.buffer_size = 512;
+     * config.hz = 40000000;
+     * rx->begin(config);
      * rx->wait(100);
      *
      * // Print each edge
@@ -216,7 +229,7 @@ public:
      * }
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) override = 0;
 
     /**
      * @brief Get device type name

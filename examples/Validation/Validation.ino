@@ -204,7 +204,7 @@ void setup() {
 
     // Step 2: Test the sanity check RX channel
     FL_WARN("\n[RX SETUP] Step 2: Running sanity check test");
-    if (!testRxChannel(sanity_rx_channel, PIN_TX, PIN_RX)) {
+    if (!testRxChannel(sanity_rx_channel, PIN_TX, PIN_RX, 20000000, 256)) {  // 20MHz, 256 symbols
         FL_ERROR("[RX SETUP]: Sanity check FAILED - RX channel is not capturing data");
         FL_ERROR("[RX SETUP]: Main validation tests will be skipped");
         error_sanity_check = true;
