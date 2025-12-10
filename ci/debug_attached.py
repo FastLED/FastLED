@@ -991,7 +991,7 @@ def run_monitor(
                                     matched_line = line
                                     print(f"\n✅ EXPECT KEYWORD DETECTED: '{keyword}'")
                                     print(f"   Matched line: {line}")
-                                    print("   Terminating monitor...\n")
+                                    print("   Terminating monitor (will drain remaining output)...\n")
                                     proc.terminate()
                                 break
 
@@ -1009,12 +1009,12 @@ def run_monitor(
                                     matched_line = line
                                     print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
                                     print(f"   Matched line: {line}")
-                                    print("   Terminating monitor...\n")
+                                    print("   Terminating monitor (will drain remaining output)...\n")
                                     proc.terminate()
                                 break
 
-                    if fail_keyword_found or expect_keyword_found:
-                        break
+                    # Continue reading even after terminate to drain buffered output
+                    # Breaking immediately would discard any remaining output in the process buffer
 
             except TimeoutError:
                 # No output within 30 seconds - continue waiting (check overall timeout on next loop)
