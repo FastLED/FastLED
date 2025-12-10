@@ -6,6 +6,7 @@ This script orchestrates a complete device development workflow in three distinc
 Phase 1: Compile
     - Builds the PlatformIO project for the target environment
     - Validates code compiles without errors
+    - May trigger global package installations
 
 Phase 2: Upload (with self-healing)
     - Kills lingering esptool/pio upload/monitor processes that may lock files or ports
@@ -17,6 +18,13 @@ Phase 3: Monitor
     - Captures output for analysis
     - Exits with code 1 if any fail keyword is detected (--fail-on)
     - Provides output summary (first/last 100 lines)
+
+Concurrency Control:
+    - Uses a file-based lock (~/.fastled/locks/device_debug.lock) for all three phases
+    - Prevents multiple agents from interfering with device operations
+    - Lock is system-wide (device is a global resource, not project-specific)
+    - Lock timeout: 600 seconds (10 minutes)
+    - Supports stale lock detection and automatic cleanup
 
 Usage:
     uv run ci/debug_attached.py                          # Auto-detect (default: 20s timeout, fails on "ERROR")
@@ -49,6 +57,7 @@ from running_process import RunningProcess
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
+from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
 
@@ -1077,30 +1086,49 @@ def main() -> int:
     print()
 
     try:
-        # Phase 1: Compile
-        if not run_compile(build_dir, args.environment, args.verbose):
+        # Acquire device debug lock for all three phases
+        # (compile can trigger global package installs, upload/monitor use serial port)
+        # Use global lock (use_global=True) since device is a system-wide resource
+        lock = BuildLock(lock_name="device_debug", use_global=True)
+        if not lock.acquire(timeout=5.0):
+            print(
+                "\n❌ Another agent is currently using the device for debug operations."
+            )
+            print("   Please retry later once the debug operation has completed.")
+            print(f"   Lock file: {lock.lock_file}")
             return 1
 
-        # Phase 2: Upload (includes self-healing port cleanup)
-        if not run_upload(build_dir, args.environment, args.upload_port, args.verbose):
-            return 1
+        try:
+            # Phase 1: Compile
+            if not run_compile(build_dir, args.environment, args.verbose):
+                return 1
 
-        # Phase 3: Monitor serial output
-        success, output = run_monitor(
-            build_dir,
-            args.environment,
-            args.upload_port,  # Use same port for monitoring
-            args.verbose,
-            timeout_seconds,
-            fail_keywords,
-            args.stream,
-        )
+            # Phase 2: Upload (includes self-healing port cleanup)
+            if not run_upload(
+                build_dir, args.environment, args.upload_port, args.verbose
+            ):
+                return 1
 
-        if not success:
-            return 1
+            # Phase 3: Monitor serial output
+            success, output = run_monitor(
+                build_dir,
+                args.environment,
+                args.upload_port,  # Use same port for monitoring
+                args.verbose,
+                timeout_seconds,
+                fail_keywords,
+                args.stream,
+            )
 
-        print("\n✅ All three phases completed successfully")
-        return 0
+            if not success:
+                return 1
+
+            print("\n✅ All three phases completed successfully")
+            return 0
+
+        finally:
+            # Always release the lock
+            lock.release()
 
     except KeyboardInterrupt:
         print("\n\n⚠️  Interrupted by user")
