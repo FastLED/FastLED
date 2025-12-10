@@ -131,6 +131,17 @@ enum class RxWaitResult : uint8_t {
 };
 
 /**
+ * @brief RX device type enumeration
+ *
+ * Defines available RX device implementations. Used with template-based
+ * factory pattern for compile-time device selection.
+ */
+enum class RxDeviceType : uint8_t {
+    ISR = 0,  ///< GPIO ISR-based receiver (ESP32)
+    RMT = 1   ///< RMT-based receiver (ESP32)
+};
+
+/**
  * @brief Configuration for RX device initialization
  *
  * Struct-based configuration allows future extensibility without breaking API compatibility.
@@ -183,18 +194,24 @@ struct RxConfig {
  * - Other platforms: Future implementations
  */
 class RxDevice {
+
+
 public:
 
     /**
-     * @brief Factory method to create RX device by type
-     * @param type Device type: "RMT" or "ISR" (ESP32 only)
-     * @return Shared pointer to RxDevice, or nullptr on failure
+     * @brief Template factory method to create RX device by type
+     * @tparam TYPE Device type from RxDeviceType enum
+     * @return Shared pointer to RxDevice
      *
-     * Hardware parameters (pin, buffer_size, hz) are now passed via RxConfig in begin().
+     * Default implementation returns a shared DummyRxDevice instance.
+     * Platform-specific implementations (e.g., ESP32) provide explicit
+     * template specializations for ISR and RMT types.
+     *
+     * Hardware parameters (pin, buffer_size, hz) are passed via RxConfig in begin().
      *
      * Example:
      * @code
-     * auto rx = RxDevice::create("RMT");
+     * auto rx = RxDevice::create<RxDeviceType::RMT>();
      * RxConfig config;
      * config.pin = 6;
      * config.buffer_size = 512;
@@ -202,9 +219,11 @@ public:
      * rx->begin(config);
      * @endcode
      */
-    static fl::shared_ptr<RxDevice> create(const char* type);
-
-    virtual ~RxDevice() = default;
+    template <RxDeviceType TYPE>
+    static fl::shared_ptr<RxDevice> create() {
+        // Explicit template specializations on the platform will override this
+        return RxDevice::createDummy();
+    }
 
     /**
      * @brief Initialize (or re-arm) RX channel with configuration
@@ -302,10 +321,22 @@ public:
     virtual int getPin() const = 0;
 
 
-
 protected:
+    // Allow shared_ptr to access protected destructor
+    friend class fl::shared_ptr<RxDevice>;
     RxDevice() = default;
-};
+    virtual ~RxDevice() = default;
 
+
+private:
+    /**
+     * @brief Create dummy RxDevice instance (default fallback)
+     * @return Shared pointer to DummyRxDevice
+     *
+     * Used by default template implementation when no platform-specific
+     * specialization exists. Returns singleton DummyRxDevice instance.
+     */
+    static fl::shared_ptr<RxDevice> createDummy();
+};
 
 } // namespace fl

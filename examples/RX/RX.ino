@@ -40,7 +40,7 @@
 // Pin and RX type configuration (extern for test.cpp access)
 const int PIN_TX = 0;   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
 const int PIN_RX = 1;   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
-const char* RX_TYPE = "RMT";
+constexpr fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 
 // ============================================================================
 // Pin Toggle Pattern
@@ -75,7 +75,7 @@ void setup() {
     FL_WARN("Platform: ESP32");
     FL_WARN("TX Pin: GPIO " << PIN_TX);
     FL_WARN("RX Pin: GPIO " << PIN_RX);
-    FL_WARN("RX Device: " << RX_TYPE);
+    FL_WARN("RX Device: " << (RX_TYPE == fl::RxDeviceType::RMT ? "RMT" : "ISR"));
     FL_WARN("LOOP BACK MODE: " << loop_back_mode);
 
     // Sanity check: Verify jumper wire connection when TX and RX are different pins
@@ -92,7 +92,7 @@ void setup() {
     // Create RX device for testing
     // Use 1MHz resolution for better timing accuracy (1us per tick)
     FL_WARN("Creating RX device for testing...");
-    auto rx_test = fl::RxDevice::create(RX_TYPE);
+    auto rx_test = fl::RxDevice::create<RX_TYPE>();
     if (!rx_test) {
         SKETCH_HALT("Failed to create RX device for testing");
     }
@@ -119,7 +119,7 @@ void setup() {
     // Create main RX device for the loop
     // Use 1MHz resolution to allow longer timeouts (40MHz = ~819us max, 1MHz = ~32ms max)
     FL_WARN("Creating main RX device...");
-    g_rx_device = fl::RxDevice::create(RX_TYPE);
+    g_rx_device = fl::RxDevice::create<RX_TYPE>();
     if (!g_rx_device) {
         SKETCH_HALT("Failed to create main RX device");
     }

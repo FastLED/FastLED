@@ -13,6 +13,16 @@
 
 namespace fl {
 
+// Private static helper - creates dummy device (singleton pattern)
+fl::shared_ptr<RxDevice> RxDevice::createDummy() {
+    static fl::shared_ptr<RxDevice> dummy = fl::make_shared<DummyRxDevice>(
+        "RX devices not supported on this platform"
+    );
+    return dummy;
+}
+
+
+
 // Implementation of make4PhaseTiming function
 ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
                                       uint32_t tolerance_ns) {
@@ -47,45 +57,32 @@ ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
 
 #ifdef ESP32
 
-// ESP32-specific implementation
+// ESP32-specific explicit template specializations
 namespace fl {
 
-// Factory implementation for ESP32
-// Both RmtRxChannel and GpioIsrRx inherit from RxDevice, so no adapters needed
-fl::shared_ptr<RxDevice> RxDevice::create(const char* type) {
-    if (fl::strcmp(type, "RMT") == 0) {
-        auto device = RmtRxChannel::create();
-        if (!device) {
-            return fl::make_shared<DummyRxDevice>("RMT RX channel creation failed");
-        }
-        return device;
+// RMT device specialization for ESP32
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>() {
+    auto device = RmtRxChannel::create();
+    if (!device) {
+        return fl::make_shared<DummyRxDevice>("RMT RX channel creation failed");
     }
-    else if (fl::strcmp(type, "ISR") == 0) {
-        auto device = GpioIsrRx::create();
-        if (!device) {
-            return fl::make_shared<DummyRxDevice>("GPIO ISR RX creation failed");
-        }
-        return device;
+    return device;
+}
+
+// ISR device specialization for ESP32
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
+    auto device = GpioIsrRx::create();
+    if (!device) {
+        return fl::make_shared<DummyRxDevice>("GPIO ISR RX creation failed");
     }
-    else {
-        return fl::make_shared<DummyRxDevice>("Unknown RX device type (valid: \"RMT\", \"ISR\")");
-    }
+    return device;
 }
 
 } // namespace fl
 
-#else // !ESP32
 
-// Stub implementation for non-ESP32 platforms
-namespace fl {
 
-fl::shared_ptr<RxDevice> RxDevice::create(const char* type) {
-    (void)type;
-    return fl::make_shared<DummyRxDevice>("RX devices not supported on this platform");
-}
-
-} // namespace fl
 
 #endif // ESP32
-
-
