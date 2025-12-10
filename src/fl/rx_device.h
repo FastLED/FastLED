@@ -131,6 +131,44 @@ enum class RxWaitResult : uint8_t {
 };
 
 /**
+ * @brief Configuration for RX device initialization
+ *
+ * Struct-based configuration allows future extensibility without breaking API compatibility.
+ *
+ * Edge Detection:
+ * The edge detection feature solves the "spurious LOW capture" problem where RX devices
+ * capture the idle pin state (LOW) before TX starts transmitting. By detecting the first
+ * rising edge (LOW→HIGH) or falling edge (HIGH→LOW), we can skip pre-transmission noise
+ * and start decoding from actual data.
+ *
+ * Example:
+ * @code
+ * RxConfig config;
+ * config.signal_range_min_ns = 100;
+ * config.signal_range_max_ns = 100000;
+ * config.skip_signals = 0;
+ * config.start_low = true;  // Pin idle state is LOW (WS2812B default)
+ * rx->begin(config);
+ * @endcode
+ */
+struct RxConfig {
+    uint32_t signal_range_min_ns = 100;     ///< Minimum pulse width (glitch filter, default: 100ns)
+    uint32_t signal_range_max_ns = 100000;  ///< Maximum pulse width (idle threshold, default: 100μs)
+    uint32_t skip_signals = 0;              ///< Number of signals to skip before capturing (default: 0)
+    bool start_low = true;                  ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
+
+    /// Default constructor with common WS2812B defaults
+    constexpr RxConfig() = default;
+
+    /// Construct with custom parameters
+    constexpr RxConfig(uint32_t min_ns, uint32_t max_ns, uint32_t skip = 0, bool low = true)
+        : signal_range_min_ns(min_ns)
+        , signal_range_max_ns(max_ns)
+        , skip_signals(skip)
+        , start_low(low) {}
+};
+
+/**
  * @brief Common interface for RX devices
  *
  * Provides a unified interface for platform-specific receivers:
@@ -142,15 +180,40 @@ public:
     virtual ~RxDevice() = default;
 
     /**
-     * @brief Initialize (or re-arm) RX channel
-     * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns)
-     * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns)
-     * @param skip_signals Number of signals to skip before capturing (default: 0)
+     * @brief Initialize (or re-arm) RX channel with configuration
+     * @param config RX configuration (signal ranges, edge detection, skip count)
      * @return true on success, false on failure
+     *
+     * First call: Initializes hardware and arms receiver
+     * Subsequent calls: Re-arms receiver for new capture (clears state)
+     *
+     * Edge Detection:
+     * - start_low=true: Skip symbols until first rising edge (LOW→HIGH), default for WS2812B
+     * - start_low=false: Skip symbols until first falling edge (HIGH→LOW), for inverted signals
+     *
+     * This solves the "spurious LOW capture" problem where RX captures the idle pin state
+     * before TX starts transmitting.
+     *
+     * Example:
+     * @code
+     * RxConfig config;
+     * config.signal_range_min_ns = 100;   // Glitch filter
+     * config.signal_range_max_ns = 100000; // Idle timeout
+     * config.start_low = true;             // WS2812B idle = LOW
+     * rx->begin(config);
+     * @endcode
      */
-    virtual bool begin(uint32_t signal_range_min_ns = 100,
-                      uint32_t signal_range_max_ns = 100000,
-                      uint32_t skip_signals = 0) = 0;
+    virtual bool begin(const RxConfig& config) = 0;
+
+    /**
+     * @brief Initialize (or re-arm) RX channel with default configuration
+     * @return true on success, false on failure
+     *
+     * Convenience overload using default RxConfig (WS2812B-compatible defaults).
+     */
+    virtual bool begin() {
+        return begin(RxConfig{});
+    }
 
     /**
      * @brief Check if receive operation is complete
@@ -226,6 +289,169 @@ public:
 
 protected:
     RxDevice() = default;
+};
+
+/**
+ * @brief Shared RX decoder component using composition pattern
+ *
+ * Provides EdgeTime buffer management, edge detection, and decoding logic
+ * that can be embedded in any RxDevice implementation via composition.
+ *
+ * Platform implementations:
+ * 1. Create RxDecoder instance as member variable
+ * 2. Call configure() during begin()
+ * 3. Call pushEdge() from ISR callbacks with raw timing data
+ * 4. Delegate decode/getRawEdgeTimes calls to decoder
+ *
+ * The decoder automatically handles:
+ * - EdgeTime buffer management
+ * - Edge detection (filters spurious LOW/HIGH based on start_low config)
+ * - Pulse width-based bit decoding
+ * - Byte accumulation
+ *
+ * Platform ISRs can push spurious idle-state edges - the decoder will
+ * automatically filter them based on the start_low configuration.
+ */
+class RxDecoder {
+public:
+    RxDecoder() = default;
+
+    // ========== Configuration ==========
+
+    /**
+     * @brief Configure decoder with RxConfig parameters
+     * @param config RX configuration (signal ranges, edge detection, skip count)
+     * @param buffer_size Maximum number of EdgeTime entries to store
+     *
+     * Allocates the EdgeTime buffer and stores configuration.
+     * Must be called before any pushEdge() calls.
+     */
+    void configure(const RxConfig& config, size_t buffer_size);
+
+    /**
+     * @brief Reset decoder state for new capture
+     *
+     * Clears edge count and finished flag without deallocating buffer.
+     * Called by platform implementations at start of new capture.
+     */
+    void reset();
+
+    // ========== Edge Capture (called by platform ISR) ==========
+
+    /**
+     * @brief Push edge into buffer with automatic filtering (called from platform ISR)
+     * @param level Signal level (true=HIGH, false=LOW)
+     * @param duration_ns Duration in nanoseconds
+     * @return true if accepted (stored or filtered), false if buffer full
+     *
+     * Platform ISRs call this to add captured edges.
+     *
+     * Edge detection filtering (ISR-safe, no logging):
+     * - For start_low=true: Filters all LOW edges until first HIGH edge
+     * - For start_low=false: Filters all HIGH edges until first LOW edge
+     * - Spurious edges are NOT stored in buffer (saves memory)
+     *
+     * Returns true for filtered edges (considered "accepted" but not stored).
+     * Returns false only when buffer is full.
+     *
+     * Example (RMT ISR):
+     * @code
+     * // Convert RMT symbol to EdgeTime and push
+     * uint32_t duration_ns = symbol.duration0 * ns_per_tick;
+     * bool level = symbol.level0 != 0;
+     * decoder.pushEdge(level, duration_ns);
+     * @endcode
+     */
+    bool pushEdge(bool level, uint32_t duration_ns);
+
+    /**
+     * @brief Mark capture as finished
+     *
+     * Called by platform ISR when capture completes (buffer full, timeout, etc).
+     */
+    void setFinished();
+
+    // ========== Query State ==========
+
+    /**
+     * @brief Check if capture is finished
+     * @return true if finished (buffer full or explicitly marked)
+     */
+    bool finished() const { return mFinished; }
+
+    /**
+     * @brief Get number of edges currently in buffer
+     * @return Edge count
+     */
+    size_t edgeCount() const { return mEdgeCount; }
+
+    /**
+     * @brief Get buffer capacity
+     * @return Maximum number of edges buffer can hold
+     */
+    size_t bufferSize() const { return mBufferSize; }
+
+    // ========== Get Raw Edges ==========
+
+    /**
+     * @brief Get raw EdgeTime array
+     * @param out Output span to write EdgeTime entries
+     * @return Number of edges copied
+     *
+     * Returns unfiltered EdgeTime array (may include spurious edges).
+     * For debugging and analysis purposes.
+     */
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const;
+
+    // ========== Decode to Bytes ==========
+
+    /**
+     * @brief Decode EdgeTime array to bytes
+     * @param timing Chipset timing thresholds for bit detection
+     * @param out Output byte buffer
+     * @return Result with byte count or error
+     *
+     * Decoding process:
+     * - Edge detection: Already handled by pushEdge() - buffer contains only valid edges
+     * - Pulse width calculation: Pairs consecutive edges (HIGH + LOW = 1 bit)
+     * - Bit decoding: Compares pulse widths against timing thresholds
+     * - Byte accumulation: Packs bits into bytes (MSB first)
+     *
+     * Example:
+     * @code
+     * ChipsetTiming4Phase ws2812b_timing = make4PhaseTiming(TIMING_WS2812_800KHZ, 150);
+     * uint8_t bytes[10];
+     * auto result = decoder.decode(ws2812b_timing, bytes);
+     * if (result.ok()) {
+     *     FL_DBG("Decoded " << result.value() << " bytes");
+     * }
+     * @endcode
+     */
+    fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase& timing,
+                                               fl::span<uint8_t> out);
+
+private:
+    // ========== Configuration ==========
+    RxConfig mConfig;
+    size_t mBufferSize = 0;
+
+    // ========== Edge Buffer ==========
+    fl::HeapVector<EdgeTime> mEdgeBuffer;
+    volatile size_t mEdgeCount = 0;
+    volatile bool mFinished = false;
+
+    // ========== Helper Methods ==========
+
+    /**
+     * @brief Decode single bit from pulse timings
+     * @param high_ns High pulse duration in nanoseconds
+     * @param low_ns Low pulse duration in nanoseconds
+     * @param timing Chipset timing thresholds
+     * @return 0 for bit 0, 1 for bit 1, -1 for invalid timing
+     *
+     * Compares pulse widths against timing thresholds to determine bit value.
+     */
+    int decodeBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTiming4Phase& timing);
 };
 
 } // namespace fl

@@ -74,6 +74,12 @@ inline bool isResetPulse(uint32_t duration_ns, const ChipsetTiming4Phase &timing
 /**
  * @brief Decode edge timestamps to bytes (span-based implementation)
  * Internal implementation - not exposed in public header
+ * @param timing Chipset timing thresholds
+ * @param edges Span of captured edge timestamps (spurious edges already filtered upstream)
+ * @param bytes_out Output span for decoded bytes
+ *
+ * Note: Edge detection/filtering must happen upstream when edges are stored.
+ * This function assumes continuous LOW samples at the beginning have been skipped.
  */
 fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &timing,
                                                          fl::span<const EdgeTimestamp> edges,
@@ -89,6 +95,9 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
     }
 
     FL_DBG("decodeEdgeTimestamps: decoding " << edges.size() << " edges into buffer of " << bytes_out.size() << " bytes");
+
+    // Note: Edge detection/filtering already happened upstream when edges were stored
+    // Input edges array contains only valid data edges (spurious LOW edges already skipped)
 
     // Decoding state
     size_t error_count = 0;
@@ -157,14 +166,8 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
             // Standard pattern: HIGH -> LOW -> (next)
             high_ns = edge1.time_ns - edge0.time_ns;
             low_ns = edge2.time_ns - edge1.time_ns;
-        } else if (edge0.level == 0 && edge1.level == 1) {
-            // Inverted start: LOW -> HIGH -> LOW
-            // This means we're starting in the middle of a LOW pulse
-            // Skip to the HIGH edge
-            i++;
-            continue;
         } else {
-            // Unexpected edge pattern
+            // Unexpected edge pattern (should be prevented by edge detection)
             FL_DBG("decodeEdgeTimestamps: unexpected edge pattern at index " << i
                    << " (level0=" << static_cast<int>(edge0.level)
                    << ", level1=" << static_cast<int>(edge1.level) << ")");
@@ -268,6 +271,7 @@ public:
         , mSignalRangeMinNs(100)
         , mSignalRangeMaxNs(100000)
         , mSkipCounter(0)
+        , mStartLow(true)
     {
         FL_DBG("GpioIsrRx constructed: pin=" << static_cast<int>(mPin)
                << " buffer_size=" << mBufferSize);
@@ -281,14 +285,17 @@ public:
         }
     }
 
-    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
-        // Store signal range parameters for noise filtering and idle detection
-        mSignalRangeMinNs = signal_range_min_ns;
-        mSignalRangeMaxNs = signal_range_max_ns;
-        mSkipCounter = skip_signals;
+    bool begin(const RxConfig& config) override {
+        // Store configuration parameters
+        mSignalRangeMinNs = config.signal_range_min_ns;
+        mSignalRangeMaxNs = config.signal_range_max_ns;
+        mSkipCounter = config.skip_signals;
+        mStartLow = config.start_low;
 
         FL_DBG("GPIO ISR RX begin: signal_range_min=" << mSignalRangeMinNs
-               << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns, skip_signals=" << skip_signals);
+               << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
+               << ", skip_signals=" << config.skip_signals
+               << ", start_low=" << (mStartLow ? "true" : "false"));
 
         // If already initialized, just re-arm the receiver for a new capture
         if (mIsrInstalled) {
@@ -418,8 +425,8 @@ public:
             return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
         }
 
-        // Use the edge timestamp decoder
-        return decodeEdgeTimestamps(timing, edges, out);
+        // Use the edge timestamp decoder with edge detection
+        return decodeEdgeTimestamps(timing, edges, out, mStartLow);
     }
 
 private:
@@ -550,6 +557,7 @@ private:
     uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
     uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
+    bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
 };
 
 // Factory method implementation

@@ -133,11 +133,17 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32
 /**
  * @brief Decode RMT symbols to bytes (span-based implementation)
  * Internal implementation - not exposed in public header
+ * @param timing Chipset timing thresholds
+ * @param resolution_hz RMT clock resolution in Hz
+ * @param symbols Span of captured RMT symbols
+ * @param bytes_out Output span for decoded bytes
+ * @param start_low Pin idle state: true=LOW (detect rising edge), false=HIGH (detect falling edge)
  */
 fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
                                                      uint32_t resolution_hz,
                                                      fl::span<const RmtSymbol> symbols,
-                                                     fl::span<uint8_t> bytes_out) {
+                                                     fl::span<uint8_t> bytes_out,
+                                                     bool start_low = true) {
     if (symbols.empty()) {
         FL_WARN("decodeRmtSymbols: symbols span is empty");
         return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
@@ -167,34 +173,68 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
     // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
     const auto *rmt_symbols = reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
 
-    // ITERATION 17: Detect first data byte boundary to fix phase misalignment
-    // RX captures line idle or pre-transmission noise that creates varying phase offsets
-    // Strategy: Scan symbols to find first complete byte where all 8 bits are '1' (0xFF)
-    // This indicates the start of the R channel in the first Red LED (RGB 255,0,0)
+    // Edge Detection: Skip symbols captured before TX starts transmitting
+    // Problem: RX is armed before TX starts, so it captures the idle pin state (LOW/HIGH)
+    // Solution: Find first edge transition (rising for start_low=true, falling for start_low=false)
+    //
+    // For start_low=true (WS2812B default):
+    //   - Pin idle state: LOW (level0=0)
+    //   - First valid data: Rising edge (level0=0 → level1=1 or next symbol level0=1)
+    //   - Skip all symbols until we see level transitioning from 0→1
+    //
+    // For start_low=false (inverted signals):
+    //   - Pin idle state: HIGH (level0=1)
+    //   - First valid data: Falling edge (level0=1 → level1=0 or next symbol level0=0)
+    //   - Skip all symbols until we see level transitioning from 1→0
 
     size_t start_index = 0;
 
-    // Scan for first byte that equals 0xFF (8 consecutive '1' bits)
-    for (size_t i = 0; i + 7 < symbols.size(); i++) {
-        // Check if next 8 symbols are all '1' bits
-        bool all_ones = true;
-        for (size_t j = 0; j < 8; j++) {
-            int bit = decodeBit(symbols[i + j], timing, ns_per_tick);
-            if (bit != 1) {
-                all_ones = false;
+    if (start_low) {
+        // Pin starts LOW, look for first rising edge (LOW→HIGH transition)
+        for (size_t i = 0; i < symbols.size(); i++) {
+            const auto &sym = rmt_symbols[i];
+            // Rising edge detected: level0=0 and level1=1, OR level0=1 (already transitioned)
+            if (sym.level0 == 1) {
+                // Symbol starts HIGH - data transmission has begun
+                start_index = i;
+                FL_DBG("[EDGE DETECT] Found rising edge at symbol " << start_index << " (level0=1)");
+                break;
+            } else if (sym.level0 == 0 && sym.level1 == 1) {
+                // Transition within symbol: LOW→HIGH
+                start_index = i;
+                FL_DBG("[EDGE DETECT] Found rising edge at symbol " << start_index << " (level0=0, level1=1)");
+                break;
+            }
+            // else: symbol is all LOW (level0=0, level1=0 or level1 doesn't transition to HIGH)
+        }
+    } else {
+        // Pin starts HIGH, look for first falling edge (HIGH→LOW transition)
+        for (size_t i = 0; i < symbols.size(); i++) {
+            const auto &sym = rmt_symbols[i];
+            // Falling edge detected: level0=1 and level1=0
+            if (sym.level0 == 1 && sym.level1 == 0) {
+                // Transition within symbol: HIGH→LOW
+                start_index = i;
+                FL_DBG("[EDGE DETECT] Found falling edge at symbol " << start_index << " (level0=1, level1=0)");
+                break;
+            } else if (sym.level0 == 0) {
+                // Symbol starts LOW - data transmission has begun
+                start_index = i;
+                FL_DBG("[EDGE DETECT] Found falling edge at symbol " << start_index << " (level0=0)");
                 break;
             }
         }
-
-        if (all_ones) {
-            start_index = i;
-            FL_DBG("[PHASE FIX] Found first 0xFF byte at symbol " << start_index << ", starting decode there");
-            break;
-        }
     }
 
-    if (start_index == 0) {
-        FL_DBG("[PHASE FIX] Could not find 0xFF byte, starting from symbol 0");
+    if (start_index == 0 && symbols.size() > 0) {
+        // Check if first symbol already matches expected pattern
+        const auto &first_sym = rmt_symbols[0];
+        bool matches_expected = (start_low && first_sym.level0 == 1) || (!start_low && first_sym.level0 == 0);
+        if (!matches_expected) {
+            FL_DBG("[EDGE DETECT] No edge transition found, starting from symbol 0 (may include idle state)");
+        } else {
+            FL_DBG("[EDGE DETECT] First symbol already at correct level, starting from symbol 0");
+        }
     }
 
     // ITERATION 18 WORKAROUND: Track symbol position within each LED to skip spurious 4th byte
@@ -369,15 +409,16 @@ template<typename OutputIteratorUint8>
 fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
                                                      uint32_t resolution_hz,
                                                      fl::span<const RmtSymbol> symbols,
-                                                     OutputIteratorUint8 out) {
+                                                     OutputIteratorUint8 out,
+                                                     bool start_low = true) {
     // Chunk size for decoding
     constexpr size_t MAX_CHUNK_SIZE = 256;
 
     fl::array<uint8_t, MAX_CHUNK_SIZE> chunk_buffer;
     fl::span<uint8_t> chunk_span(chunk_buffer.data(), MAX_CHUNK_SIZE);
 
-    // Call span-based decode implementation
-    auto result = decodeRmtSymbols(timing, resolution_hz, symbols, chunk_span);
+    // Call span-based decode implementation with edge detection
+    auto result = decodeRmtSymbols(timing, resolution_hz, symbols, chunk_span, start_low);
     if (!result.ok()) {
         return fl::Result<uint32_t, DecodeError>::failure(result.error());
     }
@@ -416,6 +457,7 @@ public:
         , mSignalRangeMinNs(100)
         , mSignalRangeMaxNs(100000)
         , mSkipCounter(0)
+        , mStartLow(true)
         , mInternalBuffer()
     {
         FL_DBG("RmtRxChannel constructed: pin=" << static_cast<int>(mPin)
@@ -434,16 +476,18 @@ public:
         }
     }
 
-    bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override {
-        // Store signal range parameters
-        mSignalRangeMinNs = signal_range_min_ns;
-        mSignalRangeMaxNs = signal_range_max_ns;
-        mSkipCounter = skip_signals;
+    bool begin(const RxConfig& config) override {
+        // Store configuration parameters
+        mSignalRangeMinNs = config.signal_range_min_ns;
+        mSignalRangeMaxNs = config.signal_range_max_ns;
+        mSkipCounter = config.skip_signals;
+        mStartLow = config.start_low;
 
         FL_WARN("[DEBUG RX] RX begin() called at " << esp_log_timestamp() << "ms");
         FL_DBG("RX begin: signal_range_min=" << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
-               << ", skip_signals=" << skip_signals);
+               << ", skip_signals=" << config.skip_signals
+               << ", start_low=" << (mStartLow ? "true" : "false"));
 
         // If already initialized, just re-arm the receiver for a new capture
         if (mChannel) {
@@ -608,8 +652,8 @@ public:
             return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
         }
 
-        // Use the span-based decoder directly
-        return decodeRmtSymbols(timing, mResolutionHz, symbols, out);
+        // Use the span-based decoder directly with edge detection
+        return decodeRmtSymbols(timing, mResolutionHz, symbols, out, mStartLow);
     }
 
     const char* name() const override {
@@ -913,6 +957,7 @@ private:
     uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
     uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
+    bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
     fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< Internal buffer for all receive operations
 };
 

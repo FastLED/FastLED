@@ -70,10 +70,8 @@ public:
     virtual ~GpioIsrRx() = default;
 
     /**
-     * @brief Initialize (or re-arm) GPIO ISR RX channel
-     * @param signal_range_min_ns Minimum pulse width in nanoseconds (default: 100ns, filters glitches)
-     * @param signal_range_max_ns Maximum pulse width in nanoseconds (default: 100000ns = 100μs, idle threshold)
-     * @param skip_signals Number of edges to skip before capturing (default: 0, capture all)
+     * @brief Initialize (or re-arm) GPIO ISR RX channel with configuration
+     * @param config RX configuration (signal ranges, edge detection, skip count)
      * @return true on success, false on failure
      *
      * First call: Configures GPIO, installs ISR service, and arms receiver
@@ -81,27 +79,26 @@ public:
      *
      * The receiver is automatically armed and ready to capture after begin() returns.
      *
-     * Signal Range Parameters:
-     * - signal_range_min_ns: Pulses shorter than this are ignored (noise filtering)
-     *   ISR-level filtering discards edges that create pulses shorter than this threshold.
-     * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection)
-     *   When no edges are received for this duration, the receiver automatically stops.
+     * Configuration Parameters:
+     * - signal_range_min_ns: Pulses shorter than this are ignored (ISR-level noise filtering)
+     * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection timeout)
      * - skip_signals: Number of edges to skip before capturing (useful for memory-constrained environments)
-     *   When skip_signals > 0, the ISR will discard the first N edges, then begin writing
-     *   to the buffer starting with edge N+1.
+     * - start_low: Pin idle state for edge detection (true=LOW for WS2812B, false=HIGH for inverted)
      *
-     * These parameters control noise filtering and idle detection behavior, allowing
-     * tuning for different LED protocols and signal characteristics.
+     * Edge Detection:
+     * Automatically skips edges captured before TX starts transmitting by detecting the first
+     * edge transition (rising for start_low=true, falling for start_low=false).
      *
      * Example with skip_signals:
      * @code
      * auto rx = GpioIsrRx::create(6, 100);  // 100 edge buffer
-     * rx->begin(100, 100000, 900);  // Skip first 900 edges
+     * RxConfig config{100, 100000, 900};  // Skip first 900 edges
+     * rx->begin(config);
      * // Transmit 1000 edges
      * // Result: Only last 100 edges captured in buffer
      * @endcode
      */
-    virtual bool begin(uint32_t signal_range_min_ns = 100, uint32_t signal_range_max_ns = 100000, uint32_t skip_signals = 0) override = 0;
+    virtual bool begin(const RxConfig& config) override = 0;
 
     /**
      * @brief Check if receive operation is complete
