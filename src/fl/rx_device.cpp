@@ -4,7 +4,7 @@
 #include "rx_device.h"
 #include "platforms/shared/rx_device_dummy.h"
 #include "fl/chipsets/led_timing.h"
-#include <cstring>
+#include "fl/str.h"
 
 #ifdef ESP32
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
@@ -56,7 +56,7 @@ fl::shared_ptr<RxDevice> RxDevice::create(const char* type,
                                            int pin,
                                            size_t buffer_size,
                                            fl::optional<uint32_t> hz) {
-    if (strcmp(type, "RMT") == 0) {
+    if (fl::strcmp(type, "RMT") == 0) {
         // Use platform default (40MHz) if not specified
         uint32_t resolution_hz = hz.has_value() ? hz.value() : 40000000;
         auto device = RmtRxChannel::create(pin, resolution_hz, buffer_size);
@@ -65,7 +65,7 @@ fl::shared_ptr<RxDevice> RxDevice::create(const char* type,
         }
         return device;
     }
-    else if (strcmp(type, "ISR") == 0) {
+    else if (fl::strcmp(type, "ISR") == 0) {
         auto device = GpioIsrRx::create(pin, buffer_size);
         if (!device) {
             return fl::make_shared<DummyRxDevice>("GPIO ISR RX creation failed");

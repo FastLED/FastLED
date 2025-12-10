@@ -10,6 +10,8 @@
 // - fastspi_esp32_arduino.h - Arduino framework SPI implementation
 // - fastspi_esp32_idf.h - ESP-IDF stub (future: native SPI using driver/spi_master.h)
 
+// ok no namespace fl
+
 // When enabled, use the bulk transfer mode to speed up SPI writes and avoid
 // lock contention.
 #ifndef FASTLED_ESP32_SPI_BULK_TRANSFER

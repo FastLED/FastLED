@@ -27,7 +27,7 @@
 #include <esp_event.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <string.h>
+#include <string.h>  // ok include
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
 #include <mbedtls/md.h>
