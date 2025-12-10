@@ -1,5 +1,7 @@
 // ESP I/O implementation - ESP-IDF native UART driver
 
+#ifdef __ESP_IDF__
+
 #include "io_esp.h"
 
 #include "driver/uart.h"
@@ -40,3 +42,5 @@ int read_esp() {
 }
 
 } // namespace fl
+
+#endif // __ESP_IDF__
