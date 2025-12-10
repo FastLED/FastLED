@@ -461,7 +461,21 @@ class DockerEntrypointBuilder:
 
     @staticmethod
     def build_sync_script() -> str:
-        """Generate the rsync script for directory syncing."""
+        """Generate the rsync script for directory syncing.
+
+        Key rsync flags explained:
+        - --checksum: Compare file contents (MD5) instead of timestamps/size
+                     Detects real changes even when timestamps are unreliable
+        - --no-t:    Do NOT update destination timestamps when content is unchanged
+                     Critical for preventing spurious rebuilds in PlatformIO
+        - --delete:  Remove files in destination that don't exist in source
+
+        Line ending protection:
+        - .gitattributes enforces eol=lf for all text files
+        - .editorconfig provides editor-level LF enforcement
+        - rsync compares byte-for-byte, so CRLF vs LF would trigger sync
+        - Run ci/docker/diagnose_sync.sh inside container to debug sync issues
+        """
         return """
 # Sync host directories to container working directory if they exist
 if command -v rsync &> /dev/null; then
@@ -470,8 +484,10 @@ if command -v rsync &> /dev/null; then
     # Define rsync exclude patterns for build artifacts
     RSYNC_EXCLUDES="--exclude=**/__pycache__ --exclude=.build/ --exclude=.pio/ --exclude=*.pyc"
 
-    # Use --checksum to compare file contents instead of timestamps
-    # This ensures changes are detected even when timestamps are unreliable across host/container filesystems
+    # rsync flags:
+    # --checksum: Compare MD5 checksums instead of timestamps (detects real changes)
+    # --no-t: Prevent timestamp updates on unchanged files (avoids spurious rebuilds)
+    # --delete: Remove destination files that don't exist in source
 
     # Start timing the entire sync phase
     SYNC_START=$(date +%s.%N)
@@ -486,7 +502,8 @@ if command -v rsync &> /dev/null; then
             START=$(date +%s.%N)
             # Copy single file to /fastled root. No --delete needed for single-file.
             # --checksum ensures content-based update even with skewed timestamps.
-            rsync -a --checksum /host/pyproject.toml /fastled/
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds).
+            rsync -a --no-t --checksum /host/pyproject.toml /fastled/
             END=$(date +%s.%N)
             echo "$END - $START" | bc > "$TMPDIR/pyproject.time"
         ) &
@@ -499,7 +516,8 @@ if command -v rsync &> /dev/null; then
             START=$(date +%s.%N)
             # Copy single file to /fastled root. No --delete needed for single-file.
             # --checksum ensures content-based update even with skewed timestamps.
-            rsync -a --checksum /host/library.json /fastled/
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds).
+            rsync -a --no-t --checksum /host/library.json /fastled/
             END=$(date +%s.%N)
             echo "$END - $START" | bc > "$TMPDIR/library.time"
         ) &
@@ -510,7 +528,8 @@ if command -v rsync &> /dev/null; then
         echo "  → syncing src/..."
         (
             START=$(date +%s.%N)
-            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/src/ /fastled/src/
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds)
+            rsync -a --no-t --checksum --delete $RSYNC_EXCLUDES /host/src/ /fastled/src/
             END=$(date +%s.%N)
             echo "$END - $START" | bc > "$TMPDIR/src.time"
         ) &
@@ -520,7 +539,8 @@ if command -v rsync &> /dev/null; then
         echo "  → syncing examples/..."
         (
             START=$(date +%s.%N)
-            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/examples/ /fastled/examples/
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds)
+            rsync -a --no-t --checksum --delete $RSYNC_EXCLUDES /host/examples/ /fastled/examples/
             END=$(date +%s.%N)
             echo "$END - $START" | bc > "$TMPDIR/examples.time"
         ) &
@@ -530,7 +550,8 @@ if command -v rsync &> /dev/null; then
         echo "  → syncing ci/..."
         (
             START=$(date +%s.%N)
-            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/ci/ /fastled/ci/
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds)
+            rsync -a --no-t --checksum --delete $RSYNC_EXCLUDES /host/ci/ /fastled/ci/
             END=$(date +%s.%N)
             echo "$END - $START" | bc > "$TMPDIR/ci.time"
         ) &

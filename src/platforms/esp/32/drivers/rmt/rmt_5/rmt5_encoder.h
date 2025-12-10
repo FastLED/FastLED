@@ -56,7 +56,7 @@ public:
      */
     bool isInitialized() const { return mEncoder != nullptr; }
 
-#ifdef 0  // Debug buffer disabled
+#if 0  // Debug buffer disabled
     /**
      * Get debug buffer for encoder output inspection
      * @param[out] size Number of symbols written to buffer (up to 24)
@@ -94,7 +94,7 @@ private:
     uint32_t mBit1LowTicks;
     uint32_t mResetTicks;
 
-#ifdef 0  // Debug buffer disabled
+#if 0  // Debug buffer disabled
     // Debug buffer for encoder output inspection (24 symbols = 1 CRGB)
     // This allows Validation.ino to directly inspect encoder output
     rmt_symbol_word_t mDebugBuffer[24];

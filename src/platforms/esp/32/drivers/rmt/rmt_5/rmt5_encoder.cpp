@@ -41,7 +41,7 @@ FastLEDRmtEncoder::FastLEDRmtEncoder()
     , mBit1HighTicks(0)
     , mBit1LowTicks(0)
     , mResetTicks(0)
-#ifdef 0  // Debug buffer disabled
+#if 0  // Debug buffer disabled
     , mDebugBufferWriteIndex(0)
 #endif
 {
@@ -50,7 +50,7 @@ FastLEDRmtEncoder::FastLEDRmtEncoder()
     mResetCode.duration1 = 0;
     mResetCode.level1 = 0;
 
-#ifdef 0  // Debug buffer disabled
+#if 0  // Debug buffer disabled
     // Initialize debug buffer
     fl::memset(mDebugBuffer, 0, sizeof(mDebugBuffer));
 #endif
@@ -94,7 +94,7 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     bytes_config.bit1.duration1 = mBit1LowTicks;   // Short LOW for data bit 1
     bytes_config.flags.msb_first = 0;
 
-#ifdef 0  // Debug logging disabled
+#if 0  // Debug logging disabled
     FL_LOG_RMT("FastLEDRmtEncoder::initialize: Configuring bytes encoder:");
     FL_LOG_RMT("  bit0: level0=" << bytes_config.bit0.level0 << " duration0=" << bytes_config.bit0.duration0
                << " (" << (bytes_config.bit0.duration0 * ns_per_tick) << "ns)"
@@ -127,7 +127,7 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     mResetCode.duration1 = 0;
     mResetCode.level1 = 0;
 
-#ifdef 0  // Debug buffer disabled
+#if 0  // Debug buffer disabled
     // Reset debug buffer on initialization
     mDebugBufferWriteIndex = 0;
     fl::memset(mDebugBuffer, 0, sizeof(mDebugBuffer));
