@@ -1091,12 +1091,29 @@ def run_monitor(
         if missing_keywords:
             print(f"❌ Monitor failed - not all expect keywords found")
             print(f"   Expected {len(expect_keywords)} keywords, found {len(found_expect_keywords)}")
-            print(f"   Missing keywords: {', '.join(sorted(missing_keywords))}")
+            # Display missing keywords clearly
+            if len(missing_keywords) == 1:
+                print(f"   Missing keyword: \"{list(missing_keywords)[0]}\"")
+            else:
+                print(f"   Missing keywords:")
+                for keyword in sorted(missing_keywords):
+                    print(f"     - \"{keyword}\"")
+            # Display found keywords if any
             if found_expect_keywords:
-                print(f"   Found keywords: {', '.join(sorted(found_expect_keywords))}")
+                if len(found_expect_keywords) == 1:
+                    print(f"   Found keyword: \"{list(found_expect_keywords)[0]}\"")
+                else:
+                    print(f"   Found keywords:")
+                    for keyword in sorted(found_expect_keywords):
+                        print(f"     - \"{keyword}\"")
         else:
             print(f"✅ Monitor succeeded - all {len(expect_keywords)} expect keywords found")
-            print(f"   Keywords: {', '.join(sorted(expect_keywords))}")
+            if len(expect_keywords) == 1:
+                print(f"   Keyword: \"{expect_keywords[0]}\"")
+            else:
+                print(f"   Keywords:")
+                for keyword in sorted(expect_keywords):
+                    print(f"     - \"{keyword}\"")
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
     elif stream and success:
