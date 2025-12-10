@@ -1,34 +1,31 @@
-// ESP I/O implementation - ESP-IDF native UART driver
+// ESP I/O implementation - ESP32 ROM functions
 
-#ifdef __ESP_IDF__
+#ifdef ESP32
 
 #include "io_esp.h"
 
-#include "driver/uart.h"
+#include "rom/uart.h"  // For uart_tx_one_char
 
 namespace fl {
-
-// Inline strlen to avoid including string.h
-static size_t _esp_strlen(const char *str) {
-    size_t len = 0;
-    while (str && *str++)
-        len++;
-    return len;
-}
 
 void print_esp(const char *str) {
     if (!str)
         return;
-    // Use direct UART write instead of ESP_LOGI to avoid vfprintf dependency
-    uart_write_bytes(UART_NUM_0, str, _esp_strlen(str));
+    // Use ROM uart_tx_one_char - writes to hardware FIFO (128 bytes)
+    // The FIFO provides hardware buffering, so this is reasonably fast
+    while (*str) {
+        uart_tx_one_char(*str++);
+    }
 }
 
 void println_esp(const char *str) {
     if (!str)
         return;
-    // Use direct UART write with newline
-    uart_write_bytes(UART_NUM_0, str, _esp_strlen(str));
-    uart_write_bytes(UART_NUM_0, "\n", 1);
+    // Use ROM uart_tx_one_char with newline
+    while (*str) {
+        uart_tx_one_char(*str++);
+    }
+    uart_tx_one_char('\n');
 }
 
 int available_esp() {
@@ -43,4 +40,4 @@ int read_esp() {
 
 } // namespace fl
 
-#endif // __ESP_IDF__
+#endif // ESP32
