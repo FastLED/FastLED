@@ -192,6 +192,36 @@ public:
     virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                        fl::span<uint8_t> out) override = 0;
 
+    /**
+     * @brief Get raw edge timings in universal format (for debugging)
+     * @param out Output span to write EdgeTime entries (pre-allocated by caller)
+     * @return Number of EdgeTime entries written (may be less than out.size() if insufficient data)
+     *
+     * Converts RMT symbols to universal EdgeTime format (high/low + nanoseconds).
+     * Each RMT symbol produces 2 EdgeTime entries (duration0/level0, duration1/level1).
+     *
+     * Example:
+     * @code
+     * auto rx = RmtRxChannel::create(6, 40000000, 512);
+     * rx->begin();
+     * rx->wait(100);
+     *
+     * // Print each edge
+     * EdgeTime edges[100];
+     * size_t count = rx->getRawEdgeTimes(edges);
+     * for (size_t i = 0; i < count; i++) {
+     *     FL_DBG((edges[i].high ? "HIGH " : "LOW ") << edges[i].ns << "ns");
+     * }
+     * @endcode
+     */
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override = 0;
+
+    /**
+     * @brief Get device type name
+     * @return "RMT" for RMT-based receiver
+     */
+    virtual const char* name() const override = 0;
+
 protected:
     RmtRxChannel() = default;
 

@@ -5,6 +5,8 @@
 
 #include "fl/rx_device.h"
 #include "fl/warn.h"
+#include "ftl/assert.h"
+#include "ftl/vector.h"
 
 namespace fl {
 
@@ -13,10 +15,22 @@ namespace fl {
  *
  * Warns on first use, then returns failures for all operations.
  * This prevents null pointer dereferences while providing clear error messages.
+ *
+ * Testable variant: Can push edge times directly for testing purposes.
  */
 class DummyRxDevice : public RxDevice {
 public:
     explicit DummyRxDevice(const char* reason) : mReason(reason), mWarned(false) {}
+
+    /**
+     * @brief Add edge time for testing purposes
+     * @param level High (true) or low (false) signal level
+     * @param nanoseconds Duration in nanoseconds (must fit in 31 bits)
+     */
+    void add(bool level, uint32_t nanoseconds) {
+        FL_ASSERT(nanoseconds <= 0x7FFFFFFF, "Nanoseconds overflow: value must fit in 31 bits");
+        mEdgeTimes.push_back(EdgeTime(level, nanoseconds));
+    }
 
     bool begin(uint32_t signal_range_min_ns = 100,
               uint32_t signal_range_max_ns = 100000,
@@ -47,6 +61,23 @@ public:
         return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+        if (mEdgeTimes.empty()) {
+            warnOnce();
+            return 0;
+        }
+
+        size_t count = (mEdgeTimes.size() < out.size()) ? mEdgeTimes.size() : out.size();
+        for (size_t i = 0; i < count; i++) {
+            out[i] = mEdgeTimes[i];
+        }
+        return count;
+    }
+
+    const char* name() const override {
+        return "dummy";
+    }
+
 private:
     void warnOnce() const {
         if (!mWarned) {
@@ -57,6 +88,7 @@ private:
 
     const char* mReason;
     mutable bool mWarned;
+    fl::vector<EdgeTime> mEdgeTimes;
 };
 
 } // namespace fl

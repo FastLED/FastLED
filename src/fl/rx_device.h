@@ -18,6 +18,33 @@ namespace fl {
 namespace fl {
 
 /**
+ * @brief Universal edge timing representation (platform-agnostic)
+ *
+ * Represents a single edge transition with duration in nanoseconds.
+ * RX devices convert their internal format (e.g., RMT ticks) to this
+ * universal format for debugging and analysis.
+ *
+ * Memory layout: 32-bit packed bit field
+ * - 31 bits: Duration in nanoseconds (max 2147483647ns ~= 2.1 seconds)
+ * - 1 bit: High/low level flag
+ *
+ * Example sequence for WS2812B bit pattern:
+ * - Bit 0: {high: true, ns: 400}, {high: false, ns: 850}
+ * - Bit 1: {high: true, ns: 800}, {high: false, ns: 450}
+ */
+struct EdgeTime {
+    uint32_t ns : 31;    ///< Duration in nanoseconds (31 bits, max ~2.1s)
+    uint32_t high : 1;   ///< High/low level (1 bit: 1=high, 0=low)
+
+    /// Default constructor (low, 0ns)
+    constexpr EdgeTime() : ns(0), high(0) {}
+
+    /// Construct from high/low state and duration
+    constexpr EdgeTime(bool high_level, uint32_t ns_duration)
+        : ns(ns_duration), high(high_level ? 1 : 0) {}
+};
+
+/**
  * @brief Error codes for RX decoder operations
  */
 enum class DecodeError : uint8_t {
@@ -146,6 +173,43 @@ public:
      */
     virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                        fl::span<uint8_t> out) = 0;
+
+    /**
+     * @brief Get raw edge timings in universal format (for debugging)
+     * @param out Output span to write EdgeTime entries (pre-allocated by caller)
+     * @return Number of EdgeTime entries written (may be less than out.size() if insufficient data)
+     *
+     * Converts internal platform-specific format (RMT ticks, ISR timestamps, etc.)
+     * to universal EdgeTime format with nanosecond durations.
+     *
+     * For RMT devices: Each RMT symbol produces 2 EdgeTime entries (high/low phases)
+     *
+     * Example:
+     * @code
+     * auto rx = RxDevice::create("RMT", 6, 512);
+     * rx->begin();
+     * rx->wait(100);
+     *
+     * // Stack allocation
+     * EdgeTime edges[100];
+     * size_t count = rx->getRawEdgeTimes(edges);
+     * for (size_t i = 0; i < count; i++) {
+     *     printf("%s %uns\n", edges[i].high ? "HIGH" : "LOW", edges[i].ns);
+     * }
+     *
+     * // Or use HeapVector for dynamic sizing
+     * fl::HeapVector<EdgeTime> edges(1024);
+     * size_t count = rx->getRawEdgeTimes(edges);
+     * edges.resize(count);  // Trim to actual size
+     * @endcode
+     */
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) const = 0;
+
+    /**
+     * @brief Get device type name
+     * @return Device name (e.g., "dummy", "RMT", "ISR")
+     */
+    virtual const char* name() const = 0;
 
     /**
      * @brief Factory method to create RX device by type

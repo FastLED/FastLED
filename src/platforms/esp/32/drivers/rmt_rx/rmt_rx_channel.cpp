@@ -612,6 +612,45 @@ public:
         return decodeRmtSymbols(timing, mResolutionHz, symbols, out);
     }
 
+    const char* name() const override {
+        return "RMT";
+    }
+
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
+        // Get received symbols from last receive operation
+        fl::span<const RmtSymbol> symbols = getReceivedSymbols();
+
+        if (symbols.empty() || out.empty()) {
+            return 0;
+        }
+
+        // Calculate nanoseconds per tick for conversion
+        uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
+
+        // Each RMT symbol produces 2 EdgeTime entries (duration0/level0, duration1/level1)
+        // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
+        const auto* rmt_symbols = reinterpret_cast<const rmt_symbol_word_t*>(symbols.data());
+
+        size_t write_index = 0;
+        for (size_t i = 0; i < symbols.size() && write_index < out.size(); i++) {
+            const auto& sym = rmt_symbols[i];
+
+            // First edge: duration0 with level0
+            if (sym.duration0 > 0 && write_index < out.size()) {
+                out[write_index] = EdgeTime(sym.level0 != 0, ticksToNs(sym.duration0, ns_per_tick));
+                write_index++;
+            }
+
+            // Second edge: duration1 with level1
+            if (sym.duration1 > 0 && write_index < out.size()) {
+                out[write_index] = EdgeTime(sym.level1 != 0, ticksToNs(sym.duration1, ns_per_tick));
+                write_index++;
+            }
+        }
+
+        return write_index;
+    }
+
 private:
     /**
      * @brief Handle skip phase by discarding symbols until mSkipCounter reaches 0
