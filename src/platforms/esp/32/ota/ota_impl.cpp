@@ -7,19 +7,32 @@
 #include "platforms/esp/esp_version.h"
 #include "fl/ota.h"  // For OTAService enum
 
-// OTA requires IDF 4.0 or higher for HTTP server and OTA APIs
-// For IDF 3.3 and earlier, fall back to null implementation
-// ESP32-H2 and ESP32-P4 don't have WiFi, so OTA is not supported
-#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(CONFIG_IDF_TARGET_ESP32H2) && !defined(CONFIG_IDF_TARGET_ESP32P4)
+// OTA support detection flag
+// OTA requires IDF 4.0+ for HTTP server and OTA APIs
+// ESP32-H2 and ESP32-P4 lack WiFi hardware
+// Arduino framework uses different OTA implementation
+#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(CONFIG_IDF_TARGET_ESP32H2) && !defined(CONFIG_IDF_TARGET_ESP32P4) && !defined(ARDUINO)
+#define FL_ESP_OTA_SUPPORTED
+#endif
 
-// ESP-IDF headers
+// Pure ESP-IDF OTA implementation (no Arduino framework required)
+#ifdef FL_ESP_OTA_SUPPORTED
+
+// ESP-IDF headers (available in both Arduino and pure ESP-IDF builds)
 #include <esp_http_server.h>
 #include <esp_ota_ops.h>
 #include <mdns.h>
-
-// Arduino headers
-#include <WiFi.h>
-#include <ArduinoOTA.h>
+#include <esp_wifi.h>
+#include <esp_netif.h>
+#include <esp_event.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <string.h>
+#include <lwip/sockets.h>
+#include <lwip/netdb.h>
+#include <mbedtls/md.h>
+#include <mbedtls/md5.h>
+#include <mbedtls/sha256.h>
 
 // FastLED headers
 #include "fl/str.h"
@@ -569,8 +582,7 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
     }
 
     // Reboot after a short delay (allow response to be sent)
-    // Note: In a real implementation, you'd use a FreeRTOS task/timer for this
-    delay(1000);
+    vTaskDelay(pdMS_TO_TICKS(1000));
     esp_restart();
 
     return ESP_OK;
@@ -624,6 +636,7 @@ public:
         : mApFallbackEnabled(false)
         , mHttpServer(nullptr)
         , mFailedServices(0)
+        , mWifiConnected(false)
     {
         mHttpContext.password = nullptr;
         mHttpContext.progress_cb = &mProgressCb;
@@ -648,10 +661,11 @@ public:
         mPassword = password ? password : "";
         mHttpContext.password = mPassword.c_str();
 
-        // Connect to Wi-Fi using Arduino WiFi library (async mode)
-        WiFi.mode(WIFI_STA);
-        WiFi.setHostname(mHostname.c_str());
-        WiFi.begin(ssid, wifi_pass);
+        // Connect to Wi-Fi using ESP-IDF WiFi API (async mode)
+        if (!initEspIdfWifi(ssid, wifi_pass)) {
+            FL_WARN("ESP-IDF WiFi initialization failed");
+            // Continue anyway - some services might still work
+        }
 
         // Async mode: Return immediately, user polls isConnected()
         // Note: We initialize services even if not connected yet
@@ -662,13 +676,13 @@ public:
             mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
-        // Setup ArduinoOTA
+        // Setup custom ESP-IDF OTA server (TCP listener on port 3232)
         setupArduinoOTA();
 
         // Start HTTP server for Web OTA
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
-            FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
+            FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
             mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
@@ -696,13 +710,13 @@ public:
             mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
-        // Setup ArduinoOTA
+        // Setup custom ESP-IDF OTA server (TCP listener on port 3232)
         setupArduinoOTA();
 
         // Start HTTP server for Web OTA
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
-            FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
+            FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
             mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
@@ -745,13 +759,13 @@ public:
     }
 
     void poll() override {
-        // Only need to handle ArduinoOTA
-        // HTTP server runs in separate FreeRTOS task (zero polling overhead)
-        ArduinoOTA.handle();
+        // Custom OTA server runs in separate FreeRTOS task (zero polling overhead)
+        // HTTP server also runs in separate FreeRTOS task
+        // Nothing to poll
     }
 
     bool isConnected() const override {
-        return WiFi.status() == WL_CONNECTED;
+        return mWifiConnected;
     }
 
     uint8_t getFailedServices() const override {
@@ -759,43 +773,580 @@ public:
     }
 
 private:
-    void setupArduinoOTA() {
-        ArduinoOTA.setHostname(mHostname.c_str());
-        ArduinoOTA.setPassword(mPassword.c_str());
+    /// @brief WiFi event handler for connection state tracking
+    /// @param arg User data (pointer to ESP32OTA instance)
+    /// @param event_base Event base (WIFI_EVENT or IP_EVENT)
+    /// @param event_id Event ID (e.g., WIFI_EVENT_STA_CONNECTED)
+    /// @param event_data Event-specific data
+    static void wifiEventHandler(void* arg, esp_event_base_t event_base,
+                                  int32_t event_id, void* event_data) {
+        ESP32OTA* self = static_cast<ESP32OTA*>(arg);
 
-        ArduinoOTA.onStart([this]() {
-            if (mStateCb) {
-                mStateCb(1);  // State: Start
+        if (event_base == WIFI_EVENT) {
+            if (event_id == WIFI_EVENT_STA_CONNECTED) {
+                FL_DBG("WiFi: Station connected to AP");
+            } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+                FL_DBG("WiFi: Station disconnected from AP");
+                self->mWifiConnected = false;
             }
-        });
-
-        ArduinoOTA.onEnd([this]() {
-            if (mStateCb) {
-                mStateCb(2);  // State: End
+        } else if (event_base == IP_EVENT) {
+            if (event_id == IP_EVENT_STA_GOT_IP) {
+                ip_event_got_ip_t* event = static_cast<ip_event_got_ip_t*>(event_data);
+                FL_DBG("WiFi: Got IP address: " << ip4addr_ntoa(&event->ip_info.ip));
+                self->mWifiConnected = true;
             }
-        });
+        }
+    }
 
-        ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
-            if (mProgressCb) {
-                mProgressCb(progress, total);
+    /// @brief Initialize ESP-IDF WiFi with STA mode
+    /// @param ssid WiFi SSID
+    /// @param password WiFi password
+    /// @return true if initialization successful, false otherwise
+    bool initEspIdfWifi(const char* ssid, const char* password) {
+        // Initialize network interface (if not already initialized)
+        // Note: This is safe to call multiple times
+        esp_err_t err = esp_netif_init();
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            FL_WARN("esp_netif_init failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Create default event loop (if not already created)
+        err = esp_event_loop_create_default();
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            FL_WARN("esp_event_loop_create_default failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Create default WiFi STA interface (if not already created)
+        // Note: Idempotent - safe to call multiple times
+        static esp_netif_t* sta_netif = nullptr;
+        if (!sta_netif) {
+            sta_netif = esp_netif_create_default_wifi_sta();
+            if (!sta_netif) {
+                FL_WARN("esp_netif_create_default_wifi_sta failed");
+                return false;
             }
-        });
+        }
 
-        ArduinoOTA.onError([this](ota_error_t error) {
+        // Register event handlers
+        err = esp_event_handler_instance_register(WIFI_EVENT,
+                                                    ESP_EVENT_ANY_ID,
+                                                    &wifiEventHandler,
+                                                    this,
+                                                    nullptr);
+        if (err != ESP_OK) {
+            FL_WARN("Failed to register WIFI_EVENT handler: " << esp_err_to_name(err));
+            return false;
+        }
+
+        err = esp_event_handler_instance_register(IP_EVENT,
+                                                    IP_EVENT_STA_GOT_IP,
+                                                    &wifiEventHandler,
+                                                    this,
+                                                    nullptr);
+        if (err != ESP_OK) {
+            FL_WARN("Failed to register IP_EVENT handler: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Initialize WiFi driver (if not already initialized)
+        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+        err = esp_wifi_init(&cfg);
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            FL_WARN("esp_wifi_init failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Set WiFi mode to STA (Station)
+        err = esp_wifi_set_mode(WIFI_MODE_STA);
+        if (err != ESP_OK) {
+            FL_WARN("esp_wifi_set_mode failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Configure WiFi credentials
+        wifi_config_t wifi_config = {};
+        strncpy((char*)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid) - 1);
+        strncpy((char*)wifi_config.sta.password, password, sizeof(wifi_config.sta.password) - 1);
+        wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+
+        err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+        if (err != ESP_OK) {
+            FL_WARN("esp_wifi_set_config failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Set hostname (must be done before starting WiFi)
+        err = esp_netif_set_hostname(sta_netif, mHostname.c_str());
+        if (err != ESP_OK) {
+            FL_WARN("esp_netif_set_hostname failed: " << esp_err_to_name(err));
+            // Non-fatal, continue
+        }
+
+        // Start WiFi
+        err = esp_wifi_start();
+        if (err != ESP_OK) {
+            FL_WARN("esp_wifi_start failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        // Connect to AP (async)
+        err = esp_wifi_connect();
+        if (err != ESP_OK) {
+            FL_WARN("esp_wifi_connect failed: " << esp_err_to_name(err));
+            return false;
+        }
+
+        FL_DBG("ESP-IDF WiFi initialization successful");
+        return true;
+    }
+
+    /// @brief Generate authentication nonce for OTA
+    /// @param nonce Output buffer for nonce (64 characters for SHA256)
+    static void generateNonce(char* nonce, size_t len) {
+        // Generate nonce from timestamp and random data
+        unsigned char hash[32];
+        mbedtls_sha256_context ctx;
+        mbedtls_sha256_init(&ctx);
+        mbedtls_sha256_starts(&ctx, 0);  // 0 = SHA256 (not SHA224)
+
+        uint32_t seed = esp_random();
+        mbedtls_sha256_update(&ctx, (unsigned char*)&seed, sizeof(seed));
+
+        int64_t time_us = esp_timer_get_time();
+        mbedtls_sha256_update(&ctx, (unsigned char*)&time_us, sizeof(time_us));
+
+        mbedtls_sha256_finish(&ctx, hash);
+        mbedtls_sha256_free(&ctx);
+
+        // Convert to hex string
+        for (size_t i = 0; i < 32 && i * 2 + 1 < len; i++) {
+            snprintf(nonce + i * 2, 3, "%02x", hash[i]);
+        }
+    }
+
+    /// @brief Verify OTA authentication response
+    /// @param password Password to verify against
+    /// @param nonce Server nonce (64 chars hex)
+    /// @param cnonce Client nonce from response
+    /// @param response Client response to verify
+    /// @return true if authentication successful
+    static bool verifyAuth(const char* password, const char* nonce,
+                          const char* cnonce, const char* response) {
+        // Compute password hash (SHA256)
+        unsigned char pass_hash[32];
+        mbedtls_sha256((unsigned char*)password, strlen(password), pass_hash, 0);
+
+        // Convert password hash to hex
+        char pass_hash_hex[65];
+        for (int i = 0; i < 32; i++) {
+            snprintf(pass_hash_hex + i * 2, 3, "%02x", pass_hash[i]);
+        }
+        pass_hash_hex[64] = '\0';
+
+        // Derive key using simple iteration (simplified PBKDF2-like)
+        unsigned char derived_key[32];
+        memcpy(derived_key, pass_hash, 32);
+        for (int i = 0; i < 1000; i++) {  // 1000 iterations (lighter than 10000)
+            mbedtls_sha256(derived_key, 32, derived_key, 0);
+        }
+
+        // Convert derived key to hex
+        char derived_key_hex[65];
+        for (int i = 0; i < 32; i++) {
+            snprintf(derived_key_hex + i * 2, 3, "%02x", derived_key[i]);
+        }
+        derived_key_hex[64] = '\0';
+
+        // Compute expected response: SHA256(derived_key_hex:nonce:cnonce)
+        char auth_string[256];
+        snprintf(auth_string, sizeof(auth_string), "%s:%s:%s",
+                derived_key_hex, nonce, cnonce);
+
+        unsigned char expected_hash[32];
+        mbedtls_sha256((unsigned char*)auth_string, strlen(auth_string),
+                      expected_hash, 0);
+
+        char expected_response[65];
+        for (int i = 0; i < 32; i++) {
+            snprintf(expected_response + i * 2, 3, "%02x", expected_hash[i]);
+        }
+        expected_response[64] = '\0';
+
+        return strcmp(response, expected_response) == 0;
+    }
+
+    /// @brief Handle TCP firmware upload after successful invitation/auth
+    /// @param client_addr UDP client address
+    /// @param port TCP port where client is listening
+    /// @param expected_size Expected firmware size in bytes
+    /// @param expected_md5 Expected MD5 hash (32-char hex string)
+    /// @param cmd OTA command (0=FLASH, 100=SPIFFS, etc.)
+    void handleFirmwareUpload(struct sockaddr_in* client_addr, int port,
+                             int expected_size, const char* expected_md5, int cmd) {
+        // Only handle FLASH command (0) for now
+        if (cmd != 0) {
+            FL_WARN("OTA: Unsupported command " << cmd << " (only FLASH supported)");
             if (mErrorCb) {
-                const char* msg = "Unknown error";
-                switch (error) {
-                    case OTA_AUTH_ERROR: msg = "Auth Failed"; break;
-                    case OTA_BEGIN_ERROR: msg = "Begin Failed"; break;
-                    case OTA_CONNECT_ERROR: msg = "Connect Failed"; break;
-                    case OTA_RECEIVE_ERROR: msg = "Receive Failed"; break;
-                    case OTA_END_ERROR: msg = "End Failed"; break;
-                }
-                mErrorCb(msg);
+                mErrorCb("Unsupported OTA command");
             }
-        });
+            return;
+        }
 
-        ArduinoOTA.begin();
+        // Call start state callback
+        if (mStateCb) {
+            mStateCb(1);  // OTA_START
+        }
+
+        // Create TCP socket to connect to client
+        int tcp_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (tcp_socket < 0) {
+            FL_WARN("OTA: Failed to create TCP socket");
+            if (mErrorCb) {
+                mErrorCb("TCP socket creation failed");
+            }
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        // Set socket timeout to 10 seconds
+        struct timeval timeout;
+        timeout.tv_sec = 10;
+        timeout.tv_usec = 0;
+        setsockopt(tcp_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+        // Connect to client's TCP server
+        struct sockaddr_in tcp_addr;
+        memcpy(&tcp_addr, client_addr, sizeof(struct sockaddr_in));
+        tcp_addr.sin_port = htons(port);
+
+        FL_DBG("OTA: Connecting to client TCP server on port " << port);
+        if (connect(tcp_socket, (struct sockaddr*)&tcp_addr, sizeof(tcp_addr)) < 0) {
+            FL_WARN("OTA: Failed to connect to client TCP server");
+            if (mErrorCb) {
+                mErrorCb("TCP connection failed");
+            }
+            close(tcp_socket);
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        FL_DBG("OTA: TCP connected, receiving firmware (" << expected_size << " bytes)");
+
+        // Get OTA partition
+        const esp_partition_t* update_partition = esp_ota_get_next_update_partition(nullptr);
+        if (!update_partition) {
+            FL_WARN("OTA: No OTA partition found");
+            if (mErrorCb) {
+                mErrorCb("No OTA partition");
+            }
+            close(tcp_socket);
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        // Begin OTA operation
+        esp_ota_handle_t ota_handle;
+        esp_err_t err = esp_ota_begin(update_partition, expected_size, &ota_handle);
+        if (err != ESP_OK) {
+            FL_WARN("OTA: esp_ota_begin failed: " << esp_err_to_name(err));
+            if (mErrorCb) {
+                mErrorCb("OTA begin failed");
+            }
+            close(tcp_socket);
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        // Initialize MD5 context for verification
+        mbedtls_md5_context md5_ctx;
+        mbedtls_md5_init(&md5_ctx);
+        mbedtls_md5_starts(&md5_ctx);
+
+        // Receive and write firmware data
+        uint8_t buffer[1024];
+        size_t total_received = 0;
+        bool write_error = false;
+
+        while (total_received < (size_t)expected_size) {
+            int remaining = expected_size - total_received;
+            int to_recv = (remaining < (int)sizeof(buffer)) ? remaining : (int)sizeof(buffer);
+
+            int received = recv(tcp_socket, buffer, to_recv, 0);
+            if (received <= 0) {
+                FL_WARN("OTA: TCP receive error or timeout");
+                if (mErrorCb) {
+                    mErrorCb("Upload interrupted");
+                }
+                write_error = true;
+                break;
+            }
+
+            // Update MD5 hash
+            mbedtls_md5_update(&md5_ctx, buffer, received);
+
+            // Write to flash
+            err = esp_ota_write(ota_handle, buffer, received);
+            if (err != ESP_OK) {
+                FL_WARN("OTA: esp_ota_write failed: " << esp_err_to_name(err));
+                if (mErrorCb) {
+                    mErrorCb("Flash write failed");
+                }
+                write_error = true;
+                break;
+            }
+
+            total_received += received;
+
+            // Call progress callback
+            if (mProgressCb) {
+                mProgressCb(total_received, expected_size);
+            }
+        }
+
+        close(tcp_socket);
+
+        // Check for errors
+        if (write_error) {
+            esp_ota_abort(ota_handle);
+            mbedtls_md5_free(&md5_ctx);
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        // Finalize MD5 and verify
+        unsigned char md5_hash[16];
+        mbedtls_md5_finish(&md5_ctx, md5_hash);
+        mbedtls_md5_free(&md5_ctx);
+
+        char computed_md5[33];
+        for (int i = 0; i < 16; i++) {
+            snprintf(computed_md5 + i * 2, 3, "%02x", md5_hash[i]);
+        }
+        computed_md5[32] = '\0';
+
+        FL_DBG("OTA: Expected MD5: " << expected_md5);
+        FL_DBG("OTA: Computed MD5: " << computed_md5);
+
+        if (strcmp(computed_md5, expected_md5) != 0) {
+            FL_WARN("OTA: MD5 mismatch!");
+            if (mErrorCb) {
+                mErrorCb("MD5 verification failed");
+            }
+            esp_ota_abort(ota_handle);
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        FL_DBG("OTA: MD5 verification passed");
+
+        // Finalize OTA
+        err = esp_ota_end(ota_handle);
+        if (err != ESP_OK) {
+            FL_WARN("OTA: esp_ota_end failed: " << esp_err_to_name(err));
+            if (mErrorCb) {
+                mErrorCb("OTA finalization failed");
+            }
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        // Set boot partition
+        err = esp_ota_set_boot_partition(update_partition);
+        if (err != ESP_OK) {
+            FL_WARN("OTA: Failed to set boot partition: " << esp_err_to_name(err));
+            if (mErrorCb) {
+                mErrorCb("Failed to set boot partition");
+            }
+            if (mStateCb) {
+                mStateCb(3);  // OTA_ERROR
+            }
+            return;
+        }
+
+        FL_DBG("OTA: Firmware update successful!");
+
+        // Call end state callback
+        if (mStateCb) {
+            mStateCb(2);  // OTA_END
+        }
+
+        // Call before-reboot callback
+        if (mBeforeRebootCb) {
+            mBeforeRebootCb();
+        }
+
+        // Reboot after short delay
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        esp_restart();
+    }
+
+    /// @brief OTA UDP server task - handles OTA invitations and protocol
+    /// @param pvParameters Pointer to ESP32OTA instance
+    static void otaServerTask(void* pvParameters) {
+        ESP32OTA* self = static_cast<ESP32OTA*>(pvParameters);
+
+        // Create UDP socket
+        self->mOtaUdpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        if (self->mOtaUdpSocket < 0) {
+            FL_WARN("OTA: Failed to create UDP socket");
+            self->mOtaRunning = false;
+            vTaskDelete(nullptr);
+            return;
+        }
+
+        // Bind to port 3232
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(3232);
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        if (bind(self->mOtaUdpSocket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+            FL_WARN("OTA: Failed to bind UDP socket to port 3232");
+            close(self->mOtaUdpSocket);
+            self->mOtaUdpSocket = -1;
+            self->mOtaRunning = false;
+            vTaskDelete(nullptr);
+            return;
+        }
+
+        FL_DBG("OTA: UDP server listening on port 3232");
+
+        // Set receive timeout for responsive shutdown
+        struct timeval timeout;
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        setsockopt(self->mOtaUdpSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+        char buffer[512];
+        struct sockaddr_in client_addr;
+        socklen_t client_len = sizeof(client_addr);
+
+        while (self->mOtaRunning) {
+            int len = recvfrom(self->mOtaUdpSocket, buffer, sizeof(buffer) - 1, 0,
+                              (struct sockaddr*)&client_addr, &client_len);
+
+            if (len <= 0) {
+                continue;  // Timeout or error, check mOtaRunning flag
+            }
+
+            buffer[len] = '\0';
+            FL_DBG("OTA: Received UDP packet: " << buffer);
+
+            // Parse command: "<cmd> <port> <size> <md5>\n"
+            int cmd, port, size;
+            char md5[33];
+            if (sscanf(buffer, "%d %d %d %32s", &cmd, &port, &size, md5) != 4) {
+                FL_WARN("OTA: Invalid invitation format");
+                continue;
+            }
+
+            // Check if password is required
+            const char* response_msg;
+            if (self->mPassword.length() > 0) {
+                // Generate nonce and send AUTH challenge
+                char nonce[65];
+                generateNonce(nonce, sizeof(nonce));
+                self->mOtaNonce = nonce;
+
+                char auth_response[128];
+                snprintf(auth_response, sizeof(auth_response), "AUTH %s", nonce);
+                sendto(self->mOtaUdpSocket, auth_response, strlen(auth_response), 0,
+                      (struct sockaddr*)&client_addr, client_len);
+                FL_DBG("OTA: Sent AUTH challenge");
+
+                // Wait for authentication response (with timeout)
+                len = recvfrom(self->mOtaUdpSocket, buffer, sizeof(buffer) - 1, 0,
+                              (struct sockaddr*)&client_addr, &client_len);
+                if (len <= 0) {
+                    FL_WARN("OTA: Authentication timeout");
+                    continue;
+                }
+
+                buffer[len] = '\0';
+                FL_DBG("OTA: Received auth response: " << buffer);
+
+                // Parse auth response: "200 <cnonce> <response>\n"
+                int auth_cmd;
+                char cnonce[65], auth_hash[65];
+                if (sscanf(buffer, "%d %64s %64s", &auth_cmd, cnonce, auth_hash) != 3 || auth_cmd != 200) {
+                    FL_WARN("OTA: Invalid auth response format");
+                    sendto(self->mOtaUdpSocket, "FAIL", 4, 0,
+                          (struct sockaddr*)&client_addr, client_len);
+                    continue;
+                }
+
+                // Verify authentication
+                if (!verifyAuth(self->mPassword.c_str(), nonce, cnonce, auth_hash)) {
+                    FL_WARN("OTA: Authentication failed");
+                    if (self->mErrorCb) {
+                        self->mErrorCb("Auth Failed");
+                    }
+                    sendto(self->mOtaUdpSocket, "FAIL", 4, 0,
+                          (struct sockaddr*)&client_addr, client_len);
+                    continue;
+                }
+
+                FL_DBG("OTA: Authentication successful");
+            }
+
+            // Send OK response
+            sendto(self->mOtaUdpSocket, "OK", 2, 0,
+                  (struct sockaddr*)&client_addr, client_len);
+
+            // Handle TCP connection for firmware upload
+            FL_DBG("OTA: Ready for TCP connection on client port " << port);
+            self->handleFirmwareUpload(&client_addr, port, size, md5, cmd);
+        }
+
+        close(self->mOtaUdpSocket);
+        self->mOtaUdpSocket = -1;
+        FL_DBG("OTA: UDP server stopped");
+        vTaskDelete(nullptr);
+    }
+
+    void setupArduinoOTA() {
+        // Start custom OTA server (replaces ArduinoOTA)
+        if (mOtaRunning) {
+            FL_WARN("OTA: Server already running");
+            return;
+        }
+
+        mOtaRunning = true;
+
+        // Create OTA server task
+        BaseType_t result = xTaskCreate(
+            otaServerTask,
+            "ota_server",
+            4096,  // Stack size
+            this,  // Parameter (ESP32OTA instance)
+            5,     // Priority
+            &mOtaServerTask
+        );
+
+        if (result != pdPASS) {
+            FL_WARN("OTA: Failed to create server task");
+            mOtaRunning = false;
+            mFailedServices |= static_cast<uint8_t>(OTAService::IDE);
+        } else {
+            FL_DBG("OTA: Custom server started (port 3232)");
+        }
     }
 
     void stopHttpServer() {
@@ -807,7 +1358,28 @@ private:
 
     void cleanup() {
         stopHttpServer();
-        ArduinoOTA.end();
+
+        // Stop custom OTA server
+        if (mOtaRunning) {
+            mOtaRunning = false;
+
+            // Wait for task to finish (it will exit on next timeout)
+            if (mOtaServerTask) {
+                // Give it 2 seconds to gracefully shut down
+                for (int i = 0; i < 20 && mOtaServerTask; i++) {
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                }
+                mOtaServerTask = nullptr;
+            }
+
+            // Close socket if still open
+            if (mOtaUdpSocket >= 0) {
+                close(mOtaUdpSocket);
+                mOtaUdpSocket = -1;
+            }
+
+            FL_DBG("OTA: Custom server stopped");
+        }
     }
 
     // Configuration - using StrN for safe string storage
@@ -816,6 +1388,7 @@ private:
     fl::StrN<32> mApSsid;
     fl::StrN<64> mApPass;
     bool mApFallbackEnabled;
+    bool mWifiConnected;
 
     // Callbacks
     fl::function<void(size_t, size_t)> mProgressCb;
@@ -831,6 +1404,12 @@ private:
 
     // Service initialization status
     uint8_t mFailedServices;
+
+    // Custom ESP-IDF OTA server state (pure ESP-IDF, no Arduino)
+    int mOtaUdpSocket = -1;              // UDP socket for OTA invitations
+    TaskHandle_t mOtaServerTask = nullptr;  // FreeRTOS task handle for OTA server
+    fl::StrN<64> mOtaNonce;              // Authentication nonce
+    bool mOtaRunning = false;            // OTA server running flag
 };
 
 // ============================================================================
@@ -844,6 +1423,6 @@ fl::shared_ptr<IOTA> platform_create_ota() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // ESP_IDF_VERSION_4_OR_HIGHER
+#endif  // FL_ESP_OTA_SUPPORTED
 
 #endif  // ESP32
