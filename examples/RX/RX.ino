@@ -21,7 +21,8 @@
 /// Platform Support:
 ///   - ESP32 (all variants: classic, S3, C3, C6, etc.)
 ///
-/// run with `bash debug RX --expect "TX Pin: GPIO 0" --expect "RX Pin: GPIO 1" --expect "RX Device: RMT" --fail-on ERROR`
+/// run with (in fastled repo)
+//    bash debug RX --expect "TX Pin: GPIO 0" --expect "RX Pin: GPIO 1" --expect "RX Device: RMT" --fail-on ERROR
 
 #include <FastLED.h>
 #include "fl/rx_device.h"
