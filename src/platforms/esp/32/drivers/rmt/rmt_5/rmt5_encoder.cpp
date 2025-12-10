@@ -284,3 +284,4 @@ esp_err_t fastled_rmt_new_encoder(const ChipsetTiming& timing,
 
 #endif // ESP32
 // Test cache
+// Test cache 2
