@@ -27,8 +27,10 @@ Concurrency Control:
     - Supports stale lock detection and automatic cleanup
 
 Usage:
-    uv run ci/debug_attached.py                          # Auto-detect (default: 20s timeout, fails on "ERROR")
-    uv run ci/debug_attached.py esp32dev                 # Specific environment
+    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, fails on "ERROR")
+    uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), auto-detect env
+    uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
+    uv run ci/debug_attached.py examples/RX/RX.ino       # Full path to sketch
     uv run ci/debug_attached.py --verbose                # Verbose mode
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
@@ -38,7 +40,7 @@ Usage:
     uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
     uv run ci/debug_attached.py --no-fail-on             # Disable all failure keywords
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
-    uv run ci/debug_attached.py esp32dev --verbose --upload-port COM3
+    uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
 """
 
 import argparse
@@ -60,6 +62,89 @@ from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+
+
+def resolve_sketch_path(sketch_arg: str, project_dir: Path) -> str:
+    """Resolve sketch argument to examples directory path.
+
+    Handles various input formats:
+        - 'RX' → 'examples/RX'
+        - 'examples/RX' → 'examples/RX'
+        - 'examples/RX/RX.ino' → 'examples/RX'
+        - '/full/path/to/examples/RX' → 'examples/RX'
+        - 'examples/deep/nested/Sketch' → 'examples/deep/nested/Sketch'
+
+    Args:
+        sketch_arg: Sketch name, relative path, or full path
+        project_dir: Project root directory
+
+    Returns:
+        Resolved path relative to project root (e.g., 'examples/RX')
+
+    Raises:
+        SystemExit: If sketch cannot be found or is ambiguous
+    """
+    # Handle full paths
+    sketch_path = Path(sketch_arg)
+    if sketch_path.is_absolute():
+        # Convert absolute path to relative from project root
+        try:
+            relative_path = sketch_path.relative_to(project_dir)
+            # If it's a .ino file, get the parent directory
+            if relative_path.suffix == ".ino":
+                relative_path = relative_path.parent
+            return str(relative_path).replace("\\", "/")
+        except ValueError:
+            print(f"❌ Error: Sketch path is outside project directory: {sketch_arg}")
+            print(f"   Project directory: {project_dir}")
+            sys.exit(1)
+
+    # Handle relative paths or sketch names
+    sketch_str = str(sketch_path).replace("\\", "/")
+
+    # Strip .ino extension if present
+    if sketch_str.endswith(".ino"):
+        sketch_str = str(Path(sketch_str).parent).replace("\\", "/")
+
+    # If already starts with 'examples/', use as-is
+    if sketch_str.startswith("examples/"):
+        candidate = project_dir / sketch_str
+        if candidate.is_dir():
+            return sketch_str
+        print(f"❌ Error: Sketch directory not found: {sketch_str}")
+        print(f"   Expected directory: {candidate}")
+        sys.exit(1)
+
+    # Search for sketch in examples directory
+    examples_dir = project_dir / "examples"
+    if not examples_dir.exists():
+        print(f"❌ Error: examples directory not found: {examples_dir}")
+        sys.exit(1)
+
+    # Find all matching directories
+    sketch_name = sketch_str.split("/")[-1]  # Get the sketch name
+    matches = list(examples_dir.rglob(f"*/{sketch_name}")) + list(
+        examples_dir.glob(sketch_name)
+    )
+
+    # Filter to directories only
+    matches = [m for m in matches if m.is_dir()]
+
+    if len(matches) == 0:
+        print(f"❌ Error: Sketch not found: {sketch_arg}")
+        print(f"   Searched in: {examples_dir}")
+        sys.exit(1)
+    elif len(matches) > 1:
+        print(f"❌ Error: Ambiguous sketch name '{sketch_arg}'. Multiple matches found:")
+        for match in matches:
+            rel_path = match.relative_to(project_dir)
+            print(f"   - {rel_path}")
+        print("\n   Please specify the full path to resolve ambiguity.")
+        sys.exit(1)
+
+    # Single match found
+    resolved = matches[0].relative_to(project_dir)
+    return str(resolved).replace("\\", "/")
 
 
 def parse_timeout(timeout_str: str) -> int:
@@ -976,8 +1061,11 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Auto-detect (default: 20s timeout, fails on "ERROR")
-  %(prog)s esp32dev                 # Specific environment
+  %(prog)s                          # Auto-detect env & sketch (default: 20s timeout, fails on "ERROR")
+  %(prog)s RX                       # Compile RX sketch (examples/RX), auto-detect environment
+  %(prog)s RX --env esp32dev        # Compile RX sketch for specific environment
+  %(prog)s examples/RX              # Same as above (explicit path)
+  %(prog)s examples/deep/nested/Sketch  # Deep nested sketch
   %(prog)s --verbose                # Verbose mode
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
@@ -987,13 +1075,20 @@ Examples:
   %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
   %(prog)s --no-fail-on             # Disable all failure keywords
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
-  %(prog)s esp32dev --verbose --upload-port COM3
+  %(prog)s RX --env esp32dev --verbose --upload-port COM3
         """,
     )
 
     parser.add_argument(
-        "environment",
+        "sketch",
         nargs="?",
+        help="Sketch to compile (e.g., 'RX', 'examples/RX', 'examples/RX/RX.ino'). "
+        "Sets FASTLED_SRC_DIR environment variable. Supports full paths and deep sketches.",
+    )
+    parser.add_argument(
+        "--env",
+        "-e",
+        dest="environment",
         help="PlatformIO environment to build (optional, auto-detect if not provided)",
     )
     parser.add_argument(
@@ -1054,6 +1149,16 @@ def main() -> int:
         print(f"❌ Error: platformio.ini not found in {build_dir}")
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
+
+    # Handle sketch argument and set PLATFORMIO_SRC_DIR environment variable
+    if args.sketch:
+        try:
+            resolved_sketch = resolve_sketch_path(args.sketch, build_dir)
+            os.environ["PLATFORMIO_SRC_DIR"] = resolved_sketch
+            print(f"📁 Sketch: {resolved_sketch}")
+        except SystemExit:
+            # resolve_sketch_path already printed error message
+            return 1
 
     # Validate --fail-on and --no-fail-on conflict
     if args.no_fail_on and args.fail_keywords:
