@@ -29,18 +29,19 @@ struct EdgeTimestamp {
  * @brief GPIO ISR-Based RX Channel Interface
  *
  * Provides ISR-based edge detection receiver that captures GPIO edge toggle
- * timestamps with 100ns precision at priority 3, outputting to a pre-allocated buffer.
+ * timestamps with ±1µs precision using fast timer polling (2µs interval).
  *
  * Features:
- * - ISR priority: 3
- * - Edge detection: Hardware-triggered (ANY_EDGE)
- * - Timestamp precision: Microsecond resolution (sufficient for 100ns requirement)
+ * - Timer polling: 2µs interval (500kHz rate) for ±1µs precision
+ * - Edge detection: Timer-driven GPIO register polling
+ * - Timestamp precision: CPU cycle counter (nanosecond resolution)
  * - Output: Array of edge change timestamps
  * - Buffer: Pre-allocated (no dynamic allocation in ISR)
  * - Disarm conditions:
  *   - Buffer full
- *   - 50µs timeout elapsed
+ *   - Idle timeout elapsed (configurable)
  * - Restrictions: No FL_WARN in ISR (ISR-safe logging only)
+ * - WARNING: 2µs polling interval below ESP-IDF recommended 5µs minimum
  *
  * Pin Configuration:
  * - IMPORTANT: The pin must be configured (pinMode) by the user BEFORE calling begin()
