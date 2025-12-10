@@ -42,8 +42,17 @@ struct EdgeTimestamp {
  *   - 50µs timeout elapsed
  * - Restrictions: No FL_WARN in ISR (ISR-safe logging only)
  *
+ * Pin Configuration:
+ * - IMPORTANT: The pin must be configured (pinMode) by the user BEFORE calling begin()
+ * - This ISR RX device only sets up interrupt handling - it does NOT change pin mode
+ * - Pin can be INPUT or OUTPUT - GPIO_IN_REG register reads work for both modes
+ * - Rationale: Allows validation of OUTPUT pins (LED drivers) without reconfiguration
+ *
  * Usage Example:
  * @code
+ * // Configure pin first (user's responsibility)
+ * pinMode(6, INPUT);  // or OUTPUT - both work
+ *
  * auto rx = GpioIsrRx::create(6, 1024);  // GPIO 6, 1024 edge buffer
  *
  * // Initialize with custom signal range (optional - defaults to 100ns/100μs)
@@ -80,7 +89,9 @@ public:
      * @param config RX configuration (signal ranges, edge detection, skip count)
      * @return true on success, false on failure
      *
-     * First call: Configures GPIO, installs ISR service, and arms receiver
+     * IMPORTANT: Pin must be configured with pinMode() BEFORE calling begin()
+     *
+     * First call: Installs ISR service and arms receiver (does NOT change pin mode)
      * Subsequent calls: Re-arms the receiver for a new capture (clears state, re-enables ISR)
      *
      * The receiver is automatically armed and ready to capture after begin() returns.
@@ -97,6 +108,7 @@ public:
      *
      * Example with skip_signals:
      * @code
+     * pinMode(6, INPUT);  // Configure pin first!
      * auto rx = GpioIsrRx::create(6, 100);  // 100 edge buffer
      * RxConfig config{100, 100000, 900};  // Skip first 900 edges
      * rx->begin(config);

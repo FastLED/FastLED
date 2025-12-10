@@ -424,21 +424,15 @@ public:
         // Clear receive state
         clear();
 
-        // Configure GPIO
-        gpio_config_t io_conf = {};
-        io_conf.pin_bit_mask = (1ULL << mPin);
-        io_conf.mode = GPIO_MODE_INPUT;
-        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
-        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-        io_conf.intr_type = GPIO_INTR_ANYEDGE;  // Capture both edges
-
-        esp_err_t err = gpio_config(&io_conf);
+        // Configure interrupt type only (don't change pin direction/mode)
+        // Pin can be INPUT or OUTPUT - GPIO_IN_REG reads work for both
+        esp_err_t err = gpio_set_intr_type(mPin, GPIO_INTR_ANYEDGE);
         if (err != ESP_OK) {
-            FL_WARN("Failed to configure GPIO: " << static_cast<int>(err));
+            FL_WARN("Failed to set GPIO interrupt type: " << static_cast<int>(err));
             return false;
         }
 
-        FL_DBG("GPIO configured successfully");
+        FL_DBG("GPIO interrupt configured successfully (pin mode unchanged)");
 
         // Install GPIO ISR service if not already installed
         static bool gpio_isr_service_installed = false;
