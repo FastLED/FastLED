@@ -36,7 +36,8 @@ bool testRxChannel(
 
     // Initialize RX channel with signal range for fast GPIO toggles
     // RMT peripheral max is ~819 μs, so use 200 μs (2x our pulse width for safety)
-    if (!rx_channel->begin(100, 200000)) {  // min=100ns, max=200μs
+    fl::RxConfig rx_config(100, 200000);  // min=100ns, max=200μs
+    if (!rx_channel->begin(rx_config)) {
         FL_ERROR("[RX TEST]: Failed to begin RX channel");
         pinMode(pin_tx, INPUT);  // Release pin
         return false;
@@ -53,13 +54,13 @@ bool testRxChannel(
 
     // Wait for RX to finish capturing (timeout = total toggle time + headroom)
     uint32_t timeout_ms = 100;  // 10 toggles * 200μs = 2ms, use 100ms for safety
-    fl::RmtRxWaitResult wait_result = rx_channel->wait(timeout_ms);
+    fl::RxWaitResult wait_result = rx_channel->wait(timeout_ms);
 
     // Release PIN_TX for FastLED use
     pinMode(pin_tx, INPUT);
 
     // Check if we successfully captured data
-    if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
+    if (wait_result != fl::RxWaitResult::SUCCESS) {
         FL_ERROR("[RX TEST]: RX channel wait failed (result: " << static_cast<int>(wait_result) << ")");
         FL_ERROR("[RX TEST]: RX may not be working - check PIN_RX (" << pin_rx << ") and RMT peripheral");
         FL_ERROR("[RX TEST]: If using non-RMT TX, ensure physical jumper from PIN " << pin_tx << " to PIN " << pin_rx);

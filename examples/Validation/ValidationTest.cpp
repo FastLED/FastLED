@@ -18,7 +18,8 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
     fl::memset(rx_buffer.data(), 0, rx_buffer.size());
 
     // Arm RX receiver (re-arms if already initialized)
-    if (!rx_channel->begin()) {
+    fl::RxConfig rx_config;  // Use default WS2812B-compatible settings
+    if (!rx_channel->begin(rx_config)) {
         FL_ERROR("Failed to arm RX receiver");
         return 0;
     }
@@ -30,7 +31,7 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
 
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
-    if (wait_result != fl::RmtRxWaitResult::SUCCESS) {
+    if (wait_result != fl::RxWaitResult::SUCCESS) {
         FL_ERROR("RX wait failed (timeout or no data received)");
         FL_WARN("");
         FL_WARN("⚠️  TROUBLESHOOTING:");
@@ -43,7 +44,12 @@ size_t capture(fl::shared_ptr<fl::RmtRxChannel> rx_channel, fl::span<uint8_t> rx
     }
 
     // Decode received data directly into rx_buffer
-    auto decode_result = rx_channel->decode(fl::CHIPSET_TIMING_WS2812B_RX, rx_buffer);
+    // Create 4-phase RX timing from WS2812B 3-phase TX timing
+    fl::ChipsetTiming ws2812b_tx{fl::TIMING_WS2812_800KHZ::T1, fl::TIMING_WS2812_800KHZ::T2,
+                                  fl::TIMING_WS2812_800KHZ::T3, fl::TIMING_WS2812_800KHZ::RESET, "WS2812B"};
+    auto rx_timing = fl::make4PhaseTiming(ws2812b_tx, 150);
+
+    auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
 
     if (!decode_result.ok()) {
         FL_ERROR("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
