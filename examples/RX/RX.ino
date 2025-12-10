@@ -23,6 +23,7 @@
 
 #include <FastLED.h>
 #include "fl/rx_device.h"
+#include "fl/error.h"
 
 // ============================================================================
 // Configuration
@@ -97,11 +98,11 @@ bool testPinLoopback() {
         FL_WARN("  HIGH: TX=1 -> RX=" << (high_read ? "1" : "0") << " ✓");
         return true;
     } else {
-        FL_WARN("ERROR: Pin loopback test FAILED");
-        FL_WARN("  LOW: TX=0 -> RX=" << (low_read ? "1 (expected 0)" : "0 ✓"));
-        FL_WARN("  HIGH: TX=1 -> RX=" << (high_read ? "1 ✓" : "0 (expected 1)"));
-        FL_WARN("");
-        FL_WARN("Please connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a wire.");
+        FL_ERROR("Pin loopback test FAILED");
+        FL_ERROR("  LOW: TX=0 -> RX=" << (low_read ? "1 (expected 0)" : "0 ✓"));
+        FL_ERROR("  HIGH: TX=1 -> RX=" << (high_read ? "1 ✓" : "0 (expected 1)"));
+        FL_ERROR("");
+        FL_ERROR("Please connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a wire.");
         return false;
     }
 }
@@ -130,7 +131,7 @@ void setup() {
     FL_WARN("Creating GPIO ISR RX device...");
     g_rx_device = fl::RxDevice::create("ISR", PIN_RX, EDGE_BUFFER_SIZE);
     if (!g_rx_device) {
-        FL_WARN("ERROR: Failed to create GPIO ISR RX device");
+        FL_ERROR("Failed to create GPIO ISR RX device");
         while (1) delay(1000);  // Halt
     }
     FL_WARN("✓ GPIO ISR RX device created\n");
@@ -145,7 +146,7 @@ void executeToggles(fl::RxDevice& rx,
 
     // Initialize RX device
     if (!rx.begin(config)) {
-        FL_WARN("ERROR: Failed to initialize RX device");
+        FL_ERROR("Failed to initialize RX device");
         return;
     }
 
