@@ -218,17 +218,21 @@ struct Rmt5EncoderImpl {
 
     esp_err_t initialize(const ChipsetTiming &timing, uint32_t resolution_hz) {
         const uint64_t ns_per_tick = 1000000000ULL / resolution_hz;
+        const uint64_t half_ns_per_tick = ns_per_tick / 2;
 
+        // WS2812 3-phase to 4-phase conversion:
+        // Bit 0: T0H = T1 (high), T0L = T2 + T3 (low)
+        // Bit 1: T1H = T1 + T2 (high), T1L = T3 (low)
         mBit0HighTicks =
-            static_cast<uint32_t>((timing.T1 + ns_per_tick / 2) / ns_per_tick);
+            static_cast<uint32_t>((timing.T1 + half_ns_per_tick) / ns_per_tick);
         mBit0LowTicks =
-            static_cast<uint32_t>((timing.T2 + ns_per_tick / 2) / ns_per_tick);
+            static_cast<uint32_t>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
         mBit1HighTicks =
-            static_cast<uint32_t>((timing.T2 + ns_per_tick / 2) / ns_per_tick);
+            static_cast<uint32_t>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
         mBit1LowTicks =
-            static_cast<uint32_t>((timing.T3 + ns_per_tick / 2) / ns_per_tick);
+            static_cast<uint32_t>((timing.T3 + half_ns_per_tick) / ns_per_tick);
         mResetTicks = static_cast<uint32_t>(
-            (timing.RESET * 1000ULL + ns_per_tick / 2) / ns_per_tick);
+            (timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
         rmt_bytes_encoder_config_t bytes_config = {};
         bytes_config.bit0.level0 = 1;

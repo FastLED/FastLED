@@ -8,7 +8,7 @@
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer) {
+size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing) {
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;
@@ -121,10 +121,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     FL_WARN("");
 
     // Decode received data directly into rx_buffer
-    // Create 4-phase RX timing from WS2812B 3-phase TX timing
-    fl::ChipsetTiming ws2812b_tx{fl::TIMING_WS2812_800KHZ::T1, fl::TIMING_WS2812_800KHZ::T2,
-                                  fl::TIMING_WS2812_800KHZ::T3, fl::TIMING_WS2812_800KHZ::RESET, "WS2812B"};
-    auto rx_timing = fl::make4PhaseTiming(ws2812b_tx, 150);
+    // Create 4-phase RX timing from the passed 3-phase TX timing
+    fl::ChipsetTiming tx_timing{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
+    auto rx_timing = fl::make4PhaseTiming(tx_timing, 150);
 
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
 
@@ -154,7 +153,7 @@ void runTest(const char* test_name,
             continue;
         }
 
-        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer);
+        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
 
         if (bytes_captured == 0) {
             FL_WARN("Result: FAIL ✗ (capture failed)");

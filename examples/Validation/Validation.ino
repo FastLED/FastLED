@@ -99,6 +99,8 @@
 // the "ERROR" message to be printed. Do not hide the symptom by changing
 // the error message keyword.
 // ============================================================================
+/// run with (in fastled repo)
+//    bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "RX Device: RMT" --fail-on ERROR
 
 #include <FastLED.h>
 #include "Common.h"
