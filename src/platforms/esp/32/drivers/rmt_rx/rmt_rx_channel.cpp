@@ -440,7 +440,6 @@ public:
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
 
-        FL_WARN("[DEBUG RX] RX begin() called at " << esp_log_timestamp() << "ms");
         FL_DBG("RX begin: signal_range_min=" << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << config.skip_signals

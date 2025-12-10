@@ -24,7 +24,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // rx_buffer holds decoded bytes (3 bytes per LED), so buffer_size = rx_buffer.size() * 8 symbols
     rx_config.buffer_size = rx_buffer.size() * 8;  // Convert bytes to symbols (1 byte = 8 bits = 8 symbols)
 
-    // Immediately arm RX to capture the transmission (TX is already started)
+    // Arm RX BEFORE starting TX transmission
+    // Note: Per ESP-IDF docs, RX will wait for first edge before capturing
+    // Pre-stabilization frame (sent earlier) ensures GPIO is in stable LOW state
     if (!rx_channel->begin(rx_config)) {
         FL_ERROR("Failed to arm RX receiver");
         return 0;
@@ -76,33 +78,44 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         }
 
         // Analyze timing patterns to detect if encoder is working
-        // For WS2812B: Bit 0 = ~400ns HIGH + ~850ns LOW, Bit 1 = ~800ns HIGH + ~450ns LOW
-        // If we see all edges with identical timing, the encoder is broken
-        // If we see varying timings around expected values, encoder is working
+        // Calculate expected timings from config (3-phase to 4-phase conversion)
+        // Bit 0: T0H = T1, T0L = T2 + T3
+        // Bit 1: T1H = T1 + T2, T1L = T3
+        uint32_t expected_bit0_high = timing.t1_ns;
+        uint32_t expected_bit0_low = timing.t2_ns + timing.t3_ns;
+        uint32_t expected_bit1_high = timing.t1_ns + timing.t2_ns;
+        uint32_t expected_bit1_low = timing.t3_ns;
 
-        bool has_short_high = false;  // ~400ns (bit 0)
-        bool has_long_high = false;   // ~800ns (bit 1)
-        bool has_short_low = false;   // ~450ns (bit 1)
-        bool has_long_low = false;    // ~850ns (bit 0)
+        // Use ±150ns tolerance for pattern matching
+        const uint32_t tolerance = 150;
+
+        bool has_short_high = false;  // Bit 0 high (T1)
+        bool has_long_high = false;   // Bit 1 high (T1+T2)
+        bool has_short_low = false;   // Bit 1 low (T3)
+        bool has_long_low = false;    // Bit 0 low (T2+T3)
 
         for (size_t i = 0; i < edge_count; i++) {
             uint32_t ns = edges[i].ns;
             if (edges[i].high) {
                 // High pulse
-                if (ns >= 250 && ns <= 550) has_short_high = true;  // Bit 0 high (~400ns ±150ns)
-                if (ns >= 650 && ns <= 950) has_long_high = true;   // Bit 1 high (~800ns ±150ns)
+                if (ns >= expected_bit0_high - tolerance && ns <= expected_bit0_high + tolerance)
+                    has_short_high = true;
+                if (ns >= expected_bit1_high - tolerance && ns <= expected_bit1_high + tolerance)
+                    has_long_high = true;
             } else {
                 // Low pulse
-                if (ns >= 300 && ns <= 600) has_short_low = true;   // Bit 1 low (~450ns ±150ns)
-                if (ns >= 700 && ns <= 1000) has_long_low = true;   // Bit 0 low (~850ns ±150ns)
+                if (ns >= expected_bit1_low - tolerance && ns <= expected_bit1_low + tolerance)
+                    has_short_low = true;
+                if (ns >= expected_bit0_low - tolerance && ns <= expected_bit0_low + tolerance)
+                    has_long_low = true;
             }
         }
 
         FL_WARN("\n[RAW EDGE TIMING] Pattern Analysis:");
-        FL_WARN("  Short HIGH (~400ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long HIGH  (~800ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Short LOW  (~450ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long LOW   (~850ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Short HIGH (~" << expected_bit0_high << "ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
 
         if (has_short_high && has_long_high && has_short_low && has_long_low) {
             FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");

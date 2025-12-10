@@ -11,6 +11,12 @@
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
 
+#ifdef ESP32
+FL_EXTERN_C_BEGIN
+#include "driver/gpio.h"
+FL_EXTERN_C_END
+#endif
+
 namespace fl {
 
 
@@ -32,6 +38,13 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
     , mId(nextId()) {
+#ifdef ESP32
+    // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
+    // This prevents RX from capturing noise/glitches on uninitialized pins
+    // Must happen before any engine initialization
+    gpio_set_pull_mode(static_cast<gpio_num_t>(pin), GPIO_PULLDOWN_ONLY);
+#endif
+
     // Set the LED data array
     setLeds(leds);
 

@@ -328,6 +328,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 rmt_disable(ch.channel);
                 rmt_del_channel(ch.channel);
 
+                // ESP32: Restore GPIO pulldown when RMT channel is destroyed
+                // This ensures pin returns to stable LOW state
+                gpio_set_pull_mode(static_cast<gpio_num_t>(ch.pin), GPIO_PULLDOWN_ONLY);
+
                 // Free DMA if this channel was using it
                 if (ch.useDMA) {
                     memMgr.freeDMA(ch.memoryChannelId,
@@ -1289,6 +1293,11 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) {
 
     channel->inUse = false;
     channel->transmissionComplete = false;
+
+    // ESP32: Restore GPIO pulldown when RMT releases pin
+    // This ensures pin returns to stable LOW state between transmissions
+    gpio_set_pull_mode(static_cast<gpio_num_t>(channel->pin), GPIO_PULLDOWN_ONLY);
+
     // NOTE: Keep channel and encoder alive for reuse
 }
 
