@@ -57,6 +57,10 @@ public:
         return "dummy";
     }
 
+    int getPin() const override {
+        return -1;  // Dummy device has no pin
+    }
+
 private:
     void warnOnce() const {
         if (!mWarned) {

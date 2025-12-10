@@ -1,10 +1,10 @@
 // @filter: (platform is esp32)
 
 /// @file    RX.ino
-/// @brief   GPIO ISR RX device test for ESP32
+/// @brief   RX device test for ESP32
 /// @example RX.ino
 ///
-/// This example demonstrates FastLED's GPIO ISR RX device on ESP32 by capturing
+/// This example demonstrates FastLED's RX device on ESP32 by capturing
 /// edge transitions from manual pin toggles. This validates the RX device can
 /// accurately capture timing data.
 ///
@@ -13,9 +13,9 @@
 ///   - No external wiring required (internal loopback test)
 ///
 /// Test Flow:
-///   1. Create and initialize GPIO ISR RX device
+///   1. Create and initialize RX device
 ///   2. Toggle pin in a defined pattern (HIGH/LOW with specific delays)
-///   3. Capture edge timing data using ISR RX device
+///   3. Capture edge timing data using RX device
 ///   4. Analyze and display raw edge timings
 ///
 /// Platform Support:
@@ -24,6 +24,7 @@
 #include <FastLED.h>
 #include "fl/rx_device.h"
 #include "fl/sketch_macros.h"
+#include "test.h"
 
 // ============================================================================
 // Configuration
@@ -33,20 +34,17 @@
 // These specific pins are required for hardware testing infrastructure.
 // Changing PIN_TX or PIN_RX will break automated testing equipment.
 // PHYSICALLY CONNECT GPIO 0 TO GPIO 19 WITH A WIRE FOR THIS TEST.
-#define PIN_TX 0   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
-#define PIN_RX 0   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
 #define EDGE_BUFFER_SIZE 100
 #define WAIT_TIMEOUT_MS 100
-#define RX_TYPE "ISR"
+
+// Pin and RX type configuration (extern for test.cpp access)
+const int PIN_TX = 0;   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
+const int PIN_RX = 1;   // DO NOT CHANGE - REQUIRED FOR TEST INFRASTRUCTURE
+const char* RX_TYPE = "RMT";
 
 // ============================================================================
 // Pin Toggle Pattern
 // ============================================================================
-
-struct PinToggle {
-    bool is_high;       // Pin state (HIGH or LOW)
-    uint32_t delay_us;  // Delay in microseconds after setting state
-};
 
 // Pattern: HIGH 1ms, LOW 1ms, HIGH 2ms, LOW 2ms, HIGH 3ms, LOW 100us
 const fl::array<PinToggle, 6> TEST_PATTERN = {{
@@ -65,151 +63,60 @@ const fl::array<PinToggle, 6> TEST_PATTERN = {{
 fl::shared_ptr<fl::RxDevice> g_rx_device;
 
 // ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * @brief Test RX device functionality with low-frequency pattern
- * @return true if RX device captures expected edges, false otherwise
- */
-bool testRxDevice() {
-    FL_WARN("Testing RX device with low-frequency pattern...");
-
-    // Create temporary RX device for sanity check
-    auto rx = fl::RxDevice::create(RX_TYPE, PIN_RX, 10);
-    if (!rx) {
-        FL_ERROR("Failed to create RX device for sanity check");
-        return false;
-    }
-
-    // Configure RX device for low-frequency test
-    fl::RxConfig config;
-    config.signal_range_min_ns = 100;       // 100ns glitch filter
-    config.signal_range_max_ns = 50000000;  // 50ms idle timeout
-    config.start_low = true;                 // Pin starts LOW
-
-    // Initialize RX device
-    pinMode(PIN_TX, OUTPUT);
-    digitalWrite(PIN_TX, LOW);
-    delay(10);  // Allow pin to settle
-
-    if (!rx->begin(config)) {
-        FL_ERROR("Failed to initialize RX device");
-        return false;
-    }
-
-    // Generate simple test pattern: 4 edges (LOW->HIGH->LOW->HIGH)
-    // Pattern: HIGH 10ms, LOW 10ms, HIGH 10ms
-    digitalWrite(PIN_TX, HIGH);
-    delay(10);
-    digitalWrite(PIN_TX, LOW);
-    delay(10);
-    digitalWrite(PIN_TX, HIGH);
-    delay(10);
-    digitalWrite(PIN_TX, LOW);
-
-    // Wait for capture with timeout
-    auto wait_result = rx->wait(100);
-
-    if (wait_result == fl::RxWaitResult::TIMEOUT) {
-        FL_ERROR("RX device test FAILED - timeout waiting for data");
-        FL_ERROR("  No edges captured within 100ms");
-        FL_ERROR("  This suggests the RX device cannot read from GPIO " << PIN_RX);
-        return false;
-    }
-
-    // Get captured edges
-    fl::array<fl::EdgeTime, 10> edge_buffer;
-    size_t edge_count = rx->getRawEdgeTimes(edge_buffer);
-
-    if (edge_count < 3) {
-        FL_ERROR("RX device test FAILED - insufficient edges captured");
-        FL_ERROR("  Expected at least 3 edges, got " << edge_count);
-        FL_ERROR("  Pin loopback may not be working correctly");
-        return false;
-    }
-
-    // Validate timing is reasonable (each edge should be ~10ms apart)
-    bool timing_ok = true;
-    for (size_t i = 0; i < edge_count && i < 3; i++) {
-        uint32_t duration_ms = edge_buffer[i].ns / 1000000;
-        if (duration_ms < 5 || duration_ms > 20) {
-            FL_WARN("WARNING: Edge " << i << " timing unusual: " << duration_ms << "ms (expected ~10ms)");
-            timing_ok = false;
-        }
-    }
-
-    if (timing_ok) {
-        FL_WARN("✓ RX device test PASSED");
-        FL_WARN("  Captured " << edge_count << " edges");
-        FL_WARN("  Timing appears correct (~10ms per edge)");
-        return true;
-    } else {
-        FL_WARN("✓ RX device test PASSED (with timing warnings)");
-        FL_WARN("  Captured " << edge_count << " edges");
-        FL_WARN("  Timing may be affected by system load");
-        return true;  // Still pass - we got edges
-    }
-}
-
-// ============================================================================
 // Arduino Setup & Loop
 // ============================================================================
 
 void setup() {
     Serial.begin(115200);
     while (!Serial && millis() < 3000);
+    const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
-    FL_WARN("\n=== FastLED GPIO ISR RX Device Test ===");
+    FL_WARN("\n=== FastLED RX Device Test ===");
     FL_WARN("Platform: ESP32");
     FL_WARN("TX Pin: GPIO " << PIN_TX);
     FL_WARN("RX Pin: GPIO " << PIN_RX);
+    FL_WARN("RX Device: " << RX_TYPE);
+    FL_WARN("LOOP BACK MODE: " << loop_back_mode);
+
+    // Sanity check: Verify jumper wire connection when TX and RX are different pins
+    if (PIN_TX != PIN_RX) {
+        if (!verifyJumperWire(PIN_TX, PIN_RX)) {
+            SKETCH_HALT("Missing jumper wire between TX and RX pins");
+        }
+    } else {
+        FL_WARN("TX and RX use same pin (" << PIN_TX << ") - no jumper wire needed");
+    }
+
     FL_WARN("");
+
+    // Create RX device for testing
+    // Use 1MHz resolution for better timing accuracy (1us per tick)
+    FL_WARN("Creating RX device for testing...");
+    auto rx_test = fl::RxDevice::create(RX_TYPE, PIN_RX, 10, 1000000);
+    if (!rx_test) {
+        SKETCH_HALT("Failed to create RX device for testing");
+    }
 
     // Test RX device functionality
-    if (!testRxDevice()) {
-        SKETCH_HALT("RX device sanity check failed - GPIO ISR RX not working");
+    if (!testRxDevice(rx_test, PIN_TX)) {
+        SKETCH_HALT("RX device sanity check failed - RX not working");
     }
     FL_WARN("");
 
-    // Create RX device
-    FL_WARN("Creating GPIO ISR RX device...");
+    // Create main RX device for the loop
+    FL_WARN("Creating main RX device...");
     g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE);
     if (!g_rx_device) {
-        SKETCH_HALT("Failed to create GPIO ISR RX device");
+        SKETCH_HALT("Failed to create main RX device");
     }
-    FL_WARN("✓ GPIO ISR RX device created\n");
+    FL_WARN("✓ Main RX device created\n");
 
     delay(1000);
 }
 
-void executeToggles(fl::RxDevice& rx,
-                    const fl::RxConfig& config,
-                    fl::span<const PinToggle> toggles,
-                    uint32_t wait_ms) {
-
-    // Set pin to initial state before begin()
-    pinMode(PIN_TX, OUTPUT);
-    digitalWrite(PIN_TX, config.start_low ? LOW : HIGH);
-    delayMicroseconds(100);  // Allow pin to settle
-
-    // Initialize RX device
-    if (!rx.begin(config)) {
-        FL_ERROR("Failed to initialize RX device");
-        return;
-    }
-
-    // Execute pin toggles
-    for (size_t i = 0; i < toggles.size(); i++) {
-        digitalWrite(PIN_TX, toggles[i].is_high ? HIGH : LOW);
-        delayMicroseconds(toggles[i].delay_us);
-    }
-}
-
-
 void loop() {
     FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ GPIO ISR RX DEVICE TEST");
+    FL_WARN("║  RX DEVICE TEST");
     FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
 
     // Configure RX device
@@ -220,7 +127,7 @@ void loop() {
 
     // Execute toggles and capture data
     FL_WARN("[TEST] Initializing RX device and executing toggles...");
-    executeToggles(*g_rx_device, config, TEST_PATTERN, WAIT_TIMEOUT_MS);
+    executeToggles(*g_rx_device, config, TEST_PATTERN, PIN_TX, WAIT_TIMEOUT_MS);
 
     // Wait for capture completion
     FL_WARN("[TEST] Waiting for capture (timeout: " << WAIT_TIMEOUT_MS << "ms)...");
@@ -229,7 +136,7 @@ void loop() {
     if (wait_result == fl::RxWaitResult::TIMEOUT) {
         FL_ERROR("Timeout waiting for data");
     } else if (wait_result == fl::RxWaitResult::BUFFER_OVERFLOW) {
-        FL_WARN("WARNING: Buffer overflow during capture");
+        FL_ERROR("Buffer overflow during capture");
     } else {
         FL_WARN("[TEST] ✓ Data captured successfully");
 
@@ -237,95 +144,9 @@ void loop() {
         fl::array<fl::EdgeTime, EDGE_BUFFER_SIZE> edge_buffer;
         size_t edge_count = g_rx_device->getRawEdgeTimes(edge_buffer);
 
-        FL_WARN("[TEST] Captured " << edge_count << " edges");
-
-        if (edge_count == 0) {
-            FL_ERROR("No edges captured!");
-        } else {
-            // Print edge timings
-            FL_WARN("[TEST] Edge timings:");
-            for (size_t i = 0; i < edge_count; i++) {
-                FL_WARN("  [" << i << "] " << (edge_buffer[i].high ? "HIGH" : "LOW ")
-                        << " " << edge_buffer[i].ns << "ns (" << (edge_buffer[i].ns / 1000) << "us)");
-            }
-
-            // Validate edge alternation
-            bool alternation_valid = true;
-            for (size_t i = 1; i < edge_count; i++) {
-                if (edge_buffer[i].high == edge_buffer[i-1].high) {
-                    FL_ERROR("Sequential " << (edge_buffer[i].high ? "HIGH" : "LOW")
-                            << " values at indices " << (i-1) << " and " << i
-                            << " - edges should alternate HIGH/LOW");
-                    alternation_valid = false;
-                }
-            }
-
-            // Validate timing accuracy against TEST_PATTERN
-            bool timing_valid = true;
-            const uint32_t TOLERANCE_PERCENT = 15;  // ±15% tolerance for timing jitter
-            FL_WARN("[TEST] Validating timing accuracy (±" << TOLERANCE_PERCENT << "% tolerance):");
-
-            // Expected edge count is TEST_PATTERN.size() - 1 because the last edge
-            // ends with timeout (no subsequent transition to measure duration)
-            size_t expected_edge_count = TEST_PATTERN.size() - 1;
-            if (edge_count != expected_edge_count) {
-                FL_WARN("WARNING: Edge count mismatch - expected " << expected_edge_count
-                        << ", got " << edge_count);
-                timing_valid = false;
-            }
-
-            size_t compare_count = edge_count < expected_edge_count ? edge_count : expected_edge_count;
-            for (size_t i = 0; i < compare_count; i++) {
-                uint32_t expected_us = TEST_PATTERN[i].delay_us;
-                uint32_t actual_us = edge_buffer[i].ns / 1000;
-                bool expected_high = TEST_PATTERN[i].is_high;
-                bool actual_high = edge_buffer[i].high;
-
-                // Calculate tolerance range
-                uint32_t tolerance_us = (expected_us * TOLERANCE_PERCENT) / 100;
-                uint32_t min_us = expected_us - tolerance_us;
-                uint32_t max_us = expected_us + tolerance_us;
-
-                // Validate timing and level
-                bool timing_ok = (actual_us >= min_us) && (actual_us <= max_us);
-                bool level_ok = (expected_high == actual_high);
-
-                if (timing_ok && level_ok) {
-                    FL_WARN("  [" << i << "] ✓ " << (actual_high ? "HIGH" : "LOW ")
-                            << " " << actual_us << "us (expected " << expected_us
-                            << "us ±" << tolerance_us << "us)");
-                } else {
-                    if (!level_ok) {
-                        FL_WARN("  [" << i << "] ✗ Level mismatch: expected "
-                                << (expected_high ? "HIGH" : "LOW") << ", got "
-                                << (actual_high ? "HIGH" : "LOW"));
-                        timing_valid = false;
-                    }
-                    if (!timing_ok) {
-                        FL_WARN("  [" << i << "] ✗ Timing out of range: " << actual_us
-                                << "us (expected " << expected_us << "us ±" << tolerance_us
-                                << "us, range: " << min_us << "-" << max_us << "us)");
-                        timing_valid = false;
-                    }
-                }
-            }
-
-            // Validate results
-            if (!alternation_valid) {
-                FL_ERROR("Edge timings are not properly alternating");
-                FL_ERROR("Expected pattern: HIGH, LOW, HIGH, LOW, ...");
-                FL_ERROR("Actual pattern contains sequential identical states");
-            } else if (!timing_valid) {
-                FL_ERROR("Captured edge timings do not match expected pattern");
-                FL_ERROR("Check timing accuracy and tolerance settings");
-            } else if (edge_count >= 5) {
-                FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges with proper alternation");
-                FL_WARN("[TEST] ✓ PASS: All timing values match expected pattern within tolerance");
-                FL_WARN("[TEST] ✓ GPIO ISR RX device working correctly!");
-            } else {
-                FL_WARN("WARNING: Only captured " << edge_count << " edges (expected >=5)");
-            }
-        }
+        // Validate edge timing against expected pattern
+        const uint32_t TOLERANCE_PERCENT = 15;  // ±15% tolerance for timing jitter
+        validateEdgeTiming(edge_buffer, edge_count, TEST_PATTERN, TOLERANCE_PERCENT);
     }
 
     FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");

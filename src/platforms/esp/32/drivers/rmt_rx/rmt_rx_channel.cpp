@@ -436,8 +436,25 @@ public:
         if (mChannel) {
             FL_DBG("RX channel already initialized, re-arming receiver");
 
+            // Disable channel to reset it to "init" state
+            // This ensures any previous receive operation is stopped
+            esp_err_t err = rmt_disable(mChannel);
+            if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+                FL_WARN("Failed to disable RX channel: " << static_cast<int>(err));
+                return false;
+            }
+            FL_DBG("RX channel disabled, ready for re-initialization");
+
             // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
+
+            // Re-enable the channel
+            err = rmt_enable(mChannel);
+            if (err != ESP_OK) {
+                FL_WARN("Failed to re-enable RX channel: " << static_cast<int>(err));
+                return false;
+            }
+            FL_DBG("RX channel re-enabled");
 
             // Handle skip phase using small discard buffer
             if (!handleSkipPhase()) {
@@ -602,6 +619,10 @@ public:
 
     const char* name() const override {
         return "RMT";
+    }
+
+    int getPin() const override {
+        return static_cast<int>(mPin);
     }
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {

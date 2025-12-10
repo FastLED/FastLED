@@ -275,6 +275,12 @@ public:
     virtual const char* name() const = 0;
 
     /**
+     * @brief Get GPIO pin number
+     * @return Pin number this device is listening on
+     */
+    virtual int getPin() const = 0;
+
+    /**
      * @brief Factory method to create RX device by type
      * @param type Device type: "RMT" or "ISR" (ESP32 only)
      * @param pin GPIO pin number

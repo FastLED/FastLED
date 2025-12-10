@@ -773,6 +773,10 @@ private:
         return "ISR";
     }
 
+    int getPin() const override {
+        return static_cast<int>(mPin);
+    }
+
     // ISR-optimized context - single structure for fast access
     IsrContext mIsrCtx;
 
