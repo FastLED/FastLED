@@ -2002,17 +2002,14 @@ The FastLED project includes WebAssembly (WASM) bindings that bridge C++ and Jav
 
 ## 🚨 WASM PLATFORM SPECIFIC RULES 🚨
 
-### WASM Unified Build Awareness
+### WASM Build Awareness
 
-**🚨 CRITICAL: WASM builds use unified compilation when `FASTLED_ALL_SRC=1` is enabled (automatic for Clang builds)**
-
-**Root Cause**: Multiple .cpp files are compiled together in a single compilation unit, causing:
+**Root Cause**: Multiple .cpp files are compiled together, causing:
 - Duplicate function definitions
-- Type signature conflicts  
+- Type signature conflicts
 - Symbol redefinition errors
 
 **MANDATORY RULES:**
-- **ALWAYS check for unified builds** when modifying WASM platform files
 - **NEVER create duplicate function definitions** across WASM .cpp files
 - **USE `EMSCRIPTEN_KEEPALIVE` functions as canonical implementations**
 - **MATCH Emscripten header signatures exactly** for external C functions

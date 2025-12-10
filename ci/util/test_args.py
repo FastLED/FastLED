@@ -86,9 +86,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Show linking commands and output",
     )
-    parser.add_argument(
-        "--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1"
-    )
+    parser.add_argument("--quick", action="store_true", help="Enable quick mode")
     parser.add_argument(
         "--no-stack-trace",
         action="store_true",

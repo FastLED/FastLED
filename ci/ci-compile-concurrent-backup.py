@@ -215,16 +215,6 @@ def parse_args():
         action="store_true",
         help="Run symbol analysis on compiled output",
     )
-    parser.add_argument(
-        "--allsrc",
-        action="store_true",
-        help="Enable all-source build (adds FASTLED_ALL_SRC=1 define)",
-    )
-    parser.add_argument(
-        "--no-allsrc",
-        action="store_true",
-        help="Disable all-source build (adds FASTLED_ALL_SRC=0 define)",
-    )
     try:
         args = parser.parse_intermixed_args()
         unknown = []
@@ -367,11 +357,6 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
-    # Add FASTLED_ALL_SRC define when --allsrc or --no-allsrc flag is specified
-    if args.allsrc:
-        defines.append("FASTLED_ALL_SRC=1")
-    elif args.no_allsrc:
-        defines.append("FASTLED_ALL_SRC=0")
     extra_packages: list[str] = []
     if args.extra_packages:
         extra_packages.extend(args.extra_packages.split(","))

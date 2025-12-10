@@ -65,7 +65,6 @@ All existing code continues to work unchanged. Dispatcher headers route to corre
 - `scale8.h` → dispatches to software or hardware multiply implementations
 
 ## What's here (quick pass)
-- **avr_compile.hpp**: Hierarchical include; ties AVR sources together when `FASTLED_ALL_SRC` is enabled (CMake globs bring `.cpp` in).
 - **avr_millis_timer_null_counter.hpp**: Defines a weak (or strong on some ATtiny) `volatile unsigned long timer_millis` symbol for boards missing a timer implementation.
 - **avr_millis_timer0_impl_source.hpp**: Minimal Timer0/TCA0 ISR-based `timer_millis` implementation for select ATtinyx/y parts; initialized via constructor.
 - **avr_millis_timer_source.cpp**: Chooses between weak symbol vs. implementation based on macros/board, includes the two headers above.

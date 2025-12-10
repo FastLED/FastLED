@@ -21,8 +21,7 @@ def setup_environment(args: TestArgs) -> None:
     """Set up the test environment based on arguments"""
     # Handle --quick flag
     if args.quick:
-        os.environ["FASTLED_ALL_SRC"] = "1"
-        print("Quick mode enabled. FASTLED_ALL_SRC=1")
+        print("Quick mode enabled.")
 
     # Handle build flags
     if args.show_compile:

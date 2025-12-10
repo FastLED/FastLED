@@ -229,7 +229,6 @@ This setup provides the **best of both worlds**:
 - **Clang's superior symbol generation**: Better template debugging, modern C++ support
 - **GDB's mature debugging features**: Robust breakpoint handling, memory inspection
 - **Cross-platform compatibility**: Works on Linux, macOS, Windows
-- **FastLED optimization**: Unified compilation testing with `FASTLED_ALL_SRC=1`
 
 #### Debug Build Configuration
 The FastLED test system automatically uses optimal debug settings:
