@@ -18,6 +18,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_timer.h"  // For esp_timer_get_time()
+#include "esp_log.h"    // For esp_log_timestamp()
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"  // For taskYIELD()
 FL_EXTERN_C_END
@@ -439,7 +440,7 @@ public:
         mSignalRangeMaxNs = signal_range_max_ns;
         mSkipCounter = skip_signals;
 
-        FL_WARN("[DEBUG RX] RX begin() called at " << (millis() / 1000.0) << "s");
+        FL_WARN("[DEBUG RX] RX begin() called at " << esp_log_timestamp() << "ms");
         FL_DBG("RX begin: signal_range_min=" << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << skip_signals);
