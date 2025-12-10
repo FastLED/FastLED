@@ -88,8 +88,10 @@
 // Convenience includes for sketch inclusion
 #include "fl/async.h"
 #include "fl/sketch_macros.h"
+#include "fl/rx_device.h"
 #include "ftl/array.h"
 #include "ftl/vector.h"
+#include "ftl/cstring.h"
 
 
 #include "fl/force_inline.h"
