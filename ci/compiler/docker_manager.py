@@ -572,6 +572,86 @@ if command -v rsync &> /dev/null; then
     echo ""
     echo "Directory sync complete"
 
+    # Verify critical files and recover from rsync failures
+    echo "Verifying critical files..."
+    RECOVERY_NEEDED=0
+    CRITICAL_FILES=(
+        "src/FastLED.h"
+    )
+
+    # Create diagnostic log directory
+    DIAG_DIR="/fastled/.docker_diag"
+    mkdir -p "$DIAG_DIR"
+    DIAG_LOG="$DIAG_DIR/rsync_recovery.log"
+
+    echo "=== RSYNC Recovery Diagnostics $(date) ===" > "$DIAG_LOG"
+    echo "Container: $(hostname)" >> "$DIAG_LOG"
+    echo "" >> "$DIAG_LOG"
+
+    for file in "${CRITICAL_FILES[@]}"; do
+        echo "Checking: $file" >> "$DIAG_LOG"
+
+        # Check if file exists in /fastled
+        if [ ! -f "/fastled/$file" ]; then
+            echo "  ✗ Missing: $file"
+            echo "  STATUS: MISSING in /fastled/$file" >> "$DIAG_LOG"
+
+            # Check if source file exists in /host
+            if [ -f "/host/$file" ]; then
+                echo "  SOURCE: EXISTS in /host/$file" >> "$DIAG_LOG"
+                ls -la "/host/$file" >> "$DIAG_LOG" 2>&1
+
+                echo "    → Recovering from /host/$file..."
+                echo "  RECOVERY: Attempting rsync..." >> "$DIAG_LOG"
+
+                # Attempt recovery with verbose logging
+                rsync -avh "/host/$file" "/fastled/$file" >> "$DIAG_LOG" 2>&1
+                RSYNC_EXIT=$?
+                echo "  RSYNC_EXIT_CODE: $RSYNC_EXIT" >> "$DIAG_LOG"
+
+                # Verify recovery
+                if [ -f "/fastled/$file" ]; then
+                    echo "    ✓ Recovered successfully"
+                    echo "  RECOVERY: SUCCESS" >> "$DIAG_LOG"
+                    ls -la "/fastled/$file" >> "$DIAG_LOG" 2>&1
+                else
+                    echo "    ✗ Recovery failed!"
+                    echo "  RECOVERY: FAILED - file still missing after rsync" >> "$DIAG_LOG"
+                    RECOVERY_NEEDED=1
+                fi
+            else
+                echo "    ✗ Source file missing in /host/$file"
+                echo "  SOURCE: MISSING in /host/$file" >> "$DIAG_LOG"
+                ls -la "/host/src/" >> "$DIAG_LOG" 2>&1
+                RECOVERY_NEEDED=1
+            fi
+        else
+            echo "  ✓ $file exists"
+            echo "  STATUS: OK" >> "$DIAG_LOG"
+            ls -la "/fastled/$file" >> "$DIAG_LOG" 2>&1
+        fi
+        echo "" >> "$DIAG_LOG"
+    done
+
+    # Log filesystem and mount information
+    echo "=== Filesystem Info ===" >> "$DIAG_LOG"
+    df -h /fastled /host >> "$DIAG_LOG" 2>&1
+    echo "" >> "$DIAG_LOG"
+    mount | grep -E "(fastled|host)" >> "$DIAG_LOG" 2>&1
+    echo "" >> "$DIAG_LOG"
+
+    if [ $RECOVERY_NEEDED -eq 1 ]; then
+        echo ""
+        echo "ERROR: Critical file recovery failed. Container may be unusable."
+        echo "This suggests an rsync or filesystem issue."
+        echo "Diagnostic log saved to: $DIAG_LOG"
+        cat "$DIAG_LOG"
+    else
+        echo "  ✓ All critical files verified"
+        echo "Diagnostic log saved to: $DIAG_LOG"
+    fi
+    echo ""
+
     # Clean Python bytecode cache to ensure latest code is used
     echo "Cleaning Python cache..."
     find /fastled/ci -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
