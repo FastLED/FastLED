@@ -171,7 +171,7 @@ bool testRxDevice(fl::shared_ptr<fl::RxDevice> rx, int pin_tx) {
     // Configure RX device for low-frequency test
     fl::RxConfig config;
     config.signal_range_min_ns = 100;       // 100ns glitch filter
-    config.signal_range_max_ns = 50000000;  // 50ms idle timeout
+    config.signal_range_max_ns = 30000000;  // 30ms idle timeout (ESP-IDF RMT limit: 32767000ns)
     config.start_low = true;                 // Pin starts LOW
 
     // Initialize TX pin and set to LOW

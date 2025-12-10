@@ -104,8 +104,9 @@ void setup() {
     FL_WARN("");
 
     // Create main RX device for the loop
+    // Use 1MHz resolution to allow longer timeouts (40MHz = ~819us max, 1MHz = ~32ms max)
     FL_WARN("Creating main RX device...");
-    g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE);
+    g_rx_device = fl::RxDevice::create(RX_TYPE, PIN_RX, EDGE_BUFFER_SIZE, 1000000);
     if (!g_rx_device) {
         SKETCH_HALT("Failed to create main RX device");
     }
@@ -122,7 +123,7 @@ void loop() {
     // Configure RX device
     fl::RxConfig config;
     config.signal_range_min_ns = 100;       // 100ns glitch filter
-    config.signal_range_max_ns = 10000000;  // 10ms idle timeout
+    config.signal_range_max_ns = 10000000;  // 10ms idle timeout (1MHz RMT allows up to ~32ms)
     config.start_low = true;                 // Pin starts LOW
 
     // Execute toggles and capture data
