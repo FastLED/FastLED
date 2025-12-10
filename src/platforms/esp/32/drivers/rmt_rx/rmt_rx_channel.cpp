@@ -173,69 +173,12 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
     // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
     const auto *rmt_symbols = reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
 
-    // Edge Detection: Skip symbols captured before TX starts transmitting
-    // Problem: RX is armed before TX starts, so it captures the idle pin state (LOW/HIGH)
-    // Solution: Find first edge transition (rising for start_low=true, falling for start_low=false)
-    //
-    // For start_low=true (WS2812B default):
-    //   - Pin idle state: LOW (level0=0)
-    //   - First valid data: Rising edge (level0=0 → level1=1 or next symbol level0=1)
-    //   - Skip all symbols until we see level transitioning from 0→1
-    //
-    // For start_low=false (inverted signals):
-    //   - Pin idle state: HIGH (level0=1)
-    //   - First valid data: Falling edge (level0=1 → level1=0 or next symbol level0=0)
-    //   - Skip all symbols until we see level transitioning from 1→0
+    // Note: Edge detection is now handled by filterSpuriousSymbols() before decode() is called.
+    // The symbols array passed here already starts at the first valid edge.
+    // The start_low parameter indicates whether the first symbol should be HIGH (start_low=true)
+    // or LOW (start_low=false), but after filtering, we always expect data to start correctly.
 
-    size_t start_index = 0;
-
-    if (start_low) {
-        // Pin starts LOW, look for first rising edge (LOW→HIGH transition)
-        for (size_t i = 0; i < symbols.size(); i++) {
-            const auto &sym = rmt_symbols[i];
-            // Rising edge detected: level0=0 and level1=1, OR level0=1 (already transitioned)
-            if (sym.level0 == 1) {
-                // Symbol starts HIGH - data transmission has begun
-                start_index = i;
-                FL_DBG("[EDGE DETECT] Found rising edge at symbol " << start_index << " (level0=1)");
-                break;
-            } else if (sym.level0 == 0 && sym.level1 == 1) {
-                // Transition within symbol: LOW→HIGH
-                start_index = i;
-                FL_DBG("[EDGE DETECT] Found rising edge at symbol " << start_index << " (level0=0, level1=1)");
-                break;
-            }
-            // else: symbol is all LOW (level0=0, level1=0 or level1 doesn't transition to HIGH)
-        }
-    } else {
-        // Pin starts HIGH, look for first falling edge (HIGH→LOW transition)
-        for (size_t i = 0; i < symbols.size(); i++) {
-            const auto &sym = rmt_symbols[i];
-            // Falling edge detected: level0=1 and level1=0
-            if (sym.level0 == 1 && sym.level1 == 0) {
-                // Transition within symbol: HIGH→LOW
-                start_index = i;
-                FL_DBG("[EDGE DETECT] Found falling edge at symbol " << start_index << " (level0=1, level1=0)");
-                break;
-            } else if (sym.level0 == 0) {
-                // Symbol starts LOW - data transmission has begun
-                start_index = i;
-                FL_DBG("[EDGE DETECT] Found falling edge at symbol " << start_index << " (level0=0)");
-                break;
-            }
-        }
-    }
-
-    if (start_index == 0 && symbols.size() > 0) {
-        // Check if first symbol already matches expected pattern
-        const auto &first_sym = rmt_symbols[0];
-        bool matches_expected = (start_low && first_sym.level0 == 1) || (!start_low && first_sym.level0 == 0);
-        if (!matches_expected) {
-            FL_DBG("[EDGE DETECT] No edge transition found, starting from symbol 0 (may include idle state)");
-        } else {
-            FL_DBG("[EDGE DETECT] First symbol already at correct level, starting from symbol 0");
-        }
-    }
+    size_t start_index = 0;  // Always start at index 0 after filtering
 
     // ITERATION 18 WORKAROUND: Track symbol position within each LED to skip spurious 4th byte
     //
@@ -634,7 +577,7 @@ public:
             taskYIELD();  // Allow other tasks to run
         }
 
-        // Receive completed naturally
+        // Receive completed naturally (spurious symbols already filtered in ISR)
         FL_DBG("wait(): receive done, count=" << mSymbolsReceived);
         return RxWaitResult::SUCCESS;
     }
@@ -645,15 +588,16 @@ public:
 
     fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                fl::span<uint8_t> out) override {
-        // Get received symbols from last receive operation
+        // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
         if (symbols.empty()) {
             return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
         }
 
-        // Use the span-based decoder directly with edge detection
-        return decodeRmtSymbols(timing, mResolutionHz, symbols, out, mStartLow);
+        // Use the span-based decoder (spurious symbols already filtered upstream in wait())
+        // Pass start_low=true since buffer now starts at first valid edge
+        return decodeRmtSymbols(timing, mResolutionHz, symbols, out, true);
     }
 
     const char* name() const override {
@@ -661,7 +605,7 @@ public:
     }
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out) const override {
-        // Get received symbols from last receive operation
+        // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
         if (symbols.empty() || out.empty()) {
@@ -907,6 +851,7 @@ private:
         return true;
     }
 
+
     /**
      * @brief ISR callback for receive completion
      *
@@ -914,7 +859,7 @@ private:
      *
      * Skip logic: When mSkipCounter > 0, we're in skip phase (called from handleSkipPhase).
      * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
-     * capture phase - store the received symbols normally.
+     * capture phase - store the received symbols and filter spurious idle-state symbols.
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t* data,

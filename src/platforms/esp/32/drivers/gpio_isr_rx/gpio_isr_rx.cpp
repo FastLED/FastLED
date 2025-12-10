@@ -425,8 +425,8 @@ public:
             return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
         }
 
-        // Use the edge timestamp decoder with edge detection
-        return decodeEdgeTimestamps(timing, edges, out, mStartLow);
+        // Use the edge timestamp decoder (edge detection already done in ISR)
+        return decodeEdgeTimestamps(timing, edges, out);
     }
 
 private:
@@ -522,15 +522,26 @@ private:
             return;
         }
 
+        // Capture edge: read GPIO level
+        int level = gpio_get_level(self->mPin);
+
+        // Edge detection: Filter spurious idle-state edges (ISR-safe, no logging)
+        // For start_low=true (WS2812B): Skip LOW edges until first HIGH edge
+        // For start_low=false (inverted): Skip HIGH edges until first LOW edge
+        if (edges_captured == 0) {
+            bool is_valid_start = (self->mStartLow && level == 1) || (!self->mStartLow && level == 0);
+            if (!is_valid_start) {
+                // Skip spurious idle-state edge - DO NOT store in buffer
+                return;
+            }
+        }
+
         // Fast path: check buffer full condition early
         if (edges_captured >= self->mBufferSize) {
             gpio_intr_disable(self->mPin);
             self->mReceiveDone = true;
             return;
         }
-
-        // Capture edge: read GPIO level and store
-        int level = gpio_get_level(self->mPin);
 
         // Direct buffer write using cached index
         self->mEdgeBuffer[edges_captured].time_ns = current_time_ns;
