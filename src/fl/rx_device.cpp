@@ -21,15 +21,6 @@ fl::shared_ptr<RxDevice> RxDevice::createDummy() {
     return dummy;
 }
 
-// Generic template implementation (fallback for unsupported platforms)
-template <RxDeviceType TYPE>
-fl::shared_ptr<RxDevice> RxDevice::create() {
-    // Explicit template specializations on the platform will override this
-    return RxDevice::createDummy();
-}
-
-
-
 // Implementation of make4PhaseTiming function
 ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
                                       uint32_t tolerance_ns) {
@@ -62,10 +53,12 @@ ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
 
 } // namespace fl
 
-#ifdef ESP32
+
 
 // ESP32-specific explicit template specializations
 namespace fl {
+
+#ifdef ESP32
 
 // RMT device specialization for ESP32
 template <>
@@ -87,10 +80,23 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
     return device;
 }
 
+#else
+
+// RMT device specialization (dummy for non-ESP32)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>() {
+    return RxDevice::createDummy();
+}
+
+// ISR device specialization (dummy for non-ESP32)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>() {
+    return RxDevice::createDummy();
+}
+
+#endif // ESP32
 // Explicit template instantiations (required for linking)
 template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>();
 template fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>();
 
 } // namespace fl
-
-#endif // ESP32

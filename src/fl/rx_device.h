@@ -10,12 +10,11 @@
 #include "ftl/optional.h"
 #include "fl/result.h"
 
-// Forward declarations
-namespace fl {
-    struct ChipsetTiming;
-}
 
 namespace fl {
+
+// Forward declarations
+struct ChipsetTiming;
 
 /**
  * @brief Universal edge timing representation (platform-agnostic)
@@ -203,9 +202,9 @@ public:
      * @tparam TYPE Device type from RxDeviceType enum
      * @return Shared pointer to RxDevice
      *
-     * Default implementation returns a shared DummyRxDevice instance.
      * Platform-specific implementations (e.g., ESP32) provide explicit
-     * template specializations for ISR and RMT types.
+     * template specializations for ISR and RMT types in rx_device.cpp.
+     * On unsupported platforms, returns a DummyRxDevice.
      *
      * Hardware parameters (pin, buffer_size, hz) are passed via RxConfig in begin().
      *
