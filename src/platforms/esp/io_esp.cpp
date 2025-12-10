@@ -1,43 +1,23 @@
-// ESP I/O implementation - ESP32 ROM functions
+// ESP I/O implementation - Trampoline dispatcher
+//
+// This file includes either Arduino or ESP-IDF backend based on build flags:
+// - Uses Arduino Serial if ARDUINO is defined (unless FL_NO_ARDUINO is set)
+// - Uses ESP-IDF ROM functions otherwise
+//
+// Build flags:
+// - ARDUINO: Defined by Arduino framework
+// - FL_NO_ARDUINO: Force ESP-IDF backend even when Arduino is available
 
 #ifdef ESP32
 
-#include "io_esp.h"
+// Determine which backend to use at compile time and include it
+#if defined(ARDUINO) && !defined(FL_NO_ARDUINO)
+    // Use Arduino backend - includes Serial.print() implementation
+    #include "io_esp_arduino.hpp"
+#else
+    // Use ESP-IDF backend - includes ROM UART implementation
+    // Warning, this version doesnt seem to work.
+    #include "io_esp_idf.hpp"
+#endif
 
-#include "rom/uart.h"  // For uart_tx_one_char
-
-namespace fl {
-
-void print_esp(const char *str) {
-    if (!str)
-        return;
-    // Use ROM uart_tx_one_char - writes to hardware FIFO (128 bytes)
-    // The FIFO provides hardware buffering, so this is reasonably fast
-    while (*str) {
-        uart_tx_one_char(*str++);
-    }
-}
-
-void println_esp(const char *str) {
-    if (!str)
-        return;
-    // Use ROM uart_tx_one_char with newline
-    while (*str) {
-        uart_tx_one_char(*str++);
-    }
-    uart_tx_one_char('\n');
-}
-
-int available_esp() {
-    // Not implemented yet
-    return 0;
-}
-
-int read_esp() {
-    // Not implemented yet
-    return -1;
-}
-
-} // namespace fl
-
-#endif // ESP32
+#endif  // ESP32
