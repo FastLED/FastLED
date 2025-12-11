@@ -22,6 +22,7 @@ import configparser
 import json
 import logging
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -251,6 +252,81 @@ def is_network_error(error_output: str) -> bool:
     return False
 
 
+def get_clean_windows_env() -> dict[str, str]:
+    """Create a clean Windows environment without Git Bash indicators.
+
+    This removes Git Bash environment variables (MSYSTEM, TERM, SHELL, etc.)
+    that might cause ESP-IDF tooling to detect Git Bash and abort installation.
+
+    Returns:
+        Clean environment dict suitable for running pio via cmd.exe
+    """
+    # Start with minimal system environment
+    clean_env = {}
+
+    # Git Bash environment variables to EXCLUDE (these cause ESP-IDF to abort)
+    git_bash_vars = {
+        "MSYSTEM",  # MSYS2/Git Bash indicator
+        "MSYSTEM_CARCH",
+        "MSYSTEM_CHOST",
+        "MSYSTEM_PREFIX",
+        "MINGW_CHOST",
+        "MINGW_PACKAGE_PREFIX",
+        "MINGW_PREFIX",
+        "TERM",  # Often set to 'xterm' in Git Bash
+        "SHELL",  # Points to bash.exe in Git Bash
+        "BASH",
+        "BASH_ENV",
+        "SHLVL",
+        "OLDPWD",
+        "LS_COLORS",
+        "ACLOCAL_PATH",
+        "MANPATH",
+        "INFOPATH",
+        "PKG_CONFIG_PATH",
+        "ORIGINAL_PATH",
+        "MSYS",
+    }
+
+    # Copy safe environment variables from parent
+    for key, value in os.environ.items():
+        # Skip Git Bash indicators
+        if key in git_bash_vars:
+            continue
+
+        # Skip variables starting with MSYS or MINGW prefixes
+        if key.startswith(("MSYS", "MINGW", "BASH_")):
+            continue
+
+        # Keep important system variables
+        clean_env[key] = value
+
+    # Ensure critical variables are set for Windows
+    if platform.system() == "Windows":
+        # Force UTF-8 encoding
+        clean_env["PYTHONIOENCODING"] = "utf-8"
+        clean_env["PYTHONUTF8"] = "1"
+
+        # Set COMSPEC to cmd.exe if not already set
+        if "COMSPEC" not in clean_env:
+            clean_env["COMSPEC"] = "C:\\Windows\\System32\\cmd.exe"
+
+        # Ensure SystemRoot is set (required by many Windows tools)
+        if "SystemRoot" not in clean_env:
+            clean_env["SystemRoot"] = "C:\\Windows"
+
+        # Ensure TEMP/TMP are set
+        if "TEMP" not in clean_env:
+            clean_env["TEMP"] = os.environ.get("TEMP", "C:\\Windows\\Temp")
+        if "TMP" not in clean_env:
+            clean_env["TMP"] = os.environ.get("TMP", "C:\\Windows\\Temp")
+
+    logging.info("Created clean Windows environment (removed Git Bash indicators)")
+    logging.debug(f"Excluded variables: {', '.join(sorted(git_bash_vars))}")
+
+    return clean_env
+
+
 def validate_request(request: dict[str, Any]) -> bool:
     """Validate package installation request.
 
@@ -294,6 +370,9 @@ def run_package_install_with_retry(
 ) -> tuple[int, str]:
     """Run package install with retry logic for network errors.
 
+    On Windows, this runs pio via cmd.exe shell with a clean environment
+    (no Git Bash indicators) to prevent ESP-IDF tooling from aborting.
+
     Args:
         cmd: Command to execute
         environment: Environment name (for status updates), or None for default
@@ -303,6 +382,26 @@ def run_package_install_with_retry(
     Returns:
         (returncode, full_output)
     """
+    # Determine if we should use shell on Windows
+    is_windows = platform.system() == "Windows"
+
+    # On Windows: use cmd.exe shell with clean environment (no Git Bash)
+    # On Linux/Mac: use direct execution with inherited environment
+    if is_windows:
+        # Use shell=True on Windows to invoke via cmd.exe
+        # Convert list to string for shell execution
+        cmd_str = " ".join(cmd)
+        shell = True
+        env = get_clean_windows_env()
+        logging.info(f"Windows detected: using cmd.exe shell with clean environment")
+        logging.debug(f"Command string: {cmd_str}")
+    else:
+        # Non-Windows: use direct execution (no shell)
+        cmd_str = cmd
+        shell = False
+        env = None  # Inherit environment
+        logging.info(f"Non-Windows platform: using direct execution")
+
     for attempt in range(max_retries):
         if attempt > 0:
             retry_msg = f"Retry {attempt}/{max_retries - 1} after network error"
@@ -316,11 +415,13 @@ def run_package_install_with_retry(
             time.sleep(5)  # Brief delay before retry
 
         proc = subprocess.Popen(
-            cmd,
+            cmd_str,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
+            shell=shell,
+            env=env,
         )
 
         output_lines = []
