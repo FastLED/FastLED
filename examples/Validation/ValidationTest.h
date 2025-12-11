@@ -17,19 +17,39 @@ struct ValidationConfig {
     const char* driver_name;                     ///< Driver name for logging (e.g., "RMT", "SPI", "PARLIO")
     fl::shared_ptr<fl::RxDevice> rx_channel;     ///< RX channel for loopback capture (created in .ino, passed in)
     fl::span<uint8_t> rx_buffer;                 ///< Buffer to store received bytes
+    int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
+    fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
 
     ValidationConfig(const fl::ChipsetTimingConfig& timing_,
                      const char* timing_name_,
                      fl::span<fl::ChannelConfig> tx_configs_,
                      const char* driver_name_,
                      fl::shared_ptr<fl::RxDevice> rx_channel_,
-                     fl::span<uint8_t> rx_buffer_)
+                     fl::span<uint8_t> rx_buffer_,
+                     int base_strip_size_,
+                     fl::RxDeviceType rx_type_)
         : timing(timing_)
         , timing_name(timing_name_)
         , tx_configs(tx_configs_)
         , driver_name(driver_name_)
         , rx_channel(rx_channel_)
-        , rx_buffer(rx_buffer_) {}
+        , rx_buffer(rx_buffer_)
+        , base_strip_size(base_strip_size_)
+        , rx_type(rx_type_) {}
+};
+
+/// @brief Test context for detailed error reporting
+/// Aggregates all test configuration parameters for error messages
+struct TestContext {
+    const char* driver_name;      ///< Driver name (e.g., "RMT", "SPI", "PARLIO")
+    const char* timing_name;      ///< Timing name (e.g., "WS2812B-V5")
+    const char* rx_type_name;     ///< RX device type name (e.g., "RMT", "ISR")
+    const char* pattern_name;     ///< Pattern name (e.g., "Pattern A (R=0xF0...)")
+    int lane_count;               ///< Total number of lanes (1-8)
+    int lane_index;               ///< Current lane index (0-7)
+    int base_strip_size;          ///< Base strip size (10 or 300 LEDs)
+    int num_leds;                 ///< Number of LEDs in this lane
+    int pin_number;               ///< TX pin number for this lane
 };
 
 /// @brief Driver test result tracking

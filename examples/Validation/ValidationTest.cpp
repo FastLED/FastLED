@@ -164,13 +164,33 @@ void runTest(const char* test_name,
     // Validate enabled configs (Lane 0 only for multi-lane)
     for (size_t config_idx = 0; config_idx < channels_to_validate; config_idx++) {
         total++;
+
+        // Build test context for detailed error reporting
+        const auto& leds = config.tx_configs[config_idx].mLeds;
+        size_t num_leds = leds.size();
+
+        fl::TestContext ctx{
+            config.driver_name,
+            config.timing_name,
+            fl::toString(config.rx_type),
+            test_name,
+            static_cast<int>(config.tx_configs.size()),
+            static_cast<int>(config_idx),
+            config.base_strip_size,
+            static_cast<int>(num_leds),
+            config.tx_configs[config_idx].pin
+        };
+
         FL_WARN("\n=== " << test_name << " [Lane " << config_idx << "/" << config.tx_configs.size()
                 << ", Pin " << config.tx_configs[config_idx].pin
                 << ", LEDs " << config.tx_configs[config_idx].mLeds.size() << "] ===");
 
         // Use RX channel provided via config (created in .ino file, never created dynamically here)
         if (!config.rx_channel) {
-            FL_ERROR("RX channel is null - must be created in .ino and passed via ValidationConfig");
+            FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
+                    << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
+                    << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
+                    << "RX channel is null - must be created in .ino and passed via ValidationConfig");
             FL_ERROR("Result: FAIL ✗ (RX channel not provided)");
             continue;
         }
@@ -178,12 +198,13 @@ void runTest(const char* test_name,
         size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
 
         if (bytes_captured == 0) {
-            FL_ERROR("Result: FAIL ✗ (capture failed)");
+            FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
+                    << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
+                    << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
+                    << "Result: FAIL ✗ (capture failed)");
             continue;
         }
 
-        const auto& leds = config.tx_configs[config_idx].mLeds;
-        size_t num_leds = leds.size();
         size_t bytes_expected = num_leds * 3;
 
         if (bytes_captured > bytes_expected) {
@@ -198,7 +219,10 @@ void runTest(const char* test_name,
         for (size_t i = 0; i < num_leds; i++) {
             size_t byte_offset = i * 3;
             if (byte_offset + 2 >= bytes_to_check) {
-                FL_ERROR("Incomplete data for LED[" << static_cast<int>(i)
+                FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
+                        << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
+                        << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
+                        << "Incomplete data for LED[" << static_cast<int>(i)
                         << "] (only " << bytes_captured << " bytes captured)");
                 break;
             }
@@ -212,10 +236,13 @@ void runTest(const char* test_name,
             uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
             if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
-                FL_ERROR("Mismatch on LED[" << static_cast<int>(i)
-                        << "], expected RGB(" << static_cast<int>(expected_r) << ","
+                FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
+                        << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
+                        << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
+                        << "LED[" << static_cast<int>(i) << "] mismatch: "
+                        << "expected RGB(" << static_cast<int>(expected_r) << ","
                         << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
-                        << ") but got RGB(" << static_cast<int>(actual_r) << ","
+                        << ") got RGB(" << static_cast<int>(actual_r) << ","
                         << static_cast<int>(actual_g) << "," << static_cast<int>(actual_b) << ")");
                 mismatches++;
             }
@@ -229,7 +256,10 @@ void runTest(const char* test_name,
             FL_WARN("Result: PASS ✓");
             passed++;
         } else {
-            FL_ERROR("Result: FAIL ✗");
+            FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
+                    << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
+                    << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
+                    << "Result: FAIL ✗");
         }
     }
 }

@@ -445,7 +445,9 @@ void runSingleTestCase(
         fl::span<fl::ChannelConfig>(tx_configs.data(), tx_configs.size()),
         test_case.driver_name.c_str(),
         rx_channel,
-        rx_buffer
+        rx_buffer,
+        test_case.base_strip_size,
+        RX_TYPE
     );
 
     // Run warm-up frame (discard results)

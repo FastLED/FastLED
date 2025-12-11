@@ -35,6 +35,8 @@ void validateExpectedEngines();
 /// @param color_order Color order
 /// @param rx_channel RX channel for loopback
 /// @param rx_buffer RX buffer for capture
+/// @param base_strip_size Base strip size for error reporting (usually same as num_leds)
+/// @param rx_type RX device type for error reporting
 /// @param result Driver test result tracker (modified)
 /// @note Automatically discards first frame (timing warm-up) on first run
 void testDriver(
@@ -46,6 +48,8 @@ void testDriver(
     EOrder color_order,
     fl::shared_ptr<fl::RxDevice> rx_channel,
     fl::span<uint8_t> rx_buffer,
+    int base_strip_size,
+    fl::RxDeviceType rx_type,
     fl::DriverTestResult& result);
 
 /// @brief Print driver validation summary table

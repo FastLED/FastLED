@@ -136,6 +136,8 @@ void testDriver(
     EOrder color_order,
     fl::shared_ptr<fl::RxDevice> rx_channel,
     fl::span<uint8_t> rx_buffer,
+    int base_strip_size,
+    fl::RxDeviceType rx_type,
     fl::DriverTestResult& result) {
 
     // Set this driver as exclusive for testing
@@ -160,7 +162,9 @@ void testDriver(
         fl::span<fl::ChannelConfig>(&tx_config, 1),
         driver_name,
         rx_channel,
-        rx_buffer
+        rx_buffer,
+        base_strip_size,
+        rx_type
     );
 
     // FIRST RUN: Discard results (timing warm-up)

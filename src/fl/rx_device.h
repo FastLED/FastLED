@@ -141,6 +141,15 @@ enum class RxDeviceType : uint8_t {
 };
 
 /**
+ * @brief Convert RxDeviceType to human-readable string
+ * @param type RX device type
+ * @return String name ("ISR" or "RMT")
+ */
+inline const char* toString(RxDeviceType type) {
+    return type == RxDeviceType::RMT ? "RMT" : "ISR";
+}
+
+/**
  * @brief Configuration for RX device initialization
  *
  * Struct-based configuration allows future extensibility without breaking API compatibility.
