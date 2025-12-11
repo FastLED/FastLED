@@ -22,11 +22,9 @@
 // MULTI-CHANNEL MODE:
 // - Single-channel: Pass one ChannelConfig - uses shared RX channel object (created in setup())
 // - Multi-channel: Pass multiple ChannelConfigs - creates dynamic RX channels
-//   on each TX pin for independent loopback validation
+//   on each TX pin for independent jumper wire validation
 // - Each channel in the span is validated sequentially with its own RX channel
-// - For RMT: Uses internal loopback (no jumper needed)
-// - For SPI/PARLIO: Requires physical jumper from each TX pin to itself
-//
+
 // Hardware Setup:
 //   ⚠️ IMPORTANT: Physical jumper wire required for non-RMT TX → RMT RX loopback
 //
@@ -359,10 +357,48 @@ void setup() {
     FL_WARN("  → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
     FL_WARN("");
 
+    // ========================================================================
+    // RX Channel Setup
+    // ========================================================================
+
+    FL_WARN("\n[RX SETUP] Creating RX channel for LED validation");
+    FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
+            << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)");
+
+    rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
+
+    if (!rx_channel) {
+        FL_ERROR("[RX SETUP]: Failed to create RX channel");
+        FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
+        error_sanity_check = true;
+        return;
+    }
+
+    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
+    FL_WARN("[RX SETUP] ✓ RX channel ready for LED validation\n");
+
+    // List all available drivers and store globally
+    FL_WARN("\nDiscovering available drivers...");
+    drivers_available = FastLED.getDriverInfos();
+    FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
+    for (fl::size i = 0; i < drivers_available.size(); i++) {
+        FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()
+                << " (priority: " << drivers_available[i].priority
+                << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")");
+    }
+
+    // Validate that expected engines are available for this platform
+    validateExpectedEngines();
+
+    // Build test matrix from preprocessor defines and available drivers
+    FL_WARN("\nBuilding test matrix configuration...");
+    test_matrix = buildTestMatrix(drivers_available);
+    printTestMatrixSummary(test_matrix);
+
     // Generate all test cases from the matrix
-    FL_WARN("\n[GENERATING TEST CASES]");
+    FL_WARN("Generating test cases...");
     test_cases = generateTestCases(test_matrix, PIN_TX);
-    FL_WARN("  Generated " << test_cases.size() << " test case(s)\n");
+    FL_WARN("Generated " << test_cases.size() << " test case(s)\n");
 
     // Initialize result tracking for each test case
     for (fl::size i = 0; i < test_cases.size(); i++) {
@@ -374,9 +410,7 @@ void setup() {
         ));
     }
 
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ SETUP COMPLETE - Starting Test Matrix                         ║");
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
+    FL_WARN("Starting test matrix validation loop...");
     delay(2000);
 }
 
