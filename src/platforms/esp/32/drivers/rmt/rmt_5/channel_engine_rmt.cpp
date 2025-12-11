@@ -243,7 +243,7 @@ struct Rmt5EncoderImpl {
         bytes_config.bit1.duration0 = mBit1HighTicks;
         bytes_config.bit1.level1 = 0;
         bytes_config.bit1.duration1 = mBit1LowTicks;
-        bytes_config.flags.msb_first = 0;
+        bytes_config.flags.msb_first = 1;  // WS2812B requires MSB-first transmission
 
         esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
         if (ret != ESP_OK) {
