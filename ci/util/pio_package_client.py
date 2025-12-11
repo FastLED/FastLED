@@ -254,7 +254,7 @@ def ensure_packages_installed(
     # Submit request
     request = {
         "project_dir": str(project_dir),
-        "environment": environment or "all",
+        "environment": environment,  # None is valid - daemon will use PlatformIO default
         "timestamp": time.time(),
     }
 

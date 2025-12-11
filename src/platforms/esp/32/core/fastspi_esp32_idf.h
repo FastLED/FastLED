@@ -3,7 +3,7 @@
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
 
 #include "crgb.h"
-#include <string.h>  // for memset
+#include "ftl/cstring.h"  // For fl::memset
 
 FL_EXTERN_C_BEGIN
 #include "driver/spi_master.h"
@@ -45,7 +45,7 @@ public:
         , mInitialized(false)
         , mInTransaction(false)
     {
-        ::memset(&mTransaction, 0, sizeof(mTransaction));
+        fl::memset(&mTransaction, 0, sizeof(mTransaction));
     }
 
     ESP32SPIOutput(Selectable* pSelect)
@@ -55,7 +55,7 @@ public:
         , mInitialized(false)
         , mInTransaction(false)
     {
-        ::memset(&mTransaction, 0, sizeof(mTransaction));
+        fl::memset(&mTransaction, 0, sizeof(mTransaction));
     }
 
     ~ESP32SPIOutput() {

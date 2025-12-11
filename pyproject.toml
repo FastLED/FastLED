@@ -43,6 +43,7 @@ dependencies = [
     "ffmpeg-python>=0.2.0",
     "fastled>=1.4.50",
     "running-process>=1.0.6",
+    "daemoniker>=0.2.3",
 ]
 
 [build-system]

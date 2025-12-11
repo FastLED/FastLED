@@ -7,6 +7,8 @@
 // Build flags:
 // - ARDUINO: Defined by Arduino framework
 // - FL_NO_ARDUINO: Force ESP-IDF backend even when Arduino is available
+//
+// ok no namespace fl
 
 #ifdef ESP32
 

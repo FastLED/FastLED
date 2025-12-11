@@ -18,6 +18,7 @@ Architecture:
               Status File    Progress Updates
 """
 
+import configparser
 import json
 import logging
 import os
@@ -260,7 +261,7 @@ def validate_request(request: dict[str, Any]) -> bool:
         True if request is valid, False otherwise
     """
     # Required fields
-    if "project_dir" not in request or "environment" not in request:
+    if "project_dir" not in request:
         logging.error("Request missing required fields")
         return False
 
@@ -276,9 +277,9 @@ def validate_request(request: dict[str, Any]) -> bool:
         logging.error(f"platformio.ini not found in {project_dir}")
         return False
 
-    # Verify environment is alphanumeric (prevent injection)
-    env = request["environment"]
-    if not isinstance(env, str) or not env:
+    # Verify environment is valid (if provided)
+    env = request.get("environment")
+    if env is not None and (not isinstance(env, str) or not env):
         logging.error(f"Invalid environment: {env}")
         return False
 
@@ -287,7 +288,7 @@ def validate_request(request: dict[str, Any]) -> bool:
 
 def run_package_install_with_retry(
     cmd: list[str],
-    environment: str,
+    environment: str | None,
     project_dir: str,
     max_retries: int = MAX_NETWORK_RETRIES,
 ) -> tuple[int, str]:
@@ -295,7 +296,7 @@ def run_package_install_with_retry(
 
     Args:
         cmd: Command to execute
-        environment: Environment name (for status updates)
+        environment: Environment name (for status updates), or None for default
         project_dir: Project directory (for status updates)
         max_retries: Maximum retry attempts (default: 3)
 
@@ -354,19 +355,67 @@ def run_package_install_with_retry(
     return 1, full_output
 
 
+def get_default_environment(project_dir: str) -> str | None:
+    """Read default_envs from platformio.ini.
+
+    Args:
+        project_dir: Path to PlatformIO project directory
+
+    Returns:
+        First default environment name, or None if not found
+    """
+    ini_path = Path(project_dir) / "platformio.ini"
+    if not ini_path.exists():
+        return None
+
+    try:
+        config = configparser.ConfigParser()
+        config.read(ini_path)
+
+        # Get default_envs from [platformio] section
+        if config.has_section("platformio") and config.has_option(
+            "platformio", "default_envs"
+        ):
+            default_envs = config.get("platformio", "default_envs")
+            # Can be comma-separated list, take first one
+            first_env = default_envs.split(",")[0].strip()
+            return first_env if first_env else None
+
+        return None
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        logging.warning(f"Failed to read default_envs from platformio.ini: {e}")
+        return None
+
+
 def process_package_request(request: dict[str, Any]) -> bool:
     """Execute package installation request.
 
     Args:
-        request: Request dictionary with project_dir and environment
+        request: Request dictionary with project_dir and optional environment
 
     Returns:
         True if installation successful, False otherwise
     """
     project_dir = request["project_dir"]
-    environment = request["environment"]
+    environment = request.get("environment")
 
-    logging.info(f"Processing package install request: {environment} in {project_dir}")
+    # If no environment specified, use default_envs from platformio.ini
+    # This prevents PlatformIO from installing packages for ALL environments
+    if not environment:
+        environment = get_default_environment(project_dir)
+        if environment:
+            logging.info(
+                f"Using default environment from platformio.ini: {environment}"
+            )
+        else:
+            logging.warning(
+                "No default_envs found in platformio.ini, will install for all environments"
+            )
+
+    env_desc = environment if environment else "all environments"
+    logging.info(f"Processing package install request: {env_desc} in {project_dir}")
 
     # Check disk space before installation
     pio_packages_dir = Path.home() / ".platformio"
@@ -378,21 +427,23 @@ def process_package_request(request: dict[str, Any]) -> bool:
 
     update_status(
         "installing",
-        f"Installing packages for {environment}",
+        f"Installing packages for {env_desc}",
         environment=environment,
         project_dir=project_dir,
         started_at=time.time(),
     )
 
+    # Build command - omit --environment if None to use PlatformIO default
     cmd = [
         "pio",
         "pkg",
         "install",
         "--project-dir",
         project_dir,
-        "--environment",
-        environment,
     ]
+
+    if environment:
+        cmd.extend(["--environment", environment])
 
     try:
         returncode, full_output = run_package_install_with_retry(
@@ -560,11 +611,14 @@ def main() -> int:
                 logging.info("Initializing daemon")
 
             # Daemonize (this returns twice - once in parent, once in child)
-            is_parent, my_pid = daemonizer(
-                DAEMON_NAME,
-                pid_file=str(PID_FILE),
+            # Note: On Windows, pid_file must be the first positional arg, not a keyword arg
+            result = daemonizer(
+                str(PID_FILE),  # pid_file (first positional arg)
                 chdir=str(Path.home()),
             )
+            # Unpack result - may be just is_parent or (is_parent,)
+            is_parent = result[0] if isinstance(result, (list, tuple)) else result
+            my_pid = os.getpid()  # Get actual PID
 
             if is_parent:
                 # Parent process exits here
