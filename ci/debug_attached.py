@@ -1183,7 +1183,7 @@ Examples:
         "sketch",
         nargs="?",
         help="Sketch to compile (e.g., 'RX', 'examples/RX', 'examples/RX/RX.ino'). "
-        "Sets FASTLED_SRC_DIR environment variable. Supports full paths and deep sketches.",
+        "Sets PLATFORMIO_SRC_DIR environment variable. Supports full paths and deep sketches.",
     )
     parser.add_argument(
         "--env",

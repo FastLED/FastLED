@@ -100,7 +100,7 @@
 // the error message keyword.
 // ============================================================================
 /// run with (in fastled repo)
-//    bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "RX Device: RMT" --fail-on ERROR
+//    bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "RX Device: PARLIO" --fail-on ERROR
 
 #include <FastLED.h>
 #include "Common.h"
@@ -127,8 +127,8 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 // ============================================================================
 // Uncomment to test ONLY a specific engine (reduces console spam)
 // Valid values: "RMT", "SPI", "PARLIO", "I2S"
-#define TEST_ONLY_ENGINE "RMT"
-// #define TEST_ONLY_ENGINE "PARLIO"
+// #define TEST_ONLY_ENGINE "RMT"
+#define TEST_ONLY_ENGINE "PARLIO"
 // #define TEST_ONLY_ENGINE "SPI"
 
 CRGB leds[NUM_LEDS];
