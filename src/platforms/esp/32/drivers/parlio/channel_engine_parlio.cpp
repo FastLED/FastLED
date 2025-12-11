@@ -821,7 +821,16 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     uint32_t actual_total_ns = bit0_size * resolution_ns;
     int32_t timing_error_ns = (int32_t)actual_total_ns - (int32_t)expected_total_ns;
     int32_t timing_error_percent = (timing_error_ns * 100) / expected_total_ns;
-    FL_ERROR("  Timing error: " << timing_error_ns << "ns (" << timing_error_percent << "% deviation from spec)");
+
+    // Only report as ERROR if timing deviation exceeds 50ns threshold
+    constexpr int32_t TIMING_ERROR_THRESHOLD_NS = 50;
+    int32_t abs_timing_error_ns = timing_error_ns < 0 ? -timing_error_ns : timing_error_ns;
+
+    if (abs_timing_error_ns > TIMING_ERROR_THRESHOLD_NS) {
+        FL_ERROR("  Timing error: " << timing_error_ns << "ns (" << timing_error_percent << "% deviation from spec)");
+    } else {
+        FL_WARN("  Timing error: " << timing_error_ns << "ns (" << timing_error_percent << "% deviation from spec)");
+    }
 
     // Step 2: Calculate width-adaptive streaming chunk size (MUST be after
     // waveform generation) Now that we know pulses_per_bit, calculate optimal

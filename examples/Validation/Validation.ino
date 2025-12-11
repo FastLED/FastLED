@@ -97,8 +97,8 @@
 // the "ERROR" message to be printed. Do not hide the symptom by changing
 // the error message keyword.
 // ============================================================================
-/// run with (in fastled repo)
-//    bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "RX Device: PARLIO" --fail-on ERROR
+// If in the fastled you can run this sketch with:
+//   bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
 
 
 #include <FastLED.h>
@@ -257,10 +257,10 @@ void setup() {
         FL_WARN("  Chip: Unknown ESP32 variant");
     #endif
 
-    // Hardware configuration
+    // Hardware configuration - machine-parseable for --expect validation
     FL_WARN("\n[HARDWARE]");
-    FL_WARN("  TX Pin: " << PIN_TX);
-    FL_WARN("  RX Pin: " << PIN_RX);
+    FL_WARN("  TX Pin: " << PIN_TX);  // --expect "TX Pin: 0"
+    FL_WARN("  RX Pin: " << PIN_RX);  // --expect "RX Pin: 1"
     FL_WARN("  RX Device: " << (RX_TYPE == fl::RxDeviceType::RMT ? "RMT" : "ISR"));
     FL_WARN("  Loopback Mode: " << loop_back_mode);
     FL_WARN("  Color Order: RGB");
@@ -316,22 +316,34 @@ void setup() {
     // Build test matrix and show which drivers will be tested
     test_matrix = buildTestMatrix(drivers_available);
     FL_WARN("  Drivers to Test (" << test_matrix.enabled_drivers.size() << "):");
+
+    // Machine-parseable driver validation prints (for --expect flags)
     for (fl::size i = 0; i < test_matrix.enabled_drivers.size(); i++) {
-        FL_WARN("    → " << test_matrix.enabled_drivers[i].c_str());
+        const char* driver_name = test_matrix.enabled_drivers[i].c_str();
+        FL_WARN("    → " << driver_name);
+        // Explicit validation print: "DRIVER_ENABLED: <name>"
+        FL_WARN("  DRIVER_ENABLED: " << driver_name);
     }
 
-    // Lane range
+    // Lane range - machine-parseable for --expect validation
     FL_WARN("  Lane Range: " << MIN_LANES << "-" << MAX_LANES << " lanes");
     FL_WARN("    → Lane N has base_size - N LEDs (decreasing pattern)");
     FL_WARN("    → Multi-lane: Only Lane 0 validated (hardware limitation)");
+    // Explicit validation prints: "LANE_MIN: X" and "LANE_MAX: Y"
+    FL_WARN("  LANE_MIN: " << MIN_LANES);
+    FL_WARN("  LANE_MAX: " << MAX_LANES);
 
-    // Strip sizes
+    // Strip sizes - machine-parseable for --expect validation
     #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
         FL_WARN("  Strip Sizes: Short only (" << SHORT_STRIP_SIZE << " LEDs)");
+        FL_WARN("  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE);
     #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
         FL_WARN("  Strip Sizes: Long only (" << LONG_STRIP_SIZE << " LEDs)");
+        FL_WARN("  STRIP_SIZE_TESTED: " << LONG_STRIP_SIZE);
     #else
         FL_WARN("  Strip Sizes: Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")");
+        FL_WARN("  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE);
+        FL_WARN("  STRIP_SIZE_TESTED: " << LONG_STRIP_SIZE);
     #endif
 
     // Bit patterns
@@ -357,48 +369,12 @@ void setup() {
     FL_WARN("  → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
     FL_WARN("");
 
-    // ========================================================================
-    // RX Channel Setup
-    // ========================================================================
-
-    FL_WARN("\n[RX SETUP] Creating RX channel for LED validation");
-    FL_WARN("[RX CREATE] Creating RX channel on PIN " << PIN_RX
-            << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)");
-
-    rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
-
-    if (!rx_channel) {
-        FL_ERROR("[RX SETUP]: Failed to create RX channel");
-        FL_ERROR("[RX SETUP]: Check that RMT peripheral is available and not in use");
-        error_sanity_check = true;
-        return;
-    }
-
-    FL_WARN("[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())");
-    FL_WARN("[RX SETUP] ✓ RX channel ready for LED validation\n");
-
-    // List all available drivers and store globally
-    FL_WARN("\nDiscovering available drivers...");
-    drivers_available = FastLED.getDriverInfos();
-    FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
-    for (fl::size i = 0; i < drivers_available.size(); i++) {
-        FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()
-                << " (priority: " << drivers_available[i].priority
-                << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")");
-    }
-
-    // Validate that expected engines are available for this platform
-    validateExpectedEngines();
-
-    // Build test matrix from preprocessor defines and available drivers
-    FL_WARN("\nBuilding test matrix configuration...");
-    test_matrix = buildTestMatrix(drivers_available);
-    printTestMatrixSummary(test_matrix);
-
     // Generate all test cases from the matrix
-    FL_WARN("Generating test cases...");
+    FL_WARN("\n[TEST CASE GENERATION]");
     test_cases = generateTestCases(test_matrix, PIN_TX);
-    FL_WARN("Generated " << test_cases.size() << " test case(s)\n");
+    FL_WARN("  Generated " << test_cases.size() << " test case(s)");
+    // Machine-parseable: "TEST_CASES_GENERATED: X"
+    FL_WARN("  TEST_CASES_GENERATED: " << test_cases.size());
 
     // Initialize result tracking for each test case
     for (fl::size i = 0; i < test_cases.size(); i++) {
@@ -410,6 +386,8 @@ void setup() {
         ));
     }
 
+    FL_WARN("\n[SETUP COMPLETE]");
+    FL_WARN("  VALIDATION_READY: true");
     FL_WARN("Starting test matrix validation loop...");
     delay(2000);
 }
