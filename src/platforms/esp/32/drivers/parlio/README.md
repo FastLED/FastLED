@@ -429,9 +429,11 @@ Comprehensive diagnostic output during initialization:
 
 The PARLIO peripheral is only available on:
 - ESP32-P4
-- ESP32-S3
+- ESP32-C6
+- ESP32-H2
+- ESP32-C5
 
-Other ESP32 variants (ESP32, ESP32-C3, ESP32-S2) do not have PARLIO hardware.
+Other ESP32 variants (ESP32, ESP32-S2, ESP32-S3, ESP32-C3) do not have PARLIO hardware.
 
 ### Compilation on Windows MSys
 
@@ -448,7 +450,9 @@ This is an ESP-IDF limitation, not a FastLED issue.
 
 Theoretical maximum is limited by available memory:
 - ESP32-P4: ~8 MB PSRAM (can handle 10,000+ LEDs)
-- ESP32-S3: ~2-8 MB PSRAM depending on module
+- ESP32-C6: ~512 KB SRAM (can handle 2,000+ LEDs)
+- ESP32-H2: ~256 KB SRAM (can handle 1,000+ LEDs)
+- ESP32-C5: ~512 KB SRAM (can handle 2,000+ LEDs)
 
 Practical limits depend on your application's other memory needs.
 

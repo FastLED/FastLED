@@ -102,6 +102,7 @@
 /// run with (in fastled repo)
 //    bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "RX Device: PARLIO" --fail-on ERROR
 
+
 #include <FastLED.h>
 #include "Common.h"
 #include "ValidationTest.h"
@@ -128,7 +129,7 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 // Uncomment to test ONLY a specific engine (reduces console spam)
 // Valid values: "RMT", "SPI", "PARLIO", "I2S"
 // #define TEST_ONLY_ENGINE "RMT"
-#define TEST_ONLY_ENGINE "PARLIO"
+// #define TEST_ONLY_ENGINE "PARLIO"
 // #define TEST_ONLY_ENGINE "SPI"
 
 CRGB leds[NUM_LEDS];
@@ -175,6 +176,9 @@ void setup() {
     FL_WARN("LOOP BACK MODE: " << loop_back_mode);
     FL_WARN("NUM_LEDS: " << NUM_LEDS);
     FL_WARN("COLOR ORDER: " << COLOR_ORDER);
+    #ifdef TEST_ONLY_ENGINE
+    FL_WARN("TESTING ONLY: " << TEST_ONLY_ENGINE);
+    #endif
     FL_WARN("");
     FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
     FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");

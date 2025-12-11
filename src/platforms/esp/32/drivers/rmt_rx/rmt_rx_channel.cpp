@@ -202,8 +202,6 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
     // pattern varies across chipsets (ESP32 vs ESP32-C6 vs ESP32-S3), make skip pattern
     // configurable via a parameter or auto-detect based on captured pattern analysis.
 
-    size_t symbols_in_current_led = 0;  // Symbols processed in current LED (0-31)
-
     for (size_t i = start_index; i < symbols.size(); i++) {
         // Check for reset pulse (frame boundary)
         if (isResetPulse(symbols[i], timing, ns_per_tick)) {
@@ -226,17 +224,6 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
                 }
             }
             break; // End of frame
-        }
-
-        // ITERATION 18: Skip symbols 24-31 of each LED (the spurious 4th byte)
-        if (symbols_in_current_led >= 24 && symbols_in_current_led < 32) {
-            FL_DBG("decodeRmtSymbols: skipping symbol " << i << " (position " << symbols_in_current_led << " in LED)");
-            symbols_in_current_led++;
-            if (symbols_in_current_led == 32) {
-                // Reset counter for next LED
-                symbols_in_current_led = 0;
-            }
-            continue;  // Skip this symbol
         }
 
         // Decode symbol to bit
@@ -282,7 +269,6 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
         // Accumulate bit into byte (MSB first)
         current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
         bit_index++;
-        symbols_in_current_led++;
 
         // Byte complete?
         if (bit_index == 8) {
@@ -298,11 +284,6 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
             }
             current_byte = 0;
             bit_index = 0;
-
-            // After every 32 symbols (4 bytes), reset counter for next LED
-            if (symbols_in_current_led == 32) {
-                symbols_in_current_led = 0;
-            }
         }
     }
 
@@ -449,25 +430,33 @@ public:
         if (mChannel) {
             FL_DBG("RX channel already initialized, re-arming receiver");
 
-            // Disable channel to reset it to "init" state
-            // This ensures any previous receive operation is stopped
+            // CRITICAL: After rmt_receive() completes, the channel is in "enabled" state
+            // but rmt_receive() CANNOT be called again until we cycle through disable/enable.
+            // The ESP-IDF RMT driver requires this pattern:
+            //   1. rmt_disable() - transition "enabled" → "init" state
+            //   2. rmt_enable() - transition "init" → "enabled" state
+            //   3. rmt_receive() - start new receive operation
+            //
+            // NOTE: This disable/enable cycling only affects the LOCAL RX channel, not other
+            // RMT channels. Previous concerns about corrupting TX interrupt routing were based
+            // on a misunderstanding - the issue was with a different code path.
+
+            // Disable channel to reset to "init" state
             esp_err_t err = rmt_disable(mChannel);
             if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                FL_WARN("Failed to disable RX channel: " << static_cast<int>(err));
+                FL_WARN("Failed to disable RX channel during re-arm: " << esp_err_to_name(err));
                 return false;
             }
-            FL_DBG("RX channel disabled, ready for re-initialization");
+            FL_DBG("RX channel disabled for re-arm");
 
             // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
 
-            // Re-enable the channel
-            err = rmt_enable(mChannel);
-            if (err != ESP_OK) {
-                FL_WARN("Failed to re-enable RX channel: " << static_cast<int>(err));
+            // Enable channel (transition "init" → "enabled")
+            if (!enable()) {
+                FL_WARN("Failed to enable RX channel during re-arm");
                 return false;
             }
-            FL_DBG("RX channel re-enabled");
 
             // Handle skip phase using small discard buffer
             if (!handleSkipPhase()) {
@@ -529,16 +518,15 @@ public:
 
         FL_DBG("RX callbacks registered successfully");
 
-        // Enable RX channel
-        err = rmt_enable(mChannel);
-        if (err != ESP_OK) {
-            FL_WARN("Failed to enable RX channel: " << static_cast<int>(err));
+        // Enable RX channel - rmt_receive() requires channel to be in "enabled" state
+        // The channel is created in "init" state by rmt_new_rx_channel()
+        // We must call rmt_enable() before calling rmt_receive()
+        if (!enable()) {
+            FL_WARN("Failed to enable RX channel");
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
         }
-
-        FL_DBG("RX channel enabled");
 
         // Handle skip phase using small discard buffer
         if (!handleSkipPhase()) {
@@ -706,13 +694,11 @@ private:
             FL_DBG("Skip phase: receiving chunk of " << chunk_size
                    << " symbols (remaining: " << mSkipCounter << ")");
 
-            // Enable channel for this receive operation
-            if (!enable()) {
-                FL_WARN("handleSkipPhase(): failed to enable channel");
-                return false;
-            }
+            // DO NOT enable channel here - rmt_receive() requires channel to be in "init" (disabled) state
+            // startReceive() calls rmt_receive() which internally calls rmt_rx_enable()
+            // and rmt_rx_enable() expects the channel to be in "init" state, not "enabled" state
 
-            // Start receive with discard buffer
+            // Start receive with discard buffer (rmt_receive will enable the RX hardware internally)
             if (!startReceive(discard_buffer.data(), chunk_size)) {
                 FL_WARN("handleSkipPhase(): failed to start receive");
                 return false;
@@ -736,11 +722,39 @@ private:
             // (ISR callback handles decrementing mSkipCounter)
             FL_DBG("Skip phase chunk complete, mSkipCounter now: " << mSkipCounter);
 
+            // Disable channel to reset to "init" state for next iteration
+            // After rmt_receive() completes, channel is in "enabled" state
+            // We need to disable it before calling rmt_receive() again
+            if (mSkipCounter > 0) {  // Only disable if more iterations needed
+                esp_err_t err = rmt_disable(mChannel);
+                if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+                    FL_WARN("handleSkipPhase(): failed to disable channel for next iteration: " << static_cast<int>(err));
+                    return false;
+                }
+                FL_DBG("Skip phase: channel disabled for next iteration");
+            }
+
             // Reset mReceiveDone for next iteration
             mReceiveDone = false;
         }
 
         FL_DBG("Skip phase complete");
+
+        // After skip phase completes, channel may be in "enabled" state from the last rmt_receive()
+        // We need to ensure it's in "init" (disabled) state before calling allocateAndArm()
+        // If skip_signals=0, channel is already in "init" state, so rmt_disable() may return ESP_ERR_INVALID_STATE
+        if (mChannel) {
+            esp_err_t err = rmt_disable(mChannel);
+            if (err == ESP_OK) {
+                FL_DBG("Skip phase: channel disabled, ready for allocateAndArm()");
+            } else if (err == ESP_ERR_INVALID_STATE) {
+                FL_DBG("Skip phase: channel already in init state (skip_signals=0 case)");
+            } else {
+                FL_WARN("handleSkipPhase(): failed to disable channel after skip phase: " << static_cast<int>(err));
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -748,8 +762,8 @@ private:
      * @brief Allocate buffer and arm receiver (internal helper)
      * @return true on success, false on failure
      *
-     * Common logic for allocating internal buffer, enabling channel,
-     * and starting receive operation.
+     * Common logic for allocating internal buffer and starting receive operation.
+     * REQUIRES: Channel must be in "enabled" state before calling.
      */
     bool allocateAndArm() {
         // Allocate internal buffer
@@ -759,11 +773,9 @@ private:
             mInternalBuffer.push_back(0);
         }
 
-        // Enable channel (may be disabled after previous receive)
-        if (!enable()) {
-            FL_WARN("allocateAndArm(): failed to enable channel");
-            return false;
-        }
+        // Channel must be enabled before calling startReceive()
+        // Caller (begin()) ensures channel is enabled via enable() call
+        // startReceive() calls rmt_receive() which requires channel to be in "enabled" state
 
         // Start receive operation
         if (!startReceive(mInternalBuffer.data(), mBufferSize)) {
@@ -775,21 +787,22 @@ private:
     }
 
     /**
-     * @brief Re-enable RMT RX channel (internal method)
+     * @brief Enable RMT RX channel (internal method)
      * @return true on success, false on failure
      *
-     * CRITICAL FIX: This method no longer calls rmt_disable() before rmt_enable().
-     * Repeatedly disabling/enabling RX channels corrupts TX interrupt routing on
-     * ESP32-C6 (RISC-V), causing TX ISR callbacks to stop firing after the first
-     * transmission. The proper pattern (matching TX implementation) is to enable
-     * the channel ONCE during creation and keep it enabled for all operations.
+     * Enables the RMT RX channel, transitioning from "init" to "enabled" state.
+     * The channel must be in "init" (disabled) state before calling this method.
      *
-     * This method is now idempotent - safe to call multiple times. If the channel
-     * is already enabled, rmt_enable() returns ESP_ERR_INVALID_STATE, which we
-     * treat as success (channel is in the desired enabled state).
+     * After calling enable(), the channel is ready to call rmt_receive().
+     * After a receive operation completes, the channel remains in "enabled" state
+     * but must be disabled before calling rmt_receive() again.
      *
-     * After a receive operation completes, the channel remains enabled and ready
-     * for the next receive operation without needing disable/enable cycling.
+     * State transitions:
+     *   - rmt_new_rx_channel() → "init" state
+     *   - rmt_enable() → "enabled" state
+     *   - rmt_receive() → requires "enabled" state
+     *   - After receive completes → remains "enabled" but must disable before next receive
+     *   - rmt_disable() → "init" state (ready for next enable/receive cycle)
      */
     bool enable() {
         if (!mChannel) {
@@ -797,25 +810,12 @@ private:
             return false;
         }
 
-        // CRITICAL: Do NOT call rmt_disable() here - it corrupts TX interrupt routing
-        // on ESP32-C6 (RISC-V). The disable/enable cycle breaks TX ISR callbacks,
-        // causing the second and subsequent transmissions to never fire their
-        // completion callbacks even though rmt_transmit() returns ESP_OK.
-        //
-        // Root cause: ESP32-C6 PLIC (Platform-Level Interrupt Controller) interrupt
-        // routing is configured during rmt_enable(). Calling rmt_disable() on the RX
-        // channel may affect global PLIC state, disrupting TX channel's ISR routing.
-
-        // Attempt to enable channel (idempotent operation)
+        // Enable channel (transition "init" → "enabled")
         esp_err_t err = rmt_enable(mChannel);
 
         // ESP_OK: Successfully enabled
-        // ESP_ERR_INVALID_STATE (0x103): Already enabled - this is acceptable
         if (err == ESP_OK) {
             FL_DBG("RX channel enabled");
-            return true;
-        } else if (err == ESP_ERR_INVALID_STATE) {
-            FL_DBG("RX channel already enabled (idempotent success)");
             return true;
         } else {
             FL_WARN("Failed to enable RX channel: " << esp_err_to_name(err)

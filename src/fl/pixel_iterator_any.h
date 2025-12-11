@@ -91,7 +91,6 @@ class PixelIteratorAny {
 
         PixelIteratorInitVisitor visitor(mRgbw);
         visitor.pixelIteratorPtr = &mPixelIterator;
-        visitor.rgbw = RgbwDefault::value();
         mAnyController.visit(visitor);
     }
 

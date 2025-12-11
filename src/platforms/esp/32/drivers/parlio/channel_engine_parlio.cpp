@@ -22,6 +22,7 @@
 #include "fl/log.h"
 #include "fl/transposition.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "ftl/algorithm.h"
 #include "ftl/assert.h"
 #include "ftl/time.h"
@@ -367,28 +368,53 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
             // Step 2: Bit-pack transpose waveform bytes to PARLIO format
             // Convert byte-based waveforms (0xFF/0x00) to bit-packed output
+            //
+            // PARLIO Data Format:
+            // - For data_width=N, each N bits represent one clock cycle
+            // - Bits are packed: bit 0 = lane 0, bit 1 = lane 1, etc.
+            // - Each byte contains 8/N clock cycles worth of data
+            //
+            // Example: data_width=1, 80 pulses
+            //   - Need 80 clock cycles = 80 bits = 10 bytes
+            //   - Each byte: [tick7, tick6, ..., tick1, tick0]
             const size_t pulsesPerByte =
-                8 * mState.pulses_per_bit; // Should be 32
+                8 * mState.pulses_per_bit; // 80 pulses for 8 bits
 
             if (mState.data_width <= 8) {
-                // Pack into single bytes (1, 2, 4, or 8-bit widths)
-                for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                // Pack into single bytes
+                // Each byte contains (8 / data_width) clock cycles
+                size_t ticksPerByte = 8 / mState.data_width;
+                size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+
+                for (size_t byteIdx = 0; byteIdx < numOutputBytes; byteIdx++) {
                     uint8_t outputByte = 0;
 
-                    // Extract one pulse from each lane and pack into bits
-                    for (size_t lane = 0; lane < mState.data_width; lane++) {
-                        uint8_t *laneWaveform =
-                            laneWaveforms + (lane * bytes_per_lane);
-                        uint8_t pulse = laneWaveform[tick];
-                        uint8_t bit =
-                            (pulse != 0) ? 1 : 0; // Convert 0xFF→1, 0x00→0
-                        outputByte |= (bit << (mState.data_width - 1 - lane));
+                    // Pack ticksPerByte time ticks into this byte
+                    for (size_t t = 0; t < ticksPerByte; t++) {
+                        size_t tick = byteIdx * ticksPerByte + t;
+                        if (tick >= pulsesPerByte) break; // Avoid overflow
+
+                        // Extract pulses from all lanes at this time tick
+                        for (size_t lane = 0; lane < mState.data_width; lane++) {
+                            uint8_t *laneWaveform =
+                                laneWaveforms + (lane * bytes_per_lane);
+                            uint8_t pulse = laneWaveform[tick];
+                            uint8_t bit =
+                                (pulse != 0) ? 1 : 0; // Convert 0xFF→1, 0x00→0
+
+                            // Bit position: temporal order (tick 0 → bit 0, tick 1 → bit 1, ...)
+                            // PARLIO transmits LSB-first (bit 0 of byte sent first)
+                            // This gives correct temporal sequence: tick 0, tick 1, ..., tick 7
+                            size_t bitPos = t * mState.data_width + lane;
+                            outputByte |= (bit << bitPos);
+                        }
                     }
 
                     nextBuffer[outputIdx++] = outputByte;
                 }
             } else if (mState.data_width == 16) {
                 // Pack into 16-bit words (two bytes per tick)
+                // For 16-bit width: 1 clock cycle = 16 bits = 2 bytes
                 for (size_t tick = 0; tick < pulsesPerByte; tick++) {
                     uint16_t outputWord = 0;
 
@@ -399,13 +425,12 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
                         uint8_t pulse = laneWaveform[tick];
                         uint8_t bit =
                             (pulse != 0) ? 1 : 0; // Convert 0xFF→1, 0x00→0
-                        outputWord |= (bit << (15 - lane));
+                        outputWord |= (bit << lane); // Lane 0 = bit 0, etc.
                     }
 
-                    // Write as two bytes (high byte first, then low byte)
-                    nextBuffer[outputIdx++] =
-                        (outputWord >> 8) & 0xFF;                // High byte
-                    nextBuffer[outputIdx++] = outputWord & 0xFF; // Low byte
+                    // Write as two bytes (low byte first for little-endian)
+                    nextBuffer[outputIdx++] = outputWord & 0xFF;          // Low byte
+                    nextBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;  // High byte
                 }
             }
         }
@@ -579,6 +604,13 @@ void ChannelEnginePARLIOImpl::beginTransmission(
         mState.pins.push_back(-1);
     }
 
+    // Extract timing configuration from the first channel
+    // All channels in a batch must have the same timing, so we use the first channel's timing
+    const ChipsetTimingConfig& timing = channelData[0]->getTiming();
+    mState.timing_t1_ns = timing.t1_ns;
+    mState.timing_t2_ns = timing.t2_ns;
+    mState.timing_t3_ns = timing.t3_ns;
+
     // Ensure PARLIO peripheral is initialized
     initializeIfNeeded();
 
@@ -613,11 +645,6 @@ void ChannelEnginePARLIOImpl::beginTransmission(
             }
         }
 
-        if (dataSize > 0 && dataSize % 3 != 0) {
-            FL_WARN("PARLIO: Channel " << i << " has " << dataSize
-                                       << " bytes (not a multiple of 3)");
-            return;
-        }
     }
 
     if (!hasData || maxChannelSize == 0) {
@@ -725,33 +752,28 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     mState.leds_per_chunk = calculateChunkSize(mState.data_width);
     FL_LOG_PARLIO("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs (optimized for " << mState.data_width << "-bit width)");
 
-    // Step 1: Generate precomputed waveforms using generic waveform generator
-    // WS2812 timing parameters (nanoseconds) for 10-tick encoding at 8.0 MHz:
-    // - T1: 375ns (initial HIGH time → 3 pulses at 125ns resolution)
-    // - T2: 500ns (additional HIGH time for bit 1 → 4 pulses at 125ns
-    // resolution)
-    // - T3: 375ns (LOW tail duration → 3 pulses at 125ns resolution)
+    // Step 1: Generate precomputed waveforms using timing from chipset configuration
+    // Timing parameters are extracted from the first channel in beginTransmission()
+    // and stored in mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns
     //
-    // Resulting waveforms:
-    // - Bit 0: 3 pulses HIGH + 7 pulses LOW = 375ns H + 875ns L = 1250ns total
-    // - Bit 1: 7 pulses HIGH + 3 pulses LOW = 875ns H + 375ns L = 1250ns total
+    // For WS2812B-V5 (typical values):
+    // - T1: 225ns (T0H - initial HIGH time)
+    // - T2: 355ns (T1H-T0H - additional HIGH time for bit 1)
+    // - T3: 645ns (T0L - LOW tail duration)
     //
-    // WS2812 specification compliance (8.0 MHz clock with standard timing):
-    // - T0H: 375ns (spec: 400±150ns = 250-550ns) ✓
-    // - T0L: 875ns (spec: 850±150ns = 700-1000ns) ✓
-    // - T1H: 875ns (spec: 800±150ns = 650-950ns) ✓
-    // - T1L: 375ns (spec: 450±150ns = 300-600ns) ✓
-    // WS2812B timing adapted for 8MHz clock
-    // With 8MHz (125ns/pulse), total = 10 pulses = 1.25μs per bit (standard
-    // timing) Bit 0: t1=375ns (3 pulses HIGH), t2=500ns, t3=375ns (7 pulses LOW
-    // total) Bit 1: t1=375ns, t2=500ns (7 pulses HIGH total), t3=375ns (3
-    // pulses LOW) This matches standard WS2812 timing requirements
+    // Resulting waveforms (with 8.0 MHz = 125ns per pulse):
+    // - Bit 0: T1 HIGH + T3 LOW = 225ns H + 645ns L ≈ 2 + 5 pulses
+    // - Bit 1: (T1+T2) HIGH + T3 LOW = 580ns H + 645ns L ≈ 5 + 5 pulses
+    FL_LOG_PARLIO("PARLIO: Using chipset timing - T1=" << mState.timing_t1_ns
+                  << "ns, T2=" << mState.timing_t2_ns
+                  << "ns, T3=" << mState.timing_t3_ns << "ns");
+
     size_t bit0_size = fl::generateBit0Waveform(
-        PARLIO_CLOCK_FREQ_HZ, 375, 500, 375, mState.bit0_waveform.data(),
-        mState.bit0_waveform.size());
+        PARLIO_CLOCK_FREQ_HZ, mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns,
+        mState.bit0_waveform.data(), mState.bit0_waveform.size());
     size_t bit1_size = fl::generateBit1Waveform(
-        PARLIO_CLOCK_FREQ_HZ, 375, 500, 375, mState.bit1_waveform.data(),
-        mState.bit1_waveform.size());
+        PARLIO_CLOCK_FREQ_HZ, mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns,
+        mState.bit1_waveform.data(), mState.bit1_waveform.size());
 
     if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {
         FL_WARN("PARLIO: Failed to generate waveforms (bit0="
@@ -763,6 +785,43 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     mState.pulses_per_bit = bit0_size;
     FL_LOG_PARLIO("PARLIO: Generated waveforms: " << mState.pulses_per_bit
                                                   << " pulses per bit");
+
+    // ITERATION 15: Detailed waveform timing analysis
+    FL_LOG_PARLIO("PARLIO: Waveform Timing Analysis (DEBUG):");
+    FL_LOG_PARLIO("  Clock: " << PARLIO_CLOCK_FREQ_HZ << " Hz (" << (1000000000UL / PARLIO_CLOCK_FREQ_HZ) << "ns per tick)");
+    FL_LOG_PARLIO("  Timing: T1=" << mState.timing_t1_ns << "ns, T2=" << mState.timing_t2_ns << "ns, T3=" << mState.timing_t3_ns << "ns");
+    FL_LOG_PARLIO("  Total expected: " << (mState.timing_t1_ns + mState.timing_t2_ns + mState.timing_t3_ns) << "ns per bit");
+    FL_LOG_PARLIO("  Bit 0: " << bit0_size << " pulses");
+    FL_LOG_PARLIO("  Bit 1: " << bit1_size << " pulses");
+
+    // Count HIGH/LOW pulses for bit 0
+    size_t bit0_high_count = 0;
+    for (size_t i = 0; i < bit0_size; i++) {
+        if (mState.bit0_waveform[i] == 0xFF) bit0_high_count++;
+    }
+    size_t bit0_low_count = bit0_size - bit0_high_count;
+
+    // Count HIGH/LOW pulses for bit 1
+    size_t bit1_high_count = 0;
+    for (size_t i = 0; i < bit1_size; i++) {
+        if (mState.bit1_waveform[i] == 0xFF) bit1_high_count++;
+    }
+    size_t bit1_low_count = bit1_size - bit1_high_count;
+
+    uint32_t resolution_ns = 1000000000UL / PARLIO_CLOCK_FREQ_HZ;
+    FL_LOG_PARLIO("  Bit 0 breakdown: " << bit0_high_count << " HIGH (" << (bit0_high_count * resolution_ns) << "ns), "
+            << bit0_low_count << " LOW (" << (bit0_low_count * resolution_ns) << "ns) = "
+            << (bit0_size * resolution_ns) << "ns total");
+    FL_LOG_PARLIO("  Bit 1 breakdown: " << bit1_high_count << " HIGH (" << (bit1_high_count * resolution_ns) << "ns), "
+            << bit1_low_count << " LOW (" << (bit1_low_count * resolution_ns) << "ns) = "
+            << (bit1_size * resolution_ns) << "ns total");
+
+    // Calculate expected vs actual
+    uint32_t expected_total_ns = mState.timing_t1_ns + mState.timing_t2_ns + mState.timing_t3_ns;
+    uint32_t actual_total_ns = bit0_size * resolution_ns;
+    int32_t timing_error_ns = (int32_t)actual_total_ns - (int32_t)expected_total_ns;
+    int32_t timing_error_percent = (timing_error_ns * 100) / expected_total_ns;
+    FL_ERROR("  Timing error: " << timing_error_ns << "ns (" << timing_error_percent << "% deviation from spec)");
 
     // Step 2: Calculate width-adaptive streaming chunk size (MUST be after
     // waveform generation) Now that we know pulses_per_bit, calculate optimal
@@ -817,7 +876,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.max_transfer_size =
         4096; // ITERATION 2: Must accommodate buffer size (2016 bytes)
     config.bit_pack_order =
-        PARLIO_BIT_PACK_ORDER_MSB; // WS2812 expects MSB-first
+        PARLIO_BIT_PACK_ORDER_LSB; // Match bit-packing logic (bit 0 = tick 0)
     config.sample_edge =
         PARLIO_SAMPLE_EDGE_POS; // ITERATION 1: Match ESP-IDF example (was NEG)
 

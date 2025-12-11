@@ -306,6 +306,11 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t actual_channels; ///< User-requested channels: 1 to data_width
         size_t dummy_lanes;     ///< Calculated: data_width - actual_channels
 
+        // Timing configuration (extracted from first channel in beginTransmission)
+        uint32_t timing_t1_ns; ///< T0H: High time for bit 0 (nanoseconds)
+        uint32_t timing_t2_ns; ///< T1H-T0H: Additional high time for bit 1 (nanoseconds)
+        uint32_t timing_t3_ns; ///< T0L: Low tail duration (nanoseconds)
+
         // Double-buffered DMA streaming (DMA-capable memory for waveform
         // output) CRITICAL: These buffers MUST be heap-allocated with
         // MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL because they are directly
@@ -368,7 +373,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
 
         ParlioState(size_t width)
             : tx_unit(nullptr), transmitting(false), data_width(width),
-              actual_channels(0), dummy_lanes(0), buffer_a(nullptr),
+              actual_channels(0), dummy_lanes(0),
+              timing_t1_ns(0), timing_t2_ns(0), timing_t3_ns(0),
+              buffer_a(nullptr),
               buffer_b(nullptr), buffer_size(0), active_buffer(nullptr),
               fill_buffer(nullptr), num_lanes(width), lane_stride(0),
               current_led(0), total_leds(0), leds_per_chunk(0),

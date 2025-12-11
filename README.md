@@ -784,7 +784,7 @@ ESP32 platforms support multiple hardware drivers with automatic priority-based 
 
 | **Driver** | **Priority** | **Best For** | **Availability** |
 |------------|--------------|--------------|------------------|
-| **PARLIO** | 50 (highest) | Maximum throughput, parallel strips | ESP32-S3, P4, C5, C6 |
+| **PARLIO** | 50 (highest) | Maximum throughput, parallel strips | ESP32-P4, C5, C6, H2 |
 | **SPI** | 40 | High speed, stable timing | All ESP32 variants |
 | **RMT** | 30 | Flexibility, per-strip timing | All ESP32 variants |
 

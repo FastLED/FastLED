@@ -31,16 +31,18 @@ size_t generateBit0Waveform(
         return 0;  // Frequency too high
     }
 
-    // Calculate pulses using ceiling division
-    uint32_t pulses_t1 = (t1_ns + resolution_ns - 1) / resolution_ns;
-    uint32_t pulses_t2 = (t2_ns + resolution_ns - 1) / resolution_ns;
-    uint32_t pulses_t3 = (t3_ns + resolution_ns - 1) / resolution_ns;
-
-    uint32_t total_pulses = pulses_t1 + pulses_t2 + pulses_t3;
+    uint32_t total_time_ns = t1_ns + t2_ns + t3_ns;
+    uint32_t total_pulses = (total_time_ns + resolution_ns / 2) / resolution_ns;
 
     if (b0_waveform_size_max < total_pulses) {
         return 0;  // Buffer too small
     }
+
+    // Allocate pulses proportionally (with rounding to nearest)
+    // This ensures timing accuracy while maintaining constant total pulse count
+    uint32_t pulses_t1 = (t1_ns * total_pulses + total_time_ns / 2) / total_time_ns;
+    uint32_t pulses_t3 = (t3_ns * total_pulses + total_time_ns / 2) / total_time_ns;
+    uint32_t pulses_t2 = total_pulses - pulses_t1 - pulses_t3;  // Remainder
 
     // Bit 0: HIGH for t1, LOW for t2+t3
     size_t idx = 0;
@@ -73,16 +75,16 @@ size_t generateBit1Waveform(
         return 0;  // Frequency too high
     }
 
-    // Calculate pulses using ceiling division
-    uint32_t pulses_t1 = (t1_ns + resolution_ns - 1) / resolution_ns;
-    uint32_t pulses_t2 = (t2_ns + resolution_ns - 1) / resolution_ns;
-    uint32_t pulses_t3 = (t3_ns + resolution_ns - 1) / resolution_ns;
-
-    uint32_t total_pulses = pulses_t1 + pulses_t2 + pulses_t3;
+    uint32_t total_time_ns = t1_ns + t2_ns + t3_ns;
+    uint32_t total_pulses = (total_time_ns + resolution_ns / 2) / resolution_ns;
 
     if (b1_waveform_size_max < total_pulses) {
         return 0;  // Buffer too small
     }
+
+    uint32_t pulses_t1 = (t1_ns * total_pulses + total_time_ns / 2) / total_time_ns;
+    uint32_t pulses_t3 = (t3_ns * total_pulses + total_time_ns / 2) / total_time_ns;
+    uint32_t pulses_t2 = total_pulses - pulses_t1 - pulses_t3;  // Remainder
 
     // Bit 1: HIGH for t1+t2, LOW for t3
     size_t idx = 0;
