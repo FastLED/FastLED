@@ -4,7 +4,7 @@
 
 #include <FastLED.h>
 #include "ValidationTest.h"
-#include "platforms/esp/32/drivers/channel_bus_manager.h"
+#include "fl/channels/channel_bus_manager.h"
 
 // ESP-IDF example configuration test (only on ESP32-C6)
 #ifdef ESP32C6

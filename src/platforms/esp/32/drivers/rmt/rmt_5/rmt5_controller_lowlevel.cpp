@@ -1,3 +1,8 @@
+// This "low level" code uset to be large, but through the refactor
+// to a channel bus manager this has become a thin stub of it's former self
+// and is pending deletion.
+
+
 #ifdef ESP32
 
 #include "fl/compiler_control.h"
@@ -9,7 +14,7 @@
 
 #include "rmt5_controller_lowlevel.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "platforms/esp/32/drivers/channel_bus_manager.h"
+#include "fl/channels/channel_bus_manager.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -32,7 +37,7 @@ RmtController5LowLevel::RmtController5LowLevel(
 )
 {
     // Get the ChannelBusManager singleton instance (which manages RMT/SPI engines)
-    mEngine = &ChannelBusManagerSingleton::instance();
+    mEngine = &channelBusManager();
 
     // Create ChipsetTimingConfig from ChipsetTiming
     ChipsetTimingConfig timingConfig(

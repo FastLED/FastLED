@@ -37,7 +37,7 @@
 #include "pixel_iterator.h"
 #include "fl/channels/channel_data.h"
 #include "fl/channels/channel_engine.h"
-#include "platforms/esp/32/drivers/channel_bus_manager.h"
+#include "fl/channels/channel_bus_manager.h"
 #include "platforms/esp/32/core/fastpin_esp32.h"
 #include "fl/chipsets/timing_traits.h"
 
@@ -58,7 +58,7 @@ private:
 
 public:
     ClocklessIdf4()
-        : mEngine(&ChannelBusManagerSingleton::instance())
+        : mEngine(&channelBusManager())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();

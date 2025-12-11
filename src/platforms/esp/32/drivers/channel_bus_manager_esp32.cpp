@@ -12,7 +12,7 @@
 #include "fl/compiler_control.h"
 #ifdef ESP32
 
-#include "channel_bus_manager.h"
+#include "fl/channels/channel_bus_manager.h"
 #include "fl/dbg.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "ftl/shared_ptr.h"
@@ -51,7 +51,7 @@ void initializeChannelBusManager() {
 
     FL_DBG("ESP32: Initializing ChannelBusManager with platform engines");
 
-    auto& manager = ChannelBusManagerSingleton::instance();
+    auto& manager = channelBusManager();
 
     // Add engines with string names (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO

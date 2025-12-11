@@ -16,7 +16,7 @@
 #include "pixel_iterator.h"
 #include "fl/channels/channel_data.h"
 #include "fl/channels/channel_engine.h"
-#include "platforms/esp/32/drivers/channel_bus_manager.h"
+#include "fl/channels/channel_bus_manager.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/log.h"
 
@@ -36,7 +36,7 @@ private:
 
 public:
     ClocklessIdf5()
-        : mEngine(&ChannelBusManagerSingleton::instance())
+        : mEngine(&channelBusManager())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
