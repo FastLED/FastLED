@@ -109,6 +109,78 @@
 #include "ValidationHelpers.h"
 
 // ============================================================================
+// Test Matrix Configuration - Multi-Driver, Multi-Lane, Variable Strip Size
+// ============================================================================
+//
+// This sketch now supports comprehensive matrix testing with the following dimensions:
+//
+// 1. DRIVER SELECTION (3 options):
+//    - Uncomment to test ONLY a specific driver:
+//    // #define JUST_PARLIO  // Test only PARLIO driver
+//    // #define JUST_RMT     // Test only RMT driver
+//    // #define JUST_SPI     // Test only SPI driver
+//    - Default: Test all available drivers (RMT, SPI, PARLIO)
+//
+// 2. LANE RANGE (1-8 lanes):
+//    - Uncomment to override lane range:
+//    // #define MIN_LANES 1  // Minimum number of lanes to test
+//    // #define MAX_LANES 8  // Maximum number of lanes to test
+//    - Default: MIN_LANES=1, MAX_LANES=8 (tests all lane counts)
+//    - Each lane has decreasing LED count: Lane 0=base, Lane 1=base-1, ..., Lane N=base-N
+//    - Multi-lane RX validation: Only Lane 0 is validated (hardware limitation)
+//
+// 3. STRIP SIZE (2 options):
+//    - Uncomment to test ONLY a specific strip size:
+//    // #define JUST_SMALL_STRIPS  // Test only short strips (10 LEDs)
+//    // #define JUST_LARGE_STRIPS  // Test only long strips (300 LEDs)
+//    - Default: Test both small (10 LEDs) and large (300 LEDs) strips
+//
+// TEST MATRIX SIZE:
+// - Full matrix: 3 drivers × 8 lane counts × 2 strip sizes = 48 test cases
+// - Use defines above to narrow scope for faster debugging
+//
+// EXAMPLES:
+// - Test only RMT with 4 lanes on small strips:
+//   #define JUST_RMT
+//   #define MIN_LANES 4
+//   #define MAX_LANES 4
+//   #define JUST_SMALL_STRIPS
+//
+// - Test all drivers with 1-3 lanes on large strips:
+//   #define MAX_LANES 3
+//   #define JUST_LARGE_STRIPS
+//
+// ============================================================================
+
+// ============================================================================
+// Driver Selection Defines (uncomment to isolate specific driver)
+// ============================================================================
+// #define JUST_PARLIO
+// #define JUST_RMT
+// #define JUST_SPI
+
+// ============================================================================
+// Lane Range Defines (uncomment to override defaults)
+// ============================================================================
+#ifndef MIN_LANES
+#define MIN_LANES 1  // Default: start at 1 lane
+#endif
+
+#ifndef MAX_LANES
+#define MAX_LANES 8  // Default: test up to 8 lanes
+#endif
+
+// ============================================================================
+// Strip Size Defines (uncomment to test only one size)
+// ============================================================================
+// #define JUST_SMALL_STRIPS
+// #define JUST_LARGE_STRIPS
+
+// Strip size constants
+#define SHORT_STRIP_SIZE 10   // Short strip: 10 LEDs
+#define LONG_STRIP_SIZE 300   // Long strip: 300 LEDs
+
+// ============================================================================
 // Configuration
 // ============================================================================
 
@@ -117,23 +189,14 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 #define PIN_TX 0
 #define PIN_RX 1
 
-#define NUM_LEDS 10
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-#define RX_BUFFER_SIZE NUM_LEDS * 32 + 10  // symbol expansion is 32:1 + headroom.
+// RX buffer sized for largest possible strip (LONG_STRIP_SIZE = 300 LEDs)
+// Each LED = 24 bits = 24 symbols, plus headroom for RESET pulses
+#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // 300 LEDs × 32:1 expansion + headroom
 
-// ============================================================================
-// Engine Filtering (Debug/Development)
-// ============================================================================
-// Uncomment to test ONLY a specific engine (reduces console spam)
-// Valid values: "RMT", "SPI", "PARLIO", "I2S"
-// #define TEST_ONLY_ENGINE "RMT"
-// #define TEST_ONLY_ENGINE "PARLIO"
-// #define TEST_ONLY_ENGINE "SPI"
-
-CRGB leds[NUM_LEDS];
-uint8_t rx_buffer[RX_BUFFER_SIZE];  // 255 LEDs × 24 bits/LED = 6120 symbols, use 8192 for headroom
+uint8_t rx_buffer[RX_BUFFER_SIZE];  // Shared RX buffer for all test cases
 
 // ⚠️ CRITICAL: RMT RX channel - MUST persist across ALL loop iterations
 // Created ONCE in setup(), reused for all driver tests
@@ -151,17 +214,26 @@ bool error_sanity_check = false;
 
 
 // ============================================================================
-// Global Driver State
+// Global Test Matrix State
 // ============================================================================
 
 // Available drivers discovered in setup()
 fl::vector<fl::DriverInfo> drivers_available;
 
-// Failed drivers - track driver names, failure reasons, and frame number
-fl::vector<fl::DriverFailureInfo> drivers_failed;
+// Test matrix configuration (built from defines and available drivers)
+fl::TestMatrixConfig test_matrix;
+
+// All test cases generated from matrix configuration
+fl::vector<fl::TestCaseConfig> test_cases;
+
+// Test case results (one per test case)
+fl::vector<fl::TestCaseResult> test_results;
 
 // Frame counter - tracks which iteration of loop() we're on
 uint32_t frame_counter = 0;
+
+// Test completion flag - set to true after first test matrix run
+bool test_matrix_complete = false;
 
 
 void setup() {
@@ -169,26 +241,32 @@ void setup() {
     while (!Serial && millis() < 3000);
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
-    FL_WARN("\n=== FastLED RMT RX Validation Sketch ===");
-    FL_WARN("TX Pin: " << PIN_TX);
-    FL_WARN("RX Pin: " << PIN_RX);
-    FL_WARN("RX Device: " << (RX_TYPE == fl::RxDeviceType::RMT ? "RMT" : "ISR"));
-    FL_WARN("LOOP BACK MODE: " << loop_back_mode);
-    FL_WARN("NUM_LEDS: " << NUM_LEDS);
-    FL_WARN("COLOR ORDER: " << COLOR_ORDER);
-    #ifdef TEST_ONLY_ENGINE
-    FL_WARN("TESTING ONLY: " << TEST_ONLY_ENGINE);
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ FastLED Validation - Test Matrix Configuration                ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    // Platform information
+    FL_WARN("\n[PLATFORM]");
+    #if defined(FL_IS_ESP_32C6)
+        FL_WARN("  Chip: ESP32-C6 (RISC-V)");
+    #elif defined(FL_IS_ESP_32S3)
+        FL_WARN("  Chip: ESP32-S3 (Xtensa)");
+    #elif defined(FL_IS_ESP_32C3)
+        FL_WARN("  Chip: ESP32-C3 (RISC-V)");
+    #elif defined(FL_IS_ESP_32DEV)
+        FL_WARN("  Chip: ESP32 (Xtensa)");
+    #else
+        FL_WARN("  Chip: Unknown ESP32 variant");
     #endif
-    FL_WARN("");
-    FL_WARN("⚠️  HARDWARE SETUP REQUIRED:");
-    FL_WARN("   If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
-    FL_WARN("   → Connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a physical jumper wire");
-    FL_WARN("   → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
-    FL_WARN("");
-    FL_WARN("   ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance");
-    FL_WARN("   → GPIO 11 is SPI2 IO_MUX pin (bypasses GPIO matrix for 80MHz speed)");
-    FL_WARN("   → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
-    FL_WARN("");
+
+    // Hardware configuration
+    FL_WARN("\n[HARDWARE]");
+    FL_WARN("  TX Pin: " << PIN_TX);
+    FL_WARN("  RX Pin: " << PIN_RX);
+    FL_WARN("  RX Device: " << (RX_TYPE == fl::RxDeviceType::RMT ? "RMT" : "ISR"));
+    FL_WARN("  Loopback Mode: " << loop_back_mode);
+    FL_WARN("  Color Order: RGB");
+    FL_WARN("  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes");
 
     // ========================================================================
     // RX Channel Setup
@@ -211,11 +289,11 @@ void setup() {
     FL_WARN("[RX SETUP] ✓ RX channel ready for LED validation\n");
 
     // List all available drivers and store globally
-    FL_WARN("\nDiscovering available drivers...");
+    FL_WARN("\n[DRIVER DISCOVERY]");
     drivers_available = FastLED.getDriverInfos();
-    FL_WARN("Found " << drivers_available.size() << " driver(s) available:");
+    FL_WARN("  Found " << drivers_available.size() << " driver(s) available:");
     for (fl::size i = 0; i < drivers_available.size(); i++) {
-        FL_WARN("  " << (i+1) << ". " << drivers_available[i].name.c_str()
+        FL_WARN("    " << (i+1) << ". " << drivers_available[i].name.c_str()
                 << " (priority: " << drivers_available[i].priority
                 << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")");
     }
@@ -223,8 +301,162 @@ void setup() {
     // Validate that expected engines are available for this platform
     validateExpectedEngines();
 
-    FL_WARN("\nStarting continuous validation test loop...");
+    // Test matrix configuration
+    FL_WARN("\n[TEST MATRIX CONFIGURATION]");
+
+    // Driver filtering
+    #if defined(JUST_PARLIO)
+        FL_WARN("  Driver Filter: JUST_PARLIO (testing PARLIO only)");
+    #elif defined(JUST_RMT)
+        FL_WARN("  Driver Filter: JUST_RMT (testing RMT only)");
+    #elif defined(JUST_SPI)
+        FL_WARN("  Driver Filter: JUST_SPI (testing SPI only)");
+    #else
+        FL_WARN("  Driver Filter: None (testing all available drivers)");
+    #endif
+
+    // Build test matrix and show which drivers will be tested
+    test_matrix = buildTestMatrix(drivers_available);
+    FL_WARN("  Drivers to Test (" << test_matrix.enabled_drivers.size() << "):");
+    for (fl::size i = 0; i < test_matrix.enabled_drivers.size(); i++) {
+        FL_WARN("    → " << test_matrix.enabled_drivers[i].c_str());
+    }
+
+    // Lane range
+    FL_WARN("  Lane Range: " << MIN_LANES << "-" << MAX_LANES << " lanes");
+    FL_WARN("    → Lane N has base_size - N LEDs (decreasing pattern)");
+    FL_WARN("    → Multi-lane: Only Lane 0 validated (hardware limitation)");
+
+    // Strip sizes
+    #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
+        FL_WARN("  Strip Sizes: Short only (" << SHORT_STRIP_SIZE << " LEDs)");
+    #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
+        FL_WARN("  Strip Sizes: Long only (" << LONG_STRIP_SIZE << " LEDs)");
+    #else
+        FL_WARN("  Strip Sizes: Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")");
+    #endif
+
+    // Bit patterns
+    FL_WARN("  Bit Patterns: 4 mixed RGB patterns (MSB/LSB testing)");
+    FL_WARN("    → Pattern A: R=0xF0, G=0x0F, B=0xAA");
+    FL_WARN("    → Pattern B: R=0x55, G=0xFF, B=0x00");
+    FL_WARN("    → Pattern C: R=0x0F, G=0xAA, B=0xF0");
+    FL_WARN("    → Pattern D: RGB Solid Alternating");
+
+    // Total test cases
+    int total_test_cases = test_matrix.getTotalTestCases();
+    int total_validation_tests = total_test_cases * 4;  // 4 bit patterns per test case
+    FL_WARN("  Total Test Cases: " << total_test_cases);
+    FL_WARN("  Total Validation Tests: " << total_validation_tests << " (" << total_test_cases << " cases × 4 patterns)");
+
+    FL_WARN("\n⚠️  [HARDWARE SETUP REQUIRED]");
+    FL_WARN("  If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):");
+    FL_WARN("  → Connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a physical jumper wire");
+    FL_WARN("  → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
+    FL_WARN("");
+    FL_WARN("  ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance");
+    FL_WARN("  → GPIO 11 is SPI2 IO_MUX pin (bypasses GPIO matrix for 80MHz speed)");
+    FL_WARN("  → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)");
+    FL_WARN("");
+
+    // Generate all test cases from the matrix
+    FL_WARN("\n[GENERATING TEST CASES]");
+    test_cases = generateTestCases(test_matrix, PIN_TX);
+    FL_WARN("  Generated " << test_cases.size() << " test case(s)\n");
+
+    // Initialize result tracking for each test case
+    for (fl::size i = 0; i < test_cases.size(); i++) {
+        const auto& test_case = test_cases[i];
+        test_results.push_back(fl::TestCaseResult(
+            test_case.driver_name.c_str(),
+            test_case.lane_count,
+            test_case.base_strip_size
+        ));
+    }
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ SETUP COMPLETE - Starting Test Matrix                         ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
     delay(2000);
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/// @brief Run a single test case (one driver × lane count × strip size combination)
+/// @param test_case Test case configuration (driver, lanes, strip sizes)
+/// @param test_result Test result tracker (modified with pass/fail counts)
+/// @param timing_config Chipset timing to test
+/// @param rx_channel RX channel for loopback validation
+/// @param rx_buffer RX buffer for capture
+void runSingleTestCase(
+    fl::TestCaseConfig& test_case,
+    fl::TestCaseResult& test_result,
+    const fl::NamedTimingConfig& timing_config,
+    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::span<uint8_t> rx_buffer) {
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ TEST CASE: " << test_case.driver_name.c_str()
+            << " | " << test_case.lane_count << " lane(s)"
+            << " | " << test_case.base_strip_size << " LEDs");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    // Set this driver as exclusive for testing
+    if (!FastLED.setExclusiveDriver(test_case.driver_name.c_str())) {
+        FL_ERROR("Failed to set " << test_case.driver_name.c_str() << " as exclusive driver");
+        test_result.skipped = true;
+        return;
+    }
+    FL_WARN(test_case.driver_name.c_str() << " driver enabled exclusively");
+
+    // Build TX channel configs for all lanes
+    fl::vector<fl::ChannelConfig> tx_configs;
+    for (int lane_idx = 0; lane_idx < test_case.lane_count; lane_idx++) {
+        auto& lane = test_case.lanes[lane_idx];
+        FL_WARN("[Lane " << lane_idx << "] Pin: " << lane.pin << ", LEDs: " << lane.num_leds);
+
+        // Create channel config for this lane
+        tx_configs.push_back(fl::ChannelConfig(
+            lane.pin,
+            timing_config.timing,
+            fl::span<CRGB>(lane.leds.data(), lane.num_leds),
+            COLOR_ORDER
+        ));
+    }
+
+    // Create validation configuration
+    fl::ValidationConfig validation_config(
+        timing_config.timing,
+        timing_config.name,
+        fl::span<fl::ChannelConfig>(tx_configs.data(), tx_configs.size()),
+        test_case.driver_name.c_str(),
+        rx_channel,
+        rx_buffer
+    );
+
+    // Run warm-up frame (discard results)
+    FL_WARN("\n[INFO] Running warm-up frame (results will be discarded)");
+    int warmup_total = 0, warmup_passed = 0;
+    validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+    FL_WARN("[INFO] Warm-up complete (" << warmup_passed << "/" << warmup_total << " passed - discarding)");
+
+    // Run actual test frame (keep results)
+    FL_WARN("\n[INFO] Running actual test frame");
+    validateChipsetTiming(validation_config, test_result.total_tests, test_result.passed_tests);
+
+    // Log test case result
+    if (test_result.allPassed()) {
+        FL_WARN("\n[PASS] Test case " << test_case.driver_name.c_str()
+                << " (" << test_case.lane_count << " lanes, "
+                << test_case.base_strip_size << " LEDs) completed successfully");
+    } else {
+        FL_ERROR("[FAIL] Test case " << test_case.driver_name.c_str()
+                << " (" << test_case.lane_count << " lanes, "
+                << test_case.base_strip_size << " LEDs) FAILED: "
+                << test_result.passed_tests << "/" << test_result.total_tests << " tests passed");
+    }
 }
 
 // ============================================================================
@@ -232,6 +464,12 @@ void setup() {
 // ============================================================================
 
 void loop() {
+    // If test matrix already completed, halt forever
+    if (test_matrix_complete) {
+        SKETCH_HALT_OK("Test matrix complete");
+        return;
+    }
+
     // Increment frame counter
     frame_counter++;
 
@@ -241,97 +479,68 @@ void loop() {
         return;
     }
 
-    // Check if any drivers failed in previous iterations
-    if (!drivers_failed.empty()) {
-        // FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-        // FL_WARN("║ DRIVER FAILURES DETECTED - CANNOT CONTINUE                     ║");
-        // FL_WARN("╚════════════════════════════════════════════════════════════════╝");
-        SKETCH_HALT("Driver failures detected - cannot continue");
-
-        for (fl::size i = 0; i < drivers_failed.size(); i++) {
-            const auto& failure = drivers_failed[i];
-            FL_ERROR("Driver '" << failure.driver_name.c_str() << "' failed on frame " << failure.frame_number);
-            FL_ERROR(failure.failure_details.c_str());
-        }
-
-        FL_WARN("\nFix the above errors before continuing. Retrying in 5 seconds...");
-        delay(5000);
-        return;  // Exit early - don't run tests again
-    }
-
     FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ FRAME " << frame_counter << " - Runtime Channel API Driver Testing");
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
-
-#ifdef TEST_ONLY_ENGINE
-    FL_WARN("⚠️  ENGINE FILTER ACTIVE: Testing ONLY '" << TEST_ONLY_ENGINE << "' driver");
-    FL_WARN("    (Uncomment #define TEST_ONLY_ENGINE in source to disable)\n");
-#endif
-
-    FL_WARN("Starting validation tests for each driver...");
-    FL_WARN("(Using persistent RX channel from setup() - not recreated)\n");
-
-    // Track driver-level test results
-    fl::vector<fl::DriverTestResult> driver_results;
-
-    // Iterate through all available drivers and test each one
-    for (fl::size i = 0; i < drivers_available.size(); i++) {
-        const auto& driver = drivers_available[i];
-
-#ifdef TEST_ONLY_ENGINE
-        // Filter: Only test the specified engine
-        if (fl::strcmp(driver.name.c_str(), TEST_ONLY_ENGINE) != 0) {
-            FL_WARN("[FILTER] Skipping driver '" << driver.name.c_str() << "' (TEST_ONLY_ENGINE=" << TEST_ONLY_ENGINE << ")");
-            continue;
-        }
-#endif
-
-        fl::DriverTestResult result(driver.name.c_str());
-
-        FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-        FL_WARN("║ TESTING DRIVER " << (i+1) << "/" << drivers_available.size() << ": " << driver.name.c_str() << " (priority: " << driver.priority << ")");
-        FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");
-
-        // Test driver with WS2812B-V5 timing (filtered for focused debugging)
-        // Note: testDriver() now handles first-frame discard internally
-        FL_WARN("[FILTER] Testing only WS2812B-V5 timing (skipping WS2812 Standard and SK6812)\n");
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-        testDriver(driver.name.c_str(),
-                   timing_config,
-                   PIN_TX,
-                   NUM_LEDS,
-                   leds,
-                   COLOR_ORDER,
-                   rx_channel,
-                   fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE),
-                   result);
-
-        // If driver test failed, add to drivers_failed list with details
-        if (result.anyFailed()) {
-            // Build failure details message
-            fl::sstream failure_msg;
-            failure_msg << "Validation failed: " << result.passed_tests << "/" << result.total_tests << " tests passed";
-
-            drivers_failed.push_back(fl::DriverFailureInfo(
-                driver.name.c_str(),
-                failure_msg.str().c_str(),
-                frame_counter
-            ));
-
-            FL_ERROR("Driver " << driver.name.c_str() << " FAILED on frame " << frame_counter);
-            FL_ERROR(failure_msg.str().c_str());
-        }
-
-        driver_results.push_back(result);
-    }
-
-    // Print summary table
-    printSummaryTable(driver_results);
-
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ ALL VALIDATION TESTS COMPLETE                                  ║");
+    FL_WARN("║ FRAME " << frame_counter << " - Test Matrix Validation");
     FL_WARN("╚════════════════════════════════════════════════════════════════╝");
 
-    FL_WARN("\n========== TEST ITERATION COMPLETE - RESTARTING ==========\n");
-    delay(1000);
+    FL_WARN("\nTest Matrix: " << test_cases.size() << " test case(s)");
+    FL_WARN("Using persistent RX channel from setup() - not recreated\n");
+
+    // Timing configuration to test (WS2812B-V5)
+    fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
+
+    // Reset all test results for this iteration
+    for (fl::size i = 0; i < test_results.size(); i++) {
+        test_results[i].total_tests = 0;
+        test_results[i].passed_tests = 0;
+        test_results[i].skipped = false;
+    }
+
+    // Iterate through all test cases
+    for (fl::size i = 0; i < test_cases.size(); i++) {
+        FL_WARN("\n════════════════════════════════════════════════════════════════");
+        FL_WARN("TEST CASE " << (i+1) << "/" << test_cases.size());
+        FL_WARN("════════════════════════════════════════════════════════════════");
+
+        // Run this test case
+        runSingleTestCase(
+            test_cases[i],
+            test_results[i],
+            timing_config,
+            rx_channel,
+            fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
+        );
+
+        // Short delay between test cases
+        delay(500);
+    }
+
+    // Print final results table
+    printTestCaseResultsTable(test_results);
+
+    // Check for failures
+    int failed_count = 0;
+    for (fl::size i = 0; i < test_results.size(); i++) {
+        if (test_results[i].anyFailed()) {
+            failed_count++;
+        }
+    }
+
+    if (failed_count > 0) {
+        FL_ERROR("\n[TEST MATRIX] " << failed_count << " test case(s) FAILED");
+        SKETCH_HALT("[TEST MATRIX] See results table above for details");
+    } else {
+        FL_WARN("\n[TEST MATRIX] ✓ All test cases PASSED");
+    }
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ TEST MATRIX COMPLETE                                           ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    // Mark test matrix as complete - will halt on next loop() iteration
+    test_matrix_complete = true;
+
+    FL_WARN("\n========== TEST MATRIX COMPLETE - HALTING ==========\n");
+
+    SKETCH_HALT_OK("Test matrix complete");
 }

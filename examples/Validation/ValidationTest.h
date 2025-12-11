@@ -77,3 +77,18 @@ void runTest(const char* test_name,
 // @param passed Output parameter - tests passed (incremented)
 void validateChipsetTiming(fl::ValidationConfig& config,
                            int& total, int& passed);
+
+// Set mixed RGB bit patterns to test MSB vs LSB handling
+// @param leds LED array to fill with pattern
+// @param count Number of LEDs in array
+// @param pattern_id Pattern identifier (0-3):
+//   0 = Pattern A: R=0xF0, G=0x0F, B=0xAA (high nibble, low nibble, alternating)
+//   1 = Pattern B: R=0x55, G=0xFF, B=0x00 (alternating, all-high, all-low)
+//   2 = Pattern C: R=0x0F, G=0xAA, B=0xF0 (rotated nibbles)
+//   3 = Pattern D: Solid colors (Red/Green/Blue alternating every 3 LEDs)
+void setMixedBitPattern(CRGB* leds, size_t count, int pattern_id);
+
+// Get name of bit pattern for logging
+// @param pattern_id Pattern identifier (0-3)
+// @return Pattern name string
+const char* getBitPatternName(int pattern_id);

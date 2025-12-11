@@ -153,23 +153,32 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 void runTest(const char* test_name,
              fl::ValidationConfig& config,
              int& total, int& passed) {
-    // Validate all configs in the span
-    for (size_t config_idx = 0; config_idx < config.tx_configs.size(); config_idx++) {
+    // Multi-lane limitation: Only validate Lane 0 (first channel)
+    // Hardware constraint: Only one TX channel can be read from via RX loopback
+    size_t channels_to_validate = config.tx_configs.size() > 1 ? 1 : config.tx_configs.size();
+
+    if (config.tx_configs.size() > 1) {
+        FL_WARN("\n[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, validating Lane 0 only (hardware limitation)");
+    }
+
+    // Validate enabled configs (Lane 0 only for multi-lane)
+    for (size_t config_idx = 0; config_idx < channels_to_validate; config_idx++) {
         total++;
-        FL_WARN("\n=== " << test_name << " [Channel " << (config_idx + 1) << "/" << config.tx_configs.size()
-                << ", Pin " << config.tx_configs[config_idx].pin << "] ===");
+        FL_WARN("\n=== " << test_name << " [Lane " << config_idx << "/" << config.tx_configs.size()
+                << ", Pin " << config.tx_configs[config_idx].pin
+                << ", LEDs " << config.tx_configs[config_idx].mLeds.size() << "] ===");
 
         // Use RX channel provided via config (created in .ino file, never created dynamically here)
         if (!config.rx_channel) {
             FL_ERROR("RX channel is null - must be created in .ino and passed via ValidationConfig");
-            FL_WARN("Result: FAIL ✗ (RX channel not provided)");
+            FL_ERROR("Result: FAIL ✗ (RX channel not provided)");
             continue;
         }
 
         size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
 
         if (bytes_captured == 0) {
-            FL_WARN("Result: FAIL ✗ (capture failed)");
+            FL_ERROR("Result: FAIL ✗ (capture failed)");
             continue;
         }
 
@@ -189,7 +198,7 @@ void runTest(const char* test_name,
         for (size_t i = 0; i < num_leds; i++) {
             size_t byte_offset = i * 3;
             if (byte_offset + 2 >= bytes_to_check) {
-                FL_WARN("WARNING: Incomplete data for LED[" << static_cast<int>(i)
+                FL_ERROR("Incomplete data for LED[" << static_cast<int>(i)
                         << "] (only " << bytes_captured << " bytes captured)");
                 break;
             }
@@ -220,7 +229,7 @@ void runTest(const char* test_name,
             FL_WARN("Result: PASS ✓");
             passed++;
         } else {
-            FL_WARN("Result: FAIL ✗");
+            FL_ERROR("Result: FAIL ✗");
         }
     }
 }
@@ -266,27 +275,22 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     FastLED.show();
     FL_WARN("[INFO] TX engine pre-initialized for " << config.timing_name);
 
-    // Run test patterns
+    // Run test patterns (mixed bit patterns to test MSB vs LSB handling)
     int total = 0;
     int passed = 0;
 
-    // Test 1: Solid Red
-    for (size_t i = 0; i < config.tx_configs.size(); i++) {
-        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Red);
+    // Test all 4 bit patterns (0-3)
+    for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
+        // Apply pattern to all lanes
+        for (size_t i = 0; i < config.tx_configs.size(); i++) {
+            setMixedBitPattern(
+                config.tx_configs[i].mLeds.data(),
+                config.tx_configs[i].mLeds.size(),
+                pattern_id
+            );
+        }
+        runTest(getBitPatternName(pattern_id), config, total, passed);
     }
-    runTest("Solid Red", config, total, passed);
-
-    // Test 2: Solid Green
-    for (size_t i = 0; i < config.tx_configs.size(); i++) {
-        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Green);
-    }
-    runTest("Solid Green", config, total, passed);
-
-    // Test 3: Solid Blue
-    for (size_t i = 0; i < config.tx_configs.size(); i++) {
-        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Blue);
-    }
-    runTest("Solid Blue", config, total, passed);
 
     // Report results
     FL_WARN("\nResults for " << config.timing_name << ": " << passed << "/" << total << " tests passed");
@@ -308,4 +312,64 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     FL_WARN("[INFO] All " << channels.size() << " channel(s) destroyed for " << config.timing_name);
 
     delay(1000);
+}
+
+// Set mixed RGB bit patterns to test MSB vs LSB handling
+void setMixedBitPattern(CRGB* leds, size_t count, int pattern_id) {
+    switch (pattern_id) {
+        case 0:
+            // Pattern A: R=0xF0 (high nibble), G=0x0F (low nibble), B=0xAA (alternating)
+            // Tests: High bits in R, low bits in G, mixed bits in B
+            for (size_t i = 0; i < count; i++) {
+                leds[i] = CRGB(0xF0, 0x0F, 0xAA);
+            }
+            break;
+
+        case 1:
+            // Pattern B: R=0x55 (alternating 01010101), G=0xFF (all high), B=0x00 (all low)
+            // Tests: Alternating bits, all-high boundary, all-low boundary
+            for (size_t i = 0; i < count; i++) {
+                leds[i] = CRGB(0x55, 0xFF, 0x00);
+            }
+            break;
+
+        case 2:
+            // Pattern C: R=0x0F (low nibble), G=0xAA (alternating), B=0xF0 (high nibble)
+            // Tests: Rotated pattern from A, ensures driver handles different channel values
+            for (size_t i = 0; i < count; i++) {
+                leds[i] = CRGB(0x0F, 0xAA, 0xF0);
+            }
+            break;
+
+        case 3:
+            // Pattern D: Solid colors alternating (Red, Green, Blue repeating)
+            // Baseline test - ensures basic RGB transmission works
+            for (size_t i = 0; i < count; i++) {
+                int color_index = i % 3;
+                if (color_index == 0) {
+                    leds[i] = CRGB::Red;     // RGB(255, 0, 0)
+                } else if (color_index == 1) {
+                    leds[i] = CRGB::Green;   // RGB(0, 255, 0)
+                } else {
+                    leds[i] = CRGB::Blue;    // RGB(0, 0, 255)
+                }
+            }
+            break;
+
+        default:
+            // Fallback: all black
+            fill_solid(leds, count, CRGB::Black);
+            break;
+    }
+}
+
+// Get name of bit pattern for logging
+const char* getBitPatternName(int pattern_id) {
+    switch (pattern_id) {
+        case 0: return "Pattern A (R=0xF0, G=0x0F, B=0xAA)";
+        case 1: return "Pattern B (R=0x55, G=0xFF, B=0x00)";
+        case 2: return "Pattern C (R=0x0F, G=0xAA, B=0xF0)";
+        case 3: return "Pattern D (RGB Solid Alternating)";
+        default: return "Unknown Pattern";
+    }
 }

@@ -51,3 +51,22 @@ void testDriver(
 /// @brief Print driver validation summary table
 /// @param driver_results Vector of driver test results
 void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results);
+
+/// @brief Build test matrix configuration from preprocessor defines and available drivers
+/// @param drivers_available List of available drivers from FastLED.getDriverInfos()
+/// @return TestMatrixConfig with filtered drivers and configured dimensions
+fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_available);
+
+/// @brief Generate all test cases from the test matrix configuration
+/// @param matrix_config Test matrix configuration
+/// @param pin_tx Base TX pin for lane 0 (consecutive pins for multi-lane)
+/// @return Vector of all test case configurations to run
+fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx);
+
+/// @brief Print test matrix summary (drivers, lanes, strip sizes, total cases)
+/// @param matrix_config Test matrix configuration
+void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config);
+
+/// @brief Print test case results summary table
+/// @param test_results Vector of test case results
+void printTestCaseResultsTable(const fl::vector<fl::TestCaseResult>& test_results);

@@ -40,3 +40,16 @@
         } \
         fl::delayMillis(100); \
     } while (1)
+
+// SKETCH_HALT_OK(msg) - Halts sketch execution after successful completion
+// Prints once: "FINISHED at file(line): msg" (no ERROR keyword)
+// Used when sketch completes successfully and should halt without triggering error detection
+#define SKETCH_HALT_OK(msg) \
+    do { \
+        static bool printed = false; \
+        if (!printed) { \
+            fl::cout << "FINISHED at " << __FILE__ << "(" << __LINE__ << "): " << msg << "\n"; \
+            printed = true; \
+        } \
+        fl::delayMillis(100); \
+    } while (1)

@@ -239,3 +239,225 @@ void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
 
     FL_WARN("╚══════════════╧═════════════╧══════════════╧═══════════════════╝");
 }
+
+// Build test matrix configuration from preprocessor defines and available drivers
+fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_available) {
+    fl::TestMatrixConfig matrix;
+
+    // Filter drivers based on JUST_* defines
+    for (fl::size i = 0; i < drivers_available.size(); i++) {
+        const char* driver_name = drivers_available[i].name.c_str();
+        bool include = false;
+
+        #if defined(JUST_PARLIO)
+            if (fl::strcmp(driver_name, "PARLIO") == 0) include = true;
+        #elif defined(JUST_RMT)
+            if (fl::strcmp(driver_name, "RMT") == 0) include = true;
+        #elif defined(JUST_SPI)
+            if (fl::strcmp(driver_name, "SPI") == 0) include = true;
+        #else
+            // No filter - include all drivers
+            include = true;
+        #endif
+
+        if (include) {
+            matrix.enabled_drivers.push_back(fl::string(driver_name));
+        }
+    }
+
+    // Set lane range from defines
+    matrix.min_lanes = MIN_LANES;
+    matrix.max_lanes = MAX_LANES;
+
+    // Set strip size flags from defines
+    #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
+        matrix.test_small_strips = true;
+        matrix.test_large_strips = false;
+    #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
+        matrix.test_small_strips = false;
+        matrix.test_large_strips = true;
+    #else
+        // Default: test both sizes
+        matrix.test_small_strips = true;
+        matrix.test_large_strips = true;
+    #endif
+
+    return matrix;
+}
+
+// Generate all test cases from the test matrix configuration
+fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx) {
+    fl::vector<fl::TestCaseConfig> test_cases;
+
+    // Iterate through all combinations: drivers × lane counts × strip sizes
+    for (fl::size driver_idx = 0; driver_idx < matrix_config.enabled_drivers.size(); driver_idx++) {
+        const char* driver_name = matrix_config.enabled_drivers[driver_idx].c_str();
+
+        for (int lane_count = matrix_config.min_lanes; lane_count <= matrix_config.max_lanes; lane_count++) {
+            // Generate test cases for enabled strip sizes
+            if (matrix_config.test_small_strips) {
+                fl::TestCaseConfig test_case(driver_name, lane_count, SHORT_STRIP_SIZE);
+                // Assign consecutive GPIO pins for multi-lane
+                for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
+                    test_case.lanes[lane_idx].pin = pin_tx + lane_idx;
+                }
+                test_cases.push_back(test_case);
+            }
+
+            if (matrix_config.test_large_strips) {
+                fl::TestCaseConfig test_case(driver_name, lane_count, LONG_STRIP_SIZE);
+                // Assign consecutive GPIO pins for multi-lane
+                for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
+                    test_case.lanes[lane_idx].pin = pin_tx + lane_idx;
+                }
+                test_cases.push_back(test_case);
+            }
+        }
+    }
+
+    return test_cases;
+}
+
+// Print test matrix summary (drivers, lanes, strip sizes, total cases)
+void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config) {
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ TEST MATRIX CONFIGURATION                                      ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    // Drivers
+    FL_WARN("Drivers (" << matrix_config.enabled_drivers.size() << "):");
+    for (fl::size i = 0; i < matrix_config.enabled_drivers.size(); i++) {
+        FL_WARN("  - " << matrix_config.enabled_drivers[i].c_str());
+    }
+
+    // Lane range
+    int lane_range = matrix_config.max_lanes - matrix_config.min_lanes + 1;
+    FL_WARN("Lane Range: " << matrix_config.min_lanes << "-" << matrix_config.max_lanes
+            << " (" << lane_range << " configurations)");
+
+    // Strip sizes
+    fl::sstream strip_info;
+    if (matrix_config.test_small_strips && matrix_config.test_large_strips) {
+        strip_info << "Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")";
+    } else if (matrix_config.test_small_strips) {
+        strip_info << "Short only (" << SHORT_STRIP_SIZE << " LEDs)";
+    } else if (matrix_config.test_large_strips) {
+        strip_info << "Long only (" << LONG_STRIP_SIZE << " LEDs)";
+    } else {
+        strip_info << "None (ERROR)";
+    }
+    FL_WARN("Strip Sizes: " << strip_info.str().c_str());
+
+    // Total test cases
+    int total_cases = matrix_config.getTotalTestCases();
+    FL_WARN("Total Test Cases: " << total_cases);
+
+    FL_WARN("");
+}
+
+// Print test case results summary table
+void printTestCaseResultsTable(const fl::vector<fl::TestCaseResult>& test_results) {
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ TEST MATRIX RESULTS SUMMARY                                                ║");
+    FL_WARN("╠════════════════════════════════════════════════════════════════════════════╣");
+    FL_WARN("║ Driver  │ Lanes │ Strip │ Status     │ Tests Passed │ Total Tests        ║");
+    FL_WARN("╠═════════╪═══════╪═══════╪════════════╪══════════════╪════════════════════╣");
+
+    int total_passed = 0;
+    int total_tests = 0;
+
+    for (fl::size i = 0; i < test_results.size(); i++) {
+        const auto& result = test_results[i];
+        const char* status;
+        if (result.skipped) {
+            status = "SKIP      ";
+        } else if (result.allPassed()) {
+            status = "PASS ✓    ";
+        } else if (result.anyFailed()) {
+            status = "FAIL ✗    ";
+        } else {
+            status = "NO TESTS  ";
+        }
+
+        // Build table row using sstream
+        fl::sstream row;
+        row << "║ ";
+
+        // Driver name (7 chars, left-aligned)
+        fl::string driver_name = result.driver_name;
+        if (driver_name.length() > 7) {
+            driver_name = driver_name.substr(0, 7);
+        }
+        row << driver_name;
+        for (size_t j = driver_name.length(); j < 7; j++) {
+            row << " ";
+        }
+        row << " │ ";
+
+        // Lane count (5 chars, right-aligned)
+        fl::string lanes = fl::to_string(result.lane_count);
+        for (size_t j = lanes.length(); j < 5; j++) {
+            row << " ";
+        }
+        row << lanes << " │ ";
+
+        // Strip size (5 chars, right-aligned)
+        fl::string strip_size = fl::to_string(result.base_strip_size);
+        for (size_t j = strip_size.length(); j < 5; j++) {
+            row << " ";
+        }
+        row << strip_size << " │ ";
+
+        // Status (10 chars)
+        row << status << " │ ";
+
+        // Tests passed (12 chars, left-aligned)
+        if (result.skipped) {
+            row << "-";
+            for (int j = 1; j < 12; j++) row << " ";
+        } else {
+            fl::string passed = fl::to_string(result.passed_tests);
+            row << passed;
+            for (size_t j = passed.length(); j < 12; j++) row << " ";
+            total_passed += result.passed_tests;
+        }
+        row << " │ ";
+
+        // Total tests (18 chars, left-aligned)
+        if (result.skipped) {
+            row << "-";
+            for (int j = 1; j < 18; j++) row << " ";
+        } else {
+            fl::string total = fl::to_string(result.total_tests);
+            row << total;
+            for (size_t j = total.length(); j < 18; j++) row << " ";
+            total_tests += result.total_tests;
+        }
+        row << " ║";
+
+        FL_WARN(row.str().c_str());
+    }
+
+    FL_WARN("╠═════════╧═══════╧═══════╧════════════╧══════════════╧════════════════════╣");
+
+    // Overall summary
+    fl::sstream summary;
+    summary << "║ OVERALL: ";
+    if (total_tests > 0) {
+        summary << total_passed << "/" << total_tests << " tests passed";
+        double pass_rate = 100.0 * total_passed / total_tests;
+        summary << " (" << static_cast<int>(pass_rate) << "%)";
+
+        // Pad to 68 chars
+        fl::string summary_str = summary.str();
+        while (summary_str.length() < 68) {
+            summary_str += " ";
+        }
+        summary_str += "║";
+        FL_WARN(summary_str.c_str());
+    } else {
+        FL_WARN("║ OVERALL: No tests run                                                     ║");
+    }
+
+    FL_WARN("╚════════════════════════════════════════════════════════════════════════════╝");
+}
