@@ -5,12 +5,12 @@
 #pragma once
 
 // ============================================================================
-// RMT TX Test: Single lane, 300 LEDs (Testing RMT capture capability)
+// RMT TX Test: Single lane, 300 LEDs (Testing PARLIO capture capability)
 // ============================================================================
 
 // Driver selection
-// #define JUST_PARLIO
-#define JUST_RMT
+#define JUST_PARLIO
+// #define JUST_RMT
 
 // Lane range (MUST be defined BEFORE Common.h)
 #define MIN_LANES 1

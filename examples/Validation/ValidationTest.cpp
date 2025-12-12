@@ -5,6 +5,11 @@
 #include "ValidationTest.h"
 #include <FastLED.h>
 
+// Phase 0: Include PARLIO debug instrumentation
+#if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
+#include "platforms/esp/32/drivers/parlio/channel_engine_parlio.h"
+#endif
+
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
@@ -39,6 +44,27 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
+
+    // Phase 0: Print PARLIO debug metrics after RX wait completes
+#if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
+#ifdef JUST_PARLIO
+    fl::ParlioDebugMetrics debug = fl::getParlioDebugMetrics();
+    FL_WARN("");
+    FL_WARN("[PARLIO DEBUG] Transmission Metrics:");
+    FL_WARN("  Start Time:      " << debug.start_time_us << " μs");
+    FL_WARN("  End Time:        " << debug.end_time_us << " μs");
+    FL_WARN("  Duration:        " << (debug.end_time_us - debug.start_time_us) << " μs");
+    FL_WARN("  ISR Callbacks:   " << debug.isr_count);
+    FL_WARN("  Chunks Queued:   " << debug.chunks_queued);
+    FL_WARN("  Chunks Completed:" << debug.chunks_completed);
+    FL_WARN("  Bytes Total:     " << debug.bytes_total);
+    FL_WARN("  Bytes TX'd:      " << debug.bytes_transmitted);
+    FL_WARN("  Error Code:      " << debug.error_code << (debug.error_code == 0 ? " (ESP_OK)" : " (ERROR)"));
+    FL_WARN("  TX Active:       " << (debug.transmission_active ? "YES" : "NO"));
+    FL_WARN("");
+#endif // JUST_PARLIO
+#endif // ESP32 && FASTLED_ESP32_HAS_PARLIO
+
     if (wait_result != fl::RxWaitResult::SUCCESS) {
         FL_ERROR("RX wait failed (timeout or no data received)");
         FL_WARN("");
