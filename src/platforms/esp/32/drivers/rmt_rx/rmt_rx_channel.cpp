@@ -383,6 +383,7 @@ public:
         , mSkipCounter(0)
         , mStartLow(true)
         , mInternalBuffer()
+        , mCallbackCount(0)
     {
         FL_DBG("RmtRxChannel constructed with pin=" << pin << " (other hardware params will be set in begin())");
     }
@@ -597,6 +598,7 @@ public:
 
         // Receive completed naturally (spurious symbols already filtered in ISR)
         FL_DBG("wait(): receive done, count=" << mSymbolsReceived);
+        FL_WARN("RMT RX callback count: " << mCallbackCount << " (en_partial_rx test)");
         return RxWaitResult::SUCCESS;
     }
 
@@ -865,11 +867,13 @@ private:
         // Reset state
         mReceiveDone = false;
         mSymbolsReceived = 0;
+        mCallbackCount = 0;  // Reset callback counter for debugging
 
         // Configure receive parameters (use values from begin())
         rmt_receive_config_t rx_params = {};
         rx_params.signal_range_min_ns = mSignalRangeMinNs;
         rx_params.signal_range_max_ns = mSignalRangeMaxNs;
+        rx_params.flags.en_partial_rx = 1;  // Enable partial reception for long data streams (>~250 symbols)
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
         auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
@@ -903,6 +907,7 @@ private:
             return false;
         }
 
+        self->mCallbackCount++;  // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
 
         // Check if we're in skip phase
@@ -919,9 +924,14 @@ private:
             return false;
         }
 
-        // Capture phase - store received symbols
-        self->mSymbolsReceived = received_count;
-        self->mReceiveDone = true;
+        // Capture phase - accumulate received symbols across multiple callbacks (partial RX mode)
+        self->mSymbolsReceived += received_count;
+
+        // Only signal completion when this is the final callback (is_last flag from ESP-IDF)
+        // With en_partial_rx enabled, callback may be invoked multiple times for long streams
+        if (data->flags.is_last) {
+            self->mReceiveDone = true;
+        }
 
         // No higher-priority task awakened
         return false;
@@ -938,6 +948,7 @@ private:
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
     fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< Internal buffer for all receive operations
+    volatile uint32_t mCallbackCount;            ///< Debug: Count ISR callbacks (TEMP - for testing en_partial_rx)
 };
 
 // Factory method implementation

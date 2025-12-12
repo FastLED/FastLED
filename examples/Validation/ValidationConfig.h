@@ -5,18 +5,20 @@
 #pragma once
 
 // ============================================================================
-// Phase 3 Configuration: PARLIO driver, 4 lanes, 10 LEDs
+// Phase 0 Configuration: RMT TX driver, 1 lanes, 300 LEDs
 // ============================================================================
 
 // Driver selection
-#define JUST_PARLIO
+// #define JUST_PARLIO
+#define JUST_RMT
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 4
-#define MAX_LANES 4
+#define MIN_LANES 1
+#define MAX_LANES 1
 
 // Strip size selection
-#define JUST_SMALL_STRIPS
+// #define JUST_SMALL_STRIPS
+#define JUST_LARGE_STRIPS
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
