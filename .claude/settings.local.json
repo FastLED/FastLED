@@ -9,7 +9,8 @@
       "SlashCommand(/git-historian screenmap absMin absMax bounds --paths src/platforms/wasm examples)",
       "SlashCommand(/git-historian wasm function names debug source-map --paths ci examples)",
       "SlashCommand(/git-historian emscripten -g profiling ASSERTIONS --paths ci examples)",
-      "SlashCommand(/git-historian DWARF symbols demangle --paths ci)"
+      "SlashCommand(/git-historian DWARF symbols demangle --paths ci)",
+      "Bash(gh issue view:*)"
     ],
     "deny": [],
     "ask": []
