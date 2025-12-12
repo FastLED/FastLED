@@ -5,16 +5,16 @@
 #pragma once
 
 // ============================================================================
-// Phase 0 Configuration: RMT TX driver, 1 lanes, 300 LEDs
+// Phase 3 Configuration: PARLIO TX driver, 2 lanes, 300 LEDs (Regression Testing)
 // ============================================================================
 
 // Driver selection
-// #define JUST_PARLIO
-#define JUST_RMT
+#define JUST_PARLIO
+// #define JUST_RMT
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1
-#define MAX_LANES 1
+#define MIN_LANES 2
+#define MAX_LANES 2
 
 // Strip size selection
 // #define JUST_SMALL_STRIPS

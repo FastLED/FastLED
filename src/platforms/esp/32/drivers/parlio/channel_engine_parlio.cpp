@@ -36,6 +36,10 @@ FL_EXTERN_C_BEGIN
 #include "freertos/FreeRTOS.h"
 FL_EXTERN_C_END
 
+#ifndef CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM
+    #warning "PARLIO: CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is not defined! Add 'build_flags = -DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1' to platformio.ini or your build system"
+#endif
+
 namespace fl {
 
 //=============================================================================
@@ -891,7 +895,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
     config.data_width = mState.data_width; // Runtime parameter
     config.trans_queue_depth =
-        4; // ITERATION 2: Reduced from 32 to avoid stack overflow
+        8; // PHASE 1: Increased from 4 to 8 for minimum ISR gap (per PARLIO_INFO.md)
     config.max_transfer_size =
         4096; // ITERATION 2: Must accommodate buffer size (2016 bytes)
     config.bit_pack_order =
