@@ -157,4 +157,55 @@ FL_IRAM size_t expandByteToWaveforms(
     size_t output_size
 );
 
+// ============================================================================
+// Nibble Lookup Table Optimization
+// ============================================================================
+
+/// @brief Maximum waveform size per nibble (4 bits × max pulses per bit)
+/// WS2812B typically uses ~10 bytes per bit, so 4 bits = ~40 bytes
+static constexpr size_t MAX_NIBBLE_WAVEFORM_SIZE = 64;
+
+/// @brief Nibble lookup table structure (passed by value to avoid aliasing)
+/// Contains precomputed waveforms for all 16 possible nibble values (0x0-0xF)
+struct NibbleLookupTable {
+    uint8_t data[16][MAX_NIBBLE_WAVEFORM_SIZE];
+    size_t nibble_size;  // Actual size used per nibble (4 bits × pulsesPerBit)
+};
+
+/// @brief Generate nibble lookup table from bit waveforms
+///
+/// Creates a lookup table containing precomputed waveforms for all 16 possible
+/// nibble values (0x0 to 0xF). Each nibble expands to 4 waveforms.
+///
+/// @param b0_waveform Precomputed waveform for bit 0
+/// @param b1_waveform Precomputed waveform for bit 1
+/// @param pulsesPerBit Number of pulses per bit (waveform size)
+/// @param table Output lookup table structure
+/// @return true if successful, false if waveform too large
+bool generateNibbleLookupTable(
+    const uint8_t* b0_waveform,
+    const uint8_t* b1_waveform,
+    size_t pulsesPerBit,
+    NibbleLookupTable& table
+);
+
+/// @brief Convert byte to waveform patterns using nibble lookup table (optimized)
+///
+/// Takes a single byte and generates 8 waveform patterns using nibble lookup.
+/// This eliminates conditional branches and enables better compiler optimization.
+///
+/// @param dataByte Input byte (8 bits of LED data)
+/// @param table Nibble lookup table (passed by value to avoid aliasing)
+/// @param output Output buffer (size must be >= 8 * pulsesPerBit)
+/// @param output_size Size of output buffer in bytes
+/// @return Number of bytes written
+///
+/// @note FL_IRAM required - this function is called from ISR context in PARLIO driver
+FL_IRAM size_t expandByteToWaveformsOptimized(
+    uint8_t dataByte,
+    NibbleLookupTable table,
+    uint8_t* output,
+    size_t output_size
+);
+
 }  // namespace fl

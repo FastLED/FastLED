@@ -207,10 +207,10 @@ namespace fl {
 // Custom Deleter for heap_caps_malloc'd Memory
 //=============================================================================
 
-/// @brief Custom deleter for heap_caps_malloc'd memory
-/// @note Uses heap_caps_free instead of delete/delete[]
+/// @brief Custom deleter for heap_caps_malloc'd memory (DMA-capable buffers)
+/// Used with fl::unique_ptr to automatically free DMA memory on destruction
 struct HeapCapsDeleter {
-    void operator()(uint8_t *ptr) const {
+    void operator()(uint8_t* ptr) const {
         if (ptr) {
             heap_caps_free(ptr);
         }
@@ -291,6 +291,10 @@ inline size_t calculateChunkSize(size_t data_width) {
 // Class Declaration
 //=============================================================================
 
+// Phase 4: Forward declaration of IsrContext (defined in channel_engine_parlio.cpp)
+// ISR context struct is cache-aligned (64 bytes) and contains all ISR-related state
+struct ParlioIsrContext;
+
 /// @brief Internal PARLIO implementation with fixed data width
 ///
 /// This is the actual hardware driver implementation. It is used internally
@@ -327,7 +331,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         parlio_tx_unit_handle_t tx_unit; ///< PARLIO TX unit handle
         fl::vector<int> pins; ///< GPIO pin assignments (gpio_num_t cast to int)
                               ///< - data_width pins
-        volatile bool transmitting; ///< Transmission in progress flag
+        ParlioIsrContext *mIsrContext; ///< ISR state (cache-aligned, 64-byte) - raw pointer to avoid incomplete type issues
+
+        volatile bool transmitting; ///< Transmission in progress flag (DEPRECATED - use mIsrContext->transmitting)
 
         // Configuration (set during initialization)
         size_t data_width; ///< PARLIO data width: 1, 2, 4, 8, or 16 (runtime
@@ -386,6 +392,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t pulses_per_bit; ///< Number of pulses per bit (varies by clock
                                ///< frequency)
 
+        // Nibble lookup table optimization (Phase 9)
+        fl::NibbleLookupTable nibble_lut; ///< Precomputed waveforms for all 16 nibble values
+
         // Pre-allocated waveform expansion buffer (avoids heap alloc in IRAM)
         // CRITICAL: This buffer is heap-allocated (MALLOC_CAP_INTERNAL) but
         // does NOT need DMA capability. It's only used temporarily in ISR for
@@ -401,7 +410,7 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
                                                ///< buffer in bytes
 
         ParlioState(size_t width)
-            : tx_unit(nullptr), transmitting(false), data_width(width),
+            : tx_unit(nullptr), mIsrContext(nullptr), transmitting(false), data_width(width),
               actual_channels(0), dummy_lanes(0),
               timing_t1_ns(0), timing_t2_ns(0), timing_t3_ns(0),
               buffer_a(nullptr),
@@ -536,6 +545,28 @@ class ChannelEnginePARLIO : public IChannelEngine {
         mTransmittingChannels; ///< Channels currently transmitting (for
                                ///< cleanup)
 };
+
+//=============================================================================
+// Debug Instrumentation (Phase 0)
+//=============================================================================
+
+/// @brief Debug metrics structure for PARLIO transmission analysis
+struct ParlioDebugMetrics {
+    uint64_t start_time_us;    ///< Timestamp when transmission begins (microseconds)
+    uint64_t end_time_us;      ///< Timestamp when transmission completes (microseconds)
+    uint32_t isr_count;        ///< Number of ISR callbacks fired
+    uint32_t chunks_queued;    ///< Number of chunks queued for transmission
+    uint32_t chunks_completed; ///< Number of chunks that completed transmission
+    uint32_t bytes_total;      ///< Total bytes expected to transmit
+    uint32_t bytes_transmitted; ///< Total bytes actually transmitted
+    uint32_t error_code;       ///< ESP-IDF error code (0 = success)
+    bool transmission_active;  ///< True if transmission is in progress
+};
+
+/// @brief Get current PARLIO debug metrics
+/// @return Debug metrics structure with transmission statistics
+/// @note This function is safe to call from any context
+ParlioDebugMetrics getParlioDebugMetrics();
 
 //=============================================================================
 // Factory Function

@@ -137,4 +137,82 @@ FL_IRAM size_t expandByteToWaveforms(
     return totalSize;
 }
 
+// ============================================================================
+// Nibble Lookup Table Optimization
+// ============================================================================
+
+bool generateNibbleLookupTable(
+    const uint8_t* b0_waveform,
+    const uint8_t* b1_waveform,
+    size_t pulsesPerBit,
+    NibbleLookupTable& table
+) {
+    // Validate inputs
+    if (!b0_waveform || !b1_waveform || pulsesPerBit == 0) {
+        return false;
+    }
+
+    // Check if nibble waveform fits in table
+    const size_t nibbleSize = 4 * pulsesPerBit;
+    if (nibbleSize > MAX_NIBBLE_WAVEFORM_SIZE) {
+        return false;  // Waveform too large
+    }
+
+    table.nibble_size = nibbleSize;
+
+    // Generate waveform for each nibble value (0x0 to 0xF)
+    for (uint8_t nibble = 0; nibble < 16; nibble++) {
+        uint8_t* nibbleWaveform = table.data[nibble];
+        size_t outIdx = 0;
+
+        // Expand 4 bits (MSB first) to waveforms
+        for (int bitPos = 3; bitPos >= 0; bitPos--) {
+            bool bitValue = (nibble >> bitPos) & 0x01;
+            const uint8_t* waveform = bitValue ? b1_waveform : b0_waveform;
+
+            // Copy waveform for this bit
+            for (size_t i = 0; i < pulsesPerBit; i++) {
+                nibbleWaveform[outIdx++] = waveform[i];
+            }
+        }
+    }
+
+    return true;
+}
+
+FL_IRAM size_t expandByteToWaveformsOptimized(
+    uint8_t dataByte,
+    NibbleLookupTable table,
+    uint8_t* output,
+    size_t output_size
+) {
+    // Validate inputs
+    if (!output || table.nibble_size == 0) {
+        return 0;
+    }
+
+    const size_t totalSize = 2 * table.nibble_size;  // 2 nibbles per byte
+    if (output_size < totalSize) {
+        return 0;
+    }
+
+    // Extract high nibble (bits 7-4) and low nibble (bits 3-0)
+    const uint8_t highNibble = (dataByte >> 4) & 0x0F;
+    const uint8_t lowNibble = dataByte & 0x0F;
+
+    // Copy high nibble waveform
+    const uint8_t* highWaveform = table.data[highNibble];
+    for (size_t i = 0; i < table.nibble_size; i++) {
+        output[i] = highWaveform[i];
+    }
+
+    // Copy low nibble waveform
+    const uint8_t* lowWaveform = table.data[lowNibble];
+    for (size_t i = 0; i < table.nibble_size; i++) {
+        output[table.nibble_size + i] = lowWaveform[i];
+    }
+
+    return totalSize;
+}
+
 }  // namespace fl
