@@ -107,6 +107,10 @@ FastLED 3.10.4 (Next Release)
     * **ESP32 integration**: Drivers auto-register with names during platform initialization
     * **Example Sketch**: See `examples/Validation/Validation.ino` for usage with `FastLED.setExclusiveDriver("RMT")`
     * Unit tested with comprehensive test suite (18 test cases covering priority, fallback, runtime control)
+  * **ESP32 SPI Chipsets No Longer Hardcoded to Specific Pins**: Use any GPIO pins for SPI-based LEDs (all ESP32 variants)
+    * Previously forced to use VSPI/HSPI pins - now fully flexible via GPIO matrix
+    * Example: `FastLED.addLeds<APA102, 2, 12>(leds, NUM_LEDS)` - pick any DATA/CLOCK pins you want
+    * Fixes https://github.com/FastLED/FastLED/issues/2144
   * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects
     * 20 components (3 core + 17 detectors): Beat, Tempo, Frequency Bands, Energy, Transient, Note, Downbeat, Dynamics, Pitch, Silence, Vocal, Percussion, Chord, Key, Mood, Buildup, Drop
     * AudioContext pattern: FFT computed once and shared across all detectors with lazy evaluation
