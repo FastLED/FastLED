@@ -90,26 +90,16 @@ namespace fl {
 	#endif
 #endif
 
-// Map SPI bus constants to pin assignments
-#if FASTLED_ESP32_SPI_BUS == VSPI || FASTLED_ESP32_SPI_BUS == SPI2
-    static int8_t spiClk = 18;
-    static int8_t spiMiso = 19;
-    static int8_t spiMosi = 23;
-    static int8_t spiCs = 5;
-#elif FASTLED_ESP32_SPI_BUS == HSPI || FASTLED_ESP32_SPI_BUS == SPI3
-    static int8_t spiClk = 14;
-    static int8_t spiMiso = 12;
-    static int8_t spiMosi = 13;
-    static int8_t spiCs = 15;
-#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2/S3/C3/C6 can re-route to arbitrary pins
-    #define spiMosi DATA_PIN
-    #define spiClk CLOCK_PIN
-    #define spiMiso -1
-    #define spiCs -1
-#endif
-
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class ESP32SPIOutput {
+    // ESP32 classic, ESP32S2/S3/C3/C6/etc. all support GPIO matrix for flexible pin routing
+    // Use template parameters DATA_PIN and CLOCK_PIN instead of hardcoded pins
+    // This enables users to specify custom pins via FastLED.addLeds<APA102, 2, 12>(...)
+    static constexpr int8_t spiMosi = DATA_PIN;
+    static constexpr int8_t spiClk = CLOCK_PIN;
+    static constexpr int8_t spiMiso = -1;
+    static constexpr int8_t spiCs = -1;
+
     SPIClass m_ledSPI;
 	Selectable 	*m_pSelect;
 
