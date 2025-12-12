@@ -43,7 +43,7 @@ Locking Architecture:
     - Phase 2-3: Device lock (~/.fastled/locks/device_debug.lock, system-wide)
 
 Usage:
-    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, fails on "ERROR")
+    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, waits until timeout)
     uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), auto-detect env
     uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
     uv run ci/debug_attached.py examples/RX/RX.ino       # Full path to sketch
@@ -52,9 +52,10 @@ Usage:
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
     uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
-    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 immediately if "PANIC" found (replaces default "ERROR")
+    uv run ci/debug_attached.py --exit-on-error          # Exit 1 immediately if "ERROR" found
+    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 immediately if "PANIC" found
     uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
-    uv run ci/debug_attached.py --no-fail-on             # Disable all failure keywords
+    uv run ci/debug_attached.py --no-fail-on             # Explicitly disable all failure keywords
     uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
     uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
@@ -1159,7 +1160,7 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Auto-detect env & sketch (default: 20s timeout, fails on "ERROR")
+  %(prog)s                          # Auto-detect env & sketch (default: 20s timeout, waits until timeout)
   %(prog)s RX                       # Compile RX sketch (examples/RX), auto-detect environment
   %(prog)s RX --env esp32dev        # Compile RX sketch for specific environment
   %(prog)s examples/RX              # Same as above (explicit path)
@@ -1169,9 +1170,10 @@ Examples:
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
-  %(prog)s --fail-on PANIC          # Exit 1 immediately if "PANIC" found (replaces default "ERROR")
+  %(prog)s --exit-on-error          # Exit 1 immediately if "ERROR" found
+  %(prog)s --fail-on PANIC          # Exit 1 immediately if "PANIC" found
   %(prog)s --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
-  %(prog)s --no-fail-on             # Disable all failure keywords
+  %(prog)s --no-fail-on             # Explicitly disable all failure keywords
   %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
   %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
@@ -1217,16 +1219,21 @@ Examples:
         help="PlatformIO project directory (default: current directory)",
     )
     parser.add_argument(
+        "--exit-on-error",
+        action="store_true",
+        help="Exit 1 immediately if 'ERROR' keyword found in output (convenient shorthand for --fail-on ERROR)",
+    )
+    parser.add_argument(
         "--fail-on",
         "-f",
         action="append",
         dest="fail_keywords",
-        help="Keyword that triggers immediate termination + exit 1 if found (can be specified multiple times). Default: 'ERROR'",
+        help="Keyword that triggers immediate termination + exit 1 if found (can be specified multiple times)",
     )
     parser.add_argument(
         "--no-fail-on",
         action="store_true",
-        help="Disable all --fail-on keywords (including default 'ERROR')",
+        help="Explicitly disable all --fail-on keywords",
     )
     parser.add_argument(
         "--expect",
@@ -1268,17 +1275,27 @@ def main() -> int:
             return 1
 
     # Validate --fail-on and --no-fail-on conflict
-    if args.no_fail_on and args.fail_keywords:
-        print("❌ Error: Cannot specify both --fail-on and --no-fail-on")
+    if args.no_fail_on and (args.fail_keywords or args.exit_on_error):
+        print(
+            "❌ Error: Cannot specify both --no-fail-on and --fail-on/--exit-on-error"
+        )
         return 1
 
-    # Set default fail keywords (unless --no-fail-on is specified)
+    # Set default fail keywords (default: wait until timeout, no immediate fail)
     if args.no_fail_on:
-        fail_keywords = []
-    elif args.fail_keywords is None:
-        fail_keywords = ["ERROR"]
+        # Explicitly disable all fail keywords
+        fail_keywords: list[str] = []
     else:
-        fail_keywords = args.fail_keywords
+        # Start with empty list (new default: no immediate fail)
+        fail_keywords: list[str] = []
+
+        # Add ERROR if --exit-on-error specified
+        if args.exit_on_error:
+            fail_keywords.append("ERROR")
+
+        # Add custom keywords from --fail-on
+        if args.fail_keywords:
+            fail_keywords.extend(args.fail_keywords)
 
     # Parse timeout string with suffix support
     try:

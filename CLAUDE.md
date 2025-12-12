@@ -81,14 +81,15 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Phase 3: Monitor** - Attach to serial monitor, capture output, detect keywords
 
 **Usage:**
-- `bash debug` - Auto-detect environment (default: 20s timeout, fails on "ERROR")
+- `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
 - `bash debug esp32dev` - Specific environment
 - `bash debug --upload-port COM3` - Specific serial port
 - `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
 - `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --fail-on PANIC` - Exit 1 immediately if keyword found (default: "ERROR")
+- `bash debug --exit-on-error` - Exit 1 immediately if "ERROR" found (opt-in fast-fail)
+- `bash debug --fail-on PANIC` - Exit 1 immediately if keyword found
 - `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords (exits on any)
-- `bash debug --no-fail-on` - Disable all failure keywords (including default)
+- `bash debug --no-fail-on` - Explicitly disable all failure keywords
 - `bash debug --expect "SUCCESS"` - Exit 0 only if keyword found by timeout
 - `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL keywords found by timeout
 
@@ -99,16 +100,17 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - Milliseconds: `5000ms`
 
 **Keyword Behavior:**
+- `--exit-on-error`: Terminates immediately on "ERROR" match, exits 1 (convenient shorthand)
 - `--fail-on`: Terminates monitor immediately on match, exits 1
 - `--expect`: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
-- Default: Fails on "ERROR" keyword (immediate termination)
+- Default: Waits until timeout (no immediate fail on errors)
 
 **Exit Codes:**
 - 0: Success (normal timeout, clean exit, or all expect keywords found)
 - 1: Failure (compile/upload error, fail keyword found, or missing expect keywords)
 - 130: User interrupt (Ctrl+C)
 
-**Note:** Using both `--fail-on` and `--no-fail-on` causes error.
+**Note:** Using both `--no-fail-on` and `--fail-on`/`--exit-on-error` causes error.
 
 ### Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
