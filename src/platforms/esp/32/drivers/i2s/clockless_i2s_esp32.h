@@ -111,6 +111,10 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 namespace fl {
+
+// Forward declaration for RGBW conversion scratchpad
+fl::vector<uint8_t>& get_rgbw_scratchpad();
+
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define NUM_COLOR_CHANNELS 3
 
@@ -169,6 +173,8 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
     CMinWait<50> mWait;
 
   public:
+    ClocklessI2S() = default;
+
     void init() {
         // -- Allocate space to save the pixel controller
         //    during parallel output
@@ -264,11 +270,53 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
             i2s_begin();
         }
 
-        // -- Initialize the local state, save a pointer to the pixel
-        //    data. We need to make a copy because pixels is a local
-        //    variable in the calling function, and this data structure
-        //    needs to outlive this call to showPixels.
-        (*mPixels) = pixels;
+        // -- Check if RGBW mode is active
+        Rgbw rgbw = this->getRgbw();
+        if (rgbw.active()) {
+            // -- RGBW mode: Convert CRGB data to RGBW format, then pack as RGB
+            int num_leds = pixels.mLen;
+            int rgb_pixel_count = Rgbw::size_as_rgb(num_leds);
+
+            // -- Get the scratchpad and resize if needed
+            fl::vector<uint8_t>& scratchpad = get_rgbw_scratchpad();
+            size_t required_bytes = rgb_pixel_count * sizeof(CRGB);
+            if (scratchpad.size() != required_bytes) {
+                scratchpad.resize(required_bytes);
+                // Zero the buffer (phantom pixels will remain black)
+                CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data());
+                for (int i = 0; i < rgb_pixel_count; i++) {
+                    buffer[i] = CRGB(0, 0, 0);
+                }
+            }
+
+            // -- Convert RGBW to RGB-packed format
+            uint8_t *dest = scratchpad.data();
+            PixelController<RGB_ORDER> temp_pixels = pixels;  // Make a copy to iterate
+            while (temp_pixels.has(1)) {
+                uint8_t r, g, b, w;
+                temp_pixels.loadAndScaleRGBW(rgbw, &r, &g, &b, &w);
+                // Pack RGBW (4 bytes) as consecutive RGB data (3 bytes at a time)
+                // This creates the "spoofing" effect where 4-byte RGBW becomes
+                // RGB data with phantom pixels at the end
+                *dest++ = r;
+                *dest++ = g;
+                *dest++ = b;
+                *dest++ = w;
+                temp_pixels.advanceData();
+                temp_pixels.stepDithering();
+            }
+
+            // -- Create a new PixelController pointing to the converted buffer
+            //    treating it as RGB pixels (even though it's packed RGBW)
+            CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data());
+            ColorAdjustment no_adjustment = ColorAdjustment::noAdjustment();
+            PixelController<RGB_ORDER> converted_pixels(
+                buffer, rgb_pixel_count, no_adjustment, DISABLE_DITHER);
+            (*mPixels) = converted_pixels;
+        } else {
+            // -- RGB mode: Use pixels as-is
+            (*mPixels) = pixels;
+        }
 
         // -- Keep track of the number of strips we've seen
         ++gNumStarted;
