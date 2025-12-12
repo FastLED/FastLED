@@ -43,7 +43,7 @@ PID_FILE = DAEMON_DIR / f"{DAEMON_NAME}.pid"
 STATUS_FILE = DAEMON_DIR / "package_status.json"
 REQUEST_FILE = DAEMON_DIR / "package_request.json"
 LOG_FILE = DAEMON_DIR / "daemon.log"
-IDLE_TIMEOUT = 300  # 5 minutes
+IDLE_TIMEOUT = 43200  # 12 hours
 
 # Network error patterns for retry detection
 NETWORK_ERROR_PATTERNS = [

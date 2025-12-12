@@ -36,7 +36,7 @@ from ci.compiler.build_utils import (
     get_utf8_env,
 )
 from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
-from ci.compiler.lock_manager import GlobalPackageLock, PlatformLock
+from ci.compiler.lock_manager import PlatformLock
 from ci.compiler.package_manager import (
     aggressive_clean_pio_packages,
     detect_and_fix_corrupted_packages_dynamic,
@@ -310,8 +310,8 @@ class PioCompiler(Compiler):
         # Ensure all directories exist
         self.paths.ensure_directories_exist()
 
-        # Create the global package installation lock
-        self._global_package_lock = GlobalPackageLock(self.board.board_name)
+        # Package installation lock is now handled by daemon (system-wide singleton)
+        # No per-board lock needed
 
         self.initialized = False
         self.executor = ThreadPoolExecutor(max_workers=1)
@@ -366,8 +366,8 @@ class PioCompiler(Compiler):
 
         futures: list[Future[SketchResult]] = []
 
-        # Submit all builds with proper lock management
-        self._global_package_lock.acquire()
+        # Package installation lock is now handled by daemon (in _internal_build_no_lock)
+        # No global lock acquire/release needed here
         cancelled = threading.Event()
         try:
             for example in examples:
@@ -388,10 +388,6 @@ class PioCompiler(Compiler):
             for future in futures:
                 future.cancel()
             raise
-        finally:
-            # Always release the global package lock after submitting all builds
-            # The lock is held during initialization and package installation
-            self._global_package_lock.release()
 
         return futures
 
@@ -575,7 +571,39 @@ class PioCompiler(Compiler):
                 example=example,
             )
         try:
+            # ============================================================
+            # PHASE 0: Ensure packages installed via daemon (ONCE per compiler instance)
+            # ============================================================
             if not self.initialized:
+                print("=" * 60)
+                print("ENSURING PLATFORMIO PACKAGES INSTALLED")
+                print("=" * 60)
+
+                from ci.util.pio_package_client import ensure_packages_installed
+
+                if not ensure_packages_installed(
+                    self.build_dir,  # Project directory with platformio.ini
+                    self.board.board_name,  # Environment name
+                    timeout=1800,  # 30 minute timeout
+                ):
+                    print("\n❌ Package installation failed or timed out")
+                    # Print FAILED message immediately in worker thread
+                    red_color = "\033[31m"
+                    reset_color = "\033[0m"
+                    print(f"{red_color}FAILED: {example}{reset_color}")
+
+                    return SketchResult(
+                        success=False,
+                        output="Package installation failed or timed out",
+                        build_dir=self.build_dir,
+                        example=example,
+                    )
+
+                print()  # Blank line separator
+
+                # ============================================================
+                # PHASE 1: Initialize build (packages already installed)
+                # ============================================================
                 init_result = self._internal_init_build_no_lock(example)
                 if not init_result.success:
                     # Print FAILED message immediately in worker thread

@@ -1,4 +1,16 @@
-"""Lock management for FastLED PlatformIO builds."""
+"""
+Lock management for FastLED PlatformIO builds.
+
+⚠️  DEPRECATION WARNING:
+   GlobalPackageLock is deprecated and will be removed in a future release.
+   Use the daemon-based package installation system instead:
+
+   from ci.util.pio_package_client import ensure_packages_installed
+
+   See ci/debug_attached.py for usage example.
+
+   PlatformLock is still used for device operations.
+"""
 
 import time
 import warnings

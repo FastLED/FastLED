@@ -129,9 +129,9 @@ The package installation daemon is a singleton background process that ensures P
 - Surviving agent termination (daemon continues independently)
 - Preventing concurrent package installations system-wide
 - Providing progress feedback to waiting clients
-- Auto-shutting down after 5 minutes of inactivity
+- Auto-shutting down after 12 hours of inactivity
 
-**Note:** The daemon starts automatically when needed by `bash debug` or other commands that require package installation. Manual management is typically not required.
+**Note:** The daemon starts automatically when needed by `bash compile` or `bash debug`. Manual management is typically not required.
 
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes
