@@ -147,6 +147,7 @@ struct SerialEmulation {
 
 void digitalWrite(int, int);
 void analogWrite(int, int);
+void analogReference(int);
 int digitalRead(int);
 void pinMode(int, int);
 

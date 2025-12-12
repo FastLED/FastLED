@@ -1,0 +1,142 @@
+#pragma once
+
+/// @file platforms/esp/32/pin_esp32_native.hpp
+/// ESP32 ESP-IDF native GPIO driver implementation
+///
+/// Provides pin control functions using ESP-IDF GPIO APIs.
+/// This file is used when building without Arduino framework.
+///
+/// Mode mapping:
+/// - 0 = INPUT (GPIO_MODE_INPUT)
+/// - 1 = OUTPUT (GPIO_MODE_OUTPUT)
+/// - 2 = INPUT_PULLUP (GPIO_MODE_INPUT with pull-up)
+/// - 3 = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
+
+#include "fl/compiler_control.h"
+
+FL_EXTERN_C_BEGIN
+#include "driver/gpio.h"
+#include "esp_adc/adc_oneshot.h"
+#include "esp_err.h"
+FL_EXTERN_C_END
+
+namespace fl {
+
+// ============================================================================
+// Digital Pin Functions
+// ============================================================================
+
+inline void pinMode(int pin, int mode) {
+    if (pin < 0 || pin >= GPIO_NUM_MAX) {
+        return;  // Invalid pin
+    }
+
+    gpio_config_t io_conf = {};
+    io_conf.pin_bit_mask = (1ULL << pin);
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+
+    switch (mode) {
+        case 0:  // INPUT
+            io_conf.mode = GPIO_MODE_INPUT;
+            io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            break;
+        case 1:  // OUTPUT
+            io_conf.mode = GPIO_MODE_OUTPUT;
+            io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            break;
+        case 2:  // INPUT_PULLUP
+            io_conf.mode = GPIO_MODE_INPUT;
+            io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            break;
+        case 3:  // INPUT_PULLDOWN
+            io_conf.mode = GPIO_MODE_INPUT;
+            io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;
+            break;
+        default:
+            return;  // Unknown mode
+    }
+
+    gpio_config(&io_conf);
+}
+
+inline void digitalWrite(int pin, int val) {
+    if (pin < 0 || pin >= GPIO_NUM_MAX) {
+        return;  // Invalid pin
+    }
+    gpio_set_level(static_cast<gpio_num_t>(pin), val ? 1 : 0);
+}
+
+inline int digitalRead(int pin) {
+    if (pin < 0 || pin >= GPIO_NUM_MAX) {
+        return 0;  // Invalid pin
+    }
+    return gpio_get_level(static_cast<gpio_num_t>(pin));
+}
+
+// ============================================================================
+// Analog Pin Functions
+// ============================================================================
+
+namespace {
+    // ADC handle for analog reads (lazy initialization)
+    adc_oneshot_unit_handle_t adc1_handle = nullptr;
+
+    void initADC1() {
+        if (adc1_handle != nullptr) {
+            return;  // Already initialized
+        }
+
+        adc_oneshot_unit_init_cfg_t init_config = {
+            .unit_id = ADC_UNIT_1,
+            .ulp_mode = ADC_ULP_MODE_DISABLE,
+        };
+        adc_oneshot_new_unit(&init_config, &adc1_handle);
+    }
+}
+
+inline int analogRead(int pin) {
+    // Map GPIO pin to ADC channel (ESP32-specific mapping)
+    // This is a simplified mapping - real implementation would need
+    // platform-specific channel detection
+    initADC1();
+
+    if (adc1_handle == nullptr) {
+        return 0;  // ADC initialization failed
+    }
+
+    // Configure channel (simplified - assumes ADC1 channel 0)
+    adc_oneshot_chan_cfg_t config = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+
+    // Note: This is a stub implementation. Real implementation would need
+    // proper GPIO-to-ADC channel mapping based on ESP32 variant
+    adc_channel_t channel = ADC_CHANNEL_0;  // Placeholder
+    adc_oneshot_config_channel(adc1_handle, channel, &config);
+
+    int raw_value = 0;
+    adc_oneshot_read(adc1_handle, channel, &raw_value);
+    return raw_value;
+}
+
+inline void analogWrite(int pin, int val) {
+    // ESP-IDF does not provide a simple analogWrite API like Arduino
+    // This would require LEDC (LED PWM Controller) setup
+    // Stub implementation - no-op
+    (void)pin;
+    (void)val;
+}
+
+inline void analogReference(int mode) {
+    // ESP32 does not support changing ADC reference voltage via software
+    // The ADC attenuation (set in analogRead) serves a similar purpose
+    // Stub implementation - no-op
+    (void)mode;
+}
+
+}  // namespace fl

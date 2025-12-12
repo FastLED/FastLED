@@ -55,6 +55,7 @@ void init() {
 // Digital I/O functions
 void digitalWrite(int, int) {}
 void analogWrite(int, int) {}
+void analogReference(int) {}
 int digitalRead(int) { return LOW; }
 void pinMode(int, int) {}
 

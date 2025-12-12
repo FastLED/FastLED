@@ -1,0 +1,363 @@
+#pragma once
+
+/// @file platforms/avr/pin_avr_native.hpp
+/// Native AVR register-based GPIO implementation (non-Arduino path)
+///
+/// This file provides direct AVR register manipulation for GPIO operations
+/// when building without Arduino framework. It implements the same pin functions
+/// as Arduino but using native AVR register access.
+///
+/// Supported platforms: ATmega328P, ATmega2560, ATmega32U4, and compatible AVR MCUs
+
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include "ftl/stdint.h"
+
+namespace fl {
+
+// Pin mode constants (matching Arduino API)
+#ifndef INPUT
+#define INPUT 0x0
+#endif
+#ifndef OUTPUT
+#define OUTPUT 0x1
+#endif
+#ifndef INPUT_PULLUP
+#define INPUT_PULLUP 0x2
+#endif
+
+// Digital value constants (matching Arduino API)
+#ifndef LOW
+#define LOW 0x0
+#endif
+#ifndef HIGH
+#define HIGH 0x1
+#endif
+
+// Analog reference modes (matching Arduino API)
+#ifndef DEFAULT
+#define DEFAULT 1
+#endif
+#ifndef INTERNAL
+#define INTERNAL 3
+#endif
+#ifndef EXTERNAL
+#define EXTERNAL 0
+#endif
+
+// Port identifiers
+#define NOT_A_PORT 0
+#define PB 2
+#define PC 3
+#define PD 4
+
+// Pin mapping tables for ATmega328P (Arduino UNO/Nano pinout)
+// These map Arduino pin numbers to AVR ports and bit masks
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega168__)
+
+// Maps Arduino digital pin numbers to port identifiers (PB, PC, PD)
+static const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+    PD, // 0 - PORTD
+    PD, // 1 - PORTD
+    PD, // 2 - PORTD
+    PD, // 3 - PORTD
+    PD, // 4 - PORTD
+    PD, // 5 - PORTD
+    PD, // 6 - PORTD
+    PD, // 7 - PORTD
+    PB, // 8 - PORTB
+    PB, // 9 - PORTB
+    PB, // 10 - PORTB
+    PB, // 11 - PORTB
+    PB, // 12 - PORTB
+    PB, // 13 - PORTB
+    PC, // 14 - PORTC (A0)
+    PC, // 15 - PORTC (A1)
+    PC, // 16 - PORTC (A2)
+    PC, // 17 - PORTC (A3)
+    PC, // 18 - PORTC (A4)
+    PC, // 19 - PORTC (A5)
+};
+
+// Maps Arduino digital pin numbers to bit masks
+static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
+    _BV(0), // 0, port D
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(6),
+    _BV(7),
+    _BV(0), // 8, port B
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(0), // 14, port C
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+};
+
+// Maps port identifiers to DDR (Data Direction Register) addresses
+static const uint16_t PROGMEM port_to_mode_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &DDRB,
+    (uint16_t) &DDRC,
+    (uint16_t) &DDRD,
+};
+
+// Maps port identifiers to PORT (Output Register) addresses
+static const uint16_t PROGMEM port_to_output_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &PORTB,
+    (uint16_t) &PORTC,
+    (uint16_t) &PORTD,
+};
+
+// Maps port identifiers to PIN (Input Register) addresses
+static const uint16_t PROGMEM port_to_input_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &PINB,
+    (uint16_t) &PINC,
+    (uint16_t) &PIND,
+};
+
+// Analog pin to ADC channel mapping (A0-A5 -> ADC0-ADC5)
+static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
+    0, // A0 -> ADC0
+    1, // A1 -> ADC1
+    2, // A2 -> ADC2
+    3, // A3 -> ADC3
+    4, // A4 -> ADC4
+    5, // A5 -> ADC5
+    6, // A6 (internal only on some variants)
+    7, // A7 (internal only on some variants)
+};
+
+#elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+
+// ATmega2560 (Arduino MEGA) pin mapping
+// Note: This is a simplified subset - full MEGA has 70 digital pins
+static const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+    // Pins 0-21 for basic compatibility
+    // A full implementation would include all 70 pins
+    4, 4, 4, 4, 4, 4, 4, 4, // 0-7: PE0-PE7 (port E)
+    5, 5, 5, 5, 5, 5, 5, 5, // 8-15: PH0-PH7 (port H)
+    2, 2, 2, 2, 2, 2,       // 16-21: PB0-PB5 (port B)
+};
+
+static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
+    _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5), _BV(6), _BV(7), // 0-7
+    _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5), _BV(6), _BV(7), // 8-15
+    _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5),                 // 16-21
+};
+
+// Port register mappings for ATmega2560
+static const uint16_t PROGMEM port_to_mode_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &DDRB,
+    (uint16_t) &DDRC,
+    (uint16_t) &DDRD,
+    (uint16_t) &DDRE,
+    (uint16_t) &DDRF,
+    (uint16_t) &DDRG,
+    (uint16_t) &DDRH,
+    NOT_A_PORT, // Port I
+    (uint16_t) &DDRJ,
+    (uint16_t) &DDRK,
+    (uint16_t) &DDRL,
+};
+
+static const uint16_t PROGMEM port_to_output_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &PORTB,
+    (uint16_t) &PORTC,
+    (uint16_t) &PORTD,
+    (uint16_t) &PORTE,
+    (uint16_t) &PORTF,
+    (uint16_t) &PORTG,
+    (uint16_t) &PORTH,
+    NOT_A_PORT,
+    (uint16_t) &PORTJ,
+    (uint16_t) &PORTK,
+    (uint16_t) &PORTL,
+};
+
+static const uint16_t PROGMEM port_to_input_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+    (uint16_t) &PINB,
+    (uint16_t) &PINC,
+    (uint16_t) &PIND,
+    (uint16_t) &PINE,
+    (uint16_t) &PINF,
+    (uint16_t) &PING,
+    (uint16_t) &PINH,
+    NOT_A_PORT,
+    (uint16_t) &PINJ,
+    (uint16_t) &PINK,
+    (uint16_t) &PINL,
+};
+
+static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, // A0-A7
+    8, 9, 10, 11, 12, 13, 14, 15, // A8-A15
+};
+
+#else
+// Fallback for other AVR variants (minimal implementation)
+static const uint8_t PROGMEM digital_pin_to_port_PGM[] = { PB, PB, PB, PB, PB, PB };
+static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = { _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5) };
+static const uint16_t PROGMEM port_to_mode_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &DDRB };
+static const uint16_t PROGMEM port_to_output_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &PORTB };
+static const uint16_t PROGMEM port_to_input_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &PINB };
+static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = { 0, 1, 2, 3 };
+#endif
+
+// Analog reference storage (set by analogReference(), used by analogRead())
+static uint8_t analog_reference = DEFAULT;
+
+// Helper macros to read from PROGMEM tables
+#define digitalPinToPort(P) ( pgm_read_byte( digital_pin_to_port_PGM + (P) ) )
+#define digitalPinToBitMask(P) ( pgm_read_byte( digital_pin_to_bit_mask_PGM + (P) ) )
+#define portModeRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_mode_PGM + (P) ) ) )
+#define portOutputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_output_PGM + (P) ) ) )
+#define portInputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_input_PGM + (P) ) ) )
+#define analogPinToChannel(P) ( pgm_read_byte( analog_pin_to_channel_PGM + (P) ) )
+
+// ============================================================================
+// GPIO Functions - Native AVR Implementation
+// ============================================================================
+
+inline void pinMode(int pin, int mode) {
+    uint8_t port = digitalPinToPort(pin);
+    if (port == NOT_A_PORT) return;
+
+    uint8_t bit_mask = digitalPinToBitMask(pin);
+    volatile uint8_t *ddr = portModeRegister(port);
+    volatile uint8_t *port_reg = portOutputRegister(port);
+
+    // Save interrupt state and disable interrupts for atomic operation
+    uint8_t oldSREG = SREG;
+    __builtin_avr_cli();
+
+    if (mode == INPUT) {
+        *ddr &= ~bit_mask;      // Set pin as input
+        *port_reg &= ~bit_mask; // Disable pull-up
+    } else if (mode == INPUT_PULLUP) {
+        *ddr &= ~bit_mask;      // Set pin as input
+        *port_reg |= bit_mask;  // Enable pull-up
+    } else { // OUTPUT
+        *ddr |= bit_mask;       // Set pin as output
+    }
+
+    // Restore interrupt state
+    SREG = oldSREG;
+}
+
+inline void digitalWrite(int pin, int val) {
+    uint8_t port = digitalPinToPort(pin);
+    if (port == NOT_A_PORT) return;
+
+    uint8_t bit_mask = digitalPinToBitMask(pin);
+    volatile uint8_t *port_reg = portOutputRegister(port);
+
+    // Save interrupt state and disable interrupts for atomic operation
+    uint8_t oldSREG = SREG;
+    __builtin_avr_cli();
+
+    if (val == LOW) {
+        *port_reg &= ~bit_mask; // Clear bit (set to LOW)
+    } else {
+        *port_reg |= bit_mask;  // Set bit (set to HIGH)
+    }
+
+    // Restore interrupt state
+    SREG = oldSREG;
+}
+
+inline int digitalRead(int pin) {
+    uint8_t port = digitalPinToPort(pin);
+    if (port == NOT_A_PORT) return LOW;
+
+    uint8_t bit_mask = digitalPinToBitMask(pin);
+    volatile uint8_t *pin_reg = portInputRegister(port);
+
+    // Read pin state (no interrupt protection needed for read)
+    if (*pin_reg & bit_mask) {
+        return HIGH;
+    }
+    return LOW;
+}
+
+inline int analogRead(int pin) {
+#if defined(ADCSRA) && defined(ADMUX)
+    // Convert analog pin number to ADC channel
+    uint8_t channel = analogPinToChannel(pin);
+
+    // Set analog reference and select ADC channel
+    // Clear previous channel selection, keep reference bits
+    ADMUX = (analog_reference << 6) | (channel & 0x0F);
+
+    // Start conversion
+    ADCSRA |= _BV(ADSC);
+
+    // Wait for conversion to complete
+    while (ADCSRA & _BV(ADSC)) {
+        // Busy wait
+    }
+
+    // Read ADC result (must read ADCL first, then ADCH)
+    uint8_t low = ADCL;
+    uint8_t high = ADCH;
+
+    return (high << 8) | low;
+#else
+    // ADC not available on this variant
+    (void)pin;
+    return 0;
+#endif
+}
+
+inline void analogWrite(int pin, int val) {
+    // Simplified PWM implementation
+    // Full implementation would require timer configuration per pin
+    // For now, treat as digital output for edge cases
+    if (val == 0) {
+        digitalWrite(pin, LOW);
+    } else if (val >= 255) {
+        digitalWrite(pin, HIGH);
+    } else {
+        // PWM requires timer setup which is platform-specific
+        // This is a basic no-op for intermediate values
+        // A full implementation would configure OCRnx registers
+        pinMode(pin, OUTPUT);
+
+        // Placeholder: In a real implementation, this would:
+        // 1. Determine which timer channel controls this pin
+        // 2. Configure the appropriate TCCRnx registers for Fast PWM
+        // 3. Set OCRnx register to 'val' for duty cycle
+        // 4. Enable PWM output on the pin
+
+        // For now, just set digital high if val > 127
+        digitalWrite(pin, val > 127 ? HIGH : LOW);
+    }
+}
+
+inline void analogReference(int mode) {
+    // Store reference mode for use in analogRead()
+    // Don't set ADMUX here to avoid shorting AVCC and AREF
+    analog_reference = mode;
+}
+
+}  // namespace fl
