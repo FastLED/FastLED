@@ -64,7 +64,7 @@ class InternalI2SDriver {
 
 class I2S_Esp32 {
   public:
-    void beginShowLeds(int data_pin, int nleds);
+    void beginShowLeds(int data_pin, int nleds, bool is_rgbw);
     void showPixels(uint8_t data_pin, PixelIterator &pixel_iterator);
     void endShowLeds();
 };
@@ -87,7 +87,7 @@ class ClocklessController_I2S_Esp32_WS2812Base
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
         void *data = Base::beginShowLeds(nleds);
-        mI2S_Esp32.beginShowLeds(mPin, nleds);
+        mI2S_Esp32.beginShowLeds(mPin, nleds, this->getRgbw().active());
         return data;
     }
 

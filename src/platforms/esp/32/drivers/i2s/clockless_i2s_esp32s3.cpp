@@ -111,10 +111,10 @@ class I2SEsp32S3_Group {
 
 namespace fl {
 
-void I2S_Esp32::beginShowLeds(int datapin, int nleds) {
+void I2S_Esp32::beginShowLeds(int datapin, int nleds, bool is_rgbw) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
     group.onQueuingStart();
-    group.addObject(datapin, nleds, false);
+    group.addObject(datapin, nleds, is_rgbw);
 }
 
 void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator &pixel_iterator) {
