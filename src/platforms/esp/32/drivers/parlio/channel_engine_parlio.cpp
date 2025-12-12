@@ -34,6 +34,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h" // For DMA-capable memory allocation
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "soc/soc_caps.h"  // For SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH
 FL_EXTERN_C_END
 
 #ifndef CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM
@@ -762,6 +763,37 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 #endif
 #endif
 
+    // Hardware capability validation
+    // Validate requested data width against chip's hardware capabilities
+    // All current PARLIO chips (ESP32-P4, C6, H2, C5) support 16-bit mode,
+    // but this check future-proofs against chips with limited PARLIO support
+#if defined(SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH)
+    if (mState.data_width > SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH) {
+        FL_WARN("PARLIO: Requested data width " << mState.data_width
+                << " bits exceeds hardware maximum " << SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH
+                << " bits on this chip. "
+                << "This chip does not support " << mState.data_width << "-bit mode. "
+                << "Maximum supported: " << SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH << " bits. "
+                << "Reduce channel count or use a chip with wider PARLIO support.");
+        mInitialized = false;
+        return;
+    }
+    FL_LOG_PARLIO("PARLIO: Hardware capability check passed (requested="
+                  << mState.data_width << " bits, maximum="
+                  << SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH << " bits)");
+#else
+    // Older ESP-IDF without SOC capability macros - perform basic validation
+    // This fallback ensures compatibility with older IDF versions while still
+    // providing some level of validation
+    if (mState.data_width > 16) {
+        FL_WARN("PARLIO: Requested data width " << mState.data_width
+                << " bits exceeds assumed maximum (16 bits). "
+                << "Hardware capability unknown - update ESP-IDF for proper detection. "
+                << "Proceeding with caution...");
+        // Don't fail - older IDF may still work, just warn
+    }
+#endif
+
     // Step 1: Calculate width-adaptive streaming chunk size
     mState.leds_per_chunk = calculateChunkSize(mState.data_width);
     FL_LOG_PARLIO("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs (optimized for " << mState.data_width << "-bit width)");
@@ -1107,54 +1139,15 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 //=============================================================================
 
 ChannelEnginePARLIO::ChannelEnginePARLIO()
-    : mEngine1Bit(nullptr), mEngine2Bit(nullptr), mEngine4Bit(nullptr),
-      mEngine8Bit(nullptr), mEngine16Bit(nullptr), mActiveEngine(nullptr) {
-    FL_LOG_PARLIO(
-        "PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
-
-    // Create all sub-engines at construction (max capability allocation)
-    mEngine1Bit = new ChannelEnginePARLIOImpl(1);
-    mEngine2Bit = new ChannelEnginePARLIOImpl(2);
-    mEngine4Bit = new ChannelEnginePARLIOImpl(4);
-    mEngine8Bit = new ChannelEnginePARLIOImpl(8);
-    mEngine16Bit = new ChannelEnginePARLIOImpl(16);
-
-    FL_LOG_PARLIO("PARLIO: Polymorphic engine ready (all 1/2/4/8/16-bit "
-                  "sub-engines created)");
+    : mEngine(), mCurrentDataWidth(0) {
+    FL_LOG_PARLIO("PARLIO: Engine created (lazy initialization - no hardware configured yet)");
 }
 
 ChannelEnginePARLIO::~ChannelEnginePARLIO() {
-    FL_LOG_PARLIO("PARLIO: Destroying polymorphic engine");
-
-    // Delete all sub-engines
-    if (mEngine1Bit) {
-        delete mEngine1Bit;
-        mEngine1Bit = nullptr;
-    }
-
-    if (mEngine2Bit) {
-        delete mEngine2Bit;
-        mEngine2Bit = nullptr;
-    }
-
-    if (mEngine4Bit) {
-        delete mEngine4Bit;
-        mEngine4Bit = nullptr;
-    }
-
-    if (mEngine8Bit) {
-        delete mEngine8Bit;
-        mEngine8Bit = nullptr;
-    }
-
-    if (mEngine16Bit) {
-        delete mEngine16Bit;
-        mEngine16Bit = nullptr;
-    }
-
-    mActiveEngine = nullptr;
-
-    FL_LOG_PARLIO("PARLIO: Polymorphic engine destroyed");
+    FL_LOG_PARLIO("PARLIO: Destroying engine");
+    // fl::unique_ptr automatically deletes mEngine when it goes out of scope (RAII)
+    mCurrentDataWidth = 0;
+    FL_LOG_PARLIO("PARLIO: Engine destroyed");
 }
 
 void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
@@ -1176,9 +1169,9 @@ void ChannelEnginePARLIO::show() {
 }
 
 IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
-    // Poll the active engine if one is selected
-    if (mActiveEngine) {
-        EngineState state = mActiveEngine->poll();
+    // Poll the engine if initialized
+    if (mEngine) {
+        EngineState state = mEngine->poll();
 
         // Clear transmitting channels when READY
         if (state == EngineState::READY && !mTransmittingChannels.empty()) {
@@ -1188,8 +1181,7 @@ IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
         return state;
     }
 
-    // No active engine = ready state (no debug output to reduce noise when
-    // engine is disabled)
+    // No engine initialized = ready state (lazy initialization)
     return EngineState::READY;
 }
 
@@ -1210,54 +1202,46 @@ void ChannelEnginePARLIO::beginTransmission(
         return;
     }
 
-    // Select optimal engine based on channel count using selectDataWidth()
-    // helper
-    size_t optimal_width = selectDataWidth(channel_count);
-
-    switch (optimal_width) {
-    case 1:
-        mActiveEngine = mEngine1Bit;
-        FL_LOG_PARLIO("PARLIO: Selected 1-bit engine for "
-                      << channel_count
-                      << " channel(s), ptr=" << (void *)mActiveEngine);
-        break;
-    case 2:
-        mActiveEngine = mEngine2Bit;
-        FL_LOG_PARLIO("PARLIO: Selected 2-bit engine for "
-                      << channel_count
-                      << " channel(s), ptr=" << (void *)mActiveEngine);
-        break;
-    case 4:
-        mActiveEngine = mEngine4Bit;
-        FL_LOG_PARLIO("PARLIO: Selected 4-bit engine for "
-                      << channel_count
-                      << " channel(s), ptr=" << (void *)mActiveEngine);
-        break;
-    case 8:
-        mActiveEngine = mEngine8Bit;
-        FL_LOG_PARLIO("PARLIO: Selected 8-bit engine for "
-                      << channel_count
-                      << " channel(s), ptr=" << (void *)mActiveEngine);
-        break;
-    case 16:
-        mActiveEngine = mEngine16Bit;
-        FL_LOG_PARLIO("PARLIO: Selected 16-bit engine for "
-                      << channel_count
-                      << " channel(s), ptr=" << (void *)mActiveEngine);
-        break;
-    default:
-        FL_WARN("PARLIO: Invalid data width "
-                << optimal_width << " for " << channel_count << " channel(s)");
+    // Determine optimal data width for this transmission
+    size_t required_width = selectDataWidth(channel_count);
+    if (required_width == 0) {
+        FL_WARN("PARLIO: Invalid channel count " << channel_count);
         return;
     }
 
-    // Delegate transmission to selected engine
-    // We need to enqueue the data and call show() on the sub-engine
-    for (const auto &channel : channelData) {
-        mActiveEngine->enqueue(channel);
+    // Check if we need to create or reconfigure the engine
+    bool need_reconfigure = false;
+
+    if (!mEngine) {
+        // First initialization - create engine with optimal width
+        FL_LOG_PARLIO("PARLIO: Lazy initialization - creating " << required_width
+                      << "-bit engine for " << channel_count << " channel(s)");
+        mEngine = fl::make_unique<ChannelEnginePARLIOImpl>(required_width);
+        mCurrentDataWidth = required_width;
+    } else if (mCurrentDataWidth != required_width) {
+        // Width changed - need to reconfigure
+        FL_LOG_PARLIO("PARLIO: Channel count changed - reconfiguring from "
+                      << mCurrentDataWidth << "-bit to " << required_width
+                      << "-bit (channels: " << channel_count << ")");
+
+        // Reset unique_ptr - automatically deletes old engine, creates new one
+        mEngine.reset(new ChannelEnginePARLIOImpl(required_width));
+        mCurrentDataWidth = required_width;
+        need_reconfigure = true;
     }
 
-    mActiveEngine->show();
+    // Log configuration info
+    if (!need_reconfigure && mEngine) {
+        FL_LOG_PARLIO("PARLIO: Reusing " << mCurrentDataWidth << "-bit engine for "
+                      << channel_count << " channel(s)");
+    }
+
+    // Delegate transmission to the single engine
+    for (const auto &channel : channelData) {
+        mEngine->enqueue(channel);
+    }
+
+    mEngine->show();
 }
 
 //=============================================================================
@@ -1265,8 +1249,7 @@ void ChannelEnginePARLIO::beginTransmission(
 //=============================================================================
 
 fl::shared_ptr<IChannelEngine> createParlioEngine() {
-    FL_LOG_PARLIO(
-        "PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
+    FL_LOG_PARLIO("PARLIO: Creating engine with lazy initialization");
     return fl::make_shared<ChannelEnginePARLIO>();
 }
 

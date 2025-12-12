@@ -177,6 +177,30 @@ typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
 // Forward declaration for heap_caps_free (defined in esp_heap_caps.h)
 extern "C" void heap_caps_free(void *ptr);
 
+//=============================================================================
+// Hardware Capability Constants
+//=============================================================================
+
+// Maximum supported PARLIO data width per chip.
+// Based on SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH from ESP-IDF soc_caps.h:
+//
+// | Chip     | Max Data Width |
+// |----------|----------------|
+// | ESP32-P4 | 16-bit         |
+// | ESP32-C6 | 16-bit         |
+// | ESP32-H2 | 8-bit          |
+// | ESP32-C5 | 8-bit          |
+//
+// Official ESP-IDF PARLIO Documentation:
+// - ESP32-P4: https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/peripherals/parlio/index.html
+// - ESP32-C6: https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/parlio/index.html
+// - ESP32-H2: https://docs.espressif.com/projects/esp-idf/en/latest/esp32h2/api-reference/peripherals/parlio.html
+// - ESP32-C5: https://docs.espressif.com/projects/esp-idf/en/latest/esp32c5/api-reference/peripherals/parlio/index.html
+//
+// Runtime validation against SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH occurs in
+// the .cpp implementation file where platform-specific headers are included.
+#define FASTLED_PARLIO_MAX_DATA_WIDTH 16
+
 namespace fl {
 
 //=============================================================================
@@ -204,9 +228,14 @@ struct HeapCapsDeleter {
 /// validation.
 ///       The polymorphic ChannelEnginePARLIO wrapper uses simplified 8/16-bit
 ///       selection.
+/// @note Hardware capability validation happens at runtime in the .cpp file
+///       using SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH.
 inline size_t selectDataWidth(size_t channel_count) {
-    if (channel_count == 0 || channel_count > 16)
+    // Validate input range (assume 16-bit max for all PARLIO chips)
+    if (channel_count == 0 || channel_count > FASTLED_PARLIO_MAX_DATA_WIDTH)
         return 0;
+
+    // Select smallest power-of-2 width that fits the channel count
     if (channel_count <= 1)
         return 1;
     if (channel_count <= 2)
@@ -419,46 +448,58 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
 // Polymorphic Wrapper Class
 //=============================================================================
 
-/// @brief Polymorphic PARLIO engine that auto-selects optimal data width
-/// implementation
+/// @brief PARLIO engine with lazy initialization and dynamic reconfiguration
 ///
-/// This wrapper class contains five internal engine instances (1, 2, 4, 8,
-/// 16-bit) and automatically delegates operations to the appropriate engine
-/// based on the number of channels in each batch.
+/// This class manages a single PARLIO TX unit instance, creating and
+/// reconfiguring it as needed based on the channel count. This architecture
+/// matches the ESP32 hardware limitation: only ONE PARLIO TX unit exists per
+/// chip.
 ///
-/// ## Architecture
-/// - Contains five ChannelEnginePARLIOImpl instances (1, 2, 4, 8, 16-bit)
-/// - Delegates to 1-bit engine for 1 channel
-/// - Delegates to 2-bit engine for 2 channels
-/// - Delegates to 4-bit engine for 3-4 channels
-/// - Delegates to 8-bit engine for 5-8 channels
-/// - Delegates to 16-bit engine for 9-16 channels
-/// - Selection happens per-batch in beginTransmission()
+/// ## Hardware Constraints (Per ESP32 Chip)
+/// - **ESP32-C6/P4**: 1 TX unit, 16-bit max width
+/// - **ESP32-H2/C5**: 1 TX unit, 8-bit max width
+/// - **Critical**: PARLIO TX unit is a SINGLE shared resource - cannot be split
+///   into multiple independent units
+/// - **Data width cannot be changed** after initialization - must delete and
+///   recreate
+///
+/// ## Architecture: Lazy Initialization
+/// - Contains ONE ChannelEnginePARLIOImpl instance (created on-demand)
+/// - On first show(), determines optimal width from channel count
+/// - Creates TX unit with power-of-2 width: 1, 2, 4, 8, or 16-bit
+/// - If channel count changes significantly, deletes and recreates with new
+///   width
 /// - Inherits from IChannelEngine for standard FastLED integration
 /// - Managed by ChannelBusManager which handles frame lifecycle events
 ///
 /// ## Lifecycle
-/// 1. **Construction**: Creates all 1/2/4/8/16-bit sub-engines
-/// 2. **Each Frame**:
-///    - enqueue() → batches channel data (inherited from ChannelEngine)
-///    - show() → calls beginTransmission()
-///    - beginTransmission() → selects engine based on channel count, delegates
-/// 3. **Polling**: pollDerived() checks active engine's state
-/// 4. **Destruction**: Cleans up all sub-engines
+/// 1. **Construction**: No hardware initialization (lazy)
+/// 2. **First show()**:
+///    - Determines optimal width from channel count
+///    - Creates single ChannelEnginePARLIOImpl instance
+///    - Initializes PARLIO TX unit with optimal width
+/// 3. **Subsequent Frames**:
+///    - If channel count fits current width: reuse engine
+///    - If width needs to change: delete engine, create new one
+/// 4. **Polling**: poll() checks engine state (if initialized)
+/// 5. **Destruction**: Cleans up engine instance
 ///
-/// ## Memory Management
-/// - Allocates all supported engines (1, 2, 4, 8, 16-bit)
-/// - Total memory: ~37.2 KB (1-bit: ~1.2KB + 2-bit: ~2.4KB + 4-bit: ~4.8KB +
-/// 8-bit: ~9.6KB + 16-bit: ~19.2KB per buffer pair)
-/// - Only active engine uses resources during transmission
-/// - Engine selection optimizes memory usage per batch
+/// ## Memory Management (Single Engine)
+/// - Only ONE engine instance allocated at a time
+/// - Memory usage depends on data width:
+///   - 1-bit: ~1.2 KB (1 channel)
+///   - 2-bit: ~2.4 KB (2 channels)
+///   - 4-bit: ~4.8 KB (3-4 channels)
+///   - 8-bit: ~9.6 KB (5-8 channels)
+///   - 16-bit: ~19.2 KB (9-16 channels)
+/// - Reconfiguration overhead: ~1-2ms (delete + create TX unit)
 ///
 /// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with
 /// PARLIO peripheral.
 ///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
 class ChannelEnginePARLIO : public IChannelEngine {
   public:
-    /// @brief Constructor - creates all 1/2/4/8/16-bit sub-engines
+    /// @brief Constructor - lazy initialization (no engine created)
     ChannelEnginePARLIO();
     ~ChannelEnginePARLIO() override;
 
@@ -474,30 +515,18 @@ class ChannelEnginePARLIO : public IChannelEngine {
     EngineState poll() override;
 
   private:
-    /// @brief Begin LED data transmission with automatic engine selection
+    /// @brief Begin LED data transmission with lazy init and reconfiguration
     /// @param channelData Span of channel data to transmit
-    /// @note Selects optimal engine based on channel count (1, 2, 4, 8, or
-    /// 16-bit)
+    /// @note Creates engine on first use, reconfigures if width changes
     void beginTransmission(fl::span<const ChannelDataPtr> channelData);
 
   private:
-    /// @brief 1-bit sub-engine (handles 1 channel)
-    ChannelEnginePARLIOImpl *mEngine1Bit;
+    /// @brief Single engine instance (created on-demand, reconfigured as needed)
+    /// @note Using fl::unique_ptr for RAII - automatic cleanup, no manual delete
+    fl::unique_ptr<ChannelEnginePARLIOImpl> mEngine;
 
-    /// @brief 2-bit sub-engine (handles 2 channels)
-    ChannelEnginePARLIOImpl *mEngine2Bit;
-
-    /// @brief 4-bit sub-engine (handles 3-4 channels)
-    ChannelEnginePARLIOImpl *mEngine4Bit;
-
-    /// @brief 8-bit sub-engine (handles 5-8 channels)
-    ChannelEnginePARLIOImpl *mEngine8Bit;
-
-    /// @brief 16-bit sub-engine (handles 9-16 channels)
-    ChannelEnginePARLIOImpl *mEngine16Bit;
-
-    /// @brief Currently active engine (selected per-batch)
-    ChannelEnginePARLIOImpl *mActiveEngine;
+    /// @brief Current data width (0 = not initialized)
+    size_t mCurrentDataWidth;
 
     /// @brief Internal state management for IChannelEngine interface
     fl::vector<ChannelDataPtr>
@@ -512,10 +541,11 @@ class ChannelEnginePARLIO : public IChannelEngine {
 // Factory Function
 //=============================================================================
 
-/// @brief Create polymorphic PARLIO engine instance
+/// @brief Create PARLIO engine instance with lazy initialization
 /// @return Shared pointer to IChannelEngine, or nullptr if creation fails
-/// @note Engine auto-selects optimal data width per batch (1, 2, 4, 8, or
-/// 16-bit)
+/// @note Engine uses lazy initialization - hardware is configured on first show()
+/// @note Auto-selects optimal data width based on channel count (1, 2, 4, 8, or 16-bit)
+/// @note Reconfigures width dynamically if channel count changes significantly
 fl::shared_ptr<IChannelEngine> createParlioEngine();
 
 } // namespace fl
