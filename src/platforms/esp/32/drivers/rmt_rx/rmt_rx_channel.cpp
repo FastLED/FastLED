@@ -379,10 +379,12 @@ public:
         , mReceiveDone(false)
         , mSymbolsReceived(0)
         , mSignalRangeMinNs(100)
-        , mSignalRangeMaxNs(100000)
+        , mSignalRangeMaxNs(4000000)  // 40us - Allow gaps between PARLIO streaming chunks
         , mSkipCounter(0)
         , mStartLow(true)
         , mInternalBuffer()
+        , mAccumulationBuffer()
+        , mAccumulationOffset(0)
         , mCallbackCount(0)
     {
         FL_DBG("RmtRxChannel constructed with pin=" << pin << " (other hardware params will be set in begin())");
@@ -562,8 +564,8 @@ public:
         FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
 
         // Only allocate and arm if not already receiving (begin() wasn't called)
-        // Check if mInternalBuffer is empty to determine if we need to arm
-        if (mInternalBuffer.empty()) {
+        // Check if accumulation buffer is empty to determine if we need to arm
+        if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
                 FL_WARN("wait(): failed to allocate and arm");
@@ -766,21 +768,46 @@ private:
      *
      * Common logic for allocating internal buffer and starting receive operation.
      * REQUIRES: Channel must be in "enabled" state before calling.
+     *
+     * Dual-Buffer Architecture:
+     * - DMA buffer (mInternalBuffer): Small buffer (4096 symbols) for hardware RX
+     * - Accumulation buffer (mAccumulationBuffer): Full-size buffer (user-requested) for complete stream
+     * - ISR callback copies from DMA buffer to accumulation buffer on each partial RX callback
      */
     bool allocateAndArm() {
-        // Allocate internal buffer
+        // Allocate DMA buffer (small size for partial RX mode)
+        // ESP-IDF partial RX mode works by:
+        // 1. User provides small buffer to rmt_receive()
+        // 2. Hardware fills this buffer from FIFO
+        // 3. Callback fires with pointer to filled region
+        // 4. User must copy data before returning from callback
+        // 5. Hardware continues filling from where it left off
+        //
+        // The buffer size should be small enough to trigger multiple callbacks
+        // but large enough to avoid excessive callback overhead.
+        constexpr size_t DMA_BUFFER_SIZE = 256;  // Small buffer to trigger multiple callbacks
         mInternalBuffer.clear();
-        mInternalBuffer.reserve(mBufferSize);
-        for (size_t i = 0; i < mBufferSize; i++) {
+        mInternalBuffer.reserve(DMA_BUFFER_SIZE);
+        for (size_t i = 0; i < DMA_BUFFER_SIZE; i++) {
             mInternalBuffer.push_back(0);
         }
+
+        // Allocate accumulation buffer (full user-requested size)
+        mAccumulationBuffer.clear();
+        mAccumulationBuffer.reserve(mBufferSize);
+        for (size_t i = 0; i < mBufferSize; i++) {
+            mAccumulationBuffer.push_back(0);
+        }
+
+        FL_DBG("allocateAndArm(): DMA buffer=" << DMA_BUFFER_SIZE
+               << " symbols, accumulation buffer=" << mBufferSize << " symbols");
 
         // Channel must be enabled before calling startReceive()
         // Caller (begin()) ensures channel is enabled via enable() call
         // startReceive() calls rmt_receive() which requires channel to be in "enabled" state
 
-        // Start receive operation
-        if (!startReceive(mInternalBuffer.data(), mBufferSize)) {
+        // Start receive operation (pass DMA buffer, not accumulation buffer)
+        if (!startReceive(mInternalBuffer.data(), DMA_BUFFER_SIZE)) {
             FL_WARN("allocateAndArm(): failed to start receive");
             return false;
         }
@@ -828,13 +855,17 @@ private:
 
     /**
      * @brief Get received symbols as a span (internal method)
-     * @return Span of const RmtSymbol containing received data
+     * @return Span of const RmtSymbol containing received data from accumulation buffer
+     *
+     * Returns data from the accumulation buffer (not DMA buffer).
+     * The accumulation buffer contains the complete data stream assembled from
+     * multiple partial RX callbacks.
      */
     fl::span<const RmtSymbol> getReceivedSymbols() const {
-        if (mInternalBuffer.empty()) {
+        if (mAccumulationBuffer.empty()) {
             return fl::span<const RmtSymbol>();
         }
-        return fl::span<const RmtSymbol>(mInternalBuffer.data(), mSymbolsReceived);
+        return fl::span<const RmtSymbol>(mAccumulationBuffer.data(), mSymbolsReceived);
     }
 
     /**
@@ -852,6 +883,9 @@ private:
      * @param buffer Buffer to store received symbols (must remain valid until done)
      * @param buffer_size Number of symbols buffer can hold
      * @return true if receive started, false on error
+     *
+     * IMPORTANT: This method is called with the DMA buffer, not the accumulation buffer.
+     * The ISR callback will copy from DMA buffer → accumulation buffer on each partial RX callback.
      */
     bool startReceive(RmtSymbol* buffer, size_t buffer_size) {
         if (!mChannel) {
@@ -864,9 +898,10 @@ private:
             return false;
         }
 
-        // Reset state
+        // Reset state for new receive operation
         mReceiveDone = false;
         mSymbolsReceived = 0;
+        mAccumulationOffset = 0;  // Reset accumulation offset for new capture
         mCallbackCount = 0;  // Reset callback counter for debugging
 
         // Configure receive parameters (use values from begin())
@@ -885,7 +920,7 @@ private:
             return false;
         }
 
-        FL_DBG("RX receive started (buffer size: " << buffer_size << " symbols)");
+        FL_DBG("RX receive started (DMA buffer size: " << buffer_size << " symbols)");
         return true;
     }
 
@@ -898,6 +933,11 @@ private:
      * Skip logic: When mSkipCounter > 0, we're in skip phase (called from handleSkipPhase).
      * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
      * capture phase - store the received symbols and filter spurious idle-state symbols.
+     *
+     * Dual-Buffer Architecture:
+     * With en_partial_rx enabled, this callback fires multiple times for long streams.
+     * Each callback receives a new chunk of data in data->received_symbols (DMA buffer).
+     * We must MANUALLY COPY from DMA buffer to accumulation buffer before the next callback overwrites it.
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t* data,
@@ -907,7 +947,7 @@ private:
             return false;
         }
 
-        self->mCallbackCount++;  // Debug: Track callback invocations
+        self->mCallbackCount = self->mCallbackCount + 1;  // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
 
         // Check if we're in skip phase
@@ -924,8 +964,30 @@ private:
             return false;
         }
 
-        // Capture phase - accumulate received symbols across multiple callbacks (partial RX mode)
-        self->mSymbolsReceived += received_count;
+        // Capture phase - manually copy from DMA buffer to accumulation buffer
+        // data->received_symbols points to the DMA buffer which will be OVERWRITTEN on next callback
+
+        // Calculate how many symbols we can safely copy (prevent buffer overflow)
+        size_t available_space = self->mAccumulationBuffer.size() - self->mAccumulationOffset;
+        size_t symbols_to_copy = (received_count < available_space) ? received_count : available_space;
+
+        if (symbols_to_copy > 0) {
+            // Copy from DMA buffer to accumulation buffer
+            // Cast dest pointer to void* for fl::memcpy
+            void* dest = static_cast<void*>(
+                self->mAccumulationBuffer.data() + self->mAccumulationOffset);
+            const void* src = static_cast<const void*>(data->received_symbols);
+
+            // fl::memcpy is safe in ISR context (no blocking, pure memory operation)
+            // Size calculation: symbols_to_copy symbols × sizeof(rmt_symbol_word_t) bytes
+            fl::memcpy(dest, src, symbols_to_copy * sizeof(rmt_symbol_word_t));
+
+            // Update accumulation offset
+            self->mAccumulationOffset += symbols_to_copy;
+        }
+
+        // Update total symbols received
+        self->mSymbolsReceived = self->mAccumulationOffset;
 
         // Only signal completion when this is the final callback (is_last flag from ESP-IDF)
         // With en_partial_rx enabled, callback may be invoked multiple times for long streams
@@ -940,14 +1002,16 @@ private:
     rmt_channel_handle_t mChannel;                ///< RMT channel handle
     gpio_num_t mPin;                              ///< GPIO pin for RX
     uint32_t mResolutionHz;                      ///< Clock resolution in Hz
-    size_t mBufferSize;                          ///< Internal buffer size in symbols
+    size_t mBufferSize;                          ///< User-requested buffer size in symbols (accumulation buffer size)
     volatile bool mReceiveDone;                  ///< Set by ISR when receive complete
-    volatile size_t mSymbolsReceived;            ///< Number of symbols received (set by ISR)
+    volatile size_t mSymbolsReceived;            ///< Total symbols received across all callbacks (set by ISR)
     uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
     uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
-    fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< Internal buffer for all receive operations
+    fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< DMA buffer for hardware RX (small, ≤4096 symbols)
+    fl::HeapVector<RmtSymbol> mAccumulationBuffer; ///< Accumulation buffer for full data stream (user-requested size)
+    volatile size_t mAccumulationOffset;         ///< Current write position in accumulation buffer (updated by ISR)
     volatile uint32_t mCallbackCount;            ///< Debug: Count ISR callbacks (TEMP - for testing en_partial_rx)
 };
 
