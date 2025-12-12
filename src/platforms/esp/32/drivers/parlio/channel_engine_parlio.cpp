@@ -275,6 +275,10 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     // Get the next buffer to fill
     uint8_t *nextBuffer = const_cast<uint8_t *>(mState.fill_buffer);
 
+    // Zero output buffer to prevent garbage data from previous use
+    // (heap_caps_malloc does not zero memory, unlike calloc)
+    fl::memset(nextBuffer, 0x00, mState.buffer_size);
+
     // DEBUG: Validate buffer pointer before use
     if (nextBuffer == nullptr) {
         // FL_WARN("PARLIO: BUG - fill_buffer is NULL! (buffer_a=" <<
@@ -320,6 +324,9 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 
     // NOTE: Cannot use FL_DBG in IRAM function - it allocates heap memory via
     // StrStream
+
+    // Zero waveform buffer to eliminate leftover data from previous iterations
+    fl::memset(laneWaveforms, 0x00, waveform_buffer_size);
 
     size_t outputIdx = 0;
 
@@ -679,15 +686,18 @@ void ChannelEnginePARLIOImpl::beginTransmission(
             mState.scratch_padded_buffer.data() + (i * maxChannelSize);
         fl::span<uint8_t> dst(laneDst, maxChannelSize);
 
+        // PARLIO FIX: Never use left-padding for multi-lane configurations
+        // All lanes MUST have same number of LEDs, so right-pad with zeros if needed
+        const auto &srcData = channelData[i]->getData();
         if (dataSize < maxChannelSize) {
-            // Lane needs padding
-            FL_LOG_PARLIO("PARLIO: Padding lane " << i << " from " << dataSize
+            // Lane needs padding - use RIGHT-padding (zeros at end) instead of left-padding
+            FL_LOG_PARLIO("PARLIO: Right-padding lane " << i << " from " << dataSize
                                                   << " to " << maxChannelSize
                                                   << " bytes");
-            channelData[i]->writeWithPadding(dst);
+            fl::memcpy(laneDst, srcData.data(), dataSize);  // Copy actual data first
+            fl::memset(laneDst + dataSize, 0, maxChannelSize - dataSize);  // Zero-fill remainder
         } else {
             // No padding needed - direct copy
-            const auto &srcData = channelData[i]->getData();
             fl::memcpy(laneDst, srcData.data(), maxChannelSize);
         }
     }

@@ -1,5 +1,6 @@
 // ValidationHelpers.cpp - Helper function implementations
 
+#include "ValidationConfig.h"  // Must be included BEFORE ValidationHelpers.h to set config macros
 #include "ValidationHelpers.h"
 
 bool testRxChannel(
@@ -62,6 +63,13 @@ bool testRxChannel(
 
     return true;
 }
+
+
+/// NOTE TO AI: TODO Fix this function
+/// FL_IS_* macros are probably not defined correctly because i don't think FastLED.h
+/// is being included. Please check for
+///   [VALIDATION] Platform: Unknown ESP32 variant - skipping engine validation
+/// please fix this sometime in the future
 
 void validateExpectedEngines() {
     // Define expected engines based on platform

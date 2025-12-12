@@ -101,10 +101,9 @@
 //   bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
 
 
-#include <FastLED.h>
-#include "Common.h"
-#include "ValidationTest.h"
-#include "ValidationHelpers.h"
+// ⚠️ IMPORTANT: Test matrix configuration moved to ValidationConfig.h
+// This ensures consistent configuration across all compilation units (.ino and .cpp files)
+#include "ValidationConfig.h"
 
 // ============================================================================
 // Test Matrix Configuration - Multi-Driver, Multi-Lane, Variable Strip Size
@@ -150,33 +149,12 @@
 //
 // ============================================================================
 
-// ============================================================================
-// Driver Selection Defines (uncomment to isolate specific driver)
-// ============================================================================
-// #define JUST_PARLIO
-// #define JUST_RMT
-// #define JUST_SPI
-
-// ============================================================================
-// Lane Range Defines (uncomment to override defaults)
-// ============================================================================
-#ifndef MIN_LANES
-#define MIN_LANES 1  // Default: start at 1 lane
-#endif
-
-#ifndef MAX_LANES
-#define MAX_LANES 8  // Default: test up to 8 lanes
-#endif
-
-// ============================================================================
-// Strip Size Defines (uncomment to test only one size)
-// ============================================================================
-// #define JUST_SMALL_STRIPS
-// #define JUST_LARGE_STRIPS
-
-// Strip size constants
-#define SHORT_STRIP_SIZE 10   // Short strip: 10 LEDs
-#define LONG_STRIP_SIZE 300   // Long strip: 300 LEDs
+// Configuration is now in ValidationConfig.h (included above)
+// Includes:
+#include <FastLED.h>
+#include "Common.h"
+#include "ValidationTest.h"
+#include "ValidationHelpers.h"
 
 // ============================================================================
 // Configuration

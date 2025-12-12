@@ -1,6 +1,7 @@
 // ValidationTest.cpp - Generic LED validation testing infrastructure
 // Driver-agnostic test function implementations
 
+#include "ValidationConfig.h"  // Must be included first to set config macros
 #include "ValidationTest.h"
 #include <FastLED.h>
 
