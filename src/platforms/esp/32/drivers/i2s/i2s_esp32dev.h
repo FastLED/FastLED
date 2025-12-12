@@ -4,9 +4,12 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/log.h"
 
-FL_EXTERN_C_BEGIN
-
+// FastLED headers - must be outside extern C (contain C++ code/macros)
 #include "platforms/esp/esp_version.h"
+#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
+
+// Wrap only ESP-IDF C headers in extern C
+FL_EXTERN_C_BEGIN
 
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
@@ -30,10 +33,11 @@ FL_EXTERN_C_BEGIN
 #else
 #include "esp_intr.h"
 #endif
-#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
-// esp include for F_CPU
+FL_EXTERN_C_END
+
+// Arduino C++ header - must be outside extern C
 #include "esp32-hal.h"
 
 #ifndef F_CPU_MHZ
@@ -41,6 +45,8 @@ FL_EXTERN_C_BEGIN
 #endif
 
 FL_EXTERN_C_END
+
+#include "fl/log.h"
 
 // TODO: this is in like 2 places. Consolidate.
 // override default NUM_DMA_BUFFERS if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
