@@ -1,16 +1,15 @@
 
 #if defined(ESP32)
 
-#include "sdkconfig.h"
 #include "fl/has_include.h"
+#include "sdkconfig.h"
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #if !FL_HAS_INCLUDE("esp_memory_utils.h")
-#warning "esp_memory_utils.h is not available, are you on esp-idf 4? The parallel clockless i2s driver will not be available"
+#warning                                                                       \
+    "esp_memory_utils.h is not available, are you on esp-idf 4? The parallel clockless i2s driver will not be available"
 #else
-
-
 
 #define CONFIG_FREERTOS_ENABLE_BACKWARD_COMPATIBILITY 1
 
@@ -19,35 +18,32 @@
 
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
+#include "cpixel_ledcontroller.h"
 #include "crgb.h"
 #include "eorder.h"
-#include "ftl/map.h"
-#include "fl/singleton.h"
-#include "ftl/vector.h"
-#include "fl/warn.h"
 #include "fl/math_macros.h"
-#include "pixel_iterator.h"
-#include "ftl/allocator.h"
-#include "ftl/unique_ptr.h"
-#include "ftl/assert.h"
 #include "fl/rectangular_draw_buffer.h"
-#include "cpixel_ledcontroller.h"
+#include "fl/singleton.h"
+#include "fl/warn.h"
+#include "ftl/allocator.h"
+#include "ftl/assert.h"
+#include "ftl/map.h"
+#include "ftl/unique_ptr.h"
+#include "ftl/vector.h"
+#include "pixel_iterator.h"
 
 #include "clockless_i2s_esp32s3.h"
 
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
-typedef uint8_t I2SPin;  // Renamed to avoid conflict with FastLED Pin class
+typedef uint8_t I2SPin; // Renamed to avoid conflict with FastLED Pin class
 
 bool gPsramInited = false;
-
-
 
 // Maps multiple pins and CRGB strips to a single I2S_Esp32 object.
 class I2SEsp32S3_Group {
   public:
-
     fl::unique_ptr<fl::I2SClocklessLedDriveresp32S3> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
@@ -64,14 +60,11 @@ class I2SEsp32S3_Group {
         mDrawn = false;
     }
 
-    void onQueuingDone() {
-        mRectDrawBuffer.onQueuingDone();
-    }
+    void onQueuingDone() { mRectDrawBuffer.onQueuingDone(); }
 
     void addObject(I2SPin pin, uint16_t numLeds, bool is_rgbw) {
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
-
 
     void showPixelsOnceThisFrame() {
         if (mDrawn) {
@@ -87,33 +80,34 @@ class I2SEsp32S3_Group {
             mDriver.reset();
             mDriver.reset(new fl::I2SClocklessLedDriveresp32S3());
             fl::FixedVector<int, 16> pinList;
-            for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
+            for (auto it = mRectDrawBuffer.mDrawList.begin();
+                 it != mRectDrawBuffer.mDrawList.end(); ++it) {
                 // Check for invalid USB-JTAG pins
                 if (it->mPin == 19 || it->mPin == 20) {
-                    FL_ASSERT(false, "GPIO19 and GPIO20 are reserved for USB-JTAG on ESP32S3 and cannot be used for LED output. "
-                                     "Using these pins will break USB flashing capability. Please choose a different pin.");
+                    FL_ASSERT(false,
+                              "GPIO19 and GPIO20 are reserved for USB-JTAG on "
+                              "ESP32S3 and cannot be used for LED output. "
+                              "Using these pins will break USB flashing "
+                              "capability. Please choose a different pin.");
                 }
                 pinList.push_back(it->mPin);
             }
             uint32_t num_strips = 0;
             uint32_t bytes_per_strip = 0;
             uint32_t total_bytes = 0;
-            mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
+            mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip,
+                                         &total_bytes);
             int num_leds_per_strip = bytes_per_strip / 3;
             uint32_t total_leds = total_bytes / 3;
-            mDriver->initled(
-                mRectDrawBuffer.mAllLedsBufferUint8.get(),
-                pinList.data(),
-                pinList.size(),
-                num_leds_per_strip
-            );
+            mDriver->initled(mRectDrawBuffer.mAllLedsBufferUint8.get(),
+                             pinList.data(), pinList.size(),
+                             num_leds_per_strip);
         }
         mDriver->show();
     }
 };
 
 } // anonymous namespace
-
 
 namespace fl {
 
@@ -123,12 +117,13 @@ void I2S_Esp32::beginShowLeds(int datapin, int nleds) {
     group.addObject(datapin, nleds, false);
 }
 
-void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator &pixel_iterator) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
-            span<uint8_t> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
+    span<uint8_t> strip_bytes =
+        group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
@@ -166,16 +161,15 @@ void I2S_Esp32::endShowLeds() {
     I2SEsp32S3_Group::getInstance().showPixelsOnceThisFrame();
 }
 
-class Driver: public InternalI2SDriver {
+class Driver : public InternalI2SDriver {
   public:
     Driver() = default;
     ~Driver() override = default;
-    void initled(uint8_t* leds, const int * pins, int numstrip, int NUM_LED_PER_STRIP) override {
+    void initled(uint8_t *leds, const int *pins, int numstrip,
+                 int NUM_LED_PER_STRIP) override {
         mDriver.initled(leds, pins, numstrip, NUM_LED_PER_STRIP);
     }
-    void show() override {
-        mDriver.show();
-    }
+    void show() override { mDriver.show(); }
 
     void setBrightness(uint8_t brightness) override {
         mDriver.setBrightness(brightness);
@@ -183,10 +177,9 @@ class Driver: public InternalI2SDriver {
 
   private:
     I2SClocklessLedDriveresp32S3 mDriver;
-
 };
 
-InternalI2SDriver* InternalI2SDriver::create() {
+InternalI2SDriver *InternalI2SDriver::create() {
     if (!gPsramInited) {
         gPsramInited = true;
         bool ok = psramInit();
@@ -202,6 +195,5 @@ InternalI2SDriver* InternalI2SDriver::create() {
 #endif // CONFIG_IDF_TARGET_ESP32S3
 
 #endif // FL_HAS_INCLUDE("esp_memory_utils.h")
-
 
 #endif // ESP32
