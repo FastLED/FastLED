@@ -86,6 +86,72 @@ meson.build (root)          → Source discovery, library compilation
 
 **If violations found**: Recommend refactoring similar to `tests/meson.build` (see git history)
 
+### **/*.h and **/*.cpp changes - PLATFORM HEADER ISOLATION
+
+**Core Principle**: Platform-specific headers MUST ONLY be included in .cpp files, NEVER in .h files.
+
+**Rationale**:
+- Improves IDE code assistance and IntelliSense support
+- Prevents platform-specific headers from polluting the interface
+- Enables better cross-platform compatibility
+- Allows headers to be parsed cleanly without platform-specific dependencies
+
+**Platform-Specific Headers** (non-exhaustive list):
+- ESP32: `soc/*.h`, `driver/*.h`, `esp_*.h`, `freertos/*.h`, `rom/*.h`
+- STM32: `stm32*.h`, `hal/*.h`, `cmsis/*.h`
+- Arduino: `Arduino.h` (exception: may be in headers when needed)
+- AVR: `avr/*.h`, `util/*.h`
+- Teensy: `core_pins.h`, `kinetis.h`
+
+**Rules**:
+1. ❌ **NEVER include platform headers in .h files** (with rare exceptions)
+2. ✅ **ALWAYS include platform headers in .cpp files**
+3. ✅ Use forward declarations in headers instead
+4. ✅ Define platform-specific constants/macros with conservative defaults in headers
+5. ✅ Perform runtime validation in .cpp files where platform headers are available
+
+**Pattern Examples**:
+```cpp
+// ❌ BAD: header.h
+#include "soc/soc_caps.h"
+#define MAX_WIDTH SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH
+
+// ✅ GOOD: header.h
+// Conservative default - runtime validation happens in .cpp
+#define MAX_WIDTH 16
+
+// ✅ GOOD: header.cpp
+#include "soc/soc_caps.h"
+void validateHardware() {
+    if (requested_width > SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH) {
+        // handle error
+    }
+}
+```
+
+**Exceptions** (must be justified):
+- Arduino.h in examples or Arduino-specific helpers
+- Platform detection macros already defined by build system
+- Forward declarations with extern "C" guards
+
+**Check Process**:
+1. For each .h file, scan for `#include` directives
+2. Identify platform-specific headers (soc/, driver/, esp_, freertos/, hal/, stm32, avr/, etc.)
+3. If found:
+   - **Violation**: Report with exact file and line number
+   - **Action**: Move include to corresponding .cpp file
+   - **Refactor**: Replace compile-time logic with runtime validation
+   - **Simplify**: Use conservative defaults in header
+
+**Action on Violation**:
+- Report the platform header include with file and line number
+- Suggest moving to .cpp file
+- Recommend refactoring approach (forward declarations, runtime validation)
+- For new changes: Fix immediately
+- For existing code: Create GitHub issue or ask user if they want to fix now
+
+---
+
 ### **/*.h and **/*.cpp changes - FILE/CLASS NAME NORMALIZATION
 
 **Core Principle**: Header and source file names MUST match the primary class/type they define.
@@ -155,6 +221,7 @@ meson.build (root)          → Source discovery, library compilation
 - Files reviewed: N
 - Violations found: N
   - Try-catch blocks: N
+  - Platform headers in .h files: N
   - Filename mismatches: N
   - Type annotation issues: N
   - Other: N
