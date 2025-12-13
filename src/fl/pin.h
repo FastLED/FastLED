@@ -28,6 +28,8 @@
 /// - Clean separation between interface and implementation
 /// - Better compile times and reduced header pollution
 
+#include "ftl/type_traits.h"
+
 namespace fl {
 
 // ============================================================================
@@ -39,10 +41,26 @@ namespace fl {
 /// @param mode Pin mode (kInput, kOutput, kInputPullup, kInputPulldown)
 inline void pinMode(int pin, int mode);
 
+/// Set pin mode (enum overload)
+/// @param pin Pin number (platform-specific numbering)
+/// @param mode Pin mode enum value (converts to int)
+template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
+inline void pinMode(int pin, T mode) {
+    pinMode(pin, static_cast<int>(mode));
+}
+
 /// Write digital value to pin
 /// @param pin Pin number (platform-specific numbering)
 /// @param val Pin value (kLow or kHigh)
 inline void digitalWrite(int pin, int val);
+
+/// Write digital value to pin (enum overload)
+/// @param pin Pin number (platform-specific numbering)
+/// @param val Pin value enum (converts to int)
+template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
+inline void digitalWrite(int pin, T val) {
+    digitalWrite(pin, static_cast<int>(val));
+}
 
 /// Read digital value from pin
 /// @param pin Pin number (platform-specific numbering)
@@ -62,5 +80,12 @@ inline void analogWrite(int pin, int val);
 /// Set analog reference voltage mode
 /// @param mode Reference mode (platform-specific values)
 inline void analogReference(int mode);
+
+/// Set analog reference voltage mode (enum overload)
+/// @param mode Reference mode enum value (converts to int)
+template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
+inline void analogReference(T mode) {
+    analogReference(static_cast<int>(mode));
+}
 
 }  // namespace fl
