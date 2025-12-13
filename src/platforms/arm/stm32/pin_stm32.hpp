@@ -26,7 +26,12 @@
 namespace fl {
 
 inline void pinMode(int pin, int mode) {
+#ifdef _WIRISH_WIRISH_H_
+    // Maple framework uses WiringPinMode enum instead of int
+    ::pinMode(pin, static_cast<WiringPinMode>(mode));
+#else
     ::pinMode(pin, mode);
+#endif
 }
 
 inline void digitalWrite(int pin, int val) {
@@ -46,7 +51,13 @@ inline void analogWrite(int pin, int val) {
 }
 
 inline void analogReference(int mode) {
+#ifdef _WIRISH_WIRISH_H_
+    // Maple framework doesn't support analogReference
+    // Reference voltage is fixed by hardware (typically 3.3V)
+    (void)mode;  // Suppress unused parameter warning
+#else
     ::analogReference(static_cast<eAnalogReference>(mode));
+#endif
 }
 
 }  // namespace fl
