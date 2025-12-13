@@ -262,17 +262,24 @@ def ensure_packages_installed(
         print("✅ Daemon started")
 
     # Submit request
+    import os
+
     request = {
         "project_dir": str(project_dir),
         "environment": environment,  # None is valid - daemon will use PlatformIO default
         "timestamp": time.time(),
+        "caller_pid": os.getpid(),
+        "caller_cwd": os.getcwd(),
     }
 
     # CHECK: Wait if installation already in progress
     status = read_status_file()
     if status.get("installation_in_progress", False):
-        print("⏳ Another installation in progress, waiting...")
-        print("   If stuck, run: bash daemon restart")
+        active_pid = status.get("caller_pid", "unknown")
+        active_cwd = status.get("caller_cwd", "unknown")
+        print(f"⏳ Another installation in progress, waiting...")
+        print(f"   Active installation: PID={active_pid}, CWD={active_cwd}")
+        print(f"   If stuck, run: bash daemon restart")
         # Wait for ongoing installation to complete
         timeout_start = time.time()
         while status.get("installation_in_progress", False):

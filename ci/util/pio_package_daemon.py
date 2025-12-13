@@ -175,14 +175,18 @@ def update_status(state: str, message: str, **kwargs: Any) -> None:
         state: One of: idle, installing, completed, failed
         message: Human-readable status message
         **kwargs: Additional fields to include in status
+                 Use installation_in_progress=True/False to override global flag
     """
     global _installation_in_progress
+
+    # Allow explicit override of installation_in_progress flag
+    if "installation_in_progress" not in kwargs:
+        kwargs["installation_in_progress"] = _installation_in_progress
 
     status = {
         "state": state,
         "message": message,
         "updated_at": time.time(),
-        "installation_in_progress": _installation_in_progress,
         **kwargs,
     }
 
@@ -375,6 +379,8 @@ def run_package_install_with_retry(
     cmd: list[str],
     environment: str | None,
     project_dir: str,
+    caller_pid: str | int = "unknown",
+    caller_cwd: str = "unknown",
     max_retries: int = MAX_NETWORK_RETRIES,
 ) -> tuple[int, str]:
     """Run package install with retry logic for network errors.
@@ -386,6 +392,8 @@ def run_package_install_with_retry(
         cmd: Command to execute
         environment: Environment name (for status updates), or None for default
         project_dir: Project directory (for status updates)
+        caller_pid: Caller process PID (for status updates)
+        caller_cwd: Caller working directory (for status updates)
         max_retries: Maximum retry attempts (default: 3)
 
     Returns:
@@ -420,6 +428,8 @@ def run_package_install_with_retry(
                 retry_msg,
                 environment=environment,
                 project_dir=project_dir,
+                caller_pid=caller_pid,
+                caller_cwd=caller_cwd,
             )
             time.sleep(5)  # Brief delay before retry
 
@@ -453,6 +463,8 @@ def run_package_install_with_retry(
                     line_stripped,
                     environment=environment,
                     project_dir=project_dir,
+                    caller_pid=caller_pid,
+                    caller_cwd=caller_cwd,
                 )
 
         # Log stdout closure
@@ -540,6 +552,8 @@ def process_package_request(request: dict[str, Any]) -> bool:
     """
     project_dir = request["project_dir"]
     environment = request.get("environment")
+    caller_pid = request.get("caller_pid", "unknown")
+    caller_cwd = request.get("caller_cwd", "unknown")
 
     # If no environment specified, use default_envs from platformio.ini
     # This prevents PlatformIO from installing packages for ALL environments
@@ -571,6 +585,8 @@ def process_package_request(request: dict[str, Any]) -> bool:
         environment=environment,
         project_dir=project_dir,
         started_at=time.time(),
+        caller_pid=caller_pid,
+        caller_cwd=caller_cwd,
     )
 
     # Build command - omit --environment if None to use PlatformIO default
@@ -595,6 +611,8 @@ def process_package_request(request: dict[str, Any]) -> bool:
             cmd,
             environment,
             project_dir,
+            caller_pid,
+            caller_cwd,
         )
 
         if returncode == 0:
@@ -623,7 +641,11 @@ def process_package_request(request: dict[str, Any]) -> bool:
                     logging.warning(f"Post-install validation error (non-fatal): {e}")
                     # Don't fail installation on validation error, just log
 
-            update_status("completed", "Package installation successful")
+            update_status(
+                "completed",
+                "Package installation successful",
+                installation_in_progress=False,
+            )
             return True
         else:
             logging.error(f"Package installation failed with exit code {returncode}")
@@ -634,16 +656,20 @@ def process_package_request(request: dict[str, Any]) -> bool:
             else:
                 error_msg = f"Package installation failed (exit {returncode})"
 
-            update_status("failed", error_msg)
+            update_status("failed", error_msg, installation_in_progress=False)
             return False
 
     except KeyboardInterrupt:
         logging.warning("Package installation interrupted by user")
-        update_status("failed", "Installation interrupted by user")
+        update_status(
+            "failed", "Installation interrupted by user", installation_in_progress=False
+        )
         raise
     except Exception as e:
         logging.error(f"Package installation error: {e}")
-        update_status("failed", f"Installation error: {e}")
+        update_status(
+            "failed", f"Installation error: {e}", installation_in_progress=False
+        )
         return False
     finally:
         # Mark installation as complete
@@ -742,12 +768,23 @@ def run_daemon_loop() -> None:
                 # CHECK: Refuse if installation already in progress
                 with _installation_lock:
                     if _installation_in_progress:
+                        # Read current status to get active caller info
+                        current_status = read_status_file_safe()
+                        active_pid = current_status.get("caller_pid", "unknown")
+                        active_cwd = current_status.get("caller_cwd", "unknown")
+
+                        # Get incoming request info
+                        incoming_pid = request.get("caller_pid", "unknown")
+                        incoming_cwd = request.get("caller_cwd", "unknown")
+
                         logging.warning(
-                            "Installation already in progress, refusing concurrent request"
+                            f"Installation already in progress, refusing concurrent request. "
+                            f"Active installation: PID={active_pid}, CWD={active_cwd}. "
+                            f"Incoming request: PID={incoming_pid}, CWD={incoming_cwd}"
                         )
                         update_status(
                             "failed",
-                            "Installation already in progress (concurrent request denied)",
+                            f"Installation already in progress (active PID: {active_pid}, CWD: {active_cwd})",
                         )
                         clear_request_file()
                         continue  # Skip this request
