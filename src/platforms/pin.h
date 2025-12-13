@@ -27,6 +27,8 @@
     #include "platforms/arm/samd/pin_samd.hpp"
 #elif defined(FL_IS_RP2040)
     #include "platforms/arm/rp/pin_rp.hpp"
+#elif defined(FL_IS_SILABS)
+    #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
 #elif defined(FL_IS_STUB)

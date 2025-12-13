@@ -13,6 +13,7 @@
 // Include platform-specific detection headers
 #include "rp/is_rp2040.h"
 #include "samd/is_samd.h"
+#include "silabs/is_silabs.h"
 #include "stm32/is_stm32.h"
 #include "teensy/is_teensy.h"
 

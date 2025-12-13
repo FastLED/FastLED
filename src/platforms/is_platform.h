@@ -47,6 +47,10 @@
 /// - FL_IS_RP2040: Raspberry Pi RP2040 (dual Cortex-M0+, Pico, Pico W, etc.)
 /// - FL_IS_RP2350: Raspberry Pi RP2350 (dual Cortex-M33 or RISC-V, Pico 2, etc.)
 ///
+/// Silicon Labs Platforms (ARM-based):
+/// - FL_IS_SILABS: General Silicon Labs EFM32/EFR32 platform
+/// - FL_IS_SILABS_MGM240: MGM240 (EFR32MG24) - Arduino Nano Matter, SparkFun Thing Plus Matter
+///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
 /// - FL_IS_AVR_ATMEGA: ATmega family (328P, 2560, 32U4, etc.)
@@ -117,6 +121,7 @@
 #include "arm/is_arm.h"
 #include "arm/rp/is_rp.h"
 #include "arm/samd/is_samd.h"
+#include "arm/silabs/is_silabs.h"
 #include "arm/teensy/is_teensy.h"
 #include "avr/is_avr.h"
 #include "esp/is_esp.h"
