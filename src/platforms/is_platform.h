@@ -57,6 +57,10 @@
 /// - FL_IS_NRF52833: nRF52833 (Cortex-M4F, 64 MHz, 512KB Flash, BLE 5.1)
 /// - FL_IS_NRF52840: nRF52840 (Cortex-M4F, 64 MHz, 1MB Flash, USB) - Adafruit Feather nRF52840, etc.
 ///
+/// Renesas Platforms (ARM-based):
+/// - FL_IS_RENESAS: General Renesas platform (any Renesas variant)
+/// - FL_IS_RENESAS_RA4M1: Renesas RA4M1 (Cortex-M4, 48 MHz) - Arduino UNO R4 Minima/WiFi
+///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
 /// - FL_IS_AVR_ATMEGA: ATmega family (328P, 2560, 32U4, etc.)

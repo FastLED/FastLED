@@ -12,6 +12,7 @@
 
 // Include platform-specific detection headers
 #include "nrf52/is_nrf52.h"
+#include "renesas/is_renesas.h"
 #include "rp/is_rp2040.h"
 #include "samd/is_samd.h"
 #include "silabs/is_silabs.h"
@@ -29,8 +30,8 @@
     defined(__MK20DX128__) || defined(__MK20DX256__) || \
     defined(__MKL26Z64__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
     defined(__IMXRT1062__) || \
-    /* Arduino Renesas UNO R4 */ \
-    defined(ARDUINO_ARCH_RENESAS) || \
+    /* Renesas (Arduino UNO R4, RA4M1) - defined by is_renesas.h */ \
+    defined(FL_IS_RENESAS) || \
     /* Arduino STM32H747 (GIGA) */ \
     defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || \
     /* Nordic nRF52 */ \

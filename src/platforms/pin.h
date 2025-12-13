@@ -29,6 +29,8 @@
     #include "platforms/arm/rp/pin_rp.hpp"
 #elif defined(FL_IS_NRF52)
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
+#elif defined(FL_IS_RENESAS)
+    #include "platforms/arm/renesas/pin_renesas.hpp"
 #elif defined(FL_IS_SILABS)
     #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(FL_IS_APOLLO3)
