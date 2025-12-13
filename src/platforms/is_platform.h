@@ -133,10 +133,13 @@
 // Include all platform detection headers
 #include "apollo3/is_apollo3.h"
 #include "arm/is_arm.h"
+#include "arm/nrf52/is_nrf52.h"
+#include "arm/renesas/is_renesas.h"
 #include "arm/rp/is_rp.h"
 #include "arm/sam/is_sam.h"
 #include "arm/samd/is_samd.h"
 #include "arm/silabs/is_silabs.h"
+#include "arm/stm32/is_stm32.h"
 #include "arm/teensy/is_teensy.h"
 #include "avr/is_avr.h"
 #include "esp/is_esp.h"
