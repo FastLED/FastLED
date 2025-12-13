@@ -25,12 +25,32 @@
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
+// ============================================================================
+// Detail namespace: Type-safe wrappers that accept Arduino enum types
+// ============================================================================
+
+namespace detail {
+
+inline void pinMode(int pin, Arduino_PinMode mode) {
     ::pinMode(pin, mode);
 }
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinStatus val) {
     ::digitalWrite(pin, val);
+}
+
+}  // namespace detail
+
+// ============================================================================
+// Public API: int-based interface that casts to enum types
+// ============================================================================
+
+inline void pinMode(int pin, int mode) {
+    detail::pinMode(pin, static_cast<Arduino_PinMode>(mode));
+}
+
+inline void digitalWrite(int pin, int val) {
+    detail::digitalWrite(pin, static_cast<PinStatus>(val));
 }
 
 inline int digitalRead(int pin) {
