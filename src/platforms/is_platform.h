@@ -37,6 +37,14 @@
 /// - FL_IS_TEENSY_40: Teensy 4.0 (Cortex-M7, IMXRT1062)
 /// - FL_IS_TEENSY_41: Teensy 4.1 (Cortex-M7, IMXRT1062)
 ///
+/// SAMD Platforms (ARM-based):
+/// - FL_IS_SAMD: General SAMD platform (any SAMD board)
+/// - FL_IS_SAMD21: SAMD21 family (Cortex-M0+, Arduino Zero, etc.)
+/// - FL_IS_SAMD51: SAMD51/SAME51 family (Cortex-M4F, Adafruit Metro M4, etc.)
+///
+/// RP2040 Platforms (ARM-based):
+/// - FL_IS_RP2040: Raspberry Pi RP2040 (dual Cortex-M0+, Pico, Pico W, etc.)
+///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
 /// - FL_IS_AVR_ATMEGA: ATmega family (328P, 2560, 32U4, etc.)
@@ -61,8 +69,14 @@
 /// - FL_IS_IDF_5_OR_HIGHER: ESP-IDF 5.x or higher
 /// - FL_IS_IDF_3_OR_LOWER: ESP-IDF 3.x or lower
 ///
+/// Apollo3 Platforms:
+/// - FL_IS_APOLLO3: Ambiq Apollo3 platform (SparkFun Artemis family)
+///
 /// WebAssembly Platforms:
 /// - FL_IS_WASM: WebAssembly platform (Emscripten)
+///
+/// Stub/Testing Platforms:
+/// - FL_IS_STUB: Stub platform (native builds, unit tests, host environments)
 ///
 /// POSIX Platforms:
 /// - FL_IS_POSIX: General POSIX-compliant platform (Linux, macOS, BSD, etc.)
@@ -97,10 +111,14 @@
 /// @endcode
 
 // Include all platform detection headers
+#include "apollo3/is_apollo3.h"
 #include "arm/is_arm.h"
+#include "arm/rp/is_rp2040.h"
+#include "arm/samd/is_samd.h"
 #include "arm/teensy/is_teensy.h"
 #include "avr/is_avr.h"
 #include "esp/is_esp.h"
 #include "posix/is_posix.h"
+#include "stub/is_stub.h"
 #include "wasm/is_wasm.h"
 #include "win/is_win.h"

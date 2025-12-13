@@ -10,8 +10,11 @@
 /// Used by platforms/int.h for platform dispatching and by ARM platform headers
 /// for validation that ARM detection has occurred.
 
-// Include STM32 platform detection
+// Include platform-specific detection headers
+#include "rp/is_rp2040.h"
+#include "samd/is_samd.h"
 #include "stm32/is_stm32.h"
+#include "teensy/is_teensy.h"
 
 /// ARM platform detection with optimized macro grouping
 /// This checks for various ARM-based microcontroller families

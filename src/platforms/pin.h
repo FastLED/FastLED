@@ -9,24 +9,27 @@
 /// compile-time platform detection. It is included ONLY by fl/pin.cpp to
 /// maintain the compilation boundary.
 
+// Include platform detection to access FL_IS_* macros
+#include "platforms/is_platform.h"
+
 // Platform-specific pin implementations (header-only .hpp files)
-#if defined(ESP32)
+#if defined(FL_IS_ESP32)
     #include "platforms/esp/32/pin_esp32.hpp"
-#elif defined(ESP8266)
+#elif defined(FL_IS_ESP8266)
     #include "platforms/esp/8266/pin_esp8266.hpp"
-#elif defined(ARDUINO_ARCH_AVR) || defined(__AVR__)
+#elif defined(FL_IS_AVR)
     #include "platforms/avr/pin_avr.hpp"
-#elif defined(ARDUINO_ARCH_TEENSY) || defined(__MK20DX256__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)
+#elif FL_IS_TEENSY
     #include "platforms/arm/teensy/pin_teensy.hpp"
-#elif defined(ARDUINO_ARCH_STM32) || defined(STM32)
+#elif defined(FL_IS_STM32)
     #include "platforms/arm/stm32/pin_stm32.hpp"
-#elif defined(ARDUINO_ARCH_SAMD) || defined(__SAMD21__) || defined(__SAMD51__)
+#elif defined(FL_IS_SAMD)
     #include "platforms/arm/samd/pin_samd.hpp"
-#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)
+#elif defined(FL_IS_RP2040)
     #include "platforms/arm/rp/pin_rp.hpp"
-#elif defined(ARDUINO_ARCH_APOLLO3) || defined(ARDUINO_APOLLO3)
+#elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
-#elif defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+#elif defined(FL_IS_STUB)
     // Stub platform for testing (no-op pins)
     #include "platforms/shared/pin_noop.hpp"
 #elif defined(ARDUINO)
