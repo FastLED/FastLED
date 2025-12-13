@@ -908,7 +908,9 @@ private:
         rmt_receive_config_t rx_params = {};
         rx_params.signal_range_min_ns = mSignalRangeMinNs;
         rx_params.signal_range_max_ns = mSignalRangeMaxNs;
-        rx_params.flags.en_partial_rx = 1;  // Enable partial reception for long data streams (>~250 symbols)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+        rx_params.flags.en_partial_rx = true;  // Enable partial reception for long data streams (>~250 symbols, ESP-IDF 5.3+)
+#endif
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
         auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
@@ -934,10 +936,12 @@ private:
      * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
      * capture phase - store the received symbols and filter spurious idle-state symbols.
      *
-     * Dual-Buffer Architecture:
+     * Dual-Buffer Architecture (ESP-IDF 5.3.0+):
      * With en_partial_rx enabled, this callback fires multiple times for long streams.
      * Each callback receives a new chunk of data in data->received_symbols (DMA buffer).
      * We must MANUALLY COPY from DMA buffer to accumulation buffer before the next callback overwrites it.
+     *
+     * ESP-IDF < 5.3.0: Single-shot receive mode only (callback fires once, buffer size limited).
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t* data,
@@ -992,9 +996,14 @@ private:
 
         // Only signal completion when this is the final callback (is_last flag from ESP-IDF)
         // With en_partial_rx enabled, callback may be invoked multiple times for long streams
-        if (data->flags.is_last) {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+        if (data->is_last) {
             self->mReceiveDone = true;
         }
+#else
+        // ESP-IDF < 5.3.0: No partial RX support, callback fires only once
+        self->mReceiveDone = true;
+#endif
 
         // No higher-priority task awakened
         return false;
