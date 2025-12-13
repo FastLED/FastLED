@@ -18,16 +18,30 @@
 namespace fl {
 
 // ============================================================================
+// Template trampolines: automatically infer parameter types from function pointers
+// ============================================================================
+
+template<typename T>
+inline void pinModeTrampoline(int pin, int mode, void(*func)(int, T)) {
+    func(pin, static_cast<T>(mode));
+}
+
+template<typename T>
+inline void digitalWriteTrampoline(int pin, int val, void(*func)(int, T)) {
+    func(pin, static_cast<T>(val));
+}
+
+template<typename T>
+inline void analogReferenceTrampoline(int mode, void(*func)(T)) {
+    func(static_cast<T>(mode));
+}
+
+// ============================================================================
 // Pin mode control
 // ============================================================================
 
 inline void pinMode(int pin, int mode) {
-#if defined(ARDUINO_ARCH_SILABS)
-    // Silabs Arduino framework requires PinMode enum instead of int
-    ::pinMode(pin, static_cast<PinMode>(mode));
-#else
-    ::pinMode(pin, mode);
-#endif
+    pinModeTrampoline(pin, mode, ::pinMode);
 }
 
 // ============================================================================
@@ -35,12 +49,7 @@ inline void pinMode(int pin, int mode) {
 // ============================================================================
 
 inline void digitalWrite(int pin, int val) {
-#if defined(ARDUINO_ARCH_SILABS)
-    // Silabs Arduino framework requires PinStatus enum instead of int
-    ::digitalWrite(pin, static_cast<PinStatus>(val));
-#else
-    ::digitalWrite(pin, val);
-#endif
+    digitalWriteTrampoline(pin, val, ::digitalWrite);
 }
 
 inline int digitalRead(int pin) {
@@ -60,12 +69,7 @@ inline void analogWrite(int pin, int val) {
 }
 
 inline void analogReference(int mode) {
-#if defined(ARDUINO_SAM_DUE) || defined(__SAM3X8E__) || defined(NRF52_SERIES)
-    // Arduino SAM (Due) and nRF52 require eAnalogReference enum instead of int
-    ::analogReference(static_cast<eAnalogReference>(mode));
-#else
-    ::analogReference(mode);
-#endif
+    analogReferenceTrampoline(mode, ::analogReference);
 }
 
 }  // namespace fl

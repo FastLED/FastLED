@@ -25,12 +25,23 @@
 
 namespace fl {
 
+// Template trampoline: automatically infers second parameter type from function pointer
+template<typename T>
+inline void pinModeTrampoline(int pin, int mode, void(*func)(int, T)) {
+    func(pin, static_cast<T>(mode));
+}
+
+template<typename T>
+inline void digitalWriteTrampoline(int pin, int val, void(*func)(int, T)) {
+    func(pin, static_cast<T>(val));
+}
+
 inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, static_cast<Arduino_PinMode>(mode));
+    pinModeTrampoline(pin, mode, ::pinMode);
 }
 
 inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, static_cast<Arduino_PinStatus>(val));
+    digitalWriteTrampoline(pin, val, ::digitalWrite);
 }
 
 inline int digitalRead(int pin) {
