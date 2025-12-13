@@ -80,6 +80,12 @@ struct ChipsetTiming4Phase {
 
     // Reset pulse threshold
     uint32_t reset_min_us; ///< Reset pulse minimum duration (e.g., 50us)
+
+    // Gap tolerance (optional, for handling transmission gaps like PARLIO DMA gaps)
+    uint32_t gap_tolerance_ns = 0; ///< Maximum gap duration to tolerate (0 = no gap tolerance, treat as error)
+                                    ///< Pulses longer than reset_min_us but shorter than gap_tolerance_ns
+                                    ///< are skipped during decoding without triggering errors.
+                                    ///< Useful for PARLIO ~20us DMA gaps between frames.
 };
 
 /**
@@ -320,6 +326,47 @@ public:
      * @return Pin number this device is listening on
      */
     virtual int getPin() const = 0;
+
+    /**
+     * @brief Manually inject edge timings for testing (Phase 1 - PARLIO gap simulation)
+     * @param edges Span of EdgeTime entries to inject (nanosecond timings)
+     * @return true on success, false if not supported or failed
+     *
+     * This method allows programmatic injection of timing data into RX devices
+     * for testing decoder behavior without actual hardware transmission. Primary
+     * use case is simulating PARLIO transmission gaps (~20us LOW pulses) to
+     * validate gap tolerance in LED decoders.
+     *
+     * IMPORTANT: EdgeTime entries must use nanosecond timings, NOT ticks.
+     * - RMT devices: Will store edges as-is in internal buffer (no tick conversion)
+     * - GPIO ISR devices: Will store edges directly in timestamp buffer
+     *
+     * After injection, use decode() to process the injected edges as if they
+     * were captured from hardware.
+     *
+     * Example (simulate WS2812B with 20us gap):
+     * @code
+     * auto rx = RxDevice::create<RxDeviceType::RMT>(1);
+     * rx->begin(config);
+     *
+     * // Generate EdgeTime sequence for 3 LEDs
+     * fl::EdgeTime edges[144];  // 3 LEDs × 24 bits × 2 edges/bit
+     * size_t count = generateLedEdges(leds, 3, edges);
+     *
+     * // Insert 20us gap (extend last LOW pulse)
+     * edges[count-1].ns += 20000;  // Add 20us to last LOW
+     *
+     * // Inject edges into RX device
+     * if (rx->injectEdges(edges, count)) {
+     *     // Decode injected edges
+     *     uint8_t buffer[9];  // 3 LEDs × 3 bytes
+     *     auto result = rx->decode(timing, buffer);
+     * }
+     * @endcode
+     *
+     * @note Not all RX devices support injection. DummyRxDevice returns false.
+     */
+    virtual bool injectEdges(fl::span<const EdgeTime> edges) = 0;
 
 
 protected:

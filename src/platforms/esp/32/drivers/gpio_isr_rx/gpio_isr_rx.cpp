@@ -164,6 +164,18 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
             break;
         }
 
+        // Check for gap pulse (transmission gap like PARLIO DMA gap)
+        // Gap tolerance check: skip long LOW pulses that are within gap tolerance
+        // Gap must be longer than t0l_max_ns but shorter than gap_tolerance_ns
+        if (timing.gap_tolerance_ns > 0 && edge1.level == 0) {
+            uint32_t low_duration = edge2.time_ns - edge1.time_ns;
+            if (low_duration > timing.t0l_max_ns && low_duration <= timing.gap_tolerance_ns) {
+                FL_DBG("decodeEdgeTimestamps: gap pulse detected at edge " << i << " (duration=" << low_duration << "ns), skipping");
+                i++;  // Skip this edge, continue with next
+                continue;
+            }
+        }
+
         // WS2812B protocol: expect HIGH -> LOW pattern
         if (edge0.level != 1 || edge1.level != 0) {
             FL_DBG("decodeEdgeTimestamps: unexpected edge pattern at " << i);
@@ -176,17 +188,22 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         uint32_t high_ns = edge1.time_ns - edge0.time_ns;
         uint32_t low_ns = edge2.time_ns - edge1.time_ns;
 
+        // Check if LOW duration is a gap (tolerated long LOW pulse)
+        bool is_gap = (timing.gap_tolerance_ns > 0 &&
+                       low_ns > timing.t0l_max_ns &&
+                       low_ns <= timing.gap_tolerance_ns);
+
         // Inline bit decoding for speed
         int bit = -1;
 
-        // Check bit 0 pattern
+        // Check bit 0 pattern (allow gap in LOW portion)
         if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns &&
-            low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) {
+            ((low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) || is_gap)) {
             bit = 0;
         }
-        // Check bit 1 pattern
+        // Check bit 1 pattern (allow gap in LOW portion)
         else if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns &&
-                 low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) {
+                 ((low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) || is_gap)) {
             bit = 1;
         }
 
@@ -797,6 +814,56 @@ private:
     int getPin() const override {
         return static_cast<int>(mPin);
     }
+
+    bool injectEdges(fl::span<const EdgeTime> edges) override {
+        if (edges.empty()) {
+            FL_WARN("injectEdges(): empty edges span");
+            return false;
+        }
+
+        // Allocate edge buffer if needed
+        if (mEdgeBuffer.empty()) {
+            mEdgeBuffer.clear();
+            mEdgeBuffer.reserve(edges.size());
+            for (size_t i = 0; i < edges.size(); i++) {
+                mEdgeBuffer.push_back({0, 0});
+            }
+        } else if (mEdgeBuffer.size() < edges.size()) {
+            FL_WARN("injectEdges(): edge buffer too small (need " << edges.size()
+                    << ", have " << mEdgeBuffer.size() << ")");
+            return false;
+        }
+
+        FL_DBG("injectEdges(): injecting " << edges.size() << " edges into GPIO ISR RX buffer");
+
+        // Convert EdgeTime to EdgeTimestamp (accumulate nanoseconds)
+        // EdgeTime stores durations, EdgeTimestamp stores transition times
+        uint32_t accumulated_ns = 0;
+        for (size_t i = 0; i < edges.size(); i++) {
+            const EdgeTime& edge = edges[i];
+
+            // Store transition time BEFORE adding duration
+            // This represents when the signal transitions TO this level
+            mEdgeBuffer[i].time_ns = accumulated_ns;
+            mEdgeBuffer[i].level = edge.high ? 1 : 0;
+
+            // Accumulate timestamp AFTER storing
+            accumulated_ns += edge.ns;
+
+            FL_DBG("  Edge[" << i << "]: time_ns=" << mEdgeBuffer[i].time_ns
+                   << ", level=" << (int)mEdgeBuffer[i].level
+                   << " (duration=" << edge.ns << "ns)");
+        }
+
+        // Update state
+        mIsrCtx.edgesCounter = edges.size();
+        mIsrCtx.receiveDone = true;
+        mNeedsConversion = false;  // Data is already in nanoseconds
+
+        FL_DBG("injectEdges(): injected " << edges.size() << " edges successfully");
+        return true;
+    }
+
 
     // ISR-optimized context - single structure for fast access
     IsrContext mIsrCtx;

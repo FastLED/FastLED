@@ -33,22 +33,26 @@ ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
     uint32_t t1h = timing_3phase.T1 + timing_3phase.T2; // Bit 1 high time
     uint32_t t1l = timing_3phase.T3;                    // Bit 1 low time
 
-    return ChipsetTiming4Phase{
-        // Bit 0 timing thresholds
-        .t0h_min_ns = (t0h > tolerance_ns) ? (t0h - tolerance_ns) : 0,
-        .t0h_max_ns = t0h + tolerance_ns,
-        .t0l_min_ns = (t0l > tolerance_ns) ? (t0l - tolerance_ns) : 0,
-        .t0l_max_ns = t0l + tolerance_ns,
+    ChipsetTiming4Phase result;
 
-        // Bit 1 timing thresholds
-        .t1h_min_ns = (t1h > tolerance_ns) ? (t1h - tolerance_ns) : 0,
-        .t1h_max_ns = t1h + tolerance_ns,
-        .t1l_min_ns = (t1l > tolerance_ns) ? (t1l - tolerance_ns) : 0,
-        .t1l_max_ns = t1l + tolerance_ns,
+    // Bit 0 timing thresholds
+    result.t0h_min_ns = (t0h > tolerance_ns) ? (t0h - tolerance_ns) : 0;
+    result.t0h_max_ns = t0h + tolerance_ns;
+    result.t0l_min_ns = (t0l > tolerance_ns) ? (t0l - tolerance_ns) : 0;
+    result.t0l_max_ns = t0l + tolerance_ns;
 
-        // Reset pulse threshold
-        .reset_min_us = timing_3phase.RESET
-    };
+    // Bit 1 timing thresholds
+    result.t1h_min_ns = (t1h > tolerance_ns) ? (t1h - tolerance_ns) : 0;
+    result.t1h_max_ns = t1h + tolerance_ns;
+    result.t1l_min_ns = (t1l > tolerance_ns) ? (t1l - tolerance_ns) : 0;
+    result.t1l_max_ns = t1l + tolerance_ns;
+
+    // Reset pulse threshold
+    result.reset_min_us = timing_3phase.RESET;
+
+    // gap_tolerance_ns retains its default value of 0
+
+    return result;
 }
 
 } // namespace fl

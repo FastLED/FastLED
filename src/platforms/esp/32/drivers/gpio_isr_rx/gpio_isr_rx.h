@@ -190,6 +190,16 @@ public:
     virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                        fl::span<uint8_t> out) override = 0;
 
+    /**
+     * @brief Manually inject edge timings for testing (Phase 1)
+     * @param edges Span of EdgeTime entries to inject (nanosecond timings)
+     * @return true on success, false on failure
+     *
+     * Stores EdgeTime entries directly in internal edge buffer as EdgeTimestamp.
+     * After injection, use decode() to process edges.
+     */
+    virtual bool injectEdges(fl::span<const EdgeTime> edges) override = 0;
+
 protected:
     GpioIsrRx() = default;
 };

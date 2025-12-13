@@ -62,6 +62,12 @@ public:
         return -1;  // Dummy device has no pin
     }
 
+    bool injectEdges(fl::span<const EdgeTime> edges) override {
+        (void)edges;
+        warnOnce();
+        return false;  // Not supported
+    }
+
 private:
     void warnOnce() const {
         if (!mWarned) {

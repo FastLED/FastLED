@@ -86,6 +86,54 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, ui
 }
 
 /**
+ * @brief Check if symbol is a gap pulse (transmission gap like PARLIO DMA gap)
+ * @param symbol RMT symbol to check
+ * @param timing Timing thresholds
+ * @param ns_per_tick Cached nanoseconds per tick
+ * @return true if symbol is gap pulse (long low duration longer than reset but within gap tolerance)
+ *
+ * Gap pulses are longer than normal bit LOW times but shorter than gap_tolerance_ns.
+ * These are skipped during decoding without triggering errors.
+ * Common in PARLIO TX due to DMA transfer gaps (~20us).
+ */
+inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32_t ns_per_tick) {
+    // No gap tolerance configured - treat as error
+    if (timing.gap_tolerance_ns == 0) {
+        return false;
+    }
+
+    // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
+    const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
+
+    // Convert durations to nanoseconds
+    uint32_t duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
+    uint32_t duration1_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
+
+    // Reset threshold (convert microseconds to nanoseconds)
+    uint32_t reset_min_ns = timing.reset_min_us * 1000;
+
+    // Gap pulse characteristics:
+    // - Long LOW duration (longer than normal bit LOW timing)
+    // - Shorter than reset threshold (not a frame reset)
+    // - Within gap_tolerance_ns
+    // - Should have level=0 (low) for the long duration
+    //
+    // The longest normal LOW pulse is t0l_max_ns, so gap must be longer than that
+
+    // Check duration1 (most common case - gap at end of bit sequence)
+    if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns && duration1_ns <= timing.gap_tolerance_ns) {
+        return true;
+    }
+
+    // Check duration0 (less common - gap at start)
+    if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns && duration0_ns <= timing.gap_tolerance_ns) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * @brief Decode single symbol to bit value
  * @param symbol RMT symbol to decode
  * @param timing Timing thresholds
@@ -110,20 +158,25 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32
         return -1;
     }
 
+    // Check if LOW duration is a gap (tolerated long LOW pulse)
+    bool is_gap = (timing.gap_tolerance_ns > 0 &&
+                   low_ns > timing.t0l_max_ns &&
+                   low_ns <= timing.gap_tolerance_ns);
+
     // Decision logic: check if timing matches bit 0 pattern
     bool t0h_match = (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
     bool t0l_match = (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
 
-    if (t0h_match && t0l_match) {
-        return 0; // Bit 0
+    if (t0h_match && (t0l_match || is_gap)) {
+        return 0; // Bit 0 (LOW matches normal timing or is a tolerated gap)
     }
 
     // Check if timing matches bit 1 pattern
     bool t1h_match = (high_ns >= timing.t1h_min_ns) && (high_ns <= timing.t1h_max_ns);
     bool t1l_match = (low_ns >= timing.t1l_min_ns) && (low_ns <= timing.t1l_max_ns);
 
-    if (t1h_match && t1l_match) {
-        return 1; // Bit 1
+    if (t1h_match && (t1l_match || is_gap)) {
+        return 1; // Bit 1 (LOW matches normal timing or is a tolerated gap)
     }
 
     // Timing doesn't match either pattern
@@ -665,6 +718,78 @@ public:
         return write_index;
     }
 
+    bool injectEdges(fl::span<const EdgeTime> edges) override {
+        if (edges.empty()) {
+            FL_WARN("injectEdges(): empty edges span");
+            return false;
+        }
+
+        // Check if edges count is even (must have pairs for RMT symbols)
+        if (edges.size() % 2 != 0) {
+            FL_WARN("injectEdges(): edge count must be even (got " << edges.size() << ")");
+            return false;
+        }
+
+        // Calculate number of symbols needed
+        size_t symbol_count = edges.size() / 2;
+
+        // Allocate accumulation buffer if needed
+        if (mAccumulationBuffer.empty()) {
+            mAccumulationBuffer.clear();
+            mAccumulationBuffer.reserve(symbol_count);
+            for (size_t i = 0; i < symbol_count; i++) {
+                mAccumulationBuffer.push_back(0);
+            }
+        } else if (mAccumulationBuffer.size() < symbol_count) {
+            FL_WARN("injectEdges(): accumulation buffer too small (need " << symbol_count
+                    << ", have " << mAccumulationBuffer.size() << ")");
+            return false;
+        }
+
+        // Calculate nanoseconds per tick for conversion (ns → ticks)
+        // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per tick
+        uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
+
+        FL_DBG("injectEdges(): converting " << edges.size() << " edges to "
+               << symbol_count << " RMT symbols (resolution=" << mResolutionHz
+               << "Hz, ns_per_tick=" << ns_per_tick << ")");
+
+        // Convert EdgeTime pairs to RMT symbols
+        auto* rmt_symbols = reinterpret_cast<rmt_symbol_word_t*>(mAccumulationBuffer.data());
+
+        for (size_t i = 0; i < symbol_count; i++) {
+            const EdgeTime& edge0 = edges[i * 2];      // First edge (duration0)
+            const EdgeTime& edge1 = edges[i * 2 + 1];  // Second edge (duration1)
+
+            // Convert nanoseconds to ticks
+            uint32_t duration0_ticks = (edge0.ns + ns_per_tick / 2) / ns_per_tick;  // Round to nearest
+            uint32_t duration1_ticks = (edge1.ns + ns_per_tick / 2) / ns_per_tick;
+
+            // Clamp to RMT symbol limits (15 bits = 0-32767)
+            if (duration0_ticks > 32767) duration0_ticks = 32767;
+            if (duration1_ticks > 32767) duration1_ticks = 32767;
+
+            // Build RMT symbol
+            rmt_symbols[i].duration0 = duration0_ticks;
+            rmt_symbols[i].level0 = edge0.high ? 1 : 0;
+            rmt_symbols[i].duration1 = duration1_ticks;
+            rmt_symbols[i].level1 = edge1.high ? 1 : 0;
+
+            FL_DBG("  Symbol[" << i << "]: duration0=" << duration0_ticks << " (" << edge0.ns
+                   << "ns), level0=" << (int)rmt_symbols[i].level0
+                   << ", duration1=" << duration1_ticks << " (" << edge1.ns
+                   << "ns), level1=" << (int)rmt_symbols[i].level1);
+        }
+
+        // Update state
+        mSymbolsReceived = symbol_count;
+        mReceiveDone = true;
+
+        FL_DBG("injectEdges(): injected " << symbol_count << " symbols successfully");
+        return true;
+    }
+
+
 private:
     /**
      * @brief Handle skip phase by discarding symbols until mSkipCounter reaches 0
@@ -775,17 +900,18 @@ private:
      * - ISR callback copies from DMA buffer to accumulation buffer on each partial RX callback
      */
     bool allocateAndArm() {
-        // Allocate DMA buffer (small size for partial RX mode)
+        // Allocate DMA buffer (moderate size for partial RX mode)
         // ESP-IDF partial RX mode works by:
-        // 1. User provides small buffer to rmt_receive()
+        // 1. User provides buffer to rmt_receive()
         // 2. Hardware fills this buffer from FIFO
         // 3. Callback fires with pointer to filled region
         // 4. User must copy data before returning from callback
         // 5. Hardware continues filling from where it left off
         //
-        // The buffer size should be small enough to trigger multiple callbacks
-        // but large enough to avoid excessive callback overhead.
-        constexpr size_t DMA_BUFFER_SIZE = 256;  // Small buffer to trigger multiple callbacks
+        // The buffer size should be large enough to reduce callback overhead
+        // but not too large to cause memory allocation issues.
+        // Iteration 10: Increased from 256 to 4096 to fix premature RX termination at ~225 LEDs
+        constexpr size_t DMA_BUFFER_SIZE = 4096;  // Larger buffer to reduce callback frequency
         mInternalBuffer.clear();
         mInternalBuffer.reserve(DMA_BUFFER_SIZE);
         for (size_t i = 0; i < DMA_BUFFER_SIZE; i++) {

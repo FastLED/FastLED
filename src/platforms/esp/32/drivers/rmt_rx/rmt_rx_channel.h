@@ -236,6 +236,16 @@ public:
      */
     virtual const char* name() const override = 0;
 
+    /**
+     * @brief Manually inject edge timings for testing (Phase 1)
+     * @param edges Span of EdgeTime entries to inject (nanosecond timings)
+     * @return true on success, false on failure
+     *
+     * Converts EdgeTime (nanosecond) to RMT symbols (ticks) and stores
+     * in internal buffer. After injection, use decode() to process edges.
+     */
+    virtual bool injectEdges(fl::span<const EdgeTime> edges) override = 0;
+
 protected:
     RmtRxChannel() = default;
 
