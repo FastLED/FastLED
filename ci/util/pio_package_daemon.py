@@ -25,8 +25,10 @@ import os
 import platform
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import threading
 import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -44,6 +46,10 @@ STATUS_FILE = DAEMON_DIR / "package_status.json"
 REQUEST_FILE = DAEMON_DIR / "package_request.json"
 LOG_FILE = DAEMON_DIR / "daemon.log"
 IDLE_TIMEOUT = 43200  # 12 hours
+
+# Global state to track installation status
+_installation_in_progress = False
+_installation_lock = threading.Lock()
 
 # Network error patterns for retry detection
 NETWORK_ERROR_PATTERNS = [
@@ -170,10 +176,13 @@ def update_status(state: str, message: str, **kwargs: Any) -> None:
         message: Human-readable status message
         **kwargs: Additional fields to include in status
     """
+    global _installation_in_progress
+
     status = {
         "state": state,
         "message": message,
         "updated_at": time.time(),
+        "installation_in_progress": _installation_in_progress,
         **kwargs,
     }
 
@@ -414,6 +423,12 @@ def run_package_install_with_retry(
             )
             time.sleep(5)  # Brief delay before retry
 
+        # Log subprocess start
+        logging.info(
+            f"Starting subprocess: pio pkg install (attempt {attempt + 1}/{max_retries})"
+        )
+        logging.debug(f"Command: {cmd_str if is_windows else ' '.join(cmd)}")
+
         proc = subprocess.Popen(
             cmd_str,
             stdout=subprocess.PIPE,
@@ -423,6 +438,9 @@ def run_package_install_with_retry(
             shell=shell,
             env=env,
         )
+
+        # Log subprocess PID
+        logging.debug(f"Subprocess PID: {proc.pid}")
 
         output_lines = []
         for line in proc.stdout:  # type: ignore
@@ -437,7 +455,28 @@ def run_package_install_with_retry(
                     project_dir=project_dir,
                 )
 
+        # Log stdout closure
+        logging.debug("PlatformIO output stream closed (EOF received)")
+
+        # Check subprocess state before wait
+        if proc.poll() is not None:
+            logging.warning(f"Subprocess already exited with code {proc.returncode}")
+
         returncode = proc.wait()
+
+        # Log subprocess exit
+        logging.info(f"Subprocess exited with code {returncode}")
+
+        # Detect signal termination
+        if returncode < 0:
+            signal_num = -returncode
+            logging.error(f"Subprocess terminated by signal {signal_num}")
+        elif returncode == 15:
+            logging.error(
+                "Exit code 15 detected. This usually indicates SIGTERM. "
+                "Check if kill_lingering_processes() killed the daemon subprocess."
+            )
+
         full_output = "".join(output_lines)
 
         if returncode == 0:
@@ -547,6 +586,11 @@ def process_package_request(request: dict[str, Any]) -> bool:
         cmd.extend(["--environment", environment])
 
     try:
+        # Mark installation as in progress
+        global _installation_in_progress
+        with _installation_lock:
+            _installation_in_progress = True
+
         returncode, full_output = run_package_install_with_retry(
             cmd,
             environment,
@@ -555,6 +599,30 @@ def process_package_request(request: dict[str, Any]) -> bool:
 
         if returncode == 0:
             logging.info("Package installation completed successfully")
+
+            # POST-INSTALL VALIDATION
+            if environment:
+                logging.info("Validating installed packages...")
+                from ci.util.package_validator import check_all_packages
+
+                try:
+                    is_valid, errors = check_all_packages(
+                        Path(project_dir), environment
+                    )
+                    if not is_valid:
+                        logging.error("Post-install validation failed:")
+                        for error in errors:
+                            logging.error(f"  - {error}")
+                        update_status(
+                            "failed", f"Package validation failed: {errors[0]}"
+                        )
+                        return False
+
+                    logging.info("Post-install validation passed")
+                except Exception as e:
+                    logging.warning(f"Post-install validation error (non-fatal): {e}")
+                    # Don't fail installation on validation error, just log
+
             update_status("completed", "Package installation successful")
             return True
         else:
@@ -577,6 +645,10 @@ def process_package_request(request: dict[str, Any]) -> bool:
         logging.error(f"Package installation error: {e}")
         update_status("failed", f"Installation error: {e}")
         return False
+    finally:
+        # Mark installation as complete
+        with _installation_lock:
+            _installation_in_progress = False
 
 
 def should_shutdown() -> bool:
@@ -595,6 +667,31 @@ def should_shutdown() -> bool:
             pass
         return True
     return False
+
+
+def signal_handler(signum: int, frame: object) -> None:
+    """Handle SIGTERM/SIGINT - refuse shutdown during installation."""
+    global _installation_in_progress
+
+    signal_name = "SIGTERM" if signum == signal.SIGTERM else "SIGINT"
+
+    with _installation_lock:
+        if _installation_in_progress:
+            logging.warning(
+                f"Received {signal_name} during active package installation. "
+                f"Refusing graceful shutdown. Use force kill (SIGKILL) to terminate."
+            )
+            print(
+                f"\n⚠️  {signal_name} received during package installation\n"
+                f"⚠️  Cannot shutdown gracefully while installation is active\n"
+                f"⚠️  Installation must complete atomically to prevent corruption\n"
+                f"⚠️  Use 'kill -9 {os.getpid()}' to force termination (may corrupt packages)\n",
+                flush=True,
+            )
+            return  # Refuse shutdown
+        else:
+            logging.info(f"Received {signal_name}, shutting down gracefully")
+            cleanup_and_exit()
 
 
 def cleanup_and_exit() -> None:
@@ -617,6 +714,10 @@ def cleanup_and_exit() -> None:
 
 def run_daemon_loop() -> None:
     """Main daemon loop: process package installation requests."""
+    # Register signal handlers
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     logging.info(f"Daemon started with PID {os.getpid()}")
     update_status("idle", "Daemon ready")
 
@@ -637,6 +738,20 @@ def run_daemon_loop() -> None:
             request = read_request_file()
             if request:
                 logging.info(f"Received request: {request}")
+
+                # CHECK: Refuse if installation already in progress
+                with _installation_lock:
+                    if _installation_in_progress:
+                        logging.warning(
+                            "Installation already in progress, refusing concurrent request"
+                        )
+                        update_status(
+                            "failed",
+                            "Installation already in progress (concurrent request denied)",
+                        )
+                        clear_request_file()
+                        continue  # Skip this request
+
                 last_activity = time.time()
 
                 # Validate request

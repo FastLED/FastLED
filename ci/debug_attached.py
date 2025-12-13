@@ -59,6 +59,7 @@ Usage:
     uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
     uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
+    uv run ci/debug_attached.py --kill-daemon            # Restart daemon before running (useful if stuck)
     uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
 """
 
@@ -69,6 +70,7 @@ import re
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 import psutil
@@ -81,6 +83,14 @@ from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+
+
+@dataclass
+class CompilationResult:
+    """Result of compilation attempt."""
+
+    success: bool
+    corruption_detected: bool
 
 
 def resolve_sketch_path(sketch_arg: str, project_dir: Path) -> str:
@@ -393,8 +403,28 @@ def kill_lingering_processes() -> int:
     except (psutil.NoSuchProcess, psutil.AccessDenied):
         protected_pids = {current_pid}
 
-    # Phase 1: Kill ALL pio.exe processes (PlatformIO native wrapper)
-    # These are always safe to kill - they're just wrappers around python
+    # ADDITION: Protect daemon process and its subprocess tree
+    daemon_pid_file = (
+        Path.home() / ".fastled" / "daemon" / "fastled_pio_package_daemon.pid"
+    )
+    if daemon_pid_file.exists():
+        try:
+            with open(daemon_pid_file, "r") as f:
+                daemon_pid = int(f.read().strip())
+            if psutil.pid_exists(daemon_pid):
+                protected_pids.add(daemon_pid)
+                # Protect daemon's children (subprocess tree)
+                try:
+                    daemon_proc = psutil.Process(daemon_pid)
+                    for child in daemon_proc.children(recursive=True):
+                        protected_pids.add(child.pid)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+        except (ValueError, OSError):
+            pass
+
+    # Phase 1: Kill pio.exe processes (EXCEPT package installation)
+    # pio.exe is a native wrapper, but MUST NOT kill during package installation
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
             if proc.pid in protected_pids:
@@ -404,6 +434,12 @@ def kill_lingering_processes() -> int:
 
             if "pio.exe" == proc_name or "pio" == proc_name:
                 cmdline = proc.info.get("cmdline", [])
+                cmdline_str = " ".join(cmdline).lower()
+
+                # EXCLUDE: Package installation processes (daemon or direct)
+                if "pkg install" in cmdline_str:
+                    continue
+
                 print(
                     f"Killing pio.exe process (PID {proc.pid}): {' '.join(cmdline[:5]) if cmdline else 'pio.exe'}..."
                 )
@@ -422,10 +458,19 @@ def kill_lingering_processes() -> int:
             if not cmdline:
                 continue
 
-            cmdline_str = " ".join(cmdline).lower()
+            cmdline_str = " ".join(cmdline)
+            cmdline_lower = cmdline_str.lower()
             proc_name = proc.info.get("name", "").lower()
 
-            if "esptool" in cmdline_str or "esptool.exe" in proc_name:
+            # REFINED: Only kill esptool when running as upload/flash tool
+            # EXCLUDE: Package installation processes
+            is_esptool_upload = (
+                ("esptool" in cmdline_lower or "esptool.exe" in proc_name)
+                and "pio pkg install" not in cmdline_lower
+                and "tool-esptoolpy" not in cmdline_lower
+            )
+
+            if is_esptool_upload:
                 print(
                     f"Killing esptool process (PID {proc.pid}): {' '.join(cmdline[:5])}..."
                 )
@@ -497,11 +542,63 @@ def kill_lingering_processes() -> int:
     return killed_count
 
 
+def detect_package_corruption() -> tuple[bool, list[str]]:
+    """Detect corrupted packages by scanning for MSYS-corrupted toolchains.
+
+    Returns:
+        (corruption_detected, list_of_corrupted_packages)
+    """
+    packages_dir = Path.home() / ".platformio" / "packages"
+    corrupted = []
+
+    # Check toolchain packages for MSYS corruption (missing bin/ directory)
+    for pkg_dir in packages_dir.glob("toolchain-*"):
+        bin_dir = pkg_dir / "bin"
+        if not bin_dir.exists() or not bin_dir.is_dir():
+            corrupted.append(pkg_dir.name)
+        elif not list(bin_dir.glob("*-gcc*")):
+            # bin exists but no compiler
+            corrupted.append(pkg_dir.name)
+
+    # Check for orphaned temp directories
+    for tmp_dir in packages_dir.glob("_tmp_installing-*"):
+        corrupted.append(tmp_dir.name)
+
+    return len(corrupted) > 0, corrupted
+
+
+def clean_corrupted_packages(corrupted_packages: list[str]) -> int:
+    """Remove corrupted packages.
+
+    Args:
+        corrupted_packages: List of package directory names to remove
+
+    Returns:
+        Number of packages removed
+    """
+    packages_dir = Path.home() / ".platformio" / "packages"
+    cleaned_count = 0
+
+    import shutil
+
+    for pkg_name in corrupted_packages:
+        pkg_path = packages_dir / pkg_name
+        if pkg_path.exists():
+            print(f"  Removing: {pkg_name}")
+            try:
+                shutil.rmtree(pkg_path, ignore_errors=True)
+                cleaned_count += 1
+            except Exception as e:
+                print(f"  Warning: Could not remove {pkg_name}: {e}")
+
+    return cleaned_count
+
+
 def run_compile(
     build_dir: Path,
     environment: str | None = None,
     verbose: bool = False,
-) -> bool:
+) -> CompilationResult:
     """Compile the PlatformIO project.
 
     Args:
@@ -510,7 +607,7 @@ def run_compile(
         verbose: Enable verbose output
 
     Returns:
-        True if compilation succeeded, False otherwise.
+        CompilationResult with success and corruption_detected fields
     """
     # Self-healing: Kill lingering processes before compilation to prevent file locks
     kill_lingering_processes()
@@ -548,13 +645,42 @@ def run_compile(
 
     proc.wait()
     success = proc.returncode == 0
+    corruption_detected = False
 
     if success:
         print("\n✅ Compilation succeeded\n")
     else:
-        print(f"\n❌ Compilation failed (exit code {proc.returncode})\n")
+        print(f"\n❌ Compilation failed (exit code {proc.returncode})")
 
-    return success
+        # Exception-style recovery: Detect corruption after failure
+        print("\nChecking for corrupted packages...")
+
+        try:
+            is_corrupted, corrupted_packages = detect_package_corruption()
+            if is_corrupted:
+                corruption_detected = True
+                print("\n⚠️  Detected corrupted packages:")
+                for pkg in corrupted_packages:
+                    print(f"  - {pkg}")
+
+                print("\n🔧 Cleaning corrupted packages...")
+                cleaned_count = clean_corrupted_packages(corrupted_packages)
+
+                if cleaned_count > 0:
+                    print(f"\n✅ Cleaned {cleaned_count} corrupted package(s)")
+                else:
+                    print("\n⚠️  Could not clean packages")
+            else:
+                print("✅ No package corruption detected")
+
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print(f"⚠️  Corruption detection failed: {e}")
+
+        print()
+
+    return CompilationResult(success=success, corruption_detected=corruption_detected)
 
 
 def check_port_available(port_name: str) -> bool:
@@ -1248,6 +1374,11 @@ Examples:
         action="store_true",
         help="Stream mode: monitor runs indefinitely until Ctrl+C (ignores timeout)",
     )
+    parser.add_argument(
+        "--kill-daemon",
+        action="store_true",
+        help="Stop and restart the package daemon before running (useful if daemon is stuck)",
+    )
 
     return parser.parse_args()
 
@@ -1315,6 +1446,21 @@ def main() -> int:
     print()
 
     try:
+        # Handle --kill-daemon flag (restart daemon before proceeding)
+        if args.kill_daemon:
+            from ci.util.pio_package_client import is_daemon_running, stop_daemon
+
+            print("🔄 Restarting package daemon...")
+            if is_daemon_running():
+                print("   Stopping existing daemon...")
+                stop_daemon()
+                time.sleep(1)  # Brief delay after stop
+                print("   ✅ Daemon stopped")
+            else:
+                print("   ℹ️  Daemon not running")
+            print("   Daemon will auto-start during package installation")
+            print()
+
         # ============================================================
         # PHASE 0: Package Installation (GLOBAL LOCK via daemon)
         # ============================================================
@@ -1337,7 +1483,31 @@ def main() -> int:
         # ============================================================
         # No lock needed: each project has isolated build directory.
         # Multiple agents can compile different projects simultaneously.
-        if not run_compile(build_dir, args.environment, args.verbose):
+
+        # Exception-style recovery: Try compilation, retry once if corruption detected
+        result = run_compile(build_dir, args.environment, args.verbose)
+
+        if not result.success and result.corruption_detected:
+            print(
+                "\n🔄 Corruption detected - reinstalling packages and retrying compilation..."
+            )
+
+            # Reinstall packages via daemon (with clean environment)
+            from ci.util.pio_package_client import ensure_packages_installed
+
+            if not ensure_packages_installed(build_dir, args.environment, timeout=1800):
+                print("\n❌ Package reinstallation failed")
+                return 1
+
+            # Retry compilation once
+            print("\n🔄 Retrying compilation...")
+            result = run_compile(build_dir, args.environment, args.verbose)
+
+            if not result.success:
+                print("\n❌ Compilation failed after retry")
+                return 1
+        elif not result.success:
+            # Compilation failed but no corruption detected
             return 1
 
         # ============================================================

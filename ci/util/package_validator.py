@@ -13,7 +13,11 @@ from pathlib import Path
 
 
 def validate_package(package_dir: Path) -> tuple[bool, str]:
-    """Validate that package is correctly installed.
+    """Validate that package is correctly installed using exception-style recovery.
+
+    This uses exception-based validation - we only fail if we encounter actual
+    exceptions when reading package metadata. No arbitrary prechecks (like file
+    counts) are performed, as these cause false positives with wrapper packages.
 
     Args:
         package_dir: Path to package directory
@@ -21,42 +25,29 @@ def validate_package(package_dir: Path) -> tuple[bool, str]:
     Returns:
         (is_valid, error_message)
     """
-    # Check 1: Directory exists
-    if not package_dir.exists():
-        return False, f"Package directory does not exist: {package_dir.name}"
-
-    if not package_dir.is_dir():
-        return False, f"Package path is not a directory: {package_dir.name}"
-
-    # Check 2: package.json exists
-    package_json = package_dir / "package.json"
-    if not package_json.exists():
-        return False, f"Missing package.json in {package_dir.name}"
-
-    # Check 3: package.json is valid JSON
     try:
+        # Try to read package.json - this is the critical test
+        # If we can successfully parse it, the package is usable
+        package_json = package_dir / "package.json"
+
         with open(package_json, "r") as f:
             data = json.load(f)
+
+        # Verify essential fields are present
+        required_fields = ["name", "version"]
+        for field in required_fields:
+            if field not in data:
+                return False, f"Missing '{field}' in {package_dir.name}/package.json"
+
+        # Success - package.json is readable and valid
+        return True, ""
+
+    except FileNotFoundError:
+        return False, f"Missing package.json in {package_dir.name}"
     except json.JSONDecodeError as e:
         return False, f"Corrupted package.json in {package_dir.name}: {e}"
     except Exception as e:
         return False, f"Cannot read package.json in {package_dir.name}: {e}"
-
-    # Check 4: Required fields present
-    required_fields = ["name", "version"]
-    for field in required_fields:
-        if field not in data:
-            return False, f"Missing '{field}' in {package_dir.name}/package.json"
-
-    # Check 5: Directory contains files (not empty)
-    file_count = sum(1 for _ in package_dir.rglob("*") if _.is_file())
-    if file_count < 5:  # Arbitrary threshold - packages should have multiple files
-        return (
-            False,
-            f"Package {package_dir.name} appears incomplete ({file_count} files)",
-        )
-
-    return True, ""
 
 
 def get_required_packages(project_dir: Path, environment: str) -> list[str]:

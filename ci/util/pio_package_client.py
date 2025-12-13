@@ -213,13 +213,23 @@ def ensure_packages_installed(
     Returns:
         True if packages installed successfully, False otherwise
     """
+    # Detect default environment if None (for package validation)
+    default_env = environment
+    if default_env is None:
+        from ci.util.pio_package_daemon import get_default_environment
+
+        default_env = get_default_environment(str(project_dir))
+        if default_env:
+            print(f"Detected default environment: {default_env}")
+
     print(f"Checking if packages are installed for {environment}...")
 
     # Quick check: are packages already installed?
     if packages_already_installed(project_dir, environment):
         # Additional validation check for corrupted packages
-        if environment:
-            is_valid, errors = check_all_packages(project_dir, environment)
+        # Use default_env (detected default) even when environment is None
+        if default_env:
+            is_valid, errors = check_all_packages(project_dir, default_env)
             if not is_valid:
                 print("⚠️  Detected corrupted packages, requesting reinstallation:")
                 for error in errors:
@@ -257,6 +267,22 @@ def ensure_packages_installed(
         "environment": environment,  # None is valid - daemon will use PlatformIO default
         "timestamp": time.time(),
     }
+
+    # CHECK: Wait if installation already in progress
+    status = read_status_file()
+    if status.get("installation_in_progress", False):
+        print("⏳ Another installation in progress, waiting...")
+        print("   If stuck, run: bash daemon restart")
+        # Wait for ongoing installation to complete
+        timeout_start = time.time()
+        while status.get("installation_in_progress", False):
+            if time.time() - timeout_start > 1800:  # 30 minute timeout
+                print("❌ Timeout waiting for ongoing installation")
+                print("   To force restart: bash daemon restart")
+                return False
+            time.sleep(2)
+            status = read_status_file()
+        print("✅ Previous installation completed")
 
     print(f"Submitting package installation request...")
     write_request_file(request)
