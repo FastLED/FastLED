@@ -42,6 +42,10 @@
 /// - FL_IS_SAMD21: SAMD21 family (Cortex-M0+, Arduino Zero, etc.)
 /// - FL_IS_SAMD51: SAMD51/SAME51 family (Cortex-M4F, Adafruit Metro M4, etc.)
 ///
+/// SAM Platforms (ARM-based):
+/// - FL_IS_SAM: General SAM platform (any SAM board)
+/// - FL_IS_SAM3X8E: SAM3X8E family (Cortex-M3, 84 MHz) - Arduino Due
+///
 /// RP Platforms (ARM-based):
 /// - FL_IS_RP: General RP platform (any RP2xxx variant)
 /// - FL_IS_RP2040: Raspberry Pi RP2040 (dual Cortex-M0+, Pico, Pico W, etc.)
@@ -130,6 +134,7 @@
 #include "apollo3/is_apollo3.h"
 #include "arm/is_arm.h"
 #include "arm/rp/is_rp.h"
+#include "arm/sam/is_sam.h"
 #include "arm/samd/is_samd.h"
 #include "arm/silabs/is_silabs.h"
 #include "arm/teensy/is_teensy.h"

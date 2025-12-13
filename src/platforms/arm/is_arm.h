@@ -14,6 +14,7 @@
 #include "nrf52/is_nrf52.h"
 #include "renesas/is_renesas.h"
 #include "rp/is_rp2040.h"
+#include "sam/is_sam.h"
 #include "samd/is_samd.h"
 #include "silabs/is_silabs.h"
 #include "stm32/is_stm32.h"
@@ -22,8 +23,8 @@
 /// ARM platform detection with optimized macro grouping
 /// This checks for various ARM-based microcontroller families
 #if \
-    /* ARM Cortex-M0/M0+ (SAM) */ \
-    defined(__SAM3X8E__) || \
+    /* Atmel SAM (Arduino Due, SAM3X8E Cortex-M3) - defined by is_sam.h */ \
+    defined(FL_IS_SAM) || defined(__SAM3X8E__) || \
     /* STM32 Family (all variants) - defined by is_stm32.h */ \
     defined(FL_IS_STM32) || \
     /* NXP Kinetis (MK20, MK26, MK64, MK66, IMXRT) */ \
