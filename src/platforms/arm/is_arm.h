@@ -11,6 +11,7 @@
 /// for validation that ARM detection has occurred.
 
 // Include platform-specific detection headers
+#include "nrf52/is_nrf52.h"
 #include "rp/is_rp2040.h"
 #include "samd/is_samd.h"
 #include "silabs/is_silabs.h"

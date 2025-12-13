@@ -51,6 +51,12 @@
 /// - FL_IS_SILABS: General Silicon Labs EFM32/EFR32 platform
 /// - FL_IS_SILABS_MGM240: MGM240 (EFR32MG24) - Arduino Nano Matter, SparkFun Thing Plus Matter
 ///
+/// Nordic nRF52 Platforms (ARM-based):
+/// - FL_IS_NRF52: General nRF52 platform (any nRF52 variant)
+/// - FL_IS_NRF52832: nRF52832 (Cortex-M4F, 64 MHz, 512KB Flash)
+/// - FL_IS_NRF52833: nRF52833 (Cortex-M4F, 64 MHz, 512KB Flash, BLE 5.1)
+/// - FL_IS_NRF52840: nRF52840 (Cortex-M4F, 64 MHz, 1MB Flash, USB) - Adafruit Feather nRF52840, etc.
+///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
 /// - FL_IS_AVR_ATMEGA: ATmega family (328P, 2560, 32U4, etc.)
