@@ -792,9 +792,7 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
 
-    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
-        #warning "ARDUINO_Seeed_XIAO_nRF52840_Sense board is a semi-untested board -- please let us know if this pin mapping works so we can disable this warning: https://github.com/FastLED/FastLED/issues"
-    #endif
+    // Pin mappings verified and tested by community (see GitHub issues #1911, #2061)
 
     // Arduino pins 0..7
     _FL_DEFPIN( 0, 2, 0); // D0  is P0.02
@@ -842,9 +840,7 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
 
-    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
-        #warning "ARDUINO_Seeed_XIAO_nRF52840 board is semi tested, pins 0-15 have been provided by the community -- if everything works well let us know at https://github.com/FastLED/FastLED/issues so we can suppress this warning"
-    #endif
+    // Pin mappings verified and tested by community (see GitHub issues #1911, #2061)
 
     // Arduino pins 0..7
     _FL_DEFPIN( 0, 2, 0); // D0  is P0.02
