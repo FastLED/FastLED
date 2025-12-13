@@ -572,9 +572,27 @@ class PioCompiler(Compiler):
             )
         try:
             # ============================================================
-            # PHASE 0: Ensure packages installed via daemon (ONCE per compiler instance)
+            # PHASE 0: Initialize build directory and create platformio.ini
             # ============================================================
             if not self.initialized:
+                init_result = self._internal_init_build_no_lock(example)
+                if not init_result.success:
+                    # Print FAILED message immediately in worker thread
+                    red_color = "\033[31m"
+                    reset_color = "\033[0m"
+                    print(f"{red_color}FAILED: {example}{reset_color}")
+
+                    return SketchResult(
+                        success=False,
+                        output=init_result.output,
+                        build_dir=init_result.build_dir,
+                        example=example,
+                    )
+
+                # ============================================================
+                # PHASE 1: Ensure packages installed via daemon (ONCE per compiler instance)
+                # ============================================================
+                # NOW platformio.ini exists at self.build_dir/platformio.ini
                 print("=" * 60)
                 print("ENSURING PLATFORMIO PACKAGES INSTALLED")
                 print("=" * 60)
@@ -601,22 +619,6 @@ class PioCompiler(Compiler):
 
                 print()  # Blank line separator
 
-                # ============================================================
-                # PHASE 1: Initialize build (packages already installed)
-                # ============================================================
-                init_result = self._internal_init_build_no_lock(example)
-                if not init_result.success:
-                    # Print FAILED message immediately in worker thread
-                    red_color = "\033[31m"
-                    reset_color = "\033[0m"
-                    print(f"{red_color}FAILED: {example}{reset_color}")
-
-                    return SketchResult(
-                        success=False,
-                        output=init_result.output,
-                        build_dir=init_result.build_dir,
-                        example=example,
-                    )
                 # If initialization succeeded and we just built the example, return success
                 # Print SUCCESS message immediately in worker thread
                 green_color = "\033[32m"
