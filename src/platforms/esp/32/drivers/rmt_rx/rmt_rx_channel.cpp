@@ -973,14 +973,14 @@ private:
 
         if (symbols_to_copy > 0) {
             // Copy from DMA buffer to accumulation buffer
-            // Cast dest pointer to void* for fl::memcpy
+            // Cast dest pointer to void* for __builtin_memcpy
             void* dest = static_cast<void*>(
                 self->mAccumulationBuffer.data() + self->mAccumulationOffset);
             const void* src = static_cast<const void*>(data->received_symbols);
 
-            // fl::memcpy is safe in ISR context (no blocking, pure memory operation)
+            // __builtin_memcpy is safe in ISR/IRAM context - compiler intrinsic, typically inlined
             // Size calculation: symbols_to_copy symbols × sizeof(rmt_symbol_word_t) bytes
-            fl::memcpy(dest, src, symbols_to_copy * sizeof(rmt_symbol_word_t));
+            __builtin_memcpy(dest, src, symbols_to_copy * sizeof(rmt_symbol_word_t));
 
             // Update accumulation offset
             self->mAccumulationOffset += symbols_to_copy;
