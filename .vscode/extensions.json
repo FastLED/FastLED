@@ -3,7 +3,8 @@
     // for the documentation about the extensions.json format
     "recommendations": [
         "llvm-vs-code-extensions.vscode-clangd",
-        "DarrenLevine.auto-debug"
+        "DarrenLevine.auto-debug",
+        "EditorConfig.EditorConfig"
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools",
