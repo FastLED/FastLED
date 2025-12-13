@@ -7,6 +7,10 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
+from running_process import RunningProcess
+from running_process.process_output_reader import EndOfStream
+
+from ci.compiler.build_utils import get_utf8_env
 from ci.compiler.compiler import CacheType
 from ci.util.create_build_dir import insert_tool_aliases
 
@@ -44,27 +48,57 @@ def generate_build_info_json_from_existing_build(
         True if build_info.json was successfully generated
     """
     try:
-        # Use existing project to get metadata (no temporary project needed)
+        # Use existing project to get metadata with streaming output
+        # This prevents the process from appearing to stall during library resolution
         metadata_cmd = ["pio", "project", "metadata", "--json-output"]
-        metadata_result = subprocess.run(
+
+        print("Generating build metadata (resolving library dependencies)...")
+
+        metadata_proc = RunningProcess(
             metadata_cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
             cwd=build_dir,
-            timeout=900,  # 15 minutes for platform builds
+            auto_run=True,
+            timeout=None,  # No global timeout - rely on per-line timeout instead
+            env=get_utf8_env(),
         )
 
-        if metadata_result.returncode != 0:
+        # Stream output while collecting it for JSON parsing
+        # Show progress indicators for long-running operations
+        # Use per-line timeout of 15 minutes - some packages take a long time to download
+        metadata_lines = []
+        while line := metadata_proc.get_next_line(timeout=900):
+            if isinstance(line, EndOfStream):
+                break
+            metadata_lines.append(line)
+            # Show progress for library resolution operations (not JSON output)
+            # JSON output will be a single line starting with '{'
+            if not line.strip().startswith("{"):
+                # This is a progress message from PlatformIO
+                stripped = line.strip()
+                if any(
+                    keyword in stripped
+                    for keyword in [
+                        "Resolving",
+                        "Installing",
+                        "Downloading",
+                        "Checking",
+                    ]
+                ):
+                    print(f"  {stripped}")
+
+        metadata_proc.wait()
+
+        if metadata_proc.returncode != 0:
+            # Note: RunningProcess merges stderr into stdout
             print(
-                f"Warning: Failed to get metadata for build_info.json: {metadata_result.stderr}"
+                f"Warning: Failed to get metadata for build_info.json (exit code {metadata_proc.returncode})"
             )
             return False
 
         # Parse and save the metadata
         try:
-            data = json.loads(metadata_result.stdout)
+            metadata_output = "".join(metadata_lines)
+            data = json.loads(metadata_output)
 
             # Add tool aliases for symbol analysis and debugging
             insert_tool_aliases(data)
@@ -85,8 +119,8 @@ def generate_build_info_json_from_existing_build(
             print(f"Warning: Failed to parse metadata JSON for build_info.json: {e}")
             return False
 
-    except subprocess.TimeoutExpired:
-        print(f"Warning: Timeout generating build_info.json")
+    except TimeoutError:
+        print(f"Warning: Timeout generating build_info.json (no output for 900s)")
         return False
     except Exception as e:
         print(f"Warning: Exception generating build_info.json: {e}")

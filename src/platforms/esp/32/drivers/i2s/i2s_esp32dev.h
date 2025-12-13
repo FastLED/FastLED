@@ -44,10 +44,6 @@ FL_EXTERN_C_END
 #define F_CPU_MHZ (F_CPU / 1000000L)
 #endif
 
-FL_EXTERN_C_END
-
-#include "fl/log.h"
-
 // TODO: this is in like 2 places. Consolidate.
 // override default NUM_DMA_BUFFERS if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
 // is defined and has a valid value
