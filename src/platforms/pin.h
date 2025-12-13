@@ -26,9 +26,12 @@
     #include "platforms/arm/rp/pin_rp.hpp"
 #elif defined(ARDUINO_ARCH_APOLLO3) || defined(ARDUINO_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
+#elif defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    // Stub platform for testing (no-op pins)
+    #include "platforms/shared/pin_noop.hpp"
 #elif defined(ARDUINO)
-    // Generic Arduino fallback for any Arduino-compatible platform
-    #include "platforms/shared/pin_arduino.hpp"
+    // Arduino-compatible platform without specific pin implementation
+    #error "Platform-specific pin implementation not defined for this Arduino variant. Please add support in src/platforms/pin.h or update the platform detection logic."
 #else
     // Non-Arduino builds (host tests, native builds)
     #include "platforms/shared/pin_noop.hpp"
