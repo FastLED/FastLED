@@ -50,7 +50,12 @@ inline void analogWrite(int pin, int val) {
 }
 
 inline void analogReference(int mode) {
+#if defined(ARDUINO_SAM_DUE) || defined(__SAM3X8E__)
+    // Arduino SAM (Due) requires eAnalogReference enum instead of int
+    ::analogReference(static_cast<eAnalogReference>(mode));
+#else
     ::analogReference(mode);
+#endif
 }
 
 }  // namespace fl
