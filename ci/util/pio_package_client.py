@@ -282,11 +282,27 @@ def ensure_packages_installed(
         print(f"   If stuck, run: bash daemon restart")
         # Wait for ongoing installation to complete
         timeout_start = time.time()
+        last_progress_update = time.time()
         while status.get("installation_in_progress", False):
-            if time.time() - timeout_start > 1800:  # 30 minute timeout
+            current_time = time.time()
+            elapsed = current_time - timeout_start
+
+            # Check timeout (30 minute timeout)
+            if elapsed > 1800:
                 print("❌ Timeout waiting for ongoing installation")
                 print("   To force restart: bash daemon restart")
                 return False
+
+            # Print progress update every 10 seconds
+            if current_time - last_progress_update >= 10:
+                elapsed_str = f"{int(elapsed)}s"
+                if elapsed >= 60:
+                    minutes = int(elapsed // 60)
+                    seconds = int(elapsed % 60)
+                    elapsed_str = f"{minutes}m {seconds}s"
+                print(f"   Still waiting... (elapsed: {elapsed_str})", flush=True)
+                last_progress_update = current_time
+
             time.sleep(2)
             status = read_status_file()
         print("✅ Previous installation completed")
