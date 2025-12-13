@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file platforms/pin.h
 /// Trampoline dispatcher for platform-specific pin implementations
 ///

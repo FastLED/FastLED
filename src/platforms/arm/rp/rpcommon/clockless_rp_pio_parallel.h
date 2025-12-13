@@ -167,8 +167,8 @@ public:
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
         // Initialize GPIO pins
         for (int i = 0; i < NUM_LANES; i++) {
-            gmPioinit(BASE_PIN + i);
-            gmPioset_dir(BASE_PIN + i, GPIO_OUT);
+            gpio_init(BASE_PIN + i);
+            gpio_set_dir(BASE_PIN + i, GPIO_OUT);
         }
 
         // Try to claim PIO and DMA on actual hardware
@@ -178,7 +178,7 @@ public:
             mPio = pio0;  // Simplified: just use pio0
         #endif
 
-        mSm = mPioclaim_unused_sm(mPio, false);
+        mSm = pio_claim_unused_sm(mPio, false);
         if (mSm == -1) {
             free(mTransposeBuffer);
             return;
@@ -186,7 +186,7 @@ public:
 
         mDmaChan = dma_claim_unused_channel(false);
         if (mDmaChan == -1) {
-            mPiomSmunclaim(mPio, mSm);
+            pio_sm_unclaim(mPio, mSm);
             free(mTransposeBuffer);
             return;
         }
@@ -279,8 +279,8 @@ private:
             mDmaChan = -1;
         }
         if (mSm != -1 && mPio != nullptr) {
-            mPiomSmset_enabled(mPio, mSm, false);
-            mPiomSmunclaim(mPio, mSm);
+            pio_sm_set_enabled(mPio, mSm, false);
+            pio_sm_unclaim(mPio, mSm);
             mSm = -1;
         }
 #endif
