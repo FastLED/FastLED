@@ -48,7 +48,7 @@ inline void analogWrite(int pin, int val) {
 inline void analogReference(int mode) {
     // Arduino Due doesn't support analogReference - analog reference is fixed at 3.3V
     // The function exists in the SAM core but does nothing
-    ::analogReference(mode);
+    ::analogReference(static_cast<eAnalogReference>(mode));
 }
 
 }  // namespace fl
