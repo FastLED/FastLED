@@ -315,9 +315,11 @@ void setup() {
     #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
         FL_WARN("  Strip Sizes: Short only (" << SHORT_STRIP_SIZE << " LEDs)");
         FL_WARN("  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE);
+        FL_WARN("  JUST_SMALL_STRIPS");
     #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
         FL_WARN("  Strip Sizes: Long only (" << LONG_STRIP_SIZE << " LEDs)");
         FL_WARN("  STRIP_SIZE_TESTED: " << LONG_STRIP_SIZE);
+        FL_WARN("  JUST_LARGE_STRIPS");
     #else
         FL_WARN("  Strip Sizes: Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")");
         FL_WARN("  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE);
