@@ -9,11 +9,11 @@
 // All functions are in the fl:: namespace.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
+#include "ftl/stdint.h"  // For uint64_t, uint8_t
+#include "ftl/cstddef.h" // For fl::size_t
+#include "fl/str.h"      // For fl::string
 
 namespace fl {
-
-class string;
 
 /// @brief Convert an integer value to hexadecimal string representation
 /// @tparam T Integral type
