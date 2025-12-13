@@ -310,8 +310,15 @@ public:
         mIsrCtx.writePtr = nullptr;
         mIsrCtx.endPtr = nullptr;
         // Set pin-specific values early (will be validated in begin())
+#ifdef GPIO_IN1_REG
+        // ESP32/S2/S3 have >32 pins and use GPIO_IN1_REG for pins 32+
         mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
         uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
+#else
+        // ESP32-C3/C6/H2 have ≤32 pins and only use GPIO_IN_REG
+        mIsrCtx.gpioInRegAddr = GPIO_IN_REG;
+        uint8_t pin_bit = mPin;
+#endif
         mIsrCtx.gpioBitMask = (1U << pin_bit);
 
         // Medium-hot path
