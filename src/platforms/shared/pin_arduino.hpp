@@ -22,7 +22,12 @@ namespace fl {
 // ============================================================================
 
 inline void pinMode(int pin, int mode) {
+#if defined(ARDUINO_ARCH_SILABS)
+    // Silabs Arduino framework requires PinMode enum instead of int
+    ::pinMode(pin, static_cast<PinMode>(mode));
+#else
     ::pinMode(pin, mode);
+#endif
 }
 
 // ============================================================================
@@ -30,7 +35,12 @@ inline void pinMode(int pin, int mode) {
 // ============================================================================
 
 inline void digitalWrite(int pin, int val) {
+#if defined(ARDUINO_ARCH_SILABS)
+    // Silabs Arduino framework requires PinStatus enum instead of int
+    ::digitalWrite(pin, static_cast<PinStatus>(val));
+#else
     ::digitalWrite(pin, val);
+#endif
 }
 
 inline int digitalRead(int pin) {
