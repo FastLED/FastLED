@@ -5,7 +5,7 @@
 #pragma once
 
 // ============================================================================
-// RMT TX Test: Single lane, 300 LEDs (Testing PARLIO capture capability)
+// PARLIO Multi-Buffer Test: Single lane, 1000 LEDs (Phase 1 Validation)
 // ============================================================================
 
 // Driver selection
@@ -22,4 +22,4 @@
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 300
+#define LONG_STRIP_SIZE 1000  // 1000 led's will exceed any attempts by the agent to put into one buffer.

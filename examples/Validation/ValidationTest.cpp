@@ -48,19 +48,73 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // Phase 0: Print PARLIO debug metrics after RX wait completes
 #if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
 #ifdef JUST_PARLIO
+    // Get debug metrics from singleton ISR context
     fl::ParlioDebugMetrics debug = fl::getParlioDebugMetrics();
+
+    // Also access ISR context directly for additional fields
+    auto* isr_ctx = fl::ParlioIsrContext::getInstance();
+
     FL_WARN("");
-    FL_WARN("[PARLIO DEBUG] Transmission Metrics:");
-    FL_WARN("  Start Time:      " << debug.start_time_us << " μs");
-    FL_WARN("  End Time:        " << debug.end_time_us << " μs");
-    FL_WARN("  Duration:        " << (debug.end_time_us - debug.start_time_us) << " μs");
-    FL_WARN("  ISR Callbacks:   " << debug.isr_count);
-    FL_WARN("  Chunks Queued:   " << debug.chunks_queued);
-    FL_WARN("  Chunks Completed:" << debug.chunks_completed);
-    FL_WARN("  Bytes Total:     " << debug.bytes_total);
-    FL_WARN("  Bytes TX'd:      " << debug.bytes_transmitted);
-    FL_WARN("  Error Code:      " << debug.error_code << (debug.error_code == 0 ? " (ESP_OK)" : " (ERROR)"));
-    FL_WARN("  TX Active:       " << (debug.transmission_active ? "YES" : "NO"));
+    FL_WARN("╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ PARLIO ISR DEBUG METRICS                                       ║");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    if (isr_ctx) {
+        FL_WARN("[ISR CONTEXT STATE]");
+        FL_WARN("  Transmitting:      " << (isr_ctx->transmitting ? "YES" : "NO"));
+        FL_WARN("  Stream Complete:   " << (isr_ctx->stream_complete ? "YES" : "NO"));
+        FL_WARN("  Ring Error:        " << (isr_ctx->ring_error ? "YES" : "NO"));
+        FL_WARN("");
+
+        FL_WARN("[BUFFER ACCOUNTING]");
+        FL_WARN("  Buffers Total:     " << isr_ctx->buffers_total);
+        FL_WARN("  Buffers Submitted: " << isr_ctx->buffers_submitted);
+        FL_WARN("  Buffers Completed: " << isr_ctx->buffers_completed);
+        FL_WARN("  ISR Callbacks:     " << isr_ctx->isr_count);
+        FL_WARN("");
+
+        FL_WARN("[LED PROGRESS]");
+        FL_WARN("  Total LEDs:        " << isr_ctx->total_leds);
+        FL_WARN("  Current LED:       " << isr_ctx->current_led);
+        FL_WARN("  Num Lanes:         " << isr_ctx->num_lanes);
+        FL_WARN("");
+
+        FL_WARN("[TRANSMISSION METRICS]");
+        FL_WARN("  Start Time:        " << debug.start_time_us << " μs");
+        FL_WARN("  End Time:          " << debug.end_time_us << " μs");
+        if (debug.end_time_us > debug.start_time_us) {
+            FL_WARN("  Duration:          " << (debug.end_time_us - debug.start_time_us) << " μs");
+        }
+        FL_WARN("  Bytes Total:       " << debug.bytes_total);
+        FL_WARN("  Bytes TX'd:        " << debug.bytes_transmitted);
+        FL_WARN("  TX Active:         " << (debug.transmission_active ? "YES" : "NO"));
+        FL_WARN("  Error Code:        " << debug.error_code << (debug.error_code == 0 ? " (ESP_OK)" : " (ERROR)"));
+        FL_WARN("");
+
+        // DEBUG: Report on DMA buffer debug deque
+        FL_WARN("[DMA BUFFER DEBUG]");
+        size_t deque_size = isr_ctx->mDebugDmaOutput.size();
+        FL_WARN("  Debug Buffer Size: " << deque_size << " bytes");
+
+        if (deque_size > 0) {
+            // Count zeros and non-zeros
+            size_t zero_count = 0;
+            size_t nonzero_count = 0;
+            for (size_t i = 0; i < deque_size; i++) {
+                if (isr_ctx->mDebugDmaOutput[i] == 0) {
+                    zero_count++;
+                } else {
+                    nonzero_count++;
+                }
+            }
+            FL_WARN("  Zero Bytes:        " << zero_count);
+            FL_WARN("  Non-Zero Bytes:    " << nonzero_count);
+            FL_WARN("  Non-Zero %:        " << (nonzero_count * 100 / deque_size) << "%");
+        }
+    } else {
+        FL_WARN("[ERROR] ISR context not initialized (nullptr)");
+    }
+
     FL_WARN("");
 #endif // JUST_PARLIO
 #endif // ESP32 && FASTLED_ESP32_HAS_PARLIO
