@@ -4,7 +4,7 @@
             "ldscript": "linker_script.ld",
             "flash_layout": "100_0"
         },
-        "extra_flags": "-DARDUINO_GIGA -DARDUINO_GIGA_PINS -DGIGA_PINS -DGIGA -DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000",
+        "extra_flags": "-DSTM32H7 -DSTM32H7xx -DSTM32H747xx -DARDUINO_GIGA -DARDUINO_GIGA_PINS -DGIGA_PINS -DGIGA -DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000",
         "core": "arduino",
         "cpu": "cortex-m7",
         "f_cpu": "480000000L",

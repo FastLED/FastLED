@@ -43,6 +43,10 @@
     defined(STM32L4) || defined(STM32L4xx) || \
     /* STM32H7 Family (400-480 MHz, High Performance) */ \
     defined(STM32H7) || defined(STM32H7xx) || \
+    defined(STM32H743xx) || defined(STM32H747xx) || defined(STM32H750xx) || \
+    defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || \
+    defined(STM32H735xx) || defined(STM32H755xx) || defined(STM32H757xx) || \
+    defined(STM32H7A3xx) || defined(STM32H7B3xx) || \
     /* STM32G4 Family (170 MHz, Motor Control) */ \
     defined(STM32G4) || defined(STM32G4xx) || \
     /* STM32U5 Family (160 MHz, Ultra Low Power) */ \
@@ -80,7 +84,11 @@
 #endif
 
 // FL_IS_STM32_H7 - STM32H7 Family (400-480 MHz, 128-1024 KB RAM, 1-2 MB Flash, High-performance)
-#if defined(STM32H7) || defined(STM32H7xx)
+#if defined(STM32H7) || defined(STM32H7xx) || \
+    defined(STM32H743xx) || defined(STM32H747xx) || defined(STM32H750xx) || \
+    defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || \
+    defined(STM32H735xx) || defined(STM32H755xx) || defined(STM32H757xx) || \
+    defined(STM32H7A3xx) || defined(STM32H7B3xx)
 #define FL_IS_STM32_H7
 #endif
 
