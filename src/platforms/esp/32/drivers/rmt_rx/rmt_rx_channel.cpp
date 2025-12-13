@@ -997,7 +997,7 @@ private:
         // Only signal completion when this is the final callback (is_last flag from ESP-IDF)
         // With en_partial_rx enabled, callback may be invoked multiple times for long streams
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
-        if (data->is_last) {
+        if (data->flags.is_last) {
             self->mReceiveDone = true;
         }
 #else
