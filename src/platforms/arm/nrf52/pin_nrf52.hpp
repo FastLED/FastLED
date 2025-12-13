@@ -40,7 +40,7 @@ inline void analogWrite(int pin, int val) {
 }
 
 inline void analogReference(int mode) {
-    ::analogReference(mode);
+    ::analogReference(static_cast<eAnalogReference>(mode));
 }
 
 }  // namespace fl
