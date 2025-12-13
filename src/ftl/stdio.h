@@ -2,6 +2,7 @@
 
 #include "ftl/strstream.h"
 #include "ftl/type_traits.h"
+#include "ftl/charconv.h"  // For fl::to_hex
 #include "fl/str.h"
 #include "fl/int.h"
 #include "ftl/cstdio.h"  // For fl::print and fl::println
@@ -186,52 +187,6 @@ inline fl::string format_float(float value, int precision) {
     return stream.str();
 }
 
-// Convert integer to hex string - only for integral types
-template<typename T>
-typename fl::enable_if<fl::is_integral<T>::value, fl::string>::type 
-to_hex(T value, bool uppercase) {
-    if (value == 0) {
-        return fl::string("0");
-    }
-    
-    fl::string result;
-    const char* digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-    
-    // Handle negative values for signed types
-    bool negative = false;
-    if (fl::is_signed<T>::value && value < 0) {
-        negative = true;
-        value = -value;
-    }
-    
-    while (value > 0) {
-        char ch = digits[value % 16];
-        // Convert char to string since fl::string::append treats char as number
-        char temp_ch_str[2] = {ch, '\0'};
-        fl::string digit_str(temp_ch_str);
-        // Use += since + operator is not defined for fl::string
-        fl::string temp = digit_str;
-        temp += result;
-        result = temp;
-        value /= 16;
-    }
-    
-    if (negative) {
-        fl::string minus_str("-");
-        minus_str += result;
-        result = minus_str;
-    }
-    
-    return result;
-}
-
-// Non-integral types return error string
-template<typename T>
-typename fl::enable_if<!fl::is_integral<T>::value, fl::string>::type 
-to_hex(T, bool) {
-    return fl::string("<not_integral>");
-}
-
 // Format a single argument based on format specifier with better type handling
 template<typename T>
 void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
@@ -293,7 +248,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
             break;
             
         case 'x':
-            stream << to_hex(arg, spec.uppercase);
+            stream << fl::to_hex(arg, spec.uppercase);
             break;
             
         case 's':
