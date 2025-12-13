@@ -26,11 +26,11 @@
 namespace fl {
 
 inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, mode);
+    ::pinMode(pin, static_cast<PinMode>(mode));
 }
 
 inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, val);
+    ::digitalWrite(pin, static_cast<PinStatus>(val));
 }
 
 inline int digitalRead(int pin) {
