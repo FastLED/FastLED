@@ -23,7 +23,8 @@ TEST_CASE("waveTranspose8_2_simple - basic correctness with known pattern") {
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
 
     // laneA = 0xFF (all bits 1 → bit1_wave), laneB = 0x00 (all bits 0 → bit0_wave)
-    waveTranspose8_2_simple(0xFF, 0x00, lut, output);
+    uint8_t lanes[2] = {0xFF, 0x00};
+    waveTranspose8_2_simple(lanes, lut, output);
 
     // Verify output was written
     bool has_data = false;
@@ -55,7 +56,8 @@ TEST_CASE("waveTranspose8_2_simple - all zeros") {
     fl::memset(output, 0xAA, sizeof(output));
 
     // Both lanes all zeros → both expand to bit0_wave (3 HIGH, 5 LOW)
-    waveTranspose8_2_simple(0x00, 0x00, lut, output);
+    uint8_t lanes[2] = {0x00, 0x00};
+    waveTranspose8_2_simple(lanes, lut, output);
 
     // First 3 pulses are HIGH (0xFF), pulse 3 is LOW (0x00)
     // Output byte 0 packs ticks 0-3 (pulses 0-3):
@@ -78,7 +80,8 @@ TEST_CASE("waveTranspose8_2_simple - all ones") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Both lanes all ones → both expand to bit1_wave (5 HIGH, 3 LOW)
-    waveTranspose8_2_simple(0xFF, 0xFF, lut, output);
+    uint8_t lanes[2] = {0xFF, 0xFF};
+    waveTranspose8_2_simple(lanes, lut, output);
 
     // First 5 pulses are HIGH → bits set to 1
     // Output byte 0 packs ticks 0,1,2,3: all both lanes HIGH → 0xFF
@@ -96,7 +99,8 @@ TEST_CASE("waveTranspose8_2_simple - alternating pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // laneA = 0xAA (10101010), laneB = 0x55 (01010101)
-    waveTranspose8_2_simple(0xAA, 0x55, lut, output);
+    uint8_t lanes[2] = {0xAA, 0x55};
+    waveTranspose8_2_simple(lanes, lut, output);
 
     // Verify we got non-zero data
     bool has_nonzero = false;
@@ -121,7 +125,8 @@ TEST_CASE("waveTranspose8_2_simple - WS2812 timing pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Test with mixed pattern: laneA = 0xF0, laneB = 0x0F
-    waveTranspose8_2_simple(0xF0, 0x0F, lut, output);
+    uint8_t lanes[2] = {0xF0, 0x0F};
+    waveTranspose8_2_simple(lanes, lut, output);
 
     // Verify output is populated (we don't verify exact values, just non-zero)
     bool has_nonzero = false;
@@ -214,7 +219,8 @@ TEST_CASE("waveTranspose8_4 - basic correctness with known pattern") {
 
     // laneA=0xFF (all bits 1→bit1_wave), laneB=0x00 (all bits 0→bit0_wave),
     // laneC=0xFF, laneD=0x00
-    waveTranspose8_4(0xFF, 0x00, 0xFF, 0x00, lut, output);
+    uint8_t lanes[4] = {0xFF, 0x00, 0xFF, 0x00};
+    waveTranspose8_4(lanes, lut, output);
 
     // Verify output was written
     bool has_data = false;
@@ -252,7 +258,8 @@ TEST_CASE("waveTranspose8_4 - all zeros") {
     fl::memset(output, 0xAA, sizeof(output));
 
     // All lanes zeros → all expand to bit0_wave (3 HIGH, 5 LOW pulses per bit)
-    waveTranspose8_4(0x00, 0x00, 0x00, 0x00, lut, output);
+    uint8_t lanes[4] = {0x00, 0x00, 0x00, 0x00};
+    waveTranspose8_4(lanes, lut, output);
 
     // First 3 pulses (ticks 0-2) are HIGH, then LOW
     // Verify first few bytes have non-zero content (shows waveform was generated)
@@ -271,7 +278,8 @@ TEST_CASE("waveTranspose8_4 - all ones") {
     fl::memset(output, 0x00, sizeof(output));
 
     // All lanes ones → all expand to bit1_wave (5 HIGH, 3 LOW pulses per bit)
-    waveTranspose8_4(0xFF, 0xFF, 0xFF, 0xFF, lut, output);
+    uint8_t lanes[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    waveTranspose8_4(lanes, lut, output);
 
     // First 5 pulses are HIGH, verify output has non-zero content
     CHECK(output[0] != 0x00);  // Contains HIGH pulses from bit1_wave
@@ -289,7 +297,8 @@ TEST_CASE("waveTranspose8_4 - alternating pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Alternating pattern: 0xAA=10101010, 0x55=01010101, 0xF0=11110000, 0x0F=00001111
-    waveTranspose8_4(0xAA, 0x55, 0xF0, 0x0F, lut, output);
+    uint8_t lanes[4] = {0xAA, 0x55, 0xF0, 0x0F};
+    waveTranspose8_4(lanes, lut, output);
 
     // Verify we got non-zero data
     bool has_nonzero = false;
@@ -314,7 +323,8 @@ TEST_CASE("waveTranspose8_4 - WS2812 timing pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Test with mixed pattern for all four lanes
-    waveTranspose8_4(0xF0, 0x0F, 0xAA, 0x55, lut, output);
+    uint8_t lanes[4] = {0xF0, 0x0F, 0xAA, 0x55};
+    waveTranspose8_4(lanes, lut, output);
 
     // Verify output is populated (we don't verify exact values, just non-zero)
     bool has_nonzero = false;
@@ -343,7 +353,8 @@ TEST_CASE("waveTranspose8_8 - basic correctness with known pattern") {
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
 
     // Alternating pattern: lanes 0,2,4,6 = 0xFF (all HIGH), lanes 1,3,5,7 = 0x00 (all LOW)
-    waveTranspose8_8(0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, lut, output);
+    uint8_t lanes[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    waveTranspose8_8(lanes, lut, output);
 
     // Verify output was written
     bool has_data = false;
@@ -374,7 +385,8 @@ TEST_CASE("waveTranspose8_8 - all zeros") {
     fl::memset(output, 0xAA, sizeof(output));
 
     // All lanes zeros → all expand to bit0_wave (3 HIGH, 5 LOW pulses per bit)
-    waveTranspose8_8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, lut, output);
+    uint8_t lanes[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    waveTranspose8_8(lanes, lut, output);
 
     // First 3 pulses (ticks 0-2) are HIGH for all lanes
     // Output byte 0 (tick 0): all 8 lanes HIGH → 0xFF
@@ -396,7 +408,8 @@ TEST_CASE("waveTranspose8_8 - all ones") {
     fl::memset(output, 0x00, sizeof(output));
 
     // All lanes ones → all expand to bit1_wave (5 HIGH, 3 LOW pulses per bit)
-    waveTranspose8_8(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, lut, output);
+    uint8_t lanes[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    waveTranspose8_8(lanes, lut, output);
 
     // First 5 pulses (ticks 0-4) are HIGH for all lanes
     CHECK(output[0] == 0xFF);
@@ -419,7 +432,8 @@ TEST_CASE("waveTranspose8_8 - alternating pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Alternating pattern: 0xAA=10101010, 0x55=01010101
-    waveTranspose8_8(0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, lut, output);
+    uint8_t lanes[8] = {0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55};
+    waveTranspose8_8(lanes, lut, output);
 
     // Verify we got non-zero data
     bool has_nonzero = false;
@@ -444,7 +458,8 @@ TEST_CASE("waveTranspose8_8 - WS2812 timing pattern") {
     fl::memset(output, 0x00, sizeof(output));
 
     // Test with mixed pattern for all eight lanes
-    waveTranspose8_8(0xF0, 0x0F, 0xAA, 0x55, 0x33, 0xCC, 0x3C, 0xC3, lut, output);
+    uint8_t lanes[8] = {0xF0, 0x0F, 0xAA, 0x55, 0x33, 0xCC, 0x3C, 0xC3};
+    waveTranspose8_8(lanes, lut, output);
 
     // Verify output is populated (we don't verify exact values, just non-zero)
     bool has_nonzero = false;

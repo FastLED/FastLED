@@ -71,47 +71,36 @@ static FL_IRAM void transpose_2lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_2_simple(
-    uint8_t laneA,
-    uint8_t laneB,
+    const uint8_t lanes[2],
     const Wave8BitExpansionLut& lut,
     uint8_t output[16]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit
 
-    // Allocate waveform buffers on stack (64 bytes per lane)
+    // Allocate waveform buffers on stack (64 bytes per lane, 2 lanes)
     uint8_t laneWaveforms[2][BYTES_PER_LANE];
 
-    // Step 1: Expand laneA using LUT (no branching!)
-    // Process high nibble (bits 7-4), then low nibble (bits 3-0)
-    uint8_t highNibbleA = laneA >> 4;
-    uint8_t lowNibbleA = laneA & 0x0F;
+    // Expand both lanes using LUT (no branching!)
+    for (size_t lane = 0; lane < 2; lane++) {
+        uint8_t laneValue = lanes[lane];
 
-    // Copy high nibble waveform (32 bytes) to first half of lane buffer
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][i] = lut.data[highNibbleA][i];
+        // Process high nibble (bits 7-4), then low nibble (bits 3-0)
+        uint8_t highNibble = laneValue >> 4;
+        uint8_t lowNibble = laneValue & 0x0F;
+
+        // Copy high nibble waveform (32 bytes) to first half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][i] = lut.data[highNibble][i];
+        }
+
+        // Copy low nibble waveform (32 bytes) to second half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][32 + i] = lut.data[lowNibble][i];
+        }
     }
 
-    // Copy low nibble waveform (32 bytes) to second half of lane buffer
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][32 + i] = lut.data[lowNibbleA][i];
-    }
-
-    // Step 2: Expand laneB using LUT (same process)
-    uint8_t highNibbleB = laneB >> 4;
-    uint8_t lowNibbleB = laneB & 0x0F;
-
-    // Copy high nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][i] = lut.data[highNibbleB][i];
-    }
-
-    // Copy low nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][32 + i] = lut.data[lowNibbleB][i];
-    }
-
-    // Step 3: Transpose waveforms to DMA format
+    // Transpose waveforms to DMA format
     transpose_2lane_pulses(laneWaveforms[0], laneWaveforms[1], output);
 }
 
@@ -191,77 +180,36 @@ static FL_IRAM void transpose_4lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_4(
-    uint8_t laneA,
-    uint8_t laneB,
-    uint8_t laneC,
-    uint8_t laneD,
+    const uint8_t lanes[4],
     const Wave8BitExpansionLut& lut,
     uint8_t output[128]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit
 
-    // Allocate waveform buffers on stack (64 bytes per lane)
+    // Allocate waveform buffers on stack (64 bytes per lane, 4 lanes)
     uint8_t laneWaveforms[4][BYTES_PER_LANE];
 
-    // Step 1: Expand laneA using LUT (no branching!)
-    // Process high nibble (bits 7-4), then low nibble (bits 3-0)
-    uint8_t highNibbleA = laneA >> 4;
-    uint8_t lowNibbleA = laneA & 0x0F;
+    // Expand all 4 lanes using LUT (no branching!)
+    for (size_t lane = 0; lane < 4; lane++) {
+        uint8_t laneValue = lanes[lane];
 
-    // Copy high nibble waveform (32 bytes) to first half of lane buffer
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][i] = lut.data[highNibbleA][i];
+        // Process high nibble (bits 7-4), then low nibble (bits 3-0)
+        uint8_t highNibble = laneValue >> 4;
+        uint8_t lowNibble = laneValue & 0x0F;
+
+        // Copy high nibble waveform (32 bytes) to first half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][i] = lut.data[highNibble][i];
+        }
+
+        // Copy low nibble waveform (32 bytes) to second half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][32 + i] = lut.data[lowNibble][i];
+        }
     }
 
-    // Copy low nibble waveform (32 bytes) to second half of lane buffer
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][32 + i] = lut.data[lowNibbleA][i];
-    }
-
-    // Step 2: Expand laneB using LUT (same process)
-    uint8_t highNibbleB = laneB >> 4;
-    uint8_t lowNibbleB = laneB & 0x0F;
-
-    // Copy high nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][i] = lut.data[highNibbleB][i];
-    }
-
-    // Copy low nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][32 + i] = lut.data[lowNibbleB][i];
-    }
-
-    // Step 3: Expand laneC using LUT
-    uint8_t highNibbleC = laneC >> 4;
-    uint8_t lowNibbleC = laneC & 0x0F;
-
-    // Copy high nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[2][i] = lut.data[highNibbleC][i];
-    }
-
-    // Copy low nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[2][32 + i] = lut.data[lowNibbleC][i];
-    }
-
-    // Step 4: Expand laneD using LUT
-    uint8_t highNibbleD = laneD >> 4;
-    uint8_t lowNibbleD = laneD & 0x0F;
-
-    // Copy high nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[3][i] = lut.data[highNibbleD][i];
-    }
-
-    // Copy low nibble waveform
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[3][32 + i] = lut.data[lowNibbleD][i];
-    }
-
-    // Step 5: Transpose waveforms to DMA format
+    // Transpose waveforms to DMA format
     transpose_4lane_pulses(laneWaveforms[0], laneWaveforms[1], laneWaveforms[2], laneWaveforms[3], output);
 }
 
@@ -431,104 +379,36 @@ static FL_IRAM void transpose_8lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_8(
-    uint8_t lane0,
-    uint8_t lane1,
-    uint8_t lane2,
-    uint8_t lane3,
-    uint8_t lane4,
-    uint8_t lane5,
-    uint8_t lane6,
-    uint8_t lane7,
+    const uint8_t lanes[8],
     const Wave8BitExpansionLut& lut,
     uint8_t output[64]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit
 
-    // Allocate waveform buffers on stack (64 bytes per lane)
+    // Allocate waveform buffers on stack (64 bytes per lane, 8 lanes)
     uint8_t laneWaveforms[8][BYTES_PER_LANE];
 
-    // Step 1: Expand lane0 using LUT (no branching!)
-    uint8_t highNibble0 = lane0 >> 4;
-    uint8_t lowNibble0 = lane0 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][i] = lut.data[highNibble0][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[0][32 + i] = lut.data[lowNibble0][i];
+    // Expand all 8 lanes using LUT (no branching!)
+    for (size_t lane = 0; lane < 8; lane++) {
+        uint8_t laneValue = lanes[lane];
+
+        // Process high nibble (bits 7-4), then low nibble (bits 3-0)
+        uint8_t highNibble = laneValue >> 4;
+        uint8_t lowNibble = laneValue & 0x0F;
+
+        // Copy high nibble waveform (32 bytes) to first half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][i] = lut.data[highNibble][i];
+        }
+
+        // Copy low nibble waveform (32 bytes) to second half of lane buffer
+        for (size_t i = 0; i < 32; i++) {
+            laneWaveforms[lane][32 + i] = lut.data[lowNibble][i];
+        }
     }
 
-    // Step 2: Expand lane1 using LUT
-    uint8_t highNibble1 = lane1 >> 4;
-    uint8_t lowNibble1 = lane1 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][i] = lut.data[highNibble1][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[1][32 + i] = lut.data[lowNibble1][i];
-    }
-
-    // Step 3: Expand lane2 using LUT
-    uint8_t highNibble2 = lane2 >> 4;
-    uint8_t lowNibble2 = lane2 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[2][i] = lut.data[highNibble2][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[2][32 + i] = lut.data[lowNibble2][i];
-    }
-
-    // Step 4: Expand lane3 using LUT
-    uint8_t highNibble3 = lane3 >> 4;
-    uint8_t lowNibble3 = lane3 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[3][i] = lut.data[highNibble3][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[3][32 + i] = lut.data[lowNibble3][i];
-    }
-
-    // Step 5: Expand lane4 using LUT
-    uint8_t highNibble4 = lane4 >> 4;
-    uint8_t lowNibble4 = lane4 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[4][i] = lut.data[highNibble4][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[4][32 + i] = lut.data[lowNibble4][i];
-    }
-
-    // Step 6: Expand lane5 using LUT
-    uint8_t highNibble5 = lane5 >> 4;
-    uint8_t lowNibble5 = lane5 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[5][i] = lut.data[highNibble5][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[5][32 + i] = lut.data[lowNibble5][i];
-    }
-
-    // Step 7: Expand lane6 using LUT
-    uint8_t highNibble6 = lane6 >> 4;
-    uint8_t lowNibble6 = lane6 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[6][i] = lut.data[highNibble6][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[6][32 + i] = lut.data[lowNibble6][i];
-    }
-
-    // Step 8: Expand lane7 using LUT
-    uint8_t highNibble7 = lane7 >> 4;
-    uint8_t lowNibble7 = lane7 & 0x0F;
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[7][i] = lut.data[highNibble7][i];
-    }
-    for (size_t i = 0; i < 32; i++) {
-        laneWaveforms[7][32 + i] = lut.data[lowNibble7][i];
-    }
-
-    // Step 9: Transpose waveforms to DMA format
+    // Transpose waveforms to DMA format
     transpose_8lane_pulses(
         laneWaveforms[0], laneWaveforms[1], laneWaveforms[2], laneWaveforms[3],
         laneWaveforms[4], laneWaveforms[5], laneWaveforms[6], laneWaveforms[7],

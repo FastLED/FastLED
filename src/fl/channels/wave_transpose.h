@@ -104,21 +104,19 @@ inline Wave8BitExpansionLut buildWaveNibbleLut(
 /// // Build LUT once (reusable for multiple calls with same timing)
 /// Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0, bit1);
 ///
-/// // Use LUT for multiple byte pairs (fast, no branching)
+/// // Use LUT for 2 lanes (fast, no branching)
+/// uint8_t lanes[2] = {0xFF, 0x00};
 /// uint8_t output[16];
-/// waveTranspose8_2_simple(0xFF, 0x00, lut, output);
-/// waveTranspose8_2_simple(0xAA, 0x55, lut, output2);
+/// waveTranspose8_2_simple(lanes, lut, output);
 /// @endcode
 ///
-/// @param laneA Byte value for lane 0 (0-255)
-/// @param laneB Byte value for lane 1 (0-255)
+/// @param lanes Array of 2 lane values (0-255 each)
 /// @param lut Pre-computed 8-bit expansion lookup table (from buildWaveNibbleLut)
 /// @param output 16-byte output buffer for transposed DMA data
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_2_simple(
-    uint8_t laneA,
-    uint8_t laneB,
+    const uint8_t lanes[2],
     const Wave8BitExpansionLut& lut,
     uint8_t output[16]
 );
@@ -153,24 +151,19 @@ FL_IRAM void waveTranspose8_2_simple(
 /// // Build LUT once (reusable for multiple calls with same timing)
 /// Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0, bit1);
 ///
-/// // Use LUT for multiple byte quads (fast, no branching)
+/// // Use LUT for 4 lanes (fast, no branching)
+/// uint8_t lanes[4] = {0xFF, 0x00, 0xAA, 0x55};
 /// uint8_t output[128];
-/// waveTranspose8_4(0xFF, 0x00, 0xAA, 0x55, lut, output);
+/// waveTranspose8_4(lanes, lut, output);
 /// @endcode
 ///
-/// @param laneA Byte value for lane 0 (0-255)
-/// @param laneB Byte value for lane 1 (0-255)
-/// @param laneC Byte value for lane 2 (0-255)
-/// @param laneD Byte value for lane 3 (0-255)
+/// @param lanes Array of 4 lane values (0-255 each)
 /// @param lut Pre-computed 8-bit expansion lookup table (from buildWaveNibbleLut)
 /// @param output 128-byte output buffer for transposed DMA data
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_4(
-    uint8_t laneA,
-    uint8_t laneB,
-    uint8_t laneC,
-    uint8_t laneD,
+    const uint8_t lanes[4],
     const Wave8BitExpansionLut& lut,
     uint8_t output[128]
 );
@@ -207,26 +200,19 @@ FL_IRAM void waveTranspose8_4(
 /// // Build LUT once (reusable for multiple calls with same timing)
 /// Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0, bit1);
 ///
-/// // Use LUT for multiple byte sets (fast, no branching)
+/// // Use LUT for 8 lanes (fast, no branching)
+/// uint8_t lanes[8] = {0xFF, 0x00, 0xAA, 0x55, 0xF0, 0x0F, 0x33, 0xCC};
 /// uint8_t output[64];
-/// waveTranspose8_8(0xFF, 0x00, 0xAA, 0x55, 0xF0, 0x0F, 0x33, 0xCC, lut, output);
+/// waveTranspose8_8(lanes, lut, output);
 /// @endcode
 ///
-/// @param lane0 Byte value for lane 0 (0-255)
-/// @param lane1 Byte value for lane 1 (0-255)
-/// @param lane2 Byte value for lane 2 (0-255)
-/// @param lane3 Byte value for lane 3 (0-255)
-/// @param lane4 Byte value for lane 4 (0-255)
-/// @param lane5 Byte value for lane 5 (0-255)
-/// @param lane6 Byte value for lane 6 (0-255)
-/// @param lane7 Byte value for lane 7 (0-255)
+/// @param lanes Array of 8 lane values (0-255 each)
 /// @param lut Pre-computed 8-bit expansion lookup table (from buildWaveNibbleLut)
 /// @param output 64-byte output buffer for transposed DMA data
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_8(
-    uint8_t lane0, uint8_t lane1, uint8_t lane2, uint8_t lane3,
-    uint8_t lane4, uint8_t lane5, uint8_t lane6, uint8_t lane7,
+    const uint8_t lanes[8],
     const Wave8BitExpansionLut& lut,
     uint8_t output[64]
 );
