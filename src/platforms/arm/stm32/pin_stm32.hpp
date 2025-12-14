@@ -29,13 +29,21 @@ inline void pinMode(int pin, int mode) {
 #ifdef _WIRISH_WIRISH_H_
     // Maple framework uses WiringPinMode enum instead of int
     ::pinMode(pin, static_cast<WiringPinMode>(mode));
+#elif defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_GIGA)
+    // Arduino MBED framework (e.g., Giga R1) uses PinMode enum
+    ::pinMode(pin, static_cast<PinMode>(mode));
 #else
     ::pinMode(pin, mode);
 #endif
 }
 
 inline void digitalWrite(int pin, int val) {
+#if defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_GIGA)
+    // Arduino MBED framework uses PinStatus enum
+    ::digitalWrite(pin, static_cast<PinStatus>(val));
+#else
     ::digitalWrite(pin, val);
+#endif
 }
 
 inline int digitalRead(int pin) {
@@ -51,8 +59,8 @@ inline void analogWrite(int pin, int val) {
 }
 
 inline void analogReference(int mode) {
-#ifdef _WIRISH_WIRISH_H_
-    // Maple framework doesn't support analogReference
+#if defined(_WIRISH_WIRISH_H_) || defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_GIGA)
+    // Maple framework and Arduino MBED don't support analogReference
     // Reference voltage is fixed by hardware (typically 3.3V)
     (void)mode;  // Suppress unused parameter warning
 #else
