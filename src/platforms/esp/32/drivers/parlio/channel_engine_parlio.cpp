@@ -1030,10 +1030,30 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mIsrContext->transmission_active = true;
     mState.mIsrContext->end_time_us = 0;
 
-    // Phase 0: Initialize buffer accounting
-    // Calculate total buffers needed for this transmission
-    size_t leds_per_buffer = (numLeds + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
-    size_t total_buffers = (numLeds + leds_per_buffer - 1) / leds_per_buffer;
+    // ITERATION 1: OLD buffer allocation (BROKEN - splits small strips into multiple buffers)
+    // size_t leds_per_buffer = (numLeds + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
+    // size_t total_buffers = (numLeds + leds_per_buffer - 1) / leds_per_buffer;
+
+    // ITERATION 2: NEW buffer allocation - single-buffer mode for Phase 0
+    // Phase 0 requirement: ALL LEDs must fit in ONE buffer to avoid DMA gaps
+    // For small strips (≤125 LEDs), use single buffer mode
+    // For large strips (>125 LEDs), use multi-buffer ring mode
+    size_t single_buffer_max_leds = mState.ring_buffer_capacity / 30; // 3750 bytes / 30 bytes per LED = 125 LEDs
+    size_t leds_per_buffer;
+    size_t total_buffers;
+
+    if (numLeds <= single_buffer_max_leds) {
+        // ITERATION 2: Phase 0 path - all LEDs fit in one buffer (NO DMA gaps)
+        leds_per_buffer = numLeds;
+        total_buffers = 1;
+        FL_WARN("PARLIO: Single-buffer mode activated (" << numLeds << " LEDs fit in one buffer)");
+    } else {
+        // ITERATION 2: Phase 1+ path - multi-buffer streaming with DMA gaps
+        leds_per_buffer = (numLeds + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
+        total_buffers = (numLeds + leds_per_buffer - 1) / leds_per_buffer;
+        FL_WARN("PARLIO: Multi-buffer mode activated (" << numLeds << " LEDs across "
+                << total_buffers << " buffers, " << leds_per_buffer << " LEDs per buffer)");
+    }
 
     mState.mIsrContext->buffers_submitted = 0;
     mState.mIsrContext->buffers_completed = 0;
