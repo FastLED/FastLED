@@ -9,8 +9,8 @@
 // ============================================================================
 
 // Driver selection
-#define JUST_PARLIO
-// #define JUST_RMT
+#define JUST_PARLIO  // ITERATION 1: Re-enabled for PARLIO investigation
+// #define JUST_RMT  // ITERATION 4: Verified - RX decoder works correctly (99.6% accuracy)
 
 // Lane range (MUST be defined BEFORE Common.h)
 #define MIN_LANES 1

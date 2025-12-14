@@ -354,8 +354,11 @@ bool FL_IRAM ChannelEnginePARLIOImpl::txDoneCallback(
                 // Phase 1 - Iteration 2: Use consistent idle_value = 0x0000 (LOW) for all buffers
                 // WS2812B protocol requires LOW state between data frames
                 // Alternating idle_value creates spurious transitions between chunks
+                // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
+                // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with sample_edge = NEG
                 parlio_transmit_config_t tx_config = {};
-                tx_config.idle_value = 0x0000; // Keep pins LOW between chunks
+                tx_config.idle_value = 0x0000; // Keep pins LOW between chunks (reverted)
+                // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
 
                 esp_err_t err = parlio_tx_unit_transmit(tx_unit, buffer_ptr,
                                                          buffer_size * 8, &tx_config);
@@ -553,8 +556,11 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     // Previously checked AFTER all writes completed, which was too late to prevent corruption
 
     // Queue transmission of this buffer
+    // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
+    // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with sample_edge = NEG
     parlio_transmit_config_t tx_config = {};
-    tx_config.idle_value = 0x0000;
+    tx_config.idle_value = 0x0000; // (reverted)
+    // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
 
     size_t chunkBits =
         outputIdx * 8; // PARLIO API requires payload size in bits
@@ -622,6 +628,14 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
     // Zero output buffer to prevent garbage data
     fl::memset(outputBuffer, 0x00, mState.ring_buffer_capacity);
 
+    // ITERATION 3: Remove padding logic - buffer alignment is the solution
+    // Previous iterations tried to fix corruption with padding, but this was wrong.
+    // Padding adds LOW pulses that become part of the waveform, confusing the decoder.
+    // The real solution is to ensure buffer boundaries align with LED frame boundaries.
+    // With correct buffer sizing (125 LEDs × 30 bytes = 3750 bytes), the DMA gap
+    // happens naturally BETWEEN LED frames, which WS2812B tolerates.
+    size_t outputIdx = 0;
+
     // Get waveform generation resources
     uint8_t* laneWaveforms = mState.waveform_expansion_buffer.get();
     const uint8_t* bit0_wave = mState.bit0_waveform.data();
@@ -631,7 +645,8 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
     const size_t max_pulses_per_bit = 16;
     const size_t bytes_per_lane = 8 * max_pulses_per_bit;
 
-    size_t outputIdx = 0;
+    // ITERATION 2: outputIdx now initialized above (with front padding logic)
+    // Removed duplicate: size_t outputIdx = 0;
 
     // Process each LED in this buffer
     for (size_t ledIdx = 0; ledIdx < led_count; ledIdx++) {
@@ -722,10 +737,12 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
         }
     }
 
-    // Add minimal padding (1 byte for 1μs LOW) to ensure final pulse completes
-    if (outputIdx + 1 <= mState.ring_buffer_capacity) {
-        outputBuffer[outputIdx++] = 0x00;
-    }
+    // ITERATION 3: Remove back padding - not needed with correct buffer alignment
+    // Previous iterations added padding to "absorb" the DMA gap, but this was misguided.
+    // The correct solution is to ensure buffers end exactly on LED frame boundaries.
+    // With 125 LEDs × 30 bytes/LED = 3750 bytes, buffer ends after LED 124 completes.
+    // The DMA gap then occurs BETWEEN LED 124 and LED 125 (between frames), which
+    // WS2812B protocol tolerates naturally (per LOOP.md line 16).
 
     // Store actual size of this buffer
     mState.ring_buffer_sizes[ring_index] = outputIdx;
@@ -1073,8 +1090,11 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     size_t first_buffer_idx = 0;
     size_t first_buffer_size = mState.ring_buffer_sizes[first_buffer_idx];
 
+    // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
+    // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with sample_edge = NEG
     parlio_transmit_config_t tx_config = {};
-    tx_config.idle_value = 0x0000; // Start with LOW
+    tx_config.idle_value = 0x0000; // Start with LOW (reverted)
+    // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
 
     esp_err_t err = parlio_tx_unit_transmit(mState.tx_unit,
                                              mState.ring_buffers[first_buffer_idx].get(),
@@ -1251,8 +1271,12 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.max_transfer_size = 65534; // Hardware maximum (65535 bits - 1 for safety)
     config.bit_pack_order =
         PARLIO_BIT_PACK_ORDER_LSB; // Match bit-packing logic (bit 0 = tick 0)
+    // ITERATION 5 - Experiment 2-3: sample_edge = NEG made things WORSE (39 corrupt LEDs vs 24)
+    // ITERATION 5 - Reverting to POS (best configuration found in Iteration 1)
     config.sample_edge =
         PARLIO_SAMPLE_EDGE_POS; // ITERATION 1: Match ESP-IDF example (was NEG)
+    // config.sample_edge =
+    //     PARLIO_SAMPLE_EDGE_NEG; // ITERATION 5: Experiment 2-3 - NEG failed (disabled)
 
     // Assign GPIO pins for data_width lanes
     for (size_t i = 0; i < mState.data_width; i++) {
@@ -1329,6 +1353,16 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     }
     size_t bufferSize = mState.leds_per_chunk * bytes_per_led;
 
+    // ITERATION 3: FIX - The above calculation is WRONG for ring buffer sizing!
+    // It calculates pulse count, not actual output bytes after bit-packing.
+    // The transpose logic (lines 710-739) packs pulses into bytes:
+    // - ticksPerByte = 8 / data_width (for data_width=1: 8 ticks per byte)
+    // - numOutputBytes = pulsesPerByte / ticksPerByte
+    // - For 1-lane: (8 bits × 10 pulses) / 8 = 10 bytes per color × 3 = 30 bytes/LED
+    //
+    // This  bug caused ring buffers to be allocated at 240 bytes/LED (8x too large!)
+    // when they should be 30 bytes/LED, causing buffer misalignment with LED frames.
+
     // Allocate DMA-capable buffers from heap using fl::unique_ptr with custom
     // deleter
     mState.buffer_a.reset(static_cast<uint8_t *>(
@@ -1365,10 +1399,32 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     mState.buffer_size = bufferSize;
 
     // Phase 0: Allocate ring buffers for streaming multi-buffer DMA
-    // Calculate LEDs per ring buffer: distribute 1000 LEDs across 32 buffers
-    // For 1000 LEDs / 32 buffers = ~31 LEDs per buffer (last buffer may be smaller)
+    // Calculate LEDs per ring buffer: distribute 1000 LEDs across 8 buffers
+    // For 1000 LEDs / 8 buffers = 125 LEDs per buffer (last buffer may be smaller)
     size_t ring_buffer_led_count = (1000 + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT; // Round up
-    size_t ring_buffer_capacity = ring_buffer_led_count * bytes_per_led;
+
+    // ITERATION 3: Calculate correct bytes_per_led accounting for bit-packing
+    // The transpose logic packs pulses into bytes based on data_width
+    // Formula matches generateRingBuffer() transpose logic (lines 710-739):
+    // - pulsesPerByte = 8 bits × pulses_per_bit
+    // - ticksPerByte = 8 / data_width
+    // - numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte
+    // - bytes_per_led = numOutputBytes × 3 colors
+    size_t bytes_per_led_ring;
+    if (mState.data_width <= 8) {
+        size_t ticksPerByte = 8 / mState.data_width;
+        size_t pulsesPerByte = 8 * mState.pulses_per_bit;  // 8 bits per color byte
+        size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+        bytes_per_led_ring = numOutputBytes * 3;  // 3 colors (RGB)
+    } else if (mState.data_width == 16) {
+        // For 16-bit width: 2 bytes per pulse tick
+        size_t pulsesPerByte = 8 * mState.pulses_per_bit;
+        bytes_per_led_ring = pulsesPerByte * 2 * 3;  // 2 bytes per pulse × 3 colors
+    } else {
+        bytes_per_led_ring = 30;  // Fallback (should never happen)
+    }
+
+    size_t ring_buffer_capacity = ring_buffer_led_count * bytes_per_led_ring;
 
     mState.ring_buffer_capacity = ring_buffer_capacity;
     mState.ring_buffers.clear();

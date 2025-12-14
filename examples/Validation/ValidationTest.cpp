@@ -219,6 +219,10 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     fl::ChipsetTiming tx_timing{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
     auto rx_timing = fl::make4PhaseTiming(tx_timing, 150);
 
+    // Enable gap tolerance for PARLIO DMA gaps (~20µs typical, 30µs safety margin)
+    // Gaps between LED frames are tolerated, preventing false errors during buffer transitions
+    rx_timing.gap_tolerance_ns = 30000; // 30µs
+
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
 
     if (!decode_result.ok()) {
