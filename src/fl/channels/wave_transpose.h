@@ -107,7 +107,7 @@ inline Wave8BitExpansionLut buildWaveNibbleLut(
 /// // Use LUT for 2 lanes (fast, no branching)
 /// uint8_t lanes[2] = {0xFF, 0x00};
 /// uint8_t output[16];
-/// waveTranspose8_2_simple(lanes, lut, output);
+/// waveTranspose8_2(lanes, lut, output);
 /// @endcode
 ///
 /// @param lanes Array of 2 lane values (0-255 each)
@@ -115,7 +115,7 @@ inline Wave8BitExpansionLut buildWaveNibbleLut(
 /// @param output 16-byte output buffer for transposed DMA data
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
-FL_IRAM void waveTranspose8_2_simple(
+FL_IRAM void waveTranspose8_2(
     const uint8_t lanes[2],
     const Wave8BitExpansionLut& lut,
     uint8_t output[16]

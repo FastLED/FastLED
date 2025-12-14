@@ -11,7 +11,7 @@ using namespace fl;
 // Simplified waveTranspose8_2 tests (LUT-based, fixed 8:1 expansion)
 // ============================================================================
 
-TEST_CASE("waveTranspose8_2_simple - basic correctness with known pattern") {
+TEST_CASE("waveTranspose8_2 - basic correctness with known pattern") {
     // Simple test pattern: bit0=all LOW, bit1=all HIGH for 8 pulses
     const uint8_t bit0_wave[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -24,7 +24,7 @@ TEST_CASE("waveTranspose8_2_simple - basic correctness with known pattern") {
 
     // laneA = 0xFF (all bits 1 → bit1_wave), laneB = 0x00 (all bits 0 → bit0_wave)
     uint8_t lanes[2] = {0xFF, 0x00};
-    waveTranspose8_2_simple(lanes, lut, output);
+    waveTranspose8_2(lanes, lut, output);
 
     // Verify output was written
     bool has_data = false;
@@ -45,7 +45,7 @@ TEST_CASE("waveTranspose8_2_simple - basic correctness with known pattern") {
     }
 }
 
-TEST_CASE("waveTranspose8_2_simple - all zeros") {
+TEST_CASE("waveTranspose8_2 - all zeros") {
     const uint8_t bit0_wave[8] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
@@ -57,7 +57,7 @@ TEST_CASE("waveTranspose8_2_simple - all zeros") {
 
     // Both lanes all zeros → both expand to bit0_wave (3 HIGH, 5 LOW)
     uint8_t lanes[2] = {0x00, 0x00};
-    waveTranspose8_2_simple(lanes, lut, output);
+    waveTranspose8_2(lanes, lut, output);
 
     // First 3 pulses are HIGH (0xFF), pulse 3 is LOW (0x00)
     // Output byte 0 packs ticks 0-3 (pulses 0-3):
@@ -69,7 +69,7 @@ TEST_CASE("waveTranspose8_2_simple - all zeros") {
     CHECK(output[0] == 0x3F);
 }
 
-TEST_CASE("waveTranspose8_2_simple - all ones") {
+TEST_CASE("waveTranspose8_2 - all ones") {
     const uint8_t bit0_wave[8] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
@@ -81,14 +81,14 @@ TEST_CASE("waveTranspose8_2_simple - all ones") {
 
     // Both lanes all ones → both expand to bit1_wave (5 HIGH, 3 LOW)
     uint8_t lanes[2] = {0xFF, 0xFF};
-    waveTranspose8_2_simple(lanes, lut, output);
+    waveTranspose8_2(lanes, lut, output);
 
     // First 5 pulses are HIGH → bits set to 1
     // Output byte 0 packs ticks 0,1,2,3: all both lanes HIGH → 0xFF
     CHECK(output[0] == 0xFF);
 }
 
-TEST_CASE("waveTranspose8_2_simple - alternating pattern") {
+TEST_CASE("waveTranspose8_2 - alternating pattern") {
     const uint8_t bit0_wave[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -100,7 +100,7 @@ TEST_CASE("waveTranspose8_2_simple - alternating pattern") {
 
     // laneA = 0xAA (10101010), laneB = 0x55 (01010101)
     uint8_t lanes[2] = {0xAA, 0x55};
-    waveTranspose8_2_simple(lanes, lut, output);
+    waveTranspose8_2(lanes, lut, output);
 
     // Verify we got non-zero data
     bool has_nonzero = false;
@@ -113,7 +113,7 @@ TEST_CASE("waveTranspose8_2_simple - alternating pattern") {
     CHECK(has_nonzero);
 }
 
-TEST_CASE("waveTranspose8_2_simple - WS2812 timing pattern") {
+TEST_CASE("waveTranspose8_2 - WS2812 timing pattern") {
     // WS2812 realistic timing: bit0 = 3H+5L, bit1 = 5H+3L
     const uint8_t bit0_wave[8] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
@@ -126,7 +126,7 @@ TEST_CASE("waveTranspose8_2_simple - WS2812 timing pattern") {
 
     // Test with mixed pattern: laneA = 0xF0, laneB = 0x0F
     uint8_t lanes[2] = {0xF0, 0x0F};
-    waveTranspose8_2_simple(lanes, lut, output);
+    waveTranspose8_2(lanes, lut, output);
 
     // Verify output is populated (we don't verify exact values, just non-zero)
     bool has_nonzero = false;

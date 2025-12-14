@@ -70,7 +70,7 @@ static FL_IRAM void transpose_2lane_pulses(
 #if defined(__GNUC__) && !defined(__clang__)
 __attribute__((optimize("O3")))
 #endif
-FL_IRAM void waveTranspose8_2_simple(
+FL_IRAM void waveTranspose8_2(
     const uint8_t lanes[2],
     const Wave8BitExpansionLut& lut,
     uint8_t output[16]
