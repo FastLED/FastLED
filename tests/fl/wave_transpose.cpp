@@ -17,8 +17,7 @@ TEST_CASE("waveTranspose8_2_simple - basic correctness with known pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[16];
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
@@ -50,8 +49,7 @@ TEST_CASE("waveTranspose8_2_simple - all zeros") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[16];
     fl::memset(output, 0xAA, sizeof(output));
@@ -74,8 +72,7 @@ TEST_CASE("waveTranspose8_2_simple - all ones") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[16];
     fl::memset(output, 0x00, sizeof(output));
@@ -93,8 +90,7 @@ TEST_CASE("waveTranspose8_2_simple - alternating pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[16];
     fl::memset(output, 0x00, sizeof(output));
@@ -119,8 +115,7 @@ TEST_CASE("waveTranspose8_2_simple - WS2812 timing pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[16];
     fl::memset(output, 0x00, sizeof(output));
@@ -148,8 +143,7 @@ TEST_CASE("buildWaveNibbleLut - correctness") {
     const uint8_t bit0_wave[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     // Test all 16 nibbles - each nibble maps to 32 pulse bytes (4 bits × 8 pulses/bit, MSB first)
     for (int nibble = 0; nibble < 16; nibble++) {
@@ -161,7 +155,7 @@ TEST_CASE("buildWaveNibbleLut - correctness") {
             // Verify 8-byte waveform pattern for this bit
             size_t wave_offset = bit_pos * 8;
             for (size_t i = 0; i < 8; i++) {
-                CHECK(lut[nibble][wave_offset + i] == expected_wave[i]);
+                CHECK(lut.data[nibble][wave_offset + i] == expected_wave[i]);
             }
         }
     }
@@ -175,7 +169,7 @@ TEST_CASE("buildWaveNibbleLut - correctness") {
     for (size_t i = 24; i < 32; i++) nibble_0x6[i] = 0x00;     // bit 0 = 0 → bit0_wave
 
     for (size_t i = 0; i < 32; i++) {
-        CHECK(lut[0x6][i] == nibble_0x6[i]);
+        CHECK(lut.data[0x6][i] == nibble_0x6[i]);
     }
 }
 
@@ -184,14 +178,13 @@ TEST_CASE("buildWaveNibbleLut - WS2812 timing") {
     const uint8_t bit0_wave[8] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     // Verify nibble 0x0 = 0b0000 (all bits 0)
     for (size_t bit_pos = 0; bit_pos < 4; bit_pos++) {
         size_t offset = bit_pos * 8;
         for (size_t i = 0; i < 8; i++) {
-            CHECK(lut[0x0][offset + i] == bit0_wave[i]);
+            CHECK(lut.data[0x0][offset + i] == bit0_wave[i]);
         }
     }
 
@@ -199,7 +192,7 @@ TEST_CASE("buildWaveNibbleLut - WS2812 timing") {
     for (size_t bit_pos = 0; bit_pos < 4; bit_pos++) {
         size_t offset = bit_pos * 8;
         for (size_t i = 0; i < 8; i++) {
-            CHECK(lut[0xF][offset + i] == bit1_wave[i]);
+            CHECK(lut.data[0xF][offset + i] == bit1_wave[i]);
         }
     }
 }
@@ -214,8 +207,7 @@ TEST_CASE("waveTranspose8_4 - basic correctness with known pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
@@ -254,8 +246,7 @@ TEST_CASE("waveTranspose8_4 - all zeros") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0xAA, sizeof(output));
@@ -274,8 +265,7 @@ TEST_CASE("waveTranspose8_4 - all ones") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
@@ -293,8 +283,7 @@ TEST_CASE("waveTranspose8_4 - alternating pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
@@ -319,8 +308,7 @@ TEST_CASE("waveTranspose8_4 - WS2812 timing pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
@@ -349,8 +337,7 @@ TEST_CASE("waveTranspose8_8 - basic correctness with known pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[64];
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
@@ -381,8 +368,7 @@ TEST_CASE("waveTranspose8_8 - all zeros") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[64];
     fl::memset(output, 0xAA, sizeof(output));
@@ -404,8 +390,7 @@ TEST_CASE("waveTranspose8_8 - all ones") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[64];
     fl::memset(output, 0x00, sizeof(output));
@@ -428,8 +413,7 @@ TEST_CASE("waveTranspose8_8 - alternating pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[64];
     fl::memset(output, 0x00, sizeof(output));
@@ -454,8 +438,7 @@ TEST_CASE("waveTranspose8_8 - WS2812 timing pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[64];
     fl::memset(output, 0x00, sizeof(output));
@@ -484,8 +467,7 @@ TEST_CASE("waveTranspose8_16 - basic correctness with known pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0xAA, sizeof(output)); // Fill with pattern to detect writes
@@ -523,8 +505,7 @@ TEST_CASE("waveTranspose8_16 - all zeros") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0xAA, sizeof(output));
@@ -546,8 +527,7 @@ TEST_CASE("waveTranspose8_16 - all ones") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
@@ -570,8 +550,7 @@ TEST_CASE("waveTranspose8_16 - alternating pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
@@ -600,8 +579,7 @@ TEST_CASE("waveTranspose8_16 - WS2812 timing pattern") {
     const uint8_t bit1_wave[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00};
 
     // Build LUT
-    wave_nibble_lut_t lut;
-    buildWaveNibbleLut(lut, bit0_wave, bit1_wave);
+    Wave8BitExpansionLut lut = buildWaveNibbleLut(bit0_wave, bit1_wave);
 
     uint8_t output[128];
     fl::memset(output, 0x00, sizeof(output));
