@@ -48,10 +48,10 @@ namespace fl {
 //=============================================================================
 
 // WS2812 timing requirements with PARLIO
-// Clock: 8.0 MHz (125ns per tick)
-// Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
-// Each LED bit is encoded as 10 clock ticks (1.25μs total)
-static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
+// Clock: 10.0 MHz (100ns per tick)
+// Divides from PLL_F160M on ESP32-P4 (160/16) or PLL_F240M on ESP32-C6 (240/24)
+// Each LED bit is encoded as 8 clock ticks (0.8μs total)
+static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 10000000; // 10.0 MHz
 
 
 //=============================================================================
@@ -122,13 +122,13 @@ static inline bool isParlioPinValid(int pin) {
 /// @param num_leds Number of LEDs per lane
 /// @param data_width Number of parallel lanes (1, 2, 4, 8, or 16)
 /// @return Total buffer size in bytes
-/// @note Formula: buffer_size = (num_leds × 240 bits × data_width + 7) / 8 bytes
+/// @note Formula: buffer_size = (num_leds × 192 bits × data_width + 7) / 8 bytes
 /// @note VALIDATION REQUIRED: Test this function with known values from README.md examples
 static inline size_t calculateTotalBufferSize(size_t num_leds, size_t data_width) {
     // Official formula from README.md
-    // Each LED = 240 bits (3 colors × 80-bit waveform each)
-    // Result: 30 bytes per LED per lane, scaled by data_width for parallel transmission
-    return (num_leds * 240 * data_width + 7) / 8;
+    // Each LED = 192 bits (3 colors × 64-bit waveform each)
+    // Result: 24 bytes per LED per lane, scaled by data_width for parallel transmission
+    return (num_leds * 192 * data_width + 7) / 8;
 }
 
 /// @brief Calculate DMA chunk buffer size for ring buffer streaming
@@ -179,32 +179,32 @@ static inline size_t calculateChunkBufferSize(size_t total_leds, size_t num_chun
 //
 // MEMORY LAYOUT:
 //   For 8 lanes:
-//     - Each LED byte → 10 ticks × 1 byte = 10 bytes (after waveform encoding)
-//     - Each LED (RGB) → 30 bytes (after waveform encoding)
+//     - Each LED byte → 8 ticks × 1 byte = 8 bytes (after waveform encoding)
+//     - Each LED (RGB) → 24 bytes (after waveform encoding)
 //
 // BUFFER SIZE CALCULATION:
 //   Scratch buffer: N LEDs × 3 colors × 8 strips bytes (per-strip layout)
-//   DMA chunks: 100 LEDs × 3 × 32 ticks × 1 byte = 9600 bytes (per buffer)
+//   DMA chunks: 100 LEDs × 3 × 8 bytes × 1 byte = 2400 bytes (per buffer)
 //
 // EXAMPLE (1000 LEDs, 8 strips):
 //   Scratch buffer: 1000 × 3 × 8 = 24,000 bytes (per-strip layout)
-//   DMA buffers: 2 × (100 × 3 × 32 × 1) = 19,200 bytes (ping-pong expanded
-//   waveforms) Total: ~43 KB (waveform expansion happens in ISR, not stored)
+//   DMA buffers: 2 × (100 × 3 × 8 × 1) = 4,800 bytes (ping-pong expanded
+//   waveforms) Total: ~29 KB (waveform expansion happens in ISR, not stored)
 //
 // CHUNKING STRATEGY:
 //   PARLIO has 65535 byte max transfer size. For large LED counts:
 //   - Break transmission at LED boundaries (not in middle of RGB)
-//   - Fixed chunk size: 100 LEDs (3000 bytes per chunk)
-//   - Max ~2184 LEDs per chunk (65535 / 30 bytes per LED)
+//   - Fixed chunk size: 100 LEDs (2400 bytes per chunk)
+//   - Max ~2730 LEDs per chunk (65535 / 24 bytes per LED)
 //   - Transmit chunks sequentially via ping-pong DMA buffering
 //
 // WAVEFORM GENERATION:
 //   Uses generic waveform generator with WS2812 timing parameters:
-//   - T1: 375ns (initial HIGH time)
-//   - T2: 500ns (additional HIGH time for bit 1)
-//   - T3: 375ns (LOW tail duration)
-//   - Clock: 8.0 MHz (125ns per pulse)
-//   - Result: 10 pulses per bit (bit0=3H+7L, bit1=7H+3L)
+//   - T1: 300ns (initial HIGH time)
+//   - T2: 200ns (additional HIGH time for bit 1)
+//   - T3: 500ns (LOW tail duration)
+//   - Clock: 10.0 MHz (100ns per pulse)
+//   - Result: 8 pulses per bit (bit0=3H+5L, bit1=5H+3L)
 //
 //-----------------------------------------------------------------------------
 
@@ -632,7 +632,7 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
     // Previous iterations tried to fix corruption with padding, but this was wrong.
     // Padding adds LOW pulses that become part of the waveform, confusing the decoder.
     // The real solution is to ensure buffer boundaries align with LED frame boundaries.
-    // With correct buffer sizing (125 LEDs × 30 bytes = 3750 bytes), the DMA gap
+    // With correct buffer sizing (156 LEDs × 24 bytes = 3744 bytes), the DMA gap
     // happens naturally BETWEEN LED frames, which WS2812B tolerates.
     size_t outputIdx = 0;
 
@@ -740,8 +740,8 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
     // ITERATION 3: Remove back padding - not needed with correct buffer alignment
     // Previous iterations added padding to "absorb" the DMA gap, but this was misguided.
     // The correct solution is to ensure buffers end exactly on LED frame boundaries.
-    // With 125 LEDs × 30 bytes/LED = 3750 bytes, buffer ends after LED 124 completes.
-    // The DMA gap then occurs BETWEEN LED 124 and LED 125 (between frames), which
+    // With 156 LEDs × 24 bytes/LED = 3744 bytes, buffer ends after LED 155 completes.
+    // The DMA gap then occurs BETWEEN LED 155 and LED 156 (between frames), which
     // WS2812B protocol tolerates naturally (per LOOP.md line 16).
 
     // Store actual size of this buffer
@@ -1036,9 +1036,9 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
     // ITERATION 2: NEW buffer allocation - single-buffer mode for Phase 0
     // Phase 0 requirement: ALL LEDs must fit in ONE buffer to avoid DMA gaps
-    // For small strips (≤125 LEDs), use single buffer mode
-    // For large strips (>125 LEDs), use multi-buffer ring mode
-    size_t single_buffer_max_leds = mState.ring_buffer_capacity / 30; // 3750 bytes / 30 bytes per LED = 125 LEDs
+    // For small strips (≤156 LEDs), use single buffer mode
+    // For large strips (>156 LEDs), use multi-buffer ring mode
+    size_t single_buffer_max_leds = mState.ring_buffer_capacity / 24; // 3744 bytes / 24 bytes per LED = 156 LEDs
     size_t leds_per_buffer;
     size_t total_buffers;
 
@@ -1200,13 +1200,13 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // and stored in mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns
     //
     // For WS2812B-V5 (typical values):
-    // - T1: 225ns (T0H - initial HIGH time)
-    // - T2: 355ns (T1H-T0H - additional HIGH time for bit 1)
-    // - T3: 645ns (T0L - LOW tail duration)
+    // - T1: 300ns (T0H - initial HIGH time)
+    // - T2: 200ns (T1H-T0H - additional HIGH time for bit 1)
+    // - T3: 500ns (T0L - LOW tail duration)
     //
-    // Resulting waveforms (with 8.0 MHz = 125ns per pulse):
-    // - Bit 0: T1 HIGH + T3 LOW = 225ns H + 645ns L ≈ 2 + 5 pulses
-    // - Bit 1: (T1+T2) HIGH + T3 LOW = 580ns H + 645ns L ≈ 5 + 5 pulses
+    // Resulting waveforms (with 10.0 MHz = 100ns per pulse):
+    // - Bit 0: T1 HIGH + T3 LOW = 300ns H + 500ns L = 3 + 5 pulses
+    // - Bit 1: (T1+T2) HIGH + T3 LOW = 500ns H + 300ns L = 5 + 3 pulses
     size_t bit0_size = fl::generateBit0Waveform(
         PARLIO_CLOCK_FREQ_HZ, mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns,
         mState.bit0_waveform.data(), mState.bit0_waveform.size());
@@ -1249,10 +1249,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     }
     // PHASE 1 OPTION E: Increase buffer size to reduce chunk count below ISR callback limit
     // Root cause: ESP-IDF PARLIO driver stops invoking ISR callbacks after 4 transmissions
-    // Solution: Use larger buffers (18KB) to fit 614 LEDs/chunk → 1000 LEDs = 2 chunks (within limit)
-    // Previous: 2KB buffer → 68 LEDs/chunk → 15 chunks (exceeds 4-callback limit)
-    // New: 18KB buffer → 614 LEDs/chunk → 2 chunks (works within ISR callback limit)
-    constexpr size_t target_buffer_size = 18432; // 18KB per buffer (614 LEDs @ 30 bytes/LED for 1-lane)
+    // Solution: Use larger buffers (18KB) to fit 768 LEDs/chunk → 1000 LEDs = 2 chunks (within limit)
+    // Previous: 2KB buffer → 85 LEDs/chunk → 12 chunks (exceeds 4-callback limit)
+    // New: 18KB buffer → 768 LEDs/chunk → 2 chunks (works within ISR callback limit)
+    constexpr size_t target_buffer_size = 18432; // 18KB per buffer (768 LEDs @ 24 bytes/LED for 1-lane)
     mState.leds_per_chunk = target_buffer_size / bytes_per_led_calc;
 
     // Clamp to reasonable range
@@ -1378,10 +1378,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // The transpose logic (lines 710-739) packs pulses into bytes:
     // - ticksPerByte = 8 / data_width (for data_width=1: 8 ticks per byte)
     // - numOutputBytes = pulsesPerByte / ticksPerByte
-    // - For 1-lane: (8 bits × 10 pulses) / 8 = 10 bytes per color × 3 = 30 bytes/LED
+    // - For 1-lane: (8 bits × 8 pulses) / 8 = 8 bytes per color × 3 = 24 bytes/LED
     //
-    // This  bug caused ring buffers to be allocated at 240 bytes/LED (8x too large!)
-    // when they should be 30 bytes/LED, causing buffer misalignment with LED frames.
+    // This bug caused ring buffers to be allocated at 192 bytes/LED (8x too large!)
+    // when they should be 24 bytes/LED, causing buffer misalignment with LED frames.
 
     // Allocate DMA-capable buffers from heap using fl::unique_ptr with custom
     // deleter
@@ -1665,7 +1665,7 @@ ParlioDebugMetrics getParlioDebugMetrics() {
     // Calculate bytes from buffer counts
     // Note: This is approximate since buffers may have different sizes
     // For accurate tracking, we'd need to sum ring_buffer_sizes
-    size_t bytes_per_led = 30; // RGB: 3 colors × 8 bits × 10 pulses / 8 bits/byte = 30 bytes
+    size_t bytes_per_led = 24; // RGB: 3 colors × 8 bits × 8 pulses / 8 bits/byte = 24 bytes
     size_t leds_per_buffer = (ctx->buffers_total > 0) ? (ctx->total_leds / ctx->buffers_total) : 0;
     if (ctx->buffers_total > 0) {
         metrics.bytes_total = ctx->total_leds * bytes_per_led;
