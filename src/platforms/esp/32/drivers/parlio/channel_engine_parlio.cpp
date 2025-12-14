@@ -333,56 +333,53 @@ bool FL_IRAM ChannelEnginePARLIOImpl::txDoneCallback(
     ctx->buffers_completed++;
     ctx->isr_count++;
 
-    // Step 2: Check if we need to submit another buffer
-    // We submit if: buffers_completed < buffers_total AND ring has data (read_ptr != write_ptr)
-    if (ctx->buffers_completed < ctx->buffers_total) {
-        // Check if next buffer is ready in ring
-        // Ring is not empty when read_ptr != write_ptr
-        volatile size_t read_ptr = ctx->ring_read_ptr;
-        volatile size_t write_ptr = ctx->ring_write_ptr;
-
-        if (read_ptr != write_ptr) {
-            // Next buffer is ready - submit it to hardware
-            size_t buffer_idx = read_ptr % ctx->ring_size;
-
-            // Get buffer pointer and size from ring
-            uint8_t* buffer_ptr = self->mState.ring_buffers[buffer_idx].get();
-            size_t buffer_size = self->mState.ring_buffer_sizes[buffer_idx];
-
-            if (buffer_ptr && buffer_size > 0) {
-                // Submit buffer to hardware
-                // Phase 1 - Iteration 2: Use consistent idle_value = 0x0000 (LOW) for all buffers
-                // WS2812B protocol requires LOW state between data frames
-                // Alternating idle_value creates spurious transitions between chunks
-                // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
-                // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with sample_edge = NEG
-                parlio_transmit_config_t tx_config = {};
-                tx_config.idle_value = 0x0000; // Keep pins LOW between chunks (reverted)
-                // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
-
-                esp_err_t err = parlio_tx_unit_transmit(tx_unit, buffer_ptr,
-                                                         buffer_size * 8, &tx_config);
-
-                if (err == ESP_OK) {
-                    // Successfully submitted - increment read pointer
-                    ctx->ring_read_ptr++;
-                } else {
-                    // Submission failed - set error flag for CPU to detect
-                    ctx->ring_error = true;
-                }
-            } else {
-                // Invalid buffer - set error flag
-                ctx->ring_error = true;
-            }
-        } else {
-            // Ring underflow - CPU didn't generate buffer fast enough
-            // This is an error condition (ring should always be ahead)
-            ctx->ring_error = true;
-        }
-    } else {
-        // All buffers have been submitted - mark transmission complete
+    // Step 2: Check if all buffers have been submitted - mark transmission complete
+    if (ctx->buffers_completed >= ctx->buffers_total) {
         ctx->stream_complete = true;
         ctx->transmitting = false;
+        return false; // No high-priority task woken
+    }
+
+    // More buffers need to be submitted - check if next buffer is ready
+    volatile size_t read_ptr = ctx->ring_read_ptr;
+    volatile size_t write_ptr = ctx->ring_write_ptr;
+
+    // Ring underflow - CPU didn't generate buffer fast enough
+    if (read_ptr == write_ptr) {
+        ctx->ring_error = true;
+        return false;
+    }
+
+    // Next buffer is ready - submit it to hardware
+    size_t buffer_idx = read_ptr % ctx->ring_size;
+    uint8_t* buffer_ptr = self->mState.ring_buffers[buffer_idx].get();
+    size_t buffer_size = self->mState.ring_buffer_sizes[buffer_idx];
+
+    // Invalid buffer - set error flag
+    if (!buffer_ptr || buffer_size == 0) {
+        ctx->ring_error = true;
+        return false;
+    }
+
+    // Submit buffer to hardware
+    // Phase 1 - Iteration 2: Use consistent idle_value = 0x0000 (LOW) for all buffers
+    // WS2812B protocol requires LOW state between data frames
+    // Alternating idle_value creates spurious transitions between chunks
+    // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
+    // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with sample_edge = NEG
+    parlio_transmit_config_t tx_config = {};
+    tx_config.idle_value = 0x0000; // Keep pins LOW between chunks (reverted)
+    // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
+
+    esp_err_t err = parlio_tx_unit_transmit(tx_unit, buffer_ptr,
+                                             buffer_size * 8, &tx_config);
+
+    if (err == ESP_OK) {
+        // Successfully submitted - increment read pointer
+        ctx->ring_read_ptr++;
+    } else {
+        // Submission failed - set error flag for CPU to detect
+        ctx->ring_error = true;
     }
 
     return false; // No high-priority task woken
