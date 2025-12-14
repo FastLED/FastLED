@@ -44,17 +44,17 @@ namespace fl {
 /// Timing behavior (nanosecond-precise):
 /// For a '1' bit:
 ///   - Set line HIGH
-///   - Delay T1 nanoseconds
-///   - Set line LOW
-///   - Delay T2 nanoseconds
-///
-/// For a '0' bit:
-///   - Set line HIGH
-///   - Delay (T1 + T2 - T3) nanoseconds
+///   - Delay (T1 + T2) nanoseconds
 ///   - Set line LOW
 ///   - Delay T3 nanoseconds
 ///
-/// Total bit time = T1 + T2 (for both 0 and 1)
+/// For a '0' bit:
+///   - Set line HIGH
+///   - Delay T1 nanoseconds
+///   - Set line LOW
+///   - Delay (T2 + T3) nanoseconds
+///
+/// Total bit time = T1 + T2 + T3 (for both 0 and 1)
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockingGeneric : public CPixelLEDController<RGB_ORDER>
 {
@@ -70,10 +70,9 @@ private:
     // static_assert(fl::FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
 
     // Static timing assertions for protocol sanity
-    static_assert(T1 > 0, "T1 (first pulse) must be positive");
-    static_assert(T2 > 0, "T2 (second pulse) must be positive");
-    static_assert(T3 > 0, "T3 (zero pulse) must be positive");
-    static_assert((T1 + T2) > T3, "Bit time (T1+T2) must be greater than zero pulse (T3)");
+    static_assert(T1 > 0, "T1 (high time for bit 0) must be positive");
+    static_assert(T2 > 0, "T2 (additional high time for bit 1) must be positive");
+    static_assert(T3 > 0, "T3 (addtional time for low tail duration) must be positive");
 
     // Minimum wait time between frames
     CMinWait<WAIT_TIME> mWait;
