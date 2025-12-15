@@ -5,6 +5,28 @@
 
 namespace fl {
 
+
+constexpr uint8_t kTranspose4_16_LUT[16] = {
+    0x00,0x01,0x04,0x05,
+    0x10,0x11,0x14,0x15,
+    0x40,0x41,0x44,0x45,
+    0x50,0x51,0x54,0x55
+};
+
+#define SPREAD8_TO_16(lane_u8_0, lane_u8_1, out_16) do {                           \
+    const uint8_t _a = (uint8_t)(lane_u8_0);                                       \
+    const uint8_t _b = (uint8_t)(lane_u8_1);                                       \
+    const uint16_t _even = (uint16_t)(                                             \
+        (uint16_t)kTranspose4_16_LUT[_b & 0x0Fu] |                                    \
+        ((uint16_t)kTranspose4_16_LUT[_b >> 4] << 8)                                  \
+    );                                                                             \
+    const uint16_t _odd  = (uint16_t)(                                             \
+        ((uint16_t)kTranspose4_16_LUT[_a & 0x0Fu] |                                   \
+         ((uint16_t)kTranspose4_16_LUT[_a >> 4] << 8)) << 1                           \
+    );                                                                             \
+    (out_16) |= (uint16_t)(_even | _odd);                                          \
+} while (0)
+
 // ============================================================================
 // Simplified waveTranspose8_2 (fixed 8:1 expansion, LUT-based, no branching)
 // ============================================================================
@@ -28,36 +50,14 @@ static FL_IRAM void transpose_wave_symbols8_2(
     const uint8_t* lane0 = reinterpret_cast<const uint8_t*>(&lane_waves[0]);
     const uint8_t* lane1 = reinterpret_cast<const uint8_t*>(&lane_waves[1]);
 
-    // For each of 64 pulse byte positions, interleave bits from both lanes
+    // For each of 64 pulse byte positions, interleave bits from both lanes using LUT-based spread
     for (int i = 0; i < 64; i++) {
-        uint8_t byte0 = lane0[i];
-        uint8_t byte1 = lane1[i];
+        uint16_t interleaved = 0;
+        SPREAD8_TO_16(lane0[i], lane1[i], interleaved);
 
-        // Interleave 8 bits from each lane → 16 bits → 2 output bytes
-        // First output byte: high 4 bits from each lane
-        uint8_t out0 = 0;
-        out0 |= ((byte0 >> 7) & 1) << 7;  // lane0 bit 7
-        out0 |= ((byte1 >> 7) & 1) << 6;  // lane1 bit 7
-        out0 |= ((byte0 >> 6) & 1) << 5;  // lane0 bit 6
-        out0 |= ((byte1 >> 6) & 1) << 4;  // lane1 bit 6
-        out0 |= ((byte0 >> 5) & 1) << 3;  // lane0 bit 5
-        out0 |= ((byte1 >> 5) & 1) << 2;  // lane1 bit 5
-        out0 |= ((byte0 >> 4) & 1) << 1;  // lane0 bit 4
-        out0 |= ((byte1 >> 4) & 1) << 0;  // lane1 bit 4
-
-        // Second output byte: low 4 bits from each lane
-        uint8_t out1 = 0;
-        out1 |= ((byte0 >> 3) & 1) << 7;  // lane0 bit 3
-        out1 |= ((byte1 >> 3) & 1) << 6;  // lane1 bit 3
-        out1 |= ((byte0 >> 2) & 1) << 5;  // lane0 bit 2
-        out1 |= ((byte1 >> 2) & 1) << 4;  // lane1 bit 2
-        out1 |= ((byte0 >> 1) & 1) << 3;  // lane0 bit 1
-        out1 |= ((byte1 >> 1) & 1) << 2;  // lane1 bit 1
-        out1 |= ((byte0 >> 0) & 1) << 1;  // lane0 bit 0
-        out1 |= ((byte1 >> 0) & 1) << 0;  // lane1 bit 0
-
-        output[i * 2] = out0;
-        output[i * 2 + 1] = out1;
+        // Write interleaved 16-bit result as two bytes (little-endian)
+        output[i * 2] = (uint8_t)(interleaved >> 8);
+        output[i * 2 + 1] = (uint8_t)(interleaved & 0xFF);
     }
 }
 
