@@ -493,6 +493,14 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t
             ring_buffer_capacity; ///< Maximum size of each ring buffer in bytes
 
+        // Ring buffer population state (for incremental buffer generation)
+        size_t next_buffer_to_populate; ///< Ring index for next buffer to fill
+                                        ///< (0 to buffers_total-1)
+        size_t next_byte_offset;  ///< Source byte offset for next buffer to
+                                  ///< populate
+        size_t buffers_populated; ///< Total buffers populated so far (0 to
+                                  ///< buffers_total)
+
         // LEGACY: Double-buffered DMA streaming (Phase 3, kept for
         // compatibility during migration)
         // TODO Phase 0: Remove after ring buffer migration complete
@@ -587,11 +595,6 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     static bool txDoneCallback(parlio_tx_unit_handle_t tx_unit,
                                const void *edata, void *user_ctx);
 
-    /// @brief Transpose and queue next chunk (called from ISR or main thread)
-    /// @note IRAM_ATTR applied in implementation (.cpp) to avoid section
-    /// conflicts
-    bool transposeAndQueueNextChunk();
-
     /// @brief Populate a DMA buffer with waveform data for a byte range
     /// @param outputBuffer DMA buffer to populate (pre-allocated and pre-zeroed)
     /// @param outputBufferCapacity Maximum size of output buffer
@@ -599,22 +602,34 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @param byteCount Number of bytes to process
     /// @param outputBytesWritten [out] Number of bytes written to output buffer
     /// @return true on success, false on error (buffer overflow, etc.)
-    /// @note Shared helper function used by generateRingBuffer() and
-    /// transposeAndQueueNextChunk()
+    /// @note Shared helper function used by populateNextDMABuffer()
     bool populateDmaBuffer(uint8_t *outputBuffer, size_t outputBufferCapacity,
                           size_t startByte, size_t byteCount,
                           size_t &outputBytesWritten);
 
-    /// @brief Phase 0: Generate waveform data into a single ring buffer
-    /// @param ring_index Index of ring buffer to fill (0 to
-    /// PARLIO_RING_BUFFER_COUNT-1)
-    /// @param start_byte Starting byte index for this buffer
-    /// @param byte_count Number of bytes to generate (may be less than buffer
-    /// capacity for last buffer)
-    /// @return true on success, false on error
-    /// @note Called from main thread (CPU), not ISR
-    bool generateRingBuffer(size_t ring_index, size_t start_byte,
-                            size_t byte_count);
+    /// @brief Allocate and zero-initialize all ring buffers (one-time setup)
+    /// @return true on success, false on allocation failure
+    /// @note Called once during initializeIfNeeded(), NOT per transmission
+    /// @note Buffers allocated with MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL
+    /// @note Buffers remain allocated across multiple transmissions, only
+    /// POPULATED on-demand
+    bool generateRingBuffer();
+
+    /// @brief Populate next available DMA buffer with waveform data
+    /// @return true if more buffers need to be populated, false if all done
+    /// @note Incremental function - populates ONE buffer per call
+    /// @note Updates mState.next_buffer_to_populate, next_byte_offset,
+    /// buffers_populated
+    /// @note Called by: (1) main thread loop in beginTransmission() for
+    /// pre-population
+    ///                  (2) poll() during transmission when ISR consumes buffers
+    bool populateNextDMABuffer();
+
+    /// @brief Check if ring has space for more buffers
+    /// @return true if ring has space (write_ptr - read_ptr <
+    /// PARLIO_RING_BUFFER_COUNT)
+    /// @note Helper for deciding when to call populateNextDMABuffer()
+    bool has_ring_space() const;
 
     /// @brief Initialization flag
     bool mInitialized;

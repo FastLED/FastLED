@@ -73,9 +73,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("  ISR Callbacks:     " << isr_ctx->isr_count);
         FL_WARN("");
 
-        FL_WARN("[LED PROGRESS]");
-        FL_WARN("  Total LEDs:        " << isr_ctx->total_leds);
-        FL_WARN("  Current LED:       " << isr_ctx->current_led);
+        FL_WARN("[BYTE PROGRESS]");
+        FL_WARN("  Total Bytes:       " << isr_ctx->total_bytes);
+        FL_WARN("  Current Byte:      " << isr_ctx->current_byte);
         FL_WARN("  Num Lanes:         " << isr_ctx->num_lanes);
         FL_WARN("");
 
