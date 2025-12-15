@@ -410,9 +410,7 @@ def setup_meson_build(
                     debug_changed = True
             except (OSError, IOError):
                 # If we can't read the marker, force reconfigure to be safe
-                _ts_print(
-                    "[MESON] ⚠️  Could not read debug marker, forcing reconfigure"
-                )
+                _ts_print("[MESON] ⚠️  Could not read debug marker, forcing reconfigure")
                 force_reconfigure = True
         else:
             # No marker file exists from previous configure
