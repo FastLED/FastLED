@@ -32,15 +32,19 @@ struct alignas(8) WavePulses8Symbol {
 // Nibble Lookup Table (LUT) Types and Generator
 // ============================================================================
 
-struct alignas(16) Wave8BitExpansionLut {
-     WavePulses8 lut[2];  // bit -> WavePulses8 (one per bit)
+/// @brief Lookup table for nibble-to-waveform expansion
+///
+/// Maps each 4-bit nibble (0x0 to 0xF) to 4 WavePulses8 structures.
+/// This reduces byte conversion from 8 lookups (bit-level) to 2 lookups (nibble-level).
+struct alignas(64) Wave8BitExpansionLut {
+     WavePulses8 lut[16][4];  // nibble -> 4 WavePulses8 (half symbol)
 };
 
 
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut& lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[16]
+    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(WavePulses8Symbol)]
 );
 
 

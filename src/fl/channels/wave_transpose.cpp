@@ -9,17 +9,17 @@ namespace fl {
 // Simplified waveTranspose8_2 (fixed 8:1 expansion, LUT-based, no branching)
 // ============================================================================
 
-/// @brief Transpose two 64-byte pulse arrays into 16-byte bit-packed output
+/// @brief Transpose two 64-byte pulse arrays into 128-byte bit-interleaved output
 ///
-/// This helper function converts two arrays of pulse bytes (0xFF/0x00) into
-/// a bit-packed DMA format for 2-lane parallel transmission.
+/// This helper function performs bit-level interleaving of two pulse arrays
+/// for 2-lane parallel transmission to DMA/GPIO.
 ///
-/// Each lane has 64 bytes (8 WavePulses8 × 8 bytes each). Each pulse byte
-/// is either 0xFF (bit=1) or 0x00 (bit=0). We extract these bits and
-/// interleave them into 16 output bytes (128 bits total).
+/// Each lane has 64 pulse bytes. For each pair of pulse bytes (one from each lane),
+/// we extract all 8 bits and interleave them to produce 2 output bytes (16 bits total).
+/// Pattern per output byte: [lane0_bit, lane1_bit, lane0_bit, lane1_bit, ...] = 0xAA when lanes differ
 ///
 /// @param lane_waves Array of 2 lane waveforms (64 bytes each)
-/// @param output Output buffer (16 bytes = 128 bits)
+/// @param output Output buffer (128 bytes = 64 positions × 2 bytes each)
 static FL_IRAM void transpose_2lane_pulses(
     const WavePulses8Symbol lane_waves[2],
     uint8_t output[2*sizeof(WavePulses8Symbol)]
@@ -28,51 +28,65 @@ static FL_IRAM void transpose_2lane_pulses(
     const uint8_t* lane0 = reinterpret_cast<const uint8_t*>(&lane_waves[0]);
     const uint8_t* lane1 = reinterpret_cast<const uint8_t*>(&lane_waves[1]);
 
-    // Each output byte contains 4 bit-pairs (8 bits total)
-    // Format: [lane0_bit3, lane1_bit3, lane0_bit2, lane1_bit2, lane0_bit1, lane1_bit1, lane0_bit0, lane1_bit0]
-    for (int out_byte = 0; out_byte < 16; out_byte++) {
-        uint8_t result = 0;
+    // For each of 64 pulse byte positions, interleave bits from both lanes
+    for (int i = 0; i < 64; i++) {
+        uint8_t byte0 = lane0[i];
+        uint8_t byte1 = lane1[i];
 
-        // Each output byte packs 4 pairs of bits from consecutive positions
-        for (int pair = 0; pair < 4; pair++) {
-            int src_index = out_byte * 4 + pair;
+        // Interleave 8 bits from each lane → 16 bits → 2 output bytes
+        // First output byte: high 4 bits from each lane
+        uint8_t out0 = 0;
+        out0 |= ((byte0 >> 7) & 1) << 7;  // lane0 bit 7
+        out0 |= ((byte1 >> 7) & 1) << 6;  // lane1 bit 7
+        out0 |= ((byte0 >> 6) & 1) << 5;  // lane0 bit 6
+        out0 |= ((byte1 >> 6) & 1) << 4;  // lane1 bit 6
+        out0 |= ((byte0 >> 5) & 1) << 3;  // lane0 bit 5
+        out0 |= ((byte1 >> 5) & 1) << 2;  // lane1 bit 5
+        out0 |= ((byte0 >> 4) & 1) << 1;  // lane0 bit 4
+        out0 |= ((byte1 >> 4) & 1) << 0;  // lane1 bit 4
 
-            // Extract bit from each lane (0xFF → 1, 0x00 → 0)
-            uint8_t bit0 = (lane0[src_index] != 0) ? 1 : 0;
-            uint8_t bit1 = (lane1[src_index] != 0) ? 1 : 0;
+        // Second output byte: low 4 bits from each lane
+        uint8_t out1 = 0;
+        out1 |= ((byte0 >> 3) & 1) << 7;  // lane0 bit 3
+        out1 |= ((byte1 >> 3) & 1) << 6;  // lane1 bit 3
+        out1 |= ((byte0 >> 2) & 1) << 5;  // lane0 bit 2
+        out1 |= ((byte1 >> 2) & 1) << 4;  // lane1 bit 2
+        out1 |= ((byte0 >> 1) & 1) << 3;  // lane0 bit 1
+        out1 |= ((byte1 >> 1) & 1) << 2;  // lane1 bit 1
+        out1 |= ((byte0 >> 0) & 1) << 1;  // lane0 bit 0
+        out1 |= ((byte1 >> 0) & 1) << 0;  // lane1 bit 0
 
-            // Pack bits in MSB-first order: lane0 in bit 7, lane1 in bit 6, etc.
-            result |= (bit0 << (7 - pair * 2));
-            result |= (bit1 << (6 - pair * 2));
-        }
-
-        output[out_byte] = result;
+        output[i * 2] = out0;
+        output[i * 2 + 1] = out1;
     }
 }
 
-/// @brief Convert a single bit to WavePulses8 using LUT
+/// @brief Convert a byte to 8 WavePulses8 structures using nibble LUT
 ///
-/// Looks up the pre-computed pulse pattern for a single bit value.
+/// Expands a byte (8 bits) into 8 WavePulses8 structures (64 bytes total)
+/// by looking up the high and low nibbles in the pre-computed LUT.
+/// Each nibble lookup returns 4 WavePulses8 structures.
 ///
-/// @param bit_value The bit to expand (0 or 1)
-/// @param lut Pre-computed bit expansion lookup table
-/// @return WavePulses8 structure containing the pulse pattern
-static FL_IRAM WavePulses8 convertBitToWavePulse8(
-    bool bit_value,
-    const Wave8BitExpansionLut& lut
-) {
-    return lut.lut[bit_value ? 1 : 0];
-}
-
+/// @param byte_value The byte to expand (0-255)
+/// @param lut Pre-computed nibble expansion lookup table
+/// @param output Output array for 8 WavePulses8 structures (64 bytes total)
 static FL_IRAM void convertByteToWavePulses8Symbol(
     uint8_t byte_value,
     const Wave8BitExpansionLut& lut,
     WavePulses8Symbol* output
 ) {
-    // Expand each bit (MSB first) to WavePulses8
-    for (int i = 0; i < 8; i++) {
-        bool bit = (byte_value >> (7 - i)) & 1;
-        output->symbols[i] = convertBitToWavePulse8(bit, lut);
+    // Extract high and low nibbles
+    uint8_t high_nibble = (byte_value >> 4) & 0xF;
+    uint8_t low_nibble = byte_value & 0xF;
+
+    // Copy high nibble expansion (first 4 WavePulses8)
+    for (int i = 0; i < 4; i++) {
+        output->symbols[i] = lut.lut[high_nibble][i];
+    }
+
+    // Copy low nibble expansion (last 4 WavePulses8)
+    for (int i = 0; i < 4; i++) {
+        output->symbols[4 + i] = lut.lut[low_nibble][i];
     }
 }
 
@@ -81,7 +95,7 @@ FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut& lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[16]
+    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(WavePulses8Symbol)]
 ) {
     // Allocate waveform buffers on stack (16 WavePulses8 total: 8 per lane × 2 lanes)
     // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
