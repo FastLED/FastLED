@@ -88,6 +88,24 @@ convertByteToWavePulses8Symbol(uint8_t byte_value,
 
 // GCC-specific optimization attribute (Clang ignores it)
 FL_OPTIMIZE_FUNCTION_O3
+FL_IRAM void wave8(
+    uint8_t lane,
+    const Wave8BitExpansionLut &lut,
+    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(WavePulses8Symbol)]) {
+    // Convert single lane byte to wave pulse symbols (64 bytes)
+    // Use properly aligned local variable to avoid alignment issues
+    WavePulses8Symbol waveformSymbol;
+    convertByteToWavePulses8Symbol(lane, lut, &waveformSymbol);
+
+    // Copy to output array byte-by-byte
+    const uint8_t* src = &waveformSymbol.symbols[0].data[0];
+    for (int i = 0; i < sizeof(WavePulses8Symbol); i++) {
+        output[i] = src[i];
+    }
+}
+
+// GCC-specific optimization attribute (Clang ignores it)
+FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,

@@ -51,6 +51,11 @@ struct alignas(8) Wave8BitExpansionLut {
 /// @return Populated Wave8BitExpansionLut lookup table
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 
+FL_IRAM void wave8(
+    uint8_t lane,
+    const Wave8BitExpansionLut &lut,
+    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(WavePulses8Symbol)]);
+
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
