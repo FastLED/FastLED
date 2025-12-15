@@ -49,6 +49,9 @@ struct alignas(8) Wave8BitExpansionLut {
 /// for 8-pulse-per-bit waveform expansion. The timing is normalized to a
 /// period of 1.0 and mapped to 8 pulses per bit (packed into 1 byte).
 ///
+/// Never call this from ISR handlers. This is something that should be
+/// called before entering ISR context.
+///
 /// @param timing ChipsetTiming struct containing T1, T2, T3 in nanoseconds
 /// @return Populated Wave8BitExpansionLut lookup table (64 bytes)
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);

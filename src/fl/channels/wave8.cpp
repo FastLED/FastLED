@@ -9,7 +9,7 @@ constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
                                             0x14, 0x15, 0x40, 0x41, 0x44, 0x45,
                                             0x50, 0x51, 0x54, 0x55};
 
-#define SPREAD8_TO_16(lane_u8_0, lane_u8_1, out_16)                            \
+#define FL_WAVE8_SPREAD_TO_16(lane_u8_0, lane_u8_1, out_16)                            \
     do {                                                                       \
         const uint8_t _a = (uint8_t)(lane_u8_0);                               \
         const uint8_t _b = (uint8_t)(lane_u8_1);                               \
@@ -23,14 +23,15 @@ constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
         (out_16) |= (uint16_t)(_even | _odd);                                  \
     } while (0)
 
-static FL_IRAM void
-transpose_wave_symbols8_2(const Wave8Byte lane_waves[2],
-                          uint8_t output[2 * sizeof(Wave8Byte)]) {
+// Special optimized transpose function for ISR/DMA contexts.
+FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+static void detail_transpose_2(const Wave8Byte lane_waves[2],
+                               uint8_t output[2 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         uint16_t interleaved = 0;
-        SPREAD8_TO_16(lane_waves[0].symbols[symbol_idx].data,
-                      lane_waves[1].symbols[symbol_idx].data,
-                      interleaved);
+        FL_WAVE8_SPREAD_TO_16(lane_waves[0].symbols[symbol_idx].data,
+                              lane_waves[1].symbols[symbol_idx].data,
+                              interleaved);
 
         output[symbol_idx * 2] = (uint8_t)(interleaved >> 8);
         output[symbol_idx * 2 + 1] = (uint8_t)(interleaved & 0xFF);
@@ -46,10 +47,10 @@ transpose_wave_symbols8_2(const Wave8Byte lane_waves[2],
 /// @param byte_value The byte to expand (0-255)
 /// @param lut Pre-computed nibble expansion lookup table
 /// @param output Output array for 8 Wave8Bit structures (8 bytes total)
-static FL_IRAM void
-convertByteToWave8Byte(uint8_t byte_value,
-                               const Wave8BitExpansionLut &lut,
-                               Wave8Byte *output) {
+FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+static void convertByteToWave8Byte(uint8_t byte_value,
+                                   const Wave8BitExpansionLut &lut,
+                                   Wave8Byte *output) {
 
     // Cache pointer to high nibble data to avoid repeated indexing
     const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
@@ -64,47 +65,11 @@ convertByteToWave8Byte(uint8_t byte_value,
     }
 }
 
-// GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION_O3
-FL_IRAM void wave8(
-    uint8_t lane,
-    const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
-    // Convert single lane byte to wave pulse symbols (8 bytes packed)
-    // Use properly aligned local variable to avoid alignment issues
-    Wave8Byte waveformSymbol;
-    convertByteToWave8Byte(lane, lut, &waveformSymbol);
-
-    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
-    const uint8_t* src = &waveformSymbol.symbols[0].data;
-    for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
-        output[i] = src[i];
-    }
-}
-
-// GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION_O3
-FL_IRAM void wave8Transpose_2(
-    const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
-    const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
-    // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
-    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
-    Wave8Byte laneWaveformSymbols[2];
-
-    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
-    convertByteToWave8Byte(lanes[0], lut, &laneWaveformSymbols[0]);
-    convertByteToWave8Byte(lanes[1], lut, &laneWaveformSymbols[1]);
-
-    // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
-    transpose_wave_symbols8_2(laneWaveformSymbols, output);
-}
-
 // ============================================================================
 // LUT Builder from Timing Data
+// Doesn't this is not designed to be called from ISR handlers.
 // ============================================================================
-
+FL_OPTIMIZE_FUNCTION_O3
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     Wave8BitExpansionLut lut;
 
@@ -163,5 +128,42 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 
     return lut;
 }
+
+// GCC-specific optimization attribute (Clang ignores it)
+FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+void wave8(uint8_t lane,
+           const Wave8BitExpansionLut &lut,
+           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
+    // Convert single lane byte to wave pulse symbols (8 bytes packed)
+    // Use properly aligned local variable to avoid alignment issues
+    Wave8Byte waveformSymbol;
+    convertByteToWave8Byte(lane, lut, &waveformSymbol);
+
+    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
+    const uint8_t* src = &waveformSymbol.symbols[0].data;
+    for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
+        output[i] = src[i];
+    }
+}
+
+// GCC-specific optimization attribute (Clang ignores it)
+FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
+                      const Wave8BitExpansionLut &lut,
+                      uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
+    // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
+    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
+    Wave8Byte laneWaveformSymbols[2];
+
+    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
+    convertByteToWave8Byte(lanes[0], lut, &laneWaveformSymbols[0]);
+    convertByteToWave8Byte(lanes[1], lut, &laneWaveformSymbols[1]);
+
+    // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
+    detail_transpose_2(laneWaveformSymbols, output);
+}
+
+
 
 } // namespace fl
