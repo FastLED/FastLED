@@ -49,11 +49,14 @@ namespace fl {
 //=============================================================================
 
 // WS2812 timing requirements with PARLIO
-// Clock: 10.0 MHz (100ns per tick)
-// Divides from PLL_F160M on ESP32-P4 (160/16) or PLL_F240M on ESP32-C6 (240/24)
-// Each LED bit is encoded as 8 clock ticks (0.8μs total)
+// ITERATION 1 FIX: Changed from 10.0 MHz to 8.0 MHz to match wave8 expectations
+// Clock: 8.0 MHz (125ns per tick)
+// Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
+// Each LED bit is encoded as 8 clock ticks (1.0μs total)
+// OLD (ITERATION 0): 10.0 MHz caused 100ns pulses (too fast, corrupted waveforms)
+// NEW (ITERATION 1): 8.0 MHz produces 125ns pulses (matches wave8 LUT expectations)
 static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ =
-    10000000; // 10.0 MHz
+    8000000; // 8.0 MHz (ITERATION 1)
 
 //=============================================================================
 // Phase 4: Cross-Platform Memory Barriers
