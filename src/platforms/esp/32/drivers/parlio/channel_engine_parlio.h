@@ -369,12 +369,6 @@ alignas(64) struct ParlioIsrContext {
     bool transmission_active; ///< Debug: Transmission currently active
     uint64_t end_time_us; ///< Debug: Transmission end timestamp (microseconds)
 
-    // Debug: DMA buffer output tracking (main thread writes, Validation.ino
-    // reads)
-    fl::deque<uint8_t>
-        mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses
-                         ///< deque to avoid large contiguous allocation)
-
     // Constructor: Initialize all fields to safe defaults
     ParlioIsrContext()
         : stream_complete(false), transmitting(false), current_byte(0),
@@ -382,7 +376,8 @@ alignas(64) struct ParlioIsrContext {
           total_bytes(0), num_lanes(0), ring_size(0), isr_count(0),
           bytes_transmitted(0), chunks_completed(0), buffers_submitted(0),
           buffers_completed(0), buffers_total(0), transmission_active(false),
-          end_time_us(0) {}
+          end_time_us(0) {
+    }
 
     // Singleton accessor for debug metrics
     static ParlioIsrContext *getInstance() { return s_instance; }
@@ -412,7 +407,13 @@ alignas(64) struct ParlioIsrContext {
 // Testing configuration: 8 larger buffers
 //   Each buffer: ~125 LEDs × 30 bytes/LED = ~3750 bytes (~3.7 KB)
 //   Total ring: 8 × 3750 bytes = ~30 KB
-constexpr size_t PARLIO_RING_BUFFER_COUNT = 8;
+// OLD (ITERATION 12b): 8 buffers - resulted in 94.8% capture (gap at buffer 7.6)
+// constexpr size_t PARLIO_RING_BUFFER_COUNT = 8;
+
+// NEW (ITERATION 13): Testing 3 buffers (fewer gaps to minimize RX termination)
+// 3 buffers × 1000 input bytes = 3000 total (max safe: 1023 bytes per buffer × 8 expansion = 8184 bytes < 8191 limit)
+// Hypothesis: Fewer buffer transitions = fewer opportunities for >819μs hardware gap
+constexpr size_t PARLIO_RING_BUFFER_COUNT = 3;
 
 /// @brief Internal PARLIO implementation with fixed data width
 ///
@@ -501,21 +502,6 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t buffers_populated; ///< Total buffers populated so far (0 to
                                   ///< buffers_total)
 
-        // LEGACY: Double-buffered DMA streaming (Phase 3, kept for
-        // compatibility during migration)
-        // TODO Phase 0: Remove after ring buffer migration complete
-        fl::unique_ptr<uint8_t[], HeapCapsDeleter>
-            buffer_a; ///< DEPRECATED: First DMA buffer (ping-pong,
-                      ///< RAII-managed)
-        fl::unique_ptr<uint8_t[], HeapCapsDeleter>
-            buffer_b;       ///< DEPRECATED: Second DMA buffer (ping-pong,
-                            ///< RAII-managed)
-        size_t buffer_size; ///< DEPRECATED: Size of each DMA buffer in bytes
-        volatile uint8_t *active_buffer; ///< DEPRECATED: Currently transmitting
-                                         ///< buffer (non-owning reference)
-        volatile uint8_t *fill_buffer; ///< DEPRECATED: Buffer being filled
-                                       ///< (non-owning reference)
-
         // Streaming state
         volatile size_t
             num_lanes; ///< Number of parallel lanes (same as data_width)
@@ -528,19 +514,6 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         // Synchronization
         volatile bool stream_complete; ///< All chunks transmitted flag
         volatile bool error_occurred;  ///< Error flag for ISR
-
-        // Phase 1 - Iteration 4: Multi-chunk ISR-driven transmission state
-        volatile size_t
-            chunk_total_bytes; ///< Total bytes in entire transmission buffer
-        volatile size_t
-            chunk_current_index; ///< Current chunk being transmitted (0-based)
-        volatile size_t chunk_total_count; ///< Total number of chunks
-        volatile const uint8_t
-            *chunk_buffer_ptr; ///< Pointer to complete transmission buffer
-                               ///< (non-owning)
-        volatile bool
-            chunk_ready_to_queue; ///< ISR signals poll() to queue next chunk
-                                  ///< (Iteration 6: poll-based chunking)
 
         // Scratch buffer (reusable, grows as needed)
         // Single segmented array: [lane0_data][lane1_data]...[laneN_data]
@@ -574,12 +547,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
             : tx_unit(nullptr), mIsrContext(nullptr), transmitting(false),
               data_width(width), actual_channels(0), dummy_lanes(0),
               timing_t1_ns(0), timing_t2_ns(0), timing_t3_ns(0),
-              ring_buffer_capacity(0), buffer_a(nullptr), buffer_b(nullptr),
-              buffer_size(0), active_buffer(nullptr), fill_buffer(nullptr),
-              num_lanes(width), lane_stride(0), current_byte(0), total_bytes(0),
-              bytes_per_chunk(0), stream_complete(false), error_occurred(false),
-              chunk_total_bytes(0), chunk_current_index(0),
-              chunk_total_count(0), chunk_buffer_ptr(nullptr),
+              ring_buffer_capacity(0), num_lanes(width), lane_stride(0),
+              current_byte(0), total_bytes(0), bytes_per_chunk(0),
+              stream_complete(false), error_occurred(false),
               waveform_expansion_buffer(nullptr),
               waveform_expansion_buffer_size(0) {}
     };

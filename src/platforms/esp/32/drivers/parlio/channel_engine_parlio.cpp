@@ -296,7 +296,6 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     // Clear state
     mState.pins.clear();
     mState.scratch_padded_buffer.clear();
-    mState.buffer_size = 0;
     mState.num_lanes = 0;
     mState.lane_stride = 0;
     // Phase 4: Clear IsrContext state (if allocated)
@@ -435,7 +434,19 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
     // Stage 2: Transpose staging buffer → DMA output buffer
     while (byteOffset < byteCount) {
         // Calculate block size for buffer space check
-        size_t blockSize = (mState.data_width <= 8) ? 8 : 16;
+        // OLD (ITERATION 1-13): blockSize = 8 for all data_width <= 8
+        // BUG (ITERATION 14): Must match transpose_wave8byte_parlio output size!
+        // NEW (ITERATION 14): Calculate based on transpose logic
+        size_t blockSize;
+        if (mState.data_width <= 8) {
+            size_t ticksPerByte = 8 / mState.data_width;
+            size_t pulsesPerByte = 64;
+            blockSize = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+        } else if (mState.data_width == 16) {
+            blockSize = 128;  // 64 pulses × 2 bytes per pulse
+        } else {
+            blockSize = 8;  // Fallback
+        }
 
         // Check if enough space for this block
         if (outputIdx + blockSize > outputBufferCapacity) {
@@ -585,14 +596,6 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
 
     // Store actual size of this buffer
     mState.ring_buffer_sizes[ring_index] = outputBytesWritten;
-
-    // DEBUG: Copy DMA buffer data to debug deque for validation
-    if (mState.mIsrContext) {
-        // Append this buffer's data to the debug deque (push_back each byte)
-        for (size_t i = 0; i < outputBytesWritten; i++) {
-            mState.mIsrContext->mDebugDmaOutput.push_back(outputBuffer[i]);
-        }
-    }
 
     // Update state for next buffer
     mState.next_byte_offset += byte_count;
@@ -885,9 +888,6 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mIsrContext->transmitting =
         false; // Will be set to true after first buffer submitted
 
-    // DEBUG: Clear debug DMA output buffer for this transmission
-    mState.mIsrContext->mDebugDmaOutput.clear();
-
     // Initialize ring buffer state
     mState.mIsrContext->ring_read_ptr = 0;
     mState.mIsrContext->ring_write_ptr = 0;
@@ -910,24 +910,43 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // Phase 0 requirement: ALL bytes must fit in ONE buffer to avoid DMA gaps
     // For small data (fits in ring buffer capacity), use single buffer mode
     // For large data (exceeds capacity), use multi-buffer ring mode
-    size_t single_buffer_max_bytes = mState.ring_buffer_capacity;
+
+    // ITERATION 6/12: Calculate expanded bytes (wave8 expansion ratio = 8:1)
+    // Must compare EXPANDED bytes to ring buffer capacity, not input bytes!
+    // OLD (ITERATION 1-14): size_t totalBytes_expanded = totalBytes * 8; // BUG: hardcoded 8x expansion for single-lane only
+    // NEW (ITERATION 15): Calculate expansion ratio based on data_width (multi-lane support)
+    // Formula matches initializeIfNeeded() calculation (lines 1321-1334)
+    size_t bytes_per_input_byte_ring;
+    if (mState.data_width <= 8) {
+        size_t ticksPerByte = 8 / mState.data_width;
+        size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
+        bytes_per_input_byte_ring = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+    } else if (mState.data_width == 16) {
+        bytes_per_input_byte_ring = 128;  // 64 pulses × 2 bytes per pulse
+    } else {
+        bytes_per_input_byte_ring = 8; // Fallback
+    }
+    size_t totalBytes_expanded = totalBytes * bytes_per_input_byte_ring; // ITERATION 15: Dynamic expansion ratio
     size_t bytes_per_buffer;
     size_t total_buffers;
 
-    if (totalBytes <= single_buffer_max_bytes) {
+    if (totalBytes_expanded <= mState.ring_buffer_capacity) {
         // ITERATION 2: Phase 0 path - all bytes fit in one buffer (NO DMA gaps)
         bytes_per_buffer = totalBytes;
         total_buffers = 1;
         FL_WARN("PARLIO: Single-buffer mode activated ("
-                << totalBytes << " bytes fit in one buffer)");
+                << totalBytes << " input bytes, " << totalBytes_expanded
+                << " expanded bytes fit in one " << mState.ring_buffer_capacity
+                << "-byte buffer)");
     } else {
         // ITERATION 2: Phase 1+ path - multi-buffer streaming with DMA gaps
         bytes_per_buffer = (totalBytes + PARLIO_RING_BUFFER_COUNT - 1) /
                            PARLIO_RING_BUFFER_COUNT;
         total_buffers = (totalBytes + bytes_per_buffer - 1) / bytes_per_buffer;
         FL_WARN("PARLIO: Multi-buffer mode activated ("
-                << totalBytes << " bytes across " << total_buffers
-                << " buffers, " << bytes_per_buffer << " bytes per buffer)");
+                << totalBytes << " input bytes, " << totalBytes_expanded
+                << " expanded bytes across " << total_buffers
+                << " buffers, " << bytes_per_buffer << " input bytes per buffer)");
     }
 
     mState.mIsrContext->buffers_submitted = 0;
@@ -1232,66 +1251,21 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         // pulse)
         bytes_per_input_byte_output = 16;
     }
-    size_t bufferSize = mState.bytes_per_chunk * bytes_per_input_byte_output;
-
-    // Buffer size calculation:
-    // - bytes_per_chunk: number of input bytes to process per chunk
-    // - bytes_per_input_byte_output: output bytes generated per input byte
-    // (after wave8 + transpose)
-    // - bufferSize: total DMA buffer size for chunk
-    //
-    // For data_width=1: bytes_per_input_byte_output = 8
-    // For data_width=8: bytes_per_input_byte_output = 8 (bit-packed across
-    // lanes) For data_width=16: bytes_per_input_byte_output = 16
-
-    // Allocate DMA-capable buffers from heap using fl::unique_ptr with custom
-    // deleter
-    mState.buffer_a.reset(static_cast<uint8_t *>(
-        heap_caps_malloc(bufferSize, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
-
-    mState.buffer_b.reset(static_cast<uint8_t *>(
-        heap_caps_malloc(bufferSize, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
-
-    // Check allocation success
-    if (!mState.buffer_a || !mState.buffer_b) {
-        FL_WARN("PARLIO: Failed to allocate DMA buffers (requested "
-                << bufferSize << " bytes each)");
-
-        // Clean up partial allocation (fl::unique_ptr will auto-free on reset)
-        mState.buffer_a.reset();
-        mState.buffer_b.reset();
-
-        // Clean up TX unit
-        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
-        if (disable_err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to disable TX unit during buffer cleanup: "
-                    << disable_err);
-        }
-        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
-        if (del_err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to delete TX unit during buffer cleanup: "
-                    << del_err);
-        }
-        mState.tx_unit = nullptr;
-        mInitialized = false;
-        return;
-    }
-
-    mState.buffer_size = bufferSize;
-
-    // Calculate ring buffer capacity (used later during beginTransmission)
-    // Target: ~125 input bytes per buffer → 125 * 8 = 1000 output bytes (for data_width <= 8)
-    size_t ring_buffer_input_byte_count = 125; // Input bytes per ring buffer
+    size_t ring_buffer_input_byte_count = 1000; // ITERATION 13: 3 buffer test (max safe size)
 
     // wave8 uses fixed 8:1 expansion with bit-packing
     // After transpose: each input byte → output bytes (depends on data_width)
     size_t bytes_per_input_byte_ring;
     if (mState.data_width <= 8) {
-        // 8 bytes output per input byte (8 pulses bit-packed)
-        bytes_per_input_byte_ring = 8;
+        // NEW (ITERATION 14): Calculate based on transpose_wave8byte_parlio logic
+        // Bit-packed format: multiple pulses per byte
+        size_t ticksPerByte = 8 / mState.data_width;
+        size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
+        bytes_per_input_byte_ring = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
     } else if (mState.data_width == 16) {
         // For 16-bit width: 16 bytes output per input byte
-        bytes_per_input_byte_ring = 16;
+        // NEW (ITERATION 14): Corrected calculation
+        bytes_per_input_byte_ring = 128;  // 64 pulses × 2 bytes per pulse
     } else {
         bytes_per_input_byte_ring = 8; // Fallback
     }
@@ -1303,10 +1277,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Buffers will be populated on-demand during transmission
     if (!generateRingBuffer()) {
         FL_WARN("PARLIO: Failed to allocate ring buffers during initialization");
-
-        // Clean up old buffers
-        mState.buffer_a.reset();
-        mState.buffer_b.reset();
 
         // Clean up TX unit
         esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
@@ -1331,7 +1301,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // 1. MUST be heap-allocated (NOT stack) - used in ISR context
     // 2. Does NOT need to be DMA-capable - only used temporarily for waveform
     // expansion
-    // 3. buffer_a and buffer_b (allocated above) MUST be DMA-capable for
+    // 3. Ring buffers (allocated in generateRingBuffer) MUST be DMA-capable for
     // PARLIO/GDMA hardware
     // 4. This buffer is managed by mState and freed in the destructor
     const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
@@ -1343,10 +1313,6 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     if (!mState.waveform_expansion_buffer) {
         FL_WARN("PARLIO: Failed to allocate waveform expansion buffer ("
                 << waveform_buffer_size << " bytes)");
-
-        // Clean up allocated buffers (fl::unique_ptr will auto-free on reset)
-        mState.buffer_a.reset();
-        mState.buffer_b.reset();
 
         // Clean up TX unit
         esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
