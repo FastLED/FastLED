@@ -10,7 +10,8 @@
 /// peripheral)
 /// - 1-16 WS2812/WS2812B LED strips (power-of-2 widths: 1, 2, 4, 8, 16)
 /// - Configurable GPIO pins (default: GPIO 1-16)
-/// - **ESP32-C6**: Requires ESP-IDF 5.5.0 or later (earlier versions have a known PARLIO driver bug)
+/// - **ESP32-C6**: Requires ESP-IDF 5.5.0 or later (earlier versions have a
+/// known PARLIO driver bug)
 ///
 /// ## Features
 /// - **Multi-Channel Support**: Drive 1-16 LED strips simultaneously
@@ -111,7 +112,8 @@
 /// To minimize memory usage while supporting arbitrary LED counts:
 /// - **Direct ISR encoding**: Waveform expansion happens in ISR from per-strip
 /// scratch buffer
-/// - **Double buffering**: Two small DMA buffers (~100 LEDs each, 1-lane: ~3 KB per buffer, 8-lane: ~24 KB per buffer)
+/// - **Double buffering**: Two small DMA buffers (~100 LEDs each, 1-lane: ~3 KB
+/// per buffer, 8-lane: ~24 KB per buffer)
 /// - **ISR callback**: Hardware triggers callback when chunk transmission
 /// completes
 /// - **Automatic refilling**: While DMA transmits buffer A, ISR
@@ -140,8 +142,10 @@
 /// - Maximum capability allocated at construction (all 1/2/4/8/16-bit engines)
 ///
 /// ## Limitations
-/// - **Platform-Specific**: Only available on ESP32-P4, ESP32-C6, ESP32-H2, ESP32-C5 with PARLIO peripheral
-/// - **ESP32-C6 Version Requirement**: ESP-IDF 5.5.0+ required (earlier versions have PARLIO driver bug)
+/// - **Platform-Specific**: Only available on ESP32-P4, ESP32-C6, ESP32-H2,
+/// ESP32-C5 with PARLIO peripheral
+/// - **ESP32-C6 Version Requirement**: ESP-IDF 5.5.0+ required (earlier
+/// versions have PARLIO driver bug)
 /// - **Channel Count**: 1-16 channels supported
 /// - **Fixed Pins**: Uses default GPIO 1-16 (future: user-configurable)
 ///
@@ -192,10 +196,14 @@ extern "C" void heap_caps_free(void *ptr);
 // | ESP32-C5 | 8-bit          |
 //
 // Official ESP-IDF PARLIO Documentation:
-// - ESP32-P4: https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/peripherals/parlio/index.html
-// - ESP32-C6: https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/parlio/index.html
-// - ESP32-H2: https://docs.espressif.com/projects/esp-idf/en/latest/esp32h2/api-reference/peripherals/parlio.html
-// - ESP32-C5: https://docs.espressif.com/projects/esp-idf/en/latest/esp32c5/api-reference/peripherals/parlio/index.html
+// - ESP32-P4:
+// https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/peripherals/parlio/index.html
+// - ESP32-C6:
+// https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/parlio/index.html
+// - ESP32-H2:
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32h2/api-reference/peripherals/parlio.html
+// - ESP32-C5:
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32c5/api-reference/peripherals/parlio/index.html
 //
 // Runtime validation against SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH occurs in
 // the .cpp implementation file where platform-specific headers are included.
@@ -210,7 +218,7 @@ namespace fl {
 /// @brief Custom deleter for heap_caps_malloc'd memory (DMA-capable buffers)
 /// Used with fl::unique_ptr to automatically free DMA memory on destruction
 struct HeapCapsDeleter {
-    void operator()(uint8_t* ptr) const {
+    void operator()(uint8_t *ptr) const {
         if (ptr) {
             heap_caps_free(ptr);
         }
@@ -251,7 +259,8 @@ inline size_t selectDataWidth(size_t channel_count) {
 /// @deprecated This function is NO LONGER USED. The calculation was moved to
 /// runtime in initializeIfNeeded() (line 707-714) because:
 /// 1. pulses_per_bit is determined at runtime (not compile-time constant)
-/// 2. The formula was incorrect (assumed bit-packing but transposeAndQueueNextChunk writes full bytes)
+/// 2. The formula was incorrect (assumed bit-packing but
+/// transposeAndQueueNextChunk writes full bytes)
 /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
 /// @return Bytes per LED after waveform expansion
 inline size_t calculateBytesPerLed(size_t data_width) {
@@ -304,82 +313,87 @@ inline size_t calculateChunkSize(size_t data_width) {
 // - Main thread reads volatile fields directly (compiler ensures fresh read)
 // - After detecting stream_complete==true, main thread executes memory barrier
 // - Memory barrier ensures all ISR writes visible before reading other fields
-// - Non-volatile fields (isr_count, etc.) read after barrier are guaranteed consistent
+// - Non-volatile fields (isr_count, etc.) read after barrier are guaranteed
+// consistent
 alignas(64) struct ParlioIsrContext {
     // === Volatile Fields (shared between ISR and main thread) ===
     // These fields are written by ISR, read by main thread
     // Marked volatile to prevent compiler optimizations that would cache values
 
-    volatile bool stream_complete;  ///< ISR sets true when transmission complete (ISR writes, main reads)
-    volatile bool transmitting;     ///< ISR updates during transmission lifecycle (ISR writes, main reads)
-    volatile size_t current_led;    ///< ISR updates LED position marker (ISR writes, main reads)
+    volatile bool stream_complete; ///< ISR sets true when transmission complete
+                                   ///< (ISR writes, main reads)
+    volatile bool transmitting;   ///< ISR updates during transmission lifecycle
+                                  ///< (ISR writes, main reads)
+    volatile size_t current_byte; ///< ISR updates byte position marker (ISR
+                                  ///< writes, main reads)
 
     // Phase 0: Ring buffer pointers for streaming DMA
     // ISR reads from read_ptr, CPU writes to write_ptr
-    // Communication protocol: ISR increments read_ptr after consuming buffer (signals CPU)
-    volatile size_t ring_read_ptr;  ///< ISR reads from this index (ISR writes, main reads)
-    volatile size_t ring_write_ptr; ///< CPU writes to this index (main writes, ISR reads)
-    volatile bool ring_error;       ///< Ring underflow/overflow error flag (ISR writes, main reads)
+    // Communication protocol: ISR increments read_ptr after consuming buffer
+    // (signals CPU)
+    volatile size_t
+        ring_read_ptr; ///< ISR reads from this index (ISR writes, main reads)
+    volatile size_t
+        ring_write_ptr; ///< CPU writes to this index (main writes, ISR reads)
+    volatile bool ring_error; ///< Ring underflow/overflow error flag (ISR
+                              ///< writes, main reads)
 
     // === Non-Volatile Fields (main thread synchronization required) ===
-    // These fields are written by ISR but read by main thread ONLY after memory barrier
-    // NOT marked volatile - main thread uses explicit barrier after reading stream_complete
+    // These fields are written by ISR but read by main thread ONLY after memory
+    // barrier NOT marked volatile - main thread uses explicit barrier after
+    // reading stream_complete
 
-    size_t total_leds;              ///< Total LEDs to transmit (main sets, ISR reads - no race)
-    size_t num_lanes;               ///< Number of parallel lanes (main sets, ISR reads - Phase 5: moved from ParlioState)
-    size_t ring_size;               ///< Number of buffers in ring (main sets, ISR reads - Phase 0)
+    size_t total_bytes; ///< Total bytes to transmit (main sets, ISR reads - no
+                        ///< race)
+    size_t num_lanes;   ///< Number of parallel lanes (main sets, ISR reads -
+                        ///< Phase 5: moved from ParlioState)
+    size_t ring_size;   ///< Number of buffers in ring (main sets, ISR reads -
+                        ///< Phase 0)
 
     // Diagnostic counters (ISR writes, main reads after barrier)
     // Note: Using simple increment operations, synchronized via memory barrier
-    uint32_t isr_count;             ///< ISR callback invocation count
-    uint32_t bytes_transmitted;     ///< Total bytes transmitted this frame
-    uint32_t chunks_completed;      ///< Number of chunks completed this frame
+    uint32_t isr_count;         ///< ISR callback invocation count
+    uint32_t bytes_transmitted; ///< Total bytes transmitted this frame
+    uint32_t chunks_completed;  ///< Number of chunks completed this frame
 
     // Phase 0: Buffer accounting for simplified ISR
-    uint32_t buffers_submitted;         ///< Total buffers submitted to hardware (main thread writes)
-    volatile uint32_t buffers_completed; ///< ISR increments, CPU polls (volatile required per LOOP.md line 34)
-    uint32_t buffers_total;             ///< Total buffers for entire transmission (main thread sets)
+    uint32_t buffers_submitted; ///< Total buffers submitted to hardware (main
+                                ///< thread writes)
+    volatile uint32_t
+        buffers_completed; ///< ISR increments, CPU polls (volatile required per
+                           ///< LOOP.md line 34)
+    uint32_t buffers_total; ///< Total buffers for entire transmission (main
+                            ///< thread sets)
 
     // Diagnostic fields (written by ISR, read by main thread after barrier)
-    bool transmission_active;       ///< Debug: Transmission currently active
-    uint64_t end_time_us;           ///< Debug: Transmission end timestamp (microseconds)
+    bool transmission_active; ///< Debug: Transmission currently active
+    uint64_t end_time_us; ///< Debug: Transmission end timestamp (microseconds)
 
-    // Debug: DMA buffer output tracking (main thread writes, Validation.ino reads)
-    fl::deque<uint8_t> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
+    // Debug: DMA buffer output tracking (main thread writes, Validation.ino
+    // reads)
+    fl::deque<uint8_t>
+        mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses
+                         ///< deque to avoid large contiguous allocation)
 
     // Constructor: Initialize all fields to safe defaults
     ParlioIsrContext()
-        : stream_complete(false)
-        , transmitting(false)
-        , current_led(0)
-        , ring_read_ptr(0)
-        , ring_write_ptr(0)
-        , ring_error(false)
-        , total_leds(0)
-        , num_lanes(0)
-        , ring_size(0)
-        , isr_count(0)
-        , bytes_transmitted(0)
-        , chunks_completed(0)
-        , buffers_submitted(0)
-        , buffers_completed(0)
-        , buffers_total(0)
-        , transmission_active(false)
-        , end_time_us(0)
-    {}
+        : stream_complete(false), transmitting(false), current_byte(0),
+          ring_read_ptr(0), ring_write_ptr(0), ring_error(false),
+          total_bytes(0), num_lanes(0), ring_size(0), isr_count(0),
+          bytes_transmitted(0), chunks_completed(0), buffers_submitted(0),
+          buffers_completed(0), buffers_total(0), transmission_active(false),
+          end_time_us(0) {}
 
     // Singleton accessor for debug metrics
-    static ParlioIsrContext* getInstance() {
-        return s_instance;
-    }
+    static ParlioIsrContext *getInstance() { return s_instance; }
 
     // Singleton setter (called by ChannelEnginePARLIOImpl)
-    static void setInstance(ParlioIsrContext* instance) {
+    static void setInstance(ParlioIsrContext *instance) {
         s_instance = instance;
     }
 
-private:
-    static ParlioIsrContext* s_instance;
+  private:
+    static ParlioIsrContext *s_instance;
 };
 
 // Phase 0: Ring buffer configuration for streaming DMA
@@ -389,7 +403,8 @@ private:
 //   buffer_size = (num_leds × 240 bits × data_width + 7) / 8 bytes
 //
 // UNIVERSAL CONSTANT: 30 bytes per LED (RGB) regardless of data_width
-//   - data_width multiplier represents LEDs transmitted in parallel, NOT overhead
+//   - data_width multiplier represents LEDs transmitted in parallel, NOT
+//   overhead
 //   - 1-lane: 30 bytes → 1 LED
 //   - 8-lane: 240 bytes → 8 LEDs (30 bytes each)
 //   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
@@ -428,7 +443,7 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @brief Get ISR context for debug metrics (singleton accessor)
     /// @return Pointer to ISR context, or nullptr if not initialized
     /// @note This is a debug function - returns the singleton ISR context
-    static ParlioIsrContext* getIsrContext() {
+    static ParlioIsrContext *getIsrContext() {
         return ParlioIsrContext::getInstance();
     }
 
@@ -443,9 +458,13 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         parlio_tx_unit_handle_t tx_unit; ///< PARLIO TX unit handle
         fl::vector<int> pins; ///< GPIO pin assignments (gpio_num_t cast to int)
                               ///< - data_width pins
-        ParlioIsrContext *mIsrContext; ///< ISR state (cache-aligned, 64-byte) - raw pointer to avoid incomplete type issues
+        ParlioIsrContext
+            *mIsrContext; ///< ISR state (cache-aligned, 64-byte) - raw pointer
+                          ///< to avoid incomplete type issues
 
-        volatile bool transmitting; ///< Transmission in progress flag (DEPRECATED - use mIsrContext->transmitting)
+        volatile bool
+            transmitting; ///< Transmission in progress flag (DEPRECATED - use
+                          ///< mIsrContext->transmitting)
 
         // Configuration (set during initialization)
         size_t data_width; ///< PARLIO data width: 1, 2, 4, 8, or 16 (runtime
@@ -453,9 +472,11 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t actual_channels; ///< User-requested channels: 1 to data_width
         size_t dummy_lanes;     ///< Calculated: data_width - actual_channels
 
-        // Timing configuration (extracted from first channel in beginTransmission)
+        // Timing configuration (extracted from first channel in
+        // beginTransmission)
         uint32_t timing_t1_ns; ///< T0H: High time for bit 0 (nanoseconds)
-        uint32_t timing_t2_ns; ///< T1H-T0H: Additional high time for bit 1 (nanoseconds)
+        uint32_t timing_t2_ns; ///< T1H-T0H: Additional high time for bit 1
+                               ///< (nanoseconds)
         uint32_t timing_t3_ns; ///< T0L: Low tail duration (nanoseconds)
 
         // Phase 0: Ring buffer architecture for streaming multi-buffer DMA
@@ -464,42 +485,54 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         // accessed by PARLIO/GDMA hardware during transmission.
         // Using fl::vector of fl::unique_ptr for automatic RAII cleanup.
         fl::vector<fl::unique_ptr<uint8_t[], HeapCapsDeleter>>
-            ring_buffers; ///< Ring of DMA buffers (PARLIO_RING_BUFFER_COUNT buffers)
+            ring_buffers; ///< Ring of DMA buffers (PARLIO_RING_BUFFER_COUNT
+                          ///< buffers)
         fl::vector<size_t>
-            ring_buffer_sizes; ///< Size of each ring buffer in bytes (may vary for last buffer)
-        size_t ring_buffer_capacity; ///< Maximum size of each ring buffer in bytes
+            ring_buffer_sizes; ///< Size of each ring buffer in bytes (may vary
+                               ///< for last buffer)
+        size_t
+            ring_buffer_capacity; ///< Maximum size of each ring buffer in bytes
 
-        // LEGACY: Double-buffered DMA streaming (Phase 3, kept for compatibility during migration)
+        // LEGACY: Double-buffered DMA streaming (Phase 3, kept for
+        // compatibility during migration)
         // TODO Phase 0: Remove after ring buffer migration complete
         fl::unique_ptr<uint8_t[], HeapCapsDeleter>
-            buffer_a; ///< DEPRECATED: First DMA buffer (ping-pong, RAII-managed)
+            buffer_a; ///< DEPRECATED: First DMA buffer (ping-pong,
+                      ///< RAII-managed)
         fl::unique_ptr<uint8_t[], HeapCapsDeleter>
-            buffer_b;       ///< DEPRECATED: Second DMA buffer (ping-pong, RAII-managed)
+            buffer_b;       ///< DEPRECATED: Second DMA buffer (ping-pong,
+                            ///< RAII-managed)
         size_t buffer_size; ///< DEPRECATED: Size of each DMA buffer in bytes
-        volatile uint8_t *active_buffer; ///< DEPRECATED: Currently transmitting buffer
-                                         ///< (non-owning reference)
-        volatile uint8_t
-            *fill_buffer; ///< DEPRECATED: Buffer being filled (non-owning reference)
+        volatile uint8_t *active_buffer; ///< DEPRECATED: Currently transmitting
+                                         ///< buffer (non-owning reference)
+        volatile uint8_t *fill_buffer; ///< DEPRECATED: Buffer being filled
+                                       ///< (non-owning reference)
 
         // Streaming state
         volatile size_t
             num_lanes; ///< Number of parallel lanes (same as data_width)
         volatile size_t
             lane_stride; ///< Bytes per lane (stride - all lanes same size)
-        volatile size_t current_led;    ///< Current LED position in source data
-        volatile size_t total_leds;     ///< Total LEDs to transmit
-        volatile size_t leds_per_chunk; ///< LEDs per DMA chunk
+        volatile size_t current_byte; ///< Current byte position in source data
+        volatile size_t total_bytes;  ///< Total bytes to transmit
+        volatile size_t bytes_per_chunk; ///< Bytes per DMA chunk
 
         // Synchronization
         volatile bool stream_complete; ///< All chunks transmitted flag
         volatile bool error_occurred;  ///< Error flag for ISR
 
         // Phase 1 - Iteration 4: Multi-chunk ISR-driven transmission state
-        volatile size_t chunk_total_bytes;     ///< Total bytes in entire transmission buffer
-        volatile size_t chunk_current_index;   ///< Current chunk being transmitted (0-based)
-        volatile size_t chunk_total_count;     ///< Total number of chunks
-        volatile const uint8_t* chunk_buffer_ptr; ///< Pointer to complete transmission buffer (non-owning)
-        volatile bool chunk_ready_to_queue;    ///< ISR signals poll() to queue next chunk (Iteration 6: poll-based chunking)
+        volatile size_t
+            chunk_total_bytes; ///< Total bytes in entire transmission buffer
+        volatile size_t
+            chunk_current_index; ///< Current chunk being transmitted (0-based)
+        volatile size_t chunk_total_count; ///< Total number of chunks
+        volatile const uint8_t
+            *chunk_buffer_ptr; ///< Pointer to complete transmission buffer
+                               ///< (non-owning)
+        volatile bool
+            chunk_ready_to_queue; ///< ISR signals poll() to queue next chunk
+                                  ///< (Iteration 6: poll-based chunking)
 
         // Scratch buffer (reusable, grows as needed)
         // Single segmented array: [lane0_data][lane1_data]...[laneN_data]
@@ -511,7 +544,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
                                    ///< only (regular heap, non-DMA)
 
         // Wave8 lookup table (replaces old waveform generation)
-        fl::Wave8BitExpansionLut wave8_lut; ///< Precomputed waveforms for all 16 nibble values (8:1 expansion)
+        fl::Wave8BitExpansionLut
+            wave8_lut; ///< Precomputed waveforms for all 16 nibble values (8:1
+                       ///< expansion)
 
         // Pre-allocated waveform expansion buffer (avoids heap alloc in IRAM)
         // CRITICAL: This buffer is heap-allocated (MALLOC_CAP_INTERNAL) but
@@ -528,16 +563,15 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
                                                ///< buffer in bytes
 
         ParlioState(size_t width)
-            : tx_unit(nullptr), mIsrContext(nullptr), transmitting(false), data_width(width),
-              actual_channels(0), dummy_lanes(0),
+            : tx_unit(nullptr), mIsrContext(nullptr), transmitting(false),
+              data_width(width), actual_channels(0), dummy_lanes(0),
               timing_t1_ns(0), timing_t2_ns(0), timing_t3_ns(0),
-              ring_buffer_capacity(0),
-              buffer_a(nullptr),
-              buffer_b(nullptr), buffer_size(0), active_buffer(nullptr),
-              fill_buffer(nullptr), num_lanes(width), lane_stride(0),
-              current_led(0), total_leds(0), leds_per_chunk(0),
-              stream_complete(false), error_occurred(false),
-              chunk_total_bytes(0), chunk_current_index(0), chunk_total_count(0), chunk_buffer_ptr(nullptr),
+              ring_buffer_capacity(0), buffer_a(nullptr), buffer_b(nullptr),
+              buffer_size(0), active_buffer(nullptr), fill_buffer(nullptr),
+              num_lanes(width), lane_stride(0), current_byte(0), total_bytes(0),
+              bytes_per_chunk(0), stream_complete(false), error_occurred(false),
+              chunk_total_bytes(0), chunk_current_index(0),
+              chunk_total_count(0), chunk_buffer_ptr(nullptr),
               waveform_expansion_buffer(nullptr),
               waveform_expansion_buffer_size(0) {}
     };
@@ -559,12 +593,15 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     bool transposeAndQueueNextChunk();
 
     /// @brief Phase 0: Generate waveform data into a single ring buffer
-    /// @param ring_index Index of ring buffer to fill (0 to PARLIO_RING_BUFFER_COUNT-1)
-    /// @param start_led Starting LED index for this buffer
-    /// @param led_count Number of LEDs to generate (may be less than buffer capacity for last buffer)
+    /// @param ring_index Index of ring buffer to fill (0 to
+    /// PARLIO_RING_BUFFER_COUNT-1)
+    /// @param start_byte Starting byte index for this buffer
+    /// @param byte_count Number of bytes to generate (may be less than buffer
+    /// capacity for last buffer)
     /// @return true on success, false on error
     /// @note Called from main thread (CPU), not ISR
-    bool generateRingBuffer(size_t ring_index, size_t start_led, size_t led_count);
+    bool generateRingBuffer(size_t ring_index, size_t start_byte,
+                            size_t byte_count);
 
     /// @brief Initialization flag
     bool mInitialized;
@@ -658,8 +695,10 @@ class ChannelEnginePARLIO : public IChannelEngine {
     void beginTransmission(fl::span<const ChannelDataPtr> channelData);
 
   private:
-    /// @brief Single engine instance (created on-demand, reconfigured as needed)
-    /// @note Using fl::unique_ptr for RAII - automatic cleanup, no manual delete
+    /// @brief Single engine instance (created on-demand, reconfigured as
+    /// needed)
+    /// @note Using fl::unique_ptr for RAII - automatic cleanup, no manual
+    /// delete
     fl::unique_ptr<ChannelEnginePARLIOImpl> mEngine;
 
     /// @brief Current data width (0 = not initialized)
@@ -680,15 +719,17 @@ class ChannelEnginePARLIO : public IChannelEngine {
 
 /// @brief Debug metrics structure for PARLIO transmission analysis
 struct ParlioDebugMetrics {
-    uint64_t start_time_us;    ///< Timestamp when transmission begins (microseconds)
-    uint64_t end_time_us;      ///< Timestamp when transmission completes (microseconds)
+    uint64_t
+        start_time_us; ///< Timestamp when transmission begins (microseconds)
+    uint64_t
+        end_time_us; ///< Timestamp when transmission completes (microseconds)
     uint32_t isr_count;        ///< Number of ISR callbacks fired
     uint32_t chunks_queued;    ///< Number of chunks queued for transmission
     uint32_t chunks_completed; ///< Number of chunks that completed transmission
     uint32_t bytes_total;      ///< Total bytes expected to transmit
     uint32_t bytes_transmitted; ///< Total bytes actually transmitted
-    uint32_t error_code;       ///< ESP-IDF error code (0 = success)
-    bool transmission_active;  ///< True if transmission is in progress
+    uint32_t error_code;        ///< ESP-IDF error code (0 = success)
+    bool transmission_active;   ///< True if transmission is in progress
 };
 
 /// @brief Get current PARLIO debug metrics
@@ -702,8 +743,10 @@ ParlioDebugMetrics getParlioDebugMetrics();
 
 /// @brief Create PARLIO engine instance with lazy initialization
 /// @return Shared pointer to IChannelEngine, or nullptr if creation fails
-/// @note Engine uses lazy initialization - hardware is configured on first show()
-/// @note Auto-selects optimal data width based on channel count (1, 2, 4, 8, or 16-bit)
+/// @note Engine uses lazy initialization - hardware is configured on first
+/// show()
+/// @note Auto-selects optimal data width based on channel count (1, 2, 4, 8, or
+/// 16-bit)
 /// @note Reconfigures width dynamically if channel count changes significantly
 fl::shared_ptr<IChannelEngine> createParlioEngine();
 
