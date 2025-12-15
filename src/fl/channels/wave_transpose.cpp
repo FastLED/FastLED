@@ -2,8 +2,6 @@
 /// @brief Waveform generation and transposition implementation
 
 #include "wave_transpose.h"
-#include "ftl/cstring.h"
-#include "fl/channels/waveform_generator.h"
 
 namespace fl {
 
@@ -16,53 +14,65 @@ namespace fl {
 /// This helper function converts two arrays of pulse bytes (0xFF/0x00) into
 /// a bit-packed DMA format for 2-lane parallel transmission.
 ///
-/// **Input:** Two 64-byte arrays (lane0_pulses, lane1_pulses)
-/// - Each byte is either 0xFF (HIGH pulse) or 0x00 (LOW pulse)
+/// Each lane has 64 bytes (8 WavePulses8 × 8 bytes each). Each pulse byte
+/// is either 0xFF (bit=1) or 0x00 (bit=0). We extract these bits and
+/// interleave them into 16 output bytes (128 bits total).
 ///
-/// **Output:** 16 bytes of bit-packed data
-/// - Each output byte packs 4 time ticks
-/// - Each tick has 2 bits (one per lane)
-/// - Bit packing: [t0_L0, t0_L1, t1_L0, t1_L1, t2_L0, t2_L1, t3_L0, t3_L1]
-///
-/// @param lane0_pulses Lane 0 pulse array (64 bytes)
-/// @param lane1_pulses Lane 1 pulse array (64 bytes)
-/// @param output Output buffer (16 bytes)
+/// @param lane_waves Array of 2 lane waveforms (64 bytes each)
+/// @param output Output buffer (16 bytes = 128 bits)
 static FL_IRAM void transpose_2lane_pulses(
-    const uint8_t lane0_pulses[64],
-    const uint8_t lane1_pulses[64],
-    uint8_t output[16]
+    const WavePulses8Symbol lane_waves[2],
+    uint8_t output[2*sizeof(WavePulses8Symbol)]
 ) {
-    // Constants for clarity
-    constexpr size_t DATA_WIDTH = 2;        // 2 lanes
-    constexpr size_t TICKS_PER_BYTE = 4;    // 8 bits / 2 lanes = 4 ticks
-    constexpr size_t NUM_OUTPUT_BYTES = 16; // 64 pulses / 4 ticks = 16 bytes
+    // Cast to byte arrays for easier indexing (64 bytes per lane)
+    const uint8_t* lane0 = reinterpret_cast<const uint8_t*>(&lane_waves[0]);
+    const uint8_t* lane1 = reinterpret_cast<const uint8_t*>(&lane_waves[1]);
 
-    // Transpose pulses into bit-packed format
-    for (size_t byteIdx = 0; byteIdx < NUM_OUTPUT_BYTES; byteIdx++) {
-        uint8_t outputByte = 0;
+    // Each output byte contains 4 bit-pairs (8 bits total)
+    // Format: [lane0_bit3, lane1_bit3, lane0_bit2, lane1_bit2, lane0_bit1, lane1_bit1, lane0_bit0, lane1_bit0]
+    for (int out_byte = 0; out_byte < 16; out_byte++) {
+        uint8_t result = 0;
 
-        // Pack TICKS_PER_BYTE (4) time ticks into this output byte
-        for (size_t t = 0; t < TICKS_PER_BYTE; t++) {
-            size_t tick = byteIdx * TICKS_PER_BYTE + t;
+        // Each output byte packs 4 pairs of bits from consecutive positions
+        for (int pair = 0; pair < 4; pair++) {
+            int src_index = out_byte * 4 + pair;
 
-            // Extract pulses from both lanes at this time tick
-            uint8_t pulse0 = lane0_pulses[tick];
-            uint8_t pulse1 = lane1_pulses[tick];
+            // Extract bit from each lane (0xFF → 1, 0x00 → 0)
+            uint8_t bit0 = (lane0[src_index] != 0) ? 1 : 0;
+            uint8_t bit1 = (lane1[src_index] != 0) ? 1 : 0;
 
-            // Convert 0xFF→1, 0x00→0
-            uint8_t bit0 = (pulse0 != 0) ? 1 : 0;
-            uint8_t bit1 = (pulse1 != 0) ? 1 : 0;
-
-            // Bit position: temporal order (lane0, lane1, lane0, lane1, ...)
-            // PARLIO transmits LSB-first, so this gives correct temporal sequence
-            size_t bitPos0 = t * DATA_WIDTH + 0; // lane0 bit position
-            size_t bitPos1 = t * DATA_WIDTH + 1; // lane1 bit position
-
-            outputByte |= (bit0 << bitPos0);
-            outputByte |= (bit1 << bitPos1);
+            // Pack bits in MSB-first order: lane0 in bit 7, lane1 in bit 6, etc.
+            result |= (bit0 << (7 - pair * 2));
+            result |= (bit1 << (6 - pair * 2));
         }
 
-        output[byteIdx] = outputByte;
+        output[out_byte] = result;
+    }
+}
+
+/// @brief Convert a single bit to WavePulses8 using LUT
+///
+/// Looks up the pre-computed pulse pattern for a single bit value.
+///
+/// @param bit_value The bit to expand (0 or 1)
+/// @param lut Pre-computed bit expansion lookup table
+/// @return WavePulses8 structure containing the pulse pattern
+static FL_IRAM WavePulses8 convertBitToWavePulse8(
+    bool bit_value,
+    const Wave8BitExpansionLut& lut
+) {
+    return lut.lut[bit_value ? 1 : 0];
+}
+
+static FL_IRAM void convertByteToWavePulses8Symbol(
+    uint8_t byte_value,
+    const Wave8BitExpansionLut& lut,
+    WavePulses8Symbol* output
+) {
+    // Expand each bit (MSB first) to WavePulses8
+    for (int i = 0; i < 8; i++) {
+        bool bit = (byte_value >> (7 - i)) & 1;
+        output->symbols[i] = convertBitToWavePulse8(bit, lut);
     }
 }
 
@@ -73,35 +83,17 @@ FL_IRAM void waveTranspose8_2(
     const Wave8BitExpansionLut& lut,
     uint8_t (&FL_RESTRICT_PARAM output)[16]
 ) {
-    // Constants for clarity
-    constexpr size_t PULSES_PER_LANE = 8; // 8 WavePulses8 structures per byte (8 bits × 1 WavePulses8/bit)
+    // Allocate waveform buffers on stack (16 WavePulses8 total: 8 per lane × 2 lanes)
+    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
+    WavePulses8Symbol laneWaveformSymbols[2];
 
-    // Allocate waveform buffers on stack (8 WavePulses8 per lane, 2 lanes)
-    WavePulses8 laneWaveforms[2][PULSES_PER_LANE];
-
-    // Expand both lanes using LUT (no branching!)
-    for (size_t lane = 0; lane < 2; lane++) {
-        uint8_t laneValue = lanes[lane];
-
-        // Process high nibble (bits 7-4), then low nibble (bits 3-0)
-        uint8_t highNibble = laneValue >> 4;
-        uint8_t lowNibble = laneValue & 0x0F;
-
-        // Copy high nibble waveform (4 WavePulses8) to first half of lane buffer
-        for (size_t i = 0; i < 4; i++) {
-            laneWaveforms[lane][i] = lut.data[highNibble][i];
-        }
-
-        // Copy low nibble waveform (4 WavePulses8) to second half of lane buffer
-        for (size_t i = 0; i < 4; i++) {
-            laneWaveforms[lane][4 + i] = lut.data[lowNibble][i];
-        }
-    }
+    // Convert each lane byte to wave pulse symbols
+    convertByteToWavePulses8Symbol(lanes[0], lut, &laneWaveformSymbols[0]);
+    convertByteToWavePulses8Symbol(lanes[1], lut, &laneWaveformSymbols[1]);
 
     // Transpose waveforms to DMA format (reinterpret as flat byte arrays)
     transpose_2lane_pulses(
-        reinterpret_cast<const uint8_t*>(laneWaveforms[0]),
-        reinterpret_cast<const uint8_t*>(laneWaveforms[1]),
+        laneWaveformSymbols,
         output
     );
 }
