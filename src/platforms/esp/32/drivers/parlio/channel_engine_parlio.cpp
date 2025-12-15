@@ -493,109 +493,51 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
                                                 size_t& outputBytesWritten) {
     // Get waveform expansion buffer for wave8 output
     // Each lane produces Wave8Byte (8 bytes) for each input byte
-    uint8_t *laneWaveforms = mState.waveform_expansion_buffer.get();
+    uint8_t* laneWaveforms = mState.waveform_expansion_buffer.get();
     constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
 
     size_t outputIdx = 0;
+    size_t byteOffset = 0;
 
-    // Process each byte in this buffer
-    for (size_t byteIdx = 0; byteIdx < byteCount; byteIdx++) {
-        size_t byteOffset = startByte + byteIdx;
+    // Shallow transposition: Process one wave8byte block at a time
+    // (one byte from each lane)
+    while (byteOffset < byteCount) {
+        // Calculate block size for buffer space check
+        size_t blockSize = (mState.data_width <= 8) ? 8 : 16;
 
-        // Step 1: Expand each lane's byte to Wave8Byte using wave8
+        // Check if enough space for this block
+        if (outputIdx + blockSize > outputBufferCapacity) {
+            break;
+        }
+
+        // Step 1: Pull next wave8byte from each lane
         for (size_t lane = 0; lane < mState.data_width; lane++) {
-            uint8_t *laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+            uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
 
             if (lane < mState.actual_channels) {
                 // Real channel - expand using wave8
-                const uint8_t *laneData = mState.scratch_padded_buffer.data() +
+                const uint8_t* laneData = mState.scratch_padded_buffer.data() +
                                           (lane * mState.lane_stride);
-                uint8_t byte = laneData[byteOffset];
+                uint8_t byte = laneData[startByte + byteOffset];
 
                 // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
                 // Cast pointer to array reference for wave8 API
-                fl::wave8(byte, mState.wave8_lut,
-                          *reinterpret_cast<uint8_t (*)[8]>(laneWaveform));
+                uint8_t (*wave8Array)[8] = reinterpret_cast<uint8_t (*)[8]>(laneWaveform);
+                fl::wave8(byte, mState.wave8_lut, *wave8Array);
             } else {
-                // Dummy lane - zero waveform (keeps GPIO LOW)
+                // Dummy lane - zero waveform (keeps GPIO LOW, 0x00 bytes)
                 fl::memset(laneWaveform, 0x00, bytes_per_lane);
             }
         }
 
-        // Step 2: Transpose Wave8Byte format to PARLIO format
-        // Wave8Byte: 8 bytes, each byte has 8 bits representing 8 pulses for
-        // that bit position Total: 8 bit positions × 8 pulses = 64 pulses per
-        // input byte
-        constexpr size_t pulsesPerByte = 64; // 8 bits × 8 pulses per bit
+        // Step 2: Transpose this wave8byte block using external transposition function
+        size_t bytesWritten = fl::transpose_wave8byte_parlio(
+            laneWaveforms,
+            mState.data_width,
+            outputBuffer + outputIdx);
 
-        if (mState.data_width <= 8) {
-            // Pack into single bytes
-            size_t ticksPerByte = 8 / mState.data_width;
-            size_t numOutputBytes =
-                (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-
-            for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes;
-                 outputByteIdx++) {
-                uint8_t outputByte = 0;
-
-                for (size_t t = 0; t < ticksPerByte; t++) {
-                    size_t pulse_idx = outputByteIdx * ticksPerByte + t;
-                    if (pulse_idx >= pulsesPerByte)
-                        break;
-
-                    // Extract pulse from Wave8Byte format
-                    // pulse_idx / 8 = bit position (0-7)
-                    // pulse_idx % 8 = pulse within that bit (0-7)
-                    size_t bit_pos = pulse_idx / 8;
-                    size_t pulse_bit = pulse_idx % 8;
-
-                    for (size_t lane = 0; lane < mState.data_width; lane++) {
-                        uint8_t *laneWaveform =
-                            laneWaveforms + (lane * bytes_per_lane);
-                        uint8_t wave8_byte =
-                            laneWaveform[bit_pos]; // Get the Wave8Bit byte
-                        uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) &
-                                        1; // MSB-first extraction
-
-                        size_t bitPos = t * mState.data_width + lane;
-                        outputByte |= (pulse << bitPos);
-                    }
-                }
-
-                // Check for buffer overflow
-                if (outputIdx + 1 > outputBufferCapacity) {
-                    return false;
-                }
-
-                outputBuffer[outputIdx++] = outputByte;
-            }
-        } else if (mState.data_width == 16) {
-            // Pack into 16-bit words
-            for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
-                uint16_t outputWord = 0;
-
-                // Extract pulse from Wave8Byte format
-                size_t bit_pos = pulse_idx / 8;
-                size_t pulse_bit = pulse_idx % 8;
-
-                for (size_t lane = 0; lane < 16; lane++) {
-                    uint8_t *laneWaveform =
-                        laneWaveforms + (lane * bytes_per_lane);
-                    uint8_t wave8_byte = laneWaveform[bit_pos];
-                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) &
-                                    1; // MSB-first extraction
-                    outputWord |= (pulse << lane);
-                }
-
-                // Check for buffer overflow
-                if (outputIdx + 2 > outputBufferCapacity) {
-                    return false;
-                }
-
-                outputBuffer[outputIdx++] = outputWord & 0xFF;
-                outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
-            }
-        }
+        outputIdx += bytesWritten;
+        byteOffset++;
     }
 
     outputBytesWritten = outputIdx;

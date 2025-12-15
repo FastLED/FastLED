@@ -802,4 +802,106 @@ inline bool transpose_strips(
     }
 }
 
+// ============================================================================
+// PARLIO Wave8 Transposer (ESP32-S3 Parallel I/O)
+// ============================================================================
+
+/// @brief Transpose Wave8Byte waveforms into PARLIO bit-parallel format (ISR-safe)
+///
+/// This function transposes Wave8Byte waveform data (8 bytes per lane representing
+/// 64 pulses) into PARLIO's bit-packed parallel format for multi-lane transmission.
+///
+/// **Input Format:** Wave8Byte structures
+/// - Each lane: 8 bytes (Wave8Bit symbols[8])
+/// - Each byte: 8 pulses packed MSB-first
+/// - Total: 64 pulses per input byte (8 bits × 8 pulses per bit)
+///
+/// **Output Format:** PARLIO bit-parallel format
+/// - data_width ≤ 8: Bit-packed bytes (multiple pulses per byte)
+/// - data_width == 16: 16-bit words (one pulse per word, 2 bytes)
+///
+/// **Supported Data Widths:** 1, 2, 4, 8, 16 lanes
+///
+/// @param laneWaveforms Array of Wave8Byte data (data_width lanes × 8 bytes each)
+/// @param data_width Number of parallel lanes (1, 2, 4, 8, or 16)
+/// @param outputBuffer Output buffer for bit-packed data
+/// @return Number of bytes written to output buffer (8 for ≤8 lanes, 16 for 16 lanes)
+///
+/// @note ISR-safe: inline function, no allocations
+/// @note Output size: 8 bytes (data_width ≤ 8) or 16 bytes (data_width = 16)
+/// @note Returns 0 if data_width is invalid (not 1, 2, 4, 8, or 16)
+///
+/// @example
+/// ```cpp
+/// uint8_t laneWaveforms[16 * 8];  // 16 lanes × 8 bytes
+/// uint8_t output[16];              // Max output size
+/// size_t written = transpose_wave8byte_parlio(laneWaveforms, 8, output);
+/// ```
+inline size_t transpose_wave8byte_parlio(
+    const uint8_t* laneWaveforms,
+    size_t data_width,
+    uint8_t* outputBuffer
+) {
+    constexpr size_t bytes_per_lane = 8;   // sizeof(Wave8Byte)
+    constexpr size_t pulsesPerByte = 64;   // 8 bits × 8 pulses per bit
+    size_t outputIdx = 0;
+
+    if (data_width <= 8) {
+        // Pack into single bytes
+        size_t ticksPerByte = 8 / data_width;
+        size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+
+        for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
+            uint8_t outputByte = 0;
+
+            for (size_t t = 0; t < ticksPerByte; t++) {
+                size_t pulse_idx = outputByteIdx * ticksPerByte + t;
+                if (pulse_idx >= pulsesPerByte)
+                    break;
+
+                // Extract pulse from Wave8Byte format
+                // pulse_idx / 8 = bit position (0-7)
+                // pulse_idx % 8 = pulse within that bit (0-7)
+                size_t bit_pos = pulse_idx / 8;
+                size_t pulse_bit = pulse_idx % 8;
+
+                for (size_t lane = 0; lane < data_width; lane++) {
+                    const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                    uint8_t wave8_byte = laneWaveform[bit_pos]; // Get the Wave8Bit byte
+                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1; // MSB-first extraction
+
+                    size_t bitPos = t * data_width + lane;
+                    outputByte |= (pulse << bitPos);
+                }
+            }
+
+            outputBuffer[outputIdx++] = outputByte;
+        }
+    } else if (data_width == 16) {
+        // Pack into 16-bit words
+        for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
+            uint16_t outputWord = 0;
+
+            // Extract pulse from Wave8Byte format
+            size_t bit_pos = pulse_idx / 8;
+            size_t pulse_bit = pulse_idx % 8;
+
+            for (size_t lane = 0; lane < 16; lane++) {
+                const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                uint8_t wave8_byte = laneWaveform[bit_pos];
+                uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1; // MSB-first extraction
+                outputWord |= (pulse << lane);
+            }
+
+            outputBuffer[outputIdx++] = outputWord & 0xFF;
+            outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
+        }
+    } else {
+        // Invalid data_width (not 1, 2, 4, 8, or 16)
+        return 0;
+    }
+
+    return outputIdx;
+}
+
 }  // namespace fl
