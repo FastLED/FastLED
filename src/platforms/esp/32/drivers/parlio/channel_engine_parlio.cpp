@@ -480,6 +480,11 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 //=============================================================================
 
 /// @brief Populate a DMA buffer with waveform data for a byte range
+///
+/// Two-stage processing model (repeated for each byte position):
+///   Stage 1: Generate wave8bytes for ALL lanes → staging buffer (waveform_expansion_buffer)
+///   Stage 2: Transpose staging buffer → DMA output buffer (bit-packed PARLIO format)
+///
 /// @param outputBuffer DMA buffer to populate (pre-allocated and pre-zeroed)
 /// @param outputBufferCapacity Maximum size of output buffer
 /// @param startByte Starting byte offset in source data
@@ -491,7 +496,8 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
                                                 size_t startByte,
                                                 size_t byteCount,
                                                 size_t& outputBytesWritten) {
-    // Get waveform expansion buffer for wave8 output
+    // Staging buffer for wave8 output before transposition
+    // Holds wave8bytes for all lanes (data_width × 8 bytes)
     // Each lane produces Wave8Byte (8 bytes) for each input byte
     uint8_t* laneWaveforms = mState.waveform_expansion_buffer.get();
     constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
@@ -499,18 +505,23 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
     size_t outputIdx = 0;
     size_t byteOffset = 0;
 
-    // Shallow transposition: Process one wave8byte block at a time
-    // (one byte from each lane)
+    // Two-stage architecture: Process one byte position at a time
+    // Stage 1: Generate wave8bytes for ALL lanes → staging buffer
+    // Stage 2: Transpose staging buffer → DMA output buffer
     while (byteOffset < byteCount) {
         // Calculate block size for buffer space check
         size_t blockSize = (mState.data_width <= 8) ? 8 : 16;
 
         // Check if enough space for this block
         if (outputIdx + blockSize > outputBufferCapacity) {
-            break;
+            // Buffer overflow - return error immediately
+            outputBytesWritten = outputIdx;
+            return false;
         }
 
-        // Step 1: Pull next wave8byte from each lane
+        // ═══════════════════════════════════════════════════════════════
+        // STAGE 1: Generate wave8bytes for ALL lanes into staging buffer
+        // ═══════════════════════════════════════════════════════════════
         for (size_t lane = 0; lane < mState.data_width; lane++) {
             uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
 
@@ -530,11 +541,15 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
             }
         }
 
-        // Step 2: Transpose this wave8byte block using external transposition function
+        // ═══════════════════════════════════════════════════════════════
+        // STAGE 2: Transpose staging buffer → DMA output buffer
+        // ═══════════════════════════════════════════════════════════════
+        // Transpose wave8bytes from all lanes (laneWaveforms staging buffer)
+        // into bit-packed format for PARLIO hardware transmission
         size_t bytesWritten = fl::transpose_wave8byte_parlio(
-            laneWaveforms,
-            mState.data_width,
-            outputBuffer + outputIdx);
+            laneWaveforms,        // Input: staging buffer (all lanes' wave8bytes)
+            mState.data_width,    // Number of lanes (1-16)
+            outputBuffer + outputIdx);  // Output: DMA buffer
 
         outputIdx += bytesWritten;
         byteOffset++;
