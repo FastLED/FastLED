@@ -43,9 +43,9 @@ constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
 static FL_IRAM void
 transpose_wave_symbols8_2(const WavePulses8Symbol lane_waves[2],
                           uint8_t output[2 * sizeof(WavePulses8Symbol)]) {
-    // Cast to byte arrays for easier indexing (64 bytes per lane)
-    const uint8_t *lane0 = reinterpret_cast<const uint8_t *>(&lane_waves[0]);
-    const uint8_t *lane1 = reinterpret_cast<const uint8_t *>(&lane_waves[1]);
+    // Get pointers to byte arrays for easier indexing (64 bytes per lane)
+    const uint8_t *lane0 = &lane_waves[0].symbols[0].data[0];
+    const uint8_t *lane1 = &lane_waves[1].symbols[0].data[0];
 
     // For each of 64 pulse byte positions, interleave bits from both lanes
     // using LUT-based spread
@@ -101,7 +101,7 @@ FL_IRAM void waveTranspose8_2(
     convertByteToWavePulses8Symbol(lanes[0], lut, &laneWaveformSymbols[0]);
     convertByteToWavePulses8Symbol(lanes[1], lut, &laneWaveformSymbols[1]);
 
-    // Transpose waveforms to DMA format (reinterpret as flat byte arrays)
+    // Transpose waveforms to DMA format (write to waveSymbols as byte array)
     transpose_wave_symbols8_2(laneWaveformSymbols, output);
 }
 
