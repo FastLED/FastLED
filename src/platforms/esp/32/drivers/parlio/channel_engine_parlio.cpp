@@ -422,121 +422,14 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
         return false;
     }
 
-    // Use pre-allocated waveform expansion buffer for wave8 output
-    const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
-    const size_t waveform_buffer_size = mState.data_width * bytes_per_lane;
-
-    if (!mState.waveform_expansion_buffer ||
-        mState.waveform_expansion_buffer_size < waveform_buffer_size) {
+    // Generate waveform data using helper function
+    size_t outputBytesWritten = 0;
+    if (!populateDmaBuffer(nextBuffer, mState.buffer_size,
+                          mState.current_byte, bytesThisChunk,
+                          outputBytesWritten)) {
         mState.error_occurred = true;
         return false;
     }
-
-    uint8_t *laneWaveforms = mState.waveform_expansion_buffer.get();
-
-    // Zero waveform buffer to eliminate leftover data
-    fl::memset(laneWaveforms, 0x00, waveform_buffer_size);
-
-    size_t outputIdx = 0;
-
-    // Process each byte in this chunk
-    for (size_t byteIdx = 0; byteIdx < bytesThisChunk; byteIdx++) {
-        size_t byteOffset = mState.current_byte + byteIdx;
-
-        // Step 1: Expand each lane's byte to Wave8Byte using wave8
-        for (size_t lane = 0; lane < mState.data_width; lane++) {
-            uint8_t *laneWaveform =
-                laneWaveforms +
-                (lane *
-                 bytes_per_lane); // Pointer to this lane's waveform buffer
-
-            if (lane < mState.actual_channels) {
-                // Real channel - expand using wave8
-                const uint8_t *laneData = mState.scratch_padded_buffer.data() +
-                                          (lane * mState.lane_stride);
-                uint8_t byte = laneData[byteOffset];
-
-                // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
-                // Cast pointer to array reference for wave8 API
-                fl::wave8(byte, mState.wave8_lut,
-                          *reinterpret_cast<uint8_t (*)[8]>(laneWaveform));
-            } else {
-                // Dummy lane - zero waveform (keeps GPIO LOW)
-                fl::memset(laneWaveform, 0x00, bytes_per_lane);
-            }
-        }
-
-        // Step 2: Transpose Wave8Byte format to PARLIO format
-        // Wave8Byte: 8 bytes, each byte has 8 bits representing 8 pulses for
-        // that bit position Total: 8 bit positions × 8 pulses = 64 pulses per
-        // input byte
-        constexpr size_t pulsesPerByte = 64; // 8 bits × 8 pulses per bit
-
-        if (mState.data_width <= 8) {
-            // Pack into single bytes
-            size_t ticksPerByte = 8 / mState.data_width;
-            size_t numOutputBytes =
-                (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-
-            for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes;
-                 outputByteIdx++) {
-                uint8_t outputByte = 0;
-
-                for (size_t t = 0; t < ticksPerByte; t++) {
-                    size_t pulse_idx = outputByteIdx * ticksPerByte + t;
-                    if (pulse_idx >= pulsesPerByte)
-                        break;
-
-                    // Extract pulse from Wave8Byte format
-                    size_t bit_pos = pulse_idx / 8;
-                    size_t pulse_bit = pulse_idx % 8;
-
-                    for (size_t lane = 0; lane < mState.data_width; lane++) {
-                        uint8_t *laneWaveform =
-                            laneWaveforms + (lane * bytes_per_lane);
-                        uint8_t wave8_byte = laneWaveform[bit_pos];
-                        uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) &
-                                        1; // MSB-first extraction
-
-                        size_t bitPos = t * mState.data_width + lane;
-                        outputByte |= (pulse << bitPos);
-                    }
-                }
-
-                nextBuffer[outputIdx++] = outputByte;
-            }
-        } else if (mState.data_width == 16) {
-            // Pack into 16-bit words
-            for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
-                uint16_t outputWord = 0;
-
-                size_t bit_pos = pulse_idx / 8;
-                size_t pulse_bit = pulse_idx % 8;
-
-                for (size_t lane = 0; lane < 16; lane++) {
-                    uint8_t *laneWaveform =
-                        laneWaveforms + (lane * bytes_per_lane);
-                    uint8_t wave8_byte = laneWaveform[bit_pos];
-                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) &
-                                    1; // MSB-first extraction
-                    outputWord |= (pulse << lane);
-                }
-
-                // Check for buffer overflow BEFORE writing
-                if (outputIdx + 2 > mState.buffer_size) {
-                    mState.error_occurred = true;
-                    return false;
-                }
-
-                nextBuffer[outputIdx++] = outputWord & 0xFF;
-                nextBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
-            }
-        }
-    }
-
-    // FIX C3-2: Removed redundant buffer overflow check (now checked BEFORE
-    // each write) Previously checked AFTER all writes completed, which was too
-    // late to prevent corruption
 
     // Queue transmission of this buffer
     // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
@@ -547,7 +440,7 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
 
     size_t chunkBits =
-        outputIdx * 8; // PARLIO API requires payload size in bits
+        outputBytesWritten * 8; // PARLIO API requires payload size in bits
 
     esp_err_t err = parlio_tx_unit_transmit(mState.tx_unit, nextBuffer,
                                             chunkBits, &tx_config);
@@ -586,54 +479,28 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 // Phase 0: Ring Buffer Generation (CPU Thread)
 //=============================================================================
 
-bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index,
-                                                 size_t start_byte,
-                                                 size_t byte_count) {
-    // Validate parameters
-    if (ring_index >= PARLIO_RING_BUFFER_COUNT) {
-        FL_WARN("PARLIO: Invalid ring_index="
-                << ring_index << " (max=" << PARLIO_RING_BUFFER_COUNT << ")");
-        return false;
-    }
-
-    if (start_byte + byte_count > mState.mIsrContext->total_bytes) {
-        FL_WARN("PARLIO: Ring buffer byte range overflow: start="
-                << start_byte << " count=" << byte_count
-                << " total=" << mState.mIsrContext->total_bytes);
-        return false;
-    }
-
-    // Get ring buffer pointer
-    uint8_t *outputBuffer = mState.ring_buffers[ring_index].get();
-    if (!outputBuffer) {
-        FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
-        return false;
-    }
-
-    // Zero output buffer to prevent garbage data
-    fl::memset(outputBuffer, 0x00, mState.ring_buffer_capacity);
-
-    // ITERATION 3: Remove padding logic - buffer alignment is the solution
-    // Previous iterations tried to fix corruption with padding, but this was
-    // wrong. Padding adds LOW pulses that become part of the waveform,
-    // confusing the decoder. The real solution is to ensure buffer boundaries
-    // align with LED frame boundaries. With correct buffer sizing (156 LEDs ×
-    // 24 bytes = 3744 bytes), the DMA gap happens naturally BETWEEN LED frames,
-    // which WS2812B tolerates.
-    size_t outputIdx = 0;
-
+/// @brief Populate a DMA buffer with waveform data for a byte range
+/// @param outputBuffer DMA buffer to populate (pre-allocated and pre-zeroed)
+/// @param outputBufferCapacity Maximum size of output buffer
+/// @param startByte Starting byte offset in source data
+/// @param byteCount Number of bytes to process
+/// @param outputBytesWritten [out] Number of bytes written to output buffer
+/// @return true on success, false on error (buffer overflow, etc.)
+bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
+                                                size_t outputBufferCapacity,
+                                                size_t startByte,
+                                                size_t byteCount,
+                                                size_t& outputBytesWritten) {
     // Get waveform expansion buffer for wave8 output
     // Each lane produces Wave8Byte (8 bytes) for each input byte
     uint8_t *laneWaveforms = mState.waveform_expansion_buffer.get();
-    constexpr size_t bytes_per_lane =
-        sizeof(Wave8Byte); // 8 bytes per input byte
+    constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
 
-    // ITERATION 2: outputIdx now initialized above (with front padding logic)
-    // Removed duplicate: size_t outputIdx = 0;
+    size_t outputIdx = 0;
 
     // Process each byte in this buffer
-    for (size_t byteIdx = 0; byteIdx < byte_count; byteIdx++) {
-        size_t byteOffset = start_byte + byteIdx;
+    for (size_t byteIdx = 0; byteIdx < byteCount; byteIdx++) {
+        size_t byteOffset = startByte + byteIdx;
 
         // Step 1: Expand each lane's byte to Wave8Byte using wave8
         for (size_t lane = 0; lane < mState.data_width; lane++) {
@@ -696,9 +563,7 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index,
                 }
 
                 // Check for buffer overflow
-                if (outputIdx + 1 > mState.ring_buffer_capacity) {
-                    FL_WARN("PARLIO: Ring buffer overflow at outputIdx="
-                            << outputIdx);
+                if (outputIdx + 1 > outputBufferCapacity) {
                     return false;
                 }
 
@@ -723,9 +588,7 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index,
                 }
 
                 // Check for buffer overflow
-                if (outputIdx + 2 > mState.ring_buffer_capacity) {
-                    FL_WARN("PARLIO: Ring buffer overflow at outputIdx="
-                            << outputIdx);
+                if (outputIdx + 2 > outputBufferCapacity) {
                     return false;
                 }
 
@@ -735,21 +598,52 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index,
         }
     }
 
-    // ITERATION 3: Remove back padding - not needed with correct buffer
-    // alignment Previous iterations added padding to "absorb" the DMA gap, but
-    // this was misguided. The correct solution is to ensure buffers end exactly
-    // on LED frame boundaries. With 156 LEDs × 24 bytes/LED = 3744 bytes,
-    // buffer ends after LED 155 completes. The DMA gap then occurs BETWEEN LED
-    // 155 and LED 156 (between frames), which WS2812B protocol tolerates
-    // naturally (per LOOP.md line 16).
+    outputBytesWritten = outputIdx;
+    return true;
+}
+
+bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index,
+                                                 size_t start_byte,
+                                                 size_t byte_count) {
+    // Validate parameters
+    if (ring_index >= PARLIO_RING_BUFFER_COUNT) {
+        FL_WARN("PARLIO: Invalid ring_index="
+                << ring_index << " (max=" << PARLIO_RING_BUFFER_COUNT << ")");
+        return false;
+    }
+
+    if (start_byte + byte_count > mState.mIsrContext->total_bytes) {
+        FL_WARN("PARLIO: Ring buffer byte range overflow: start="
+                << start_byte << " count=" << byte_count
+                << " total=" << mState.mIsrContext->total_bytes);
+        return false;
+    }
+
+    // Get ring buffer pointer
+    uint8_t *outputBuffer = mState.ring_buffers[ring_index].get();
+    if (!outputBuffer) {
+        FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
+        return false;
+    }
+
+    // Zero output buffer to prevent garbage data
+    fl::memset(outputBuffer, 0x00, mState.ring_buffer_capacity);
+
+    // Generate waveform data using helper function
+    size_t outputBytesWritten = 0;
+    if (!populateDmaBuffer(outputBuffer, mState.ring_buffer_capacity,
+                          start_byte, byte_count, outputBytesWritten)) {
+        FL_WARN("PARLIO: Ring buffer overflow at ring_index=" << ring_index);
+        return false;
+    }
 
     // Store actual size of this buffer
-    mState.ring_buffer_sizes[ring_index] = outputIdx;
+    mState.ring_buffer_sizes[ring_index] = outputBytesWritten;
 
     // DEBUG: Copy DMA buffer data to debug deque for validation
     if (mState.mIsrContext) {
         // Append this buffer's data to the debug deque (push_back each byte)
-        for (size_t i = 0; i < outputIdx; i++) {
+        for (size_t i = 0; i < outputBytesWritten; i++) {
             mState.mIsrContext->mDebugDmaOutput.push_back(outputBuffer[i]);
         }
     }

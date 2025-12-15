@@ -592,6 +592,19 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// conflicts
     bool transposeAndQueueNextChunk();
 
+    /// @brief Populate a DMA buffer with waveform data for a byte range
+    /// @param outputBuffer DMA buffer to populate (pre-allocated and pre-zeroed)
+    /// @param outputBufferCapacity Maximum size of output buffer
+    /// @param startByte Starting byte offset in source data
+    /// @param byteCount Number of bytes to process
+    /// @param outputBytesWritten [out] Number of bytes written to output buffer
+    /// @return true on success, false on error (buffer overflow, etc.)
+    /// @note Shared helper function used by generateRingBuffer() and
+    /// transposeAndQueueNextChunk()
+    bool populateDmaBuffer(uint8_t *outputBuffer, size_t outputBufferCapacity,
+                          size_t startByte, size_t byteCount,
+                          size_t &outputBytesWritten);
+
     /// @brief Phase 0: Generate waveform data into a single ring buffer
     /// @param ring_index Index of ring buffer to fill (0 to
     /// PARLIO_RING_BUFFER_COUNT-1)
