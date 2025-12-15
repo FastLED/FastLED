@@ -71,9 +71,9 @@ static FL_IRAM void transpose_2lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_2(
-    const uint8_t lanes[2],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[16]
+    uint8_t (&FL_RESTRICT_PARAM output)[16]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit
@@ -180,9 +180,9 @@ static FL_IRAM void transpose_4lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_4(
-    const uint8_t lanes[4],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[128]
+    uint8_t (&FL_RESTRICT_PARAM output)[128]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit
@@ -271,9 +271,9 @@ static FL_IRAM void transpose_16lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_16(
-    const uint8_t lanes[16],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[128]
+    uint8_t (&FL_RESTRICT_PARAM output)[128]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits x 8 pulses/bit
@@ -379,9 +379,9 @@ static FL_IRAM void transpose_8lane_pulses(
 __attribute__((optimize("O3")))
 #endif
 FL_IRAM void waveTranspose8_8(
-    const uint8_t lanes[8],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[64]
+    uint8_t (&FL_RESTRICT_PARAM output)[64]
 ) {
     // Constants for clarity
     constexpr size_t BYTES_PER_LANE = 64; // 8 bits × 8 pulses/bit

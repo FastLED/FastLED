@@ -116,9 +116,9 @@ inline Wave8BitExpansionLut buildWaveNibbleLut(
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_2(
-    const uint8_t lanes[2],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[16]
+    uint8_t (&FL_RESTRICT_PARAM output)[16]
 );
 
 /// @brief Optimized 4-lane waveform transpose using nibble LUT (branch-free)
@@ -163,9 +163,9 @@ FL_IRAM void waveTranspose8_2(
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_4(
-    const uint8_t lanes[4],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[128]
+    uint8_t (&FL_RESTRICT_PARAM output)[128]
 );
 
 /// @brief Optimized 8-lane waveform transpose using nibble LUT (branch-free)
@@ -212,9 +212,9 @@ FL_IRAM void waveTranspose8_4(
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_8(
-    const uint8_t lanes[8],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[64]
+    uint8_t (&FL_RESTRICT_PARAM output)[64]
 );
 
 
@@ -263,9 +263,9 @@ FL_IRAM void waveTranspose8_8(
 ///
 /// @see buildWaveNibbleLut() to generate the LUT
 FL_IRAM void waveTranspose8_16(
-    const uint8_t lanes[16],
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
     const Wave8BitExpansionLut& lut,
-    uint8_t output[128]
+    uint8_t (&FL_RESTRICT_PARAM output)[128]
 );
 
 } // namespace fl
