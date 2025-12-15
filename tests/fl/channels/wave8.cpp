@@ -60,7 +60,7 @@ TEST_CASE("convertToWave8Bit") {
     uint8_t lanes[2] = {0xff, 0x00};
     uint8_t output[2 * sizeof(Wave8Byte)]; // 16 bytes
 
-    waveTranspose8_2(lanes, lut, output);
+    wave8Transpose_2(lanes, lut, output);
 
     // Test transposed output
     // Expected: 0xAA (0b10101010) for all 16 bytes

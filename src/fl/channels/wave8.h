@@ -58,7 +58,7 @@ FL_IRAM void wave8(
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
 
-FL_IRAM void waveTranspose8_2(
+FL_IRAM void wave8Transpose_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
