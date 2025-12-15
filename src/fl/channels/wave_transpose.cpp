@@ -67,9 +67,7 @@ static FL_IRAM void transpose_2lane_pulses(
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-#if defined(__GNUC__) && !defined(__clang__)
-__attribute__((optimize("O3")))
-#endif
+FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut& lut,
@@ -176,9 +174,7 @@ static FL_IRAM void transpose_4lane_pulses(
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-#if defined(__GNUC__) && !defined(__clang__)
-__attribute__((optimize("O3")))
-#endif
+FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_4(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
     const Wave8BitExpansionLut& lut,
@@ -267,9 +263,7 @@ static FL_IRAM void transpose_16lane_pulses(
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-#if defined(__GNUC__) && !defined(__clang__)
-__attribute__((optimize("O3")))
-#endif
+FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_16(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
     const Wave8BitExpansionLut& lut,
@@ -375,9 +369,7 @@ static FL_IRAM void transpose_8lane_pulses(
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-#if defined(__GNUC__) && !defined(__clang__)
-__attribute__((optimize("O3")))
-#endif
+FL_OPTIMIZE_FUNCTION_O3
 FL_IRAM void waveTranspose8_8(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
     const Wave8BitExpansionLut& lut,

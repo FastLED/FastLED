@@ -195,6 +195,14 @@
   #define FL_END_OPTIMIZE_FOR_EXACT_TIMING   /* nothing */
 #endif
 
+// Function-level optimization attribute for O3
+// GCC supports per-function optimization attributes, Clang ignores them
+#if defined(__GNUC__) && !defined(__clang__)
+  #define FL_OPTIMIZE_FUNCTION_O3 __attribute__((optimize("O3")))
+#else
+  #define FL_OPTIMIZE_FUNCTION_O3
+#endif
+
 #ifndef FL_LINK_WEAK
 #define FL_LINK_WEAK __attribute__((weak))
 #endif
