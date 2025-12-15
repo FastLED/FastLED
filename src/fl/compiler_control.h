@@ -309,3 +309,24 @@ FL_DISABLE_WARNING_POP
   #define FL_NODISCARD
 #endif
 
+// Restrict pointer attribute for better optimization (no aliasing)
+// Tells the compiler that a pointer is the only way to access the underlying
+// object for the scope of that pointer, enabling better optimization.
+//
+// Usage: void process(int* FL_RESTRICT_PARAM a, int* FL_RESTRICT_PARAM b);
+//
+// The restrict keyword indicates that 'a' and 'b' do not alias (point to
+// overlapping memory), allowing the compiler to optimize more aggressively.
+#if defined(__cplusplus)
+  // C++ doesn't have 'restrict' keyword, use compiler-specific extensions
+  #if defined(__GNUC__) || defined(__clang__)
+    #define FL_RESTRICT_PARAM __restrict__
+  #elif defined(_MSC_VER)
+    #define FL_RESTRICT_PARAM __restrict
+  #else
+    #define FL_RESTRICT_PARAM
+  #endif
+#else
+  // C99 has native 'restrict' keyword
+  #define FL_RESTRICT_PARAM restrict
+#endif
