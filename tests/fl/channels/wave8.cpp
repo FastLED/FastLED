@@ -1,9 +1,9 @@
-/// @file wave_transpose.cpp
+/// @file wave8.cpp
 /// @brief Unit tests for waveform generation and transposition
 ///
 /// Tests the wave transpose functionality used for multi-lane LED protocols.
 
-#include "fl/channels/wave_transpose.h"
+#include "fl/channels/wave8.h"
 #include "ftl/cstring.h"
 #include "test.h"
 

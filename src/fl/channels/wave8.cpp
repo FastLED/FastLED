@@ -1,7 +1,7 @@
-/// @file wave_transpose.cpp
+/// @file wave8.cpp
 /// @brief Waveform generation and transposition implementation
 
-#include "wave_transpose.h"
+#include "wave8.h"
 
 namespace fl {
 
@@ -99,7 +99,7 @@ FL_IRAM void wave8(
 
     // Copy to output array byte-by-byte
     const uint8_t* src = &waveformSymbol.symbols[0].data[0];
-    for (int i = 0; i < sizeof(WavePulses8Symbol); i++) {
+    for (size_t i = 0; i < sizeof(WavePulses8Symbol); i++) {
         output[i] = src[i];
     }
 }
