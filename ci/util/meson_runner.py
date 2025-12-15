@@ -268,6 +268,7 @@ def setup_meson_build(
     thin_archive_marker = build_dir / ".thin_archive_config"
     unity_marker = build_dir / ".unity_config"
     source_files_marker = build_dir / ".source_files_hash"
+    debug_marker = build_dir / ".debug_config"
     force_reconfigure = False
 
     # Get current source file hash (used for change detection and saving after setup)
@@ -388,6 +389,81 @@ def setup_meson_build(
                     "[MESON] ℹ️  No source files marker found, forcing reconfigure"
                 )
                 force_reconfigure = True
+
+        # Check if debug mode setting has changed since last configure
+        # This is critical because debug mode changes compiler flags (sanitizers, optimization)
+        # Using old object files with different flags causes linker errors
+        # CRITICAL: When debug mode changes, we must delete all object files and archives
+        # because they were compiled with different sanitizer/optimization flags
+        debug_changed = False
+        if debug_marker.exists():
+            try:
+                last_debug_setting = debug_marker.read_text().strip() == "True"
+                if last_debug_setting != debug:
+                    _ts_print(
+                        f"[MESON] ⚠️  Debug mode changed: {last_debug_setting} → {debug}"
+                    )
+                    _ts_print(
+                        "[MESON] 🔄 Forcing reconfigure to update sanitizer/optimization flags"
+                    )
+                    force_reconfigure = True
+                    debug_changed = True
+            except (OSError, IOError):
+                # If we can't read the marker, force reconfigure to be safe
+                _ts_print(
+                    "[MESON] ⚠️  Could not read debug marker, forcing reconfigure"
+                )
+                force_reconfigure = True
+        else:
+            # No marker file exists from previous configure
+            # This can happen on first run after updating to this version
+            _ts_print("[MESON] ℹ️  No debug marker found, will create after setup")
+
+        # CRITICAL: Delete all object files and archives when debug mode changes
+        # Object files compiled with sanitizers cannot be linked without sanitizer runtime
+        # We must force a complete rebuild with the new compiler flags
+        if debug_changed:
+            import glob
+            import shutil
+
+            _ts_print(
+                "[MESON] 🗑️  Debug mode changed - cleaning all object files and archives"
+            )
+
+            # Delete all .obj and .o files (object files)
+            obj_files = glob.glob(str(build_dir / "**" / "*.obj"), recursive=True)
+            obj_files.extend(glob.glob(str(build_dir / "**" / "*.o"), recursive=True))
+            deleted_obj_count = 0
+            for obj_file in obj_files:
+                try:
+                    Path(obj_file).unlink()
+                    deleted_obj_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {obj_file}: {e}")
+
+            # Delete all .a files (static libraries)
+            archive_files = glob.glob(str(build_dir / "**" / "*.a"), recursive=True)
+            deleted_archive_count = 0
+            for archive_file in archive_files:
+                try:
+                    Path(archive_file).unlink()
+                    deleted_archive_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {archive_file}: {e}")
+
+            # Delete all .exe files (test executables)
+            exe_files = glob.glob(str(build_dir / "**" / "*.exe"), recursive=True)
+            deleted_exe_count = 0
+            for exe_file in exe_files:
+                try:
+                    Path(exe_file).unlink()
+                    deleted_exe_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {exe_file}: {e}")
+
+            _ts_print(
+                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, {deleted_exe_count} executables"
+            )
 
     # Check if any meson.build files are newer than build.ninja (requires reconfigure)
     build_ninja_path = build_dir / "build.ninja"
@@ -725,6 +801,14 @@ endian = 'little'
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write unity marker: {e}")
+
+        # Write marker file to track debug setting for future runs
+        try:
+            debug_marker.write_text(str(debug), encoding="utf-8")
+            _ts_print(f"[MESON] ✅ Saved debug configuration: {debug}")
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
 
         # Write marker file to track source file list for future runs
         if current_source_hash:

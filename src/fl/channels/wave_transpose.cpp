@@ -20,7 +20,7 @@ namespace fl {
 ///
 /// @param lane_waves Array of 2 lane waveforms (64 bytes each)
 /// @param output Output buffer (128 bytes = 64 positions × 2 bytes each)
-static FL_IRAM void transpose_2lane_pulses(
+static FL_IRAM void transpose_wave_symbols8_2(
     const WavePulses8Symbol lane_waves[2],
     uint8_t output[2*sizeof(WavePulses8Symbol)]
 ) {
@@ -75,18 +75,17 @@ static FL_IRAM void convertByteToWavePulses8Symbol(
     const Wave8BitExpansionLut& lut,
     WavePulses8Symbol* output
 ) {
-    // Extract high and low nibbles
-    uint8_t high_nibble = (byte_value >> 4) & 0xF;
-    uint8_t low_nibble = byte_value & 0xF;
 
-    // Copy high nibble expansion (first 4 WavePulses8)
+    // Cache pointer to high nibble data to avoid repeated indexing
+    const WavePulses8* high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
     for (int i = 0; i < 4; i++) {
-        output->symbols[i] = lut.lut[high_nibble][i];
+        output->symbols[i] = high_nibble_data[i];
     }
 
-    // Copy low nibble expansion (last 4 WavePulses8)
+    // Cache pointer to low nibble data to avoid repeated indexing
+    const WavePulses8* low_nibble_data = lut.lut[byte_value & 0xF];
     for (int i = 0; i < 4; i++) {
-        output->symbols[4 + i] = lut.lut[low_nibble][i];
+        output->symbols[4 + i] = low_nibble_data[i];
     }
 }
 
@@ -106,7 +105,7 @@ FL_IRAM void waveTranspose8_2(
     convertByteToWavePulses8Symbol(lanes[1], lut, &laneWaveformSymbols[1]);
 
     // Transpose waveforms to DMA format (reinterpret as flat byte arrays)
-    transpose_2lane_pulses(
+    transpose_wave_symbols8_2(
         laneWaveformSymbols,
         output
     );
