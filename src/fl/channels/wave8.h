@@ -9,10 +9,6 @@
 
 namespace fl {
 
-// ============================================================================
-// Wave Pulse Types
-// ============================================================================
-
 /// @brief Type-safe container for 8-byte wave pulse pattern
 ///
 /// Represents the pulse expansion of a single bit. Each bit in the LED protocol
@@ -20,12 +16,12 @@ namespace fl {
 ///
 /// The struct is 8-byte aligned for optimized memory access in ISR/DMA
 /// contexts.
-struct alignas(8) WavePulses8 {
+struct alignas(8) Wave8Bit {
     uint8_t data[8];
 };
 
-struct alignas(8) WavePulses8Symbol {
-    WavePulses8 symbols[8];
+struct alignas(8) Wave8Byte {
+    Wave8Bit symbols[8];
 };
 
 // ============================================================================
@@ -34,11 +30,11 @@ struct alignas(8) WavePulses8Symbol {
 
 /// @brief Lookup table for nibble-to-waveform expansion
 ///
-/// Maps each 4-bit nibble (0x0 to 0xF) to 4 WavePulses8 structures.
+/// Maps each 4-bit nibble (0x0 to 0xF) to 4 Wave8Bit structures.
 /// This reduces byte conversion from 8 lookups (bit-level) to 2 lookups
 /// (nibble-level).
 struct alignas(8) Wave8BitExpansionLut {
-    WavePulses8 lut[16][4]; // nibble -> 4 WavePulses8 (half symbol)
+    Wave8Bit lut[16][4]; // nibble -> 4 Wave8Bit (half symbol)
 };
 
 /// @brief Build a Wave8BitExpansionLut from chipset timing data
@@ -54,11 +50,11 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 FL_IRAM void wave8(
     uint8_t lane,
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(WavePulses8Symbol)]);
+    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
 
 FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(WavePulses8Symbol)]);
+    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
 
 } // namespace fl

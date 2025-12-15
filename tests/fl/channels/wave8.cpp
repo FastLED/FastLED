@@ -60,7 +60,7 @@ TEST_CASE("buildWave8ExpansionLUT") {
     }
 }
 
-TEST_CASE("convertToWavePulses8") {
+TEST_CASE("convertToWave8Bit") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     // This creates simple patterns for testing transpose
     ChipsetTiming timing;
@@ -70,11 +70,11 @@ TEST_CASE("convertToWavePulses8") {
 
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
 
-    // Convert to WavePulses8
+    // Convert to Wave8Bit
     // lane0: 0xff (all bits are 1) = high nibble 0xF, low nibble 0xF
     // lane1: 0x00 (all bits are 0) = high nibble 0x0, low nibble 0x0
     uint8_t lanes[2] = {0xff, 0x00};
-    uint8_t output[2 * sizeof(WavePulses8Symbol)]; // 128 bytes
+    uint8_t output[2 * sizeof(Wave8Byte)]; // 128 bytes
 
     waveTranspose8_2(lanes, lut, output);
 
