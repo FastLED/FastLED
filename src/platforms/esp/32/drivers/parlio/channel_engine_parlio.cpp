@@ -410,9 +410,8 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
         return false;
     }
 
-    // Use pre-allocated waveform expansion buffer
-    const size_t max_pulses_per_bit = 16; // Conservative max
-    const size_t bytes_per_lane = 8 * max_pulses_per_bit; // 128 bytes per lane
+    // Use pre-allocated waveform expansion buffer for wave8 output
+    const size_t bytes_per_lane = sizeof(Wave8Byte);  // 8 bytes per input byte
     const size_t waveform_buffer_size = mState.data_width * bytes_per_lane;
 
     if (!mState.waveform_expansion_buffer ||
@@ -422,9 +421,6 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     }
 
     uint8_t *laneWaveforms = mState.waveform_expansion_buffer.get();
-    const uint8_t *bit0_wave = mState.bit0_waveform.data();
-    const uint8_t *bit1_wave = mState.bit1_waveform.data();
-    size_t waveform_size = mState.pulses_per_bit;
 
     // Zero waveform buffer to eliminate leftover data
     fl::memset(laneWaveforms, 0x00, waveform_buffer_size);
@@ -439,8 +435,7 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
         for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
             size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
 
-            // Step 1: Expand each lane's byte to waveform using generic
-            // function
+            // Step 1: Expand each lane's byte to Wave8Byte using wave8
             for (size_t lane = 0; lane < mState.data_width; lane++) {
                 uint8_t *laneWaveform =
                     laneWaveforms +
@@ -448,102 +443,79 @@ bool FL_IRAM ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
                      bytes_per_lane); // Pointer to this lane's waveform buffer
 
                 if (lane < mState.actual_channels) {
-                    // Real channel - expand waveform from scratch buffer
+                    // Real channel - expand using wave8
                     const uint8_t *laneData =
                         mState.scratch_padded_buffer.data() +
                         (lane * mState.lane_stride);
                     uint8_t byte = laneData[byteOffset];
 
-                    // PHASE 9: Use optimized nibble lookup table for waveform expansion
-                    size_t expanded = fl::expandByteToWaveformsOptimized(
-                        byte, mState.nibble_lut, laneWaveform, bytes_per_lane);
-                    if (expanded == 0) {
-                        // Waveform expansion failed - abort
-                        mState.error_occurred = true;
-                        // CRITICAL: laneWaveforms points to
-                        // mState.waveform_expansion_buffer (pre-allocated heap
-                        // buffer managed by this class). DO NOT call
-                        // heap_caps_free(laneWaveforms)! The buffer is owned by
-                        // mState and will be freed in the destructor.
-                        return false;
-                    }
+                    // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
+                    // Cast pointer to array reference for wave8 API
+                    fl::wave8(byte, mState.wave8_lut, *reinterpret_cast<uint8_t(*)[8]>(laneWaveform));
                 } else {
                     // Dummy lane - zero waveform (keeps GPIO LOW)
                     fl::memset(laneWaveform, 0x00, bytes_per_lane);
                 }
             }
 
-            // Step 2: Bit-pack transpose waveform bytes to PARLIO format
-            // Convert byte-based waveforms (0xFF/0x00) to bit-packed output
-            //
-            // PARLIO Data Format:
-            // - For data_width=N, each N bits represent one clock cycle
-            // - Bits are packed: bit 0 = lane 0, bit 1 = lane 1, etc.
-            // - Each byte contains 8/N clock cycles worth of data
-            //
-            // Example: data_width=1, 80 pulses
-            //   - Need 80 clock cycles = 80 bits = 10 bytes
-            //   - Each byte: [tick7, tick6, ..., tick1, tick0]
-            const size_t pulsesPerByte =
-                8 * mState.pulses_per_bit; // 80 pulses for 8 bits
+            // Step 2: Transpose Wave8Byte format to PARLIO format
+            // Wave8Byte: 8 bytes, each byte has 8 bits representing 8 pulses for that bit position
+            // Total: 8 bit positions × 8 pulses = 64 pulses per input byte
+            constexpr size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
 
             if (mState.data_width <= 8) {
                 // Pack into single bytes
-                // Each byte contains (8 / data_width) clock cycles
                 size_t ticksPerByte = 8 / mState.data_width;
                 size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
 
                 for (size_t byteIdx = 0; byteIdx < numOutputBytes; byteIdx++) {
                     uint8_t outputByte = 0;
 
-                    // Pack ticksPerByte time ticks into this byte
                     for (size_t t = 0; t < ticksPerByte; t++) {
-                        size_t tick = byteIdx * ticksPerByte + t;
-                        if (tick >= pulsesPerByte) break; // Avoid overflow
+                        size_t pulse_idx = byteIdx * ticksPerByte + t;
+                        if (pulse_idx >= pulsesPerByte) break;
 
-                        // Extract pulses from all lanes at this time tick
+                        // Extract pulse from Wave8Byte format
+                        size_t bit_pos = pulse_idx / 8;
+                        size_t pulse_bit = pulse_idx % 8;
+
                         for (size_t lane = 0; lane < mState.data_width; lane++) {
                             uint8_t *laneWaveform =
                                 laneWaveforms + (lane * bytes_per_lane);
-                            uint8_t pulse = laneWaveform[tick];
-                            uint8_t bit =
-                                (pulse != 0) ? 1 : 0; // Convert 0xFF→1, 0x00→0
+                            uint8_t wave8_byte = laneWaveform[bit_pos];
+                            uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;  // MSB-first extraction
 
-                            // Bit position: temporal order (tick 0 → bit 0, tick 1 → bit 1, ...)
-                            // PARLIO transmits LSB-first (bit 0 of byte sent first)
-                            // This gives correct temporal sequence: tick 0, tick 1, ..., tick 7
                             size_t bitPos = t * mState.data_width + lane;
-                            outputByte |= (bit << bitPos);
+                            outputByte |= (pulse << bitPos);
                         }
                     }
 
                     nextBuffer[outputIdx++] = outputByte;
                 }
             } else if (mState.data_width == 16) {
-                // Pack into 16-bit words (two bytes per tick)
-                // For 16-bit width: 1 clock cycle = 16 bits = 2 bytes
-                for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                // Pack into 16-bit words
+                for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
                     uint16_t outputWord = 0;
 
-                    // Extract one pulse from each lane and pack into bits
+                    size_t bit_pos = pulse_idx / 8;
+                    size_t pulse_bit = pulse_idx % 8;
+
                     for (size_t lane = 0; lane < 16; lane++) {
                         uint8_t *laneWaveform =
                             laneWaveforms + (lane * bytes_per_lane);
-                        uint8_t pulse = laneWaveform[tick];
-                        uint8_t bit =
-                            (pulse != 0) ? 1 : 0; // Convert 0xFF→1, 0x00→0
-                        outputWord |= (bit << lane); // Lane 0 = bit 0, etc.
+                        uint8_t wave8_byte = laneWaveform[bit_pos];
+                        uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;  // MSB-first extraction
+                        outputWord |= (pulse << lane);
                     }
 
-                    // FIX C3-2: Check for buffer overflow BEFORE writing (prevent corruption)
+                    // Check for buffer overflow BEFORE writing
                     if (outputIdx + 2 > mState.buffer_size) {
                         mState.error_occurred = true;
                         return false;
                     }
 
-                    // Write as two bytes (low byte first for little-endian)
-                    nextBuffer[outputIdx++] = outputWord & 0xFF;          // Low byte
-                    nextBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;  // High byte
+                    nextBuffer[outputIdx++] = outputWord & 0xFF;
+                    nextBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
                 }
             }
         }
@@ -633,14 +605,10 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
     // happens naturally BETWEEN LED frames, which WS2812B tolerates.
     size_t outputIdx = 0;
 
-    // Get waveform generation resources
+    // Get waveform expansion buffer for wave8 output
+    // Each lane produces Wave8Byte (8 bytes) for each input byte
     uint8_t* laneWaveforms = mState.waveform_expansion_buffer.get();
-    const uint8_t* bit0_wave = mState.bit0_waveform.data();
-    const uint8_t* bit1_wave = mState.bit1_waveform.data();
-    size_t waveform_size = mState.pulses_per_bit;
-
-    const size_t max_pulses_per_bit = 16;
-    const size_t bytes_per_lane = 8 * max_pulses_per_bit;
+    constexpr size_t bytes_per_lane = sizeof(Wave8Byte);  // 8 bytes per input byte
 
     // ITERATION 2: outputIdx now initialized above (with front padding logic)
     // Removed duplicate: size_t outputIdx = 0;
@@ -653,31 +621,28 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
         for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
             size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
 
-            // Step 1: Expand each lane's byte to waveform
+            // Step 1: Expand each lane's byte to Wave8Byte using wave8
             for (size_t lane = 0; lane < mState.data_width; lane++) {
                 uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
 
                 if (lane < mState.actual_channels) {
-                    // Real channel - expand waveform from scratch buffer
+                    // Real channel - expand using wave8
                     const uint8_t* laneData = mState.scratch_padded_buffer.data() + (lane * mState.lane_stride);
                     uint8_t byte = laneData[byteOffset];
 
-                    size_t expanded = fl::expandByteToWaveforms(
-                        byte, bit0_wave, waveform_size, bit1_wave, waveform_size,
-                        laneWaveform, bytes_per_lane);
-
-                    if (expanded == 0) {
-                        FL_WARN("PARLIO: Waveform expansion failed at LED " << absoluteLedIdx);
-                        return false;
-                    }
+                    // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
+                    // Cast pointer to array reference for wave8 API
+                    fl::wave8(byte, mState.wave8_lut, *reinterpret_cast<uint8_t(*)[8]>(laneWaveform));
                 } else {
                     // Dummy lane - zero waveform (keeps GPIO LOW)
                     fl::memset(laneWaveform, 0x00, bytes_per_lane);
                 }
             }
 
-            // Step 2: Bit-pack transpose waveform bytes to PARLIO format
-            const size_t pulsesPerByte = 8 * mState.pulses_per_bit;
+            // Step 2: Transpose Wave8Byte format to PARLIO format
+            // Wave8Byte: 8 bytes, each byte has 8 bits representing 8 pulses for that bit position
+            // Total: 8 bit positions × 8 pulses = 64 pulses per input byte
+            constexpr size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
 
             if (mState.data_width <= 8) {
                 // Pack into single bytes
@@ -688,16 +653,22 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
                     uint8_t outputByte = 0;
 
                     for (size_t t = 0; t < ticksPerByte; t++) {
-                        size_t tick = byteIdx * ticksPerByte + t;
-                        if (tick >= pulsesPerByte) break;
+                        size_t pulse_idx = byteIdx * ticksPerByte + t;
+                        if (pulse_idx >= pulsesPerByte) break;
+
+                        // Extract pulse from Wave8Byte format
+                        // pulse_idx / 8 = bit position (0-7)
+                        // pulse_idx % 8 = pulse within that bit (0-7)
+                        size_t bit_pos = pulse_idx / 8;
+                        size_t pulse_bit = pulse_idx % 8;
 
                         for (size_t lane = 0; lane < mState.data_width; lane++) {
                             uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                            uint8_t pulse = laneWaveform[tick];
-                            uint8_t bit = (pulse != 0) ? 1 : 0;
+                            uint8_t wave8_byte = laneWaveform[bit_pos];  // Get the Wave8Bit byte
+                            uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;  // MSB-first extraction
 
                             size_t bitPos = t * mState.data_width + lane;
-                            outputByte |= (bit << bitPos);
+                            outputByte |= (pulse << bitPos);
                         }
                     }
 
@@ -711,14 +682,18 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer(size_t ring_index, size_t start
                 }
             } else if (mState.data_width == 16) {
                 // Pack into 16-bit words
-                for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
                     uint16_t outputWord = 0;
+
+                    // Extract pulse from Wave8Byte format
+                    size_t bit_pos = pulse_idx / 8;
+                    size_t pulse_bit = pulse_idx % 8;
 
                     for (size_t lane = 0; lane < 16; lane++) {
                         uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                        uint8_t pulse = laneWaveform[tick];
-                        uint8_t bit = (pulse != 0) ? 1 : 0;
-                        outputWord |= (bit << lane);
+                        uint8_t wave8_byte = laneWaveform[bit_pos];
+                        uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;  // MSB-first extraction
+                        outputWord |= (pulse << lane);
                     }
 
                     // Check for buffer overflow
@@ -1192,7 +1167,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     // Step 1: Calculate width-adaptive streaming chunk size
     mState.leds_per_chunk = calculateChunkSize(mState.data_width);
-    // Step 1: Generate precomputed waveforms using timing from chipset configuration
+    // Step 1: Build wave8 expansion LUT from timing configuration
     // Timing parameters are extracted from the first channel in beginTransmission()
     // and stored in mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns
     //
@@ -1201,48 +1176,31 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // - T2: 200ns (T1H-T0H - additional HIGH time for bit 1)
     // - T3: 500ns (T0L - LOW tail duration)
     //
-    // Resulting waveforms (with 10.0 MHz = 100ns per pulse):
-    // - Bit 0: T1 HIGH + T3 LOW = 300ns H + 500ns L = 3 + 5 pulses
-    // - Bit 1: (T1+T2) HIGH + T3 LOW = 500ns H + 300ns L = 5 + 3 pulses
-    size_t bit0_size = fl::generateBit0Waveform(
-        PARLIO_CLOCK_FREQ_HZ, mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns,
-        mState.bit0_waveform.data(), mState.bit0_waveform.size());
-    size_t bit1_size = fl::generateBit1Waveform(
-        PARLIO_CLOCK_FREQ_HZ, mState.timing_t1_ns, mState.timing_t2_ns, mState.timing_t3_ns,
-        mState.bit1_waveform.data(), mState.bit1_waveform.size());
+    // wave8 normalizes timing to 8 pulses per bit (fixed 8:1 expansion)
+    ChipsetTiming timing;
+    timing.T1 = mState.timing_t1_ns;
+    timing.T2 = mState.timing_t2_ns;
+    timing.T3 = mState.timing_t3_ns;
+    timing.RESET = 0;  // Not used for waveform generation
+    timing.name = "PARLIO";
 
-    if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {
-        FL_WARN("PARLIO: Failed to generate waveforms (bit0="
-                << bit0_size << ", bit1=" << bit1_size << ")");
-        mInitialized = false;
-        return;
-    }
-
-    mState.pulses_per_bit = bit0_size;
-    // PHASE 9: Generate nibble lookup table for optimized waveform expansion
-    bool lut_success = fl::generateNibbleLookupTable(
-        mState.bit0_waveform.data(),
-        mState.bit1_waveform.data(),
-        mState.pulses_per_bit,
-        mState.nibble_lut
-    );
-    if (!lut_success) {
-        FL_WARN("PARLIO: Failed to generate nibble lookup table");
-        mInitialized = false;
-        return;
-    }
-    // Step 2: Calculate width-adaptive streaming chunk size (MUST be after
-    // waveform generation) Now that we know pulses_per_bit, calculate optimal
-    // chunk size for ~2KB buffers Formula matches transposeAndQueueNextChunk()
-    // logic: For data_width <= 8: writes 1 byte per pulse tick For data_width ==
-    // 16: writes 2 bytes per pulse tick
+    mState.wave8_lut = buildWave8ExpansionLUT(timing);
+    // Step 2: Calculate width-adaptive streaming chunk size
+    // wave8 uses fixed 8 pulses per bit (8:1 expansion)
+    // After bit-packing transpose:
+    // - For data_width <= 8: outputs (8 pulses × 8 bits / (8/data_width)) bytes per byte
+    // - For data_width = 1: outputs 8 bytes per input byte (after transpose)
+    // - For data_width = 8: outputs 8 bytes per input byte (after transpose)
+    // - Each LED = 3 bytes × 8 bytes/byte = 24 bytes (after transpose)
+    constexpr size_t pulses_per_bit = 8;  // Fixed for wave8
     size_t bytes_per_led_calc;
     if (mState.data_width <= 8) {
-        // One output byte per pulse tick
-        bytes_per_led_calc = 3 * 8 * mState.pulses_per_bit;
+        // After transpose: 8 pulses × 8 bits / (8/data_width) ticks per byte
+        // For data_width=1: 8*8 / 8 = 8 bytes per input byte
+        bytes_per_led_calc = 3 * 8 * pulses_per_bit / (8 / mState.data_width);
     } else {
-        // Two output bytes per pulse tick for 16-bit width
-        bytes_per_led_calc = 3 * 8 * mState.pulses_per_bit * 2;
+        // For 16-bit width: 2 bytes per pulse tick
+        bytes_per_led_calc = 3 * 8 * pulses_per_bit * 2;
     }
     // PHASE 1 OPTION E: Increase buffer size to reduce chunk count below ISR callback limit
     // Root cause: ESP-IDF PARLIO driver stops invoking ISR callbacks after 4 transmissions
@@ -1287,7 +1245,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Set max_transfer_size to hardware maximum (must be < 65535, so use 65534)
     config.max_transfer_size = 65534; // Hardware maximum (65535 bits - 1 for safety)
     config.bit_pack_order =
-        PARLIO_BIT_PACK_ORDER_LSB; // Match bit-packing logic (bit 0 = tick 0)
+        PARLIO_BIT_PACK_ORDER_LSB; // Lane 0 = bit 0, transmit bit 0 first
     // ITERATION 5 - Experiment 2-3: sample_edge = NEG made things WORSE (39 corrupt LEDs vs 24)
     // ITERATION 5 - Reverting to POS (best configuration found in Iteration 1)
     config.sample_edge =
@@ -1351,22 +1309,18 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // 3. Buffer size depends on data_width and actual pulses_per_bit
     // (calculated at runtime)
 
-    // ITERATION 2: CRITICAL FIX - Match transpose logic exactly!
-    // The transposeAndQueueNextChunk() function writes:
-    // - For data_width <= 8: 1 output byte per pulse tick
-    //   → bytes_per_led = 3 colors × 8 bits × pulses_per_bit
-    // - For data_width == 16: 2 output bytes per pulse tick
-    //   → bytes_per_led = 3 colors × 8 bits × pulses_per_bit × 2
-    //
-    // Previous bug: divided by 8 assuming bit-packing, but transpose writes
-    // full bytes per pulse (inefficient for data_width=1, but that's the logic)
+    // wave8 uses fixed 8:1 expansion, output is bit-packed
+    // After transpose, each LED becomes:
+    // - data_width=1: 3 colors × 8 bytes/color = 24 bytes
+    // - data_width=8: 3 colors × 8 bytes/color = 24 bytes (8 lanes packed)
+    // - data_width=16: 3 colors × 8 bytes/color × 2 = 48 bytes
     size_t bytes_per_led;
     if (mState.data_width <= 8) {
-        // One output byte per pulse tick (see transposeAndQueueNextChunk line 360)
-        bytes_per_led = 3 * 8 * mState.pulses_per_bit;
+        // 8 bytes per color after transpose (8 pulses bit-packed)
+        bytes_per_led = 3 * 8;
     } else {
-        // Two output bytes per pulse tick for 16-bit width (line 378-380)
-        bytes_per_led = 3 * 8 * mState.pulses_per_bit * 2;
+        // 16 bytes per color for 16-bit width (16 pulses, 2 bytes per pulse)
+        bytes_per_led = 3 * 16;
     }
     size_t bufferSize = mState.leds_per_chunk * bytes_per_led;
 
@@ -1420,25 +1374,17 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // For 1000 LEDs / 8 buffers = 125 LEDs per buffer (last buffer may be smaller)
     size_t ring_buffer_led_count = (1000 + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT; // Round up
 
-    // ITERATION 3: Calculate correct bytes_per_led accounting for bit-packing
-    // The transpose logic packs pulses into bytes based on data_width
-    // Formula matches generateRingBuffer() transpose logic (lines 710-739):
-    // - pulsesPerByte = 8 bits × pulses_per_bit
-    // - ticksPerByte = 8 / data_width
-    // - numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte
-    // - bytes_per_led = numOutputBytes × 3 colors
+    // wave8 uses fixed 8:1 expansion with bit-packing
+    // After transpose: each LED = 24 bytes (for data_width <= 8)
     size_t bytes_per_led_ring;
     if (mState.data_width <= 8) {
-        size_t ticksPerByte = 8 / mState.data_width;
-        size_t pulsesPerByte = 8 * mState.pulses_per_bit;  // 8 bits per color byte
-        size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-        bytes_per_led_ring = numOutputBytes * 3;  // 3 colors (RGB)
+        // 8 bytes per color (8 pulses bit-packed) × 3 colors = 24 bytes
+        bytes_per_led_ring = 24;
     } else if (mState.data_width == 16) {
-        // For 16-bit width: 2 bytes per pulse tick
-        size_t pulsesPerByte = 8 * mState.pulses_per_bit;
-        bytes_per_led_ring = pulsesPerByte * 2 * 3;  // 2 bytes per pulse × 3 colors
+        // For 16-bit width: 16 bytes per color × 3 colors = 48 bytes
+        bytes_per_led_ring = 48;
     } else {
-        bytes_per_led_ring = 30;  // Fallback (should never happen)
+        bytes_per_led_ring = 24;  // Fallback
     }
 
     size_t ring_buffer_capacity = ring_buffer_led_count * bytes_per_led_ring;
@@ -1482,22 +1428,15 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         mState.ring_buffer_sizes.push_back(0); // Will be set during generation
     }
 
-    // Step 9: Allocate waveform expansion buffer (avoids heap_caps_malloc in
-    // IRAM) Calculate buffer size: 16 lanes (max) × 8 bits × 16 pulses (max) =
-    // 2048 bytes CRITICAL REQUIREMENTS:
-    // 1. MUST be heap-allocated (NOT stack) - used in ISR context and may be
-    // large (up to 2KB)
-    // 2. Does NOT need to be DMA-capable - only used temporarily for waveform
-    // expansion
-    //    in the ISR, not directly accessed by DMA hardware
-    // 3. buffer_a and buffer_b (allocated above) MUST be DMA-capable for
-    // PARLIO/GDMA hardware
-    // 4. This buffer is managed by mState and freed in the destructor - never
-    // free the
-    //    temporary pointer (laneWaveforms) that points to this buffer in
-    //    transposeAndQueueNextChunk()
-    const size_t max_pulses_per_bit = 16;
-    const size_t bytes_per_lane = 8 * max_pulses_per_bit; // 128 bytes per lane
+    // Step 9: Allocate waveform expansion buffer for wave8 output
+    // wave8 produces Wave8Byte (8 bytes) for each input byte
+    // Buffer size: 16 lanes (max) × 8 bytes per lane = 128 bytes
+    // CRITICAL REQUIREMENTS:
+    // 1. MUST be heap-allocated (NOT stack) - used in ISR context
+    // 2. Does NOT need to be DMA-capable - only used temporarily for waveform expansion
+    // 3. buffer_a and buffer_b (allocated above) MUST be DMA-capable for PARLIO/GDMA hardware
+    // 4. This buffer is managed by mState and freed in the destructor
+    const size_t bytes_per_lane = sizeof(Wave8Byte);  // 8 bytes per input byte
     const size_t waveform_buffer_size = mState.data_width * bytes_per_lane;
 
     mState.waveform_expansion_buffer.reset(static_cast<uint8_t *>(

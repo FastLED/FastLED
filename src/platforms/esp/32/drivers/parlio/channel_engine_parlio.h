@@ -161,7 +161,8 @@
 
 #include "fl/channels/channel_data.h"
 #include "fl/channels/channel_engine.h"
-#include "fl/channels/waveform_generator.h"
+#include "fl/channels/wave8.h"
+#include "fl/chipsets/led_timing.h"
 #include "fl/engine_events.h"
 #include "ftl/array.h"
 #include "ftl/deque.h"
@@ -509,17 +510,8 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
             scratch_padded_buffer; ///< Contiguous buffer for actual channels
                                    ///< only (regular heap, non-DMA)
 
-        // Precomputed waveforms (generated from timing parameters during
-        // initialization)
-        fl::array<uint8_t, 16>
-            bit0_waveform; ///< Waveform pattern for bit 0 (up to 16 pulses)
-        fl::array<uint8_t, 16>
-            bit1_waveform;     ///< Waveform pattern for bit 1 (up to 16 pulses)
-        size_t pulses_per_bit; ///< Number of pulses per bit (varies by clock
-                               ///< frequency)
-
-        // Nibble lookup table optimization (Phase 9)
-        fl::NibbleLookupTable nibble_lut; ///< Precomputed waveforms for all 16 nibble values
+        // Wave8 lookup table (replaces old waveform generation)
+        fl::Wave8BitExpansionLut wave8_lut; ///< Precomputed waveforms for all 16 nibble values (8:1 expansion)
 
         // Pre-allocated waveform expansion buffer (avoids heap alloc in IRAM)
         // CRITICAL: This buffer is heap-allocated (MALLOC_CAP_INTERNAL) but
@@ -546,7 +538,6 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
               current_led(0), total_leds(0), leds_per_chunk(0),
               stream_complete(false), error_occurred(false),
               chunk_total_bytes(0), chunk_current_index(0), chunk_total_count(0), chunk_buffer_ptr(nullptr),
-              pulses_per_bit(0),
               waveform_expansion_buffer(nullptr),
               waveform_expansion_buffer_size(0) {}
     };

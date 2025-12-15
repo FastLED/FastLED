@@ -73,24 +73,25 @@ FL_OPTIMIZE_FUNCTION_O3
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     Wave8BitExpansionLut lut;
 
-    // Step 1: Calculate absolute times (avoids accumulation errors)
-    const uint32_t t1_absolute = timing.T1;             // When bit 0 goes LOW
-    const uint32_t t2_absolute = timing.T1 + timing.T2; // When bit 1 goes LOW
-    const uint32_t t3_absolute =
-        timing.T1 + timing.T2 + timing.T3; // Period time
+    // Step 1: Calculate absolute times from ChipsetTiming format
+    // ChipsetTiming.T1 = T0H (high time for bit 0)
+    // ChipsetTiming.T2 = T1H - T0H (ADDITIONAL high time for bit 1)
+    // ChipsetTiming.T3 = T0L (low tail duration)
+    const uint32_t t0h = timing.T1;                     // T0H: bit 0 goes LOW here
+    const uint32_t t1h = timing.T1 + timing.T2;          // T1H: bit 1 goes LOW here
+    const uint32_t period = timing.T1 + timing.T2 + timing.T3; // Total period
 
     // Step 2: Normalize absolute times
-    const float t1_norm = static_cast<float>(t1_absolute) / t3_absolute;
-    const float t2_norm = static_cast<float>(t2_absolute) / t3_absolute;
+    const float t0h_norm = static_cast<float>(t0h) / period;
+    const float t1h_norm = static_cast<float>(t1h) / period;
 
     // Step 3: Convert to pulse counts (fixed 8 pulses per bit)
-    // pulses_bit0: number of HIGH pulses for bit 0 (before it goes LOW at
-    // t1_absolute) pulses_bit1: number of HIGH pulses for bit 1 (before it goes
-    // LOW at t2_absolute)
+    // pulses_bit0: number of HIGH pulses for bit 0 (before it goes LOW at t0h)
+    // pulses_bit1: number of HIGH pulses for bit 1 (before it goes LOW at t1h)
     uint32_t pulses_bit0 =
-        static_cast<uint32_t>(t1_norm * 8.0f + 0.5f); // round
+        static_cast<uint32_t>(t0h_norm * 8.0f + 0.5f); // round
     uint32_t pulses_bit1 =
-        static_cast<uint32_t>(t2_norm * 8.0f + 0.5f); // round
+        static_cast<uint32_t>(t1h_norm * 8.0f + 0.5f); // round
 
     // Clamp to valid range [0, 8]
     if (pulses_bit0 > 8)
