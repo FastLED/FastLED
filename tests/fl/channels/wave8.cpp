@@ -28,36 +28,20 @@ TEST_CASE("buildWave8ExpansionLUT") {
     const uint8_t nibble = 0xA;
 
     // Check bit 3 (MSB, value=1) -> should use bit1 waveform (6 HIGH, 2 LOW)
-    for (int i = 0; i < 6; i++) {
-        REQUIRE(lut.lut[nibble][0].data[i] == 0xFF);
-    }
-    for (int i = 6; i < 8; i++) {
-        REQUIRE(lut.lut[nibble][0].data[i] == 0x00);
-    }
+    // Expected: 0b11111100 = 0xFC
+    REQUIRE(lut.lut[nibble][0].data == 0xFC);
 
     // Check bit 2 (value=0) -> should use bit0 waveform (2 HIGH, 6 LOW)
-    for (int i = 0; i < 2; i++) {
-        REQUIRE(lut.lut[nibble][1].data[i] == 0xFF);
-    }
-    for (int i = 2; i < 8; i++) {
-        REQUIRE(lut.lut[nibble][1].data[i] == 0x00);
-    }
+    // Expected: 0b11000000 = 0xC0
+    REQUIRE(lut.lut[nibble][1].data == 0xC0);
 
     // Check bit 1 (value=1) -> should use bit1 waveform (6 HIGH, 2 LOW)
-    for (int i = 0; i < 6; i++) {
-        REQUIRE(lut.lut[nibble][2].data[i] == 0xFF);
-    }
-    for (int i = 6; i < 8; i++) {
-        REQUIRE(lut.lut[nibble][2].data[i] == 0x00);
-    }
+    // Expected: 0b11111100 = 0xFC
+    REQUIRE(lut.lut[nibble][2].data == 0xFC);
 
     // Check bit 0 (LSB, value=0) -> should use bit0 waveform (2 HIGH, 6 LOW)
-    for (int i = 0; i < 2; i++) {
-        REQUIRE(lut.lut[nibble][3].data[i] == 0xFF);
-    }
-    for (int i = 2; i < 8; i++) {
-        REQUIRE(lut.lut[nibble][3].data[i] == 0x00);
-    }
+    // Expected: 0b11000000 = 0xC0
+    REQUIRE(lut.lut[nibble][3].data == 0xC0);
 }
 
 TEST_CASE("convertToWave8Bit") {
@@ -74,20 +58,18 @@ TEST_CASE("convertToWave8Bit") {
     // lane0: 0xff (all bits are 1) = high nibble 0xF, low nibble 0xF
     // lane1: 0x00 (all bits are 0) = high nibble 0x0, low nibble 0x0
     uint8_t lanes[2] = {0xff, 0x00};
-    uint8_t output[2 * sizeof(Wave8Byte)]; // 128 bytes
+    uint8_t output[2 * sizeof(Wave8Byte)]; // 16 bytes
 
     waveTranspose8_2(lanes, lut, output);
 
     // Test transposed output
-    // Expected: 0xAA (0b10101010) for all 128 bytes
-    // - lane0 has all 1s (0xff) → all 64 pulse bytes have all bits set
-    // (11111111)
-    // - lane1 has all 0s (0x00) → all 64 pulse bytes have all bits clear
-    // (00000000)
+    // Expected: 0xAA (0b10101010) for all 16 bytes
+    // - lane0 has all 1s (0xff) → all 8 symbols have all bits set (11111111)
+    // - lane1 has all 0s (0x00) → all 8 symbols have all bits clear (00000000)
     // - Bit interleaving: [lane0_bit, lane1_bit, lane0_bit, lane1_bit, ...]
     // - Result: 0b10101010 = 0xAA for every output byte
 
-    for (int i = 0; i < 128; i++) {
+    for (int i = 0; i < 16; i++) {
         REQUIRE(output[i] == 0xAA);
     }
 }

@@ -23,51 +23,29 @@ constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
         (out_16) |= (uint16_t)(_even | _odd);                                  \
     } while (0)
 
-// ============================================================================
-// Simplified waveTranspose8_2 (fixed 8:1 expansion, LUT-based, no branching)
-// ============================================================================
-
-/// @brief Transpose two 64-byte pulse arrays into 128-byte bit-interleaved
-/// output
-///
-/// This helper function performs bit-level interleaving of two pulse arrays
-/// for 2-lane parallel transmission to DMA/GPIO.
-///
-/// Each lane has 64 pulse bytes. For each pair of pulse bytes (one from each
-/// lane), we extract all 8 bits and interleave them to produce 2 output bytes
-/// (16 bits total). Pattern per output byte: [lane0_bit, lane1_bit, lane0_bit,
-/// lane1_bit, ...] = 0xAA when lanes differ
-///
-/// @param lane_waves Array of 2 lane waveforms (64 bytes each)
-/// @param output Output buffer (128 bytes = 64 positions × 2 bytes each)
 static FL_IRAM void
 transpose_wave_symbols8_2(const Wave8Byte lane_waves[2],
                           uint8_t output[2 * sizeof(Wave8Byte)]) {
-    // Get pointers to byte arrays for easier indexing (64 bytes per lane)
-    const uint8_t *lane0 = &lane_waves[0].symbols[0].data[0];
-    const uint8_t *lane1 = &lane_waves[1].symbols[0].data[0];
-
-    // For each of 64 pulse byte positions, interleave bits from both lanes
-    // using LUT-based spread
-    for (int i = 0; i < 64; i++) {
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         uint16_t interleaved = 0;
-        SPREAD8_TO_16(lane0[i], lane1[i], interleaved);
+        SPREAD8_TO_16(lane_waves[0].symbols[symbol_idx].data,
+                      lane_waves[1].symbols[symbol_idx].data,
+                      interleaved);
 
-        // Write interleaved 16-bit result as two bytes (little-endian)
-        output[i * 2] = (uint8_t)(interleaved >> 8);
-        output[i * 2 + 1] = (uint8_t)(interleaved & 0xFF);
+        output[symbol_idx * 2] = (uint8_t)(interleaved >> 8);
+        output[symbol_idx * 2 + 1] = (uint8_t)(interleaved & 0xFF);
     }
 }
 
 /// @brief Convert a byte to 8 Wave8Bit structures using nibble LUT
 ///
-/// Expands a byte (8 bits) into 8 Wave8Bit structures (64 bytes total)
+/// Expands a byte (8 bits) into 8 Wave8Bit structures (8 bytes total)
 /// by looking up the high and low nibbles in the pre-computed LUT.
-/// Each nibble lookup returns 4 Wave8Bit structures.
+/// Each nibble lookup returns 4 Wave8Bit structures (4 bytes).
 ///
 /// @param byte_value The byte to expand (0-255)
 /// @param lut Pre-computed nibble expansion lookup table
-/// @param output Output array for 8 Wave8Bit structures (64 bytes total)
+/// @param output Output array for 8 Wave8Bit structures (8 bytes total)
 static FL_IRAM void
 convertByteToWave8Byte(uint8_t byte_value,
                                const Wave8BitExpansionLut &lut,
@@ -92,13 +70,13 @@ FL_IRAM void wave8(
     uint8_t lane,
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
-    // Convert single lane byte to wave pulse symbols (64 bytes)
+    // Convert single lane byte to wave pulse symbols (8 bytes packed)
     // Use properly aligned local variable to avoid alignment issues
     Wave8Byte waveformSymbol;
     convertByteToWave8Byte(lane, lut, &waveformSymbol);
 
-    // Copy to output array byte-by-byte
-    const uint8_t* src = &waveformSymbol.symbols[0].data[0];
+    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
+    const uint8_t* src = &waveformSymbol.symbols[0].data;
     for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
         output[i] = src[i];
     }
@@ -110,16 +88,16 @@ FL_IRAM void waveTranspose8_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 per lane × 2
-    // lanes) Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7,
-    // Lane1_bit6, ..., Lane1_bit0]
+    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
+    // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
+    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
     Wave8Byte laneWaveformSymbols[2];
 
-    // Convert each lane byte to wave pulse symbols
+    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
     convertByteToWave8Byte(lanes[0], lut, &laneWaveformSymbols[0]);
     convertByteToWave8Byte(lanes[1], lut, &laneWaveformSymbols[1]);
 
-    // Transpose waveforms to DMA format (write to waveSymbols as byte array)
+    // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
     transpose_wave_symbols8_2(laneWaveformSymbols, output);
 }
 
@@ -155,26 +133,19 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     if (pulses_bit1 > 8)
         pulses_bit1 = 8;
 
-    // Step 4: Generate bit0 and bit1 waveforms (8 bytes each)
-    uint8_t bit0_waveform[8];
-    uint8_t bit1_waveform[8];
+    // Step 4: Generate bit0 and bit1 waveforms (1 byte each, packed format)
+    // Each bit represents one pulse (MSB = first pulse)
+    uint8_t bit0_waveform = 0;
+    uint8_t bit1_waveform = 0;
 
-    // Bit 0: HIGH for pulses_bit0, LOW for remaining pulses
-    uint32_t idx = 0;
+    // Bit 0: Set MSB bits for HIGH pulses
     for (uint32_t i = 0; i < pulses_bit0; i++) {
-        bit0_waveform[idx++] = 0xFF;
-    }
-    for (uint32_t i = pulses_bit0; i < 8; i++) {
-        bit0_waveform[idx++] = 0x00;
+        bit0_waveform |= (0x80 >> i);  // Set bit from MSB
     }
 
-    // Bit 1: HIGH for pulses_bit1, LOW for remaining pulses
-    idx = 0;
+    // Bit 1: Set MSB bits for HIGH pulses
     for (uint32_t i = 0; i < pulses_bit1; i++) {
-        bit1_waveform[idx++] = 0xFF;
-    }
-    for (uint32_t i = pulses_bit1; i < 8; i++) {
-        bit1_waveform[idx++] = 0x00;
+        bit1_waveform |= (0x80 >> i);  // Set bit from MSB
     }
 
     // Step 5: Build LUT for all 16 nibbles
@@ -183,13 +154,10 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
         for (int bit_pos = 3; bit_pos >= 0; bit_pos--) {
             // Extract bit (MSB first: bit 3, 2, 1, 0)
             const bool bit_set = (nibble >> bit_pos) & 1;
-            const uint8_t *waveform = bit_set ? bit1_waveform : bit0_waveform;
+            const uint8_t waveform = bit_set ? bit1_waveform : bit0_waveform;
 
-            // Copy waveform to LUT entry
-            for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
-                lut.lut[nibble][3 - bit_pos].data[byte_idx] =
-                    waveform[byte_idx];
-            }
+            // Store packed waveform to LUT entry
+            lut.lut[nibble][3 - bit_pos].data = waveform;
         }
     }
 
