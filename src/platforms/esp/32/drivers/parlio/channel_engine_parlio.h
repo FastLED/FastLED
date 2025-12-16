@@ -315,7 +315,7 @@ inline size_t calculateChunkSize(size_t data_width) {
 // - Memory barrier ensures all ISR writes visible before reading other fields
 // - Non-volatile fields (isr_count, etc.) read after barrier are guaranteed
 // consistent
-alignas(64) struct ParlioIsrContext {
+struct alignas(64) ParlioIsrContext {
     // === Volatile Fields (shared between ISR and main thread) ===
     // These fields are written by ISR, read by main thread
     // Marked volatile to prevent compiler optimizations that would cache values
@@ -327,12 +327,13 @@ alignas(64) struct ParlioIsrContext {
     volatile size_t mCurrentByte; ///< ISR updates byte position marker (ISR
                                   ///< writes, main reads)
 
-    // Phase 0: Ring buffer pointers for streaming DMA
-    // ISR reads from read_ptr, CPU writes to write_ptr
-    // Communication protocol: ISR increments read_ptr after consuming buffer
+    // Ring buffer indices for streaming DMA (0-2 only, modulo-3 arithmetic)
+    // ISR reads from read_idx, CPU writes to write_idx
+    // Communication protocol: ISR increments read_idx after consuming buffer
     // (signals CPU)
-    volatile size_t mRingReadPtr; ///< ISR reads from this index (ISR writes, main reads)
-    volatile size_t mRingWritePtr; ///< CPU writes to this index (main writes, ISR reads)
+    volatile size_t mRingReadIdx; ///< ISR reads from this index (0, 1, or 2)
+    volatile size_t mRingWriteIdx; ///< CPU writes to this index (0, 1, or 2)
+    volatile size_t mRingCount; ///< Number of buffers currently in ring (0-3) - distinguishes full vs empty
     volatile bool mRingError; ///< Ring underflow/overflow error flag (ISR
                               ///< writes, main reads)
 
@@ -345,22 +346,12 @@ alignas(64) struct ParlioIsrContext {
                         ///< race)
     size_t mNumLanes;   ///< Number of parallel lanes (main sets, ISR reads -
                         ///< Phase 5: moved from ParlioState)
-    size_t mRingSize;   ///< Number of buffers in ring (main sets, ISR reads -
-                        ///< Phase 0)
 
     // Diagnostic counters (ISR writes, main reads after barrier)
     // Note: Using simple increment operations, synchronized via memory barrier
     uint32_t mIsrCount;         ///< ISR callback invocation count
     uint32_t mBytesTransmitted; ///< Total bytes transmitted this frame
     uint32_t mChunksCompleted;  ///< Number of chunks completed this frame
-
-    // Phase 0: Buffer accounting for simplified ISR
-    uint32_t mBuffersSubmitted; ///< Total buffers submitted to hardware (main
-                                ///< thread writes)
-    volatile uint32_t mBuffersCompleted; ///< ISR increments, CPU polls (volatile required per
-                                         ///< LOOP.md line 34)
-    uint32_t mBuffersTotal; ///< Total buffers for entire transmission (main
-                            ///< thread sets)
 
     // Diagnostic fields (written by ISR, read by main thread after barrier)
     bool mTransmissionActive; ///< Debug: Transmission currently active
@@ -369,11 +360,10 @@ alignas(64) struct ParlioIsrContext {
     // Constructor: Initialize all fields to safe defaults
     ParlioIsrContext()
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
-          mRingReadPtr(0), mRingWritePtr(0), mRingError(false),
-          mTotalBytes(0), mNumLanes(0), mRingSize(0), mIsrCount(0),
-          mBytesTransmitted(0), mChunksCompleted(0), mBuffersSubmitted(0),
-          mBuffersCompleted(0), mBuffersTotal(0), mTransmissionActive(false),
-          mEndTimeUs(0) {
+          mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
+          mTotalBytes(0), mNumLanes(0), mIsrCount(0),
+          mBytesTransmitted(0), mChunksCompleted(0),
+          mTransmissionActive(false), mEndTimeUs(0) {
     }
 
     // Singleton accessor for debug metrics
@@ -401,15 +391,9 @@ alignas(64) struct ParlioIsrContext {
 //   - 8-lane: 240 bytes → 8 LEDs (30 bytes each)
 //   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
 //
-// Testing configuration: 8 larger buffers
-//   Each buffer: ~125 LEDs × 30 bytes/LED = ~3750 bytes (~3.7 KB)
-//   Total ring: 8 × 3750 bytes = ~30 KB
-// OLD (ITERATION 12b): 8 buffers - resulted in 94.8% capture (gap at buffer 7.6)
-// constexpr size_t PARLIO_RING_BUFFER_COUNT = 8;
-
-// NEW (ITERATION 13): Testing 3 buffers (fewer gaps to minimize RX termination)
-// 3 buffers × 1000 input bytes = 3000 total (max safe: 1023 bytes per buffer × 8 expansion = 8184 bytes < 8191 limit)
-// Hypothesis: Fewer buffer transitions = fewer opportunities for >819μs hardware gap
+// Ring buffer configuration: 3 buffers for optimal streaming
+// - Each buffer: up to 1000 input bytes (~8KB after expansion)
+// - Fewer buffers = fewer transitions = reduced gap opportunities
 constexpr size_t PARLIO_RING_BUFFER_COUNT = 3;
 
 /// @brief Internal PARLIO implementation with fixed data width
@@ -491,12 +475,9 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         size_t mRingBufferCapacity; ///< Maximum size of each ring buffer in bytes
 
         // Ring buffer population state (for incremental buffer generation)
-        size_t mNextBufferToPopulate; ///< Ring index for next buffer to fill
-                                      ///< (0 to buffers_total-1)
+        size_t mNextPopulateIdx; ///< Next ring buffer index to populate (0, 1, or 2)
         size_t mNextByteOffset;  ///< Source byte offset for next buffer to
                                  ///< populate
-        size_t mBuffersPopulated; ///< Total buffers populated so far (0 to
-                                  ///< buffers_total)
 
         // Streaming state
         volatile size_t mNumLanes; ///< Number of parallel lanes (same as data_width)
