@@ -259,28 +259,28 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     }
 
     // Clean up PARLIO TX unit resources
-    if (mState.tx_unit != nullptr) {
+    if (mState.mTxUnit != nullptr) {
         // Wait for any pending transmissions (with timeout)
         esp_err_t err =
-            parlio_tx_unit_wait_all_done(mState.tx_unit, pdMS_TO_TICKS(1000));
+            parlio_tx_unit_wait_all_done(mState.mTxUnit, pdMS_TO_TICKS(1000));
         if (err != ESP_OK) {
             FL_WARN("PARLIO: Wait for transmission timeout during cleanup: "
                     << err);
         }
 
         // Disable TX unit
-        err = parlio_tx_unit_disable(mState.tx_unit);
+        err = parlio_tx_unit_disable(mState.mTxUnit);
         if (err != ESP_OK) {
             FL_WARN("PARLIO: Failed to disable TX unit: " << err);
         }
 
         // Delete TX unit
-        err = parlio_del_tx_unit(mState.tx_unit);
+        err = parlio_del_tx_unit(mState.mTxUnit);
         if (err != ESP_OK) {
             FL_WARN("PARLIO: Failed to delete TX unit: " << err);
         }
 
-        mState.tx_unit = nullptr;
+        mState.mTxUnit = nullptr;
     }
 
     // DMA buffers and waveform expansion buffer are automatically freed
@@ -294,16 +294,16 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     }
 
     // Clear state
-    mState.pins.clear();
-    mState.scratch_padded_buffer.clear();
-    mState.num_lanes = 0;
-    mState.lane_stride = 0;
+    mState.mPins.clear();
+    mState.mScratchPaddedBuffer.clear();
+    mState.mNumLanes = 0;
+    mState.mLaneStride = 0;
     // Phase 4: Clear IsrContext state (if allocated)
     if (mState.mIsrContext) {
-        mState.mIsrContext->transmitting = false;
-        mState.mIsrContext->stream_complete = false;
+        mState.mIsrContext->mTransmitting = false;
+        mState.mIsrContext->mStreamComplete = false;
     }
-    mState.error_occurred = false;
+    mState.mErrorOccurred = false;
 }
 
 //=============================================================================
@@ -342,35 +342,35 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     // Step 1: Increment completion counter (signals CPU that one buffer
     // finished)
-    ctx->buffers_completed++;
-    ctx->isr_count++;
+    ctx->mBuffersCompleted++;
+    ctx->mIsrCount++;
 
     // Step 2: Check if all buffers have been submitted - mark transmission
     // complete
-    if (ctx->buffers_completed >= ctx->buffers_total) {
-        ctx->stream_complete = true;
-        ctx->transmitting = false;
+    if (ctx->mBuffersCompleted >= ctx->mBuffersTotal) {
+        ctx->mStreamComplete = true;
+        ctx->mTransmitting = false;
         return false; // No high-priority task woken
     }
 
     // More buffers need to be submitted - check if next buffer is ready
-    volatile size_t read_ptr = ctx->ring_read_ptr;
-    volatile size_t write_ptr = ctx->ring_write_ptr;
+    volatile size_t read_ptr = ctx->mRingReadPtr;
+    volatile size_t write_ptr = ctx->mRingWritePtr;
 
     // Ring underflow - CPU didn't generate buffer fast enough
     if (read_ptr == write_ptr) {
-        ctx->ring_error = true;
+        ctx->mRingError = true;
         return false;
     }
 
     // Next buffer is ready - submit it to hardware
-    size_t buffer_idx = read_ptr % ctx->ring_size;
-    uint8_t *buffer_ptr = self->mState.ring_buffers[buffer_idx].get();
-    size_t buffer_size = self->mState.ring_buffer_sizes[buffer_idx];
+    size_t buffer_idx = read_ptr % ctx->mRingSize;
+    uint8_t *buffer_ptr = self->mState.mRingBuffers[buffer_idx].get();
+    size_t buffer_size = self->mState.mRingBufferSizes[buffer_idx];
 
     // Invalid buffer - set error flag
     if (!buffer_ptr || buffer_size == 0) {
-        ctx->ring_error = true;
+        ctx->mRingError = true;
         return false;
     }
 
@@ -390,10 +390,10 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     if (err == ESP_OK) {
         // Successfully submitted - increment read pointer
-        ctx->ring_read_ptr++;
+        ctx->mRingReadPtr++;
     } else {
         // Submission failed - set error flag for CPU to detect
-        ctx->ring_error = true;
+        ctx->mRingError = true;
     }
 
     return false; // No high-priority task woken
@@ -423,7 +423,7 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
     // Staging buffer for wave8 output before transposition
     // Holds wave8bytes for all lanes (data_width × 8 bytes)
     // Each lane produces Wave8Byte (8 bytes) for each input byte
-    uint8_t* laneWaveforms = mState.waveform_expansion_buffer.get();
+    uint8_t* laneWaveforms = mState.mWaveformExpansionBuffer.get();
     constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
 
     size_t outputIdx = 0;
@@ -438,11 +438,11 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
         // BUG (ITERATION 14): Must match transpose_wave8byte_parlio output size!
         // NEW (ITERATION 14): Calculate based on transpose logic
         size_t blockSize;
-        if (mState.data_width <= 8) {
-            size_t ticksPerByte = 8 / mState.data_width;
+        if (mState.mDataWidth <= 8) {
+            size_t ticksPerByte = 8 / mState.mDataWidth;
             size_t pulsesPerByte = 64;
             blockSize = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-        } else if (mState.data_width == 16) {
+        } else if (mState.mDataWidth == 16) {
             blockSize = 128;  // 64 pulses × 2 bytes per pulse
         } else {
             blockSize = 8;  // Fallback
@@ -458,19 +458,19 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
         // ═══════════════════════════════════════════════════════════════
         // STAGE 1: Generate wave8bytes for ALL lanes into staging buffer
         // ═══════════════════════════════════════════════════════════════
-        for (size_t lane = 0; lane < mState.data_width; lane++) {
+        for (size_t lane = 0; lane < mState.mDataWidth; lane++) {
             uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
 
-            if (lane < mState.actual_channels) {
+            if (lane < mState.mActualChannels) {
                 // Real channel - expand using wave8
-                const uint8_t* laneData = mState.scratch_padded_buffer.data() +
-                                          (lane * mState.lane_stride);
+                const uint8_t* laneData = mState.mScratchPaddedBuffer.data() +
+                                          (lane * mState.mLaneStride);
                 uint8_t byte = laneData[startByte + byteOffset];
 
                 // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
                 // Cast pointer to array reference for wave8 API
                 uint8_t (*wave8Array)[8] = reinterpret_cast<uint8_t (*)[8]>(laneWaveform);
-                fl::wave8(byte, mState.wave8_lut, *wave8Array);
+                fl::wave8(byte, mState.mWave8Lut, *wave8Array);
             } else {
                 // Dummy lane - zero waveform (keeps GPIO LOW, 0x00 bytes)
                 fl::memset(laneWaveform, 0x00, bytes_per_lane);
@@ -484,7 +484,7 @@ bool ChannelEnginePARLIOImpl::populateDmaBuffer(uint8_t* outputBuffer,
         // into bit-packed format for PARLIO hardware transmission
         size_t bytesWritten = fl::transpose_wave8byte_parlio(
             laneWaveforms,        // Input: staging buffer (all lanes' wave8bytes)
-            mState.data_width,    // Number of lanes (1-16)
+            mState.mDataWidth,    // Number of lanes (1-16)
             outputBuffer + outputIdx);  // Output: DMA buffer
 
         outputIdx += bytesWritten;
@@ -505,8 +505,8 @@ bool ChannelEnginePARLIOImpl::has_ring_space() const {
     }
 
     // Calculate how many buffers are currently in the ring (filled but not consumed)
-    volatile size_t write_ptr = mState.mIsrContext->ring_write_ptr;
-    volatile size_t read_ptr = mState.mIsrContext->ring_read_ptr;
+    volatile size_t write_ptr = mState.mIsrContext->mRingWritePtr;
+    volatile size_t read_ptr = mState.mIsrContext->mRingReadPtr;
     size_t filled = write_ptr - read_ptr;
 
     // Ring has space if filled count is less than total ring size
@@ -519,30 +519,30 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer() {
     // Buffers remain allocated, only POPULATED on-demand during transmission
 
     // Clear any existing ring buffers
-    mState.ring_buffers.clear();
-    mState.ring_buffer_sizes.clear();
+    mState.mRingBuffers.clear();
+    mState.mRingBufferSizes.clear();
 
     // Allocate all ring buffers with DMA capability
     for (size_t i = 0; i < PARLIO_RING_BUFFER_COUNT; i++) {
         fl::unique_ptr<uint8_t[], HeapCapsDeleter> buffer(
             static_cast<uint8_t *>(heap_caps_malloc(
-                mState.ring_buffer_capacity, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
+                mState.mRingBufferCapacity, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
 
         if (!buffer) {
             FL_WARN("PARLIO: Failed to allocate ring buffer "
                     << i << "/" << PARLIO_RING_BUFFER_COUNT << " (requested "
-                    << mState.ring_buffer_capacity << " bytes)");
+                    << mState.mRingBufferCapacity << " bytes)");
             // Clean up already allocated ring buffers (automatic via unique_ptr destructors)
-            mState.ring_buffers.clear();
-            mState.ring_buffer_sizes.clear();
+            mState.mRingBuffers.clear();
+            mState.mRingBufferSizes.clear();
             return false;
         }
 
         // Zero-initialize buffer to prevent garbage data
-        fl::memset(buffer.get(), 0x00, mState.ring_buffer_capacity);
+        fl::memset(buffer.get(), 0x00, mState.mRingBufferCapacity);
 
-        mState.ring_buffers.push_back(fl::move(buffer));
-        mState.ring_buffer_sizes.push_back(0); // Will be set during population
+        mState.mRingBuffers.push_back(fl::move(buffer));
+        mState.mRingBufferSizes.push_back(0); // Will be set during population
     }
 
     return true;
@@ -557,56 +557,56 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     }
 
     // Check if we've populated all buffers
-    if (mState.buffers_populated >= mState.mIsrContext->buffers_total) {
+    if (mState.mBuffersPopulated >= mState.mIsrContext->mBuffersTotal) {
         return false; // All done
     }
 
     // Check if more data to process
-    if (mState.next_byte_offset >= mState.mIsrContext->total_bytes) {
+    if (mState.mNextByteOffset >= mState.mIsrContext->mTotalBytes) {
         return false; // No more source data
     }
 
     // Calculate ring buffer index (wraps around)
-    size_t ring_index = mState.next_buffer_to_populate % PARLIO_RING_BUFFER_COUNT;
+    size_t ring_index = mState.mNextBufferToPopulate % PARLIO_RING_BUFFER_COUNT;
 
     // Get ring buffer pointer
-    uint8_t *outputBuffer = mState.ring_buffers[ring_index].get();
+    uint8_t *outputBuffer = mState.mRingBuffers[ring_index].get();
     if (!outputBuffer) {
         FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
-        mState.error_occurred = true;
+        mState.mErrorOccurred = true;
         return false;
     }
 
     // Calculate byte range for this buffer
-    size_t bytes_remaining = mState.mIsrContext->total_bytes - mState.next_byte_offset;
-    size_t bytes_per_buffer = (mState.mIsrContext->total_bytes + mState.mIsrContext->buffers_total - 1) / mState.mIsrContext->buffers_total;
+    size_t bytes_remaining = mState.mIsrContext->mTotalBytes - mState.mNextByteOffset;
+    size_t bytes_per_buffer = (mState.mIsrContext->mTotalBytes + mState.mIsrContext->mBuffersTotal - 1) / mState.mIsrContext->mBuffersTotal;
     size_t byte_count = (bytes_remaining < bytes_per_buffer) ? bytes_remaining : bytes_per_buffer;
 
     // Zero output buffer to prevent garbage data from previous use
-    fl::memset(outputBuffer, 0x00, mState.ring_buffer_capacity);
+    fl::memset(outputBuffer, 0x00, mState.mRingBufferCapacity);
 
     // Generate waveform data using helper function
     size_t outputBytesWritten = 0;
-    if (!populateDmaBuffer(outputBuffer, mState.ring_buffer_capacity,
-                          mState.next_byte_offset, byte_count, outputBytesWritten)) {
+    if (!populateDmaBuffer(outputBuffer, mState.mRingBufferCapacity,
+                          mState.mNextByteOffset, byte_count, outputBytesWritten)) {
         FL_WARN("PARLIO: Ring buffer overflow at ring_index=" << ring_index);
-        mState.error_occurred = true;
+        mState.mErrorOccurred = true;
         return false;
     }
 
     // Store actual size of this buffer
-    mState.ring_buffer_sizes[ring_index] = outputBytesWritten;
+    mState.mRingBufferSizes[ring_index] = outputBytesWritten;
 
     // Update state for next buffer
-    mState.next_byte_offset += byte_count;
-    mState.next_buffer_to_populate++;
-    mState.buffers_populated++;
+    mState.mNextByteOffset += byte_count;
+    mState.mNextBufferToPopulate++;
+    mState.mBuffersPopulated++;
 
     // Signal ISR that buffer is ready (increment write pointer)
-    mState.mIsrContext->ring_write_ptr++;
+    mState.mIsrContext->mRingWritePtr++;
 
     // Return true if more buffers need to be populated
-    return mState.buffers_populated < mState.mIsrContext->buffers_total;
+    return mState.mBuffersPopulated < mState.mIsrContext->mBuffersTotal;
 }
 
 //=============================================================================
@@ -633,22 +633,22 @@ void ChannelEnginePARLIOImpl::show() {
 
 IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
     // If not initialized, we're ready (no hardware to poll)
-    if (!mInitialized || mState.tx_unit == nullptr || !mState.mIsrContext) {
+    if (!mInitialized || mState.mTxUnit == nullptr || !mState.mIsrContext) {
         return EngineState::READY;
     }
 
     // Check for ISR-reported errors
-    if (mState.error_occurred) {
+    if (mState.mErrorOccurred) {
         FL_WARN("PARLIO: Error occurred during streaming transmission");
-        mState.mIsrContext->transmitting = false;
-        mState.error_occurred = false;
+        mState.mIsrContext->mTransmitting = false;
+        mState.mErrorOccurred = false;
         return EngineState::ERROR;
     }
 
     // Phase 4: Check if streaming is complete (volatile read, no barrier yet)
     // Read stream_complete first (volatile field ensures fresh read from
     // memory)
-    if (mState.mIsrContext->stream_complete) {
+    if (mState.mIsrContext->mStreamComplete) {
         // Execute memory barrier to synchronize all ISR writes
         // This ensures all non-volatile ISR data (isr_count, bytes_transmitted,
         // etc.) is visible
@@ -658,11 +658,11 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
         // assignment) This prevents race condition where new transmission could
         // start during cleanup Previous code cleared flags AFTER cleanup,
         // allowing state corruption
-        mState.mIsrContext->transmitting = false;
-        mState.mIsrContext->stream_complete = false;
+        mState.mIsrContext->mTransmitting = false;
+        mState.mIsrContext->mStreamComplete = false;
 
         // Wait for final chunk to complete
-        esp_err_t err = parlio_tx_unit_wait_all_done(mState.tx_unit, 0);
+        esp_err_t err = parlio_tx_unit_wait_all_done(mState.mTxUnit, 0);
 
         if (err == ESP_OK) {
             // FIX C5-1 PARTIAL REVERT: GPIO reset loop IS needed (Iteration 21
@@ -673,15 +673,15 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
             // prevents glitches)
 
             // Disable PARLIO to reset peripheral state
-            err = parlio_tx_unit_disable(mState.tx_unit);
+            err = parlio_tx_unit_disable(mState.mTxUnit);
             if (err != ESP_OK) {
                 FL_WARN("PARLIO: Failed to disable TX unit after transmission: "
                         << err);
             }
 
             // Force all GPIO pins to LOW state
-            for (size_t i = 0; i < mState.actual_channels; i++) {
-                int pin = mState.pins[i];
+            for (size_t i = 0; i < mState.mActualChannels; i++) {
+                int pin = mState.mPins[i];
                 if (pin >= 0) {
                     gpio_set_level(static_cast<gpio_num_t>(pin), 0);
                 }
@@ -692,7 +692,7 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
             fl::delayMicros(100);
 
             // Re-enable PARLIO for next transmission
-            err = parlio_tx_unit_enable(mState.tx_unit);
+            err = parlio_tx_unit_enable(mState.mTxUnit);
             if (err != ESP_OK) {
                 FL_WARN("PARLIO: Failed to re-enable TX unit: " << err);
                 // Flags already cleared atomically at line 670-671
@@ -713,7 +713,7 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
     }
 
     // If we're not transmitting, we're ready
-    if (!mState.mIsrContext->transmitting) {
+    if (!mState.mIsrContext->mTransmitting) {
         return EngineState::READY;
     }
 
@@ -747,22 +747,22 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
     // Validate channel count matches data_width constraints
     size_t required_width = selectDataWidth(channel_count);
-    if (required_width != mState.data_width) {
+    if (required_width != mState.mDataWidth) {
         FL_WARN("PARLIO: Channel count "
                 << channel_count << " requires data_width=" << required_width
-                << " but this instance is data_width=" << mState.data_width);
+                << " but this instance is data_width=" << mState.mDataWidth);
         return;
     }
 
     // Store actual channel count (for dummy lane logic)
-    mState.actual_channels = channel_count;
-    mState.dummy_lanes = mState.data_width - channel_count;
+    mState.mActualChannels = channel_count;
+    mState.mDummyLanes = mState.mDataWidth - channel_count;
 
-    if (mState.dummy_lanes > 0) {
+    if (mState.mDummyLanes > 0) {
     }
 
     // Extract and validate GPIO pins from channel data
-    mState.pins.clear();
+    mState.mPins.clear();
     for (size_t i = 0; i < channel_count; i++) {
         int pin = channelData[i]->getPin();
 
@@ -777,12 +777,12 @@ void ChannelEnginePARLIOImpl::beginTransmission(
             return;
         }
 
-        mState.pins.push_back(pin);
+        mState.mPins.push_back(pin);
     }
 
     // Fill remaining pins with -1 for dummy lanes (unused)
-    for (size_t i = channel_count; i < mState.data_width; i++) {
-        mState.pins.push_back(-1);
+    for (size_t i = channel_count; i < mState.mDataWidth; i++) {
+        mState.mPins.push_back(-1);
     }
 
     // FIX C1-3: Extract timing configuration BEFORE initializeIfNeeded()
@@ -790,22 +790,22 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // start Previously, timing was set AFTER init, causing first frame to use
     // uninitialized values (0,0,0)
     const ChipsetTimingConfig &timing = channelData[0]->getTiming();
-    mState.timing_t1_ns = timing.t1_ns;
-    mState.timing_t2_ns = timing.t2_ns;
-    mState.timing_t3_ns = timing.t3_ns;
+    mState.mTimingT1Ns = timing.t1_ns;
+    mState.mTimingT2Ns = timing.t2_ns;
+    mState.mTimingT3Ns = timing.t3_ns;
 
     // Ensure PARLIO peripheral is initialized
     // Note: initializeIfNeeded() uses mState.timing_* to configure waveforms
     initializeIfNeeded();
 
     // If initialization failed, abort
-    if (!mInitialized || mState.tx_unit == nullptr || !mState.mIsrContext) {
+    if (!mInitialized || mState.mTxUnit == nullptr || !mState.mIsrContext) {
         FL_WARN("PARLIO: Cannot transmit - initialization failed");
         return;
     }
 
     // Check if we're already transmitting
-    if (mState.mIsrContext->transmitting) {
+    if (mState.mIsrContext->mTransmitting) {
         FL_WARN("PARLIO: Transmission already in progress");
         return;
     }
@@ -842,24 +842,24 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // capability
 
     size_t totalBufferSize = channelData.size() * maxChannelSize;
-    mState.scratch_padded_buffer.resize(totalBufferSize);
+    mState.mScratchPaddedBuffer.resize(totalBufferSize);
 
     // FIX H3-4: Removed redundant scratch buffer zero-fill (1-2ms savings per
     // frame) Subsequent loop (lines 862-882) overwrites all bytes via memcpy +
     // right-padding memset Pattern D corruption (Iteration 22) was fixed by
     // right-padding logic, not this memset
 
-    mState.lane_stride = maxChannelSize;
-    mState.num_lanes = channelData.size();
+    mState.mLaneStride = maxChannelSize;
+    mState.mNumLanes = channelData.size();
     // Phase 5: Also set num_lanes in ISR context (ISR needs this for
     // bytes_transmitted calculation)
-    mState.mIsrContext->num_lanes = channelData.size();
+    mState.mIsrContext->mNumLanes = channelData.size();
 
     // Write all channels to segmented scratch buffer with stride-based layout
     for (size_t i = 0; i < channelData.size(); i++) {
         size_t dataSize = channelData[i]->getSize();
         uint8_t *laneDst =
-            mState.scratch_padded_buffer.data() + (i * maxChannelSize);
+            mState.mScratchPaddedBuffer.data() + (i * maxChannelSize);
         fl::span<uint8_t> dst(laneDst, maxChannelSize);
 
         // PARLIO FIX: Never use left-padding for multi-lane configurations
@@ -881,25 +881,25 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
     // Phase 0: Ring buffer streaming architecture with CPU-based waveform
     // generation Initialize IsrContext state for ring buffer streaming
-    mState.mIsrContext->total_bytes = totalBytes;
-    mState.mIsrContext->current_byte = 0;
-    mState.mIsrContext->stream_complete = false;
-    mState.error_occurred = false;
-    mState.mIsrContext->transmitting =
+    mState.mIsrContext->mTotalBytes = totalBytes;
+    mState.mIsrContext->mCurrentByte = 0;
+    mState.mIsrContext->mStreamComplete = false;
+    mState.mErrorOccurred = false;
+    mState.mIsrContext->mTransmitting =
         false; // Will be set to true after first buffer submitted
 
     // Initialize ring buffer state
-    mState.mIsrContext->ring_read_ptr = 0;
-    mState.mIsrContext->ring_write_ptr = 0;
-    mState.mIsrContext->ring_size = PARLIO_RING_BUFFER_COUNT;
-    mState.mIsrContext->ring_error = false;
+    mState.mIsrContext->mRingReadPtr = 0;
+    mState.mIsrContext->mRingWritePtr = 0;
+    mState.mIsrContext->mRingSize = PARLIO_RING_BUFFER_COUNT;
+    mState.mIsrContext->mRingError = false;
 
     // Initialize counters
-    mState.mIsrContext->isr_count = 0;
-    mState.mIsrContext->bytes_transmitted = 0;
-    mState.mIsrContext->chunks_completed = 0;
-    mState.mIsrContext->transmission_active = true;
-    mState.mIsrContext->end_time_us = 0;
+    mState.mIsrContext->mIsrCount = 0;
+    mState.mIsrContext->mBytesTransmitted = 0;
+    mState.mIsrContext->mChunksCompleted = 0;
+    mState.mIsrContext->mTransmissionActive = true;
+    mState.mIsrContext->mEndTimeUs = 0;
 
     // ITERATION 1: OLD buffer allocation (BROKEN - splits small strips into
     // multiple buffers) size_t leds_per_buffer = (numLeds +
@@ -917,11 +917,11 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // NEW (ITERATION 15): Calculate expansion ratio based on data_width (multi-lane support)
     // Formula matches initializeIfNeeded() calculation (lines 1321-1334)
     size_t bytes_per_input_byte_ring;
-    if (mState.data_width <= 8) {
-        size_t ticksPerByte = 8 / mState.data_width;
+    if (mState.mDataWidth <= 8) {
+        size_t ticksPerByte = 8 / mState.mDataWidth;
         size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
         bytes_per_input_byte_ring = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-    } else if (mState.data_width == 16) {
+    } else if (mState.mDataWidth == 16) {
         bytes_per_input_byte_ring = 128;  // 64 pulses × 2 bytes per pulse
     } else {
         bytes_per_input_byte_ring = 8; // Fallback
@@ -930,13 +930,13 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     size_t bytes_per_buffer;
     size_t total_buffers;
 
-    if (totalBytes_expanded <= mState.ring_buffer_capacity) {
+    if (totalBytes_expanded <= mState.mRingBufferCapacity) {
         // ITERATION 2: Phase 0 path - all bytes fit in one buffer (NO DMA gaps)
         bytes_per_buffer = totalBytes;
         total_buffers = 1;
         FL_WARN("PARLIO: Single-buffer mode activated ("
                 << totalBytes << " input bytes, " << totalBytes_expanded
-                << " expanded bytes fit in one " << mState.ring_buffer_capacity
+                << " expanded bytes fit in one " << mState.mRingBufferCapacity
                 << "-byte buffer)");
     } else {
         // ITERATION 2: Phase 1+ path - multi-buffer streaming with DMA gaps
@@ -949,18 +949,18 @@ void ChannelEnginePARLIOImpl::beginTransmission(
                 << " buffers, " << bytes_per_buffer << " input bytes per buffer)");
     }
 
-    mState.mIsrContext->buffers_submitted = 0;
-    mState.mIsrContext->buffers_completed = 0;
-    mState.mIsrContext->buffers_total = total_buffers;
+    mState.mIsrContext->mBuffersSubmitted = 0;
+    mState.mIsrContext->mBuffersCompleted = 0;
+    mState.mIsrContext->mBuffersTotal = total_buffers;
 
     // NEW ARCHITECTURE: Incremental ring buffer population
     // Ring buffers already allocated during initializeIfNeeded()
     // Now populate them incrementally with waveform data
 
     // Step 1: Initialize population state
-    mState.next_buffer_to_populate = 0;
-    mState.next_byte_offset = 0;
-    mState.buffers_populated = 0;
+    mState.mNextBufferToPopulate = 0;
+    mState.mNextByteOffset = 0;
+    mState.mBuffersPopulated = 0;
 
     FL_WARN("PARLIO: Pre-populating ring buffers (up to "
             << PARLIO_RING_BUFFER_COUNT << " buffers)");
@@ -971,24 +971,24 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     while (has_ring_space() && populateNextDMABuffer()) {
         // Loop until ring is full or all buffers populated
         FL_WARN("PARLIO: Pre-populated buffer "
-                << (mState.buffers_populated - 1) << "/" << total_buffers
-                << " (ring_write_ptr=" << mState.mIsrContext->ring_write_ptr << ")");
+                << (mState.mBuffersPopulated - 1) << "/" << total_buffers
+                << " (ring_write_ptr=" << mState.mIsrContext->mRingWritePtr << ")");
     }
 
-    FL_WARN("PARLIO: Pre-populated " << mState.buffers_populated << "/"
+    FL_WARN("PARLIO: Pre-populated " << mState.mBuffersPopulated << "/"
                                      << total_buffers << " buffers");
 
     // Verify at least one buffer was populated
-    if (mState.buffers_populated == 0) {
+    if (mState.mBuffersPopulated == 0) {
         FL_WARN("PARLIO: No buffers populated - cannot start transmission");
-        mState.error_occurred = true;
+        mState.mErrorOccurred = true;
         return;
     }
 
     // Phase 0: Submit ONLY first buffer from CPU thread
     // ISR will submit all subsequent buffers as they complete
     size_t first_buffer_idx = 0;
-    size_t first_buffer_size = mState.ring_buffer_sizes[first_buffer_idx];
+    size_t first_buffer_size = mState.mRingBufferSizes[first_buffer_idx];
 
     // ITERATION 5 - Experiment 1-2: idle_value = HIGH FAILED (100% error rate)
     // ITERATION 5 - Experiment 3: Revert to idle_value = LOW, test with
@@ -998,12 +998,12 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // tx_config.idle_value = 0xFFFF; // ITERATION 5: HIGH failed (disabled)
 
     esp_err_t err = parlio_tx_unit_transmit(
-        mState.tx_unit, mState.ring_buffers[first_buffer_idx].get(),
+        mState.mTxUnit, mState.mRingBuffers[first_buffer_idx].get(),
         first_buffer_size * 8, &tx_config);
 
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to submit first buffer: " << err);
-        mState.error_occurred = true;
+        mState.mErrorOccurred = true;
         return;
     }
 
@@ -1011,11 +1011,11 @@ void ChannelEnginePARLIOImpl::beginTransmission(
                                                << " bytes)");
 
     // Update read pointer (first buffer submitted, ISR will submit rest)
-    mState.mIsrContext->ring_read_ptr = 1; // ISR starts from buffer 1
+    mState.mIsrContext->mRingReadPtr = 1; // ISR starts from buffer 1
 
     // Mark transmission started and buffer accounting
-    mState.mIsrContext->transmitting = true;
-    mState.mIsrContext->buffers_submitted =
+    mState.mIsrContext->mTransmitting = true;
+    mState.mIsrContext->mBuffersSubmitted =
         1; // Only first buffer submitted by CPU
 
     FL_WARN("PARLIO: Transmission started - ISR will handle remaining "
@@ -1057,12 +1057,12 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // All current PARLIO chips (ESP32-P4, C6, H2, C5) support 16-bit mode,
     // but this check future-proofs against chips with limited PARLIO support
 #if defined(SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH)
-    if (mState.data_width > SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH) {
+    if (mState.mDataWidth > SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH) {
         FL_WARN(
             "PARLIO: Requested data width "
-            << mState.data_width << " bits exceeds hardware maximum "
+            << mState.mDataWidth << " bits exceeds hardware maximum "
             << SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH << " bits on this chip. "
-            << "This chip does not support " << mState.data_width
+            << "This chip does not support " << mState.mDataWidth
             << "-bit mode. "
             << "Maximum supported: " << SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH
             << " bits. "
@@ -1074,9 +1074,9 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Older ESP-IDF without SOC capability macros - perform basic validation
     // This fallback ensures compatibility with older IDF versions while still
     // providing some level of validation
-    if (mState.data_width > 16) {
+    if (mState.mDataWidth > 16) {
         FL_WARN("PARLIO: Requested data width "
-                << mState.data_width
+                << mState.mDataWidth
                 << " bits exceeds assumed maximum (16 bits). "
                 << "Hardware capability unknown - update ESP-IDF for proper "
                    "detection. "
@@ -1087,8 +1087,8 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
 
     // Step 1: Build wave8 expansion LUT from timing configuration
     // Timing parameters are extracted from the first channel in
-    // beginTransmission() and stored in mState.timing_t1_ns,
-    // mState.timing_t2_ns, mState.timing_t3_ns
+    // beginTransmission() and stored in mState.mTimingT1Ns,
+    // mState.mTimingT2Ns, mState.mTimingT3Ns
     //
     // For WS2812B-V5 (typical values):
     // - T1: 300ns (T0H - initial HIGH time)
@@ -1097,13 +1097,13 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //
     // wave8 normalizes timing to 8 pulses per bit (fixed 8:1 expansion)
     ChipsetTiming timing;
-    timing.T1 = mState.timing_t1_ns;
-    timing.T2 = mState.timing_t2_ns;
-    timing.T3 = mState.timing_t3_ns;
+    timing.T1 = mState.mTimingT1Ns;
+    timing.T2 = mState.mTimingT2Ns;
+    timing.T3 = mState.mTimingT3Ns;
     timing.RESET = 0; // Not used for waveform generation
     timing.name = "PARLIO";
 
-    mState.wave8_lut = buildWave8ExpansionLUT(timing);
+    mState.mWave8Lut = buildWave8ExpansionLUT(timing);
     // Step 2: Calculate width-adaptive streaming chunk size
     // wave8 uses fixed 8 pulses per bit (8:1 expansion)
     // After bit-packing transpose:
@@ -1114,10 +1114,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // - Each input byte → 8 output bytes (after transpose, for data_width <= 8)
     constexpr size_t pulses_per_bit = 8; // Fixed for wave8
     size_t bytes_per_input_byte;
-    if (mState.data_width <= 8) {
+    if (mState.mDataWidth <= 8) {
         // After transpose: 8 pulses × 8 bits / (8/data_width) ticks per byte
         // For data_width=1: 8*8 / 8 = 8 bytes per input byte
-        bytes_per_input_byte = 8 * pulses_per_bit / (8 / mState.data_width);
+        bytes_per_input_byte = 8 * pulses_per_bit / (8 / mState.mDataWidth);
     } else {
         // For 16-bit width: 2 bytes per pulse tick
         bytes_per_input_byte = 8 * pulses_per_bit * 2;
@@ -1129,19 +1129,19 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // chunks (exceeds 4-callback limit) New: 18KB buffer → larger chunks →
     // fewer chunks (works within ISR callback limit)
     constexpr size_t target_buffer_size = 18432; // 18KB per buffer
-    mState.bytes_per_chunk = target_buffer_size / bytes_per_input_byte;
+    mState.mBytesPerChunk = target_buffer_size / bytes_per_input_byte;
 
     // Clamp to reasonable range (in input bytes)
-    if (mState.bytes_per_chunk < 10)
-        mState.bytes_per_chunk = 10;
-    if (mState.bytes_per_chunk > 5000)
-        mState.bytes_per_chunk = 5000;
+    if (mState.mBytesPerChunk < 10)
+        mState.mBytesPerChunk = 10;
+    if (mState.mBytesPerChunk > 5000)
+        mState.mBytesPerChunk = 5000;
 
     // Step 3: Validate GPIO pins were provided by beginTransmission()
     // Pins are extracted from ChannelData and validated before initialization
-    if (mState.pins.size() != mState.data_width) {
+    if (mState.mPins.size() != mState.mDataWidth) {
         FL_WARN("PARLIO: Pin configuration error - expected "
-                << mState.data_width << " pins, got " << mState.pins.size());
+                << mState.mDataWidth << " pins, got " << mState.mPins.size());
         FL_WARN(
             "  Pins must be provided via FastLED.addLeds<WS2812, PIN>() API");
         mInitialized = false;
@@ -1154,7 +1154,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.clk_in_gpio_num =
         static_cast<gpio_num_t>(-1); // Use internal clock, not external
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
-    config.data_width = mState.data_width; // Runtime parameter
+    config.data_width = mState.mDataWidth; // Runtime parameter
     // Phase 1 - Iteration 2: Set trans_queue_depth to 2 (minimum for ISR
     // streaming) PARLIO has 3 internal queues (READY, PROGRESS, COMPLETE) per
     // README.md line 101 With depth=1, ISR callback can't queue next buffer
@@ -1180,11 +1180,11 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //     (disabled)
 
     // Assign GPIO pins for data_width lanes
-    for (size_t i = 0; i < mState.data_width; i++) {
-        config.data_gpio_nums[i] = static_cast<gpio_num_t>(mState.pins[i]);
+    for (size_t i = 0; i < mState.mDataWidth; i++) {
+        config.data_gpio_nums[i] = static_cast<gpio_num_t>(mState.mPins[i]);
     }
     // Mark unused pins as invalid
-    for (size_t i = mState.data_width; i < 16; i++) {
+    for (size_t i = mState.mDataWidth; i < 16; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
     }
 
@@ -1192,7 +1192,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     config.valid_gpio_num = static_cast<gpio_num_t>(-1);
 
     // Step 5: Create TX unit
-    esp_err_t err = parlio_new_tx_unit(&config, &mState.tx_unit);
+    esp_err_t err = parlio_new_tx_unit(&config, &mState.mTxUnit);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to create TX unit: " << err);
         mInitialized = false;
@@ -1207,22 +1207,22 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     callbacks.on_trans_done =
         reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
 
-    err = parlio_tx_unit_register_event_callbacks(mState.tx_unit, &callbacks,
+    err = parlio_tx_unit_register_event_callbacks(mState.mTxUnit, &callbacks,
                                                   this);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to register callbacks: " << err);
-        parlio_del_tx_unit(mState.tx_unit);
-        mState.tx_unit = nullptr;
+        parlio_del_tx_unit(mState.mTxUnit);
+        mState.mTxUnit = nullptr;
         mInitialized = false;
         return;
     }
 
     // Step 7: Enable TX unit (AFTER callback registration)
-    err = parlio_tx_unit_enable(mState.tx_unit);
+    err = parlio_tx_unit_enable(mState.mTxUnit);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to enable TX unit: " << err);
-        parlio_del_tx_unit(mState.tx_unit);
-        mState.tx_unit = nullptr;
+        parlio_del_tx_unit(mState.mTxUnit);
+        mState.mTxUnit = nullptr;
         mInitialized = false;
         return;
     }
@@ -1243,7 +1243,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // across lanes)
     // - data_width=16: 16 bytes output (64 pulses × 2 bytes per pulse)
     size_t bytes_per_input_byte_output;
-    if (mState.data_width <= 8) {
+    if (mState.mDataWidth <= 8) {
         // 8 bytes per input byte after transpose (8 pulses bit-packed)
         bytes_per_input_byte_output = 8;
     } else {
@@ -1256,13 +1256,13 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // wave8 uses fixed 8:1 expansion with bit-packing
     // After transpose: each input byte → output bytes (depends on data_width)
     size_t bytes_per_input_byte_ring;
-    if (mState.data_width <= 8) {
+    if (mState.mDataWidth <= 8) {
         // NEW (ITERATION 14): Calculate based on transpose_wave8byte_parlio logic
         // Bit-packed format: multiple pulses per byte
-        size_t ticksPerByte = 8 / mState.data_width;
+        size_t ticksPerByte = 8 / mState.mDataWidth;
         size_t pulsesPerByte = 64;  // 8 bits × 8 pulses per bit
         bytes_per_input_byte_ring = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-    } else if (mState.data_width == 16) {
+    } else if (mState.mDataWidth == 16) {
         // For 16-bit width: 16 bytes output per input byte
         // NEW (ITERATION 14): Corrected calculation
         bytes_per_input_byte_ring = 128;  // 64 pulses × 2 bytes per pulse
@@ -1270,7 +1270,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         bytes_per_input_byte_ring = 8; // Fallback
     }
 
-    mState.ring_buffer_capacity =
+    mState.mRingBufferCapacity =
         ring_buffer_input_byte_count * bytes_per_input_byte_ring;
 
     // Step 8: Allocate ring buffers upfront (all memory allocated during init)
@@ -1279,17 +1279,17 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         FL_WARN("PARLIO: Failed to allocate ring buffers during initialization");
 
         // Clean up TX unit
-        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
+        esp_err_t disable_err = parlio_tx_unit_disable(mState.mTxUnit);
         if (disable_err != ESP_OK) {
             FL_WARN("PARLIO: Failed to disable TX unit during ring buffer cleanup: "
                     << disable_err);
         }
-        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
+        esp_err_t del_err = parlio_del_tx_unit(mState.mTxUnit);
         if (del_err != ESP_OK) {
             FL_WARN("PARLIO: Failed to delete TX unit during ring buffer cleanup: "
                     << del_err);
         }
-        mState.tx_unit = nullptr;
+        mState.mTxUnit = nullptr;
         mInitialized = false;
         return;
     }
@@ -1305,42 +1305,42 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // PARLIO/GDMA hardware
     // 4. This buffer is managed by mState and freed in the destructor
     const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
-    const size_t waveform_buffer_size = mState.data_width * bytes_per_lane;
+    const size_t waveform_buffer_size = mState.mDataWidth * bytes_per_lane;
 
-    mState.waveform_expansion_buffer.reset(static_cast<uint8_t *>(
+    mState.mWaveformExpansionBuffer.reset(static_cast<uint8_t *>(
         heap_caps_malloc(waveform_buffer_size, MALLOC_CAP_INTERNAL)));
 
-    if (!mState.waveform_expansion_buffer) {
+    if (!mState.mWaveformExpansionBuffer) {
         FL_WARN("PARLIO: Failed to allocate waveform expansion buffer ("
                 << waveform_buffer_size << " bytes)");
 
         // Clean up TX unit
-        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
+        esp_err_t disable_err = parlio_tx_unit_disable(mState.mTxUnit);
         if (disable_err != ESP_OK) {
             FL_WARN("PARLIO: Failed to disable TX unit during waveform buffer "
                     "cleanup: "
                     << disable_err);
         }
-        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
+        esp_err_t del_err = parlio_del_tx_unit(mState.mTxUnit);
         if (del_err != ESP_OK) {
             FL_WARN("PARLIO: Failed to delete TX unit during waveform buffer "
                     "cleanup: "
                     << del_err);
         }
-        mState.tx_unit = nullptr;
+        mState.mTxUnit = nullptr;
         mInitialized = false;
         return;
     }
 
-    mState.waveform_expansion_buffer_size = waveform_buffer_size;
+    mState.mWaveformExpansionBufferSize = waveform_buffer_size;
     // Phase 4: Initialize IsrContext state (if allocated)
     if (mState.mIsrContext) {
-        mState.mIsrContext->transmitting = false;
-        mState.mIsrContext->stream_complete = false;
-        mState.mIsrContext->current_byte = 0;
-        mState.mIsrContext->total_bytes = 0;
+        mState.mIsrContext->mTransmitting = false;
+        mState.mIsrContext->mStreamComplete = false;
+        mState.mIsrContext->mCurrentByte = 0;
+        mState.mIsrContext->mTotalBytes = 0;
     }
-    mState.error_occurred = false;
+    mState.mErrorOccurred = false;
 
     mInitialized = true;
 }
@@ -1457,9 +1457,9 @@ ParlioDebugMetrics getParlioDebugMetrics() {
     }
 
     // Read buffer accounting from ISR context
-    metrics.isr_count = ctx->buffers_completed;
-    metrics.chunks_queued = ctx->buffers_submitted;
-    metrics.chunks_completed = ctx->buffers_completed;
+    metrics.isr_count = ctx->mBuffersCompleted;
+    metrics.chunks_queued = ctx->mBuffersSubmitted;
+    metrics.chunks_completed = ctx->mBuffersCompleted;
 
     // Calculate bytes from buffer counts
     // Note: This is approximate since buffers may have different sizes
@@ -1469,16 +1469,16 @@ ParlioDebugMetrics getParlioDebugMetrics() {
     size_t bytes_per_input_byte_output =
         8; // Simplified estimate (assumes data_width <= 8)
     size_t bytes_per_buffer =
-        (ctx->buffers_total > 0) ? (ctx->total_bytes / ctx->buffers_total) : 0;
-    if (ctx->buffers_total > 0) {
-        metrics.bytes_total = ctx->total_bytes * bytes_per_input_byte_output;
-        metrics.bytes_transmitted = ctx->buffers_completed * bytes_per_buffer *
+        (ctx->mBuffersTotal > 0) ? (ctx->mTotalBytes / ctx->mBuffersTotal) : 0;
+    if (ctx->mBuffersTotal > 0) {
+        metrics.bytes_total = ctx->mTotalBytes * bytes_per_input_byte_output;
+        metrics.bytes_transmitted = ctx->mBuffersCompleted * bytes_per_buffer *
                                     bytes_per_input_byte_output;
     }
 
-    metrics.transmission_active = ctx->transmitting;
+    metrics.transmission_active = ctx->mTransmitting;
     metrics.start_time_us = 0; // Not currently tracked
-    metrics.end_time_us = ctx->end_time_us;
+    metrics.end_time_us = ctx->mEndTimeUs;
     metrics.error_code = 0; // ESP_OK
 
     return metrics;
