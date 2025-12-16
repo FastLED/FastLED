@@ -637,7 +637,7 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
     // memory)
     if (mState.mIsrContext->mStreamComplete) {
         // Execute memory barrier to synchronize all ISR writes
-        // This ensures all non-volatile ISR data (isr_count, bytes_transmitted,
+        // This ensures all non-volatile ISR data (mIsrCount, mBytesTransmitted,
         // etc.) is visible
         PARLIO_MEMORY_BARRIER();
 
@@ -839,7 +839,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mLaneStride = maxChannelSize;
     mState.mNumLanes = channelData.size();
     // Phase 5: Also set num_lanes in ISR context (ISR needs this for
-    // bytes_transmitted calculation)
+    // mBytesTransmitted calculation)
     mState.mIsrContext->mNumLanes = channelData.size();
 
     // Write all channels to segmented scratch buffer with stride-based layout
@@ -1329,16 +1329,16 @@ ParlioDebugMetrics getParlioDebugMetrics() {
     }
 
     // Read ISR counters
-    metrics.isr_count = ctx->mIsrCount;
-    metrics.chunks_queued = 0;  // No longer tracked
-    metrics.chunks_completed = ctx->mChunksCompleted;
-    metrics.bytes_total = ctx->mTotalBytes;
-    metrics.bytes_transmitted = ctx->mBytesTransmitted;
+    metrics.mIsrCount = ctx->mIsrCount;
+    metrics.mChunksQueued = 0;  // No longer tracked
+    metrics.mChunksCompleted = ctx->mChunksCompleted;
+    metrics.mBytesTotal = ctx->mTotalBytes;
+    metrics.mBytesTransmitted = ctx->mBytesTransmitted;
 
-    metrics.transmission_active = ctx->mTransmitting;
-    metrics.start_time_us = 0; // Not currently tracked
-    metrics.end_time_us = ctx->mEndTimeUs;
-    metrics.error_code = 0; // ESP_OK
+    metrics.mTransmissionActive = ctx->mTransmitting;
+    metrics.mStartTimeUs = 0; // Not currently tracked
+    metrics.mEndTimeUs = ctx->mEndTimeUs;
+    metrics.mErrorCode = 0; // ESP_OK
 
     return metrics;
 }

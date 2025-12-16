@@ -693,16 +693,16 @@ class ChannelEnginePARLIO : public IChannelEngine {
 /// @brief Debug metrics structure for PARLIO transmission analysis
 struct ParlioDebugMetrics {
     uint64_t
-        start_time_us; ///< Timestamp when transmission begins (microseconds)
+        mStartTimeUs; ///< Timestamp when transmission begins (microseconds)
     uint64_t
-        end_time_us; ///< Timestamp when transmission completes (microseconds)
-    uint32_t isr_count;        ///< Number of ISR callbacks fired
-    uint32_t chunks_queued;    ///< Number of chunks queued for transmission
-    uint32_t chunks_completed; ///< Number of chunks that completed transmission
-    uint32_t bytes_total;      ///< Total bytes expected to transmit
-    uint32_t bytes_transmitted; ///< Total bytes actually transmitted
-    uint32_t error_code;        ///< ESP-IDF error code (0 = success)
-    bool transmission_active;   ///< True if transmission is in progress
+        mEndTimeUs; ///< Timestamp when transmission completes (microseconds)
+    uint32_t mIsrCount;        ///< Number of ISR callbacks fired
+    uint32_t mChunksQueued;    ///< Number of chunks queued for transmission
+    uint32_t mChunksCompleted; ///< Number of chunks that completed transmission
+    uint32_t mBytesTotal;      ///< Total bytes expected to transmit
+    uint32_t mBytesTransmitted; ///< Total bytes actually transmitted
+    uint32_t mErrorCode;        ///< ESP-IDF error code (0 = success)
+    bool mTransmissionActive;   ///< True if transmission is in progress
 };
 
 /// @brief Get current PARLIO debug metrics

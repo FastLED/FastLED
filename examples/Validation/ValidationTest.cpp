@@ -79,15 +79,15 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("");
 
         FL_WARN("[TRANSMISSION METRICS]");
-        FL_WARN("  Start Time:        " << debug.start_time_us << " μs");
-        FL_WARN("  End Time:          " << debug.end_time_us << " μs");
-        if (debug.end_time_us > debug.start_time_us) {
-            FL_WARN("  Duration:          " << (debug.end_time_us - debug.start_time_us) << " μs");
+        FL_WARN("  Start Time:        " << debug.mStartTimeUs << " μs");
+        FL_WARN("  End Time:          " << debug.mEndTimeUs << " μs");
+        if (debug.mEndTimeUs > debug.mStartTimeUs) {
+            FL_WARN("  Duration:          " << (debug.mEndTimeUs - debug.mStartTimeUs) << " μs");
         }
-        FL_WARN("  Bytes Total:       " << debug.bytes_total);
-        FL_WARN("  Bytes TX'd:        " << debug.bytes_transmitted);
-        FL_WARN("  TX Active:         " << (debug.transmission_active ? "YES" : "NO"));
-        FL_WARN("  Error Code:        " << debug.error_code << (debug.error_code == 0 ? " (ESP_OK)" : " (ERROR)"));
+        FL_WARN("  Bytes Total:       " << debug.mBytesTotal);
+        FL_WARN("  Bytes TX'd:        " << debug.mBytesTransmitted);
+        FL_WARN("  TX Active:         " << (debug.mTransmissionActive ? "YES" : "NO"));
+        FL_WARN("  Error Code:        " << debug.mErrorCode << (debug.mErrorCode == 0 ? " (ESP_OK)" : " (ERROR)"));
     } else {
         FL_WARN("[ERROR] ISR context not initialized (nullptr)");
     }
