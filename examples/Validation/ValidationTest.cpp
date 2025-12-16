@@ -61,22 +61,22 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     if (isr_ctx) {
         FL_WARN("[ISR CONTEXT STATE]");
-        FL_WARN("  Transmitting:      " << (isr_ctx->transmitting ? "YES" : "NO"));
-        FL_WARN("  Stream Complete:   " << (isr_ctx->stream_complete ? "YES" : "NO"));
-        FL_WARN("  Ring Error:        " << (isr_ctx->ring_error ? "YES" : "NO"));
+        FL_WARN("  Transmitting:      " << (isr_ctx->mTransmitting ? "YES" : "NO"));
+        FL_WARN("  Stream Complete:   " << (isr_ctx->mStreamComplete ? "YES" : "NO"));
+        FL_WARN("  Ring Error:        " << (isr_ctx->mRingError ? "YES" : "NO"));
         FL_WARN("");
 
         FL_WARN("[BUFFER ACCOUNTING]");
-        FL_WARN("  Buffers Total:     " << isr_ctx->buffers_total);
-        FL_WARN("  Buffers Submitted: " << isr_ctx->buffers_submitted);
-        FL_WARN("  Buffers Completed: " << isr_ctx->buffers_completed);
-        FL_WARN("  ISR Callbacks:     " << isr_ctx->isr_count);
+        FL_WARN("  Buffers Total:     " << isr_ctx->mBuffersTotal);
+        FL_WARN("  Buffers Submitted: " << isr_ctx->mBuffersSubmitted);
+        FL_WARN("  Buffers Completed: " << isr_ctx->mBuffersCompleted);
+        FL_WARN("  ISR Callbacks:     " << isr_ctx->mIsrCount);
         FL_WARN("");
 
         FL_WARN("[BYTE PROGRESS]");
-        FL_WARN("  Total Bytes:       " << isr_ctx->total_bytes);
-        FL_WARN("  Current Byte:      " << isr_ctx->current_byte);
-        FL_WARN("  Num Lanes:         " << isr_ctx->num_lanes);
+        FL_WARN("  Total Bytes:       " << isr_ctx->mTotalBytes);
+        FL_WARN("  Current Byte:      " << isr_ctx->mCurrentByte);
+        FL_WARN("  Num Lanes:         " << isr_ctx->mNumLanes);
         FL_WARN("");
 
         FL_WARN("[TRANSMISSION METRICS]");
@@ -89,28 +89,6 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("  Bytes TX'd:        " << debug.bytes_transmitted);
         FL_WARN("  TX Active:         " << (debug.transmission_active ? "YES" : "NO"));
         FL_WARN("  Error Code:        " << debug.error_code << (debug.error_code == 0 ? " (ESP_OK)" : " (ERROR)"));
-        FL_WARN("");
-
-        // DEBUG: Report on DMA buffer debug deque
-        FL_WARN("[DMA BUFFER DEBUG]");
-        size_t deque_size = isr_ctx->mDebugDmaOutput.size();
-        FL_WARN("  Debug Buffer Size: " << deque_size << " bytes");
-
-        if (deque_size > 0) {
-            // Count zeros and non-zeros
-            size_t zero_count = 0;
-            size_t nonzero_count = 0;
-            for (size_t i = 0; i < deque_size; i++) {
-                if (isr_ctx->mDebugDmaOutput[i] == 0) {
-                    zero_count++;
-                } else {
-                    nonzero_count++;
-                }
-            }
-            FL_WARN("  Zero Bytes:        " << zero_count);
-            FL_WARN("  Non-Zero Bytes:    " << nonzero_count);
-            FL_WARN("  Non-Zero %:        " << (nonzero_count * 100 / deque_size) << "%");
-        }
     } else {
         FL_WARN("[ERROR] ISR context not initialized (nullptr)");
     }

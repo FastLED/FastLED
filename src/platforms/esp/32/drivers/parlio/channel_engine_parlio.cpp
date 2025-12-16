@@ -327,7 +327,7 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
 //   - Pre-compute next DMA buffer when ring has space
 //   - Update ring_write_ptr after pre-computation
 //   - Detect stream_complete flag for transmission end
-__attribute__((optimize("O3"))) bool FL_IRAM
+FL_OPTIMIZE_FUNCTION bool FL_IRAM
 ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
                                         const void *edata, void *user_ctx) {
     (void)edata;

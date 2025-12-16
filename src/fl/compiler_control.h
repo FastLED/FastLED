@@ -196,11 +196,14 @@
 #endif
 
 // Function-level optimization attribute for O3
-// GCC supports per-function optimization attributes, Clang ignores them
+// GCC supports per-function optimization attributes
+// Clang doesn't support optimize("O3"), but supports hot attribute for aggressive optimization
 #if defined(__GNUC__) && !defined(__clang__)
-  #define FL_OPTIMIZE_FUNCTION_O3 __attribute__((optimize("O3")))
+  #define FL_OPTIMIZE_FUNCTION __attribute__((optimize("O3")))
+#elif defined(__clang__)
+  #define FL_OPTIMIZE_FUNCTION __attribute__((hot))
 #else
-  #define FL_OPTIMIZE_FUNCTION_O3
+  #define FL_OPTIMIZE_FUNCTION
 #endif
 
 #ifndef FL_LINK_WEAK

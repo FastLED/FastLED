@@ -24,7 +24,7 @@ constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
     } while (0)
 
 // Special optimized transpose function for ISR/DMA contexts.
-FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+FL_OPTIMIZE_FUNCTION FL_IRAM
 static void detail_transpose_2(const Wave8Byte lane_waves[2],
                                uint8_t output[2 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
@@ -47,7 +47,7 @@ static void detail_transpose_2(const Wave8Byte lane_waves[2],
 /// @param byte_value The byte to expand (0-255)
 /// @param lut Pre-computed nibble expansion lookup table
 /// @param output Output array for 8 Wave8Bit structures (8 bytes total)
-FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+FL_OPTIMIZE_FUNCTION FL_IRAM
 static void convertByteToWave8Byte(uint8_t byte_value,
                                    const Wave8BitExpansionLut &lut,
                                    Wave8Byte *output) {
@@ -69,7 +69,7 @@ static void convertByteToWave8Byte(uint8_t byte_value,
 // LUT Builder from Timing Data
 // Doesn't this is not designed to be called from ISR handlers.
 // ============================================================================
-FL_OPTIMIZE_FUNCTION_O3
+FL_OPTIMIZE_FUNCTION
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     Wave8BitExpansionLut lut;
 
@@ -131,7 +131,7 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8(uint8_t lane,
            const Wave8BitExpansionLut &lut,
            uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
@@ -148,7 +148,7 @@ void wave8(uint8_t lane,
 }
 
 // GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION_O3 FL_IRAM
+FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
                       const Wave8BitExpansionLut &lut,
                       uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {

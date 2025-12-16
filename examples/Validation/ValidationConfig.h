@@ -17,8 +17,8 @@
 #define MAX_LANES 1
 
 // Strip size selection
-// #define JUST_SMALL_STRIPS
-#define JUST_LARGE_STRIPS
+// #define JUST_SMALL_STRIPS  // ITERATION 1: Phase 0 - Sanity check with small strips (10-30 LEDs)
+#define JUST_LARGE_STRIPS  // ITERATION 6: Phase 2 - Testing DMA gaps with 1000 LEDs (24 buffers)
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
