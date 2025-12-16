@@ -66,10 +66,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("  Ring Error:        " << (isr_ctx->mRingError ? "YES" : "NO"));
         FL_WARN("");
 
-        FL_WARN("[BUFFER ACCOUNTING]");
-        FL_WARN("  Buffers Total:     " << isr_ctx->mBuffersTotal);
-        FL_WARN("  Buffers Submitted: " << isr_ctx->mBuffersSubmitted);
-        FL_WARN("  Buffers Completed: " << isr_ctx->mBuffersCompleted);
+        FL_WARN("[RING BUFFER STATE]");
+        FL_WARN("  Ring Read Index:   " << isr_ctx->mRingReadIdx);
+        FL_WARN("  Ring Write Index:  " << isr_ctx->mRingWriteIdx);
         FL_WARN("  ISR Callbacks:     " << isr_ctx->mIsrCount);
         FL_WARN("");
 
