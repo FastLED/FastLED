@@ -39,7 +39,7 @@ FASTLED_SHARED_PTR(ChannelData);
 class Channel: public CPixelLEDController<RGB> {
 public:
     /// @brief Create a new channel with compile-time engine type
-    /// @tparam CHANNEL_ENGINE Engine type (e.g., ParlioEngine)
+    /// @tparam CHANNEL_ENGINE Engine type (e.g., fl::ChannelEnginePARLIO)
     /// @param config Channel configuration
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
     template<typename CHANNEL_ENGINE>

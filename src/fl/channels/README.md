@@ -38,88 +38,94 @@ config.add(channel1_config)
       .setDither(BINARY_DITHER);
 ```
 
-### Multi-Lane SPI (ESP32 Only)
+### Advanced Engine Selection
 
-**Available on ESP32 SPI-based engines (`ChannelEngineSpi`):**
+The Channels API automatically selects the best available hardware engine for your platform:
 
-The SPI channel engine supports multi-lane (dual/quad) SPI transmission for **higher throughput** to a single LED strip. This uses the ESP32's dual/quad SPI modes to send data across multiple pins simultaneously.
+**Engine Priority (ESP32 platforms):**
+1. **PARLIO** (Highest) - ESP32-P4, C6, H2: Parallel I/O with hardware timing
+2. **SPI** (Medium) - ESP32, S2, S3: DMA-based SPI transmission
+3. **RMT** (Fallback) - All ESP32 variants: Remote control peripheral
 
-**Platform Support:**
-- **ESP32 classic, S2, S3**: Supports 1, 2, or 4 lanes (single/dual/quad modes)
-- **ESP32-C6, C3, H2**: Supports 1 or 2 lanes only (single/dual modes, no quad)
+**Driver Control:**
 
-**Throughput Benefits:**
-- **Single-lane (default)**: Standard SPI transmission (~2.5 MHz for WS2812)
-- **Dual-lane**: 2x throughput by using 2 data pins
-- **Quad-lane**: 4x throughput by using 4 data pins (ESP32/S2/S3 only)
-
-**How It Works:**
-
-Multi-lane SPI modes (SPI_TRANS_MODE_DIO/QIO) split each byte across multiple data lines, sending nibbles or bits in parallel. This is designed for QSPI flash communication but works perfectly for WS2812-over-SPI encoding - the same encoded bit stream is transmitted faster using multiple pins.
-
-**Important**: This is NOT for driving multiple independent LED strips in parallel. For parallel strips, use separate channels or the I2S-based engine (SpiHw16).
-
-**Example Usage:**
+You can override automatic selection for testing or performance tuning:
 
 ```cpp
 #include "FastLED.h"
-#include "fl/channels/channel_engine_spi.h"
 
 #define NUM_LEDS 300
-#define DATA0_PIN 23  // MOSI
-#define DATA1_PIN 19  // MISO (for dual mode)
-#define DATA2_PIN 18  // WP (for quad mode, ESP32/S2/S3 only)
-#define DATA3_PIN 5   // HD (for quad mode, ESP32/S2/S3 only)
+#define DATA_PIN 23
 
 CRGB leds[NUM_LEDS];
-fl::ChannelEngineSpi* spiEngine;
 
 void setup() {
-    // Create SPI engine
-    spiEngine = new fl::ChannelEngineSpi();
+    // Standard API - add LED strip
+    FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS);
 
-    // Configure multi-lane pins BEFORE creating channels
-    // Option 1: Dual-lane (2x throughput)
-    spiEngine->configureMultiLanePins(fl::MultiLanePinConfig(DATA0_PIN, DATA1_PIN));
+    // Force SPI engine exclusively (ESP32/S2/S3 only)
+    FastLED.setExclusiveDriver("SPI");
 
-    // Option 2: Quad-lane (4x throughput, ESP32/S2/S3 only)
-    // spiEngine->configureMultiLanePins(
-    //     fl::MultiLanePinConfig(DATA0_PIN, DATA1_PIN, DATA2_PIN, DATA3_PIN));
-
-    // Create channel with same data0_pin
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config(DATA0_PIN, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
-
-    // Create channel (automatically uses multi-lane config for DATA0_PIN)
-    auto channel = fl::Channel::create(spiEngine, config);
-    FastLED.addLedChannel(channel);
+    // Check which drivers are available
+    for (size_t i = 0; i < FastLED.getDriverCount(); i++) {
+        auto drivers = FastLED.getDriverInfos();
+        auto& info = drivers[i];
+        Serial.printf("Driver: %s, Priority: %d, Enabled: %s\n",
+                      info.name.c_str(), info.priority,
+                      info.enabled ? "yes" : "no");
+    }
 }
 
 void loop() {
-    // Normal FastLED usage - multi-lane transmission is automatic
     fill_rainbow(leds, NUM_LEDS, 0, 255 / NUM_LEDS);
     FastLED.show();
     delay(20);
 }
 ```
 
-**Wiring:**
+**Note:** Most users don't need `setExclusiveDriver()` - the automatic selection provides optimal performance for each platform.
 
-For dual-lane mode, connect both data pins to the LED strip's data input:
-- **ESP32 classic**: Use IO_MUX pins for best performance (lower latency)
-- **ESP32-C6**: Only SPI2_HOST available (GPIO matrix routing, ~25ns delay)
-- All data pins must be physically connected together at the LED strip
+## Advanced: Direct Engine Selection with Channel API
 
-**Performance Notes:**
-- Multi-lane modes reduce transmission time by 2x (dual) or 4x (quad)
-- Timer ISR automatically scales encoding throughput based on lane count:
-  - Single-lane: 40 LEDs/chunk (120 bytes → 360 SPI bytes @ 3x expansion)
-  - Dual-lane: 80 LEDs/chunk (240 bytes → 720 SPI bytes)
-  - Quad-lane: 160 LEDs/chunk (480 bytes → 1440 SPI bytes)
-- Maintains constant CPU utilization across all lane modes (4 kHz ISR rate)
-- Useful for very long LED strips (300+ LEDs) where transmission time is a bottleneck
-- GPIO matrix routing adds ~25ns delay vs IO_MUX (negligible for most use cases)
-- DMA is automatically used for buffers > 64 bytes
+For advanced use cases requiring direct engine control, you can use the Channel API:
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/channel_config.h"
+#include "platforms/esp/32/drivers/parlio/channel_engine_parlio.h"
+
+#define NUM_LEDS 60
+#define PIN 16
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    // Create channel configuration
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig config(PIN, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    // Create channel with specific engine type
+    auto channel = fl::Channel::create<fl::ChannelEnginePARLIO>(config);
+
+    // Register with FastLED
+    FastLED.addLedChannel(channel);
+}
+
+void loop() {
+    fill_rainbow(leds, NUM_LEDS, 0, 255 / NUM_LEDS);
+    FastLED.show();
+    delay(20);
+}
+```
+
+**Available Engine Types:**
+- `fl::ChannelEnginePARLIO` - ESP32-P4, C6, H2 (parallel I/O)
+- `fl::ChannelEngineSpi` - ESP32, S2, S3 (SPI-based)
+- `fl::ChannelEngineRMT` - RMT5 (ESP32-C6, H2, P4)
+- `fl::ChannelEngineRMT4` - RMT4 (ESP32 classic, S2, S3)
+
+**Note:** This advanced API is primarily for testing or special use cases. Most users should use `FastLED.addLeds<>()` which automatically selects the best engine.
 
 ## Minimal Example: 4 Parallel LED Strips
 
@@ -139,33 +145,17 @@ CRGB strip3[NUM_LEDS];
 CRGB strip4[NUM_LEDS];
 
 void setup() {
-    // Create timing configuration for WS2812
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    // Standard FastLED API - automatically selects best available engine
+    // (PARLIO on ESP32-P4/C6/H2, SPI on ESP32/S2/S3, RMT as fallback)
+    FastLED.addLeds<WS2812, PIN1>(strip1, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN2>(strip2, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN3>(strip3, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN4>(strip4, NUM_LEDS);
 
-    // Optional: Configure LED settings (defaults shown)
-    fl::LEDSettings settings;
-    settings.correction = UncorrectedColor;
-    settings.temperature = UncorrectedTemperature;
-    settings.ditherMode = BINARY_DITHER;
-    settings.rgbw = RgbwInvalid::value();
-
-    // Create individual channel configurations
-    fl::ChannelConfig config1(PIN1, timing, fl::span<CRGB>(strip1, NUM_LEDS), RGB, settings);
-    fl::ChannelConfig config2(PIN2, timing, fl::span<CRGB>(strip2, NUM_LEDS), RGB, settings);
-    fl::ChannelConfig config3(PIN3, timing, fl::span<CRGB>(strip3, NUM_LEDS), RGB, settings);
-    fl::ChannelConfig config4(PIN4, timing, fl::span<CRGB>(strip4, NUM_LEDS), RGB, settings);
-
-    // Create channels using platform-specific engine (e.g., ParlioEngine for ESP32-P4)
-    auto channel1 = fl::Channel::create<ParlioEngine>(config1);
-    auto channel2 = fl::Channel::create<ParlioEngine>(config2);
-    auto channel3 = fl::Channel::create<ParlioEngine>(config3);
-    auto channel4 = fl::Channel::create<ParlioEngine>(config4);
-
-    // Add channels to FastLED (they're automatically in the controller list)
-    FastLED.addLedChannel(channel1);
-    FastLED.addLedChannel(channel2);
-    FastLED.addLedChannel(channel3);
-    FastLED.addLedChannel(channel4);
+    // Optional: Force a specific driver for testing or performance tuning
+    // FastLED.setExclusiveDriver("PARLIO");  // ESP32-P4/C6/H2 only
+    // FastLED.setExclusiveDriver("SPI");     // ESP32/S2/S3 only
+    // FastLED.setExclusiveDriver("RMT");     // All ESP32 variants
 }
 
 void loop() {
@@ -175,7 +165,6 @@ void loop() {
     fill_solid(strip3, NUM_LEDS, CRGB::Blue);
     fill_solid(strip4, NUM_LEDS, CRGB::Yellow);
 
-    // Show updates all channels
     FastLED.show();
     delay(1000);
 
@@ -189,20 +178,7 @@ void loop() {
     }
     hue++;
 
-    // When FastLED.show() is called:
-    //   1. Engine's beginTransmission() is called with all channels
-    //      - May block if poll() returns BUSY or DRAINING (previous frame still transmitting)
-    //      - Queues all channel data for transmission
-    //      - Starts DMA transmission
-    //
-    // When FastLED.show() returns, the engine will be in DRAINING, READY, or ERROR state:
-    //   - DRAINING: Transmission queued/started and still in progress
-    //   - READY: Transmission already complete
-    //   - ERROR: An error occurred during transmission (check getLastError())
-    //
-    // The engine manages state transitions internally via poll() state machine.
-    // Advanced users can call poll() directly for non-blocking state queries.
-    FastLED.show();  // Show updates all channels
+    FastLED.show();
     delay(20);
 }
 ```

@@ -502,8 +502,8 @@ public:
 	/// // Create channel configuration
 	/// ChannelConfig config(pin, timing, leds, RGB);
 	///
-	/// // Create and register channel with engine
-	/// ChannelPtr channel = FastLED.addLedChannel(Channel::create<ParlioEngine>(config));
+	/// // Create and register channel with specific engine
+	/// ChannelPtr channel = FastLED.addLedChannel(Channel::create<fl::ChannelEnginePARLIO>(config));
 	/// @endcode
 	///
 	/// @param channel Shared pointer to a Channel instance
