@@ -163,8 +163,8 @@
 #include "fl/compiler_control.h"
 #ifdef ESP32
 
-#include "fl/channels/channel_data.h"
-#include "fl/channels/channel_engine.h"
+#include "fl/channels/data.h"
+#include "fl/channels/engine.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/engine_events.h"
@@ -422,6 +422,10 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
     EngineState poll() override;
 
+    /// @brief Get the engine name for affinity binding
+    /// @return "PARLIO"
+    const char* getName() const override { return "PARLIO"; }
+
     /// @brief Get ISR context for debug metrics (singleton accessor)
     /// @return Pointer to ISR context, or nullptr if not initialized
     /// @note This is a debug function - returns the singleton ISR context
@@ -660,6 +664,10 @@ class ChannelEnginePARLIO : public IChannelEngine {
     /// @brief Query engine state and perform maintenance
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
     EngineState poll() override;
+
+    /// @brief Get the engine name for affinity binding
+    /// @return "PARLIO"
+    const char* getName() const override { return "PARLIO"; }
 
   private:
     /// @brief Begin LED data transmission with lazy init and reconfiguration

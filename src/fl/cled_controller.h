@@ -18,7 +18,7 @@
 #include "fl/virtual_if_not_avr.h"
 #include "fl/int.h"
 #include "ftl/bit_cast.h"
-#include "fl/led_settings.h"
+#include "fl/channels/options.h"
 #include "ftl/span.h"
 
 
@@ -42,7 +42,7 @@ protected:
     friend class CFastLED;
     fl::span<CRGB> m_Leds;     ///< span of LED data used by this controller
     CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
-    LEDSettings mSettings;     ///< Common LED settings (correction, temperature, dither, rgbw)
+    ChannelOptions mSettings;  ///< Optional channel settings (correction, temperature, dither, rgbw, affinity)
     bool m_enabled = true;
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list

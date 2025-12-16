@@ -1,7 +1,7 @@
-/// @file channel_bus_manager.cpp
+/// @file bus_manager.cpp
 /// @brief Implementation of unified channel bus manager
 
-#include "channel_bus_manager.h"
+#include "fl/channels/bus_manager.h"
 #include "fl/singleton.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
@@ -134,6 +134,19 @@ fl::span<const DriverInfo> ChannelBusManager::getDriverInfos() const {
     }
 
     return fl::span<const DriverInfo>(mCachedDriverInfo.data(), mCachedDriverInfo.size());
+}
+
+IChannelEngine* ChannelBusManager::getEngineByName(const char* name) const {
+    if (!name || !name[0]) {
+        return nullptr;  // Null or empty name = not found
+    }
+
+    for (const auto& entry : mEngines) {
+        if (entry.enabled && entry.name == name) {
+            return entry.engine.get();
+        }
+    }
+    return nullptr;  // Not found or not enabled
 }
 
 // IChannelEngine interface implementation

@@ -6,8 +6,8 @@
 #include "fl/export.h"
 #include "fl/int.h"
 #include "fl/channels/channel.h"
-#include "fl/channels/channel_config.h"
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/config.h"
+#include "fl/channels/bus_manager.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -454,7 +454,7 @@ fl::ChannelPtr CFastLED::addChannel(const fl::ChannelConfig& config) {
     fl::ChannelBusManager& manager = fl::channelBusManager();
     FL_ASSERT(manager.getDriverCount() > 0,
               "No channel drivers available - channel API requires at least one registered driver");
-    return fl::Channel::create(config, &manager);
+    return fl::Channel::create(config);
 }
 
 // ============================================================================

@@ -73,6 +73,11 @@ public:
     ///   - Update internal error state if needed
     virtual EngineState poll() = 0;
 
+    /// @brief Get the engine name for affinity binding
+    /// @return Engine name (e.g., "RMT", "SPI", "PARLIO"), or nullptr if unnamed
+    /// @note Used by Channel affinity system to bind channels to specific engines
+    virtual const char* getName() const { return nullptr; }
+
     /// @brief Virtual destructor
     virtual ~IChannelEngine() = default;
 

@@ -1,4 +1,4 @@
-/// @file channel_data.h
+/// @file data.h
 /// @brief Channel transmission data - lightweight DTO for engine transmission
 
 #pragma once
@@ -8,7 +8,7 @@
 #include "ftl/shared_ptr.h"
 #include "ftl/function.h"
 #include "ftl/span.h"
-#include "channel_config.h"
+#include "fl/channels/config.h"
 
 namespace fl {
 

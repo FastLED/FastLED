@@ -10,8 +10,8 @@
 
 #if FASTLED_RMT5  // Must check BEFORE including any RMT5 headers to prevent symbol conflicts
 
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
 #include "fl/engine_events.h"
 #include "ftl/shared_ptr.h"
 
@@ -66,6 +66,12 @@ public:
      * @return Current engine state (READY, BUSY, DRAINING, or ERROR)
      */
     virtual EngineState poll() override = 0;
+
+    /**
+     * @brief Get the engine name for affinity binding
+     * @return "RMT"
+     */
+    const char* getName() const override { return "RMT"; }
 
 protected:
     ChannelEngineRMT() = default;

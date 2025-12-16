@@ -108,7 +108,7 @@
 #include "fl/fastled.h"
 
 #include "fl/channels/channel.h"
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/bus_manager.h"
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS

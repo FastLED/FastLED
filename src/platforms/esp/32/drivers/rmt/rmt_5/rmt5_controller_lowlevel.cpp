@@ -14,7 +14,7 @@
 
 #include "rmt5_controller_lowlevel.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/bus_manager.h"
 
 FL_EXTERN_C_BEGIN
 

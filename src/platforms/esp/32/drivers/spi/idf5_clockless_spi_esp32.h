@@ -12,9 +12,9 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "fl/channels/channel_data.h"
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/bus_manager.h"
 #include "fl/chipsets/timing_traits.h"
 
 namespace fl {

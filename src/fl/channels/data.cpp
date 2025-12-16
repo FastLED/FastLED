@@ -1,7 +1,7 @@
-/// @file channel_data.cpp
+/// @file data.cpp
 /// @brief Channel transmission data implementation
 
-#include "channel_data.h"
+#include "fl/channels/data.h"
 #include "ftl/algorithm.h"
 #include "ftl/cstring.h"
 #include "fl/log.h"

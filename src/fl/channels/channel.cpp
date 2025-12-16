@@ -1,13 +1,15 @@
 /// @file channel.cpp
 /// @brief LED channel implementation
 
-#include "channel.h"
-#include "channel_config.h"
-#include "channel_data.h"
-#include "channel_engine.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/config.h"
+#include "fl/channels/data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/bus_manager.h"
 #include "ftl/atomic.h"
 #include "fl/dbg.h"
-#include "fl/led_settings.h"
+#include "fl/warn.h"
+#include "fl/channels/options.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
 
@@ -25,13 +27,31 @@ int32_t Channel::nextId() {
     return gNextChannelId.fetch_add(1);
 }
 
-ChannelPtr Channel::create(const ChannelConfig &config, IChannelEngine* engine) {
+ChannelPtr Channel::create(const ChannelConfig &config) {
+    IChannelEngine* selectedEngine = nullptr;
+
+    // Handle affinity binding: if affinity is specified, look up engine by name
+    if (config.options.affinity && config.options.affinity[0]) {
+        selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.affinity);
+        if (selectedEngine) {
+            FL_DBG("Channel: Bound to engine '" << config.options.affinity << "' via affinity");
+        } else {
+            FL_WARN("Channel: Affinity engine '" << config.options.affinity << "' not found or not enabled - using ChannelBusManager");
+        }
+    }
+
+    // If no affinity or affinity engine not found, use ChannelBusManager
+    if (!selectedEngine) {
+        selectedEngine = &ChannelBusManager::instance();
+        FL_DBG("Channel: Using ChannelBusManager for engine selection");
+    }
+
     return fl::make_shared<Channel>(config.pin, config.timing, config.mLeds,
-                                     config.rgb_order, engine, config.settings);
+                                     config.rgb_order, selectedEngine, config.options);
 }
 
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                 EOrder rgbOrder, IChannelEngine* engine, const LEDSettings& settings)
+                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
     : CPixelLEDController<RGB>()
     , mPin(pin)
     , mTiming(timing)
@@ -48,11 +68,11 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     // Set the LED data array
     setLeds(leds);
 
-    // Set color correction/temperature/dither/rgbw from LEDSettings
-    setCorrection(settings.correction);
-    setTemperature(settings.temperature);
-    setDither(settings.ditherMode);
-    setRgbw(settings.rgbw);
+    // Set color correction/temperature/dither/rgbw from ChannelOptions
+    setCorrection(options.correction);
+    setTemperature(options.temperature);
+    setDither(options.ditherMode);
+    setRgbw(options.rgbw);
 
     // Create ChannelData during construction
     mChannelData = ChannelData::create(mPin, mTiming);

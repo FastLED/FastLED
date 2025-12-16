@@ -10,8 +10,8 @@
 #include "pixel_iterator.h"
 #include "ftl/stdint.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/channels/channel_data.h"
-#include "fl/channels/channel_engine.h"
+#include "fl/channels/data.h"
+#include "fl/channels/engine.h"
 
 FL_EXTERN_C_BEGIN
 

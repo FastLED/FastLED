@@ -18,14 +18,14 @@
 #include "ftl/stdint.h"
 #include "fl/singleton.h"
 #include "pixeltypes.h"
-#include "channel_config.h"
+#include "fl/channels/config.h"
 
 namespace fl {
 
 // Forward declarations
 class IChannelEngine;
 class ChannelData;
-struct LEDSettings;
+struct ChannelOptions;
 
 class Channel;
 FASTLED_SHARED_PTR(Channel);
@@ -38,21 +38,12 @@ FASTLED_SHARED_PTR(ChannelData);
 /// RGB_ORDER is set to RGB - reordering is handled internally by the Channel
 class Channel: public CPixelLEDController<RGB> {
 public:
-    /// @brief Create a new channel with compile-time engine type
-    /// @tparam CHANNEL_ENGINE Engine type (e.g., fl::ChannelEnginePARLIO)
-    /// @param config Channel configuration
+    /// @brief Create a new channel with optional affinity binding
+    /// @param config Channel configuration (includes optional affinity for engine selection)
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
-    template<typename CHANNEL_ENGINE>
-    static ChannelPtr create(const ChannelConfig& config) {
-        IChannelEngine* engine = fl::Singleton<CHANNEL_ENGINE>::instance();
-        return create(config, engine);
-    }
-
-    /// @brief Create a new channel with runtime engine instance
-    /// @param config Channel configuration
-    /// @param engine Channel engine this channel belongs to (singleton pointer, not owned)
-    /// @return Shared pointer to the channel
-    static ChannelPtr create(const ChannelConfig& config, IChannelEngine* engine);
+    /// @note Channels always use ChannelBusManager by default
+    /// @note If config.affinity is set, binds to the named engine from ChannelBusManager
+    static ChannelPtr create(const ChannelConfig& config);
 
     /// @brief Destructor
     virtual ~Channel();
@@ -88,7 +79,7 @@ private:
 
     /// @brief Private constructor (use create() factory method)
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-            EOrder rgbOrder, IChannelEngine* engine, const LEDSettings& settings);
+            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
 
     // Non-copyable, non-movable
     Channel(const Channel&) = delete;

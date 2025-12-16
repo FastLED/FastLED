@@ -22,8 +22,8 @@
 // Skip RMT4 implementation for RMT5-only chips
 #elif !FASTLED_RMT5  // Only compile for RMT4 (IDF 4.x)
 
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
 #include "ftl/span.h"
 #include "fl/register.h"
 #include "platforms/esp/32/core/clock_cycles.h"
@@ -160,6 +160,10 @@ public:
     static ChannelEngineRMT4Ptr create();
 
     virtual ~ChannelEngineRMT4() = default;
+
+    /// @brief Get the engine name for affinity binding
+    /// @return "RMT"
+    const char* getName() const override { return "RMT"; }
 
 protected:
     ChannelEngineRMT4() = default;

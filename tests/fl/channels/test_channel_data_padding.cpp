@@ -5,7 +5,7 @@
 /// for protocols that require alignment (e.g., UCS7604's divisible-by-3 requirement)
 
 #include "test.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/data.h"
 #include "fl/chipsets/led_timing.h"
 #include "ftl/cstring.h"
 #include "ftl/algorithm.h"

@@ -8,7 +8,7 @@
 #include "fl/screenmap.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/eorder.h"
-#include "fl/led_settings.h"
+#include "fl/channels/options.h"
 #include "color.h"
 #include "dither_mode.h"
 
@@ -27,12 +27,12 @@ struct ChannelConfig {
     // Template constructor with TIMING type
     template<typename TIMING>
     ChannelConfig(int pin, fl::span<CRGB> leds, EOrder rgbOrder = RGB,
-                  const LEDSettings& settings = LEDSettings())
-        : ChannelConfig(pin, makeTimingConfig<TIMING>(), leds, rgbOrder, settings) {}
+                  const ChannelOptions& options = ChannelOptions())
+        : ChannelConfig(pin, makeTimingConfig<TIMING>(), leds, rgbOrder, options) {}
 
-    // Basic constructor with timing, leds, rgb_order, and LEDSettings
+    // Basic constructor with timing, leds, rgb_order, and ChannelOptions
     ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const LEDSettings& settings = LEDSettings());
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions());
 
     // Copy constructor (needed because of const members)
     ChannelConfig(const ChannelConfig& other);
@@ -56,8 +56,8 @@ struct ChannelConfig {
     // RGB channel ordering
     EOrder rgb_order = RGB;
 
-    // LED settings (correction, temperature, dither, rgbw)
-    LEDSettings settings;
+    // Optional channel settings (correction, temperature, dither, rgbw, affinity)
+    ChannelOptions options;
 
     // Screen mapping
     fl::ScreenMap mScreenMap;

@@ -2,8 +2,8 @@
 /// @brief Tests for ChannelBusManager priority-based engine selection
 
 #include "test.h"
-#include "fl/channels/channel_bus_manager.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/bus_manager.h"
+#include "fl/channels/data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "ftl/shared_ptr.h"
 #include "ftl/vector.h"
@@ -28,7 +28,7 @@ public:
     // Test accessors
     int getTransmitCount() const { return mTransmitCount; }
     int getLastChannelCount() const { return mLastChannelCount; }
-    const char* getName() const { return mName; }
+    const char* getName() const override { return mName; }
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
     void setShouldFail(bool shouldFail) { mShouldFail = shouldFail; }
 

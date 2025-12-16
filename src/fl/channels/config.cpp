@@ -1,22 +1,22 @@
-/// @file channel_config.cpp
+/// @file config.cpp
 /// @brief Implementation of MultiChannelConfig builder pattern methods
 
-#include "channel_config.h"
+#include "fl/channels/config.h"
 
 namespace fl {
 
 // Constructors
 ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                              EOrder rgbOrder, const LEDSettings& settings)
-    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), settings(settings) {}
+                              EOrder rgbOrder, const ChannelOptions& options)
+    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), options(options) {}
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other)
     : pin(other.pin), timing(other.timing), mLeds(other.mLeds), rgb_order(other.rgb_order),
-      settings(other.settings) {}
+      options(other.options) {}
 
 ChannelConfig::ChannelConfig(ChannelConfig&& other)
     : pin(other.pin), timing(fl::move(other.timing)), mLeds(other.mLeds), rgb_order(other.rgb_order),
-      settings(fl::move(other.settings)) {}
+      options(fl::move(other.options)) {}
 
 // MultiChannelConfig constructors
 

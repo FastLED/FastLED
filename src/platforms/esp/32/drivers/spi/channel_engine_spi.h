@@ -14,8 +14,8 @@
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
 #include "fl/engine_events.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"
@@ -201,6 +201,10 @@ public:
     void enqueue(ChannelDataPtr channelData) override;
     void show() override;
     EngineState poll() override;
+
+    /// @brief Get the engine name for affinity binding
+    /// @return "SPI"
+    const char* getName() const override { return "SPI"; }
 
 private:
     /// @brief Begin LED data transmission with internal batching (internal helper)

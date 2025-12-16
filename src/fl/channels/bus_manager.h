@@ -1,4 +1,4 @@
-/// @file channel_bus_manager.h
+/// @file bus_manager.h
 /// @brief Unified bus manager for channel engines with priority-based fallback
 ///
 /// The ChannelBusManager coordinates multiple channel engines (e.g., PARLIO, SPI, RMT)
@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
 #include "fl/engine_events.h"
 #include "ftl/vector.h"
 #include "ftl/shared_ptr.h"
@@ -100,6 +100,12 @@ public:
     /// @note This method updates an internal cache - not thread-safe
     /// @note fl::string copies are cheap (shared pointer internally, no heap allocation)
     fl::span<const DriverInfo> getDriverInfos() const;
+
+    /// @brief Get engine by name for affinity binding
+    /// @param name Engine name to look up (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
+    /// @return Pointer to engine if found and enabled, nullptr otherwise
+    /// @note Used by Channel affinity system to bind channels to specific engines
+    IChannelEngine* getEngineByName(const char* name) const;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit

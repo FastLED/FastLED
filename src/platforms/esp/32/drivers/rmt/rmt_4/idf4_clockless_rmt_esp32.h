@@ -35,9 +35,9 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "fl/channels/channel_data.h"
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/data.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/bus_manager.h"
 #include "platforms/esp/32/core/fastpin_esp32.h"
 #include "fl/chipsets/timing_traits.h"
 

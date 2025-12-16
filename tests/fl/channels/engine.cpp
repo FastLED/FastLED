@@ -3,9 +3,10 @@
 
 #include "test.h"
 #include "fl/channels/channel.h"
-#include "fl/channels/channel_config.h"
-#include "fl/channels/channel_engine.h"
-#include "fl/channels/channel_data.h"
+#include "fl/channels/config.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
+#include "fl/channels/bus_manager.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "ftl/vector.h"
 #include "ftl/move.h"
@@ -42,6 +43,8 @@ public:
         return EngineState::READY;
     }
 
+    const char* getName() const override { return "MOCK"; }
+
 private:
     void beginTransmission(fl::span<const ChannelDataPtr> channels) {
         transmitCount++;
@@ -53,59 +56,85 @@ private:
 };
 
 TEST_CASE("Channel basic operations") {
-    MockEngine engine;
+    auto mockEngine = fl::make_shared<MockEngine>();
+
+    // Register mock engine with ChannelBusManager for testing
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK");  // High priority to ensure selection
+
     CRGB leds[10];
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
-    LEDSettings settings;
+    ChannelOptions options;
+    options.affinity = "MOCK";
 
-    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 10), RGB, settings);
-    auto channel = Channel::create(config, &engine);
+    // Use affinity to bind to mock engine
+    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 10), RGB, options);
+    auto channel = Channel::create(config);
 
     REQUIRE(channel != nullptr);
     CHECK(channel->getPin() == 1);
     CHECK(channel->size() == 10);
-    CHECK(channel->getChannelEngine() == &engine);
+    CHECK(channel->getChannelEngine() == mockEngine.get());
+
+    // Clean up: disable mock engine after test
+    manager.setDriverEnabled("MOCK", false);
 }
 
 TEST_CASE("Channel transmission") {
-    MockEngine engine;
+    auto mockEngine = fl::make_shared<MockEngine>();
+
+    // Register mock engine with ChannelBusManager for testing
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_TX");  // High priority to ensure selection
+
     CRGB leds[5];
     fill_solid(leds, 5, CRGB::Red);
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
-    LEDSettings settings;
-    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, settings);
-    auto channel = Channel::create(config, &engine);
+    ChannelOptions options;
+    options.affinity = "MOCK_TX";
+    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
+    auto channel = Channel::create(config);
 
     // Trigger show - this encodes and enqueues
     channel->showLeds(255);
 
     // Engine's show() triggers transmission
-    engine.show();
+    mockEngine->show();
 
-    CHECK(engine.transmitCount == 1);
-    CHECK(engine.lastChannelCount == 1);
+    CHECK(mockEngine->transmitCount == 1);
+    CHECK(mockEngine->lastChannelCount == 1);
+
+    // Clean up: disable mock engine after test
+    manager.setDriverEnabled("MOCK_TX", false);
 }
 
 TEST_CASE("FastLED.show() with channels") {
-    MockEngine engine;
+    auto mockEngine = fl::make_shared<MockEngine>();
+
+    // Register mock engine with ChannelBusManager for testing
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_FASTLED");  // High priority to ensure selection
+
     CRGB leds[5];
     fill_solid(leds, 5, CRGB::Blue);
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
-    LEDSettings settings;
-    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, settings);
-    auto channel = Channel::create(config, &engine);
+    ChannelOptions options;
+    options.affinity = "MOCK_FASTLED";
+    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
+    auto channel = Channel::create(config);
 
     FastLED.addLedChannel(channel);
 
-    int before = engine.transmitCount;
+    int before = mockEngine->transmitCount;
     FastLED.show();
 
-    CHECK(engine.transmitCount > before);
+    CHECK(mockEngine->transmitCount > before);
 
     // Clean up
     channel->removeFromDrawList();
+    manager.setDriverEnabled("MOCK_FASTLED", false);
 }
 
 } // namespace channel_engine_test

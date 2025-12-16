@@ -12,7 +12,7 @@
 #include "fl/compiler_control.h"
 #ifdef ESP32
 
-#include "fl/channels/channel_bus_manager.h"
+#include "fl/channels/bus_manager.h"
 #include "fl/dbg.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "ftl/shared_ptr.h"
