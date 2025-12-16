@@ -9,9 +9,16 @@ namespace fl {
 namespace detail {
 
 fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase) {
-    // Handle zero case
+    // Calculate expected number of hex characters based on bit width
+    size_t expected_chars = static_cast<uint8_t>(width) / 4;
+
+    // Handle zero case - pad to expected width
     if (value == 0) {
-        return fl::string("0");
+        fl::string result;
+        for (size_t i = 0; i < expected_chars; ++i) {
+            result += "0";
+        }
+        return result;
     }
 
     fl::string result;
@@ -28,6 +35,13 @@ fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool upperca
         temp += result;
         result = temp;
         value /= 16;
+    }
+
+    // Pad with leading zeros to reach expected width
+    while (result.size() < expected_chars) {
+        fl::string temp = "0";
+        temp += result;
+        result = temp;
     }
 
     // Add negative sign if needed

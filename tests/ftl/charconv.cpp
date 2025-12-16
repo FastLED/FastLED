@@ -17,32 +17,34 @@ using namespace fl;
 
 TEST_CASE("fl::to_hex - zero value") {
     SUBCASE("zero") {
-        CHECK_EQ(to_hex(0), "0");
-        CHECK_EQ(to_hex(0, false), "0");
-        CHECK_EQ(to_hex(0, true), "0");
+        // Default int is typically 32-bit = 8 hex chars
+        CHECK_EQ(to_hex(0), "00000000");
+        CHECK_EQ(to_hex(0, false), "00000000");
+        CHECK_EQ(to_hex(0, true), "00000000");
     }
 }
 
 TEST_CASE("fl::to_hex - positive integers") {
     SUBCASE("single digit") {
-        CHECK_EQ(to_hex(1), "1");
-        CHECK_EQ(to_hex(9), "9");
-        CHECK_EQ(to_hex(15), "f");
-        CHECK_EQ(to_hex(15, true), "F");
+        // Default int is 32-bit = 8 hex chars with zero-padding
+        CHECK_EQ(to_hex(1), "00000001");
+        CHECK_EQ(to_hex(9), "00000009");
+        CHECK_EQ(to_hex(15), "0000000f");
+        CHECK_EQ(to_hex(15, true), "0000000F");
     }
 
     SUBCASE("multiple digits") {
-        CHECK_EQ(to_hex(16), "10");
-        CHECK_EQ(to_hex(255), "ff");
-        CHECK_EQ(to_hex(255, true), "FF");
-        CHECK_EQ(to_hex(256), "100");
-        CHECK_EQ(to_hex(4095), "fff");
-        CHECK_EQ(to_hex(4095, true), "FFF");
+        CHECK_EQ(to_hex(16), "00000010");
+        CHECK_EQ(to_hex(255), "000000ff");
+        CHECK_EQ(to_hex(255, true), "000000FF");
+        CHECK_EQ(to_hex(256), "00000100");
+        CHECK_EQ(to_hex(4095), "00000fff");
+        CHECK_EQ(to_hex(4095, true), "00000FFF");
     }
 
     SUBCASE("large values") {
-        CHECK_EQ(to_hex(65535), "ffff");
-        CHECK_EQ(to_hex(65535, true), "FFFF");
+        CHECK_EQ(to_hex(65535), "0000ffff");
+        CHECK_EQ(to_hex(65535, true), "0000FFFF");
         CHECK_EQ(to_hex(0xDEADBEEF), "deadbeef");
         CHECK_EQ(to_hex(0xDEADBEEF, true), "DEADBEEF");
     }
@@ -50,51 +52,58 @@ TEST_CASE("fl::to_hex - positive integers") {
 
 TEST_CASE("fl::to_hex - negative integers") {
     SUBCASE("negative values") {
-        CHECK_EQ(to_hex(-1), "-1");
-        CHECK_EQ(to_hex(-16), "-10");
-        CHECK_EQ(to_hex(-255), "-ff");
-        CHECK_EQ(to_hex(-255, true), "-FF");
+        // Negative sign before zero-padded hex value
+        CHECK_EQ(to_hex(-1), "-00000001");
+        CHECK_EQ(to_hex(-16), "-00000010");
+        CHECK_EQ(to_hex(-255), "-000000ff");
+        CHECK_EQ(to_hex(-255, true), "-000000FF");
     }
 }
 
 TEST_CASE("fl::to_hex - different integer types") {
     SUBCASE("uint8_t") {
         uint8_t val = 0xAB;
+        // 8-bit = 2 hex chars
         CHECK_EQ(to_hex(val), "ab");
         CHECK_EQ(to_hex(val, true), "AB");
     }
 
     SUBCASE("uint16_t") {
         uint16_t val = 0x1234;
+        // 16-bit = 4 hex chars
         CHECK_EQ(to_hex(val), "1234");
         CHECK_EQ(to_hex(val, true), "1234");
     }
 
     SUBCASE("uint32_t") {
         uint32_t val = 0xABCD1234;
+        // 32-bit = 8 hex chars
         CHECK_EQ(to_hex(val), "abcd1234");
         CHECK_EQ(to_hex(val, true), "ABCD1234");
     }
 
     SUBCASE("int8_t") {
         int8_t val = -16;
+        // 8-bit = 2 hex chars with negative sign
         CHECK_EQ(to_hex(val), "-10");
     }
 
     SUBCASE("int16_t") {
         int16_t val = -256;
-        CHECK_EQ(to_hex(val), "-100");
+        // 16-bit = 4 hex chars with negative sign
+        CHECK_EQ(to_hex(val), "-0100");
     }
 }
 
 TEST_CASE("fl::to_hex - case sensitivity") {
     SUBCASE("lowercase") {
-        CHECK_EQ(to_hex(0xABCDEF, false), "abcdef");
-        CHECK_EQ(to_hex(0xFEDCBA, false), "fedcba");
+        // 32-bit int = 8 hex chars with zero-padding
+        CHECK_EQ(to_hex(0xABCDEF, false), "00abcdef");
+        CHECK_EQ(to_hex(0xFEDCBA, false), "00fedcba");
     }
 
     SUBCASE("uppercase") {
-        CHECK_EQ(to_hex(0xABCDEF, true), "ABCDEF");
-        CHECK_EQ(to_hex(0xFEDCBA, true), "FEDCBA");
+        CHECK_EQ(to_hex(0xABCDEF, true), "00ABCDEF");
+        CHECK_EQ(to_hex(0xFEDCBA, true), "00FEDCBA");
     }
 }
