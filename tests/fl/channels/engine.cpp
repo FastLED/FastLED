@@ -65,7 +65,7 @@ TEST_CASE("Channel basic operations") {
     CRGB leds[10];
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.affinity = "MOCK";
+    options.mAffinity = "MOCK";
 
     // Use affinity to bind to mock engine
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 10), RGB, options);
@@ -92,7 +92,7 @@ TEST_CASE("Channel transmission") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.affinity = "MOCK_TX";
+    options.mAffinity = "MOCK_TX";
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
@@ -121,7 +121,7 @@ TEST_CASE("FastLED.show() with channels") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.affinity = "MOCK_FASTLED";
+    options.mAffinity = "MOCK_FASTLED";
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 

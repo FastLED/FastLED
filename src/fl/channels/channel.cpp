@@ -31,12 +31,12 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
     IChannelEngine* selectedEngine = nullptr;
 
     // Handle affinity binding: if affinity is specified, look up engine by name
-    if (config.options.affinity && config.options.affinity[0]) {
-        selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.affinity);
+    if (config.options.mAffinity && config.options.mAffinity[0]) {
+        selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.mAffinity);
         if (selectedEngine) {
-            FL_DBG("Channel: Bound to engine '" << config.options.affinity << "' via affinity");
+            FL_DBG("Channel: Bound to engine '" << config.options.mAffinity << "' via affinity");
         } else {
-            FL_WARN("Channel: Affinity engine '" << config.options.affinity << "' not found or not enabled - using ChannelBusManager");
+            FL_WARN("Channel: Affinity engine '" << config.options.mAffinity << "' not found or not enabled - using ChannelBusManager");
         }
     }
 
@@ -69,10 +69,10 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     setLeds(leds);
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    setCorrection(options.correction);
-    setTemperature(options.temperature);
-    setDither(options.ditherMode);
-    setRgbw(options.rgbw);
+    setCorrection(options.mCorrection);
+    setTemperature(options.mTemperature);
+    setDither(options.mDitherMode);
+    setRgbw(options.mRgbw);
 
     // Create ChannelData during construction
     mChannelData = ChannelData::create(mPin, mTiming);
@@ -93,7 +93,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     }
 
     // Encode pixels into the channel data
-    PixelIteratorAny any(pixels, mRgbOrder, mSettings.rgbw);
+    PixelIteratorAny any(pixels, mRgbOrder, mSettings.mRgbw);
     PixelIterator& pixelIterator = any;
     // FUTURE WORK: This is where we put the encoder
     auto& data = mChannelData->getData();

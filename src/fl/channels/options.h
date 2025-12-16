@@ -11,11 +11,11 @@ namespace fl {
 /// Optional channel configuration parameters
 /// All fields have sensible defaults and can be overridden as needed
 struct ChannelOptions {
-    CRGB correction = UncorrectedColor;
-    CRGB temperature = UncorrectedTemperature;
-    fl::u8 ditherMode = BINARY_DITHER;
-    Rgbw rgbw = RgbwInvalid::value(); // RGBW is RGB by default
-    const char* affinity = nullptr;   // Engine affinity (nullptr = let ChannelBusManager decide)
+    CRGB mCorrection = UncorrectedColor;
+    CRGB mTemperature = UncorrectedTemperature;
+    fl::u8 mDitherMode = BINARY_DITHER;
+    Rgbw mRgbw = RgbwInvalid::value(); // RGBW is RGB by default
+    const char* mAffinity = nullptr;   // Engine affinity (nullptr = let ChannelBusManager decide)
 };
 
 } // namespace fl
