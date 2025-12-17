@@ -1,17 +1,17 @@
 
 #include "fl/json.h"
-#include "ftl/string.h"
-#include "ftl/vector.h"
-#include "ftl/deque.h"
-#include "ftl/function.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
+#include "fl/stl/function.h"
 #include "fl/sketch_macros.h"
-#include "ftl/math.h" // For floor function
+#include "fl/stl/math.h" // For floor function
 #include "fl/compiler_control.h"
 #include "fl/thread_local.h"
 #include "fl/numeric_limits.h"
 
 // fl::numeric_limits<i16>::min(), fl::numeric_limits<i16>::max(), and fl::numeric_limits<u8>::max() should come from the platform's
-// <stdint.h> or <cstdint> headers (via ftl/stdint.h).
+// <stdint.h> or <cstdint> headers (via fl/stl/stdint.h).
 // FastLED no longer defines these macros to avoid conflicts with system headers.
 
 

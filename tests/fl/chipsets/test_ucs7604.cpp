@@ -10,7 +10,7 @@
 #include "FastLED.h"
 #include "fl/chipsets/ucs7604.h"
 #include "crgb.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/ease.h"
 
 using namespace fl;

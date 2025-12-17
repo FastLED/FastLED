@@ -2,11 +2,11 @@
 
 #include "fl/codec/common.h"
 #include "fl/audio.h"
-#include "ftl/span.h"
-#include "ftl/vector.h"
-#include "ftl/stdint.h"
+#include "fl/stl/span.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/str.h"
 
 namespace fl {

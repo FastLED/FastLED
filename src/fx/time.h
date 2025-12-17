@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #include "fl/deprecated.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 
 namespace fl {
 

@@ -4,7 +4,7 @@
 // Define this before including headers to prevent duplicate specializations in delay_cycles_generic.h
 #define FL_DELAY_CPP_SPECIALIZATIONS
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/delay.h"
 #include "platforms/cycle_type.h"
 #include "fl/compiler_control.h"

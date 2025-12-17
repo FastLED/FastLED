@@ -37,13 +37,13 @@
 // - G4 (channel-based DMA with DMAMUX - not yet implemented)
 // - U5 (GPDMA architecture - not yet implemented)
 
-#include "ftl/stdint.h"  // For UINT32_MAX
+#include "fl/stl/stdint.h"  // For UINT32_MAX
 #include <Arduino.h>  // Ensure STM32 HAL is initialized
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 // Allow software-mode testing without hardware Timer/DMA
 // Define this to enable software GPIO bitbanging mode for testing

@@ -47,9 +47,9 @@
 
 //#include "hlxclib/stdlib.h"		/* for malloc, free */
 #include <stdlib.h>
-#include "ftl/string.h"
+#include "fl/stl/string.h"
 #include "coder.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 namespace third_party {

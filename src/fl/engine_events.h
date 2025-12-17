@@ -2,9 +2,9 @@
 
 #include "fl/screenmap.h"
 #include "fl/singleton.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/xymap.h"
-#include "ftl/string.h"
+#include "fl/stl/string.h"
 #include "fl/int.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS

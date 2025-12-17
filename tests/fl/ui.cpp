@@ -16,7 +16,7 @@
 #include "platforms/shared/ui/json/slider.h"
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/json_console.h"
-#include "ftl/sstream.h"
+#include "fl/stl/sstream.h"
 #include <cstring>
 #include "fl/json.h"
 #include "fl/unused.h"

@@ -11,7 +11,7 @@ Dominic Szablewski - https://phoboslab.org
 // library to create the implementation.
 
 #define PL_MPEG_IMPLEMENTATION
-#include "ftl/cstddef.h"
+#include "fl/stl/cstddef.h"
 #include "plmpeg.h"
 
 // This function gets called for each decoded video frame
@@ -147,18 +147,18 @@ See below for detailed the API documentation.
 #define PLM_NO_STDIO
 
 #include "pl_mpeg.h"
-#include "ftl/malloc.h"
+#include "fl/stl/malloc.h"
 
 
 // Include headers outside the namespace to avoid conflicts
 
 #include "fl/stddef.h"  // For NULL definition
 
-#include "ftl/stdint.h"
-#include "ftl/math.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/str.h"
-#include "ftl/cstring.h"  // for fl::memset(), fl::memcpy(), fl::memmove()
+#include "fl/stl/cstring.h"  // for fl::memset(), fl::memcpy(), fl::memmove()
 
 
 // #ifdef __cplusplus

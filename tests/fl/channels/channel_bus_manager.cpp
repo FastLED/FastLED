@@ -5,9 +5,9 @@
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/data.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/vector.h"
-#include "ftl/move.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/move.h"
 #include "fl/dbg.h"
 
 namespace channel_bus_manager_test {

@@ -1,7 +1,7 @@
 #ifndef __INC_FASTPIN_APOLLO3_H
 #define __INC_FASTPIN_APOLLO3_H
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 
 // Include Arduino core to get Apollo3 HAL function declarations

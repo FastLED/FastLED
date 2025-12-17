@@ -1,7 +1,7 @@
 #include "test.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
-// Test that ftl/stdint.h provides standard integer types without including <stdint.h>
+// Test that fl/stl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy
 
 TEST_CASE("stdint type definitions") {

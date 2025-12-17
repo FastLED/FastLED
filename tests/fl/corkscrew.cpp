@@ -2,9 +2,9 @@
 
 #include "fl/math_macros.h"
 #include "test.h"
-#include "ftl/algorithm.h"
+#include "fl/stl/algorithm.h"
 
-#include "ftl/sstream.h"
+#include "fl/stl/sstream.h"
 
 #include "fl/corkscrew.h"
 #include "fl/grid.h"

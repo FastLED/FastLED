@@ -5,8 +5,8 @@
 
 #include "fl/pixel_iterator.h"
 #include "pixel_controller.h"
-#include "ftl/variant.h"
-#include "ftl/optional.h"
+#include "fl/stl/variant.h"
+#include "fl/stl/optional.h"
 #include "rgbw.h"
 
 namespace fl {

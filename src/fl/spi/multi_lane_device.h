@@ -3,11 +3,11 @@
 /// @file spi/multi_lane_device.h
 /// @brief Multi-lane SPI device for 2-8 independent LED strips
 
-#include "ftl/stdint.h"
-#include "ftl/vector.h"
-#include "ftl/unique_ptr.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/result.h"
-#include "ftl/optional.h"
+#include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
 #include "fl/spi/config.h"
 #include "fl/spi/lane.h"

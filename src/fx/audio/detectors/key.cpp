@@ -2,9 +2,9 @@
 
 #include "fx/audio/detectors/key.h"
 #include "fl/audio/audio_context.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/dbg.h"
-#include "ftl/stdio.h"
+#include "fl/stl/stdio.h"
 
 namespace fl {
 

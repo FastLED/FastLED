@@ -1,6 +1,6 @@
 #include "test.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/memory.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/memory.h"
 #include "fl/compiler_control.h"
 
 namespace shared_ptr_test {

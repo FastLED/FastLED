@@ -3,9 +3,9 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
 #include "fx/audio/detectors/beat.h"
-#include "ftl/function.h"
-#include "ftl/vector.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/function.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 

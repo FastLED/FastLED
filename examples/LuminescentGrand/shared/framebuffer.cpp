@@ -6,7 +6,7 @@
 #include "./framebuffer.h"
 
 #include "./color.h"
-#include "ftl/malloc.h"
+#include "fl/stl/malloc.h"
 
 FrameBufferBase::FrameBufferBase(Color3i* array, int n_pixels)
     : color_array_(array), n_color_array_(n_pixels) {}

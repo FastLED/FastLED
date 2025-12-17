@@ -2,11 +2,11 @@
 
 #include "test.h"
 #include "fl/ui.h"
-#include "ftl/variant.h"
-#include "ftl/optional.h"
+#include "fl/stl/variant.h"
+#include "fl/stl/optional.h"
 #include "fl/str.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/function.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/function.h"
 
 
 // Test object that tracks construction/destruction for move semantics testing

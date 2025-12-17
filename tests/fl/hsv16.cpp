@@ -3,7 +3,7 @@
 #include "test.h"
 
 #include "fl/hsv16.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "lib8tion/intmap.h"
 
 

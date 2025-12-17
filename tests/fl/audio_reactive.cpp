@@ -1,7 +1,7 @@
 #include "test.h"
 #include "fl/audio_reactive.h"
-#include "ftl/math.h"
-#include "ftl/memory.h"
+#include "fl/stl/math.h"
+#include "fl/stl/memory.h"
 #include "fl/circular_buffer.h"
 
 using namespace fl;

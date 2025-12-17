@@ -7,9 +7,9 @@
 #include "test.h"
 #include "fl/channels/data.h"
 #include "fl/chipsets/led_timing.h"
-#include "ftl/cstring.h"
-#include "ftl/algorithm.h"
-#include "ftl/vector.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 

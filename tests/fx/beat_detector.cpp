@@ -6,7 +6,7 @@
 #include "fx/audio/advanced/beat_detector_edm.h"
 #include "fl/codec/mp3.h"
 #include "fl/file_system.h"
-#include "ftl/stdio.h"
+#include "fl/stl/stdio.h"
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #endif

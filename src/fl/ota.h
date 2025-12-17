@@ -87,8 +87,8 @@
 
 #pragma once
 
-#include "ftl/function.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
 
 // Note: OTA implementation uses Arduino/ESP-IDF standard types
 // No FastLED type headers needed here to avoid conflicts

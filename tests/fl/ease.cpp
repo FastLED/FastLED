@@ -1,6 +1,6 @@
 #include "fl/ease.h"
-#include "ftl/array.h"
-#include "ftl/pair.h"
+#include "fl/stl/array.h"
+#include "fl/stl/pair.h"
 #include "lib8tion/intmap.h"
 #include "test.h"
 #include <cmath>

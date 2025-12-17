@@ -7,7 +7,7 @@
 #if FASTLED_RMT5
 
 #include "fl/compiler_control.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "sdkconfig.h"
 
 FL_EXTERN_C_BEGIN

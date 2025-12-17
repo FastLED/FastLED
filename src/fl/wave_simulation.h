@@ -12,15 +12,15 @@ Based on works and code by Shawn Silverman.
 
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
-#include "ftl/unique_ptr.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/warn.h"
 #include "fl/wave_simulation_real.h"
 
 #include "fl/grid.h"
-#include "ftl/unique_ptr.h"  // For unique_ptr
+#include "fl/stl/unique_ptr.h"  // For unique_ptr
 #include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

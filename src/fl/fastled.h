@@ -20,7 +20,7 @@
 // ============================================================================
 
 /// Platform-agnostic integer types
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/int.h"
 
 /// Version and configuration
@@ -45,8 +45,8 @@
 #include "fl/math_macros.h"
 
 /// Memory and type utilities
-#include "ftl/bit_cast.h"
-#include "ftl/cstring.h"
+#include "fl/stl/bit_cast.h"
+#include "fl/stl/cstring.h"
 
 // ============================================================================
 // CORE LED TYPE DEFINITIONS

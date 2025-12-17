@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "noise.h"
 
 #include "fl/math_macros.h"

@@ -3,9 +3,9 @@
 
 #include "platforms/esp/esp_version.h"
 #include "fl/sketch_macros.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/memory.h"
-#include "ftl/string.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/memory.h"
+#include "fl/stl/string.h"
 #include "platforms/audio_input_null.hpp"
 
 

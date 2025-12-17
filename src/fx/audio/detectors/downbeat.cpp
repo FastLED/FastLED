@@ -1,7 +1,7 @@
 #include "fx/audio/detectors/downbeat.h"
 #include "fl/audio/audio_context.h"
-#include "ftl/math.h"
-#include "ftl/array.h"
+#include "fl/stl/math.h"
+#include "fl/stl/array.h"
 
 namespace fl {
 

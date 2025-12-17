@@ -10,9 +10,9 @@
 #include "fl/force_inline.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/pixel_iterator.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "lib8tion/intmap.h"
-#include "ftl/type_traits.h"
+#include "fl/stl/type_traits.h"
 #include "fl/ease.h"
 
 /// @file ucs7604.h

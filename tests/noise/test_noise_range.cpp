@@ -1,6 +1,6 @@
 #include "test.h"
 #include "noise.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 using namespace fl;
 
 TEST_CASE("Noise Range Analysis") {

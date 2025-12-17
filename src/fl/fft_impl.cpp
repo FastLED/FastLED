@@ -16,16 +16,16 @@
 #include "third_party/cq_kernel/kiss_fftr.h"
 
 #include "fl/alloca.h"
-#include "ftl/array.h"
+#include "fl/stl/array.h"
 #include "fl/audio.h"
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
 #include "fl/str.h"
 #include "fl/unused.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/warn.h"
 
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 #define AUDIO_SAMPLE_RATE 44100
 #define SAMPLES 512

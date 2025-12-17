@@ -3,8 +3,8 @@
 #pragma once
 
 #include "fl/fastled.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "ftl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fx/fx2d.h"
 
 namespace fl {

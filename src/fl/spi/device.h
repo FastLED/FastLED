@@ -5,11 +5,11 @@
 ///
 /// This file contains the main Device class for SPI communication.
 
-#include "ftl/stdint.h"
-#include "ftl/span.h"
-#include "ftl/unique_ptr.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/span.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/result.h"
-#include "ftl/optional.h"
+#include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
 #include "fl/numeric_limits.h"
 #include "fl/spi/config.h"

@@ -11,8 +11,8 @@
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/isr.h"
-#include "ftl/unique_ptr.h"
-#include "ftl/atomic.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/atomic.h"
 
 #include <chrono>
 #include <thread>

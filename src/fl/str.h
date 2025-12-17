@@ -5,7 +5,7 @@
 
 
 #include "fl/int.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 // Forward declarations for string comparison functions
 extern "C" {
@@ -19,11 +19,11 @@ extern "C" {
 
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macro
-#include "ftl/optional.h"
-#include "ftl/type_traits.h"
-#include "ftl/vector.h"
-#include "ftl/span.h"
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macro
+#include "fl/stl/optional.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/span.h"
 #include "fl/force_inline.h"
 #include "fl/deprecated.h"
 

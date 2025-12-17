@@ -4,10 +4,10 @@
 
 #if FASTLED_RMT5
 
-#include "ftl/allocator.h"
-#include "ftl/span.h"
-#include "ftl/vector.h"
-#include "ftl/stdint.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/span.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

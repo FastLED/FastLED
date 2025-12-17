@@ -12,11 +12,11 @@
 
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/unused.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/warn.h"
 
 namespace fl {

@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fx/frame.h"
 #include <cstdlib>
-#include "ftl/allocator.h"
+#include "fl/stl/allocator.h"
 using namespace fl;
 namespace {
     int allocation_count = 0;

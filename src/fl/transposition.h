@@ -23,9 +23,9 @@
 
 #include "fl/force_inline.h"
 #include "fl/int.h"
-#include "ftl/stdint.h"
-#include "ftl/span.h"
-#include "ftl/optional.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/span.h"
+#include "fl/stl/optional.h"
 
 namespace fl {
 

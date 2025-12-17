@@ -8,7 +8,7 @@
 
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 // FFT tests adapt to the build-time FASTLED_FFT_PRECISION setting.
 // Test expectations are provided for all three precision modes:

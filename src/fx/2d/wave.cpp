@@ -3,8 +3,8 @@
 
 #include "wave.h"
 
-#include "ftl/pair.h"
-#include "ftl/vector.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 

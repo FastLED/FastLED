@@ -20,7 +20,7 @@
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "fl/ease.h"
-#include "ftl/span.h"
+#include "fl/stl/span.h"
 #include "fl/dbg.h"
 
 using namespace fl;

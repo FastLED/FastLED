@@ -2,10 +2,10 @@
 
 #include "fl/engine_events.h"
 #include "fl/str.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"
-#include "ftl/shared_ptr.h" // For fl::shared_ptr
+#include "fl/stl/shared_ptr.h" // For fl::shared_ptr
 
 namespace fl {
 

@@ -14,7 +14,7 @@
 #include "platforms/shared/spi_hw_1.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>

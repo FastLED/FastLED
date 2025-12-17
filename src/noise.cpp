@@ -6,7 +6,7 @@
 #endif
 
 #include <string.h>  // ok include
-#include "ftl/array.h"
+#include "fl/stl/array.h"
 
 
 /// Disables pragma messages and warnings
@@ -14,7 +14,7 @@
 #include "fl/fastled.h"
 
 
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include "fl/map_range.h"
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it

@@ -15,7 +15,7 @@
 #include "fl/channels/bus_manager.h"
 #include "fl/dbg.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 
 // Include concrete engine implementations
 // RMT5-only platforms must use new driver architecture

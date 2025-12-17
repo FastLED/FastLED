@@ -21,8 +21,8 @@
 
 #if FASTLED_RMT5
 
-#include "ftl/stdint.h"
-#include "ftl/vector.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/vector.h"
 #include "fl/result.h"
 
 FL_EXTERN_C_BEGIN

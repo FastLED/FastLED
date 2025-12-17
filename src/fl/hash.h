@@ -1,11 +1,11 @@
 #pragma once
 
 #include "fl/str.h"
-#include "ftl/type_traits.h"
+#include "fl/stl/type_traits.h"
 #include "fl/int.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/force_inline.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include "fl/compiler_control.h"
 
 namespace fl {

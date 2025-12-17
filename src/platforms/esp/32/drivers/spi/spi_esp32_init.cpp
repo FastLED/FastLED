@@ -12,7 +12,7 @@
 
 #include "platforms/shared/spi_hw_1.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/compiler_control.h"
 
 namespace fl {

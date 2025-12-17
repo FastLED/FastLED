@@ -4,7 +4,7 @@
 /// @brief Result<T, E> type alias for fl::expected (Rust-style naming)
 ///
 /// This file provides a Rust-style naming alias for the C++23-style expected type.
-/// The underlying implementation is in ftl/expected.h.
+/// The underlying implementation is in fl/stl/expected.h.
 ///
 /// Example usage:
 /// @code
@@ -21,7 +21,7 @@
 /// }
 /// @endcode
 
-#include "ftl/expected.h"
+#include "fl/stl/expected.h"
 
 namespace fl {
 

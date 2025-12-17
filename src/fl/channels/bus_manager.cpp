@@ -7,8 +7,8 @@
 #include "fl/warn.h"
 #include "fl/engine_events.h"
 #include "fl/delay.h"
-#include "ftl/algorithm.h"
-#include "ftl/move.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/move.h"
 
 namespace fl {
 

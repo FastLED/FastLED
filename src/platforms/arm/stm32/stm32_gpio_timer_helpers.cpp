@@ -28,7 +28,7 @@
 #include "platforms/arm/stm32/stm32_capabilities.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 namespace fl {
 namespace stm32 {

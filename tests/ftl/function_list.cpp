@@ -2,7 +2,7 @@
 /// @brief Comprehensive tests for function_list class
 
 #include "test.h"
-#include "ftl/function.h"
+#include "fl/stl/function.h"
 #include "fl/unused.h"
 
 using namespace fl;

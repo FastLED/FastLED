@@ -8,7 +8,7 @@
 #include "fl/compiler_control.h"
 
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 #if FASTLED_RMT5
 
@@ -22,7 +22,7 @@ FL_EXTERN_C_BEGIN
 
 FL_EXTERN_C_END
 
-#include "ftl/assert.h"
+#include "fl/stl/assert.h"
 #include "fl/warn.h"
 #include "fl/log.h"
 #include "fl/chipsets/led_timing.h"

@@ -1,8 +1,8 @@
 // ok no namespace fl
 #pragma once
 
-#include "ftl/stdint.h"
-#include "ftl/function.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/function.h"
 
 // Stub timing functions for Arduino compatibility
 // These provide timing functionality when using the stub platform

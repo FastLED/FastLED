@@ -4,7 +4,7 @@
 /// Tests the wave transpose functionality used for multi-lane LED protocols.
 
 #include "fl/channels/wave8.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include "test.h"
 
 using namespace fl;

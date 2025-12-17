@@ -7,7 +7,7 @@
 #include "fl/has_include.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/math_macros.h"
 
 #ifdef FASTLED_TESTING
@@ -31,7 +31,7 @@
 #include "fl/codec/mpeg1.h"
 #include "fl/bytestream.h"
 #include "fl/math_macros.h" // for fl_min
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 namespace fl {
 

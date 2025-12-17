@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #include "crgb.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
 #include "fl/unused.h"
 

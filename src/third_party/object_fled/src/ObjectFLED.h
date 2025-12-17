@@ -42,7 +42,7 @@
 #include "DMAChannel.h"
 #include "ObjectFLEDDmaManager.h"
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 //Experimentally found DSE=3, SPEED=0 gave best LED overclocking
 //boot defaults DSE=6, SPEED=2.

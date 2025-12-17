@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "crgb.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {

@@ -1,8 +1,8 @@
 #include "software_decoder.h"
 #include "fl/scoped_array.h"
-#include "ftl/string.h"
+#include "fl/stl/string.h"
 #include "fl/str.h"
-#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 namespace fl {
 namespace third_party {

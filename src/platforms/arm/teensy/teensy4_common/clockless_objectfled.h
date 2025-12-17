@@ -25,9 +25,9 @@
 
 #include "cpixel_ledcontroller.h"
 #include "pixel_iterator.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/singleton.h"
-#include "ftl/map.h"
+#include "fl/stl/map.h"
 
 #ifndef FASTLED_OBJECTFLED_LATCH_DELAY
 #define FASTLED_OBJECTFLED_LATCH_DELAY 300  // WS2812-5VB

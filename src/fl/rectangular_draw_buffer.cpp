@@ -1,9 +1,9 @@
 
 #include "fl/rectangular_draw_buffer.h"
-#include "ftl/allocator.h"
+#include "fl/stl/allocator.h"
 #include "rgbw.h"
 #include "fl/str.h"
-#include "ftl/cstring.h"  // for fl::memset()
+#include "fl/stl/cstring.h"  // for fl::memset()
 
 namespace fl {
 

@@ -5,7 +5,7 @@
 #include "./Keyboard.h"
 #include "./dprint.h"
 #include "fl/unused.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 Key::Key() : on_(false), sustained_(false), sustain_pedal_on_(false),
              velocity_(0), idx_(0), event_time_(0) {}

@@ -8,14 +8,14 @@ Based on works and code by Shawn Silverman.
 
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
-#include "ftl/unique_ptr.h"
-#include "ftl/vector.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/vector.h"
 #include "fl/warn.h"
 
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

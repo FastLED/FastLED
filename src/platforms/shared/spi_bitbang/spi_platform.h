@@ -15,7 +15,7 @@
 #ifndef FL_PARALLEL_SPI_PLATFORM_H
 #define FL_PARALLEL_SPI_PLATFORM_H
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
 
 /* Auto-enable host simulation mode on stub platform */

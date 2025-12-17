@@ -17,9 +17,9 @@
 #include "fl/screenmap.h"
 #include "fl/virtual_if_not_avr.h"
 #include "fl/int.h"
-#include "ftl/bit_cast.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/channels/options.h"
-#include "ftl/span.h"
+#include "fl/stl/span.h"
 
 
 

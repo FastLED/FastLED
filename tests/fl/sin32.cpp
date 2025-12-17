@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/sin32.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 using namespace fl;
 

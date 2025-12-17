@@ -2,11 +2,11 @@
 
 #include "fl/codec/idecoder.h"
 #include "fl/codec/common.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/str.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/scoped_array.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fx/frame.h"
 
 // Include the actual nsgif header

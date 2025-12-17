@@ -10,8 +10,8 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "strip_spi.h"
-#include "ftl/unique_ptr.h"
-#include "ftl/assert.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/assert.h"
 #include "fl/chipsets/timing_traits.h"
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>

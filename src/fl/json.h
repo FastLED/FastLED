@@ -65,8 +65,8 @@
  *
  * @code
  * #include "fl/json.h"
- * #include "ftl/string.h"
- * #include "ftl/vector.h"
+ * #include "fl/stl/string.h"
+ * #include "fl/stl/vector.h"
  * #include "fl/warn.h"
  *
  * // Create a root JSON object
@@ -142,14 +142,14 @@
 */
 
 
-#include "ftl/string.h"
-#include "ftl/vector.h"
-#include "ftl/hash_map.h"
-#include "ftl/variant.h"
-#include "ftl/optional.h"
-#include "ftl/unique_ptr.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/functional.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/hash_map.h"
+#include "fl/stl/variant.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/functional.h"
 #include "fl/str.h" // For StringFormatter
 #include "fl/promise.h" // For Error type
 

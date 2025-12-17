@@ -1,7 +1,7 @@
 #include "test.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
-// Test C++ standard integer types and macros defined in ftl/stdint.h
+// Test C++ standard integer types and macros defined in fl/stl/stdint.h
 // This header provides C++ integer type definitions without <stdint.h>
 // Note: Uses fl:: namespace types internally but exposes standard C++ type names
 

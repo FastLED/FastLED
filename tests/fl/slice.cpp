@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/slice.h"
-#include "ftl/array.h"
+#include "fl/stl/array.h"
 
 using namespace fl;
 

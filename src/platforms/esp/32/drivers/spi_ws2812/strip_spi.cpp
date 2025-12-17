@@ -14,8 +14,8 @@
 #include "rgbw.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "ftl/cstring.h"
-#include "ftl/vector.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 static const char *STRIP_SPI_TAG = "strip_spi";

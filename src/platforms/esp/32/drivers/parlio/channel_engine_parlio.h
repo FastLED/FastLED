@@ -168,11 +168,11 @@
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/engine_events.h"
-#include "ftl/array.h"
-#include "ftl/deque.h"
-#include "ftl/span.h"
-#include "ftl/unique_ptr.h"
-#include "ftl/vector.h"
+#include "fl/stl/array.h"
+#include "fl/stl/deque.h"
+#include "fl/stl/span.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/vector.h"
 
 // Forward declarations for PARLIO types (avoid including driver headers in .h)
 struct parlio_tx_unit_t;

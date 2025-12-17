@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/str.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
 #include "fl/scoped_array.h"
 #include "fx/frame.h"

@@ -11,7 +11,7 @@
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

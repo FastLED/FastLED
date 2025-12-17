@@ -1,7 +1,7 @@
 #include "test.h"
-#include "ftl/functional.h"
-#include "ftl/scoped_ptr.h"
-#include "ftl/function.h"
+#include "fl/stl/functional.h"
+#include "fl/stl/scoped_ptr.h"
+#include "fl/stl/function.h"
 
 using namespace fl;
 

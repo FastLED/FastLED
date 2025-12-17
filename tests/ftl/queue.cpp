@@ -1,9 +1,9 @@
 // Test file for fl::queue
 
 #include "test.h"
-#include "ftl/queue.h"
-#include "ftl/vector.h"
-#include "ftl/deque.h"
+#include "fl/stl/queue.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 
 
 TEST_CASE("Basic Queue Operations") {

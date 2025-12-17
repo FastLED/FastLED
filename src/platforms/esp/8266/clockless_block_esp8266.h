@@ -1,7 +1,7 @@
 #ifndef __INC_CLOCKLESS_BLOCK_ESP8266_H
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/register.h"
 #include "fl/math_macros.h"
 #include "fl/fastpin.h"

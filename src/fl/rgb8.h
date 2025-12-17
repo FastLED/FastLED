@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/int.h"
 
 #include "hsv.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
-#include "ftl/type_traits.h"
+#include "fl/stl/type_traits.h"
 #include "fl/ease.h"
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared

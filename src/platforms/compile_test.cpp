@@ -1,8 +1,8 @@
 #define FASTLED_INTERNAL  
 #include "fl/fastled.h"
 #include "fl/int.h"
-#include "ftl/stdint.h"
-#include "ftl/type_traits.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/type_traits.h"
 
 // In the future, one of these might fail, and the user will want
 // to disable the compile tests so that they can continue on their

@@ -3,9 +3,9 @@
 /// @file spi/config.h
 /// @brief Configuration structure for SPI communication
 
-#include "ftl/stdint.h"
-#include "ftl/vector.h"
-#include "ftl/span.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 

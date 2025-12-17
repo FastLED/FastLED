@@ -36,8 +36,8 @@
 
 #include "test.h"
 #include "fl/str.h"
-#include "ftl/strstream.h"
-#include "ftl/vector.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/vector.h"
 #include "crgb.h"
 #include <sstream>
 

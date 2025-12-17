@@ -8,11 +8,11 @@
 /// DualSPIDevice to work across different platforms (ESP32, RP2040, etc.)
 /// without knowing platform-specific implementation details.
 
-#include "ftl/vector.h"
-#include "ftl/span.h"
-#include "ftl/stdint.h"
-#include "ftl/limits.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/span.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/limits.h"
+#include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_types.h"
 #include "platforms/shared/spi_hw_base.h"
 

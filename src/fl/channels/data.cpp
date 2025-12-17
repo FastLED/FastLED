@@ -2,8 +2,8 @@
 /// @brief Channel transmission data implementation
 
 #include "fl/channels/data.h"
-#include "ftl/algorithm.h"
-#include "ftl/cstring.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/cstring.h"
 #include "fl/log.h"
 
 namespace fl {

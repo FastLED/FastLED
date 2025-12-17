@@ -2,7 +2,7 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/dll.h"  // Will optionally compile in.
 
 /// @file FastLED.h
@@ -93,9 +93,9 @@
 #include "fl/async.h"
 #include "fl/sketch_macros.h"
 #include "fl/rx_device.h"
-#include "ftl/array.h"
-#include "ftl/vector.h"
-#include "ftl/cstring.h"
+#include "fl/stl/array.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/cstring.h"
 
 
 #include "fl/force_inline.h"
@@ -114,7 +114,7 @@
 // C STRING FUNCTION USING DECLARATIONS
 // ============================================================================
 
-/// Memory functions are available in fl:: namespace via ftl/cstring.h
+/// Memory functions are available in fl:: namespace via fl/stl/cstring.h
 /// Using declarations cannot work because system headers define memset/memcpy/memmove
 /// before FastLED.h is fully processed, causing signature conflicts even though
 /// fl::size and ::size_t refer to the same underlying type.
@@ -1154,18 +1154,18 @@ extern CFastLED FastLED;
 
 #include "fl/error.h"
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
-#include "ftl/assert.h"  // FASTLED_ASSERT(condition, "message");
+#include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
-#include "ftl/sstream.h"  // fl::sstream for string stream operations
+#include "fl/stl/sstream.h"  // fl::sstream for string stream operations
 
 // provides:
 //   fl::vector<T> - Standard heap vector
 //   fl::vector_inlined<T,N> - Allocate on stack N elements, then overflow to heap vector.
 //   fl::vector_fixed<T,N> - Stack allocated fixed size vector, elements will fail to add when full.
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 
 // Flexible callbacks in the style of std::function.
-#include "ftl/function.h"
+#include "fl/stl/function.h"
 
 // Clears the led data and other objects.
 // CRGB leds[NUM_LEDS];

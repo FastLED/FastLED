@@ -7,7 +7,7 @@
 #pragma once
 
 #include "platforms/intmap.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 /// @addtogroup lib8tion

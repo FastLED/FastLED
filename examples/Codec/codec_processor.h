@@ -5,8 +5,8 @@
 #include "fl/codec/mpeg1.h"
 #include "fl/bytestreammemory.h"
 #include "fl/xymap.h"
-#include "ftl/sstream.h"
-#include "ftl/function.h"
+#include "fl/stl/sstream.h"
+#include "fl/stl/function.h"
 
 namespace CodecProcessor {
 

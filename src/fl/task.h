@@ -31,12 +31,12 @@ void loop() {
 ```
 */
 
-#include "ftl/functional.h"
-#include "ftl/string.h"
+#include "fl/stl/functional.h"
+#include "fl/stl/string.h"
 #include "fl/trace.h"
 #include "fl/promise.h"
-#include "ftl/time.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/time.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 

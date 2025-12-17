@@ -1,15 +1,15 @@
 #pragma once
 
-#include "ftl/strstream.h"
+#include "fl/stl/strstream.h"
 #include "fl/sketch_macros.h"
 #include "fl/int.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 // Include category-based logging system
 #include "fl/log.h"
 
 
-// Forward declaration to avoid pulling in ftl/cstdio.h and causing ftl/cstdio.cpp to be compiled
+// Forward declaration to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications
 #ifndef FL_DBG_PRINTLN_DECLARED
 #define FL_DBG_PRINTLN_DECLARED

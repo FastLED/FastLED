@@ -14,10 +14,10 @@
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/esp/32/core/fastspi_esp32.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/stddef.h"
 #include "fl/log.h"
 

@@ -7,7 +7,7 @@
 #include "third_party/object_fled/src/ObjectFLED.h"
 #include "third_party/object_fled/src/ObjectFLEDPinValidation.h"
 #include "fl/warn.h"
-#include "ftl/cstring.h"  // for fl::memset()
+#include "fl/stl/cstring.h"  // for fl::memset()
 
 namespace {
 

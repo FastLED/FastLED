@@ -42,17 +42,17 @@
 /// }
 /// @endcode
 
-#include "ftl/vector.h"
-#include "ftl/function.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/variant.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/variant.h"
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 #include "fl/singleton.h"
 #include "fl/thread_local.h"
 
 #include "fl/task.h"
-#include "ftl/time.h"
+#include "fl/stl/time.h"
 
 namespace fl {
 

@@ -11,7 +11,7 @@
 #include "test.h"
 
 #include "fl/scoped_array.h"
-#include "ftl/ostream.h"
+#include "fl/stl/ostream.h"
 
 
 // Simple test effect that fills with a solid color

@@ -14,7 +14,7 @@
 //       PLIC register addresses and assembly directives need research and
 //       validation for specific RISC-V ESP32 variants before use.
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "soc/soc.h"
 #include "esp_intr_alloc.h"
 #include "riscv/interrupt.h"

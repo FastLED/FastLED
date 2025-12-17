@@ -1,9 +1,9 @@
 #include "fl/async.h"
-#include "ftl/functional.h"
+#include "fl/stl/functional.h"
 #include "fl/singleton.h"
-#include "ftl/algorithm.h"
+#include "fl/stl/algorithm.h"
 #include "fl/task.h"
-#include "ftl/time.h"
+#include "fl/stl/time.h"
 #include "fl/warn.h"
 
 // Platform-specific includes

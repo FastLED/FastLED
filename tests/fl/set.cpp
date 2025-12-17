@@ -2,10 +2,10 @@
 // Combined from test_fixed_set.cpp and test_set_inlined.cpp
 
 #include "test.h"
-#include "ftl/set.h"
-#include "ftl/allocator.h"
+#include "fl/stl/set.h"
+#include "fl/stl/allocator.h"
 #include "fl/int.h"
-#include "ftl/bit_cast.h"
+#include "fl/stl/bit_cast.h"
 #include <algorithm>
 
 using namespace fl;

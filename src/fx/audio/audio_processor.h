@@ -3,8 +3,8 @@
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/audio_detector.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/function.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/function.h"
 
 namespace fl {
 

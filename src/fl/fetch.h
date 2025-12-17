@@ -52,15 +52,15 @@
 /// @endcode
 
 #include "fl/promise.h"
-#include "ftl/string.h"
-#include "ftl/vector.h"
-#include "ftl/map.h"
-#include "ftl/hash_map.h"
-#include "ftl/optional.h"
-#include "ftl/function.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/map.h"
+#include "fl/stl/hash_map.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/async.h"
-#include "ftl/mutex.h"
+#include "fl/stl/mutex.h"
 #include "fl/warn.h"
 #include "fl/json.h"  // Add JSON support for response.json() method
 

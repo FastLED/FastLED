@@ -1,11 +1,11 @@
 #include "fl/fetch.h"
 #include "fl/warn.h"
 #include "fl/str.h"
-#include "ftl/mutex.h"
+#include "fl/stl/mutex.h"
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/async.h"
-#include "ftl/unique_ptr.h"  // For make_unique
+#include "fl/stl/unique_ptr.h"  // For make_unique
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

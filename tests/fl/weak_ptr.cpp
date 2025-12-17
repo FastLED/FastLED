@@ -1,9 +1,9 @@
 #include "test.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/weak_ptr.h"
-#include "ftl/memory.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/weak_ptr.h"
+#include "fl/stl/memory.h"
 #include "fl/compiler_control.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 
 namespace weak_ptr_test {
 

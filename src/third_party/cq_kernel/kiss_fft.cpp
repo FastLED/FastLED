@@ -6,9 +6,9 @@
  *  See COPYING file for more information.
  */
 
-#include "ftl/cstddef.h"
+#include "fl/stl/cstddef.h"
 #include "fl/str.h"
-#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "_kiss_fft_guts.h"
 
 // Ensure NULL is defined (standard C macro)

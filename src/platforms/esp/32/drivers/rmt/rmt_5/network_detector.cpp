@@ -7,7 +7,7 @@
 #if FASTLED_RMT5
 
 #include "fl/compiler_control.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 // Use ESP-IDF SoC capability macros to detect hardware features
 // These are defined in soc/soc_caps.h for each chip variant

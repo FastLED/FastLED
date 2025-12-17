@@ -18,15 +18,15 @@
 #include <stdio.h>
 #include "fl/json.h"
 #include "fl/math_macros.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/warn.h"
 #include "noisegen.h"
 #include "fl/screenmap.h"
 #include "fl/slice.h"
 #include "fl/ui.h"
 #include "sensors/pir.h"
-#include "ftl/sstream.h"
-#include "ftl/assert.h"
+#include "fl/stl/sstream.h"
+#include "fl/stl/assert.h"
 #include "fl/noise.h"
 
 // Defines come after all includes

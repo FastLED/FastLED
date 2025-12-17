@@ -1,8 +1,8 @@
 #include "test.h"
 #include "noise.h"
 #include "crgb.h"
-#include "ftl/math.h"
-#include "ftl/random.h"
+#include "fl/stl/math.h"
+#include "fl/stl/random.h"
 #include "lib8tion/random8.h"
 #include "noise_test_helpers.h"
 #include <cmath>

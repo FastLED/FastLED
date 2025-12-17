@@ -8,7 +8,7 @@
 #include "pixeltypes.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
-#include "ftl/bit_cast.h"
+#include "fl/stl/bit_cast.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"

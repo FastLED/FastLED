@@ -9,7 +9,7 @@
 
 #if FASTLED_RMT5
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/rmt_struct.h"

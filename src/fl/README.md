@@ -57,7 +57,7 @@ Common types to reach for:
 - Strings and streams: `fl::string`, `fl::ostream`, `fl::sstream`, `fl::printf`
 - Optionals and variants: `fl::optional<T>`, `fl::variant<...>`
 - Memory/ownership: `fl::unique_ptr<T>`, `fl::shared_ptr<T>`, `fl::weak_ptr<T>`
-- Functional: `fl::function<Signature>` (in `ftl/function.h`), `fl::function_list<Signature>` (in `ftl/function.h`)
+- Functional: `fl::function<Signature>` (in `fl/stl/function.h`), `fl::function_list<Signature>` (in `fl/stl/function.h`)
 - Concurrency: `fl::thread`, `fl::mutex`, `fl::thread_local`
 - Async: `fl::promise<T>`, `fl::task`
 - Math: `fl::math`, `fl::sin32`, `fl::random`, `fl::gamma`, `fl::gradient`
@@ -68,9 +68,9 @@ Common types to reach for:
 Example: using containers, views, and ownership
 
 ```cpp
-#include "ftl/vector.h"
-#include "ftl/span.h"
-#include "ftl/memory.h"   // for fl::make_unique
+#include "fl/stl/vector.h"
+#include "fl/stl/span.h"
+#include "fl/stl/memory.h"   // for fl::make_unique
 
 void process(fl::span<const int> values) {
     // Non-owning view over contiguous data
@@ -258,7 +258,7 @@ Threads, synchronization, async primitives, eventing, and callable utilities.
 
 - Threads and sync: `thread.h`, `mutex.h`, `thread_local.h`
 - Async primitives: `promise.h`, `promise_result.h`, `task.h`, `async.h`
-- Functional: `function.h` (in `ftl/`), `functional.h`
+- Functional: `function.h` (in `fl/stl/`), `functional.h`
 - Events and engine hooks: `engine_events.h`
 - Interrupt service routines: `isr.h`
 
@@ -271,7 +271,7 @@ Per‑header quick descriptions:
 - `promise_result.h`: Result type accompanying promises/futures.
 - `task.h`: Lightweight async task primitive for orchestration.
 - `async.h`: Helpers for async composition and coordination.
-- `ftl/function.h`: Type‑erased callable wrapper analogous to `std::function`, and `function_list` for multicast callbacks.
+- `fl/stl/function.h`: Type‑erased callable wrapper analogous to `std::function`, and `function_list` for multicast callbacks.
 - `functional.h`: Adapters, binders, and predicates for composing callables.
 - `engine_events.h`: Event channel definitions for engine‑style systems.
 - `isr.h`: Cross-platform interrupt service routine (ISR) attachment API for timer and GPIO interrupts.
@@ -308,8 +308,8 @@ This section groups headers by domain, explains their role, and shows minimal us
 Why: Embedded‑aware containers with predictable behavior across platforms. Prefer passing `fl::span<T>` to functions.
 
 ```cpp
-#include "ftl/vector.h"
-#include "ftl/span.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/span.h"
 
 size_t count_nonzero(fl::span<const uint8_t> bytes) {
     size_t count = 0;
@@ -342,7 +342,7 @@ fl::string greet(const fl::string& name) {
 Why: RAII ownership with explicit semantics. Prefer `fl::make_shared<T>()`/`fl::make_unique<T>()` patterns where available, or direct constructors provided by these headers.
 
 ```cpp
-#include "../ftl/shared_ptr.h"
+#include "../fl/stl/shared_ptr.h"
 
 struct Widget { int value; };
 
@@ -354,12 +354,12 @@ void ownership_example() {
 
 ### Functional Utilities
 
-- Callables and lists: `ftl/function.h`, `functional.h`
+- Callables and lists: `fl/stl/function.h`, `functional.h`
 
 Why: Store callbacks and multicast them safely.
 
 ```cpp
-#include "ftl/function.h"
+#include "fl/stl/function.h"
 
 void on_event(int code) { /* ... */ }
 

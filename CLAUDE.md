@@ -155,7 +155,7 @@ The package installation daemon is a singleton background process that ensures P
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
-- **Vector type usage**: Use `fl::vector<T>` instead of `HeapVector<T>` directly. `HeapVector` is an implementation detail in `src/ftl/detail/heap_vector.h` and should not be referenced directly in code.
+- **Vector type usage**: Use `fl::vector<T>` instead of `HeapVector<T>` directly. `HeapVector` is an implementation detail in `src/fl/stl/detail/heap_vector.h` and should not be referenced directly in code.
 - **Platform dispatch headers**: FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
 - **Platform-specific headers (`src/platforms/**`)**: Header files typically do NOT need platform guards (e.g., `#ifdef ESP32`). Only the `.cpp` implementation files require guards. When the `.cpp` file is guarded from compilation, the header won't be included. This approach provides better IDE code assistance and IntelliSense support.
   - ✅ Correct pattern:

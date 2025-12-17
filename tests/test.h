@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include <iostream>
 #include <cstring>  // Bring in C string functions first
 #include <set>
@@ -10,13 +10,13 @@
 #include <vector>
 
 #include "crgb.h"
-#include "ftl/hash_set.h"
+#include "fl/stl/hash_set.h"
 #include "fl/lut.h"
-#include "ftl/optional.h"
+#include "fl/stl/optional.h"
 #include "fl/str.h"
-#include "ftl/strstream.h"
+#include "fl/stl/strstream.h"
 #include "fl/tile2x2.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/xypath.h"
 
 // Define an improved CHECK_CLOSE macro that provides better error messages

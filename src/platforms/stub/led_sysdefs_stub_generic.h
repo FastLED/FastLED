@@ -6,7 +6,7 @@
 #define FASTLED_STUB_IMPL
 #endif
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #ifndef F_CPU
 #define F_CPU 1000000000

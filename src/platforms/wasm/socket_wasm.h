@@ -3,8 +3,8 @@
 #ifdef FASTLED_HAS_NETWORKING
 
 #include "fl/networking.h"  // For SocketError enum
-#include "ftl/string.h"
-#include "ftl/stdint.h"
+#include "fl/stl/string.h"
+#include "fl/stl/stdint.h"
 
 // Minimal socket includes for function declarations
 // WASM provides some basic socket types but limited functionality

@@ -2,7 +2,7 @@
 
 #include "fx/audio/detectors/buildup.h"
 #include "fl/audio/audio_context.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 

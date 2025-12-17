@@ -8,7 +8,7 @@
 
 #if FASTLED_RMT5
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

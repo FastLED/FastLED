@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/int.h"
 
 #include "fl/math_macros.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include "fl/compiler_control.h"
 
 namespace fl {

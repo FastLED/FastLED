@@ -3,9 +3,9 @@
 
 
 #include "fl/sketch_macros.h"
-#include "ftl/shared_ptr.h"
-#include "ftl/shared_ptr.h"  // For shared_ptr
-#include "ftl/string.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/string.h"
 #include "fl/compiler_control.h"
 #include "fl/has_include.h"
 #include "platforms/audio_input_null.hpp"

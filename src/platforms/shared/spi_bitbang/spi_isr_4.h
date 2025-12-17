@@ -1,7 +1,7 @@
 // spi_isr_4.h — 4-way Quad-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "spi_isr_engine.h"
 
 namespace fl {

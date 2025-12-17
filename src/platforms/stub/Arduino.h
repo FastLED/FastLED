@@ -11,11 +11,11 @@
 
 // FastLED headers only - NO stdlib headers
 #include "fl/str.h"
-#include "ftl/stdint.h"
-#include "ftl/ostream.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/ostream.h"
 #include "time_stub.h"
 #include "fl/math_macros.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 // Math functions from fl:: namespace
 // On stub platform, standard library <cmath> provides math functions in global namespace

@@ -2,10 +2,10 @@
 // Verifies that allocators are properly moved during move construction and move assignment
 
 #include "test.h"
-#include "ftl/vector.h"
-#include "ftl/map.h"
-#include "ftl/set.h"
-#include "ftl/allocator.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/map.h"
+#include "fl/stl/set.h"
+#include "fl/stl/allocator.h"
 
 namespace {
 

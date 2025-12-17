@@ -10,7 +10,7 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/error.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
 #include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros

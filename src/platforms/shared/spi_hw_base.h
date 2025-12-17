@@ -19,8 +19,8 @@
 /// backend->transmit(TransmitMode::ASYNC);  // Clean polymorphic call
 /// ```
 
-#include "ftl/stdint.h"
-#include "ftl/limits.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/limits.h"
 #include "platforms/shared/spi_types.h"
 
 namespace fl {

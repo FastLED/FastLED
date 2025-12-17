@@ -1,6 +1,6 @@
 
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"

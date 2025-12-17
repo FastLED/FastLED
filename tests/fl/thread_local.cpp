@@ -1,7 +1,7 @@
 #include "test.h"
 #include "fl/thread_local.h"
-#include "ftl/vector.h"
-#include "ftl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/string.h"
 
 #if FASTLED_USE_THREAD_LOCAL
 #include <pthread.h>

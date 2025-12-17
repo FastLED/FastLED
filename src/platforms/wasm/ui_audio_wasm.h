@@ -2,10 +2,10 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "ftl/string.h"
+#include "fl/stl/string.h"
 #include "fl/audio.h"
 #include "fl/audio_input.h"  // For AudioConfig
-#include "ftl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 

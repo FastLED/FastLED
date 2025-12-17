@@ -11,7 +11,7 @@
 #include "fl/audio.h"
 #include "fl/fft.h"
 #include "fl/xymap.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/math_macros.h"
 
 #include "fl/compiler_control.h"

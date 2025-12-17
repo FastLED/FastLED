@@ -2,7 +2,7 @@
 #pragma once
 
 #include "fl/int.h"  // for FastLED integer types
-#include "ftl/cstring.h"  // for memcopy (FastLED equivalent)
+#include "fl/stl/cstring.h"  // for memcopy (FastLED equivalent)
 
 // Guard against PROGMEM redefinition on platforms that have their own definition
 #if !defined(PROGMEM) && !defined(__IMXRT1062__) && !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__MK66FX1M0__) && !defined(__MK64FX512__) && !defined(__MKL26Z64__)

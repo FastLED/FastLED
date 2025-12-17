@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/chipsets/spi_chipsets.h"
 
 namespace fl {

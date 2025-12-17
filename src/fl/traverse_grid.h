@@ -6,7 +6,7 @@ Given a line defined by two points, this algorithm traverses the grid cells
 intersecting the line and calls a visitor function for each cell.
 */
 
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/point.h"
 #include "fl/int.h"
 #include "fl/numeric_limits.h"

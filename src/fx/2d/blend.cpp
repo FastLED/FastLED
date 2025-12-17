@@ -9,7 +9,7 @@ are blended by the the max luminance of the components.
 #include "colorutils.h"
 #include "fx/frame.h"
 #include "fx/fx.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/xymap.h"
 #include "fl/warn.h"
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #include "crgb.h"
-#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
-#include "ftl/vector.h"
-#include "ftl/stdint.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/stdint.h"
 
-#include "ftl/allocator.h"
+#include "fl/stl/allocator.h"
 #include "fl/draw_mode.h"
 #include "fl/codec/pixel.h"
 

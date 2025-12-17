@@ -44,7 +44,7 @@
 // Forward declarations for memory operations
 // (can be replaced with different implementations if desired)
 // Bind to fl/ equivalents instead of C standard library
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 

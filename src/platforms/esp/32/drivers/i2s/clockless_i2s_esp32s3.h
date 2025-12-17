@@ -12,7 +12,7 @@
 #include "cpixel_ledcontroller.h"
 #include "eorder.h"
 #include "fl/log.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "pixel_iterator.h"
 
 #ifndef FASTLED_INTERNAL

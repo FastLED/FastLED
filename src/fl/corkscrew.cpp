@@ -1,7 +1,7 @@
 #include "fl/corkscrew.h"
-#include "ftl/algorithm.h"
-#include "ftl/assert.h"
-#include "ftl/math.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/assert.h"
+#include "fl/stl/math.h"
 #include "fl/splat.h"
 #include "fl/warn.h"
 #include "fl/tile2x2.h"
@@ -11,7 +11,7 @@
 #include "fl/leds.h"
 #include "fl/grid.h"
 #include "fl/screenmap.h"
-#include "ftl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/int.h"
 
 

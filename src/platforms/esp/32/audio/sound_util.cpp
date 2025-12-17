@@ -4,8 +4,8 @@
 
 #include <math.h>  // ok include
 #include "sound_util.h"
-#include "ftl/math.h"
-#include "ftl/assert.h"
+#include "fl/stl/math.h"
+#include "fl/stl/assert.h"
 
 
 namespace fl {

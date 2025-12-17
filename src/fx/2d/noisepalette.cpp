@@ -1,11 +1,11 @@
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 #ifndef FASTLED_INTERNAL
 #define FASTLED_INTERNAL
 #endif
 
 #include "fl/fastled.h"
-#include "ftl/memory.h"
+#include "fl/stl/memory.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"

@@ -35,12 +35,12 @@
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/wasm/js.h"
 #include "fl/dbg.h"
-#include "ftl/math.h"
-#include "ftl/malloc.h"
-#include "ftl/cstring.h"
+#include "fl/stl/math.h"
+#include "fl/stl/malloc.h"
+#include "fl/stl/cstring.h"
 #include "fl/screenmap.h"
 #include "fl/json.h"
-#include "ftl/stdio.h"
+#include "fl/stl/stdio.h"
 
 // EM_JS function to push screenmap updates to JavaScript
 // This allows C++ to notify JavaScript when screenmap data changes

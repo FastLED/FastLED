@@ -44,7 +44,7 @@
 #ifndef _MP3COMMON_H
 #define _MP3COMMON_H
 
-#include "ftl/stdint.h"  // MUST be first - defines int32_t used in inline functions
+#include "fl/stl/stdint.h"  // MUST be first - defines int32_t used in inline functions
 #include "mp3dec.h"
 #include "statname.h"	/* do name-mangling for static linking */
 

@@ -14,7 +14,7 @@
    typedef struct { kiss_fft_scalar r; kiss_fft_scalar i; }kiss_fft_cpx; */
 #include "kiss_fft.h"
 #include <limits.h>
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 
 #define MAXFACTORS 32
 /* e.g. an fft of length 128 has 4 factors 

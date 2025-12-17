@@ -7,9 +7,9 @@
 #include "./dprint.h"
 #include "./Keyboard.h"
 #include "fl/math_macros.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/warn.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 namespace {
 

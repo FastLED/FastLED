@@ -1,8 +1,8 @@
 // spi_isr_32.h — 32-way parallel soft-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
-#include "ftl/stdint.h"
-#include "ftl/cstddef.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/cstddef.h"
 #include "spi_isr_engine.h"
 
 #ifdef FL_SPI_ISR_VALIDATE

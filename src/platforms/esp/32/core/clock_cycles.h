@@ -2,10 +2,10 @@
 // ok no namespace fl
 #pragma once
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/has_include.h"
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "hal/cpu_hal.h"

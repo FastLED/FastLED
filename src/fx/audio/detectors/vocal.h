@@ -9,8 +9,8 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
-#include "ftl/function.h"
-#include "ftl/shared_ptr.h"
+#include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 

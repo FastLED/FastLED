@@ -2,12 +2,12 @@
 #include "scale_up.h"
 
 #include "crgb.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/upscale.h"
-#include "ftl/memory.h"
+#include "fl/stl/memory.h"
 #include "fl/xymap.h"
-#include "ftl/vector.h"
-#include "ftl/allocator.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/allocator.h"
 #include "fx/fx2d.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.

@@ -4,8 +4,8 @@
 
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
-#include "ftl/cstddef.h"
-#include "ftl/stdint.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

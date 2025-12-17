@@ -24,10 +24,10 @@
 
 #include "fl/channels/engine.h"
 #include "fl/channels/data.h"
-#include "ftl/span.h"
+#include "fl/stl/span.h"
 #include "fl/register.h"
 #include "platforms/esp/32/core/clock_cycles.h"
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 
 FL_EXTERN_C_BEGIN
 #include "esp32-hal.h"

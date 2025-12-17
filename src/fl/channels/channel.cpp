@@ -6,7 +6,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/engine.h"
 #include "fl/channels/bus_manager.h"
-#include "ftl/atomic.h"
+#include "fl/stl/atomic.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/error.h"

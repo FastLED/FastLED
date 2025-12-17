@@ -2,14 +2,14 @@
 
 #include "fl/singleton.h"
 
-#include "ftl/map.h"
-#include "ftl/memory.h"
-#include "ftl/set.h"
+#include "fl/stl/map.h"
+#include "fl/stl/memory.h"
+#include "fl/stl/set.h"
 #include "fl/engine_events.h"
 
 #include "fl/json.h"
 #include "fl/json.h"
-#include "ftl/function.h"
+#include "fl/stl/function.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 
 namespace fl {

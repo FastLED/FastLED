@@ -1,12 +1,12 @@
 #include "software_decoder.h"
-#include "ftl/cstddef.h"
-#include "ftl/utility.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/utility.h"
 #include "fl/str.h"
 #include "fl/compiler_control.h"
-#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 // Include stdio for FILE type needed by pl_mpeg
-#include "ftl/stdio.h"
+#include "fl/stl/stdio.h"
 
 
 // Declare pl_mpeg types and function prototypes manually

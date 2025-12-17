@@ -1,6 +1,6 @@
-// Test file for ftl/cstring.h
+// Test file for fl/stl/cstring.h
 //
-// This file tests all string and memory functions provided by ftl/cstring.h,
+// This file tests all string and memory functions provided by fl/stl/cstring.h,
 // which wraps standard C library functions in the fl:: namespace.
 //
 // Functions tested:
@@ -13,7 +13,7 @@
 // and are not tested in this host-based test suite.
 
 #include "test.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 
 // Note: We do NOT use "using namespace fl;" because string functions
 // would conflict with system C library functions (strcmp, strcpy, etc.)

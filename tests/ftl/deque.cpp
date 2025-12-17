@@ -1,5 +1,5 @@
 #include "test.h"
-#include "ftl/deque.h"
+#include "fl/stl/deque.h"
 
 using namespace fl;
 

@@ -3,11 +3,11 @@
 /// @file spi/parallel_device.h
 /// @brief Parallel GPIO SPI device for 1-32 outputs driven from single data stream
 
-#include "ftl/stdint.h"
-#include "ftl/vector.h"
-#include "ftl/unique_ptr.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/result.h"
-#include "ftl/optional.h"
+#include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"

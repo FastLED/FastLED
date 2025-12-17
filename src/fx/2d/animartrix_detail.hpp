@@ -26,9 +26,9 @@ License CC BY-NC 3.0
 
 */
 
-#include "ftl/vector.h"
-#include "ftl/math.h"
-#include "ftl/stdint.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/math.h"
+#include "fl/stl/stdint.h"
 #include "fl/math_macros.h"
 
 #ifndef ANIMARTRIX_INTERNAL
@@ -57,7 +57,7 @@ License CC BY-NC 3.0
 
 #include "crgb.h"
 #include "fl/force_inline.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/compiler_control.h"
 
 #ifndef FL_ANIMARTRIX_USES_FAST_MATH

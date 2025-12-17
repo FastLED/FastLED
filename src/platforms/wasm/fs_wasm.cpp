@@ -45,10 +45,10 @@
 #include "fl/file_system.h"
 #include "fl/json.h"
 #include "fl/math_macros.h"
-#include "ftl/memory.h"
+#include "fl/stl/memory.h"
 #include "fl/str.h"
 #include "fl/warn.h"
-#include "ftl/mutex.h"
+#include "fl/stl/mutex.h"
 #include "platforms/wasm/js.h"
 
 

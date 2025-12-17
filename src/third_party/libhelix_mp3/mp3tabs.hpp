@@ -42,7 +42,7 @@
  **************************************************************************************/
 
 #include "pub/mp3common.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 namespace third_party {

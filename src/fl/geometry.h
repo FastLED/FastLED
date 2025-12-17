@@ -1,9 +1,9 @@
 #pragma once
 
 #include "fl/int.h"
-#include "ftl/math.h"
+#include "fl/stl/math.h"
 #include "fl/compiler_control.h"
-#include "ftl/move.h"
+#include "fl/stl/move.h"
 
 #include "fl/compiler_control.h"
 

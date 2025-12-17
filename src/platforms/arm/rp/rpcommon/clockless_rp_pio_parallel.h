@@ -71,7 +71,7 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
-#include "ftl/cstring.h"
+#include "fl/stl/cstring.h"
 #endif
 namespace fl {
 /// @brief Parallel clockless LED controller for RP2040/RP2350

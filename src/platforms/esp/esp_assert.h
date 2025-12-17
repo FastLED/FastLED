@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ftl/strstream.h"
+#include "fl/stl/strstream.h"
 
-// Forward declaration to avoid pulling in ftl/cstdio.h and causing ftl/cstdio.cpp to be compiled
+// Forward declaration to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
 namespace fl {
     void println(const char* str);
 }

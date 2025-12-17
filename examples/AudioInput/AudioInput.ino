@@ -8,7 +8,7 @@
 #include "FastLED.h"
 
 #include "fl/audio_input.h"
-#include "ftl/sstream.h"
+#include "fl/stl/sstream.h"
 
 
 #if FL_IS_TEENSY

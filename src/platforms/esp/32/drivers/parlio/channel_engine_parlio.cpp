@@ -23,9 +23,9 @@
 #include "fl/log.h"
 #include "fl/transposition.h"
 #include "fl/warn.h"
-#include "ftl/algorithm.h"
-#include "ftl/assert.h"
-#include "ftl/time.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/assert.h"
+#include "fl/stl/time.h"
 #include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
 
 FL_EXTERN_C_BEGIN

@@ -2,11 +2,11 @@
 #include "fl/fetch.h"  // Include for fl::response definition
 #include "fl/warn.h"
 #include "fl/str.h"
-#include "ftl/function.h"
-#include "ftl/hash_map.h"
-#include "ftl/mutex.h"
+#include "fl/stl/function.h"
+#include "fl/stl/hash_map.h"
+#include "fl/stl/mutex.h"
 #include "fl/singleton.h"
-#include "ftl/optional.h"
+#include "fl/stl/optional.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

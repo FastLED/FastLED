@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ftl/thread.h"
+#include "fl/stl/thread.h"
 #if FASTLED_USE_THREAD_LOCAL
-#include "ftl/hash_map.h"
+#include "fl/stl/hash_map.h"
 #include <pthread.h>  // ok include
 #endif
 

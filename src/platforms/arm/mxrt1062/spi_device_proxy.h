@@ -20,10 +20,10 @@
 
 #if FL_IS_TEENSY_4X
 
-#include "ftl/vector.h"
+#include "fl/stl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h"
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/stddef.h"
 #include "fl/log.h"
 #include <SPI.h>

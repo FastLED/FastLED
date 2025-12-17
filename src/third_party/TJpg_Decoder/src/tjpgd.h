@@ -5,8 +5,8 @@
 #define DEF_TJPGDEC
 
 // Include standard library headers outside namespace to avoid conflicts
-#include "ftl/string.h"
-#include "ftl/stdint.h"
+#include "fl/stl/string.h"
+#include "fl/stl/stdint.h"
 #include "tjpgdcnf.h"
 
 namespace fl {

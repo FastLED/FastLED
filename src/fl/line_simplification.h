@@ -13,13 +13,13 @@ threshold. The first version is much faster and should be used in most cases.
 
 */
 
-#include "ftl/bitset.h"
-#include "ftl/math.h"
+#include "fl/stl/bitset.h"
+#include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "ftl/pair.h"
+#include "fl/stl/pair.h"
 #include "fl/point.h"
-#include "ftl/span.h"
-#include "ftl/vector.h"
+#include "fl/stl/span.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 

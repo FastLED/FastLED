@@ -100,7 +100,7 @@
 - ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
 - ❌ `#include <string>` → ✅ `#include "fl/string.h"`
 - ❌ `#include <optional>` → ✅ `#include "fl/optional.h"`
-- ❌ `#include <memory>` → ✅ `#include "ftl/scoped_ptr.h"` or `#include "ftl/shared_ptr.h"`
+- ❌ `#include <memory>` → ✅ `#include "fl/stl/scoped_ptr.h"` or `#include "fl/stl/shared_ptr.h"`
 
 **Functions and classes:**
 - ❌ `std::move()` → ✅ `fl::move()`

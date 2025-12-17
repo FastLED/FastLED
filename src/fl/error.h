@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/sketch_macros.h"
-#include "ftl/strstream.h"
+#include "fl/stl/strstream.h"
 
 // Forward declare println to avoid pulling in full dbg.h machinery
 #ifndef FL_PRINTLN_DECLARED

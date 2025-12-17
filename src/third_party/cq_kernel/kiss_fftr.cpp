@@ -6,12 +6,12 @@
  *  See COPYING file for more information.
  */
 
-#include "ftl/cstddef.h"
-#include "ftl/stdio.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdio.h"
 #include "kiss_fftr.h"
 #include "_kiss_fft_guts.h"
 #include "fl/str.h"
-#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 // Ensure NULL is defined (standard C macro)
 #ifndef NULL
@@ -19,7 +19,7 @@
 #endif
 
 #include "fl/warn.h"
-#include "ftl/malloc.h"
+#include "fl/stl/malloc.h"
 #include "fl/exit.h"
 
 struct kiss_fftr_state{

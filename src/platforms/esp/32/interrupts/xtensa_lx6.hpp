@@ -14,7 +14,7 @@
 //       The assembly directives and implementation need to be researched and
 //       validated for Xtensa LX6 architecture before use.
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 #include "soc/soc.h"
 #include "esp_intr_alloc.h"
 #include "hal/interrupt_coreasm.h"

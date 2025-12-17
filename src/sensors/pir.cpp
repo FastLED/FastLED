@@ -5,9 +5,9 @@
 #include "fl/fastled.h"
 
 #include "fl/fastpin.h"
-#include "ftl/strstream.h"
+#include "fl/stl/strstream.h"
 #include "fl/warn.h"
-#include "ftl/assert.h"
+#include "fl/stl/assert.h"
 #include "sensors/pir.h"
 
 namespace fl {
