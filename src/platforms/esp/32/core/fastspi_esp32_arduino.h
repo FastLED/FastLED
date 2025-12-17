@@ -3,6 +3,7 @@
 // This file requires the Arduino framework and SPI.h
 
 #include "crgb.h"
+#include "fastspi_types.h"
 #include <SPI.h>
 
 /*

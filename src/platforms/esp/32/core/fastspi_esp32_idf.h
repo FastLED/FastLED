@@ -3,6 +3,7 @@
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
 
 #include "crgb.h"
+#include "fastspi_types.h"
 #include "fl/stl/cstring.h"  // For fl::memset
 
 FL_EXTERN_C_BEGIN
