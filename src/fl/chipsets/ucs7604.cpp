@@ -1,7 +1,7 @@
 /// @file ucs7604.cpp
 /// @brief UCS7604 chipset global state
 
-#include "encoders/ucs7604.h"
+#include "ucs7604.h"
 
 // Define FL_UCS7604_BRIGHTNESS if not already defined
 #ifndef FL_UCS7604_BRIGHTNESS
