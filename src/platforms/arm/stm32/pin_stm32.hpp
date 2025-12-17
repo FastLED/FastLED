@@ -74,9 +74,9 @@ inline void setAdcRange(AdcRange range) {
     (void)range;  // Suppress unused parameter warning
 #else
     // Translate fl::AdcRange to Arduino analogReference mode
-    // This is platform-specific and may not map directly
+    // STM32duino only supports AR_DEFAULT in eAnalogReference enum
     int mode = static_cast<int>(range);
-    ::analogReference(mode);
+    ::analogReference(static_cast<eAnalogReference>(mode));
 #endif
 }
 
