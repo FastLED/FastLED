@@ -26,31 +26,14 @@
 namespace fl {
 
 // ============================================================================
-// Pin Mode Constants
-// ============================================================================
-
-// Arduino pin mode constants (if not already defined)
-#ifndef INPUT
-#define INPUT 0x0
-#endif
-
-#ifndef OUTPUT
-#define OUTPUT 0x1
-#endif
-
-#ifndef INPUT_PULLUP
-#define INPUT_PULLUP 0x2
-#endif
-
-// ============================================================================
 // GPIO Functions - Native SAM Implementation (STUBS)
 // ============================================================================
 
 /// Set pin mode (input, output, input_pullup)
 /// @param pin Arduino pin number
-/// @param mode Pin mode (INPUT, OUTPUT, INPUT_PULLUP)
+/// @param mode Pin mode (Input, Output, InputPullup, InputPulldown)
 /// @note STUB: Real implementation requires SAM3X8E register access
-inline void pinMode(int /*pin*/, int /*mode*/) {
+inline void pinMode(int /*pin*/, PinMode /*mode*/) {
     // STUB: Native SAM pin mode configuration requires:
     // 1. Map Arduino pin to (PIO controller, bit position)
     // 2. Enable PIO control (PIO_PER)
@@ -62,9 +45,9 @@ inline void pinMode(int /*pin*/, int /*mode*/) {
 
 /// Write digital output value
 /// @param pin Arduino pin number
-/// @param val Output value (0=LOW, non-zero=HIGH)
+/// @param val Output value (Low or High)
 /// @note STUB: Real implementation requires SAM3X8E register access
-inline void digitalWrite(int /*pin*/, int /*val*/) {
+inline void digitalWrite(int /*pin*/, PinValue /*val*/) {
     // STUB: Native SAM digital write requires:
     // 1. Map Arduino pin to (PIO controller, bit position)
     // 2. Use PIO_SODR to set high or PIO_CODR to set low
@@ -74,22 +57,22 @@ inline void digitalWrite(int /*pin*/, int /*val*/) {
 
 /// Read digital input value
 /// @param pin Arduino pin number
-/// @return Pin state (0=LOW, 1=HIGH)
+/// @return Pin state (Low or High)
 /// @note STUB: Real implementation requires SAM3X8E register access
-inline int digitalRead(int /*pin*/) {
+inline PinValue digitalRead(int /*pin*/) {
     // STUB: Native SAM digital read requires:
     // 1. Map Arduino pin to (PIO controller, bit position)
     // 2. Read from PIO_PDSR register
     //
-    // For now, return 0 as stub.
-    return 0;
+    // For now, return Low as stub.
+    return PinValue::Low;
 }
 
 /// Read analog input value
 /// @param pin Arduino pin number
 /// @return ADC value (0-4095 for 12-bit SAM3X8E ADC)
 /// @note STUB: Real implementation requires ADC peripheral configuration
-inline int analogRead(int /*pin*/) {
+inline uint16_t analogRead(int /*pin*/) {
     // STUB: ADC implementation requires:
     // 1. Enable ADC peripheral clock (PMC)
     // 2. Configure ADC resolution, timing, reference
@@ -105,7 +88,7 @@ inline int analogRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-255)
 /// @note STUB: Real implementation requires PWM peripheral configuration
-inline void analogWrite(int /*pin*/, int /*val*/) {
+inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // STUB: PWM implementation requires:
     // 1. Enable PWM peripheral clock (PMC)
     // 2. Configure PWM channel mode, period, prescaler
@@ -115,10 +98,10 @@ inline void analogWrite(int /*pin*/, int /*val*/) {
     // For now, no-op as stub.
 }
 
-/// Set analog reference voltage
-/// @param mode Reference mode
+/// Set ADC voltage range
+/// @param range Voltage range for analog readings
 /// @note Arduino Due doesn't support analogReference - always 3.3V
-inline void analogReference(int /*mode*/) {
+inline void setAdcRange(AdcRange /*range*/) {
     // Arduino Due analog reference is fixed at 3.3V
     // This function does nothing on the Due platform
 }

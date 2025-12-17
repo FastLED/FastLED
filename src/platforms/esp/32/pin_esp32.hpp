@@ -9,7 +9,7 @@
 /// 1. Arduino path (#ifdef ARDUINO): Wraps Arduino pin functions
 /// 2. ESP-IDF path (#else): Uses pin_esp32_native.hpp (native ESP-IDF GPIO drivers)
 ///
-/// IMPORTANT: All functions return/accept int types only (no enums).
+/// IMPORTANT: Translates fl::PinMode/fl::PinValue/fl::AdcRange enum classes to platform-specific types.
 
 #ifndef ARDUINO
 #include "pin_esp32_native.hpp"
@@ -25,29 +25,36 @@
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, mode);
+inline void pinMode(int pin, PinMode mode) {
+    // Translate PinMode enum to Arduino constants
+    // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
+    ::pinMode(pin, static_cast<int>(mode));
 }
 
-inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, val);
+inline void digitalWrite(int pin, PinValue val) {
+    // Translate PinValue enum to Arduino constants
+    // PinValue::Low=0, High=1
+    ::digitalWrite(pin, static_cast<int>(val));
 }
 
-inline int digitalRead(int pin) {
-    return ::digitalRead(pin);
+inline PinValue digitalRead(int pin) {
+    int raw = ::digitalRead(pin);
+    return raw ? PinValue::High : PinValue::Low;
 }
 
-inline int analogRead(int pin) {
-    return ::analogRead(pin);
+inline uint16_t analogRead(int pin) {
+    return static_cast<uint16_t>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, int val) {
-    ::analogWrite(pin, val);
+inline void analogWrite(int pin, uint16_t val) {
+    ::analogWrite(pin, static_cast<int>(val));
 }
 
-inline void analogReference(int /*mode*/) {
+inline void setAdcRange(AdcRange range) {
     // ESP32 doesn't support analogReference in Arduino
     // ADC reference is fixed (different per ESP32 variant)
+    // No-op for all ranges
+    (void)range;
 }
 
 }  // namespace fl

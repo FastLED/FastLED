@@ -20,7 +20,7 @@ namespace fl {
 // Pin Mode Control
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+inline void pinMode(int pin, PinMode mode) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
@@ -76,23 +76,27 @@ inline void pinMode(int pin, int mode) {
     GPIO_InitStruct.Pin = pin_mask;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-    // Map Arduino pin modes to STM32 HAL modes
-    // Arduino modes: INPUT (0), OUTPUT (1), INPUT_PULLUP (2)
+    // Map fl::PinMode to STM32 HAL modes
+    // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
     switch (mode) {
-        case 0:  // INPUT
+        case PinMode::Input:
             GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
             GPIO_InitStruct.Pull = GPIO_NOPULL;
             break;
-        case 1:  // OUTPUT
+        case PinMode::Output:
             GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
             GPIO_InitStruct.Pull = GPIO_NOPULL;
             break;
-        case 2:  // INPUT_PULLUP
+        case PinMode::InputPullup:
             GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
             GPIO_InitStruct.Pull = GPIO_PULLUP;
             break;
+        case PinMode::InputPulldown:
+            GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+            GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+            break;
         default:
-            FL_WARN("STM32: Unknown pin mode " << mode << " for pin " << pin);
+            FL_WARN("STM32: Unknown pin mode " << static_cast<int>(mode) << " for pin " << pin);
             return;
     }
 
@@ -108,7 +112,7 @@ inline void pinMode(int pin, int mode) {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
@@ -123,32 +127,33 @@ inline void digitalWrite(int pin, int val) {
     }
 
     // Write pin state using HAL
-    HAL_GPIO_WritePin(port, pin_mask, val ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    // Translate fl::PinValue to GPIO_PinState
+    HAL_GPIO_WritePin(port, pin_mask, (val == PinValue::High) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 #else
     (void)pin;
     (void)val;
 #endif
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
-        return 0;
+        return PinValue::Low;
     }
 
     GPIO_TypeDef* port = get_GPIO_Port(STM_PORT(pin_name));
     uint32_t pin_mask = STM_GPIO_PIN(pin_name);
 
     if (port == nullptr) {
-        return 0;
+        return PinValue::Low;
     }
 
     // Read pin state using HAL
-    return HAL_GPIO_ReadPin(port, pin_mask) == GPIO_PIN_SET ? 1 : 0;
+    return (HAL_GPIO_ReadPin(port, pin_mask) == GPIO_PIN_SET) ? PinValue::High : PinValue::Low;
 #else
     (void)pin;
-    return 0;
+    return PinValue::Low;
 #endif
 }
 
@@ -156,7 +161,7 @@ inline int digitalRead(int pin) {
 // Analog I/O
 // ============================================================================
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
 #ifdef HAL_ADC_MODULE_ENABLED
     // Implementation based on STM32duino analog.cpp adc_read_value()
     // Uses HAL ADC APIs for single-shot 12-bit ADC conversion
@@ -249,7 +254,7 @@ inline int analogRead(int pin) {
     // Read converted value
     uint16_t value = 0;
     if ((HAL_ADC_GetState(&AdcHandle) & HAL_ADC_STATE_REG_EOC) == HAL_ADC_STATE_REG_EOC) {
-        value = HAL_ADC_GetValue(&AdcHandle);
+        value = static_cast<uint16_t>(HAL_ADC_GetValue(&AdcHandle));
     }
 
     // Stop and deinitialize ADC
@@ -257,7 +262,7 @@ inline int analogRead(int pin) {
     HAL_ADC_DeInit(&AdcHandle);
 
     // Scale 12-bit value to 10-bit Arduino-compatible value (0-1023)
-    return (value >> 2);  // 4096 -> 1024 range
+    return static_cast<uint16_t>(value >> 2);  // 4096 -> 1024 range
 
 #else
     (void)pin;
@@ -265,7 +270,7 @@ inline int analogRead(int pin) {
 #endif
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
 #ifdef HAL_TIM_MODULE_ENABLED
     // Implementation based on STM32duino analog.cpp pwm_start()
     // Uses HAL Timer PWM APIs for 8-bit PWM output (Arduino-compatible)
@@ -277,7 +282,6 @@ inline void analogWrite(int pin, int val) {
     }
 
     // Clamp value to 8-bit range (0-255) for Arduino compatibility
-    if (val < 0) val = 0;
     if (val > 255) val = 255;
 
     // Find Timer instance and channel for this pin using STM32duino pinmap
@@ -411,7 +415,7 @@ inline void analogWrite(int pin, int val) {
 
     // Calculate pulse width (duty cycle) from 8-bit value
     // val: 0-255 -> pulse: 0-period
-    sConfigOC.Pulse = (val * period) / 255;
+    sConfigOC.Pulse = (static_cast<uint32_t>(val) * period) / 255;
 
     if (HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, hal_channel) != HAL_OK) {
         FL_WARN("STM32: Timer PWM configuration failed");
@@ -430,17 +434,17 @@ inline void analogWrite(int pin, int val) {
 #endif
 }
 
-inline void analogReference(int mode) {
+inline void setAdcRange(AdcRange range) {
     // STM32 ADC reference voltage configuration
     // On STM32, the ADC reference voltage is typically hardware-configured:
     // - VDDA (analog supply voltage) is the default reference
     // - VREF+ pin can be used on some MCUs with external reference
     // - Internal reference voltage (~1.2V) available on some families
     //
-    // Arduino reference modes:
-    // - DEFAULT: Use default reference (VDDA on STM32)
-    // - INTERNAL: Use internal reference (~1.2V on STM32)
-    // - EXTERNAL: Use external reference on VREF+ pin
+    // fl::AdcRange modes:
+    // - Default: Use default reference (VDDA on STM32)
+    // - Range0_1V1: Use internal reference (~1.2V on STM32)
+    // - External: Use external reference on VREF+ pin
     //
     // STM32 HAL doesn't provide a simple API to switch reference voltage
     // at runtime without full ADC reconfiguration. This would require:
@@ -448,11 +452,11 @@ inline void analogReference(int mode) {
     // 2. Reconfiguring ADC common registers
     // 3. Restarting ADC calibration
     //
-    // For compatibility, we accept the mode parameter but don't implement
+    // For compatibility, we accept the range parameter but don't implement
     // dynamic switching. Users should configure VREF hardware appropriately.
 
-    (void)mode;
-    FL_DBG("STM32: analogReference not dynamically configurable - using hardware VREF");
+    (void)range;
+    FL_DBG("STM32: setAdcRange not dynamically configurable - using hardware VREF");
 }
 
 }  // namespace fl

@@ -8,14 +8,9 @@
 ///
 /// Implementation based on ESP8266 Arduino core's wiring_digital.cpp:
 /// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/core_esp8266_wiring_digital.cpp
-///
-/// Mode mapping:
-/// - 0 = INPUT (GPIO_MODE_INPUT)
-/// - 1 = OUTPUT (GPIO_MODE_OUTPUT)
-/// - 2 = INPUT_PULLUP (GPIO_MODE_INPUT with pull-up)
-/// - 3 = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down, pin 16 only)
 
 #include "fl/compiler_control.h"
+#include "fl/pin.h"
 
 FL_EXTERN_C_BEGIN
 // ESP8266 SDK peripheral register definitions
@@ -75,25 +70,21 @@ namespace fl {
 #define GP16FFS(v)     ((v) << 0)  // GPIO16 function select
 #define GP16FPD        6   // GPIO16 pull-down bit
 
-// Arduino mode constants (for compatibility)
-#define INPUT              0
-#define OUTPUT             1
-#define INPUT_PULLUP       2
-#define INPUT_PULLDOWN_16  3  // Only for pin 16
-
 // ============================================================================
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+inline void pinMode(int pin, PinMode mode) {
     if (pin < 0) {
         return;  // Invalid pin
     }
 
+    int mode_int = static_cast<int>(mode);
+
     if (pin < 16) {
         // Configure pins 0-15
-        switch (mode) {
-            case INPUT:  // INPUT mode
+        switch (mode_int) {
+            case 0:  // Input
                 // Set GPIO function (function select = 0)
                 GPF(pin) = 0;
                 // Disable output (write 1 to bit position to disable)
@@ -102,7 +93,7 @@ inline void pinMode(int pin, int mode) {
                 GPC(pin) = (GPC(pin) & ~(0xF << GPCI)) | (1 << GPCD);
                 break;
 
-            case OUTPUT:  // OUTPUT mode
+            case 1:  // Output
                 // Set GPIO function (function select = 0)
                 GPF(pin) = 0;
                 // Clear open-drain and interrupt config
@@ -111,7 +102,7 @@ inline void pinMode(int pin, int mode) {
                 GPES = (1 << pin);
                 break;
 
-            case INPUT_PULLUP:  // INPUT_PULLUP mode
+            case 2:  // InputPullup
                 // Set GPIO function with pull-up enabled
                 GPF(pin) = (1 << GPFPU);
                 // Disable output
@@ -125,8 +116,8 @@ inline void pinMode(int pin, int mode) {
         }
     } else if (pin == 16) {
         // GPIO16 has separate registers and different control
-        switch (mode) {
-            case INPUT:  // INPUT mode
+        switch (mode_int) {
+            case 0:  // Input
                 // Set GPIO function for GPIO16
                 GPF16 = GP16FFS(0);
                 // Clear control register
@@ -135,7 +126,7 @@ inline void pinMode(int pin, int mode) {
                 GP16E &= ~1;
                 break;
 
-            case OUTPUT:  // OUTPUT mode
+            case 1:  // Output
                 // Set GPIO function
                 GPF16 = GP16FFS(0);
                 // Clear control register
@@ -144,7 +135,7 @@ inline void pinMode(int pin, int mode) {
                 GP16E |= 1;
                 break;
 
-            case INPUT_PULLDOWN_16:  // INPUT_PULLDOWN (pin 16 only)
+            case 3:  // InputPulldown (pin 16 only)
                 // Set GPIO function with pull-down enabled
                 GPF16 = GP16FFS(0) | (1 << GP16FPD);
                 // Clear control register
@@ -160,21 +151,23 @@ inline void pinMode(int pin, int mode) {
     // Pins > 16 are invalid, silently ignore
 }
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
     if (pin < 0) {
         return;  // Invalid pin
     }
 
+    int val_int = static_cast<int>(val);
+
     if (pin < 16) {
         // For pins 0-15: use set/clear registers for atomic operation
-        if (val) {
+        if (val_int) {
             GPOS = (1 << pin);  // Set output high
         } else {
             GPOC = (1 << pin);  // Set output low
         }
     } else if (pin == 16) {
         // GPIO16 uses direct register manipulation
-        if (val) {
+        if (val_int) {
             GP16O |= 1;   // Set high
         } else {
             GP16O &= ~1;  // Set low
@@ -183,20 +176,20 @@ inline void digitalWrite(int pin, int val) {
     // Pins > 16 are invalid, silently ignore
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
     if (pin < 0) {
-        return 0;  // Invalid pin
+        return PinValue::Low;  // Invalid pin
     }
 
     if (pin < 16) {
         // Read from input register (bit shift and mask)
-        return GPIP(pin);
+        return GPIP(pin) ? PinValue::High : PinValue::Low;
     } else if (pin == 16) {
         // GPIO16 input register
-        return GP16I & 0x01;
+        return (GP16I & 0x01) ? PinValue::High : PinValue::Low;
     }
 
-    return 0;  // Invalid pin
+    return PinValue::Low;  // Invalid pin
 }
 
 // ============================================================================
@@ -209,7 +202,7 @@ inline int digitalRead(int pin) {
 // A0 pin constant (matches Arduino ESP8266 core definition)
 #define A0 17
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
     // ESP8266 has only one ADC on A0/TOUT pin (pin 17 or 0)
     // Pin 17 is the standard A0 constant, pin 0 is accepted for compatibility
     if (pin == 17 || pin == 0) {
@@ -220,10 +213,10 @@ inline int analogRead(int pin) {
 
     // For non-ADC pins, return digital read scaled to ADC range
     // This matches Arduino ESP8266 core behavior
-    return digitalRead(pin) * 1023;
+    return static_cast<uint16_t>(digitalRead(pin) == PinValue::High ? 1023 : 0);
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     // ESP8266 does not have true analog output (no DAC)
     // The Arduino core implements PWM via software waveform generation using
     // TIMER1 and GPIO manipulation, which is complex and requires:
@@ -244,18 +237,18 @@ inline void analogWrite(int pin, int val) {
         return;  // Invalid pin
     }
 
-    if (val <= 0) {
+    if (val == 0) {
         // Fully off
-        digitalWrite(pin, 0);
+        digitalWrite(pin, PinValue::Low);
     } else if (val >= 255) {
         // Fully on (assuming 8-bit PWM range 0-255)
-        digitalWrite(pin, 1);
+        digitalWrite(pin, PinValue::High);
     }
     // For intermediate values (0 < val < 255), do nothing
     // True PWM would require timer-based implementation
 }
 
-inline void analogReference(int mode) {
+inline void setAdcRange(AdcRange range) {
     // ESP8266 ADC reference voltage is fixed at 1.0V (internal reference)
     // This function has no effect on ESP8266 hardware - reference cannot be changed
     //
@@ -267,7 +260,7 @@ inline void analogReference(int mode) {
     // down to the chip's 0-1.0V ADC range. This is a hardware feature
     // and cannot be controlled via software.
 
-    (void)mode;  // Parameter unused but kept for API compatibility
+    (void)range;  // Parameter unused - no-op
 }
 
 }  // namespace fl

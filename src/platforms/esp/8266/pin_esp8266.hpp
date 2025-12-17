@@ -8,8 +8,6 @@
 /// Two paths:
 /// 1. Arduino path (#ifdef ARDUINO): Wraps Arduino pin functions
 /// 2. ESP8266 SDK path (#else): Uses pin_esp8266_native.hpp
-///
-/// IMPORTANT: All functions return/accept int types only (no enums).
 
 #ifndef ARDUINO
 #include "pin_esp8266_native.hpp"
@@ -22,31 +20,34 @@
 // ============================================================================
 
 #include <Arduino.h>
+#include "fl/pin.h"
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, mode);
+inline void pinMode(int pin, PinMode mode) {
+    ::pinMode(pin, static_cast<int>(mode));
 }
 
-inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, val);
+inline void digitalWrite(int pin, PinValue val) {
+    ::digitalWrite(pin, static_cast<int>(val));
 }
 
-inline int digitalRead(int pin) {
-    return ::digitalRead(pin);
+inline PinValue digitalRead(int pin) {
+    return ::digitalRead(pin) ? PinValue::High : PinValue::Low;
 }
 
-inline int analogRead(int pin) {
-    return ::analogRead(pin);
+inline uint16_t analogRead(int pin) {
+    return static_cast<uint16_t>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, int val) {
-    ::analogWrite(pin, val);
+inline void analogWrite(int pin, uint16_t val) {
+    ::analogWrite(pin, static_cast<int>(val));
 }
 
-inline void analogReference(int mode) {
-    ::analogReference(mode);
+inline void setAdcRange(AdcRange range) {
+    // ESP8266 ADC reference voltage is fixed at 1.0V (internal reference)
+    // This function has no effect on ESP8266 hardware - reference cannot be changed
+    (void)range;  // Parameter unused - no-op
 }
 
 }  // namespace fl

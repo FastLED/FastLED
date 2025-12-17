@@ -239,7 +239,12 @@ static uint8_t analog_reference = DEFAULT;
 // GPIO Functions - Native AVR Implementation
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+// Forward declarations from fl/pin.h
+enum class PinMode;
+enum class PinValue;
+enum class AdcRange;
+
+inline void pinMode(int pin, PinMode mode) {
     uint8_t port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return;
 
@@ -251,13 +256,20 @@ inline void pinMode(int pin, int mode) {
     uint8_t oldSREG = SREG;
     __builtin_avr_cli();
 
-    if (mode == INPUT) {
+    // Translate PinMode to internal constants
+    // PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
+    int mode_val = static_cast<int>(mode);
+
+    if (mode_val == 0) {  // Input
         *ddr &= ~bit_mask;      // Set pin as input
         *port_reg &= ~bit_mask; // Disable pull-up
-    } else if (mode == INPUT_PULLUP) {
+    } else if (mode_val == 2) {  // InputPullup
         *ddr &= ~bit_mask;      // Set pin as input
         *port_reg |= bit_mask;  // Enable pull-up
-    } else { // OUTPUT
+    } else if (mode_val == 3) {  // InputPulldown (not supported on AVR)
+        *ddr &= ~bit_mask;      // Treat as Input
+        *port_reg &= ~bit_mask; // Disable pull-up
+    } else {  // Output
         *ddr |= bit_mask;       // Set pin as output
     }
 
@@ -265,7 +277,7 @@ inline void pinMode(int pin, int mode) {
     SREG = oldSREG;
 }
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
     uint8_t port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return;
 
@@ -276,9 +288,10 @@ inline void digitalWrite(int pin, int val) {
     uint8_t oldSREG = SREG;
     __builtin_avr_cli();
 
-    if (val == LOW) {
+    // Translate PinValue (Low=0, High=1) to register value
+    if (static_cast<int>(val) == 0) {  // Low
         *port_reg &= ~bit_mask; // Clear bit (set to LOW)
-    } else {
+    } else {  // High
         *port_reg |= bit_mask;  // Set bit (set to HIGH)
     }
 
@@ -286,21 +299,21 @@ inline void digitalWrite(int pin, int val) {
     SREG = oldSREG;
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
     uint8_t port = digitalPinToPort(pin);
-    if (port == NOT_A_PORT) return LOW;
+    if (port == NOT_A_PORT) return PinValue::Low;
 
     uint8_t bit_mask = digitalPinToBitMask(pin);
     volatile uint8_t *pin_reg = portInputRegister(port);
 
     // Read pin state (no interrupt protection needed for read)
     if (*pin_reg & bit_mask) {
-        return HIGH;
+        return PinValue::High;
     }
-    return LOW;
+    return PinValue::Low;
 }
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
 #if defined(ADCSRA) && defined(ADMUX)
     // Convert analog pin number to ADC channel
     uint8_t channel = analogPinToChannel(pin);
@@ -321,7 +334,7 @@ inline int analogRead(int pin) {
     uint8_t low = ADCL;
     uint8_t high = ADCH;
 
-    return (high << 8) | low;
+    return static_cast<uint16_t>((high << 8) | low);
 #else
     // ADC not available on this variant
     (void)pin;
@@ -329,19 +342,19 @@ inline int analogRead(int pin) {
 #endif
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     // Simplified PWM implementation
     // Full implementation would require timer configuration per pin
     // For now, treat as digital output for edge cases
     if (val == 0) {
-        digitalWrite(pin, LOW);
+        digitalWrite(pin, PinValue::Low);
     } else if (val >= 255) {
-        digitalWrite(pin, HIGH);
+        digitalWrite(pin, PinValue::High);
     } else {
         // PWM requires timer setup which is platform-specific
         // This is a basic no-op for intermediate values
         // A full implementation would configure OCRnx registers
-        pinMode(pin, OUTPUT);
+        pinMode(pin, PinMode::Output);
 
         // Placeholder: In a real implementation, this would:
         // 1. Determine which timer channel controls this pin
@@ -350,14 +363,36 @@ inline void analogWrite(int pin, int val) {
         // 4. Enable PWM output on the pin
 
         // For now, just set digital high if val > 127
-        digitalWrite(pin, val > 127 ? HIGH : LOW);
+        digitalWrite(pin, val > 127 ? PinValue::High : PinValue::Low);
     }
 }
 
-inline void analogReference(int mode) {
+inline void setAdcRange(AdcRange range) {
+    // Translate AdcRange to AVR analogReference constants
+    // AdcRange: Default=0, Range0_1V1=1, Range0_1V5=2, Range0_2V2=3, Range0_3V3=4, Range0_5V=5, External=6
+    // AVR constants: DEFAULT=1, INTERNAL=3, EXTERNAL=0
+    uint8_t ref_mode;
+    switch (range) {
+        case AdcRange::Default:
+            ref_mode = DEFAULT;  // 1 (5V on 5V boards)
+            break;
+        case AdcRange::Range0_1V1:
+            ref_mode = INTERNAL;  // 3 (1.1V internal reference)
+            break;
+        case AdcRange::External:
+            ref_mode = EXTERNAL;  // 0 (AREF pin)
+            break;
+        case AdcRange::Range0_5V:
+            ref_mode = DEFAULT;  // 1 (same as Default for 5V AVR boards)
+            break;
+        default:
+            // Other ranges not supported on AVR (no-op)
+            return;
+    }
+
     // Store reference mode for use in analogRead()
     // Don't set ADMUX here to avoid shorting AVCC and AREF
-    analog_reference = mode;
+    analog_reference = ref_mode;
 }
 
 }  // namespace fl

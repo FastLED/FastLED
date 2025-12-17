@@ -9,42 +9,30 @@
 #include "hardware/gpio.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
+#include "fl/pin.h"
 
 namespace fl {
 
-// Pin mode constants matching Arduino API
-constexpr int INPUT = 0;
-constexpr int OUTPUT = 1;
-constexpr int INPUT_PULLUP = 2;
-constexpr int INPUT_PULLDOWN = 3;
-
-// Digital level constants
-constexpr int LOW = 0;
-constexpr int HIGH = 1;
-
-// ADC reference mode (stub - RP2040 uses fixed 3.3V reference)
-constexpr int DEFAULT = 0;
-
 /// @brief Configure a GPIO pin mode
 /// @param pin GPIO pin number (0-29 for RP2040, 0-47 for RP2350)
-/// @param mode Pin mode: INPUT, OUTPUT, INPUT_PULLUP, or INPUT_PULLDOWN
-inline void pinMode(int pin, int mode) {
+/// @param mode Pin mode: Input, Output, InputPullup, or InputPulldown
+inline void pinMode(int pin, PinMode mode) {
     gpio_init(pin);
 
     switch (mode) {
-        case OUTPUT:
+        case PinMode::Output:
             gpio_set_dir(pin, GPIO_OUT);
             break;
-        case INPUT:
+        case PinMode::Input:
             gpio_set_dir(pin, GPIO_IN);
             gpio_pull_up(pin);   // Disable pull-up
             gpio_pull_down(pin); // Disable pull-down
             break;
-        case INPUT_PULLUP:
+        case PinMode::InputPullup:
             gpio_set_dir(pin, GPIO_IN);
             gpio_pull_up(pin);
             break;
-        case INPUT_PULLDOWN:
+        case PinMode::InputPulldown:
             gpio_set_dir(pin, GPIO_IN);
             gpio_pull_down(pin);
             break;
@@ -56,16 +44,16 @@ inline void pinMode(int pin, int mode) {
 
 /// @brief Write a digital value to a GPIO pin
 /// @param pin GPIO pin number
-/// @param val Digital level: LOW (0) or HIGH (1)
-inline void digitalWrite(int pin, int val) {
-    gpio_put(pin, val != 0);
+/// @param val Digital level: Low or High
+inline void digitalWrite(int pin, PinValue val) {
+    gpio_put(pin, val == PinValue::High);
 }
 
 /// @brief Read a digital value from a GPIO pin
 /// @param pin GPIO pin number
-/// @return Digital level: LOW (0) or HIGH (1)
-inline int digitalRead(int pin) {
-    return gpio_get(pin) ? HIGH : LOW;
+/// @return Digital level: Low or High
+inline PinValue digitalRead(int pin) {
+    return gpio_get(pin) ? PinValue::High : PinValue::Low;
 }
 
 /// @brief Read an analog value from an ADC pin
@@ -78,7 +66,7 @@ inline int digitalRead(int pin) {
 /// - GPIO28 = ADC2
 /// - GPIO29 = ADC3 (also VSYS/3 on Pico)
 /// - ADC4 = Internal temperature sensor (virtual pin 4)
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
     static bool adc_initialized = false;
 
     // Initialize ADC hardware on first use
@@ -104,7 +92,7 @@ inline int analogRead(int pin) {
 
     // Select ADC input and read
     adc_select_input(adc_channel);
-    return adc_read();
+    return static_cast<uint16_t>(adc_read());
 }
 
 /// @brief Write an analog (PWM) value to a GPIO pin
@@ -113,7 +101,7 @@ inline int analogRead(int pin) {
 ///
 /// Uses hardware PWM. Each PWM slice controls 2 pins (A/B channels).
 /// PWM frequency is approximately 244 Hz (system clock / 65536).
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     // Check if pin supports PWM
     if (pin >= NUM_BANK0_GPIOS) {
         return;  // Invalid pin for PWM
@@ -136,12 +124,12 @@ inline void analogWrite(int pin, int val) {
     pwm_set_enabled(slice, true);
 }
 
-/// @brief Set analog reference voltage (stub - not supported on RP2040/RP2350)
-/// @param mode Reference mode (ignored - RP2040 uses fixed 3.3V reference)
+/// @brief Set analog reference voltage (not supported on RP2040/RP2350)
+/// @param range Reference voltage range (ignored - RP2040 uses fixed 3.3V reference)
 ///
 /// RP2040/RP2350 ADC uses a fixed 3.3V reference voltage.
-/// This function is provided for Arduino API compatibility but does nothing.
-inline void analogReference(int /*mode*/) {
+/// This function is provided for API compatibility but does nothing.
+inline void setAdcRange(AdcRange /*range*/) {
     // No-op: RP2040/RP2350 ADC uses fixed 3.3V reference
 }
 

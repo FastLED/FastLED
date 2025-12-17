@@ -68,34 +68,13 @@ inline PinMapping getPinMapping(int pin) {
 }
 
 // ============================================================================
-// Pin Mode Constants
-// ============================================================================
-
-// Arduino pin mode constants (if not already defined)
-#ifndef INPUT
-#define INPUT 0x0
-#endif
-
-#ifndef OUTPUT
-#define OUTPUT 0x1
-#endif
-
-#ifndef INPUT_PULLUP
-#define INPUT_PULLUP 0x2
-#endif
-
-#ifndef INPUT_PULLDOWN
-#define INPUT_PULLDOWN 0x3
-#endif
-
-// ============================================================================
 // GPIO Functions - Native SAMD Implementation
 // ============================================================================
 
-/// Set pin mode (input, output, input_pullup)
+/// Set pin mode (input, output, input_pullup, input_pulldown)
 /// @param pin Arduino pin number
-/// @param mode Pin mode (INPUT, OUTPUT, INPUT_PULLUP, INPUT_PULLDOWN)
-inline void pinMode(int pin, int mode) {
+/// @param mode Pin mode (PinMode enum)
+inline void pinMode(int pin, PinMode mode) {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
         return;  // Invalid pin
@@ -105,21 +84,21 @@ inline void pinMode(int pin, int mode) {
     uint32_t mask = 1ul << pm.bit;
 
     switch (mode) {
-        case OUTPUT:
+        case PinMode::Output:
             // Set as output: DIR bit = 1
             port->DIRSET.reg = mask;
             // Disable input buffer and pull resistor
             port->PINCFG[pm.bit].reg = 0;
             break;
 
-        case INPUT:
+        case PinMode::Input:
             // Set as input: DIR bit = 0
             port->DIRCLR.reg = mask;
             // Enable input buffer, disable pull resistor
             port->PINCFG[pm.bit].reg = PORT_PINCFG_INEN;
             break;
 
-        case INPUT_PULLUP:
+        case PinMode::InputPullup:
             // Set as input with pull-up
             port->DIRCLR.reg = mask;
             // Enable input buffer and pull resistor, set output high for pull-up
@@ -127,7 +106,7 @@ inline void pinMode(int pin, int mode) {
             port->PINCFG[pm.bit].reg = PORT_PINCFG_INEN | PORT_PINCFG_PULLEN;
             break;
 
-        case INPUT_PULLDOWN:
+        case PinMode::InputPulldown:
             // Set as input with pull-down
             port->DIRCLR.reg = mask;
             // Enable input buffer and pull resistor, set output low for pull-down
@@ -145,8 +124,8 @@ inline void pinMode(int pin, int mode) {
 
 /// Write digital output value
 /// @param pin Arduino pin number
-/// @param val Output value (0=LOW, non-zero=HIGH)
-inline void digitalWrite(int pin, int val) {
+/// @param val Output value (PinValue enum)
+inline void digitalWrite(int pin, PinValue val) {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
         return;  // Invalid pin
@@ -155,7 +134,7 @@ inline void digitalWrite(int pin, int val) {
     PortGroup* port = &PORT->Group[pm.group];
     uint32_t mask = 1ul << pm.bit;
 
-    if (val) {
+    if (val == PinValue::High) {
         // Set pin high using OUTSET register (atomic set)
         port->OUTSET.reg = mask;
     } else {
@@ -166,25 +145,25 @@ inline void digitalWrite(int pin, int val) {
 
 /// Read digital input value
 /// @param pin Arduino pin number
-/// @return Pin state (0=LOW, 1=HIGH)
-inline int digitalRead(int pin) {
+/// @return Pin value (PinValue enum: Low or High)
+inline PinValue digitalRead(int pin) {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
-        return 0;  // Invalid pin
+        return PinValue::Low;  // Invalid pin
     }
 
     PortGroup* port = &PORT->Group[pm.group];
     uint32_t mask = 1ul << pm.bit;
 
     // Read from IN register
-    return (port->IN.reg & mask) ? 1 : 0;
+    return (port->IN.reg & mask) ? PinValue::High : PinValue::Low;
 }
 
 /// Read analog input value
 /// @param pin Arduino pin number
 /// @return ADC value (0-1023 for 10-bit, 0-4095 for 12-bit)
 /// @note STUB: Real implementation requires ADC peripheral configuration
-inline int analogRead(int /*pin*/) {
+inline uint16_t analogRead(int /*pin*/) {
     // STUB: ADC implementation requires:
     // 1. Enable ADC peripheral clock (GCLK + MCLK/PM)
     // 2. Configure ADC resolution, reference, prescaler
@@ -201,7 +180,7 @@ inline int analogRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-255)
 /// @note STUB: Real implementation requires TCC/TC peripheral configuration
-inline void analogWrite(int /*pin*/, int /*val*/) {
+inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // STUB: PWM implementation requires:
     // 1. Enable TCC/TC peripheral clock (GCLK + MCLK/PM)
     // 2. Configure timer mode, period, prescaler
@@ -213,10 +192,10 @@ inline void analogWrite(int /*pin*/, int /*val*/) {
     // For now, no-op as stub.
 }
 
-/// Set analog reference voltage
-/// @param mode Reference mode (AR_DEFAULT, AR_INTERNAL, AR_EXTERNAL, etc.)
+/// Set ADC voltage range
+/// @param range ADC voltage range (AdcRange enum)
 /// @note STUB: Real implementation requires ADC REFCTRL register configuration
-inline void analogReference(int /*mode*/) {
+inline void setAdcRange(AdcRange /*range*/) {
     // STUB: Analog reference configuration requires:
     // 1. Access to ADC peripheral
     // 2. Configure ADC REFCTRL register

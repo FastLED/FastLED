@@ -17,7 +17,7 @@ namespace fl {
 // Pin mode control
 // ============================================================================
 
-inline void pinMode(int /*pin*/, int /*mode*/) {
+inline void pinMode(int /*pin*/, PinMode /*mode*/) {
     // No-op: Host builds don't have physical pins
 }
 
@@ -25,29 +25,29 @@ inline void pinMode(int /*pin*/, int /*mode*/) {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int /*pin*/, int /*val*/) {
+inline void digitalWrite(int /*pin*/, PinValue /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 
-inline int digitalRead(int /*pin*/) {
+inline PinValue digitalRead(int /*pin*/) {
     // No-op: Host builds don't have physical pins
-    return 0;  // Always return LOW
+    return PinValue::Low;  // Always return LOW
 }
 
 // ============================================================================
 // Analog I/O
 // ============================================================================
 
-inline int analogRead(int /*pin*/) {
+inline uint16_t analogRead(int /*pin*/) {
     // No-op: Host builds don't have physical pins
     return 0;  // Always return 0
 }
 
-inline void analogWrite(int /*pin*/, int /*val*/) {
+inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 
-inline void analogReference(int /*mode*/) {
+inline void setAdcRange(AdcRange /*range*/) {
     // No-op: Host builds don't have physical pins
 }
 

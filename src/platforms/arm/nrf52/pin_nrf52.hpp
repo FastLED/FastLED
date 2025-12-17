@@ -7,7 +7,7 @@
 ///
 /// Arduino path: Wraps Arduino pin functions (nRF52 uses standard Arduino API)
 ///
-/// IMPORTANT: All functions return/accept int types only (no enums).
+/// IMPORTANT: Uses enum class types from fl/pin.h for type safety.
 
 #ifdef ARDUINO
 
@@ -19,28 +19,52 @@
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, mode);
+// Forward declarations from fl/pin.h
+enum class PinMode;
+enum class PinValue;
+enum class AdcRange;
+
+inline void pinMode(int pin, PinMode mode) {
+    ::pinMode(pin, static_cast<int>(mode));
 }
 
-inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, val);
+inline void digitalWrite(int pin, PinValue val) {
+    ::digitalWrite(pin, static_cast<int>(val));
 }
 
-inline int digitalRead(int pin) {
-    return ::digitalRead(pin);
+inline PinValue digitalRead(int pin) {
+    return ::digitalRead(pin) ? PinValue::High : PinValue::Low;
 }
 
-inline int analogRead(int pin) {
-    return ::analogRead(pin);
+inline uint16_t analogRead(int pin) {
+    return static_cast<uint16_t>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
-inline void analogReference(int mode) {
-    ::analogReference(static_cast<eAnalogReference>(mode));
+inline void setAdcRange(AdcRange range) {
+    // Map AdcRange to nRF52 eAnalogReference values
+    // nRF52 reference values: AR_DEFAULT, AR_INTERNAL (0.6V), AR_INTERNAL_3_0 (3.0V), AR_VDD4 (VDD/4)
+    switch (range) {
+        case AdcRange::Default:
+            ::analogReference(AR_DEFAULT);  // VDD/4 (0.825V with VDD=3.3V)
+            break;
+        case AdcRange::Range0_1V1:
+            ::analogReference(AR_INTERNAL);  // 0.6V internal reference (closest to 1.1V)
+            break;
+        case AdcRange::Range0_3V3:
+            ::analogReference(AR_INTERNAL_3_0);  // 3.0V internal reference
+            break;
+        case AdcRange::Range0_1V5:
+        case AdcRange::Range0_2V2:
+        case AdcRange::Range0_5V:
+        case AdcRange::External:
+            // Not supported on nRF52, use default
+            ::analogReference(AR_DEFAULT);
+            break;
+    }
 }
 
 }  // namespace fl

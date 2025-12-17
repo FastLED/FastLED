@@ -7,10 +7,10 @@
 /// This file is used when building without Arduino framework.
 ///
 /// Mode mapping:
-/// - 0 = INPUT (GPIO_MODE_INPUT)
-/// - 1 = OUTPUT (GPIO_MODE_OUTPUT)
-/// - 2 = INPUT_PULLUP (GPIO_MODE_INPUT with pull-up)
-/// - 3 = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
+/// - PinMode::Input (0) = INPUT (GPIO_MODE_INPUT)
+/// - PinMode::Output (1) = OUTPUT (GPIO_MODE_OUTPUT)
+/// - PinMode::InputPullup (2) = INPUT_PULLUP (GPIO_MODE_INPUT with pull-up)
+/// - PinMode::InputPulldown (3) = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
 
 #include "fl/compiler_control.h"
 
@@ -26,7 +26,7 @@ namespace fl {
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+inline void pinMode(int pin, PinMode mode) {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -36,22 +36,22 @@ inline void pinMode(int pin, int mode) {
     io_conf.intr_type = GPIO_INTR_DISABLE;
 
     switch (mode) {
-        case 0:  // INPUT
+        case PinMode::Input:
             io_conf.mode = GPIO_MODE_INPUT;
             io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
             io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
             break;
-        case 1:  // OUTPUT
+        case PinMode::Output:
             io_conf.mode = GPIO_MODE_OUTPUT;
             io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
             io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
             break;
-        case 2:  // INPUT_PULLUP
+        case PinMode::InputPullup:
             io_conf.mode = GPIO_MODE_INPUT;
             io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
             io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
             break;
-        case 3:  // INPUT_PULLDOWN
+        case PinMode::InputPulldown:
             io_conf.mode = GPIO_MODE_INPUT;
             io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
             io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;
@@ -63,18 +63,20 @@ inline void pinMode(int pin, int mode) {
     gpio_config(&io_conf);
 }
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
-    gpio_set_level(static_cast<gpio_num_t>(pin), val ? 1 : 0);
+    gpio_set_level(static_cast<gpio_num_t>(pin), 
+                   val == PinValue::High ? 1 : 0);
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
-        return 0;  // Invalid pin
+        return PinValue::Low;  // Invalid pin
     }
-    return gpio_get_level(static_cast<gpio_num_t>(pin));
+    int raw = gpio_get_level(static_cast<gpio_num_t>(pin));
+    return raw ? PinValue::High : PinValue::Low;
 }
 
 // ============================================================================
@@ -98,7 +100,7 @@ namespace {
     }
 }
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
     // Map GPIO pin to ADC channel (ESP32-specific mapping)
     // This is a simplified mapping - real implementation would need
     // platform-specific channel detection
@@ -121,10 +123,10 @@ inline int analogRead(int pin) {
 
     int raw_value = 0;
     adc_oneshot_read(adc1_handle, channel, &raw_value);
-    return raw_value;
+    return static_cast<uint16_t>(raw_value);
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     // ESP-IDF does not provide a simple analogWrite API like Arduino
     // This would require LEDC (LED PWM Controller) setup
     // Stub implementation - no-op
@@ -132,11 +134,11 @@ inline void analogWrite(int pin, int val) {
     (void)val;
 }
 
-inline void analogReference(int mode) {
-    // ESP32 does not support changing ADC reference voltage via software
-    // The ADC attenuation (set in analogRead) serves a similar purpose
-    // Stub implementation - no-op
-    (void)mode;
+inline void setAdcRange(AdcRange range) {
+    // ESP32 uses ADC attenuation instead of reference voltage
+    // This would need to be implemented per-channel in analogRead
+    // For now, this is a stub implementation - no-op
+    (void)range;
 }
 
 }  // namespace fl

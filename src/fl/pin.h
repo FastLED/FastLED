@@ -7,7 +7,7 @@
 /// NO platform headers (Arduino.h, driver headers, etc.) should EVER be included here.
 ///
 /// Architecture:
-/// - This file: Minimal public interface (enum declarations + function signatures)
+/// - This file: Minimal public interface (enum class declarations + function signatures)
 ///   → Users include this and get ONLY the interface
 ///   → No Arduino.h, no platform headers, no dependencies beyond stdlib
 ///
@@ -16,21 +16,53 @@
 ///   → Prevents platform headers from leaking into user code
 ///
 /// - platforms/pin.h: Trampoline dispatcher
-///   → Includes the appropriate platform .hpp file based on compile-time detection
+///   → Includes the appropriate platform-specific pin.hpp file based on compile-time detection
 ///
 /// - platforms/*/pin.hpp: Platform implementations (header-only)
 ///   → Provides inline implementations for zero-overhead
-///   → Split into Arduino path (#ifdef ARDUINO) and non-Arduino path
+///   → Translates fl::PinMode/fl::PinValue/fl::AdcRange to platform-specific constants
 ///
 /// Why this matters:
 /// - Users can safely `#include "fl/pin.h"` without pulling in Arduino.h
+/// - Type-safe enum classes prevent accidental int misuse
 /// - Platform detection and implementation selection happens at the compilation boundary
 /// - Clean separation between interface and implementation
 /// - Better compile times and reduced header pollution
 
-#include "ftl/type_traits.h"
+#include "ftl/stdint.h"
 
 namespace fl {
+
+// ============================================================================
+// Pin Configuration Enums
+// ============================================================================
+
+/// Pin mode configuration
+enum class PinMode {
+    Input = 0,         ///< Digital input (high impedance)
+    Output,            ///< Digital output (push-pull)
+    InputPullup,       ///< Digital input with internal pull-up resistor
+    InputPulldown      ///< Digital input with internal pull-down resistor
+};
+
+/// Digital pin value
+enum class PinValue {
+    Low = 0,           ///< Logic low (0V / GND)
+    High = 1           ///< Logic high (3.3V / 5V, platform-dependent)
+};
+
+/// ADC voltage range configuration
+/// @note Different platforms implement this differently (reference voltage vs attenuation)
+/// @note Not all ranges are available on all platforms (no-op for unsupported values)
+enum class AdcRange {
+    Default = 0,       ///< Platform default (5V on AVR Uno, 3.3V on ESP32 w/ 11dB, etc.)
+    Range0_1V1,        ///< 0-1.1V range (INTERNAL on AVR, 0dB on ESP32)
+    Range0_1V5,        ///< 0-1.5V range (2.5dB on ESP32)
+    Range0_2V2,        ///< 0-2.2V range (6dB on ESP32)
+    Range0_3V3,        ///< 0-3.3V range (11dB on ESP32, VDDANA on 3.3V SAMD)
+    Range0_5V,         ///< 0-5V range (DEFAULT on 5V AVR boards)
+    External           ///< External reference voltage on AREF pin (AVR/SAMD only)
+};
 
 // ============================================================================
 // Function declarations (implementations in platform-specific .hpp files)
@@ -38,54 +70,33 @@ namespace fl {
 
 /// Set pin mode (input, output, pull-up, pull-down)
 /// @param pin Pin number (platform-specific numbering)
-/// @param mode Pin mode (kInput, kOutput, kInputPullup, kInputPulldown)
-inline void pinMode(int pin, int mode);
-
-/// Set pin mode (enum overload)
-/// @param pin Pin number (platform-specific numbering)
-/// @param mode Pin mode enum value (converts to int)
-template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
-inline void pinMode(int pin, T mode) {
-    pinMode(pin, static_cast<int>(mode));
-}
+/// @param mode Pin mode configuration
+inline void pinMode(int pin, PinMode mode);
 
 /// Write digital value to pin
 /// @param pin Pin number (platform-specific numbering)
-/// @param val Pin value (kLow or kHigh)
-inline void digitalWrite(int pin, int val);
-
-/// Write digital value to pin (enum overload)
-/// @param pin Pin number (platform-specific numbering)
-/// @param val Pin value enum (converts to int)
-template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
-inline void digitalWrite(int pin, T val) {
-    digitalWrite(pin, static_cast<int>(val));
-}
+/// @param val Pin value (Low or High)
+inline void digitalWrite(int pin, PinValue val);
 
 /// Read digital value from pin
 /// @param pin Pin number (platform-specific numbering)
-/// @return Pin value (kLow or kHigh)
-inline int digitalRead(int pin);
+/// @return Pin value (Low or High)
+inline PinValue digitalRead(int pin);
 
 /// Read analog value from pin
 /// @param pin Pin number (platform-specific numbering)
-/// @return Analog value (platform-specific range, typically 0-1023 or 0-4095)
-inline int analogRead(int pin);
+/// @return Analog value (0-1023 for 10-bit ADC, 0-4095 for 12-bit ADC)
+inline uint16_t analogRead(int pin);
 
 /// Write analog value to pin (PWM)
 /// @param pin Pin number (platform-specific numbering)
-/// @param val Analog value (platform-specific range, typically 0-255)
-inline void analogWrite(int pin, int val);
+/// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
+inline void analogWrite(int pin, uint16_t val);
 
-/// Set analog reference voltage mode
-/// @param mode Reference mode (platform-specific values)
-inline void analogReference(int mode);
-
-/// Set analog reference voltage mode (enum overload)
-/// @param mode Reference mode enum value (converts to int)
-template <typename T, typename = fl::enable_if_t<fl::is_enum<T>::value>>
-inline void analogReference(T mode) {
-    analogReference(static_cast<int>(mode));
-}
+/// Set ADC voltage range
+/// @param range Voltage range for analog readings
+/// @note Implementation varies by platform (reference voltage vs attenuation)
+/// @note Not all ranges supported on all platforms (no-op for unsupported values)
+inline void setAdcRange(AdcRange range);
 
 }  // namespace fl

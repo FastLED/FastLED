@@ -7,9 +7,9 @@
 ///
 /// Arduino path: Wraps Arduino pin functions (pinMode, digitalWrite, etc.)
 ///
-/// IMPORTANT: All functions return/accept int types only (no enums).
+/// IMPORTANT: Uses fl::PinMode, fl::PinValue, fl::AdcRange enum classes.
 /// The Silicon Labs Arduino API uses strict enum types (PinMode, PinStatus),
-/// so we cast from int to the appropriate enum types.
+/// so we cast between fl:: and Arduino enum types.
 
 #ifdef ARDUINO
 
@@ -18,31 +18,42 @@
 // ============================================================================
 
 #include <Arduino.h>
+#include "fl/pin.h"
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, static_cast<PinMode>(mode));
+inline void pinMode(int pin, fl::PinMode mode) {
+    // Map fl::PinMode to Arduino PinMode
+    // Arduino PinMode: INPUT=0, OUTPUT=1, INPUT_PULLUP=2
+    // fl::PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
+    ::pinMode(pin, static_cast<::PinMode>(static_cast<int>(mode)));
 }
 
-inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, static_cast<PinStatus>(val));
+inline void digitalWrite(int pin, fl::PinValue val) {
+    // Map fl::PinValue to Arduino PinStatus
+    // Arduino PinStatus: LOW=0, HIGH=1
+    // fl::PinValue: Low=0, High=1
+    ::digitalWrite(pin, static_cast<::PinStatus>(static_cast<int>(val)));
 }
 
-inline int digitalRead(int pin) {
-    return ::digitalRead(pin);
+inline fl::PinValue digitalRead(int pin) {
+    int result = ::digitalRead(pin);
+    return result ? fl::PinValue::High : fl::PinValue::Low;
 }
 
-inline int analogRead(int pin) {
-    return ::analogRead(pin);
+inline uint16_t analogRead(int pin) {
+    return static_cast<uint16_t>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
-inline void analogReference(int mode) {
-    ::analogReference(mode);
+inline void setAdcRange(fl::AdcRange range) {
+    // Silicon Labs Arduino API uses analogReference(uint8_t mode)
+    // Map fl::AdcRange to Arduino reference constants
+    // Note: Silicon Labs may not support all ranges - platform-specific behavior
+    ::analogReference(static_cast<uint8_t>(range));
 }
 
 }  // namespace fl

@@ -7,9 +7,10 @@
 /// Used when building without Arduino framework.
 ///
 /// Pin mode mapping:
-/// - 0 = INPUT (GPIO input enabled)
-/// - 1 = OUTPUT (GPIO output push-pull)
-/// - 2 = INPUT_PULLUP (GPIO input with weak pullup)
+/// - PinMode::Input = INPUT (GPIO input enabled)
+/// - PinMode::Output = OUTPUT (GPIO output push-pull)
+/// - PinMode::InputPullup = INPUT_PULLUP (GPIO input with weak pullup)
+/// - PinMode::InputPulldown = INPUT_PULLDOWN (GPIO input with weak pulldown)
 ///
 /// IMPORTANT: Requires Ambiq Apollo3 HAL headers (am_hal_gpio.h).
 /// The fastgpio functions used here provide high-speed GPIO access.
@@ -26,6 +27,7 @@ FL_EXTERN_C_END
 
 #include "fl/warn.h"
 #include "fl/dbg.h"
+#include "fl/pin.h"
 
 namespace fl {
 
@@ -61,7 +63,7 @@ static PWMState g_pwm_state[AM_HAL_GPIO_MAX_PADS] = {};
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+inline void pinMode(int pin, PinMode mode) {
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
         FL_WARN("Apollo3: Invalid pin " << pin);
         return;
@@ -70,14 +72,14 @@ inline void pinMode(int pin, int mode) {
     am_hal_gpio_pincfg_t pin_config = {0};
 
     switch (mode) {
-        case 0:  // INPUT
+        case PinMode::Input:
             pin_config.uFuncSel = 3;  // GPIO function
             pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_ENABLE;
             pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_DISABLE;
             pin_config.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;
             break;
 
-        case 1:  // OUTPUT
+        case PinMode::Output:
             pin_config.uFuncSel = 3;  // GPIO function
             pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_NONE;
             pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_PUSHPULL;
@@ -85,16 +87,20 @@ inline void pinMode(int pin, int mode) {
             pin_config.eDriveStrength = AM_HAL_GPIO_PIN_DRIVESTRENGTH_2MA;
             break;
 
-        case 2:  // INPUT_PULLUP
+        case PinMode::InputPullup:
             pin_config.uFuncSel = 3;  // GPIO function
             pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_ENABLE;
             pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_DISABLE;
             pin_config.ePullup = AM_HAL_GPIO_PIN_PULLUP_WEAK;  // ~1.5K pullup
             break;
 
-        default:
-            FL_WARN("Apollo3: Unknown pin mode " << mode << " for pin " << pin);
-            return;
+        case PinMode::InputPulldown:
+            pin_config.uFuncSel = 3;  // GPIO function
+            pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_ENABLE;
+            pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_DISABLE;
+            pin_config.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;  // Apollo3 doesn't have internal pulldown
+            FL_WARN("Apollo3: InputPulldown mode not supported (no internal pulldown), using Input mode");
+            break;
     }
 
     uint32_t result = am_hal_gpio_pinconfig(pin, pin_config);
@@ -103,36 +109,36 @@ inline void pinMode(int pin, int mode) {
     }
 }
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
         return;  // Invalid pin
     }
 
     // Use am_hal_gpio_state_write for standard GPIO writes
-    am_hal_gpio_write_type_e write_type = val ? AM_HAL_GPIO_OUTPUT_SET : AM_HAL_GPIO_OUTPUT_CLEAR;
+    am_hal_gpio_write_type_e write_type = (val == PinValue::High) ? AM_HAL_GPIO_OUTPUT_SET : AM_HAL_GPIO_OUTPUT_CLEAR;
     am_hal_gpio_state_write(pin, write_type);
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
-        return 0;  // Invalid pin
+        return PinValue::Low;  // Invalid pin
     }
 
     uint32_t read_state = 0;
     uint32_t result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);
 
     if (result != AM_HAL_STATUS_SUCCESS) {
-        return 0;
+        return PinValue::Low;
     }
 
-    return read_state ? 1 : 0;
+    return read_state ? PinValue::High : PinValue::Low;
 }
 
 // ============================================================================
 // Analog Pin Functions
 // ============================================================================
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
     // Apollo3 ADC implementation using HAL APIs
     // Maps Arduino pin numbers to ADC channels and performs 12-bit conversion
     // Returns 10-bit value (0-1023) for Arduino compatibility
@@ -245,7 +251,7 @@ inline int analogRead(int pin) {
             uint16_t adc_value = AM_HAL_ADC_FIFO_SAMPLE(sample.ui32Sample);
 
             // Scale 12-bit (0-4095) to 10-bit (0-1023) for Arduino compatibility
-            return (adc_value >> 2);
+            return static_cast<uint16_t>(adc_value >> 2);
         }
 
         // Small delay before retry
@@ -256,7 +262,7 @@ inline int analogRead(int pin) {
     return 0;
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
     // Apollo3 PWM implementation using CTIMER HAL APIs
     // Generates PWM output at ~490Hz (Arduino default) with 8-bit duty cycle
 
@@ -269,8 +275,8 @@ inline void analogWrite(int pin, int val) {
     }
 
     // Clamp value to 8-bit range (0-255) for Arduino compatibility
-    if (val < 0) val = 0;
-    if (val > 255) val = 255;
+    uint16_t clamped_val = val;
+    if (clamped_val > 255) clamped_val = 255;
 
     // Pin to CTIMER mapping (based on Apollo3 capabilities)
     // Each pin can map to different timers/segments via alternate functions
@@ -290,8 +296,8 @@ inline void analogWrite(int pin, int val) {
         case 19: timer_num = 3; segment = AM_HAL_CTIMER_TIMERA; output_cfg = AM_HAL_CTIMER_OUTPUT_NORMAL; break;
         default:
             // Pin doesn't support PWM - fall back to digital write
-            pinMode(pin, 1);  // OUTPUT mode
-            digitalWrite(pin, val >= 128 ? 1 : 0);
+            pinMode(pin, PinMode::Output);
+            digitalWrite(pin, clamped_val >= 128 ? PinValue::High : PinValue::Low);
             return;
     }
 
@@ -303,7 +309,7 @@ inline void analogWrite(int pin, int val) {
     uint32_t period = (TIMER_CLOCK / PWM_FREQUENCY) - 1;
 
     // Calculate duty cycle (on-time) from 8-bit value
-    uint32_t on_time = (val * period) / 255;
+    uint32_t on_time = (clamped_val * period) / 255;
 
     // Configure timer if not already active for this pin
     if (!g_pwm_state[pin].active || g_pwm_state[pin].period != period) {
@@ -347,37 +353,37 @@ inline void analogWrite(int pin, int val) {
     }
 }
 
-inline void analogReference(int mode) {
+inline void setAdcRange(AdcRange range) {
     // Apollo3 ADC reference voltage configuration
     // Supports internal 1.5V, 2.0V, and external references
     //
-    // Arduino reference modes:
-    // - DEFAULT (0): Use default reference (1.5V internal)
-    // - INTERNAL (1): Use internal reference (1.5V)
-    // - EXTERNAL (2): Use external reference on VREF pin
-    // - INTERNAL1V5 (3): Use internal 1.5V reference
-    // - INTERNAL2V0 (4): Use internal 2.0V reference
+    // fl::AdcRange modes:
+    // - Default: Use default reference (1.5V internal)
+    // - Range0_1V1: Use internal reference (1.5V - closest available)
+    // - Range0_1V5: Use internal 1.5V reference
+    // - Range0_2V2: Use internal 2.0V reference (closest to 2.2V)
+    // - Range0_3V3/Range0_5V: Use internal 2.0V reference (max internal)
+    // - External: Use external reference on VREF pin
 
     using namespace apollo3_internal;
 
-    // Determine Apollo3 ADC reference from Arduino mode
+    // Determine Apollo3 ADC reference from fl::AdcRange
     am_hal_adc_refsel_e adc_ref = AM_HAL_ADC_REFSEL_INT_1P5;
 
-    switch (mode) {
-        case 0:  // DEFAULT
-        case 1:  // INTERNAL
-        case 3:  // INTERNAL1V5
+    switch (range) {
+        case AdcRange::Default:
+        case AdcRange::Range0_1V1:
+        case AdcRange::Range0_1V5:
             adc_ref = AM_HAL_ADC_REFSEL_INT_1P5;  // 1.5V internal
             break;
-        case 4:  // INTERNAL2V0
+        case AdcRange::Range0_2V2:
+        case AdcRange::Range0_3V3:
+        case AdcRange::Range0_5V:
             adc_ref = AM_HAL_ADC_REFSEL_INT_2P0;  // 2.0V internal
             break;
-        case 2:  // EXTERNAL
+        case AdcRange::External:
             adc_ref = AM_HAL_ADC_REFSEL_EXT_2P0;  // External reference
             break;
-        default:
-            FL_WARN("Apollo3: Unknown analogReference mode " << mode);
-            return;
     }
 
     // If ADC is already initialized, reconfigure with new reference
@@ -408,7 +414,7 @@ inline void analogReference(int mode) {
             return;
         }
 
-        FL_DBG("Apollo3: ADC reference changed to mode " << mode);
+        FL_DBG("Apollo3: ADC reference changed");
     }
 
     // Store reference for future use (will be applied on next ADC init if not yet initialized)

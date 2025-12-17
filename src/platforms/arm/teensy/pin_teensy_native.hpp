@@ -54,9 +54,31 @@ namespace fl {
 // Pin mode control
 // ============================================================================
 
-inline void pinMode(int pin, int mode) {
+inline void pinMode(int pin, PinMode mode) {
 #if defined(CORE_TEENSY)
-    ::pinMode(pin, mode);
+    // Translate PinMode to Teensy core constants
+    // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
+    // Teensy: INPUT=0, OUTPUT=1, INPUT_PULLUP=2, INPUT_PULLDOWN (Teensy-specific)
+    int teensy_mode;
+    switch (mode) {
+        case PinMode::Input:
+            teensy_mode = INPUT;  // 0
+            break;
+        case PinMode::Output:
+            teensy_mode = OUTPUT;  // 1
+            break;
+        case PinMode::InputPullup:
+            teensy_mode = INPUT_PULLUP;  // 2
+            break;
+        case PinMode::InputPulldown:
+#ifdef INPUT_PULLDOWN
+            teensy_mode = INPUT_PULLDOWN;  // Teensy-specific
+#else
+            teensy_mode = INPUT_PULLUP;  // Fallback to INPUT_PULLUP
+#endif
+            break;
+    }
+    ::pinMode(pin, teensy_mode);
 #else
     // No-op: Teensy core not available
     (void)pin;
@@ -68,9 +90,9 @@ inline void pinMode(int pin, int mode) {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, PinValue val) {
 #if defined(CORE_TEENSY)
-    ::digitalWrite(pin, val);
+    ::digitalWrite(pin, static_cast<int>(val));  // PinValue::Low=0, High=1
 #else
     // No-op: Teensy core not available
     (void)pin;
@@ -78,13 +100,13 @@ inline void digitalWrite(int pin, int val) {
 #endif
 }
 
-inline int digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
 #if defined(CORE_TEENSY)
-    return ::digitalRead(pin);
+    return ::digitalRead(pin) ? PinValue::High : PinValue::Low;
 #else
     // No-op: Teensy core not available
     (void)pin;
-    return 0;  // Always return LOW
+    return PinValue::Low;  // Always return Low
 #endif
 }
 
@@ -92,9 +114,9 @@ inline int digitalRead(int pin) {
 // Analog I/O
 // ============================================================================
 
-inline int analogRead(int pin) {
+inline uint16_t analogRead(int pin) {
 #if defined(CORE_TEENSY)
-    return ::analogRead(pin);
+    return static_cast<uint16_t>(::analogRead(pin));
 #else
     // No-op: Teensy core not available
     (void)pin;
@@ -102,7 +124,7 @@ inline int analogRead(int pin) {
 #endif
 }
 
-inline void analogWrite(int pin, int val) {
+inline void analogWrite(int pin, uint16_t val) {
 #if defined(CORE_TEENSY)
     ::analogWrite(pin, val);
 #else
@@ -112,12 +134,30 @@ inline void analogWrite(int pin, int val) {
 #endif
 }
 
-inline void analogReference(int mode) {
+inline void setAdcRange(AdcRange range) {
 #if defined(CORE_TEENSY)
-    ::analogReference(mode);
+    // Translate AdcRange to Teensy analogReference() constants
+    // Teensy supports: DEFAULT, INTERNAL, EXTERNAL
+    int ref_mode;
+    switch (range) {
+        case AdcRange::Default:
+            ref_mode = DEFAULT;
+            break;
+        case AdcRange::Range0_1V1:
+            ref_mode = INTERNAL;  // 1.2V internal reference on Teensy
+            break;
+        case AdcRange::External:
+            ref_mode = EXTERNAL;  // External AREF pin
+            break;
+        default:
+            // Unsupported ranges - use default
+            ref_mode = DEFAULT;
+            break;
+    }
+    ::analogReference(ref_mode);
 #else
     // No-op: Teensy core not available
-    (void)mode;
+    (void)range;
 #endif
 }
 

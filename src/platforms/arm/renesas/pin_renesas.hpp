@@ -6,8 +6,6 @@
 /// Provides zero-overhead wrappers for Renesas pin functions.
 ///
 /// Arduino path: Wraps Arduino pin functions (Renesas uses standard Arduino API)
-///
-/// IMPORTANT: All functions return/accept int types only (no enums).
 
 #ifdef ARDUINO
 
@@ -19,28 +17,48 @@
 
 namespace fl {
 
-inline void pinMode(int pin, int mode) {
-    ::pinMode(pin, static_cast<PinMode>(mode));
+inline void pinMode(int pin, PinMode mode) {
+    // Translate fl::PinMode to Arduino constants
+    // Input=0, Output=1, InputPullup=2, InputPulldown=3
+    ::pinMode(pin, static_cast<::PinMode>(static_cast<int>(mode)));
 }
 
-inline void digitalWrite(int pin, int val) {
-    ::digitalWrite(pin, static_cast<PinStatus>(val));
+inline void digitalWrite(int pin, PinValue val) {
+    // Translate fl::PinValue to Arduino constants
+    // Low=0, High=1
+    ::digitalWrite(pin, static_cast<::PinStatus>(static_cast<int>(val)));
 }
 
-inline int digitalRead(int pin) {
-    return ::digitalRead(pin);
+inline PinValue digitalRead(int pin) {
+    int result = ::digitalRead(pin);
+    return (result == HIGH) ? PinValue::High : PinValue::Low;
 }
 
-inline int analogRead(int pin) {
-    return ::analogRead(pin);
+inline uint16_t analogRead(int pin) {
+    return static_cast<uint16_t>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, int val) {
-    ::analogWrite(pin, val);
+inline void analogWrite(int pin, uint16_t val) {
+    ::analogWrite(pin, static_cast<int>(val));
 }
 
-inline void analogReference(int mode) {
-    ::analogReference(mode);
+inline void setAdcRange(AdcRange range) {
+    // Translate fl::AdcRange to Arduino analogReference constants
+    // Note: Renesas supports DEFAULT, INTERNAL, and EXTERNAL reference modes
+    switch (range) {
+        case AdcRange::Default:
+            ::analogReference(DEFAULT);
+            break;
+        case AdcRange::Range0_1V1:
+            ::analogReference(INTERNAL);
+            break;
+        case AdcRange::External:
+            ::analogReference(EXTERNAL);
+            break;
+        default:
+            // Unsupported range - no-op
+            break;
+    }
 }
 
 }  // namespace fl
