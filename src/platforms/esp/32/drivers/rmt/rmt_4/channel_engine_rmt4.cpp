@@ -6,8 +6,10 @@
 #include "fl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
-// ESP32-C6, C5, P4, H2 only support RMT5 (new driver) - exclude from RMT4 compilation
-#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+// Skip entirely if platform has no RMT hardware (ESP32-C2)
+#if !FASTLED_ESP32_HAS_RMT
+// No RMT hardware available
+#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
     defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
 // Skip RMT4 implementation for RMT5-only chips
 #elif !FASTLED_RMT5  // Only compile for RMT4 (IDF 4.x)

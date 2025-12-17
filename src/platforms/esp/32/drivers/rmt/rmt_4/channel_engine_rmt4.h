@@ -11,8 +11,10 @@
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
-// RMT5-only platforms do not support RMT4 - exclude from compilation
-#if FASTLED_ESP32_RMT5_ONLY_PLATFORM
+// Skip entirely if platform has no RMT hardware (ESP32-C2)
+#if !FASTLED_ESP32_HAS_RMT
+// No RMT hardware available
+#elif FASTLED_ESP32_RMT5_ONLY_PLATFORM
 
 // Detect misconfiguration: RMT5-only chip with FASTLED_RMT5=0
 #if FASTLED_RMT5 == 0

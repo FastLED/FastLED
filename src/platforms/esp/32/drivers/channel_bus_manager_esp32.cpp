@@ -18,72 +18,93 @@
 #include "fl/stl/shared_ptr.h"
 
 // Include concrete engine implementations
-// RMT5-only platforms must use new driver architecture
-#if FASTLED_ESP32_RMT5_ONLY_PLATFORM
-#include "rmt/rmt_5/channel_engine_rmt.h"
-#elif FASTLED_RMT5
-#include "rmt/rmt_5/channel_engine_rmt.h"
-#else
-#include "rmt/rmt_4/channel_engine_rmt4.h"
+#if FASTLED_ESP32_HAS_PARLIO
+#include "parlio/channel_engine_parlio.h"
 #endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "spi/channel_engine_spi.h"
 #endif
-#if FASTLED_ESP32_HAS_PARLIO
-#include "parlio/channel_engine_parlio.h"
+#if FASTLED_ESP32_HAS_RMT
+// Include the appropriate RMT driver (RMT4 or RMT5) based on platform
+#if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
+#include "rmt/rmt_5/channel_engine_rmt.h"
+#else
+#include "rmt/rmt_4/channel_engine_rmt4.h"
 #endif
+#endif  // FASTLED_ESP32_HAS_RMT
 
 namespace fl {
 
-/// @brief Initialize ESP32 channel bus manager with platform-specific engines
-///
-/// This function is called automatically during C++ static initialization (before main())
-/// to configure the ChannelBusManager singleton with ESP32-specific engines.
 namespace detail {
-void initializeChannelBusManager() {
 
-    /// @brief Engine priority constants for ESP32
-    /// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
-    /// @note These are defined here (not in header) to avoid exposing platform-specific details
-    constexpr int PRIORITY_PARLIO = 100;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
-    constexpr int PRIORITY_SPI = 50;      ///< Medium priority value (SPI engine)
-    constexpr int PRIORITY_RMT = 10;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
+/// @brief Engine priority constants for ESP32
+/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
+constexpr int PRIORITY_PARLIO = 100;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
+constexpr int PRIORITY_SPI = 50;      ///< Medium priority value (SPI engine)
+constexpr int PRIORITY_RMT = 10;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
 
-    FL_DBG("ESP32: Initializing ChannelBusManager with platform engines");
-
-    auto& manager = channelBusManager();
-
-    // Add engines with string names (automatically sorted by priority on each insertion)
-    #if FASTLED_ESP32_HAS_PARLIO
+/// @brief Add PARLIO engine if supported by platform
+static void addParlioIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_PARLIO
     // ESP32-C6: Fixed by explicitly setting clk_in_gpio_num = -1 (Iteration 2)
     // This tells the driver to use internal clock source instead of external GPIO 0
     manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>(), "PARLIO");
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
-    #endif
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
 
-    #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+/// @brief Add SPI engine if supported by platform
+static void addSpiIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
     #if defined(CONFIG_IDF_TARGET_ESP32C6)
     // ESP32-C6 has SPI2 available, but only 1 host vs 2-3 on other ESP32 chips.
     // RMT5 provides better performance and scalability for LED control on this platform.
     // Note: SPI0/SPI1 are reserved for flash operations and cannot be used.
     FL_DBG("ESP32-C6: SPI engine not enabled (only 1 SPI host available, RMT5 preferred)");
+    (void)manager;  // Suppress unused parameter warning
     #else
     manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>(), "SPI");
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
+
+/// @brief Add RMT engine if supported by platform
+static void addRmtIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_RMT
+    // Create RMT engine using the appropriate driver (RMT4 or RMT5)
+    #if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
+    auto engine = fl::ChannelEngineRMT::create();
+    const char* version = "RMT5";
+    #else
+    auto engine = fl::ChannelEngineRMT4::create();
+    const char* version = "RMT4";
     #endif
 
-    // RMT5-only platforms must use new driver architecture
-    #if FASTLED_ESP32_RMT5_ONLY_PLATFORM
-    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT::create(), "RMT");
-    FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ") [forced for RMT5-only chip]");
-    #elif FASTLED_RMT5
-    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT::create(), "RMT");
-    FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ")");
-    #else
-    manager.addEngine(PRIORITY_RMT, fl::ChannelEngineRMT4::create(), "RMT");
-    FL_DBG("ESP32: Added RMT4 engine (priority " << PRIORITY_RMT << ")");
-    #endif
+    manager.addEngine(PRIORITY_RMT, engine, "RMT");
+    FL_DBG("ESP32: Added " << version << " engine (priority " << PRIORITY_RMT << ")");
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
+
+/// @brief Initialize ESP32 channel bus manager with platform-specific engines
+///
+/// This function is called automatically during C++ static initialization (before main())
+/// to configure the ChannelBusManager singleton with ESP32-specific engines.
+void initializeChannelBusManager() {
+    FL_DBG("ESP32: Initializing ChannelBusManager with platform engines");
+
+    auto& manager = channelBusManager();
+
+    // Add engines in priority order (each function handles platform-specific ifdefs)
+    addParlioIfPossible(manager);
+    addSpiIfPossible(manager);
+    addRmtIfPossible(manager);
 
     FL_DBG("ESP32: ChannelBusManager initialization complete");
 }
