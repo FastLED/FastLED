@@ -211,6 +211,10 @@ The package installation daemon is a singleton background process that ensures P
   - **Exception**: Statics inside template functions are allowed (each template instantiation gets its own static, avoiding conflicts)
   - **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
   - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)
+- **Member variable naming**: All member variables in classes and structs MUST use mCamelCase (prefix with 'm'):
+  - ✅ Correct: `int mCount;`, `fl::string mName;`, `bool mIsEnabled;`
+  - ❌ Wrong: `int count;`, `fl::string name;`, `bool isEnabled;`
+  - The 'm' prefix clearly distinguishes member variables from local variables and parameters
 - **Follow existing code patterns** and naming conventions
 
 ### Debugging C++ Crashes
