@@ -209,6 +209,13 @@ struct PixelController {
     }
     #endif
 
+    /// Get read-only access to the current pixel data
+    /// Used by encoders to access raw RGB values for HD processing
+    /// @returns pointer to the current pixel's RGB data (3 bytes)
+    const uint8_t* getRawPixelData() const {
+        return mData;
+    }
+
 
 // ============================================================================
 // TEMPORAL DITHERING OVERVIEW
@@ -564,35 +571,8 @@ struct PixelController {
     }
     #endif
 
-
-    FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out,
-                                                     uint8_t *b2_out,
-                                                     uint8_t *brightness_out) {
-        CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
-        uint8_t brightness = 0;
-        if (rgb) {
-            #if FASTLED_HD_COLOR_MIXING
-            brightness = mColorAdjustment.brightness;
-            CRGB scale = mColorAdjustment.color;
-            #else
-            brightness = 255;
-            CRGB scale = mColorAdjustment.premixed;
-            #endif
-            fl::five_bit_hd_gamma_bitshift(
-                rgb,
-                scale,
-                brightness,
-                &rgb,
-                &brightness);
-        }
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        *brightness_out = brightness;
-    }
+    // NOTE: loadAndScale_APA102_HD() has been moved to src/fl/chipsets/encoders/apa102.h
+    // Use fl::loadAndScale_APA102_HD<RGB_ORDER>(pixels, ...) instead
 
     FASTLED_FORCE_INLINE void loadAndScaleRGB(uint8_t *b0_out, uint8_t *b1_out,
                                               uint8_t *b2_out) {
@@ -601,46 +581,8 @@ struct PixelController {
         *b2_out = loadAndScale2();
     }
 
-    // WS2816B has native 16 bit/channel color and internal 4 bit gamma correction.
-    // So we don't do gamma here, and we don't bother with dithering.
-    FASTLED_FORCE_INLINE void loadAndScale_WS2816_HD(uint16_t *s0_out, uint16_t *s1_out, uint16_t *s2_out) {
-        // Note that the WS2816 has a 4 bit gamma correction built in. To improve things this algorithm may
-        // change in the future with a partial gamma correction that is completed by the chipset gamma
-        // correction.
-        uint16_t r16 = fl::map8_to_16(mData[0]);
-        uint16_t g16 = fl::map8_to_16(mData[1]);
-        uint16_t b16 = fl::map8_to_16(mData[2]);
-        if (r16 || g16 || b16) {
-    #if FASTLED_HD_COLOR_MIXING
-            uint8_t brightness = mColorAdjustment.brightness;
-            CRGB scale = mColorAdjustment.color;
-    #else
-            uint8_t brightness = 255;
-            CRGB scale = mColorAdjustment.premixed;
-    #endif
-            if (scale[0] != 255) {
-                r16 = scale16by8(r16, scale[0]);
-            }
-            if (scale[1] != 255) {
-                g16 = scale16by8(g16, scale[1]);
-            }
-            if (scale[2] != 255) {
-                b16 = scale16by8(b16, scale[2]);
-            }
-            if (brightness != 255) {
-                r16 = scale16by8(r16, brightness);
-                g16 = scale16by8(g16, brightness);
-                b16 = scale16by8(b16, brightness);
-            }
-        }
-        uint16_t rgb16[3] = {r16, g16, b16};
-        const uint8_t s0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t s1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t s2_index = RGB_BYTE2(RGB_ORDER);
-        *s0_out = rgb16[s0_index];
-        *s1_out = rgb16[s1_index];
-        *s2_out = rgb16[s2_index];
-    }
+    // NOTE: loadAndScale_WS2816_HD() has been moved to src/fl/chipsets/encoders/ws2816.h
+    // Use fl::loadAndScale_WS2816_HD<RGB_ORDER>(pixels, ...) instead
 
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, uint8_t *b0_out, uint8_t *b1_out,
                                                uint8_t *b2_out, uint8_t *b3_out) {

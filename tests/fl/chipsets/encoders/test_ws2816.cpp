@@ -22,21 +22,17 @@ using namespace fl;
 namespace test_ws2816 {
 
 // ============================================================================
-// Mock 16-bit RGB Pixel Iterator
+// Helper for creating 16-bit RGB pixels
 // ============================================================================
 
-/// @brief Mock pixel structure that provides loadAndScale_WS2816_HD interface
-struct MockPixel16 {
-    u16 r16, g16, b16;
-
-    MockPixel16(u16 r, u16 g, u16 b) : r16(r), g16(g), b16(b) {}
-
-    void loadAndScale_WS2816_HD(u16* s0_out, u16* s1_out, u16* s2_out) const {
-        *s0_out = r16;
-        *s1_out = g16;
-        *s2_out = b16;
-    }
-};
+/// @brief Create a 16-bit RGB pixel array (wire-ordered)
+/// @param r 16-bit red channel
+/// @param g 16-bit green channel
+/// @param b 16-bit blue channel
+/// @return fl::array<u16, 3> in wire order
+inline fl::array<u16, 3> makePixel16(u16 r, u16 g, u16 b) {
+    return fl::array<u16, 3>{{r, g, b}};
+}
 
 // ============================================================================
 // Helper Functions
@@ -184,7 +180,7 @@ TEST_CASE("packWS2816Pixel - sequential pattern") {
 
 TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
     // Test encoding with no LEDs - should produce no output
-    fl::vector<MockPixel16> pixels;
+    fl::vector<fl::array<u16, 3>> pixels;
     fl::vector<CRGB> output;
 
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -195,8 +191,8 @@ TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
 
 TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
     // Test single black pixel (0, 0, 0)
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0000, 0x0000, 0x0000));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0000, 0x0000, 0x0000));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -208,8 +204,8 @@ TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
 
 TEST_CASE("encodeWS2816 - single pixel (all max)") {
     // Test single white pixel (0xFFFF, 0xFFFF, 0xFFFF)
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0xFFFF, 0xFFFF, 0xFFFF));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0xFFFF, 0xFFFF, 0xFFFF));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -221,8 +217,8 @@ TEST_CASE("encodeWS2816 - single pixel (all max)") {
 
 TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
     // Test R = 0xFF00, G = 0, B = 0
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0xFF00, 0x0000, 0x0000));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0xFF00, 0x0000, 0x0000));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -233,8 +229,8 @@ TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
 
 TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
     // Test R = 0x00FF, G = 0, B = 0
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x00FF, 0x0000, 0x0000));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x00FF, 0x0000, 0x0000));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -245,8 +241,8 @@ TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
 
 TEST_CASE("encodeWS2816 - single pixel (green split)") {
     // Test R = 0, G = 0xAABB (split across pixels), B = 0
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0000, 0xAABB, 0x0000));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0000, 0xAABB, 0x0000));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -257,8 +253,8 @@ TEST_CASE("encodeWS2816 - single pixel (green split)") {
 
 TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
     // Test R = 0, G = 0, B = 0xFF00
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0000, 0x0000, 0xFF00));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0000, 0x0000, 0xFF00));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -269,8 +265,8 @@ TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
 
 TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
     // Test R = 0, G = 0, B = 0x00FF
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0000, 0x0000, 0x00FF));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0000, 0x0000, 0x00FF));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -281,8 +277,8 @@ TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
 
 TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
     // Test R = 0x1234, G = 0x5678, B = 0x9ABC
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x1234, 0x5678, 0x9ABC));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x1234, 0x5678, 0x9ABC));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -293,9 +289,9 @@ TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
 
 TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
     // Test 2 pixels: (0x1122, 0x3344, 0x5566) and (0x7788, 0x99AA, 0xBBCC)
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x1122, 0x3344, 0x5566));
-    pixels.push_back(MockPixel16(0x7788, 0x99AA, 0xBBCC));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x1122, 0x3344, 0x5566));
+    pixels.push_back(makePixel16(0x7788, 0x99AA, 0xBBCC));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -312,10 +308,10 @@ TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
 
 TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
     // Test 3 distinct pixels
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0xFF00, 0x0000, 0x0000));  // Red high
-    pixels.push_back(MockPixel16(0x0000, 0xFF00, 0x0000));  // Green high
-    pixels.push_back(MockPixel16(0x0000, 0x0000, 0xFF00));  // Blue high
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0xFF00, 0x0000, 0x0000));  // Red high
+    pixels.push_back(makePixel16(0x0000, 0xFF00, 0x0000));  // Green high
+    pixels.push_back(makePixel16(0x0000, 0x0000, 0xFF00));  // Blue high
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -330,8 +326,8 @@ TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
 
 TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
     // Test extreme values: min (0x0000), mid (0x8000), max (0xFFFF)
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0000, 0x8000, 0xFFFF));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0000, 0x8000, 0xFFFF));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -342,8 +338,8 @@ TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
 
 TEST_CASE("encodeWS2816 - sequential hex pattern") {
     // Test sequential hex values for debugging
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0x0102, 0x0304, 0x0506));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0x0102, 0x0304, 0x0506));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
@@ -359,9 +355,9 @@ TEST_CASE("encodeWS2816 - sequential hex pattern") {
 
 TEST_CASE("encodeWS2816 - large array (100 pixels)") {
     // Test encoding large arrays efficiently
-    fl::vector<MockPixel16> pixels;
+    fl::vector<fl::array<u16, 3>> pixels;
     for (int i = 0; i < 100; ++i) {
-        pixels.push_back(MockPixel16(i * 0x0101, i * 0x0202, i * 0x0303));
+        pixels.push_back(makePixel16(i * 0x0101, i * 0x0202, i * 0x0303));
     }
 
     fl::vector<CRGB> output;
@@ -398,8 +394,8 @@ TEST_CASE("encodeWS2816 - channel layout documentation") {
     // Input: R16 = 0xRrRr, G16 = 0xGgGg, B16 = 0xBbBb (uppercase = high, lowercase = low)
     // Output: CRGB1 = [Rr, Rr, Gg], CRGB2 = [Gg, Bb, Bb]
 
-    fl::vector<MockPixel16> pixels;
-    pixels.push_back(MockPixel16(0xABCD, 0xEF01, 0x2345));
+    fl::vector<fl::array<u16, 3>> pixels;
+    pixels.push_back(makePixel16(0xABCD, 0xEF01, 0x2345));
 
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));

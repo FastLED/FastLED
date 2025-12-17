@@ -623,35 +623,23 @@ public:
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 
-		// expand and copy all the pixels
-		size_t out_index = 0;
-        while (pixels.has(1)) {
-            pixels.stepDithering();
+        // Create PixelIterator from PixelController (WS2816 is RGB-only, no W channel)
+        fl::PixelIterator pixel_iter = pixels.as_iterator(fl::Rgbw());
 
-			fl::u16 s0, s1, s2;
-            pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
-			fl::u8 b0_hi = s0 >> 8;
-			fl::u8 b0_lo = s0 & 0xFF;
-			fl::u8 b1_hi = s1 >> 8;
-			fl::u8 b1_lo = s1 & 0xFF;
-			fl::u8 b2_hi = s2 >> 8;
-			fl::u8 b2_lo = s2 & 0xFF;
+        // Create 16-bit RGB iterator range (handles RGB reordering, scaling, brightness)
+        auto rgb16_range = fl::makeScaledPixelRangeRGB16(&pixel_iter);
 
-			mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
-			mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
+        // Encode 16-bit RGB pixels to dual 8-bit CRGB format
+        fl::encodeWS2816(rgb16_range.first, rgb16_range.second, mData.get());
 
-            pixels.advanceData();
-			out_index += 2;
-        }
-
-		// ensure device controller won't modify color values
+        // Ensure device controller won't modify color values
         mController.setCorrection(CRGB(255, 255, 255));
         mController.setTemperature(CRGB(255, 255, 255));
         mController.setDither(DISABLE_DITHER);
 
-		// output the data stream
+        // Output the data stream
         mController.setEnabled(true);
-		mController.callShow(mData.get(), 2 * pixels.size(), 255);
+        mController.callShow(mData.get(), 2 * pixels.size(), 255);
         mController.setEnabled(false);
     }
 

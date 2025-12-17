@@ -17,9 +17,18 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/pair.h"
+#include "fl/force_inline.h"
 #include "crgb.h"
+#include "lib8tion/scale8.h"
+#include "lib8tion/intmap.h"
 
 namespace fl {
+
+// NOTE: The old loadAndScale_WS2816_HD<RGB_ORDER>() function has been removed.
+// RGB reordering now happens upstream via ScaledPixelIteratorRGB16 adapter.
+// The encoder receives wire-ordered 16-bit RGB data (fl::array<u16, 3>).
+// For backward compatibility, WS2816Controller in chipsets.h still uses the
+// old pattern temporarily - it will be updated to use the new iterator pattern.
 
 /// @brief Pack a single 16-bit RGB pixel into two 8-bit CRGB pixels for WS2816
 /// @param s0 First 16-bit channel value (R)
@@ -44,17 +53,21 @@ inline pair<CRGB, CRGB> packWS2816Pixel(u16 s0, u16 s1, u16 s2) {
 }
 
 /// @brief Encode 16-bit RGB pixel data into dual 8-bit RGB format for WS2816
-/// @tparam InputIterator Iterator providing access to loadAndScale_WS2816_HD(u16*, u16*, u16*)
+/// @tparam InputIterator Iterator yielding fl::array<u16, 3> (16-bit RGB in wire order)
 /// @tparam OutputIterator Output iterator accepting CRGB (e.g., raw pointer)
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel (sentinel)
 /// @param out Output iterator for encoded CRGB pairs
 /// @note Each input pixel yields 2 CRGB output pixels (48 bits → 2×24 bits)
+/// @note Input iterator yields wire-ordered 16-bit RGB (reordering already done upstream)
 template <typename InputIterator, typename OutputIterator>
 void encodeWS2816(InputIterator first, InputIterator last, OutputIterator out) {
     while (first != last) {
-        u16 s0, s1, s2;
-        first->loadAndScale_WS2816_HD(&s0, &s1, &s2);
+        // Get 16-bit RGB in wire order (already scaled, color-corrected, brightness-adjusted)
+        const array<u16, 3>& rgb16 = *first;
+        u16 s0 = rgb16[0];
+        u16 s1 = rgb16[1];
+        u16 s2 = rgb16[2];
 
         // Use the packing helper function
         pair<CRGB, CRGB> packed = packWS2816Pixel(s0, s1, s2);

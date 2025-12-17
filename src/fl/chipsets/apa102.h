@@ -9,6 +9,7 @@
 #include "fl/math_macros.h"
 #include "platforms/shared/spi_pixel_writer.h"
 #include "platforms/spi_output_template.h"
+#include "fl/chipsets/encoders/apa102.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -170,14 +171,46 @@ private:
 	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 		startBoundary();
+
 		while (pixels.has(1)) {
-			// Load raw uncorrected r,g,b values.
-			fl::u8 brightness, c0, c1, c2;  // c0-c2 is the RGB data re-ordered for pixel
-			pixels.loadAndScale_APA102_HD(&c0, &c1, &c2, &brightness);
+			// Get raw pixel data
+			const fl::u8* raw_data = pixels.getRawPixelData();
+			CRGB rgb = CRGB(raw_data[0], raw_data[1], raw_data[2]);
+			fl::u8 brightness = 0;
+
+			if (rgb) {
+				// Get color correction scales and brightness
+				fl::u8 scale_r, scale_g, scale_b;
+				#if FASTLED_HD_COLOR_MIXING
+				// HD mode: separate color correction and brightness
+				pixels.loadRGBScaleAndBrightness(&scale_r, &scale_g, &scale_b, &brightness);
+				#else
+				// Standard mode: premixed color and brightness
+				pixels.loadAndScaleRGB(&scale_r, &scale_g, &scale_b);
+				brightness = 255;
+				#endif
+				CRGB scale = CRGB(scale_r, scale_g, scale_b);
+
+				// Apply 5-bit HD gamma correction
+				fl::five_bit_hd_gamma_bitshift(rgb, scale, brightness, &rgb, &brightness);
+			}
+
+			// Reorder RGB to wire order manually (RGB_ORDER determines wire ordering)
+			// Uses RO() macro pattern from PixelController
+			const fl::u8 b0_index = (RGB_ORDER >> 6) & 0x3;  // First wire byte color index
+			const fl::u8 b1_index = (RGB_ORDER >> 3) & 0x3;  // Second wire byte color index
+			const fl::u8 b2_index = RGB_ORDER & 0x3;         // Third wire byte color index
+			const fl::u8 c0 = rgb.raw[b0_index];
+			const fl::u8 c1 = rgb.raw[b1_index];
+			const fl::u8 c2 = rgb.raw[b2_index];
+
+			// APA102 uses BGR wire order: c0=Blue, c1=Green, c2=Red (when RGB_ORDER=BGR)
 			writeLed(brightness, c0, c1, c2);
+
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
+
 		endBoundary(pixels.size());
 		mSPI.endTransaction();
 

@@ -31,10 +31,9 @@ namespace fl {
 // Forward declaration
 class PixelIterator;
 
-#ifndef FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-// Takes more memory, so disable by default.
-#define FASTLED_PIXEL_ITERATOR_HAS_APA102_HD 0
-#endif
+// NOTE: FASTLED_PIXEL_ITERATOR_HAS_APA102_HD flag removed - HD functions moved to encoder files
+// loadAndScale_APA102_HD() moved to src/fl/chipsets/encoders/apa102.h
+// loadAndScale_WS2816_HD() moved to src/fl/chipsets/encoders/ws2816.h
 
 // Due to to the template nature of the PixelController class, the only way we can make
 // it a concrete polymorphic class is to manually bind the functions and make our own
@@ -51,19 +50,8 @@ struct PixelControllerVtable {
     pc->loadAndScaleRGB(r_out, g_out, b_out);
   }
 
-  #if FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-
-  static void loadAndScale_APA102_HD(void* pixel_controller, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* brightness_out) {
-    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
-    pc->loadAndScale_APA102_HD(b0_out, b1_out, b2_out, brightness_out);
-  }
-
-  #endif
-
-  static void loadAndScale_WS2816_HD(void* pixel_controller, uint16_t *s0_out, uint16_t* s1_out, uint16_t* s2_out) {
-    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
-    pc->loadAndScale_WS2816_HD(s0_out, s1_out, s2_out);
-  }
+  // NOTE: loadAndScale_APA102_HD() removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
+  // NOTE: loadAndScale_WS2816_HD() removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
 
   static void stepDithering(void* pixel_controller) {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
@@ -100,10 +88,8 @@ struct PixelControllerVtable {
 
 typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, Rgbw rgbw, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* b3_out);
 typedef void (*loadAndScaleRGBFunction)(void* pixel_controller, uint8_t* r_out, uint8_t* g_out, uint8_t* b_out);
-#if FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-typedef void (*loadAndScale_APA102_HDFunction)(void* pixel_controller, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* brightness_out);
-#endif
-typedef void (*loadAndScale_WS2816_HDFunction)(void* pixel_controller, uint16_t* b0_out, uint16_t* b1_out, uint16_t* b2_out);
+// NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
+// NOTE: loadAndScale_WS2816_HDFunction removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
 typedef void (*stepDitheringFunction)(void* pixel_controller);
 typedef void (*advanceDataFunction)(void* pixel_controller);
 typedef int (*sizeFunction)(void* pixel_controller);
@@ -151,10 +137,8 @@ class PixelIterator {
       typedef PixelControllerVtable<PixelControllerT> Vtable;
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
-      #if FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-      mLoadAndScale_APA102_HD = &Vtable::loadAndScale_APA102_HD;
-      #endif
-      mLoadAndScale_WS2816_HD = &Vtable::loadAndScale_WS2816_HD;
+      // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
+      // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
       mStepDithering = &Vtable::stepDithering;
       mAdvanceData = &Vtable::advanceData;
       mSize = &Vtable::size;
@@ -172,14 +156,8 @@ class PixelIterator {
     void loadAndScaleRGB(uint8_t *r_out, uint8_t *g_out, uint8_t *b_out) {
       mLoadAndScaleRGB(mPixelController, r_out, g_out, b_out);
     }
-    #if FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-    void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *brightness_out) {
-      mLoadAndScale_APA102_HD(mPixelController, b0_out, b1_out, b2_out, brightness_out);
-    }
-    #endif
-    void loadAndScale_WS2816_HD(uint16_t *s0_out, uint16_t *s1_out, uint16_t *s2_out) {
-      mLoadAndScale_WS2816_HD(mPixelController, s0_out, s1_out, s2_out);
-    }
+    // NOTE: loadAndScale_APA102_HD() removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
+    // NOTE: loadAndScale_WS2816_HD() removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
     void stepDithering() { mStepDithering(mPixelController); }
     void advanceData() { mAdvanceData(mPixelController); }
     int size() { return mSize(mPixelController); }
@@ -366,10 +344,8 @@ class PixelIterator {
     Rgbw mRgbw;
     loadAndScaleRGBWFunction mLoadAndScaleRGBW = nullptr;
     loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
-    #if FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
-    loadAndScale_APA102_HDFunction mLoadAndScale_APA102_HD = nullptr;
-    #endif
-    loadAndScale_WS2816_HDFunction mLoadAndScale_WS2816_HD = nullptr;
+    // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
+    // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
     stepDitheringFunction mStepDithering = nullptr;
     advanceDataFunction mAdvanceData = nullptr;
     sizeFunction mSize = nullptr;
@@ -445,6 +421,48 @@ inline void ScaledPixelIteratorBrightness::advance() {
         mPixels->loadAndScaleRGB(&r, &g, &b);
         mCurrent = FL_MAX(FL_MAX(r, g), b);
         #endif
+        mPixels->stepDithering();
+        mPixels->advanceData();
+        mHasValue = true;
+    } else {
+        mHasValue = false;
+    }
+}
+
+// ScaledPixelIteratorRGB16 implementation
+inline void ScaledPixelIteratorRGB16::advance() {
+    if (!mPixels) {
+        mHasValue = false;
+        return;
+    }
+
+    if (mPixels->has(1)) {
+        // Get wire-ordered, color-corrected RGB bytes from PixelIterator (RGB reordering already applied)
+        u8 b0, b1, b2;
+        u8 brightness;
+
+        #if FASTLED_HD_COLOR_MIXING
+        // HD mode: RGB is color-corrected but NOT brightness-scaled
+        mPixels->loadRGBScaleAndBrightness(&b0, &b1, &b2, &brightness);
+        #else
+        // Standard mode: RGB is color-corrected AND brightness-scaled (premixed)
+        mPixels->loadAndScaleRGB(&b0, &b1, &b2);
+        brightness = 255;  // No separate brightness scaling needed
+        #endif
+
+        // Map 8-bit → 16-bit RGB (color correction already applied)
+        u16 r16 = fl::map8_to_16(b0);
+        u16 g16 = fl::map8_to_16(b1);
+        u16 b16 = fl::map8_to_16(b2);
+
+        // Apply brightness scaling in HD mode (brightness not yet applied by loadRGBScaleAndBrightness)
+        if (brightness != 255) {
+            r16 = scale16by8(r16, brightness);
+            g16 = scale16by8(g16, brightness);
+            b16 = scale16by8(b16, brightness);
+        }
+
+        mCurrent = array<u16, 3>{{r16, g16, b16}};  // Wire order 16-bit channels
         mPixels->stepDithering();
         mPixels->advanceData();
         mHasValue = true;

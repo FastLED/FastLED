@@ -21,8 +21,17 @@
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
+#include "fl/five_bit_hd_gamma.h"
+#include "fl/force_inline.h"
+#include "crgb.h"
 
 namespace fl {
+
+// NOTE: The old loadAndScale_APA102_HD<RGB_ORDER>() function has been removed.
+// RGB reordering now happens upstream via ScaledPixelIteratorRGB adapter.
+// The encoder receives wire-ordered RGB data (fl::array<u8, 3>) and brightness separately.
+// For APA102HD usage, the chipset controller uses ScaledPixelIteratorRGB + ScaledPixelIteratorBrightness
+// with the existing encodeAPA102_HD() function that accepts separate RGB and brightness iterators.
 
 /// @brief Encode pixel data in APA102 format with global brightness
 /// @tparam InputIterator Iterator yielding fl::array<u8, 3> (3 bytes in wire order)
