@@ -74,17 +74,17 @@ inline void setAdcRange(AdcRange range) {
     int ref_mode;
     switch (range) {
         case AdcRange::Default:
-            ref_mode = DEFAULT;
+            ref_mode = ::DEFAULT;
             break;
         case AdcRange::Range0_1V1:
-            ref_mode = INTERNAL;  // 1.2V internal reference on Teensy
+            ref_mode = ::INTERNAL;  // 1.2V internal reference on Teensy
             break;
         case AdcRange::External:
-            ref_mode = EXTERNAL;  // External AREF pin
+            ref_mode = ::EXTERNAL;  // External AREF pin
             break;
         default:
             // Unsupported ranges - use default
-            ref_mode = DEFAULT;
+            ref_mode = ::DEFAULT;
             break;
     }
     ::analogReference(ref_mode);
