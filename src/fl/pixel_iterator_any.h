@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "fl/pixel_iterator.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
 #include "pixel_controller.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/optional.h"

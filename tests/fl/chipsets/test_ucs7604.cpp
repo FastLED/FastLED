@@ -8,7 +8,7 @@
 
 #include "test.h"
 #include "FastLED.h"
-#include "fl/chipsets/ucs7604.h"
+#include "fl/chipsets/encoders/ucs7604.h"
 #include "crgb.h"
 #include "fl/stl/vector.h"
 #include "fl/ease.h"

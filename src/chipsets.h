@@ -9,6 +9,7 @@
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "fl/stl/bit_cast.h"
+#include "fl/stl/unique_ptr.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
@@ -30,7 +31,8 @@
 #include "platforms/clockless.h"
 
 // Include UCS7604 controller (works on all platforms with clockless controller support)
-#include "fl/chipsets/ucs7604.h"
+#include "fl/chipsets/encoders/ucs7604.h"
+#include "fl/chipsets/encoders/ws2816_encoder.h"
 
 // Include platform-independent SPI utilities
 #include "platforms/shared/spi_pixel_writer.h"
@@ -602,7 +604,6 @@ public:
     WS2816Controller() {}
     ~WS2816Controller() {
         mController.setLeds(nullptr, 0);
-        delete [] mData;
     }
 
     virtual void *beginShowLeds(int size) override {
@@ -650,11 +651,7 @@ public:
 
 		// output the data stream
         mController.setEnabled(true);
-#ifdef BOUNCE_SUBCLASS
-		mController.callShow(mData, 2 * pixels.size(), 255);
-#else
-        mController.show(mData, 2 * pixels.size(), 255);
-#endif
+		mController.callShow(mData.get(), 2 * pixels.size(), 255);
         mController.setEnabled(false);
     }
 
@@ -667,14 +664,14 @@ private:
     void ensureBuffer(int size_8bit) {
         int size_16bit = 2 * size_8bit;
         if (mController.size() != size_16bit) {
-            delete [] mData;
-            CRGB *new_leds = new CRGB[size_16bit];
-			mData = new_leds;
-            mController.setLeds(new_leds, size_16bit);
+            
+            auto new_leds = fl::make_unique<CRGB[]>(size_16bit);
+			mData = fl::move(new_leds);
+            mController.setLeds(mData.get(), size_16bit);
         }
     }
 
-    CRGB *mData = 0;
+    fl::unique_ptr<CRGB[]> mData;
     ControllerT mController;
 };
 

@@ -9,13 +9,13 @@
 #include "cpixel_ledcontroller.h"
 #include "fl/force_inline.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/pixel_iterator.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/stl/vector.h"
 #include "lib8tion/intmap.h"
 #include "fl/stl/type_traits.h"
 #include "fl/ease.h"
 
-/// @file ucs7604.h
+/// @file fl/chipsets/encoders/ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
 ///
 /// The UCS7604 uses a unique preamble-based protocol. This implementation
