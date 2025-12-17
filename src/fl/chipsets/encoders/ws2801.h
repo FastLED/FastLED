@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/ws2801_encoder.h
+/// @file chipsets/encoders/ws2801.h
 /// @brief WS2801/WS2803 SPI chipset encoder
 ///
 /// Free function encoder for WS2801 and WS2803 chipsets.

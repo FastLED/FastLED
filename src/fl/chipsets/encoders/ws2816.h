@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/chipsets/encoders/ws2816_encoder.h
+/// @file fl/chipsets/encoders/ws2816.h
 /// @brief WS2816 encoder - converts 16-bit RGB pixels to dual 8-bit RGB format
 ///
 /// The WS2816 is a high-definition LED chipset that uses 16-bit color depth.

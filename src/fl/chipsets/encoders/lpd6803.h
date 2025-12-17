@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/lpd6803_encoder.h
+/// @file chipsets/encoders/lpd6803.h
 /// @brief LPD6803 SPI chipset encoder
 ///
 /// Free function encoder for LPD6803 chipsets.

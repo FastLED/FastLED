@@ -1,21 +1,21 @@
 #pragma once
 
-/// @file chipsets/encoders/apa102_encoder.h
-/// @brief APA102/DOTSTAR SPI chipset encoder
+/// @file chipsets/encoders/sk9822.h
+/// @brief SK9822 SPI chipset encoder
 ///
-/// Free function encoder for APA102/DOTSTAR chipsets.
+/// Free function encoder for SK9822 chipsets.
+/// SK9822 is nearly identical to APA102, with one key difference:
+/// end frame uses 0x00 instead of 0xFF.
 ///
 /// Protocol:
 /// - Start frame: 4 bytes of 0x00
 /// - LED data: [0xE0|brightness][B][G][R] (4 bytes per LED)
-/// - End frame: ⌈num_leds/32⌉ DWords of 0xFF
+/// - End frame: ⌈num_leds/32⌉ DWords of 0x00 (differs from APA102)
 ///
 /// Brightness modes:
-/// - Global: All LEDs use same 5-bit brightness (from first pixel)
-/// - Per-LED: Each LED has individual brightness (if brightness iterator provided)
+/// - Global: All LEDs use same 5-bit brightness
+/// - Per-LED: Each LED has individual brightness
 /// - Full: All LEDs at maximum brightness (31)
-///
-/// @note Brightness is 5-bit (0-31), stored in bits 0-4 of header byte
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"
@@ -24,17 +24,16 @@
 
 namespace fl {
 
-/// @brief Encode pixel data in APA102 format with global brightness
+/// @brief Encode pixel data in SK9822 format with global brightness
 /// @tparam InputIterator Iterator yielding fl::array<u8, 3> (3 bytes in wire order)
 /// @tparam OutputIterator Output iterator accepting uint8_t
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel
 /// @param out Output iterator for encoded bytes
 /// @param global_brightness Global 5-bit brightness (0-31), default 31
-/// @note All LEDs use the same brightness value
-/// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
+/// @note SK9822 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename OutputIterator>
-void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
+void encodeSK9822(InputIterator first, InputIterator last, OutputIterator out,
                   u8 global_brightness = 31) {
     // Clamp brightness to 5-bit range
     global_brightness = global_brightness & 0x1F;
@@ -45,7 +44,7 @@ void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
     *out++ = 0x00;
     *out++ = 0x00;
 
-    // LED data: brightness header + BGR (count pixels as we go)
+    // LED data: brightness header + BGR (count as we go)
     size_t num_leds = 0;
     while (first != last) {
         const fl::array<u8, BYTES_PER_PIXEL_RGB>& pixel = *first;
@@ -57,14 +56,14 @@ void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
         ++num_leds;
     }
 
-    // End frame: ⌈num_leds/32⌉ DWords of 0xFF
+    // SK9822 difference: end frame uses 0x00 instead of 0xFF
     size_t end_dwords = (num_leds / 32) + 1;
     for (size_t i = 0; i < end_dwords * 4; i++) {
-        *out++ = 0xFF;
+        *out++ = 0x00;
     }
 }
 
-/// @brief Encode pixel data in APA102 format with per-LED brightness
+/// @brief Encode pixel data in SK9822 format with per-LED brightness
 /// @tparam InputIterator Iterator yielding fl::array<u8, 3> (3 bytes in wire order)
 /// @tparam BrightnessIterator Iterator yielding uint8_t brightness values
 /// @tparam OutputIterator Output iterator accepting uint8_t
@@ -72,10 +71,9 @@ void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
 /// @param last Iterator past last pixel
 /// @param brightness_first Iterator to first brightness value (8-bit, 0-255)
 /// @param out Output iterator for encoded bytes
-/// @note Each LED has individual brightness (HD gamma mode)
-/// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
+/// @note SK9822 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename BrightnessIterator, typename OutputIterator>
-void encodeAPA102_HD(InputIterator first, InputIterator last,
+void encodeSK9822_HD(InputIterator first, InputIterator last,
                      BrightnessIterator brightness_first, OutputIterator out) {
     // Start frame: 4 bytes of 0x00
     *out++ = 0x00;
@@ -100,26 +98,25 @@ void encodeAPA102_HD(InputIterator first, InputIterator last,
         ++num_leds;
     }
 
-    // End frame: ⌈num_leds/32⌉ DWords of 0xFF
+    // SK9822 difference: end frame uses 0x00
     size_t end_dwords = (num_leds / 32) + 1;
     for (size_t i = 0; i < end_dwords * 4; i++) {
-        *out++ = 0xFF;
+        *out++ = 0x00;
     }
 }
 
-/// @brief Encode pixel data in APA102 format (auto-detected brightness from first pixel)
+/// @brief Encode pixel data in SK9822 format (auto-detected brightness from first pixel)
 /// @tparam InputIterator Iterator yielding fl::array<u8, 3> (3 bytes in wire order)
 /// @tparam OutputIterator Output iterator accepting uint8_t
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel
 /// @param out Output iterator for encoded bytes
-/// @note Extracts global brightness from max component of first pixel
-/// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
+/// @note SK9822 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename OutputIterator>
-void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
+void encodeSK9822_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) {
     if (first == last) {
-        // Empty range - just write start frame (no end frame needed for 0 LEDs)
+        // Empty range - just write start frame
         *out++ = 0x00; *out++ = 0x00; *out++ = 0x00; *out++ = 0x00;
         return;
     }
@@ -160,10 +157,10 @@ void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
         ++num_leds;
     }
 
-    // End frame
+    // End frame (SK9822 uses 0x00)
     size_t end_dwords = (num_leds / 32) + 1;
     for (size_t i = 0; i < end_dwords * 4; i++) {
-        *out++ = 0xFF;
+        *out++ = 0x00;
     }
 }
 

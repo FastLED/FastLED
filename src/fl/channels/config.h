@@ -8,7 +8,7 @@
 #include "fl/stl/variant.h"
 #include "fl/screenmap.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/chipsets/spi_encoder.h"
+#include "fl/chipsets/spi.h"
 #include "fl/eorder.h"
 #include "fl/channels/options.h"
 #include "color.h"

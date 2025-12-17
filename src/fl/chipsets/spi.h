@@ -1,4 +1,4 @@
-/// @file fl/chipsets/spi_encoder.h
+/// @file fl/chipsets/spi.h
 /// @brief SPI encoder configuration for clocked LED chipsets
 ///
 /// Defines encoder parameters for SPI-based LED protocols (APA102, SK9822, etc.)

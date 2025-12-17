@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/lpd8806_encoder.h
+/// @file chipsets/encoders/lpd8806.h
 /// @brief LPD8806 SPI chipset encoder
 ///
 /// Free function encoder for LPD8806 chipsets.

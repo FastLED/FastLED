@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/p9813_encoder.h
+/// @file chipsets/encoders/p9813.h
 /// @brief P9813 SPI chipset encoder
 ///
 /// Free function encoder for P9813 chipsets.

@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/ws2812_encoder.h
+/// @file chipsets/encoders/ws2812.h
 /// @brief WS2812/WS2812B/WS2813/NeoPixel encoder
 ///
 /// Free function encoder for WS2812 family chipsets.

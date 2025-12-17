@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/sm16716_encoder.h
+/// @file chipsets/encoders/sm16716.h
 /// @brief SM16716 SPI chipset encoder
 ///
 /// Free function encoder for SM16716 chipsets.

@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/hd108_encoder.h
+/// @file chipsets/encoders/hd108.h
 /// @brief HD108 SPI chipset encoder
 ///
 /// Free function encoder for HD108 chipsets.

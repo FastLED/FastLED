@@ -32,7 +32,7 @@
 
 // Include UCS7604 controller (works on all platforms with clockless controller support)
 #include "fl/chipsets/encoders/ucs7604.h"
-#include "fl/chipsets/encoders/ws2816_encoder.h"
+#include "fl/chipsets/encoders/ws2816.h"
 
 // Include platform-independent SPI utilities
 #include "platforms/shared/spi_pixel_writer.h"

@@ -10,16 +10,16 @@
 #include "fl/gamma.h"
 #include "fl/rgbw.h"
 #include "crgb.h"
-#include "fl/chipsets/encoders/ws2801_encoder.h"
-#include "fl/chipsets/encoders/ws2803_encoder.h"
-#include "fl/chipsets/encoders/ws2812_encoder.h"
-#include "fl/chipsets/encoders/apa102_encoder.h"
-#include "fl/chipsets/encoders/sk9822_encoder.h"
-#include "fl/chipsets/encoders/hd108_encoder.h"
-#include "fl/chipsets/encoders/p9813_encoder.h"
-#include "fl/chipsets/encoders/lpd8806_encoder.h"
-#include "fl/chipsets/encoders/lpd6803_encoder.h"
-#include "fl/chipsets/encoders/sm16716_encoder.h"
+#include "fl/chipsets/encoders/ws2801.h"
+#include "fl/chipsets/encoders/ws2803.h"
+#include "fl/chipsets/encoders/ws2812.h"
+#include "fl/chipsets/encoders/apa102.h"
+#include "fl/chipsets/encoders/sk9822.h"
+#include "fl/chipsets/encoders/hd108.h"
+#include "fl/chipsets/encoders/p9813.h"
+#include "fl/chipsets/encoders/lpd8806.h"
+#include "fl/chipsets/encoders/lpd6803.h"
+#include "fl/chipsets/encoders/sm16716.h"
 
 // Include adapter class definitions (but not implementations yet)
 // This provides the full definitions of ScaledPixelIterator* classes
@@ -280,7 +280,7 @@ class PixelIterator {
     /// @brief Encode pixels in WS2801 format (zero allocation)
     /// @param out Output buffer to write encoded bytes
     /// @note Protocol: Simple RGB bytes, no frame overhead
-    /// @note Uses unified encoder: src/fl/chipsets/encoders/ws2801_encoder.h
+    /// @note Uses unified encoder: src/fl/chipsets/encoders/ws2801.h
     template <typename CONTAINER_UIN8_T>
     void writeWS2801(CONTAINER_UIN8_T* out) {
         auto back_ins = fl::back_inserter(*out);
@@ -291,7 +291,7 @@ class PixelIterator {
     /// @brief Encode pixels in WS2803 format (zero allocation)
     /// @param out Output buffer to write encoded bytes
     /// @note Protocol: Identical to WS2801
-    /// @note Uses unified encoder: src/fl/chipsets/encoders/ws2803_encoder.h
+    /// @note Uses unified encoder: src/fl/chipsets/encoders/ws2803.h
     template <typename CONTAINER_UIN8_T>
     void writeWS2803(CONTAINER_UIN8_T* out) {
         auto back_ins = fl::back_inserter(*out);

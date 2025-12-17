@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file chipsets/encoders/ws2803_encoder.h
+/// @file chipsets/encoders/ws2803.h
 /// @brief WS2803 SPI chipset encoder (WS2801 alias)
 ///
 /// WS2803 uses identical protocol to WS2801 - just simple RGB byte streaming.
