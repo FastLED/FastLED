@@ -19,6 +19,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/ease.h"
+#include "fl/chipsets/encoders/pixel_iterator_adapters.h"
 
 namespace fl {
 
@@ -88,63 +89,59 @@ void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
 }
 
 /// @brief Encode RGB pixels in UCS7604 8-bit format
-/// @tparam PixelIteratorT PixelIterator or compatible type
+/// @tparam InputIterator Iterator yielding fl::array<uint8_t, 3> (RGB bytes)
 /// @tparam OutputIterator Output iterator accepting uint8_t
-/// @param pixel_iter PixelIterator with has() and loadAndScaleRGB() methods
-/// @param num_leds Number of LEDs to encode
+/// @param first Beginning of pixel range
+/// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
 /// @note Writes 3 bytes per pixel (RGB order)
-template <typename PixelIteratorT, typename OutputIterator>
-void encodeUCS7604_8bit_RGB(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator out) {
-    for (size_t i = 0; i < num_leds && pixel_iter.has(1); ++i) {
-        uint8_t r, g, b;
-        pixel_iter.loadAndScaleRGB(&r, &g, &b);
-        pixel_iter.advanceData();
-        *out++ = r;
-        *out++ = g;
-        *out++ = b;
+template <typename InputIterator, typename OutputIterator>
+void encodeUCS7604_8bit_RGB(InputIterator first, InputIterator last, OutputIterator out) {
+    while (first != last) {
+        const auto& pixel = *first;
+        *out++ = pixel[0];  // R
+        *out++ = pixel[1];  // G
+        *out++ = pixel[2];  // B
+        ++first;
     }
 }
 
 /// @brief Encode RGBW pixels in UCS7604 8-bit format
-/// @tparam PixelIteratorT PixelIterator or compatible type
+/// @tparam InputIterator Iterator yielding fl::array<uint8_t, 4> (RGBW bytes)
 /// @tparam OutputIterator Output iterator accepting uint8_t
-/// @param pixel_iter PixelIterator with has() and loadAndScaleRGBW() methods
-/// @param num_leds Number of LEDs to encode
+/// @param first Beginning of pixel range
+/// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
 /// @note Writes 4 bytes per pixel (RGBW order)
-template <typename PixelIteratorT, typename OutputIterator>
-void encodeUCS7604_8bit_RGBW(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator out) {
-    for (size_t i = 0; i < num_leds && pixel_iter.has(1); ++i) {
-        uint8_t r, g, b, w;
-        pixel_iter.loadAndScaleRGBW(&r, &g, &b, &w);
-        pixel_iter.advanceData();
-        *out++ = r;
-        *out++ = g;
-        *out++ = b;
-        *out++ = w;
+template <typename InputIterator, typename OutputIterator>
+void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIterator out) {
+    while (first != last) {
+        const auto& pixel = *first;
+        *out++ = pixel[0];  // R
+        *out++ = pixel[1];  // G
+        *out++ = pixel[2];  // B
+        *out++ = pixel[3];  // W
+        ++first;
     }
 }
 
 /// @brief Encode RGB pixels in UCS7604 16-bit format with gamma correction
-/// @tparam PixelIteratorT PixelIterator or compatible type
+/// @tparam InputIterator Iterator yielding fl::array<uint8_t, 3> (RGB bytes)
 /// @tparam OutputIterator Output iterator accepting uint8_t
-/// @param pixel_iter PixelIterator with has() and loadAndScaleRGB() methods
-/// @param num_leds Number of LEDs to encode
+/// @param first Beginning of pixel range
+/// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
 /// @note Writes 6 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo)
 /// @note Applies gamma 2.8 correction to expand 8-bit to 16-bit values
-template <typename PixelIteratorT, typename OutputIterator>
-void encodeUCS7604_16bit_RGB(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator out) {
-    for (size_t i = 0; i < num_leds && pixel_iter.has(1); ++i) {
-        uint8_t r, g, b;
-        pixel_iter.loadAndScaleRGB(&r, &g, &b);
-        pixel_iter.advanceData();
+template <typename InputIterator, typename OutputIterator>
+void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out) {
+    while (first != last) {
+        const auto& pixel = *first;
 
         // Apply gamma 2.8 correction for 16-bit output
-        uint16_t r16 = fl::gamma_2_8(r);
-        uint16_t g16 = fl::gamma_2_8(g);
-        uint16_t b16 = fl::gamma_2_8(b);
+        uint16_t r16 = fl::gamma_2_8(pixel[0]);
+        uint16_t g16 = fl::gamma_2_8(pixel[1]);
+        uint16_t b16 = fl::gamma_2_8(pixel[2]);
 
         // Write big-endian 16-bit values
         *out++ = r16 >> 8;
@@ -153,29 +150,28 @@ void encodeUCS7604_16bit_RGB(PixelIteratorT& pixel_iter, size_t num_leds, Output
         *out++ = g16 & 0xFF;
         *out++ = b16 >> 8;
         *out++ = b16 & 0xFF;
+        ++first;
     }
 }
 
 /// @brief Encode RGBW pixels in UCS7604 16-bit format with gamma correction
-/// @tparam PixelIteratorT PixelIterator or compatible type
+/// @tparam InputIterator Iterator yielding fl::array<uint8_t, 4> (RGBW bytes)
 /// @tparam OutputIterator Output iterator accepting uint8_t
-/// @param pixel_iter PixelIterator with has() and loadAndScaleRGBW() methods
-/// @param num_leds Number of LEDs to encode
+/// @param first Beginning of pixel range
+/// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
 /// @note Writes 8 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo, W16_hi, W16_lo)
 /// @note Applies gamma 2.8 correction to expand 8-bit to 16-bit values
-template <typename PixelIteratorT, typename OutputIterator>
-void encodeUCS7604_16bit_RGBW(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator out) {
-    for (size_t i = 0; i < num_leds && pixel_iter.has(1); ++i) {
-        uint8_t r, g, b, w;
-        pixel_iter.loadAndScaleRGBW(&r, &g, &b, &w);
-        pixel_iter.advanceData();
+template <typename InputIterator, typename OutputIterator>
+void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIterator out) {
+    while (first != last) {
+        const auto& pixel = *first;
 
         // Apply gamma 2.8 correction for 16-bit output
-        uint16_t r16 = fl::gamma_2_8(r);
-        uint16_t g16 = fl::gamma_2_8(g);
-        uint16_t b16 = fl::gamma_2_8(b);
-        uint16_t w16 = fl::gamma_2_8(w);
+        uint16_t r16 = fl::gamma_2_8(pixel[0]);
+        uint16_t g16 = fl::gamma_2_8(pixel[1]);
+        uint16_t b16 = fl::gamma_2_8(pixel[2]);
+        uint16_t w16 = fl::gamma_2_8(pixel[3]);
 
         // Write big-endian 16-bit values
         *out++ = r16 >> 8;
@@ -186,13 +182,13 @@ void encodeUCS7604_16bit_RGBW(PixelIteratorT& pixel_iter, size_t num_leds, Outpu
         *out++ = b16 & 0xFF;
         *out++ = w16 >> 8;
         *out++ = w16 & 0xFF;
+        ++first;
     }
 }
 
 /// @brief Encode complete UCS7604 frame (preamble + padding + pixel data)
-/// @tparam PixelIteratorT PixelIterator or compatible type
 /// @tparam OutputIterator Output iterator accepting uint8_t
-/// @param pixel_iter PixelIterator with has(), advanceData(), loadAndScaleRGB/RGBW() methods
+/// @param pixel_iter PixelIterator with pixel data and scaling/gamma/dithering
 /// @param num_leds Number of LEDs to encode
 /// @param out Output iterator for complete frame
 /// @param mode UCS7604 protocol mode (8-bit/16-bit)
@@ -200,8 +196,8 @@ void encodeUCS7604_16bit_RGBW(PixelIteratorT& pixel_iter, size_t num_leds, Outpu
 /// @param is_rgbw True for RGBW mode, false for RGB mode
 /// @note Outputs: preamble (15 bytes) + padding (0-2 bytes) + LED data
 /// @note Total output size is always divisible by 3 (required by UCS7604 protocol)
-template <typename PixelIteratorT, typename OutputIterator>
-void encodeUCS7604(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator out,
+template <typename OutputIterator>
+void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator out,
                    UCS7604Mode mode, const UCS7604CurrentControl& current, bool is_rgbw) {
     constexpr size_t PREAMBLE_LEN = 15;
 
@@ -229,16 +225,20 @@ void encodeUCS7604(PixelIteratorT& pixel_iter, size_t num_leds, OutputIterator o
     // Encode LED data based on mode and RGB/RGBW
     if (mode == UCS7604_MODE_8BIT_800KHZ) {
         if (is_rgbw) {
-            encodeUCS7604_8bit_RGBW(pixel_iter, num_leds, out);
+            auto range = makeScaledPixelRangeRGBW(&pixel_iter);
+            encodeUCS7604_8bit_RGBW(range.first, range.second, out);
         } else {
-            encodeUCS7604_8bit_RGB(pixel_iter, num_leds, out);
+            auto range = makeScaledPixelRangeRGB(&pixel_iter);
+            encodeUCS7604_8bit_RGB(range.first, range.second, out);
         }
     } else {
         // 16-bit modes
         if (is_rgbw) {
-            encodeUCS7604_16bit_RGBW(pixel_iter, num_leds, out);
+            auto range = makeScaledPixelRangeRGBW(&pixel_iter);
+            encodeUCS7604_16bit_RGBW(range.first, range.second, out);
         } else {
-            encodeUCS7604_16bit_RGB(pixel_iter, num_leds, out);
+            auto range = makeScaledPixelRangeRGB(&pixel_iter);
+            encodeUCS7604_16bit_RGB(range.first, range.second, out);
         }
     }
 }
