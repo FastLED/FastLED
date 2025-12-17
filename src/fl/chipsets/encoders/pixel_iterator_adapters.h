@@ -14,6 +14,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"
+#include "fl/stl/utility.h"
 #include "crgb.h"
 #include "fl/rgbw.h"
 
