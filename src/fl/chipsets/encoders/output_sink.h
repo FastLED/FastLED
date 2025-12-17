@@ -30,45 +30,22 @@ namespace fl {
 /// - May be stateful (e.g., tracking buffer position)
 /// - Should be lightweight (passed by reference, not value)
 
-/// @brief Buffer sink adapter for container-based output
+/// @brief Modern encoder pattern using output iterators
 ///
-/// Wraps any container that supports `push_back(u8)` and allows
-/// encoder functions to write to it via the OutputSink interface.
-///
-/// @tparam CONTAINER Container type (e.g., fl::vector<u8>, fl::vector_psram<u8>)
+/// Modern encoder functions use output iterators (like fl::back_inserter)
+/// instead of custom sink adapters. This provides better compatibility with
+/// standard algorithms and zero-overhead abstraction.
 ///
 /// @example
 /// ```cpp
 /// fl::vector<u8> buffer;
-/// BufferSink<fl::vector<u8>> sink{&buffer};
-/// encodeWS2801(pixelIterator, sink);
+/// auto out = fl::back_inserter(buffer);
+/// auto pixel_range = makeScaledPixelRangeRGB(&pixelIterator);
+/// encodeWS2801(pixel_range.first, pixel_range.second, out);
 /// // buffer now contains encoded data
 /// ```
-template <typename CONTAINER>
-struct BufferSink {
-    CONTAINER* mBuffer;  ///< Pointer to output buffer
-
-    /// @brief Write a single byte to the buffer
-    /// @param byte Byte to write
-    void write(fl::u8 byte) {
-        mBuffer->push_back(byte);
-    }
-};
-
-/// @brief Helper function to create BufferSink with type deduction
-/// @tparam CONTAINER Container type (automatically deduced)
-/// @param buffer Pointer to output buffer
-/// @return BufferSink adapter wrapping the buffer
 ///
-/// @example
-/// ```cpp
-/// fl::vector<u8> buffer;
-/// auto sink = makeBufferSink(&buffer);
-/// encodeWS2801(pixelIterator, sink);
-/// ```
-template <typename CONTAINER>
-BufferSink<CONTAINER> makeBufferSink(CONTAINER* buffer) {
-    return BufferSink<CONTAINER>{buffer};
-}
+/// @note fl::back_inserter is defined in fl/stl/iterator.h
+/// @note Pixel iterator adapters are in fl/chipsets/encoders/pixel_iterator_adapters.h
 
 } // namespace fl
