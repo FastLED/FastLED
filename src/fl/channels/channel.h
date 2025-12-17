@@ -52,13 +52,28 @@ public:
     /// @return Channel ID (always increments, starts at 0)
     int32_t id() const { return mId; }
 
-    /// @brief Get the pin number for this channel
+    /// @brief Get the pin number for this channel (data pin)
     /// @return Pin number
     int getPin() const { return mPin; }
 
-    /// @brief Get the timing configuration for this channel
+    /// @brief Get the clock pin for this channel (SPI only, -1 for clockless)
+    /// @return Clock pin number or -1
+    int getClockPin() const;
+
+    /// @brief Get the timing configuration for this channel (clockless only)
     /// @return ChipsetTimingConfig reference
+    /// @deprecated Use getChipset() instead
     const ChipsetTimingConfig& getTiming() const { return mTiming; }
+
+    /// @brief Get the chipset configuration variant
+    /// @return ChipsetVariant reference
+    const ChipsetVariant& getChipset() const { return mChipset; }
+
+    /// @brief Check if this is a clockless chipset
+    bool isClockless() const { return mChipset.is<ClocklessChipset>(); }
+
+    /// @brief Check if this is an SPI chipset
+    bool isSpi() const { return mChipset.is<SpiChipsetConfig>(); }
 
     /// @brief Get the channel engine this channel belongs to
     /// @return Pointer to the IChannelEngine, or nullptr if not set
@@ -78,6 +93,16 @@ private:
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
 
     /// @brief Private constructor (use create() factory method)
+    /// @param chipset Chipset configuration (clockless or SPI)
+    /// @param leds LED data array
+    /// @param rgbOrder RGB channel ordering
+    /// @param engine Channel engine pointer
+    /// @param options Channel options (correction, temperature, dither, rgbw)
+    Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
+            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
+
+    /// @brief Backwards-compatible constructor (deprecated)
+    /// @deprecated Use variant-based constructor instead
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
             EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
 
@@ -89,10 +114,11 @@ private:
 
     static int32_t nextId();
 
-    const int mPin;
-    const ChipsetTimingConfig mTiming;
+    ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
+    const int mPin;                  // Data pin (backwards compatibility)
+    const ChipsetTimingConfig mTiming; // Timing (backwards compatibility, clockless only)
     const EOrder mRgbOrder;
-    IChannelEngine* mEngine;  // Singleton pointer, not owned
+    IChannelEngine* mEngine;         // Singleton pointer, not owned
     const int32_t mId;
     ChannelDataPtr mChannelData;
 };

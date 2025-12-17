@@ -155,23 +155,27 @@
 
 // clockless.h removed - BulkClockless API has been superseded by Channel API
 
-/// LED chipsets with SPI interface
+// SPI chipset enumeration (modern type-safe enum class)
+#include "fl/chipsets/spi_chipsets.h"
+
+/// Backwards compatibility enum - allows old code to use unscoped names (e.g., APA102 instead of fl::SpiChipset::APA102)
+/// @deprecated Use fl::SpiChipset enum class instead for type safety
 enum ESPIChipsets {
-	LPD6803,  ///< LPD6803 LED chipset
-	LPD8806,  ///< LPD8806 LED chipset
-	WS2801,   ///< WS2801 LED chipset
-	WS2803,   ///< WS2803 LED chipset
-	SM16716,  ///< SM16716 LED chipset
-	P9813,    ///< P9813 LED chipset
-	APA102,   ///< APA102 LED chipset
-	SK9822,   ///< SK9822 LED chipset
-	SK9822HD, ///< SK9822 LED chipset with 5-bit gamma correction
-	DOTSTAR,  ///< APA102 LED chipset alias
-	DOTSTARHD, ///< APA102HD LED chipset alias
-	APA102HD, ///< APA102 LED chipset with 5-bit gamma correction
-	HD107,  /// Same as APA102, but in turbo 40-mhz mode.
-	HD107HD,  /// Same as APA102HD, but in turbo 40-mhz mode.
-	HD108,  /// 16-bit variant of HD107, always gamma corrected. No SD (standard definition) option available - all HD108s use gamma correction, and a non-gamma corrected version is not planned.
+	LPD6803   = static_cast<int>(fl::SpiChipset::LPD6803),   ///< LPD6803 LED chipset
+	LPD8806   = static_cast<int>(fl::SpiChipset::LPD8806),   ///< LPD8806 LED chipset
+	WS2801    = static_cast<int>(fl::SpiChipset::WS2801),    ///< WS2801 LED chipset
+	WS2803    = static_cast<int>(fl::SpiChipset::WS2803),    ///< WS2803 LED chipset
+	SM16716   = static_cast<int>(fl::SpiChipset::SM16716),   ///< SM16716 LED chipset
+	P9813     = static_cast<int>(fl::SpiChipset::P9813),     ///< P9813 LED chipset
+	APA102    = static_cast<int>(fl::SpiChipset::APA102),    ///< APA102 LED chipset
+	SK9822    = static_cast<int>(fl::SpiChipset::SK9822),    ///< SK9822 LED chipset
+	SK9822HD  = static_cast<int>(fl::SpiChipset::SK9822HD),  ///< SK9822 LED chipset with 5-bit gamma correction
+	DOTSTAR   = static_cast<int>(fl::SpiChipset::DOTSTAR),   ///< APA102 LED chipset alias
+	DOTSTARHD = static_cast<int>(fl::SpiChipset::DOTSTARHD), ///< APA102HD LED chipset alias
+	APA102HD  = static_cast<int>(fl::SpiChipset::APA102HD),  ///< APA102 LED chipset with 5-bit gamma correction
+	HD107     = static_cast<int>(fl::SpiChipset::HD107),     ///< Same as APA102, but in turbo 40-mhz mode.
+	HD107HD   = static_cast<int>(fl::SpiChipset::HD107HD),   ///< Same as APA102HD, but in turbo 40-mhz mode.
+	HD108     = static_cast<int>(fl::SpiChipset::HD108),     ///< 16-bit variant of HD107, always gamma corrected. No SD (standard definition) option available - all HD108s use gamma correction, and a non-gamma corrected version is not planned.
 };
 
 /// Smart Matrix Library controller type
@@ -591,6 +595,7 @@ public:
 		};
 
 	// Define specializations for each supported CHIPSET
+	// Note: Using unscoped enum values for backwards compatibility
 	_FL_MAP_CLOCKED_CHIPSET(LPD6803, LPD6803Controller)
 	_FL_MAP_CLOCKED_CHIPSET(LPD8806, LPD8806Controller)
 	_FL_MAP_CLOCKED_CHIPSET(WS2801, WS2801Controller)

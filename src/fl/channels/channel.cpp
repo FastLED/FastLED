@@ -9,6 +9,7 @@
 #include "ftl/atomic.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "fl/channels/options.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
@@ -28,33 +29,69 @@ int32_t Channel::nextId() {
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {
+    // Select engine based on chipset type
     IChannelEngine* selectedEngine = nullptr;
 
-    // Handle affinity binding: if affinity is specified, look up engine by name
+    // Handle affinity binding if specified
     if (config.options.mAffinity && config.options.mAffinity[0]) {
         selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.mAffinity);
         if (selectedEngine) {
             FL_DBG("Channel: Bound to engine '" << config.options.mAffinity << "' via affinity");
         } else {
-            FL_WARN("Channel: Affinity engine '" << config.options.mAffinity << "' not found or not enabled - using ChannelBusManager");
+            FL_ERROR("Channel: Affinity engine '" << config.options.mAffinity << "' not found - using ChannelBusManager");
         }
     }
 
-    // If no affinity or affinity engine not found, use ChannelBusManager
+    // If no affinity or not found, select engine based on chipset type
     if (!selectedEngine) {
-        selectedEngine = &ChannelBusManager::instance();
-        FL_DBG("Channel: Using ChannelBusManager for engine selection");
+        if (config.chipset.is<SpiChipsetConfig>()) {
+            // For SPI chipsets, try to get SPI engine first
+            IChannelEngine* spiEngine = ChannelBusManager::instance().getEngineByName("SPI");
+            if (spiEngine) {
+                selectedEngine = spiEngine;
+                FL_DBG("Channel (SPI): Using SPI engine");
+            } else {
+                // Fall back to ChannelBusManager
+                selectedEngine = &ChannelBusManager::instance();
+                FL_DBG("Channel (SPI): SPI engine not available, using ChannelBusManager");
+            }
+        } else {
+            // Clockless chipsets use ChannelBusManager
+            selectedEngine = &ChannelBusManager::instance();
+            FL_DBG("Channel (clockless): Using ChannelBusManager for engine selection");
+        }
     }
 
-    return fl::make_shared<Channel>(config.pin, config.timing, config.mLeds,
+    return fl::make_shared<Channel>(config.chipset, config.mLeds,
                                      config.rgb_order, selectedEngine, config.options);
 }
 
-Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+// Helper to extract data pin from chipset variant
+namespace {
+int getDataPinFromChipset(const ChipsetVariant& chipset) {
+    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
+        return clockless->pin;
+    } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
+        return spi->dataPin;
+    }
+    return -1;
+}
+
+// Helper to extract timing from chipset variant (clockless only)
+ChipsetTimingConfig getTimingFromChipset(const ChipsetVariant& chipset) {
+    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
+        return clockless->timing;
+    }
+    return ChipsetTimingConfig(0, 0, 0, 0);  // Invalid/empty timing for SPI
+}
+} // anonymous namespace
+
+Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
     : CPixelLEDController<RGB>()
-    , mPin(pin)
-    , mTiming(timing)
+    , mChipset(chipset)
+    , mPin(getDataPinFromChipset(chipset))
+    , mTiming(getTimingFromChipset(chipset))
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
     , mId(nextId()) {
@@ -62,6 +99,39 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     // This prevents RX from capturing noise/glitches on uninitialized pins
     // Must happen before any engine initialization
+    gpio_set_pull_mode(static_cast<gpio_num_t>(mPin), GPIO_PULLDOWN_ONLY);
+
+    // For SPI chipsets, also initialize the clock pin
+    if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
+        gpio_set_pull_mode(static_cast<gpio_num_t>(spi->clockPin), GPIO_PULLDOWN_ONLY);
+    }
+#endif
+
+    // Set the LED data array
+    setLeds(leds);
+
+    // Set color correction/temperature/dither/rgbw from ChannelOptions
+    setCorrection(options.mCorrection);
+    setTemperature(options.mTemperature);
+    setDither(options.mDitherMode);
+    setRgbw(options.mRgbw);
+
+    // Create ChannelData during construction
+    mChannelData = ChannelData::create(mPin, mTiming);
+}
+
+// Backwards-compatible constructor (deprecated)
+Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
+    : CPixelLEDController<RGB>()
+    , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
+    , mPin(pin)
+    , mTiming(timing)
+    , mRgbOrder(rgbOrder)
+    , mEngine(engine)
+    , mId(nextId()) {
+#ifdef ESP32
+    // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     gpio_set_pull_mode(static_cast<gpio_num_t>(pin), GPIO_PULLDOWN_ONLY);
 #endif
 
@@ -80,25 +150,37 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
 
 Channel::~Channel() {}
 
+int Channel::getClockPin() const {
+    if (const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>()) {
+        return spi->clockPin;
+    }
+    return -1;  // Clockless chipsets don't have a clock pin
+}
 
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
-    // BIG TODO: CHANNEL NEEDS AN ENCODER:
-    // Convert pixels to channel data using the configured color order and RGBW settings
-
     // Safety check: don't modify buffer if engine is currently transmitting it
     if (mChannelData->isInUse()) {
         FL_ASSERT(false, "Channel " << mId << ": Skipping update - buffer in use by engine");
         return;
     }
 
-    // Encode pixels into the channel data
+    // Create pixel iterator with color order and RGBW conversion
     PixelIteratorAny any(pixels, mRgbOrder, mSettings.mRgbw);
     PixelIterator& pixelIterator = any;
-    // FUTURE WORK: This is where we put the encoder
+
+    // Encode pixels based on chipset type
     auto& data = mChannelData->getData();
     data.clear();
-    pixelIterator.writeWS2812(&data);
+
+    if (mChipset.is<ClocklessChipset>()) {
+        // Clockless chipsets: use WS2812 encoding (timing-sensitive byte stream)
+        pixelIterator.writeWS2812(&data);
+        FL_DBG("Channel " << mId << " (clockless): Encoded " << data.size() << " bytes for WS2812");
+    } else if (mChipset.is<SpiChipsetConfig>()) {
+        // SPI chipsets are not yet supported in the Channel API
+        FL_ERROR("SPI chipsets are not yet supported in the Channel API");
+    }
 
     // Enqueue for transmission (will be sent when engine->show() is called)
     if (mEngine) {
