@@ -1223,7 +1223,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
             }
 
             // Update accumulation offset
+            FL_DISABLE_WARNING_PUSH
+            FL_DISABLE_WARNING_VOLATILE
             self->mAccumulationOffset += symbols_to_copy;
+            FL_DISABLE_WARNING_POP
         }
 
         // Update total symbols received

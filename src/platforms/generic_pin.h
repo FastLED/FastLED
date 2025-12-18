@@ -59,6 +59,7 @@ public:
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_NULL_DEREFERENCE
+	FL_DISABLE_WARNING_VOLATILE
 	inline void hi() __attribute__ ((always_inline)) {
 		if (mPort) { *mPort |= mPinMask; }
 		else { digitalWrite(mPin, HIGH); }
@@ -81,10 +82,13 @@ public:
 
 	/// Set the same pin on another port to `HIGH`
 	/// @param port the port to modify
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING_VOLATILE
 	inline void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
 	/// Set the same pin on another port to `LOW`
 	/// @param port the port to modify
 	inline void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
+	FL_DISABLE_WARNING_POP
 	/// Set the state of the output register
 	/// @param val the state to set the output register to
 	/// @note This function is not limited to the current pin! It modifies the entire register.

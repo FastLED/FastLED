@@ -7,7 +7,8 @@
 
 // This can't be in the namespace fl. It needs to be in the global namespace.
 
-#if defined(FASTLED_STUB_MAIN) || defined(FASTLED_STUB_MAIN_INCLUDE_INO)
+// Only compile this file for stub platforms (not real Arduino platforms)
+#if (defined(FASTLED_STUB_MAIN) || defined(FASTLED_STUB_MAIN_INCLUDE_INO)) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
 
 #ifndef _FASTLED_STRINGIFY
 #define _FASTLED_STRINGIFY_HELPER(x) #x
@@ -26,4 +27,4 @@ void loop() {}
 // Include the header which provides main() and other infrastructure
 #include "platforms/stub_main.hpp"
 
-#endif // FASTLED_STUB_MAIN or FASTLED_STUB_MAIN_INCLUDE_INO
+#endif // (FASTLED_STUB_MAIN || FASTLED_STUB_MAIN_INCLUDE_INO) && (!ARDUINO || FASTLED_USE_STUB_ARDUINO)

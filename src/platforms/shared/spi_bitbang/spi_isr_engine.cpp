@@ -59,7 +59,10 @@ FastLED_SPI_ISR_State* fl_spi_state(void) { return &g_isr_state; }
 void fl_spi_visibility_delay_us(uint32_t approx_us) {
   volatile uint32_t spin = 0;
   /* Tune constant per CPU; here ~100 cycles/us at 240 MHz, coarse. */
+  FL_DISABLE_WARNING_PUSH
+  FL_DISABLE_WARNING_VOLATILE
   for (uint32_t i = 0; i < approx_us * 100u; ++i) spin += 1;
+  FL_DISABLE_WARNING_POP
   (void)spin;
 }
 

@@ -15,7 +15,9 @@
 // Include function.h and time_stub.h at file scope
 #include "fl/compiler_control.h"  // For FL_MAYBE_UNUSED
 #include "fl/stl/function.h"
+#if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 #include "platforms/stub/time_stub.h"
+#endif
 
 extern void init();
 extern void setup();
