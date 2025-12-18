@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from running_process import RunningProcess
 
-from ci.docker.DockerManager import DockerManager
+from ci.docker_utils.DockerManager import DockerManager
 
 
 # Docker image constants
@@ -214,7 +214,7 @@ class DockerQEMURunner:
         Returns:
             Docker image name following FastLED convention
         """
-        from ci.docker.build_image import generate_config_hash
+        from ci.docker_utils.build_image import generate_config_hash
 
         try:
             config_hash = generate_config_hash(platform)
@@ -232,7 +232,7 @@ class DockerQEMURunner:
         Returns:
             Docker Hub registry image name (e.g., 'niteris/fastled-simulator-esp-xtensa')
         """
-        from ci.docker.build_platforms import get_platform_for_board
+        from ci.docker_utils.build_platforms import get_platform_for_board
 
         # Get platform family (e.g., 'esp32s3' -> 'esp-xtensa')
         platform_family = get_platform_for_board(platform)
@@ -258,7 +258,7 @@ class DockerQEMURunner:
         Returns:
             True if pull and tag succeeded, False otherwise
         """
-        from ci.docker.build_platforms import get_platform_for_board
+        from ci.docker_utils.build_platforms import get_platform_for_board
 
         # Show platform family resolution for debugging
         platform_family = get_platform_for_board(platform)
@@ -589,7 +589,7 @@ class DockerQEMURunner:
 
             # Generate unique container name based on platform family
             # Determine platform family from machine type
-            from ci.docker.build_platforms import get_platform_for_board
+            from ci.docker_utils.build_platforms import get_platform_for_board
 
             platform = get_platform_for_board(machine)
             if platform:

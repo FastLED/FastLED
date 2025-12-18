@@ -11,8 +11,10 @@ import sys
 import time
 from typing import Optional, Tuple
 
-from ci.docker.build_platforms import get_docker_image_name as get_platform_image_name
-from ci.docker.build_platforms import get_platform_for_board
+from ci.docker_utils.build_platforms import (
+    get_docker_image_name as get_platform_image_name,
+)
+from ci.docker_utils.build_platforms import get_platform_for_board
 
 # Import Docker command utilities from separate module to avoid circular imports
 from ci.util.docker_command import (
@@ -419,7 +421,7 @@ def get_docker_image_name(board_name: str) -> str:
     if not platform:
         raise ValueError(
             f"Board '{board_name}' is not mapped to a Docker platform family. "
-            f"Please check ci/docker/build_platforms.py"
+            f"Please check ci/docker_utils/build_platforms.py"
         )
 
     # Generate full image name with tag

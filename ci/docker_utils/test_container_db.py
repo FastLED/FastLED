@@ -13,7 +13,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-from ci.docker.container_db import (
+from ci.docker_utils.container_db import (
     ContainerDatabase,
     cleanup_orphaned_containers,
     process_exists,

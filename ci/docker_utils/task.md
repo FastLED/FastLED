@@ -198,10 +198,10 @@ docker stop fastled-uno-abc123
    - Copy .bin, .hex, .elf files from `.pio/build/*/` to output
    - **Implementation**: Added `fastled-entrypoint.sh` script in Dockerfile.template
    - **Entrypoint**: Automatically copies build artifacts after compilation if `/fastled/output` is mounted
-5. ✅ Create cleanup script: `ci/docker/prune_old_images.py`
+5. ✅ Create cleanup script: `ci/docker_utils/prune_old_images.py`
    - **Features**: Dry run mode, age-based cleanup, platform filtering, force delete
    - **Default behavior**: Keeps newest image per platform, removes older hashes
-6. ✅ Document local development usage in ci/docker/README.md
+6. ✅ Document local development usage in ci/docker_utils/README.md
    - **Comprehensive documentation**: Quick start, usage examples, troubleshooting
    - **Architecture explanation**: Build-time vs runtime, hash-based naming rationale
 
@@ -598,14 +598,14 @@ uv run python ci/build_docker_image_pio.py --platform uno --image-name my-uno --
 - Measure compilation time improvement
 
 **Expansion:**
-- Document usage patterns in ci/docker/README.md
+- Document usage patterns in ci/docker_utils/README.md
 - Create CI workflow to build and publish Docker images
 - Extend to ESP32 platforms (esp32dev, esp32s3, esp32c3, etc.)
 - Add support for STM32, Teensy, and other platforms
 
 ## Follow-up Task: Unified Compilation Entrypoint
 
-### 4. Create Unified Script: `ci/docker/compile_sketch.py`
+### 4. Create Unified Script: `ci/docker_utils/compile_sketch.py`
 
 **Purpose**: Single-command workflow for building Docker images and compiling sketches inside containers.
 
@@ -757,22 +757,22 @@ parser.add_argument(
 
 ```bash
 # Simple compilation (builds image if needed)
-uv run python ci/docker/compile_sketch.py --platform uno --sketch Blink
+uv run python ci/docker_utils/compile_sketch.py --platform uno --sketch Blink
 
 # Force rebuild image before compilation
-uv run python ci/docker/compile_sketch.py --platform uno --sketch Blink --rebuild-image
+uv run python ci/docker_utils/compile_sketch.py --platform uno --sketch Blink --rebuild-image
 
 # Compile with framework override
-uv run python ci/docker/compile_sketch.py --platform esp32s3 --sketch Blink --framework arduino
+uv run python ci/docker_utils/compile_sketch.py --platform esp32s3 --sketch Blink --framework arduino
 
 # Build from scratch without cache
-uv run python ci/docker/compile_sketch.py --platform uno --sketch Blink --no-cache
+uv run python ci/docker_utils/compile_sketch.py --platform uno --sketch Blink --no-cache
 
 # Keep container for debugging
-uv run python ci/docker/compile_sketch.py --platform uno --sketch Blink --keep-container
+uv run python ci/docker_utils/compile_sketch.py --platform uno --sketch Blink --keep-container
 
 # Use custom image name
-uv run python ci/docker/compile_sketch.py --platform uno --sketch Blink --image-name my-test-image
+uv run python ci/docker_utils/compile_sketch.py --platform uno --sketch Blink --image-name my-test-image
 ```
 
 **Output Format**:
@@ -867,14 +867,14 @@ jobs:
 
       - name: Compile sketch in Docker
         run: |
-          uv run python ci/docker/compile_sketch.py \
+          uv run python ci/docker_utils/compile_sketch.py \
             --platform ${{ matrix.platform }} \
             --sketch ${{ matrix.sketch }}
 ```
 
 **Success Criteria**:
 
-- [ ] `ci/docker/compile_sketch.py` script created
+- [ ] `ci/docker_utils/compile_sketch.py` script created
 - [ ] Automatic image existence detection working
 - [ ] Image building integrated (calls `ci/build_docker_image_pio.py`)
 - [ ] Container execution working with proper volume mounts
@@ -911,7 +911,7 @@ All core functionality for the Docker-based PlatformIO compilation system has be
 - **Benefit**: Automatic cache invalidation when platform config changes
 
 #### 2. Output Directory Support ✅
-- **File**: `ci/docker/Dockerfile.template`
+- **File**: `ci/docker_utils/Dockerfile.template`
 - **Implementation**: Added entrypoint script `fastled-entrypoint.sh`
 - **Features**:
   - Executes compilation command
@@ -922,7 +922,7 @@ All core functionality for the Docker-based PlatformIO compilation system has be
 - **Usage**: `-v ./build_output:/fastled/output:rw`
 
 #### 3. Image Cleanup Script ✅
-- **File**: `ci/docker/prune_old_images.py`
+- **File**: `ci/docker_utils/prune_old_images.py`
 - **Features**:
   - Dry run mode (default) - shows what would be deleted
   - Force mode (`--force`) - actually deletes images
@@ -933,7 +933,7 @@ All core functionality for the Docker-based PlatformIO compilation system has be
 - **Type-safe**: Full type annotations, passes pyright strict checking
 
 #### 4. Comprehensive Documentation ✅
-- **File**: `ci/docker/README.md`
+- **File**: `ci/docker_utils/README.md`
 - **Contents**:
   - Quick start guide with examples
   - Architecture explanation (build-time vs runtime)
@@ -958,11 +958,11 @@ All core functionality for the Docker-based PlatformIO compilation system has be
 
 **Modified:**
 1. `ci/build_docker_image_pio.py` - Added hash generation logic
-2. `ci/docker/Dockerfile.template` - Added entrypoint script and output directory support
+2. `ci/docker_utils/Dockerfile.template` - Added entrypoint script and output directory support
 
 **Created:**
-1. `ci/docker/prune_old_images.py` - Image cleanup utility (384 lines)
-2. `ci/docker/README.md` - Comprehensive documentation (540 lines)
+1. `ci/docker_utils/prune_old_images.py` - Image cleanup utility (384 lines)
+2. `ci/docker_utils/README.md` - Comprehensive documentation (540 lines)
 
 ### Testing Status
 
@@ -992,7 +992,7 @@ When Docker is available:
    ```
 4. Verify build artifacts copied to `./build_output/`
 5. Test ESP32 merged binary generation
-6. Test cleanup script: `uv run python ci/docker/prune_old_images.py`
+6. Test cleanup script: `uv run python ci/docker_utils/prune_old_images.py`
 
 ### Summary
 

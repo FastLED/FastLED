@@ -82,46 +82,46 @@ class BannedHeadersChecker(FileContentChecker):
     HEADER_RECOMMENDATIONS = {
         "pthread.h": "fl/thread.h or fl/mutex.h (depending on what you need)",
         "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
-        "iostream": "ftl/iostream.h or fl/str.h",
+        "iostream": "fl/stl/iostream.h or fl/str.h",
         "stdio.h": "fl/str.h for string operations",
         "cstdio": "fl/str.h for string operations",
-        "cstdlib": "ftl/cstdlib.h or fl/string operations",
-        "vector": "ftl/vector.h",
-        "list": "ftl/list.h or ftl/vector.h",
-        "map": "ftl/map.h (check ftl/hash_map.h for hash-based)",
-        "set": "ftl/set.h",
-        "queue": "ftl/queue.h or ftl/vector.h with manual queue semantics",
-        "deque": "ftl/deque.h",
-        "algorithm": "ftl/algorithm.h",
-        "memory": "ftl/shared_ptr.h or ftl/unique_ptr.h",
+        "cstdlib": "fl/stl/cstdlib.h or fl/string operations",
+        "vector": "fl/stl/vector.h",
+        "list": "fl/stl/list.h or fl/stl/vector.h",
+        "map": "fl/stl/map.h (check fl/stl/hash_map.h for hash-based)",
+        "set": "fl/stl/set.h",
+        "queue": "fl/stl/queue.h or fl/stl/vector.h with manual queue semantics",
+        "deque": "fl/stl/deque.h",
+        "algorithm": "fl/stl/algorithm.h",
+        "memory": "fl/stl/shared_ptr.h or fl/stl/unique_ptr.h",
         "thread": "fl/thread.h",
         "mutex": "fl/mutex.h",
         "chrono": "fl/time.h",
         "fstream": "fl/file.h or platform file operations",
-        "sstream": "ftl/sstream.h",
-        "iomanip": "ftl/iostream.h stream manipulators",
-        "exception": "Use error codes or ftl/exception.h if available",
+        "sstream": "fl/stl/sstream.h",
+        "iomanip": "fl/stl/iostream.h stream manipulators",
+        "exception": "Use error codes or fl/stl/exception.h if available",
         "stdexcept": "Use error codes instead",
-        "typeinfo": "Use ftl/type_traits.h or RTTI if unavoidable",
+        "typeinfo": "Use fl/stl/type_traits.h or RTTI if unavoidable",
         "ctime": "fl/time.h",
         "cmath": "fl/math.h",
         "math.h": "fl/math.h",
         "complex": "Custom complex number class or fl/geometry.h",
-        "valarray": "ftl/vector.h",
+        "valarray": "fl/stl/vector.h",
         "cfloat": "fl/numeric_limits.h or platform-specific headers",
         "cassert": "FL_CHECK macros from fl/compiler_control.h",
         "cerrno": "Error handling through return codes",
         "cctype": "Character classification (implement if needed)",
         "cwctype": "Wide character classification (implement if needed)",
-        "cstring": "fl/str.h or ftl/cstring.h",
+        "cstring": "fl/str.h or fl/stl/cstring.h",
         "cwchar": "Wide character support (implement if needed)",
         "cuchar": "Character support (implement if needed)",
-        "cstdint": "ftl/stdint.h or ftl/cstdint.h",
-        "stdint.h": "ftl/stdint.h",
-        "stddef.h": "ftl/stddef.h or ftl/cstddef.h",
-        "cstddef": "ftl/cstddef.h",
+        "cstdint": "fl/stl/stdint.h or fl/stl/cstdint.h",
+        "stdint.h": "fl/stl/stdint.h",
+        "stddef.h": "fl/stl/stddef.h or fl/stl/cstddef.h",
+        "cstddef": "fl/stl/cstddef.h",
         "string.h": "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
-        "type_traits": "ftl/type_traits.h",
+        "type_traits": "fl/stl/type_traits.h",
         "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
     }
 
@@ -175,6 +175,14 @@ class BannedHeadersChecker(FileContentChecker):
 
             # Allow mutex in mutex.h - this is the wrapper for platform mutex
             if header == "mutex" and "mutex.h" in file_path:
+                return True
+
+            # Allow algorithm in mutex.h - needed for <string_view> dependency in <mutex>
+            if header == "algorithm" and "mutex.h" in file_path:
+                return True
+
+            # Allow stdint.h in cstdint.h - needed for limit macros (INT8_MAX, UINT64_MAX, etc.)
+            if header == "stdint.h" and "cstdint.h" in file_path:
                 return True
 
             # Allow math.h in math implementation files (cpp files)

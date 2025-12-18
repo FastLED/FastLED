@@ -12,13 +12,13 @@ without overwhelming the build system.
 
 Usage:
     # Check which images need building (prioritized)
-    python ci/docker/image_priority_tracker.py --check --limit 5
+    python ci/docker_utils/image_priority_tracker.py --check --limit 5
 
     # Record successful build
-    python ci/docker/image_priority_tracker.py --record esp-32s3
+    python ci/docker_utils/image_priority_tracker.py --record esp-32s3
 
     # Get JSON output for GitHub Actions
-    python ci/docker/image_priority_tracker.py --check --limit 5 --json
+    python ci/docker_utils/image_priority_tracker.py --check --limit 5 --json
 """
 
 import argparse
@@ -29,7 +29,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from ci.docker.build_platforms import DOCKER_PLATFORMS, get_docker_image_name
+from ci.docker_utils.build_platforms import DOCKER_PLATFORMS, get_docker_image_name
 
 
 def get_cache_file() -> Path:

@@ -142,8 +142,11 @@ class StaticInHeaderChecker(FileContentChecker):
 
                 if static_var_match:
                     # Skip if line contains function definition pattern (to avoid false positives)
-                    # e.g., "static void foo() {" should not be flagged
-                    if not re.search(r"static\s+\w+\s+\w+\s*\([^)]*\)\s*\{", code_part):
+                    # e.g., "static void foo() {" or "static fl::size foo() {" should not be flagged
+                    # Updated to handle namespace-qualified types like fl::size
+                    if not re.search(
+                        r"static\s+[\w:]+(?:<[^>]+>)?\s+\w+\s*\([^)]*\)\s*\{", code_part
+                    ):
                         # Allow suppression
                         if "// okay static in header" not in line:
                             failings.append(

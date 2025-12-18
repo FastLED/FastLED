@@ -30,7 +30,7 @@ from typing import Dict, List, Optional
 
 # Import board configuration
 from ci.boards import create_board
-from ci.docker.build_image import generate_config_hash
+from ci.docker_utils.build_image import generate_config_hash
 from ci.util.docker_helper import (
     attempt_start_docker,
     get_docker_command,
@@ -151,7 +151,7 @@ def generate_platformio_ini(platform_name: str, framework: Optional[str] = None)
 
 def load_dockerfile_template() -> str:
     """
-    Load Dockerfile template from ci/docker/Dockerfile.template.
+    Load Dockerfile template from ci/docker_utils/Dockerfile.template.
 
     Returns:
         String content of Dockerfile template
@@ -159,12 +159,12 @@ def load_dockerfile_template() -> str:
     Raises:
         FileNotFoundError: If template file is not found
     """
-    template_path = Path(__file__).parent / "docker" / "Dockerfile.template"
+    template_path = Path(__file__).parent / "docker_utils" / "Dockerfile.template"
 
     if not template_path.exists():
         raise FileNotFoundError(
             f"Dockerfile template not found: {template_path}\n"
-            "Expected location: ci/docker/Dockerfile.template"
+            "Expected location: ci/docker_utils/Dockerfile.template"
         )
 
     with open(template_path, "r") as f:
@@ -241,13 +241,13 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
             )
 
     # Find the base Dockerfile and project root
-    base_dockerfile_path = Path(__file__).parent / "docker" / "Dockerfile.base"
+    base_dockerfile_path = Path(__file__).parent / "docker_utils" / "Dockerfile.base"
     project_root = Path(__file__).parent.parent
 
     if not base_dockerfile_path.exists():
         raise FileNotFoundError(
             f"Base Dockerfile not found: {base_dockerfile_path}\n"
-            "Expected location: ci/docker/Dockerfile.base"
+            "Expected location: ci/docker_utils/Dockerfile.base"
         )
 
     # Create temporary directory for base image build context
@@ -484,8 +484,8 @@ def _main_impl() -> int:
         image_name = args.image_name
     else:
         # Try to use platform mapping first (preferred for grouped/flat platforms)
-        from ci.docker.build_image import generate_docker_tag
-        from ci.docker.build_platforms import (
+        from ci.docker_utils.build_image import generate_docker_tag
+        from ci.docker_utils.build_platforms import (
             get_docker_image_name,
             get_platform_for_board,
         )
@@ -501,7 +501,7 @@ def _main_impl() -> int:
                 image_name = f"{get_docker_image_name(platform)}:{tag}"
             else:
                 # Fallback to architecture-based naming for unmapped boards
-                from ci.docker.build_image import extract_architecture
+                from ci.docker_utils.build_image import extract_architecture
 
                 arch = extract_architecture(platform_name)
                 tag = args.tag if args.tag else generate_docker_tag(platform_name)
@@ -554,7 +554,7 @@ def _main_impl() -> int:
             f.write(dockerfile_content)
 
         # Copy ci/ directory structure to temp directory
-        # The Dockerfile expects ci/docker/build.sh and ci/ for Python imports
+        # The Dockerfile expects ci/docker_utils/build.sh and ci/ for Python imports
         import shutil
 
         # Create ci/ directory structure in temp directory

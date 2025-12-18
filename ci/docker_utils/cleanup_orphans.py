@@ -15,7 +15,7 @@ Usage:
 import argparse
 import sys
 
-from ci.docker.container_db import ContainerDatabase, cleanup_orphaned_containers
+from ci.docker_utils.container_db import ContainerDatabase, cleanup_orphaned_containers
 
 
 def main() -> int:

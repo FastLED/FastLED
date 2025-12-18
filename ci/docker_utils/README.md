@@ -195,19 +195,19 @@ The `prune_old_images.py` script removes outdated images:
 
 ```bash
 # Dry run (show what would be deleted)
-uv run python ci/docker/prune_old_images.py
+uv run python ci/docker_utils/prune_old_images.py
 
 # Actually delete old images (keeps newest for each platform)
-uv run python ci/docker/prune_old_images.py --force
+uv run python ci/docker_utils/prune_old_images.py --force
 
 # Remove images older than 30 days
-uv run python ci/docker/prune_old_images.py --days 30 --force
+uv run python ci/docker_utils/prune_old_images.py --days 30 --force
 
 # Remove images for specific platform only
-uv run python ci/docker/prune_old_images.py --platform esp32s3 --force
+uv run python ci/docker_utils/prune_old_images.py --platform esp32s3 --force
 
 # Remove ALL FastLED PlatformIO images (dangerous!)
-uv run python ci/docker/prune_old_images.py --all --force
+uv run python ci/docker_utils/prune_old_images.py --all --force
 ```
 
 **Default behavior** (without `--days` or `--all`):
@@ -572,7 +572,7 @@ bash compile esp32c6 Blink --docker
 
 ### Implementation Details
 
-Platform→boards mapping is defined in `ci/docker/build_platforms.py`:
+Platform→boards mapping is defined in `ci/docker_utils/build_platforms.py`:
 
 ```python
 DOCKER_PLATFORMS = {
@@ -582,7 +582,7 @@ DOCKER_PLATFORMS = {
 }
 ```
 
-During image build, `ci/docker/build.sh`:
+During image build, `ci/docker_utils/build.sh`:
 1. Receives platform name (e.g., "uno")
 2. Looks up platform family ("avr")
 3. Gets all boards for platform
@@ -618,16 +618,16 @@ For complete details on the CI/CD Docker system:
 
 ### Local Development
 - `ci/build_docker_image_pio.py` - Build script for local images
-- `ci/docker/prune_old_images.py` - Cleanup script for local images
+- `ci/docker_utils/prune_old_images.py` - Cleanup script for local images
 
 ### CI/CD Published Images
-- `ci/docker/build_platforms.py` - Platform→boards mapping
-- `ci/docker/DOCKER_DESIGN.md` - Complete CI/CD system documentation
+- `ci/docker_utils/build_platforms.py` - Platform→boards mapping
+- `ci/docker_utils/DOCKER_DESIGN.md` - Complete CI/CD system documentation
 - `.github/workflows/build_docker_compiler_*.yml` - GitHub Actions workflows
 
 ### Shared
-- `ci/docker/Dockerfile.template` - Platform-specific Dockerfile (used by both systems)
-- `ci/docker/Dockerfile.base` - Base image Dockerfile (used by both systems)
-- `ci/docker/build.sh` - Multi-board build script (used by CI/CD)
+- `ci/docker_utils/Dockerfile.template` - Platform-specific Dockerfile (used by both systems)
+- `ci/docker_utils/Dockerfile.base` - Base image Dockerfile (used by both systems)
+- `ci/docker_utils/build.sh` - Multi-board build script (used by CI/CD)
 - `ci/boards.py` - Platform configurations (used by both systems)
 - `ci/AGENTS.md` - CI/build system documentation

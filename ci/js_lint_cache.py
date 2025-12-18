@@ -52,7 +52,7 @@ def check_js_files_changed() -> bool:
 
     Monitors:
     - src/platforms/wasm/compiler (JavaScript files)
-    - ci/docker/avr8js (TypeScript files)
+    - ci/docker_utils/avr8js (TypeScript files)
 
     Uses the safe pre-computed fingerprint pattern to avoid race conditions.
 
@@ -63,7 +63,7 @@ def check_js_files_changed() -> bool:
     # Monitor both JavaScript and TypeScript directories
     directories = [
         Path("src/platforms/wasm/compiler"),
-        Path("ci/docker/avr8js"),
+        Path("ci/docker_utils/avr8js"),
     ]
 
     all_file_paths: list[Path] = []

@@ -7,16 +7,16 @@ keeping only the most recent image for each platform/architecture combination.
 
 Usage:
     # Dry run (show what would be deleted)
-    uv run python ci/docker/prune_old_images.py
+    uv run python ci/docker_utils/prune_old_images.py
 
     # Actually delete old images
-    uv run python ci/docker/prune_old_images.py --force
+    uv run python ci/docker_utils/prune_old_images.py --force
 
     # Remove images older than specific days
-    uv run python ci/docker/prune_old_images.py --days 30 --force
+    uv run python ci/docker_utils/prune_old_images.py --days 30 --force
 
     # Remove all FastLED PlatformIO images (dangerous!)
-    uv run python ci/docker/prune_old_images.py --all --force
+    uv run python ci/docker_utils/prune_old_images.py --all --force
 """
 
 import argparse

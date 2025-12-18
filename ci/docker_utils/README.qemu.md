@@ -38,12 +38,12 @@ No custom Dockerfiles needed - everything runs using the official Espressif imag
 
 2. **Run a firmware test with Docker directly:**
    ```bash
-   uv run ci/docker/qemu_esp32_docker.py path/to/firmware.bin
+   uv run ci/docker_utils/qemu_esp32_docker.py path/to/firmware.bin
    ```
 
 3. **Run with specific timeout and interrupt pattern:**
    ```bash
-   uv run ci/docker/qemu_esp32_docker.py firmware.bin \
+   uv run ci/docker_utils/qemu_esp32_docker.py firmware.bin \
      --timeout 60 \
      --interrupt-regex "Test passed"
    ```
@@ -54,13 +54,13 @@ The Docker QEMU runner integrates with the existing test framework:
 
 ```bash
 # Check available runners
-uv run ci/docker/qemu_test_integration.py check
+uv run ci/docker_utils/qemu_test_integration.py check
 
 # Run test with automatic runner selection
-uv run ci/docker/qemu_test_integration.py test --firmware path/to/firmware.bin
+uv run ci/docker_utils/qemu_test_integration.py test --firmware path/to/firmware.bin
 
 # Force Docker runner
-uv run ci/docker/qemu_test_integration.py test --firmware firmware.bin --docker
+uv run ci/docker_utils/qemu_test_integration.py test --firmware firmware.bin --docker
 ```
 
 ### Docker Image Used
@@ -127,7 +127,7 @@ Check internet connection and Docker Hub access. The runner will automatically t
 
 Increase timeout value:
 ```bash
-uv run ci/docker/qemu_esp32_docker.py firmware.bin --timeout 120
+uv run ci/docker_utils/qemu_esp32_docker.py firmware.bin --timeout 120
 ```
 
 ## CI/CD Integration
@@ -137,7 +137,7 @@ uv run ci/docker/qemu_esp32_docker.py firmware.bin --timeout 120
 ```yaml
 - name: Run QEMU Test in Docker
   run: |
-    uv run ci/docker/qemu_esp32_docker.py \
+    uv run ci/docker_utils/qemu_esp32_docker.py \
       .pio/build/esp32dev/firmware.bin \
       --timeout 60 \
       --interrupt-regex "Setup complete"
@@ -150,7 +150,7 @@ uv run ci/docker/qemu_esp32_docker.py firmware.bin --timeout 120
 uv pip install -r requirements.txt
 
 # Run tests
-uv run ci/docker/qemu_test_integration.py test \
+uv run ci/docker_utils/qemu_test_integration.py test \
   --firmware .pio/build/esp32dev/firmware.bin
 ```
 
@@ -167,7 +167,7 @@ uv run ci/docker/qemu_test_integration.py test \
 
 Run interactively with extended timeout:
 ```bash
-uv run ci/docker/qemu_esp32_docker.py firmware.bin --interactive --timeout 300
+uv run ci/docker_utils/qemu_esp32_docker.py firmware.bin --interactive --timeout 300
 ```
 
 Check QEMU output logs:

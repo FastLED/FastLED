@@ -28,6 +28,12 @@ class TestWrongDefines(unittest.TestCase):
                     continue
                 for needle, message in WRONG_DEFINES.items():
                     if needle in line:
+                        # Exception: Allow "#if defined(FASTLED_RMT5)" when followed by value checks
+                        # e.g., "#if defined(FASTLED_RMT5) && FASTLED_RMT5 == 0"
+                        if needle == "#if defined(FASTLED_RMT5)":
+                            # Skip if it's a value check pattern (contains == or !=)
+                            if "==" in line or "!=" in line:
+                                continue
                         failings.append(f"{file_path}:{line_number}: {message}")
         return failings
 

@@ -13,7 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-from ci.docker.container_db import (
+from ci.docker_utils.container_db import (
     ContainerDatabase,
     cleanup_container,
     prepare_container,
@@ -131,7 +131,7 @@ class DockerConfig:
             esp8266 -> niteris/fastled-compiler-esp-8266:latest, container: fastled-compiler-esp-8266
             teensy41 -> niteris/fastled-compiler-teensy:latest, container: fastled-compiler-teensy
         """
-        from ci.docker.build_platforms import (
+        from ci.docker_utils.build_platforms import (
             get_docker_image_name,
             get_platform_for_board,
         )
@@ -150,7 +150,7 @@ class DockerConfig:
                 image_name = f"{platform_image}:latest"
             else:
                 # Board not in platform mapping - generate ad-hoc name with registry prefix
-                from ci.docker.build_image import extract_architecture
+                from ci.docker_utils.build_image import extract_architecture
 
                 arch = extract_architecture(board_name)
                 image_name = f"niteris/fastled-compiler-{arch}-{board_name}:latest"
@@ -353,7 +353,7 @@ class DockerContainerManager:
             existing_by_hash = self._db.get_by_config_hash(config_hash)
             if existing_by_hash:
                 # Container with matching config exists - check if we can reuse it
-                from ci.docker.container_db import (
+                from ci.docker_utils.container_db import (
                     docker_container_exists,
                     process_exists,
                 )
@@ -396,7 +396,7 @@ class DockerContainerManager:
                             return True
 
             # No reusable container found - run garbage collection before creating new one
-            from ci.docker.container_db import garbage_collect_platform_containers
+            from ci.docker_utils.container_db import garbage_collect_platform_containers
 
             cleaned = garbage_collect_platform_containers(
                 self.config.platform_type, max_containers=2, db=self._db
@@ -485,7 +485,7 @@ class DockerEntrypointBuilder:
         - .gitattributes enforces eol=lf for all text files
         - .editorconfig provides editor-level LF enforcement
         - rsync compares byte-for-byte, so CRLF vs LF would trigger sync
-        - Run ci/docker/diagnose_sync.sh inside container to debug sync issues
+        - Run ci/docker_utils/diagnose_sync.sh inside container to debug sync issues
         """
         return """
 # Sync host directories to container working directory if they exist

@@ -48,7 +48,7 @@ niteris/fastled-compiler-base:latest
 
 **Build Schedule**: Daily at 2:00 AM UTC
 
-**Dockerfile**: `ci/docker/Dockerfile.base`
+**Dockerfile**: `ci/docker_utils/Dockerfile.base`
 
 ### Platform Images
 
@@ -80,7 +80,7 @@ This ensures instant compilation without downloading additional toolchains, whil
 
 **Build Schedule**: Daily at 3:00 AM UTC (1 hour after base)
 
-**Dockerfile**: `ci/docker/Dockerfile.template` (with `PLATFORM_NAME` build arg for initial setup, then multi-board warm-up)
+**Dockerfile**: `ci/docker_utils/Dockerfile.template` (with `PLATFORM_NAME` build arg for initial setup, then multi-board warm-up)
 
 ## Platform Naming Strategy
 
@@ -335,7 +335,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
 
 ### Python Board Mapping
 
-**File**: `ci/docker/build_platforms.py`
+**File**: `ci/docker_utils/build_platforms.py`
 
 The single source of truth for platform→boards relationships. This module defines which boards belong to which Docker platform family and is used by `build.sh` during Docker image builds.
 
@@ -383,7 +383,7 @@ BOARD_TO_PLATFORM = {
 
 **How It Works**:
 
-During Docker build (`ci/docker/build.sh`), the "compile" stage:
+During Docker build (`ci/docker_utils/build.sh`), the "compile" stage:
 
 **Grouped Platforms** (e.g., AVR, Teensy):
 1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "uno")
@@ -428,7 +428,7 @@ The board will automatically be included in the next Docker build, and its toolc
 
 To add a new platform image:
 
-1. **Add platform to `ci/docker/build_platforms.py`**:
+1. **Add platform to `ci/docker_utils/build_platforms.py`**:
    ```python
    DOCKER_PLATFORMS = {
        # ... existing platforms ...
@@ -586,9 +586,9 @@ This would reduce workflow duplication but make scheduling offsets harder.
 
 ## References
 
-- **ci/docker/Dockerfile.base**: Base image with PlatformIO and dependencies
-- **ci/docker/Dockerfile.template**: Platform-specific image template
-- **ci/docker/build.sh**: Docker build script with layered caching and multi-board compilation
-- **ci/docker/build_platforms.py**: Platform→boards mapping (source of truth for Docker families)
+- **ci/docker_utils/Dockerfile.base**: Base image with PlatformIO and dependencies
+- **ci/docker_utils/Dockerfile.template**: Platform-specific image template
+- **ci/docker_utils/build.sh**: Docker build script with layered caching and multi-board compilation
+- **ci/docker_utils/build_platforms.py**: Platform→boards mapping (source of truth for Docker families)
 - **ci/boards.py**: Individual board configurations (source of truth for PlatformIO settings)
 - **build.py**: Local testing script for building multiple platforms

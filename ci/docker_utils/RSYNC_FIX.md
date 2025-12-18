@@ -94,7 +94,7 @@ docker run -it --rm \
   bash
 
 # Inside container, run diagnostic
-bash /host/ci/docker/diagnose_sync.sh
+bash /host/ci/docker_utils/diagnose_sync.sh
 ```
 
 **Expected:** Should show "No changes detected" for all directories
@@ -124,11 +124,11 @@ for f in files:
    - Enforces `end_of_line = lf` across all text files
    - Provides editor-level consistency
 
-3. **`ci/docker/diagnose_sync.sh`** (new file):
+3. **`ci/docker_utils/diagnose_sync.sh`** (new file):
    - Diagnostic tool to check sync behavior inside containers
    - Detects line ending mismatches and content differences
 
-4. **`ci/docker/RSYNC_FIX.md`** (this file):
+4. **`ci/docker_utils/RSYNC_FIX.md`** (this file):
    - Documentation of the problem, solution, and testing
 
 ## Verification

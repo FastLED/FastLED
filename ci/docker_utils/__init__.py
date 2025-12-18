@@ -1,6 +1,6 @@
 """Docker build utilities for FastLED PlatformIO compilation."""
 
-from ci.docker.container_db import (
+from ci.docker_utils.container_db import (
     ContainerDatabase,
     ContainerRecord,
     cleanup_container,

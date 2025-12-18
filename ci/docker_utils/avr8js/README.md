@@ -53,7 +53,7 @@ Test validation
 
 ### From Python (CI)
 ```python
-from ci.docker.avr8js_docker import DockerAVR8jsRunner
+from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
 
 runner = DockerAVR8jsRunner()
 exit_code = runner.run(
@@ -66,7 +66,7 @@ exit_code = runner.run(
 
 ### From Command Line
 ```bash
-uv run python ci/docker/avr8js_docker.py firmware.elf 30
+uv run python ci/docker_utils/avr8js_docker.py firmware.elf 30
 ```
 
 ### Direct Docker
