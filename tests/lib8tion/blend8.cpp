@@ -77,9 +77,11 @@ TEST_CASE("blend8_full_range") {
                 uint8_t min_val = (a < b) ? a : b;
                 uint8_t max_val = (a > b) ? a : b;
 
-                // Allow for rounding tolerance
-                CHECK(result >= min_val || result == (min_val - 1));
-                CHECK(result <= max_val || result == (max_val + 1));
+                // Allow for rounding tolerance (split checks to avoid doctest || restriction)
+                bool min_check = (result >= min_val) || (result == (min_val - 1));
+                bool max_check = (result <= max_val) || (result == (max_val + 1));
+                CHECK(min_check);
+                CHECK(max_check);
             }
         }
     }

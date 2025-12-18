@@ -13,8 +13,25 @@
 #undef INPUT
 #endif
 
+// Suppress -Wpragma-pack warnings from Windows SDK headers
+// These warnings come from Microsoft's own headers (winnt.h, wingdi.h, etc.) which use
+// #pragma pack(push/pop) to control struct alignment. Clang warns about these alignment
+// changes, but they're intentional and properly balanced in the SDK headers.
+#ifdef _WIN32
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpragma-pack"
+#endif
+#endif
+
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
+
+#ifdef _WIN32
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#endif
 
 // Restore Arduino INPUT macro after Windows headers
 #ifdef ARDUINO_INPUT_BACKUP
