@@ -69,15 +69,20 @@ inline void analogWrite(int pin, uint16_t val) {
 }
 
 inline void setAdcRange(AdcRange range) {
-    // Translate AdcRange to Arduino analogReference() constants
-    // Teensy supports: DEFAULT, INTERNAL, EXTERNAL
+#if defined(__IMXRT1062__) || defined(__IMXRT1052__)
+    // Teensy 4.x: ADC range is fixed at 3.3V, analogReference() not supported
+    // No-op: These processors have a fixed 3.3V reference
+    (void)range;  // Suppress unused parameter warning
+#else
+    // Teensy 3.x: Translate AdcRange to Arduino analogReference() constants
+    // Supports: DEFAULT (3.3V), INTERNAL (1.2V), EXTERNAL (AREF pin)
     int ref_mode;
     switch (range) {
         case AdcRange::Default:
             ref_mode = DEFAULT;
             break;
         case AdcRange::Range0_1V1:
-            ref_mode = INTERNAL;  // 1.2V internal reference on Teensy
+            ref_mode = INTERNAL;  // 1.2V internal reference on Teensy 3.x
             break;
         case AdcRange::External:
             ref_mode = EXTERNAL;  // External AREF pin
@@ -88,6 +93,7 @@ inline void setAdcRange(AdcRange range) {
             break;
     }
     ::analogReference(ref_mode);
+#endif
 }
 
 }  // namespace fl
