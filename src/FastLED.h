@@ -40,10 +40,12 @@
 // which conflicts with FastLED's legacy RMT4 driver (FASTLED_RMT5=0).
 // Disable Arduino's built-in RGB LED support to prevent the conflict.
 // This is only needed for ESP-IDF 5.x+ with legacy RMT4 driver, not earlier versions or RMT5 driver.
+// Only applies to platforms that actually have RMT hardware (excludes ESP32-C2 which lacks RMT).
 // Reference: https://github.com/espressif/arduino-esp32/issues/9866
 #if defined(ESP32)
 #include "platforms/esp/esp_version.h"
-#if defined(FASTLED_RMT5) && FASTLED_RMT5 == 0 && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
+#include "platforms/esp/32/feature_flags/enabled.h"
+#if defined(FASTLED_RMT5) && FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
 #error "ESP-IDF 5.x+ with legacy RMT4 driver detected: Please define ESP32_ARDUINO_NO_RGB_BUILTIN=1 to prevent conflicts with Arduino's neopixelWrite() function. Add '-DESP32_ARDUINO_NO_RGB_BUILTIN=1' to your build flags or use '-DFASTLED_RMT5=1' to enable RMT5 driver."
 #endif
 #endif
