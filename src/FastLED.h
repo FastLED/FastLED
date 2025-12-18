@@ -43,10 +43,8 @@
 // Reference: https://github.com/espressif/arduino-esp32/issues/9866
 #if defined(ESP32)
 #include "platforms/esp/esp_version.h"
-#ifdef FASTLED_RMT5
-#if ESP_IDF_VERSION_5_OR_HIGHER && FASTLED_RMT5 == 0 && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
+#if defined(FASTLED_RMT5) && FASTLED_RMT5 == 0 && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
 #error "ESP-IDF 5.x+ with legacy RMT4 driver detected: Please define ESP32_ARDUINO_NO_RGB_BUILTIN=1 to prevent conflicts with Arduino's neopixelWrite() function. Add '-DESP32_ARDUINO_NO_RGB_BUILTIN=1' to your build flags or use '-DFASTLED_RMT5=1' to enable RMT5 driver."
-#endif
 #endif
 #endif
 
