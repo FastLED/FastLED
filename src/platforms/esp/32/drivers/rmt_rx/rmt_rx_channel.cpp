@@ -5,22 +5,24 @@
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
 
+// Include FL_WARN for both RMT5 and RMT4 paths
+#include "fl/warn.h"
+
 #if FASTLED_RMT5
 
 #include "fl/dbg.h"
-#include "fl/warn.h"
 #include "fl/stl/iterator.h"
 
 FL_EXTERN_C_BEGIN
-#include "driver/rmt_rx.h"
-#include "driver/rmt_common.h"
 #include "driver/gpio.h"
+#include "driver/rmt_common.h"
+#include "driver/rmt_rx.h"
 #include "esp_attr.h"
 #include "esp_err.h"
-#include "esp_timer.h"  // For esp_timer_get_time()
-#include "esp_log.h"    // For esp_log_timestamp()
+#include "esp_log.h"   // For esp_log_timestamp()
+#include "esp_timer.h" // For esp_timer_get_time()
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"  // For taskYIELD()
+#include "freertos/task.h" // For taskYIELD()
 FL_EXTERN_C_END
 
 #include "fl/stl/type_traits.h"
@@ -58,7 +60,8 @@ inline uint32_t ticksToNs(uint32_t ticks, uint32_t ns_per_tick) {
  * @param ns_per_tick Cached nanoseconds per tick
  * @return true if symbol is reset pulse (long low duration)
  */
-inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32_t ns_per_tick) {
+inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
+                         uint32_t ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
 
@@ -90,13 +93,15 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, ui
  * @param symbol RMT symbol to check
  * @param timing Timing thresholds
  * @param ns_per_tick Cached nanoseconds per tick
- * @return true if symbol is gap pulse (long low duration longer than reset but within gap tolerance)
+ * @return true if symbol is gap pulse (long low duration longer than reset but
+ * within gap tolerance)
  *
- * Gap pulses are longer than normal bit LOW times but shorter than gap_tolerance_ns.
- * These are skipped during decoding without triggering errors.
- * Common in PARLIO TX due to DMA transfer gaps (~20us).
+ * Gap pulses are longer than normal bit LOW times but shorter than
+ * gap_tolerance_ns. These are skipped during decoding without triggering
+ * errors. Common in PARLIO TX due to DMA transfer gaps (~20us).
  */
-inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32_t ns_per_tick) {
+inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
+                       uint32_t ns_per_tick) {
     // No gap tolerance configured - treat as error
     if (timing.gap_tolerance_ns == 0) {
         return false;
@@ -118,15 +123,18 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint
     // - Within gap_tolerance_ns
     // - Should have level=0 (low) for the long duration
     //
-    // The longest normal LOW pulse is t0l_max_ns, so gap must be longer than that
+    // The longest normal LOW pulse is t0l_max_ns, so gap must be longer than
+    // that
 
     // Check duration1 (most common case - gap at end of bit sequence)
-    if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns && duration1_ns <= timing.gap_tolerance_ns) {
+    if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns &&
+        duration1_ns <= timing.gap_tolerance_ns) {
         return true;
     }
 
     // Check duration0 (less common - gap at start)
-    if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns && duration0_ns <= timing.gap_tolerance_ns) {
+    if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns &&
+        duration0_ns <= timing.gap_tolerance_ns) {
         return true;
     }
 
@@ -143,7 +151,8 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint
  * Checks high time and low time against timing thresholds.
  * Returns -1 if timing doesn't match either bit pattern.
  */
-inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32_t ns_per_tick) {
+inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
+                     uint32_t ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
 
@@ -159,21 +168,24 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32
     }
 
     // Check if LOW duration is a gap (tolerated long LOW pulse)
-    bool is_gap = (timing.gap_tolerance_ns > 0 &&
-                   low_ns > timing.t0l_max_ns &&
+    bool is_gap = (timing.gap_tolerance_ns > 0 && low_ns > timing.t0l_max_ns &&
                    low_ns <= timing.gap_tolerance_ns);
 
     // Decision logic: check if timing matches bit 0 pattern
-    bool t0h_match = (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
-    bool t0l_match = (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
+    bool t0h_match =
+        (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
+    bool t0l_match =
+        (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
 
     if (t0h_match && (t0l_match || is_gap)) {
         return 0; // Bit 0 (LOW matches normal timing or is a tolerated gap)
     }
 
     // Check if timing matches bit 1 pattern
-    bool t1h_match = (high_ns >= timing.t1h_min_ns) && (high_ns <= timing.t1h_max_ns);
-    bool t1l_match = (low_ns >= timing.t1l_min_ns) && (low_ns <= timing.t1l_max_ns);
+    bool t1h_match =
+        (high_ns >= timing.t1h_min_ns) && (high_ns <= timing.t1h_max_ns);
+    bool t1l_match =
+        (low_ns >= timing.t1l_min_ns) && (low_ns <= timing.t1l_max_ns);
 
     if (t1h_match && (t1l_match || is_gap)) {
         return 1; // Bit 1 (LOW matches normal timing or is a tolerated gap)
@@ -190,28 +202,32 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing, uint32
  * @param resolution_hz RMT clock resolution in Hz
  * @param symbols Span of captured RMT symbols
  * @param bytes_out Output span for decoded bytes
- * @param start_low Pin idle state: true=LOW (detect rising edge), false=HIGH (detect falling edge)
+ * @param start_low Pin idle state: true=LOW (detect rising edge), false=HIGH
+ * (detect falling edge)
  */
-fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
-                                                     uint32_t resolution_hz,
-                                                     fl::span<const RmtSymbol> symbols,
-                                                     fl::span<uint8_t> bytes_out,
-                                                     bool start_low = true) {
+fl::Result<uint32_t, DecodeError>
+decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
+                 fl::span<const RmtSymbol> symbols, fl::span<uint8_t> bytes_out,
+                 bool start_low = true) {
     if (symbols.empty()) {
         FL_WARN("decodeRmtSymbols: symbols span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        return fl::Result<uint32_t, DecodeError>::failure(
+            DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_out.empty()) {
         FL_WARN("decodeRmtSymbols: bytes_out span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        return fl::Result<uint32_t, DecodeError>::failure(
+            DecodeError::INVALID_ARGUMENT);
     }
 
     // Calculate nanoseconds per tick for efficient conversion
-    // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per tick
+    // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per
+    // tick
     uint32_t ns_per_tick = 1000000000UL / resolution_hz;
 
-    FL_DBG("decodeRmtSymbols: resolution=" << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
+    FL_DBG("decodeRmtSymbols: resolution="
+           << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
 
     // Decoding state
     size_t error_count = 0;
@@ -221,39 +237,49 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
     int bit_index = 0; // 0-7, MSB first
     bool buffer_overflow = false;
 
-    FL_DBG("decodeRmtSymbols: decoding " << symbols.size() << " symbols into buffer of " << bytes_out.size() << " bytes");
+    FL_DBG("decodeRmtSymbols: decoding "
+           << symbols.size() << " symbols into buffer of " << bytes_out.size()
+           << " bytes");
 
     // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
-    const auto *rmt_symbols = reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
+    const auto *rmt_symbols =
+        reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
 
-    // Note: Edge detection is now handled by filterSpuriousSymbols() before decode() is called.
-    // The symbols array passed here already starts at the first valid edge.
-    // The start_low parameter indicates whether the first symbol should be HIGH (start_low=true)
-    // or LOW (start_low=false), but after filtering, we always expect data to start correctly.
+    // Note: Edge detection is now handled by filterSpuriousSymbols() before
+    // decode() is called. The symbols array passed here already starts at the
+    // first valid edge. The start_low parameter indicates whether the first
+    // symbol should be HIGH (start_low=true) or LOW (start_low=false), but
+    // after filtering, we always expect data to start correctly.
 
-    size_t start_index = 0;  // Always start at index 0 after filtering
+    size_t start_index = 0; // Always start at index 0 after filtering
 
-    // ITERATION 18 WORKAROUND: Track symbol position within each LED to skip spurious 4th byte
+    // ITERATION 18 WORKAROUND: Track symbol position within each LED to skip
+    // spurious 4th byte
     //
-    // PROBLEM: RX captures 32 symbols per LED instead of the expected 24 symbols (3 bytes RGB).
-    // This results in a spurious 4th byte appearing after each LED's RGB data.
+    // PROBLEM: RX captures 32 symbols per LED instead of the expected 24
+    // symbols (3 bytes RGB). This results in a spurious 4th byte appearing
+    // after each LED's RGB data.
     //
-    // EVIDENCE: Hex dump shows pattern "ff 00 00 00" repeating (R=255, G=0, B=0, SPURIOUS=0x00)
+    // EVIDENCE: Hex dump shows pattern "ff 00 00 00" repeating (R=255, G=0,
+    // B=0, SPURIOUS=0x00)
     // - Expected: 24 symbols/LED × 255 LEDs = 6120 symbols total
     // - Actual: 32 symbols/LED × 255 LEDs = 8160 symbols total (33% overhead)
     //
-    // ROOT CAUSE: Unknown - could be TX encoder adding padding, RX capture artifact, or
-    // timing peculiarity of the test setup. The extra 8 symbols appear consistently at
-    // symbol positions 24-31 of each 32-symbol block.
+    // ROOT CAUSE: Unknown - could be TX encoder adding padding, RX capture
+    // artifact, or timing peculiarity of the test setup. The extra 8 symbols
+    // appear consistently at symbol positions 24-31 of each 32-symbol block.
     //
-    // WORKAROUND: Skip symbols 24-31 within each LED's 32-symbol block. This effectively
-    // discards the spurious 4th byte while preserving the valid RGB data (symbols 0-23).
+    // WORKAROUND: Skip symbols 24-31 within each LED's 32-symbol block. This
+    // effectively discards the spurious 4th byte while preserving the valid RGB
+    // data (symbols 0-23).
     //
-    // ACCURACY: 99.6% (254/255 LEDs pass validation, 1 LED has intermittent single-bit error)
+    // ACCURACY: 99.6% (254/255 LEDs pass validation, 1 LED has intermittent
+    // single-bit error)
     //
-    // FUTURE WORK: Investigate TX encoder to determine if padding is intentional. If this
-    // pattern varies across chipsets (ESP32 vs ESP32-C6 vs ESP32-S3), make skip pattern
-    // configurable via a parameter or auto-detect based on captured pattern analysis.
+    // FUTURE WORK: Investigate TX encoder to determine if padding is
+    // intentional. If this pattern varies across chipsets (ESP32 vs ESP32-C6 vs
+    // ESP32-S3), make skip pattern configurable via a parameter or auto-detect
+    // based on captured pattern analysis.
 
     for (size_t i = start_index; i < symbols.size(); i++) {
         // Check for reset pulse (frame boundary)
@@ -287,24 +313,33 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
             uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
             FL_DBG("decodeRmtSymbols: invalid symbol at index "
                    << i << " (duration0=" << rmt_symbols[i].duration0
-                   << ", duration1=" << rmt_symbols[i].duration1
-                   << " => " << high_ns << "ns high, " << low_ns << "ns low)");
+                   << ", duration1=" << rmt_symbols[i].duration1 << " => "
+                   << high_ns << "ns high, " << low_ns << "ns low)");
 
-            // Special handling for last symbol with duration1=0 (idle threshold truncation)
-            // This occurs when the RMT RX idle threshold is exceeded, truncating the low period
-            // We can still decode the bit using only the high period (duration0)
-            if (i == symbols.size() - 1 && rmt_symbols[i].duration1 == 0 && rmt_symbols[i].level0 == 1) {
-                uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
+            // Special handling for last symbol with duration1=0 (idle threshold
+            // truncation) This occurs when the RMT RX idle threshold is
+            // exceeded, truncating the low period We can still decode the bit
+            // using only the high period (duration0)
+            if (i == symbols.size() - 1 && rmt_symbols[i].duration1 == 0 &&
+                rmt_symbols[i].level0 == 1) {
+                uint32_t high_ns =
+                    ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
 
                 // Check if high period matches bit 0 pattern
-                if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+                if (high_ns >= timing.t0h_min_ns &&
+                    high_ns <= timing.t0h_max_ns) {
                     bit = 0;
-                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, decoded as bit 0 from high period (" << high_ns << "ns)");
+                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, "
+                           "decoded as bit 0 from high period ("
+                           << high_ns << "ns)");
                 }
                 // Check if high period matches bit 1 pattern
-                else if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+                else if (high_ns >= timing.t1h_min_ns &&
+                         high_ns <= timing.t1h_max_ns) {
                     bit = 1;
-                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, decoded as bit 1 from high period (" << high_ns << "ns)");
+                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, "
+                           "decoded as bit 1 from high period ("
+                           << high_ns << "ns)");
                 }
 
                 // If we successfully decoded the bit, don't skip it
@@ -331,7 +366,8 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
                 bytes_decoded++;
             } else {
                 // Buffer full, stop decoding
-                FL_WARN("decodeRmtSymbols: output buffer overflow at byte " << bytes_decoded);
+                FL_WARN("decodeRmtSymbols: output buffer overflow at byte "
+                        << bytes_decoded);
                 buffer_overflow = true;
                 break;
             }
@@ -357,22 +393,26 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
 
     size_t symbols_processed = symbols.size() - start_index;
     size_t valid_symbols = symbols_processed - error_count;
-    FL_DBG("decodeRmtSymbols: decoded " << bytes_decoded << " bytes from " << symbols_processed
-           << " symbols, " << error_count << " errors ("
-           << (symbols_processed > 0 ? (100 * error_count / symbols_processed) : 0)
-           << "%), " << reset_pulse_count << " reset pulses");
+    FL_DBG(
+        "decodeRmtSymbols: decoded "
+        << bytes_decoded << " bytes from " << symbols_processed << " symbols, "
+        << error_count << " errors ("
+        << (symbols_processed > 0 ? (100 * error_count / symbols_processed) : 0)
+        << "%), " << reset_pulse_count << " reset pulses");
 
     // Determine error type and return Result
     if (buffer_overflow) {
         FL_WARN("decodeRmtSymbols: buffer overflow - output buffer too small");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
+        return fl::Result<uint32_t, DecodeError>::failure(
+            DecodeError::BUFFER_OVERFLOW);
     }
 
     if (error_count >= (symbols.size() / 10)) {
         FL_WARN("decodeRmtSymbols: high error rate: "
                 << error_count << "/" << symbols.size() << " symbols ("
                 << (100 * error_count / symbols.size()) << "%)");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::HIGH_ERROR_RATE);
+        return fl::Result<uint32_t, DecodeError>::failure(
+            DecodeError::HIGH_ERROR_RATE);
     }
 
     return fl::Result<uint32_t, DecodeError>::success(bytes_decoded);
@@ -382,12 +422,11 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
  * @brief Decode RMT symbols to bytes using output iterator (template wrapper)
  * Internal implementation - not exposed in public header
  */
-template<typename OutputIteratorUint8>
-fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
-                                                     uint32_t resolution_hz,
-                                                     fl::span<const RmtSymbol> symbols,
-                                                     OutputIteratorUint8 out,
-                                                     bool start_low = true) {
+template <typename OutputIteratorUint8>
+fl::Result<uint32_t, DecodeError>
+decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
+                 fl::span<const RmtSymbol> symbols, OutputIteratorUint8 out,
+                 bool start_low = true) {
     // Chunk size for decoding
     constexpr size_t MAX_CHUNK_SIZE = 256;
 
@@ -395,7 +434,8 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
     fl::span<uint8_t> chunk_span(chunk_buffer.data(), MAX_CHUNK_SIZE);
 
     // Call span-based decode implementation with edge detection
-    auto result = decodeRmtSymbols(timing, resolution_hz, symbols, chunk_span, start_low);
+    auto result =
+        decodeRmtSymbols(timing, resolution_hz, symbols, chunk_span, start_low);
     if (!result.ok()) {
         return fl::Result<uint32_t, DecodeError>::failure(result.error());
     }
@@ -420,54 +460,53 @@ fl::Result<uint32_t, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &ti
  * @brief Implementation of RMT RX Channel
  *
  * All methods are defined inline to avoid IRAM attribute warnings.
- * IRAM_ATTR must be specified only once (on definition), not separately on declaration.
+ * IRAM_ATTR must be specified only once (on definition), not separately on
+ * declaration.
  */
 class RmtRxChannelImpl : public RmtRxChannel {
-public:
+  public:
     RmtRxChannelImpl(int pin)
-        : mChannel(nullptr)
-        , mPin(static_cast<gpio_num_t>(pin))
-        , mResolutionHz(0)
-        , mBufferSize(0)
-        , mReceiveDone(false)
-        , mSymbolsReceived(0)
-        , mSignalRangeMinNs(100)
-        , mSignalRangeMaxNs(4000000)  // 40us - Allow gaps between PARLIO streaming chunks
-        , mSkipCounter(0)
-        , mStartLow(true)
-        , mInternalBuffer()
-        , mAccumulationBuffer()
-        , mAccumulationOffset(0)
-        , mCallbackCount(0)
-    {
-        FL_DBG("RmtRxChannel constructed with pin=" << pin << " (other hardware params will be set in begin())");
+        : mChannel(nullptr), mPin(static_cast<gpio_num_t>(pin)),
+          mResolutionHz(0), mBufferSize(0), mReceiveDone(false),
+          mSymbolsReceived(0), mSignalRangeMinNs(100),
+          mSignalRangeMaxNs(
+              4000000) // 40us - Allow gaps between PARLIO streaming chunks
+          ,
+          mSkipCounter(0), mStartLow(true), mInternalBuffer(),
+          mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0) {
+        FL_DBG("RmtRxChannel constructed with pin="
+               << pin << " (other hardware params will be set in begin())");
     }
 
     ~RmtRxChannelImpl() override {
         if (mChannel) {
             FL_DBG("Deleting RMT RX channel");
             // Disable channel before deletion (required by ESP-IDF)
-            // Channel must be in "init" state (disabled) before rmt_del_channel()
+            // Channel must be in "init" state (disabled) before
+            // rmt_del_channel()
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
         }
     }
 
-    bool begin(const RxConfig& config) override {
+    bool begin(const RxConfig &config) override {
         // Validate and extract hardware parameters on first call
         if (!mChannel) {
-            // First-time initialization - extract hardware parameters from config
+            // First-time initialization - extract hardware parameters from
+            // config
             if (config.buffer_size == 0) {
-                FL_WARN("RX begin: Invalid buffer_size in config (buffer_size=0)");
+                FL_WARN(
+                    "RX begin: Invalid buffer_size in config (buffer_size=0)");
                 return false;
             }
 
             mBufferSize = config.buffer_size;
-            mResolutionHz = config.hz.has_value() ? config.hz.value() : 40000000;  // Default: 40MHz
+            mResolutionHz = config.hz.has_value() ? config.hz.value()
+                                                  : 40000000; // Default: 40MHz
 
-            FL_DBG("RX first-time init: pin=" << static_cast<int>(mPin)
-                   << ", buffer_size=" << mBufferSize
+            FL_DBG("RX first-time init: pin="
+                   << static_cast<int>(mPin) << ", buffer_size=" << mBufferSize
                    << ", resolution_hz=" << mResolutionHz);
         }
 
@@ -477,7 +516,8 @@ public:
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
 
-        FL_DBG("RX begin: signal_range_min=" << mSignalRangeMinNs
+        FL_DBG("RX begin: signal_range_min="
+               << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << config.skip_signals
                << ", start_low=" << (mStartLow ? "true" : "false"));
@@ -486,21 +526,24 @@ public:
         if (mChannel) {
             FL_DBG("RX channel already initialized, re-arming receiver");
 
-            // CRITICAL: After rmt_receive() completes, the channel is in "enabled" state
-            // but rmt_receive() CANNOT be called again until we cycle through disable/enable.
-            // The ESP-IDF RMT driver requires this pattern:
+            // CRITICAL: After rmt_receive() completes, the channel is in
+            // "enabled" state but rmt_receive() CANNOT be called again until we
+            // cycle through disable/enable. The ESP-IDF RMT driver requires
+            // this pattern:
             //   1. rmt_disable() - transition "enabled" → "init" state
             //   2. rmt_enable() - transition "init" → "enabled" state
             //   3. rmt_receive() - start new receive operation
             //
-            // NOTE: This disable/enable cycling only affects the LOCAL RX channel, not other
-            // RMT channels. Previous concerns about corrupting TX interrupt routing were based
-            // on a misunderstanding - the issue was with a different code path.
+            // NOTE: This disable/enable cycling only affects the LOCAL RX
+            // channel, not other RMT channels. Previous concerns about
+            // corrupting TX interrupt routing were based on a misunderstanding
+            // - the issue was with a different code path.
 
             // Disable channel to reset to "init" state
             esp_err_t err = rmt_disable(mChannel);
             if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                FL_WARN("Failed to disable RX channel during re-arm: " << esp_err_to_name(err));
+                FL_WARN("Failed to disable RX channel during re-arm: "
+                        << esp_err_to_name(err));
                 return false;
             }
             FL_DBG("RX channel disabled for re-arm");
@@ -539,17 +582,21 @@ public:
         rx_config.gpio_num = mPin;
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
         rx_config.resolution_hz = mResolutionHz;
-        rx_config.mem_block_symbols = 64;  // Use 64 symbols per memory block
-        // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver API)
-        // Note: Both RISC-V and Xtensa platforms are limited to level 3 by driver validation
-        // RISC-V hardware supports 1-7, but ESP-IDF rmt_new_rx_channel() rejects >3
-        // Testing on ESP32-C6 confirmed level 4 fails with ESP_ERR_INVALID_ARG
+        rx_config.mem_block_symbols = 64; // Use 64 symbols per memory block
+        // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
+        // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
+        // driver validation RISC-V hardware supports 1-7, but ESP-IDF
+        // rmt_new_rx_channel() rejects >3 Testing on ESP32-C6 confirmed level 4
+        // fails with ESP_ERR_INVALID_ARG
         rx_config.intr_priority = 3;
 
         // Additional flags
-        rx_config.flags.invert_in = false;  // No signal inversion
-        rx_config.flags.with_dma = false;   // Start with non-DMA (universal compatibility)
-        rx_config.flags.io_loop_back = false;  // Disable internal loopback - using external jumper wire (TX pin → RX pin)
+        rx_config.flags.invert_in = false; // No signal inversion
+        rx_config.flags.with_dma =
+            false; // Start with non-DMA (universal compatibility)
+        rx_config.flags.io_loop_back =
+            false; // Disable internal loopback - using external jumper wire (TX
+                   // pin → RX pin)
 
         // Create RX channel
         esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
@@ -566,7 +613,8 @@ public:
 
         err = rmt_rx_register_event_callbacks(mChannel, &callbacks, this);
         if (err != ESP_OK) {
-            FL_WARN("Failed to register RX callbacks: " << static_cast<int>(err));
+            FL_WARN(
+                "Failed to register RX callbacks: " << static_cast<int>(err));
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
@@ -574,8 +622,8 @@ public:
 
         FL_DBG("RX callbacks registered successfully");
 
-        // Enable RX channel - rmt_receive() requires channel to be in "enabled" state
-        // The channel is created in "init" state by rmt_new_rx_channel()
+        // Enable RX channel - rmt_receive() requires channel to be in "enabled"
+        // state The channel is created in "init" state by rmt_new_rx_channel()
         // We must call rmt_enable() before calling rmt_receive()
         if (!enable()) {
             FL_WARN("Failed to enable RX channel");
@@ -604,25 +652,25 @@ public:
         return true;
     }
 
-    bool finished() const override {
-        return mReceiveDone;
-    }
+    bool finished() const override { return mReceiveDone; }
 
     RxWaitResult wait(uint32_t timeout_ms) override {
         if (!mChannel) {
             FL_WARN("wait(): channel not initialized");
-            return RxWaitResult::TIMEOUT;  // Treat as timeout
+            return RxWaitResult::TIMEOUT; // Treat as timeout
         }
 
-        FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
+        FL_DBG("wait(): buffer_size=" << mBufferSize
+                                      << ", timeout_ms=" << timeout_ms);
 
-        // Only allocate and arm if not already receiving (begin() wasn't called)
-        // Check if accumulation buffer is empty to determine if we need to arm
+        // Only allocate and arm if not already receiving (begin() wasn't
+        // called) Check if accumulation buffer is empty to determine if we need
+        // to arm
         if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
                 FL_WARN("wait(): failed to allocate and arm");
-                return RxWaitResult::TIMEOUT;  // Treat as timeout
+                return RxWaitResult::TIMEOUT; // Treat as timeout
             }
         } else {
             FL_DBG("wait(): receiver already armed, using existing buffer");
@@ -644,44 +692,44 @@ public:
 
             // Check timeout
             if (elapsed_us >= timeout_us) {
-                FL_WARN("wait(): timeout after " << elapsed_us << "us, received " << mSymbolsReceived << " symbols");
+                FL_WARN("wait(): timeout after "
+                        << elapsed_us << "us, received " << mSymbolsReceived
+                        << " symbols");
                 return RxWaitResult::TIMEOUT;
             }
 
-            taskYIELD();  // Allow other tasks to run
+            taskYIELD(); // Allow other tasks to run
         }
 
-        // Receive completed naturally (spurious symbols already filtered in ISR)
+        // Receive completed naturally (spurious symbols already filtered in
+        // ISR)
         FL_DBG("wait(): receive done, count=" << mSymbolsReceived);
-        FL_WARN("RMT RX callback count: " << mCallbackCount << " (en_partial_rx test)");
+        FL_WARN("RMT RX callback count: " << mCallbackCount
+                                          << " (en_partial_rx test)");
         return RxWaitResult::SUCCESS;
     }
 
-    uint32_t getResolutionHz() const override {
-        return mResolutionHz;
-    }
+    uint32_t getResolutionHz() const override { return mResolutionHz; }
 
     fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                               fl::span<uint8_t> out) override {
+                                             fl::span<uint8_t> out) override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
         if (symbols.empty()) {
-            return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+            return fl::Result<uint32_t, DecodeError>::failure(
+                DecodeError::INVALID_ARGUMENT);
         }
 
-        // Use the span-based decoder (spurious symbols already filtered upstream in wait())
-        // Pass start_low=true since buffer now starts at first valid edge
+        // Use the span-based decoder (spurious symbols already filtered
+        // upstream in wait()) Pass start_low=true since buffer now starts at
+        // first valid edge
         return decodeRmtSymbols(timing, mResolutionHz, symbols, out, true);
     }
 
-    const char* name() const override {
-        return "RMT";
-    }
+    const char *name() const override { return "RMT"; }
 
-    int getPin() const override {
-        return static_cast<int>(mPin);
-    }
+    int getPin() const override { return static_cast<int>(mPin); }
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
         // Get received symbols (spurious symbols already filtered by wait())
@@ -694,23 +742,28 @@ public:
         // Calculate nanoseconds per tick for conversion
         uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
 
-        // Each RMT symbol produces 2 EdgeTime entries (duration0/level0, duration1/level1)
-        // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
-        const auto* rmt_symbols = reinterpret_cast<const rmt_symbol_word_t*>(symbols.data());
+        // Each RMT symbol produces 2 EdgeTime entries (duration0/level0,
+        // duration1/level1) Cast RmtSymbol to rmt_symbol_word_t to access
+        // bitfields
+        const auto *rmt_symbols =
+            reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
 
         size_t write_index = 0;
-        for (size_t i = 0; i < symbols.size() && write_index < out.size(); i++) {
-            const auto& sym = rmt_symbols[i];
+        for (size_t i = 0; i < symbols.size() && write_index < out.size();
+             i++) {
+            const auto &sym = rmt_symbols[i];
 
             // First edge: duration0 with level0
             if (sym.duration0 > 0 && write_index < out.size()) {
-                out[write_index] = EdgeTime(sym.level0 != 0, ticksToNs(sym.duration0, ns_per_tick));
+                out[write_index] = EdgeTime(
+                    sym.level0 != 0, ticksToNs(sym.duration0, ns_per_tick));
                 write_index++;
             }
 
             // Second edge: duration1 with level1
             if (sym.duration1 > 0 && write_index < out.size()) {
-                out[write_index] = EdgeTime(sym.level1 != 0, ticksToNs(sym.duration1, ns_per_tick));
+                out[write_index] = EdgeTime(
+                    sym.level1 != 0, ticksToNs(sym.duration1, ns_per_tick));
                 write_index++;
             }
         }
@@ -726,7 +779,8 @@ public:
 
         // Check if edges count is even (must have pairs for RMT symbols)
         if (edges.size() % 2 != 0) {
-            FL_WARN("injectEdges(): edge count must be even (got " << edges.size() << ")");
+            FL_WARN("injectEdges(): edge count must be even (got "
+                    << edges.size() << ")");
             return false;
         }
 
@@ -741,33 +795,41 @@ public:
                 mAccumulationBuffer.push_back(0);
             }
         } else if (mAccumulationBuffer.size() < symbol_count) {
-            FL_WARN("injectEdges(): accumulation buffer too small (need " << symbol_count
-                    << ", have " << mAccumulationBuffer.size() << ")");
+            FL_WARN("injectEdges(): accumulation buffer too small (need "
+                    << symbol_count << ", have " << mAccumulationBuffer.size()
+                    << ")");
             return false;
         }
 
         // Calculate nanoseconds per tick for conversion (ns → ticks)
-        // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per tick
+        // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns
+        // per tick
         uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
 
-        FL_DBG("injectEdges(): converting " << edges.size() << " edges to "
-               << symbol_count << " RMT symbols (resolution=" << mResolutionHz
+        FL_DBG("injectEdges(): converting "
+               << edges.size() << " edges to " << symbol_count
+               << " RMT symbols (resolution=" << mResolutionHz
                << "Hz, ns_per_tick=" << ns_per_tick << ")");
 
         // Convert EdgeTime pairs to RMT symbols
-        auto* rmt_symbols = reinterpret_cast<rmt_symbol_word_t*>(mAccumulationBuffer.data());
+        auto *rmt_symbols =
+            reinterpret_cast<rmt_symbol_word_t *>(mAccumulationBuffer.data());
 
         for (size_t i = 0; i < symbol_count; i++) {
-            const EdgeTime& edge0 = edges[i * 2];      // First edge (duration0)
-            const EdgeTime& edge1 = edges[i * 2 + 1];  // Second edge (duration1)
+            const EdgeTime &edge0 = edges[i * 2];     // First edge (duration0)
+            const EdgeTime &edge1 = edges[i * 2 + 1]; // Second edge (duration1)
 
             // Convert nanoseconds to ticks
-            uint32_t duration0_ticks = (edge0.ns + ns_per_tick / 2) / ns_per_tick;  // Round to nearest
-            uint32_t duration1_ticks = (edge1.ns + ns_per_tick / 2) / ns_per_tick;
+            uint32_t duration0_ticks =
+                (edge0.ns + ns_per_tick / 2) / ns_per_tick; // Round to nearest
+            uint32_t duration1_ticks =
+                (edge1.ns + ns_per_tick / 2) / ns_per_tick;
 
             // Clamp to RMT symbol limits (15 bits = 0-32767)
-            if (duration0_ticks > 32767) duration0_ticks = 32767;
-            if (duration1_ticks > 32767) duration1_ticks = 32767;
+            if (duration0_ticks > 32767)
+                duration0_ticks = 32767;
+            if (duration1_ticks > 32767)
+                duration1_ticks = 32767;
 
             // Build RMT symbol
             rmt_symbols[i].duration0 = duration0_ticks;
@@ -775,8 +837,9 @@ public:
             rmt_symbols[i].duration1 = duration1_ticks;
             rmt_symbols[i].level1 = edge1.high ? 1 : 0;
 
-            FL_DBG("  Symbol[" << i << "]: duration0=" << duration0_ticks << " (" << edge0.ns
-                   << "ns), level0=" << (int)rmt_symbols[i].level0
+            FL_DBG("  Symbol["
+                   << i << "]: duration0=" << duration0_ticks << " ("
+                   << edge0.ns << "ns), level0=" << (int)rmt_symbols[i].level0
                    << ", duration1=" << duration1_ticks << " (" << edge1.ns
                    << "ns), level1=" << (int)rmt_symbols[i].level1);
         }
@@ -785,19 +848,20 @@ public:
         mSymbolsReceived = symbol_count;
         mReceiveDone = true;
 
-        FL_DBG("injectEdges(): injected " << symbol_count << " symbols successfully");
+        FL_DBG("injectEdges(): injected " << symbol_count
+                                          << " symbols successfully");
         return true;
     }
 
-
-private:
+  private:
     /**
-     * @brief Handle skip phase by discarding symbols until mSkipCounter reaches 0
+     * @brief Handle skip phase by discarding symbols until mSkipCounter reaches
+     * 0
      * @return true on success, false on failure
      *
      * Uses a small discard buffer to receive and discard symbols without
-     * allocating the full buffer. This ensures we don't buffer unwanted symbols.
-     * Only allocates memory temporarily during the skip phase.
+     * allocating the full buffer. This ensures we don't buffer unwanted
+     * symbols. Only allocates memory temporarily during the skip phase.
      */
     bool handleSkipPhase() {
         if (mSkipCounter == 0) {
@@ -818,23 +882,28 @@ private:
         // Skip symbols in chunks until mSkipCounter reaches 0
         while (mSkipCounter > 0) {
             size_t chunk_size = (mSkipCounter < DISCARD_BUFFER_SIZE)
-                ? mSkipCounter : DISCARD_BUFFER_SIZE;
+                                    ? mSkipCounter
+                                    : DISCARD_BUFFER_SIZE;
 
-            FL_DBG("Skip phase: receiving chunk of " << chunk_size
-                   << " symbols (remaining: " << mSkipCounter << ")");
+            FL_DBG("Skip phase: receiving chunk of "
+                   << chunk_size << " symbols (remaining: " << mSkipCounter
+                   << ")");
 
-            // DO NOT enable channel here - rmt_receive() requires channel to be in "init" (disabled) state
-            // startReceive() calls rmt_receive() which internally calls rmt_rx_enable()
-            // and rmt_rx_enable() expects the channel to be in "init" state, not "enabled" state
+            // DO NOT enable channel here - rmt_receive() requires channel to be
+            // in "init" (disabled) state startReceive() calls rmt_receive()
+            // which internally calls rmt_rx_enable() and rmt_rx_enable()
+            // expects the channel to be in "init" state, not "enabled" state
 
-            // Start receive with discard buffer (rmt_receive will enable the RX hardware internally)
+            // Start receive with discard buffer (rmt_receive will enable the RX
+            // hardware internally)
             if (!startReceive(discard_buffer.data(), chunk_size)) {
                 FL_WARN("handleSkipPhase(): failed to start receive");
                 return false;
             }
 
             // Wait for receive to complete (with timeout)
-            constexpr uint32_t SKIP_TIMEOUT_MS = 5000;  // 5 second timeout per chunk
+            constexpr uint32_t SKIP_TIMEOUT_MS =
+                5000; // 5 second timeout per chunk
             int64_t start_time_us = esp_timer_get_time();
             int64_t timeout_us = SKIP_TIMEOUT_MS * 1000;
 
@@ -849,15 +918,18 @@ private:
 
             // Check if ISR properly decremented mSkipCounter
             // (ISR callback handles decrementing mSkipCounter)
-            FL_DBG("Skip phase chunk complete, mSkipCounter now: " << mSkipCounter);
+            FL_DBG("Skip phase chunk complete, mSkipCounter now: "
+                   << mSkipCounter);
 
             // Disable channel to reset to "init" state for next iteration
             // After rmt_receive() completes, channel is in "enabled" state
             // We need to disable it before calling rmt_receive() again
-            if (mSkipCounter > 0) {  // Only disable if more iterations needed
+            if (mSkipCounter > 0) { // Only disable if more iterations needed
                 esp_err_t err = rmt_disable(mChannel);
                 if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    FL_WARN("handleSkipPhase(): failed to disable channel for next iteration: " << static_cast<int>(err));
+                    FL_WARN("handleSkipPhase(): failed to disable channel for "
+                            "next iteration: "
+                            << static_cast<int>(err));
                     return false;
                 }
                 FL_DBG("Skip phase: channel disabled for next iteration");
@@ -869,17 +941,23 @@ private:
 
         FL_DBG("Skip phase complete");
 
-        // After skip phase completes, channel may be in "enabled" state from the last rmt_receive()
-        // We need to ensure it's in "init" (disabled) state before calling allocateAndArm()
-        // If skip_signals=0, channel is already in "init" state, so rmt_disable() may return ESP_ERR_INVALID_STATE
+        // After skip phase completes, channel may be in "enabled" state from
+        // the last rmt_receive() We need to ensure it's in "init" (disabled)
+        // state before calling allocateAndArm() If skip_signals=0, channel is
+        // already in "init" state, so rmt_disable() may return
+        // ESP_ERR_INVALID_STATE
         if (mChannel) {
             esp_err_t err = rmt_disable(mChannel);
             if (err == ESP_OK) {
-                FL_DBG("Skip phase: channel disabled, ready for allocateAndArm()");
+                FL_DBG(
+                    "Skip phase: channel disabled, ready for allocateAndArm()");
             } else if (err == ESP_ERR_INVALID_STATE) {
-                FL_DBG("Skip phase: channel already in init state (skip_signals=0 case)");
+                FL_DBG("Skip phase: channel already in init state "
+                       "(skip_signals=0 case)");
             } else {
-                FL_WARN("handleSkipPhase(): failed to disable channel after skip phase: " << static_cast<int>(err));
+                FL_WARN("handleSkipPhase(): failed to disable channel after "
+                        "skip phase: "
+                        << static_cast<int>(err));
                 return false;
             }
         }
@@ -891,13 +969,16 @@ private:
      * @brief Allocate buffer and arm receiver (internal helper)
      * @return true on success, false on failure
      *
-     * Common logic for allocating internal buffer and starting receive operation.
-     * REQUIRES: Channel must be in "enabled" state before calling.
+     * Common logic for allocating internal buffer and starting receive
+     * operation. REQUIRES: Channel must be in "enabled" state before calling.
      *
      * Dual-Buffer Architecture:
-     * - DMA buffer (mInternalBuffer): Small buffer (4096 symbols) for hardware RX
-     * - Accumulation buffer (mAccumulationBuffer): Full-size buffer (user-requested) for complete stream
-     * - ISR callback copies from DMA buffer to accumulation buffer on each partial RX callback
+     * - DMA buffer (mInternalBuffer): Small buffer (4096 symbols) for hardware
+     * RX
+     * - Accumulation buffer (mAccumulationBuffer): Full-size buffer
+     * (user-requested) for complete stream
+     * - ISR callback copies from DMA buffer to accumulation buffer on each
+     * partial RX callback
      */
     bool allocateAndArm() {
         // Allocate DMA buffer (moderate size for partial RX mode)
@@ -910,8 +991,10 @@ private:
         //
         // The buffer size should be large enough to reduce callback overhead
         // but not too large to cause memory allocation issues.
-        // Iteration 10: Increased from 256 to 4096 to fix premature RX termination at ~225 LEDs
-        constexpr size_t DMA_BUFFER_SIZE = 4096;  // Larger buffer to reduce callback frequency
+        // Iteration 10: Increased from 256 to 4096 to fix premature RX
+        // termination at ~225 LEDs
+        constexpr size_t DMA_BUFFER_SIZE =
+            4096; // Larger buffer to reduce callback frequency
         mInternalBuffer.clear();
         mInternalBuffer.reserve(DMA_BUFFER_SIZE);
         for (size_t i = 0; i < DMA_BUFFER_SIZE; i++) {
@@ -925,12 +1008,14 @@ private:
             mAccumulationBuffer.push_back(0);
         }
 
-        FL_DBG("allocateAndArm(): DMA buffer=" << DMA_BUFFER_SIZE
-               << " symbols, accumulation buffer=" << mBufferSize << " symbols");
+        FL_DBG("allocateAndArm(): DMA buffer="
+               << DMA_BUFFER_SIZE << " symbols, accumulation buffer="
+               << mBufferSize << " symbols");
 
         // Channel must be enabled before calling startReceive()
         // Caller (begin()) ensures channel is enabled via enable() call
-        // startReceive() calls rmt_receive() which requires channel to be in "enabled" state
+        // startReceive() calls rmt_receive() which requires channel to be in
+        // "enabled" state
 
         // Start receive operation (pass DMA buffer, not accumulation buffer)
         if (!startReceive(mInternalBuffer.data(), DMA_BUFFER_SIZE)) {
@@ -946,17 +1031,19 @@ private:
      * @return true on success, false on failure
      *
      * Enables the RMT RX channel, transitioning from "init" to "enabled" state.
-     * The channel must be in "init" (disabled) state before calling this method.
+     * The channel must be in "init" (disabled) state before calling this
+     * method.
      *
      * After calling enable(), the channel is ready to call rmt_receive().
-     * After a receive operation completes, the channel remains in "enabled" state
-     * but must be disabled before calling rmt_receive() again.
+     * After a receive operation completes, the channel remains in "enabled"
+     * state but must be disabled before calling rmt_receive() again.
      *
      * State transitions:
      *   - rmt_new_rx_channel() → "init" state
      *   - rmt_enable() → "enabled" state
      *   - rmt_receive() → requires "enabled" state
-     *   - After receive completes → remains "enabled" but must disable before next receive
+     *   - After receive completes → remains "enabled" but must disable before
+     * next receive
      *   - rmt_disable() → "init" state (ready for next enable/receive cycle)
      */
     bool enable() {
@@ -973,7 +1060,8 @@ private:
             FL_DBG("RX channel enabled");
             return true;
         } else {
-            FL_WARN("Failed to enable RX channel: " << esp_err_to_name(err)
+            FL_WARN("Failed to enable RX channel: "
+                    << esp_err_to_name(err)
                     << " (code: " << static_cast<int>(err) << ")");
             return false;
         }
@@ -981,7 +1069,8 @@ private:
 
     /**
      * @brief Get received symbols as a span (internal method)
-     * @return Span of const RmtSymbol containing received data from accumulation buffer
+     * @return Span of const RmtSymbol containing received data from
+     * accumulation buffer
      *
      * Returns data from the accumulation buffer (not DMA buffer).
      * The accumulation buffer contains the complete data stream assembled from
@@ -991,7 +1080,8 @@ private:
         if (mAccumulationBuffer.empty()) {
             return fl::span<const RmtSymbol>();
         }
-        return fl::span<const RmtSymbol>(mAccumulationBuffer.data(), mSymbolsReceived);
+        return fl::span<const RmtSymbol>(mAccumulationBuffer.data(),
+                                         mSymbolsReceived);
     }
 
     /**
@@ -1006,14 +1096,16 @@ private:
 
     /**
      * @brief Internal method to start receiving RMT symbols
-     * @param buffer Buffer to store received symbols (must remain valid until done)
+     * @param buffer Buffer to store received symbols (must remain valid until
+     * done)
      * @param buffer_size Number of symbols buffer can hold
      * @return true if receive started, false on error
      *
-     * IMPORTANT: This method is called with the DMA buffer, not the accumulation buffer.
-     * The ISR callback will copy from DMA buffer → accumulation buffer on each partial RX callback.
+     * IMPORTANT: This method is called with the DMA buffer, not the
+     * accumulation buffer. The ISR callback will copy from DMA buffer →
+     * accumulation buffer on each partial RX callback.
      */
-    bool startReceive(RmtSymbol* buffer, size_t buffer_size) {
+    bool startReceive(RmtSymbol *buffer, size_t buffer_size) {
         if (!mChannel) {
             FL_WARN("RX channel not initialized (call begin() first)");
             return false;
@@ -1027,57 +1119,67 @@ private:
         // Reset state for new receive operation
         mReceiveDone = false;
         mSymbolsReceived = 0;
-        mAccumulationOffset = 0;  // Reset accumulation offset for new capture
-        mCallbackCount = 0;  // Reset callback counter for debugging
+        mAccumulationOffset = 0; // Reset accumulation offset for new capture
+        mCallbackCount = 0;      // Reset callback counter for debugging
 
         // Configure receive parameters (use values from begin())
         rmt_receive_config_t rx_params = {};
         rx_params.signal_range_min_ns = mSignalRangeMinNs;
         rx_params.signal_range_max_ns = mSignalRangeMaxNs;
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
-        rx_params.flags.en_partial_rx = true;  // Enable partial reception for long data streams (>~250 symbols, ESP-IDF 5.3+)
+        rx_params.flags.en_partial_rx =
+            true; // Enable partial reception for long data streams (>~250
+                  // symbols, ESP-IDF 5.3+)
 #endif
 
-        // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert above)
-        auto* rmt_buffer = reinterpret_cast<rmt_symbol_word_t*>(buffer);
+        // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert
+        // above)
+        auto *rmt_buffer = reinterpret_cast<rmt_symbol_word_t *>(buffer);
 
         // Start receiving
-        esp_err_t err = rmt_receive(mChannel, rmt_buffer, buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
+        esp_err_t err =
+            rmt_receive(mChannel, rmt_buffer,
+                        buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
         if (err != ESP_OK) {
             FL_WARN("Failed to start RX receive: " << static_cast<int>(err));
             return false;
         }
 
-        FL_DBG("RX receive started (DMA buffer size: " << buffer_size << " symbols)");
+        FL_DBG("RX receive started (DMA buffer size: " << buffer_size
+                                                       << " symbols)");
         return true;
     }
-
 
     /**
      * @brief ISR callback for receive completion
      *
-     * IRAM_ATTR specified on definition only (not declaration) to avoid warnings.
+     * IRAM_ATTR specified on definition only (not declaration) to avoid
+     * warnings.
      *
-     * Skip logic: When mSkipCounter > 0, we're in skip phase (called from handleSkipPhase).
-     * Decrement mSkipCounter and discard symbols. When mSkipCounter == 0, we're in
-     * capture phase - store the received symbols and filter spurious idle-state symbols.
+     * Skip logic: When mSkipCounter > 0, we're in skip phase (called from
+     * handleSkipPhase). Decrement mSkipCounter and discard symbols. When
+     * mSkipCounter == 0, we're in capture phase - store the received symbols
+     * and filter spurious idle-state symbols.
      *
      * Dual-Buffer Architecture (ESP-IDF 5.3.0+):
-     * With en_partial_rx enabled, this callback fires multiple times for long streams.
-     * Each callback receives a new chunk of data in data->received_symbols (DMA buffer).
-     * We must MANUALLY COPY from DMA buffer to accumulation buffer before the next callback overwrites it.
+     * With en_partial_rx enabled, this callback fires multiple times for long
+     * streams. Each callback receives a new chunk of data in
+     * data->received_symbols (DMA buffer). We must MANUALLY COPY from DMA
+     * buffer to accumulation buffer before the next callback overwrites it.
      *
-     * ESP-IDF < 5.3.0: Single-shot receive mode only (callback fires once, buffer size limited).
+     * ESP-IDF < 5.3.0: Single-shot receive mode only (callback fires once,
+     * buffer size limited).
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
-                                         const rmt_rx_done_event_data_t* data,
-                                         void* user_data) {
-        RmtRxChannelImpl* self = static_cast<RmtRxChannelImpl*>(user_data);
+                                         const rmt_rx_done_event_data_t *data,
+                                         void *user_data) {
+        RmtRxChannelImpl *self = static_cast<RmtRxChannelImpl *>(user_data);
         if (!self) {
             return false;
         }
 
-        self->mCallbackCount = self->mCallbackCount + 1;  // Debug: Track callback invocations
+        self->mCallbackCount =
+            self->mCallbackCount + 1; // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
 
         // Check if we're in skip phase
@@ -1090,27 +1192,34 @@ private:
             }
 
             self->mSymbolsReceived = 0;
-            self->mReceiveDone = true;  // Signal completion for skip phase
+            self->mReceiveDone = true; // Signal completion for skip phase
             return false;
         }
 
         // Capture phase - manually copy from DMA buffer to accumulation buffer
-        // data->received_symbols points to the DMA buffer which will be OVERWRITTEN on next callback
+        // data->received_symbols points to the DMA buffer which will be
+        // OVERWRITTEN on next callback
 
-        // Calculate how many symbols we can safely copy (prevent buffer overflow)
-        size_t available_space = self->mAccumulationBuffer.size() - self->mAccumulationOffset;
-        size_t symbols_to_copy = (received_count < available_space) ? received_count : available_space;
+        // Calculate how many symbols we can safely copy (prevent buffer
+        // overflow)
+        size_t available_space =
+            self->mAccumulationBuffer.size() - self->mAccumulationOffset;
+        size_t symbols_to_copy = (received_count < available_space)
+                                     ? received_count
+                                     : available_space;
 
         if (symbols_to_copy > 0) {
             // Copy from DMA buffer to accumulation buffer
-            // Use simple inline loop to avoid IRAM literal references (ESP32-S2 IRAM size limit)
-            // This approach prevents "l32r: literal placed after use" linker errors
-            RmtSymbol* dest = self->mAccumulationBuffer.data() + self->mAccumulationOffset;
-            const rmt_symbol_word_t* src = data->received_symbols;
+            // Use simple inline loop to avoid IRAM literal references (ESP32-S2
+            // IRAM size limit) This approach prevents "l32r: literal placed
+            // after use" linker errors
+            RmtSymbol *dest =
+                self->mAccumulationBuffer.data() + self->mAccumulationOffset;
+            const rmt_symbol_word_t *src = data->received_symbols;
 
             // Copy word-by-word (32-bit aligned, efficient)
             for (size_t i = 0; i < symbols_to_copy; i++) {
-                dest[i] = reinterpret_cast<const RmtSymbol&>(src[i]);
+                dest[i] = reinterpret_cast<const RmtSymbol &>(src[i]);
             }
 
             // Update accumulation offset
@@ -1120,8 +1229,9 @@ private:
         // Update total symbols received
         self->mSymbolsReceived = self->mAccumulationOffset;
 
-        // Only signal completion when this is the final callback (is_last flag from ESP-IDF)
-        // With en_partial_rx enabled, callback may be invoked multiple times for long streams
+        // Only signal completion when this is the final callback (is_last flag
+        // from ESP-IDF) With en_partial_rx enabled, callback may be invoked
+        // multiple times for long streams
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
         if (data->flags.is_last) {
             self->mReceiveDone = true;
@@ -1135,25 +1245,50 @@ private:
         return false;
     }
 
-    rmt_channel_handle_t mChannel;                ///< RMT channel handle
-    gpio_num_t mPin;                              ///< GPIO pin for RX
-    uint32_t mResolutionHz;                      ///< Clock resolution in Hz
-    size_t mBufferSize;                          ///< User-requested buffer size in symbols (accumulation buffer size)
-    volatile bool mReceiveDone;                  ///< Set by ISR when receive complete
-    volatile size_t mSymbolsReceived;            ///< Total symbols received across all callbacks (set by ISR)
-    uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
-    uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
-    uint32_t mSkipCounter;                       ///< Runtime counter for skipping (decremented in ISR)
-    bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
-    fl::HeapVector<RmtSymbol> mInternalBuffer;   ///< DMA buffer for hardware RX (small, ≤4096 symbols)
-    fl::HeapVector<RmtSymbol> mAccumulationBuffer; ///< Accumulation buffer for full data stream (user-requested size)
-    volatile size_t mAccumulationOffset;         ///< Current write position in accumulation buffer (updated by ISR)
-    volatile uint32_t mCallbackCount;            ///< Debug: Count ISR callbacks (TEMP - for testing en_partial_rx)
+    rmt_channel_handle_t mChannel; ///< RMT channel handle
+    gpio_num_t mPin;               ///< GPIO pin for RX
+    uint32_t mResolutionHz;        ///< Clock resolution in Hz
+    size_t mBufferSize; ///< User-requested buffer size in symbols (accumulation
+                        ///< buffer size)
+    volatile bool mReceiveDone;       ///< Set by ISR when receive complete
+    volatile size_t mSymbolsReceived; ///< Total symbols received across all
+                                      ///< callbacks (set by ISR)
+    uint32_t mSignalRangeMinNs;       ///< Minimum pulse width (noise filtering)
+    uint32_t mSignalRangeMaxNs;       ///< Maximum pulse width (idle detection)
+    uint32_t
+        mSkipCounter; ///< Runtime counter for skipping (decremented in ISR)
+    bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
+                      ///< (inverted)
+    fl::HeapVector<RmtSymbol>
+        mInternalBuffer; ///< DMA buffer for hardware RX (small, ≤4096 symbols)
+    fl::HeapVector<RmtSymbol>
+        mAccumulationBuffer; ///< Accumulation buffer for full data stream
+                             ///< (user-requested size)
+    volatile size_t
+        mAccumulationOffset; ///< Current write position in accumulation buffer
+                             ///< (updated by ISR)
+    volatile uint32_t mCallbackCount; ///< Debug: Count ISR callbacks (TEMP -
+                                      ///< for testing en_partial_rx)
 };
 
 // Factory method implementation
 fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) {
     return fl::make_shared<RmtRxChannelImpl>(pin);
+}
+
+} // namespace fl
+
+#else // !FASTLED_RMT5
+
+// RMT4 platforms (ESP32 with ESP-IDF < 5.0) - provide stub implementation
+// RX functionality requires RMT5 driver (ESP-IDF 5.0+)
+namespace fl {
+
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) {
+    (void)pin; // Suppress unused parameter warning
+    FL_WARN("RmtRxChannel::create() requires RMT5 driver (ESP-IDF 5.0+). "
+            "Returning nullptr.");
+    return nullptr;
 }
 
 } // namespace fl
