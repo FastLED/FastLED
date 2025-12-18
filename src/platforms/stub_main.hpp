@@ -67,10 +67,12 @@ bool next_loop() {
 }  // namespace stub_main
 }  // namespace fl
 
-
-
+// Only provide main() for non-Arduino platforms (stub platforms)
+// Real Arduino platforms (ESP32, etc.) have their own main() in the framework
+#if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 int main() {
     fl::stub_main::setup();
     while (fl::stub_main::next_loop()) {;}
     return 0;
 }
+#endif
