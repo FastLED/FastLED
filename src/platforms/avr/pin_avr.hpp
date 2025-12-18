@@ -23,6 +23,17 @@
 
 #include <Arduino.h>
 
+// Analog reference modes fallback definitions (for ATmega8 and other old AVR cores)
+#ifndef DEFAULT
+#define DEFAULT 1
+#endif
+#ifndef INTERNAL
+#define INTERNAL 3
+#endif
+#ifndef EXTERNAL
+#define EXTERNAL 0
+#endif
+
 namespace fl {
 
 // Forward declarations from fl/pin.h
@@ -71,11 +82,9 @@ inline void setAdcRange(AdcRange range) {
         case AdcRange::Range0_1V1:
             arduino_ref = INTERNAL;  // 3 (1.1V internal reference)
             break;
-#ifdef EXTERNAL
         case AdcRange::External:
             arduino_ref = EXTERNAL;  // 0 (AREF pin)
             break;
-#endif
         case AdcRange::Range0_5V:
             arduino_ref = DEFAULT;  // 1 (same as Default for 5V AVR boards)
             break;
