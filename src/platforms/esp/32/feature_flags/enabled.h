@@ -6,10 +6,13 @@
 #include "platforms/esp/esp_version.h"
 
 // Include ESP-IDF SoC capability macros for hardware feature detection
+// Note: soc/soc_caps.h only exists in ESP-IDF 4.0+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
 #include "fl/compiler_control.h"
 FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
 FL_EXTERN_C_END
+#endif
 
 // Provide safe defaults for SoC capabilities if not defined
 #ifndef SOC_RMT_SUPPORTED
