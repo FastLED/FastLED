@@ -233,7 +233,7 @@ static inline lzw_result lzw__handle_clear(
 		struct lzw_ctx *ctx,
 		fl::u16 *code_out)
 {
-	fl::u16 code;
+	fl::u16 code = 0;
 
 	/* Reset table building context */
 	ctx->code_size = ctx->initial_code_size;
@@ -393,7 +393,7 @@ static inline lzw_result lzw__decode(
 		fl::u32 * output_written)
 {
 	lzw_result res;
-	fl::u16 code;
+	fl::u16 code = 0;
 
 	/* Get a new code from the input */
 	res = lzw__read_code(&ctx->input, ctx->code_size, &code);

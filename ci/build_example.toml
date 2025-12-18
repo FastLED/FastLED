@@ -125,6 +125,7 @@ flags = [
     "-Werror=unused-function",          # Force error on unused functions
     "-Werror=unused-but-set-variable",  # Force error on variables that are set but never used
     "-Wuninitialized",
+    "-Werror=maybe-uninitialized",      # Force error on possibly uninitialized variables (GCC only)
     "-Wdouble-promotion",
     "-Wformat=2",
     "-Wcast-align",

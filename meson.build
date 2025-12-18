@@ -106,6 +106,12 @@ base_warnings = [
   '-Werror=unused-result',     # Treat ignored FL_NODISCARD return values as errors
 ]
 
+# Add GCC-specific warnings (maybe-uninitialized is GCC-only, not available in Clang)
+cpp_compiler = meson.get_compiler('cpp')
+if cpp_compiler.get_id() == 'gcc'
+  base_warnings += ['-Werror=maybe-uninitialized']
+endif
+
 # Group 3: Optimization and code generation flags (mode-dependent)
 # Common flags present in all modes (ABI-critical)
 base_common = [

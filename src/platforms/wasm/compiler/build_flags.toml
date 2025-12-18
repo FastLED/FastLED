@@ -382,6 +382,7 @@ flags = [
     # Code Quality Warnings
     "-Wunused",                                 # Warn about unused variables, functions, etc.
     "-Wuninitialized",                          # Warn about uninitialized variable usage
+    "-Werror=maybe-uninitialized",              # Error on possibly uninitialized variables (Clang may ignore)
     "-Wdouble-promotion",                       # Warn about float->double promotions
     
     # Format and Safety Warnings
