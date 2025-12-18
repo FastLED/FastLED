@@ -16,6 +16,7 @@
 #endif
 
 #ifdef ARDUINO
+#include "../esp_version.h"
 
 // ============================================================================
 // Arduino Path: Zero-overhead wrappers around Arduino pin functions
@@ -47,7 +48,15 @@ inline uint16_t analogRead(int pin) {
 }
 
 inline void analogWrite(int pin, uint16_t val) {
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // Arduino-ESP32 2.x+ (ESP-IDF 4.x+) provides analogWrite
     ::analogWrite(pin, static_cast<int>(val));
+#else
+    // ESP-IDF 3.x (Arduino-ESP32 1.x) does not provide analogWrite
+    // No-op for compatibility - PWM would require LEDC setup
+    (void)pin;
+    (void)val;
+#endif
 }
 
 inline void setAdcRange(AdcRange range) {
