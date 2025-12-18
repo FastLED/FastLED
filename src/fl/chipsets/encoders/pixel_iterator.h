@@ -197,16 +197,15 @@ class PixelIterator {
     void writeAPA102(CONTAINER_UIN8_T* out, bool hd_gamma = false) {
         auto back_ins = fl::back_inserter(*out);
 
-        #if FASTLED_HD_COLOR_MIXING
         if (hd_gamma) {
-            // HD gamma mode: per-LED brightness
+            // HD gamma mode: per-LED brightness (required by APA102HD/DOTSTARHD/HD107HD hardware)
+            // Note: brightness iterator has fallback for !FASTLED_HD_COLOR_MIXING (uses max(R,G,B))
             auto pixel_range = makeScaledPixelRangeRGB(this);
             auto brightness_range = makeScaledBrightnessRange(this);
             encodeAPA102_HD(pixel_range.first, pixel_range.second,
                                       brightness_range.first, back_ins);
             return;
         }
-        #endif
 
         #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
         // Global brightness mode: extract from first pixel
@@ -229,16 +228,15 @@ class PixelIterator {
     void writeSK9822(CONTAINER_UIN8_T* out, bool hd_gamma = false) {
         auto back_ins = fl::back_inserter(*out);
 
-        #if FASTLED_HD_COLOR_MIXING
         if (hd_gamma) {
-            // HD gamma mode: per-LED brightness
+            // HD gamma mode: per-LED brightness (required by SK9822HD hardware)
+            // Note: brightness iterator has fallback for !FASTLED_HD_COLOR_MIXING (uses max(R,G,B))
             auto pixel_range = makeScaledPixelRangeRGB(this);
             auto brightness_range = makeScaledBrightnessRange(this);
             encodeSK9822_HD(pixel_range.first, pixel_range.second,
                                       brightness_range.first, back_ins);
             return;
         }
-        #endif
 
         #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
         // Global brightness mode: extract from first pixel
