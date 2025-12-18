@@ -44,16 +44,16 @@ inline void analogWrite(int pin, uint16_t val) {
 
 inline void setAdcRange(AdcRange range) {
     // Translate fl::AdcRange to Arduino analogReference constants
-    // Note: Renesas supports DEFAULT, INTERNAL, and EXTERNAL reference modes
+    // Note: Renesas uses AR_DEFAULT, AR_INTERNAL, AR_EXTERNAL
     switch (range) {
         case AdcRange::Default:
-            ::analogReference(DEFAULT);
+            ::analogReference(AR_DEFAULT);
             break;
         case AdcRange::Range0_1V1:
-            ::analogReference(INTERNAL);
+            ::analogReference(AR_INTERNAL);
             break;
         case AdcRange::External:
-            ::analogReference(EXTERNAL);
+            ::analogReference(AR_EXTERNAL);
             break;
         default:
             // Unsupported range - no-op
