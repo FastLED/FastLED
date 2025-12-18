@@ -23,6 +23,7 @@
 #include "fl/chipsets/encoders/encoder_constants.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
+#include "fl/compiler_control.h"
 #include "crgb.h"
 
 namespace fl {
@@ -125,7 +126,9 @@ void encodeAPA102_HD(InputIterator first, InputIterator last,
 /// @note Extracts global brightness from max component of first pixel
 /// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 /// @note Uses O2 optimization to avoid AVR register allocation issues with LTO
+/// @note Marked noinline on AVR to prevent register exhaustion from divisions
 template <typename InputIterator, typename OutputIterator>
+FL_NO_INLINE_IF_AVR
 __attribute__((optimize("O2")))
 void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) {

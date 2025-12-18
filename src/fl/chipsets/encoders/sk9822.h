@@ -21,6 +21,7 @@
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -113,8 +114,9 @@ void encodeSK9822_HD(InputIterator first, InputIterator last,
 /// @param out Output iterator for encoded bytes
 /// @note SK9822 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 /// @note Uses O2 optimization to avoid AVR register allocation issues with LTO
+/// @note Marked noinline on AVR to prevent register exhaustion from divisions
 template <typename InputIterator, typename OutputIterator>
-__attribute__((optimize("O2")))
+FL_NO_INLINE_IF_AVR
 void encodeSK9822_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) {
     if (first == last) {

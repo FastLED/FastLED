@@ -195,15 +195,18 @@
   #define FL_END_OPTIMIZE_FOR_EXACT_TIMING   /* nothing */
 #endif
 
-// Function-level optimization attribute for O3
+// Function-level optimization attributes
 // GCC supports per-function optimization attributes
 // Clang doesn't support optimize("O3"), but supports hot attribute for aggressive optimization
 #if defined(__GNUC__) && !defined(__clang__)
   #define FL_OPTIMIZE_FUNCTION __attribute__((optimize("O3")))
+  #define FL_OPTIMIZE_O2 __attribute__((optimize("O2")))
 #elif defined(__clang__)
   #define FL_OPTIMIZE_FUNCTION __attribute__((hot))
+  #define FL_OPTIMIZE_O2 __attribute__((hot))
 #else
   #define FL_OPTIMIZE_FUNCTION
+  #define FL_OPTIMIZE_O2
 #endif
 
 #ifndef FL_LINK_WEAK
@@ -215,6 +218,24 @@
   #define FL_MAYBE_UNUSED __attribute__((unused))
 #else
   #define FL_MAYBE_UNUSED
+#endif
+
+// Prevent inlining on AVR to reduce register pressure
+// AVR has only 16 general-purpose registers (r0-r15), and complex functions
+// with divisions can exhaust available registers during LTO optimization.
+// This macro forces functions to be out-of-line on AVR while allowing
+// inlining on other platforms for performance.
+//
+// Usage: FL_NO_INLINE_IF_AVR void myComplexFunction() { ... }
+//
+// Typical use cases:
+//   - Functions containing multiple divisions (AVR has no hardware divide)
+//   - Template functions with many intermediate variables
+//   - Functions called from multiple instantiation sites with LTO enabled
+#if defined(__AVR__)
+  #define FL_NO_INLINE_IF_AVR __attribute__((noinline))
+#else
+  #define FL_NO_INLINE_IF_AVR
 #endif
 
 // Mark functions to run during C++ static initialization (before main())

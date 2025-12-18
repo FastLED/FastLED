@@ -6,6 +6,7 @@
 #include "fl/gamma.h"
 #include "fl/int.h"
 #include "fl/stl/math.h"
+#include "fl/compiler_control.h"
 
 #include "crgb.h"
 #include "lib8tion/scale8.h"
@@ -89,6 +90,7 @@ inline void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
+FL_NO_INLINE_IF_AVR
 inline void internal_builtin_five_bit_hd_gamma_bitshift(
     CRGB colors, CRGB colors_scale, fl::u8 global_brightness, CRGB *out_colors,
     fl::u8 *out_power_5bit) {
@@ -122,6 +124,7 @@ inline void internal_builtin_five_bit_hd_gamma_bitshift(
 // Since the return value wasn't used, it has been omitted.
 // It's not clear what scale brightness is, or how it is to be applied,
 // so we assume 8 bits applied over the given rgb values.
+FL_NO_INLINE_IF_AVR
 inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
                               uint8_t brightness, CRGB *out,
                               uint8_t *out_power_5bit) {
