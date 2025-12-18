@@ -10,33 +10,33 @@
 #include "fl/colorutils_misc.h"
 #include "fl/compiler_control.h"
 #include "fl/deprecated.h"
+#include "fl/error.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "lib8tion/scale8.h"
 #include "fl/int.h"
 
-namespace fl {
-
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
-fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
+// IMPORTANT: This MUST be in the global namespace (not fl::) for backward compatibility
+// with user code from FastLED 3.7.6 that defines: uint16_t XY(uint8_t x, uint8_t y)
+uint16_t XY(uint8_t x, uint8_t y) FL_LINK_WEAK;
 
-FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
+FL_LINK_WEAK uint16_t XY(uint8_t x, uint8_t y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
-    FASTLED_ASSERT(false, "the user didn't provide an XY function");
+    FL_ERROR("XY function not provided - using default [0][0]. Use blur2d with XYMap instead");
     return 0;
 }
 
-// fl::u16 XY(fl::u8 x, fl::u8 y) {
-//   return 0;
-// }
+namespace fl {
+
 // make this a weak symbol
 namespace {
 fl::u16 xy_legacy_wrapper(fl::u16 x, fl::u16 y, fl::u16 width,
                            fl::u16 height) {
     FASTLED_UNUSED(width);
     FASTLED_UNUSED(height);
-    return XY(x, y);
+    return ::XY(x, y);  // Call global namespace XY
 }
 } // namespace
 
