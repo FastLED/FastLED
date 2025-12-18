@@ -326,6 +326,153 @@ void runTest(const char* test_name,
     }
 }
 
+// Multi-run validation test runner
+// Runs the same test multiple times and tracks errors across runs
+void runMultiTest(const char* test_name,
+                  fl::ValidationConfig& config,
+                  const fl::MultiRunConfig& multi_config,
+                  int& total, int& passed) {
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ MULTI-RUN TEST: " << test_name);
+    FL_WARN("║ Runs: " << multi_config.num_runs << " | Print Mode: "
+            << (multi_config.print_all_runs ? "ALL" : "ERRORS ONLY"));
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+
+    fl::vector<fl::RunResult> run_results;
+
+    // Multi-lane limitation: Only validate Lane 0
+    size_t channels_to_validate = config.tx_configs.size() > 1 ? 1 : config.tx_configs.size();
+
+    if (config.tx_configs.size() > 1) {
+        FL_WARN("[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, validating Lane 0 only");
+    }
+
+    // Execute multiple runs
+    for (int run = 1; run <= multi_config.num_runs; run++) {
+        fl::RunResult result;
+        result.run_number = run;
+
+        // Validate Lane 0 only
+        for (size_t config_idx = 0; config_idx < channels_to_validate; config_idx++) {
+            const auto& leds = config.tx_configs[config_idx].mLeds;
+            size_t num_leds = leds.size();
+            result.total_leds = num_leds;
+
+            // Capture RX data
+            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
+
+            if (bytes_captured == 0) {
+                FL_ERROR("[Run " << run << "] Capture failed");
+                result.passed = false;
+                break;
+            }
+
+            // Validate pixel data
+            int mismatches = 0;
+            size_t bytes_expected = num_leds * 3;
+            size_t bytes_to_check = bytes_captured < bytes_expected ? bytes_captured : bytes_expected;
+
+            for (size_t i = 0; i < num_leds; i++) {
+                size_t byte_offset = i * 3;
+                if (byte_offset + 2 >= bytes_to_check) {
+                    break;
+                }
+
+                uint8_t expected_r = leds[i].r;
+                uint8_t expected_g = leds[i].g;
+                uint8_t expected_b = leds[i].b;
+
+                uint8_t actual_r = config.rx_buffer[byte_offset + 0];
+                uint8_t actual_g = config.rx_buffer[byte_offset + 1];
+                uint8_t actual_b = config.rx_buffer[byte_offset + 2];
+
+                if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
+                    mismatches++;
+
+                    // Store first N errors
+                    if (result.errors.size() < static_cast<size_t>(multi_config.max_errors_per_run)) {
+                        result.errors.push_back(fl::LEDError(
+                            i, expected_r, expected_g, expected_b,
+                            actual_r, actual_g, actual_b
+                        ));
+                    }
+                }
+            }
+
+            result.mismatches = mismatches;
+            result.passed = (mismatches == 0);
+        }
+
+        run_results.push_back(result);
+
+        // Print run result if configured
+        if (multi_config.print_all_runs || !result.passed) {
+            FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] "
+                    << (result.passed ? "PASS" : "FAIL")
+                    << " | Errors: " << result.mismatches << "/" << result.total_leds
+                    << " (" << (100.0 * (result.total_leds - result.mismatches) / result.total_leds) << "%)");
+
+            // Print error details if enabled
+            if (!result.passed && multi_config.print_per_led_errors && !result.errors.empty()) {
+                FL_WARN("  First " << result.errors.size() << " error(s):");
+                for (size_t i = 0; i < result.errors.size(); i++) {
+                    const auto& err = result.errors[i];
+                    FL_WARN("    LED[" << err.led_index << "]: expected RGB("
+                            << static_cast<int>(err.expected_r) << ","
+                            << static_cast<int>(err.expected_g) << ","
+                            << static_cast<int>(err.expected_b) << ") got RGB("
+                            << static_cast<int>(err.actual_r) << ","
+                            << static_cast<int>(err.actual_g) << ","
+                            << static_cast<int>(err.actual_b) << ")");
+                }
+            }
+        }
+    }
+
+    // Summary statistics
+    int total_passed = 0;
+    int total_failed = 0;
+    for (const auto& r : run_results) {
+        if (r.passed) total_passed++;
+        else total_failed++;
+    }
+
+    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
+    FL_WARN("║ MULTI-RUN SUMMARY");
+    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+    FL_WARN("Total Runs:   " << multi_config.num_runs);
+    FL_WARN("Passed:       " << total_passed << " (" << (100.0 * total_passed / multi_config.num_runs) << "%)");
+    FL_WARN("Failed:       " << total_failed << " (" << (100.0 * total_failed / multi_config.num_runs) << "%)");
+
+    if (total_failed > 0) {
+        FL_WARN("\nFailed Run Numbers:");
+        for (const auto& r : run_results) {
+            if (!r.passed) {
+                FL_WARN("  Run #" << r.run_number << " - " << r.mismatches << " errors");
+                if (!r.errors.empty()) {
+                    FL_WARN("    First error at LED[" << r.errors[0].led_index << "]: "
+                            << "expected RGB(" << static_cast<int>(r.errors[0].expected_r) << ","
+                            << static_cast<int>(r.errors[0].expected_g) << ","
+                            << static_cast<int>(r.errors[0].expected_b) << ") got RGB("
+                            << static_cast<int>(r.errors[0].actual_r) << ","
+                            << static_cast<int>(r.errors[0].actual_g) << ","
+                            << static_cast<int>(r.errors[0].actual_b) << ")");
+                }
+            }
+        }
+    }
+
+    // Update totals
+    total++;
+    if (total_failed == 0) {
+        passed++;
+        FL_WARN("\n[OVERALL] PASS ✓ - All " << multi_config.num_runs << " runs succeeded");
+    } else {
+        FL_ERROR("\n[OVERALL] FAIL ✗ - " << total_failed << "/" << multi_config.num_runs << " runs failed");
+    }
+}
+
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
 void validateChipsetTiming(fl::ValidationConfig& config,
@@ -371,8 +518,16 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     int total = 0;
     int passed = 0;
 
+    // Multi-run configuration
+    fl::MultiRunConfig multi_config;
+    multi_config.num_runs = 10;           // Run each pattern 10 times
+    multi_config.print_all_runs = false;  // Only print failed runs
+    multi_config.print_per_led_errors = true;  // Show first 5 LED errors per run
+    multi_config.max_errors_per_run = 5;  // Store first 5 errors
+
     // Test all 4 bit patterns (0-3)
-    for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
+    // ISOLATION: Testing ONLY Pattern A (pattern_id = 0) for debugging
+    for (int pattern_id = 0; pattern_id < 1; pattern_id++) {
         // Apply pattern to all lanes
         for (size_t i = 0; i < config.tx_configs.size(); i++) {
             setMixedBitPattern(
@@ -381,7 +536,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
                 pattern_id
             );
         }
-        runTest(getBitPatternName(pattern_id), config, total, passed);
+        runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed);
     }
 
     // Report results

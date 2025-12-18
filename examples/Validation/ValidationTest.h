@@ -52,6 +52,48 @@ struct TestContext {
     int pin_number;               ///< TX pin number for this lane
 };
 
+/// @brief LED error information for a single run
+struct LEDError {
+    int led_index;          ///< LED index where error occurred
+    uint8_t expected_r;     ///< Expected R value
+    uint8_t expected_g;     ///< Expected G value
+    uint8_t expected_b;     ///< Expected B value
+    uint8_t actual_r;       ///< Actual R value
+    uint8_t actual_g;       ///< Actual G value
+    uint8_t actual_b;       ///< Actual B value
+
+    LEDError(int idx, uint8_t exp_r, uint8_t exp_g, uint8_t exp_b,
+             uint8_t act_r, uint8_t act_g, uint8_t act_b)
+        : led_index(idx)
+        , expected_r(exp_r), expected_g(exp_g), expected_b(exp_b)
+        , actual_r(act_r), actual_g(act_g), actual_b(act_b) {}
+};
+
+/// @brief Single run result with error tracking
+struct RunResult {
+    int run_number;                 ///< Run iteration number (1-based)
+    int total_leds;                 ///< Total LEDs tested
+    int mismatches;                 ///< Number of LED mismatches
+    fl::vector<LEDError> errors;    ///< First few errors (up to 5)
+    bool passed;                    ///< True if no errors
+
+    RunResult() : run_number(0), total_leds(0), mismatches(0), passed(false) {}
+};
+
+/// @brief Multi-run test configuration
+struct MultiRunConfig {
+    int num_runs;               ///< Number of runs to execute
+    bool print_all_runs;        ///< Print all run results (default: only errors)
+    bool print_per_led_errors;  ///< Print every LED error (default: false)
+    int max_errors_per_run;     ///< Max errors to store per run (default: 5)
+
+    MultiRunConfig()
+        : num_runs(10)
+        , print_all_runs(false)
+        , print_per_led_errors(false)
+        , max_errors_per_run(5) {}
+};
+
 /// @brief Driver test result tracking
 struct DriverTestResult {
     fl::string driver_name;  ///< Driver name (e.g., "RMT", "SPI", "PARLIO")
@@ -80,7 +122,7 @@ struct DriverTestResult {
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer);
 
-// Generic driver-agnostic validation test runner
+// Generic driver-agnostic validation test runner (single run)
 // Validates all channels using the specified configuration
 // @param test_name Test name for logging (e.g., "Solid Red", "Solid Green")
 // @param config All validation configuration (timing, channels, driver, RX, buffer) - non-const for LED manipulation
@@ -89,6 +131,18 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 void runTest(const char* test_name,
              fl::ValidationConfig& config,
              int& total, int& passed);
+
+// Multi-run validation test runner
+// Runs the same test multiple times and tracks errors across runs
+// @param test_name Test name for logging (e.g., "Pattern A", "Pattern B")
+// @param config All validation configuration (timing, channels, driver, RX, buffer) - non-const for LED manipulation
+// @param multi_config Multi-run configuration (num runs, print settings)
+// @param total Output parameter - total tests run (incremented)
+// @param passed Output parameter - tests passed (incremented)
+void runMultiTest(const char* test_name,
+                  fl::ValidationConfig& config,
+                  const fl::MultiRunConfig& multi_config,
+                  int& total, int& passed);
 
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
