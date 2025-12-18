@@ -188,8 +188,8 @@ FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) {
         y = *(unsigned int*)(A);
         x = *(unsigned int*)(A+4);
     } else {
-        x = (A[0]<<24)   | (A[m]<<16)   | (A[2*m]<<8) | A[3*m];
-        y = (A[4*m]<<24) | (A[5*m]<<16) | (A[6*m]<<8) | A[7*m];
+        x = (fl::u32(A[0])<<24)   | (fl::u32(A[m])<<16)   | (fl::u32(A[2*m])<<8) | A[3*m];
+        y = (fl::u32(A[4*m])<<24) | (fl::u32(A[5*m])<<16) | (fl::u32(A[6*m])<<8) | A[7*m];
     }
 
     // pre-transform x
