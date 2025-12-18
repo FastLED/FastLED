@@ -150,7 +150,7 @@ reportUnknownVariableType = "error"
 reportUnknownMemberType = "error"
 reportMissingParameterType = "error"
 reportMissingTypeArgument = "error"
-reportMissingReturnType = "error"
+reportReturnType = "error"
 reportUntypedFunctionDecorator = "error"
 reportUntypedClassDecorator = "error"
 reportUntypedBaseClass = "error"
@@ -181,9 +181,6 @@ autoImportCompletions = false
 indexing = false
 functionSignatureDisplay = "compact"
 
-# Task list tokens
-taskListTokens = ["TODO", "FIXME", "BUG", "HACK", "NOTE"]
-
 [tool.pytest.ini_options]
 markers = [
     "full: marks tests as requiring the full test suite (deselected during quick Python-only runs)",
@@ -201,4 +198,4 @@ root = "ci/tests"
 pythonVersion = "3.11"
 pythonPlatform = "All"
 # Enforce return type annotations even for test methods
-reportMissingReturnType = "error"
+reportReturnType = "error"
