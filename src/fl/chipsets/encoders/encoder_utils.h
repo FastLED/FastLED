@@ -15,9 +15,22 @@ namespace fl {
 /// @param brightness_8bit Input brightness (0-255)
 /// @return 5-bit brightness (0-31)
 /// @note Ensures non-zero input maps to non-zero output (fixes issue #1908)
+/// @note Uses bit-shift approximation on AVR to avoid expensive division
 inline u8 mapBrightness8to5(u8 brightness_8bit) {
-    // Proportional mapping: (brightness_8bit * 31 + 127) / 255
-    // Using intermediate u16 to avoid overflow
+    #if defined(__AVR__)
+    // AVR-specific: Use bit shifts to avoid expensive division
+    // Approximation: (value * 31) / 255 ≈ (value * 31) >> 8
+    // Add rounding: ((value * 31) + 128) >> 8
+    u16 bri5 = ((u16)brightness_8bit * 31 + 128) >> 8;
+
+    // Ensure non-zero input doesn't map to zero output
+    if (bri5 == 0 && brightness_8bit != 0) {
+        bri5 = 1;
+    }
+
+    return static_cast<u8>(bri5);
+    #else
+    // Non-AVR: Use accurate division
     u16 bri5 = ((u16)brightness_8bit * 31 + 127) / 255;
 
     // Ensure non-zero input doesn't map to zero output
@@ -26,6 +39,7 @@ inline u8 mapBrightness8to5(u8 brightness_8bit) {
     }
 
     return static_cast<u8>(bri5);
+    #endif
 }
 
 /// @brief Generate P9813 flag byte from RGB components

@@ -133,7 +133,10 @@ private:
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		// This function is pure magic.
 		const fl::u16 maxBrightness = 0x1F;
-		fl::u16 brightness = ((((fl::u16)FL_MAX(FL_MAX(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		// Use sequential comparisons to avoid nested FL_MAX (helps AVR register allocation)
+		fl::u8 max_s01 = (s0 > s1) ? s0 : s1;
+		fl::u8 max_component = (max_s01 > s2) ? max_s01 : s2;
+		fl::u16 brightness = ((((fl::u16)max_component + 1) * maxBrightness - 1) >> 8) + 1;
 		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
 		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
 		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;

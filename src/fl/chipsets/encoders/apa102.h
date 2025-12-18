@@ -124,7 +124,9 @@ void encodeAPA102_HD(InputIterator first, InputIterator last,
 /// @param out Output iterator for encoded bytes
 /// @note Extracts global brightness from max component of first pixel
 /// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
+/// @note Uses O2 optimization to avoid AVR register allocation issues with LTO
 template <typename InputIterator, typename OutputIterator>
+__attribute__((optimize("O2")))
 void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) {
     if (first == last) {
@@ -142,7 +144,9 @@ void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
     // Extract global brightness from first pixel
     const fl::array<u8, BYTES_PER_PIXEL_RGB>& first_pixel = *first;
     const u16 maxBrightness = 0x1F;
-    u8 max_component = FL_MAX(FL_MAX(first_pixel[2], first_pixel[1]), first_pixel[0]);
+    // Use sequential comparisons to avoid nested FL_MAX (helps AVR register allocation)
+    u8 max_rg = (first_pixel[2] > first_pixel[1]) ? first_pixel[2] : first_pixel[1];
+    u8 max_component = (max_rg > first_pixel[0]) ? max_rg : first_pixel[0];
     u16 brightness = ((((u16)max_component + 1) * maxBrightness - 1) >> 8) + 1;
     u8 global_brightness = static_cast<u8>(brightness);
 
