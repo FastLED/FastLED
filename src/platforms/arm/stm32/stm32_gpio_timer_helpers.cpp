@@ -43,7 +43,32 @@ GPIO_TypeDef* getGPIOPort(uint8_t pin) {
     if (pin_name == NC) {
         return nullptr;
     }
+
+    // STM32H7 Mbed core doesn't provide get_GPIO_Port/STM_PORT macros
+    // Use direct port extraction from PinName
+#if defined(FL_IS_STM32_H7)
+    // PinName format: (port << 4) | pin_number
+    // Extract port number and map to GPIO_TypeDef*
+    uint32_t port_idx = STM_PORT(pin_name);
+    static GPIO_TypeDef* const gpio_ports[] = {
+        GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH,
+#ifdef GPIOI
+        GPIOI,
+#endif
+#ifdef GPIOJ
+        GPIOJ,
+#endif
+#ifdef GPIOK
+        GPIOK
+#endif
+    };
+    if (port_idx < sizeof(gpio_ports) / sizeof(gpio_ports[0])) {
+        return gpio_ports[port_idx];
+    }
+    return nullptr;
+#else
     return get_GPIO_Port(STM_PORT(pin_name));
+#endif
 #else
     (void)pin;
     return nullptr;
@@ -56,7 +81,17 @@ uint32_t getGPIOPin(uint8_t pin) {
     if (pin_name == NC) {
         return 0;
     }
+
+    // STM32H7 Mbed core doesn't provide STM_GPIO_PIN macro
+    // Use direct pin extraction from PinName
+#if defined(FL_IS_STM32_H7)
+    // PinName format: (port << 4) | pin_number
+    // Extract pin number and convert to GPIO_PIN_x define
+    uint32_t pin_num = STM_PIN(pin_name);
+    return (1 << pin_num);  // Convert to GPIO_PIN_0, GPIO_PIN_1, etc.
+#else
     return STM_GPIO_PIN(pin_name);
+#endif
 #else
     (void)pin;
     return 0;
@@ -203,7 +238,12 @@ bool configurePinAsTimerAF(uint8_t pin, TIM_TypeDef* timer, uint32_t speed) {
 #elif defined(FASTLED_STM32_GPIO_USES_AF_NUMBERS)
     // STM32F2/F4/F7/H7/L4/G4/U5: Use AF numbers
     // Find the AF number for this pin and timer using STM32duino pinmap
-    uint32_t af_mode = pinmap_find_function(pin_name, PinMap_TIM);
+    // Note: H7 uses PinMap_PWM instead of PinMap_TIM
+    #if defined(FL_IS_STM32_H7)
+        uint32_t af_mode = pinmap_find_function(pin_name, PinMap_PWM);
+    #else
+        uint32_t af_mode = pinmap_find_function(pin_name, PinMap_TIM);
+    #endif
 
     if (af_mode == (uint32_t)NC) {
         // Pin doesn't support Timer AF
@@ -611,7 +651,33 @@ DMA_Stream_TypeDef* getDMAStream(TIM_TypeDef* timer, int bus_id, int lane) {
 
 uint32_t getDMAChannel(TIM_TypeDef* timer) {
 #if defined(FASTLED_STM32_HAS_DMA_STREAMS)
-    // DMA channel numbers for timer update events (STM32F4/F7):
+
+#if defined(FL_IS_STM32_H7)
+    // STM32H7 uses DMAMUX - return DMA request ID instead of channel
+    // See STM32H7 reference manual, Table "DMAMUX1 request mapping"
+#ifdef TIM2
+    if (timer == TIM2) {
+        return DMA_REQUEST_TIM2_UP;  // DMAMUX request ID for TIM2_UP
+    }
+#endif
+#ifdef TIM3
+    if (timer == TIM3) {
+        return DMA_REQUEST_TIM3_UP;  // DMAMUX request ID for TIM3_UP
+    }
+#endif
+#ifdef TIM4
+    if (timer == TIM4) {
+        return DMA_REQUEST_TIM4_UP;  // DMAMUX request ID for TIM4_UP
+    }
+#endif
+#ifdef TIM5
+    if (timer == TIM5) {
+        return DMA_REQUEST_TIM5_UP;  // DMAMUX request ID for TIM5_UP
+    }
+#endif
+
+#else
+    // STM32F2/F4/F7/L4: Use fixed DMA channel numbers
     // TIM2_UP: Channel 3
     // TIM3_UP: Channel 5
     // TIM4_UP: Channel 2
@@ -637,6 +703,8 @@ uint32_t getDMAChannel(TIM_TypeDef* timer) {
         return DMA_CHANNEL_6;
     }
 #endif
+#endif  // FL_IS_STM32_H7
+
 #else
     (void)timer;
 #endif
@@ -709,7 +777,14 @@ bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, ui
     // Create DMA handle
     DMA_HandleTypeDef hdma = {};
     hdma.Instance = stream;
+
+    // STM32H7 uses Request (DMAMUX), F4/F7 use Channel
+#if defined(FL_IS_STM32_H7)
+    hdma.Init.Request = channel;  // On H7, this is actually a DMAMUX request ID
+#else
     hdma.Init.Channel = channel;
+#endif
+
     hdma.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma.Init.PeriphInc = DMA_PINC_DISABLE;     // Fixed peripheral address
     hdma.Init.MemInc = DMA_MINC_ENABLE;          // Increment memory address
@@ -761,7 +836,26 @@ bool isDMAComplete(DMA_Stream_TypeDef* stream) {
         return true;  // Assume complete if invalid
     }
 
-    // Use LL driver functions for flag checking (stream-specific)
+#if defined(FL_IS_STM32_H7)
+    // STM32H7: Use direct register access instead of LL functions
+    // Check the Transfer Complete Interrupt Flag (TCIFx) in LISR/HISR
+    if (stream_idx < 4) {
+        // Streams 0-3: Use LISR (Low Interrupt Status Register)
+        // Bit positions: Stream 0: bit 5, Stream 1: bit 11, Stream 2: bit 21, Stream 3: bit 27
+        static const uint32_t tc_flags[] = {
+            DMA_LISR_TCIF0, DMA_LISR_TCIF1, DMA_LISR_TCIF2, DMA_LISR_TCIF3
+        };
+        return (dma->LISR & tc_flags[stream_idx]) != 0;
+    } else {
+        // Streams 4-7: Use HISR (High Interrupt Status Register)
+        // Bit positions: Stream 4: bit 5, Stream 5: bit 11, Stream 6: bit 21, Stream 7: bit 27
+        static const uint32_t tc_flags[] = {
+            DMA_HISR_TCIF4, DMA_HISR_TCIF5, DMA_HISR_TCIF6, DMA_HISR_TCIF7
+        };
+        return (dma->HISR & tc_flags[stream_idx - 4]) != 0;
+    }
+#else
+    // STM32F2/F4/F7/L4: Use LL driver functions for flag checking (stream-specific)
     // Create function pointer array for TC flag checks
     typedef uint32_t (*FlagFunc)(DMA_TypeDef*);
     static const FlagFunc tc_funcs[] = {
@@ -776,6 +870,8 @@ bool isDMAComplete(DMA_Stream_TypeDef* stream) {
     }
 
     return true;
+#endif
+
 #else
     (void)stream;
     return true;
@@ -795,7 +891,30 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream) {
         return;
     }
 
-    // Clear all flags for this stream
+#if defined(FL_IS_STM32_H7)
+    // STM32H7: Use direct register access to clear flags
+    // Clear all interrupt flags for this stream (TC, HT, TE, DME, FE)
+    if (stream_idx < 4) {
+        // Streams 0-3: Use LIFCR (Low Interrupt Flag Clear Register)
+        static const uint32_t clear_flags[] = {
+            DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CFEIF0,
+            DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1,
+            DMA_LIFCR_CTCIF2 | DMA_LIFCR_CHTIF2 | DMA_LIFCR_CTEIF2 | DMA_LIFCR_CDMEIF2 | DMA_LIFCR_CFEIF2,
+            DMA_LIFCR_CTCIF3 | DMA_LIFCR_CHTIF3 | DMA_LIFCR_CTEIF3 | DMA_LIFCR_CDMEIF3 | DMA_LIFCR_CFEIF3
+        };
+        dma->LIFCR = clear_flags[stream_idx];
+    } else {
+        // Streams 4-7: Use HIFCR (High Interrupt Flag Clear Register)
+        static const uint32_t clear_flags[] = {
+            DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4 | DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4,
+            DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5,
+            DMA_HIFCR_CTCIF6 | DMA_HIFCR_CHTIF6 | DMA_HIFCR_CTEIF6 | DMA_HIFCR_CDMEIF6 | DMA_HIFCR_CFEIF6,
+            DMA_HIFCR_CTCIF7 | DMA_HIFCR_CHTIF7 | DMA_HIFCR_CTEIF7 | DMA_HIFCR_CDMEIF7 | DMA_HIFCR_CFEIF7
+        };
+        dma->HIFCR = clear_flags[stream_idx - 4];
+    }
+#else
+    // STM32F2/F4/F7/L4: Use LL driver functions to clear flags
     typedef void (*ClearFunc)(DMA_TypeDef*);
     static const ClearFunc clear_funcs[] = {
         LL_DMA_ClearFlag_TC0, LL_DMA_ClearFlag_TC1,
@@ -807,6 +926,8 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream) {
     if (stream_idx < 8) {
         clear_funcs[stream_idx](dma);
     }
+#endif
+
 #else
     (void)stream;
 #endif
