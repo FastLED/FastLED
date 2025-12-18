@@ -129,7 +129,7 @@ void encodeAPA102_HD(InputIterator first, InputIterator last,
 /// @note Marked noinline on AVR to prevent register exhaustion from divisions
 template <typename InputIterator, typename OutputIterator>
 FL_NO_INLINE_IF_AVR
-__attribute__((optimize("O2")))
+FL_OPTIMIZE_O2
 void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) {
     if (first == last) {
