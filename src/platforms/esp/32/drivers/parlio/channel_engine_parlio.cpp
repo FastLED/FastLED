@@ -614,7 +614,18 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
         bytes_per_buffer = bytes_per_led_all_lanes;
     }
 
-    size_t byte_count = (bytes_remaining < bytes_per_buffer) ? bytes_remaining : bytes_per_buffer;
+    // FIX: For the LAST buffer, take ALL remaining bytes (don't round down and lose data)
+    // This prevents data loss when the remaining bytes don't evenly divide by LED boundary
+    // Detect last buffer: when populated buffers would reach or exceed ring capacity (3 buffers)
+    size_t byte_count;
+    size_t buffers_already_populated = mState.mIsrContext->mRingCount;
+    bool is_last_buffer = (buffers_already_populated >= PARLIO_RING_BUFFER_COUNT - 1) ||
+                          (bytes_remaining <= bytes_per_buffer);
+    if (is_last_buffer) {
+        byte_count = bytes_remaining;  // Last buffer takes all remaining bytes
+    } else {
+        byte_count = bytes_per_buffer;  // Earlier buffers use aligned size
+    }
 
     // Zero output buffer to prevent garbage data from previous use
     fl::memset(outputBuffer, 0x00, mState.mRingBufferCapacity);
