@@ -1,4 +1,4 @@
-# FastLED - The Universal LED Library
+# FastLED - The Universal LED Library for Embedded and Arduino
 
 **Transform any microcontroller into an LED powerhouse.**
 
