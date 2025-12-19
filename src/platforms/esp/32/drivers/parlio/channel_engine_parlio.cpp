@@ -604,13 +604,14 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     size_t bytes_remaining = mState.mIsrContext->mTotalBytes - mState.mNextByteOffset;
     size_t bytes_per_buffer = (mState.mIsrContext->mTotalBytes + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
 
-    // LED boundary alignment: Round DOWN to nearest multiple of 3 bytes (RGB triplet)
-    // This prevents buffer splits from occurring mid-LED, which causes bit shift corruption
-    bytes_per_buffer = (bytes_per_buffer / 3) * 3;
+    // LED boundary alignment: Round DOWN to nearest multiple of (3 bytes × lane count)
+    // This prevents buffer splits from occurring mid-LED across all lanes, which causes bit shift corruption
+    size_t bytes_per_led_all_lanes = 3 * mState.mDataWidth;  // 3 bytes (RGB) × lane count
+    bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
 
-    // Edge case: Ensure at least 3 bytes (1 LED) per buffer if data exists
-    if (bytes_per_buffer < 3 && mState.mIsrContext->mTotalBytes >= 3) {
-        bytes_per_buffer = 3;
+    // Edge case: Ensure at least one LED across all lanes per buffer if data exists
+    if (bytes_per_buffer < bytes_per_led_all_lanes && mState.mIsrContext->mTotalBytes >= bytes_per_led_all_lanes) {
+        bytes_per_buffer = bytes_per_led_all_lanes;
     }
 
     size_t byte_count = (bytes_remaining < bytes_per_buffer) ? bytes_remaining : bytes_per_buffer;
@@ -1224,8 +1225,9 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // (calculated at runtime)
 
     // Calculate ring buffer capacity using unified calculator
+    // Scale by lane count (data_width) to ensure sufficient buffer space for multi-lane configurations
     ParlioBufferCalculator calc{mState.mDataWidth};
-    size_t ring_buffer_input_byte_count = 1000; // Max 1000 input bytes per buffer
+    size_t ring_buffer_input_byte_count = 1000 * mState.mDataWidth; // Scale by lane count
     mState.mRingBufferCapacity = calc.dmaBufferSize(ring_buffer_input_byte_count);
 
     // Step 8: Allocate ring buffers upfront (all memory allocated during init)

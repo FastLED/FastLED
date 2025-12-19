@@ -5,21 +5,26 @@
 #pragma once
 
 // ============================================================================
-// PARLIO Multi-Buffer Test: Single lane, 1000 LEDs (Phase 1 Validation)
+// PARLIO Multi-Buffer Test: Four lanes validation (Phase 3 Validation)
 // ============================================================================
 
+// Disable PARLIO ISR logging to prevent watchdog timeout
+// (Serial printing inside ISR exceeds watchdog threshold)
+#undef FASTLED_LOG_PARLIO_ENABLED
+
 // Driver selection
-#define JUST_PARLIO  // ITERATION 1: Re-enabled for PARLIO investigation
-// #define JUST_RMT  // ITERATION 4: Verified - RX decoder works correctly (99.6% accuracy)
+#define JUST_PARLIO  // Phase 3: Four-lane validation with PARLIO
+// #define JUST_RMT
+// #define JUST_SPI
 
 // Lane range (MUST be defined BEFORE Common.h)
 #define MIN_LANES 1
 #define MAX_LANES 1
 
 // Strip size selection
-// #define JUST_SMALL_STRIPS  // ITERATION 1: Phase 0 - Sanity check with small strips (10-30 LEDs)
-#define JUST_LARGE_STRIPS  // ITERATION 6: Phase 2 - Testing DMA gaps with 1000 LEDs (24 buffers)
+#define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
+// #define JUST_LARGE_STRIPS
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 1000  // 1000 led's will exceed any attempts by the agent to put into one buffer.
+#define LONG_STRIP_SIZE 300

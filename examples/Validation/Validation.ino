@@ -101,6 +101,10 @@
 //   bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
 
 
+// Disable PARLIO ISR logging BEFORE any FastLED includes to prevent watchdog timeout
+// (Serial printing inside ISR exceeds watchdog threshold - must disable at translation unit level)
+#undef FASTLED_LOG_PARLIO_ENABLED
+
 // ⚠️ IMPORTANT: Test matrix configuration moved to ValidationConfig.h
 // This ensures consistent configuration across all compilation units (.ino and .cpp files)
 #include "ValidationConfig.h"
