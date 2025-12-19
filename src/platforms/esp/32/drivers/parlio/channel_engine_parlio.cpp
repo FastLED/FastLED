@@ -362,6 +362,34 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     ctx->mCurrentByte += input_bytes;
     ctx->mChunksCompleted++;
 
+    // DEBUG: Log buffer completion details
+    FL_LOG_PARLIO("PARLIO ISR: Buffer " << completed_buffer_idx
+           << " COMPLETED | dma_bytes=" << dma_bytes
+           << " | input_bytes=" << input_bytes
+           << " | total_tx=" << ctx->mBytesTransmitted);
+
+    // Check if buffers were pre-queued by CPU (new approach to eliminate gaps)
+    if (ctx->mPreQueuedBuffers) {
+        // Buffers already queued by CPU - ISR just tracks completion
+        // Advance read index to track which buffer completed
+        ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
+        ctx->mRingCount = (ctx->mRingCount > 0) ? (ctx->mRingCount - 1) : 0;
+
+        FL_LOG_PARLIO("PARLIO ISR: Pre-queued buffer " << completed_buffer_idx
+               << " completed | remaining=" << ctx->mRingCount);
+
+        // Check if all pre-queued buffers completed
+        if (ctx->mRingCount == 0) {
+            ctx->mStreamComplete = true;
+            ctx->mTransmitting = false;
+            ctx->mPreQueuedBuffers = false; // Reset for next transmission
+            FL_LOG_PARLIO("PARLIO ISR: All pre-queued buffers completed");
+        }
+
+        return false; // Don't queue more buffers (already queued by CPU)
+    }
+
+    // Traditional ISR queuing (for poll() incremental buffers if needed in future)
     // Check if next buffer is ready in the ring (use count to detect empty ring)
     volatile size_t count = ctx->mRingCount;
 
@@ -384,6 +412,12 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         return false;
     }
 
+    // DEBUG: Log ISR buffer submission (careful - this is ISR context!)
+    // Note: FL_LOG_PARLIO uses printf which is safe in ISR if properly configured
+    FL_LOG_PARLIO("PARLIO ISR: Submitting buffer " << buffer_idx
+           << " | size=" << buffer_size
+           << " | bits=" << (buffer_size * 8));
+
     // Submit buffer to hardware
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x0000; // Keep pins LOW between chunks
@@ -395,9 +429,11 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         // Successfully submitted - advance read index (modulo-3) and decrement count
         ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
         ctx->mRingCount = ctx->mRingCount - 1;
+        FL_LOG_PARLIO("PARLIO ISR: Buffer " << buffer_idx << " submitted OK");
     } else {
         // Submission failed - set error flag for CPU to detect
         ctx->mRingError = true;
+        FL_WARN("PARLIO ISR: Buffer " << buffer_idx << " submission failed: " << err);
     }
 
     return false; // No high-priority task woken
@@ -583,6 +619,12 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
 
     // Store actual size of this buffer
     mState.mRingBufferSizes[ring_index] = outputBytesWritten;
+
+    // DEBUG: Log buffer population details
+    FL_LOG_PARLIO("PARLIO: Populated buffer " << ring_index
+           << " | input bytes " << mState.mNextByteOffset << "-" << (mState.mNextByteOffset + byte_count - 1)
+           << " | byte_count=" << byte_count
+           << " | DMA bytes=" << outputBytesWritten);
 
     // Update state for next buffer
     mState.mNextByteOffset += byte_count;
@@ -880,6 +922,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mIsrContext->mRingWriteIdx = 0;
     mState.mIsrContext->mRingCount = 0;
     mState.mIsrContext->mRingError = false;
+    mState.mIsrContext->mPreQueuedBuffers = false;
 
     // Initialize counters
     mState.mIsrContext->mIsrCount = 0;
@@ -895,10 +938,15 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // Pre-populate ring buffers (fill all 3 buffers if possible)
     // This ensures ISR has buffers ready when transmission starts
     // Remaining data will be populated incrementally during poll()
-    size_t buffers_populated = 0;
+    // Phase 3 - Iteration 8: Simplify buffer counting by reading mRingCount directly
+    // The loop increments mRingCount inside populateNextDMABuffer(), so we can just
+    // read the final value after the loop completes.
     while (has_ring_space() && populateNextDMABuffer()) {
-        buffers_populated++;
+        // populateNextDMABuffer() increments mRingCount and returns true if more data
     }
+
+    // Get actual number of buffers populated from mRingCount
+    size_t buffers_populated = mState.mIsrContext->mRingCount;
 
     // Verify at least one buffer was populated
     if (buffers_populated == 0) {
@@ -907,27 +955,50 @@ void ChannelEnginePARLIOImpl::beginTransmission(
         return;
     }
 
-    // Submit ONLY first buffer from CPU thread
-    // ISR will submit all subsequent buffers as they complete
-    size_t first_buffer_idx = 0;
-    size_t first_buffer_size = mState.mRingBufferSizes[first_buffer_idx];
+    // Phase 3 - Iteration 7: Pre-queue ALL populated buffers before starting transmission
+    // Root cause: ESP32-C6 PARLIO has hardware gaps between buffer transmissions when
+    // buffers are queued from ISR callbacks (buffer submission is asynchronous).
+    // Fix: Submit all pre-populated buffers to the transaction queue BEFORE starting,
+    // allowing hardware to chain them seamlessly without ISR callback delays.
+    // Reference: ESP-IDF PARLIO example shows "transaction length can't be controlled by DMA,
+    // thus we can't flush the LED screen continuously within a hardware loop"
+    FL_LOG_PARLIO("PARLIO: Pre-queuing all " << buffers_populated << " buffers for seamless transmission");
 
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x0000; // Start with pins LOW
 
-    esp_err_t err = parlio_tx_unit_transmit(
-        mState.mTxUnit, mState.mRingBuffers[first_buffer_idx].get(),
-        first_buffer_size * 8, &tx_config);
+    // Submit all pre-populated buffers to the transaction queue
+    size_t buffers_submitted = 0;
+    for (size_t i = 0; i < buffers_populated; i++) {
+        size_t buffer_idx = i; // Buffers 0, 1, 2
+        size_t buffer_size = mState.mRingBufferSizes[buffer_idx];
 
-    if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to submit first buffer: " << err);
-        mState.mErrorOccurred = true;
-        return;
+        FL_LOG_PARLIO("PARLIO: Queuing buffer " << buffer_idx
+               << " | size=" << buffer_size
+               << " | bits=" << (buffer_size * 8));
+
+        esp_err_t err = parlio_tx_unit_transmit(
+            mState.mTxUnit, mState.mRingBuffers[buffer_idx].get(),
+            buffer_size * 8, &tx_config);
+
+        if (err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to queue buffer " << buffer_idx << ": " << err);
+            mState.mErrorOccurred = true;
+            return;
+        }
+
+        buffers_submitted++;
+        FL_LOG_PARLIO("PARLIO: Buffer " << buffer_idx << " queued OK | err=" << err
+               << " | ESP_OK=" << ESP_OK);
+
+        // DO NOT touch mRingCount or mRingReadIdx here!
+        // ISR will handle counting as buffers complete
     }
 
-    // Advance read index and decrement count (first buffer now in flight, consumed from ring)
-    mState.mIsrContext->mRingReadIdx = (mState.mIsrContext->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
-    mState.mIsrContext->mRingCount = mState.mIsrContext->mRingCount - 1;
+    FL_LOG_PARLIO("PARLIO: All " << buffers_submitted << " buffers queued - transmission starting");
+
+    // Set flag to tell ISR that buffers are pre-queued (ISR won't queue more)
+    mState.mIsrContext->mPreQueuedBuffers = true;
 
     // Mark transmission started
     mState.mIsrContext->mTransmitting = true;
@@ -1066,13 +1137,15 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         static_cast<gpio_num_t>(-1); // Use internal clock, not external
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
     config.data_width = mState.mDataWidth; // Runtime parameter
-    // Phase 1 - Iteration 2: Set trans_queue_depth to 2 (minimum for ISR
-    // streaming) PARLIO has 3 internal queues (READY, PROGRESS, COMPLETE) per
-    // README.md line 101 With depth=1, ISR callback can't queue next buffer
-    // (completed transaction still in COMPLETE queue) With depth=2, allows: 1
-    // in PROGRESS + 1 buffer for ISR to queue → prevents watchdog timeout
-    // Testing showed depth=1 causes watchdog timeout; depth=2 resolves it
-    config.trans_queue_depth = 2;
+    // Phase 3 - Iteration 6: Set trans_queue_depth to 3 (matches ring buffer count)
+    // PARLIO has 3 internal queues (READY, PROGRESS, COMPLETE) per README.md line 101
+    // Root cause: With depth=2, when ISR fires:
+    //   - Completed transaction still in COMPLETE queue (slot 1)
+    //   - New transmission in PROGRESS queue (slot 2)
+    //   - No room for ISR to queue 3rd buffer → transmission stops at buffer 1
+    // Fix: depth=3 allows all 3 ring buffers to be queued simultaneously
+    // Testing: depth=2 transmits only ~968 bytes (1 buffer); depth=3 should transmit full 3000 bytes
+    config.trans_queue_depth = 3;
     // Phase 3 - Iteration 19: ESP-IDF PARLIO hardware limit is 65535 BITS per
     // transmission This is a hard hardware limit that cannot be exceeded For
     // transmissions larger than this, we must chunk into multiple calls Set
