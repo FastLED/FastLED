@@ -240,6 +240,9 @@ FastLED 3.10.4 (Next Release)
     * **Usage**: `fl::isr::attachTimerHandler(config, &handle)` / `fl::isr::attachExternalHandler(pin, config, &handle)`
     * **Documentation**: Complete API reference with examples in [src/fl/isr.h](src/fl/isr.h) and [src/fl/README.md](src/fl/README.md#interrupt-service-routines-isr)
     * **Testing**: Software simulation via stub platform for deterministic unit testing
+  * **NEW: Arduino-Like Pin Functions** (`fl/pin.h`): Cross-platform digital and analog I/O with Arduino-compatible API
+    * Unified API for GPIO control across all platforms (ESP32, AVR, STM32, Teensy, RP2040, etc.)
+    * Includes `analogWrite16(pin, value)` for 16-bit PWM control (platform-dependent support)
   * **NEW: Multi-Width Software SPI ISR Implementation for ESP32 RISC-V** (ESP32-C2/C3/C6/H2): High-performance interrupt-driven parallel soft-SPI
     * **Four width variants** sharing a unified ISR core engine for maximum code reuse:
       * **Single-SPI (1-way)**: 1 data pin - baseline testing and simple applications
