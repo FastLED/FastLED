@@ -16,7 +16,7 @@
 #endif
 
 #ifdef ARDUINO
-#include "../esp_version.h"
+#include "platforms/esp/esp_version.h"
 
 // ============================================================================
 // Arduino Path: Zero-overhead wrappers around Arduino pin functions
