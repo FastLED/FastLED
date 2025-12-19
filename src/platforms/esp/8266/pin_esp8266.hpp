@@ -44,6 +44,15 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // ESP8266: Accept 16-bit input, scale to 10-bit Arduino analogWrite
+    // Hardware supports 14-bit, but Arduino core uses 10-bit
+    // Users apply gamma correction upstream
+    // Scale 16-bit (0-65535) to 10-bit (0-1023)
+    uint16_t val10 = val >> 6;  // 16-bit → 10-bit
+    ::analogWrite(pin, static_cast<int>(val10));
+}
+
 inline void setAdcRange(AdcRange range) {
     // ESP8266 ADC reference voltage is fixed at 1.0V (internal reference)
     // This function has no effect on ESP8266 hardware - reference cannot be changed

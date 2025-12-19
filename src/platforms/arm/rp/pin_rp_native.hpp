@@ -124,6 +124,37 @@ inline void analogWrite(int pin, uint16_t val) {
     pwm_set_enabled(slice, true);
 }
 
+/// @brief Set PWM duty cycle with 16-bit resolution
+/// @param pin GPIO pin number
+/// @param val PWM duty cycle (0-65535, mapped to 0-100% duty cycle)
+///
+/// Uses hardware PWM with 16-bit resolution. Each PWM slice controls 2 pins (A/B channels).
+/// WARNING: All pins on the same PWM slice share the same period (wrap value).
+/// Setting 16-bit resolution on one pin affects all pins on that slice.
+/// PWM frequency is approximately 1.9 Hz @ 125 MHz (system clock / 65536).
+inline void setPwm16(int pin, uint16_t val) {
+    // Check if pin supports PWM
+    if (pin >= NUM_BANK0_GPIOS) {
+        return;  // Invalid pin for PWM
+    }
+
+    // Get PWM slice and channel for this GPIO
+    uint slice = pwm_gpio_to_slice_num(pin);
+    uint channel = pwm_gpio_to_channel(pin);
+
+    // Configure GPIO for PWM function
+    gpio_set_function(pin, GPIO_FUNC_PWM);
+
+    // Set PWM wrap value (period) to 65535 for 16-bit resolution
+    pwm_set_wrap(slice, 65535);
+
+    // Set duty cycle (0-65535)
+    pwm_set_chan_level(slice, channel, val);
+
+    // Enable PWM on this slice
+    pwm_set_enabled(slice, true);
+}
+
 /// @brief Set analog reference voltage (not supported on RP2040/RP2350)
 /// @param range Reference voltage range (ignored - RP2040 uses fixed 3.3V reference)
 ///

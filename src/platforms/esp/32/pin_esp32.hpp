@@ -59,6 +59,21 @@ inline void analogWrite(int pin, uint16_t val) {
 #endif
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // ESP32: Accept 16-bit input, scale to Arduino's 8-bit analogWrite
+    // Users apply gamma correction upstream, this function just scales
+    // For higher resolution, use CLED class or direct LEDC configuration
+    // Scale 16-bit (0-65535) to 8-bit (0-255)
+    uint8_t val8 = val >> 8;
+    ::analogWrite(pin, val8);
+#else
+    // ESP-IDF 3.x: No PWM support without manual LEDC configuration
+    (void)pin;
+    (void)val;
+#endif
+}
+
 inline void setAdcRange(AdcRange range) {
     // ESP32 doesn't support analogReference in Arduino
     // ADC reference is fixed (different per ESP32 variant)

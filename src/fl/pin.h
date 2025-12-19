@@ -93,6 +93,18 @@ inline uint16_t analogRead(int pin);
 /// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
 inline void analogWrite(int pin, uint16_t val);
 
+/// Set PWM duty cycle with 16-bit resolution
+/// @param pin Pin number (platform-specific numbering)
+/// @param val PWM duty cycle (0-65535, platform-specific maximum)
+inline void setPwm16(int pin, uint16_t val);
+
+/// Alias for setPwm16 - Set PWM duty cycle with 16-bit resolution
+/// @param pin Pin number (platform-specific numbering)
+/// @param val PWM duty cycle (0-65535, platform-specific maximum)
+inline void analogWrite16(int pin, uint16_t val) {
+    setPwm16(pin, val);
+}
+
 /// Set ADC voltage range
 /// @param range Voltage range for analog readings
 /// @note Implementation varies by platform (reference voltage vs attenuation)

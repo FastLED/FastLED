@@ -42,6 +42,13 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // Renesas (Arduino UNO R4) Arduino core supports 8-bit analogWrite
+    // Scale 16-bit value down to 8-bit for compatibility
+    // True 16-bit PWM would require direct GPT timer configuration
+    ::analogWrite(pin, static_cast<int>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Translate fl::AdcRange to Arduino analogReference constants
     // Note: Renesas uses AR_DEFAULT, AR_INTERNAL, AR_EXTERNAL

@@ -55,6 +55,13 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // SAMD (Arduino Zero, M4, etc.) supports 16-bit PWM via TCC/TC modules
+    // Arduino core's analogWrite handles resolution internally via mapResolution
+    // Just pass the value through - Arduino core will scale it appropriately
+    ::analogWrite(pin, static_cast<int>(val));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Translate AdcRange enum to Arduino analogReference constants
     switch (range) {

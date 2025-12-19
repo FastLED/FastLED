@@ -44,6 +44,13 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // NRF52 Arduino core typically provides 8-bit PWM via analogWrite
+    // Scale 16-bit value down to 8-bit for Arduino compatibility
+    // True 16-bit would require direct PWM peripheral access
+    ::analogWrite(pin, static_cast<uint8_t>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Map AdcRange to nRF52 eAnalogReference values
     // nRF52 reference values: AR_DEFAULT, AR_INTERNAL (0.6V), AR_INTERNAL_3_0 (3.0V), AR_VDD4 (VDD/4)

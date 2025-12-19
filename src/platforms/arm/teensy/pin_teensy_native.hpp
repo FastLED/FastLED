@@ -134,6 +134,18 @@ inline void analogWrite(int pin, uint16_t val) {
 #endif
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+#if defined(CORE_TEENSY)
+    // Teensy native path: Use analogWriteResolution for 16-bit PWM
+    analogWriteResolution(16);
+    ::analogWrite(pin, val);
+#else
+    // No-op: Teensy core not available
+    (void)pin;
+    (void)val;
+#endif
+}
+
 inline void setAdcRange(AdcRange range) {
 #if defined(CORE_TEENSY)
     // Translate AdcRange to Teensy analogReference() constants

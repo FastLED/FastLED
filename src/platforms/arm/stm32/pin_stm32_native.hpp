@@ -434,6 +434,13 @@ inline void analogWrite(int pin, uint16_t val) {
 #endif
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // STM32 16-bit PWM implementation would configure Timer PWM with period=65535
+    // For simplified implementation, scale 16-bit value to 8-bit and use analogWrite
+    // Full 16-bit implementation would require HAL timer reconfiguration
+    analogWrite(pin, val >> 8);
+}
+
 inline void setAdcRange(AdcRange range) {
     // STM32 ADC reference voltage configuration
     // On STM32, the ADC reference voltage is typically hardware-configured:

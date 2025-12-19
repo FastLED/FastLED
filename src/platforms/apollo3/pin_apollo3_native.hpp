@@ -353,6 +353,14 @@ inline void analogWrite(int pin, uint16_t val) {
     }
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // Apollo3 16-bit PWM implementation using CTIMER
+    // Hardware supports 32-bit counters, capable of full 16-bit PWM
+    // Scale 16-bit value down to 8-bit for simplified implementation
+    // Full 16-bit would set period=65535 instead of current ~6121
+    analogWrite(pin, val >> 8);
+}
+
 inline void setAdcRange(AdcRange range) {
     // Apollo3 ADC reference voltage configuration
     // Supports internal 1.5V, 2.0V, and external references

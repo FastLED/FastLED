@@ -367,6 +367,67 @@ inline void analogWrite(int pin, uint16_t val) {
     }
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // AVR 16-bit PWM using Timer1 (pins 9, 10 on Uno)
+    // Provides true 16-bit resolution at ~244 Hz (16 MHz / 65536)
+
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega168__)
+    // ATmega328P (Arduino Uno/Nano): Timer1 controls pins 9 (OC1A) and 10 (OC1B)
+    if (pin == 9 || pin == 10) {
+        // Set pins as output
+        pinMode(pin, PinMode::Output);
+
+        // Configure Timer1 for Fast PWM mode 14 (ICR1 = TOP)
+        // WGM13:0 = 1110 (Fast PWM, TOP = ICR1)
+        // COM1A1:0 = 10 (Clear OC1A on compare match, set at BOTTOM)
+        // COM1B1:0 = 10 (Clear OC1B on compare match, set at BOTTOM)
+        // CS12:0 = 001 (No prescaler, 16 MHz timer clock)
+
+        // Set ICR1 to maximum for 16-bit resolution
+        ICR1 = 0xFFFF;  // TOP = 65535
+
+        // Configure waveform generation mode and prescaler
+        TCCR1A = _BV(WGM11);  // WGM11 = 1, WGM10 = 0
+        TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS10);  // WGM13 = 1, WGM12 = 1, CS10 = 1 (no prescaler)
+
+        // Set compare output mode and duty cycle
+        if (pin == 9) {
+            // Pin 9 = OC1A (OCR1A)
+            TCCR1A |= _BV(COM1A1);  // Clear OC1A on compare match
+            OCR1A = val;
+        } else {
+            // Pin 10 = OC1B (OCR1B)
+            TCCR1A |= _BV(COM1B1);  // Clear OC1B on compare match
+            OCR1B = val;
+        }
+
+        return;
+    }
+#elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+    // ATmega2560 (Arduino Mega): Timer1 controls pins 11 (OC1A) and 12 (OC1B)
+    if (pin == 11 || pin == 12) {
+        pinMode(pin, PinMode::Output);
+
+        ICR1 = 0xFFFF;
+        TCCR1A = _BV(WGM11);
+        TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS10);
+
+        if (pin == 11) {
+            TCCR1A |= _BV(COM1A1);
+            OCR1A = val;
+        } else {
+            TCCR1A |= _BV(COM1B1);
+            OCR1B = val;
+        }
+
+        return;
+    }
+#endif
+
+    // Fallback for non-Timer1 pins: scale 16-bit to 8-bit
+    analogWrite(pin, val >> 8);
+}
+
 inline void setAdcRange(AdcRange range) {
     // Translate AdcRange to AVR analogReference constants
     // AdcRange: Default=0, Range0_1V1=1, Range0_1V5=2, Range0_2V2=3, Range0_3V3=4, Range0_5V=5, External=6

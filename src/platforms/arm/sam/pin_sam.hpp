@@ -48,6 +48,17 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // SAM (Arduino Due) supports 16-bit PWM natively via PWM controller
+    // Use analogWriteResolution to set 16-bit mode, then write value
+    static bool resolution_set = false;
+    if (!resolution_set) {
+        analogWriteResolution(16);
+        resolution_set = true;
+    }
+    ::analogWrite(pin, static_cast<int>(val));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Arduino Due doesn't support analogReference - analog reference is fixed at 3.3V
     // The function exists in the SAM core but does nothing

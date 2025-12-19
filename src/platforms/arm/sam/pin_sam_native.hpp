@@ -98,6 +98,16 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // For now, no-op as stub.
 }
 
+/// Set PWM duty cycle with 16-bit resolution
+/// @param pin Arduino pin number
+/// @param val PWM duty cycle (0-65535)
+/// @note STUB: Real implementation requires PWM peripheral configuration
+inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+    // STUB: 16-bit PWM would configure SAM3X8E PWM controller
+    // with CPRD=65535 for full 16-bit resolution
+    // For now, no-op as stub.
+}
+
 /// Set ADC voltage range
 /// @param range Voltage range for analog readings
 /// @note Arduino Due doesn't support analogReference - always 3.3V

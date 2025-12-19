@@ -73,6 +73,14 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // Apollo3 CTIMER supports 32-bit counters, capable of 16-bit PWM
+    // Arduino core's analogWrite uses 8-bit resolution by default
+    // Scale 16-bit value down to 8-bit for Arduino compatibility
+    // Full 16-bit would require direct CTIMER configuration (see pin_apollo3_native.hpp)
+    ::analogWrite(pin, static_cast<uint8_t>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Translate fl::AdcRange to Arduino analogReference modes
     // AdcRange: Default=0, Range0_1V1=1, Range0_1V5=2, Range0_2V2=3, Range0_3V3=4, Range0_5V=5, External=6

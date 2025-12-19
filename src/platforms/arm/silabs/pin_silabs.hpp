@@ -49,6 +49,22 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // Silicon Labs Arduino core PWM capabilities vary
+    // Check if analogWriteResolution is available, otherwise scale to 8-bit
+#if defined(analogWriteResolution)
+    static bool resolution_set = false;
+    if (!resolution_set) {
+        analogWriteResolution(16);
+        resolution_set = true;
+    }
+    ::analogWrite(pin, val);
+#else
+    // Scale 16-bit value down to 8-bit if no resolution control
+    ::analogWrite(pin, static_cast<uint8_t>(val >> 8));
+#endif
+}
+
 inline void setAdcRange(fl::AdcRange range) {
     // Silicon Labs Arduino API uses analogReference(uint8_t mode)
     // Map fl::AdcRange to Arduino reference constants

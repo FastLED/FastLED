@@ -134,6 +134,17 @@ inline void analogWrite(int pin, uint16_t val) {
     (void)val;
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // ESP-IDF native: Full LEDC 16-bit PWM would require:
+    // 1. Channel allocation (16 channels available)
+    // 2. ledc_timer_config for 16-bit resolution
+    // 3. ledc_channel_config to attach pin to channel
+    // 4. ledc_set_duty + ledc_update_duty to set value
+    // Stub implementation for now - no-op
+    (void)pin;
+    (void)val;
+}
+
 inline void setAdcRange(AdcRange range) {
     // ESP32 uses ADC attenuation instead of reference voltage
     // This would need to be implemented per-channel in analogRead

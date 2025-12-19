@@ -248,6 +248,27 @@ inline void analogWrite(int pin, uint16_t val) {
     // True PWM would require timer-based implementation
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // ESP8266 hardware supports up to 14-bit PWM via TIMER1
+    // However, implementing true PWM requires complex timer configuration
+    // Provide digital fallback similar to analogWrite
+    if (pin < 0 || pin > 16) {
+        return;  // Invalid pin
+    }
+
+    // Scale 16-bit to midpoint for on/off decision
+    if (val == 0) {
+        digitalWrite(pin, PinValue::Low);
+    } else if (val >= 65535) {
+        digitalWrite(pin, PinValue::High);
+    } else if (val >= 32768) {
+        digitalWrite(pin, PinValue::High);  // Above 50% → on
+    } else {
+        digitalWrite(pin, PinValue::Low);   // Below 50% → off
+    }
+    // True 16-bit PWM would require TIMER1-based implementation
+}
+
 inline void setAdcRange(AdcRange range) {
     // ESP8266 ADC reference voltage is fixed at 1.0V (internal reference)
     // This function has no effect on ESP8266 hardware - reference cannot be changed

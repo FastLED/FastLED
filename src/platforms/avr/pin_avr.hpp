@@ -70,6 +70,13 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // AVR: Only Timer1 (pins 9,10 on Uno, more on Mega) supports true 16-bit PWM
+    // Arduino's analogWrite uses 8-bit resolution
+    // Scale 16-bit value down to 8-bit for Arduino compatibility
+    ::analogWrite(pin, static_cast<int>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
     // Translate AdcRange to Arduino analogReference constants
     // AdcRange: Default=0, Range0_1V1=1, Range0_1V5=2, Range0_2V2=3, Range0_3V3=4, Range0_5V=5, External=6

@@ -192,6 +192,16 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // For now, no-op as stub.
 }
 
+/// Set PWM duty cycle with 16-bit resolution
+/// @param pin Arduino pin number
+/// @param val PWM duty cycle (0-65535)
+/// @note STUB: Real implementation requires TCC/TC peripheral configuration
+inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+    // STUB: 16-bit PWM would use same TCC/TC configuration as analogWrite
+    // but with 16-bit period and compare registers
+    // For now, no-op as stub.
+}
+
 /// Set ADC voltage range
 /// @param range ADC voltage range (AdcRange enum)
 /// @note STUB: Real implementation requires ADC REFCTRL register configuration

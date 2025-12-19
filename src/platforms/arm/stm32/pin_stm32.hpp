@@ -67,6 +67,14 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // STM32 hardware timers support 16-bit PWM
+    // Arduino STM32 core's analogWrite typically uses 8-bit resolution
+    // Scale 16-bit value down to 8-bit for Arduino compatibility
+    // Full 16-bit would require direct HAL timer configuration (see pin_stm32_native.hpp)
+    ::analogWrite(pin, static_cast<int>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
 #if defined(_WIRISH_WIRISH_H_) || defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_GIGA)
     // Maple framework and Arduino MBED don't support analogReference

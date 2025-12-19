@@ -55,6 +55,12 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, static_cast<int>(val));
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // RP2040 Arduino core's analogWrite typically uses 8-bit resolution
+    // Scale 16-bit value down to 8-bit for Arduino compatibility
+    ::analogWrite(pin, static_cast<int>(val >> 8));
+}
+
 inline void setAdcRange(AdcRange range) {
     // RP2040/RP2350 uses fixed 3.3V reference, so this is a no-op
     // analogReference() exists in Arduino API but has no effect on RP2040

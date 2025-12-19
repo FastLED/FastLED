@@ -47,6 +47,10 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 
+inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+    // No-op: Host builds don't have physical pins
+}
+
 inline void setAdcRange(AdcRange /*range*/) {
     // No-op: Host builds don't have physical pins
 }

@@ -68,6 +68,14 @@ inline void analogWrite(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
+inline void setPwm16(int pin, uint16_t val) {
+    // Teensy has excellent 16-bit PWM support via analogWriteResolution
+    // Set 16-bit resolution for full dynamic range (0-65535)
+    // Note: This may affect PWM frequency depending on timer configuration
+    analogWriteResolution(16);
+    ::analogWrite(pin, val);
+}
+
 inline void setAdcRange(AdcRange range) {
 #if defined(__IMXRT1062__) || defined(__IMXRT1052__)
     // Teensy 4.x: ADC range is fixed at 3.3V, analogReference() not supported
