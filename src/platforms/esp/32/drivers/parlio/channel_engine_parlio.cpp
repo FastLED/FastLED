@@ -603,6 +603,16 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     // Calculate byte range for this buffer (divide total bytes into ~3 chunks)
     size_t bytes_remaining = mState.mIsrContext->mTotalBytes - mState.mNextByteOffset;
     size_t bytes_per_buffer = (mState.mIsrContext->mTotalBytes + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
+
+    // LED boundary alignment: Round DOWN to nearest multiple of 3 bytes (RGB triplet)
+    // This prevents buffer splits from occurring mid-LED, which causes bit shift corruption
+    bytes_per_buffer = (bytes_per_buffer / 3) * 3;
+
+    // Edge case: Ensure at least 3 bytes (1 LED) per buffer if data exists
+    if (bytes_per_buffer < 3 && mState.mIsrContext->mTotalBytes >= 3) {
+        bytes_per_buffer = 3;
+    }
+
     size_t byte_count = (bytes_remaining < bytes_per_buffer) ? bytes_remaining : bytes_per_buffer;
 
     // Zero output buffer to prevent garbage data from previous use
