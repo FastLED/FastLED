@@ -730,25 +730,10 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
                         << err);
             }
 
-            // Force all GPIO pins to LOW state
-            for (size_t i = 0; i < mState.mActualChannels; i++) {
-                int pin = mState.mPins[i];
-                if (pin >= 0) {
-                    gpio_set_level(static_cast<gpio_num_t>(pin), 0);
-                }
-            }
-
             // Reduced delay: 100μs instead of 1ms (10x faster, 2% overhead
             // instead of 20%)
             fl::delayMicros(100);
 
-            // Re-enable PARLIO for next transmission
-            err = parlio_tx_unit_enable(mState.mTxUnit);
-            if (err != ESP_OK) {
-                FL_WARN("PARLIO: Failed to re-enable TX unit: " << err);
-                // Flags already cleared atomically at line 670-671
-                return EngineState::ERROR;
-            }
 
             // Clear transmitting channels on completion
             mTransmittingChannels.clear();
@@ -977,6 +962,20 @@ void ChannelEnginePARLIOImpl::beginTransmission(
         return;
     }
 
+    // Enable PARLIO TX unit for this transmission
+    // ESP-IDF PARLIO state machine:
+    //   - init state → enable() → enabled state (ready to transmit)
+    //   - enabled state → disable() → init state (after transmission done in poll())
+    // After initializeIfNeeded(): unit is in "init" state
+    // After poll() completes transmission: unit is in "init" state (disabled)
+    // This enable() transitions from "init" to "enabled" for this transmission
+    esp_err_t err = parlio_tx_unit_enable(mState.mTxUnit);
+    if (err != ESP_OK) {
+        FL_WARN("PARLIO: Failed to enable TX unit for transmission: " << err);
+        mState.mErrorOccurred = true;
+        return;
+    }
+
     // Phase 3 - Iteration 7: Pre-queue ALL populated buffers before starting transmission
     // Root cause: ESP32-C6 PARLIO has hardware gaps between buffer transmissions when
     // buffers are queued from ISR callbacks (buffer submission is asynchronous).
@@ -999,7 +998,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
                << " | size=" << buffer_size
                << " | bits=" << (buffer_size * 8));
 
-        esp_err_t err = parlio_tx_unit_transmit(
+        err = parlio_tx_unit_transmit(
             mState.mTxUnit, mState.mRingBuffers[buffer_idx].get(),
             buffer_size * 8, &tx_config);
 
@@ -1216,15 +1215,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         return;
     }
 
-    // Step 7: Enable TX unit (AFTER callback registration)
-    err = parlio_tx_unit_enable(mState.mTxUnit);
-    if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to enable TX unit: " << err);
-        parlio_del_tx_unit(mState.mTxUnit);
-        mState.mTxUnit = nullptr;
-        mInitialized = false;
-        return;
-    }
+    // Step 7: TX unit created and callbacks registered
+    // NOTE: Unit remains in "init" state (NOT enabled yet)
+    // Enable will be called by beginTransmission() before each transmission
+    // This follows the enable-when-needed pattern recommended for peripheral management
 
     // Step 8: Allocate double buffers for ping-pong streaming
     // CRITICAL REQUIREMENTS:
