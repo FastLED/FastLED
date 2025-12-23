@@ -69,7 +69,31 @@ bool CLED::begin(const CLEDConfig& config) {
            << " (" << tx_result.value() << " words)");
 #endif
 
-    // Arduino LEDC setup
+    // Arduino LEDC setup - API differs between Arduino Core 2.x and 3.x
+#ifndef ESP_ARDUINO_VERSION_MAJOR
+    #define ESP_ARDUINO_VERSION_MAJOR 2  // Assume old API if not defined
+#endif
+
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
+    uint8_t assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
+    if (assigned_channel == 0) {
+#if FASTLED_RMT5
+        // Release RMT resources on failure
+        fl::RmtMemoryManager::instance().free(mRmtChannelId, true);
+#endif
+        FL_WARN("CLED: LEDC attach failed for pin " << config.pin);
+        return false;
+    }
+
+    // Update internal state with auto-assigned channel
+    mConfig.channel = assigned_channel;
+
+    FL_DBG("CLED: Initialized pin " << config.pin << " with auto-assigned channel "
+           << static_cast<int>(assigned_channel) << " at " << config.frequency
+           << " Hz, " << config.resolution_bits << " bits");
+#else
+    // Old API (Arduino Core 2.x): ledcSetup + ledcAttachPin with explicit channel
     ledcAttachPin(config.pin, config.channel);
     uint32_t freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
 
@@ -82,13 +106,14 @@ bool CLED::begin(const CLEDConfig& config) {
         return false;
     }
 
+    FL_DBG("CLED: Initialized channel " << config.channel << " at " << freq
+           << " Hz, " << config.resolution_bits << " bits");
+#endif
+
     mInitialized = true;
 
     // Initialize to off
     write16(0);
-
-    FL_DBG("CLED: Initialized channel " << config.channel << " at " << freq
-           << " Hz, " << config.resolution_bits << " bits");
 
     return true;
 }
