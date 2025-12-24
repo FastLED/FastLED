@@ -15,6 +15,18 @@
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
 #include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros
 
+// RX device logging: Disabled by default to reduce noise
+// Enable with: #define FASTLED_RX_LOG_ENABLED 1
+#ifndef FASTLED_RX_LOG_ENABLED
+#define FASTLED_RX_LOG_ENABLED 0
+#endif
+
+#if FASTLED_RX_LOG_ENABLED
+#define FL_LOG_RX(X) FL_DBG(X)
+#else
+#define FL_LOG_RX(X) FL_DBG_NO_OP(X)
+#endif
+
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "driver/gptimer.h"  // For hardware timer
@@ -123,7 +135,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
-    FL_DBG("decodeEdgeTimestamps: decoding " << edge_count << " edges into buffer of " << bytes_capacity << " bytes");
+    FL_LOG_RX("decodeEdgeTimestamps: decoding " << edge_count << " edges into buffer of " << bytes_capacity << " bytes");
 
     // Decoding state
     size_t error_count = 0;
@@ -148,7 +160,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         // Check for reset pulse (long low period indicates frame end)
         uint32_t pulse0_duration = edge1.time_ns - edge0.time_ns;
         if (edge0.level == 0 && pulse0_duration >= reset_min_ns) {
-            FL_DBG("decodeEdgeTimestamps: reset pulse detected at edge " << i);
+            FL_LOG_RX("decodeEdgeTimestamps: reset pulse detected at edge " << i);
 
             // Flush partial byte if needed
             if (bit_index != 0) {
@@ -170,7 +182,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         if (timing.gap_tolerance_ns > 0 && edge1.level == 0) {
             uint32_t low_duration = edge2.time_ns - edge1.time_ns;
             if (low_duration > timing.t0l_max_ns && low_duration <= timing.gap_tolerance_ns) {
-                FL_DBG("decodeEdgeTimestamps: gap pulse detected at edge " << i << " (duration=" << low_duration << "ns), skipping");
+                FL_LOG_RX("decodeEdgeTimestamps: gap pulse detected at edge " << i << " (duration=" << low_duration << "ns), skipping");
                 i++;  // Skip this edge, continue with next
                 continue;
             }
@@ -178,7 +190,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
 
         // WS2812B protocol: expect HIGH -> LOW pattern
         if (edge0.level != 1 || edge1.level != 0) {
-            FL_DBG("decodeEdgeTimestamps: unexpected edge pattern at " << i);
+            FL_LOG_RX("decodeEdgeTimestamps: unexpected edge pattern at " << i);
             error_count++;
             i++;
             continue;
@@ -209,7 +221,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
 
         if (bit < 0) {
             error_count++;
-            FL_DBG("decodeEdgeTimestamps: invalid pulse at edge " << i);
+            FL_LOG_RX("decodeEdgeTimestamps: invalid pulse at edge " << i);
             i += 2;
             continue;
         }
@@ -243,7 +255,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         }
     }
 
-    FL_DBG("decodeEdgeTimestamps: decoded " << bytes_decoded << " bytes, " << error_count << " errors");
+    FL_LOG_RX("decodeEdgeTimestamps: decoded " << bytes_decoded << " bytes, " << error_count << " errors");
 
     // Calculate error rate (avoid division by zero)
     size_t total_pulses = edge_count / 2;
@@ -320,7 +332,7 @@ public:
         , mSignalRangeMaxNs(100000)
         , mStartLow(true)
     {
-        FL_DBG("GpioIsrRx constructed with pin=" << pin << " (other hardware params will be set in begin())");
+        FL_LOG_RX("GpioIsrRx constructed with pin=" << pin << " (other hardware params will be set in begin())");
 
         // Initialize ISR context in optimal order (matching struct layout)
         // Hot path variables
@@ -395,7 +407,7 @@ public:
 
             mBufferSize = config.buffer_size;
 
-            FL_DBG("GPIO ISR RX first-time init: pin=" << static_cast<int>(mPin)
+            FL_LOG_RX("GPIO ISR RX first-time init: pin=" << static_cast<int>(mPin)
                    << ", buffer_size=" << mBufferSize);
         }
 
@@ -412,7 +424,7 @@ public:
         if (mIsrCtx.minPulseCycles == 0) mIsrCtx.minPulseCycles = 1;  // Minimum 1 cycle
         mIsrCtx.skipCounter = config.skip_signals;
 
-        FL_DBG("GPIO ISR RX begin: signal_range_min=" << mSignalRangeMinNs
+        FL_LOG_RX("GPIO ISR RX begin: signal_range_min=" << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << config.skip_signals
                << ", start_low=" << (mStartLow ? "true" : "false"));
@@ -468,12 +480,12 @@ public:
                 return false;
             }
 
-            FL_DBG("Hardware timer created successfully");
+            FL_LOG_RX("Hardware timer created successfully");
         }
 
         // If already initialized, just re-arm the receiver for a new capture
         if (mIsrInstalled) {
-            FL_DBG("Timer ISR already initialized, re-arming receiver");
+            FL_LOG_RX("Timer ISR already initialized, re-arming receiver");
 
             // Check if ISR is still armed from previous capture (error condition)
             if (!mIsrCtx.receiveDone) {
@@ -492,7 +504,7 @@ public:
             }
             mIsrCtx.timerStarted = true;
 
-            FL_DBG("Hardware timer receiver re-armed and ready");
+            FL_LOG_RX("Hardware timer receiver re-armed and ready");
             return true;
         }
 
@@ -527,7 +539,7 @@ public:
             return false;
         }
 
-        FL_DBG("Timer ISR started successfully - polling at 2µs intervals for ±1µs precision");
+        FL_LOG_RX("Timer ISR started successfully - polling at 2µs intervals for ±1µs precision");
 
         // Mark buffer as needing conversion (ISR will write cycles)
         mNeedsConversion = true;
@@ -555,7 +567,7 @@ public:
             return RxWaitResult::TIMEOUT;
         }
 
-        FL_DBG("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
+        FL_LOG_RX("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
 
         // Convert timeout to microseconds for comparison
         int64_t timeout_us = static_cast<int64_t>(timeout_ms) * 1000;
@@ -567,7 +579,7 @@ public:
 
             // Check if buffer filled (success condition)
             if (mIsrCtx.edgesCounter >= mBufferSize) {
-                FL_DBG("wait(): buffer filled (" << mIsrCtx.edgesCounter << ")");
+                FL_LOG_RX("wait(): buffer filled (" << mIsrCtx.edgesCounter << ")");
                 return RxWaitResult::SUCCESS;
             }
 
@@ -581,7 +593,7 @@ public:
         }
 
         // Receive completed (ISR timeout triggered)
-        FL_DBG("wait(): receive done, count=" << mIsrCtx.edgesCounter);
+        FL_LOG_RX("wait(): receive done, count=" << mIsrCtx.edgesCounter);
         return RxWaitResult::SUCCESS;
     }
 
@@ -651,7 +663,7 @@ private:
         // Mark buffer as needing conversion (will contain cycles after ISR)
         mNeedsConversion = true;
 
-        FL_DBG("GPIO ISR RX state cleared");
+        FL_LOG_RX("GPIO ISR RX state cleared");
     }
 
     /**
@@ -858,7 +870,7 @@ private:
             return false;
         }
 
-        FL_DBG("injectEdges(): injecting " << edges.size() << " edges into GPIO ISR RX buffer");
+        FL_LOG_RX("injectEdges(): injecting " << edges.size() << " edges into GPIO ISR RX buffer");
 
         // Convert EdgeTime to EdgeTimestamp (accumulate nanoseconds)
         // EdgeTime stores durations, EdgeTimestamp stores transition times
@@ -874,7 +886,7 @@ private:
             // Accumulate timestamp AFTER storing
             accumulated_ns += edge.ns;
 
-            FL_DBG("  Edge[" << i << "]: time_ns=" << mEdgeBuffer[i].time_ns
+            FL_LOG_RX("  Edge[" << i << "]: time_ns=" << mEdgeBuffer[i].time_ns
                    << ", level=" << (int)mEdgeBuffer[i].level
                    << " (duration=" << edge.ns << "ns)");
         }
@@ -884,7 +896,7 @@ private:
         mIsrCtx.receiveDone = true;
         mNeedsConversion = false;  // Data is already in nanoseconds
 
-        FL_DBG("injectEdges(): injected " << edges.size() << " edges successfully");
+        FL_LOG_RX("injectEdges(): injected " << edges.size() << " edges successfully");
         return true;
     }
 

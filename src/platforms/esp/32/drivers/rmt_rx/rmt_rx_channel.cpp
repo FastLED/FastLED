@@ -13,6 +13,18 @@
 #include "fl/dbg.h"
 #include "fl/stl/iterator.h"
 
+// RX device logging: Disabled by default to reduce noise
+// Enable with: #define FASTLED_RX_LOG_ENABLED 1
+#ifndef FASTLED_RX_LOG_ENABLED
+#define FASTLED_RX_LOG_ENABLED 0
+#endif
+
+#if FASTLED_RX_LOG_ENABLED
+#define FL_LOG_RX(X) FL_DBG(X)
+#else
+#define FL_LOG_RX(X) FL_DBG_NO_OP(X)
+#endif
+
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "driver/rmt_common.h"
@@ -226,8 +238,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     // tick
     uint32_t ns_per_tick = 1000000000UL / resolution_hz;
 
-    FL_DBG("decodeRmtSymbols: resolution="
-           << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
+    FL_LOG_RX("decodeRmtSymbols: resolution="
+              << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
 
     // Decoding state
     size_t error_count = 0;
@@ -237,7 +249,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     int bit_index = 0; // 0-7, MSB first
     bool buffer_overflow = false;
 
-    FL_DBG("decodeRmtSymbols: decoding "
+    FL_LOG_RX("decodeRmtSymbols: decoding "
            << symbols.size() << " symbols into buffer of " << bytes_out.size()
            << " bytes");
 
@@ -285,7 +297,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         // Check for reset pulse (frame boundary)
         if (isResetPulse(symbols[i], timing, ns_per_tick)) {
             reset_pulse_count++;
-            FL_DBG("decodeRmtSymbols: reset pulse detected at symbol " << i);
+            FL_LOG_RX("decodeRmtSymbols: reset pulse detected at symbol " << i);
 
             // Flush partial byte if needed
             if (bit_index != 0) {
@@ -311,7 +323,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
             error_count++;
             uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
             uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
-            FL_DBG("decodeRmtSymbols: invalid symbol at index "
+            FL_LOG_RX("decodeRmtSymbols: invalid symbol at index "
                    << i << " (duration0=" << rmt_symbols[i].duration0
                    << ", duration1=" << rmt_symbols[i].duration1 << " => "
                    << high_ns << "ns high, " << low_ns << "ns low)");
@@ -329,7 +341,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
                 if (high_ns >= timing.t0h_min_ns &&
                     high_ns <= timing.t0h_max_ns) {
                     bit = 0;
-                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, "
+                    FL_LOG_RX("decodeRmtSymbols: last symbol with duration1=0, "
                            "decoded as bit 0 from high period ("
                            << high_ns << "ns)");
                 }
@@ -337,7 +349,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
                 else if (high_ns >= timing.t1h_min_ns &&
                          high_ns <= timing.t1h_max_ns) {
                     bit = 1;
-                    FL_DBG("decodeRmtSymbols: last symbol with duration1=0, "
+                    FL_LOG_RX("decodeRmtSymbols: last symbol with duration1=0, "
                            "decoded as bit 1 from high period ("
                            << high_ns << "ns)");
                 }
@@ -393,7 +405,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
 
     size_t symbols_processed = symbols.size() - start_index;
     size_t valid_symbols = symbols_processed - error_count;
-    FL_DBG(
+    FL_LOG_RX(
         "decodeRmtSymbols: decoded "
         << bytes_decoded << " bytes from " << symbols_processed << " symbols, "
         << error_count << " errors ("
@@ -474,13 +486,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
           ,
           mSkipCounter(0), mStartLow(true), mInternalBuffer(),
           mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0) {
-        FL_DBG("RmtRxChannel constructed with pin="
+        FL_LOG_RX("RmtRxChannel constructed with pin="
                << pin << " (other hardware params will be set in begin())");
     }
 
     ~RmtRxChannelImpl() override {
         if (mChannel) {
-            FL_DBG("Deleting RMT RX channel");
+            FL_LOG_RX("Deleting RMT RX channel");
             // Disable channel before deletion (required by ESP-IDF)
             // Channel must be in "init" state (disabled) before
             // rmt_del_channel()
@@ -505,7 +517,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             mResolutionHz = config.hz.has_value() ? config.hz.value()
                                                   : 40000000; // Default: 40MHz
 
-            FL_DBG("RX first-time init: pin="
+            FL_LOG_RX("RX first-time init: pin="
                    << static_cast<int>(mPin) << ", buffer_size=" << mBufferSize
                    << ", resolution_hz=" << mResolutionHz);
         }
@@ -516,7 +528,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
 
-        FL_DBG("RX begin: signal_range_min="
+        FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
                << "ns, signal_range_max=" << mSignalRangeMaxNs << "ns"
                << ", skip_signals=" << config.skip_signals
@@ -524,7 +536,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // If already initialized, just re-arm the receiver for a new capture
         if (mChannel) {
-            FL_DBG("RX channel already initialized, re-arming receiver");
+            FL_LOG_RX("RX channel already initialized, re-arming receiver");
 
             // CRITICAL: After rmt_receive() completes, the channel is in
             // "enabled" state but rmt_receive() CANNOT be called again until we
@@ -546,7 +558,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                         << esp_err_to_name(err));
                 return false;
             }
-            FL_DBG("RX channel disabled for re-arm");
+            FL_LOG_RX("RX channel disabled for re-arm");
 
             // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
@@ -569,7 +581,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 return false;
             }
 
-            FL_DBG("RX receiver re-armed and ready");
+            FL_LOG_RX("RX receiver re-armed and ready");
             return true;
         }
 
@@ -605,7 +617,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
-        FL_DBG("RX channel created successfully");
+        FL_LOG_RX("RX channel created successfully");
 
         // Register ISR callback
         rmt_rx_event_callbacks_t callbacks = {};
@@ -620,7 +632,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
-        FL_DBG("RX callbacks registered successfully");
+        FL_LOG_RX("RX callbacks registered successfully");
 
         // Enable RX channel - rmt_receive() requires channel to be in "enabled"
         // state The channel is created in "init" state by rmt_new_rx_channel()
@@ -648,7 +660,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
-        FL_DBG("RX receiver armed and ready");
+        FL_LOG_RX("RX receiver armed and ready");
         return true;
     }
 
@@ -660,7 +672,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return RxWaitResult::TIMEOUT; // Treat as timeout
         }
 
-        FL_DBG("wait(): buffer_size=" << mBufferSize
+        FL_LOG_RX("wait(): buffer_size=" << mBufferSize
                                       << ", timeout_ms=" << timeout_ms);
 
         // Only allocate and arm if not already receiving (begin() wasn't
@@ -673,7 +685,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 return RxWaitResult::TIMEOUT; // Treat as timeout
             }
         } else {
-            FL_DBG("wait(): receiver already armed, using existing buffer");
+            FL_LOG_RX("wait(): receiver already armed, using existing buffer");
         }
 
         // Convert timeout to microseconds for comparison
@@ -686,7 +698,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Check if buffer filled (success condition)
             if (mSymbolsReceived >= mBufferSize) {
-                FL_DBG("wait(): buffer filled (" << mSymbolsReceived << ")");
+                FL_LOG_RX("wait(): buffer filled (" << mSymbolsReceived << ")");
                 return RxWaitResult::SUCCESS;
             }
 
@@ -703,7 +715,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Receive completed naturally (spurious symbols already filtered in
         // ISR)
-        FL_DBG("wait(): receive done, count=" << mSymbolsReceived);
+        FL_LOG_RX("wait(): receive done, count=" << mSymbolsReceived);
         FL_WARN("RMT RX callback count: " << mCallbackCount
                                           << " (en_partial_rx test)");
         return RxWaitResult::SUCCESS;
@@ -832,7 +844,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // per tick
         uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
 
-        FL_DBG("injectEdges(): converting "
+        FL_LOG_RX("injectEdges(): converting "
                << edges.size() << " edges to " << symbol_count
                << " RMT symbols (resolution=" << mResolutionHz
                << "Hz, ns_per_tick=" << ns_per_tick << ")");
@@ -863,7 +875,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             rmt_symbols[i].duration1 = duration1_ticks;
             rmt_symbols[i].level1 = edge1.high ? 1 : 0;
 
-            FL_DBG("  Symbol["
+            FL_LOG_RX("  Symbol["
                    << i << "]: duration0=" << duration0_ticks << " ("
                    << edge0.ns << "ns), level0=" << (int)rmt_symbols[i].level0
                    << ", duration1=" << duration1_ticks << " (" << edge1.ns
@@ -874,7 +886,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSymbolsReceived = symbol_count;
         mReceiveDone = true;
 
-        FL_DBG("injectEdges(): injected " << symbol_count
+        FL_LOG_RX("injectEdges(): injected " << symbol_count
                                           << " symbols successfully");
         return true;
     }
@@ -891,11 +903,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
      */
     bool handleSkipPhase() {
         if (mSkipCounter == 0) {
-            FL_DBG("No symbols to skip, skip phase complete");
+            FL_LOG_RX("No symbols to skip, skip phase complete");
             return true;
         }
 
-        FL_DBG("Entering skip phase: skipping " << mSkipCounter << " symbols");
+        FL_LOG_RX("Entering skip phase: skipping " << mSkipCounter << " symbols");
 
         // Use a small discard buffer (64 symbols = 256 bytes)
         constexpr size_t DISCARD_BUFFER_SIZE = 64;
@@ -911,7 +923,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                                     ? mSkipCounter
                                     : DISCARD_BUFFER_SIZE;
 
-            FL_DBG("Skip phase: receiving chunk of "
+            FL_LOG_RX("Skip phase: receiving chunk of "
                    << chunk_size << " symbols (remaining: " << mSkipCounter
                    << ")");
 
@@ -944,7 +956,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Check if ISR properly decremented mSkipCounter
             // (ISR callback handles decrementing mSkipCounter)
-            FL_DBG("Skip phase chunk complete, mSkipCounter now: "
+            FL_LOG_RX("Skip phase chunk complete, mSkipCounter now: "
                    << mSkipCounter);
 
             // Disable channel to reset to "init" state for next iteration
@@ -958,14 +970,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
                             << static_cast<int>(err));
                     return false;
                 }
-                FL_DBG("Skip phase: channel disabled for next iteration");
+                FL_LOG_RX("Skip phase: channel disabled for next iteration");
             }
 
             // Reset mReceiveDone for next iteration
             mReceiveDone = false;
         }
 
-        FL_DBG("Skip phase complete");
+        FL_LOG_RX("Skip phase complete");
 
         // After skip phase completes, channel may be in "enabled" state from
         // the last rmt_receive() We need to ensure it's in "init" (disabled)
@@ -975,10 +987,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mChannel) {
             esp_err_t err = rmt_disable(mChannel);
             if (err == ESP_OK) {
-                FL_DBG(
+                FL_LOG_RX(
                     "Skip phase: channel disabled, ready for allocateAndArm()");
             } else if (err == ESP_ERR_INVALID_STATE) {
-                FL_DBG("Skip phase: channel already in init state "
+                FL_LOG_RX("Skip phase: channel already in init state "
                        "(skip_signals=0 case)");
             } else {
                 FL_WARN("handleSkipPhase(): failed to disable channel after "
@@ -1034,7 +1046,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             mAccumulationBuffer.push_back(0);
         }
 
-        FL_DBG("allocateAndArm(): DMA buffer="
+        FL_LOG_RX("allocateAndArm(): DMA buffer="
                << DMA_BUFFER_SIZE << " symbols, accumulation buffer="
                << mBufferSize << " symbols");
 
@@ -1083,7 +1095,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // ESP_OK: Successfully enabled
         if (err == ESP_OK) {
-            FL_DBG("RX channel enabled");
+            FL_LOG_RX("RX channel enabled");
             return true;
         } else {
             FL_WARN("Failed to enable RX channel: "
@@ -1117,7 +1129,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mReceiveDone = false;
         mSymbolsReceived = 0;
         // mSkipCounter is set in begin(), not here
-        FL_DBG("RX state cleared");
+        FL_LOG_RX("RX state cleared");
     }
 
     /**
@@ -1171,7 +1183,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
-        FL_DBG("RX receive started (DMA buffer size: " << buffer_size
+        FL_LOG_RX("RX receive started (DMA buffer size: " << buffer_size
                                                        << " symbols)");
         return true;
     }
