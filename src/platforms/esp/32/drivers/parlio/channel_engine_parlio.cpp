@@ -415,9 +415,11 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             return false; // No high-priority task woken
         }
 
-        // Ring empty but more data pending - wait for CPU to populate more buffers
-        FL_LOG_PARLIO("PARLIO ISR: Ring empty, waiting for CPU | transmitted="
+        // Ring empty but more data pending - mark hardware as idle so CPU can restart
+        FL_LOG_PARLIO("PARLIO ISR: Ring empty, hardware going IDLE | transmitted="
                << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes);
+        ctx->mHardwareIdle = true; // Signal CPU that hardware needs restart
+        ctx->mTransmitting = false; // Hardware is idle, not transmitting
         return false; // No high-priority task woken
     }
 
@@ -449,6 +451,7 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         // Successfully submitted - advance read index (modulo-3) and decrement count
         ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
         ctx->mRingCount = ctx->mRingCount - 1;
+        ctx->mHardwareIdle = false; // Hardware is active again
         FL_LOG_PARLIO("PARLIO ISR: Buffer " << buffer_idx << " submitted OK");
     } else {
         // Submission failed - set error flag for CPU to detect
@@ -688,6 +691,41 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     // Signal ISR that buffer is ready (advance write index and increment count)
     mState.mIsrContext->mRingWriteIdx = (mState.mIsrContext->mRingWriteIdx + 1) % PARLIO_RING_BUFFER_COUNT;
     mState.mIsrContext->mRingCount = mState.mIsrContext->mRingCount + 1;
+
+    // CRITICAL: Check if hardware went idle while we were populating
+    // If so, we need to restart transmission from the CPU thread
+    // This fixes the ISR-CPU deadlock where ISR drains ring, hardware goes idle,
+    // CPU populates buffers but ISR never fires again to queue them
+    if (mState.mIsrContext->mHardwareIdle) {
+        FL_LOG_PARLIO("PARLIO CPU: Hardware was idle, restarting transmission | ring_count="
+               << mState.mIsrContext->mRingCount);
+
+        // Get the buffer that was just populated (read_idx points to next buffer to transmit)
+        size_t buffer_idx = mState.mIsrContext->mRingReadIdx;
+        uint8_t *buffer_ptr = mState.mRingBuffers[buffer_idx].get();
+        size_t buffer_size = mState.mRingBufferSizes[buffer_idx];
+
+        if (buffer_ptr && buffer_size > 0) {
+            // Submit buffer to hardware to restart transmission
+            parlio_transmit_config_t tx_config = {};
+            tx_config.idle_value = 0x0000;
+
+            esp_err_t err = parlio_tx_unit_transmit(
+                mState.mTxUnit, buffer_ptr, buffer_size * 8, &tx_config);
+
+            if (err == ESP_OK) {
+                // Successfully restarted - advance read index and decrement count
+                mState.mIsrContext->mRingReadIdx = (mState.mIsrContext->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
+                mState.mIsrContext->mRingCount = mState.mIsrContext->mRingCount - 1;
+                mState.mIsrContext->mHardwareIdle = false;
+                mState.mIsrContext->mTransmitting = true;
+                FL_LOG_PARLIO("PARLIO CPU: Hardware restarted OK | buffer=" << buffer_idx);
+            } else {
+                FL_WARN("PARLIO CPU: Failed to restart hardware: " << err);
+                mState.mErrorOccurred = true;
+            }
+        }
+    }
 
     // Return true if more bytes remain to be processed
     return mState.mNextByteOffset < mState.mIsrContext->mTotalBytes;
@@ -962,6 +1000,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mIsrContext->mRingWriteIdx = 0;
     mState.mIsrContext->mRingCount = 0;
     mState.mIsrContext->mRingError = false;
+    mState.mIsrContext->mHardwareIdle = false;
 
     // Initialize counters
     mState.mIsrContext->mIsrCount = 0;

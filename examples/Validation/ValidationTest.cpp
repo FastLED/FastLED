@@ -314,7 +314,7 @@ void runMultiTest(const char* test_name,
     ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
     ss << "║ MULTI-RUN TEST: " << test_name << "\n";
     ss << "║ Runs: " << multi_config.num_runs << " | Print Mode: "
-       << (multi_config.print_all_runs ? "ALL" : "ERRORS ONLY") << "\n";
+       << (multi_config.print_all_runs ? "All" : "Errors ONLY") << "\n";
     ss << "╚════════════════════════════════════════════════════════════════╝";
     FL_WARN(ss.str());
 

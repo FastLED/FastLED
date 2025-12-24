@@ -336,6 +336,8 @@ struct alignas(64) ParlioIsrContext {
     volatile size_t mRingCount; ///< Number of buffers currently in ring (0-3) - distinguishes full vs empty
     volatile bool mRingError; ///< Ring underflow/overflow error flag (ISR
                               ///< writes, main reads)
+    volatile bool mHardwareIdle; ///< ISR sets true when ring empty and hardware goes idle
+                                 ///< CPU checks this and restarts transmission (ISR writes, main reads/writes)
 
     // === Non-Volatile Fields (main thread synchronization required) ===
     // These fields are written by ISR but read by main thread ONLY after memory
@@ -361,6 +363,7 @@ struct alignas(64) ParlioIsrContext {
     ParlioIsrContext()
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
           mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
+          mHardwareIdle(false),
           mTotalBytes(0), mNumLanes(0), mIsrCount(0),
           mBytesTransmitted(0), mChunksCompleted(0),
           mTransmissionActive(false), mEndTimeUs(0) {
