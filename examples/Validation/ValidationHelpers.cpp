@@ -482,3 +482,99 @@ void printTestCaseResultsTable(const fl::vector<fl::TestCaseResult>& test_result
 
     FL_WARN("╚════════════════════════════════════════════════════════════════════════════╝");
 }
+
+// Print final validation result banner (large, prominent PASS/FAIL indicator)
+void printFinalResultBanner(const fl::vector<fl::TestCaseResult>& test_results) {
+    // Calculate overall statistics
+    int total_passed = 0;
+    int total_tests = 0;
+    int failed_cases = 0;
+    int passed_cases = 0;
+    int skipped_cases = 0;
+
+    for (fl::size i = 0; i < test_results.size(); i++) {
+        const auto& result = test_results[i];
+        if (!result.skipped) {
+            total_passed += result.passed_tests;
+            total_tests += result.total_tests;
+
+            if (result.anyFailed()) {
+                failed_cases++;
+            } else if (result.allPassed()) {
+                passed_cases++;
+            }
+        } else {
+            skipped_cases++;
+        }
+    }
+
+    bool all_passed = (failed_cases == 0 && total_tests > 0 && skipped_cases == 0);
+    double pass_rate = (total_tests > 0) ? (100.0 * total_passed / total_tests) : 0.0;
+
+    // Print the banner
+    fl::sstream ss;
+    ss << "\n╔════════════════════════════════════════════════════════════════════════════╗\n";
+    ss << "║                                                                            ║\n";
+
+    if (all_passed) {
+        ss << "║                         ✓✓✓ VALIDATION PASSED ✓✓✓                         ║\n";
+    } else {
+        ss << "║                         ✗✗✗ VALIDATION FAILED ✗✗✗                         ║\n";
+    }
+
+    ss << "║                                                                            ║\n";
+
+    // Summary statistics
+    if (all_passed) {
+        fl::sstream line;
+        line << "║  " << passed_cases << " test case(s) PASSED";
+        fl::string line_str = line.str();
+        while (line_str.length() < 76) {
+            line_str += " ";
+        }
+        line_str += "║\n";
+        ss << line_str;
+    } else {
+        // Failed cases
+        fl::sstream line;
+        line << "║  " << failed_cases << " test case(s) FAILED";
+        if (passed_cases > 0) {
+            line << ", " << passed_cases << " passed";
+        }
+        if (skipped_cases > 0) {
+            line << ", " << skipped_cases << " skipped";
+        }
+        fl::string line_str = line.str();
+        while (line_str.length() < 76) {
+            line_str += " ";
+        }
+        line_str += "║\n";
+        ss << line_str;
+    }
+
+    // Total tests statistics
+    fl::sstream line2;
+    line2 << "║  " << total_passed << " out of " << total_tests << " validation tests passed (" << static_cast<int>(pass_rate) << "%)";
+    fl::string line2_str = line2.str();
+    while (line2_str.length() < 76) {
+        line2_str += " ";
+    }
+    line2_str += "║\n";
+    ss << line2_str;
+
+    if (!all_passed && total_tests > 0) {
+        ss << "║                                                                            ║\n";
+        ss << "║  See detailed results table above for specifics                            ║\n";
+    }
+
+    ss << "║                                                                            ║\n";
+    ss << "╚════════════════════════════════════════════════════════════════════════════╝";
+
+    // Use FL_WARN for passed tests, FL_ERROR for failures (to trigger --fail-on ERROR detection)
+    if (all_passed) {
+        FL_WARN(ss.str());
+    } else {
+        // Print the banner as an error so it's clearly visible
+        FL_ERROR(ss.str());
+    }
+}

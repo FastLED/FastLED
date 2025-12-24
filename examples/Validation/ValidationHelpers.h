@@ -74,3 +74,7 @@ void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config);
 /// @brief Print test case results summary table
 /// @param test_results Vector of test case results
 void printTestCaseResultsTable(const fl::vector<fl::TestCaseResult>& test_results);
+
+/// @brief Print final validation result banner (large, prominent PASS/FAIL indicator)
+/// @param test_results Vector of test case results
+void printFinalResultBanner(const fl::vector<fl::TestCaseResult>& test_results);

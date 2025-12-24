@@ -542,6 +542,9 @@ void loop() {
     // Print final results table
     printTestCaseResultsTable(test_results);
 
+    // Print prominent final result banner
+    printFinalResultBanner(test_results);
+
     // Check for failures
     int failed_count = 0;
     for (fl::size i = 0; i < test_results.size(); i++) {
@@ -551,8 +554,7 @@ void loop() {
     }
 
     if (failed_count > 0) {
-        FL_ERROR("\n[TEST MATRIX] " << failed_count << " test case(s) FAILED");
-        SKETCH_HALT("[TEST MATRIX] See results table above for details");
+        SKETCH_HALT("[TEST MATRIX] See results table and summary above for details");
     } else {
         FL_WARN("\n[TEST MATRIX] ✓ All test cases PASSED");
     }
