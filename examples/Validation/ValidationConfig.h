@@ -8,18 +8,14 @@
 // PARLIO Multi-Buffer Test: Four lanes validation (Phase 3 Validation)
 // ============================================================================
 
-// Disable PARLIO ISR logging to prevent watchdog timeout
-// (Serial printing inside ISR exceeds watchdog threshold)
-#undef FASTLED_LOG_PARLIO_ENABLED
-
 // Driver selection
 #define JUST_PARLIO  // Phase 3: Four-lane validation with PARLIO
 // #define JUST_RMT
 // #define JUST_SPI
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1
-#define MAX_LANES 1
+#define MIN_LANES 1  // DO NOT CHANGE THIS!!! NO EXCEPTIONS!!!
+#define MAX_LANES 1  // DO NOT CHANGE THIS!!! NO EXCEPTIONS!!!
 
 // Strip size selection
 // #define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
