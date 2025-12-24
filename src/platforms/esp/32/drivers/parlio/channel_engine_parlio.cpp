@@ -54,6 +54,8 @@ namespace fl {
 // - Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
 static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
 
+constexpr size_t MAX_LEDS_PER_CHANNEL = 100; // Support up to 3000 LEDs per channel (configurable)
+
 //=============================================================================
 // Phase 4: Cross-Platform Memory Barriers
 //=============================================================================
@@ -127,15 +129,15 @@ static inline bool isParlioPinValid(int pin) {
 /// Wave8 expands each input byte to 64 pulses (8 bits × 8 pulses per bit).
 /// Transposition packs pulses into bytes based on data_width.
 struct ParlioBufferCalculator {
-    size_t dataWidth;
+    size_t mDataWdith;
 
     /// @brief Calculate output bytes per input byte after wave8 + transpose
     /// @return Output bytes per input byte (8 for width≤8, 128 for width=16)
     size_t outputBytesPerInputByte() const {
-        if (dataWidth <= 8) {
-            // Bit-packed: 64 pulses / (8 / dataWidth) ticks per byte = 8 bytes
+        if (mDataWdith <= 8) {
+            // Bit-packed: 64 pulses / (8 / mDataWdith) ticks per byte = 8 bytes
             return 8;
-        } else if (dataWidth == 16) {
+        } else if (mDataWdith == 16) {
             // 16-bit mode: 64 pulses × 2 bytes per pulse = 128 bytes
             return 128;
         }
@@ -152,14 +154,44 @@ struct ParlioBufferCalculator {
     /// @brief Calculate transpose output block size for populateDmaBuffer
     /// @return Block size in bytes for transpose operation
     size_t transposeBlockSize() const {
-        if (dataWidth <= 8) {
-            size_t ticksPerByte = 8 / dataWidth;
+        if (mDataWdith <= 8) {
+            size_t ticksPerByte = 8 / mDataWdith;
             size_t pulsesPerByte = 64;
             return (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-        } else if (dataWidth == 16) {
+        } else if (mDataWdith == 16) {
             return 128; // 64 pulses × 2 bytes per pulse
         }
         return 8; // Fallback
+    }
+
+    /// @brief Calculate optimal ring buffer capacity based on LED frame boundaries
+    /// @param maxLedsPerChannel Maximum LEDs per channel (strip size)
+    /// @param numRingBuffers Number of ring buffers (default: 3)
+    /// @return DMA buffer capacity in bytes, aligned to LED boundaries
+    ///
+    /// Algorithm:
+    /// 1. Calculate LEDs per buffer: maxLedsPerChannel / numRingBuffers
+    /// 2. Convert to input bytes: LEDs × 3 bytes/LED × mDataWdith (multi-lane)
+    /// 3. Apply wave8 expansion (8:1 ratio): input_bytes × outputBytesPerInputByte()
+    /// 4. Result is DMA buffer capacity per ring buffer
+    ///
+    /// Example (3000 LEDs, 1 lane, 3 ring buffers):
+    /// - LEDs per buffer: 3000 / 3 = 1000 LEDs
+    /// - Input bytes per buffer: 1000 × 3 × 1 = 3000 bytes
+    /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
+    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, size_t numRingBuffers = 3) const {
+        // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
+        size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
+
+        // Step 2: Calculate input bytes per buffer
+        // - 3 bytes per LED (RGB)
+        // - Multiply by mDataWdith for multi-lane (each lane gets same LED count)
+        size_t inputBytesPerBuffer = ledsPerBuffer * 3 * mDataWdith;
+
+        // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
+        size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer);
+
+        return dmaBufferCapacity;
     }
 };
 
@@ -1229,11 +1261,12 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // 3. Buffer size depends on data_width and actual pulses_per_bit
     // (calculated at runtime)
 
-    // Calculate ring buffer capacity using unified calculator
-    // Scale by lane count (data_width) to ensure sufficient buffer space for multi-lane configurations
+    // Calculate ring buffer capacity based on LED frame boundaries and wave8 expansion
+    // Default sizing: 3000 LEDs per channel (1000 LEDs per buffer × 3 ring buffers)
+    // This ensures proper DMA chunking for large LED strips with multiple boundaries
     ParlioBufferCalculator calc{mState.mDataWidth};
-    size_t ring_buffer_input_byte_count = 3000 * mState.mDataWidth; // Scale by lane count (3000 bytes = 1000 LEDs per buffer for large strips)
-    mState.mRingBufferCapacity = calc.dmaBufferSize(ring_buffer_input_byte_count);
+
+    mState.mRingBufferCapacity = calc.calculateRingBufferCapacity(MAX_LEDS_PER_CHANNEL, PARLIO_RING_BUFFER_COUNT);
 
     // Step 8: Allocate ring buffers upfront (all memory allocated during init)
     // Buffers will be populated on-demand during transmission
