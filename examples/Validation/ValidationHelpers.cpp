@@ -2,6 +2,7 @@
 
 #include "ValidationConfig.h"  // Must be included BEFORE ValidationHelpers.h to set config macros
 #include "ValidationHelpers.h"
+#include "fl/stl/sstream.h"
 
 bool testRxChannel(
     fl::shared_ptr<fl::RxDevice> rx_channel,
@@ -101,10 +102,12 @@ void validateExpectedEngines() {
     return;
 #endif
 
-    FL_WARN("[VALIDATION] Expected engines: " << expected_engines.size());
+    fl::sstream ss;
+    ss << "[VALIDATION] Expected engines: " << expected_engines.size() << "\n";
     for (fl::size i = 0; i < expected_engines.size(); i++) {
-        FL_WARN("  - " << expected_engines[i]);
+        ss << "  - " << expected_engines[i] << "\n";
     }
+    FL_WARN(ss.str());
 
     // Get available drivers
     auto drivers = FastLED.getDriverInfos();
@@ -190,11 +193,13 @@ void testDriver(
 }
 
 void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ DRIVER VALIDATION SUMMARY                                      ║");
-    FL_WARN("╠════════════════════════════════════════════════════════════════╣");
-    FL_WARN("║ Driver       │ Status      │ Tests Passed │ Total Tests       ║");
-    FL_WARN("╠══════════════╪═════════════╪══════════════╪═══════════════════╣");
+    fl::sstream ss;
+    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+    ss << "║ DRIVER VALIDATION SUMMARY                                      ║\n";
+    ss << "╠════════════════════════════════════════════════════════════════╣\n";
+    ss << "║ Driver       │ Status      │ Tests Passed │ Total Tests       ║\n";
+    ss << "╠══════════════╪═════════════╪══════════════╪═══════════════════╣";
+    FL_WARN(ss.str());
 
     for (fl::size i = 0; i < driver_results.size(); i++) {
         const auto& result = driver_results[i];
@@ -332,15 +337,17 @@ fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& mat
 
 // Print test matrix summary (drivers, lanes, strip sizes, total cases)
 void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config) {
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ TEST MATRIX CONFIGURATION                                      ║");
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+    fl::sstream ss;
+    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+    ss << "║ TEST MATRIX CONFIGURATION                                      ║\n";
+    ss << "╚════════════════════════════════════════════════════════════════╝\n";
 
     // Drivers
-    FL_WARN("Drivers (" << matrix_config.enabled_drivers.size() << "):");
+    ss << "Drivers (" << matrix_config.enabled_drivers.size() << "):\n";
     for (fl::size i = 0; i < matrix_config.enabled_drivers.size(); i++) {
-        FL_WARN("  - " << matrix_config.enabled_drivers[i].c_str());
+        ss << "  - " << matrix_config.enabled_drivers[i].c_str() << "\n";
     }
+    FL_WARN(ss.str());
 
     // Lane range
     int lane_range = matrix_config.max_lanes - matrix_config.min_lanes + 1;
@@ -369,11 +376,13 @@ void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config) {
 
 // Print test case results summary table
 void printTestCaseResultsTable(const fl::vector<fl::TestCaseResult>& test_results) {
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ TEST MATRIX RESULTS SUMMARY                                                ║");
-    FL_WARN("╠════════════════════════════════════════════════════════════════════════════╣");
-    FL_WARN("║ Driver  │ Lanes │ Strip │ Status     │ Tests Passed │ Total Tests        ║");
-    FL_WARN("╠═════════╪═══════╪═══════╪════════════╪══════════════╪════════════════════╣");
+    fl::sstream ss;
+    ss << "\n╔════════════════════════════════════════════════════════════════════════════╗\n";
+    ss << "║ TEST MATRIX RESULTS SUMMARY                                                ║\n";
+    ss << "╠════════════════════════════════════════════════════════════════════════════╣\n";
+    ss << "║ Driver  │ Lanes │ Strip │ Status     │ Tests Passed │ Total Tests        ║\n";
+    ss << "╠═════════╪═══════╪═══════╪════════════╪══════════════╪════════════════════╣";
+    FL_WARN(ss.str());
 
     int total_passed = 0;
     int total_tests = 0;

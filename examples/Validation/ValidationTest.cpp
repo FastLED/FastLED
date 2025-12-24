@@ -4,6 +4,7 @@
 #include "ValidationConfig.h"  // Must be included first to set config macros
 #include "ValidationTest.h"
 #include <FastLED.h>
+#include "fl/stl/sstream.h"
 
 // Phase 0: Include PARLIO debug instrumentation
 #if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
@@ -76,20 +77,24 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxDevice> rx_channel,
             }
         }
 
-        FL_WARN("\n[RAW EDGE TIMING] Pattern Analysis:");
-        FL_WARN("  Short HIGH (~" << expected_bit0_high << "ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
+        fl::sstream ss;
+        ss << "\n[RAW EDGE TIMING] Pattern Analysis:\n";
+        ss << "  Short HIGH (~" << expected_bit0_high << "ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗") << "\n";
+        ss << "  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗") << "\n";
+        ss << "  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗") << "\n";
+        ss << "  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗");
+        FL_WARN(ss.str());
 
         if (has_short_high && has_long_high && has_short_low && has_long_low) {
             FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
         } else if (!has_short_high && !has_long_high) {
-            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!");
-            FL_ERROR("[RAW EDGE TIMING]   Possible causes:");
-            FL_ERROR("[RAW EDGE TIMING]   1. Encoder not reading pixel buffer data");
-            FL_ERROR("[RAW EDGE TIMING]   2. Bytes encoder state machine stuck");
-            FL_ERROR("[RAW EDGE TIMING]   3. Data pointer not passed correctly to encoder");
+            ss.clear();
+            ss << "[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!\n";
+            ss << "[RAW EDGE TIMING]   Possible causes:\n";
+            ss << "[RAW EDGE TIMING]   1. Encoder not reading pixel buffer data\n";
+            ss << "[RAW EDGE TIMING]   2. Bytes encoder state machine stuck\n";
+            ss << "[RAW EDGE TIMING]   3. Data pointer not passed correctly to encoder";
+            FL_ERROR(ss.str());
         } else if (!has_short_low && !has_long_low) {
             FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
         } else {
@@ -139,13 +144,13 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
         FL_ERROR("RX wait failed (timeout or no data received)");
-        FL_WARN("");
-        FL_WARN("⚠️  TROUBLESHOOTING:");
-        FL_WARN("   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin());
-        FL_WARN("   2. Internal loopback (io_loop_back) only works for RMT TX → RMT RX");
-        FL_WARN("   3. ESP32 GPIO matrix cannot route other peripheral outputs to RMT input");
-        FL_WARN("   4. Check that TX and RX use the same GPIO pin number (RX pin: " << rx_channel->getPin() << ")");
-        FL_WARN("");
+        fl::sstream ss;
+        ss << "\n⚠️  TROUBLESHOOTING:\n";
+        ss << "   1. If using non-RMT TX (SPI/ParallelIO): Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
+        ss << "   2. Internal loopback (io_loop_back) only works for RMT TX → RMT RX\n";
+        ss << "   3. ESP32 GPIO matrix cannot route other peripheral outputs to RMT input\n";
+        ss << "   4. Check that TX and RX use the same GPIO pin number (RX pin: " << rx_channel->getPin() << ")";
+        FL_WARN(ss.str());
         return 0;
     }
 
@@ -306,11 +311,13 @@ void runMultiTest(const char* test_name,
                   const fl::MultiRunConfig& multi_config,
                   int& total, int& passed) {
 
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ MULTI-RUN TEST: " << test_name);
-    FL_WARN("║ Runs: " << multi_config.num_runs << " | Print Mode: "
-            << (multi_config.print_all_runs ? "ALL" : "ERRORS ONLY"));
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
+    fl::sstream ss;
+    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+    ss << "║ MULTI-RUN TEST: " << test_name << "\n";
+    ss << "║ Runs: " << multi_config.num_runs << " | Print Mode: "
+       << (multi_config.print_all_runs ? "ALL" : "ERRORS ONLY") << "\n";
+    ss << "╚════════════════════════════════════════════════════════════════╝";
+    FL_WARN(ss.str());
 
     fl::vector<fl::RunResult> run_results;
 
@@ -423,29 +430,33 @@ void runMultiTest(const char* test_name,
         else total_failed++;
     }
 
-    FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ MULTI-RUN SUMMARY");
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
-    FL_WARN("Total Runs:   " << multi_config.num_runs);
-    FL_WARN("Passed:       " << total_passed << " (" << (100.0 * total_passed / multi_config.num_runs) << "%)");
-    FL_WARN("Failed:       " << total_failed << " (" << (100.0 * total_failed / multi_config.num_runs) << "%)");
+    ss.clear();
+    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+    ss << "║ MULTI-RUN SUMMARY\n";
+    ss << "╚════════════════════════════════════════════════════════════════╝\n";
+    ss << "Total Runs:   " << multi_config.num_runs << "\n";
+    ss << "Passed:       " << total_passed << " (" << (100.0 * total_passed / multi_config.num_runs) << "%)\n";
+    ss << "Failed:       " << total_failed << " (" << (100.0 * total_failed / multi_config.num_runs) << "%)";
+    FL_WARN(ss.str());
 
     if (total_failed > 0) {
-        FL_WARN("\nFailed Run Numbers:");
+        ss.clear();
+        ss << "\nFailed Run Numbers:\n";
         for (const auto& r : run_results) {
             if (!r.passed) {
-                FL_WARN("  Run #" << r.run_number << " - " << r.mismatches << " errors");
+                ss << "  Run #" << r.run_number << " - " << r.mismatches << " errors\n";
                 if (!r.errors.empty()) {
-                    FL_WARN("    First error at LED[" << r.errors[0].led_index << "]: "
-                            << "expected RGB(" << static_cast<int>(r.errors[0].expected_r) << ","
-                            << static_cast<int>(r.errors[0].expected_g) << ","
-                            << static_cast<int>(r.errors[0].expected_b) << ") got RGB("
-                            << static_cast<int>(r.errors[0].actual_r) << ","
-                            << static_cast<int>(r.errors[0].actual_g) << ","
-                            << static_cast<int>(r.errors[0].actual_b) << ")");
+                    ss << "    First error at LED[" << r.errors[0].led_index << "]: "
+                       << "expected RGB(" << static_cast<int>(r.errors[0].expected_r) << ","
+                       << static_cast<int>(r.errors[0].expected_g) << ","
+                       << static_cast<int>(r.errors[0].expected_b) << ") got RGB("
+                       << static_cast<int>(r.errors[0].actual_r) << ","
+                       << static_cast<int>(r.errors[0].actual_g) << ","
+                       << static_cast<int>(r.errors[0].actual_b) << ")\n";
                 }
             }
         }
+        FL_WARN(ss.str());
     }
 
     // Update totals
@@ -462,14 +473,16 @@ void runMultiTest(const char* test_name,
 // Creates channels, runs tests, destroys channels
 void validateChipsetTiming(fl::ValidationConfig& config,
                            int& driver_total, int& driver_passed) {
-    FL_WARN("\n========================================");
-    FL_WARN("Testing: " << config.timing_name);
-    FL_WARN("  T0H: " << config.timing.t1_ns << "ns");
-    FL_WARN("  T1H: " << (config.timing.t1_ns + config.timing.t2_ns) << "ns");
-    FL_WARN("  T0L: " << config.timing.t3_ns << "ns");
-    FL_WARN("  RESET: " << config.timing.reset_us << "us");
-    FL_WARN("  Channels: " << config.tx_configs.size());
-    FL_WARN("========================================");
+    fl::sstream ss;
+    ss << "\n========================================\n";
+    ss << "Testing: " << config.timing_name << "\n";
+    ss << "  T0H: " << config.timing.t1_ns << "ns\n";
+    ss << "  T1H: " << (config.timing.t1_ns + config.timing.t2_ns) << "ns\n";
+    ss << "  T0L: " << config.timing.t3_ns << "ns\n";
+    ss << "  RESET: " << config.timing.reset_us << "us\n";
+    ss << "  Channels: " << config.tx_configs.size() << "\n";
+    ss << "========================================";
+    FL_WARN(ss.str());
 
     // Create ALL channels from tx_configs (multi-channel support)
     fl::vector<fl::shared_ptr<fl::Channel>> channels;

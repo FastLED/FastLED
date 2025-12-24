@@ -27,4 +27,4 @@
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 300
+#define LONG_STRIP_SIZE 3000

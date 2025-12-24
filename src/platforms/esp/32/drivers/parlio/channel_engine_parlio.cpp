@@ -1232,7 +1232,7 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Calculate ring buffer capacity using unified calculator
     // Scale by lane count (data_width) to ensure sufficient buffer space for multi-lane configurations
     ParlioBufferCalculator calc{mState.mDataWidth};
-    size_t ring_buffer_input_byte_count = 1000 * mState.mDataWidth; // Scale by lane count
+    size_t ring_buffer_input_byte_count = 3000 * mState.mDataWidth; // Scale by lane count (3000 bytes = 1000 LEDs per buffer for large strips)
     mState.mRingBufferCapacity = calc.dmaBufferSize(ring_buffer_input_byte_count);
 
     // Step 8: Allocate ring buffers upfront (all memory allocated during init)
