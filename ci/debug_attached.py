@@ -25,8 +25,9 @@ Phase 2: Upload
 
 Phase 3: Monitor
     - Attaches to serial monitor and displays real-time output
-    - --expect: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
-    - --fail-on: Terminates immediately on match, exits 1
+    - --expect: Monitors until timeout, exits 0 if ALL regex patterns match, exits 1 if any missing
+    - --fail-on: Terminates immediately on regex match, exits 1
+    - --exit-on-error: Uses \bERROR\b regex pattern (word boundary required)
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
@@ -51,12 +52,12 @@ Usage:
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
     uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
-    uv run ci/debug_attached.py --exit-on-error          # Exit 1 immediately if "ERROR" found
-    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 immediately if "PANIC" found
-    uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
-    uv run ci/debug_attached.py --no-fail-on             # Explicitly disable all failure keywords
-    uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
-    uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
+    uv run ci/debug_attached.py --exit-on-error          # Exit 1 immediately if \bERROR\b pattern matches
+    uv run ci/debug_attached.py --fail-on "PANIC"        # Exit 1 immediately if "PANIC" pattern found
+    uv run ci/debug_attached.py --fail-on "ERROR" --fail-on "CRASH"  # Exit 1 on any pattern match
+    uv run ci/debug_attached.py --no-fail-on             # Explicitly disable all failure patterns
+    uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" pattern found by timeout
+    uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL patterns found
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
     uv run ci/debug_attached.py --kill-daemon            # Restart daemon before running (useful if stuck)
     uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
@@ -400,8 +401,8 @@ def run_monitor(
         monitor_port: Serial port to monitor (None = auto-detect)
         verbose: Enable verbose output
         timeout: Maximum time to monitor in seconds (default: 20)
-        fail_keywords: List of keywords that trigger immediate termination + exit 1 (default: ["ERROR"])
-        expect_keywords: List of keywords that must ALL be found by timeout for exit 0
+        fail_keywords: List of regex patterns that trigger immediate termination + exit 1 (default: [r"\bERROR\b"])
+        expect_keywords: List of regex patterns that must ALL be found by timeout for exit 0
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
 
     Returns:
@@ -411,6 +412,27 @@ def run_monitor(
         fail_keywords = []
     if expect_keywords is None:
         expect_keywords = []
+
+    # Compile regex patterns for fail and expect keywords
+    fail_patterns = []
+    for pattern_str in fail_keywords:
+        try:
+            fail_patterns.append((pattern_str, re.compile(pattern_str)))
+        except re.error as e:
+            print(f"⚠️  Warning: Invalid regex pattern '{pattern_str}': {e}")
+            print(f"   Using literal string match instead")
+            # Fallback to escaped literal pattern
+            fail_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
+
+    expect_patterns = []
+    for pattern_str in expect_keywords:
+        try:
+            expect_patterns.append((pattern_str, re.compile(pattern_str)))
+        except re.error as e:
+            print(f"⚠️  Warning: Invalid regex pattern '{pattern_str}': {e}")
+            print(f"   Using literal string match instead")
+            # Fallback to escaped literal pattern
+            expect_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
     cmd = [
         "pio",
         "device",
@@ -431,10 +453,10 @@ def run_monitor(
         print("Mode: STREAMING (runs until Ctrl+C)")
     else:
         print(f"Timeout: {timeout} seconds")
-    if fail_keywords:
-        print(f"Fail keywords: {', '.join(fail_keywords)}")
-    if expect_keywords:
-        print(f"Expect keywords: {', '.join(expect_keywords)}")
+    if fail_patterns:
+        print(f"Fail patterns: {', '.join(f'/{p}/' for p, _ in fail_patterns)}")
+    if expect_patterns:
+        print(f"Expect patterns: {', '.join(f'/{p}/' for p, _ in expect_patterns)}")
     print("=" * 60)
 
     formatter = TimestampFormatter()
@@ -476,35 +498,39 @@ def run_monitor(
                     output_lines.append(line)
                     print(line)  # Real-time output
 
-                    # Check for expect keywords (track but don't terminate)
-                    if expect_keywords:
-                        for keyword in expect_keywords:
-                            if keyword in line:
+                    # Check for expect patterns (track but don't terminate)
+                    if expect_patterns:
+                        for pattern_str, pattern_re in expect_patterns:
+                            if pattern_re.search(line):
                                 # Track this expected line
-                                expect_lines.append((keyword, line))
+                                expect_lines.append((pattern_str, line))
 
-                                # Mark this keyword as found
-                                if keyword not in found_expect_keywords:
-                                    found_expect_keywords.add(keyword)
-                                    print(f"\n✅ EXPECT KEYWORD DETECTED: '{keyword}'")
+                                # Mark this pattern as found
+                                if pattern_str not in found_expect_keywords:
+                                    found_expect_keywords.add(pattern_str)
+                                    print(
+                                        f"\n✅ EXPECT PATTERN DETECTED: /{pattern_str}/"
+                                    )
                                     print(f"   Matched line: {line}")
                                     print(
-                                        f"   (Continuing to monitor - need all {len(expect_keywords)} keywords)\n"
+                                        f"   (Continuing to monitor - need all {len(expect_patterns)} patterns)\n"
                                     )
 
-                    # Check for fail keywords - TERMINATE IMMEDIATELY
-                    if fail_keywords and not fail_keyword_found:
-                        for keyword in fail_keywords:
-                            if keyword in line:
+                    # Check for fail patterns - TERMINATE IMMEDIATELY
+                    if fail_patterns and not fail_keyword_found:
+                        for pattern_str, pattern_re in fail_patterns:
+                            if pattern_re.search(line):
                                 # Track this failing line
-                                failing_lines.append((keyword, line))
+                                failing_lines.append((pattern_str, line))
 
                                 if not fail_keyword_found:
                                     # First failure - terminate immediately
                                     fail_keyword_found = True
-                                    matched_fail_keyword = keyword
+                                    matched_fail_keyword = pattern_str
                                     matched_fail_line = line
-                                    print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
+                                    print(
+                                        f"\n🚨 FAIL PATTERN DETECTED: /{pattern_str}/"
+                                    )
                                     print(f"   Matched line: {line}")
                                     print(f"   Terminating monitor immediately...\n")
                                     proc.terminate()
@@ -524,16 +550,16 @@ def run_monitor(
 
     # Determine success based on exit conditions
     if fail_keyword_found:
-        # Fail keyword match always means failure
+        # Fail pattern match always means failure
         success = False
-    elif expect_keywords:
-        # If expect keywords were specified, ALL must be found for success
-        missing_keywords = set(expect_keywords) - found_expect_keywords
-        if missing_keywords:
-            # Not all expect keywords found - failure
+    elif expect_patterns:
+        # If expect patterns were specified, ALL must be found for success
+        missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
+        if missing_patterns:
+            # Not all expect patterns found - failure
             success = False
         else:
-            # All expect keywords found - success
+            # All expect patterns found - success
             success = True
     elif timeout_reached:
         # Normal timeout is considered success (exit 0)
@@ -579,41 +605,41 @@ def run_monitor(
     print("\n" + "=" * 60)
 
     if fail_keyword_found:
-        print(f"❌ Monitor failed - fail keyword '{matched_fail_keyword}' detected")
+        print(f"❌ Monitor failed - fail pattern /{matched_fail_keyword}/ detected")
         print(f"   Matched line: {matched_fail_line}")
-    elif expect_keywords:
-        # Check if all expect keywords were found
-        missing_keywords = set(expect_keywords) - found_expect_keywords
-        if missing_keywords:
-            print(f"❌ Monitor failed - not all expect keywords found")
+    elif expect_patterns:
+        # Check if all expect patterns were found
+        missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
+        if missing_patterns:
+            print(f"❌ Monitor failed - not all expect patterns found")
             print(
-                f"   Expected {len(expect_keywords)} keywords, found {len(found_expect_keywords)}"
+                f"   Expected {len(expect_patterns)} patterns, found {len(found_expect_keywords)}"
             )
-            # Display missing keywords clearly
-            if len(missing_keywords) == 1:
-                print(f'   Missing keyword: "{list(missing_keywords)[0]}"')
+            # Display missing patterns clearly
+            if len(missing_patterns) == 1:
+                print(f"   Missing pattern: /{list(missing_patterns)[0]}/")
             else:
-                print(f"   Missing keywords:")
-                for keyword in sorted(missing_keywords):
-                    print(f'     - "{keyword}"')
-            # Display found keywords if any
+                print(f"   Missing patterns:")
+                for pattern in sorted(missing_patterns):
+                    print(f"     - /{pattern}/")
+            # Display found patterns if any
             if found_expect_keywords:
                 if len(found_expect_keywords) == 1:
-                    print(f'   Found keyword: "{list(found_expect_keywords)[0]}"')
+                    print(f"   Found pattern: /{list(found_expect_keywords)[0]}/")
                 else:
-                    print(f"   Found keywords:")
-                    for keyword in sorted(found_expect_keywords):
-                        print(f'     - "{keyword}"')
+                    print(f"   Found patterns:")
+                    for pattern in sorted(found_expect_keywords):
+                        print(f"     - /{pattern}/")
         else:
             print(
-                f"✅ Monitor succeeded - all {len(expect_keywords)} expect keywords found"
+                f"✅ Monitor succeeded - all {len(expect_patterns)} expect patterns found"
             )
-            if len(expect_keywords) == 1:
-                print(f'   Keyword: "{expect_keywords[0]}"')
+            if len(expect_patterns) == 1:
+                print(f"   Pattern: /{expect_patterns[0][0]}/")
             else:
-                print(f"   Keywords:")
-                for keyword in sorted(expect_keywords):
-                    print(f'     - "{keyword}"')
+                print(f"   Patterns:")
+                for pattern_str, _ in sorted(expect_patterns):
+                    print(f"     - /{pattern_str}/")
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
     elif stream and success:
@@ -643,12 +669,12 @@ Examples:
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
-  %(prog)s --exit-on-error          # Exit 1 immediately if "ERROR" found
-  %(prog)s --fail-on PANIC          # Exit 1 immediately if "PANIC" found
-  %(prog)s --fail-on ERROR --fail-on CRASH  # Exit 1 on any keyword
-  %(prog)s --no-fail-on             # Explicitly disable all failure keywords
-  %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
-  %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
+  %(prog)s --exit-on-error          # Exit 1 immediately if \bERROR\b pattern matches
+  %(prog)s --fail-on "PANIC"        # Exit 1 immediately if "PANIC" pattern found
+  %(prog)s --fail-on "ERROR" --fail-on "CRASH"  # Exit 1 on any pattern match
+  %(prog)s --no-fail-on             # Explicitly disable all failure patterns
+  %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" pattern found by timeout
+  %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL patterns found
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
   %(prog)s RX --env esp32dev --verbose --upload-port COM3
         """,
@@ -694,26 +720,26 @@ Examples:
     parser.add_argument(
         "--exit-on-error",
         action="store_true",
-        help="Exit 1 immediately if 'ERROR' keyword found in output (convenient shorthand for --fail-on ERROR)",
+        help=r"Exit 1 immediately if ERROR found (word boundary required). Uses regex pattern \bERROR\b to match ERROR as a complete word.",
     )
     parser.add_argument(
         "--fail-on",
         "-f",
         action="append",
         dest="fail_keywords",
-        help="Keyword that triggers immediate termination + exit 1 if found (can be specified multiple times)",
+        help="Regex pattern that triggers immediate termination + exit 1 if matched (can be specified multiple times)",
     )
     parser.add_argument(
         "--no-fail-on",
         action="store_true",
-        help="Explicitly disable all --fail-on keywords",
+        help="Explicitly disable all --fail-on patterns",
     )
     parser.add_argument(
         "--expect",
         "-x",
         action="append",
         dest="expect_keywords",
-        help="Keyword that must be found by timeout for exit 0. ALL keywords must be found (can be specified multiple times). Monitor runs until timeout to find all.",
+        help="Regex pattern that must be matched by timeout for exit 0. ALL patterns must be found (can be specified multiple times). Monitor runs until timeout to find all.",
     )
     parser.add_argument(
         "--stream",
@@ -759,19 +785,19 @@ def main() -> int:
         )
         return 1
 
-    # Set default fail keywords (default: wait until timeout, no immediate fail)
+    # Set default fail patterns (default: wait until timeout, no immediate fail)
     if args.no_fail_on:
-        # Explicitly disable all fail keywords
+        # Explicitly disable all fail patterns
         fail_keywords: list[str] = []
     else:
         # Start with empty list (new default: no immediate fail)
         fail_keywords: list[str] = []
 
-        # Add ERROR if --exit-on-error specified
+        # Add \bERROR\b regex pattern if --exit-on-error specified
         if args.exit_on_error:
-            fail_keywords.append("ERROR")
+            fail_keywords.append(r"\bERROR\b")
 
-        # Add custom keywords from --fail-on
+        # Add custom patterns from --fail-on
         if args.fail_keywords:
             fail_keywords.extend(args.fail_keywords)
 
