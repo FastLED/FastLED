@@ -103,7 +103,7 @@
 
 // Disable PARLIO ISR logging BEFORE any FastLED includes to prevent watchdog timeout
 // (Serial printing inside ISR exceeds watchdog threshold - must disable at translation unit level)
-#undef FASTLED_LOG_PARLIO_ENABLED
+// #undef FASTLED_LOG_PARLIO_ENABLED  // COMMENTED OUT: Agent loop instructions require FL_LOG_PARLIO_ENABLED to be kept enabled
 
 // ⚠️ IMPORTANT: Test matrix configuration moved to ValidationConfig.h
 // This ensures consistent configuration across all compilation units (.ino and .cpp files)
