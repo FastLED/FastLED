@@ -92,8 +92,6 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug --no-fail-on` - Explicitly disable all failure keywords
 - `bash debug --expect "SUCCESS"` - Exit 0 only if keyword found by timeout
 - `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL keywords found by timeout
-- `bash debug --auto-exit 10` - Auto-exit after 10 seconds of no output (default: 5s)
-- `bash debug --no-auto-exit` - Disable auto-exit feature
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
@@ -111,8 +109,6 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - 0: Success (normal timeout, clean exit, or all expect keywords found)
 - 1: Failure (compile/upload error, fail keyword found, or missing expect keywords)
 - 130: User interrupt (Ctrl+C)
-
-**Note:** Using both `--no-fail-on` and `--fail-on`/`--exit-on-error` causes error.
 
 ### Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:

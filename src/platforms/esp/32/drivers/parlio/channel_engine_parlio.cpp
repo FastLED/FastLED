@@ -54,7 +54,7 @@ namespace fl {
 // - Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
 static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
 
-constexpr size_t MAX_LEDS_PER_CHANNEL = 100; // Support up to 3000 LEDs per channel (configurable)
+constexpr size_t MAX_LEDS_PER_CHANNEL = 3000; // Support up to 3000 LEDs per channel (configurable)
 
 //=============================================================================
 // Phase 4: Cross-Platform Memory Barriers
@@ -636,6 +636,15 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     size_t bytes_remaining = mState.mIsrContext->mTotalBytes - mState.mNextByteOffset;
     size_t bytes_per_buffer = (mState.mIsrContext->mTotalBytes + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
 
+    // CAP bytes_per_buffer at ring buffer capacity to enable streaming for large strips
+    // Without this cap, large LED strips (e.g., 3000 LEDs) would try to fit 3000 bytes into
+    // a buffer sized for 100 LEDs, causing buffer overflow
+    ParlioBufferCalculator calc{mState.mDataWidth};
+    size_t max_input_bytes_per_buffer = mState.mRingBufferCapacity / calc.outputBytesPerInputByte();
+    if (bytes_per_buffer > max_input_bytes_per_buffer) {
+        bytes_per_buffer = max_input_bytes_per_buffer;
+    }
+
     // LED boundary alignment: Round DOWN to nearest multiple of (3 bytes × lane count)
     // This prevents buffer splits from occurring mid-LED across all lanes, which causes bit shift corruption
     size_t bytes_per_led_all_lanes = 3 * mState.mDataWidth;  // 3 bytes (RGB) × lane count
@@ -655,6 +664,10 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
                           (bytes_remaining <= bytes_per_buffer);
     if (is_last_buffer) {
         byte_count = bytes_remaining;  // Last buffer takes all remaining bytes
+        // BUT cap at buffer capacity (streaming will handle rest)
+        if (byte_count > max_input_bytes_per_buffer) {
+            byte_count = max_input_bytes_per_buffer;
+        }
     } else {
         byte_count = bytes_per_buffer;  // Earlier buffers use aligned size
     }

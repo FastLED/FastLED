@@ -134,10 +134,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     FastLED.show();
 
-
-
-    // Wait for RX completion
-    auto wait_result = rx_channel->wait(100);
+    // Wait for RX completion (10ms timeout - fast fail without hardware)
+    // Reduced from 100ms to make tests complete faster and prevent auto-exit timeout
+    auto wait_result = rx_channel->wait(10);
 
     // PARLIO debug metrics only shown on errors (controlled via PARLIO_DEBUG_VERBOSE)
     // To enable verbose PARLIO debugging, define PARLIO_DEBUG_VERBOSE in ValidationConfig.h
@@ -330,6 +329,11 @@ void runMultiTest(const char* test_name,
 
     // Execute multiple runs
     for (int run = 1; run <= multi_config.num_runs; run++) {
+        // Print progress to keep output flowing (prevents auto-exit timeout)
+        if (run % 3 == 1 || multi_config.num_runs <= 5) {
+            FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] Testing...");
+        }
+
         fl::RunResult result;
         result.run_number = run;
 
@@ -524,8 +528,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     multi_config.max_errors_per_run = 5;  // Store first 5 errors
 
     // Test all 4 bit patterns (0-3)
-    // ISOLATION: Testing ONLY Pattern A (pattern_id = 0) for debugging
-    for (int pattern_id = 0; pattern_id < 1; pattern_id++) {
+    for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
         // Apply pattern to all lanes
         for (size_t i = 0; i < config.tx_configs.size(); i++) {
             setMixedBitPattern(
