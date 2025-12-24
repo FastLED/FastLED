@@ -78,7 +78,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 **Phase 1: Compile** - Build PlatformIO project for target environment
 **Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
-**Phase 3: Monitor** - Attach to serial monitor, capture output, detect keywords
+**Phase 3: Monitor** - Attach to serial monitor, capture output, detect patterns
 
 **Usage:**
 - `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
@@ -86,12 +86,12 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug --upload-port COM3` - Specific serial port
 - `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
 - `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --exit-on-error` - Exit 1 immediately if "ERROR" found (opt-in fast-fail)
-- `bash debug --fail-on PANIC` - Exit 1 immediately if keyword found
-- `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords (exits on any)
-- `bash debug --no-fail-on` - Explicitly disable all failure keywords
-- `bash debug --expect "SUCCESS"` - Exit 0 only if keyword found by timeout
-- `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL keywords found by timeout
+- `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (uses `\bERROR\b` regex pattern)
+- `bash debug --fail-on "PANIC"` - Exit 1 immediately if "PANIC" pattern found
+- `bash debug --fail-on "ERROR" --fail-on "CRASH"` - Multiple failure patterns (exits on any)
+- `bash debug --no-fail-on` - Explicitly disable all failure patterns
+- `bash debug --expect "SUCCESS"` - Exit 0 only if "SUCCESS" pattern found by timeout
+- `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL patterns found by timeout
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
@@ -99,15 +99,15 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - Minutes: `2m`
 - Milliseconds: `5000ms`
 
-**Keyword Behavior:**
-- `--exit-on-error`: Terminates immediately on "ERROR" match, exits 1 (convenient shorthand)
-- `--fail-on`: Terminates monitor immediately on match, exits 1
-- `--expect`: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
+**Pattern Behavior:**
+- `--exit-on-error`: Uses `\bERROR\b` regex (word boundary). Terminates immediately on match, exits 1 (convenient shorthand)
+- `--fail-on`: Accepts regex patterns. Terminates monitor immediately on match, exits 1
+- `--expect`: Accepts regex patterns. Monitors until timeout, exits 0 if ALL patterns found, exits 1 if any missing
 - Default: Waits until timeout (no immediate fail on errors)
 
 **Exit Codes:**
-- 0: Success (normal timeout, clean exit, or all expect keywords found)
-- 1: Failure (compile/upload error, fail keyword found, or missing expect keywords)
+- 0: Success (normal timeout, clean exit, or all expect patterns found)
+- 1: Failure (compile/upload error, fail pattern matched, or missing expect patterns)
 - 130: User interrupt (Ctrl+C)
 
 ### Package Installation Daemon Management
