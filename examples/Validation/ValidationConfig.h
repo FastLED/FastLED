@@ -22,8 +22,8 @@
 #define MAX_LANES 1
 
 // Strip size selection
-#define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
-// #define JUST_LARGE_STRIPS
+// #define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
+#define JUST_LARGE_STRIPS
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
