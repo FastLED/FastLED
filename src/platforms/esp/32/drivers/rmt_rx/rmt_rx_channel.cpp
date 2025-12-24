@@ -731,7 +731,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     int getPin() const override { return static_cast<int>(mPin); }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -748,24 +748,50 @@ class RmtRxChannelImpl : public RmtRxChannel {
         const auto *rmt_symbols =
             reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
 
+        // First pass: Count total edges
+        size_t total_edges = 0;
+        for (size_t i = 0; i < symbols.size(); i++) {
+            const auto &sym = rmt_symbols[i];
+            if (sym.duration0 > 0) total_edges++;
+            if (sym.duration1 > 0) total_edges++;
+        }
+
+        // Calculate range to extract
+        size_t start_edge = offset;
+        size_t end_edge = offset + out.size();  // span size = max count
+
+        if (start_edge >= total_edges) return 0;
+        if (end_edge > total_edges) end_edge = total_edges;
+
+        // Second pass: Extract edges in requested range
+        size_t current_edge = 0;
         size_t write_index = 0;
-        for (size_t i = 0; i < symbols.size() && write_index < out.size();
-             i++) {
+
+        for (size_t i = 0; i < symbols.size() && write_index < out.size(); i++) {
             const auto &sym = rmt_symbols[i];
 
             // First edge: duration0 with level0
-            if (sym.duration0 > 0 && write_index < out.size()) {
-                out[write_index] = EdgeTime(
-                    sym.level0 != 0, ticksToNs(sym.duration0, ns_per_tick));
-                write_index++;
+            if (sym.duration0 > 0) {
+                if (current_edge >= start_edge && current_edge < end_edge) {
+                    out[write_index] = EdgeTime(
+                        sym.level0 != 0, ticksToNs(sym.duration0, ns_per_tick));
+                    write_index++;
+                }
+                current_edge++;
             }
 
             // Second edge: duration1 with level1
-            if (sym.duration1 > 0 && write_index < out.size()) {
-                out[write_index] = EdgeTime(
-                    sym.level1 != 0, ticksToNs(sym.duration1, ns_per_tick));
-                write_index++;
+            if (sym.duration1 > 0) {
+                if (current_edge >= start_edge && current_edge < end_edge) {
+                    out[write_index] = EdgeTime(
+                        sym.level1 != 0, ticksToNs(sym.duration1, ns_per_tick));
+                    write_index++;
+                }
+                current_edge++;
             }
+
+            // Early exit if we've written all requested edges
+            if (current_edge >= end_edge) break;
         }
 
         return write_index;

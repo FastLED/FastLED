@@ -44,6 +44,25 @@ struct EdgeTime {
 };
 
 /**
+ * @brief Edge range specification for getRawEdgeTimes() debugging
+ *
+ * Specifies a range of edges to extract from the RX buffer.
+ * Used for printing edge timing context around specific locations.
+ *
+ * Example:
+ * - EdgeRange{0, 256} = first 256 edges
+ * - EdgeRange{100, 20} = 20 edges starting at offset 100
+ */
+struct EdgeRange {
+    size_t offset;  ///< Starting edge index
+    size_t count;   ///< Number of edges to extract
+
+    /// Constructor
+    constexpr EdgeRange(size_t offset_, size_t count_)
+        : offset(offset_), count(count_) {}
+};
+
+/**
  * @brief Error codes for RX decoder operations
  */
 enum class DecodeError : uint8_t {
@@ -284,7 +303,8 @@ public:
 
     /**
      * @brief Get raw edge timings in universal format (for debugging)
-     * @param out Output span to write EdgeTime entries (pre-allocated by caller)
+     * @param out Output span to write EdgeTime entries (span.size() = max edges to read)
+     * @param offset Starting edge index to read from (default: 0)
      * @return Number of EdgeTime entries written (may be less than out.size() if insufficient data)
      *
      * Converts internal platform-specific format (RMT ticks, ISR timestamps, etc.)
@@ -300,20 +320,16 @@ public:
      * rx->begin(config);
      * rx->wait(100);
      *
-     * // Stack allocation
+     * // Get first 100 edges
      * EdgeTime edges[100];
-     * size_t count = rx->getRawEdgeTimes(edges);
-     * for (size_t i = 0; i < count; i++) {
-     *     printf("%s %uns\n", edges[i].high ? "HIGH" : "LOW", edges[i].ns);
-     * }
+     * size_t count = rx->getRawEdgeTimes(edges);  // offset defaults to 0
      *
-     * // Or use HeapVector for dynamic sizing
-     * fl::HeapVector<EdgeTime> edges(1024);
-     * size_t count = rx->getRawEdgeTimes(edges);
-     * edges.resize(count);  // Trim to actual size
+     * // Get 10 edges starting at offset 50
+     * EdgeTime edges[10];
+     * size_t count = rx->getRawEdgeTimes(edges, 50);
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) = 0;
 
     /**
      * @brief Get device type name

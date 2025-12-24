@@ -10,6 +10,95 @@
 #include "platforms/esp/32/drivers/parlio/channel_engine_parlio.h"
 #endif
 
+/// @brief Dump raw edge timing data to console for debugging
+/// @param rx_channel RX device to read edge data from
+/// @param timing Chipset timing configuration for pattern analysis
+/// @param range Edge range to print (offset, count)
+void dumpRawEdgeTiming(fl::shared_ptr<fl::RxDevice> rx_channel,
+                       const fl::ChipsetTimingConfig& timing,
+                       fl::EdgeRange range) {
+    if (!rx_channel) {
+        FL_WARN("[RAW EDGE TIMING] ERROR: RX channel is null");
+        return;
+    }
+
+    // Allocate edge buffer sized to requested count (max 256 to avoid stack overflow)
+    fl::FixedVector<fl::EdgeTime, 256> edges;
+    size_t buffer_size = range.count < 256 ? range.count : 256;
+    edges.resize(buffer_size);  // Default initializes to EdgeTime()
+
+    // Get edges starting at offset
+    size_t edge_count = rx_channel->getRawEdgeTimes(edges, range.offset);
+
+    if (edge_count == 0) {
+        FL_WARN("[RAW EDGE TIMING] WARNING: No edge data captured at offset " << range.offset);
+        return;
+    }
+
+    // Calculate actual range printed (start from offset)
+    size_t start_idx = range.offset;
+    size_t end_idx = range.offset + edge_count;
+
+    FL_WARN("[RAW EDGES " << start_idx << ".." << (end_idx - 1) << "]");
+
+    // Display edges (edges buffer contains data starting from offset)
+    for (size_t i = 0; i < edge_count; i++) {
+        const char* level = edges[i].high ? "H" : "L";
+        size_t absolute_index = start_idx + i;
+        FL_WARN("  [" << absolute_index << "] " << level << " " << edges[i].ns);
+    }
+
+    // Pattern analysis (only if showing edges from start)
+    if (range.offset == 0 && edge_count >= 16) {
+        // Calculate expected timings from config (3-phase to 4-phase conversion)
+        uint32_t expected_bit0_high = timing.t1_ns;
+        uint32_t expected_bit0_low = timing.t2_ns + timing.t3_ns;
+        uint32_t expected_bit1_high = timing.t1_ns + timing.t2_ns;
+        uint32_t expected_bit1_low = timing.t3_ns;
+
+        const uint32_t tolerance = 150;
+
+        bool has_short_high = false, has_long_high = false;
+        bool has_short_low = false, has_long_low = false;
+
+        for (size_t i = 0; i < edge_count; i++) {
+            uint32_t ns = edges[i].ns;
+            if (edges[i].high) {
+                if (ns >= expected_bit0_high - tolerance && ns <= expected_bit0_high + tolerance)
+                    has_short_high = true;
+                if (ns >= expected_bit1_high - tolerance && ns <= expected_bit1_high + tolerance)
+                    has_long_high = true;
+            } else {
+                if (ns >= expected_bit1_low - tolerance && ns <= expected_bit1_low + tolerance)
+                    has_short_low = true;
+                if (ns >= expected_bit0_low - tolerance && ns <= expected_bit0_low + tolerance)
+                    has_long_low = true;
+            }
+        }
+
+        FL_WARN("\n[RAW EDGE TIMING] Pattern Analysis:");
+        FL_WARN("  Short HIGH (~" << expected_bit0_high << "ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
+        FL_WARN("  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
+
+        if (has_short_high && has_long_high && has_short_low && has_long_low) {
+            FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
+        } else if (!has_short_high && !has_long_high) {
+            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!");
+            FL_ERROR("[RAW EDGE TIMING]   Possible causes:");
+            FL_ERROR("[RAW EDGE TIMING]   1. Encoder not reading pixel buffer data");
+            FL_ERROR("[RAW EDGE TIMING]   2. Bytes encoder state machine stuck");
+            FL_ERROR("[RAW EDGE TIMING]   3. Data pointer not passed correctly to encoder");
+        } else if (!has_short_low && !has_long_low) {
+            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
+        } else {
+            FL_WARN("[RAW EDGE TIMING] ⚠ Partial pattern match - encoder may have issues");
+        }
+    }
+    FL_WARN("");
+}
+
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
@@ -45,56 +134,8 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // Wait for RX completion
     auto wait_result = rx_channel->wait(100);
 
-    // Phase 0: Print PARLIO debug metrics after RX wait completes
-#if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
-#ifdef JUST_PARLIO
-    // Get debug metrics from singleton ISR context
-    fl::ParlioDebugMetrics debug = fl::getParlioDebugMetrics();
-
-    // Also access ISR context directly for additional fields
-    auto* isr_ctx = fl::ParlioIsrContext::getInstance();
-
-    FL_WARN("");
-    FL_WARN("╔════════════════════════════════════════════════════════════════╗");
-    FL_WARN("║ PARLIO ISR DEBUG METRICS                                       ║");
-    FL_WARN("╚════════════════════════════════════════════════════════════════╝");
-
-    if (isr_ctx) {
-        FL_WARN("[ISR CONTEXT STATE]");
-        FL_WARN("  Transmitting:      " << (isr_ctx->mTransmitting ? "YES" : "NO"));
-        FL_WARN("  Stream Complete:   " << (isr_ctx->mStreamComplete ? "YES" : "NO"));
-        FL_WARN("  Ring Error:        " << (isr_ctx->mRingError ? "YES" : "NO"));
-        FL_WARN("");
-
-        FL_WARN("[RING BUFFER STATE]");
-        FL_WARN("  Ring Read Index:   " << isr_ctx->mRingReadIdx);
-        FL_WARN("  Ring Write Index:  " << isr_ctx->mRingWriteIdx);
-        FL_WARN("  ISR Callbacks:     " << isr_ctx->mIsrCount);
-        FL_WARN("");
-
-        FL_WARN("[BYTE PROGRESS]");
-        FL_WARN("  Total Bytes:       " << isr_ctx->mTotalBytes);
-        FL_WARN("  Current Byte:      " << isr_ctx->mCurrentByte);
-        FL_WARN("  Num Lanes:         " << isr_ctx->mNumLanes);
-        FL_WARN("");
-
-        FL_WARN("[TRANSMISSION METRICS]");
-        FL_WARN("  Start Time:        " << debug.mStartTimeUs << " μs");
-        FL_WARN("  End Time:          " << debug.mEndTimeUs << " μs");
-        if (debug.mEndTimeUs > debug.mStartTimeUs) {
-            FL_WARN("  Duration:          " << (debug.mEndTimeUs - debug.mStartTimeUs) << " μs");
-        }
-        FL_WARN("  Bytes Total:       " << debug.mBytesTotal);
-        FL_WARN("  Bytes TX'd:        " << debug.mBytesTransmitted);
-        FL_WARN("  TX Active:         " << (debug.mTransmissionActive ? "YES" : "NO"));
-        FL_WARN("  Error Code:        " << debug.mErrorCode << (debug.mErrorCode == 0 ? " (ESP_OK)" : " (ERROR)"));
-    } else {
-        FL_WARN("[ERROR] ISR context not initialized (nullptr)");
-    }
-
-    FL_WARN("");
-#endif // JUST_PARLIO
-#endif // ESP32 && FASTLED_ESP32_HAS_PARLIO
+    // PARLIO debug metrics only shown on errors (controlled via PARLIO_DEBUG_VERBOSE)
+    // To enable verbose PARLIO debugging, define PARLIO_DEBUG_VERBOSE in ValidationConfig.h
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
         FL_ERROR("RX wait failed (timeout or no data received)");
@@ -107,89 +148,6 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("");
         return 0;
     }
-
-    // ========================================================================
-    // RAW EDGE TIMING INSPECTION (Debug: Validate encoder output)
-    // ========================================================================
-    // This inspection helps determine if the RMT encoder is producing correct
-    // symbols or if it's outputting constant timing (which would decode to all zeros)
-
-    FL_WARN("\n[RAW EDGE TIMING] Inspecting first 32 edge transitions:");
-
-    fl::EdgeTime edges[32];  // Capture first 32 edges (enough for ~2 WS2812B bits)
-    size_t edge_count = rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges, 32));
-
-    if (edge_count == 0) {
-        FL_WARN("[RAW EDGE TIMING] WARNING: No edge data captured!");
-    } else {
-        FL_WARN("[RAW EDGE TIMING] Captured " << edge_count << " edges:");
-
-        // Display first few edges with their timing
-        size_t display_limit = edge_count < 16 ? edge_count : 16;
-        for (size_t i = 0; i < display_limit; i++) {
-            const char* level = edges[i].high ? "HIGH" : "LOW ";
-            FL_WARN("  Edge[" << i << "]: " << level << " " << edges[i].ns << "ns");
-        }
-
-        if (edge_count > display_limit) {
-            FL_WARN("  ... (" << (edge_count - display_limit) << " more edges not shown)");
-        }
-
-        // Analyze timing patterns to detect if encoder is working
-        // Calculate expected timings from config (3-phase to 4-phase conversion)
-        // Bit 0: T0H = T1, T0L = T2 + T3
-        // Bit 1: T1H = T1 + T2, T1L = T3
-        uint32_t expected_bit0_high = timing.t1_ns;
-        uint32_t expected_bit0_low = timing.t2_ns + timing.t3_ns;
-        uint32_t expected_bit1_high = timing.t1_ns + timing.t2_ns;
-        uint32_t expected_bit1_low = timing.t3_ns;
-
-        // Use ±150ns tolerance for pattern matching
-        const uint32_t tolerance = 150;
-
-        bool has_short_high = false;  // Bit 0 high (T1)
-        bool has_long_high = false;   // Bit 1 high (T1+T2)
-        bool has_short_low = false;   // Bit 1 low (T3)
-        bool has_long_low = false;    // Bit 0 low (T2+T3)
-
-        for (size_t i = 0; i < edge_count; i++) {
-            uint32_t ns = edges[i].ns;
-            if (edges[i].high) {
-                // High pulse
-                if (ns >= expected_bit0_high - tolerance && ns <= expected_bit0_high + tolerance)
-                    has_short_high = true;
-                if (ns >= expected_bit1_high - tolerance && ns <= expected_bit1_high + tolerance)
-                    has_long_high = true;
-            } else {
-                // Low pulse
-                if (ns >= expected_bit1_low - tolerance && ns <= expected_bit1_low + tolerance)
-                    has_short_low = true;
-                if (ns >= expected_bit0_low - tolerance && ns <= expected_bit0_low + tolerance)
-                    has_long_low = true;
-            }
-        }
-
-        FL_WARN("\n[RAW EDGE TIMING] Pattern Analysis:");
-        FL_WARN("  Short HIGH (~" << expected_bit0_high << "ns, Bit 0): " << (has_short_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗"));
-        FL_WARN("  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗"));
-
-        if (has_short_high && has_long_high && has_short_low && has_long_low) {
-            FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
-        } else if (!has_short_high && !has_long_high) {
-            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!");
-            FL_ERROR("[RAW EDGE TIMING]   Possible causes:");
-            FL_ERROR("[RAW EDGE TIMING]   1. Encoder not reading pixel buffer data");
-            FL_ERROR("[RAW EDGE TIMING]   2. Bytes encoder state machine stuck");
-            FL_ERROR("[RAW EDGE TIMING]   3. Data pointer not passed correctly to encoder");
-        } else if (!has_short_low && !has_long_low) {
-            FL_ERROR("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
-        } else {
-            FL_WARN("[RAW EDGE TIMING] ⚠ Partial pattern match - encoder may have issues");
-        }
-    }
-    FL_WARN("");
 
     // Decode received data directly into rx_buffer
     // Create 4-phase RX timing from the passed 3-phase TX timing
@@ -204,6 +162,8 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     if (!decode_result.ok()) {
         FL_ERROR("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
+        // Print raw edge timing on decode failure to diagnose the issue
+        dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 256));
         return 0;
     }
 
@@ -306,6 +266,19 @@ void runTest(const char* test_name,
                         << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
                         << ") got RGB(" << static_cast<int>(actual_r) << ","
                         << static_cast<int>(actual_g) << "," << static_cast<int>(actual_b) << ")");
+
+                // Print raw edge timing context around corruption point
+                if (mismatches == 0) {  // Only print for first mismatch to avoid spam
+                    FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << "]");
+
+                    // Calculate edge index for corrupted LED
+                    size_t corruption_edge_index = i * 48;
+                    size_t offset = corruption_edge_index > 4 ? corruption_edge_index - 4 : 0;
+
+                    // Dump raw edge timing around corruption point (9 edges: -4 to +4)
+                    dumpRawEdgeTiming(config.rx_channel, config.timing, fl::EdgeRange(offset, 9));
+                }
+
                 mismatches++;
             }
         }
@@ -388,6 +361,18 @@ void runMultiTest(const char* test_name,
                 uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
                 if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
+                    // Print corruption context for first mismatch only
+                    if (mismatches == 0) {
+                        FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << ", Run " << run << "]");
+
+                        // Calculate edge index and print timing around corruption point
+                        size_t corruption_edge_index = i * 48;
+                        size_t offset = corruption_edge_index > 4 ? corruption_edge_index - 4 : 0;
+
+                        // Dump raw edge timing around corruption point (9 edges: -4 to +4)
+                        dumpRawEdgeTiming(config.rx_channel, config.timing, fl::EdgeRange(offset, 9));
+                    }
+
                     mismatches++;
 
                     // Store first N errors

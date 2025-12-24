@@ -228,7 +228,7 @@ public:
      * }
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out) override = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override = 0;
 
     /**
      * @brief Get device type name

@@ -760,7 +760,7 @@ private:
         return false;
     }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out) override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override {
         // Ensure conversion from cycles to nanoseconds has happened
         fl::span<const EdgeTimestamp> edges = getEdges();
 
@@ -768,37 +768,61 @@ private:
             return 0;
         }
 
-        size_t out_index = 0;
-
-        // Process edges: Calculate duration between transitions (state durations)
-        // Each EdgeTimestamp records when a transition occurred and the new level
-        for (size_t i = 0; i < edges.size() && out_index < out.size(); ) {
-            // Current edge: level = state AFTER this transition
+        // First pass: Count total valid edges
+        size_t total_edges = 0;
+        for (size_t i = 0; i < edges.size(); ) {
             uint8_t current_state = edges[i].level;
-            uint32_t state_start_ns = edges[i].time_ns;  // This state started at this transition
+            uint32_t state_start_ns = edges[i].time_ns;
 
-            // Find next transition (different level) to calculate duration
             size_t next_i = i + 1;
             while (next_i < edges.size() && edges[next_i].level == current_state) {
-                // Same state (glitch/bounce) - skip to next different state
                 next_i++;
             }
 
-            // Calculate duration: from this transition to next transition (or end)
+            if (next_i < edges.size()) {
+                uint32_t accumulated_ns = edges[next_i].time_ns - state_start_ns;
+                if (accumulated_ns >= mSignalRangeMinNs) {
+                    total_edges++;
+                }
+            }
+
+            i = next_i;
+        }
+
+        // Calculate range to extract
+        size_t start_edge = offset;
+        size_t end_edge = offset + out.size();  // span size = max count
+
+        if (start_edge >= total_edges) return 0;
+        if (end_edge > total_edges) end_edge = total_edges;
+
+        // Second pass: Extract edges in requested range
+        size_t current_edge = 0;
+        size_t out_index = 0;
+
+        for (size_t i = 0; i < edges.size() && out_index < out.size(); ) {
+            uint8_t current_state = edges[i].level;
+            uint32_t state_start_ns = edges[i].time_ns;
+
+            size_t next_i = i + 1;
+            while (next_i < edges.size() && edges[next_i].level == current_state) {
+                next_i++;
+            }
+
             uint32_t accumulated_ns;
             if (next_i < edges.size()) {
-                // Duration until next transition
                 accumulated_ns = edges[next_i].time_ns - state_start_ns;
             } else {
-                // Last edge - no next transition, skip it (incomplete duration)
                 break;
             }
 
-            // Filter out transitions shorter than minimum threshold
             if (accumulated_ns >= mSignalRangeMinNs) {
-                // Emit accumulated duration for this state
-                out[out_index] = EdgeTime(current_state == 1, accumulated_ns);
-                out_index++;
+                if (current_edge >= start_edge && current_edge < end_edge) {
+                    out[out_index] = EdgeTime(current_state == 1, accumulated_ns);
+                    out_index++;
+                }
+                current_edge++;
+                if (current_edge >= end_edge) break;
             }
 
             i = next_i;
