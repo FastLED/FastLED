@@ -27,6 +27,8 @@ Phase 3: Monitor
     - Attaches to serial monitor and displays real-time output
     - --expect: Monitors until timeout, exits 0 if ALL keywords found, exits 1 if any missing
     - --fail-on: Terminates immediately on match, exits 1
+    - --auto-exit: Auto-terminates if no output for N seconds (default: 5s)
+    - --no-auto-exit: Disables auto-exit feature
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
@@ -58,6 +60,8 @@ Usage:
     uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
     uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
+    uv run ci/debug_attached.py --auto-exit 10           # Auto-exit after 10 seconds of no output
+    uv run ci/debug_attached.py --no-auto-exit           # Disable auto-exit (default is 5 seconds)
     uv run ci/debug_attached.py --kill-daemon            # Restart daemon before running (useful if stuck)
     uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
 """
@@ -386,6 +390,7 @@ def run_monitor(
     fail_keywords: list[str] | None = None,
     expect_keywords: list[str] | None = None,
     stream: bool = False,
+    auto_exit_timeout: int | None = None,
 ) -> tuple[bool, list[str]]:
     """Attach to serial monitor and capture output.
 
@@ -403,6 +408,7 @@ def run_monitor(
         fail_keywords: List of keywords that trigger immediate termination + exit 1 (default: ["ERROR"])
         expect_keywords: List of keywords that must ALL be found by timeout for exit 0
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
+        auto_exit_timeout: If set, auto-exit if no output received for this many seconds (default: None = disabled)
 
     Returns:
         Tuple of (success, output_lines)
@@ -431,6 +437,8 @@ def run_monitor(
         print("Mode: STREAMING (runs until Ctrl+C)")
     else:
         print(f"Timeout: {timeout} seconds")
+    if auto_exit_timeout is not None:
+        print(f"Auto-exit: {auto_exit_timeout} seconds (no output)")
     if fail_keywords:
         print(f"Fail keywords: {', '.join(fail_keywords)}")
     if expect_keywords:
@@ -451,10 +459,12 @@ def run_monitor(
     expect_lines = []  # Track all lines containing expect keywords
     found_expect_keywords = set()  # Track which expect keywords have been found
     start_time = time.time()
+    last_output_time = time.time()  # Track time of last output for auto-exit
     fail_keyword_found = False
     matched_fail_keyword = None
     matched_fail_line = None
     timeout_reached = False
+    auto_exit_triggered = False
 
     try:
         while True:
@@ -467,14 +477,33 @@ def run_monitor(
                     proc.terminate()
                     break
 
-            # Read next line with 30-second timeout
+            # Check auto-exit timeout (no output for specified duration)
+            if auto_exit_timeout is not None:
+                time_since_output = time.time() - last_output_time
+                if time_since_output >= auto_exit_timeout:
+                    print(
+                        f"\n⏱️  Auto-exit triggered: No output for {auto_exit_timeout} seconds"
+                    )
+                    print(
+                        "   Use --no-auto-exit or --auto-exit <SECONDS> to control this behavior"
+                    )
+                    auto_exit_triggered = True
+                    proc.terminate()
+                    break
+
+            # Read next line with appropriate timeout
+            # Use shorter timeout when auto-exit is enabled to check more frequently
+            read_timeout = (
+                min(30, auto_exit_timeout) if auto_exit_timeout is not None else 30
+            )
             try:
-                line = proc.get_next_line(timeout=30)
+                line = proc.get_next_line(timeout=read_timeout)
                 if isinstance(line, EndOfStream):
                     break
                 if line:
                     output_lines.append(line)
                     print(line)  # Real-time output
+                    last_output_time = time.time()  # Update last output time
 
                     # Check for expect keywords (track but don't terminate)
                     if expect_keywords:
@@ -511,7 +540,7 @@ def run_monitor(
                                 break
 
             except TimeoutError:
-                # No output within 30 seconds - continue waiting (check overall timeout on next loop)
+                # No output within read timeout - continue waiting (will check timeouts on next loop)
                 continue
 
     except KeyboardInterrupt:
@@ -526,6 +555,9 @@ def run_monitor(
     if fail_keyword_found:
         # Fail keyword match always means failure
         success = False
+    elif auto_exit_triggered:
+        # Auto-exit is considered success (clean exit due to no output)
+        success = True
     elif expect_keywords:
         # If expect keywords were specified, ALL must be found for success
         missing_keywords = set(expect_keywords) - found_expect_keywords
@@ -581,6 +613,10 @@ def run_monitor(
     if fail_keyword_found:
         print(f"❌ Monitor failed - fail keyword '{matched_fail_keyword}' detected")
         print(f"   Matched line: {matched_fail_line}")
+    elif auto_exit_triggered:
+        print(
+            f"✅ Monitor completed successfully (auto-exit triggered after {auto_exit_timeout}s of no output)"
+        )
     elif expect_keywords:
         # Check if all expect keywords were found
         missing_keywords = set(expect_keywords) - found_expect_keywords
@@ -650,6 +686,8 @@ Examples:
   %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" found by timeout
   %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL keywords found
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
+  %(prog)s --auto-exit 10           # Auto-exit after 10 seconds of no output
+  %(prog)s --no-auto-exit           # Disable auto-exit (default is 5 seconds)
   %(prog)s RX --env esp32dev --verbose --upload-port COM3
         """,
     )
@@ -726,6 +764,17 @@ Examples:
         action="store_true",
         help="Stop and restart the package daemon before running (useful if daemon is stuck)",
     )
+    parser.add_argument(
+        "--auto-exit",
+        type=str,
+        metavar="SECONDS",
+        help="Auto-exit if no serial output received for SECONDS (default: 5). Use --no-auto-exit to disable.",
+    )
+    parser.add_argument(
+        "--no-auto-exit",
+        action="store_true",
+        help="Disable auto-exit on no output (auto-exit is enabled by default with 5 second timeout)",
+    )
 
     return parser.parse_args()
 
@@ -781,6 +830,26 @@ def main() -> int:
     except ValueError as e:
         print(f"❌ Error: {e}")
         return 1
+
+    # Handle auto-exit arguments
+    if args.no_auto_exit and args.auto_exit:
+        print("❌ Error: Cannot specify both --no-auto-exit and --auto-exit")
+        return 1
+
+    if args.no_auto_exit:
+        auto_exit_timeout: int | None = None
+    elif args.auto_exit:
+        try:
+            auto_exit_timeout = int(args.auto_exit)
+            if auto_exit_timeout <= 0:
+                print("❌ Error: --auto-exit timeout must be positive")
+                return 1
+        except ValueError:
+            print(f"❌ Error: Invalid --auto-exit value: {args.auto_exit}")
+            return 1
+    else:
+        # Default: 5 seconds
+        auto_exit_timeout = 5
 
     print("FastLED Debug Attached Device")
     print("=" * 60)
@@ -865,6 +934,7 @@ def main() -> int:
                 fail_keywords,
                 args.expect_keywords or [],
                 args.stream,
+                auto_exit_timeout,
             )
 
             if not success:
