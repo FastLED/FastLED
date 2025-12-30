@@ -1124,7 +1124,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
         // Wait for ring to have space (ISR consuming buffers)
         while (!has_ring_space() && mState.mIsrContext->mTransmitting) {
-            fl::delayMicroseconds(10); // Yield to ISR
+            fl::delayMicroseconds(1); // Yield to ISR (reduced from 10µs for faster response)
         }
 
         // Check if transmission completed or errored
