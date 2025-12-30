@@ -57,6 +57,22 @@
 /// - **CPU Overhead**: Minimal - ISR performs waveform encoding and
 /// transposition on-the-fly
 ///
+/// ⚠️  **CRITICAL AI AGENT WARNING: NO LOGGING IN HOT PATHS**
+///
+/// The main thread computation loop (populateNextDMABuffer + blocking loop in
+/// beginTransmission) is a CRITICAL PERFORMANCE HOT PATH. Adding ANY logging
+/// (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf) to these sections causes:
+///
+/// - 98× performance degradation (1.2s vs 12ms per transmission)
+/// - Ring buffer underruns (hardware drains faster than CPU can refill)
+/// - "Hardware was idle" errors (45+ per transmission)
+///
+/// **Root Cause**: UART at 115200 baud = ~9ms per 80-char log message
+/// **CPU Budget**: Only 600μs available per buffer (hardware transmission time)
+///
+/// See TASK.md UPDATE #2 and #3 for detailed investigation and performance
+/// analysis. DO NOT add logging to hot paths without explicit permission.
+///
 /// ## Technical Details
 ///
 /// ### WS2812 Timing
@@ -586,6 +602,12 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @note Called by: (1) main thread loop in beginTransmission() for
     /// pre-population
     ///                  (2) poll() during transmission when ISR consumes buffers
+    ///
+    /// ⚠️  AI WARNING: CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
+    /// This function is called 20+ times per transmission in a tight timing loop.
+    /// Adding FL_LOG_PARLIO, FL_WARN, or any UART logging causes 98× performance
+    /// degradation and ring buffer underruns. See channel_engine_parlio.cpp for
+    /// detailed warnings and TASK.md UPDATE #2/#3 for investigation analysis.
     bool populateNextDMABuffer();
 
     /// @brief Check if ring has space for more buffers

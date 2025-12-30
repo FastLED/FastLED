@@ -682,6 +682,30 @@ bool ChannelEnginePARLIOImpl::generateRingBuffer() {
     return true;
 }
 
+//=============================================================================
+// ⚠️  AI AGENT WARNING: CRITICAL PERFORMANCE HOT PATH - NO LOGGING ALLOWED ⚠️
+//=============================================================================
+//
+// This function (populateNextDMABuffer) is called 20+ times per transmission
+// in a tight loop competing with hardware timing. ANY logging here causes:
+//
+// - UART overhead: ~9ms per log call @ 115200 baud (80 chars/log)
+// - CPU budget: Only 600μs available per buffer (hardware transmission time)
+// - Performance impact: Logging causes 98× slowdown (1.2s vs 12ms)
+// - Ring buffer underruns: Hardware drains faster than CPU can refill
+//
+// ❌ FORBIDDEN: FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, Serial.print
+// ✅ ALLOWED: Error conditions using FL_WARN (non-hot path, infrequent)
+//
+// If you need to debug this function:
+// 1. Use a logic analyzer or oscilloscope (hardware timing)
+// 2. Increment counters and log AFTER transmission completes
+// 3. Enable logging ONLY for single-shot debugging, then remove
+//
+// See TASK.md UPDATE #2 and #3 for detailed investigation of logging impact.
+//
+//=============================================================================
+
 bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     // Incremental buffer population - called repeatedly to fill ring buffers
     // Returns true if more buffers need to be populated, false if all done
@@ -774,10 +798,10 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     mState.mRingBufferSizes[ring_index] = outputBytesWritten;
 
     // DEBUG: Log buffer population details
-    FL_LOG_PARLIO("PARLIO: Populated buffer " << ring_index
-           << " | input bytes " << mState.mNextByteOffset << "-" << (mState.mNextByteOffset + byte_count - 1)
-           << " | byte_count=" << byte_count
-           << " | DMA bytes=" << outputBytesWritten);
+    // FL_LOG_PARLIO("PARLIO: Populated buffer " << ring_index
+    //        << " | input bytes " << mState.mNextByteOffset << "-" << (mState.mNextByteOffset + byte_count - 1)
+    //        << " | byte_count=" << byte_count
+    //        << " | DMA bytes=" << outputBytesWritten);
 
     // Update state for next buffer
     mState.mNextByteOffset += byte_count;
@@ -792,8 +816,8 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     // This fixes the ISR-CPU deadlock where ISR drains ring, hardware goes idle,
     // CPU populates buffers but ISR never fires again to queue them
     if (mState.mIsrContext->mHardwareIdle) {
-        FL_LOG_PARLIO("PARLIO CPU: Hardware was idle, restarting transmission | ring_count="
-               << mState.mIsrContext->mRingCount);
+        // FL_LOG_PARLIO("PARLIO CPU: Hardware was idle, restarting transmission | ring_count="
+        //        << mState.mIsrContext->mRingCount);
 
         // Get the buffer that was just populated (read_idx points to next buffer to transmit)
         size_t buffer_idx = mState.mIsrContext->mRingReadIdx;
@@ -814,7 +838,7 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
                 mState.mIsrContext->mRingCount = mState.mIsrContext->mRingCount - 1;
                 mState.mIsrContext->mHardwareIdle = false;
                 mState.mIsrContext->mTransmitting = true;
-                FL_LOG_PARLIO("PARLIO CPU: Hardware restarted OK | buffer=" << buffer_idx);
+                // FL_LOG_PARLIO("PARLIO CPU: Hardware restarted OK | buffer=" << buffer_idx);
             } else {
                 FL_WARN("PARLIO CPU: Failed to restart hardware: " << err);
                 mState.mErrorOccurred = true;
@@ -1108,14 +1132,14 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     mState.mNextPopulateIdx = 0;
     mState.mNextByteOffset = 0;
 
-    // Pre-populate ring buffers (fill all 3 buffers if possible)
+    // Pre-populate ring buffers (fill all N buffers if possible)
     // This ensures ISR has buffers ready when transmission starts
     // Remaining data will be populated incrementally during blocking loop
-    // Consume semaphore for each buffer populated (decrement available count)
+    // CRITICAL: NO semaphore operations during pre-population
+    // Semaphore represents ISR completion events, not buffer population events
     while (has_ring_space() && populateNextDMABuffer()) {
-        // Consume semaphore count for this buffer (non-blocking take)
-        // This keeps semaphore count in sync with actual ring space
-        xSemaphoreTake(static_cast<SemaphoreHandle_t>(mState.mRingSpaceSemaphore), 0);
+        // Buffer populated into ring, no semaphore operation needed
+        // Semaphore will be signaled by ISR when buffers complete transmission
     }
 
     // Get actual number of buffers populated from mRingCount
@@ -1178,18 +1202,37 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // Mark transmission started
     mState.mIsrContext->mTransmitting = true;
 
+    //=========================================================================
+    // ⚠️  AI AGENT WARNING: CRITICAL HOT PATH - NO LOGGING IN THIS LOOP ⚠️
+    //=========================================================================
+    //
     // Phase 2: Block here and continue populating buffers as ISR consumes them
     // This ensures all data gets transmitted before returning
     // The ISR queues buffers, and we refill the ring from CPU side
+    //
+    // PERFORMANCE CRITICAL: This loop iterates 20+ times per transmission and
+    // must complete each iteration in <600μs to keep hardware fed.
+    //
+    // ❌ DO NOT ADD: FL_LOG_PARLIO, FL_WARN, FL_DBG, printf inside this loop
+    // ✅ Logging BEFORE loop entry is acceptable (one-time startup cost)
+    //
+    // Logging inside this loop causes 98× performance degradation:
+    // - Each log call: ~9ms UART overhead @ 115200 baud
+    // - Hardware timing: 600μs per buffer transmission
+    // - Result: Ring buffer underruns, "Hardware was idle" errors
+    //
+    // See TASK.md UPDATE #2 and #3 for full analysis of logging impact.
+    //
+    //=========================================================================
     FL_LOG_PARLIO("PARLIO: Entering blocking loop | mNextByteOffset=" << mState.mNextByteOffset
            << " | mTotalBytes=" << mState.mIsrContext->mTotalBytes);
 
     while (mState.mNextByteOffset < mState.mIsrContext->mTotalBytes) {
-        FL_LOG_PARLIO("PARLIO: Loop iteration | offset=" << mState.mNextByteOffset
-               << "/" << mState.mIsrContext->mTotalBytes
-               << " | has_space=" << has_ring_space()
-               << " | transmitting=" << mState.mIsrContext->mTransmitting
-               << " | ring_count=" << mState.mIsrContext->mRingCount);
+        // FL_LOG_PARLIO("PARLIO: Loop iteration | offset=" << mState.mNextByteOffset
+        //        << "/" << mState.mIsrContext->mTotalBytes
+        //        << " | has_space=" << has_ring_space()
+        //        << " | transmitting=" << mState.mIsrContext->mTransmitting
+        //        << " | ring_count=" << mState.mIsrContext->mRingCount);
 
         // Wait for ring buffer slot to become available
         // Counting semaphore: count represents available slots (ISR increments when buffer consumed)
@@ -1199,27 +1242,27 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
         // If semaphore take failed (timeout) or transmission stopped, exit loop
         if (result != pdTRUE || !mState.mIsrContext->mTransmitting) {
-            FL_LOG_PARLIO("PARLIO: Semaphore take result=" << (result == pdTRUE ? "success" : "timeout")
-                   << " | transmitting=" << mState.mIsrContext->mTransmitting);
+            // FL_LOG_PARLIO("PARLIO: Semaphore take result=" << (result == pdTRUE ? "success" : "timeout")
+            //        << " | transmitting=" << mState.mIsrContext->mTransmitting);
             break;
         }
 
         // Semaphore obtained successfully - ring has space, proceed to populate
         // Populate next buffer if more data remains
         if (mState.mNextByteOffset < mState.mIsrContext->mTotalBytes) {
-            FL_LOG_PARLIO("PARLIO: About to populate next buffer | offset=" << mState.mNextByteOffset);
+            // FL_LOG_PARLIO("PARLIO: About to populate next buffer | offset=" << mState.mNextByteOffset);
             bool result = populateNextDMABuffer();
-            FL_LOG_PARLIO("PARLIO: Buffer populated | new_offset=" << mState.mNextByteOffset
-                   << " | result=" << (result ? "true" : "false"));
+            // FL_LOG_PARLIO("PARLIO: Buffer populated | new_offset=" << mState.mNextByteOffset
+            //        << " | result=" << (result ? "true" : "false"));
             // Note: populateNextDMABuffer() returns false when no more data to populate
             // This is normal completion, not an error
         }
     }
 
-    FL_LOG_PARLIO("PARLIO: Exited blocking loop | final_offset=" << mState.mNextByteOffset
-           << " | expected=" << mState.mIsrContext->mTotalBytes);
+    // FL_LOG_PARLIO("PARLIO: Exited blocking loop | final_offset=" << mState.mNextByteOffset
+    //        << " | expected=" << mState.mIsrContext->mTotalBytes);
 
-    FL_LOG_PARLIO("PARLIO: All buffers queued - transmission in progress");
+    // FL_LOG_PARLIO("PARLIO: All buffers queued - transmission in progress");
 }
 
 //=============================================================================
@@ -1465,15 +1508,15 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // Enable will be called by beginTransmission() before each transmission
     // This follows the enable-when-needed pattern recommended for peripheral management
 
-    // Step 7a: Create counting semaphore for ISR→CPU signaling (ring space tracking)
-    // Counting semaphore: count represents available ring buffer slots (0-3)
-    // - ISR gives semaphore for each buffer consumed (increments count)
-    // - CPU takes semaphore for each buffer to populate (decrements count, blocks if 0)
-    // This provides direct tracking of ring space and handles back pressure naturally
+    // Step 7a: Create counting semaphore for ISR→CPU signaling (completion tracking)
+    // Counting semaphore: count represents ISR completion signals not yet consumed by CPU
+    // - ISR gives semaphore for each buffer completion (increments count)
+    // - CPU takes semaphore to wait for completion signal (decrements count, blocks if 0)
+    // - Initial count = 0 (no completions yet, CPU will block until first ISR fires)
     if (!mState.mRingSpaceSemaphore) {
-        // Max count = 3 (PARLIO_RING_BUFFER_COUNT), initial count = 3 (all slots available)
+        // Max count = PARLIO_RING_BUFFER_COUNT (4), initial count = 0 (no completions yet)
         mState.mRingSpaceSemaphore = xSemaphoreCreateCounting(PARLIO_RING_BUFFER_COUNT,
-                                                                PARLIO_RING_BUFFER_COUNT);
+                                                                0);
         if (!mState.mRingSpaceSemaphore) {
             FL_WARN("PARLIO: Failed to create ring space semaphore");
             parlio_del_tx_unit(mState.mTxUnit);
