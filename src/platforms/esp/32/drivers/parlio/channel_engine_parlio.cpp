@@ -135,8 +135,13 @@ struct ParlioBufferCalculator {
     /// @return Output bytes per input byte (8 for width≤8, 128 for width=16)
     size_t outputBytesPerInputByte() const {
         if (mDataWdith <= 8) {
-            // Bit-packed: 64 pulses / (8 / mDataWdith) ticks per byte = 8 bytes
-            return 8;
+            // Bit-packed: 64 pulses packed into (8 / mDataWidth) ticks per byte
+            // For data_width=1: 64 pulses / 8 ticks = 8 bytes
+            // For data_width=2: 64 pulses / 4 ticks = 16 bytes
+            // For data_width=4: 64 pulses / 2 ticks = 32 bytes
+            // For data_width=8: 64 pulses / 1 tick = 64 bytes
+            size_t ticksPerByte = 8 / mDataWdith;
+            return (64 + ticksPerByte - 1) / ticksPerByte;
         } else if (mDataWdith == 16) {
             // 16-bit mode: 64 pulses × 2 bytes per pulse = 128 bytes
             return 128;
@@ -173,12 +178,14 @@ struct ParlioBufferCalculator {
     /// 1. Calculate LEDs per buffer: maxLedsPerChannel / numRingBuffers
     /// 2. Convert to input bytes: LEDs × 3 bytes/LED × mDataWdith (multi-lane)
     /// 3. Apply wave8 expansion (8:1 ratio): input_bytes × outputBytesPerInputByte()
-    /// 4. Result is DMA buffer capacity per ring buffer
+    /// 4. Add safety margin for boundary checks
+    /// 5. Result is DMA buffer capacity per ring buffer
     ///
     /// Example (3000 LEDs, 1 lane, 3 ring buffers):
     /// - LEDs per buffer: 3000 / 3 = 1000 LEDs
     /// - Input bytes per buffer: 1000 × 3 × 1 = 3000 bytes
     /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
+    /// - With safety margin: 24000 + 128 = 24128 bytes
     size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, size_t numRingBuffers = 3) const {
         // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
@@ -190,6 +197,13 @@ struct ParlioBufferCalculator {
 
         // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
         size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer);
+
+        // Step 4: Add safety margin to prevent boundary check failures
+        // The populateDmaBuffer() boundary check at line 505 tests (outputIdx + blockSize > capacity)
+        // When buffer is filled exactly to capacity, we need extra space for the final block
+        // Safety margin = max(transposeBlockSize) = 128 bytes (for 16-bit mode)
+        size_t safetyMargin = 128;
+        dmaBufferCapacity += safetyMargin;
 
         return dmaBufferCapacity;
     }
@@ -627,18 +641,30 @@ bool ChannelEnginePARLIOImpl::populateNextDMABuffer() {
     size_t bytes_remaining = mState.mIsrContext->mTotalBytes - mState.mNextByteOffset;
     size_t bytes_per_buffer = (mState.mIsrContext->mTotalBytes + PARLIO_RING_BUFFER_COUNT - 1) / PARLIO_RING_BUFFER_COUNT;
 
+    // LED boundary alignment constant: 3 bytes (RGB) × lane count
+    // Used for both capacity calculation and alignment rounding
+    size_t bytes_per_led_all_lanes = 3 * mState.mDataWidth;
+
     // CAP bytes_per_buffer at ring buffer capacity to enable streaming for large strips
     // Without this cap, large LED strips (e.g., 3000 LEDs) would try to fit 3000 bytes into
     // a buffer sized for 100 LEDs, causing buffer overflow
     ParlioBufferCalculator calc{mState.mDataWidth};
     size_t max_input_bytes_per_buffer = mState.mRingBufferCapacity / calc.outputBytesPerInputByte();
+
+    // CRITICAL FIX: Reduce max by one LED boundary to prevent exact-capacity overflow
+    // The populateDmaBuffer() boundary check (outputIdx + blockSize > capacity) fails when
+    // the buffer is filled exactly to capacity after LED alignment rounding
+    // Subtracting one LED ensures we always have headroom for the final transpose block
+    if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
+        max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
+    }
+
     if (bytes_per_buffer > max_input_bytes_per_buffer) {
         bytes_per_buffer = max_input_bytes_per_buffer;
     }
 
     // LED boundary alignment: Round DOWN to nearest multiple of (3 bytes × lane count)
     // This prevents buffer splits from occurring mid-LED across all lanes, which causes bit shift corruption
-    size_t bytes_per_led_all_lanes = 3 * mState.mDataWidth;  // 3 bytes (RGB) × lane count
     bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
 
     // Edge case: Ensure at least one LED across all lanes per buffer if data exists

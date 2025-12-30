@@ -5,17 +5,17 @@
 #pragma once
 
 // ============================================================================
-// PARLIO Multi-Buffer Test: Four lanes validation (Phase 3 Validation)
+// PARLIO Multi-Buffer Test: Five lanes validation (Phase 4 Validation)
 // ============================================================================
 
 // Driver selection
-#define JUST_PARLIO  // Phase 3: Four-lane validation with PARLIO
+#define JUST_PARLIO  // Phase 4: Five-lane validation with PARLIO
 // #define JUST_RMT
 // #define JUST_SPI
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1  // DO NOT CHANGE THIS!!! NO EXCEPTIONS!!!
-#define MAX_LANES 1  // DO NOT CHANGE THIS!!! NO EXCEPTIONS!!!
+#define MIN_LANES 4  // Phase 3: Four-lane streaming (re-verification)
+#define MAX_LANES 4  // Phase 3: Four-lane streaming (re-verification)
 
 // Strip size selection
 // #define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
