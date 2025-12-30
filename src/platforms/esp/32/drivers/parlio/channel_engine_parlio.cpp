@@ -1286,15 +1286,69 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
         static_cast<gpio_num_t>(-1); // Use internal clock, not external
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
     config.data_width = mState.mDataWidth; // Runtime parameter
-    // Phase 3 - Iteration 6: Set trans_queue_depth to 3 (matches ring buffer count)
-    // PARLIO has 3 internal queues (READY, PROGRESS, COMPLETE) per README.md line 101
-    // Root cause: With depth=2, when ISR fires:
-    //   - Completed transaction still in COMPLETE queue (slot 1)
-    //   - New transmission in PROGRESS queue (slot 2)
-    //   - No room for ISR to queue 3rd buffer → transmission stops at buffer 1
-    // Fix: depth=3 allows all 3 ring buffers to be queued simultaneously
-    // Testing: depth=2 transmits only ~968 bytes (1 buffer); depth=3 should transmit full 3000 bytes
+
+    // ========================================================================
+    // ⚠️  CRITICAL: ESP32-C6 PARLIO Transaction Queue Depth Configuration ⚠️
+    // ========================================================================
+    // DO NOT CHANGE THIS VALUE FROM 3 WITHOUT UNDERSTANDING THE CONSEQUENCES
+    //
+    // ESP32-C6 PARLIO hardware architecture:
+    //   - 3-state finite state machine (FSM): READY → PROGRESS → COMPLETE
+    //   - Can track a MAXIMUM of 3 pending transactions in hardware
+    //   - This is a HARDWARE LIMITATION, not a software design choice
+    //
+    // What happens with depth=2:
+    //   - Transmission stalls after first buffer completes
+    //   - ISR cannot queue 3rd buffer (no hardware slot available)
+    //   - Result: Only ~968 bytes transmitted (1 buffer) instead of full 3000
+    //
+    // What happens with depth=3:
+    //   - All 3 ring buffers can be queued to hardware simultaneously ✅
+    //   - ISR-based streaming works correctly (buffers flow continuously)
+    //   - Result: Full transmission completes successfully
+    //
+    // What happens with depth > 3 (e.g., 4, 8, 16):
+    //   - Software allocates N transaction slots
+    //   - Hardware FSM has only 3 states to track them
+    //   - ISR callbacks FAIL TO FIRE for transactions beyond slot 3
+    //   - CPU enters INFINITE BUSY-WAIT LOOP in beginTransmission()
+    //   - delayMicroseconds(10) doesn't yield to RTOS scheduler
+    //   - ESP32 IDLE task cannot run to feed Task Watchdog Timer
+    //   - After 5 seconds: ❌ WATCHDOG TIMEOUT → SYSTEM RESET ❌
+    //
+    // Empirical Testing Results (DONE.md, 2025-12-29):
+    //   ✅ trans_queue_depth = 3: 11 IDLE gaps (optimal performance)
+    //   ⚠️  trans_queue_depth = 4: 18 IDLE gaps (+64% worse, queue desync)
+    //   ❌ trans_queue_depth = 8: System crash (watchdog timeout)
+    //
+    // MUST match PARLIO_RING_BUFFER_COUNT (channel_engine_parlio.h:400)
+    // Both values are constrained by the ESP32-C6 hardware architecture.
+    // ========================================================================
     config.trans_queue_depth = 3;
+
+    // Validation: ESP32-C6 PARLIO hardware queue depth limit
+    // Hardware architecture has 3 internal states (READY, PROGRESS, COMPLETE)
+    // Setting trans_queue_depth > 3 causes:
+    //   - Queue desynchronization (software queue != hardware states)
+    //   - ISR callbacks may not fire for buffers beyond slot 3
+    //   - CPU busy-wait loops never exit → Task Watchdog timeout after 5s
+    // Empirical testing (DONE.md):
+    //   - trans_queue_depth=3: 11 IDLE gaps (optimal) ✅
+    //   - trans_queue_depth=4: 18 IDLE gaps (degraded) ⚠️
+    //   - trans_queue_depth=8: System crash (watchdog timeout) ❌
+#if defined(CONFIG_IDF_TARGET_ESP32C6)
+    constexpr size_t ESP32C6_PARLIO_MAX_QUEUE_DEPTH = 3;
+    if (config.trans_queue_depth > ESP32C6_PARLIO_MAX_QUEUE_DEPTH) {
+        FL_WARN("PARLIO: trans_queue_depth=" << config.trans_queue_depth
+                << " exceeds ESP32-C6 hardware limit ("
+                << ESP32C6_PARLIO_MAX_QUEUE_DEPTH << "). "
+                << "Hardware has 3 internal states (READY/PROGRESS/COMPLETE). "
+                << "Exceeding this limit causes queue desync, ISR callback failures, "
+                << "and potential watchdog timeouts. "
+                << "Recommended: Set trans_queue_depth <= " << ESP32C6_PARLIO_MAX_QUEUE_DEPTH);
+    }
+#endif
+
     // Phase 3 - Iteration 19: ESP-IDF PARLIO hardware limit is 65535 BITS per
     // transmission This is a hard hardware limit that cannot be exceeded For
     // transmissions larger than this, we must chunk into multiple calls Set

@@ -394,9 +394,32 @@ struct alignas(64) ParlioIsrContext {
 //   - 8-lane: 240 bytes → 8 LEDs (30 bytes each)
 //   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
 //
+// ============================================================================
 // Ring buffer configuration: 3 buffers for optimal streaming
-// - Each buffer: up to 1000 input bytes (~8KB after expansion)
-// - Fewer buffers = fewer transitions = reduced gap opportunities
+// ============================================================================
+// ⚠️  WARNING: DO NOT CHANGE THIS VALUE WITHOUT READING THIS COMMENT ⚠️
+//
+// CRITICAL: ESP32-C6 PARLIO hardware has a 3-state FSM (READY/PROGRESS/COMPLETE)
+// This value MUST match the hardware architecture's transaction queue depth.
+//
+// Empirical Testing Results (DONE.md, 2025-12-29):
+//   ✅ PARLIO_RING_BUFFER_COUNT = 3: 11 IDLE gaps (OPTIMAL - hardware designed for this)
+//   ⚠️  PARLIO_RING_BUFFER_COUNT = 4: 18 IDLE gaps (+64% worse - queue desync)
+//   ❌ PARLIO_RING_BUFFER_COUNT = 8: SYSTEM CRASH (watchdog timeout after 5s)
+//
+// Why higher values cause crashes:
+//   1. Hardware FSM has only 3 states to track pending transactions
+//   2. Software queue allocates N slots, but hardware can't track beyond 3
+//   3. ISR callbacks fail to fire for buffers beyond slot 3 (hardware limitation)
+//   4. CPU spins in infinite busy-wait loop waiting for ring space
+//   5. delayMicroseconds() doesn't yield to RTOS scheduler
+//   6. IDLE task cannot run to feed watchdog → timeout after 5s → reset
+//
+// This is a HARDWARE LIMITATION, not a software bug. The ESP32-C6 PARLIO
+// peripheral's internal state machine has exactly 3 transaction queue slots.
+//
+// Related: config.trans_queue_depth in initializeIfNeeded() MUST also be 3
+// ============================================================================
 constexpr size_t PARLIO_RING_BUFFER_COUNT = 3;
 
 /// @brief Internal PARLIO implementation with fixed data width
