@@ -395,28 +395,37 @@ struct alignas(64) ParlioIsrContext {
 //   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
 //
 // ============================================================================
-// Ring buffer configuration: 3 buffers for optimal streaming
+// Ring buffer configuration: 3 buffers (hardware maximum)
 // ============================================================================
 // ⚠️  WARNING: DO NOT CHANGE THIS VALUE WITHOUT READING THIS COMMENT ⚠️
 //
 // CRITICAL: ESP32-C6 PARLIO hardware has a 3-state FSM (READY/PROGRESS/COMPLETE)
 // This value MUST match the hardware architecture's transaction queue depth.
 //
-// Empirical Testing Results (DONE.md, 2025-12-29):
-//   ✅ PARLIO_RING_BUFFER_COUNT = 3: 11 IDLE gaps (OPTIMAL - hardware designed for this)
-//   ⚠️  PARLIO_RING_BUFFER_COUNT = 4: 18 IDLE gaps (+64% worse - queue desync)
-//   ❌ PARLIO_RING_BUFFER_COUNT = 8: SYSTEM CRASH (watchdog timeout after 5s)
+// Performance Characteristics (Empirical Testing, 2025-12-29):
+//   PARLIO_RING_BUFFER_COUNT = 3: 11 ring buffer underruns per transmission
+//     - Ring empties before CPU can populate next buffer (performance limitation)
+//     - Hardware goes IDLE, CPU must manually restart transmission
+//     - These underruns are EXPECTED/TOLERATED due to hardware constraint below
+//     - More buffers would eliminate underruns, but hardware FSM prevents this
 //
-// Why higher values cause crashes:
-//   1. Hardware FSM has only 3 states to track pending transactions
-//   2. Software queue allocates N slots, but hardware can't track beyond 3
-//   3. ISR callbacks fail to fire for buffers beyond slot 3 (hardware limitation)
-//   4. CPU spins in infinite busy-wait loop waiting for ring space
-//   5. delayMicroseconds() doesn't yield to RTOS scheduler
-//   6. IDLE task cannot run to feed watchdog → timeout after 5s → reset
+//   PARLIO_RING_BUFFER_COUNT = 4: 18 underruns (+64% worse - queue desync)
+//     - Hardware FSM only has 3 states, 4th buffer causes tracking errors
+//     - ISR callbacks fire at wrong times, ring management degrades
 //
-// This is a HARDWARE LIMITATION, not a software bug. The ESP32-C6 PARLIO
-// peripheral's internal state machine has exactly 3 transaction queue slots.
+//   PARLIO_RING_BUFFER_COUNT = 8+: SYSTEM CRASH (watchdog timeout after 5s)
+//     - Hardware FSM completely loses track of buffers beyond slot 3
+//     - ISR callbacks fail to fire for buffers beyond hardware limit
+//     - CPU enters infinite busy-wait loop waiting for ring space
+//     - delayMicroseconds() doesn't yield to RTOS scheduler
+//     - IDLE task cannot run to feed watchdog → timeout → system reset
+//
+// Hardware Limitation Explanation:
+//   The ESP32-C6 PARLIO peripheral's internal FSM has exactly 3 transaction
+//   queue slots. Software can allocate more ring buffers, but hardware can
+//   only track 3 pending transactions. This creates an inherent tradeoff:
+//     - 3 buffers: Works reliably, but CPU cannot keep hardware continuously fed
+//     - 4+ buffers: Would reduce underruns, but hardware FSM causes crashes
 //
 // Related: config.trans_queue_depth in initializeIfNeeded() MUST also be 3
 // ============================================================================

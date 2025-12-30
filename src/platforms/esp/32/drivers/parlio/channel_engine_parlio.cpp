@@ -430,7 +430,7 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         }
 
         // Ring empty but more data pending - mark hardware as idle so CPU can restart
-        FL_LOG_PARLIO("PARLIO ISR: Ring empty, hardware going IDLE | transmitted="
+        FL_ERROR("PARLIO ISR: Ring buffer underrun, hardware going IDLE | transmitted="
                << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes);
         ctx->mHardwareIdle = true; // Signal CPU that hardware needs restart
         ctx->mTransmitting = false; // Hardware is idle, not transmitting
@@ -1304,8 +1304,9 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //
     // What happens with depth=3:
     //   - All 3 ring buffers can be queued to hardware simultaneously ✅
-    //   - ISR-based streaming works correctly (buffers flow continuously)
-    //   - Result: Full transmission completes successfully
+    //   - ISR-based streaming works, but CPU cannot keep hardware continuously fed
+    //   - Result: 11 ring buffer underruns per transmission (hardware goes IDLE)
+    //   - Transmission completes successfully despite underruns (CPU restarts hardware)
     //
     // What happens with depth > 3 (e.g., 4, 8, 16):
     //   - Software allocates N transaction slots
@@ -1316,10 +1317,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //   - ESP32 IDLE task cannot run to feed Task Watchdog Timer
     //   - After 5 seconds: ❌ WATCHDOG TIMEOUT → SYSTEM RESET ❌
     //
-    // Empirical Testing Results (DONE.md, 2025-12-29):
-    //   ✅ trans_queue_depth = 3: 11 IDLE gaps (optimal performance)
-    //   ⚠️  trans_queue_depth = 4: 18 IDLE gaps (+64% worse, queue desync)
-    //   ❌ trans_queue_depth = 8: System crash (watchdog timeout)
+    // Empirical Testing Results (2025-12-29):
+    //   trans_queue_depth = 3: 11 ring buffer underruns (hardware maximum, tolerated)
+    //   trans_queue_depth = 4: 18 underruns (+64% worse - queue desync)
+    //   trans_queue_depth = 8: System crash (watchdog timeout)
     //
     // MUST match PARLIO_RING_BUFFER_COUNT (channel_engine_parlio.h:400)
     // Both values are constrained by the ESP32-C6 hardware architecture.
@@ -1332,10 +1333,10 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //   - Queue desynchronization (software queue != hardware states)
     //   - ISR callbacks may not fire for buffers beyond slot 3
     //   - CPU busy-wait loops never exit → Task Watchdog timeout after 5s
-    // Empirical testing (DONE.md):
-    //   - trans_queue_depth=3: 11 IDLE gaps (optimal) ✅
-    //   - trans_queue_depth=4: 18 IDLE gaps (degraded) ⚠️
-    //   - trans_queue_depth=8: System crash (watchdog timeout) ❌
+    // Empirical testing:
+    //   - trans_queue_depth=3: 11 ring buffer underruns (hardware max, tolerated)
+    //   - trans_queue_depth=4: 18 underruns (+64% worse - queue desync)
+    //   - trans_queue_depth=8: System crash (watchdog timeout)
 #if defined(CONFIG_IDF_TARGET_ESP32C6)
     constexpr size_t ESP32C6_PARLIO_MAX_QUEUE_DEPTH = 3;
     if (config.trans_queue_depth > ESP32C6_PARLIO_MAX_QUEUE_DEPTH) {
