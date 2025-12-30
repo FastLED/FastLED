@@ -58,8 +58,8 @@ struct EdgeRange {
     size_t count;   ///< Number of edges to extract
 
     /// Constructor
-    constexpr EdgeRange(size_t offset_, size_t count_)
-        : offset(offset_), count(count_) {}
+    constexpr EdgeRange(size_t offsetParam, size_t countParam)
+        : offset(offsetParam), count(countParam) {}
 };
 
 /**

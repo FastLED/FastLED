@@ -101,6 +101,10 @@
 //   bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
 
 
+// Enable async PARLIO logging to prevent ISR watchdog timeout
+// Async logging queues messages from ISRs and drains them from the main loop
+#define FASTLED_LOG_PARLIO_ASYNC_ENABLED
+
 // Disable PARLIO ISR logging BEFORE any FastLED includes to prevent watchdog timeout
 // (Serial printing inside ISR exceeds watchdog threshold - must disable at translation unit level)
 // #undef FASTLED_LOG_PARLIO_ENABLED  // COMMENTED OUT: Agent loop instructions require FL_LOG_PARLIO_ENABLED to be kept enabled
@@ -539,6 +543,9 @@ void loop() {
         delay(500);
     }
 
+    // Flush async PARLIO logs accumulated during test execution
+    FL_LOG_PARLIO_ASYNC_FLUSH();
+
     // Print final results table
     printTestCaseResultsTable(test_results);
 
@@ -565,6 +572,9 @@ void loop() {
     ss << "╚════════════════════════════════════════════════════════════════╝\n";
     ss << "\n========== TEST MATRIX COMPLETE - HALTING ==========";
     FL_WARN(ss.str());
+
+    // Flush any remaining async PARLIO logs before halting
+    FL_LOG_PARLIO_ASYNC_FLUSH();
 
     // Mark test matrix as complete - will halt on next loop() iteration
     test_matrix_complete = true;
