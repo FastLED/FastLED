@@ -58,46 +58,88 @@ fl::u32 AsyncLogger::droppedCount() const {
 }
 
 // ============================================================================
-// Global async logger instances (one per category)
+// Global async logger instances (separate ISR and main thread queues)
 // ============================================================================
+// NOTE: SPSC queue design requires separate queues for ISR vs main thread
+//       to avoid race conditions when both contexts call push() concurrently
 
 namespace detail {
-    AsyncLogger& parlio_async_logger() {
+    // PARLIO loggers (ISR + main)
+    AsyncLogger& parlio_async_logger_isr() {
         static AsyncLogger logger;
         return logger;
     }
 
-    AsyncLogger& rmt_async_logger() {
+    AsyncLogger& parlio_async_logger_main() {
         static AsyncLogger logger;
         return logger;
     }
 
-    AsyncLogger& spi_async_logger() {
+    // RMT loggers (ISR + main)
+    AsyncLogger& rmt_async_logger_isr() {
         static AsyncLogger logger;
         return logger;
     }
 
-    AsyncLogger& audio_async_logger() {
+    AsyncLogger& rmt_async_logger_main() {
+        static AsyncLogger logger;
+        return logger;
+    }
+
+    // SPI loggers (ISR + main)
+    AsyncLogger& spi_async_logger_isr() {
+        static AsyncLogger logger;
+        return logger;
+    }
+
+    AsyncLogger& spi_async_logger_main() {
+        static AsyncLogger logger;
+        return logger;
+    }
+
+    // AUDIO loggers (ISR + main)
+    AsyncLogger& audio_async_logger_isr() {
+        static AsyncLogger logger;
+        return logger;
+    }
+
+    AsyncLogger& audio_async_logger_main() {
         static AsyncLogger logger;
         return logger;
     }
 } // namespace detail
 
 // Public accessor functions
-AsyncLogger& get_parlio_async_logger() {
-    return detail::parlio_async_logger();
+AsyncLogger& get_parlio_async_logger_isr() {
+    return detail::parlio_async_logger_isr();
 }
 
-AsyncLogger& get_rmt_async_logger() {
-    return detail::rmt_async_logger();
+AsyncLogger& get_parlio_async_logger_main() {
+    return detail::parlio_async_logger_main();
 }
 
-AsyncLogger& get_spi_async_logger() {
-    return detail::spi_async_logger();
+AsyncLogger& get_rmt_async_logger_isr() {
+    return detail::rmt_async_logger_isr();
 }
 
-AsyncLogger& get_audio_async_logger() {
-    return detail::audio_async_logger();
+AsyncLogger& get_rmt_async_logger_main() {
+    return detail::rmt_async_logger_main();
+}
+
+AsyncLogger& get_spi_async_logger_isr() {
+    return detail::spi_async_logger_isr();
+}
+
+AsyncLogger& get_spi_async_logger_main() {
+    return detail::spi_async_logger_main();
+}
+
+AsyncLogger& get_audio_async_logger_isr() {
+    return detail::audio_async_logger_isr();
+}
+
+AsyncLogger& get_audio_async_logger_main() {
+    return detail::audio_async_logger_main();
 }
 
 } // namespace fl

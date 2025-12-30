@@ -29,10 +29,15 @@ namespace fl {
     };
 
     // Global async logger accessor functions (defined in log.cpp)
-    AsyncLogger& get_parlio_async_logger();
-    AsyncLogger& get_rmt_async_logger();
-    AsyncLogger& get_spi_async_logger();
-    AsyncLogger& get_audio_async_logger();
+    // Separate queues for ISR and main thread contexts (SPSC requirement)
+    AsyncLogger& get_parlio_async_logger_isr();
+    AsyncLogger& get_parlio_async_logger_main();
+    AsyncLogger& get_rmt_async_logger_isr();
+    AsyncLogger& get_rmt_async_logger_main();
+    AsyncLogger& get_spi_async_logger_isr();
+    AsyncLogger& get_spi_async_logger_main();
+    AsyncLogger& get_audio_async_logger_isr();
+    AsyncLogger& get_audio_async_logger_main();
 }
 
 /// @file fl/log.h
@@ -139,18 +144,29 @@ namespace fl {
 // SPI Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async SPI logging (ISR-safe)
-/// Queues SPI log messages for deferred output
+/// @brief Async SPI logging from ISR context (ISR-safe, single producer)
+/// Queues SPI log messages for deferred output from interrupt handlers
 #ifdef FASTLED_LOG_SPI_ASYNC_ENABLED
-    #define FL_LOG_SPI_ASYNC(X) FL_LOG_ASYNC(fl::get_spi_async_logger(), X)
+    #define FL_LOG_SPI_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_spi_async_logger_isr(), X)
 #else
-    #define FL_LOG_SPI_ASYNC(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_SPI_ASYNC_ISR(X) FL_DBG_NO_OP(X)
+#endif
+
+/// @brief Async SPI logging from main thread context (ISR-safe, single producer)
+/// Queues SPI log messages for deferred output from main thread
+#ifdef FASTLED_LOG_SPI_ASYNC_ENABLED
+    #define FL_LOG_SPI_ASYNC_MAIN(X) FL_LOG_ASYNC(fl::get_spi_async_logger_main(), X)
+#else
+    #define FL_LOG_SPI_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
 #endif
 
 /// @brief Flush all queued SPI log messages (blocking)
-/// Drains the SPI async log buffer until empty. Call from main thread only.
+/// Drains both ISR and main thread SPI async log buffers. Call from main thread only.
 #ifdef FASTLED_LOG_SPI_ASYNC_ENABLED
-    #define FL_LOG_SPI_ASYNC_FLUSH() fl::get_spi_async_logger().flush()
+    #define FL_LOG_SPI_ASYNC_FLUSH() do { \
+        fl::get_spi_async_logger_isr().flush(); \
+        fl::get_spi_async_logger_main().flush(); \
+    } while(0)
 #else
     #define FL_LOG_SPI_ASYNC_FLUSH() do {} while(0)
 #endif
@@ -159,18 +175,29 @@ namespace fl {
 // RMT Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async RMT logging (ISR-safe)
-/// Queues RMT log messages for deferred output
+/// @brief Async RMT logging from ISR context (ISR-safe, single producer)
+/// Queues RMT log messages for deferred output from interrupt handlers
 #ifdef FASTLED_LOG_RMT_ASYNC_ENABLED
-    #define FL_LOG_RMT_ASYNC(X) FL_LOG_ASYNC(fl::get_rmt_async_logger(), X)
+    #define FL_LOG_RMT_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_rmt_async_logger_isr(), X)
 #else
-    #define FL_LOG_RMT_ASYNC(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_RMT_ASYNC_ISR(X) FL_DBG_NO_OP(X)
+#endif
+
+/// @brief Async RMT logging from main thread context (ISR-safe, single producer)
+/// Queues RMT log messages for deferred output from main thread
+#ifdef FASTLED_LOG_RMT_ASYNC_ENABLED
+    #define FL_LOG_RMT_ASYNC_MAIN(X) FL_LOG_ASYNC(fl::get_rmt_async_logger_main(), X)
+#else
+    #define FL_LOG_RMT_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
 #endif
 
 /// @brief Flush all queued RMT log messages (blocking)
-/// Drains the RMT async log buffer until empty. Call from main thread only.
+/// Drains both ISR and main thread RMT async log buffers. Call from main thread only.
 #ifdef FASTLED_LOG_RMT_ASYNC_ENABLED
-    #define FL_LOG_RMT_ASYNC_FLUSH() fl::get_rmt_async_logger().flush()
+    #define FL_LOG_RMT_ASYNC_FLUSH() do { \
+        fl::get_rmt_async_logger_isr().flush(); \
+        fl::get_rmt_async_logger_main().flush(); \
+    } while(0)
 #else
     #define FL_LOG_RMT_ASYNC_FLUSH() do {} while(0)
 #endif
@@ -179,18 +206,29 @@ namespace fl {
 // PARLIO Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async PARLIO logging (ISR-safe)
-/// Queues PARLIO log messages for deferred output
+/// @brief Async PARLIO logging from ISR context (ISR-safe, single producer)
+/// Queues PARLIO log messages for deferred output from interrupt handlers
 #ifdef FASTLED_LOG_PARLIO_ASYNC_ENABLED
-    #define FL_LOG_PARLIO_ASYNC(X) FL_LOG_ASYNC(fl::get_parlio_async_logger(), X)
+    #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_parlio_async_logger_isr(), X)
 #else
-    #define FL_LOG_PARLIO_ASYNC(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
+#endif
+
+/// @brief Async PARLIO logging from main thread context (ISR-safe, single producer)
+/// Queues PARLIO log messages for deferred output from main thread
+#ifdef FASTLED_LOG_PARLIO_ASYNC_ENABLED
+    #define FL_LOG_PARLIO_ASYNC_MAIN(X) FL_LOG_ASYNC(fl::get_parlio_async_logger_main(), X)
+#else
+    #define FL_LOG_PARLIO_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
 #endif
 
 /// @brief Flush all queued PARLIO log messages (blocking)
-/// Drains the PARLIO async log buffer until empty. Call from main thread only.
+/// Drains both ISR and main thread PARLIO async log buffers. Call from main thread only.
 #ifdef FASTLED_LOG_PARLIO_ASYNC_ENABLED
-    #define FL_LOG_PARLIO_ASYNC_FLUSH() fl::get_parlio_async_logger().flush()
+    #define FL_LOG_PARLIO_ASYNC_FLUSH() do { \
+        fl::get_parlio_async_logger_isr().flush(); \
+        fl::get_parlio_async_logger_main().flush(); \
+    } while(0)
 #else
     #define FL_LOG_PARLIO_ASYNC_FLUSH() do {} while(0)
 #endif
@@ -199,18 +237,29 @@ namespace fl {
 // AUDIO Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async AUDIO logging (ISR-safe)
-/// Queues AUDIO log messages for deferred output
+/// @brief Async AUDIO logging from ISR context (ISR-safe, single producer)
+/// Queues AUDIO log messages for deferred output from interrupt handlers
 #ifdef FASTLED_LOG_AUDIO_ASYNC_ENABLED
-    #define FL_LOG_AUDIO_ASYNC(X) FL_LOG_ASYNC(fl::get_audio_async_logger(), X)
+    #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_audio_async_logger_isr(), X)
 #else
-    #define FL_LOG_AUDIO_ASYNC(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
+#endif
+
+/// @brief Async AUDIO logging from main thread context (ISR-safe, single producer)
+/// Queues AUDIO log messages for deferred output from main thread
+#ifdef FASTLED_LOG_AUDIO_ASYNC_ENABLED
+    #define FL_LOG_AUDIO_ASYNC_MAIN(X) FL_LOG_ASYNC(fl::get_audio_async_logger_main(), X)
+#else
+    #define FL_LOG_AUDIO_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
 #endif
 
 /// @brief Flush all queued AUDIO log messages (blocking)
-/// Drains the AUDIO async log buffer until empty. Call from main thread only.
+/// Drains both ISR and main thread AUDIO async log buffers. Call from main thread only.
 #ifdef FASTLED_LOG_AUDIO_ASYNC_ENABLED
-    #define FL_LOG_AUDIO_ASYNC_FLUSH() fl::get_audio_async_logger().flush()
+    #define FL_LOG_AUDIO_ASYNC_FLUSH() do { \
+        fl::get_audio_async_logger_isr().flush(); \
+        fl::get_audio_async_logger_main().flush(); \
+    } while(0)
 #else
     #define FL_LOG_AUDIO_ASYNC_FLUSH() do {} while(0)
 #endif

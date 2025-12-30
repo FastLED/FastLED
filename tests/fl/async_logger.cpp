@@ -110,8 +110,8 @@ TEST_CASE("fl::AsyncLogger - edge cases") {
 }
 
 TEST_CASE("fl::AsyncLogger - global instances") {
-    SUBCASE("get_parlio_async_logger returns valid logger") {
-        AsyncLogger& logger = get_parlio_async_logger();
+    SUBCASE("get_parlio_async_logger_isr returns valid logger") {
+        AsyncLogger& logger = get_parlio_async_logger_isr();
 
         // Verify it's usable
         fl::size initial_size = logger.size();
@@ -122,8 +122,8 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_rmt_async_logger returns valid logger") {
-        AsyncLogger& logger = get_rmt_async_logger();
+    SUBCASE("get_parlio_async_logger_main returns valid logger") {
+        AsyncLogger& logger = get_parlio_async_logger_main();
 
         fl::size initial_size = logger.size();
         logger.push(fl::string("test"));
@@ -132,8 +132,8 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_spi_async_logger returns valid logger") {
-        AsyncLogger& logger = get_spi_async_logger();
+    SUBCASE("get_rmt_async_logger_isr returns valid logger") {
+        AsyncLogger& logger = get_rmt_async_logger_isr();
 
         fl::size initial_size = logger.size();
         logger.push(fl::string("test"));
@@ -142,8 +142,8 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_audio_async_logger returns valid logger") {
-        AsyncLogger& logger = get_audio_async_logger();
+    SUBCASE("get_rmt_async_logger_main returns valid logger") {
+        AsyncLogger& logger = get_rmt_async_logger_main();
 
         fl::size initial_size = logger.size();
         logger.push(fl::string("test"));
@@ -152,9 +152,70 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("all loggers are independent") {
-        AsyncLogger& parlio = get_parlio_async_logger();
-        AsyncLogger& rmt = get_rmt_async_logger();
+    SUBCASE("get_spi_async_logger_isr returns valid logger") {
+        AsyncLogger& logger = get_spi_async_logger_isr();
+
+        fl::size initial_size = logger.size();
+        logger.push(fl::string("test"));
+        CHECK_EQ(logger.size(), initial_size + 1);
+
+        logger.clear();
+    }
+
+    SUBCASE("get_spi_async_logger_main returns valid logger") {
+        AsyncLogger& logger = get_spi_async_logger_main();
+
+        fl::size initial_size = logger.size();
+        logger.push(fl::string("test"));
+        CHECK_EQ(logger.size(), initial_size + 1);
+
+        logger.clear();
+    }
+
+    SUBCASE("get_audio_async_logger_isr returns valid logger") {
+        AsyncLogger& logger = get_audio_async_logger_isr();
+
+        fl::size initial_size = logger.size();
+        logger.push(fl::string("test"));
+        CHECK_EQ(logger.size(), initial_size + 1);
+
+        logger.clear();
+    }
+
+    SUBCASE("get_audio_async_logger_main returns valid logger") {
+        AsyncLogger& logger = get_audio_async_logger_main();
+
+        fl::size initial_size = logger.size();
+        logger.push(fl::string("test"));
+        CHECK_EQ(logger.size(), initial_size + 1);
+
+        logger.clear();
+    }
+
+    SUBCASE("ISR and main loggers are independent (PARLIO)") {
+        AsyncLogger& isr_logger = get_parlio_async_logger_isr();
+        AsyncLogger& main_logger = get_parlio_async_logger_main();
+
+        isr_logger.clear();
+        main_logger.clear();
+
+        // Push to ISR logger
+        isr_logger.push(fl::string("isr msg"));
+        CHECK_EQ(isr_logger.size(), 1);
+        CHECK_EQ(main_logger.size(), 0);  // Main logger unaffected
+
+        // Push to main logger
+        main_logger.push(fl::string("main msg"));
+        CHECK_EQ(isr_logger.size(), 1);  // ISR logger unaffected
+        CHECK_EQ(main_logger.size(), 1);
+
+        isr_logger.clear();
+        main_logger.clear();
+    }
+
+    SUBCASE("all loggers are independent across categories") {
+        AsyncLogger& parlio = get_parlio_async_logger_isr();
+        AsyncLogger& rmt = get_rmt_async_logger_isr();
 
         parlio.clear();
         rmt.clear();
