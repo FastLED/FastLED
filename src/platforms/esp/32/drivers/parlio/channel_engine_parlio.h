@@ -395,41 +395,15 @@ struct alignas(64) ParlioIsrContext {
 //   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
 //
 // ============================================================================
-// Ring buffer configuration: 3 buffers (hardware maximum)
+// Ring buffer configuration
 // ============================================================================
-// ⚠️  WARNING: DO NOT CHANGE THIS VALUE WITHOUT READING THIS COMMENT ⚠️
+// Software ring buffer for pre-computing DMA buffers.
+// This is independent of the hardware transaction queue depth (trans_queue_depth = 3).
+// We can pre-compute additional buffers beyond what the hardware queue supports.
 //
-// CRITICAL: ESP32-C6 PARLIO hardware has a 3-state FSM (READY/PROGRESS/COMPLETE)
-// This value MUST match the hardware architecture's transaction queue depth.
-//
-// Performance Characteristics (Empirical Testing, 2025-12-29):
-//   PARLIO_RING_BUFFER_COUNT = 3: 11 ring buffer underruns per transmission
-//     - Ring empties before CPU can populate next buffer (performance limitation)
-//     - Hardware goes IDLE, CPU must manually restart transmission
-//     - These underruns are EXPECTED/TOLERATED due to hardware constraint below
-//     - More buffers would eliminate underruns, but hardware FSM prevents this
-//
-//   PARLIO_RING_BUFFER_COUNT = 4: 18 underruns (+64% worse - queue desync)
-//     - Hardware FSM only has 3 states, 4th buffer causes tracking errors
-//     - ISR callbacks fire at wrong times, ring management degrades
-//
-//   PARLIO_RING_BUFFER_COUNT = 8+: SYSTEM CRASH (watchdog timeout after 5s)
-//     - Hardware FSM completely loses track of buffers beyond slot 3
-//     - ISR callbacks fail to fire for buffers beyond hardware limit
-//     - CPU enters infinite busy-wait loop waiting for ring space
-//     - delayMicroseconds() doesn't yield to RTOS scheduler
-//     - IDLE task cannot run to feed watchdog → timeout → system reset
-//
-// Hardware Limitation Explanation:
-//   The ESP32-C6 PARLIO peripheral's internal FSM has exactly 3 transaction
-//   queue slots. Software can allocate more ring buffers, but hardware can
-//   only track 3 pending transactions. This creates an inherent tradeoff:
-//     - 3 buffers: Works reliably, but CPU cannot keep hardware continuously fed
-//     - 4+ buffers: Would reduce underruns, but hardware FSM causes crashes
-//
-// Related: config.trans_queue_depth in initializeIfNeeded() MUST also be 3
+// Counting semaphore allows main thread to process backlog of consumed buffers.
 // ============================================================================
-constexpr size_t PARLIO_RING_BUFFER_COUNT = 3;
+constexpr size_t PARLIO_RING_BUFFER_COUNT = 4;
 
 /// @brief Internal PARLIO implementation with fixed data width
 ///
@@ -482,6 +456,11 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
         ParlioIsrContext
             *mIsrContext; ///< ISR state (cache-aligned, 64-byte) - raw pointer
                           ///< to avoid incomplete type issues
+
+        void* mRingSpaceSemaphore; ///< Counting semaphore for ISR→CPU signaling
+                                   ///< (void* to avoid FreeRTOS header in .h)
+                                   ///< Count represents available ring buffer slots (0-3)
+                                   ///< ISR gives for each buffer consumed, CPU takes for each buffer to populate
 
         volatile bool
             mTransmitting; ///< Transmission in progress flag (DEPRECATED - use
@@ -558,8 +537,8 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
                                              ///< buffer in bytes
 
         ParlioState(size_t width)
-            : mTxUnit(nullptr), mIsrContext(nullptr), mTransmitting(false),
-              mDataWidth(width), mActualChannels(0), mDummyLanes(0),
+            : mTxUnit(nullptr), mIsrContext(nullptr), mRingSpaceSemaphore(nullptr),
+              mTransmitting(false), mDataWidth(width), mActualChannels(0), mDummyLanes(0),
               mTimingT1Ns(0), mTimingT2Ns(0), mTimingT3Ns(0),
               mRingBufferCapacity(0), mNumLanes(width), mLaneStride(0),
               mCurrentByte(0), mTotalBytes(0), mBytesPerChunk(0),

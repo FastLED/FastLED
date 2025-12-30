@@ -34,6 +34,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h" // For DMA-capable memory allocation
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h" // For semaphore operations
 #include "soc/soc_caps.h" // For SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH
 FL_EXTERN_C_END
 
@@ -55,6 +56,16 @@ namespace fl {
 static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
 
 constexpr size_t MAX_LEDS_PER_CHANNEL = 300; // Support up to 300 LEDs per channel (configurable)
+
+// ESP32-C6 PARLIO hardware transaction queue depth limit
+// CRITICAL: This value CANNOT be changed - it is a hardware limitation
+// The ESP32-C6 PARLIO peripheral has a 3-state FSM (READY/PROGRESS/COMPLETE)
+// Setting trans_queue_depth > 3 causes queue desynchronization and system crashes
+// Empirical testing results (2025-12-29):
+//   - trans_queue_depth = 3: Stable operation (hardware maximum)
+//   - trans_queue_depth = 4: Queue desync, 64% more underruns
+//   - trans_queue_depth = 8: Watchdog timeout crash
+static constexpr size_t PARLIO_HARDWARE_QUEUE_DEPTH = 3;
 
 //=============================================================================
 // Phase 4: Cross-Platform Memory Barriers
@@ -336,6 +347,12 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     // DMA buffers and waveform expansion buffer are automatically freed
     // by fl::unique_ptr destructors (RAII)
 
+    // Clean up semaphore
+    if (mState.mRingSpaceSemaphore) {
+        vSemaphoreDelete(static_cast<SemaphoreHandle_t>(mState.mRingSpaceSemaphore));
+        mState.mRingSpaceSemaphore = nullptr;
+    }
+
     // Phase 4: Clean up IsrContext and clear singleton
     if (mState.mIsrContext) {
         ParlioIsrContext::setInstance(nullptr); // Clear singleton reference
@@ -377,9 +394,40 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
 //   - Pre-compute next DMA buffer when ring has space
 //   - Update ring_write_ptr after pre-computation
 //   - Detect stream_complete flag for transmission end
+//
+// ============================================================================
+// ⚠️ ⚠️ ⚠️  CRITICAL ISR SAFETY RULES - READ BEFORE MODIFYING ⚠️ ⚠️ ⚠️
+// ============================================================================
+//
+// This function runs in INTERRUPT CONTEXT with EXTREMELY strict constraints:
+//
+// 1. ❌ ABSOLUTELY NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_ERROR, printf, etc.)
+//    - Logging can cause watchdog timeouts, crashes, or system instability
+//    - Even "ISR-safe" logging can introduce unacceptable latency
+//    - If you need to debug, use GPIO toggling or counters instead
+//
+// 2. ❌ NO BLOCKING OPERATIONS (mutex, delay, heap allocation, etc.)
+//    - ISRs must complete in microseconds, not milliseconds
+//    - Any blocking operation will crash the system
+//
+// 3. ✅ ONLY USE ISR-SAFE FREERTOS FUNCTIONS (xSemaphoreGiveFromISR, etc.)
+//    - Always pass higherPriorityTaskWoken and return its value
+//    - Never use non-ISR variants (xSemaphoreGive, etc.)
+//
+// 4. ✅ MINIMIZE EXECUTION TIME
+//    - Keep ISR as short as possible (ideally <10µs)
+//    - Defer complex work to main thread via flags/semaphores
+//
+// If the system crashes after you modify this function:
+// - First suspect: Did you add logging?
+// - Second suspect: Did you add blocking operations?
+// - Third suspect: Did you increase execution time?
+//
+// ============================================================================
 FL_OPTIMIZE_FUNCTION bool FL_IRAM
 ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
                                         const void *edata, void *user_ctx) {
+    // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED - SEE FUNCTION HEADER ⚠️
     (void)edata;
 
     auto *self = static_cast<ChannelEnginePARLIOImpl *>(user_ctx);
@@ -408,11 +456,12 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     ctx->mCurrentByte += input_bytes;
     ctx->mChunksCompleted++;
 
-    // DEBUG: Log buffer completion details
-    FL_LOG_PARLIO("PARLIO ISR: Buffer " << completed_buffer_idx
-           << " COMPLETED | dma_bytes=" << dma_bytes
-           << " | input_bytes=" << input_bytes
-           << " | total_tx=" << ctx->mBytesTransmitted);
+    // ⚠️  NO LOGGING IN ISR - Logging causes watchdog timeouts and crashes
+    // Use GPIO toggling or counters for debug instead
+    // FL_LOG_PARLIO("PARLIO ISR: Buffer " << completed_buffer_idx
+    //        << " COMPLETED | dma_bytes=" << dma_bytes
+    //        << " | input_bytes=" << input_bytes
+    //        << " | total_tx=" << ctx->mBytesTransmitted);
 
     // ISR-based streaming: Check if next buffer is ready in the ring (use count to detect empty ring)
     volatile size_t count = ctx->mRingCount;
@@ -422,19 +471,27 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         // Ring is empty - check if we've transmitted ALL the data
         if (ctx->mBytesTransmitted >= ctx->mTotalBytes) {
             // All data transmitted - mark transmission complete
-            FL_LOG_PARLIO("PARLIO ISR: Transmission COMPLETE | transmitted="
-                   << ctx->mBytesTransmitted << " | total=" << ctx->mTotalBytes);
+            // ⚠️  NO LOGGING IN ISR - Logging causes watchdog timeouts and crashes
+            // FL_LOG_PARLIO("PARLIO ISR: Transmission COMPLETE | transmitted="
+            //        << ctx->mBytesTransmitted << " | total=" << ctx->mTotalBytes);
             ctx->mStreamComplete = true;
             ctx->mTransmitting = false;
             return false; // No high-priority task woken
         }
 
         // Ring empty but more data pending - mark hardware as idle so CPU can restart
-        FL_ERROR("PARLIO ISR: Ring buffer underrun, hardware going IDLE | transmitted="
-               << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes);
+        // ⚠️  NO LOGGING IN ISR - Logging causes watchdog timeouts and crashes
+        // Track underruns via ctx->mUnderrunCount if you need metrics
+        // FL_ERROR("PARLIO ISR: Ring buffer underrun, hardware going IDLE | transmitted="
+        //        << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes);
         ctx->mHardwareIdle = true; // Signal CPU that hardware needs restart
         ctx->mTransmitting = false; // Hardware is idle, not transmitting
-        return false; // No high-priority task woken
+
+        // Signal semaphore: ring is now empty (has space) and CPU should populate
+        BaseType_t higherPriorityTaskWoken = pdFALSE;
+        xSemaphoreGiveFromISR(static_cast<SemaphoreHandle_t>(self->mState.mRingSpaceSemaphore),
+                             &higherPriorityTaskWoken);
+        return higherPriorityTaskWoken == pdTRUE;
     }
 
     // Next buffer is ready - submit it to hardware
@@ -448,11 +505,12 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         return false;
     }
 
-    // DEBUG: Log ISR buffer submission (careful - this is ISR context!)
-    // Note: FL_LOG_PARLIO uses printf which is safe in ISR if properly configured
-    FL_LOG_PARLIO("PARLIO ISR: Submitting buffer " << buffer_idx
-           << " | size=" << buffer_size
-           << " | bits=" << (buffer_size * 8));
+   // NO LOGGING IN ISR!!!
+   // // DEBUG: Log ISR buffer submission (careful - this is ISR context!)
+   // // Note: FL_LOG_PARLIO uses printf which is safe in ISR if properly configured
+   // FL_LOG_PARLIO("PARLIO ISR: Submitting buffer " << buffer_idx
+    //        << " | size=" << buffer_size
+    //        << " | bits=" << (buffer_size * 8));
 
     // Submit buffer to hardware
     parlio_transmit_config_t tx_config = {};
@@ -466,15 +524,26 @@ ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % PARLIO_RING_BUFFER_COUNT;
         ctx->mRingCount = ctx->mRingCount - 1;
         ctx->mHardwareIdle = false; // Hardware is active again
-        FL_LOG_PARLIO("PARLIO ISR: Buffer " << buffer_idx << " submitted OK");
+        // NO LOGGING IN ISR!!!
+        //FL_LOG_PARLIO("PARLIO ISR: Buffer " << buffer_idx << " submitted OK");
+
+        // Signal semaphore: ring space now available for CPU to populate
+        BaseType_t higherPriorityTaskWoken = pdFALSE;
+        xSemaphoreGiveFromISR(static_cast<SemaphoreHandle_t>(self->mState.mRingSpaceSemaphore),
+                             &higherPriorityTaskWoken);
+        return higherPriorityTaskWoken == pdTRUE;
     } else {
         // Submission failed - set error flag for CPU to detect
         ctx->mRingError = true;
-        FL_WARN("PARLIO ISR: Buffer " << buffer_idx << " submission failed: " << err);
+        // NO LOGGING IN ISR!!!
+        //FL_WARN("PARLIO ISR: Buffer " << buffer_idx << " submission failed: " << err);
     }
 
     return false; // No high-priority task woken
 }
+// ============================================================================
+// END OF ISR - Remember: NO LOGGING, NO BLOCKING, MINIMIZE EXECUTION TIME
+// ============================================================================
 
 //=============================================================================
 // Phase 0: Ring Buffer Generation (CPU Thread)
@@ -1041,12 +1110,12 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
     // Pre-populate ring buffers (fill all 3 buffers if possible)
     // This ensures ISR has buffers ready when transmission starts
-    // Remaining data will be populated incrementally during poll()
-    // Phase 3 - Iteration 8: Simplify buffer counting by reading mRingCount directly
-    // The loop increments mRingCount inside populateNextDMABuffer(), so we can just
-    // read the final value after the loop completes.
+    // Remaining data will be populated incrementally during blocking loop
+    // Consume semaphore for each buffer populated (decrement available count)
     while (has_ring_space() && populateNextDMABuffer()) {
-        // populateNextDMABuffer() increments mRingCount and returns true if more data
+        // Consume semaphore count for this buffer (non-blocking take)
+        // This keeps semaphore count in sync with actual ring space
+        xSemaphoreTake(static_cast<SemaphoreHandle_t>(mState.mRingSpaceSemaphore), 0);
     }
 
     // Get actual number of buffers populated from mRingCount
@@ -1122,33 +1191,33 @@ void ChannelEnginePARLIOImpl::beginTransmission(
                << " | transmitting=" << mState.mIsrContext->mTransmitting
                << " | ring_count=" << mState.mIsrContext->mRingCount);
 
-        // Wait for ring to have space (ISR consuming buffers)
-        while (!has_ring_space() && mState.mIsrContext->mTransmitting) {
-            fl::delayMicroseconds(1); // Yield to ISR (reduced from 10µs for faster response)
-        }
+        // Wait for ring buffer slot to become available
+        // Counting semaphore: count represents available slots (ISR increments when buffer consumed)
+        // Block on semaphore take with 10ms timeout (long enough for user perception, fast enough for responsiveness)
+        BaseType_t result = xSemaphoreTake(static_cast<SemaphoreHandle_t>(mState.mRingSpaceSemaphore),
+                                          pdMS_TO_TICKS(10)); // 10ms timeout
 
-        // Check if transmission completed or errored
-        if (!mState.mIsrContext->mTransmitting || mState.mErrorOccurred) {
-            FL_LOG_PARLIO("PARLIO: Loop exit - transmission stopped | transmitting="
-                   << mState.mIsrContext->mTransmitting << " | error=" << mState.mErrorOccurred);
+        // If semaphore take failed (timeout) or transmission stopped, exit loop
+        if (result != pdTRUE || !mState.mIsrContext->mTransmitting) {
+            FL_LOG_PARLIO("PARLIO: Semaphore take result=" << (result == pdTRUE ? "success" : "timeout")
+                   << " | transmitting=" << mState.mIsrContext->mTransmitting);
             break;
         }
 
+        // Semaphore obtained successfully - ring has space, proceed to populate
         // Populate next buffer if more data remains
         if (mState.mNextByteOffset < mState.mIsrContext->mTotalBytes) {
             FL_LOG_PARLIO("PARLIO: About to populate next buffer | offset=" << mState.mNextByteOffset);
-            if (!populateNextDMABuffer()) {
-                FL_WARN("PARLIO: Failed to populate buffer during transmission");
-                mState.mErrorOccurred = true;
-                break;
-            }
-            FL_LOG_PARLIO("PARLIO: Buffer populated | new_offset=" << mState.mNextByteOffset);
+            bool result = populateNextDMABuffer();
+            FL_LOG_PARLIO("PARLIO: Buffer populated | new_offset=" << mState.mNextByteOffset
+                   << " | result=" << (result ? "true" : "false"));
+            // Note: populateNextDMABuffer() returns false when no more data to populate
+            // This is normal completion, not an error
         }
     }
 
     FL_LOG_PARLIO("PARLIO: Exited blocking loop | final_offset=" << mState.mNextByteOffset
-           << " | expected=" << mState.mIsrContext->mTotalBytes
-           << " | error=" << mState.mErrorOccurred);
+           << " | expected=" << mState.mIsrContext->mTotalBytes);
 
     FL_LOG_PARLIO("PARLIO: All buffers queued - transmission in progress");
 }
@@ -1317,36 +1386,29 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     //   - ESP32 IDLE task cannot run to feed Task Watchdog Timer
     //   - After 5 seconds: ❌ WATCHDOG TIMEOUT → SYSTEM RESET ❌
     //
-    // Empirical Testing Results (2025-12-29):
+    // Empirical Testing Results (2025-12-29, with delayMicroseconds busy-wait):
     //   trans_queue_depth = 3: 11 ring buffer underruns (hardware maximum, tolerated)
     //   trans_queue_depth = 4: 18 underruns (+64% worse - queue desync)
     //   trans_queue_depth = 8: System crash (watchdog timeout)
     //
-    // MUST match PARLIO_RING_BUFFER_COUNT (channel_engine_parlio.h:400)
-    // Both values are constrained by the ESP32-C6 hardware architecture.
+    // CRITICAL: Hardware transaction queue depth (see PARLIO_HARDWARE_QUEUE_DEPTH constant)
+    //   - trans_queue_depth = HARDWARE transaction queue (3-state FSM limit)
+    //   - PARLIO_RING_BUFFER_COUNT = SOFTWARE ring buffer (independent, can be larger)
+    //   - Software can pre-compute additional buffers beyond hardware queue depth
     // ========================================================================
-    config.trans_queue_depth = 3;
+    config.trans_queue_depth = PARLIO_HARDWARE_QUEUE_DEPTH;
 
     // Validation: ESP32-C6 PARLIO hardware queue depth limit
-    // Hardware architecture has 3 internal states (READY, PROGRESS, COMPLETE)
-    // Setting trans_queue_depth > 3 causes:
-    //   - Queue desynchronization (software queue != hardware states)
-    //   - ISR callbacks may not fire for buffers beyond slot 3
-    //   - CPU busy-wait loops never exit → Task Watchdog timeout after 5s
-    // Empirical testing:
-    //   - trans_queue_depth=3: 11 ring buffer underruns (hardware max, tolerated)
-    //   - trans_queue_depth=4: 18 underruns (+64% worse - queue desync)
-    //   - trans_queue_depth=8: System crash (watchdog timeout)
+    // See PARLIO_HARDWARE_QUEUE_DEPTH constant at top of file for details
 #if defined(CONFIG_IDF_TARGET_ESP32C6)
-    constexpr size_t ESP32C6_PARLIO_MAX_QUEUE_DEPTH = 3;
-    if (config.trans_queue_depth > ESP32C6_PARLIO_MAX_QUEUE_DEPTH) {
+    if (config.trans_queue_depth > PARLIO_HARDWARE_QUEUE_DEPTH) {
         FL_WARN("PARLIO: trans_queue_depth=" << config.trans_queue_depth
                 << " exceeds ESP32-C6 hardware limit ("
-                << ESP32C6_PARLIO_MAX_QUEUE_DEPTH << "). "
-                << "Hardware has 3 internal states (READY/PROGRESS/COMPLETE). "
+                << PARLIO_HARDWARE_QUEUE_DEPTH << "). "
+                << "Hardware has " << PARLIO_HARDWARE_QUEUE_DEPTH << " internal states (READY/PROGRESS/COMPLETE). "
                 << "Exceeding this limit causes queue desync, ISR callback failures, "
                 << "and potential watchdog timeouts. "
-                << "Recommended: Set trans_queue_depth <= " << ESP32C6_PARLIO_MAX_QUEUE_DEPTH);
+                << "Recommended: Set trans_queue_depth <= " << PARLIO_HARDWARE_QUEUE_DEPTH);
     }
 #endif
 
@@ -1402,6 +1464,24 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // NOTE: Unit remains in "init" state (NOT enabled yet)
     // Enable will be called by beginTransmission() before each transmission
     // This follows the enable-when-needed pattern recommended for peripheral management
+
+    // Step 7a: Create counting semaphore for ISR→CPU signaling (ring space tracking)
+    // Counting semaphore: count represents available ring buffer slots (0-3)
+    // - ISR gives semaphore for each buffer consumed (increments count)
+    // - CPU takes semaphore for each buffer to populate (decrements count, blocks if 0)
+    // This provides direct tracking of ring space and handles back pressure naturally
+    if (!mState.mRingSpaceSemaphore) {
+        // Max count = 3 (PARLIO_RING_BUFFER_COUNT), initial count = 3 (all slots available)
+        mState.mRingSpaceSemaphore = xSemaphoreCreateCounting(PARLIO_RING_BUFFER_COUNT,
+                                                                PARLIO_RING_BUFFER_COUNT);
+        if (!mState.mRingSpaceSemaphore) {
+            FL_WARN("PARLIO: Failed to create ring space semaphore");
+            parlio_del_tx_unit(mState.mTxUnit);
+            mState.mTxUnit = nullptr;
+            mInitialized = false;
+            return;
+        }
+    }
 
     // Step 8: Allocate double buffers for ping-pong streaming
     // CRITICAL REQUIREMENTS:
