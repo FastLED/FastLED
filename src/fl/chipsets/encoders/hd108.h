@@ -11,9 +11,11 @@
 /// - LED data: [Header:2B][R:16b][G:16b][B:16b] (8 bytes per LED)
 /// - End frame: (num_leds / 2) + 4 bytes of 0xFF
 ///
-/// Header encoding (dual-byte brightness):
-/// - Byte 0: 0x80 | ((brightness_5bit & 0x1F) << 2)
-/// - Byte 1: ((brightness_5bit & 0x07) << 5) | (brightness_5bit & 0x1F)
+/// Header encoding (per-channel gain control):
+/// - Byte 0: [1][RRRRR][GG] - marker bit, 5-bit R gain, 2 MSBs of G gain
+/// - Byte 1: [GGG][BBBBB]   - 3 LSBs of G gain, 5-bit B gain
+/// - Currently: R=G=B=brightness (same gain for all channels)
+/// - Future: Per channel gain control for higher color range
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"

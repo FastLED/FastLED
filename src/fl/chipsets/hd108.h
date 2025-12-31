@@ -105,12 +105,14 @@ void showPixels(PixelController<RGB_ORDER> &pixels) override {
             lastBrightness5 = bri5;
         }
 
-        // Header bytes: HD108 dual-byte encoding for brightness/current control
-        // f0 format: 1bbbbb00 (bit 7=start marker, bits 6-2=brightness, bits 1-0=padding)
-        // f1 format: bbbBBBBB (bits 7-5=lower 3 bits, bits 4-0=full 5 bits, overlapping)
-        // This encoding may provide separate PWM and current controls (not fully documented)
-        const fl::u8 f0 = fl::u8(0x80 | ((bri5 & 0x1F) << 2));
-        const fl::u8 f1 = fl::u8(((bri5 & 0x07) << 5) | (bri5 & 0x1F));
+        // Header bytes: HD108 per-channel gain control encoding
+        // f0: [1][RRRRR][GG] - marker bit, 5-bit R gain, 2 MSBs of G gain
+        // f1: [GGG][BBBBB]   - 3 LSBs of G gain, 5-bit B gain
+        // Currently: R=G=B=bri5 (same gain for all channels)
+        // Future: Per channel gain control for higher color range
+        fl::u8 r_gain = bri5, g_gain = bri5, b_gain = bri5;
+        const fl::u8 f0 = fl::u8(0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03));
+        const fl::u8 f1 = fl::u8(((g_gain & 0x07) << 5) | (b_gain & 0x1F));
 
         // Transmit LED frame: 2 header bytes + 6 color bytes (16-bit, big-endian, in RGB_ORDER)
         mSPI.writeByte(f0);
