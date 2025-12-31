@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+# validation - FastLED Validation Test Wrapper
+#
+# Runs the Validation.ino sketch with proper --expect and --fail-on patterns
+# to catch ISR failures, hardware issues, and test matrix errors.
+#
+# Usage:
+#   ./validation                    # Run with default patterns
+#   ./validation --timeout 120      # Override timeout
+#   ./validation --skip-lint        # Skip linting phase
+#   ./validation --help             # Show help
+
+set -euo pipefail
+
+# Default expect patterns from Validation.ino (line 101) and SketchHalt.h
+DEFAULT_EXPECT=(
+    "TX Pin: 0"                      # Hardware setup verification
+    "RX Pin: 1"                      # Hardware setup verification
+    "DRIVER_ENABLED: RMT"            # RMT driver availability
+    "DRIVER_ENABLED: SPI"            # SPI driver availability
+    "DRIVER_ENABLED: PARLIO"         # Parlio driver availability
+    "LANE_MIN: 1"                    # Test matrix configuration
+    "LANE_MAX: 8"                    # Test matrix configuration
+    "STRIP_SIZE_TESTED: 10"          # Small strip test
+    "STRIP_SIZE_TESTED: 300"         # Large strip test
+    "TEST_CASES_GENERATED: 48"       # Full test matrix size
+    "VALIDATION_READY: true"         # Test ready indicator
+    "FINISHED: Test matrix complete" # CRITICAL: Halting state (prevents false positives when ISR stops)
+)
+
+# Default fail-on pattern from Validation.ino (lines 78-98)
+DEFAULT_FAIL_ON="ERROR"
+
+# Help message
+show_help() {
+    cat <<EOF
+FastLED Validation Test Wrapper
+
+Usage:
+  ./validation [OPTIONS]
+
+Description:
+  Runs the Validation.ino sketch with comprehensive --expect and --fail-on patterns
+  to detect ISR failures, hardware issues, and test matrix errors.
+
+  CRITICAL PATTERN: "FINISHED: Test matrix complete"
+  - This pattern prevents false positives when the ISR stops firing
+  - The sketch halts in a loop printing this message every 5 seconds
+  - Without this pattern, a silent ISR hang would look like success
+
+Default Patterns:
+  12 --expect patterns covering:
+    - Hardware setup (TX/RX pins)
+    - Driver availability (RMT, SPI, PARLIO)
+    - Test matrix configuration (lanes, strip sizes, test count)
+    - Validation ready indicator
+    - Halting state message (CRITICAL - prevents ISR hang false positives)
+
+  1 --fail-on pattern:
+    - ERROR (catches test failures via FL_WARN)
+
+Options:
+  -h, --help          Show this help message
+  --timeout SECONDS   Override default timeout (default: 20s)
+  --skip-lint         Skip C++ linting phase (faster iteration)
+  --no-expect         Clear default --expect patterns (use custom only)
+  --no-fail-on        Clear default --fail-on pattern (use custom only)
+
+  Any other options are passed directly to 'bash debug Validation'
+
+Examples:
+  ./validation                        # Run with all default patterns
+  ./validation --timeout 60           # Longer timeout for debugging
+  ./validation --skip-lint            # Skip linting for faster iteration
+  ./validation --no-expect --expect "CUSTOM PATTERN"  # Custom patterns only
+
+Exit Codes:
+  0   Success (all patterns found, no failures)
+  1   Failure (missing patterns, ERROR detected, or compilation/upload failed)
+  130 User interrupt (Ctrl+C)
+
+See Also:
+  - examples/Validation/Validation.ino (lines 78-102) - Pattern documentation
+  - examples/Validation/SketchHalt.h (lines 36-52) - Halting state mechanism
+  - LOOP.md Section 4 - Testing & Validation Loop Workflow
+
+EOF
+}
+
+# Parse arguments
+USE_DEFAULT_EXPECT=true
+USE_DEFAULT_FAIL_ON=true
+EXTRA_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        --no-expect)
+            USE_DEFAULT_EXPECT=false
+            shift
+            ;;
+        --no-fail-on)
+            USE_DEFAULT_FAIL_ON=false
+            shift
+            ;;
+        *)
+            EXTRA_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Build final command
+CMD=(bash debug Validation)
+
+# Add default --expect patterns unless disabled
+if [[ "$USE_DEFAULT_EXPECT" == "true" ]]; then
+    for pattern in "${DEFAULT_EXPECT[@]}"; do
+        CMD+=(--expect "$pattern")
+    done
+fi
+
+# Add default --fail-on pattern unless disabled
+if [[ "$USE_DEFAULT_FAIL_ON" == "true" ]]; then
+    CMD+=(--fail-on "$DEFAULT_FAIL_ON")
+fi
+
+# Append any extra arguments
+CMD+=("${EXTRA_ARGS[@]}")
+
+# Print command for transparency
+echo "Running validation with patterns:"
+echo "  Expect: ${#DEFAULT_EXPECT[@]} patterns (use --help to see list)"
+echo "  Fail-on: $DEFAULT_FAIL_ON"
+echo ""
+echo "Command: ${CMD[*]}"
+echo ""
+
+# Execute
+exec "${CMD[@]}"
