@@ -64,6 +64,7 @@ Usage:
 """
 
 import argparse
+import datetime
 import os
 import re
 import subprocess
@@ -71,6 +72,7 @@ import sys
 import time
 from pathlib import Path
 
+import psutil
 import serial
 import serial.tools.list_ports
 from running_process import RunningProcess
@@ -652,6 +654,156 @@ def run_monitor(
     return success, output_lines
 
 
+def log_port_cleanup(message: str) -> None:
+    """Log port cleanup operations to .logs/debug_attached/port_cleanup.log.
+
+    Args:
+        message: Log message to write
+    """
+    try:
+        # Get project root (where .logs directory is located)
+        project_root = Path(__file__).parent.parent
+        log_dir = project_root / ".logs" / "debug_attached"
+        log_file = log_dir / "port_cleanup.log"
+
+        # Create directory if it doesn't exist
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # Append log entry with timestamp
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{timestamp}] {message}\n")
+    except Exception:
+        # Silently ignore logging errors - don't fail the operation
+        pass
+
+
+def kill_port_users(port: str) -> None:
+    """Kill processes holding the serial port.
+
+    ⚠️ CRITICAL: MUST BE CALLED INSIDE DAEMON LOCK.
+    Only kills orphaned processes from crashed sessions.
+    Assumes caller has exclusive daemon lock (any port user is an orphan).
+
+    This function uses process name and command-line pattern matching
+    (not open file handles) because on Windows, COM ports don't typically
+    show up as file handles via psutil.Process.open_files().
+
+    Args:
+        port: Serial port name (e.g., "COM4", "/dev/ttyUSB0")
+    """
+    port_lower = port.lower()
+    processes_to_kill = []
+
+    # Get current process and its entire process tree (ancestors)
+    # We must NEVER kill ourselves or any parent process
+    current_pid = os.getpid()
+    protected_pids = {current_pid}
+
+    try:
+        current_proc = psutil.Process(current_pid)
+        # Walk up the process tree and protect all ancestors
+        parent = current_proc.parent()
+        while parent:
+            protected_pids.add(parent.pid)
+            parent = parent.parent()
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        pass
+
+    # Define patterns for serial port users
+    # Only kill dedicated serial tools - NEVER kill Python processes
+    # (Python could be the agent backend: clud, claude, etc.)
+    safe_serial_exes = [
+        "pio.exe",
+        "pio",
+        "esptool.exe",
+        "esptool",
+        "platformio.exe",
+        "platformio",
+        "miniterm.exe",
+        "miniterm",
+        "putty.exe",
+        "putty",
+        "teraterm.exe",
+        "teraterm",
+        "screen",  # Unix serial terminal
+        "cu",  # Unix serial terminal
+    ]
+
+    cmdline_patterns = [
+        "pio monitor",
+        "pio device monitor",
+        "device monitor",
+        "miniterm",
+        "esptool",
+        port_lower,
+    ]
+
+    # Find processes using the port
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
+            proc_pid = proc_info["pid"]
+            proc_name = proc_info["name"]
+            cmdline = proc_info["cmdline"]
+            proc_name_lower = proc_name.lower()
+
+            # NEVER kill ourselves or parent processes
+            if proc_pid in protected_pids:
+                continue
+
+            # NEVER kill Python processes (could be agent backend)
+            if "python" in proc_name_lower:
+                continue
+
+            # Check dedicated serial tools (safe to kill)
+            if any(exe in proc_name_lower for exe in safe_serial_exes):
+                if cmdline:
+                    cmdline_str = " ".join(cmdline).lower()
+                    # Check if command line contains port or serial patterns
+                    if any(pattern in cmdline_str for pattern in cmdline_patterns):
+                        processes_to_kill.append((proc, proc_name, cmdline))
+
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            # Process may have terminated or access denied
+            pass
+
+    # Kill identified processes
+    if processes_to_kill:
+        log_port_cleanup(
+            f"Port cleanup started for {port}: Found {len(processes_to_kill)} orphaned process(es)"
+        )
+        print(
+            f"🔪 Cleaning up {len(processes_to_kill)} orphaned process(es) using {port}:"
+        )
+        for proc, proc_name, cmdline in processes_to_kill:
+            try:
+                cmdline_str = " ".join(cmdline) if cmdline else "<no cmdline>"
+                # Truncate long command lines
+                if len(cmdline_str) > 80:
+                    cmdline_str = cmdline_str[:77] + "..."
+                print(f"   → Killing {proc_name} (PID {proc.pid})")
+                print(f"      Command: {cmdline_str}")
+                proc.kill()
+                log_port_cleanup(
+                    f"Killed process: {proc_name} (PID {proc.pid}) - Command: {cmdline_str}"
+                )
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                print(f"      ⚠️  Could not kill (may have already exited): {e}")
+                log_port_cleanup(
+                    f"Failed to kill process: {proc_name} (PID {proc.pid}) - Error: {e}"
+                )
+
+        # Wait for OS to release port
+        print(f"   Waiting 2 seconds for OS to release {port}...")
+        time.sleep(2)
+        print(f"✅ Port cleanup completed")
+        log_port_cleanup(f"Port cleanup completed for {port}")
+    else:
+        print(f"✅ No orphaned processes found using {port}")
+        log_port_cleanup(f"Port cleanup for {port}: No orphaned processes found")
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -875,6 +1027,11 @@ def main() -> int:
             return 1
 
         try:
+            # Clean up orphaned processes holding the serial port
+            # This MUST happen inside the lock to prevent race conditions
+            if args.upload_port:
+                kill_port_users(args.upload_port)
+
             # Phase 2: Upload firmware (with incremental rebuild if needed)
             if not run_upload(
                 build_dir, args.environment, args.upload_port, args.verbose

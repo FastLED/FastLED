@@ -17,7 +17,7 @@ import sys
 
 import serial.tools.list_ports
 
-from ci.debug_attached import auto_detect_upload_port, kill_process_using_port
+from ci.debug_attached import auto_detect_upload_port, kill_port_users
 
 
 def list_all_ports():
@@ -107,17 +107,14 @@ def main():
     if is_locked and args.kill:
         print("Attempting to kill process using port...")
         print("-" * 60)
-        result = kill_process_using_port(port_to_check)
+        kill_port_users(port_to_check)
         print()
 
-        if result:
-            print(f"✅ Successfully killed process using {port_to_check}")
-            print()
-            print("Re-checking port status...")
-            print("-" * 60)
-            check_port_status(port_to_check)
-        else:
-            print(f"⚠️  No process killed (port may have been released)")
+        print(f"✅ Port cleanup completed for {port_to_check}")
+        print()
+        print("Re-checking port status...")
+        print("-" * 60)
+        check_port_status(port_to_check)
     elif is_locked:
         print("Port is locked. Run with --kill to attempt killing the process.")
         print(f"Example: uv run python {sys.argv[0]} {port_to_check} --kill")
