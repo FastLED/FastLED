@@ -46,17 +46,18 @@ static void verifyEndFrame(const fl::vector<u8>& data, size_t expected_size) {
     }
 }
 
-/// Helper to verify header bytes match expected 5-bit per-channel gain
-/// Currently all channels use same gain value (R=G=B=expected_bri5)
+/// Helper to verify header bytes use maximum gain (31) for all channels
+/// Brightness parameter is ignored - gain is always max for maximum precision
 static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset, u8 expected_bri5) {
+    (void)expected_bri5;  // Unused - all gains are max (31) regardless of brightness input
+
     u8 f0 = data[offset];
     u8 f1 = data[offset + 1];
 
     // Per-channel encoding: f0=[1][RRRRR][GG], f1=[GGG][BBBBB]
-    // When R=G=B=expected_bri5 (all channels same value)
-    u8 r_gain = expected_bri5, g_gain = expected_bri5, b_gain = expected_bri5;
-    u8 expected_f0 = 0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03);
-    u8 expected_f1 = ((g_gain & 0x07) << 5) | (b_gain & 0x1F);
+    // All channels use maximum gain: R=G=B=31
+    u8 expected_f0 = 0xFF;  // [1][11111][11]
+    u8 expected_f1 = 0xFF;  // [111][11111]
 
     CHECK_EQ(f0, expected_f0);
     CHECK_EQ(f1, expected_f1);
@@ -421,26 +422,27 @@ TEST_CASE("encodeHD108_HD() - min/max brightness values") {
 // Helper function tests
 //-----------------------------------------------------------------------------
 
-TEST_CASE("hd108BrightnessHeader() - per-channel gain encoding") {
+TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
     // Test the per-channel gain header generation function
-    // When R=G=B (same brightness for all channels), verify correct bit packing
+    // All channels use maximum gain (31) regardless of brightness input
+    // Brightness control is handled via 16-bit PWM values, not gain
 
     struct HeaderTest {
-        u8 brightness_8bit;
-        u8 expected_bri5;
-        u8 expected_f0;
-        u8 expected_f1;
+        u8 brightness_8bit;  // Input brightness (now ignored)
+        u8 expected_gain;    // Expected gain for all channels
+        u8 expected_f0;      // Expected header byte 0
+        u8 expected_f1;      // Expected header byte 1
     };
 
-    // Per-channel encoding: f0=[1][RRRRR][GG], f1=[GGG][BBBBB]
-    // When R=G=B=bri5 (all channels same value)
+    // All brightness inputs produce the same output: R=G=B=31 (max gain)
+    // f0: [1][11111][11] = 0xFF, f1: [111][11111] = 0xFF
     HeaderTest tests[] = {
-        {0,   0,  0x80, 0x00},  // R=0,  G_hi=0, G_lo=0, B=0
-        {1,   1,  0x84, 0x21},  // R=1,  G_hi=0, G_lo=1, B=1
-        {64,  8,  0xA1, 0x08},  // R=8,  G_hi=1, G_lo=0, B=8  (CHANGED from 0xA0)
-        {128, 16, 0xC2, 0x10},  // R=16, G_hi=2, G_lo=0, B=16 (CHANGED from 0xC0)
-        {200, 24, 0xE3, 0x18},  // R=24, G_hi=3, G_lo=0, B=24 (CHANGED from 0xE0)
-        {255, 31, 0xFF, 0xFF}   // R=31, G_hi=3, G_lo=7, B=31
+        {0,   31, 0xFF, 0xFF},  // brightness=0   → gain=31 (max)
+        {1,   31, 0xFF, 0xFF},  // brightness=1   → gain=31 (max)
+        {64,  31, 0xFF, 0xFF},  // brightness=64  → gain=31 (max)
+        {128, 31, 0xFF, 0xFF},  // brightness=128 → gain=31 (max)
+        {200, 31, 0xFF, 0xFF},  // brightness=200 → gain=31 (max)
+        {255, 31, 0xFF, 0xFF}   // brightness=255 → gain=31 (max)
     };
 
     for (const auto& test : tests) {
@@ -450,16 +452,16 @@ TEST_CASE("hd108BrightnessHeader() - per-channel gain encoding") {
         CHECK_EQ(f0, test.expected_f0);
         CHECK_EQ(f1, test.expected_f1);
 
-        // Verify per-channel gain extraction (R, G, B should all equal expected_bri5)
+        // Verify all channels use maximum gain (31)
         u8 extracted_r = (f0 >> 2) & 0x1F;            // Extract R gain (bits 6-2 of f0)
         u8 extracted_g_hi = f0 & 0x03;                // Extract G gain high bits (bits 1-0 of f0)
         u8 extracted_g_lo = (f1 >> 5) & 0x07;         // Extract G gain low bits (bits 7-5 of f1)
         u8 extracted_g = (extracted_g_hi << 3) | extracted_g_lo;  // Reconstruct G gain
         u8 extracted_b = f1 & 0x1F;                   // Extract B gain (bits 4-0 of f1)
 
-        CHECK_EQ(extracted_r, test.expected_bri5);
-        CHECK_EQ(extracted_g, test.expected_bri5);
-        CHECK_EQ(extracted_b, test.expected_bri5);
+        CHECK_EQ(extracted_r, test.expected_gain);
+        CHECK_EQ(extracted_g, test.expected_gain);
+        CHECK_EQ(extracted_b, test.expected_gain);
     }
 }
 

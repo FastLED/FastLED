@@ -50,14 +50,6 @@ public:
 
 protected:
 void showPixels(PixelController<RGB_ORDER> &pixels) override {
-
-	// Brightness conversion cache
-	// Initialize with invalid marker - use 0x100 conceptually (impossible 8-bit value)
-	// We'll detect this by checking if lastBrightness5 > 31
-	fl::u8 lastBrightness8 = 0;
-	fl::u8 lastBrightness5 = 0xFF;  // > 31, 0xff marks cache as invalid
-
-
     mSPI.select();
 
     // ---- Start frame: 64 bits of 0 ----
@@ -72,47 +64,21 @@ void showPixels(PixelController<RGB_ORDER> &pixels) override {
         fl::u8 c1_8 = PixelController<RGB_ORDER>::template loadByte<1>(pixels);
         fl::u8 c2_8 = PixelController<RGB_ORDER>::template loadByte<2>(pixels);
 
-        // Extract brightness from ColorAdjustment
-        #if FASTLED_HD_COLOR_MIXING
-        fl::u8 brightness = pixels.getBrightness();
-        #else
-        fl::u8 brightness = 255;  // Use full brightness if HD color mixing is disabled
-        #endif
-
         // Apply gamma correction (2.8) to convert 8-bit to 16-bit for HD108
         // This provides smooth perceptual brightness transitions across the full 65K range
+        // Note: Brightness is already applied via loadAndScaleRGB before gamma correction
         fl::u16 c0_16 = fl::gamma_2_8(c0_8);
         fl::u16 c1_16 = fl::gamma_2_8(c1_8);
         fl::u16 c2_16 = fl::gamma_2_8(c2_8);
 
-        // Map 8-bit brightness (0-255) to 5-bit (0-31) for HD108 current control
-        // Formula: (brightness * 31 + 127) / 255 provides proper rounding
-        // Caching optimization: reuse conversion if brightness unchanged from previous LED
-        fl::u8 bri5;
-        if (brightness == lastBrightness8 && lastBrightness5 <= 31) {
-            // Use cached conversion (common when all LEDs have same brightness)
-            // Only use cache if lastBrightness5 is valid (<=31)
-            bri5 = lastBrightness5;
-        } else {
-            // Compute new conversion with rounding
-            fl::u16 bri = ((fl::u16)brightness * 31 + 127) / 255;
-            if (bri == 0 && brightness != 0) {
-                bri = 1;  // Clamp to minimum visible: prevent invisible LEDs at brightness=1-7
-            }
-            bri5 = static_cast<fl::u8>(bri);
-            // Update cache
-            lastBrightness8 = brightness;
-            lastBrightness5 = bri5;
-        }
-
         // Header bytes: HD108 per-channel gain control encoding
         // f0: [1][RRRRR][GG] - marker bit, 5-bit R gain, 2 MSBs of G gain
         // f1: [GGG][BBBBB]   - 3 LSBs of G gain, 5-bit B gain
-        // Currently: R=G=B=bri5 (same gain for all channels)
-        // Future: Per channel gain control for higher color range
-        fl::u8 r_gain = bri5, g_gain = bri5, b_gain = bri5;
-        const fl::u8 f0 = fl::u8(0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03));
-        const fl::u8 f1 = fl::u8(((g_gain & 0x07) << 5) | (b_gain & 0x1F));
+        // Use maximum gain (31) for all channels to maximize precision
+        // Brightness control via 16-bit PWM values (already applied via loadAndScaleRGB)
+        constexpr fl::u8 r_gain = 31, g_gain = 31, b_gain = 31;
+        constexpr fl::u8 f0 = fl::u8(0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03));
+        constexpr fl::u8 f1 = fl::u8(((g_gain & 0x07) << 5) | (b_gain & 0x1F));
 
         // Transmit LED frame: 2 header bytes + 6 color bytes (16-bit, big-endian, in RGB_ORDER)
         mSPI.writeByte(f0);

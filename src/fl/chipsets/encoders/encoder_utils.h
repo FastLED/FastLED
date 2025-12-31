@@ -70,19 +70,21 @@ inline u16 hd108GammaCorrect(u8 value) {
 }
 
 /// @brief Generate HD108 per-channel gain header bytes
-/// @param brightness_8bit 8-bit brightness (0-255)
+/// @param brightness_8bit 8-bit brightness (0-255) - UNUSED, kept for API compatibility
 /// @param f0_out Output: first header byte
 /// @param f1_out Output: second header byte
 /// @note HD108 uses per-channel gain encoding: 5 bits each for R/G/B
-/// @note Currently uses same gain for all channels (R=G=B=brightness)
+/// @note All gains set to maximum (31) for maximum precision
+/// @note Brightness control via 16-bit PWM values (applied before encoding)
 /// @note Future: Per channel gain control for higher color range
 inline void hd108BrightnessHeader(u8 brightness_8bit, u8* f0_out, u8* f1_out) {
-    u8 bri5 = mapBrightness8to5(brightness_8bit);
+    (void)brightness_8bit;  // Unused - brightness applied to 16-bit values instead
 
-    // For now: Use same gain for all channels (R=G=B=brightness)
-    u8 r_gain = bri5;
-    u8 g_gain = bri5;
-    u8 b_gain = bri5;
+    // Use maximum gain for all channels for maximum precision
+    // Brightness control happens via 16-bit PWM values
+    constexpr u8 r_gain = 31;
+    constexpr u8 g_gain = 31;
+    constexpr u8 b_gain = 31;
 
     // Correct HD108 per-channel encoding:
     // f0: [1][RRRRR][GG] - marker bit, 5-bit R gain, 2 MSBs of G gain
