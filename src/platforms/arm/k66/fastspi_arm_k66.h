@@ -8,6 +8,9 @@
 // TODO: add alternative pins for SPI1
 // TODO: add SPI2 output
 //
+#include "fl/math_macros.h"
+#include "fastspi_types.h"
+
 namespace fl {
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
@@ -40,8 +43,6 @@ template<int VAL> class BitWork<VAL, 0> {
 public:
 	static int highestBit() __attribute__((always_inline)) { return 0; }
 };
-
-#define FL_MAX(A, B) (( (A) > (B) ) ? (A) : (B))
 
 #define USE_CONT 0
 // intra-frame backup data

@@ -3,6 +3,8 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
+#include "fastled_delay.h"
+
 namespace fl {
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.

@@ -2,6 +2,9 @@
 #define __INC_BLOCK_CLOCKLESS_ARM_K66_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "fl/math_macros.h"
+#include "fl/transposition.h"
+#include "fastled_delay.h"
 
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.
@@ -17,7 +20,6 @@
 #define PORT_SHIFT(P) ((P) << ((FIRST_PIN==0) ? 16 : 0))
 #define PORT_MASK PORT_SHIFT(LANE_MASK)
 
-#define FL_MIN(X,Y) (((X)<(Y)) ? (X):(Y))
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
