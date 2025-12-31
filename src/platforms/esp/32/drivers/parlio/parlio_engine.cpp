@@ -269,8 +269,8 @@ struct ParlioBufferCalculator {
             size_t uncappedCapacity = dmaBufferCapacity;
             dmaBufferCapacity = perBufferCap;
 
-            // Debug logging (enabled via FL_DBG macro)
-            FL_DBG("PARLIO: Ring buffer capped at " << dmaBufferCapacity
+            // Debug logging (enabled via FL_LOG_PARLIO macro)
+            FL_LOG_PARLIO("PARLIO: Ring buffer capped at " << dmaBufferCapacity
                    << " bytes/buffer (uncapped: " << uncappedCapacity
                    << ", total cap: " << TOTAL_CAP << " bytes)");
         }
@@ -324,7 +324,7 @@ ParlioEngine::~ParlioEngine() {
         esp_err_t err =
             parlio_tx_unit_wait_all_done(mTxUnit, pdMS_TO_TICKS(1000));
         if (err != ESP_OK) {
-            FL_WARN("PARLIO: Wait for transmission timeout during cleanup: "
+            FL_LOG_PARLIO("PARLIO: Wait for transmission timeout during cleanup: "
                     << err);
         }
 
@@ -332,7 +332,7 @@ ParlioEngine::~ParlioEngine() {
         if (mTxUnitEnabled) {
             err = parlio_tx_unit_disable(mTxUnit);
             if (err != ESP_OK) {
-                FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+                FL_LOG_PARLIO("PARLIO: Failed to disable TX unit: " << err);
             }
             mTxUnitEnabled = false;
         }
@@ -340,7 +340,7 @@ ParlioEngine::~ParlioEngine() {
         // Delete TX unit
         err = parlio_del_tx_unit(mTxUnit);
         if (err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to delete TX unit: " << err);
+            FL_LOG_PARLIO("PARLIO: Failed to delete TX unit: " << err);
         }
 
         mTxUnit = nullptr;
@@ -974,7 +974,7 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
 
         // Boundary check: Ensure padding fits in output buffer
         if (outputIdx + reset_padding_bytes > outputBufferCapacity) {
-            FL_WARN("PARLIO: Reset padding overflow - needed "
+            FL_LOG_PARLIO("PARLIO: Reset padding overflow - needed "
                     << reset_padding_bytes << " bytes, available "
                     << (outputBufferCapacity - outputIdx));
             outputBytesWritten = outputIdx;
@@ -1023,7 +1023,7 @@ bool ParlioEngine::allocateRingBuffers() {
                 mRingBufferCapacity, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
 
         if (!buffer) {
-            FL_WARN("PARLIO: Failed to allocate ring buffer "
+            FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer "
                     << i << "/" << RING_BUFFER_COUNT << " (requested "
                     << mRingBufferCapacity << " bytes)");
             // Clean up already allocated ring buffers (automatic via unique_ptr destructors)
@@ -1059,7 +1059,7 @@ bool ParlioEngine::allocateWorkerTimer() {
 
     esp_err_t err = gptimer_new_timer(&timer_config, &mWorkerTimerHandle);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to create worker timer: " << static_cast<int>(err));
+        FL_LOG_PARLIO("PARLIO: Failed to create worker timer: " << static_cast<int>(err));
         return false;
     }
 
@@ -1069,7 +1069,7 @@ bool ParlioEngine::allocateWorkerTimer() {
     };
     err = gptimer_register_event_callbacks(mWorkerTimerHandle, &cbs, this);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to register timer callback: " << static_cast<int>(err));
+        FL_LOG_PARLIO("PARLIO: Failed to register timer callback: " << static_cast<int>(err));
         gptimer_del_timer(mWorkerTimerHandle);
         mWorkerTimerHandle = nullptr;
         return false;
@@ -1085,7 +1085,7 @@ bool ParlioEngine::allocateWorkerTimer() {
     };
     err = gptimer_set_alarm_action(mWorkerTimerHandle, &alarm_config);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to set timer alarm: " << static_cast<int>(err));
+        FL_LOG_PARLIO("PARLIO: Failed to set timer alarm: " << static_cast<int>(err));
         gptimer_del_timer(mWorkerTimerHandle);
         mWorkerTimerHandle = nullptr;
         return false;
@@ -1094,13 +1094,13 @@ bool ParlioEngine::allocateWorkerTimer() {
     // Enable timer (but do NOT start it yet - will be started in beginTransmission)
     err = gptimer_enable(mWorkerTimerHandle);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to enable timer: " << static_cast<int>(err));
+        FL_LOG_PARLIO("PARLIO: Failed to enable timer: " << static_cast<int>(err));
         gptimer_del_timer(mWorkerTimerHandle);
         mWorkerTimerHandle = nullptr;
         return false;
     }
 
-    FL_DBG("PARLIO: Worker timer allocated successfully (10µs period)");
+    FL_LOG_PARLIO("PARLIO: Worker timer allocated successfully (10µs period)");
     return true;
 }
 
@@ -1279,7 +1279,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Validate data width
     if (dataWidth != 1 && dataWidth != 2 && dataWidth != 4 &&
         dataWidth != 8 && dataWidth != 16) {
-        FL_WARN("PARLIO: Invalid data_width=" << dataWidth);
+        FL_LOG_PARLIO("PARLIO: Invalid data_width=" << dataWidth);
         return false;
     }
 
@@ -1290,14 +1290,14 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Validate pins
     if (pins.size() != dataWidth) {
-        FL_WARN("PARLIO: Pin configuration error - expected "
+        FL_LOG_PARLIO("PARLIO: Pin configuration error - expected "
                 << dataWidth << " pins, got " << pins.size());
         return false;
     }
 
     for (size_t i = 0; i < pins.size(); i++) {
         if (!isParlioPinValid(pins[i])) {
-            FL_WARN("PARLIO: Invalid pin " << pins[i] << " for channel " << i);
+            FL_LOG_PARLIO("PARLIO: Invalid pin " << pins[i] << " for channel " << i);
             return false;
         }
     }
@@ -1337,7 +1337,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Create TX unit
     esp_err_t err = parlio_new_tx_unit(&config, &mTxUnit);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to create TX unit: " << err);
+        FL_LOG_PARLIO("PARLIO: Failed to create TX unit: " << err);
         return false;
     }
 
@@ -1348,7 +1348,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     err = parlio_tx_unit_register_event_callbacks(mTxUnit, &callbacks, this);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to register callbacks: " << err);
+        FL_LOG_PARLIO("PARLIO: Failed to register callbacks: " << err);
         parlio_del_tx_unit(mTxUnit);
         mTxUnit = nullptr;
         return false;
@@ -1360,7 +1360,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Allocate ring buffers
     if (!allocateRingBuffers()) {
-        FL_WARN("PARLIO: Failed to allocate ring buffers");
+        FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffers");
         parlio_del_tx_unit(mTxUnit);
         mTxUnit = nullptr;
         return false;
@@ -1368,7 +1368,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Allocate worker timer
     if (!allocateWorkerTimer()) {
-        FL_WARN("PARLIO: Failed to allocate worker timer");
+        FL_LOG_PARLIO("PARLIO: Failed to allocate worker timer");
         parlio_del_tx_unit(mTxUnit);
         mTxUnit = nullptr;
         return false;
@@ -1382,7 +1382,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
         heap_caps_malloc(waveform_buffer_size, MALLOC_CAP_INTERNAL)));
 
     if (!mWaveformExpansionBuffer) {
-        FL_WARN("PARLIO: Failed to allocate waveform expansion buffer");
+        FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
         parlio_del_tx_unit(mTxUnit);
         mTxUnit = nullptr;
         return false;
@@ -1408,13 +1408,13 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
                                      size_t numLanes,
                                      size_t laneStride) {
     if (!mInitialized || !mTxUnit || !mIsrContext) {
-        FL_WARN("PARLIO: Cannot transmit - not initialized");
+        FL_LOG_PARLIO("PARLIO: Cannot transmit - not initialized");
         return false;
     }
 
     // Check if already transmitting
     if (mIsrContext->mTransmitting) {
-        FL_WARN("PARLIO: Transmission already in progress");
+        FL_LOG_PARLIO("PARLIO: Transmission already in progress");
         return false;
     }
 
@@ -1463,7 +1463,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // Verify at least one buffer was populated
     if (buffers_populated == 0) {
-        FL_WARN("PARLIO: No buffers populated - cannot start transmission");
+        FL_LOG_PARLIO("PARLIO: No buffers populated - cannot start transmission");
         mErrorOccurred = true;
         return false;
     }
@@ -1473,7 +1473,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     if (!mTxUnitEnabled) {
         err = parlio_tx_unit_enable(mTxUnit);
         if (err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to enable TX unit: " << err);
+            FL_LOG_PARLIO("PARLIO: Failed to enable TX unit: " << err);
             mErrorOccurred = true;
             return false;
         }
@@ -1494,7 +1494,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         first_buffer_size * 8, &tx_config);
 
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to queue first buffer: " << err);
+        FL_LOG_PARLIO("PARLIO: Failed to queue first buffer: " << err);
         mErrorOccurred = true;
         return false;
     }
@@ -1540,7 +1540,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     if (mTxUnitEnabled) {
         esp_err_t disable_err = parlio_tx_unit_disable(mTxUnit);
         if (disable_err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to disable TX unit after transmission: " << disable_err);
+            FL_LOG_PARLIO("PARLIO: Failed to disable TX unit after transmission: " << disable_err);
         } else {
             mTxUnitEnabled = false;
         }
@@ -1576,7 +1576,7 @@ ParlioEngineState ParlioEngine::poll() {
 
     // Check for errors
     if (mErrorOccurred) {
-        FL_WARN("PARLIO: Error occurred during transmission");
+        FL_LOG_PARLIO("PARLIO: Error occurred during transmission");
         mIsrContext->mTransmitting = false;
         mErrorOccurred = false;
         return ParlioEngineState::ERROR;
@@ -1604,7 +1604,7 @@ ParlioEngineState ParlioEngine::poll() {
             if (mTxUnitEnabled) {
                 err = parlio_tx_unit_disable(mTxUnit);
                 if (err != ESP_OK) {
-                    FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+                    FL_LOG_PARLIO("PARLIO: Failed to disable TX unit: " << err);
                 } else {
                     mTxUnitEnabled = false;
                 }
@@ -1617,7 +1617,7 @@ ParlioEngineState ParlioEngine::poll() {
         } else if (err == ESP_ERR_TIMEOUT) {
             return ParlioEngineState::BUSY;
         } else {
-            FL_WARN("PARLIO: Error waiting for final chunk: " << err);
+            FL_LOG_PARLIO("PARLIO: Error waiting for final chunk: " << err);
             return ParlioEngineState::ERROR;
         }
     }
