@@ -13,6 +13,12 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from ci.util.check_files import (
+    FileContent,
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    collect_files_to_check,
+)
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -133,6 +139,100 @@ def find_includes_after_namespace(
         return []
 
 
+class NamespaceIncludesChecker(FileContentChecker):
+    """FileContentChecker implementation for detecting includes after namespace declarations."""
+
+    def __init__(self):
+        self.violations: dict[
+            str, list[tuple[int, str, Optional[tuple[int, str]]]]
+        ] = {}
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed (only .h and .hpp files in src/)."""
+        # Skip build directories, third-party code, and tests
+        if any(
+            part in file_path.lower()
+            for part in [
+                ".build",
+                ".pio",
+                ".venv",
+                "libdeps",
+                "third_party",
+                "vendor",
+                "tests",
+            ]
+        ):
+            return False
+
+        # Only check .h and .hpp files
+        return file_path.endswith((".h", ".hpp"))
+
+    def check_file_content(self, file_content: FileContent) -> list[str]:
+        """Check file content for includes after namespace declarations."""
+        violations: list[tuple[int, str, Optional[tuple[int, str]]]] = []
+        current_namespace: Optional[tuple[int, str]] = None
+
+        # Compiled regex patterns for validation (only used after fast string search)
+        using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
+        namespace_open_pattern = re.compile(r"^\s*namespace\s+\w+\s*\{")
+        include_pattern = re.compile(r"^\s*#\s*include")
+
+        def truncate_snippet(text: str, max_len: int = 50) -> str:
+            """Truncate text to max_len characters."""
+            text = text.strip()
+            if len(text) <= max_len:
+                return text
+            return text[: max_len - 3] + "..."
+
+        # Get lines with newlines for original_line tracking
+        lines_with_newlines = file_content.content.splitlines(keepends=True)
+
+        for i, line in enumerate(file_content.lines, 1):
+            original_line = (
+                lines_with_newlines[i - 1] if i - 1 < len(lines_with_newlines) else line
+            )
+            line_stripped = line.strip()
+
+            # Skip empty lines and comments
+            if (
+                not line_stripped
+                or line_stripped.startswith("//")
+                or line_stripped.startswith("/*")
+            ):
+                continue
+
+            # Check for closing namespace brace - reset namespace tracking
+            if current_namespace and line_stripped.startswith("}"):
+                current_namespace = None
+
+            # Fast string search for "using namespace" before regex validation
+            if "using namespace" in line_stripped:
+                if using_namespace_pattern.match(line_stripped):
+                    current_namespace = (i, truncate_snippet(original_line))
+
+            # Fast string search for "namespace X {" before regex validation
+            if "namespace" in line_stripped and "{" in line_stripped:
+                if namespace_open_pattern.match(line_stripped):
+                    current_namespace = (i, truncate_snippet(original_line))
+
+            # Fast string search for "#include" before regex validation
+            if current_namespace and "#include" in line_stripped:
+                if include_pattern.match(line_stripped):
+                    include_snippet = truncate_snippet(original_line)
+                    violations.append((i, include_snippet, current_namespace))
+
+        # Second pass: if we found violations, verify with bracket counting
+        if violations:
+            if not is_bracket_balanced(Path(file_content.path)):
+                # Brackets are unbalanced, keep violations as they might be false positives
+                # But file has syntax errors, so just clear violations to avoid noise
+                return []
+            # Brackets are balanced, violations are real
+            self.violations[file_content.path] = violations
+
+        return []  # We collect violations internally
+
+
 def scan_cpp_files(directory: str = ".") -> dict[str, Any]:
     """
     Scan all C++ files in a directory for includes after namespace declarations.
@@ -176,9 +276,21 @@ def scan_cpp_files(directory: str = ".") -> dict[str, Any]:
 
 
 def main() -> None:
-    # Only scan src/ directory for .h files
-    src_dir = os.path.join(PROJECT_ROOT, "src")
-    violations: dict[str, Any] = scan_cpp_files(str(src_dir))
+    # Use the new FileContentChecker-based approach
+    src_dir = str(PROJECT_ROOT / "src")
+
+    # Collect files using collect_files_to_check
+    files_to_check = collect_files_to_check([src_dir], extensions=[".h", ".hpp"])
+
+    # Create checker and processor
+    checker = NamespaceIncludesChecker()
+    processor = MultiCheckerFileProcessor()
+
+    # Process all files in a single pass
+    processor.process_files_with_checkers(files_to_check, [checker])
+
+    # Get violations from checker
+    violations = checker.violations
 
     if violations:
         # Count total violations

@@ -13,12 +13,62 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List
 
+from ci.util.check_files import (
+    FileContent,
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    collect_files_to_check,
+)
 from ci.util.paths import PROJECT_ROOT
 
 
 SRC_ROOT = PROJECT_ROOT / "src"
 
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
+
+
+class NamespaceFlDeclarationChecker(FileContentChecker):
+    """FileContentChecker implementation for detecting 'namespace fl {' in src/ root files."""
+
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed (only src/ root files)."""
+        # Only check .h and .cpp files directly in src/ directory (not subdirectories)
+        path_obj = Path(file_path)
+
+        # Check if file is directly in src/ (parent directory is src/ AND parent's parent is project root)
+        # This ensures we only match PROJECT_ROOT/src/*.{h,cpp} and not src/third_party/*/src/*.{h,cpp}
+        if path_obj.parent.name != "src":
+            return False
+
+        # Ensure parent is actually PROJECT_ROOT/src, not some nested src/
+        try:
+            if path_obj.parent.resolve() != SRC_ROOT.resolve():
+                return False
+        except Exception:
+            return False
+
+        # Only check .h and .cpp files
+        return path_obj.suffix in [".h", ".cpp"]
+
+    def check_file_content(self, file_content: FileContent) -> list[str]:
+        """Check file content for 'namespace fl {' declarations."""
+        violations: list[tuple[int, str]] = []
+
+        for line_num, line in enumerate(file_content.lines, 1):
+            # Skip comment lines
+            if line.strip().startswith("//"):
+                continue
+            # Match 'namespace fl {' pattern
+            if re.search(r"\bnamespace\s+fl\s*\{", line):
+                violations.append((line_num, line.strip()))
+
+        if violations:
+            self.violations[file_content.path] = violations
+
+        return []  # We collect violations internally
 
 
 class NoNamespaceFlDeclarationTester(unittest.TestCase):
@@ -45,9 +95,8 @@ class NoNamespaceFlDeclarationTester(unittest.TestCase):
         This only checks files directly in src/, not in subdirectories like
         src/chipsets/, src/protocols/, etc.
         """
+        # Collect only files directly in src/ directory
         files_to_check: list[str] = []
-
-        # Only check files directly in src/ directory, not subdirectories
         try:
             src_path = Path(SRC_ROOT)
             for file_path in src_path.glob("*"):
@@ -57,16 +106,22 @@ class NoNamespaceFlDeclarationTester(unittest.TestCase):
         except (OSError, IOError):
             pass
 
-        all_failings: list[str] = []
-        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-            futures = [
-                executor.submit(self.check_file, file_path)
-                for file_path in files_to_check
-            ]
-            for future in futures:
-                all_failings.extend(future.result())
+        # Create checker and processor
+        checker = NamespaceFlDeclarationChecker()
+        processor = MultiCheckerFileProcessor()
 
-        if all_failings:
+        # Process all files in a single pass
+        processor.process_files_with_checkers(files_to_check, [checker])
+
+        # Get violations from checker
+        violations = checker.violations
+
+        if violations:
+            all_failings: list[str] = []
+            for file_path, line_info in violations.items():
+                for line_num, line_content in line_info:
+                    all_failings.append(f"{file_path}:{line_num}: {line_content}")
+
             msg = (
                 f"Found {len(all_failings)} file(s) with 'namespace fl {{' "
                 f"in src/ root directory (not allowed):\n" + "\n".join(all_failings)

@@ -15,13 +15,61 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Tuple
 
+from ci.util.check_files import (
+    FileContent,
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    collect_files_to_check,
+)
 from ci.util.paths import PROJECT_ROOT
+
+
+NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 SRC_ROOT = PROJECT_ROOT / "src"
 PLATFORMS_DIR = SRC_ROOT / "platforms"
 
-NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
+
+class PlatformsFlNamespaceChecker(FileContentChecker):
+    """FileContentChecker implementation for ensuring platforms files have 'namespace fl' or exception."""
+
+    def __init__(self):
+        self.violations: dict[str, str] = {}
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed (only PROJECT_ROOT/src/platforms/ subdirectory files)."""
+        # Fast normalized path check
+        normalized_path = file_path.replace("\\", "/")
+
+        # Must be in /src/platforms/ subdirectory
+        if "/src/platforms/" not in normalized_path:
+            return False
+
+        # Must NOT be in examples or tests
+        if "/examples/" in normalized_path or "/tests/" in normalized_path:
+            return False
+
+        # Only check .h, .cpp, and .hpp files
+        return any(file_path.endswith(ext) for ext in [".h", ".cpp", ".hpp"])
+
+    def check_file_content(self, file_content: FileContent) -> list[str]:
+        """Check file content for 'namespace fl {' or exception comment."""
+        content = file_content.content
+
+        # Check for namespace fl
+        if "namespace fl" in content:
+            return []
+
+        # Check for exception comment
+        if "// ok no namespace fl" in content:
+            return []
+
+        # Neither found - violation
+        self.violations[file_content.path] = (
+            "Missing 'namespace fl {' or '// ok no namespace fl' comment"
+        )
+        return []  # We collect violations internally
 
 
 def check_file_has_namespace_or_exception(file_path: str) -> tuple[bool, str]:
@@ -57,9 +105,8 @@ def check_file_has_namespace_or_exception(file_path: str) -> tuple[bool, str]:
 class PlatformsFlNamespaceTester(unittest.TestCase):
     def test_platforms_have_namespace_or_exception(self) -> None:
         """Check that files in src/platforms/ have 'namespace fl' or exception comment."""
-        files_to_check: list[str] = []
-
         # Find all .h, .cpp, and .hpp files in src/platforms/
+        files_to_check: list[str] = []
         try:
             if PLATFORMS_DIR.exists():
                 for file_path in PLATFORMS_DIR.rglob("*"):
@@ -76,23 +123,22 @@ class PlatformsFlNamespaceTester(unittest.TestCase):
             print("✅ No files found in src/platforms/")
             return
 
-        # Check files in parallel
-        violations: list[str] = []
-        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-            futures = {
-                executor.submit(
-                    check_file_has_namespace_or_exception, file_path
-                ): file_path
-                for file_path in files_to_check
-            }
-            for future in futures:
-                file_path = futures[future]
-                is_valid, error_msg = future.result()
-                if not is_valid:
-                    rel_path = os.path.relpath(file_path, PROJECT_ROOT)
-                    violations.append(f"{rel_path}: {error_msg}")
+        # Create checker and processor
+        checker = PlatformsFlNamespaceChecker()
+        processor = MultiCheckerFileProcessor()
 
-        if violations:
+        # Process all files in a single pass
+        processor.process_files_with_checkers(files_to_check, [checker])
+
+        # Get violations from checker
+        violations_dict = checker.violations
+
+        if violations_dict:
+            violations: list[str] = []
+            for file_path, error_msg in violations_dict.items():
+                rel_path = os.path.relpath(file_path, PROJECT_ROOT)
+                violations.append(f"{rel_path}: {error_msg}")
+
             msg = f"Found {len(violations)} file(s) in src/platforms/ without 'namespace fl' or exception:\n"
             for violation in violations:
                 print(violation)

@@ -192,29 +192,25 @@ if [ "$JS_ONLY" = false ]; then
           uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
         done
 
-        # C++ custom linters
+        # C++ custom linters - unified runner
         echo ""
-        echo "🔍 C++ CUSTOM LINTERS"
-        echo "----------------------"
-        for lint_script in ci/lint_cpp/*.py; do
-            if [ -f "$lint_script" ]; then
-                echo "Running $(basename "$lint_script")"
-                # Check if it's a unittest-based script or standalone
-                if grep -q "unittest.main()" "$lint_script"; then
-                    # Run as unittest
-                    uv run python -m pytest "$lint_script" -v || {
-                        echo "❌ C++ linter failed: $(basename "$lint_script")"
-                        exit 1
-                    }
-                else
-                    # Run as standalone script
-                    uv run python "$lint_script" || {
-                        echo "❌ C++ linter failed: $(basename "$lint_script")"
-                        exit 1
-                    }
-                fi
-            fi
-        done
+        echo "🔍 C++ CUSTOM LINTERS (UNIFIED)"
+        echo "-------------------------------"
+        echo "Running unified C++ checker (all content-based linters in one pass)"
+        uv run python ci/lint_cpp/run_all_checkers.py || {
+            echo "❌ Unified C++ linter failed"
+            exit 1
+        }
+
+        # Run test_test_headers_exist.py separately (file existence check, not content)
+        if [ -f "ci/lint_cpp/test_test_headers_exist.py" ]; then
+            echo ""
+            echo "Running test_test_headers_exist.py (file existence validation)"
+            uv run python -m pytest ci/lint_cpp/test_test_headers_exist.py -v || {
+                echo "❌ Test headers validation failed"
+                exit 1
+            }
+        fi
 
         # Check for relative includes (paths with "..")
         # Only enforce strict no-relative-includes rule for src/, not examples/

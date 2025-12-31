@@ -3,6 +3,12 @@ import re
 import unittest
 from typing import Dict, List, Tuple
 
+from ci.util.check_files import (
+    FileContent,
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    collect_files_to_check,
+)
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -49,6 +55,51 @@ INCLUDE_PATTERN = re.compile(
 
 ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
 NOLINT_PATTERN = re.compile(r"//\s*nolint")
+
+
+class IncludeAfterNamespaceChecker(FileContentChecker):
+    """FileContentChecker implementation for detecting includes after namespace declarations."""
+
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed."""
+        # Skip files matching skip patterns
+        if any(pattern in file_path for pattern in SKIP_PATTERNS):
+            return False
+        # Only check C++ files
+        return any(
+            file_path.endswith(ext) for ext in [".cpp", ".h", ".hpp", ".cc", ".ino"]
+        )
+
+    def check_file_content(self, file_content: FileContent) -> list[str]:
+        """Check file content for includes after namespace declarations."""
+        # Check if the file has the allow directive
+        for line in file_content.lines:
+            if ALLOW_DIRECTIVE_PATTERN.search(line):
+                return []  # Return empty if directive is found
+
+        namespace_started = False
+        violations: list[tuple[int, str]] = []
+
+        for i, line in enumerate(file_content.lines, 1):
+            # Check if we're entering a namespace
+            if NAMESPACE_PATTERN.match(line):
+                namespace_started = True
+                continue
+
+            # Check for includes after namespace started
+            if namespace_started and INCLUDE_PATTERN.match(line):
+                # Skip if the line has a // nolint comment
+                if NOLINT_PATTERN.search(line):
+                    continue
+                violations.append((i, line.rstrip("\n")))
+
+        if violations:
+            self.violations[file_content.path] = violations
+
+        return []  # We collect violations internally
 
 
 def find_includes_after_namespace(file_path: str) -> list[tuple[int, str]]:
@@ -129,12 +180,25 @@ def scan_cpp_files(directory: str = ".") -> dict[str, list[tuple[int, str]]]:
 
 
 class TestNoIncludeAfterNamespace(unittest.TestCase):
-    def test_no_includes_after_namespace_in_src(self) -> None:
-        """Check that src/ directory doesn't have includes after namespace declarations."""
-        violations = scan_cpp_files(str(SRC_ROOT))
+    def _check_directory(self, directory: str, directory_name: str) -> None:
+        """Helper method to check a directory for violations using FileContentChecker."""
+        # Use the new FileContentChecker-based approach
+        files_to_check = collect_files_to_check(
+            [directory], extensions=[".cpp", ".h", ".hpp", ".cc", ".ino"]
+        )
+
+        # Create checker and processor
+        checker = IncludeAfterNamespaceChecker()
+        processor = MultiCheckerFileProcessor()
+
+        # Process all files in a single pass
+        processor.process_files_with_checkers(files_to_check, [checker])
+
+        # Get violations from checker
+        violations = checker.violations
 
         if violations:
-            msg = "Found includes after namespace declarations in src/:\n"
+            msg = f"Found includes after namespace declarations in {directory_name}/:\n"
             for file_path, line_info in violations.items():
                 msg += f"  {file_path}:\n"
                 for line_num, line_content in line_info:
@@ -146,48 +210,20 @@ class TestNoIncludeAfterNamespace(unittest.TestCase):
             )
         else:
             print(
-                "No violations found in src/! All includes are properly placed before namespace declarations."
+                f"No violations found in {directory_name}/! All includes are properly placed before namespace declarations."
             )
+
+    def test_no_includes_after_namespace_in_src(self) -> None:
+        """Check that src/ directory doesn't have includes after namespace declarations."""
+        self._check_directory(str(SRC_ROOT), "src")
 
     def test_no_includes_after_namespace_in_examples(self) -> None:
         """Check that examples/ directory doesn't have includes after namespace declarations."""
-        violations = scan_cpp_files(str(EXAMPLES_ROOT))
-
-        if violations:
-            msg = "Found includes after namespace declarations in examples/:\n"
-            for file_path, line_info in violations.items():
-                msg += f"  {file_path}:\n"
-                for line_num, line_content in line_info:
-                    msg += f"    Line {line_num}: {line_content}\n"
-            self.fail(
-                msg
-                + "\nPlease fix these issues by moving includes to the top of the file.\n"
-                "See TEST_NAMESPACE_INCLUDES.md for more information."
-            )
-        else:
-            print(
-                "No violations found in examples/! All includes are properly placed before namespace declarations."
-            )
+        self._check_directory(str(EXAMPLES_ROOT), "examples")
 
     def test_no_includes_after_namespace_in_tests(self) -> None:
         """Check that tests/ directory doesn't have includes after namespace declarations."""
-        violations = scan_cpp_files(str(TESTS_ROOT))
-
-        if violations:
-            msg = "Found includes after namespace declarations in tests/:\n"
-            for file_path, line_info in violations.items():
-                msg += f"  {file_path}:\n"
-                for line_num, line_content in line_info:
-                    msg += f"    Line {line_num}: {line_content}\n"
-            self.fail(
-                msg
-                + "\nPlease fix these issues by moving includes to the top of the file.\n"
-                "See TEST_NAMESPACE_INCLUDES.md for more information."
-            )
-        else:
-            print(
-                "No violations found in tests/! All includes are properly placed before namespace declarations."
-            )
+        self._check_directory(str(TESTS_ROOT), "tests")
 
 
 if __name__ == "__main__":
