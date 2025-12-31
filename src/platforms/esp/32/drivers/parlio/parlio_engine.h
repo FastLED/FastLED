@@ -159,6 +159,14 @@ struct ParlioDebugMetrics {
 /// ```
 /// Engine generates DMA buffers with PARLIO bit-parallel layout.
 ///
+/// ## Ring Buffer Memory Management
+/// - Total buffer size capped at FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES
+/// - Default caps: 256 KB (ESP32-C6/S3), 512 KB (ESP32-P4)
+/// - Override via build flags: -DFASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES=<bytes>
+/// - When cap exceeded, system uses streaming mode (multiple iterations)
+/// - Performance impact: ~30 µs overhead per streaming iteration
+/// - Prevents OOM on constrained platforms while maintaining functionality
+///
 /// ## Thread Safety
 /// - initialize() is NOT thread-safe (call once during setup)
 /// - beginTransmission() blocks until complete (no concurrent calls)

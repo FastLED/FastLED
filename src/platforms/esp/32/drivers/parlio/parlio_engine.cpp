@@ -71,6 +71,26 @@ namespace detail {
 #define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
+// Total DMA ring buffer memory cap (all 3 ring buffers combined)
+// Prevents OOM on constrained platforms while allowing streaming for large LED counts
+// Override via build flags: -DFASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES=<bytes>
+#ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES
+  #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32S3)
+    // ESP32-C6/S3: 256 KB total (fits in ~512 KB SRAM, leaves room for other allocations)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
+  #elif defined(CONFIG_IDF_TARGET_ESP32P4)
+    // ESP32-P4: 512 KB total (better performance, larger SRAM available)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (512 * 1024)
+  #else
+    // Conservative default for unknown platforms
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
+  #endif
+#endif
+
+// Minimum cap validation (supports at least 1 LED × 16 lanes)
+static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12 * 1024,
+              "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES too small (minimum 12 KB)");
+
 //=============================================================================
 // ISR-Safe Memory Operations
 //=============================================================================
@@ -209,7 +229,22 @@ struct ParlioBufferCalculator {
         // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
         size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer);
 
-        // Step 4: Add safety margin to prevent boundary check failures
+        // Step 4: Apply total ring buffer memory cap (prevent OOM on C6/S3)
+        // When cap exceeded, system uses streaming mode (multiple buffer iterations)
+        constexpr size_t TOTAL_CAP = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES;
+        size_t perBufferCap = TOTAL_CAP / numRingBuffers;
+
+        if (dmaBufferCapacity > perBufferCap) {
+            size_t uncappedCapacity = dmaBufferCapacity;
+            dmaBufferCapacity = perBufferCap;
+
+            // Debug logging (enabled via FL_DBG macro)
+            FL_DBG("PARLIO: Ring buffer capped at " << dmaBufferCapacity
+                   << " bytes/buffer (uncapped: " << uncappedCapacity
+                   << ", total cap: " << TOTAL_CAP << " bytes)");
+        }
+
+        // Step 5: Add safety margin to prevent boundary check failures
         // The populateDmaBuffer() boundary check at line 505 tests (outputIdx + blockSize > capacity)
         // When buffer is filled exactly to capacity, we need extra space for the final block
         // Safety margin = max(transposeBlockSize) = 128 bytes (for 16-bit mode)

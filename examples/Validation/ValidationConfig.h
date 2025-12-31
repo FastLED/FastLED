@@ -23,4 +23,4 @@
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 1000  // Reduced from 3000 to avoid memory exhaustion with 16 lanes
+#define LONG_STRIP_SIZE 3000  // Testing memory cap with 16 lanes × 3000 LEDs (~18 MB uncapped → 256 KB capped)
