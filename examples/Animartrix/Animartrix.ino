@@ -59,7 +59,10 @@ Performence notes @64x64:
 using namespace fl;
 
 
-#define LED_PIN 3
+#ifndef PIN_DATA
+#define PIN_DATA 3
+#endif  // PIN_DATA
+
 #define BRIGHTNESS 32
 #define COLOR_ORDER GRB
 
