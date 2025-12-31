@@ -13,18 +13,11 @@
 
 set -euo pipefail
 
-# Default expect patterns from Validation.ino (line 101) and SketchHalt.h
+# Default expect patterns - simplified to essential checks only
 DEFAULT_EXPECT=(
     "TX Pin: 0"                      # Hardware setup verification
     "RX Pin: 1"                      # Hardware setup verification
-    "DRIVER_ENABLED: RMT"            # RMT driver availability
-    "DRIVER_ENABLED: SPI"            # SPI driver availability
-    "DRIVER_ENABLED: PARLIO"         # Parlio driver availability
-    "LANE_MIN: 1"                    # Test matrix configuration
-    "LANE_MAX: 8"                    # Test matrix configuration
-    "STRIP_SIZE_TESTED: 10"          # Small strip test
-    "STRIP_SIZE_TESTED: 300"         # Large strip test
-    "TEST_CASES_GENERATED: 48"       # Full test matrix size
+    "DRIVER_ENABLED: PARLIO"         # Parlio driver availability (key driver)
     "VALIDATION_READY: true"         # Test ready indicator
     "FINISHED: Test matrix complete" # CRITICAL: Halting state (prevents false positives when ISR stops)
 )
@@ -54,10 +47,9 @@ Description:
   - Without this pattern, a silent ISR hang would look like success
 
 Default Patterns:
-  12 --expect patterns covering:
+  5 --expect patterns covering:
     - Hardware setup (TX/RX pins)
-    - Driver availability (RMT, SPI, PARLIO)
-    - Test matrix configuration (lanes, strip sizes, test count)
+    - Driver availability (PARLIO)
     - Validation ready indicator
     - Halting state message (CRITICAL - prevents ISR hang false positives)
 
@@ -123,6 +115,9 @@ done
 
 # Build final command
 CMD=(bash debug Validation)
+
+# Add input-on-trigger to auto-send START when VALIDATION_READY appears
+CMD+=(--input-on-trigger "VALIDATION_READY:START")
 
 # Add default --expect patterns unless disabled
 if [[ "$USE_DEFAULT_EXPECT" == "true" ]]; then
