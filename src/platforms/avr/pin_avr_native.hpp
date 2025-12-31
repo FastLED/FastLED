@@ -14,6 +14,7 @@
 #include "fl/stl/stdint.h"
 
 namespace fl {
+namespace platform {
 
 // Pin mode constants (matching Arduino API)
 #ifndef INPUT
@@ -456,4 +457,5 @@ inline void setAdcRange(AdcRange range) {
     analog_reference = ref_mode;
 }
 
+}  // namespace platform
 }  // namespace fl

@@ -23,6 +23,7 @@ extern "C" {
 FL_EXTERN_C_END
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // GPIO Register Access Macros (ESP8266)
@@ -284,4 +285,5 @@ inline void setAdcRange(AdcRange range) {
     (void)range;  // Parameter unused - no-op
 }
 
+}  // namespace platform
 }  // namespace fl

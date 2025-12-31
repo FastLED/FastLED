@@ -9,9 +9,11 @@
 /// - Simulators and emulators
 /// - Any non-Arduino build where physical pin access is not available
 ///
-/// All functions are constexpr inline for zero overhead.
+/// Functions are placed in the platform namespace and will be wrapped by non-inline
+/// functions in fl/pin.cpp.
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // Pin mode control
@@ -55,4 +57,5 @@ inline void setAdcRange(AdcRange /*range*/) {
     // No-op: Host builds don't have physical pins
 }
 
+}  // namespace platform
 }  // namespace fl

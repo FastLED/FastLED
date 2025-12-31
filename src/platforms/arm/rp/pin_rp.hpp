@@ -25,6 +25,7 @@
 #include "fl/pin.h"
 
 namespace fl {
+namespace platform {
 
 inline void pinMode(int pin, PinMode mode) {
     // Translate fl::PinMode to Arduino PinMode constants
@@ -67,6 +68,7 @@ inline void setAdcRange(AdcRange range) {
     (void)range;  // Suppress unused parameter warning
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

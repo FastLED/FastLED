@@ -15,6 +15,7 @@
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // GPIO and Timer helper functions
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // Pin Mode Control
@@ -466,4 +467,5 @@ inline void setAdcRange(AdcRange range) {
     FL_DBG("STM32: setAdcRange not dynamically configurable - using hardware VREF");
 }
 
+}  // namespace platform
 }  // namespace fl

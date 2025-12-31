@@ -35,6 +35,7 @@
 #endif
 
 namespace fl {
+namespace platform {
 
 // Forward declarations from fl/pin.h
 enum class PinMode;
@@ -102,6 +103,7 @@ inline void setAdcRange(AdcRange range) {
     ::analogReference(arduino_ref);
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

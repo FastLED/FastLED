@@ -21,6 +21,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // Digital Pin Functions
@@ -152,4 +153,5 @@ inline void setAdcRange(AdcRange range) {
     (void)range;
 }
 
+}  // namespace platform
 }  // namespace fl

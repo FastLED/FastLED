@@ -21,6 +21,7 @@
 #include "fl/pin.h"
 
 namespace fl {
+namespace platform {
 
 inline void pinMode(int pin, fl::PinMode mode) {
     // Map fl::PinMode to Arduino PinMode
@@ -72,6 +73,7 @@ inline void setAdcRange(fl::AdcRange range) {
     ::analogReference(static_cast<uint8_t>(range));
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

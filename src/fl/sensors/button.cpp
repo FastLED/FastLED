@@ -18,11 +18,9 @@ ButtonLowLevel::ButtonLowLevel(int pin, ButtonStrategy strategy)
 ButtonLowLevel::~ButtonLowLevel() {}
 
 bool ButtonLowLevel::highLowFloating() {
-    // FastLED doesn't have reliable support for pullups/pulldowns.
-    // So we instead use a strategy where the pin is set to high, then
-    // checked if it's high, then set to low, and then checked if it's low
-    // if this is the case, then the pin is floating and thefore the button is
-    // not being pressed.
+    // High-low floating detection: Set pin to high, check if high,
+    // set pin to low, check if low. If both conditions are true,
+    // the pin is floating and therefore the button is not pressed.
     mPin.setPinMode(DigitalPin::kOutput);
     mPin.write(true); // set pin to high
     mPin.setPinMode(DigitalPin::kInput);
@@ -39,23 +37,18 @@ bool ButtonLowLevel::highLowFloating() {
 }
 
 bool ButtonLowLevel::isPressed() {
-    // FastLED doesn't have reliable support for pullups/pulldowns.
-    // So we instead use a strategy where the pin is set to high, then
-    // checked if it's high, then set to low, and then checked if it's low
-    // if this is the case, then the pin is floating and thefore the button is
-    // not being pressed. return (mStrategy == kHighLowFloating) ?
-    // highLowFloating() :
-    //        (mStrategy == kPullUp) ? mPin.high() : // not implemented yet
-    //        (mStrategy == kPullDown) ? !mPin.high() : // not implemented yet
-    //        false; // unknown strategy, return false
     switch (mStrategy) {
     case kHighLowFloating:
         return highLowFloating();
     case kPullUp:
-        return mPin.high(); // not implemented yet
+        // Active-low: Button pulls pin to ground when pressed
+        return !mPin.high();
+    case kPullDown:
+        // Active-high: Button pulls pin to VCC when pressed
+        return mPin.high();
     default:
         FASTLED_ASSERT(false, "Unknown ButtonLowLevel strategy");
-        return false; // unknown strategy, return false
+        return false;
     }
 }
 
@@ -102,14 +95,15 @@ void ButtonLowLevel::setStrategy(ButtonStrategy strategy) {
     mStrategy = strategy;
     switch (mStrategy) {
     case kHighLowFloating:
-        mPin.setPinMode(DigitalPin::kInput); // Set pin to input mode
+        mPin.setPinMode(DigitalPin::kInput);
         break;
     case kPullUp:
-        mPin.setPinMode(
-            DigitalPin::kInputPullup); // Set pin to input pullup mode
+        mPin.setPinMode(DigitalPin::kInputPullup);
+        break;
+    case kPullDown:
+        mPin.setPinMode(DigitalPin::kInputPulldown);
         break;
     default:
-        // Unknown strategy, do nothing
         FASTLED_ASSERT(false, "Unknown ButtonLowLevel strategy");
         break;
     }

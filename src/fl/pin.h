@@ -71,32 +71,32 @@ enum class AdcRange {
 /// Set pin mode (input, output, pull-up, pull-down)
 /// @param pin Pin number (platform-specific numbering)
 /// @param mode Pin mode configuration
-inline void pinMode(int pin, PinMode mode);
+void pinMode(int pin, PinMode mode);
 
 /// Write digital value to pin
 /// @param pin Pin number (platform-specific numbering)
 /// @param val Pin value (Low or High)
-inline void digitalWrite(int pin, PinValue val);
+void digitalWrite(int pin, PinValue val);
 
 /// Read digital value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Pin value (Low or High)
-inline PinValue digitalRead(int pin);
+PinValue digitalRead(int pin);
 
 /// Read analog value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Analog value (0-1023 for 10-bit ADC, 0-4095 for 12-bit ADC)
-inline uint16_t analogRead(int pin);
+uint16_t analogRead(int pin);
 
 /// Write analog value to pin (PWM)
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
-inline void analogWrite(int pin, uint16_t val);
+void analogWrite(int pin, uint16_t val);
 
 /// Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-65535, platform-specific maximum)
-inline void setPwm16(int pin, uint16_t val);
+void setPwm16(int pin, uint16_t val);
 
 /// Alias for setPwm16 - Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
@@ -109,6 +109,6 @@ inline void analogWrite16(int pin, uint16_t val) {
 /// @param range Voltage range for analog readings
 /// @note Implementation varies by platform (reference voltage vs attenuation)
 /// @note Not all ranges supported on all platforms (no-op for unsupported values)
-inline void setAdcRange(AdcRange range);
+void setAdcRange(AdcRange range);
 
 }  // namespace fl

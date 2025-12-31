@@ -46,6 +46,8 @@ inline void digitalWrite(int pin, PinStatus val) {
 // Public API: fl::PinMode/PinValue/AdcRange interface
 // ============================================================================
 
+namespace platform {
+
 inline void pinMode(int pin, PinMode mode) {
     // Translate fl::PinMode to Arduino_PinMode
     // PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
@@ -112,6 +114,7 @@ inline void setAdcRange(AdcRange range) {
     ::analogReference(mode);
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

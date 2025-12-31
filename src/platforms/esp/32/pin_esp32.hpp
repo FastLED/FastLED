@@ -25,6 +25,7 @@
 #include <Arduino.h>
 
 namespace fl {
+namespace platform {
 
 inline void pinMode(int pin, PinMode mode) {
     // Translate PinMode enum to Arduino constants
@@ -81,6 +82,7 @@ inline void setAdcRange(AdcRange range) {
     (void)range;
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

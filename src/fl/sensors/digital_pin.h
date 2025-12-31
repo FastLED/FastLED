@@ -10,16 +10,16 @@ namespace fl {
 FASTLED_SHARED_PTR(DigitalPinImpl);
 
 
-// A simple digital pin. If we are compiling in an Arduino environment, then
-// this class will bind to that. Otherwise it will fall back to the platform api.
-// Note that this class does not support analog mode nor pullups/pulldowns.
+// A simple digital pin that provides a unified interface across all platforms
+// using fl/pin.h. Supports digital I/O, pullup/pulldown resistors.
+// Note: Analog mode is not supported by this class (use fl::analogRead directly).
 class DigitalPin {
   public:
     enum Mode {
         kInput = 0,
         kOutput,
         kInputPullup,
-        // kInputPulldown,  Not implemented in Arduino.h
+        kInputPulldown,
     };
 
     DigitalPin(int pin);

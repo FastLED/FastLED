@@ -18,6 +18,7 @@
 #include <Arduino.h>
 
 namespace fl {
+namespace platform {
 
 // Forward declarations from fl/pin.h
 enum class PinMode;
@@ -74,6 +75,7 @@ inline void setAdcRange(AdcRange range) {
     }
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

@@ -24,6 +24,7 @@
 #if defined(__SAM3X8E__)
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // GPIO Functions - Native SAM Implementation (STUBS)
@@ -116,6 +117,7 @@ inline void setAdcRange(AdcRange /*range*/) {
     // This function does nothing on the Due platform
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // __SAM3X8E__

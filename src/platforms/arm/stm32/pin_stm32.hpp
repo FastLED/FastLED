@@ -24,6 +24,7 @@
 #include <Arduino.h>
 
 namespace fl {
+namespace platform {
 
 inline void pinMode(int pin, PinMode mode) {
     // Translate fl::PinMode to Arduino pin mode integer
@@ -88,6 +89,7 @@ inline void setAdcRange(AdcRange range) {
 #endif
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO

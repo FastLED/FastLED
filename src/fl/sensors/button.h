@@ -10,16 +10,18 @@
 namespace fl {
 
 enum ButtonStrategy {
-
-    // FastLED doesn't have reliable support for pullups/pulldowns.
-    // So we instead use a strategy where the pin is set to high, then
-    // checked if it's high, then set to low, and then checked if it's low
-    // if this is the case, then the pin is floating and thefore the button
-    // is not
-    // being pressed.
+    // High-low floating detection strategy: Sets pin to high, checks if high,
+    // sets pin to low, checks if low. If both are true, pin is floating and
+    // button is not pressed. Useful for detecting buttons without pull resistors.
     kHighLowFloating,
+
+    // Active-low button strategy: Uses internal pull-up resistor.
+    // Button connects pin to ground when pressed. Reading LOW = pressed.
     kPullUp,
 
+    // Active-high button strategy: Uses internal pull-down resistor.
+    // Button connects pin to VCC when pressed. Reading HIGH = pressed.
+    kPullDown,
 };
 
 // A simple digital pin. If we are compiling in an Arduino environment, then

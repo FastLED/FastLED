@@ -23,6 +23,7 @@
 #include "fl/pin.h"
 
 namespace fl {
+namespace platform {
 
 inline void pinMode(int pin, PinMode mode) {
     ::pinMode(pin, static_cast<int>(mode));
@@ -59,6 +60,7 @@ inline void setAdcRange(AdcRange range) {
     (void)range;  // Parameter unused - no-op
 }
 
+}  // namespace platform
 }  // namespace fl
 
 #endif  // ARDUINO
