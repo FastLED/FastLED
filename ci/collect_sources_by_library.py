@@ -44,9 +44,9 @@ SOURCE_LIBRARIES: dict[str, list[tuple[str, bool]]] = {
     "thirdparty": [
         ("src/third_party", True),  # Third-party libraries (recursive)
     ],
-    # Sensor support (src/sensors)
+    # Sensor support (src/fl/sensors)
     "sensors": [
-        ("src/sensors", False),  # Sensor support
+        ("src/fl/sensors", False),  # Sensor support
     ],
 }
 

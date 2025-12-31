@@ -4,7 +4,7 @@
 #include "fl/ui.h"
 #include "fl/stl/shared_ptr.h"  // For make_shared
 
-#include "digital_pin.h"
+#include "fl/sensors/digital_pin.h"
 
 
 

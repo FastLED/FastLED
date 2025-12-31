@@ -24,7 +24,7 @@
 #include "fl/screenmap.h"
 #include "fl/slice.h"
 #include "fl/ui.h"
-#include "sensors/pir.h"
+#include "fl/sensors/pir.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/assert.h"
 #include "fl/noise.h"

@@ -16,7 +16,7 @@ The `src/` directory contains the classic FastLED public API (`FastLED.h`), the 
   - [Core foundation: `fl/`](#core-foundation-fl)
   - [Effects and graphics: `fx/`](#effects-and-graphics-fx)
   - [Platforms and HAL: `platforms/`](#platforms-and-hal-platforms)
-  - [Sensors and input: `sensors/`](#sensors-and-input-sensors)
+  - [Sensors and input: `fl/sensors/`](#sensors-and-input-sensors)
   - [Fonts and assets: `fonts/`](#fonts-and-assets-fonts)
   - [Third‑party and shims: `third_party/`](#third-party-and-shims-third_party)
 - [Quick Usage Examples](#quick-usage-examples)
@@ -44,7 +44,7 @@ The `src/` directory contains the classic FastLED public API (`FastLED.h`), the 
 - `fl/`: cross‑platform foundation (containers, math, graphics primitives, async, JSON)
 - `fx/`: effect/graphics utilities and 1D/2D composition helpers
 - `platforms/`: hardware abstraction layers (AVR, ARM, ESP, POSIX, STUB, WASM, etc.)
-- `sensors/`: basic input components (buttons, digital pins)
+- `fl/sensors/`: basic input components (buttons, digital pins)
 - `fonts/`: built‑in bitmap fonts for overlays
 - `third_party/`: vendored minimal headers and compatibility glue
 
@@ -81,7 +81,7 @@ If you are writing Arduino‑style sketches, include `FastLED.h`. For advanced/h
 - Target backends and shims for AVR, ARM, ESP, POSIX, STUB (for tests), WASM, etc.
 - Shared code for JSON UI, timing, and platform integrations
 
-### Sensors and input: `sensors/`
+### Sensors and input: `fl/sensors/`
 
 - Minimal input primitives (e.g., `button`, `digital_pin`) intended for demos and portable logic
 

@@ -2,7 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "digital_pin.h"
+#include "fl/sensors/digital_pin.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/ui.h"
 #include "fl/time_alpha.h"

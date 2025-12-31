@@ -2149,7 +2149,7 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
     
     # Known approved includes (from our grep search)
     approved_includes = {
-        "src/sensors/digital_pin.hpp": "ok include",
+        "src/fl/sensors/digital_pin.hpp": "ok include",
         "src/third_party/arduinojson/json.hpp": "ok include", 
         "src/lib8tion.cpp": "ok include",
         "src/led_sysdefs.h": "ok include",

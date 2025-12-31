@@ -8,7 +8,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/warn.h"
 #include "fl/stl/assert.h"
-#include "sensors/pir.h"
+#include "fl/sensors/pir.h"
 
 namespace fl {
 
