@@ -231,7 +231,7 @@ fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
 template <fl::size DescriptorCount, fl::size ArenaSize>
 void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
     CriticalSection cs;
-    mDropped++;
+    mDropped = mDropped + 1;  // C++20-compliant volatile increment
 }
 
 // ============================================================================
