@@ -77,18 +77,41 @@ import re
 import subprocess
 import sys
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import psutil
 import serial
 import serial.tools.list_ports
+from colorama import Fore, Style, init
 from running_process import RunningProcess
 from running_process.process_output_reader import EndOfStream
+from serial.tools.list_ports_common import ListPortInfo
 
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+
+# Initialize colorama for cross-platform colored output
+init(autoreset=True)
+
+
+@dataclass
+class ComportResult:
+    """Result of COM port detection with detailed diagnostics.
+
+    Attributes:
+        ok: True if a suitable USB port was found, False otherwise
+        selected_port: The selected USB port device name (e.g., 'COM3'), or None if not found
+        error_message: Optional error description if detection failed
+        all_ports: List of all ports scanned (for diagnostics), empty list by default
+    """
+
+    ok: bool
+    selected_port: str | None
+    error_message: str | None = None
+    all_ports: list[ListPortInfo] = field(default_factory=list)
 
 
 def resolve_sketch_path(sketch_arg: str, project_dir: Path) -> str:
@@ -228,33 +251,79 @@ def parse_timeout(timeout_str: str) -> int:
     return max(1, int(seconds))
 
 
-def auto_detect_upload_port() -> str | None:
+def auto_detect_upload_port() -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
-    Returns the first available ESP32/ESP8266/Arduino serial port found,
-    or None if no suitable port is detected.
+    Only considers USB devices - filters out Bluetooth and other non-USB ports.
+    Returns a structured result with success status, selected port, error details,
+    and all scanned ports for diagnostics.
 
     Returns:
-        Port name (e.g., 'COM3') or None if not found.
+        ComportResult with detection status and diagnostics
     """
-    ports = serial.tools.list_ports.comports()
+    try:
+        # Scan all available COM ports
+        all_ports = list(serial.tools.list_ports.comports())
+    except Exception as e:
+        # Failed to scan ports - return error result
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message=f"Failed to scan COM ports: {e}",
+            all_ports=[],
+        )
 
-    # Look for common ESP32/Arduino USB-to-serial chips
-    for port in ports:
+    if not all_ports:
+        # No ports found at all
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message="No serial ports detected on system",
+            all_ports=[],
+        )
+
+    # Filter to USB devices only (exclude Bluetooth, ACPI, etc.)
+    # USB devices have "USB" in their hwid (hardware ID) string
+    usb_ports = [port for port in all_ports if "USB" in port.hwid.upper()]
+
+    if not usb_ports:
+        # No USB ports found - only non-USB ports available
+        non_usb_types = set()
+        for port in all_ports:
+            if "BTHENUM" in port.hwid.upper():
+                non_usb_types.add("Bluetooth")
+            elif "ACPI" in port.hwid.upper():
+                non_usb_types.add("ACPI")
+            else:
+                non_usb_types.add("other")
+
+        types_str = ", ".join(sorted(non_usb_types))
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message=f"No USB serial ports found (only {types_str} ports detected)",
+            all_ports=all_ports,
+        )
+
+    # Select best USB port (prefer ESP32/Arduino chips if available)
+    selected_port = None
+    for port in usb_ports:
         description = port.description.lower()
         # Common ESP32 USB chips: CP2102, CH340, FTDI
         if any(
             chip in description
             for chip in ["cp210", "ch340", "ch341", "ftdi", "usb-serial", "uart"]
         ):
-            return port.device
+            selected_port = port.device
+            break
 
-    # If no ESP-specific port found, return first non-Bluetooth port
-    for port in ports:
-        if "bluetooth" not in port.description.lower():
-            return port.device
+    # If no ESP-specific chip found, use first USB port
+    if not selected_port:
+        selected_port = usb_ports[0].device
 
-    return None
+    return ComportResult(
+        ok=True, selected_port=selected_port, error_message=None, all_ports=all_ports
+    )
 
 
 def run_cpp_lint() -> bool:
@@ -1092,13 +1161,43 @@ def main() -> int:
         print(f"❌ Error: {e}")
         return 1
 
+    # Auto-detect upload port if not specified
+    upload_port = args.upload_port
+    if not upload_port:
+        result = auto_detect_upload_port()
+        if not result.ok:
+            # Port detection failed - display detailed error and exit
+            print(Fore.RED + "=" * 60)
+            print(Fore.RED + "⚠️  FATAL ERROR: PORT DETECTION FAILED")
+            print(Fore.RED + "=" * 60)
+            print(f"\n{Fore.RED}{result.error_message}{Style.RESET_ALL}\n")
+
+            # Display all scanned ports for diagnostics
+            if result.all_ports:
+                print("Available ports (all non-USB):")
+                for port in result.all_ports:
+                    print(f"  {port.device}: {port.description}")
+                    print(f"    hwid: {port.hwid}")
+            else:
+                print("No serial ports detected on system.")
+
+            print(
+                f"\n{Fore.RED}Only USB devices are supported. Please connect a USB device and try again.{Style.RESET_ALL}"
+            )
+            print(
+                f"{Fore.RED}Note: Bluetooth serial ports (BTHENUM) are not supported.{Style.RESET_ALL}\n"
+            )
+            return 1
+
+        # Port detection succeeded
+        upload_port = result.selected_port
+
     print("FastLED Debug Attached Device")
     print("=" * 60)
     print(f"Project: {build_dir}")
     if args.environment:
         print(f"Environment: {args.environment}")
-    if args.upload_port:
-        print(f"Upload port: {args.upload_port}")
+    print(f"Upload port: {upload_port}")
     print("=" * 60)
     print()
 
@@ -1172,12 +1271,12 @@ def main() -> int:
         try:
             # Clean up orphaned processes holding the serial port
             # This MUST happen inside the lock to prevent race conditions
-            if args.upload_port:
-                kill_port_users(args.upload_port)
+            if upload_port:
+                kill_port_users(upload_port)
 
             # Phase 3: Upload firmware (with incremental rebuild if needed)
             if not run_upload(
-                build_dir, args.environment, args.upload_port, args.verbose
+                build_dir, args.environment, upload_port, args.verbose
             ):
                 return 1
 
@@ -1185,7 +1284,7 @@ def main() -> int:
             success, output = run_monitor(
                 build_dir,
                 args.environment,
-                args.upload_port,  # Use same port for monitoring
+                upload_port,  # Use same port for monitoring
                 args.verbose,
                 timeout_seconds,
                 fail_keywords,

@@ -44,6 +44,7 @@ dependencies = [
     "fastled>=1.4.50",
     "running-process>=1.0.6",
     "daemoniker>=0.2.3",
+    "colorama>=0.4.6",
 ]
 
 [build-system]
