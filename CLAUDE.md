@@ -98,7 +98,8 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug --upload-port COM3` - Specific serial port
 - `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
 - `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (uses `\bERROR\b` regex pattern)
+- `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (default: `\bERROR\b` regex pattern)
+- `bash debug --exit-on-error "ClearCommError"` - Exit 1 immediately if custom pattern found
 - `bash debug --fail-on "PANIC"` - Exit 1 immediately if "PANIC" pattern found
 - `bash debug --fail-on "ERROR" --fail-on "CRASH"` - Multiple failure patterns (exits on any)
 - `bash debug --no-fail-on` - Explicitly disable all failure patterns

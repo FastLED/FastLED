@@ -32,6 +32,10 @@ DEFAULT_EXPECT=(
 # Default fail-on pattern from Validation.ino (lines 78-98)
 DEFAULT_FAIL_ON="ERROR"
 
+# Exit-on-error pattern for immediate device failure detection
+# ClearCommError indicates device is stuck (ISR hogging CPU, crashed, etc.)
+EXIT_ON_ERROR_PATTERN="ClearCommError"
+
 # Help message
 show_help() {
     cat <<EOF
@@ -59,6 +63,9 @@ Default Patterns:
 
   1 --fail-on pattern:
     - ERROR (catches test failures via FL_WARN)
+
+  1 --exit-on-error pattern:
+    - ClearCommError (immediate device failure - ISR hang, crash, etc.)
 
 Options:
   -h, --help          Show this help message
@@ -129,6 +136,9 @@ if [[ "$USE_DEFAULT_FAIL_ON" == "true" ]]; then
     CMD+=(--fail-on "$DEFAULT_FAIL_ON")
 fi
 
+# Add exit-on-error pattern for immediate device failure detection
+CMD+=(--exit-on-error "$EXIT_ON_ERROR_PATTERN")
+
 # Append any extra arguments
 CMD+=("${EXTRA_ARGS[@]}")
 
@@ -136,6 +146,7 @@ CMD+=("${EXTRA_ARGS[@]}")
 echo "Running validation with patterns:"
 echo "  Expect: ${#DEFAULT_EXPECT[@]} patterns (use --help to see list)"
 echo "  Fail-on: $DEFAULT_FAIL_ON"
+echo "  Exit-on-error: $EXIT_ON_ERROR_PATTERN (immediate failure)"
 echo ""
 echo "Command: ${CMD[*]}"
 echo ""
