@@ -27,6 +27,11 @@
 #include "fl/log.h"
 #include "fl/stl/algorithm.h"
 
+    // The test may have 3000 LEDs, but we use streaming buffers for large strips
+#ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
+#define FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL 300
+#endif // defined(FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL)
+
 namespace fl {
 
 //=============================================================================
@@ -177,10 +182,9 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     }
 
     // Calculate max LEDs for buffer sizing (cap at 300 to avoid excessive memory usage)
-    // The test may have 3000 LEDs, but we use streaming buffers for large strips
-    constexpr size_t MAX_LEDS_PER_CHANNEL = 300;
+
     size_t actualLeds = maxChannelSize / 3;
-    size_t maxLeds = (actualLeds < MAX_LEDS_PER_CHANNEL) ? actualLeds : MAX_LEDS_PER_CHANNEL;
+    size_t maxLeds = (actualLeds < FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL) ? actualLeds : FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL;
 
     // Initialize HAL if needed
     if (!mEngine.initialize(mDataWidth, pins, timing, maxLeds)) {

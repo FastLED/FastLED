@@ -293,6 +293,9 @@ private:
 
     // Error state
     bool mErrorOccurred;
+
+    // TX unit enable state tracking (prevents double-disable errors)
+    bool mTxUnitEnabled;
 };
 
 } // namespace detail

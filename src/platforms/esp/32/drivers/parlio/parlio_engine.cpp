@@ -22,6 +22,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/time.h"
 #include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
+#include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
@@ -50,9 +51,13 @@ namespace detail {
 // - 8.0 MHz produces 125ns per tick (matches wave8 8-pulse expansion)
 // - Each LED bit = 8 clock ticks = 1.0μs total
 // - Divides from PLL_F160M on ESP32-P4 (160/20) or PLL_F240M on ESP32-C6 (240/30)
-static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000; // 8.0 MHz
+#ifndef FL_ESP_PARLIO_CLOCK_FREQ_HZ
+#define FL_ESP_PARLIO_CLOCK_FREQ_HZ 8000000 // 8.0 MHz
+#endif // defined(FL_ESP_PARLIO_CLOCK_FREQ_HZ)
 
-constexpr size_t MAX_LEDS_PER_CHANNEL = 300; // Support up to 300 LEDs per channel (configurable)
+#ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
+#define FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL 300 // Support up to 300 LEDs per channel (configurable)
+#endif // defined(FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL)
 
 // ESP32-C6 PARLIO hardware transaction queue depth limit
 // CRITICAL: This value CANNOT be changed - it is a hardware limitation
@@ -62,7 +67,9 @@ constexpr size_t MAX_LEDS_PER_CHANNEL = 300; // Support up to 300 LEDs per chann
 //   - trans_queue_depth = 3: Stable operation (hardware maximum)
 //   - trans_queue_depth = 4: Queue desync, 64% more underruns
 //   - trans_queue_depth = 8: Watchdog timeout crash
-static constexpr size_t PARLIO_HARDWARE_QUEUE_DEPTH = 3;
+#ifndef FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH
+#define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
+#endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
 //=============================================================================
 // ISR-Safe Memory Operations
@@ -77,31 +84,6 @@ isr_memset_zero(uint8_t* dest, size_t count) {
         dest[i] = 0x00;
     }
 }
-
-//=============================================================================
-// Cross-Platform Memory Barriers
-//=============================================================================
-// Memory barriers ensure correct synchronization between ISR and main thread
-// - ISR writes to volatile fields (stream_complete, transmitting, current_led)
-// - Main thread reads volatile fields, then executes barrier before reading
-// non-volatile fields
-// - Barrier ensures all ISR writes are visible to main thread
-//
-// Platform-Specific Barriers:
-// - Xtensa (ESP32, ESP32-S3): memw instruction (memory write barrier)
-// - RISC-V (ESP32-C6, ESP32-C3, ESP32-H2): fence rw,rw instruction (full memory
-// fence)
-//
-#if defined(__XTENSA__)
-              // Xtensa architecture (ESP32, ESP32-S3)
-#define PARLIO_MEMORY_BARRIER() asm volatile("memw" ::: "memory")
-#elif defined(__riscv)
-              // RISC-V architecture (ESP32-C6, ESP32-C3, ESP32-H2, ESP32-P4)
-#define PARLIO_MEMORY_BARRIER() asm volatile("fence rw, rw" ::: "memory")
-#else
-#error \
-    "Unsupported architecture for PARLIO memory barrier (expected __XTENSA__ or __riscv)"
-#endif
 
 //=============================================================================
 // ParlioIsrContext Implementation
@@ -258,7 +240,8 @@ ParlioEngine::ParlioEngine()
       mScratchBuffer(nullptr),
       mLaneStride(0),
       mWaveformExpansionBufferSize(0),
-      mErrorOccurred(false) {
+      mErrorOccurred(false),
+      mTxUnitEnabled(false) {
 }
 
 ParlioEngine::~ParlioEngine() {
@@ -277,10 +260,13 @@ ParlioEngine::~ParlioEngine() {
                     << err);
         }
 
-        // Disable TX unit
-        err = parlio_tx_unit_disable(mTxUnit);
-        if (err != ESP_OK) {
-            FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+        // Disable TX unit (only if currently enabled)
+        if (mTxUnitEnabled) {
+            err = parlio_tx_unit_disable(mTxUnit);
+            if (err != ESP_OK) {
+                FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+            }
+            mTxUnitEnabled = false;
         }
 
         // Delete TX unit
@@ -299,7 +285,7 @@ ParlioEngine::~ParlioEngine() {
     if (mWorkerTaskHandle && mIsrContext) {
         // Disarm worker task (signals task to exit loop)
         mIsrContext->mWorkerIsrEnabled = false;
-        PARLIO_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER();
 
         // Wake up task if it's blocked waiting for notification
         xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
@@ -407,7 +393,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
             // DISARM WORKER TASK on last transmission
             ctx->mWorkerIsrEnabled = false;
-            PARLIO_MEMORY_BARRIER();
+            FL_MEMORY_BARRIER();
 
             BaseType_t higherPriorityTaskWoken = pdFALSE;
 
@@ -609,7 +595,7 @@ ParlioEngine::workerTaskFunction(void* arg) {
         ctx->mRingCount = ctx->mRingCount + 1;
 
         // Memory barrier to ensure state visible to on-done callback ISR
-        PARLIO_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER();
     }
 
     // Task is shutting down - cleanup and exit
@@ -972,9 +958,9 @@ bool ParlioEngine::initialize(size_t dataWidth,
     parlio_tx_unit_config_t config = {};
     config.clk_src = PARLIO_CLK_SRC_DEFAULT;
     config.clk_in_gpio_num = static_cast<gpio_num_t>(-1);
-    config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
+    config.output_clk_freq_hz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
     config.data_width = mDataWidth;
-    config.trans_queue_depth = PARLIO_HARDWARE_QUEUE_DEPTH;
+    config.trans_queue_depth = FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH;
     config.max_transfer_size = 65534;
     config.bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB;
     config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
@@ -1116,12 +1102,16 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         return false;
     }
 
-    // Enable PARLIO TX unit for this transmission
-    esp_err_t err = parlio_tx_unit_enable(mTxUnit);
-    if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to enable TX unit: " << err);
-        mErrorOccurred = true;
-        return false;
+    // Enable PARLIO TX unit for this transmission (only if not already enabled)
+    esp_err_t err = ESP_OK;
+    if (!mTxUnitEnabled) {
+        err = parlio_tx_unit_enable(mTxUnit);
+        if (err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to enable TX unit: " << err);
+            mErrorOccurred = true;
+            return false;
+        }
+        mTxUnitEnabled = true;
     }
 
     // Queue first buffer to start transmission
@@ -1191,10 +1181,14 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // ISR will signal this task when transmission is complete
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-    // Disable PARLIO hardware after completion
-    esp_err_t disable_err = parlio_tx_unit_disable(mTxUnit);
-    if (disable_err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to disable TX unit after transmission: " << disable_err);
+    // Disable PARLIO hardware after completion (only if currently enabled)
+    if (mTxUnitEnabled) {
+        esp_err_t disable_err = parlio_tx_unit_disable(mTxUnit);
+        if (disable_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to disable TX unit after transmission: " << disable_err);
+        } else {
+            mTxUnitEnabled = false;
+        }
     }
 
     //=========================================================================
@@ -1203,7 +1197,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     if (mWorkerTaskHandle) {
         // Disarm worker task (signals task to exit loop)
         mIsrContext->mWorkerIsrEnabled = false;
-        PARLIO_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER();
 
         // Wake up task if it's blocked waiting for notification
         xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
@@ -1234,7 +1228,7 @@ ParlioEngineState ParlioEngine::poll() {
     // Check if streaming is complete
     if (mIsrContext->mStreamComplete) {
         // Execute memory barrier to synchronize all ISR writes
-        PARLIO_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER();
 
         // Clear completion flags
         mIsrContext->mTransmitting = false;
@@ -1244,10 +1238,14 @@ ParlioEngineState ParlioEngine::poll() {
         esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, 0);
 
         if (err == ESP_OK) {
-            // Disable PARLIO to reset peripheral state
-            err = parlio_tx_unit_disable(mTxUnit);
-            if (err != ESP_OK) {
-                FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+            // Disable PARLIO to reset peripheral state (only if currently enabled)
+            if (mTxUnitEnabled) {
+                err = parlio_tx_unit_disable(mTxUnit);
+                if (err != ESP_OK) {
+                    FL_WARN("PARLIO: Failed to disable TX unit: " << err);
+                } else {
+                    mTxUnitEnabled = false;
+                }
             }
 
             // Short delay for GPIO stabilization
@@ -1290,7 +1288,7 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const {
     }
 
     // Execute memory barrier to ensure all ISR writes are visible
-    PARLIO_MEMORY_BARRIER();
+    FL_MEMORY_BARRIER();
 
     metrics.mStartTimeUs = 0; // Not tracked yet
     metrics.mEndTimeUs = mIsrContext->mEndTimeUs;
