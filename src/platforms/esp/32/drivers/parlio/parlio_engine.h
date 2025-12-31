@@ -89,11 +89,13 @@ struct alignas(64) ParlioIsrContext {
     volatile bool mStreamComplete;
     volatile bool mTransmitting;
     volatile size_t mCurrentByte;
-    volatile size_t mRingReadIdx;    // 0-3 (for 4-buffer ring)
-    volatile size_t mRingWriteIdx;   // 0-3 (for 4-buffer ring)
-    volatile size_t mRingCount;      // 0-4 (distinguishes full vs empty)
+    volatile size_t mRingReadIdx;    // 0-2 (for 3-buffer ring)
+    volatile size_t mRingWriteIdx;   // 0-2 (for 3-buffer ring)
+    volatile size_t mRingCount;      // 0-3 (distinguishes full vs empty)
     volatile bool mRingError;
     volatile bool mHardwareIdle;
+    volatile size_t mNextByteOffset; // Next byte offset in source data (Worker ISR updates)
+    volatile bool mWorkerIsrEnabled; // Worker ISR armed state
 
     // === Non-Volatile Fields (read after barrier only) ===
     size_t mTotalBytes;
@@ -218,6 +220,12 @@ private:
                               const void* edata,
                               void* user_ctx);
 
+    /// @brief Worker task function for background DMA buffer population
+    /// ⚠️  CRITICAL: NO LOGGING IN THIS FUNCTION - Runs in high-priority task context
+    /// ⚠️  Priority: configMAX_PRIORITIES - 1 (highest user priority, below ISRs)
+    /// @note This is a FreeRTOS task, not a true ISR, for better portability and debugging
+    static void workerTaskFunction(void* arg);
+
     /// @brief Populate a DMA buffer with waveform data
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
     bool populateDmaBuffer(uint8_t* outputBuffer,
@@ -262,18 +270,17 @@ private:
     // ISR context (cache-aligned, 64 bytes)
     ParlioIsrContext* mIsrContext;
 
-    // FreeRTOS semaphore (void* to avoid header dependency)
-    void* mRingSpaceSemaphore;
+    // Main task handle for transmission completion signaling (TaskHandle_t)
+    void* mMainTaskHandle;
 
-    // Ring buffer architecture (4 buffers for streaming)
-    static constexpr size_t RING_BUFFER_COUNT = 4;
+    // Worker task handle for background buffer population (TaskHandle_t)
+    void* mWorkerTaskHandle;
+
+    // Ring buffer architecture (3 buffers for streaming - ISR-based cooperative streaming)
+    static constexpr size_t RING_BUFFER_COUNT = 3;
     fl::vector<fl::unique_ptr<uint8_t[], HeapCapsDeleter>> mRingBuffers;
     fl::vector<size_t> mRingBufferSizes;
     size_t mRingBufferCapacity;
-
-    // Ring buffer population state
-    size_t mNextPopulateIdx;
-    size_t mNextByteOffset;
 
     // Scratch buffer pointer (owned by caller, NOT by this class)
     const uint8_t* mScratchBuffer;

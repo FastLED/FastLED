@@ -80,6 +80,8 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
 **Phase 3: Monitor** - Attach to serial monitor, capture output, detect patterns
 
+**⚠️ IMPORTANT: `bash debug` includes compilation - do NOT run `bash compile` separately before `bash debug`**
+
 **Usage:**
 - `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
 - `bash debug esp32dev` - Specific environment
