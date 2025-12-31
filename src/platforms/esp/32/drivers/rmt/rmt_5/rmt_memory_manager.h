@@ -165,6 +165,26 @@ public:
     /// @brief Reset all allocations (for testing or error recovery)
     void reset();
 
+    /// @brief Reserve memory for external RMT usage (user-controlled accounting)
+    /// @param tx_words Number of TX memory words to reserve (reduce available pool)
+    /// @param rx_words Number of RX memory words to reserve (reduce available pool)
+    ///
+    /// Use this when external code (non-FastLED) is using RMT channels and you need
+    /// to prevent FastLED from over-allocating the hardware resources.
+    ///
+    /// Example:
+    /// @code
+    /// // External code uses 1 RMT channel with 64 words
+    /// auto& mgr = fl::RmtMemoryManager::instance();
+    /// mgr.reserveExternalMemory(64, 0);  // Reserve 64 TX words, 0 RX words
+    /// @endcode
+    void reserveExternalMemory(size_t tx_words, size_t rx_words);
+
+    /// @brief Get currently reserved external memory (debug/logging)
+    /// @param tx_words Output: Reserved TX words
+    /// @param rx_words Output: Reserved RX words
+    void getReservedMemory(size_t& tx_words, size_t& rx_words) const;
+
     /// @brief Calculate adaptive memory blocks based on network state
     /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active
     /// @return Number of memory blocks to allocate (2 or 3)
@@ -247,6 +267,10 @@ private:
         size_t allocated_tx_words;  ///< Currently allocated TX memory (dedicated pools only)
         size_t allocated_rx_words;  ///< Currently allocated RX memory (dedicated pools only)
 
+        // External reservation tracking (user-controlled accounting for non-FastLED RMT usage)
+        size_t reserved_tx_words;   ///< TX words reserved for external RMT usage
+        size_t reserved_rx_words;   ///< RX words reserved for external RMT usage
+
         fl::vector_inlined<ChannelAllocation, 8> allocations;  ///< Active allocations
 
         MemoryLedger();
@@ -273,6 +297,22 @@ private:
 
     /// @brief Initialize platform-specific memory limits
     static void initPlatformLimits(size_t& total_tx, size_t& total_rx);
+
+    /// @brief Helper to get available memory for TX or RX
+    /// @param is_tx true for TX pool, false for RX pool
+    /// @return Available words (accounting for reservations)
+    size_t getAvailableWords(bool is_tx) const;
+
+    /// @brief Helper to allocate words from the appropriate pool
+    /// @param words_needed Number of words to allocate
+    /// @param is_tx true for TX pool, false for RX pool
+    /// @return true if allocation succeeded, false otherwise
+    bool tryAllocateWords(size_t words_needed, bool is_tx);
+
+    /// @brief Helper to free words from the appropriate pool
+    /// @param words Number of words to free
+    /// @param is_tx true for TX pool, false for RX pool
+    void freeWords(size_t words, bool is_tx);
 };
 
 } // namespace fl

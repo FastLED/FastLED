@@ -22,11 +22,13 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
+#include "fl/error.h"
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/sstream.h"
 #include "fl/stl/time.h"
 #include "fl/stl/unique_ptr.h"
 #include "network_detector.h"
@@ -303,7 +305,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
   public:
     ChannelEngineRMTImpl()
         : mDMAChannelsInUse(0), mAllocationFailed(false),
-          mLastKnownNetworkState(false) {
+          mLastKnownNetworkState(false), mMemoryReductionOffset(0),
+          mConsecutiveAllocationFailures(0), mRecoveryWarningShown(false) {
         // Suppress ESP-IDF RMT "no free channels" errors (expected during
         // time-multiplexing) Only show critical RMT errors (ESP_LOG_ERROR and
         // above)
@@ -702,6 +705,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         fl::size mem_block_symbols = alloc_result.value();
 
+        // Apply previously discovered memory reduction offset (from self-healing)
+        // This prevents re-running the progressive retry on every allocation
+        if (mMemoryReductionOffset > 0 && mem_block_symbols > mMemoryReductionOffset) {
+            FL_LOG_RMT("Applying memory reduction offset: " << mMemoryReductionOffset
+                       << " symbols (learned from previous recovery)");
+            mem_block_symbols -= mMemoryReductionOffset;
+        }
+
         // Log channel number and allocation type
         size_t channel_num = mChannels.size() + 1;
         if (memMgr.getDMAChannelsInUse() > 0) {
@@ -739,14 +750,121 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         tx_config.intr_priority = intr_priority;
 
         esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
+
+        // PROGRESSIVE RETRY MECHANISM FOR MEMORY ALLOCATION RECOVERY
+        // =========================================================
+        // If ESP_ERR_NOT_FOUND: Actual RMT memory may be less than accounting expects
+        // (external code using RMT peripherals, or hardware issues)
+        //
+        // Strategy: Progressively reduce mem_block_symbols and retry
+        // - Start with full allocation (mem_block_symbols)
+        // - Reduce by 1 symbol per retry until success or minimum reached
+        // - Minimum: SOC_RMT_MEM_WORDS_PER_CHANNEL (1 block)
+
+        if (err == ESP_ERR_NOT_FOUND && mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            FL_WARN("RMT channel allocation failed: " << esp_err_to_name(err)
+                    << " (initial request: " << mem_block_symbols << " symbols)");
+            FL_WARN("Attempting progressive memory reduction recovery...");
+
+            mConsecutiveAllocationFailures++;
+            size_t original_symbols = mem_block_symbols;
+            size_t retry_count = 0;
+            const size_t min_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL; // Minimum 1 block
+            bool recovery_succeeded = false;
+
+            // Progressively reduce memory until it works or we hit minimum
+            for (size_t reduced_symbols = mem_block_symbols - 1;
+                 reduced_symbols >= min_symbols;
+                 reduced_symbols--) {
+                retry_count++;
+
+                // Free previous allocation attempt
+                memMgr.free(state->memoryChannelId, true);
+
+                // Try allocating with reduced memory (bypass memory manager, direct allocation)
+                // We need to manually account for this since we're going below expected size
+                tx_config.mem_block_symbols = reduced_symbols;
+
+                FL_LOG_RMT("Retry #" << retry_count << ": Attempting " << reduced_symbols
+                           << " symbols (reduced by " << (original_symbols - reduced_symbols) << ")");
+
+                err = rmt_new_tx_channel(&tx_config, &state->channel);
+                if (err == ESP_OK) {
+                    // SUCCESS - Record the memory reduction offset
+                    mMemoryReductionOffset = original_symbols - reduced_symbols;
+                    mConsecutiveAllocationFailures = 0; // Reset failure counter
+
+                    // Calculate how many words we actually need to reserve
+                    size_t external_words = original_symbols - reduced_symbols;
+
+                    // Show recovery warning with user action guidance
+                    if (!mRecoveryWarningShown) {
+                        fl::sstream msg;
+                        msg << "\n========================================\n"
+                            << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"
+                            << "========================================\n"
+                            << "FastLED detected external RMT memory usage!\n"
+                            << "  Expected: " << original_symbols << " symbols available\n"
+                            << "  Actual: " << reduced_symbols << " symbols available\n"
+                            << "  External usage: ~" << external_words << " words\n"
+                            << "\n"
+                            << "To prevent future recovery attempts, add this to setup():\n"
+                            << "----------------------------------------\n"
+                            << "  auto& rmtMgr = fl::RmtMemoryManager::instance();\n"
+                            << "  rmtMgr.reserveExternalMemory(" << external_words << ", 0);\n"
+                            << "----------------------------------------\n"
+                            << "\n"
+                            << "FastLED will continue with reduced buffer size.\n"
+                            << "Performance may be degraded during WiFi/network activity.\n"
+                            << "========================================";
+                        FL_WARN(msg.str());
+                        mRecoveryWarningShown = true;
+                    }
+
+                    // Re-allocate through memory manager with reduced size
+                    // (This ensures accounting stays synchronized)
+                    mem_block_symbols = reduced_symbols;
+                    recovery_succeeded = true;
+                    break; // Exit retry loop
+                }
+            }
+
+            // If recovery failed, show detailed error
+            if (!recovery_succeeded) {
+                fl::sstream msg;
+                msg << "\n========================================\n"
+                    << "RMT CHANNEL ALLOCATION FAILED\n"
+                    << "========================================\n"
+                    << "FastLED could not allocate RMT channel after " << retry_count << " retry attempts\n"
+                    << "  Platform: " << CONFIG_IDF_TARGET << "\n"
+                    << "  Requested: " << original_symbols << " symbols\n"
+                    << "  Minimum attempted: " << min_symbols << " symbols\n"
+                    << "  Error: " << esp_err_to_name(err) << "\n"
+                    << "\n"
+                    << "Possible causes:\n"
+                    << "  1. External code is using all RMT channels\n"
+                    << "  2. RMT hardware failure\n"
+                    << "  3. Insufficient RMT memory for platform\n"
+                    << "\n"
+                    << "LEDs on pin " << static_cast<int>(pin) << " will NOT work!\n"
+                    << "========================================";
+                FL_ERROR(msg.str());
+
+                state->channel = nullptr;
+                memMgr.free(state->memoryChannelId, true);
+                return false;
+            }
+
+            // Recovery succeeded - fall through to encoder creation
+            err = ESP_OK;
+        }
+
         if (err != ESP_OK) {
-            // This is expected when all HW channels are in use
-            // (time-multiplexing scenario)
+            // Non-recoverable error (not ESP_ERR_NOT_FOUND, or already at minimum)
             FL_LOG_RMT("Failed to create non-DMA RMT channel on pin "
                        << static_cast<int>(pin) << ": "
                        << esp_err_to_name(err));
             state->channel = nullptr;
-            // Free memory allocation
             memMgr.free(state->memoryChannelId, true);
             return false;
         }
@@ -1189,6 +1307,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Track last known network state for change detection
     bool mLastKnownNetworkState;
+
+    /// @brief Progressive retry: Memory reduction offset (symbols to reduce per retry)
+    /// When RMT allocation fails, progressively reduce memory allocation by this amount
+    size_t mMemoryReductionOffset;
+
+    /// @brief Track consecutive allocation failures for progressive retry
+    size_t mConsecutiveAllocationFailures;
+
+    /// @brief Track whether recovery warning has been shown to user
+    bool mRecoveryWarningShown;
 };
 
 //=============================================================================
