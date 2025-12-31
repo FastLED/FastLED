@@ -575,6 +575,7 @@ def run_monitor(
     matched_fail_keyword = None
     matched_fail_line = None
     timeout_reached = False
+    device_stuck = False
 
     try:
         while True:
@@ -637,6 +638,26 @@ def run_monitor(
             except TimeoutError:
                 # No output within read timeout - continue waiting (will check timeouts on next loop)
                 continue
+            except Exception as e:
+                # Check for specific serial port errors indicating device is stuck
+                error_str = str(e)
+                if "ClearCommError" in error_str and "PermissionError" in error_str:
+                    device_stuck = True
+                    print(
+                        "\n🚨 CRITICAL ERROR: Device appears stuck and no longer responding"
+                    )
+                    print(
+                        "   Serial port failure: ClearCommError (device not recognizing commands)"
+                    )
+                    print("   Possible causes:")
+                    print("     - ISR (Interrupt Service Routine) hogging CPU time")
+                    print("     - Device crashed or entered non-responsive state")
+                    print("     - Hardware watchdog triggered")
+                    print(f"   Technical details: {error_str}")
+                    proc.terminate()
+                    break
+                # Re-raise other exceptions
+                raise
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping monitor")
@@ -647,7 +668,10 @@ def run_monitor(
     proc.wait()
 
     # Determine success based on exit conditions
-    if fail_keyword_found:
+    if device_stuck:
+        # Device stuck is always a failure
+        success = False
+    elif fail_keyword_found:
         # Fail pattern match always means failure
         success = False
     elif expect_patterns:
@@ -702,7 +726,13 @@ def run_monitor(
 
     print("\n" + "=" * 60)
 
-    if fail_keyword_found:
+    if device_stuck:
+        print("❌ Monitor failed - device appears stuck and no longer responding")
+        print("   WARNING: Serial port communication failed (ClearCommError)")
+        print(
+            "   This typically indicates an ISR is hogging CPU time or device crashed"
+        )
+    elif fail_keyword_found:
         print(f"❌ Monitor failed - fail pattern /{matched_fail_keyword}/ detected")
         print(f"   Matched line: {matched_fail_line}")
     elif expect_patterns:
