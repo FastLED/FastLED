@@ -26,8 +26,8 @@
 
 #include <FastLED.h>
 #include "fl/rx_device.h"
-#include "fl/sketch_macros.h"
 #include "test.h"
+#include "SketchHalt.h"
 
 // ============================================================================
 // Configuration
@@ -65,6 +65,9 @@ const fl::array<PinToggle, 6> TEST_PATTERN = {{
 
 fl::shared_ptr<fl::RxDevice> g_rx_device;
 
+// Sketch halt controller - handles safe halting without watchdog timer resets
+SketchHalt halt;
+
 // ============================================================================
 // Arduino Setup & Loop
 // ============================================================================
@@ -84,7 +87,8 @@ void setup() {
     // Sanity check: Verify jumper wire connection when TX and RX are different pins
     if (PIN_TX != PIN_RX) {
         if (!verifyJumperWire(PIN_TX, PIN_RX)) {
-            SKETCH_HALT("Missing jumper wire between TX and RX pins");
+            halt.error("Missing jumper wire between TX and RX pins");
+            return;
         }
     } else {
         FL_WARN("TX and RX use same pin (" << PIN_TX << ") - no jumper wire needed");
@@ -97,7 +101,8 @@ void setup() {
     FL_WARN("Creating RX device for testing...");
     auto rx_test = fl::RxDevice::create<RX_TYPE>(PIN_RX);
     if (!rx_test) {
-        SKETCH_HALT("Failed to create RX device for testing");
+        halt.error("Failed to create RX device for testing");
+        return;
     }
 
     // Initialize test RX device with config
@@ -109,12 +114,14 @@ void setup() {
     test_config.start_low = true;
 
     if (!rx_test->begin(test_config)) {
-        SKETCH_HALT("Failed to initialize test RX device");
+        halt.error("Failed to initialize test RX device");
+        return;
     }
 
     // Test RX device functionality
     if (!testRxDevice(rx_test, PIN_TX)) {
-        SKETCH_HALT("RX device sanity check failed - RX not working");
+        halt.error("RX device sanity check failed - RX not working");
+        return;
     }
     FL_WARN("");
 
@@ -123,7 +130,8 @@ void setup() {
     FL_WARN("Creating main RX device...");
     g_rx_device = fl::RxDevice::create<RX_TYPE>(PIN_RX);
     if (!g_rx_device) {
-        SKETCH_HALT("Failed to create main RX device");
+        halt.error("Failed to create main RX device");
+        return;
     }
     FL_WARN("✓ Main RX device created\n");
 
@@ -131,6 +139,9 @@ void setup() {
 }
 
 void loop() {
+    // IMPORTANT: Must be first line - handles halt state and prevents watchdog resets
+    if (halt.check()) return;
+
     FL_WARN("\n╔════════════════════════════════════════════════════════════════╗");
     FL_WARN("║  RX DEVICE TEST");
     FL_WARN("╚════════════════════════════════════════════════════════════════╝\n");

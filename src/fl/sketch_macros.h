@@ -28,28 +28,17 @@
 #define SKETCH_STRINGIFY(x) SKETCH_STRINGIFY_HELPER(x)
 #endif
 
-// SKETCH_HALT(msg) - Halts sketch execution and prints diagnostic message
-// Prints immediately and then once every 5 seconds: "HALT at file(line): msg"
-#define SKETCH_HALT(msg) \
-    do { \
-        static fl::u32 last_print_time = 0; \
-        fl::u32 current_time = fl::time(); \
-        if (last_print_time == 0 || (current_time - last_print_time) >= 5000) { \
-            fl::cout << "ERROR: HALT at " << __FILE__ << "(" << __LINE__ << "): " << msg << "\n"; \
-            last_print_time = current_time; \
-        } \
-        fl::delayMillis(100); \
-    } while (1)
-
-// SKETCH_HALT_OK(msg) - Halts sketch execution after successful completion
-// Prints once: "FINISHED at file(line): msg" (no ERROR keyword)
-// Used when sketch completes successfully and should halt without triggering error detection
-#define SKETCH_HALT_OK(msg) \
-    do { \
-        static bool printed = false; \
-        if (!printed) { \
-            fl::cout << "FINISHED at " << __FILE__ << "(" << __LINE__ << "): " << msg << "\n"; \
-            printed = true; \
-        } \
-        fl::delayMillis(100); \
-    } while (1)
+// SKETCH_HALT and SKETCH_HALT_OK macros have been removed.
+// They caused watchdog timer resets on ESP32-C6 due to the infinite while(1) loop
+// preventing loop() from returning.
+//
+// Replacement: Use a SketchHalt helper class (see examples/Validation/SketchHalt.h
+// or examples/RX/SketchHalt.h for reference implementation).
+//
+// Pattern:
+//   1. Create a local SketchHalt.h header in your sketch directory
+//   2. Include it and create a global halt object
+//   3. First line of loop() MUST be: if (halt.check()) return;
+//   4. Call halt.error("message") or halt.finish("message") to halt
+//
+// This allows loop() to return normally, preventing watchdog timer resets.

@@ -164,6 +164,7 @@
 #include "Common.h"
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
+#include "SketchHalt.h"
 
 // ============================================================================
 // Configuration
@@ -189,13 +190,11 @@ uint8_t rx_buffer[RX_BUFFER_SIZE];  // Shared RX buffer for all test cases
 fl::shared_ptr<fl::RxDevice> rx_channel;
 
 // ============================================================================
-// Global Error Tracking
+// Global Error Tracking and Halt Control
 // ============================================================================
 
-// Global error tracking flags
-
-// Sanity check failure - if true, print error and delay in loop()
-bool error_sanity_check = false;
+// Sketch halt controller - handles safe halting without watchdog timer resets
+SketchHalt halt;
 
 
 // ============================================================================
@@ -273,7 +272,7 @@ void setup() {
         ss << "[RX SETUP]: Failed to create RX channel\n";
         ss << "[RX SETUP]: Check that RMT peripheral is available and not in use";
         FL_ERROR(ss.str());
-        error_sanity_check = true;
+        halt.error("Sanity check failed - RX channel creation failed");
         return;
     }
 
@@ -489,20 +488,17 @@ void runSingleTestCase(
 // ============================================================================
 
 void loop() {
-    // If test matrix already completed, halt forever
+    // IMPORTANT: Must be first line - handles halt state and prevents watchdog resets
+    if (halt.check()) return;
+
+    // If test matrix already completed, halt with success message
     if (test_matrix_complete) {
-        SKETCH_HALT_OK("Test matrix complete");
+        halt.finish("Test matrix complete");
         return;
     }
 
     // Increment frame counter
     frame_counter++;
-
-    // If sanity check failed, print error continuously and delay
-    if (error_sanity_check) {
-        SKETCH_HALT("Sanity check failed - RX channel is not working");
-        return;
-    }
 
     fl::sstream ss;
     ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
@@ -561,7 +557,7 @@ void loop() {
     }
 
     if (failed_count > 0) {
-        SKETCH_HALT("[TEST MATRIX] See results table and summary above for details");
+        halt.error("[TEST MATRIX] See results table and summary above for details");
     } else {
         FL_WARN("\n[TEST MATRIX] ✓ All test cases PASSED");
     }
@@ -578,6 +574,4 @@ void loop() {
 
     // Mark test matrix as complete - will halt on next loop() iteration
     test_matrix_complete = true;
-
-    SKETCH_HALT_OK("Test matrix complete");
 }
