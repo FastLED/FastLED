@@ -351,7 +351,7 @@ ParlioEngine::~ParlioEngine() {
     if (mWorkerTaskHandle && mIsrContext) {
         // Disarm worker task (signals task to exit loop)
         mIsrContext->mWorkerIsrEnabled = false;
-        FL_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER
 
         // Wake up task if it's blocked waiting for notification
         xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
@@ -459,7 +459,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
             // DISARM WORKER TASK on last transmission
             ctx->mWorkerIsrEnabled = false;
-            FL_MEMORY_BARRIER();
+            FL_MEMORY_BARRIER
 
             BaseType_t higherPriorityTaskWoken = pdFALSE;
 
@@ -663,7 +663,7 @@ ParlioEngine::workerTaskFunction(void* arg) {
         ctx->mRingCount = ctx->mRingCount + 1;
 
         // Memory barrier to ensure state visible to on-done callback ISR
-        FL_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER
     }
 
     // Task is shutting down - cleanup and exit
@@ -1294,7 +1294,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     if (mWorkerTaskHandle) {
         // Disarm worker task (signals task to exit loop)
         mIsrContext->mWorkerIsrEnabled = false;
-        FL_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER
 
         // Wake up task if it's blocked waiting for notification
         xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
@@ -1325,7 +1325,7 @@ ParlioEngineState ParlioEngine::poll() {
     // Check if streaming is complete
     if (mIsrContext->mStreamComplete) {
         // Execute memory barrier to synchronize all ISR writes
-        FL_MEMORY_BARRIER();
+        FL_MEMORY_BARRIER
 
         // Clear completion flags
         mIsrContext->mTransmitting = false;
@@ -1385,7 +1385,7 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const {
     }
 
     // Execute memory barrier to ensure all ISR writes are visible
-    FL_MEMORY_BARRIER();
+    FL_MEMORY_BARRIER
 
     metrics.mStartTimeUs = 0; // Not tracked yet
     metrics.mEndTimeUs = mIsrContext->mEndTimeUs;

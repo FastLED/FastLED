@@ -28,10 +28,10 @@
 //
 #if defined(__XTENSA__)
 // Xtensa architecture (ESP32, ESP32-S3)
-#define FL_MEMORY_BARRIER() asm volatile("memw" ::: "memory")
+#define FL_MEMORY_BARRIER asm volatile("memw" ::: "memory")
 #elif defined(__riscv)
 // RISC-V architecture (ESP32-C6, ESP32-C3, ESP32-H2, ESP32-P4)
-#define FL_MEMORY_BARRIER() asm volatile("fence rw, rw" ::: "memory")
+#define FL_MEMORY_BARRIER asm volatile("fence rw, rw" ::: "memory")
 #else
 #error \
     "Unsupported architecture for ESP32 memory barrier (expected __XTENSA__ or __riscv)"
