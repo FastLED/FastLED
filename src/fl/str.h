@@ -26,6 +26,7 @@ extern "C" {
 #include "fl/stl/span.h"
 #include "fl/force_inline.h"
 #include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -440,7 +441,14 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return mLength;
         }
         if (newLen + 1 <= SIZE) {
+            // GCC -O2 false positive: offset [-83, -19] out of bounds [0, 88]
+            // The bounds check above protects this memcpy, but aggressive inlining
+            // causes GCC's optimizer to lose track of the invariant (mLength < SIZE).
+            // See: https://github.com/FastLED/FastLED/issues/2150
+            FL_DISABLE_WARNING_PUSH
+            FL_DISABLE_WARNING(array-bounds)
             fl::memcpy(mInlineData + mLength, str, n);
+            FL_DISABLE_WARNING_POP
             mLength = newLen;
             mInlineData[mLength] = '\0';
             return mLength;
