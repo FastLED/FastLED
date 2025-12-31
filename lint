@@ -26,6 +26,7 @@ get_elapsed_seconds() {
 
 # Parse command line arguments
 JS_ONLY=false
+CPP_ONLY=false
 NO_FINGERPRINT=false
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -35,6 +36,7 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  --help            Show this help message"
             echo "  --js              Run JavaScript linting only"
+            echo "  --cpp             Run C++ linting only"
             echo "  --no-fingerprint  Force re-run all linters (skip timestamp checks)"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
@@ -43,6 +45,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --js)
             JS_ONLY=true
+            shift
+            ;;
+        --cpp)
+            CPP_ONLY=true
             shift
             ;;
         --no-fingerprint)
@@ -69,10 +75,15 @@ find tests/ -name "*.sln" -exec rm {} \; 2>/dev/null || true
 if [ "$JS_ONLY" = true ]; then
     echo "🌐 Running JavaScript Linting Only"
     echo "==================================="
+elif [ "$CPP_ONLY" = true ]; then
+    echo "🔧 Running C++ Linting Only"
+    echo "============================"
 else
     echo "🚀 Running FastLED Comprehensive Linting Suite"
     echo "=============================================="
+fi
 
+if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
     # Python linting
     echo ""
     echo "📝 PYTHON LINTING"
@@ -124,7 +135,9 @@ else
     # Record Python linting stages
     record_stage "ruff" "$PYTHON_LINT_DURATION" false
     record_stage "pyright" "$PYRIGHT_DURATION" "$PYRIGHT_SKIPPED"
+fi
 
+if [ "$JS_ONLY" = false ]; then
     export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
     # C++ linting with Meson dependency tracking
@@ -225,10 +238,11 @@ else
     record_stage "cpp_linting" "$CPP_LINT_DURATION" "$CPP_LINT_SKIPPED"
 fi
 
-# JavaScript linting and enhanced checking (now included by default)
-echo ""
-echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
-echo "--------------------------------------"
+if [ "$CPP_ONLY" = false ]; then
+    # JavaScript linting and enhanced checking (now included by default)
+    echo ""
+    echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
+    echo "--------------------------------------"
 
 # Colors for JavaScript linting output
 RED='\033[0;31m'
@@ -283,14 +297,17 @@ else
         # Don't exit with error, just skip JS linting
     fi
 fi
-JS_LINT_DURATION=$(get_elapsed_seconds $JS_LINT_START)
+    JS_LINT_DURATION=$(get_elapsed_seconds $JS_LINT_START)
 
-# Record JavaScript linting stage
-record_stage "javascript_linting" "$JS_LINT_DURATION" false
+    # Record JavaScript linting stage
+    record_stage "javascript_linting" "$JS_LINT_DURATION" false
+fi
 
 echo ""
 if [ "$JS_ONLY" = true ]; then
     echo "🎉 JavaScript linting completed!"
+elif [ "$CPP_ONLY" = true ]; then
+    echo "🎉 C++ linting completed!"
 else
     echo "🎉 All linting completed!"
 fi
@@ -345,6 +362,7 @@ echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"
 echo "  - Use 'bash lint --js' for JavaScript linting only"
+echo "  - Use 'bash lint --cpp' for C++ linting only"
 echo "  - JavaScript linting: FAST ONLY (no slow fallback)"
 echo "  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py"
 echo "  - Use 'bash lint --help' for usage information"
