@@ -303,6 +303,7 @@ ParlioEngine::ParlioEngine()
       mResetUs(0),
       mIsrContext(nullptr),
       mMainTaskHandle(nullptr),
+      mWorkerTaskHandle(nullptr),
       mWorkerTimerHandle(nullptr),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
@@ -357,6 +358,23 @@ ParlioEngine::~ParlioEngine() {
         gptimer_del_timer(mWorkerTimerHandle);
         mWorkerTimerHandle = nullptr;
     }
+
+    // Clean up worker task (LEGACY - commented out during refactor to timer ISR)
+    // NOTE: Worker task code will be removed completely in Step 8 cleanup phase
+    // if (mWorkerTaskHandle && mIsrContext) {
+    //     // Disarm worker task (signals task to exit loop)
+    //     mIsrContext->mWorkerIsrEnabled = false;
+    //     FL_MEMORY_BARRIER
+    //
+    //     // Wake up task if it's blocked waiting for notification
+    //     xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
+    //
+    //     // Give task time to exit gracefully (10ms should be plenty)
+    //     vTaskDelay(pdMS_TO_TICKS(10));
+    //
+    //     // Task will delete itself via vTaskDelete(NULL) in workerTaskFunction
+    //     mWorkerTaskHandle = nullptr;
+    // }
 
     // Clean up IsrContext
     if (mIsrContext) {
@@ -467,6 +485,12 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
             BaseType_t higherPriorityTaskWoken = pdFALSE;
 
+            // Wake up worker task so it can exit (LEGACY - will be removed after full refactor)
+            if (self->mWorkerTaskHandle) {
+                vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mWorkerTaskHandle),
+                                      &higherPriorityTaskWoken);
+            }
+
             // Signal main task that transmission is complete
             if (self->mMainTaskHandle) {
                 vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mMainTaskHandle),
@@ -536,7 +560,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         ctx->mRingCount = ctx->mRingCount - 1;
         ctx->mHardwareIdle = false; // Hardware is active again
 
-        // ARM ONE-SHOT TIMER if buffers need refilling
+        // ARM ONE-SHOT TIMER if buffers need refilling (replaces worker task notification)
         if (ctx->mRingCount < ParlioEngine::RING_BUFFER_COUNT &&
             ctx->mNextByteOffset < ctx->mTotalBytes &&
             self->mWorkerTimerHandle &&
@@ -551,6 +575,17 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             gptimer_start(self->mWorkerTimerHandle);
         }
 
+        // LEGACY: Worker task notification (kept for fallback if timer disabled)
+        if (ctx->mRingCount < ParlioEngine::RING_BUFFER_COUNT &&
+            ctx->mNextByteOffset < ctx->mTotalBytes &&
+            self->mWorkerTaskHandle) {
+
+            BaseType_t higherPriorityTaskWoken = pdFALSE;
+            vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mWorkerTaskHandle),
+                                  &higherPriorityTaskWoken);
+            return higherPriorityTaskWoken == pdTRUE;
+        }
+
         return false;
     } else {
         // Submission failed - set error flag for CPU to detect
@@ -563,6 +598,146 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 // END OF ISR - Remember: NO LOGGING, NO BLOCKING, MINIMIZE EXECUTION TIME
 // ============================================================================
 
+//=============================================================================
+// Worker Task - Background DMA Buffer Population
+//=============================================================================
+
+// ============================================================================
+// ⚠️ ⚠️ ⚠️  CRITICAL TASK SAFETY RULES - READ BEFORE MODIFYING ⚠️ ⚠️ ⚠️
+// ============================================================================
+//
+// This function runs as a HIGH-PRIORITY FREERTOS TASK with strict constraints:
+//
+// 1. ❌ NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_ERROR, printf, etc.) - interferes with timing
+// 2. ❌ NO BLOCKING OPERATIONS (mutex, delay, heap allocation inside loop, etc.)
+// 3. ✅ MINIMIZE EXECUTION TIME (early exit if no work available)
+// 4. ✅ Priority: configMAX_PRIORITIES - 1 (highest user priority, below ISRs)
+//
+// This task populates DMA buffers in the background while txDoneCallback
+// submits them to hardware. The two coordinate via ring buffer count.
+//
+// FreeRTOS Task Notification Pattern:
+// - Waits on ulTaskNotifyTake() for notification from txDoneCallback ISR
+// - txDoneCallback calls vTaskNotifyGiveFromISR() when buffers need refilling
+// - Task exits when mWorkerIsrEnabled becomes false (set by destructor)
+//
+// ============================================================================
+FL_OPTIMIZE_FUNCTION void
+ParlioEngine::workerTaskFunction(void* arg) {
+    // ⚠️  HIGH-PRIORITY TASK CONTEXT - NO LOGGING ALLOWED - SEE FUNCTION HEADER ⚠️
+
+    auto *self = static_cast<ParlioEngine *>(arg);
+    if (!self || !self->mIsrContext) {
+        vTaskDelete(NULL);  // Exit task if invalid context
+        return;
+    }
+
+    ParlioIsrContext *ctx = self->mIsrContext;
+
+    // Main worker loop - runs until disabled by destructor or completion
+    while (true) {
+        // Block until notified by txDoneCallback ISR
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        // CRITICAL: Early exit checks (in order of likelihood)
+
+        // Check 1: Worker task disabled by on-done callback or destructor
+        if (!ctx->mWorkerIsrEnabled) {
+            break;  // Exit loop - task is being shut down
+        }
+
+        // Check 2: Ring buffer full (no space to populate)
+        if (ctx->mRingCount >= ParlioEngine::RING_BUFFER_COUNT) {
+            continue;  // Wait for next notification
+        }
+
+        // Check 3: All data already processed
+        if (ctx->mNextByteOffset >= ctx->mTotalBytes) {
+            continue;  // Wait for next notification (or shutdown)
+        }
+
+        // Work available - populate one complete buffer
+        // Get next ring buffer index (0-2)
+        size_t ring_index = ctx->mRingWriteIdx;
+
+        // Get ring buffer pointer (use cached pointer for optimization)
+        uint8_t *outputBuffer = self->mRingBufferPtrs[ring_index];
+        if (!outputBuffer) {
+            continue;  // Invalid buffer - wait for next notification
+        }
+
+        // Calculate byte range for this buffer
+        size_t bytes_remaining = ctx->mTotalBytes - ctx->mNextByteOffset;
+        size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioEngine::RING_BUFFER_COUNT - 1) / ParlioEngine::RING_BUFFER_COUNT;
+
+        // LED boundary alignment constant
+        size_t bytes_per_led_all_lanes = 3 * ctx->mNumLanes;
+
+        // CAP bytes_per_buffer at ring buffer capacity
+        ParlioBufferCalculator calc{self->mDataWidth};
+        size_t reset_padding = calc.resetPaddingBytes(self->mResetUs);
+        size_t available_capacity = self->mRingBufferCapacity - reset_padding;  // Reserve space for reset padding
+        size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
+
+        // Reduce max by one LED boundary to prevent exact-capacity overflow
+        if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
+            max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
+        }
+
+        if (bytes_per_buffer > max_input_bytes_per_buffer) {
+            bytes_per_buffer = max_input_bytes_per_buffer;
+        }
+
+        // LED boundary alignment: Round DOWN
+        bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
+
+        // Ensure at least one LED per buffer
+        if (bytes_per_buffer < bytes_per_led_all_lanes && ctx->mTotalBytes >= bytes_per_led_all_lanes) {
+            bytes_per_buffer = bytes_per_led_all_lanes;
+        }
+
+        // For LAST buffer, take ALL remaining bytes
+        size_t byte_count;
+        size_t buffers_already_populated = ctx->mRingCount;
+        bool is_last_buffer = (buffers_already_populated >= ParlioEngine::RING_BUFFER_COUNT - 1) ||
+                              (bytes_remaining <= bytes_per_buffer);
+        if (is_last_buffer) {
+            byte_count = bytes_remaining;
+            if (byte_count > max_input_bytes_per_buffer) {
+                byte_count = max_input_bytes_per_buffer;
+            }
+        } else {
+            byte_count = bytes_per_buffer;
+        }
+
+        // Zero output buffer (ISR-safe memset)
+        isr_memset_zero(outputBuffer, self->mRingBufferCapacity);
+
+        // Generate waveform data
+        size_t outputBytesWritten = 0;
+        if (!self->populateDmaBuffer(outputBuffer, self->mRingBufferCapacity,
+                                      ctx->mNextByteOffset, byte_count, outputBytesWritten)) {
+            continue;  // Buffer overflow - skip and wait for next notification
+        }
+
+        // Store actual size of this buffer
+        self->mRingBufferSizes[ring_index] = outputBytesWritten;
+
+        // Update state for next buffer
+        ctx->mNextByteOffset += byte_count;
+        ctx->mRingWriteIdx = (ctx->mRingWriteIdx + 1) % ParlioEngine::RING_BUFFER_COUNT;
+        ctx->mRingCount = ctx->mRingCount + 1;
+
+        // Memory barrier to ensure state visible to on-done callback ISR
+        FL_MEMORY_BARRIER;
+    }
+
+    // Task is shutting down - cleanup and exit
+    vTaskDelete(NULL);
+}
+// ============================================================================
+// END OF WORKER TASK - Remember: NO LOGGING, NO BLOCKING, MINIMIZE EXECUTION TIME
+// ============================================================================
 
 //=============================================================================
 // Worker ISR Callback - Hardware Timer-Based DMA Buffer Population
@@ -1457,6 +1632,26 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
             mTxUnitEnabled = false;
         }
     }
+
+    //=========================================================================
+    // Cleanup worker task (LEGACY - commented out during refactor to timer ISR)
+    //=========================================================================
+    // NOTE: Worker task cleanup handled by timer stop in txDoneCallback
+    // Worker task code will be removed completely in Step 8 cleanup phase
+    // if (mWorkerTaskHandle) {
+    //     // Disarm worker task (signals task to exit loop)
+    //     mIsrContext->mWorkerIsrEnabled = false;
+    //     FL_MEMORY_BARRIER
+    //
+    //     // Wake up task if it's blocked waiting for notification
+    //     xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
+    //
+    //     // Give task time to exit gracefully (10ms should be plenty)
+    //     vTaskDelay(pdMS_TO_TICKS(10));
+    //
+    //     // Task will delete itself via vTaskDelete(NULL) in workerTaskFunction
+    //     mWorkerTaskHandle = nullptr;
+    // }
 
     return true; // Transmission completed successfully
 }
