@@ -57,6 +57,11 @@ long random(long min, long max);
 long random(long max);
 int analogRead(int);
 void init();  // Arduino hardware initialization (stub: does nothing)
+
+// Test helper functions for analog value injection (stub platform only)
+void setAnalogValue(int pin, int value);  // Set analog value for specific pin
+int getAnalogValue(int pin);              // Get current analog value for pin
+void clearAnalogValues();                 // Reset all analog values to default (random)
 #endif // FASTLED_NO_ARDUINO_STUBS
 
 

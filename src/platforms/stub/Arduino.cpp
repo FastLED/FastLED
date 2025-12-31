@@ -43,8 +43,36 @@ long random(long max) {
     return random(0, max);
 }
 
-int analogRead(int) {
-    return random(0, 1023);
+// Analog value storage for test injection
+// Key: pin number, Value: analog value (or -1 for unset/random)
+#include <map>
+static std::map<int, int> g_analog_values;
+
+int analogRead(int pin) {
+    // Check if a test value has been set for this pin
+    auto it = g_analog_values.find(pin);
+    if (it != g_analog_values.end() && it->second >= 0) {
+        return it->second;
+    }
+    // Default: return random value (0-1023 for 10-bit ADC emulation)
+    return random(0, 1024);  // Arduino random is exclusive of max
+}
+
+// Test helper functions for analog value injection
+void setAnalogValue(int pin, int value) {
+    g_analog_values[pin] = value;
+}
+
+int getAnalogValue(int pin) {
+    auto it = g_analog_values.find(pin);
+    if (it != g_analog_values.end()) {
+        return it->second;
+    }
+    return -1;  // Not set
+}
+
+void clearAnalogValues() {
+    g_analog_values.clear();
 }
 
 // Arduino hardware initialization (stub: does nothing)
