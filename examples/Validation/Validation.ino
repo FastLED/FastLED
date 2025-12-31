@@ -170,6 +170,9 @@
 // Configuration
 // ============================================================================
 
+// Serial port timeout (milliseconds) - wait for serial monitor to attach
+#define SERIAL_TIMEOUT_MS 120000  // 120 seconds
+
 const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 
 #define PIN_TX 0
@@ -222,7 +225,7 @@ bool test_matrix_complete = false;
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial && millis() < 3000);
+    while (!Serial && millis() < SERIAL_TIMEOUT_MS);
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
     // Build header and platform/hardware info
