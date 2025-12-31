@@ -76,24 +76,36 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 ### Device Debug Workflow (Compile → Upload → Monitor)
 `bash debug` or `uv run ci/debug_attached.py` - Three-phase workflow for attached device development:
 
-**Phase 1: Compile** - Build PlatformIO project for target environment
+**Phase 1: Compile** - Build PlatformIO project for target environment (auto-detects default platform)
 **Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
 **Phase 3: Monitor** - Attach to serial monitor, capture output, detect patterns
 
-**⚠️ IMPORTANT: `bash debug` includes compilation - do NOT run `bash compile` separately before `bash debug`**
+**🚨 CRITICAL RULES FOR AGENTS:**
+1. **NEVER compile before `bash debug`** - `bash debug` handles compilation automatically for the attached device's platform
+2. **OMIT `--timeout` by default** - Most test programs complete quickly (default 20s is sufficient)
+3. **Only add `--timeout` for known long-running tests** - Use sparingly and only when necessary
 
 **Usage:**
 - `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
-- `bash debug esp32dev` - Specific environment
+- `bash debug Validation` - Debug sketch by name (auto-detects environment, no --env needed)
+- `bash debug esp32dev` - Specific environment (for non-sketch builds)
 - `bash debug --upload-port COM3` - Specific serial port
-- `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
-- `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
+- `bash debug --timeout 120` - Monitor timeout in seconds (RARELY NEEDED - omit by default)
+- `bash debug --timeout 2m` - Monitor timeout with time suffix (RARELY NEEDED - omit by default)
 - `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (uses `\bERROR\b` regex pattern)
 - `bash debug --fail-on "PANIC"` - Exit 1 immediately if "PANIC" pattern found
 - `bash debug --fail-on "ERROR" --fail-on "CRASH"` - Multiple failure patterns (exits on any)
 - `bash debug --no-fail-on` - Explicitly disable all failure patterns
 - `bash debug --expect "SUCCESS"` - Exit 0 only if "SUCCESS" pattern found by timeout
 - `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL patterns found by timeout
+
+**Sketch Name Resolution:**
+- When providing a sketch name (e.g., `Validation`, `Blink`, `DemoReel100`), the environment is auto-detected
+- No need to specify `--env` when using sketch names
+- ✅ Correct: `bash debug Validation`
+- ✅ Correct: `bash debug Validation --expect "PASS"`
+- ❌ Wrong: `bash compile esp32dev && bash debug Validation` (redundant compilation)
+- ❌ Wrong: `bash debug Validation --timeout 120` (excessive timeout for fast tests)
 
 **Timeout Formats:**
 - Plain number: `120` (assumes seconds)
