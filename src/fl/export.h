@@ -39,11 +39,4 @@
 /// Combined export and calling convention macro
 #define FASTLED_API FASTLED_EXPORT FASTLED_CALL
 
-#ifndef FL_KEEP_ALIVE
-    #if defined(__EMSCRIPTEN__)
-        #include <emscripten.h>
-        #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE
-    #else
-        #define FL_KEEP_ALIVE
-    #endif
-#endif
+// FL_KEEP_ALIVE is now defined in fl/compiler_control.h

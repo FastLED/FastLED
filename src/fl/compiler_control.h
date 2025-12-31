@@ -250,6 +250,27 @@
   #define FL_CONSTRUCTOR
 #endif
 
+// Prevent linker from discarding symbols (functions/variables)
+// Used to ensure static constructors and other "unused" symbols are retained
+#ifndef FL_KEEP_ALIVE
+  #if defined(__EMSCRIPTEN__)
+    // Emscripten: Use EMSCRIPTEN_KEEPALIVE to export symbols to JavaScript
+    #include <emscripten.h>
+    #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE
+  #elif defined(__GNUC__) || defined(__clang__)
+    // GCC/Clang: Mark symbol as used to prevent linker optimization
+    #define FL_KEEP_ALIVE __attribute__((used))
+  #elif defined(_MSC_VER)
+    // MSVC: Force symbol retention through optimization pragma
+    // Note: MSVC's linker will still strip unreferenced symbols even with this,
+    // so static constructors may need explicit references or /OPT:NOREF linker flag
+    #define FL_KEEP_ALIVE __pragma(optimize("", off)) __pragma(optimize("", on))
+  #else
+    // Fallback for unknown compilers
+    #define FL_KEEP_ALIVE
+  #endif
+#endif
+
 // FL_INIT: Convenient macro for static initialization functions
 // Registers a function to run during C++ static initialization (before main())
 // Usage:
@@ -261,7 +282,7 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 #define FL_INIT(func) \
   namespace { \
-    FL_CONSTRUCTOR \
+    FL_CONSTRUCTOR FL_KEEP_ALIVE \
     void __fl_init_at_line_##__LINE__() { func(); } \
   }
 FL_DISABLE_WARNING_POP
