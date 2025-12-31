@@ -279,6 +279,7 @@ private:
     // Ring buffer architecture (3 buffers for streaming - ISR-based cooperative streaming)
     static constexpr size_t RING_BUFFER_COUNT = 3;
     fl::vector<fl::unique_ptr<uint8_t[], HeapCapsDeleter>> mRingBuffers;
+    fl::vector<uint8_t*> mRingBufferPtrs;  // Cached raw pointers (avoids unique_ptr deref in hot paths)
     fl::vector<size_t> mRingBufferSizes;
     size_t mRingBufferCapacity;
 

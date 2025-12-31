@@ -38,33 +38,6 @@ static void detail_transpose_2(const Wave8Byte lane_waves[2],
     }
 }
 
-/// @brief Convert a byte to 8 Wave8Bit structures using nibble LUT
-///
-/// Expands a byte (8 bits) into 8 Wave8Bit structures (8 bytes total)
-/// by looking up the high and low nibbles in the pre-computed LUT.
-/// Each nibble lookup returns 4 Wave8Bit structures (4 bytes).
-///
-/// @param byte_value The byte to expand (0-255)
-/// @param lut Pre-computed nibble expansion lookup table
-/// @param output Output array for 8 Wave8Bit structures (8 bytes total)
-FL_OPTIMIZE_FUNCTION FL_IRAM
-static void convertByteToWave8Byte(uint8_t byte_value,
-                                   const Wave8BitExpansionLut &lut,
-                                   Wave8Byte *output) {
-
-    // Cache pointer to high nibble data to avoid repeated indexing
-    const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
-    for (int i = 0; i < 4; i++) {
-        output->symbols[i] = high_nibble_data[i];
-    }
-
-    // Cache pointer to low nibble data to avoid repeated indexing
-    const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
-    for (int i = 0; i < 4; i++) {
-        output->symbols[4 + i] = low_nibble_data[i];
-    }
-}
-
 // ============================================================================
 // LUT Builder from Timing Data
 // Doesn't this is not designed to be called from ISR handlers.
@@ -130,22 +103,7 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     return lut;
 }
 
-// GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8(uint8_t lane,
-           const Wave8BitExpansionLut &lut,
-           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
-    // Convert single lane byte to wave pulse symbols (8 bytes packed)
-    // Use properly aligned local variable to avoid alignment issues
-    Wave8Byte waveformSymbol;
-    convertByteToWave8Byte(lane, lut, &waveformSymbol);
-
-    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
-    const uint8_t* src = &waveformSymbol.symbols[0].data;
-    for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
-        output[i] = src[i];
-    }
-}
+// Note: wave8() implementation moved to header file for FASTLED_FORCE_INLINE compatibility
 
 // GCC-specific optimization attribute (Clang ignores it)
 FL_OPTIMIZE_FUNCTION FL_IRAM
@@ -158,8 +116,8 @@ void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     Wave8Byte laneWaveformSymbols[2];
 
     // Convert each lane byte to wave pulse symbols (8 packed bytes each)
-    convertByteToWave8Byte(lanes[0], lut, &laneWaveformSymbols[0]);
-    convertByteToWave8Byte(lanes[1], lut, &laneWaveformSymbols[1]);
+    convertByteToWave8Byte_inline(lanes[0], lut, &laneWaveformSymbols[0]);
+    convertByteToWave8Byte_inline(lanes[1], lut, &laneWaveformSymbols[1]);
 
     // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
     detail_transpose_2(laneWaveformSymbols, output);

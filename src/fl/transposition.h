@@ -21,6 +21,7 @@
 /// - Optimized for 2/4/8 strip configurations
 /// - Used by RP2040/RP2350 PIO-based parallel output
 
+#include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 #include "fl/int.h"
 #include "fl/stl/stdint.h"
@@ -806,6 +807,80 @@ inline bool transpose_strips(
 // PARLIO Wave8 Transposer (ESP32-S3 Parallel I/O)
 // ============================================================================
 
+/// @brief Template specialization of transpose for compile-time data_width (optimization)
+///
+/// This template version eliminates runtime branching by specializing for each data width.
+/// The compiler generates optimized code for each DATA_WIDTH value at compile time.
+///
+/// @tparam DATA_WIDTH Number of parallel lanes (1, 2, 4, 8, or 16) - compile-time constant
+template<size_t DATA_WIDTH>
+FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
+    const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
+    uint8_t* FL_RESTRICT_PARAM outputBuffer
+) {
+    constexpr size_t bytes_per_lane = 8;   // sizeof(Wave8Byte)
+    constexpr size_t pulsesPerByte = 64;   // 8 bits × 8 pulses per bit
+    size_t outputIdx = 0;
+
+    // Note: Using regular if statements (C++11 compatible)
+    // Compiler optimizes away dead branches for constant template parameters
+    if (DATA_WIDTH <= 8) {
+        // Pack into single bytes (compile-time branch elimination via template instantiation)
+        const size_t ticksPerByte = 8 / DATA_WIDTH;
+        const size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
+
+        for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
+            uint8_t outputByte = 0;
+
+            #pragma GCC unroll 8
+            for (size_t t = 0; t < ticksPerByte; t++) {
+                size_t pulse_idx = outputByteIdx * ticksPerByte + t;
+                if (pulse_idx >= pulsesPerByte)
+                    break;
+
+                size_t bit_pos = pulse_idx / 8;
+                size_t pulse_bit = pulse_idx % 8;
+
+                #pragma GCC unroll 8
+                for (size_t lane = 0; lane < DATA_WIDTH; lane++) {
+                    const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                    uint8_t wave8_byte = laneWaveform[bit_pos];
+                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;
+
+                    size_t bitPos = t * DATA_WIDTH + lane;
+                    outputByte |= (pulse << bitPos);
+                }
+            }
+
+            outputBuffer[outputIdx++] = outputByte;
+        }
+    } else if (DATA_WIDTH == 16) {
+        // Pack into 16-bit words (compile-time branch)
+        for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
+            uint16_t outputWord = 0;
+
+            size_t bit_pos = pulse_idx / 8;
+            size_t pulse_bit = pulse_idx % 8;
+
+            #pragma GCC unroll 16
+            for (size_t lane = 0; lane < 16; lane++) {
+                const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                uint8_t wave8_byte = laneWaveform[bit_pos];
+                uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;
+                outputWord |= (pulse << lane);
+            }
+
+            outputBuffer[outputIdx++] = outputWord & 0xFF;
+            outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
+        }
+    } else {
+        // Invalid DATA_WIDTH (compile-time error if template instantiated with wrong value)
+        return 0;
+    }
+
+    return outputIdx;
+}
+
 /// @brief Transpose Wave8Byte waveforms into PARLIO bit-parallel format (ISR-safe)
 ///
 /// This function transposes Wave8Byte waveform data (8 bytes per lane representing
@@ -837,71 +912,28 @@ inline bool transpose_strips(
 /// uint8_t output[16];              // Max output size
 /// size_t written = transpose_wave8byte_parlio(laneWaveforms, 8, output);
 /// ```
-inline size_t transpose_wave8byte_parlio(
-    const uint8_t* laneWaveforms,
+FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio(
+    const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
     size_t data_width,
-    uint8_t* outputBuffer
+    uint8_t* FL_RESTRICT_PARAM outputBuffer
 ) {
-    constexpr size_t bytes_per_lane = 8;   // sizeof(Wave8Byte)
-    constexpr size_t pulsesPerByte = 64;   // 8 bits × 8 pulses per bit
-    size_t outputIdx = 0;
-
-    if (data_width <= 8) {
-        // Pack into single bytes
-        size_t ticksPerByte = 8 / data_width;
-        size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-
-        for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
-            uint8_t outputByte = 0;
-
-            for (size_t t = 0; t < ticksPerByte; t++) {
-                size_t pulse_idx = outputByteIdx * ticksPerByte + t;
-                if (pulse_idx >= pulsesPerByte)
-                    break;
-
-                // Extract pulse from Wave8Byte format
-                // pulse_idx / 8 = bit position (0-7)
-                // pulse_idx % 8 = pulse within that bit (0-7)
-                size_t bit_pos = pulse_idx / 8;
-                size_t pulse_bit = pulse_idx % 8;
-
-                for (size_t lane = 0; lane < data_width; lane++) {
-                    const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                    uint8_t wave8_byte = laneWaveform[bit_pos]; // Get the Wave8Bit byte
-                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1; // MSB-first extraction
-
-                    size_t bitPos = t * data_width + lane;
-                    outputByte |= (pulse << bitPos);
-                }
-            }
-
-            outputBuffer[outputIdx++] = outputByte;
-        }
-    } else if (data_width == 16) {
-        // Pack into 16-bit words
-        for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
-            uint16_t outputWord = 0;
-
-            // Extract pulse from Wave8Byte format
-            size_t bit_pos = pulse_idx / 8;
-            size_t pulse_bit = pulse_idx % 8;
-
-            for (size_t lane = 0; lane < 16; lane++) {
-                const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                uint8_t wave8_byte = laneWaveform[bit_pos];
-                uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1; // MSB-first extraction
-                outputWord |= (pulse << lane);
-            }
-
-            outputBuffer[outputIdx++] = outputWord & 0xFF;
-            outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
-        }
-    } else {
-        // Invalid data_width (not 1, 2, 4, 8, or 16)
-        return 0;
+    // Dispatch to template specialization based on runtime data_width
+    // Compiler generates optimized code for each specialization (no runtime branching)
+    switch (data_width) {
+        case 1:
+            return transpose_wave8byte_parlio_template<1>(laneWaveforms, outputBuffer);
+        case 2:
+            return transpose_wave8byte_parlio_template<2>(laneWaveforms, outputBuffer);
+        case 4:
+            return transpose_wave8byte_parlio_template<4>(laneWaveforms, outputBuffer);
+        case 8:
+            return transpose_wave8byte_parlio_template<8>(laneWaveforms, outputBuffer);
+        case 16:
+            return transpose_wave8byte_parlio_template<16>(laneWaveforms, outputBuffer);
+        default:
+            // Invalid data_width
+            return 0;
     }
-
-    return outputIdx;
 }
 
 }  // namespace fl

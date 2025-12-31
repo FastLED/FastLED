@@ -4,6 +4,7 @@
 
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 
@@ -56,10 +57,42 @@ struct alignas(8) Wave8BitExpansionLut {
 /// @return Populated Wave8BitExpansionLut lookup table (64 bytes)
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 
-FL_IRAM void wave8(
-    uint8_t lane,
-    const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
+/// @brief Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)
+/// @note Inline implementation for ISR performance
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+static void convertByteToWave8Byte_inline(uint8_t byte_value,
+                                           const Wave8BitExpansionLut &lut,
+                                           Wave8Byte *output) {
+    // Cache pointer to high nibble data to avoid repeated indexing
+    const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
+    for (int i = 0; i < 4; i++) {
+        output->symbols[i] = high_nibble_data[i];
+    }
+
+    // Cache pointer to low nibble data to avoid repeated indexing
+    const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
+    for (int i = 0; i < 4; i++) {
+        output->symbols[4 + i] = low_nibble_data[i];
+    }
+}
+
+/// @brief Convert byte to 8 Wave8Bit structures using nibble LUT
+/// @note Inline implementation for ISR performance (always_inline requires visible body)
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void wave8(uint8_t lane,
+           const Wave8BitExpansionLut &lut,
+           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
+    // Convert single lane byte to wave pulse symbols (8 bytes packed)
+    // Use properly aligned local variable to avoid alignment issues
+    Wave8Byte waveformSymbol;
+    convertByteToWave8Byte_inline(lane, lut, &waveformSymbol);
+
+    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
+    const uint8_t* src = &waveformSymbol.symbols[0].data;
+    for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
+        output[i] = src[i];
+    }
+}
 
 FL_IRAM void wave8Transpose_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],

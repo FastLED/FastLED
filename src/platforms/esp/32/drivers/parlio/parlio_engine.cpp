@@ -434,7 +434,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     // Next buffer is ready - submit it to hardware
     size_t buffer_idx = read_idx;
-    uint8_t *buffer_ptr = self->mRingBuffers[buffer_idx].get();
+    uint8_t *buffer_ptr = self->mRingBufferPtrs[buffer_idx];  // Use cached pointer (ISR optimization)
     size_t buffer_size = self->mRingBufferSizes[buffer_idx];
 
     // Invalid buffer - set error flag
@@ -542,8 +542,8 @@ ParlioEngine::workerTaskFunction(void* arg) {
         // Get next ring buffer index (0-2)
         size_t ring_index = ctx->mRingWriteIdx;
 
-        // Get ring buffer pointer
-        uint8_t *outputBuffer = self->mRingBuffers[ring_index].get();
+        // Get ring buffer pointer (use cached pointer for optimization)
+        uint8_t *outputBuffer = self->mRingBufferPtrs[ring_index];
         if (!outputBuffer) {
             continue;  // Invalid buffer - wait for next notification
         }
@@ -669,24 +669,25 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
         // ═══════════════════════════════════════════════════════════════
         // STAGE 1: Generate wave8bytes for ALL lanes into staging buffer
         // ═══════════════════════════════════════════════════════════════
-        for (size_t lane = 0; lane < mDataWidth; lane++) {
+        // Split real and dummy lane processing to eliminate branch in inner loop
+
+        // Process real channels first (no branch mispredictions)
+        for (size_t lane = 0; lane < mActualChannels; lane++) {
             uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+            const uint8_t* laneData = mScratchBuffer + (lane * mLaneStride);
+            uint8_t byte = laneData[startByte + byteOffset];
 
-            if (lane < mActualChannels) {
-                // Real channel - expand using wave8
-                const uint8_t* laneData = mScratchBuffer +
-                                          (lane * mLaneStride);
-                uint8_t byte = laneData[startByte + byteOffset];
+            // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
+            // Cast pointer to array reference for wave8 API
+            uint8_t (*wave8Array)[8] = reinterpret_cast<uint8_t (*)[8]>(laneWaveform);
+            fl::wave8(byte, mWave8Lut, *wave8Array);
+        }
 
-                // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
-                // Cast pointer to array reference for wave8 API
-                uint8_t (*wave8Array)[8] = reinterpret_cast<uint8_t (*)[8]>(laneWaveform);
-                fl::wave8(byte, mWave8Lut, *wave8Array);
-            } else {
-                // Dummy lane - zero waveform (keeps GPIO LOW, 0x00 bytes)
-                // Use ISR-safe memset since this function is called from workerIsr()
-                isr_memset_zero(laneWaveform, bytes_per_lane);
-            }
+        // Bulk-zero dummy lanes separately (more efficient than per-lane zeroing)
+        if (mActualChannels < mDataWidth) {
+            uint8_t* firstDummyLane = laneWaveforms + (mActualChannels * bytes_per_lane);
+            size_t dummyLaneBytes = (mDataWidth - mActualChannels) * bytes_per_lane;
+            isr_memset_zero(firstDummyLane, dummyLaneBytes);
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -730,6 +731,7 @@ bool ParlioEngine::allocateRingBuffers() {
 
     // Clear any existing ring buffers
     mRingBuffers.clear();
+    mRingBufferPtrs.clear();  // Clear cached pointers
     mRingBufferSizes.clear();
 
     // Allocate all ring buffers with DMA capability
@@ -751,7 +753,10 @@ bool ParlioEngine::allocateRingBuffers() {
         // Zero-initialize buffer to prevent garbage data
         fl::memset(buffer.get(), 0x00, mRingBufferCapacity);
 
+        // Cache raw pointer before moving (optimization: avoid unique_ptr deref in hot paths)
+        uint8_t* raw_ptr = buffer.get();
         mRingBuffers.push_back(fl::move(buffer));
+        mRingBufferPtrs.push_back(raw_ptr);
         mRingBufferSizes.push_back(0); // Will be set during population
     }
 
@@ -799,8 +804,8 @@ ParlioEngine::populateNextDMABuffer() {
     // Get next ring buffer index (use ISR context's mRingWriteIdx)
     size_t ring_index = mIsrContext->mRingWriteIdx;
 
-    // Get ring buffer pointer
-    uint8_t *outputBuffer = mRingBuffers[ring_index].get();
+    // Get ring buffer pointer (use cached pointer for optimization)
+    uint8_t *outputBuffer = mRingBufferPtrs[ring_index];
     if (!outputBuffer) {
         FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
         mErrorOccurred = true;
@@ -876,7 +881,7 @@ ParlioEngine::populateNextDMABuffer() {
     if (mIsrContext->mHardwareIdle) {
         // Get the buffer that was just populated (read_idx points to next buffer to transmit)
         size_t buffer_idx = mIsrContext->mRingReadIdx;
-        uint8_t *buffer_ptr = mRingBuffers[buffer_idx].get();
+        uint8_t *buffer_ptr = mRingBufferPtrs[buffer_idx];  // Use cached pointer for optimization
         size_t buffer_size = mRingBufferSizes[buffer_idx];
 
         if (buffer_ptr && buffer_size > 0) {
@@ -1129,7 +1134,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     size_t first_buffer_size = mRingBufferSizes[0];
 
     err = parlio_tx_unit_transmit(
-        mTxUnit, mRingBuffers[0].get(),
+        mTxUnit, mRingBufferPtrs[0],  // Use cached pointer for optimization
         first_buffer_size * 8, &tx_config);
 
     if (err != ESP_OK) {
