@@ -230,12 +230,6 @@ private:
                               const void* edata,
                               void* user_ctx);
 
-    /// @brief Worker task function for background DMA buffer population
-    /// ⚠️  CRITICAL: NO LOGGING IN THIS FUNCTION - Runs in high-priority task context
-    /// ⚠️  Priority: configMAX_PRIORITIES - 1 (highest user priority, below ISRs)
-    /// @note This is a FreeRTOS task, not a true ISR, for better portability and debugging
-    static void workerTaskFunction(void* arg);
-
     /// @brief Worker ISR callback for hardware timer-based DMA buffer population
     /// ⚠️  CRITICAL ISR SAFETY RULES:
     /// ⚠️  1. NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
@@ -301,9 +295,6 @@ private:
 
     // Main task handle for transmission completion signaling (TaskHandle_t)
     void* mMainTaskHandle;
-
-    // Worker task handle for background buffer population (TaskHandle_t)
-    void* mWorkerTaskHandle;
 
     // Worker timer for ISR-based background buffer population (gptimer_handle_t)
     gptimer_handle_t mWorkerTimerHandle;
