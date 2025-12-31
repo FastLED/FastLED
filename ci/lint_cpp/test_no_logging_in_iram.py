@@ -9,8 +9,8 @@ routines (ISRs). Logging macros cannot be used in ISRs because they:
 3. Access peripherals that may be in use by main code
 
 Banned macros:
-- FL_WARN, FL_DBG, FL_ASSERT
-- FL_LOG_SPI, FL_LOG_RMT, FL_LOG_PARLIO, FL_LOG_AUDIO, FL_LOG_INTERRUPT
+- FL_WARN, FL_ERROR, FL_DBG, FL_ASSERT
+- FL_LOG_* (all variants except FL_LOG_*ASYNC*)
 
 Example violation:
     void FL_IRAM interruptHandler(void *arg) {
@@ -48,15 +48,12 @@ from ci.util.paths import PROJECT_ROOT
 SRC_ROOT = PROJECT_ROOT / "src"
 
 # List of banned logging macros that cannot be used in FL_IRAM functions
+# Note: FL_LOG_* pattern excludes FL_LOG_*ASYNC* variants (those are allowed)
 BANNED_MACROS = [
     "FL_WARN",
+    "FL_ERROR",
     "FL_DBG",
     "FL_ASSERT",
-    "FL_LOG_SPI",
-    "FL_LOG_RMT",
-    "FL_LOG_PARLIO",
-    "FL_LOG_AUDIO",
-    "FL_LOG_INTERRUPT",
 ]
 
 
@@ -150,13 +147,44 @@ class LoggingInIramChecker(FileContentChecker):
             func_body = cleaned_content[func_start:func_body_end]
 
             # Search for banned logging macros in the function body
+            # Pattern 1: Explicit banned macros (FL_WARN, FL_ERROR, FL_DBG, FL_ASSERT)
             banned_pattern = re.compile(r"\b(" + "|".join(BANNED_MACROS) + r")\s*\(")
+
+            # Pattern 2: FL_LOG_* but NOT FL_LOG_*ASYNC* variants
+            # This uses a negative lookahead to exclude ASYNC variants
+            fl_log_pattern = re.compile(r"\bFL_LOG_(?!.*ASYNC)\w+\s*\(")
+
+            # Check for explicit banned macros
             for macro_match in banned_pattern.finditer(func_body):
                 macro_name = macro_match.group(1)
 
                 # Calculate line number for error reporting
                 # Count newlines from start of file to the match position
                 match_pos = func_start + macro_match.start()
+                line_number = cleaned_content[:match_pos].count("\n") + 1
+
+                # Get the line content for context (from original content with comments)
+                original_line = (
+                    file_content.lines[line_number - 1].strip()
+                    if line_number <= len(file_content.lines)
+                    else ""
+                )
+
+                failings.append(
+                    f"Found '{macro_name}' in FL_IRAM function '{func_name}' at "
+                    f"{file_content.path}:{line_number}\n"
+                    f"  Line: {original_line[:100]}\n"
+                    f"  Logging macros cannot be used in ISR functions marked with FL_IRAM."
+                )
+
+            # Check for FL_LOG_* patterns (excluding ASYNC variants)
+            for log_match in fl_log_pattern.finditer(func_body):
+                # Extract the full macro name (e.g., FL_LOG_CUSTOM, FL_LOG_SPI)
+                macro_call = log_match.group(0)
+                macro_name = macro_call.split("(")[0].strip()
+
+                # Calculate line number for error reporting
+                match_pos = func_start + log_match.start()
                 line_number = cleaned_content[:match_pos].count("\n") + 1
 
                 # Get the line content for context (from original content with comments)
@@ -308,6 +336,46 @@ void another_function() {
             len(failings_8), 0, "Should skip files without FL_IRAM (early exit)"
         )
 
+        # Test case 9: FL_ERROR in FL_IRAM function (should fail)
+        test_code_9 = """
+void FL_IRAM errorHandler() {
+    FL_ERROR("Error in IRAM");
+}
+"""
+        file_content_9 = FileContent("test_file.cpp", test_code_9, [])
+        failings_9 = checker.check_file_content(file_content_9)
+        self.assertTrue(
+            len(failings_9) > 0, "Should detect FL_ERROR in FL_IRAM function"
+        )
+        self.assertIn("FL_ERROR", failings_9[0])
+
+        # Test case 10: Generic FL_LOG_* in FL_IRAM (should fail)
+        test_code_10 = """
+void FL_IRAM logHandler() {
+    FL_LOG_CUSTOM("Custom log");
+    FL_LOG_DATA("Data");
+}
+"""
+        file_content_10 = FileContent("test_file.cpp", test_code_10, [])
+        failings_10 = checker.check_file_content(file_content_10)
+        self.assertEqual(
+            len(failings_10), 2, "Should detect FL_LOG_CUSTOM and FL_LOG_DATA"
+        )
+
+        # Test case 11: FL_LOG_*ASYNC* in FL_IRAM (should PASS - async variants allowed)
+        test_code_11 = """
+void FL_IRAM asyncHandler() {
+    FL_LOG_ASYNC("Async log");
+    FL_LOG_INTERRUPT_ASYNC("Async interrupt log");
+    FL_LOG_SPI_ASYNC("Async SPI");
+}
+"""
+        file_content_11 = FileContent("test_file.cpp", test_code_11, [])
+        failings_11 = checker.check_file_content(file_content_11)
+        self.assertEqual(
+            len(failings_11), 0, "Should NOT detect FL_LOG_*ASYNC* variants (allowed)"
+        )
+
     def test_no_logging_in_iram_functions(self) -> None:
         """Check critical directories for logging macros in FL_IRAM functions.
 
@@ -333,11 +401,12 @@ void another_function() {
                 "  1. They call functions that may not be in IRAM (causing crashes)\n"
                 "  2. They use heap allocation (unsafe in ISR context)\n"
                 "  3. They access peripherals that may be in use by main code\n\n"
-                f"BANNED MACROS: {banned_list}\n\n"
+                f"BANNED MACROS: {banned_list}, FL_LOG_* (except FL_LOG_*ASYNC*)\n\n"
                 "SOLUTION: Remove logging from FL_IRAM functions:\n"
                 "  1. Use volatile flags to signal events from ISR\n"
                 "  2. Check flags in main code and log there\n"
-                "  3. For debugging, use hardware-specific debug mechanisms\n\n"
+                "  3. For debugging, use hardware-specific debug mechanisms\n"
+                "  4. For async-safe logging, use FL_LOG_*ASYNC* variants (allowed)\n\n"
                 "STRICT ENFORCEMENT: No suppression comments allowed - logging in ISRs "
                 "is always incorrect and will cause crashes or undefined behavior."
             )

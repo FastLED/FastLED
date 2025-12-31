@@ -63,6 +63,10 @@ using namespace fl;
 #define PIN_DATA 3
 #endif  // PIN_DATA
 
+#ifndef LED_PIN
+#define LED_PIN PIN_DATA
+#endif  // LED_PIN
+
 #define BRIGHTNESS 32
 #define COLOR_ORDER GRB
 

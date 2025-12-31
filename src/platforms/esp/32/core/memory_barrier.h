@@ -6,6 +6,8 @@
 ///
 /// This file is included by platforms/memory_barrier.h for ESP32 platforms.
 
+// ok no namespace fl
+
 #pragma once
 
 #ifdef ESP32
