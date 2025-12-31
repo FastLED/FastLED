@@ -93,6 +93,7 @@ from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
 
+
 # Initialize colorama for cross-platform colored output
 init(autoreset=True)
 
@@ -1275,9 +1276,7 @@ def main() -> int:
                 kill_port_users(upload_port)
 
             # Phase 3: Upload firmware (with incremental rebuild if needed)
-            if not run_upload(
-                build_dir, args.environment, upload_port, args.verbose
-            ):
+            if not run_upload(build_dir, args.environment, upload_port, args.verbose):
                 return 1
 
             # Phase 4: Monitor serial output
