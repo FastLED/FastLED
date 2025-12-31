@@ -13,18 +13,17 @@
     // Provides FL_MEMORY_BARRIER for Xtensa and RISC-V architectures
     #include "platforms/esp/32/core/memory_barrier.h"
 #elif defined(ESP8266)
-    // ESP8266 currently has no memory barrier implementation
-    // Future: Add platforms/esp/8266/memory_barrier.h if needed
-    #define FL_MEMORY_BARRIER ((void)0)
+    // ESP8266 (Xtensa LX106 architecture)
+    // Provides FL_MEMORY_BARRIER using memw instruction for ISR-to-main-thread synchronization
+    #include "platforms/esp/8266/memory_barrier.h"
 #elif defined(__AVR__)
     // AVR platforms currently have no memory barrier implementation
     // For ISR synchronization on AVR, use volatile variables
     #define FL_MEMORY_BARRIER ((void)0)
 #elif defined(FASTLED_ARM)
     // ARM platforms (Teensy, SAMD, RP2040, STM32, nRF52, etc.)
-    // Future: Add platform-specific implementations as needed
-    // For now, use compiler barrier
-    #define FL_MEMORY_BARRIER __asm__ __volatile__ ("" ::: "memory")
+    // Provides FL_MEMORY_BARRIER for ARM Cortex-M architectures
+    #include "platforms/arm/memory_barrier.h"
 #elif defined(__EMSCRIPTEN__)
     // WebAssembly / Emscripten
     // WASM is single-threaded, no memory barrier needed
