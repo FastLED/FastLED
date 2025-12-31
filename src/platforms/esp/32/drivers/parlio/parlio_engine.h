@@ -50,6 +50,8 @@
 // Forward declarations
 struct parlio_tx_unit_t;
 typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
+struct gptimer_t;
+typedef struct gptimer_t *gptimer_handle_t;
 extern "C" void heap_caps_free(void *ptr);
 
 namespace fl {
@@ -234,6 +236,20 @@ private:
     /// @note This is a FreeRTOS task, not a true ISR, for better portability and debugging
     static void workerTaskFunction(void* arg);
 
+    /// @brief Worker ISR callback for hardware timer-based DMA buffer population
+    /// ⚠️  CRITICAL ISR SAFETY RULES:
+    /// ⚠️  1. NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
+    /// ⚠️  2. NO BLOCKING operations (mutex, delay, heap alloc)
+    /// ⚠️  3. MINIMIZE execution time (<10µs ideal)
+    /// ⚠️  4. ONLY ISR-safe operations
+    /// @param timer Timer handle
+    /// @param edata Event data (unused)
+    /// @param user_ctx ParlioEngine instance pointer
+    /// @return true if high-priority task woken, false otherwise
+    static bool FL_IRAM workerIsrCallback(struct gptimer_t* timer,
+                                          const void* edata,
+                                          void* user_ctx);
+
     /// @brief Populate a DMA buffer with waveform data
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
     bool populateDmaBuffer(uint8_t* outputBuffer,
@@ -253,6 +269,10 @@ private:
 
     /// @brief Allocate and initialize all ring buffers (one-time)
     bool allocateRingBuffers();
+
+    /// @brief Allocate and configure worker timer for ISR-based buffer population
+    /// @return true on success, false on error
+    bool allocateWorkerTimer();
 
 private:
     // Initialization state
@@ -284,6 +304,9 @@ private:
 
     // Worker task handle for background buffer population (TaskHandle_t)
     void* mWorkerTaskHandle;
+
+    // Worker timer for ISR-based background buffer population (gptimer_handle_t)
+    gptimer_handle_t mWorkerTimerHandle;
 
     // Ring buffer architecture (3 buffers for streaming - ISR-based cooperative streaming)
     static constexpr size_t RING_BUFFER_COUNT = 3;
