@@ -22,7 +22,9 @@
 // through included headers like <mutex>. No need to re-export fl:: math functions here.
 // Arduino sketches can use either the stdlib versions or explicitly use fl:: prefix.
 
+#ifndef FASTLED_NO_ARDUINO_STUBS
 // Custom min/max to avoid <algorithm> include
+// Excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 template <typename T>
 T min(T a, T b) {
     return a < b ? a : b;
@@ -31,6 +33,7 @@ template <typename T>
 T max(T a, T b) {
     return a > b ? a : b;
 }
+#endif // FASTLED_NO_ARDUINO_STUBS
 
 
 
@@ -45,6 +48,8 @@ template <typename T> T constrain(T x, T a, T b) {
 }
 } // namespace fl
 
+#ifndef FASTLED_NO_ARDUINO_STUBS
+// Arduino stub functions - excluded when FASTLED_NO_ARDUINO_STUBS is defined
 using fl::constrain;
 using fl::map;
 
@@ -52,9 +57,12 @@ long random(long min, long max);
 long random(long max);
 int analogRead(int);
 void init();  // Arduino hardware initialization (stub: does nothing)
+#endif // FASTLED_NO_ARDUINO_STUBS
 
 
 
+#ifndef FASTLED_NO_ARDUINO_STUBS
+// Analog pin definitions - excluded when FASTLED_NO_ARDUINO_STUBS is defined
 #ifndef A0
 #define A0 0
 #endif
@@ -102,9 +110,12 @@ void init();  // Arduino hardware initialization (stub: does nothing)
 #ifndef A11
 #define A11 11
 #endif
+#endif // FASTLED_NO_ARDUINO_STUBS
 
 
 
+#ifndef FASTLED_NO_ARDUINO_STUBS
+// Serial emulation and digital I/O - excluded when FASTLED_NO_ARDUINO_STUBS is defined
 struct SerialEmulation {
     void begin(int);
 
@@ -150,6 +161,7 @@ void analogWrite(int, int);
 void analogReference(int);
 int digitalRead(int);
 void pinMode(int, int);
+#endif // FASTLED_NO_ARDUINO_STUBS
 
 
 
@@ -168,6 +180,7 @@ void pinMode(int, int);
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
 
+#ifndef FASTLED_NO_ARDUINO_STUBS
 // Define Serial instances for stub compilation
 extern SerialEmulation Serial;
 extern SerialEmulation Serial1;
@@ -176,3 +189,4 @@ extern SerialEmulation Serial3;
 
 typedef SerialEmulation HardwareSerial;
 typedef SerialEmulation SoftwareSerial;
+#endif // FASTLED_NO_ARDUINO_STUBS

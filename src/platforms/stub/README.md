@@ -21,6 +21,7 @@ Native (no‑hardware) platform used for tests and host builds; may delegate to 
 ## Optional feature defines
 
 - **`FASTLED_STUB_IMPL`**: Enable stubbed platform behavior. Default set in `led_sysdefs_stub_generic.h` when targeting stub builds.
+- **`FASTLED_NO_ARDUINO_STUBS`**: Disable FastLED's Arduino stub implementations (functions like `millis()`, `micros()`, `delay()`, `pinMode()`, etc. and macros like `digitalPinToBitMask`, `HIGH`, `LOW`, etc.). Use this when integrating with Arduino mock frameworks like ArduinoFake to avoid symbol conflicts. When defined, you must provide these functions/symbols from another library.
 - **`FASTLED_HAS_MILLIS`**: Default `1`.
 - **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`.
 - **`FASTLED_USE_PROGMEM`**: Default `0`.
@@ -28,3 +29,18 @@ Native (no‑hardware) platform used for tests and host builds; may delegate to 
 - Optional thread helpers: **`FASTLED_USE_PTHREAD_DELAY`**, **`FASTLED_USE_PTHREAD_YIELD`** influence time/yield behavior in `time_stub.cpp`.
 
 Define before including `FastLED.h` to override.
+
+### Using with ArduinoFake
+
+When using ArduinoFake or similar Arduino mock frameworks for testing:
+
+```cpp
+// In your platformio.ini or build flags
+#define FASTLED_NO_ARDUINO_STUBS
+
+// Then include ArduinoFake before FastLED
+#include <ArduinoFake.h>
+#include <FastLED.h>
+```
+
+This prevents conflicts between FastLED's stub implementations and ArduinoFake's mock implementations.

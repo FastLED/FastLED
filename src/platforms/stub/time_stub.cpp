@@ -20,9 +20,10 @@ static fl::function<void(uint32_t)> g_delay_override;
 
 extern "C" {
 
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(FASTLED_NO_ARDUINO_STUBS)
 // STUB timing functions - excluded for WASM builds which provide their own implementations
 // WASM timing functions are in src/platforms/wasm/timer.cpp and src/platforms/wasm/js.cpp
+// Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
 uint32_t millis() {
     auto current_time = std::chrono::system_clock::now();
@@ -75,7 +76,7 @@ void yield() {
 #endif
 }
 
-#endif // __EMSCRIPTEN__
+#endif // !__EMSCRIPTEN__ && !FASTLED_NO_ARDUINO_STUBS
 
 } // extern "C"
 
