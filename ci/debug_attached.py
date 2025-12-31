@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Three-phase device workflow: Package Install → Compile+Upload+Monitor.
+"""Four-phase device workflow: Package Install → Lint → Compile → Upload+Monitor.
 
-This script orchestrates a complete device development workflow in three distinct phases:
+This script orchestrates a complete device development workflow in four distinct phases:
 
 Phase 0: Package Installation (GLOBAL SINGLETON LOCK via daemon)
     - Ensures PlatformIO packages are installed using `pio pkg install -e <environment>`
@@ -11,19 +11,25 @@ Phase 0: Package Installation (GLOBAL SINGLETON LOCK via daemon)
     - Fast path: ~3.8s validation when packages already installed
     - Prevents corruption from concurrent package downloads
 
-Phase 1: Compile (NO LOCK - parallelizable)
+Phase 1: Linting (C++ linting only - catches ISR errors)
+    - Runs C++ linting to catch ISR errors before compilation
+    - Detects logging macros in FL_IRAM functions (ISR safety)
+    - Enforces namespace, include, and code style rules
+    - Can be skipped with --skip-lint flag for faster iteration
+
+Phase 2: Compile (NO LOCK - parallelizable)
     - Builds the PlatformIO project for the target environment
     - Uses `pio run -e <environment>` (normal compilation)
     - No lock needed: Each project has isolated build directory
     - Packages already installed, so no downloads triggered
     - Multiple agents can compile different projects simultaneously
 
-Phase 2: Upload
+Phase 3: Upload
     - Uploads firmware to the attached device using `pio run -t upload`
     - PlatformIO's incremental build system only rebuilds if source files changed
     - Blocks if daemon indicates resource is busy
 
-Phase 3: Monitor
+Phase 4: Monitor
     - Attaches to serial monitor and displays real-time output
     - --expect: Monitors until timeout, exits 0 if ALL regex patterns match, exits 1 if any missing
     - --fail-on: Terminates immediately on regex match, exits 1
@@ -48,6 +54,7 @@ Usage:
     uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
     uv run ci/debug_attached.py examples/RX/RX.ino       # Full path to sketch
     uv run ci/debug_attached.py --verbose                # Verbose mode
+    uv run ci/debug_attached.py --skip-lint              # Skip C++ linting phase (faster iteration)
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
@@ -248,6 +255,95 @@ def auto_detect_upload_port() -> str | None:
             return port.device
 
     return None
+
+
+def run_cpp_lint() -> bool:
+    """Run C++ linting to catch ISR errors and other issues.
+
+    Returns:
+        True if linting succeeded, False otherwise
+    """
+    print("=" * 60)
+    print("LINTING C++ CODE")
+    print("=" * 60)
+    print("Running C++ linters (ISR safety, namespace checks, etc.)")
+    print()
+
+    # Run C++ linting scripts from ci/lint_cpp/
+    project_root = Path(__file__).parent.parent
+    lint_cpp_dir = project_root / "ci" / "lint_cpp"
+
+    if not lint_cpp_dir.exists():
+        print(f"⚠️  Warning: lint_cpp directory not found: {lint_cpp_dir}")
+        return True  # Don't fail if linting isn't available
+
+    lint_scripts = sorted(lint_cpp_dir.glob("*.py"))
+    if not lint_scripts:
+        print(f"⚠️  Warning: No lint scripts found in {lint_cpp_dir}")
+        return True
+
+    all_passed = True
+    for lint_script in lint_scripts:
+        script_name = lint_script.name
+        print(f"Running {script_name}...")
+
+        # Check if it's a unittest-based script
+        try:
+            with open(lint_script, "r", encoding="utf-8") as f:
+                content = f.read()
+                is_unittest = "unittest.main()" in content
+        except Exception as e:
+            print(f"⚠️  Warning: Could not read {script_name}: {e}")
+            continue
+
+        try:
+            if is_unittest:
+                # Run as unittest via pytest
+                result = subprocess.run(
+                    ["uv", "run", "python", "-m", "pytest", str(lint_script), "-v"],
+                    cwd=project_root,
+                    capture_output=True,
+                    text=True,
+                    env=get_utf8_env(),
+                )
+            else:
+                # Run as standalone script
+                result = subprocess.run(
+                    ["uv", "run", "python", str(lint_script)],
+                    cwd=project_root,
+                    capture_output=True,
+                    text=True,
+                    env=get_utf8_env(),
+                )
+
+            # Display output (both stdout and stderr)
+            if result.stdout:
+                print(result.stdout)
+            if result.stderr:
+                print(result.stderr, file=sys.stderr)
+
+            if result.returncode != 0:
+                print(f"❌ Lint check failed: {script_name}")
+                all_passed = False
+            else:
+                print(f"✅ {script_name} passed")
+
+        except KeyboardInterrupt:
+            print("\nKeyboardInterrupt: Stopping linting")
+            notify_main_thread()
+            raise
+        except Exception as e:
+            print(f"❌ Error running {script_name}: {e}")
+            all_passed = False
+
+        print()  # Blank line between scripts
+
+    if all_passed:
+        print("✅ All C++ lint checks passed\n")
+    else:
+        print("❌ Some C++ lint checks failed\n")
+
+    return all_passed
 
 
 def run_compile(
@@ -817,6 +913,7 @@ Examples:
   %(prog)s examples/RX              # Same as above (explicit path)
   %(prog)s examples/deep/nested/Sketch  # Deep nested sketch
   %(prog)s --verbose                # Verbose mode
+  %(prog)s --skip-lint              # Skip C++ linting (faster, but may miss ISR errors)
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
@@ -849,6 +946,11 @@ Examples:
         "-v",
         action="store_true",
         help="Enable verbose output",
+    )
+    parser.add_argument(
+        "--skip-lint",
+        action="store_true",
+        help="Skip C++ linting phase (faster iteration, but may miss ISR errors)",
     )
     parser.add_argument(
         "--upload-port",
@@ -1004,7 +1106,18 @@ def main() -> int:
         print()
 
         # ============================================================
-        # PHASE 1: Compile (NO LOCK - parallelizable)
+        # PHASE 1: Lint C++ Code (catches ISR errors before compile)
+        # ============================================================
+        if not args.skip_lint:
+            if not run_cpp_lint():
+                print("\n❌ Linting failed. Fix issues or use --skip-lint to bypass.")
+                return 1
+        else:
+            print("⚠️  Skipping C++ linting (--skip-lint flag set)")
+            print()
+
+        # ============================================================
+        # PHASE 2: Compile (NO LOCK - parallelizable)
         # ============================================================
         # No lock needed: each project has isolated build directory.
         # Multiple agents can compile different projects simultaneously.
@@ -1013,7 +1126,7 @@ def main() -> int:
             return 1
 
         # ============================================================
-        # PHASES 2-3: Upload + Monitor (DEVICE LOCK)
+        # PHASES 3-4: Upload + Monitor (DEVICE LOCK)
         # ============================================================
         # Acquire device lock for upload and monitor phases.
         # Lock ensures only one agent accesses the device at a time.
@@ -1032,13 +1145,13 @@ def main() -> int:
             if args.upload_port:
                 kill_port_users(args.upload_port)
 
-            # Phase 2: Upload firmware (with incremental rebuild if needed)
+            # Phase 3: Upload firmware (with incremental rebuild if needed)
             if not run_upload(
                 build_dir, args.environment, args.upload_port, args.verbose
             ):
                 return 1
 
-            # Phase 3: Monitor serial output
+            # Phase 4: Monitor serial output
             success, output = run_monitor(
                 build_dir,
                 args.environment,
@@ -1053,7 +1166,8 @@ def main() -> int:
             if not success:
                 return 1
 
-            print("\n✅ All three phases completed successfully")
+            phases_completed = "three" if args.skip_lint else "four"
+            print(f"\n✅ All {phases_completed} phases completed successfully")
             return 0
 
         finally:

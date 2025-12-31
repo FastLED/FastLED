@@ -73,12 +73,16 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
 - `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
 
-### Device Debug Workflow (Compile → Upload → Monitor)
-`bash debug` or `uv run ci/debug_attached.py` - Three-phase workflow for attached device development:
+### Device Debug Workflow (Lint → Compile → Upload → Monitor)
+`bash debug` or `uv run ci/debug_attached.py` - Four-phase workflow for attached device development:
 
-**Phase 1: Compile** - Build PlatformIO project for target environment (auto-detects default platform)
-**Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
-**Phase 3: Monitor** - Attach to serial monitor, capture output, detect patterns
+**Phase 0: Package Installation** - Ensure PlatformIO packages are installed (daemon-managed)
+**Phase 1: Linting** - Run C++ linters to catch ISR errors and code quality issues before compilation
+**Phase 2: Compile** - Build PlatformIO project for target environment
+**Phase 3: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
+**Phase 4: Monitor** - Attach to serial monitor, capture output, detect patterns
+
+**⚠️ IMPORTANT: `bash debug` includes linting and compilation - do NOT run `bash compile` or `bash lint` separately before `bash debug`**
 
 **🚨 CRITICAL RULES FOR AGENTS:**
 1. **NEVER compile before `bash debug`** - `bash debug` handles compilation automatically for the attached device's platform
@@ -89,9 +93,10 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
 - `bash debug Validation` - Debug sketch by name (auto-detects environment, no --env needed)
 - `bash debug esp32dev` - Specific environment (for non-sketch builds)
+- `bash debug --skip-lint` - Skip C++ linting phase (faster iteration, but may miss ISR errors)
 - `bash debug --upload-port COM3` - Specific serial port
-- `bash debug --timeout 120` - Monitor timeout in seconds (RARELY NEEDED - omit by default)
-- `bash debug --timeout 2m` - Monitor timeout with time suffix (RARELY NEEDED - omit by default)
+- `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
+- `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
 - `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (uses `\bERROR\b` regex pattern)
 - `bash debug --fail-on "PANIC"` - Exit 1 immediately if "PANIC" pattern found
 - `bash debug --fail-on "ERROR" --fail-on "CRASH"` - Multiple failure patterns (exits on any)
