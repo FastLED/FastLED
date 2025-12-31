@@ -98,7 +98,7 @@
 // the error message keyword.
 // ============================================================================
 // If in the fastled you can run this sketch with:
-//   bash debug Validation --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
+//   bash debug Validation --input-on-trigger "VALIDATION_READY:START" --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
 
 
 // Enable async PARLIO logging to prevent ISR watchdog timeout
@@ -222,10 +222,16 @@ uint32_t frame_counter = 0;
 // Test completion flag - set to true after first test matrix run
 bool test_matrix_complete = false;
 
+// START command flag - set to true when "START" received on serial
+bool start_command_received = false;
+
+// Last "waiting for START" message timestamp (milliseconds)
+uint32_t last_wait_message_ms = 0;
+
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial && millis() < SERIAL_TIMEOUT_MS);
+    while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
     // Build header and platform/hardware info
@@ -493,6 +499,31 @@ void runSingleTestCase(
 void loop() {
     // IMPORTANT: Must be first line - handles halt state and prevents watchdog resets
     if (halt.check()) return;
+
+    // Check for START command on serial input
+    if (!start_command_received) {
+        // Read any available serial data
+        while (Serial.available() > 0) {
+            String input = Serial.readStringUntil('\n');
+            input.trim();
+            if (input == "START") {
+                start_command_received = true;
+                FL_WARN("\n[START] Received START command - beginning test matrix");
+                break;
+            }
+        }
+
+        // If START not received yet, print waiting message every 5 seconds
+        if (!start_command_received) {
+            uint32_t now = millis();
+            if (now - last_wait_message_ms >= 5000) {
+                FL_WARN("[WAITING] Waiting for START command on serial input...");
+                last_wait_message_ms = now;
+            }
+            delay(100);  // Small delay to prevent tight loop
+            return;
+        }
+    }
 
     // If test matrix already completed, halt with success message
     if (test_matrix_complete) {

@@ -72,260 +72,41 @@ Usage:
 """
 
 import argparse
-import datetime
 import os
 import re
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
 from pathlib import Path
 
-import psutil
 import serial
-import serial.tools.list_ports
 from colorama import Fore, Style, init
 from running_process import RunningProcess
 from running_process.process_output_reader import EndOfStream
-from serial.tools.list_ports_common import ListPortInfo
 
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.port_utils import ComportResult, auto_detect_upload_port, kill_port_users
+from ci.util.serial_monitor import (
+    ExpectHandler,
+    FailHandler,
+    InputTriggerHandler,
+    OutputCollector,
+    PioDeviceMonitorHandler,
+    SerialMonitor,
+)
+from ci.util.sketch_resolver import parse_timeout, resolve_sketch_path
 
 
 # Initialize colorama for cross-platform colored output
 init(autoreset=True)
 
 
-@dataclass
-class ComportResult:
-    """Result of COM port detection with detailed diagnostics.
-
-    Attributes:
-        ok: True if a suitable USB port was found, False otherwise
-        selected_port: The selected USB port device name (e.g., 'COM3'), or None if not found
-        error_message: Optional error description if detection failed
-        all_ports: List of all ports scanned (for diagnostics), empty list by default
-    """
-
-    ok: bool
-    selected_port: str | None
-    error_message: str | None = None
-    all_ports: list[ListPortInfo] = field(default_factory=list)
-
-
-def resolve_sketch_path(sketch_arg: str, project_dir: Path) -> str:
-    """Resolve sketch argument to examples directory path.
-
-    Handles various input formats:
-        - 'RX' → 'examples/RX'
-        - 'examples/RX' → 'examples/RX'
-        - 'examples/RX/RX.ino' → 'examples/RX'
-        - '/full/path/to/examples/RX' → 'examples/RX'
-        - 'examples/deep/nested/Sketch' → 'examples/deep/nested/Sketch'
-
-    Args:
-        sketch_arg: Sketch name, relative path, or full path
-        project_dir: Project root directory
-
-    Returns:
-        Resolved path relative to project root (e.g., 'examples/RX')
-
-    Raises:
-        SystemExit: If sketch cannot be found or is ambiguous
-    """
-    # Handle full paths
-    sketch_path = Path(sketch_arg)
-    if sketch_path.is_absolute():
-        # Convert absolute path to relative from project root
-        try:
-            relative_path = sketch_path.relative_to(project_dir)
-            # If it's a .ino file, get the parent directory
-            if relative_path.suffix == ".ino":
-                relative_path = relative_path.parent
-            return str(relative_path).replace("\\", "/")
-        except ValueError:
-            print(f"❌ Error: Sketch path is outside project directory: {sketch_arg}")
-            print(f"   Project directory: {project_dir}")
-            sys.exit(1)
-
-    # Handle relative paths or sketch names
-    sketch_str = str(sketch_path).replace("\\", "/")
-
-    # Strip .ino extension if present
-    if sketch_str.endswith(".ino"):
-        sketch_str = str(Path(sketch_str).parent).replace("\\", "/")
-
-    # If already starts with 'examples/', use as-is
-    if sketch_str.startswith("examples/"):
-        candidate = project_dir / sketch_str
-        if candidate.is_dir():
-            return sketch_str
-        print(f"❌ Error: Sketch directory not found: {sketch_str}")
-        print(f"   Expected directory: {candidate}")
-        sys.exit(1)
-
-    # Search for sketch in examples directory
-    examples_dir = project_dir / "examples"
-    if not examples_dir.exists():
-        print(f"❌ Error: examples directory not found: {examples_dir}")
-        sys.exit(1)
-
-    # Find all matching directories
-    sketch_name = sketch_str.split("/")[-1]  # Get the sketch name
-    matches = list(examples_dir.rglob(f"*/{sketch_name}")) + list(
-        examples_dir.glob(sketch_name)
-    )
-
-    # Filter to directories only
-    matches = [m for m in matches if m.is_dir()]
-
-    if len(matches) == 0:
-        print(f"❌ Error: Sketch not found: {sketch_arg}")
-        print(f"   Searched in: {examples_dir}")
-        sys.exit(1)
-    elif len(matches) > 1:
-        print(
-            f"❌ Error: Ambiguous sketch name '{sketch_arg}'. Multiple matches found:"
-        )
-        for match in matches:
-            rel_path = match.relative_to(project_dir)
-            print(f"   - {rel_path}")
-        print("\n   Please specify the full path to resolve ambiguity.")
-        sys.exit(1)
-
-    # Single match found
-    resolved = matches[0].relative_to(project_dir)
-    return str(resolved).replace("\\", "/")
-
-
-def parse_timeout(timeout_str: str) -> int:
-    """Parse timeout string with optional suffix into seconds.
-
-    Supported formats:
-        - Plain number: "120" → 120 seconds
-        - Milliseconds: "5000ms" → 5 seconds
-        - Seconds: "120s" → 120 seconds
-        - Minutes: "2m" → 120 seconds
-
-    Args:
-        timeout_str: Timeout string (e.g., "120", "2m", "5000ms")
-
-    Returns:
-        Timeout in seconds (integer)
-
-    Raises:
-        ValueError: If format is invalid or value is not positive
-    """
-    timeout_str = timeout_str.strip()
-
-    # Match number with optional suffix
-    match = re.match(r"^(\d+(?:\.\d+)?)\s*(ms|s|m)?$", timeout_str, re.IGNORECASE)
-    if not match:
-        raise ValueError(
-            f"Invalid timeout format: '{timeout_str}'. "
-            f"Expected formats: '120', '120s', '2m', '5000ms'"
-        )
-
-    value_str, suffix = match.groups()
-    value = float(value_str)
-
-    if value <= 0:
-        raise ValueError(f"Timeout must be positive, got: {value}")
-
-    # Convert to seconds
-    if suffix is None or suffix.lower() == "s":
-        # Default is seconds
-        seconds = value
-    elif suffix.lower() == "ms":
-        # Milliseconds to seconds
-        seconds = value / 1000
-    elif suffix.lower() == "m":
-        # Minutes to seconds
-        seconds = value * 60
-    else:
-        # Should never reach here due to regex
-        raise ValueError(f"Unknown suffix: {suffix}")
-
-    # Return as integer (round up to ensure at least 1 second for small values)
-    return max(1, int(seconds))
-
-
-def auto_detect_upload_port() -> ComportResult:
-    """Auto-detect the upload port from available serial ports.
-
-    Only considers USB devices - filters out Bluetooth and other non-USB ports.
-    Returns a structured result with success status, selected port, error details,
-    and all scanned ports for diagnostics.
-
-    Returns:
-        ComportResult with detection status and diagnostics
-    """
-    try:
-        # Scan all available COM ports
-        all_ports = list(serial.tools.list_ports.comports())
-    except Exception as e:
-        # Failed to scan ports - return error result
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message=f"Failed to scan COM ports: {e}",
-            all_ports=[],
-        )
-
-    if not all_ports:
-        # No ports found at all
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message="No serial ports detected on system",
-            all_ports=[],
-        )
-
-    # Filter to USB devices only (exclude Bluetooth, ACPI, etc.)
-    # USB devices have "USB" in their hwid (hardware ID) string
-    usb_ports = [port for port in all_ports if "USB" in port.hwid.upper()]
-
-    if not usb_ports:
-        # No USB ports found - only non-USB ports available
-        non_usb_types = set()
-        for port in all_ports:
-            if "BTHENUM" in port.hwid.upper():
-                non_usb_types.add("Bluetooth")
-            elif "ACPI" in port.hwid.upper():
-                non_usb_types.add("ACPI")
-            else:
-                non_usb_types.add("other")
-
-        types_str = ", ".join(sorted(non_usb_types))
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message=f"No USB serial ports found (only {types_str} ports detected)",
-            all_ports=all_ports,
-        )
-
-    # Select best USB port (prefer ESP32/Arduino chips if available)
-    selected_port = None
-    for port in usb_ports:
-        description = port.description.lower()
-        # Common ESP32 USB chips: CP2102, CH340, FTDI
-        if any(
-            chip in description
-            for chip in ["cp210", "ch340", "ch341", "ftdi", "usb-serial", "uart"]
-        ):
-            selected_port = port.device
-            break
-
-    # If no ESP-specific chip found, use first USB port
-    if not selected_port:
-        selected_port = usb_ports[0].device
-
-    return ComportResult(
-        ok=True, selected_port=selected_port, error_message=None, all_ports=all_ports
-    )
+# ============================================================
+# PlatformIO Workflow Functions
+# ============================================================
 
 
 def run_cpp_lint() -> bool:
@@ -556,6 +337,8 @@ def run_monitor(
     fail_keywords: list[str] | None = None,
     expect_keywords: list[str] | None = None,
     stream: bool = False,
+    input_on_trigger: str | None = None,
+    device_error_keywords: list[str] | None = None,
 ) -> tuple[bool, list[str]]:
     """Attach to serial monitor and capture output.
 
@@ -563,6 +346,7 @@ def run_monitor(
         --expect: Monitors until timeout, then checks if ALL keywords were found.
                   Exit 0 if all found, exit 1 if any missing.
         --fail-on: Terminates immediately when ANY keyword is found, exits 1.
+        --input-on-trigger: Wait for trigger pattern, then send text to serial.
 
     Args:
         build_dir: Project directory containing platformio.ini
@@ -573,6 +357,9 @@ def run_monitor(
         fail_keywords: List of regex patterns that trigger immediate termination + exit 1 (default: [r"\bERROR\b"])
         expect_keywords: List of regex patterns that must ALL be found by timeout for exit 0
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
+        input_on_trigger: Format "PATTERN:TEXT" - sends TEXT when PATTERN is detected
+        device_error_keywords: List of error keywords in serial exceptions that indicate device stuck
+                               (default: ["ClearCommError", "PermissionError"])
 
     Returns:
         Tuple of (success, output_lines)
@@ -581,6 +368,34 @@ def run_monitor(
         fail_keywords = []
     if expect_keywords is None:
         expect_keywords = []
+    if device_error_keywords is None:
+        device_error_keywords = ["ClearCommError", "PermissionError"]
+
+    # Parse input-on-trigger argument
+    trigger_pattern = None
+    trigger_text = None
+    if input_on_trigger:
+        if ":" not in input_on_trigger:
+            print(
+                f"⚠️  Warning: Invalid --input-on-trigger format: '{input_on_trigger}'"
+            )
+            print(
+                f"   Expected format: 'PATTERN:TEXT' (e.g., 'VALIDATION_READY:START')"
+            )
+            print(f"   Ignoring input-on-trigger")
+        else:
+            trigger_pattern_str, trigger_text = input_on_trigger.split(":", 1)
+            try:
+                trigger_pattern = re.compile(trigger_pattern_str)
+                print(
+                    f"📥 Input-on-trigger enabled: Will send '{trigger_text}' when pattern /{trigger_pattern_str}/ is detected"
+                )
+            except re.error as e:
+                print(
+                    f"⚠️  Warning: Invalid regex pattern in input-on-trigger '{trigger_pattern_str}': {e}"
+                )
+                print(f"   Using literal string match instead")
+                trigger_pattern = re.compile(re.escape(trigger_pattern_str))
 
     # Compile regex patterns for fail and expect keywords
     fail_patterns = []
@@ -602,40 +417,97 @@ def run_monitor(
             print(f"   Using literal string match instead")
             # Fallback to escaped literal pattern
             expect_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
-    cmd = [
-        "pio",
-        "device",
-        "monitor",
-        "--project-dir",
-        str(build_dir),
-    ]
-    if environment:
-        cmd.extend(["--environment", environment])
-    if monitor_port:
-        cmd.extend(["--port", monitor_port])
-    if verbose:
-        cmd.append("--verbose")
+    print("=" * 60)
+    print("MONITORING CONFIGURATION")
+    print("=" * 60)
+    print(f"📡 Serial Port: {monitor_port if monitor_port else 'AUTO-DETECT'}")
+    print(
+        f"⏱️  Mode: {'STREAMING (runs until Ctrl+C)' if stream else f'TIMEOUT ({timeout}s)'}"
+    )
+    print(f"🔍 Verbose: {verbose}")
+
+    print("\n--- Pattern Matching ---")
+    if fail_patterns:
+        print(
+            f"❌ Fail patterns ({len(fail_patterns)}) - terminate immediately on match:"
+        )
+        for i, (pattern_str, _) in enumerate(fail_patterns, 1):
+            print(f"   {i}. /{pattern_str}/")
+    else:
+        print("❌ Fail patterns: None")
+
+    if expect_patterns:
+        print(
+            f"✅ Expect patterns ({len(expect_patterns)}) - ALL must match by timeout:"
+        )
+        for i, (pattern_str, _) in enumerate(expect_patterns, 1):
+            print(f"   {i}. /{pattern_str}/")
+    else:
+        print("✅ Expect patterns: None")
+
+    print("\n--- Interactive Features ---")
+    if trigger_pattern:
+        print(f"📤 Input-on-trigger: ENABLED")
+        print(f"   Trigger pattern: /{trigger_pattern.pattern}/")
+        print(f"   Text to send: '{trigger_text}'")
+    else:
+        print("📤 Input-on-trigger: DISABLED")
+
+    print("\n--- Error Detection ---")
+    if device_error_keywords:
+        print(
+            f"🚨 Device error keywords ({len(device_error_keywords)}) - detect stuck device:"
+        )
+        for i, keyword in enumerate(device_error_keywords, 1):
+            print(f"   {i}. '{keyword}'")
+    else:
+        print("🚨 Device error keywords: None (no device stuck detection)")
 
     print("=" * 60)
-    print("MONITORING SERIAL OUTPUT")
-    if stream:
-        print("Mode: STREAMING (runs until Ctrl+C)")
-    else:
-        print(f"Timeout: {timeout} seconds")
-    if fail_patterns:
-        print(f"Fail patterns: {', '.join(f'/{p}/' for p, _ in fail_patterns)}")
-    if expect_patterns:
-        print(f"Expect patterns: {', '.join(f'/{p}/' for p, _ in expect_patterns)}")
+
+    # Open serial port directly for full read/write control
+    if not monitor_port:
+        # Auto-detect serial port
+        from serial.tools import list_ports
+
+        ports = list(list_ports.comports())
+        if not ports:
+            print("❌ No serial ports found")
+            return False, []
+        monitor_port = ports[0].device
+        print(f"📡 Auto-detected serial port: {monitor_port}")
+
+    try:
+        ser = serial.Serial(
+            port=monitor_port,
+            baudrate=115200,
+            timeout=0.1,  # Non-blocking read with 100ms timeout
+            write_timeout=1.0,
+        )
+        print(f"\n✓ Serial port opened: {monitor_port} (115200 baud)")
+    except serial.SerialException as e:
+        print(f"❌ Failed to open serial port {monitor_port}: {e}")
+        return False, []
+
+    # Print final configuration summary before starting monitoring
+    print("\n" + "=" * 60)
+    print("STARTING SERIAL MONITOR")
     print("=" * 60)
+    print(f"Port: {monitor_port}")
+    print(f"Timeout: {timeout}s" if not stream else "Mode: STREAMING")
+    if fail_patterns:
+        print(f"Fail-on: {len(fail_patterns)} pattern(s)")
+    if expect_patterns:
+        print(f"Expect: {len(expect_patterns)} pattern(s)")
+    if trigger_pattern:
+        print(f"Trigger: '{trigger_text}' on /{trigger_pattern.pattern}/")
+        print(f"  ⏳ Waiting for trigger pattern: /{trigger_pattern.pattern}/")
+    if device_error_keywords:
+        print(f"Device errors: {len(device_error_keywords)} keyword(s)")
+    print("=" * 60 + "\n")
 
     formatter = TimestampFormatter()
-    proc = RunningProcess(
-        cmd,
-        cwd=build_dir,
-        auto_run=True,
-        output_formatter=formatter,
-        env=get_utf8_env(),
-    )
+    formatter.begin()  # Start the timestamp timer
 
     output_lines = []
     failing_lines = []  # Track all lines containing fail keywords
@@ -647,6 +519,8 @@ def run_monitor(
     matched_fail_line = None
     timeout_reached = False
     device_stuck = False
+    trigger_sent = False  # Track if input-on-trigger text has been sent
+    line_buffer = ""  # Buffer for incomplete lines
 
     try:
         while True:
@@ -656,87 +530,138 @@ def run_monitor(
                 if elapsed >= timeout:
                     print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
                     timeout_reached = True
-                    proc.terminate()
                     break
 
-            # Read next line with 30 second read timeout
+            # Read from serial port
             try:
-                line = proc.get_next_line(timeout=30)
-                if isinstance(line, EndOfStream):
-                    break
-                if line:
-                    output_lines.append(line)
-                    print(line)  # Real-time output
+                if ser.in_waiting > 0:
+                    # Read available data
+                    data = ser.read(ser.in_waiting)
+                    try:
+                        text = data.decode("utf-8", errors="replace")
+                    except Exception:
+                        text = data.decode("latin-1", errors="replace")
 
-                    # Check for expect patterns (track but don't terminate)
-                    if expect_patterns:
-                        for pattern_str, pattern_re in expect_patterns:
-                            if pattern_re.search(line):
-                                # Track this expected line
-                                expect_lines.append((pattern_str, line))
+                    # Add to line buffer
+                    line_buffer += text
 
-                                # Mark this pattern as found
-                                if pattern_str not in found_expect_keywords:
-                                    found_expect_keywords.add(pattern_str)
+                    # Process complete lines
+                    while "\n" in line_buffer:
+                        line, line_buffer = line_buffer.split("\n", 1)
+                        line = line.rstrip("\r")  # Remove carriage return
+
+                        # Format with timestamp using the formatter's transform method
+                        formatted_line = formatter.transform(line)
+
+                        if formatted_line:
+                            output_lines.append(
+                                formatted_line
+                            )  # Store timestamped line
+                            print(formatted_line)  # Display with timestamp
+
+                            # Check for expect patterns (track but don't terminate)
+                            if expect_patterns:
+                                for pattern_str, pattern_re in expect_patterns:
+                                    if pattern_re.search(formatted_line):
+                                        # Track this expected line
+                                        expect_lines.append(
+                                            (pattern_str, formatted_line)
+                                        )
+
+                                        # Mark this pattern as found
+                                        if pattern_str not in found_expect_keywords:
+                                            found_expect_keywords.add(pattern_str)
+                                            print(
+                                                f"\n✅ EXPECT PATTERN DETECTED: /{pattern_str}/"
+                                            )
+                                            print(f"   Matched line: {formatted_line}")
+                                            print(
+                                                f"   (Continuing to monitor - need all {len(expect_patterns)} patterns)\n"
+                                            )
+
+                            # Check for input-on-trigger pattern
+                            if trigger_pattern and not trigger_sent:
+                                if trigger_pattern.search(formatted_line):
+                                    trigger_sent = True
                                     print(
-                                        f"\n✅ EXPECT PATTERN DETECTED: /{pattern_str}/"
+                                        f"\n📤 TRIGGER DETECTED: Pattern /{trigger_pattern.pattern}/ matched"
                                     )
-                                    print(f"   Matched line: {line}")
+                                    print(f"   Matched line: {formatted_line}")
                                     print(
-                                        f"   (Continuing to monitor - need all {len(expect_patterns)} patterns)\n"
+                                        f"   Sending '{trigger_text}' to serial port...\n"
                                     )
+                                    # Send text to serial with newline
+                                    try:
+                                        ser.write(f"{trigger_text}\n".encode("utf-8"))
+                                        ser.flush()
+                                        print(f"   ✓ Sent '{trigger_text}' to serial\n")
+                                    except Exception as e:
+                                        print(
+                                            f"   ⚠️  Warning: Failed to send trigger text to serial: {e}\n"
+                                        )
 
-                    # Check for fail patterns - TERMINATE IMMEDIATELY
-                    if fail_patterns and not fail_keyword_found:
-                        for pattern_str, pattern_re in fail_patterns:
-                            if pattern_re.search(line):
-                                # Track this failing line
-                                failing_lines.append((pattern_str, line))
+                            # Check for fail patterns - TERMINATE IMMEDIATELY
+                            if fail_patterns and not fail_keyword_found:
+                                for pattern_str, pattern_re in fail_patterns:
+                                    if pattern_re.search(formatted_line):
+                                        # Track this failing line
+                                        failing_lines.append(
+                                            (pattern_str, formatted_line)
+                                        )
 
-                                if not fail_keyword_found:
-                                    # First failure - terminate immediately
-                                    fail_keyword_found = True
-                                    matched_fail_keyword = pattern_str
-                                    matched_fail_line = line
-                                    print(
-                                        f"\n🚨 FAIL PATTERN DETECTED: /{pattern_str}/"
-                                    )
-                                    print(f"   Matched line: {line}")
-                                    print(f"   Terminating monitor immediately...\n")
-                                    proc.terminate()
-                                break
+                                        if not fail_keyword_found:
+                                            # First failure - terminate immediately
+                                            fail_keyword_found = True
+                                            matched_fail_keyword = pattern_str
+                                            matched_fail_line = formatted_line
+                                            print(
+                                                f"\n🚨 FAIL PATTERN DETECTED: /{pattern_str}/"
+                                            )
+                                            print(f"   Matched line: {formatted_line}")
+                                            print(
+                                                f"   Terminating monitor immediately...\n"
+                                            )
+                                            break
 
-            except TimeoutError:
-                # No output within read timeout - continue waiting (will check timeouts on next loop)
-                continue
-            except Exception as e:
+                                # Break outer loop if fail found
+                                if fail_keyword_found:
+                                    break
+                else:
+                    # No data available, small sleep to prevent busy loop
+                    time.sleep(0.01)
+
+            except serial.SerialException as e:
                 # Check for specific serial port errors indicating device is stuck
                 error_str = str(e)
-                if "ClearCommError" in error_str and "PermissionError" in error_str:
+                if any(keyword in error_str for keyword in device_error_keywords):
                     device_stuck = True
+                    matched_keywords = [
+                        kw for kw in device_error_keywords if kw in error_str
+                    ]
                     print(
                         "\n🚨 CRITICAL ERROR: Device appears stuck and no longer responding"
                     )
                     print(
-                        "   Serial port failure: ClearCommError (device not recognizing commands)"
+                        f"   Serial port failure: {', '.join(matched_keywords)} (device not recognizing commands)"
                     )
                     print("   Possible causes:")
                     print("     - ISR (Interrupt Service Routine) hogging CPU time")
                     print("     - Device crashed or entered non-responsive state")
                     print("     - Hardware watchdog triggered")
                     print(f"   Technical details: {error_str}")
-                    proc.terminate()
                     break
                 # Re-raise other exceptions
                 raise
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping monitor")
-        proc.terminate()
         notify_main_thread()
         raise
-
-    proc.wait()
+    finally:
+        # Close serial port
+        if ser and ser.is_open:
+            ser.close()
+            print(f"\n✓ Closed serial port: {monitor_port}")
 
     # Determine success based on exit conditions
     if device_stuck:
@@ -758,8 +683,8 @@ def run_monitor(
         # Normal timeout is considered success (exit 0)
         success = True
     else:
-        # Process exited on its own - use actual return code
-        success = proc.returncode == 0
+        # No specific failure conditions - success
+        success = True
 
     # Display first 50 and last 100 lines summary
     print("\n" + "=" * 60)
@@ -849,156 +774,6 @@ def run_monitor(
         print(f"❌ Monitor failed (exit code {proc.returncode})")
 
     return success, output_lines
-
-
-def log_port_cleanup(message: str) -> None:
-    """Log port cleanup operations to .logs/debug_attached/port_cleanup.log.
-
-    Args:
-        message: Log message to write
-    """
-    try:
-        # Get project root (where .logs directory is located)
-        project_root = Path(__file__).parent.parent
-        log_dir = project_root / ".logs" / "debug_attached"
-        log_file = log_dir / "port_cleanup.log"
-
-        # Create directory if it doesn't exist
-        log_dir.mkdir(parents=True, exist_ok=True)
-
-        # Append log entry with timestamp
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(log_file, "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {message}\n")
-    except Exception:
-        # Silently ignore logging errors - don't fail the operation
-        pass
-
-
-def kill_port_users(port: str) -> None:
-    """Kill processes holding the serial port.
-
-    ⚠️ CRITICAL: MUST BE CALLED INSIDE DAEMON LOCK.
-    Only kills orphaned processes from crashed sessions.
-    Assumes caller has exclusive daemon lock (any port user is an orphan).
-
-    This function uses process name and command-line pattern matching
-    (not open file handles) because on Windows, COM ports don't typically
-    show up as file handles via psutil.Process.open_files().
-
-    Args:
-        port: Serial port name (e.g., "COM4", "/dev/ttyUSB0")
-    """
-    port_lower = port.lower()
-    processes_to_kill = []
-
-    # Get current process and its entire process tree (ancestors)
-    # We must NEVER kill ourselves or any parent process
-    current_pid = os.getpid()
-    protected_pids = {current_pid}
-
-    try:
-        current_proc = psutil.Process(current_pid)
-        # Walk up the process tree and protect all ancestors
-        parent = current_proc.parent()
-        while parent:
-            protected_pids.add(parent.pid)
-            parent = parent.parent()
-    except (psutil.NoSuchProcess, psutil.AccessDenied):
-        pass
-
-    # Define patterns for serial port users
-    # Only kill dedicated serial tools - NEVER kill Python processes
-    # (Python could be the agent backend: clud, claude, etc.)
-    safe_serial_exes = [
-        "pio.exe",
-        "pio",
-        "esptool.exe",
-        "esptool",
-        "platformio.exe",
-        "platformio",
-        "miniterm.exe",
-        "miniterm",
-        "putty.exe",
-        "putty",
-        "teraterm.exe",
-        "teraterm",
-        "screen",  # Unix serial terminal
-        "cu",  # Unix serial terminal
-    ]
-
-    cmdline_patterns = [
-        "pio monitor",
-        "pio device monitor",
-        "device monitor",
-        "miniterm",
-        "esptool",
-        port_lower,
-    ]
-
-    # Find processes using the port
-    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
-        try:
-            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
-            proc_pid = proc_info["pid"]
-            proc_name = proc_info["name"]
-            cmdline = proc_info["cmdline"]
-            proc_name_lower = proc_name.lower()
-
-            # NEVER kill ourselves or parent processes
-            if proc_pid in protected_pids:
-                continue
-
-            # NEVER kill Python processes (could be agent backend)
-            if "python" in proc_name_lower:
-                continue
-
-            # Check dedicated serial tools (safe to kill)
-            if any(exe in proc_name_lower for exe in safe_serial_exes):
-                if cmdline:
-                    cmdline_str = " ".join(cmdline).lower()
-                    # Check if command line contains port or serial patterns
-                    if any(pattern in cmdline_str for pattern in cmdline_patterns):
-                        processes_to_kill.append((proc, proc_name, cmdline))
-
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            # Process may have terminated or access denied
-            pass
-
-    # Kill identified processes
-    if processes_to_kill:
-        log_port_cleanup(
-            f"Port cleanup started for {port}: Found {len(processes_to_kill)} orphaned process(es)"
-        )
-        print(
-            f"🔪 Cleaning up {len(processes_to_kill)} orphaned process(es) using {port}:"
-        )
-        for proc, proc_name, cmdline in processes_to_kill:
-            try:
-                cmdline_str = " ".join(cmdline) if cmdline else "<no cmdline>"
-                # Truncate long command lines
-                if len(cmdline_str) > 80:
-                    cmdline_str = cmdline_str[:77] + "..."
-                print(f"   → Killing {proc_name} (PID {proc.pid})")
-                print(f"      Command: {cmdline_str}")
-                proc.kill()
-                log_port_cleanup(
-                    f"Killed process: {proc_name} (PID {proc.pid}) - Command: {cmdline_str}"
-                )
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                print(f"      ⚠️  Could not kill (may have already exited): {e}")
-                log_port_cleanup(
-                    f"Failed to kill process: {proc_name} (PID {proc.pid}) - Error: {e}"
-                )
-
-        # Wait for OS to release port
-        print(f"   Waiting 2 seconds for OS to release {port}...")
-        time.sleep(2)
-        print(f"✅ Port cleanup completed")
-        log_port_cleanup(f"Port cleanup completed for {port}")
-    else:
-        print(f"✅ No orphaned processes found using {port}")
-        log_port_cleanup(f"Port cleanup for {port}: No orphaned processes found")
 
 
 def parse_args() -> argparse.Namespace:
@@ -1104,6 +879,18 @@ Examples:
         "-s",
         action="store_true",
         help="Stream mode: monitor runs indefinitely until Ctrl+C (ignores timeout)",
+    )
+    parser.add_argument(
+        "--input-on-trigger",
+        type=str,
+        metavar="TRIGGER:TEXT",
+        help='Wait for trigger pattern, then send text. Format: "PATTERN:TEXT" (e.g., "VALIDATION_READY:START")',
+    )
+    parser.add_argument(
+        "--device-error-keyword",
+        action="append",
+        dest="device_error_keywords",
+        help='Serial exception keywords indicating device stuck. Can be specified multiple times to check for multiple error conditions. If omitted, uses defaults: "ClearCommError", "PermissionError". If specified, replaces all defaults.',
     )
     parser.add_argument(
         "--kill-daemon",
@@ -1293,6 +1080,8 @@ def main() -> int:
                 fail_keywords,
                 args.expect_keywords or [],
                 args.stream,
+                args.input_on_trigger,
+                args.device_error_keywords,
             )
 
             if not success:
