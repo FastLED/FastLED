@@ -138,6 +138,13 @@ int SerialEmulation::read() {
     return 0;
 }
 
+fl::string SerialEmulation::readStringUntil(char terminator) {
+    // Stub implementation: returns empty string since there's no actual serial input
+    // In a real implementation, this would read from stdin until the terminator is found
+    // For testing purposes, you could set an environment variable or use stdin redirection
+    return fl::string();
+}
+
 void SerialEmulation::write(uint8_t) {}
 
 void SerialEmulation::write(const char *s) {

@@ -136,6 +136,7 @@ struct SerialEmulation {
     void println();
     int available();
     int read();
+    fl::string readStringUntil(char terminator);
     void write(uint8_t);
     void write(const char *s);
     void write(const uint8_t *s, size_t n);
@@ -179,6 +180,9 @@ void pinMode(int, int);
 
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
+
+// Arduino String class compatibility - use fl::string as String
+typedef fl::string String;
 
 #ifndef FASTLED_NO_ARDUINO_STUBS
 // Define Serial instances for stub compilation
