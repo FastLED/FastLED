@@ -131,7 +131,7 @@ void setup() {
 
     auto screen_map = xyMap.toScreenMap();
     screen_map.setDiameter(LED_DIAMETER);
-    FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+    FastLED.addLeds<WS2811, PIN_DATA, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screen_map);
     FastLED.setBrightness(brightness);

@@ -171,6 +171,10 @@ inline void validation_setup_multilane() {
     FastLED.show();
 
     FL_WARN("TX engine pre-initialized");
+
+    // Run reset time validation test
+    test_parlio_reset_time(leds_lane0, NUM_LEDS);
+
     FL_WARN("Initialization complete");
     FL_WARN("Starting multi-lane validation test...\n");
 }
@@ -286,6 +290,10 @@ inline void validation_setup() {
     FastLED.show();
 
     FL_WARN("TX engine pre-initialized");
+
+    // Run reset time validation test
+    test_parlio_reset_time(leds, NUM_LEDS);
+
     FL_WARN("Initialization complete");
     FL_WARN("Starting single-lane validation test...\n");
 }
@@ -352,3 +360,136 @@ inline void validation_loop() {
 }
 
 #endif // MULTILANE
+
+// ============================================================================
+// RESET TIME VALIDATION TEST
+// ============================================================================
+
+/// @brief Test PARLIO reset time padding by measuring inter-frame timing
+/// @param leds_ptr Pointer to LED array (will use first 3 LEDs only)
+/// @param num_leds Total LED count in array
+/// @return true if reset time validation passes, false otherwise
+///
+/// This test validates that PARLIO driver correctly inserts reset time padding
+/// between frames by measuring actual timing between consecutive show() calls.
+///
+/// Test procedure:
+/// 1. Pre-warm driver with initial show() call
+/// 2. Measure Frame 1: start -> show() -> end
+/// 3. Measure Frame 2: start -> show() -> end
+/// 4. Calculate inter-frame time: frame2_start - frame1_start
+/// 5. Validate: measured_time >= (transmission_time + reset_time - tolerance)
+///
+/// Expected timing for WS2812B-V5 with 3 LEDs:
+/// - Per-LED transmission: ~29.4µs (24 bits × 1.225µs/bit)
+/// - 3 LEDs transmission: ~88µs
+/// - Reset time: 280µs
+/// - Minimum frame time: ~368µs
+inline bool test_parlio_reset_time(CRGB* leds_ptr, size_t num_leds) {
+    // Ensure we have at least 3 LEDs to test
+    const size_t TEST_LED_COUNT = 3;
+    if (num_leds < TEST_LED_COUNT) {
+        FL_WARN("[RESET_TIME_TEST] Insufficient LEDs: " << num_leds << " < " << TEST_LED_COUNT);
+        return false;
+    }
+
+    FL_WARN("\n=== PARLIO Reset Time Validation Test ===");
+    FL_WARN("Testing that PARLIO driver enforces minimum reset time between frames\n");
+
+    // Chipset timing constants for WS2812B-V5 (from led_timing.h)
+    constexpr uint32_t T1_NS = 225;   // T1 high time
+    constexpr uint32_t T2_NS = 355;   // T2 high time
+    constexpr uint32_t T3_NS = 645;   // T3 low time
+    constexpr uint32_t RESET_US = 280; // Reset time in microseconds
+
+    // Calculate expected timing
+    uint32_t bit_period_ns = T1_NS + T2_NS + T3_NS;  // 1225ns per bit
+    uint32_t per_led_us = (24 * bit_period_ns) / 1000;  // 24 bits per LED, convert to µs
+    uint32_t transmission_us = TEST_LED_COUNT * per_led_us;
+    uint32_t expected_min_us = transmission_us + RESET_US;
+
+    // Tolerance: Allow 10% variance for measurement overhead
+    uint32_t tolerance_us = expected_min_us / 10;
+    uint32_t expected_with_tolerance = expected_min_us - tolerance_us;
+
+    FL_WARN("Test configuration:");
+    FL_WARN("  LED count: " << TEST_LED_COUNT);
+    FL_WARN("  Chipset: WS2812B-V5");
+    FL_WARN("  Bit period: " << (bit_period_ns / 1000.0) << "µs");
+    FL_WARN("  Per-LED transmission: " << per_led_us << "µs");
+    FL_WARN("  Total transmission: " << transmission_us << "µs");
+    FL_WARN("  Reset time: " << RESET_US << "µs");
+    FL_WARN("  Expected minimum frame time: " << expected_min_us << "µs");
+    FL_WARN("  Tolerance (10%): ±" << tolerance_us << "µs");
+    FL_WARN("  Acceptable minimum: " << expected_with_tolerance << "µs\n");
+
+    // Setup test pattern (simple white color for all test LEDs)
+    for (size_t i = 0; i < TEST_LED_COUNT; i++) {
+        leds_ptr[i] = CRGB::White;
+    }
+
+    // Pre-warm: Initial show() to initialize driver state
+    FL_WARN("Pre-warming driver (initialization call)...");
+    FastLED.show();
+    delay(10);  // Allow time for driver to stabilize
+
+    // Measure Frame 1
+    FL_WARN("Measuring Frame 1...");
+    uint64_t frame1_start = esp_timer_get_time();
+    FastLED.show();
+    uint64_t frame1_end = esp_timer_get_time();
+    uint32_t frame1_duration = static_cast<uint32_t>(frame1_end - frame1_start);
+
+    // Measure Frame 2
+    FL_WARN("Measuring Frame 2...");
+    uint64_t frame2_start = esp_timer_get_time();
+    FastLED.show();
+    uint64_t frame2_end = esp_timer_get_time();
+    uint32_t frame2_duration = static_cast<uint32_t>(frame2_end - frame2_start);
+
+    // Calculate inter-frame timing
+    uint32_t inter_frame_time = static_cast<uint32_t>(frame2_start - frame1_start);
+
+    // Report measurements
+    FL_WARN("\nTiming measurements:");
+    FL_WARN("  Frame 1:");
+    FL_WARN("    Start: " << frame1_start << "µs");
+    FL_WARN("    End:   " << frame1_end << "µs");
+    FL_WARN("    Duration: " << frame1_duration << "µs");
+    FL_WARN("  Frame 2:");
+    FL_WARN("    Start: " << frame2_start << "µs");
+    FL_WARN("    End:   " << frame2_end << "µs");
+    FL_WARN("    Duration: " << frame2_duration << "µs");
+    FL_WARN("\nInter-frame timing:");
+    FL_WARN("  Measured: " << inter_frame_time << "µs");
+    FL_WARN("  Expected (min): " << expected_min_us << "µs");
+    FL_WARN("  Expected (with tolerance): >= " << expected_with_tolerance << "µs");
+
+    // Validate result
+    bool passed = (inter_frame_time >= expected_with_tolerance);
+
+    if (passed) {
+        FL_WARN("\n[PASS] Reset time validation succeeded!");
+        FL_WARN("  ✓ Measured time (" << inter_frame_time << "µs) >= minimum ("
+                << expected_with_tolerance << "µs)");
+        FL_WARN("  ✓ Reset time padding is working correctly");
+
+        // Additional diagnostic: Check if we're close to expected value
+        int32_t delta = static_cast<int32_t>(inter_frame_time) - static_cast<int32_t>(expected_min_us);
+        FL_WARN("  ✓ Delta from expected: " << (delta >= 0 ? "+" : "") << delta << "µs");
+
+        return true;
+    } else {
+        FL_WARN("\n[FAIL] Reset time validation FAILED!");
+        FL_WARN("  ✗ Measured time (" << inter_frame_time << "µs) < minimum ("
+                << expected_with_tolerance << "µs)");
+        FL_WARN("  ✗ Reset time padding is NOT working correctly");
+        FL_WARN("  ✗ Shortfall: " << (expected_with_tolerance - inter_frame_time) << "µs");
+        FL_WARN("\nPossible causes:");
+        FL_WARN("  1. Reset padding not implemented in PARLIO driver");
+        FL_WARN("  2. Reset padding calculation incorrect");
+        FL_WARN("  3. DMA buffer does not include reset padding bytes");
+
+        return false;
+    }
+}

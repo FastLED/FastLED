@@ -180,11 +180,14 @@ struct ParlioBufferCalculator {
         return 8; // Fallback
     }
 
-    /// @brief Calculate DMA buffer size for given input bytes
+    /// @brief Calculate DMA buffer size for given input bytes (includes reset padding)
     /// @param inputBytes Number of input bytes to transmit
-    /// @return Total DMA buffer size in bytes
-    size_t dmaBufferSize(size_t inputBytes) const {
-        return inputBytes * outputBytesPerInputByte();
+    /// @param reset_us Reset time in microseconds (default: 0)
+    /// @return Total DMA buffer size in bytes (pixel data + reset padding)
+    size_t dmaBufferSize(size_t inputBytes, uint32_t reset_us = 0) const {
+        size_t pixel_bytes = inputBytes * outputBytesPerInputByte();
+        size_t padding_bytes = resetPaddingBytes(reset_us);
+        return pixel_bytes + padding_bytes;
     }
 
     /// @brief Calculate transpose output block size for populateDmaBuffer
@@ -200,8 +203,32 @@ struct ParlioBufferCalculator {
         return 8; // Fallback
     }
 
+    /// @brief Calculate additional bytes needed for reset time padding
+    /// @param reset_us Reset time in microseconds
+    /// @return Bytes to append for reset padding (all-zero Wave8Bytes)
+    ///
+    /// Calculation:
+    /// - Each Wave8Byte = 64 pulses × 125ns (8MHz clock) = 8µs
+    /// - Reset padding bytes = ceil(reset_us / 8µs) × 8 bytes
+    /// - Example: 280µs reset ÷ 8µs = 35 Wave8Bytes = 280 bytes
+    size_t resetPaddingBytes(uint32_t reset_us) const {
+        if (reset_us == 0) {
+            return 0;
+        }
+
+        // Each Wave8Byte covers 8µs (64 ticks at 8MHz)
+        constexpr size_t US_PER_WAVE8BYTE = 8;
+
+        // Calculate number of Wave8Bytes needed (round up)
+        size_t num_wave8bytes = (reset_us + US_PER_WAVE8BYTE - 1) / US_PER_WAVE8BYTE;
+
+        // Convert to byte count (8 bytes per Wave8Byte)
+        return num_wave8bytes * 8;
+    }
+
     /// @brief Calculate optimal ring buffer capacity based on LED frame boundaries
     /// @param maxLedsPerChannel Maximum LEDs per channel (strip size)
+    /// @param reset_us Reset time in microseconds (for padding calculation)
     /// @param numRingBuffers Number of ring buffers (default: 3)
     /// @return DMA buffer capacity in bytes, aligned to LED boundaries
     ///
@@ -209,15 +236,17 @@ struct ParlioBufferCalculator {
     /// 1. Calculate LEDs per buffer: maxLedsPerChannel / numRingBuffers
     /// 2. Convert to input bytes: LEDs × 3 bytes/LED × mDataWidth (multi-lane)
     /// 3. Apply wave8 expansion (8:1 ratio): input_bytes × outputBytesPerInputByte()
-    /// 4. Add safety margin for boundary checks
-    /// 5. Result is DMA buffer capacity per ring buffer
+    /// 4. Add reset padding bytes (only to last buffer in stream)
+    /// 5. Add safety margin for boundary checks
+    /// 6. Result is DMA buffer capacity per ring buffer
     ///
-    /// Example (3000 LEDs, 1 lane, 3 ring buffers):
+    /// Example (3000 LEDs, 1 lane, 3 ring buffers, 280µs reset):
     /// - LEDs per buffer: 3000 / 3 = 1000 LEDs
     /// - Input bytes per buffer: 1000 × 3 × 1 = 3000 bytes
     /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
-    /// - With safety margin: 24000 + 128 = 24128 bytes
-    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, size_t numRingBuffers = 3) const {
+    /// - Reset padding: 280 bytes (35 Wave8Bytes × 8 bytes)
+    /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
+    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, uint32_t reset_us, size_t numRingBuffers = 3) const {
         // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
 
@@ -227,7 +256,8 @@ struct ParlioBufferCalculator {
         size_t inputBytesPerBuffer = ledsPerBuffer * 3 * mDataWidth;
 
         // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
-        size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer);
+        //         and add reset padding bytes (for last buffer in stream)
+        size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer, reset_us);
 
         // Step 4: Apply total ring buffer memory cap (prevent OOM on C6/S3)
         // When cap exceeded, system uses streaming mode (multiple buffer iterations)
@@ -268,6 +298,7 @@ ParlioEngine::ParlioEngine()
       mTimingT1Ns(0),
       mTimingT2Ns(0),
       mTimingT3Ns(0),
+      mResetUs(0),
       mIsrContext(nullptr),
       mMainTaskHandle(nullptr),
       mWorkerTaskHandle(nullptr),
@@ -578,7 +609,9 @@ ParlioEngine::workerTaskFunction(void* arg) {
 
         // CAP bytes_per_buffer at ring buffer capacity
         ParlioBufferCalculator calc{self->mDataWidth};
-        size_t max_input_bytes_per_buffer = self->mRingBufferCapacity / calc.outputBytesPerInputByte();
+        size_t reset_padding = calc.resetPaddingBytes(self->mResetUs);
+        size_t available_capacity = self->mRingBufferCapacity - reset_padding;  // Reserve space for reset padding
+        size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
 
         // Reduce max by one LED boundary to prevent exact-capacity overflow
         if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
@@ -725,6 +758,32 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
         byteOffset++;
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // STAGE 3: Append reset time padding (all-zero Wave8Bytes)
+    // ═══════════════════════════════════════════════════════════════
+    // Only append reset padding on the LAST byte of transmission
+    // (when processing the final byte in the total byte range)
+    bool is_last_byte = (startByte + byteCount >= mIsrContext->mTotalBytes);
+
+    if (is_last_byte && mResetUs > 0) {
+        // Calculate reset padding bytes needed
+        ParlioBufferCalculator calc{mDataWidth};
+        size_t reset_padding_bytes = calc.resetPaddingBytes(mResetUs);
+
+        // Boundary check: Ensure padding fits in output buffer
+        if (outputIdx + reset_padding_bytes > outputBufferCapacity) {
+            FL_WARN("PARLIO: Reset padding overflow - needed "
+                    << reset_padding_bytes << " bytes, available "
+                    << (outputBufferCapacity - outputIdx));
+            outputBytesWritten = outputIdx;
+            return false;
+        }
+
+        // Append all-zero bytes (LOW signal for reset duration)
+        // Buffer is already pre-zeroed by caller, so we just advance the index
+        outputIdx += reset_padding_bytes;
+    }
+
     outputBytesWritten = outputIdx;
     return true;
 }
@@ -843,7 +902,9 @@ ParlioEngine::populateNextDMABuffer() {
 
     // CAP bytes_per_buffer at ring buffer capacity to enable streaming for large strips
     ParlioBufferCalculator calc{mDataWidth};
-    size_t max_input_bytes_per_buffer = mRingBufferCapacity / calc.outputBytesPerInputByte();
+    size_t reset_padding = calc.resetPaddingBytes(mResetUs);
+    size_t available_capacity = mRingBufferCapacity - reset_padding;  // Reserve space for reset padding
+    size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
 
     // CRITICAL FIX: Reduce max by one LED boundary to prevent exact-capacity overflow
     if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
@@ -952,6 +1013,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     mTimingT1Ns = timing.t1_ns;
     mTimingT2Ns = timing.t2_ns;
     mTimingT3Ns = timing.t3_ns;
+    mResetUs = timing.reset_us;
 
     // Validate data width
     if (dataWidth != 1 && dataWidth != 2 && dataWidth != 4 &&
@@ -984,7 +1046,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     chipsetTiming.T1 = mTimingT1Ns;
     chipsetTiming.T2 = mTimingT2Ns;
     chipsetTiming.T3 = mTimingT3Ns;
-    chipsetTiming.RESET = 0;
+    chipsetTiming.RESET = mResetUs;  // Stored for documentation (padding handled in DMA buffer population)
     chipsetTiming.name = "PARLIO";
 
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -1033,7 +1095,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Calculate ring buffer capacity
     ParlioBufferCalculator calc{mDataWidth};
-    mRingBufferCapacity = calc.calculateRingBufferCapacity(maxLedsPerChannel, RING_BUFFER_COUNT);
+    mRingBufferCapacity = calc.calculateRingBufferCapacity(maxLedsPerChannel, mResetUs, RING_BUFFER_COUNT);
 
     // Allocate ring buffers
     if (!allocateRingBuffers()) {

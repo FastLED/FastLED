@@ -271,6 +271,7 @@ private:
     uint32_t mTimingT1Ns;
     uint32_t mTimingT2Ns;
     uint32_t mTimingT3Ns;
+    uint32_t mResetUs;  // Reset time in microseconds
 
     // Wave8 lookup table
     fl::Wave8BitExpansionLut mWave8Lut;
