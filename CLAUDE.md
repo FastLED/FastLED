@@ -82,12 +82,13 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Phase 3: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
 **Phase 4: Monitor** - Attach to serial monitor, capture output, detect patterns
 
-**⚠️ IMPORTANT: `bash debug` includes linting and compilation - do NOT run `bash compile` or `bash lint` separately before `bash debug`**
+**⚠️ IMPORTANT: `bash debug` includes BOTH linting AND compilation - do NOT run `bash compile` or `bash lint` separately before `bash debug`**
 
 **🚨 CRITICAL RULES FOR AGENTS:**
-1. **NEVER compile before `bash debug`** - `bash debug` handles compilation automatically for the attached device's platform
-2. **OMIT `--timeout` by default** - Most test programs complete quickly (default 20s is sufficient)
-3. **Only add `--timeout` for known long-running tests** - Use sparingly and only when necessary
+1. **NEVER EVER run `bash compile` before `bash debug`** - `bash debug` handles compilation automatically for the attached device's platform. Running `bash compile` first is slow, redundant, and wastes time.
+2. **NEVER run `bash lint` before `bash debug`** - `bash debug` includes linting in Phase 1
+3. **OMIT `--timeout` by default** - Most test programs complete quickly (default 20s is sufficient)
+4. **Only add `--timeout` for known long-running tests** - Use sparingly and only when necessary
 
 **Usage:**
 - `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
