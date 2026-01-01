@@ -27,6 +27,7 @@
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "driver/gptimer.h"
+#include "esp_cache.h" // For esp_cache_msync (DMA cache coherency)
 #include "driver/parlio_tx.h"
 #include "esp_heap_caps.h" // For DMA-capable memory allocation
 #include "esp_intr_alloc.h" // For software interrupt allocation
@@ -419,6 +420,10 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     // Access ISR state via cache-aligned ParlioIsrContext struct
     ParlioIsrContext *ctx = self->mIsrContext;
 
+    // Debug: Increment txDoneCallback counter and timestamp
+    ctx->mDebugTxDoneCount++;
+    ctx->mDebugLastTxDoneTime = esp_timer_get_time();
+
     // Increment ISR call counter
     ctx->mIsrCount++;
 
@@ -471,9 +476,19 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             return higherPriorityTaskWoken == pdTRUE;
         }
 
-        // Ring empty but more data pending - mark hardware as idle so worker can restart
+        // Ring empty but more data pending - ARM WORKER TIMER TO RESUME
         ctx->mHardwareIdle = true; // Signal that hardware needs restart
         ctx->mTransmitting = false; // Hardware is idle, not transmitting
+
+        // CRITICAL FIX: Arm worker timer to populate next buffer
+        // Without this, the system deadlocks when ring underruns (Issue #1)
+        if (ctx->mNextByteOffset < ctx->mTotalBytes &&
+            self->mWorkerTimerHandle &&
+            ctx->mWorkerIsrEnabled) {
+            gptimer_set_raw_count(self->mWorkerTimerHandle, 0);
+            gptimer_start(self->mWorkerTimerHandle);
+        }
+
         return false;
     }
 
@@ -486,6 +501,19 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     if (!buffer_ptr || buffer_size == 0) {
         ctx->mRingError = true;
         return false;
+    }
+
+    // CRITICAL: Flush CPU cache to memory before DMA reads buffer
+    // DMA reads directly from RAM, bypassing cache. Without this flush,
+    // DMA may read stale data, causing corruption (esp32.com/viewtopic.php?t=44194)
+    esp_err_t cache_err = esp_cache_msync(
+        const_cast<void*>(reinterpret_cast<const void*>(buffer_ptr)),
+        buffer_size,
+        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+
+    if (cache_err != ESP_OK) {
+        FL_WARN("PARLIO: Cache flush failed before DMA: " << cache_err);
+        // Continue anyway - may cause data corruption but better than deadlock
     }
 
     // Submit buffer to hardware
@@ -591,6 +619,10 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     }
 
     ParlioIsrContext *ctx = self->mIsrContext;
+
+    // Debug: Increment workerIsrCallback counter and timestamp
+    ctx->mDebugWorkerIsrCount++;
+    ctx->mDebugLastWorkerIsrTime = esp_timer_get_time();
 
     // CRITICAL: Early exit checks (in order of likelihood)
     // All these exits are safe because timer was stopped at top
@@ -1065,6 +1097,16 @@ ParlioEngine::populateNextDMABuffer() {
         size_t buffer_size = mRingBufferSizes[buffer_idx];
 
         if (buffer_ptr && buffer_size > 0) {
+            // CRITICAL: Flush CPU cache to memory before DMA reads buffer
+            esp_err_t cache_err = esp_cache_msync(
+                buffer_ptr,
+                buffer_size,
+                ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+
+            if (cache_err != ESP_OK) {
+                FL_WARN("PARLIO: Cache flush failed before DMA restart: " << cache_err);
+            }
+
             // Submit buffer to hardware to restart transmission
             parlio_transmit_config_t tx_config = {};
             tx_config.idle_value = 0x0000;
@@ -1296,6 +1338,12 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mTransmissionActive = true;
     mIsrContext->mEndTimeUs = 0;
 
+    // Initialize debug counters
+    mIsrContext->mDebugTxDoneCount = 0;
+    mIsrContext->mDebugWorkerIsrCount = 0;
+    mIsrContext->mDebugLastTxDoneTime = 0;
+    mIsrContext->mDebugLastWorkerIsrTime = 0;
+
     // Pre-populate ring buffers (fill all buffers if possible)
     while (hasRingSpace() && populateNextDMABuffer()) {
         // Buffer populated into ring
@@ -1332,12 +1380,27 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     size_t first_buffer_size = mRingBufferSizes[0];
 
+    // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
+    // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
+    mIsrContext->mTransmitting = true;
+
+    // CRITICAL: Flush CPU cache to memory before DMA reads buffer
+    esp_err_t cache_err = esp_cache_msync(
+        mRingBufferPtrs[0],
+        first_buffer_size,
+        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+
+    if (cache_err != ESP_OK) {
+        FL_WARN("PARLIO: Cache flush failed before first buffer DMA: " << cache_err);
+    }
+
     err = parlio_tx_unit_transmit(
         mTxUnit, mRingBufferPtrs[0],  // Use cached pointer for optimization
         first_buffer_size * 8, &tx_config);
 
     if (err != ESP_OK) {
         FL_LOG_PARLIO("PARLIO: Failed to queue first buffer: " << err);
+        mIsrContext->mTransmitting = false;  // Rollback flag on error
         mErrorOccurred = true;
         return false;
     }
@@ -1345,9 +1408,6 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // Advance read index to consume the first buffer
     mIsrContext->mRingReadIdx = 1;
     mIsrContext->mRingCount = buffers_populated - 1;
-
-    // Mark transmission started
-    mIsrContext->mTransmitting = true;
 
     //=========================================================================
     // Start worker timer ISR for background DMA buffer population
@@ -1373,9 +1433,20 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     FL_LOG_PARLIO("PARLIO: Worker timer ready (one-shot mode, armed by txDoneCallback)"
            << " | buffers_ready=" << buffers_populated);
 
+    // Debug: Print initial counter state before waiting
+    FL_LOG_PARLIO("DEBUG: Starting transmission wait"
+           << " | txDone_count=" << mIsrContext->mDebugTxDoneCount
+           << " | worker_count=" << mIsrContext->mDebugWorkerIsrCount);
+
     // Wait for transmission to complete (block on task notification from ISR)
     // ISR will signal this task when transmission is complete
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    // Debug: Print final counter state after completion
+    FL_LOG_PARLIO("DEBUG: Transmission completed"
+           << " | txDone_count=" << mIsrContext->mDebugTxDoneCount
+           << " | worker_count=" << mIsrContext->mDebugWorkerIsrCount
+           << " | total_bytes=" << mIsrContext->mBytesTransmitted);
 
     // Disable PARLIO hardware after completion (only if currently enabled)
     if (mTxUnitEnabled) {

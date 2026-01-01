@@ -108,6 +108,12 @@ struct alignas(64) ParlioIsrContext {
     bool mTransmissionActive;
     uint64_t mEndTimeUs;
 
+    // === Debug Counters (volatile for ISR access) ===
+    volatile uint32_t mDebugTxDoneCount;       // Count of txDoneCallback invocations
+    volatile uint32_t mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
+    volatile uint64_t mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
+    volatile uint64_t mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
+
     ParlioIsrContext();
 };
 
