@@ -115,7 +115,10 @@ init(autoreset=True)
 
 
 def run_cpp_lint() -> bool:
-    """Run C++ linting to catch ISR errors and other issues.
+    """Run C++ linting using unified runner (matches 'bash lint' behavior).
+
+    This function mirrors the C++ linting approach from the 'lint' script to ensure
+    consistent behavior between 'bash validate' and 'bash lint'.
 
     Returns:
         True if linting succeeded, False otherwise
@@ -123,89 +126,71 @@ def run_cpp_lint() -> bool:
     print("=" * 60)
     print("LINTING C++ CODE")
     print("=" * 60)
-    print("Running C++ linters (ISR safety, namespace checks, etc.)")
+    print("Running C++ linters (unified runner - matches 'bash lint')")
     print()
 
-    # Run C++ linting scripts from ci/lint_cpp/
     project_root = Path(__file__).parent.parent
-    lint_cpp_dir = project_root / "ci" / "lint_cpp"
 
-    if not lint_cpp_dir.exists():
-        print(f"⚠️  Warning: lint_cpp directory not found: {lint_cpp_dir}")
-        return True  # Don't fail if linting isn't available
+    try:
+        # Phase 1: Run unified C++ checker (all content-based linters in one pass)
+        # This is the same as 'bash lint' line 200
+        print("🔍 Running unified C++ checker (all content-based linters in one pass)")
+        result = subprocess.run(
+            ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"],
+            cwd=project_root,
+            env=get_utf8_env(),
+        )
+        if result.returncode != 0:
+            print("❌ Unified C++ linter failed")
+            return False
 
-    lint_scripts = sorted(lint_cpp_dir.glob("*.py"))
-    if not lint_scripts:
-        print(f"⚠️  Warning: No lint scripts found in {lint_cpp_dir}")
+        print()
+
+        # Phase 2: Run file existence validation (separate, not content-based)
+        # This is the same as 'bash lint' line 209
+        print("📁 Running file existence validation (test_test_headers_exist.py)")
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "python",
+                "-m",
+                "pytest",
+                "ci/lint_cpp/test_test_headers_exist.py",
+                "-v",
+            ],
+            cwd=project_root,
+            env=get_utf8_env(),
+        )
+        if result.returncode != 0:
+            print("❌ Test headers validation failed")
+            return False
+
+        print()
+
+        # Phase 3: Run relative includes check for src/ only
+        # This is the same as 'bash lint' line 219
+        print("🔗 Running relative includes check (cpp_lint.py for src/ only)")
+        result = subprocess.run(
+            ["uv", "run", "python", "cpp_lint.py", "src/"],
+            cwd=project_root,
+            env=get_utf8_env(),
+        )
+        if result.returncode != 0:
+            print("❌ cpp_lint.py failed: Found relative includes in src/")
+            return False
+
+        print()
+        print("✅ All C++ lint checks passed\n")
         return True
 
-    all_passed = True
-    for lint_script in lint_scripts:
-        script_name = lint_script.name
-        print(f"Running {script_name}...")
-
-        # Check if it's a unittest-based script
-        try:
-            with open(lint_script, "r", encoding="utf-8") as f:
-                content = f.read()
-                is_unittest = "unittest.main()" in content
-        except KeyboardInterrupt:
-            print("\nKeyboardInterrupt: Stopping linting")
-            notify_main_thread()
-            raise
-        except Exception as e:
-            print(f"❌ Error reading {script_name}: {e}")
-            all_passed = False
-            continue
-
-        try:
-            if is_unittest:
-                # Run as unittest via pytest
-                result = subprocess.run(
-                    ["uv", "run", "python", "-m", "pytest", str(lint_script), "-v"],
-                    cwd=project_root,
-                    capture_output=True,
-                    text=True,
-                    env=get_utf8_env(),
-                )
-            else:
-                # Run as standalone script
-                result = subprocess.run(
-                    ["uv", "run", "python", str(lint_script)],
-                    cwd=project_root,
-                    capture_output=True,
-                    text=True,
-                    env=get_utf8_env(),
-                )
-
-            # Display output (both stdout and stderr)
-            if result.stdout:
-                print(result.stdout)
-            if result.stderr:
-                print(result.stderr, file=sys.stderr)
-
-            if result.returncode != 0:
-                print(f"❌ Lint check failed: {script_name}")
-                all_passed = False
-            else:
-                print(f"✅ {script_name} passed")
-
-        except KeyboardInterrupt:
-            print("\nKeyboardInterrupt: Stopping linting")
-            notify_main_thread()
-            raise
-        except Exception as e:
-            print(f"❌ Error running {script_name}: {e}")
-            all_passed = False
-
-        print()  # Blank line between scripts
-
-    if all_passed:
-        print("✅ All C++ lint checks passed\n")
-    else:
-        print("❌ Some C++ lint checks failed\n")
-
-    return all_passed
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt: Stopping linting")
+        notify_main_thread()
+        raise
+    except Exception as e:
+        print(f"❌ Error running C++ linting: {e}")
+        return False
 
 
 def run_compile(
