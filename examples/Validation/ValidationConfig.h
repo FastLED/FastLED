@@ -5,17 +5,17 @@
 #pragma once
 
 // ============================================================================
-// PARLIO Multi-Buffer Test: 16-lane maximum capacity test
+// PARLIO Single-Lane Test: Debugging ISR worker issues
 // ============================================================================
 
 // Driver selection
-#define JUST_PARLIO  // Testing 16 lanes (maximum PARLIO capacity)
+#define JUST_PARLIO  // Testing PARLIO only
 // #define JUST_RMT
 // #define JUST_SPI
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 16  // Testing maximum 16-lane capacity
-#define MAX_LANES 16  // Testing maximum 16-lane capacity
+#define MIN_LANES 1  // Single lane for debugging
+#define MAX_LANES 1  // Single lane for debugging
 
 // Strip size selection
 // #define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)
@@ -23,4 +23,4 @@
 
 // Strip size constants (MUST be defined BEFORE Common.h)
 #define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 3000  // Testing memory cap with 16 lanes × 3000 LEDs (~18 MB uncapped → 256 KB capped)
+#define LONG_STRIP_SIZE 3000  // Testing with 1 lane × 3000 LEDs to trigger streaming mode
