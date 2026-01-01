@@ -530,13 +530,23 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     // CRITICAL: Flush CPU cache to memory before DMA reads buffer
     // DMA reads directly from RAM, bypassing cache. Without this flush,
     // DMA may read stale data, causing corruption (esp32.com/viewtopic.php?t=44194)
+
+    // Memory barrier: Ensure all preceding writes complete before cache sync
+    FL_MEMORY_BARRIER;
+
     esp_err_t cache_err = esp_cache_msync(
         const_cast<void*>(reinterpret_cast<const void*>(buffer_ptr)),
         buffer_size,
         ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
+    // Memory barrier: Ensure cache sync completes before DMA submission
+    FL_MEMORY_BARRIER;
+
     if (cache_err != ESP_OK) {
-        FL_WARN_ONCE("PARLIO: Cache flush failed before DMA: " << cache_err);
+        FL_WARN("PARLIO: Cache sync FAILED (txDoneCallback) | err=" << cache_err
+                << " | buffer_ptr=0x" << fl::hex << (uintptr_t)buffer_ptr
+                << " | size=" << fl::dec << buffer_size
+                << " | aligned64=" << ((uintptr_t)buffer_ptr % 64 == 0 ? "YES" : "NO"));
         // Continue anyway - may cause data corruption but better than deadlock
     }
 
@@ -1060,11 +1070,17 @@ bool ParlioEngine::allocateRingBuffers() {
     mRingBufferPtrs.clear();  // Clear cached pointers
     mRingBufferSizes.clear();
 
-    // Allocate all ring buffers with DMA capability
+    // Allocate all ring buffers with cache alignment
+    // CRITICAL: Use MALLOC_CAP_INTERNAL (cacheable SRAM), NOT MALLOC_CAP_DMA
+    // MALLOC_CAP_DMA allocates non-cacheable memory which causes esp_cache_msync
+    // to return ESP_ERR_INVALID_ARG (258) because the address is not cache-supported
+    // PARLIO DMA works with cacheable SRAM - it doesn't require non-cacheable buffers
     for (size_t i = 0; i < RING_BUFFER_COUNT; i++) {
         fl::unique_ptr<uint8_t[], HeapCapsDeleter> buffer(
-            static_cast<uint8_t *>(heap_caps_malloc(
-                mRingBufferCapacity, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)));
+            static_cast<uint8_t *>(heap_caps_aligned_alloc(
+                64,  // ESP32-C6 cache line size (64 bytes)
+                mRingBufferCapacity,
+                MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
 
         if (!buffer) {
             FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer "
@@ -1273,13 +1289,23 @@ ParlioEngine::populateNextDMABuffer() {
 
         if (buffer_ptr && buffer_size > 0) {
             // CRITICAL: Flush CPU cache to memory before DMA reads buffer
+
+            // Memory barrier: Ensure all preceding writes complete before cache sync
+            FL_MEMORY_BARRIER;
+
             esp_err_t cache_err = esp_cache_msync(
                 buffer_ptr,
                 buffer_size,
                 ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
+            // Memory barrier: Ensure cache sync completes before DMA submission
+            FL_MEMORY_BARRIER;
+
             if (cache_err != ESP_OK) {
-                FL_WARN_ONCE("PARLIO: Cache flush failed before DMA restart: " << cache_err);
+                FL_WARN("PARLIO: Cache sync FAILED (populateNextDMABuffer) | err=" << cache_err
+                        << " | buffer_ptr=0x" << fl::hex << (uintptr_t)buffer_ptr
+                        << " | size=" << fl::dec << buffer_size
+                        << " | aligned64=" << ((uintptr_t)buffer_ptr % 64 == 0 ? "YES" : "NO"));
             }
 
             // Submit buffer to hardware to restart transmission
@@ -1560,13 +1586,23 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mTransmitting = true;
 
     // CRITICAL: Flush CPU cache to memory before DMA reads buffer
+
+    // Memory barrier: Ensure all preceding writes complete before cache sync
+    FL_MEMORY_BARRIER;
+
     esp_err_t cache_err = esp_cache_msync(
         mRingBufferPtrs[0],
         first_buffer_size,
         ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
+    // Memory barrier: Ensure cache sync completes before DMA submission
+    FL_MEMORY_BARRIER;
+
     if (cache_err != ESP_OK) {
-        FL_WARN_ONCE("PARLIO: Cache flush failed before first buffer DMA: " << cache_err);
+        FL_WARN("PARLIO: Cache sync FAILED (beginTransmission) | err=" << cache_err
+                << " | buffer_ptr=0x" << fl::hex << (uintptr_t)mRingBufferPtrs[0]
+                << " | size=" << fl::dec << first_buffer_size
+                << " | aligned64=" << ((uintptr_t)mRingBufferPtrs[0] % 64 == 0 ? "YES" : "NO"));
     }
 
     err = parlio_tx_unit_transmit(
