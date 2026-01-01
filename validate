@@ -113,8 +113,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Build final command
-CMD=(bash debug Validation)
+# Build final command (bypass bash debug wrapper to avoid --check-usage)
+CMD=(uv run ci/debug_attached.py Validation)
 
 # Add input-on-trigger to auto-send START when VALIDATION_READY appears
 CMD+=(--input-on-trigger "VALIDATION_READY:START")
@@ -144,6 +144,8 @@ echo "  Fail-on: $DEFAULT_FAIL_ON"
 echo "  Exit-on-error: $EXIT_ON_ERROR_PATTERN (immediate failure)"
 echo ""
 echo "Command: ${CMD[*]}"
+echo ""
+echo "Note: Using direct backend call (bypasses 'bash debug' wrapper check)"
 echo ""
 
 # Execute

@@ -902,6 +902,11 @@ Examples:
         action="store_true",
         help="Stop and restart the package daemon before running (useful if daemon is stuck)",
     )
+    parser.add_argument(
+        "--check-usage",
+        action="store_true",
+        help="Enable sketch usage checks (e.g., block 'bash debug Validation' without wrapper)",
+    )
 
     return parser.parse_args()
 
@@ -923,9 +928,9 @@ def main() -> int:
         try:
             resolved_sketch = resolve_sketch_path(args.sketch, build_dir)
 
-            # Detect if user is trying to run Validation sketch directly
+            # Detect if user is trying to run Validation sketch directly (only with --check-usage)
             sketch_name = Path(resolved_sketch).name
-            if sketch_name.lower() == "validation":
+            if args.check_usage and sketch_name.lower() == "validation":
                 # Display red banner error
                 print()
                 print(Fore.RED + "=" * 60)
