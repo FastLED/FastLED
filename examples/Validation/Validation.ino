@@ -600,6 +600,8 @@ void loop() {
         halt.error("[TEST MATRIX] See results table and summary above for details");
     } else {
         FL_WARN("\n[TEST MATRIX] ✓ All test cases PASSED");
+        // Signal successful completion for early exit via --stop pattern
+        FL_WARN("\nVALIDATION_SUITE_COMPLETE");
     }
 
     ss.clear();

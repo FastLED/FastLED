@@ -36,6 +36,7 @@ Phase 4: Monitor
     - Attaches to serial monitor and displays real-time output
     - --expect: Monitors until timeout, exits 0 if ALL regex patterns match, exits 1 if any missing
     - --fail-on: Terminates immediately on regex match, exits 1
+    - --stop: Early exit on regex match, exits 0 if all expects found (saves time on long tests)
     - --exit-on-error: Terminates immediately on regex match (default: \bERROR\b), accepts custom pattern
     - Provides output summary (first/last 100 lines)
 
@@ -54,7 +55,7 @@ Locking Architecture:
 Usage:
     ⚠️ AI agents should use 'bash validate' for device testing (see CLAUDE.md)
 
-    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, waits until timeout)
+    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 60s timeout, waits until timeout)
     uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), auto-detect env
     uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
     uv run ci/debug_attached.py examples/RX/RX.ino       # Full path to sketch
@@ -71,6 +72,8 @@ Usage:
     uv run ci/debug_attached.py --no-fail-on             # Explicitly disable all failure patterns
     uv run ci/debug_attached.py --expect "SUCCESS"       # Exit 0 only if "SUCCESS" pattern found by timeout
     uv run ci/debug_attached.py --expect "PASS" --expect "OK"  # Exit 0 only if ALL patterns found
+    uv run ci/debug_attached.py --stop "TEST COMPLETE"   # Early exit when pattern found (success if all expects found)
+    uv run ci/debug_attached.py --expect "READY" --stop "FINISHED"  # Exit early when FINISHED found (after READY matched)
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
     uv run ci/debug_attached.py --kill-daemon            # Restart daemon before running (useful if stuck)
     uv run ci/debug_attached.py RX --env esp32dev --verbose --upload-port COM3
@@ -312,6 +315,7 @@ def run_monitor(
     stream: bool = False,
     input_on_trigger: str | None = None,
     device_error_keywords: list[str] | None = None,
+    stop_keyword: str | None = None,
 ) -> tuple[bool, list[str]]:
     """Attach to serial monitor and capture output.
 
@@ -319,6 +323,7 @@ def run_monitor(
         --expect: Monitors until timeout, then checks if ALL keywords were found.
                   Exit 0 if all found, exit 1 if any missing.
         --fail-on: Terminates immediately when ANY keyword is found, exits 1.
+        --stop: Terminates immediately when keyword is found, exits 0 if all expect patterns found.
         --input-on-trigger: Wait for trigger pattern, then send text to serial.
 
     Args:
@@ -326,13 +331,14 @@ def run_monitor(
         environment: PlatformIO environment to monitor (None = default)
         monitor_port: Serial port to monitor (None = auto-detect)
         verbose: Enable verbose output
-        timeout: Maximum time to monitor in seconds (default: 20)
+        timeout: Maximum time to monitor in seconds (default: 60)
         fail_keywords: List of regex patterns that trigger immediate termination + exit 1 (default: [r"\bERROR\b"])
         expect_keywords: List of regex patterns that must ALL be found by timeout for exit 0
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
         input_on_trigger: Format "PATTERN:TEXT" - sends TEXT when PATTERN is detected
         device_error_keywords: List of error keywords in serial exceptions that indicate device stuck
                                (default: ["ClearCommError", "PermissionError"])
+        stop_keyword: Regex pattern that triggers early successful exit if all expect patterns found
 
     Returns:
         Tuple of (success, output_lines)
@@ -390,6 +396,16 @@ def run_monitor(
             print(f"   Using literal string match instead")
             # Fallback to escaped literal pattern
             expect_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
+
+    # Compile stop pattern if provided
+    stop_pattern = None
+    if stop_keyword:
+        try:
+            stop_pattern = re.compile(stop_keyword)
+        except re.error as e:
+            print(f"⚠️  Warning: Invalid regex pattern in --stop '{stop_keyword}': {e}")
+            print(f"   Using literal string match instead")
+            stop_pattern = re.compile(re.escape(stop_keyword))
     print("=" * 60)
     print("MONITORING CONFIGURATION")
     print("=" * 60)
@@ -417,6 +433,11 @@ def run_monitor(
             print(f"   {i}. /{pattern_str}/")
     else:
         print("✅ Expect patterns: None")
+
+    if stop_pattern:
+        print(f"🛑 Stop pattern: /{stop_pattern.pattern}/ - early exit on match (success if all expects found)")
+    else:
+        print("🛑 Stop pattern: None")
 
     print("\n--- Interactive Features ---")
     if trigger_pattern:
@@ -493,6 +514,8 @@ def run_monitor(
     timeout_reached = False
     device_stuck = False
     trigger_sent = False  # Track if input-on-trigger text has been sent
+    stop_keyword_found = False  # Track if stop keyword was found
+    stop_matched_line = None
     line_buffer = ""  # Buffer for incomplete lines
 
     try:
@@ -573,6 +596,33 @@ def run_monitor(
                                             f"   ⚠️  Warning: Failed to send trigger text to serial: {e}\n"
                                         )
 
+                            # Check for stop pattern - EARLY EXIT (success if all expects found)
+                            if stop_pattern and not stop_keyword_found:
+                                if stop_pattern.search(formatted_line):
+                                    stop_keyword_found = True
+                                    stop_matched_line = formatted_line
+                                    print(
+                                        f"\n🛑 STOP PATTERN DETECTED: /{stop_pattern.pattern}/"
+                                    )
+                                    print(f"   Matched line: {formatted_line}")
+                                    if expect_patterns:
+                                        missing = set(p for p, _ in expect_patterns) - found_expect_keywords
+                                        if missing:
+                                            print(
+                                                f"   ⚠️  Stop pattern found, but not all expect patterns matched yet"
+                                            )
+                                            print(f"   Missing {len(missing)} pattern(s), continuing to monitor...")
+                                        else:
+                                            print(
+                                                f"   ✅ All expect patterns found - early successful exit\n"
+                                            )
+                                            break
+                                    else:
+                                        print(
+                                            f"   ✅ Stop pattern found - early successful exit\n"
+                                        )
+                                        break
+
                             # Check for fail patterns - TERMINATE IMMEDIATELY
                             if fail_patterns and not fail_keyword_found:
                                 for pattern_str, pattern_re in fail_patterns:
@@ -643,6 +693,22 @@ def run_monitor(
     elif fail_keyword_found:
         # Fail pattern match always means failure
         success = False
+    elif stop_pattern and not stop_keyword_found:
+        # Stop pattern was specified but never found - failure
+        success = False
+    elif stop_keyword_found:
+        # Stop pattern found - success if all expect patterns found (or no expect patterns)
+        if expect_patterns:
+            missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
+            if missing_patterns:
+                # Stop found but not all expects - this shouldn't happen (we check in loop)
+                success = False
+            else:
+                # Stop found and all expects matched - success
+                success = True
+        else:
+            # Stop found with no expect patterns - success
+            success = True
     elif expect_patterns:
         # If expect patterns were specified, ALL must be found for success
         missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
@@ -704,6 +770,9 @@ def run_monitor(
     elif fail_keyword_found:
         print(f"❌ Monitor failed - fail pattern /{matched_fail_keyword}/ detected")
         print(f"   Matched line: {matched_fail_line}")
+    elif stop_pattern and not stop_keyword_found:
+        print(f"❌ Monitor failed - stop pattern /{stop_pattern.pattern}/ was specified but not found")
+        print(f"   The test did not complete successfully or the stop word was not emitted")
     elif expect_patterns:
         # Check if all expect patterns were found
         missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
@@ -756,7 +825,7 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Auto-detect env & sketch (default: 20s timeout, waits until timeout)
+  %(prog)s                          # Auto-detect env & sketch (default: 60s timeout, waits until timeout)
   %(prog)s RX                       # Compile RX sketch (examples/RX), auto-detect environment
   %(prog)s RX --env esp32dev        # Compile RX sketch for specific environment
   %(prog)s examples/RX              # Same as above (explicit path)
@@ -764,7 +833,7 @@ Examples:
   %(prog)s --verbose                # Verbose mode
   %(prog)s --skip-lint              # Skip C++ linting (faster, but may miss ISR errors)
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
-  %(prog)s --timeout 120            # Monitor for 120 seconds (default: 20s)
+  %(prog)s --timeout 120            # Monitor for 120 seconds (default: 60s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
   %(prog)s --exit-on-error          # Exit 1 immediately if \bERROR\b pattern matches (default)
@@ -774,6 +843,8 @@ Examples:
   %(prog)s --no-fail-on             # Explicitly disable all failure patterns
   %(prog)s --expect "SUCCESS"       # Exit 0 only if "SUCCESS" pattern found by timeout
   %(prog)s --expect "PASS" --expect "OK"  # Exit 0 only if ALL patterns found
+  %(prog)s --stop "TEST COMPLETE"   # Early exit when pattern found (success if all expects found)
+  %(prog)s --expect "READY" --stop "FINISHED"  # Exit early when FINISHED found (after READY matched)
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
   %(prog)s RX --env esp32dev --verbose --upload-port COM3
         """,
@@ -811,8 +882,8 @@ Examples:
         "--timeout",
         "-t",
         type=str,
-        default="20",
-        help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 20)",
+        default="60",
+        help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 60)",
     )
     parser.add_argument(
         "--project-dir",
@@ -846,6 +917,12 @@ Examples:
         action="append",
         dest="expect_keywords",
         help="Regex pattern that must be matched by timeout for exit 0. ALL patterns must be found (can be specified multiple times). Monitor runs until timeout to find all.",
+    )
+    parser.add_argument(
+        "--stop",
+        type=str,
+        dest="stop_keyword",
+        help="Regex pattern that triggers early successful exit if all expect patterns found (or no expect patterns). Allows tests to exit early when complete.",
     )
     parser.add_argument(
         "--stream",
@@ -1088,6 +1165,7 @@ def main() -> int:
                 args.stream,
                 args.input_on_trigger,
                 args.device_error_keywords,
+                args.stop_keyword,
             )
 
             if not success:

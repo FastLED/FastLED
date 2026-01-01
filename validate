@@ -19,8 +19,11 @@ DEFAULT_EXPECT=(
     "RX Pin: 1"                      # Hardware setup verification
     "DRIVER_ENABLED: PARLIO"         # Parlio driver availability (key driver)
     "VALIDATION_READY: true"         # Test ready indicator
-    "FINISHED: Test matrix complete" # CRITICAL: Halting state (prevents false positives when ISR stops)
 )
+
+# Stop pattern - early exit when test suite completes successfully
+# This allows the test to exit early instead of waiting for timeout
+STOP_PATTERN="VALIDATION_SUITE_COMPLETE"
 
 # Default fail-on pattern from Validation.ino (lines 78-98)
 DEFAULT_FAIL_ON="ERROR"
@@ -41,17 +44,20 @@ Description:
   Runs the Validation.ino sketch with comprehensive --expect and --fail-on patterns
   to detect ISR failures, hardware issues, and test matrix errors.
 
-  CRITICAL PATTERN: "FINISHED: Test matrix complete"
-  - This pattern prevents false positives when the ISR stops firing
-  - The sketch halts in a loop printing this message every 5 seconds
-  - Without this pattern, a silent ISR hang would look like success
+  STOP PATTERN: "VALIDATION_SUITE_COMPLETE"
+  - Triggers early successful exit when all tests complete
+  - Saves time by not waiting for full timeout (typically 60s)
+  - Only exits if all --expect patterns have been found
+  - The sketch prints this after completing the test matrix
 
 Default Patterns:
-  5 --expect patterns covering:
+  4 --expect patterns covering:
     - Hardware setup (TX/RX pins)
     - Driver availability (PARLIO)
     - Validation ready indicator
-    - Halting state message (CRITICAL - prevents ISR hang false positives)
+
+  1 --stop pattern:
+    - VALIDATION_SUITE_COMPLETE (early exit when tests complete)
 
   1 --fail-on pattern:
     - ERROR (catches test failures via FL_WARN)
@@ -61,7 +67,7 @@ Default Patterns:
 
 Options:
   -h, --help          Show this help message
-  --timeout SECONDS   Override default timeout (default: 20s)
+  --timeout SECONDS   Override default timeout (default: 60s)
   --skip-lint         Skip C++ linting phase (faster iteration)
   --no-expect         Clear default --expect patterns (use custom only)
   --no-fail-on        Clear default --fail-on pattern (use custom only)
@@ -131,6 +137,9 @@ if [[ "$USE_DEFAULT_FAIL_ON" == "true" ]]; then
     CMD+=(--fail-on "$DEFAULT_FAIL_ON")
 fi
 
+# Add stop pattern for early exit when test suite completes
+CMD+=(--stop "$STOP_PATTERN")
+
 # Add exit-on-error pattern for immediate device failure detection
 CMD+=(--exit-on-error "$EXIT_ON_ERROR_PATTERN")
 
@@ -140,6 +149,7 @@ CMD+=("${EXTRA_ARGS[@]}")
 # Print command for transparency
 echo "Running validation with patterns:"
 echo "  Expect: ${#DEFAULT_EXPECT[@]} patterns (use --help to see list)"
+echo "  Stop: $STOP_PATTERN (early exit when tests complete)"
 echo "  Fail-on: $DEFAULT_FAIL_ON"
 echo "  Exit-on-error: $EXIT_ON_ERROR_PATTERN (immediate failure)"
 echo ""
