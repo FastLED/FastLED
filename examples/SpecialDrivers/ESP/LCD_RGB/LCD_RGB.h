@@ -63,7 +63,7 @@ void setup() {
 }
 
 void loop() {
-    static uint8_t hue = 0;
+    static uint8_t hue = 0; // okay static in header
 
     EVERY_N_MILLIS(1000) {
         Serial.println("Loop!");

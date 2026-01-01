@@ -125,7 +125,7 @@ void loop() {
     shape->setScale(scale.value());
 
     float curr_alpha = getAnimationTime(now_warped);
-    static float s_prev_alpha = 0.0f;
+    static float s_prev_alpha = 0.0f; // okay static in header
 
     // unconditionally apply the circle.
     if (trigger) {

@@ -8,37 +8,37 @@ namespace shared_ptr_test {
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
 class TestClass {
 public:
-    TestClass() : value_(0), destructor_called_(nullptr) {}
-    TestClass(int value) : value_(value), destructor_called_(nullptr) {}
-    TestClass(int a, int b) : value_(a + b), destructor_called_(nullptr) {}
-    
+    TestClass() : mValue(0), mDestructorCalled(nullptr) {}
+    TestClass(int value) : mValue(value), mDestructorCalled(nullptr) {}
+    TestClass(int a, int b) : mValue(a + b), mDestructorCalled(nullptr) {}
+
     // Constructor that allows tracking destructor calls
-    TestClass(int value, bool* destructor_flag) : value_(value), destructor_called_(destructor_flag) {}
-    
+    TestClass(int value, bool* destructor_flag) : mValue(value), mDestructorCalled(destructor_flag) {}
+
     ~TestClass() {
-        if (destructor_called_) {
-            *destructor_called_ = true;
+        if (mDestructorCalled) {
+            *mDestructorCalled = true;
         }
     }
-    
-    int getValue() const { return value_; }
-    void setValue(int value) { value_ = value; }
-    
+
+    int getValue() const { return mValue; }
+    void setValue(int value) { mValue = value; }
+
 private:
-    int value_;
-    bool* destructor_called_;
+    int mValue;
+    bool* mDestructorCalled;
 };
 
 // Derived class for testing polymorphism
 class DerivedTestClass : public TestClass {
 public:
-    DerivedTestClass() : TestClass(), extra_value_(0) {}
-    DerivedTestClass(int value, int extra) : TestClass(value), extra_value_(extra) {}
-    
-    int getExtraValue() const { return extra_value_; }
-    
+    DerivedTestClass() : TestClass(), mExtraValue(0) {}
+    DerivedTestClass(int value, int extra) : TestClass(value), mExtraValue(extra) {}
+
+    int getExtraValue() const { return mExtraValue; }
+
 private:
-    int extra_value_;
+    int mExtraValue;
 };
 
 // Custom deleter for testing
@@ -388,25 +388,25 @@ TEST_CASE("fl::shared_ptr self-assignment safety") {
 // Node class for testing circular references and self-assignment scenarios
 class SharedNode {
 public:
-    SharedNode(int value) : value_(value), destructor_called_(nullptr) {}
-    SharedNode(int value, bool* destructor_flag) : value_(value), destructor_called_(destructor_flag) {}
-    
+    SharedNode(int value) : mValue(value), mDestructorCalled(nullptr) {}
+    SharedNode(int value, bool* destructor_flag) : mValue(value), mDestructorCalled(destructor_flag) {}
+
     ~SharedNode() {
-        if (destructor_called_) {
-            *destructor_called_ = true;
+        if (mDestructorCalled) {
+            *mDestructorCalled = true;
         }
     }
-    
-    int getValue() const { return value_; }
-    void setValue(int value) { value_ = value; }
-    
-    void setNext(fl::shared_ptr<SharedNode> next) { next_ = next; }
-    fl::shared_ptr<SharedNode> getNext() const { return next_; }
-    
+
+    int getValue() const { return mValue; }
+    void setValue(int value) { mValue = value; }
+
+    void setNext(fl::shared_ptr<SharedNode> next) { mNext = next; }
+    fl::shared_ptr<SharedNode> getNext() const { return mNext; }
+
 private:
-    int value_;
-    bool* destructor_called_;
-    fl::shared_ptr<SharedNode> next_;
+    int mValue;
+    bool* mDestructorCalled;
+    fl::shared_ptr<SharedNode> mNext;
 };
 
 TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {

@@ -62,7 +62,7 @@ EM_JS(void, js_notify_screenmap_update, (const char* jsonData), {
 
 // Forward declarations for functions used in this file
 namespace fl {
-void jsUpdateUiComponents(const std::string &jsonStr);
+void jsUpdateUiComponents(const std::string &jsonStr);  // okay std namespace
 }
 
 namespace fl {
@@ -202,7 +202,7 @@ EMSCRIPTEN_KEEPALIVE void processUiInput(const char* jsonInput) {
     
     // Process UI input from JavaScript
     // Forward to existing UI system
-    fl::jsUpdateUiComponents(std::string(jsonInput));
+    fl::jsUpdateUiComponents(std::string(jsonInput));  // okay std namespace
 }
 
 } // extern "C"

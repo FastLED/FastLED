@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include "fl/stl/cstdint.h"
 
 namespace fl {
 

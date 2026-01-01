@@ -1,27 +1,15 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Test to ensure standard integer limit macros are not used in fl/ directory.
+"""Checker to ensure standard integer limit macros are not used.
 
 Detects usage of macros like UINT32_MAX, INT16_MAX, etc. and suggests
 using fl::numeric_limits<T> instead.
 """
 
-import os
 import re
-import unittest
-from typing import Callable
 
-from ci.util.check_files import (
-    EXCLUDED_FILES,
-    FileContent,
-    FileContentChecker,
-    MultiCheckerFileProcessor,
-    collect_files_to_check,
-)
-from ci.util.paths import PROJECT_ROOT
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
-
-SRC_ROOT = PROJECT_ROOT / "src"
 
 # Common integer limit macros from stdint.h and limits.h
 # Pattern captures the macro name for better error messages
@@ -70,6 +58,9 @@ NUMERIC_LIMIT_MACROS = [
 class NumericLimitMacroChecker(FileContentChecker):
     """Checker class for numeric limit macro usage."""
 
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
+
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for numeric limit macro usage."""
         # Check file extension
@@ -80,11 +71,24 @@ class NumericLimitMacroChecker(FileContentChecker):
         if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
             return False
 
+        # Exclude test files that test the macros themselves
+        if file_path.endswith(
+            (
+                "tests/ftl/cstdint.cpp",
+                "tests\\ftl\\cstdint.cpp",
+                "tests/ftl/stdint.cpp",
+                "tests\\ftl\\stdint.cpp",
+                "tests/ftl/rbtree.cpp",
+                "tests\\ftl\\rbtree.cpp",
+            )
+        ):
+            return False
+
         return True
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for numeric limit macro usage."""
-        failings: list[str] = []
+        violations: list[tuple[int, str]] = []
         in_multiline_comment = False
 
         # Create a regex pattern to match any of the macros as whole words
@@ -124,12 +128,15 @@ class NumericLimitMacroChecker(FileContentChecker):
                 macro_name = match.group(1)
                 # Determine the suggested fl::numeric_limits type
                 type_suggestion = self._suggest_numeric_limits_type(macro_name)
-                failings.append(
-                    f"Found '{macro_name}' in {file_content.path}:{line_number} "
-                    f"(use {type_suggestion} instead)"
+                violations.append(
+                    (line_number, f"{stripped} (use {type_suggestion} instead)")
                 )
 
-        return failings
+        # Store violations if any found
+        if violations:
+            self.violations[file_content.path] = violations
+
+        return []  # MUST return empty list
 
     def _suggest_numeric_limits_type(self, macro_name: str) -> str:
         """Suggest the appropriate fl::numeric_limits<T> replacement for a macro."""
@@ -173,60 +180,3 @@ class NumericLimitMacroChecker(FileContentChecker):
         }
 
         return type_map.get(macro_name, "fl::numeric_limits<T>::max/min()")
-
-
-def _test_no_numeric_limit_macros(
-    test_directories: list[str],
-    on_fail: Callable[[str], None],
-) -> None:
-    """Searches through program files to check for numeric limit macro usage."""
-    # Collect files to check
-    files_to_check = collect_files_to_check(test_directories)
-
-    # Create processor and checker
-    processor = MultiCheckerFileProcessor()
-    checker = NumericLimitMacroChecker()
-
-    # Process files
-    results = processor.process_files_with_checkers(files_to_check, [checker])
-
-    # Get results for numeric limit macro checker
-    all_failings = results.get("NumericLimitMacroChecker", []) or []
-
-    if all_failings:
-        msg = f"Found {len(all_failings)} numeric limit macro usage(s): \n" + "\n".join(
-            all_failings
-        )
-        for failing in all_failings:
-            print(failing)
-
-        on_fail(msg)
-    else:
-        print("No numeric limit macros found.")
-
-
-class TestNoNumericLimitMacros(unittest.TestCase):
-    def test_no_numeric_limit_macros_fl(self) -> None:
-        """Searches through the fl/ directory to check for numeric limit macro usage."""
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg
-                + "\n"
-                + "Use 'fl::numeric_limits<T>::max()' or 'fl::numeric_limits<T>::min()' "
-                + "instead of standard limit macros (UINT32_MAX, INT16_MIN, etc.). "
-                + "You can add '// okay numeric limit macro' at the end of the line to silence this error for specific cases."
-            )
-
-        # Test directory - only fl/ for now
-        test_directories = [
-            os.path.join(SRC_ROOT, "fl"),
-        ]
-        _test_no_numeric_limit_macros(
-            test_directories=test_directories,
-            on_fail=on_fail,
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()

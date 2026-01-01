@@ -223,25 +223,25 @@ TEST_CASE("fl::istream types match expected interfaces") {
 // Helper class to mock input data for testing
 class InputMocker {
 private:
-    fl::Str data_;
-    fl::size pos_;
-    
+    fl::Str mData;
+    fl::size mPos;
+
 public:
-    InputMocker(const char* input_data) : data_(input_data), pos_(0) {}
-    
+    InputMocker(const char* input_data) : mData(input_data), mPos(0) {}
+
     int available() {
-        return (pos_ < data_.size()) ? (data_.size() - pos_) : 0;
+        return (mPos < mData.size()) ? (mData.size() - mPos) : 0;
     }
-    
+
     int read() {
-        if (pos_ < data_.size()) {
-            return static_cast<int>(static_cast<unsigned char>(data_[pos_++]));
+        if (mPos < mData.size()) {
+            return static_cast<int>(static_cast<unsigned char>(mData[mPos++]));
         }
         return -1;
     }
-    
+
     void reset() {
-        pos_ = 0;
+        mPos = 0;
     }
 };
 

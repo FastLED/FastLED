@@ -15,6 +15,7 @@
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
 #include "fl/stl/cstring.h"
+#include "fl/numeric_limits.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -39,7 +40,7 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;

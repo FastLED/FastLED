@@ -89,7 +89,7 @@ void setup() {
 
 void loop() {
   Serial.println("Loop....");
-  static uint8_t hue = 0;
+  static uint8_t hue = 0; // okay static in header
   for(int i = 0; i < NUM_STRIPS; i++) {
     for(int j = 0; j < NUM_LEDS_PER_STRIP; j++) {
       leds[(i*NUM_LEDS_PER_STRIP) + j] = CHSV((32*i) + hue+j,192,255);

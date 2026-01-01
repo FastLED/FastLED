@@ -429,7 +429,7 @@ void drawFireEffect(float peak) {
 
 // Visualization: Plasma Wave
 void drawPlasmaWave(float peak) {
-    static float time = 0;
+    static float time = 0; // okay static in header
     time += 0.05f + (peak * 0.2f);
     
     CRGBPalette16 palette = getCurrentPalette();

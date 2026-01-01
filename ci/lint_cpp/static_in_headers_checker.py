@@ -36,23 +36,15 @@ Exception for template functions:
 
 # pyright: reportUnknownMemberType=false
 import re
-import unittest
 
-from ci.util.check_files import (
-    EXCLUDED_FILES,
-    FileContent,
-    FileContentChecker,
-    MultiCheckerFileProcessor,
-    collect_files_to_check,
-)
-from ci.util.paths import PROJECT_ROOT
-
-
-SRC_ROOT = PROJECT_ROOT / "src"
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
 
 class StaticInHeaderChecker(FileContentChecker):
     """Checker for function-local static variables in header files."""
+
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
         """Only process header files (.h, .hpp)."""
@@ -68,7 +60,7 @@ class StaticInHeaderChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check header file for function-local static variables."""
-        failings: list[str] = []
+        violations: list[tuple[int, str]] = []
         in_multiline_comment = False
         brace_depth = 0  # Track brace nesting level
         in_function = False  # Are we inside a function implementation?
@@ -149,73 +141,10 @@ class StaticInHeaderChecker(FileContentChecker):
                     ):
                         # Allow suppression
                         if "// okay static in header" not in line:
-                            failings.append(
-                                f"Found function-local 'static' variable in header "
-                                f"{file_content.path}:{line_number}\n"
-                                f"  Line: {stripped[:100]}"
-                            )
+                            violations.append((line_number, stripped))
 
-        return failings
+        # Store violations if any found
+        if violations:
+            self.violations[file_content.path] = violations
 
-
-def _check_static_in_headers(
-    test_directories: list[str],
-) -> list[str]:
-    """Check for function-local static variables in header files."""
-    # Collect files to check
-    files_to_check = collect_files_to_check(test_directories)
-
-    # Create processor and checker
-    processor = MultiCheckerFileProcessor()
-    checker = StaticInHeaderChecker()
-
-    # Process files
-    results = processor.process_files_with_checkers(files_to_check, [checker])
-
-    # Get results
-    all_failings = results.get("StaticInHeaderChecker", []) or []
-
-    return all_failings
-
-
-class TestNoStaticInHeaders(unittest.TestCase):
-    """Unit tests for static-in-header linter."""
-
-    def test_no_static_locals_in_critical_dirs(self) -> None:
-        """Check critical directories for function-local statics in headers.
-
-        Critical directories that must compile on all platforms including Teensy 3.0:
-        - src/platforms/shared: Platform-agnostic hardware interfaces
-        - src/fl: FastLED core library namespace
-        - src/fx: Effects library
-        """
-        test_directories = [
-            str(SRC_ROOT / "platforms" / "shared"),
-            str(SRC_ROOT / "fl"),
-            str(SRC_ROOT / "fx"),
-        ]
-
-        failings = _check_static_in_headers(test_directories)
-
-        if failings:
-            msg = (
-                f"Found {len(failings)} function-local static variable(s) in critical headers:\n\n"
-                + "\n".join(failings)
-                + "\n\n"
-                "REASON: Function-local static variables in headers cause compilation errors "
-                "on Teensy 3.0 and other platforms with older toolchains due to conflicting "
-                "__cxa_guard function declarations.\n\n"
-                "SOLUTION: Move the static initialization to a .cpp file:\n"
-                "  1. In header: Change inline function to declaration only\n"
-                "  2. In cpp file: Add the function implementation with the static variable\n\n"
-                "EXAMPLE: See spi_hw_1.h / spi_hw_1.cpp for the correct pattern.\n\n"
-                "EXCEPTION: Statics inside template functions are allowed (each template "
-                "instantiation gets its own static, avoiding __cxa_guard conflicts).\n\n"
-                "SUPPRESSION: Add '// okay static in header' comment to silence this check "
-                "for specific cases (use sparingly!)."
-            )
-            self.fail(msg)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        return []  # MUST return empty list

@@ -7,23 +7,23 @@ class MaxFadeTracker {
 public:
     /// @param attackTimeSec  τ₁: how quickly to rise toward a new peak.
     /// @param decayTimeSec   τ₂: how quickly to decay to 1/e of value.
-    /// @param outputTimeSec  τ₃: how quickly the returned value follows currentLevel_.
+    /// @param outputTimeSec  τ₃: how quickly the returned value follows mCurrentLevel.
     /// @param sampleRate     audio sample rate (e.g. 44100 or 48000).
     MaxFadeTracker(float attackTimeSec,
                    float decayTimeSec,
                    float outputTimeSec,
                    float sampleRate)
-      : attackRate_(1.0f / attackTimeSec)
-      , decayRate_(1.0f / decayTimeSec)
-      , outputRate_(1.0f / outputTimeSec)
-      , sampleRate_(sampleRate)
-      , currentLevel_(0.0f)
-      , smoothedOutput_(0.0f)
+      : mAttackRate(1.0f / attackTimeSec)
+      , mDecayRate(1.0f / decayTimeSec)
+      , mOutputRate(1.0f / outputTimeSec)
+      , mSampleRate(sampleRate)
+      , mCurrentLevel(0.0f)
+      , mSmoothedOutput(0.0f)
     {}
 
-    void setAttackTime(float t){ attackRate_ = 1.0f/t; }
-    void setDecayTime (float t){  decayRate_ = 1.0f/t; }
-    void setOutputTime(float t){ outputRate_ = 1.0f/t; }
+    void setAttackTime(float t){ mAttackRate = 1.0f/t; }
+    void setDecayTime (float t){  mDecayRate = 1.0f/t; }
+    void setOutputTime(float t){ mOutputRate = 1.0f/t; }
 
     /// Process one 512-sample block; returns [0…1] with inertia.
     float operator()(const int16_t* samples, size_t length) {
@@ -36,29 +36,29 @@ public:
         }
 
         // 2) time delta
-        float dt = static_cast<float>(length) / sampleRate_;
+        float dt = static_cast<float>(length) / mSampleRate;
 
-        // 3) update currentLevel_ with attack/decay
-        if (peak > currentLevel_) {
-            float riseFactor = 1.0f - fl::exp(-attackRate_ * dt);
-            currentLevel_ += (peak - currentLevel_) * riseFactor;
+        // 3) update mCurrentLevel with attack/decay
+        if (peak > mCurrentLevel) {
+            float riseFactor = 1.0f - fl::exp(-mAttackRate * dt);
+            mCurrentLevel += (peak - mCurrentLevel) * riseFactor;
         } else {
-            float decayFactor = fl::exp(-decayRate_ * dt);
-            currentLevel_ *= decayFactor;
+            float decayFactor = fl::exp(-mDecayRate * dt);
+            mCurrentLevel *= decayFactor;
         }
 
-        // 4) output inertia: smooth smoothedOutput_ → currentLevel_
-        float outFactor = 1.0f - fl::exp(-outputRate_ * dt);
-        smoothedOutput_ += (currentLevel_ - smoothedOutput_) * outFactor;
+        // 4) output inertia: smooth mSmoothedOutput → mCurrentLevel
+        float outFactor = 1.0f - fl::exp(-mOutputRate * dt);
+        mSmoothedOutput += (mCurrentLevel - mSmoothedOutput) * outFactor;
 
-        return smoothedOutput_;
+        return mSmoothedOutput;
     }
 
 private:
-    float attackRate_;    // = 1/τ₁
-    float decayRate_;     // = 1/τ₂
-    float outputRate_;    // = 1/τ₃
-    float sampleRate_;
-    float currentLevel_;  // instantaneous peak with attack/decay
-    float smoothedOutput_; // returned value with inertia
+    float mAttackRate;    // = 1/τ₁
+    float mDecayRate;     // = 1/τ₂
+    float mOutputRate;    // = 1/τ₃
+    float mSampleRate;
+    float mCurrentLevel;  // instantaneous peak with attack/decay
+    float mSmoothedOutput; // returned value with inertia
 };

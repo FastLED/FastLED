@@ -93,7 +93,7 @@ uint16_t XY(uint8_t x, uint8_t y) {
 
 void loop() {
   // swap the src/dest buffers on each frame
-  static uint8_t buffer = 0;
+  static uint8_t buffer = 0; // okay static in header
   uint8_t * const bufA = &water[buffer][0];
   buffer = (buffer + 1) % 2;
   uint8_t * const bufB = &water[buffer][0];
@@ -107,7 +107,7 @@ void loop() {
 
   // display the water effect on the LEDs
   uint8_t * input = bufB + WATERWIDTH - 1;
-  static uint16_t pal_offset = 0;
+  static uint16_t pal_offset = 0; // okay static in header
   pal_offset += 256;
   for (uint8_t y = 0; y < HEIGHT; y++) {
     input += 2;

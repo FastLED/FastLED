@@ -33,19 +33,19 @@ struct Key {
   float IntensityFactor() const;
   void UpdateIntensity(uint32_t now_ms, uint32_t delta_ms);
 
-  bool on_;  // Max number of MIDI keys.
-  bool sustained_;
-  bool sustain_pedal_on_;
-  uint8_t velocity_;
-  int idx_;
-  unsigned long event_time_;
+  bool mOn;  // Max number of MIDI keys.
+  bool mSustained;
+  bool mSustainPedalOn;
+  uint8_t mVelocity;
+  int mIdx;
+  unsigned long mEventTime;
 
   // 0.0 -> 1.0 How intense the key is, used for light sequences to represent
   // 0 -> 0% of lights on to 1.0 -> 100% of lights on. this is a smooth
   // value through time.
-  float intensity_;
-  ColorHSV orig_color_;
-  ColorHSV curr_color_;
+  float mIntensity;
+  ColorHSV mOrigColor;
+  ColorHSV mCurrColor;
 };
 
 // Interface into the Keyboard state.
@@ -95,12 +95,12 @@ class KeyboardState {
 
 
   static uint8_t KeyIndex(int midi_pitch);
- 
+
   Key* GetKey(int midi_pitch);
- 
+
   static const int kNumKeys = 88;
-  bool sustain_pedal_;
-  Key keys_[kNumKeys];
+  bool mSustainPedal;
+  Key mKeys[kNumKeys];
 };
 
 

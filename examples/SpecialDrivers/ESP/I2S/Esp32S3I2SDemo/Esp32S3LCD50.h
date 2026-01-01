@@ -128,7 +128,7 @@ void setup() {
 }
 
 void fill_rainbow_lcd(CRGB leds[][NUM_LEDS_PER_STRIP]) {
-    static int s_offset = 0;
+    static int s_offset = 0; // okay static in header
     for (int j = 0; j < NUMSTRIPS; j++) {
         for (int i = 0; i < NUM_LEDS_PER_STRIP; i++) {
             leds[j][i] = CHSV((i + s_offset) % 256, 255, 255);
@@ -138,8 +138,8 @@ void fill_rainbow_lcd(CRGB leds[][NUM_LEDS_PER_STRIP]) {
 }
 
 void loop() {
-    static uint32_t frame_count = 0;
-    static uint32_t last_fps_print = 0;
+    static uint32_t frame_count = 0; // okay static in header
+    static uint32_t last_fps_print = 0; // okay static in header
 
     fill_rainbow_lcd(leds);
 

@@ -8,6 +8,7 @@
 
 #include "spi_hw_2_nrf52.h"
 #include "fl/stl/cstring.h"
+#include "fl/numeric_limits.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
@@ -278,12 +279,12 @@ bool SPIDualNRF52::waitComplete(uint32_t timeout_ms) {
     // Wait for both SPIM peripherals to complete
     while ((!nrf_spim_event_check(mSPIM0, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM1, NRF_SPIM_EVENT_END)) &&
-           (timeout_ms == UINT32_MAX || iterations < timeout_iterations)) {
+           (timeout_ms == fl::numeric_limits<uint32_t>::max() || iterations < timeout_iterations)) {
         iterations++;
     }
 
     // Check if we timed out
-    bool timed_out = (timeout_ms != UINT32_MAX) && (iterations >= timeout_iterations);
+    bool timed_out = (timeout_ms != fl::numeric_limits<uint32_t>::max()) && (iterations >= timeout_iterations);
     if (timed_out) {
         FL_WARN("SPIDualNRF52: Transaction timeout");
         // Clear state even on timeout

@@ -64,7 +64,7 @@ FASTLED_SHARED_PTR(FileData);
 class FileData {
   public:
     FileData(size_t capacity) : mCapacity(capacity) { mData.reserve(capacity); }
-    FileData(const std::vector<uint8_t> &data, size_t len)
+    FileData(const std::vector<uint8_t> &data, size_t len)  // okay std namespace
         : mData(data), mCapacity(len) {}
     FileData() = default;
 
@@ -83,7 +83,7 @@ class FileData {
         size_t bytesToActuallyRead = FL_MIN(len, bytesAvailable);
         auto begin_it = mData.begin() + pos;
         auto end_it = begin_it + bytesToActuallyRead;
-        std::copy(begin_it, end_it, dst);
+        std::copy(begin_it, end_it, dst);  // okay std namespace
         return bytesToActuallyRead;
     }
 
@@ -103,12 +103,12 @@ class FileData {
     }
 
   private:
-    std::vector<uint8_t> mData;
+    std::vector<uint8_t> mData;  // okay std namespace
     size_t mCapacity = 0;
     mutable fl::mutex mMutex;
 };
 
-typedef std::map<Str, FileDataPtr> FileMap;
+typedef std::map<Str, FileDataPtr> FileMap;  // okay std namespace
 static FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
@@ -241,7 +241,7 @@ FileDataPtr _findOrCreate(const Str &path, size_t len) {
         return it->second;
     }
     auto entry = fl::make_shared<FileData>(len);
-    gFileMap.insert(std::make_pair(path, entry));
+    gFileMap.insert(std::make_pair(path, entry));  // okay std namespace
     return entry;
 }
 
@@ -252,7 +252,7 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
         return FileDataPtr();
     }
     auto entry = fl::make_shared<FileData>(len);
-    gFileMap.insert(std::make_pair(path, entry));
+    gFileMap.insert(std::make_pair(path, entry));  // okay std namespace
     return entry;
 }
 

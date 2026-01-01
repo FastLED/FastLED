@@ -9,34 +9,34 @@ using namespace fl;
 // Done by hand. Old school.
 class ToggleButton {
  public:
-  ToggleButton(int pin) : pin_(pin), on_(false), debounce_timestamp_(0), changed_(false) {
-    pinMode(pin_, OUTPUT);
-    digitalWrite(pin_, LOW);
+  ToggleButton(int pin) : mPin(pin), mOn(false), mDebounceTimestamp(0), mChanged(false) {
+    pinMode(mPin, OUTPUT);
+    digitalWrite(mPin, LOW);
     delay(1);
   }
 
   // true - button is pressed.
   bool Read() {
     Update(millis());
-    return changed_;
+    return mChanged;
   }
 
   void Update(uint32_t time_now) {
-    if ((time_now - debounce_timestamp_) < 150) {
-      changed_ = false;
+    if ((time_now - mDebounceTimestamp) < 150) {
+      mChanged = false;
       return;
     }
 
     int val = Read_Internal();
-    changed_ = on_ != val;
+    mChanged = mOn != val;
 
-    if (changed_) {  // Has the toggle switch changed?
-      on_ = val;       // Set the new toggle switch value.
+    if (mChanged) {  // Has the toggle switch changed?
+      mOn = val;       // Set the new toggle switch value.
       // Protect against debouncing artifacts by putting a 200ms delay from the
       // last time the value changed.
-      if ((time_now - debounce_timestamp_) > 150) {
+      if ((time_now - mDebounceTimestamp) > 150) {
         //++curr_val_;     // ... and increment the value.
-        debounce_timestamp_ = time_now;
+        mDebounceTimestamp = time_now;
       }
     }
   }
@@ -44,55 +44,55 @@ class ToggleButton {
  private:
   bool Read_Internal() {
     // Toggle the pin back to INPUT and take a reading.
-    pinMode(pin_, INPUT);
-    bool on = (digitalRead(pin_) == HIGH);
+    pinMode(mPin, INPUT);
+    bool on = (digitalRead(mPin) == HIGH);
     // Switch the pin back to output so that we can enable the
     // pulldown resister.
-    pinMode(pin_, OUTPUT);
-    digitalWrite(pin_, LOW);
+    pinMode(mPin, OUTPUT);
+    digitalWrite(mPin, LOW);
     return on;
   }
 
 
-  int pin_;
-  bool on_;
-  uint32_t debounce_timestamp_;
-  bool changed_;
+  int mPin;
+  bool mOn;
+  uint32_t mDebounceTimestamp;
+  bool mChanged;
 };
 
 // This is the new type that is built into the midi shield.
 class MidiShieldButton {
  public:
-  MidiShieldButton(int pin) : pin_(pin) {
-    pinMode(pin_, INPUT_PULLUP);
+  MidiShieldButton(int pin) : mPin(pin) {
+    pinMode(mPin, INPUT_PULLUP);
     delay(1);
   }
 
   bool Read() {
     // Toggle the pin back to INPUT and take a reading.
-    int val = digitalRead(pin_) == LOW;
+    int val = digitalRead(mPin) == LOW;
 
     return val;
   }
  private:
-  int pin_;
+  int mPin;
 };
 
 class Potentiometer {
  public:
-  Potentiometer(int sensor_pin) : sensor_pin_(sensor_pin) {}
+  Potentiometer(int sensor_pin) : mSensorPin(sensor_pin) {}
   float Read() {
     float avg = 0.0;
     // Filter by reading the value multiple times and taking
     // the average.
     for (int i = 0; i < 8; ++i) {
-      avg += analogRead(sensor_pin_);
+      avg += analogRead(mSensorPin);
     }
     avg = avg / 8.0f;
     return avg;
   }
  private:
-  int sensor_pin_;
+  int mSensorPin;
 };
 
 typedef MidiShieldButton DigitalButton;
@@ -100,58 +100,58 @@ typedef MidiShieldButton DigitalButton;
 
 class CountingButton {
  public:
-  explicit CountingButton(int but_pin) : button_(but_pin), curr_val_(0), mButton("Counting UIButton") {
-    debounce_timestamp_ = millis();
-    on_ = Read();
+  explicit CountingButton(int but_pin) : mButton(but_pin), mCurrVal(0), mUIButton("Counting UIButton") {
+    mDebounceTimestamp = millis();
+    mOn = Read();
   }
-  
+
   void Update(uint32_t time_now) {
-    bool clicked = mButton.clicked();
-    bool val = Read() || mButton.clicked();
-    bool changed = val != on_;
+    bool clicked = mUIButton.clicked();
+    bool val = Read() || mUIButton.clicked();
+    bool changed = val != mOn;
 
     if (clicked) {
-      ++curr_val_;
-      debounce_timestamp_ = time_now;
+      ++mCurrVal;
+      mDebounceTimestamp = time_now;
       return;
     }
 
     if (changed) {  // Has the toggle switch changed?
-      on_ = val;       // Set the new toggle switch value.
+      mOn = val;       // Set the new toggle switch value.
       // Protect against debouncing artifacts by putting a 200ms delay from the
       // last time the value changed.
-      if ((time_now - debounce_timestamp_) > 16) {
-        if (on_) {
-          ++curr_val_;     // ... and increment the value.
+      if ((time_now - mDebounceTimestamp) > 16) {
+        if (mOn) {
+          ++mCurrVal;     // ... and increment the value.
         }
-        debounce_timestamp_ = time_now;
+        mDebounceTimestamp = time_now;
       }
     }
   }
-  
-  int curr_val() const { return curr_val_; }
-  
+
+  int curr_val() const { return mCurrVal; }
+
  private:
   bool Read() {
-  	return button_.Read();
+  	return mButton.Read();
   }
- 
-  DigitalButton button_;
-  bool on_;
-  int curr_val_;
-  unsigned long debounce_timestamp_;
-  UIButton mButton;
+
+  DigitalButton mButton;
+  bool mOn;
+  int mCurrVal;
+  unsigned long mDebounceTimestamp;
+  UIButton mUIButton;
 };
 
 class ColorSelector {
  public:
-  ColorSelector(int sensor_pin) : but_(sensor_pin) {}
-  
+  ColorSelector(int sensor_pin) : mBut(sensor_pin) {}
+
   void Update() {
-  	but_.Update(millis());
+  	mBut.Update(millis());
   }
-  
-  int curr_val() const { return but_.curr_val() % 7; }
+
+  int curr_val() const { return mBut.curr_val() % 7; }
  private:
-  CountingButton but_;
+  CountingButton mBut;
 };

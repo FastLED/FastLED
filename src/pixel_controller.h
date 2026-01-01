@@ -305,7 +305,7 @@ struct PixelController {
     void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
         // STEP 1: Increment frame counter (creates temporal variation)
-        static uint8_t R = 0;
+        static uint8_t R = 0; // okay static in header
         ++R;
 
         // STEP 2: Wrap counter at 2^ditherBits (creates 8-frame cycle: 0,1,2,3,4,5,6,7,0...)

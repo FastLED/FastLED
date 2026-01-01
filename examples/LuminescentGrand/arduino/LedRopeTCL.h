@@ -53,14 +53,14 @@ class LedRopeTCL : public LedRopeInterface {
   void set_draw_offset(int val);
   
   virtual void Set(int i, const Color3i& c) {
-    frame_buffer_.Set(i, c);
+    mFrameBuffer.Set(i, c);
   }
 
   Color3i* GetIterator(int i) {
-    return frame_buffer_.GetIterator(i);
+    return mFrameBuffer.GetIterator(i);
   }
 
-  int length() const { return frame_buffer_.length(); }
+  int length() const { return mFrameBuffer.length(); }
 
   void RawBeginDraw();
   void RawDrawPixel(const Color3i& c);
@@ -70,11 +70,11 @@ class LedRopeTCL : public LedRopeInterface {
 
  protected:
   void PreDrawSetup();
-  int draw_offset_ = 0;
-  bool lazy_initialized_;
-  FrameBuffer frame_buffer_;
-  bool controller_added_ = false;
-  fl::HeapVector<CRGB> led_buffer_;
+  int mDrawOffset = 0;
+  bool mLazyInitialized;
+  FrameBuffer mFrameBuffer;
+  bool mControllerAdded = false;
+  fl::HeapVector<CRGB> mLedBuffer;
   fl::ScreenMap mScreenMap;
 };
 

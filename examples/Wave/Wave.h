@@ -80,7 +80,7 @@ void loop() {
     // wave effect that doesn't look good.
     waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
-    static int x = 0;
+    static int x = 0; // okay static in header
     if (button.clicked()) {
         // If button click then select a random position in the wave.
         x = random(NUM_LEDS);

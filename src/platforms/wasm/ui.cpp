@@ -64,7 +64,7 @@ extern "C" void checkUpdateEngineState() {
  * Async-aware UI component updater
  * Now handles async operations and provides better error handling
  */
-void jsUpdateUiComponents(const std::string &jsonStr) {
+void jsUpdateUiComponents(const std::string &jsonStr) {  // okay std namespace
     // FL_WARN("*** jsUpdateUiComponents ASYNC ENTRY ***");
     // FL_WARN("*** jsUpdateUiComponents ASYNC RECEIVED JSON: " << jsonStr.c_str());
     // FL_WARN("*** jsUpdateUiComponents ASYNC JSON LENGTH: " << jsonStr.length());
@@ -196,7 +196,7 @@ extern "C" {
         }
         
         // Call the async-aware C++ implementation
-        fl::jsUpdateUiComponents(std::string(jsonStr));
+        fl::jsUpdateUiComponents(std::string(jsonStr));  // okay std namespace
     }
 }
 

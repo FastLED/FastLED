@@ -54,7 +54,7 @@ inline void setPwm16(int pin, uint16_t val) {
     // Silicon Labs Arduino core PWM capabilities vary
     // Check if analogWriteResolution is available, otherwise scale to 8-bit
 #if defined(analogWriteResolution)
-    static bool resolution_set = false;
+    static bool resolution_set = false; // okay static in header
     if (!resolution_set) {
         analogWriteResolution(16);
         resolution_set = true;

@@ -13,8 +13,8 @@
 #if !ESP_IDF_VERSION_4_OR_HIGHER
 FL_LINK_WEAK void analogWrite(uint8_t pin, int value) {
   // Setup PWM channel for the pin if not already done
-  static bool channels_setup[16] = {false}; // ESP32 has 16 PWM channels
-  static uint8_t channel_counter = 0;
+  static bool channels_setup[16] = {false}; // ESP32 has 16 PWM channels // okay static in header
+  static uint8_t channel_counter = 0; // okay static in header
   
   // Find or assign channel for this pin
   static uint8_t pin_to_channel[40] = {255}; // ESP32 has up to 40 GPIO pins, 255 = unassigned

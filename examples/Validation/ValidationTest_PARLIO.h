@@ -180,10 +180,10 @@ inline void validation_setup_multilane() {
 }
 
 inline void validation_loop_multilane() {
-    static uint32_t refresh_count = 0;
-    static uint32_t last_report = 0;
-    static uint32_t test_start_time = millis();
-    static bool test_completed = false;
+    static uint32_t refresh_count = 0; // okay static in header
+    static uint32_t last_report = 0; // okay static in header
+    static uint32_t test_start_time = millis(); // okay static in header
+    static bool test_completed = false; // okay static in header
 
     if (!test_completed) {
         // Cycle through different colors on all 4 lanes
@@ -299,10 +299,10 @@ inline void validation_setup() {
 }
 
 inline void validation_loop() {
-    static uint32_t refresh_count = 0;
-    static uint32_t last_report = 0;
-    static uint32_t test_start_time = millis();
-    static bool test_completed = false;
+    static uint32_t refresh_count = 0; // okay static in header
+    static uint32_t last_report = 0; // okay static in header
+    static uint32_t test_start_time = millis(); // okay static in header
+    static bool test_completed = false; // okay static in header
 
     if (!test_completed) {
         // Cycle through different colors

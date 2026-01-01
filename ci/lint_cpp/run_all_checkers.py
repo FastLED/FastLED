@@ -11,26 +11,28 @@ import os
 import sys
 from pathlib import Path
 
-# Import all checker classes
-from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
-from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
-from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
-from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
-from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
-from ci.lint_cpp.test_no_banned_headers import (
+from ci.lint_cpp.banned_headers_checker import (
     BANNED_HEADERS_COMMON,
     BANNED_HEADERS_CORE,
     BANNED_HEADERS_PLATFORMS,
     BannedHeadersChecker,
 )
-from ci.lint_cpp.test_no_cpp_includes import CppIncludeChecker
-from ci.lint_cpp.test_no_google_member_style import GoogleMemberStyleChecker
-from ci.lint_cpp.test_no_include_after_namespace import IncludeAfterNamespaceChecker
-from ci.lint_cpp.test_no_logging_in_iram import LoggingInIramChecker
-from ci.lint_cpp.test_no_numeric_limit_macros import NumericLimitMacroChecker
-from ci.lint_cpp.test_no_serial_printf import SerialPrintfChecker
-from ci.lint_cpp.test_no_static_in_headers import StaticInHeaderChecker
-from ci.lint_cpp.test_no_std_namespace import StdNamespaceChecker
+
+# Import all checker classes
+from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
+from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
+from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
+from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
+from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
+from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
+from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
+from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
+from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
+from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
+from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
+from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
+from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.util.check_files import MultiCheckerFileProcessor, collect_files_to_check
 from ci.util.paths import PROJECT_ROOT
 
@@ -47,8 +49,10 @@ def collect_all_files_by_directory() -> dict[str, list[str]]:
     # Collect src/ files (all subdirectories)
     files_by_dir["src"] = collect_files_to_check([str(SRC_ROOT)])
 
-    # Collect examples/ files
-    files_by_dir["examples"] = collect_files_to_check([str(EXAMPLES_ROOT)])
+    # Collect examples/ files (including .ino files)
+    files_by_dir["examples"] = collect_files_to_check(
+        [str(EXAMPLES_ROOT)], extensions=[".cpp", ".h", ".hpp", ".ino"]
+    )
 
     # Collect tests/ files
     files_by_dir["tests"] = collect_files_to_check([str(TESTS_ROOT)])
@@ -166,6 +170,11 @@ def create_checkers() -> dict[str, list]:
         UsingNamespaceChecker(),
     ]
 
+    # Tests-only checkers
+    checkers_by_scope["tests"] = [
+        HeadersExistChecker(),
+    ]
+
     return checkers_by_scope
 
 
@@ -268,6 +277,12 @@ def run_checkers(
     if third_party_files and third_party_checkers:
         processor.process_files_with_checkers(third_party_files, third_party_checkers)
 
+    # Run tests-only checkers
+    tests_files = files_by_dir.get("tests", [])
+    tests_checkers = checkers_by_scope.get("tests", [])
+    if tests_files and tests_checkers:
+        processor.process_files_with_checkers(tests_files, tests_checkers)
+
     # Collect all violations from all checkers
     all_checkers = []
     for scope_checkers in checkers_by_scope.values():
@@ -276,7 +291,10 @@ def run_checkers(
     for checker in all_checkers:
         checker_name = checker.__class__.__name__
         if hasattr(checker, "violations") and checker.violations:
-            all_results[checker_name] = checker.violations
+            # Merge violations from multiple checkers with same name
+            if checker_name not in all_results:
+                all_results[checker_name] = {}
+            all_results[checker_name].update(checker.violations)
 
     return all_results
 

@@ -19,7 +19,7 @@
 
 // Simple logging for stub platform (avoid FL_WARN/FL_DBG due to exception issues)
 #include <iostream>
-#define STUB_LOG(msg) std::cerr << "[fl::isr::stub] " << msg << std::endl
+#define STUB_LOG(msg) std::cerr << "[fl::isr::stub] " << msg << std::endl  // okay std namespace
 
 namespace fl {
 namespace isr {
@@ -29,7 +29,7 @@ namespace isr {
 // =============================================================================
 
 struct stub_isr_handle_data {
-    fl::unique_ptr<std::thread> timer_thread;  // Thread for timer simulation
+    fl::unique_ptr<std::thread> timer_thread;  // Thread for timer simulation  // okay std namespace
     fl::atomic<bool> should_stop;              // Stop flag for thread
     fl::atomic<bool> is_enabled;               // Current enable state
     isr_handler_t user_handler;                // User handler function
@@ -72,8 +72,8 @@ static void timer_thread_func(stub_isr_handle_data* handle_data)
     const uint64_t period_us = 1000000ULL / handle_data->frequency_hz;
 
     // Use high-resolution clock for accurate timing
-    using clock = std::chrono::high_resolution_clock;
-    auto next_tick = clock::now() + std::chrono::microseconds(period_us);
+    using clock = std::chrono::high_resolution_clock;  // okay std namespace
+    auto next_tick = clock::now() + std::chrono::microseconds(period_us);  // okay std namespace
 
     while (!handle_data->should_stop) {
         // Execute handler first (if enabled)
@@ -92,8 +92,8 @@ static void timer_thread_func(stub_isr_handle_data* handle_data)
         }
 
         // Sleep until next tick using precise timing
-        std::this_thread::sleep_until(next_tick);
-        next_tick += std::chrono::microseconds(period_us);
+        std::this_thread::sleep_until(next_tick);  // okay std namespace
+        next_tick += std::chrono::microseconds(period_us);  // okay std namespace
     }
 }
 
@@ -127,7 +127,7 @@ int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_hand
 
         // Start timer thread (unless manual tick mode)
         if (!(config.flags & ISR_FLAG_MANUAL_TICK)) {
-            handle_data->timer_thread = fl::make_unique<std::thread>(timer_thread_func, handle_data);
+            handle_data->timer_thread = fl::make_unique<std::thread>(timer_thread_func, handle_data);  // okay std namespace
             if (!handle_data->timer_thread) {
                 STUB_LOG("attachTimerHandler: failed to create timer thread");
                 delete handle_data;

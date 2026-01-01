@@ -53,8 +53,8 @@ struct LaneConfig {
     int num_leds;               ///< Number of LEDs on this lane
     fl::vector<CRGB> leds;      ///< LED array for this lane
 
-    LaneConfig(int pin_, int num_leds_)
-        : pin(pin_), num_leds(num_leds_), leds(num_leds_) {}
+    LaneConfig(int p, int n)
+        : pin(p), num_leds(n), leds(n) {}
 };
 
 /// @brief Test case configuration (one combination in the test matrix)

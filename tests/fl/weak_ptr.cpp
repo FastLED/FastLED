@@ -10,24 +10,24 @@ namespace weak_ptr_test {
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
 class TestClass {
 public:
-    TestClass() : value_(0), destructor_called_(nullptr) {}
-    TestClass(int value) : value_(value), destructor_called_(nullptr) {}
-    
+    TestClass() : mValue(0), mDestructorCalled(nullptr) {}
+    TestClass(int value) : mValue(value), mDestructorCalled(nullptr) {}
+
     // Constructor that allows tracking destructor calls
-    TestClass(int value, bool* destructor_flag) : value_(value), destructor_called_(destructor_flag) {}
-    
+    TestClass(int value, bool* destructor_flag) : mValue(value), mDestructorCalled(destructor_flag) {}
+
     ~TestClass() {
-        if (destructor_called_) {
-            *destructor_called_ = true;
+        if (mDestructorCalled) {
+            *mDestructorCalled = true;
         }
     }
-    
-    int getValue() const { return value_; }
-    void setValue(int value) { value_ = value; }
-    
+
+    int getValue() const { return mValue; }
+    void setValue(int value) { mValue = value; }
+
 private:
-    int value_;
-    bool* destructor_called_;
+    int mValue;
+    bool* mDestructorCalled;
 };
 
 TEST_CASE("fl::weak_ptr default construction") {
@@ -293,29 +293,29 @@ TEST_CASE("fl::weak_ptr self-assignment safety") {
 // Node class for testing circular references and self-assignment scenarios
 class Node {
 public:
-    Node(int value) : value_(value), destructor_called_(nullptr) {}
-    Node(int value, bool* destructor_flag) : value_(value), destructor_called_(destructor_flag) {}
-    
+    Node(int value) : mValue(value), mDestructorCalled(nullptr) {}
+    Node(int value, bool* destructor_flag) : mValue(value), mDestructorCalled(destructor_flag) {}
+
     ~Node() {
-        if (destructor_called_) {
-            *destructor_called_ = true;
+        if (mDestructorCalled) {
+            *mDestructorCalled = true;
         }
     }
-    
-    int getValue() const { return value_; }
-    void setValue(int value) { value_ = value; }
-    
-    void setNext(fl::shared_ptr<Node> next) { next_ = next; }
-    fl::shared_ptr<Node> getNext() const { return next_; }
-    
-    void setWeakNext(fl::weak_ptr<Node> next) { weak_next_ = next; }
-    fl::weak_ptr<Node> getWeakNext() const { return weak_next_; }
-    
+
+    int getValue() const { return mValue; }
+    void setValue(int value) { mValue = value; }
+
+    void setNext(fl::shared_ptr<Node> next) { mNext = next; }
+    fl::shared_ptr<Node> getNext() const { return mNext; }
+
+    void setWeakNext(fl::weak_ptr<Node> next) { mWeakNext = next; }
+    fl::weak_ptr<Node> getWeakNext() const { return mWeakNext; }
+
 private:
-    int value_;
-    bool* destructor_called_;
-    fl::shared_ptr<Node> next_;
-    fl::weak_ptr<Node> weak_next_;
+    int mValue;
+    bool* mDestructorCalled;
+    fl::shared_ptr<Node> mNext;
+    fl::weak_ptr<Node> mWeakNext;
 };
 
 TEST_CASE("fl::weak_ptr dead memory safety - basic scenario") {

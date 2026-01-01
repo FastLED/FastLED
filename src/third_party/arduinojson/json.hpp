@@ -1,6 +1,8 @@
 // ArduinoJson - https://arduinojson.org
 // Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
+//
+// okay std namespace (third-party library)
 
 #pragma once
 

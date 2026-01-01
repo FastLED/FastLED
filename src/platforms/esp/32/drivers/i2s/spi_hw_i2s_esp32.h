@@ -65,6 +65,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
+#include "fl/numeric_limits.h"
 #include "platforms/shared/spi_hw_16.h"
 #include "platforms/shared/spi_types.h"
 
@@ -137,10 +138,10 @@ public:
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for async transmission to complete
-    /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
+    /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @returns true if completed successfully, false on timeout
     /// @note Uses FreeRTOS semaphore for efficient blocking
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
 
     /// @brief Check if a transmission is currently in progress
     /// @returns true if busy, false if idle

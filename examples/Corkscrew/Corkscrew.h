@@ -134,14 +134,14 @@ void setup() {
 
 void loop() {
     fl::clear(frameBuffer);
-    static float pos = 0;
+    static float pos = 0; // okay static in header
     pos += speed.value();
     if (pos > corkscrew.size() - 1) {
         pos = 0; // Reset to the beginning
     }
 
     // Update caching setting if it changed
-    static bool lastCachingState = cachingEnabled.value();
+    static bool lastCachingState = cachingEnabled.value(); // okay static in header
     if (lastCachingState != cachingEnabled.value()) {
         corkscrew.setCachingEnabled(cachingEnabled.value());
         lastCachingState = cachingEnabled.value();

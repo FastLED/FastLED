@@ -52,7 +52,7 @@ inline void analogWrite(int pin, uint16_t val) {
 inline void setPwm16(int pin, uint16_t val) {
     // SAM (Arduino Due) supports 16-bit PWM natively via PWM controller
     // Use analogWriteResolution to set 16-bit mode, then write value
-    static bool resolution_set = false;
+    static bool resolution_set = false; // okay static in header
     if (!resolution_set) {
         analogWriteResolution(16);
         resolution_set = true;

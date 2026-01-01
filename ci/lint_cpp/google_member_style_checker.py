@@ -22,19 +22,12 @@ The linter will suggest the correct m-prefix camelCase conversion for each viola
 """
 
 import re
-import unittest
 
 from ci.util.check_files import (
     EXCLUDED_FILES,
     FileContent,
     FileContentChecker,
-    MultiCheckerFileProcessor,
-    collect_files_to_check,
 )
-from ci.util.paths import PROJECT_ROOT
-
-
-SRC_ROOT = PROJECT_ROOT / "src"
 
 
 def convert_google_to_m_prefix(var_name: str) -> str:
@@ -74,6 +67,9 @@ def convert_google_to_m_prefix(var_name: str) -> str:
 class GoogleMemberStyleChecker(FileContentChecker):
     """Checker for Google-style member variables (trailing underscore)."""
 
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
+
     def should_process_file(self, file_path: str) -> bool:
         """Only process C++ source and header files."""
         # Check file extension
@@ -92,7 +88,7 @@ class GoogleMemberStyleChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file for Google-style member variables."""
-        failings: list[str] = []
+        violations: list[tuple[int, str]] = []
         in_multiline_comment = False
         in_string = False
 
@@ -171,99 +167,12 @@ class GoogleMemberStyleChecker(FileContentChecker):
                 # Generate suggested name
                 suggested_name = convert_google_to_m_prefix(var_name)
 
-                failings.append(
-                    f"Found Google-style member variable in "
-                    f"{file_content.path}:{line_number}\n"
-                    f"  Variable: '{var_name}'\n"
-                    f"  Suggested: '{suggested_name}'\n"
-                    f"  Line: {stripped[:100]}"
-                )
+                # Store violation as (line_number, content) tuple with metadata
+                violation_content = f"{var_name} -> {suggested_name}: {stripped[:80]}"
+                violations.append((line_number, violation_content))
 
-        return failings
+        # Store violations if any found
+        if violations:
+            self.violations[file_content.path] = violations
 
-
-def _check_google_member_style(
-    test_directories: list[str],
-) -> list[str]:
-    """Check for Google-style member variables."""
-    # Collect files to check
-    files_to_check = collect_files_to_check(test_directories)
-
-    # Create processor and checker
-    processor = MultiCheckerFileProcessor()
-    checker = GoogleMemberStyleChecker()
-
-    # Process files
-    results = processor.process_files_with_checkers(files_to_check, [checker])
-
-    # Get results
-    all_failings = results.get("GoogleMemberStyleChecker", []) or []
-
-    return all_failings
-
-
-class TestNoGoogleMemberStyle(unittest.TestCase):
-    """Unit tests for Google-style member variable linter."""
-
-    def test_no_google_style_in_src(self) -> None:
-        """Check src/ directory for Google-style member variables.
-
-        This project uses m-prefix camelCase for member variables:
-        - ✅ Correct: mState, mIsReady, mDataPtr
-        - ❌ Wrong: state_, is_ready_, data_ptr_
-        """
-        test_directories = [
-            str(SRC_ROOT),
-        ]
-
-        failings = _check_google_member_style(test_directories)
-
-        if failings:
-            msg = (
-                f"Found {len(failings)} Google-style member variable(s) (trailing underscore):\n\n"
-                + "\n".join(failings)
-                + "\n\n"
-                "REASON: This project uses m-prefix camelCase for member variables, "
-                "not Google-style trailing underscore.\n\n"
-                "SOLUTION: Rename variables from 'name_' to 'mName' format:\n"
-                "  - state_ -> mState\n"
-                "  - is_ready_ -> mIsReady\n"
-                "  - variable_state_ -> mVariableState\n\n"
-                "See the suggested names above for each violation."
-            )
-            self.fail(msg)
-
-
-class TestConversionFunction(unittest.TestCase):
-    """Test the conversion function logic."""
-
-    def test_simple_conversions(self) -> None:
-        """Test basic snake_case_ to mCamelCase conversions."""
-        self.assertEqual(convert_google_to_m_prefix("state_"), "mState")
-        self.assertEqual(convert_google_to_m_prefix("count_"), "mCount")
-        self.assertEqual(convert_google_to_m_prefix("data_"), "mData")
-
-    def test_multi_word_conversions(self) -> None:
-        """Test multi-word conversions."""
-        self.assertEqual(convert_google_to_m_prefix("is_ready_"), "mIsReady")
-        self.assertEqual(
-            convert_google_to_m_prefix("variable_state_"), "mVariableState"
-        )
-        self.assertEqual(convert_google_to_m_prefix("my_var_name_"), "mMyVarName")
-        self.assertEqual(convert_google_to_m_prefix("data_ptr_"), "mDataPtr")
-
-    def test_camel_case_preservation(self) -> None:
-        """Test that existing camelCase is preserved."""
-        self.assertEqual(convert_google_to_m_prefix("fileHandle_"), "mFileHandle")
-        self.assertEqual(convert_google_to_m_prefix("currentFrame_"), "mCurrentFrame")
-        self.assertEqual(convert_google_to_m_prefix("hasValidFrame_"), "mHasValidFrame")
-        self.assertEqual(convert_google_to_m_prefix("isReady_"), "mIsReady")
-
-    def test_no_trailing_underscore(self) -> None:
-        """Test that names without trailing underscore are returned unchanged."""
-        self.assertEqual(convert_google_to_m_prefix("mState"), "mState")
-        self.assertEqual(convert_google_to_m_prefix("normalVar"), "normalVar")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        return []  # MUST return empty list

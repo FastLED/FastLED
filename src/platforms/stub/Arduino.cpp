@@ -31,12 +31,12 @@ long random(long min, long max) {
     if (min == max) {
         return min;
     }
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::random_device rd;  // okay std namespace
+    std::mt19937 gen(rd());  // okay std namespace
     // Arduino random is exclusive of the max value, but
     // std::uniform_int_distribution is inclusive. So we subtract 1 from the max
     // value.
-    std::uniform_int_distribution<> dis(min, max - 1);
+    std::uniform_int_distribution<> dis(min, max - 1);  // okay std namespace
     return dis(gen);
 }
 
@@ -167,6 +167,7 @@ int SerialEmulation::read() {
 }
 
 fl::string SerialEmulation::readStringUntil(char terminator) {
+    (void)terminator;
     // Stub implementation: returns empty string since there's no actual serial input
     // In a real implementation, this would read from stdin until the terminator is found
     // For testing purposes, you could set an environment variable or use stdin redirection

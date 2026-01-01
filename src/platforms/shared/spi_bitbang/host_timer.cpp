@@ -29,14 +29,14 @@
 #include "fl/stl/vector.h"
 
 // Simple printf-style debugging for thread mode
-#define ISR_DBG(...) std::printf("[ISR_THREAD] " __VA_ARGS__)
+#define ISR_DBG(...) std::printf("[ISR_THREAD] " __VA_ARGS__)  // okay std namespace
 
 /* ISR context for thread-based execution */
 struct ISRContext {
     uint32_t timer_hz;
     fl::atomic<bool> running;
     fl::atomic<bool> started;  // Signals when thread has begun execution
-    std::thread thread;
+    std::thread thread;  // okay std namespace
 
     ISRContext(uint32_t hz) : timer_hz(hz), running(false), started(false) {}
 };
@@ -59,14 +59,14 @@ static void isr_thread_func(ISRContext* ctx) {
     // Signal that thread has started
     ctx->started.store(true, fl::memory_order_release);
 
-    auto interval = std::chrono::nanoseconds(1000000000 / ctx->timer_hz);
+    auto interval = std::chrono::nanoseconds(1000000000 / ctx->timer_hz);  // okay std namespace
     uint32_t tick_count = 0;
 
     while (ctx->running.load(fl::memory_order_acquire)) {
-        auto start = std::chrono::steady_clock::now();
+        auto start = std::chrono::steady_clock::now();  // okay std namespace
 
         // Acquire fence: ensure we see latest doorbell value from main thread
-        std::atomic_thread_fence(std::memory_order_acquire);
+        std::atomic_thread_fence(std::memory_order_acquire);  // okay std namespace
 
         // Execute ISR (same code as ESP32 hardware)
         uint32_t flags_before = fl_spi_status_flags();
@@ -76,18 +76,18 @@ static void isr_thread_func(ISRContext* ctx) {
         tick_count++;
 
         // Release fence: ensure status_flags write is visible to main thread
-        std::atomic_thread_fence(std::memory_order_release);
+        std::atomic_thread_fence(std::memory_order_release);  // okay std namespace
 
         if (tick_count <= 10 || flags_before != flags_after) {
             ISR_DBG("Tick #%u executed, flags: 0x%x -> 0x%x\n", tick_count, flags_before, flags_after);
         }
 
         // Compensate for ISR execution time
-        auto elapsed = std::chrono::steady_clock::now() - start;
+        auto elapsed = std::chrono::steady_clock::now() - start;  // okay std namespace
         auto sleep_time = interval - elapsed;
 
-        if (sleep_time > std::chrono::nanoseconds(0)) {
-            std::this_thread::sleep_for(sleep_time);
+        if (sleep_time > std::chrono::nanoseconds(0)) {  // okay std namespace
+            std::this_thread::sleep_for(sleep_time);  // okay std namespace
         }
     }
     ISR_DBG("Thread stopped after %u ticks\n", tick_count);
@@ -107,11 +107,11 @@ int fl_spi_platform_isr_start(uint32_t timer_hz) {
 
     // Launch thread
     ISR_DBG("Launching thread...\n");
-    ctx->thread = std::thread(isr_thread_func, ctx);
+    ctx->thread = std::thread(isr_thread_func, ctx);  // okay std namespace
 
     // Wait for thread to actually start (prevents race condition)
     while (!ctx->started.load(fl::memory_order_acquire)) {
-        std::this_thread::yield();
+        std::this_thread::yield();  // okay std namespace
     }
     ISR_DBG("Thread confirmed started\n");
 

@@ -1848,11 +1848,11 @@ DOCTEST_CLANG_SUPPRESS_WARNING_POP
 
     template <typename L> class ContextScope : public ContextScopeBase
     {
-        L lambda_;
+        L mLambda;
 
     public:
-        explicit ContextScope(const L &lambda) : lambda_(lambda) {}
-        explicit ContextScope(L&& lambda) : lambda_(static_cast<L&&>(lambda)) { }
+        explicit ContextScope(const L &lambda) : mLambda(lambda) {}
+        explicit ContextScope(L&& lambda) : mLambda(static_cast<L&&>(lambda)) { }
 
         ContextScope(const ContextScope&) = delete;
         ContextScope(ContextScope&&) noexcept = default;
@@ -1860,7 +1860,7 @@ DOCTEST_CLANG_SUPPRESS_WARNING_POP
         ContextScope& operator=(const ContextScope&) = delete;
         ContextScope& operator=(ContextScope&&) = delete;
 
-        void stringify(std::ostream* s) const override { lambda_(s); }
+        void stringify(std::ostream* s) const override { mLambda(s); }
 
         ~ContextScope() override {
             if (need_to_destroy) {
@@ -3384,7 +3384,7 @@ using ticks_t = timer_large_integer::type;
     ticks_t getCurrentTicks() { return DOCTEST_CONFIG_GETCURRENTTICKS(); }
 #elif defined(DOCTEST_PLATFORM_WINDOWS)
     ticks_t getCurrentTicks() {
-        static LARGE_INTEGER hz = { {0} }, hzo = { {0} };
+        static LARGE_INTEGER hz = { {0} }, hzo = { {0} }; // okay static in header
         if(!hz.QuadPart) {
             QueryPerformanceFrequency(&hz);
             QueryPerformanceCounter(&hzo);
@@ -4061,7 +4061,7 @@ int registerReporter(const char*, int, IReporter*) { return 0; }
 namespace doctest_detail_test_suite_ns {
 // holds the current test suite
 doctest::detail::TestSuite& getCurrentTestSuite() {
-    static doctest::detail::TestSuite data{};
+    static doctest::detail::TestSuite data{}; // okay static in header
     return data;
 }
 } // namespace doctest_detail_test_suite_ns
@@ -4531,7 +4531,7 @@ namespace detail {
         ErrnoGuard guard;
         std::ifstream in("/proc/self/status");
         for(std::string line; std::getline(in, line);) {
-            static const int PREFIX_LEN = 11;
+            static const int PREFIX_LEN = 11; // okay static in header
             if(line.compare(0, PREFIX_LEN, "TracerPid:\t") == 0) {
                 return line.length() > PREFIX_LEN && line[PREFIX_LEN] != '0';
             }
@@ -4655,7 +4655,7 @@ namespace {
             // Multiple threads may enter this filter/handler at once. We want the error message to be printed on the
             // console just once no matter how many threads have crashed.
             DOCTEST_DECLARE_STATIC_MUTEX(mutex)
-            static bool execute = true;
+            static bool execute = true; // okay static in header
             {
                 DOCTEST_LOCK_MUTEX(mutex)
                 if(execute) {
@@ -6666,10 +6666,10 @@ void Context::parseArgs(int argc, const char* const* argv, bool withDefaults) {
     DOCTEST_PARSE_INT_OPTION("rand-seed", "rs", rand_seed, 0);
 
     DOCTEST_PARSE_INT_OPTION("first", "f", first, 0);
-    DOCTEST_PARSE_INT_OPTION("last", "l", last, UINT_MAX);
+    DOCTEST_PARSE_INT_OPTION("last", "l", last, UINT_MAX);  // okay numeric limit macro
 
     DOCTEST_PARSE_INT_OPTION("abort-after", "aa", abort_after, 0);
-    DOCTEST_PARSE_INT_OPTION("subcase-filter-levels", "scfl", subcase_filter_levels, INT_MAX);
+    DOCTEST_PARSE_INT_OPTION("subcase-filter-levels", "scfl", subcase_filter_levels, INT_MAX);  // okay numeric limit macro
 
     DOCTEST_PARSE_AS_BOOL_OR_FLAG("success", "s", success, false);
     DOCTEST_PARSE_AS_BOOL_OR_FLAG("case-sensitive", "cs", case_sensitive, false);

@@ -107,10 +107,10 @@ void fillnoise8() {
 
 
 void loop() {
-  static uint8_t circlex = 0;
-  static uint8_t circley = 0;
+  static uint8_t circlex = 0; // okay static in header
+  static uint8_t circley = 0; // okay static in header
 
-  static uint8_t ihue=0;
+  static uint8_t ihue=0; // okay static in header
   fillnoise8();
   for(int i = 0; i < kMatrixWidth; i++) {
     for(int j = 0; j < kMatrixHeight; j++) {

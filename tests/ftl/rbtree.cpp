@@ -4,7 +4,7 @@
 #include <vector>
 #include <random>
 #include <algorithm>
-#include <climits>
+#include <climits>  // ok INT_MAX (testing edge cases with extreme values)
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/string.h"
 

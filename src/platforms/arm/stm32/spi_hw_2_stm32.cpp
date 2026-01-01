@@ -37,7 +37,8 @@
 // - G4 (channel-based DMA with DMAMUX - not yet implemented)
 // - U5 (GPDMA architecture - not yet implemented)
 
-#include "fl/stl/stdint.h"  // For UINT32_MAX
+#include "fl/stl/stdint.h"
+#include "fl/numeric_limits.h"
 #include <Arduino.h>  // Ensure STM32 HAL is initialized
 
 #include "platforms/shared/spi_hw_2.h"
@@ -106,9 +107,9 @@ public:
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
-    /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
+    /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -585,7 +586,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
 #if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
     // Record start time for timeout checking
     uint32_t start_ms = millis();
-    bool timeout_enabled = (timeout_ms != UINT32_MAX);
+    bool timeout_enabled = (timeout_ms != fl::numeric_limits<uint32_t>::max());
 
     // Poll DMA completion flags for both streams
     while (true) {

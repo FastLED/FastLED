@@ -14,6 +14,7 @@
 #include "hardware/pio.h"
 #include "pio_asm.h"
 #include "fl/warn.h"
+#include "fl/numeric_limits.h"
 #include <cstring> // ok include
 #include "fl/stl/cstring.h"
 #include "fl/stl/time.h"
@@ -136,9 +137,9 @@ public:
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
-    /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
+    /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -478,7 +479,7 @@ bool SPIQuadRP2040::waitComplete(uint32_t timeout_ms) {
     }
 
     // Poll with timeout checking
-    if (timeout_ms == UINT32_MAX) {
+    if (timeout_ms == fl::numeric_limits<uint32_t>::max()) {
         // Infinite timeout - just wait
         dma_channel_wait_for_finish_blocking(mDMAChannel);
     } else {

@@ -20,22 +20,22 @@ struct ValidationConfig {
     int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
 
-    ValidationConfig(const fl::ChipsetTimingConfig& timing_,
-                     const char* timing_name_,
-                     fl::span<fl::ChannelConfig> tx_configs_,
-                     const char* driver_name_,
-                     fl::shared_ptr<fl::RxDevice> rx_channel_,
-                     fl::span<uint8_t> rx_buffer_,
-                     int base_strip_size_,
-                     fl::RxDeviceType rx_type_)
-        : timing(timing_)
-        , timing_name(timing_name_)
-        , tx_configs(tx_configs_)
-        , driver_name(driver_name_)
-        , rx_channel(rx_channel_)
-        , rx_buffer(rx_buffer_)
-        , base_strip_size(base_strip_size_)
-        , rx_type(rx_type_) {}
+    ValidationConfig(const fl::ChipsetTimingConfig& t,
+                     const char* tn,
+                     fl::span<fl::ChannelConfig> tc,
+                     const char* dn,
+                     fl::shared_ptr<fl::RxDevice> rc,
+                     fl::span<uint8_t> rb,
+                     int bss,
+                     fl::RxDeviceType rt)
+        : timing(t)
+        , timing_name(tn)
+        , tx_configs(tc)
+        , driver_name(dn)
+        , rx_channel(rc)
+        , rx_buffer(rb)
+        , base_strip_size(bss)
+        , rx_type(rt) {}
 };
 
 /// @brief Test context for detailed error reporting

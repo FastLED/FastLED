@@ -20,7 +20,7 @@ void setup() {
 
 void loop() {
     // Simple rainbow animation for fallback
-    static uint8_t hue = 0;
+    static uint8_t hue = 0; // okay static in header
     fill_rainbow(leds, NUM_LEDS, hue, 255/NUM_LEDS);
     FastLED.show();
     delay(50);

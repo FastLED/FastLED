@@ -104,7 +104,7 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
     
     // Build gdb command for symbol resolution (much better with PE+DWARF than addr2line)
     // Use a temporary script file to avoid quoting issues
-    static int script_counter = 0;
+    static int script_counter = 0; // okay static in header
     char script_name[256];
     snprintf(script_name, sizeof(script_name), "gdb_temp_%d.gdb", ++script_counter);
     

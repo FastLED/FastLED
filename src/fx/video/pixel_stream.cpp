@@ -1,9 +1,7 @@
 
 #include "fx/video/pixel_stream.h"
 #include "fl/dbg.h"
-#ifndef INT32_MAX
-#define INT32_MAX 0x7fffffff
-#endif
+#include "fl/numeric_limits.h"
 
 #define DBG FASTLED_DBG
 
@@ -144,7 +142,7 @@ int32_t PixelStream::framesDisplayed() const {
 
 int32_t PixelStream::bytesRemaining() const {
     if (mUsingByteStream) {
-        return INT32_MAX;
+        return fl::numeric_limits<int32_t>::max();
     } else {
         return mFileHandle->bytesLeft();
     }

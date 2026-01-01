@@ -6,6 +6,7 @@
 
 #include "spi_hw_i2s_esp32.h"
 #include "fl/dbg.h"
+#include "fl/numeric_limits.h"
 #include "platforms/esp/is_esp.h"
 
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2
@@ -218,7 +219,7 @@ bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
     while (mDriver.isDisplaying) {
         vTaskDelay(pdMS_TO_TICKS(1));  // Check every 1ms
 
-        if (timeout_ms != UINT32_MAX) {  // Check for infinite timeout
+        if (timeout_ms != fl::numeric_limits<uint32_t>::max()) {  // Check for infinite timeout
             TickType_t elapsed_ticks = xTaskGetTickCount() - start_ticks;
             if (elapsed_ticks >= timeout_ticks) {
                 return false;  // Timeout

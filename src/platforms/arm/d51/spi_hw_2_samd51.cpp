@@ -41,6 +41,7 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
 #include "fl/stl/time.h"
+#include "fl/numeric_limits.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
@@ -93,9 +94,9 @@ public:
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
-    /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
+    /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle

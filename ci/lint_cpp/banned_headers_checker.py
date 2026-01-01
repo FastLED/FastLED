@@ -1,20 +1,14 @@
 # pyright: reportUnknownMemberType=false
-import os
-import unittest
-from typing import Callable, List
+"""Checker for banned standard library headers.
 
-from ci.util.check_files import (
-    EXCLUDED_FILES,
-    FileContent,
-    FileContentChecker,
-    MultiCheckerFileProcessor,
-    collect_files_to_check,
-)
-from ci.util.paths import PROJECT_ROOT
+FastLED uses custom fl/ alternatives instead of standard library headers
+to ensure consistent behavior across all platforms and reduce code size.
+"""
+
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
 
-SRC_ROOT = PROJECT_ROOT / "src"
-
+# Configuration constants
 ENABLE_PARANOID_GNU_HEADER_INSPECTION = False
 
 if ENABLE_PARANOID_GNU_HEADER_INSPECTION:
@@ -134,6 +128,7 @@ class BannedHeadersChecker(FileContentChecker):
         """
         self.banned_headers_list = banned_headers_list
         self.strict_mode = strict_mode
+        self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for banned headers."""
@@ -274,10 +269,10 @@ class BannedHeadersChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for banned headers."""
-        failings: list[str] = []
+        violations: list[tuple[int, str]] = []
 
         if len(self.banned_headers_list) == 0:
-            return failings
+            return []
 
         # Determine file type and if bypass is allowed
         can_bypass = self._should_allow_bypass(file_content.path)
@@ -301,214 +296,31 @@ class BannedHeadersChecker(FileContentChecker):
 
                     # Header files: NEVER allow bypass
                     if file_ext in ("h", "hpp"):
-                        failings.append(
-                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
-                            f"Use {self._get_recommendation(header)} instead (banned in header files)"
+                        violations.append(
+                            (
+                                line_number,
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (banned in header files)",
+                            )
                         )
                     # Strict mode: no bypass allowed (for fl/ directory)
                     elif self.strict_mode and not has_bypass_comment:
-                        failings.append(
-                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
-                            f"Use {self._get_recommendation(header)} instead (strict mode, no bypass allowed)"
+                        violations.append(
+                            (
+                                line_number,
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (strict mode, no bypass allowed)",
+                            )
                         )
                     # Non-strict: allow bypass
                     elif not self.strict_mode and not has_bypass_comment:
-                        failings.append(
-                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
-                            f"Use {self._get_recommendation(header)} instead"
+                        violations.append(
+                            (
+                                line_number,
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead",
+                            )
                         )
 
-        return failings
+        # Store violations if any found
+        if violations:
+            self.violations[file_content.path] = violations
 
-
-def _test_no_banned_headers(
-    test_directories: list[str],
-    banned_headers_list: list[str],
-    on_fail: Callable[[str], None],
-    strict_mode: bool = False,
-) -> None:
-    """Searches through the program files to check for banned headers.
-
-    Args:
-        test_directories: Directories to check
-        banned_headers_list: List of banned headers
-        on_fail: Callback to call on failure
-        strict_mode: If True, do not allow "// ok include" bypass (for fl/ directory)
-    """
-    # Collect files to check
-    files_to_check = collect_files_to_check(test_directories)
-
-    # Create processor and checker
-    processor = MultiCheckerFileProcessor()
-    checker = BannedHeadersChecker(banned_headers_list, strict_mode=strict_mode)
-
-    # Process files
-    results = processor.process_files_with_checkers(files_to_check, [checker])
-
-    # Get results for banned headers checker
-    all_failings = results.get("BannedHeadersChecker", []) or []
-
-    if all_failings:
-        msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
-            all_failings
-        )
-        for failing in all_failings:
-            print(failing)
-
-        on_fail(msg)
-    else:
-        print("No banned headers found.")
-
-
-class TestNoBannedHeaders(unittest.TestCase):
-    def test_no_banned_headers_fl(self) -> None:
-        """Searches through fl/ directory with STRICT enforcement - no bypass allowed."""
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n\n"
-                "STRICT MODE: fl/ directory headers must not include stdlib headers.\n"
-                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
-                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
-                "Fix by removing the banned header or use fl/ alternatives.\n"
-                "See HEADER_RECOMMENDATIONS for suggested replacements."
-            )
-
-        # Test fl/ directory with strict mode
-        test_directories = [
-            os.path.join(SRC_ROOT, "fl"),
-        ]
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_CORE,
-            on_fail=on_fail,
-            strict_mode=True,
-        )
-
-    def test_no_banned_headers_lib8tion(self) -> None:
-        """Searches through lib8tion/ directory with STRICT enforcement - no bypass allowed."""
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n\n"
-                "STRICT MODE: lib8tion/ directory headers must not include stdlib headers.\n"
-                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
-                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
-                "Fix by removing the banned header or use fl/ alternatives.\n"
-                "See HEADER_RECOMMENDATIONS for suggested replacements."
-            )
-
-        # Test lib8tion/ directory with strict mode
-        test_directories = [
-            os.path.join(SRC_ROOT, "lib8tion"),
-        ]
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_CORE,
-            on_fail=on_fail,
-            strict_mode=True,
-        )
-
-    def test_no_banned_headers_src(self) -> None:
-        """Searches through fx/, sensors/, and platforms/shared/ directories for banned headers."""
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n\n"
-                "Policy for fx/, sensors/, platforms/shared/ directories:\n"
-                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
-                "- .cpp files: Use '// ok include' comment at the end of line to bypass\n"
-                "Recommended: Use fl/ alternatives instead of stdlib headers.\n"
-                "See HEADER_RECOMMENDATIONS for suggested replacements."
-            )
-
-        # Test other source directories (not fl/)
-        test_directories = [
-            os.path.join(SRC_ROOT, "fx"),
-            os.path.join(SRC_ROOT, "sensors"),
-            os.path.join(SRC_ROOT, "platforms", "shared"),
-        ]
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_CORE,
-            on_fail=on_fail,
-            strict_mode=False,
-        )
-
-    def test_no_banned_headers_examples(self) -> None:
-        """Searches through the program files to check for banned headers."""
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n"
-                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
-            )
-
-        test_directories = ["examples"]
-
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_COMMON,
-            on_fail=on_fail,
-        )
-
-    def test_no_banned_headers_platforms(self) -> None:
-        """Searches through the platforms directory to enforce no stdlib headers in .h files.
-
-        Platform headers must use fl/ alternatives, just like core FastLED code.
-        This ensures platform implementations are consistent with library standards.
-        """
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n\n"
-                "Policy for src/platforms/**/*.h files:\n"
-                "- .h/.hpp files: NEVER allow stdlib headers (must use fl/ alternatives)\n"
-                "- .cpp files: Use '// ok include' comment at the end of line to bypass\n"
-                "Platform implementations must follow the same standards as core FastLED code.\n"
-                "See HEADER_RECOMMENDATIONS for suggested replacements."
-            )
-
-        # Test the platforms directory with strict rules for .h files
-        test_directories = [
-            os.path.join(SRC_ROOT, "platforms"),
-        ]
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_PLATFORMS,
-            on_fail=on_fail,
-            strict_mode=False,  # Allow bypass in .cpp files, but never in .h files
-        )
-
-    def test_no_banned_headers_third_party(self) -> None:
-        """Searches through third_party directory to check for stdlib headers.
-
-        Third-party libraries should use fl/ alternatives instead of standard library headers.
-        STRICT MODE: No banned headers allowed in third_party/**/*.h files.
-        """
-
-        def on_fail(msg: str) -> None:
-            self.fail(
-                msg + "\n\n"
-                "STRICT MODE: Third-party libraries must use fl/ equivalents instead of stdlib headers.\n"
-                "Policy for third_party/ directory:\n"
-                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
-                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
-                "Third-party code must follow FastLED conventions and use fl/ alternatives.\n"
-                "See HEADER_RECOMMENDATIONS for suggested replacements."
-            )
-
-        # Test the third_party directory
-        test_directories = [
-            os.path.join(SRC_ROOT, "third_party"),
-        ]
-        _test_no_banned_headers(
-            test_directories=test_directories,
-            banned_headers_list=BANNED_HEADERS_COMMON,
-            on_fail=on_fail,
-            strict_mode=True,  # STRICT mode - no "// ok include" bypass for third_party
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()
+        return []

@@ -36,7 +36,7 @@ bool keep_going() {
 #ifndef FASTLED_STUB_MAIN_FAST_EXIT
     return true;
 #else
-    static int max_iterations = 5;
+    static int max_iterations = 5; // okay static in header
     bool keep_going = max_iterations-- > 0;
     return keep_going;
 #endif

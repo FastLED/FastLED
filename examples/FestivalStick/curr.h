@@ -751,7 +751,7 @@ void drawAnimartrix(uint32_t now) {
     fxEngine->setSpeed(animartrixTimeSpeed.value());
     
     // Handle animation index changes
-    static int lastAnimartrixIndex = -1;
+    static int lastAnimartrixIndex = -1; // okay static in header
     if (animartrixIndex.value() != lastAnimartrixIndex) {
         lastAnimartrixIndex = animartrixIndex.value();
         animartrix->fxSet(animartrixIndex.value());

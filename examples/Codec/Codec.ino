@@ -7,7 +7,7 @@
 #include <FastLED.h>
 #include "fl/sketch_macros.h"
 #include "fl/ui.h"
-#include <string.h>
+#include "fl/str.h"
 
 #include "fl/xymap.h"
 #include "inlined_data.h"

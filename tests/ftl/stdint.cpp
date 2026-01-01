@@ -3,6 +3,7 @@
 
 // Test that fl/stl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy
+// ok INT_MAX (this file tests that the numeric limit macros are properly defined)
 
 TEST_CASE("stdint type definitions") {
     SUBCASE("uint8_t and int8_t") {

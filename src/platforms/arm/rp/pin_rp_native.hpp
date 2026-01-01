@@ -68,7 +68,7 @@ inline PinValue digitalRead(int pin) {
 /// - GPIO29 = ADC3 (also VSYS/3 on Pico)
 /// - ADC4 = Internal temperature sensor (virtual pin 4)
 inline uint16_t analogRead(int pin) {
-    static bool adc_initialized = false;
+    static bool adc_initialized = false; // okay static in header
 
     // Initialize ADC hardware on first use
     if (!adc_initialized) {

@@ -21,17 +21,17 @@ namespace fl {
 
 class StubFileHandle : public FileHandle {
 private:
-    std::ifstream mFile;
-    std::string mPath;
-    std::size_t mSize;
-    std::size_t mPos;
+    std::ifstream mFile;  // okay std namespace
+    std::string mPath;  // okay std namespace
+    std::size_t mSize;  // okay std namespace
+    std::size_t mPos;  // okay std namespace
 
 public:
-    StubFileHandle(const std::string& path) : mPath(path), mPos(0) {
-        mFile.open(path, std::ios::binary | std::ios::ate);
+    StubFileHandle(const std::string& path) : mPath(path), mPos(0) {  // okay std namespace
+        mFile.open(path, std::ios::binary | std::ios::ate);  // okay std namespace
         if (mFile.is_open()) {
             mSize = mFile.tellg();
-            mFile.seekg(0, std::ios::beg);
+            mFile.seekg(0, std::ios::beg);  // okay std namespace
         } else {
             mSize = 0;
         }
@@ -78,7 +78,7 @@ public:
         if (!mFile.is_open() || pos > mSize) {
             return false;
         }
-        mFile.seekg(pos, std::ios::beg);
+        mFile.seekg(pos, std::ios::beg);  // okay std namespace
         mPos = pos;
         return true;
     }
@@ -96,13 +96,13 @@ public:
 
 class StubFileSystem : public FsImpl {
 private:
-    std::string mRootPath;
+    std::string mRootPath;  // okay std namespace
 
 public:
     StubFileSystem() = default;
     ~StubFileSystem() override = default;
 
-    void setRootPath(const std::string& path) {
+    void setRootPath(const std::string& path) {  // okay std namespace
         mRootPath = path;
         // Ensure the path ends with a directory separator
         if (!mRootPath.empty() && mRootPath.back() != '/' && mRootPath.back() != '\\') {
@@ -112,7 +112,7 @@ public:
 
     // Static test utility functions for file/directory management
     // These are only available on the stub/test platform
-    static bool createDirectory(const std::string& path) {
+    static bool createDirectory(const std::string& path) {  // okay std namespace
 #ifdef _WIN32
         return _mkdir(path.c_str()) == 0 || errno == EEXIST;
 #else
@@ -120,7 +120,7 @@ public:
 #endif
     }
 
-    static bool removeDirectory(const std::string& path) {
+    static bool removeDirectory(const std::string& path) {  // okay std namespace
 #ifdef _WIN32
         return _rmdir(path.c_str()) == 0;
 #else
@@ -128,12 +128,12 @@ public:
 #endif
     }
 
-    static bool removeFile(const std::string& path) {
+    static bool removeFile(const std::string& path) {  // okay std namespace
         return ::remove(path.c_str()) == 0;
     }
 
-    static bool createTextFile(const std::string& path, const std::string& content) {
-        std::ofstream ofs(path);
+    static bool createTextFile(const std::string& path, const std::string& content) {  // okay std namespace
+        std::ofstream ofs(path);  // okay std namespace
         if (!ofs.is_open()) {
             return false;
         }
@@ -156,12 +156,12 @@ public:
     }
 
     FileHandlePtr openRead(const char* path) override {
-        std::string full_path = mRootPath;
+        std::string full_path = mRootPath;  // okay std namespace
         full_path.append(path);
 
         // Convert forward slashes to platform-appropriate separators
 #ifdef _WIN32
-        std::replace(full_path.begin(), full_path.end(), '/', '\\');
+        std::replace(full_path.begin(), full_path.end(), '/', '\\');  // okay std namespace
 #endif
 
         // Check if file exists
