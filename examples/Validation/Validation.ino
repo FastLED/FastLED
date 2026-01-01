@@ -165,7 +165,10 @@
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
 #include "SketchHalt.h"
-#include "watchdog.h"
+
+#ifdef FL_IS_ESP32
+#include "platforms/esp/32/watchdog_esp32.h"
+#endif
 
 // ============================================================================
 // Configuration
@@ -234,8 +237,10 @@ void setup() {
     Serial.begin(115200);
     while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
 
-    // Setup watchdog timer for proof-of-life monitoring (ESP32-C6 only, 5s timeout)
-    validation::setup_watchdog();
+    // Setup watchdog timer for proof-of-life monitoring (ESP32 only, 5s timeout)
+#ifdef FL_IS_ESP32
+    fl::watchdog_setup();
+#endif
 
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
