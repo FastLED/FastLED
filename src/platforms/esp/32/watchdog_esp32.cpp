@@ -2,6 +2,11 @@
 //
 // ESP32 Watchdog Timer Implementation
 //
+// FIXES WINDOWS USB DISCONNECT ISSUE. If the watchdog fires normally then the USB line
+// is not held low. This causes Windows to think the device is dead and won't reconnect.
+// This implementation fixes this by overriding the panic handler to perform a safe
+// USB disconnect sequence before reset.
+//
 // Provides a configurable proof-of-life watchdog that automatically monitors
 // the Arduino loop() task. No manual feeding required - the ESP32 framework
 // handles watchdog feeding automatically as long as loop() keeps executing.
@@ -10,25 +15,29 @@
 
 #ifdef FL_IS_ESP32
 
-#include "fl/log.h"
+#include "fl/dbg.h"
 #include "esp_task_wdt.h"
 #include "soc/usb_serial_jtag_reg.h"
 #include "esp_system.h"
 
 namespace fl {
+namespace detail {
 
 // Static storage for user callback and data
+// Shared between watchdog setup and panic handler
 static watchdog_callback_t s_user_callback = nullptr;
 static void* s_user_data = nullptr;
+
+} // namespace detail
 
 void watchdog_setup(uint32_t timeout_ms,
                     watchdog_callback_t callback,
                     void* user_data) {
-    FL_WARN("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog");
+    FL_DBG("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog");
 
-    // Store user callback and data for ISR handler
-    s_user_callback = callback;
-    s_user_data = user_data;
+    // Store user callback and data for panic handler (defined in init.cpp)
+    detail::s_user_callback = callback;
+    detail::s_user_data = user_data;
 
     // Deinitialize default watchdog first to clear any existing configuration
     esp_task_wdt_deinit();
@@ -43,29 +52,33 @@ void watchdog_setup(uint32_t timeout_ms,
 
     esp_err_t err = esp_task_wdt_init(&config);
     if (err != ESP_OK) {
-        FL_WARN("[WATCHDOG] Failed to initialize (error: " << err << ")");
+        FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
         return;
     }
 
-    FL_WARN("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
+    FL_DBG("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
     if (callback != nullptr) {
-        FL_WARN("[WATCHDOG] ℹ️  User callback registered");
+        FL_DBG("[WATCHDOG] ℹ️  User callback registered");
     }
-    FL_WARN("[WATCHDOG] ℹ️  Automatically monitors loop() execution - no manual feeding needed");
+    FL_DBG("[WATCHDOG] ℹ️  Automatically monitors loop() execution - no manual feeding needed");
 }
 
 } // namespace fl
 
 // ESP32 panic hook to perform safe USB disconnect before reset
-// This runs when the watchdog triggers a panic
+// This runs when the watchdog triggers a panic or any system panic occurs
+//
+// IMPORTANT: This function overrides a weak symbol in ESP-IDF's panic handler.
+// The function signature and behavior must match ESP-IDF expectations.
+// See: esp-idf/components/esp_system/panic.c
 extern "C" void esp_panic_handler_reconfigure_wdts(void) {
-    // Call user callback first if provided
-    if (fl::s_user_callback != nullptr) {
-        fl::s_user_callback(fl::s_user_data);
+    // Call user callback first if provided (from watchdog setup)
+    if (fl::detail::s_user_callback != nullptr) {
+        fl::detail::s_user_callback(fl::detail::s_user_data);
     }
 
-    // Print watchdog fired message
-    FL_WARN("\n[WATCHDOG FIRED] Watchdog timeout - performing safe reset");
+    // Print watchdog/panic message
+    FL_DBG("\n[PANIC HANDLER] System panic detected - performing safe USB reset");
 
     // Force USB disconnect to prevent phantom device on Windows
     // Clear D+ pullup to signal USB disconnect
@@ -78,7 +91,7 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
     // Note: This delay is safe in panic handler context
     delay(150);
 
-    FL_WARN("[WATCHDOG FIRED] ✓ USB disconnected - proceeding with reset");
+    FL_DBG("[PANIC HANDLER] ✓ USB disconnected - proceeding with reset");
 }
 
 #endif // FL_IS_ESP32
