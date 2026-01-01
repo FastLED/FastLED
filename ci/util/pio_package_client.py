@@ -7,6 +7,7 @@ Handles daemon lifecycle, request submission, and progress monitoring.
 """
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -14,6 +15,21 @@ from pathlib import Path
 from typing import Any
 
 import psutil
+
+from ci.util.banner_print import (
+    BannerPrinter,
+    format_elapsed_time,
+    print_error_banner,
+    print_phase_banner,
+    print_progress_section,
+    print_success_banner,
+    print_tree_status,
+)
+from ci.util.pio_package_messages import (
+    DaemonState,
+    DaemonStatus,
+    PackageRequest,
+)
 
 
 # Import package validator
@@ -86,77 +102,78 @@ def start_daemon() -> None:
     )
 
 
-def read_status_file() -> dict[str, Any]:
+def read_status_file() -> DaemonStatus:
     """Read current daemon status with corruption recovery.
 
     Returns:
-        Status dictionary or default status if file doesn't exist or corrupted
+        DaemonStatus object (or default status if file doesn't exist or corrupted)
     """
     if not STATUS_FILE.exists():
-        return {"state": "unknown", "message": "Status file not found"}
+        return DaemonStatus(
+            state=DaemonState.UNKNOWN,
+            message="Status file not found",
+            updated_at=time.time(),
+        )
 
     try:
         with open(STATUS_FILE, "r") as f:
             data = json.load(f)
 
-        # Validate required fields
-        required = ["state", "message", "updated_at"]
-        for field in required:
-            if field not in data:
-                return {
-                    "state": "error",
-                    "message": "Status file corrupted (missing fields)",
-                }
-
-        return data
+        # Parse into typed DaemonStatus
+        return DaemonStatus.from_dict(data)
 
     except (json.JSONDecodeError, ValueError):
         # Corrupted JSON - return default status
-        return {
-            "state": "error",
-            "message": "Status file corrupted (invalid JSON)",
-        }
+        return DaemonStatus(
+            state=DaemonState.UNKNOWN,
+            message="Status file corrupted (invalid JSON)",
+            updated_at=time.time(),
+        )
     except KeyboardInterrupt:
         raise
     except Exception:
-        return {"state": "error", "message": "Failed to read status"}
+        return DaemonStatus(
+            state=DaemonState.UNKNOWN,
+            message="Failed to read status",
+            updated_at=time.time(),
+        )
 
 
-def write_request_file(request: dict[str, Any]) -> None:
+def write_request_file(request: PackageRequest) -> None:
     """Atomically write request file.
 
     Args:
-        request: Request dictionary
+        request: PackageRequest object
     """
     DAEMON_DIR.mkdir(parents=True, exist_ok=True)
 
     # Atomic write using temporary file
     temp_file = REQUEST_FILE.with_suffix(".tmp")
     with open(temp_file, "w") as f:
-        json.dump(request, f, indent=2)
+        json.dump(request.to_dict(), f, indent=2)
 
     # Atomic rename
     temp_file.replace(REQUEST_FILE)
 
 
-def display_status(status: dict[str, Any], prefix: str = "  ") -> None:
-    """Display status update to user.
+def display_status(status: DaemonStatus, prefix: str = "  ") -> None:
+    """Display status update to user with enhanced formatting.
 
     Args:
-        status: Status dictionary
+        status: DaemonStatus object
         prefix: Line prefix for indentation
     """
-    state = status.get("state", "unknown")
-    message = status.get("message", "")
+    # Show current operation if available, otherwise use message
+    display_text = status.current_operation or status.message
 
-    if state == "installing":
-        print(f"{prefix}📦 {message}", flush=True)
-    elif state == "completed":
-        print(f"{prefix}✅ {message}", flush=True)
-    elif state == "failed":
-        print(f"{prefix}❌ {message}", flush=True)
+    if status.state == DaemonState.INSTALLING:
+        print(f"{prefix}📦 {display_text}", flush=True)
+    elif status.state == DaemonState.COMPLETED:
+        print(f"{prefix}✅ {display_text}", flush=True)
+    elif status.state == DaemonState.FAILED:
+        print(f"{prefix}❌ {display_text}", flush=True)
     else:
-        print(f"{prefix}ℹ️  {message}", flush=True)
+        print(f"{prefix}ℹ️  {display_text}", flush=True)
 
 
 def packages_already_installed(project_dir: Path, environment: str | None) -> bool:
@@ -205,6 +222,8 @@ def ensure_packages_installed(
 ) -> bool:
     """Ensure PlatformIO packages are installed via daemon.
 
+    Enhanced with banner-style logging and typed message protocol.
+
     Args:
         project_dir: PlatformIO project directory
         environment: PlatformIO environment name (or None for all)
@@ -220,33 +239,80 @@ def ensure_packages_installed(
 
         default_env = get_default_environment(str(project_dir))
         if default_env:
-            print(f"Detected default environment: {default_env}")
+            environment = default_env  # Use detected default for display
 
-    print(f"Checking if packages are installed for {environment}...")
+    # ═══════════════════════════════════════════════════════════
+    # PHASE BANNER
+    # ═══════════════════════════════════════════════════════════
+    print_phase_banner(
+        "PHASE 0: PACKAGE INSTALLATION",
+        details={
+            "Project": str(project_dir),
+            "Environment": environment or "default",
+            "Caller PID": str(os.getpid()),
+        },
+    )
 
+    # ───────────────────────────────────────────────────────────
+    # PRE-FLIGHT CHECK
+    # ───────────────────────────────────────────────────────────
     # Quick check: are packages already installed?
     if packages_already_installed(project_dir, environment):
         # Additional validation check for corrupted packages
-        # Use default_env (detected default) even when environment is None
         if default_env:
             is_valid, errors = check_all_packages(project_dir, default_env)
             if not is_valid:
-                print("⚠️  Detected corrupted packages, requesting reinstallation:")
-                for error in errors:
-                    print(f"  - {error}")
+                print_tree_status(
+                    "🔍 Checking packages...",
+                    [
+                        ("├─", "Validating integrity...", None),
+                        ("├─", f"❌ Corrupted: {errors[0]}", "error"),
+                        ("└─", "📦 Reinstallation required", None),
+                    ],
+                )
                 # Fall through to daemon installation
             else:
-                print("✅ Packages already installed and validated")
+                print_tree_status(
+                    "🔍 Checking packages...",
+                    [
+                        ("├─", "Validating integrity...", None),
+                        ("└─", "✅ Packages valid", "success"),
+                    ],
+                )
                 return True
         else:
-            print("✅ Packages already installed")
+            print_tree_status(
+                "🔍 Checking packages...",
+                [
+                    ("└─", "✅ Packages already installed", "success"),
+                ],
+            )
             return True
+    else:
+        print_tree_status(
+            "🔍 Checking packages...",
+            [
+                ("├─", "Validating integrity...", None),
+                ("└─", "📦 Installation required", None),
+            ],
+        )
 
-    print("📦 Packages need installation - requesting daemon...")
+    # ───────────────────────────────────────────────────────────
+    # DAEMON CONNECTION
+    # ───────────────────────────────────────────────────────────
+    daemon_pid = None
+    daemon_status_age = None
 
     # Start daemon if not running
     if not is_daemon_running():
-        print("Starting package installation daemon...")
+        print_tree_status(
+            "🔗 Connecting to daemon...",
+            [
+                ("├─", "Status: NOT RUNNING", None),
+                ("└─", "Starting daemon...", None),
+            ],
+        )
+
         start_daemon()
         time.sleep(2)  # Give daemon time to initialize
 
@@ -256,67 +322,117 @@ def ensure_packages_installed(
                 break
             time.sleep(1)
         else:
-            print("❌ Failed to start daemon")
+            print_error_banner(
+                "Daemon Connection FAILED",
+                "Failed to start package installation daemon",
+                recommendations=[
+                    "Check daemon logs: bash daemon logs",
+                    "Manually start daemon: uv run python ci/util/pio_package_daemon.py --foreground",
+                    "Check for port conflicts or permission issues",
+                ],
+            )
             return False
 
-        print("✅ Daemon started")
+        print("   └─ ✅ Daemon started")
+    else:
+        # Daemon is running - get health info
+        status = read_status_file()
+        daemon_pid = status.daemon_pid
+        daemon_status_age = status.get_age_seconds()
 
-    # Submit request
-    import os
+        health_status = "OK" if not status.is_stale() else "STALE"
+        health_color = None if not status.is_stale() else "warning"
 
-    request = {
-        "project_dir": str(project_dir),
-        "environment": environment,  # None is valid - daemon will use PlatformIO default
-        "timestamp": time.time(),
-        "caller_pid": os.getpid(),
-        "caller_cwd": os.getcwd(),
-    }
+        print_tree_status(
+            "🔗 Connecting to daemon...",
+            [
+                ("├─", f"Status: RUNNING (PID {daemon_pid or 'unknown'})", None),
+                (
+                    "├─",
+                    f"Health: {health_status} (updated {daemon_status_age:.1f}s ago)",
+                    health_color,
+                ),
+                ("└─", "✅ Connected", "success"),
+            ],
+        )
+
+    # ───────────────────────────────────────────────────────────
+    # SUBMIT REQUEST
+    # ───────────────────────────────────────────────────────────
+    request = PackageRequest(
+        project_dir=str(project_dir),
+        environment=environment,  # None is valid - daemon will use PlatformIO default
+        timestamp=time.time(),
+        caller_pid=os.getpid(),
+        caller_cwd=os.getcwd(),
+    )
 
     # CHECK: Wait if installation already in progress
     status = read_status_file()
-    if status.get("installation_in_progress", False):
-        active_pid = status.get("caller_pid", "unknown")
-        active_cwd = status.get("caller_cwd", "unknown")
-        print(f"⏳ Another installation in progress, waiting...")
-        print(f"   Active installation: PID={active_pid}, CWD={active_cwd}")
-        print(f"   If stuck, run: bash daemon restart")
+    if status.installation_in_progress:
+        print_tree_status(
+            "📤 Submitting request...",
+            [
+                ("├─", "⏳ Queue position: waiting", None),
+                (
+                    "├─",
+                    f"Active: PID {status.caller_pid} ({status.caller_cwd})",
+                    None,
+                ),
+                ("└─", "Waiting for slot...", None),
+            ],
+        )
+
         # Wait for ongoing installation to complete
         timeout_start = time.time()
         last_progress_update = time.time()
-        while status.get("installation_in_progress", False):
+        while status.installation_in_progress:
             current_time = time.time()
             elapsed = current_time - timeout_start
 
             # Check timeout (30 minute timeout)
             if elapsed > 1800:
-                print("❌ Timeout waiting for ongoing installation")
-                print("   To force restart: bash daemon restart")
+                print_error_banner(
+                    "Request Submission FAILED",
+                    f"Timeout waiting for active installation (PID {status.caller_pid})",
+                    recommendations=[
+                        "Check if active installation is stuck: bash daemon logs-tail",
+                        "Force restart daemon: bash daemon restart (may corrupt packages)",
+                    ],
+                )
                 return False
 
             # Print progress update every 10 seconds
             if current_time - last_progress_update >= 10:
-                elapsed_str = f"{int(elapsed)}s"
-                if elapsed >= 60:
-                    minutes = int(elapsed // 60)
-                    seconds = int(elapsed % 60)
-                    elapsed_str = f"{minutes}m {seconds}s"
-                print(f"   Still waiting... (elapsed: {elapsed_str})", flush=True)
+                elapsed_str = format_elapsed_time(elapsed)
+                print(
+                    f"   └─ Still queued... (elapsed: {elapsed_str}, active PID: {status.caller_pid})",
+                    flush=True,
+                )
                 last_progress_update = current_time
 
             time.sleep(2)
             status = read_status_file()
-        print("✅ Previous installation completed")
 
-    print(f"Submitting package installation request...")
+        print("   └─ ✅ Queue clear, proceeding...")
+
+    print_tree_status(
+        "📤 Submitting request...",
+        [
+            ("├─", f"Request ID: {request.request_id}", None),
+            ("└─", "✅ Submitted", "success"),
+        ],
+    )
     write_request_file(request)
 
-    # Wait for completion with progress updates
-    print("\nPackage Installation Progress:")
-    print("-" * 60)
+    # ───────────────────────────────────────────────────────────
+    # MONITOR INSTALLATION PROGRESS
+    # ───────────────────────────────────────────────────────────
+    print_progress_section("Package Installation Progress:")
 
     start_time = time.time()
-    last_status = None
     last_message = None
+    last_heartbeat = time.time()
 
     while True:
         try:
@@ -324,28 +440,59 @@ def ensure_packages_installed(
 
             # Check timeout
             if elapsed > timeout:
-                print(f"\n❌ Package installation timeout after {timeout}s")
-                print("Note: Daemon will continue installation in background")
+                timeout_str = format_elapsed_time(timeout)
+                print_error_banner(
+                    "Package Installation TIMEOUT",
+                    f"Installation did not complete within {timeout_str}",
+                    recommendations=[
+                        "Daemon continues in background - check logs: bash daemon logs-tail",
+                        "Check network connectivity if downloading packages",
+                        "Increase timeout if needed (current: {}s)".format(timeout),
+                    ],
+                )
                 return False
 
             # Read status
             status = read_status_file()
-            current_message = status.get("message", "")
 
-            # Display progress (only if changed)
-            if current_message != last_message:
+            # Display progress when message changes
+            if status.message != last_message:
                 display_status(status)
-                last_message = current_message
+                last_message = status.message
+                last_heartbeat = time.time()  # Reset heartbeat on message change
+
+            # Heartbeat: print periodic updates during long operations (every 30s)
+            if time.time() - last_heartbeat >= 30:
+                elapsed_str = format_elapsed_time(elapsed)
+                status_age = status.get_age_seconds()
+                print(
+                    f"  ⏱️  Still {status.state.value}... (elapsed: {elapsed_str}, last update: {status_age:.1f}s ago)",
+                    flush=True,
+                )
+                last_heartbeat = time.time()
+
+                # Warn if daemon appears stale
+                if status.is_stale(timeout_seconds=60):
+                    print(
+                        f"  ⚠️  Daemon status is stale (no update for {status_age:.0f}s) - check logs: bash daemon logs-tail",
+                        flush=True,
+                    )
 
             # Check completion
-            state = status.get("state", "unknown")
-            if state == "completed":
-                print("-" * 60)
-                print("✅ Package installation completed successfully\n")
+            if status.state == DaemonState.COMPLETED:
+                total_time = format_elapsed_time(elapsed)
+                print_success_banner("Package installation completed", total_time)
                 return True
-            elif state == "failed":
-                print("-" * 60)
-                print(f"❌ Package installation failed: {current_message}\n")
+            elif status.state == DaemonState.FAILED:
+                print_error_banner(
+                    "Package Installation FAILED",
+                    status.message,
+                    recommendations=[
+                        "Check daemon logs for details: bash daemon logs",
+                        "Verify network connectivity and disk space",
+                        "Try again: installation may have been interrupted",
+                    ],
+                )
                 return False
 
             # Sleep before next poll
@@ -354,6 +501,7 @@ def ensure_packages_installed(
         except KeyboardInterrupt:
             print("\n\n⚠️  Interrupted by user")
             print("Note: Daemon will continue installation in background")
+            print("      Check progress: bash daemon logs-tail")
             raise
 
 
@@ -403,7 +551,9 @@ def get_daemon_status() -> dict[str, Any]:
             status["pid"] = None
 
     if STATUS_FILE.exists():
-        status["current_status"] = read_status_file()
+        daemon_status = read_status_file()
+        # Convert DaemonStatus to dict for JSON serialization
+        status["current_status"] = daemon_status.to_dict()
 
     return status
 

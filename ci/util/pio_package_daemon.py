@@ -37,6 +37,8 @@ from typing import Any
 import psutil
 from daemoniker import Daemonizer
 
+from ci.util.pio_package_messages import DaemonState, DaemonStatus, PackageRequest
+
 
 # Daemon configuration
 DAEMON_NAME = "fastled_pio_package_daemon"
@@ -47,9 +49,11 @@ REQUEST_FILE = DAEMON_DIR / "package_request.json"
 LOG_FILE = DAEMON_DIR / "daemon.log"
 IDLE_TIMEOUT = 43200  # 12 hours
 
-# Global state to track installation status
+# Global state to track installation status and daemon info
 _installation_in_progress = False
 _installation_lock = threading.Lock()
+_daemon_pid: int | None = None
+_daemon_started_at: float | None = None
 
 # Network error patterns for retry detection
 NETWORK_ERROR_PATTERNS = [
@@ -101,18 +105,17 @@ def setup_logging(foreground: bool = False) -> None:
     logger.addHandler(file_handler)
 
 
-def read_status_file_safe() -> dict[str, Any]:
+def read_status_file_safe() -> DaemonStatus:
     """Read status file with corruption recovery.
 
     Returns:
-        Status dict (or default if corrupted)
+        DaemonStatus object (or default if corrupted)
     """
-    default_status = {
-        "state": "idle",
-        "message": "",
-        "started_at": None,
-        "updated_at": time.time(),
-    }
+    default_status = DaemonStatus(
+        state=DaemonState.IDLE,
+        message="",
+        updated_at=time.time(),
+    )
 
     if not STATUS_FILE.exists():
         return default_status
@@ -121,27 +124,22 @@ def read_status_file_safe() -> dict[str, Any]:
         with open(STATUS_FILE, "r") as f:
             data = json.load(f)
 
-        # Validate required fields
-        required = ["state", "message", "updated_at"]
-        for field in required:
-            if field not in data:
-                raise ValueError(f"Missing field: {field}")
-
-        return data
+        # Parse into typed DaemonStatus
+        return DaemonStatus.from_dict(data)
 
     except (json.JSONDecodeError, ValueError) as e:
         logging.warning(f"Corrupted status file detected: {e}")
         logging.warning("Creating fresh status file")
 
         # Write fresh status file
-        write_status_file_atomic(default_status)
+        write_status_file_atomic(default_status.to_dict())
 
         return default_status
     except KeyboardInterrupt:
         raise
     except Exception as e:
         logging.error(f"Unexpected error reading status file: {e}")
-        write_status_file_atomic(default_status)
+        write_status_file_atomic(default_status.to_dict())
         return default_status
 
 
@@ -168,48 +166,57 @@ def write_status_file_atomic(status: dict[str, Any]) -> None:
         temp_file.unlink(missing_ok=True)
 
 
-def update_status(state: str, message: str, **kwargs: Any) -> None:
+def update_status(state: DaemonState, message: str, **kwargs: Any) -> None:
     """Update status file with current daemon state.
 
     Args:
-        state: One of: idle, installing, completed, failed
+        state: DaemonState enum value
         message: Human-readable status message
         **kwargs: Additional fields to include in status
                  Use installation_in_progress=True/False to override global flag
     """
-    global _installation_in_progress
+    global _installation_in_progress, _daemon_pid, _daemon_started_at
 
     # Allow explicit override of installation_in_progress flag
     if "installation_in_progress" not in kwargs:
         kwargs["installation_in_progress"] = _installation_in_progress
 
-    status = {
-        "state": state,
-        "message": message,
-        "updated_at": time.time(),
+    # Create typed DaemonStatus object
+    status_obj = DaemonStatus(
+        state=state,
+        message=message,
+        updated_at=time.time(),
+        daemon_pid=_daemon_pid,
+        daemon_started_at=_daemon_started_at,
         **kwargs,
-    }
+    )
 
-    write_status_file_atomic(status)
+    write_status_file_atomic(status_obj.to_dict())
 
 
-def read_request_file() -> dict[str, Any] | None:
+def read_request_file() -> PackageRequest | None:
     """Read and parse request file.
 
     Returns:
-        Request dict if valid request exists, None otherwise
+        PackageRequest object if valid request exists, None otherwise
     """
     if not REQUEST_FILE.exists():
         return None
 
     try:
         with open(REQUEST_FILE, "r") as f:
-            request = json.load(f)
-        return request
+            data = json.load(f)
+
+        # Parse into typed PackageRequest
+        return PackageRequest.from_dict(data)
+
+    except (json.JSONDecodeError, ValueError, TypeError) as e:
+        logging.error(f"Failed to parse request file: {e}")
+        return None
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        logging.error(f"Failed to read request file: {e}")
+        logging.error(f"Unexpected error reading request file: {e}")
         return None
 
 
@@ -340,21 +347,16 @@ def get_clean_windows_env() -> dict[str, str]:
     return clean_env
 
 
-def validate_request(request: dict[str, Any]) -> bool:
+def validate_request(request: PackageRequest) -> bool:
     """Validate package installation request.
 
     Args:
-        request: Request dictionary
+        request: PackageRequest object
 
     Returns:
         True if request is valid, False otherwise
     """
-    # Required fields
-    if "project_dir" not in request:
-        logging.error("Request missing required fields")
-        return False
-
-    project_dir = Path(request["project_dir"])
+    project_dir = Path(request.project_dir)
 
     # Verify project directory exists
     if not project_dir.exists() or not project_dir.is_dir():
@@ -367,7 +369,7 @@ def validate_request(request: dict[str, Any]) -> bool:
         return False
 
     # Verify environment is valid (if provided)
-    env = request.get("environment")
+    env = request.environment
     if env is not None and (not isinstance(env, str) or not env):
         logging.error(f"Invalid environment: {env}")
         return False
@@ -424,12 +426,13 @@ def run_package_install_with_retry(
             retry_msg = f"Retry {attempt}/{max_retries - 1} after network error"
             logging.info(retry_msg)
             update_status(
-                "installing",
+                DaemonState.INSTALLING,
                 retry_msg,
                 environment=environment,
                 project_dir=project_dir,
                 caller_pid=caller_pid,
                 caller_cwd=caller_cwd,
+                current_operation=retry_msg,
             )
             time.sleep(5)  # Brief delay before retry
 
@@ -458,13 +461,24 @@ def run_package_install_with_retry(
             if line_stripped:
                 output_lines.append(line)
                 logging.info(f"PlatformIO: {line_stripped}")
+
+                # Extract operation details for better status visibility
+                current_op = None
+                if "Tool Manager: Installing" in line_stripped:
+                    current_op = line_stripped
+                elif "Downloading" in line_stripped:
+                    current_op = "Downloading packages..."
+                elif "Unpacking" in line_stripped:
+                    current_op = "Unpacking packages..."
+
                 update_status(
-                    "installing",
+                    DaemonState.INSTALLING,
                     line_stripped,
                     environment=environment,
                     project_dir=project_dir,
                     caller_pid=caller_pid,
                     caller_cwd=caller_cwd,
+                    current_operation=current_op,
                 )
 
         # Log stdout closure
@@ -541,19 +555,19 @@ def get_default_environment(project_dir: str) -> str | None:
         return None
 
 
-def process_package_request(request: dict[str, Any]) -> bool:
+def process_package_request(request: PackageRequest) -> bool:
     """Execute package installation request.
 
     Args:
-        request: Request dictionary with project_dir and optional environment
+        request: PackageRequest object with project_dir and optional environment
 
     Returns:
         True if installation successful, False otherwise
     """
-    project_dir = request["project_dir"]
-    environment = request.get("environment")
-    caller_pid = request.get("caller_pid", "unknown")
-    caller_cwd = request.get("caller_cwd", "unknown")
+    project_dir = request.project_dir
+    environment = request.environment
+    caller_pid = request.caller_pid
+    caller_cwd = request.caller_cwd
 
     # If no environment specified, use default_envs from platformio.ini
     # This prevents PlatformIO from installing packages for ALL environments
@@ -576,15 +590,15 @@ def process_package_request(request: dict[str, Any]) -> bool:
     has_space, error_msg = check_disk_space(pio_packages_dir, required_mb=1000)
     if not has_space:
         logging.error(f"Disk space check failed: {error_msg}")
-        update_status("failed", error_msg)
+        update_status(DaemonState.FAILED, error_msg)
         return False
 
     update_status(
-        "installing",
+        DaemonState.INSTALLING,
         f"Installing packages for {env_desc}",
         environment=environment,
         project_dir=project_dir,
-        started_at=time.time(),
+        request_started_at=time.time(),
         caller_pid=caller_pid,
         caller_cwd=caller_cwd,
     )
@@ -632,7 +646,8 @@ def process_package_request(request: dict[str, Any]) -> bool:
                         for error in errors:
                             logging.error(f"  - {error}")
                         update_status(
-                            "failed", f"Package validation failed: {errors[0]}"
+                            DaemonState.FAILED,
+                            f"Package validation failed: {errors[0]}",
                         )
                         return False
 
@@ -642,7 +657,7 @@ def process_package_request(request: dict[str, Any]) -> bool:
                     # Don't fail installation on validation error, just log
 
             update_status(
-                "completed",
+                DaemonState.COMPLETED,
                 "Package installation successful",
                 installation_in_progress=False,
             )
@@ -656,19 +671,23 @@ def process_package_request(request: dict[str, Any]) -> bool:
             else:
                 error_msg = f"Package installation failed (exit {returncode})"
 
-            update_status("failed", error_msg, installation_in_progress=False)
+            update_status(DaemonState.FAILED, error_msg, installation_in_progress=False)
             return False
 
     except KeyboardInterrupt:
         logging.warning("Package installation interrupted by user")
         update_status(
-            "failed", "Installation interrupted by user", installation_in_progress=False
+            DaemonState.FAILED,
+            "Installation interrupted by user",
+            installation_in_progress=False,
         )
         raise
     except Exception as e:
         logging.error(f"Package installation error: {e}")
         update_status(
-            "failed", f"Installation error: {e}", installation_in_progress=False
+            DaemonState.FAILED,
+            f"Installation error: {e}",
+            installation_in_progress=False,
         )
         return False
     finally:
@@ -733,19 +752,25 @@ def cleanup_and_exit() -> None:
         logging.error(f"Failed to remove PID file: {e}")
 
     # Set final status
-    update_status("idle", "Daemon shut down")
+    update_status(DaemonState.IDLE, "Daemon shut down")
 
     sys.exit(0)
 
 
 def run_daemon_loop() -> None:
     """Main daemon loop: process package installation requests."""
+    global _daemon_pid, _daemon_started_at
+
     # Register signal handlers
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
-    logging.info(f"Daemon started with PID {os.getpid()}")
-    update_status("idle", "Daemon ready")
+    # Initialize daemon tracking variables
+    _daemon_pid = os.getpid()
+    _daemon_started_at = time.time()
+
+    logging.info(f"Daemon started with PID {_daemon_pid}")
+    update_status(DaemonState.IDLE, "Daemon ready")
 
     last_activity = time.time()
 
@@ -770,12 +795,12 @@ def run_daemon_loop() -> None:
                     if _installation_in_progress:
                         # Read current status to get active caller info
                         current_status = read_status_file_safe()
-                        active_pid = current_status.get("caller_pid", "unknown")
-                        active_cwd = current_status.get("caller_cwd", "unknown")
+                        active_pid = current_status.caller_pid or "unknown"
+                        active_cwd = current_status.caller_cwd or "unknown"
 
                         # Get incoming request info
-                        incoming_pid = request.get("caller_pid", "unknown")
-                        incoming_cwd = request.get("caller_cwd", "unknown")
+                        incoming_pid = request.caller_pid
+                        incoming_cwd = request.caller_cwd
 
                         logging.warning(
                             f"Installation already in progress, refusing concurrent request. "
@@ -783,7 +808,7 @@ def run_daemon_loop() -> None:
                             f"Incoming request: PID={incoming_pid}, CWD={incoming_cwd}"
                         )
                         update_status(
-                            "failed",
+                            DaemonState.FAILED,
                             f"Installation already in progress (active PID: {active_pid}, CWD: {active_cwd})",
                         )
                         clear_request_file()
@@ -796,7 +821,7 @@ def run_daemon_loop() -> None:
                     # Process request
                     process_package_request(request)
                 else:
-                    update_status("failed", "Invalid request")
+                    update_status(DaemonState.FAILED, "Invalid request")
 
                 # Clear request file
                 clear_request_file()

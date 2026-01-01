@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# daemon - PlatformIO Package Daemon Management Wrapper
+#
+# Provides convenient commands for managing the singleton package installation daemon.
+#
+# Usage:
+#   bash daemon status      - Show daemon status and health
+#   bash daemon stop        - Stop the daemon gracefully
+#   bash daemon start       - Start the daemon (usually automatic)
+#   bash daemon restart     - Stop and start the daemon
+#   bash daemon logs        - View daemon log file (last 50 lines)
+#   bash daemon logs-tail   - Follow daemon logs in real-time (Ctrl+C to exit)
+#   bash daemon clean       - Remove all daemon state (force fresh start)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Function to show usage
+show_usage() {
+    cat <<EOF
+PlatformIO Package Daemon Management
+
+Usage:
+  bash daemon {status|stop|start|restart|logs|logs-tail|clean}
+
+Commands:
+  status       Show daemon status and health
+  stop         Stop the daemon gracefully
+  start        Start the daemon (usually automatic)
+  restart      Stop and start the daemon
+  logs         View daemon log file (last 50 lines)
+  logs-tail    Follow daemon logs in real-time (Ctrl+C to exit)
+  clean        Remove all daemon state (force fresh start)
+
+Examples:
+  bash daemon status      # Check if daemon is running
+  bash daemon logs-tail   # Monitor daemon activity in real-time
+  bash daemon restart     # Restart stuck daemon
+
+For more information, see CLAUDE.md section "Package Installation Daemon Management"
+EOF
+}
+
+# Main command dispatch
+case "${1:-}" in
+    status)
+        uv run python ci/util/pio_package_client.py --status
+        ;;
+
+    stop)
+        uv run python ci/util/pio_package_client.py --stop
+        ;;
+
+    start)
+        # Daemon auto-starts on demand, just check if running
+        echo "Checking daemon status..."
+        uv run python ci/util/pio_package_client.py --status
+        echo ""
+        echo "Note: Daemon auto-starts when needed by 'bash validate' or 'bash debug'"
+        ;;
+
+    restart)
+        echo "Restarting daemon..."
+        uv run python ci/util/pio_package_client.py --stop || true
+        sleep 2
+        echo ""
+        echo "✅ Daemon will auto-start on next package installation request"
+        ;;
+
+    logs)
+        if [[ -f ~/.fastled/daemon/daemon.log ]]; then
+            tail -50 ~/.fastled/daemon/daemon.log
+        else
+            echo "❌ Daemon log file not found: ~/.fastled/daemon/daemon.log"
+            echo "   Daemon may not have been started yet"
+            exit 1
+        fi
+        ;;
+
+    logs-tail)
+        if [[ -f ~/.fastled/daemon/daemon.log ]]; then
+            echo "Following daemon logs (Ctrl+C to exit)..."
+            echo ""
+            tail -f ~/.fastled/daemon/daemon.log
+        else
+            echo "❌ Daemon log file not found: ~/.fastled/daemon/daemon.log"
+            echo "   Daemon may not have been started yet"
+            exit 1
+        fi
+        ;;
+
+    clean)
+        echo "Cleaning daemon state..."
+        rm -rf ~/.fastled/daemon/
+        echo "✅ Daemon state cleared"
+        echo "   All PID files, status files, and logs removed"
+        echo "   Daemon will start fresh on next request"
+        ;;
+
+    -h|--help|help)
+        show_usage
+        exit 0
+        ;;
+
+    "")
+        echo "❌ Error: No command specified"
+        echo ""
+        show_usage
+        exit 1
+        ;;
+
+    *)
+        echo "❌ Error: Unknown command '$1'"
+        echo ""
+        show_usage
+        exit 1
+        ;;
+esac
