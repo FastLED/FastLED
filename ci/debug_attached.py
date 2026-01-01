@@ -149,8 +149,13 @@ def run_cpp_lint() -> bool:
             with open(lint_script, "r", encoding="utf-8") as f:
                 content = f.read()
                 is_unittest = "unittest.main()" in content
+        except KeyboardInterrupt:
+            print("\nKeyboardInterrupt: Stopping linting")
+            notify_main_thread()
+            raise
         except Exception as e:
-            print(f"⚠️  Warning: Could not read {script_name}: {e}")
+            print(f"❌ Error reading {script_name}: {e}")
+            all_passed = False
             continue
 
         try:
