@@ -11,7 +11,7 @@ This validation system creates a **hardware-in-the-loop testing feedback loop** 
 
 **Run Validation:**
 ```bash
-./validation
+bash validate
 ```
 
 **What happens:**
@@ -30,7 +30,7 @@ This validation system creates a **hardware-in-the-loop testing feedback loop** 
 
 **For AI Agents:**
 - Make code changes to FastLED drivers (RMT, SPI, PARLIO)
-- Run `./validation` to compile, upload, and verify on real hardware
+- Run `bash validate` to compile, upload, and verify on real hardware
 - Get immediate pass/fail feedback from actual LED signal analysis
 - Iterate rapidly with hardware-verified confidence
 
@@ -287,7 +287,7 @@ The default pins are defined in `Validation.ino`:
 **From the FastLED project root directory:**
 
 ```bash
-./validation
+bash validate
 ```
 
 **What this does:**
@@ -309,17 +309,17 @@ Code change → Lint → Compile → Upload → Test on hardware → PASS/FAIL
 
 **Quick iteration (skip linting):**
 ```bash
-./validation --skip-lint
+bash validate --skip-lint
 ```
 
 **Custom timeout:**
 ```bash
-./validation --timeout 60  # 60 seconds instead of default 20s
+bash validate --timeout 60  # 60 seconds instead of default 20s
 ```
 
 **See all options:**
 ```bash
-./validation --help
+bash validate --help
 ```
 
 ### Expected Serial Output
@@ -537,7 +537,7 @@ This validation system provides:
 - Tests all drivers: RMT, SPI, PARLIO (comprehensive coverage)
 
 **2. Rapid Iteration Loop**
-- **For AI agents**: Run `./validation` after code changes → get hardware-verified results in ~30 seconds
+- **For AI agents**: Run `bash validate` after code changes → get hardware-verified results in ~30 seconds
 - **For humans**: Quick sanity check without external test equipment
 - **For CI/CD**: Automated hardware-in-the-loop testing (with attached ESP32 board)
 
@@ -556,21 +556,21 @@ This validation system provides:
 **AI Agent Development:**
 ```
 Agent: "I'll modify the PARLIO driver to fix the timing bug"
-Agent: "Running ./validation to verify the fix..."
+Agent: "Running bash validate to verify the fix..."
 Agent: "✓ All tests passed - fix confirmed on real hardware"
 ```
 
 **Human Quick Check:**
 ```
 Developer: "Did my SPI driver change break anything?"
-Developer: "./validation"
+Developer: "bash validate"
 Developer: "✓ All 48 test cases pass - safe to commit"
 ```
 
 **Regression Testing:**
 ```
 CI System: "New PR submitted - testing on hardware..."
-CI System: "./validation"
+CI System: "bash validate"
 CI System: "✗ Test failure on PARLIO 8-lane case - blocking merge"
 ```
 

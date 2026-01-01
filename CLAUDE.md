@@ -22,6 +22,7 @@ This project uses directory-specific agent guidelines. See:
 - `uv run test.py TestName` - Run specific C++ test (e.g., `uv run test.py xypath`)
 - `uv run test.py --no-fingerprint` - Disable fingerprint caching (force rebuild/rerun)
 - `bash lint` - Run code formatting/linting
+- `bash validate` - 🎯 **AI agents: Use this for live device testing** (hardware-in-the-loop validation)
 - `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
@@ -73,63 +74,47 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
 - `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
 
-### Device Debug Workflow (Lint → Compile → Upload → Monitor)
-`bash debug` or `uv run ci/debug_attached.py` - Four-phase workflow for attached device development:
+### Live Device Testing (AI Agents)
+**🎯 PRIMARY TOOL: `bash validate`** - Hardware-in-the-loop validation framework:
 
-**Phase 0: Package Installation** - Ensure PlatformIO packages are installed (daemon-managed)
-**Phase 1: Linting** - Run C++ linters to catch ISR errors and code quality issues before compilation
-**Phase 2: Compile** - Build PlatformIO project for target environment
-**Phase 3: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
-**Phase 4: Monitor** - Attach to serial monitor, capture output, detect patterns
-
-**⚠️ IMPORTANT: `bash debug` includes BOTH linting AND compilation - do NOT run `bash compile` or `bash lint` separately before `bash debug`**
-
-**🚨 CRITICAL RULES FOR AGENTS:**
-1. **NEVER EVER run `bash compile` before `bash debug`** - `bash debug` handles compilation automatically for the attached device's platform. Running `bash compile` first is slow, redundant, and wastes time.
-2. **NEVER run `bash lint` before `bash debug`** - `bash debug` includes linting in Phase 1
-3. **OMIT `--timeout` by default** - Most test programs complete quickly (default 20s is sufficient)
-4. **Only add `--timeout` for known long-running tests** - Use sparingly and only when necessary
+The `bash validate` command is the **preferred entry point** for AI agents doing live device testing. It provides a complete validation framework with pre-configured expect/fail patterns designed for hardware testing.
 
 **Usage:**
-- `bash debug` - Auto-detect environment (default: 20s timeout, waits until timeout)
-- `bash debug Validation` - Debug sketch by name (auto-detects environment, no --env needed)
-- `bash debug esp32dev` - Specific environment (for non-sketch builds)
-- `bash debug --skip-lint` - Skip C++ linting phase (faster iteration, but may miss ISR errors)
-- `bash debug --upload-port COM3` - Specific serial port
-- `bash debug --timeout 120` - Monitor timeout in seconds (default: 20s)
-- `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
-- `bash debug --exit-on-error` - Exit 1 immediately if ERROR found (default: `\bERROR\b` regex pattern)
-- `bash debug --exit-on-error "ClearCommError"` - Exit 1 immediately if custom pattern found
-- `bash debug --fail-on "PANIC"` - Exit 1 immediately if "PANIC" pattern found
-- `bash debug --fail-on "ERROR" --fail-on "CRASH"` - Multiple failure patterns (exits on any)
-- `bash debug --no-fail-on` - Explicitly disable all failure patterns
-- `bash debug --expect "SUCCESS"` - Exit 0 only if "SUCCESS" pattern found by timeout
-- `bash debug --expect "PASS" --expect "OK"` - Exit 0 only if ALL patterns found by timeout
+- `bash validate` - Run full hardware validation suite (recommended for AI agents)
+- `bash validate --skip-lint` - Skip linting for faster iteration
+- `bash validate --timeout 60` - Custom timeout (default: 20s)
+- `bash validate --help` - See all options
 
-**Sketch Name Resolution:**
-- When providing a sketch name (e.g., `Validation`, `Blink`, `DemoReel100`), the environment is auto-detected
-- No need to specify `--env` when using sketch names
-- ✅ Correct: `bash debug Validation`
-- ✅ Correct: `bash debug Validation --expect "PASS"`
-- ❌ Wrong: `bash compile esp32dev && bash debug Validation` (redundant compilation)
-- ❌ Wrong: `bash debug Validation --timeout 120` (excessive timeout for fast tests)
+**What it does:**
+1. **Lint** → Catches ISR errors and code quality issues
+2. **Compile** → Builds for attached device
+3. **Upload** → Flashes firmware to device
+4. **Monitor** → Validates output with smart pattern matching
+5. **Report** → Exit 0 (success) or 1 (failure) with detailed feedback
 
-**Timeout Formats:**
-- Plain number: `120` (assumes seconds)
-- Seconds: `120s`
-- Minutes: `2m`
-- Milliseconds: `5000ms`
+**Why use `bash validate` instead of `bash debug`:**
+- ✅ Pre-configured patterns catch hardware failures automatically
+- ✅ Designed for automated testing and AI feedback loops
+- ✅ Prevents false positives from ISR hangs and device crashes
+- ✅ Comprehensive test matrix (48 test cases across drivers/lanes/sizes)
 
-**Pattern Behavior:**
-- `--exit-on-error`: Uses `\bERROR\b` regex (word boundary). Terminates immediately on match, exits 1 (convenient shorthand)
-- `--fail-on`: Accepts regex patterns. Terminates monitor immediately on match, exits 1
-- `--expect`: Accepts regex patterns. Monitors until timeout, exits 0 if ALL patterns found, exits 1 if any missing
-- Default: Waits until timeout (no immediate fail on errors)
+**When to use `bash debug` (advanced):**
+For custom sketches requiring manual pattern configuration. See examples below.
 
-**Exit Codes:**
-- 0: Success (normal timeout, clean exit, or all expect patterns found)
-- 1: Failure (compile/upload error, fail pattern matched, or missing expect patterns)
-- 130: User interrupt (Ctrl+C)
+### Device Debug (Manual Testing)
+`bash debug <sketch>` - Low-level tool for custom device workflows:
+
+**Simple example:**
+```bash
+bash debug MySketch --expect "READY"
+```
+
+**Complex example:**
+```bash
+bash debug MySketch --expect "INIT OK" --expect "TEST PASS" --fail-on "PANIC" --timeout 2m
+```
+
+For full documentation, see `uv run ci/debug_attached.py --help`
 
 ### Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:

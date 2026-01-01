@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Four-phase device workflow: Package Install → Lint → Compile → Upload+Monitor.
 
+⚠️ NOTE FOR AI AGENTS: For live device testing, prefer 'bash validate' which provides
+a complete hardware validation framework. This script is for advanced/custom workflows.
+
 This script orchestrates a complete device development workflow in four distinct phases:
 
 Phase 0: Package Installation (GLOBAL SINGLETON LOCK via daemon)
@@ -49,6 +52,8 @@ Locking Architecture:
     - Phase 2-3: Device lock (~/.fastled/locks/device_debug.lock, system-wide)
 
 Usage:
+    ⚠️ AI agents should use 'bash validate' for device testing (see CLAUDE.md)
+
     uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 20s timeout, waits until timeout)
     uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), auto-detect env
     uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
@@ -917,6 +922,34 @@ def main() -> int:
     if args.sketch:
         try:
             resolved_sketch = resolve_sketch_path(args.sketch, build_dir)
+
+            # Detect if user is trying to run Validation sketch directly
+            sketch_name = Path(resolved_sketch).name
+            if sketch_name.lower() == "validation":
+                # Display red banner error
+                print()
+                print(Fore.RED + "=" * 60)
+                print(Fore.RED + "⚠️  ERROR: DO NOT USE 'bash debug Validation'")
+                print(Fore.RED + "=" * 60)
+                print(
+                    Fore.RED
+                    + "The Validation sketch requires specific --expect and --fail-on"
+                )
+                print(
+                    Fore.RED
+                    + "patterns to work correctly. Use the dedicated wrapper instead:"
+                )
+                print()
+                print(Fore.YELLOW + "  bash validate" + Style.RESET_ALL)
+                print()
+                print(
+                    Fore.RED
+                    + "This ensures proper pattern matching and prevents false positives."
+                )
+                print(Fore.RED + "=" * 60 + Style.RESET_ALL)
+                print()
+                return 1
+
             os.environ["PLATFORMIO_SRC_DIR"] = resolved_sketch
             print(f"📁 Sketch: {resolved_sketch}")
         except SystemExit:

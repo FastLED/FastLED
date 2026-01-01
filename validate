@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-# validation - FastLED Validation Test Wrapper
+# validate - FastLED Validation Test Wrapper
 #
 # Runs the Validation.ino sketch with proper --expect and --fail-on patterns
 # to catch ISR failures, hardware issues, and test matrix errors.
 #
 # Usage:
-#   ./validation                    # Run with default patterns
-#   ./validation --timeout 120      # Override timeout
-#   ./validation --skip-lint        # Skip linting phase
-#   ./validation --help             # Show help
+#   bash validate                   # Run with default patterns
+#   bash validate --timeout 120     # Override timeout
+#   bash validate --skip-lint       # Skip linting phase
+#   bash validate --help            # Show help
 
 set -euo pipefail
 
@@ -35,7 +35,7 @@ show_help() {
 FastLED Validation Test Wrapper
 
 Usage:
-  ./validation [OPTIONS]
+  bash validate [OPTIONS]
 
 Description:
   Runs the Validation.ino sketch with comprehensive --expect and --fail-on patterns
@@ -69,10 +69,10 @@ Options:
   Any other options are passed directly to 'bash debug Validation'
 
 Examples:
-  ./validation                        # Run with all default patterns
-  ./validation --timeout 60           # Longer timeout for debugging
-  ./validation --skip-lint            # Skip linting for faster iteration
-  ./validation --no-expect --expect "CUSTOM PATTERN"  # Custom patterns only
+  bash validate                       # Run with all default patterns
+  bash validate --timeout 60          # Longer timeout for debugging
+  bash validate --skip-lint           # Skip linting for faster iteration
+  bash validate --no-expect --expect "CUSTOM PATTERN"  # Custom patterns only
 
 Exit Codes:
   0   Success (all patterns found, no failures)

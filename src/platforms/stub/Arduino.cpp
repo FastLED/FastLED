@@ -4,6 +4,7 @@
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
 // Stdlib headers included first
+#include <map>
 #include <random>
 
 #include "./Arduino.h"  // ok include
@@ -45,7 +46,6 @@ long random(long max) {
 
 // Analog value storage for test injection
 // Key: pin number, Value: analog value (or -1 for unset/random)
-#include <map>
 static std::map<int, int> g_analog_values;
 
 int analogRead(int pin) {
