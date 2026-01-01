@@ -58,16 +58,22 @@
       ],
       "tools": [
         "clang-format",
+        "run_all_checkers.py (unified C++ checker)",
+        "banned_headers_checker.py",
         "check_namespace_includes.py",
+        "check_platforms_fl_namespace.py",
         "check_using_namespace.py",
+        "cpp_include_checker.py",
+        "google_member_style_checker.py",
+        "headers_exist_checker.py",
+        "include_after_namespace_checker.py",
+        "logging_in_iram_checker.py",
         "no_namespace_fl_declaration.py",
         "no_using_namespace_fl_in_headers.py",
-        "test_no_banned_headers.py",
-        "test_no_cpp_includes.py",
-        "test_no_include_after_namespace.py",
-        "test_no_serial_printf.py",
-        "test_no_std_namespace.py",
-        "test_test_headers_exist.py"
+        "numeric_limit_macros_checker.py",
+        "serial_printf_checker.py",
+        "static_in_headers_checker.py",
+        "std_namespace_checker.py"
       ],
       "script": "ci/cpp_lint_cache.py (TO CREATE)",
       "lint_command": "bash lint (currently uses timestamp-based checking with ci/lint_cpp/*.py tracking)"

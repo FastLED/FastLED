@@ -146,28 +146,6 @@ def run_cpp_lint() -> bool:
 
         print()
 
-        # Phase 2: Run file existence validation (separate, not content-based)
-        # This is the same as 'bash lint' line 209
-        print("📁 Running file existence validation (test_test_headers_exist.py)")
-        result = subprocess.run(
-            [
-                "uv",
-                "run",
-                "python",
-                "-m",
-                "pytest",
-                "ci/lint_cpp/test_test_headers_exist.py",
-                "-v",
-            ],
-            cwd=project_root,
-            env=get_utf8_env(),
-        )
-        if result.returncode != 0:
-            print("❌ Test headers validation failed")
-            return False
-
-        print()
-
         # Phase 3: Run relative includes check for src/ only
         # This is the same as 'bash lint' line 219
         print("🔗 Running relative includes check (cpp_lint.py for src/ only)")

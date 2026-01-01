@@ -202,16 +202,6 @@ if [ "$JS_ONLY" = false ]; then
             exit 1
         }
 
-        # Run test_test_headers_exist.py separately (file existence check, not content)
-        if [ -f "ci/lint_cpp/test_test_headers_exist.py" ]; then
-            echo ""
-            echo "Running test_test_headers_exist.py (file existence validation)"
-            uv run python -m pytest ci/lint_cpp/test_test_headers_exist.py -v || {
-                echo "❌ Test headers validation failed"
-                exit 1
-            }
-        fi
-
         # Check for relative includes (paths with "..")
         # Only enforce strict no-relative-includes rule for src/, not examples/
         echo ""
