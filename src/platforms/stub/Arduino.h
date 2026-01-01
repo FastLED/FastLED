@@ -13,6 +13,7 @@
 #include "fl/str.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/ostream.h"
+#include "fl/stl/stdio.h"
 #include "time_stub.h"
 #include "fl/math_macros.h"
 #include "fl/stl/math.h"
@@ -139,6 +140,13 @@ struct SerialEmulation {
     void print(unsigned int val, int base);
 
     void println();
+
+    // Printf-style formatted output (variadic template implementation)
+    template<typename... Args>
+    void printf(const char* format, Args... args) {
+        fl::printf(format, args...);
+    }
+
     int available();
     int read();
     fl::string readStringUntil(char terminator);
