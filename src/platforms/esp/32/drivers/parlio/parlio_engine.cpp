@@ -512,7 +512,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
     if (cache_err != ESP_OK) {
-        FL_WARN("PARLIO: Cache flush failed before DMA: " << cache_err);
+        FL_WARN_ONCE("PARLIO: Cache flush failed before DMA: " << cache_err);
         // Continue anyway - may cause data corruption but better than deadlock
     }
 
@@ -1104,7 +1104,7 @@ ParlioEngine::populateNextDMABuffer() {
                 ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
             if (cache_err != ESP_OK) {
-                FL_WARN("PARLIO: Cache flush failed before DMA restart: " << cache_err);
+                FL_WARN_ONCE("PARLIO: Cache flush failed before DMA restart: " << cache_err);
             }
 
             // Submit buffer to hardware to restart transmission
@@ -1391,7 +1391,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
 
     if (cache_err != ESP_OK) {
-        FL_WARN("PARLIO: Cache flush failed before first buffer DMA: " << cache_err);
+        FL_WARN_ONCE("PARLIO: Cache flush failed before first buffer DMA: " << cache_err);
     }
 
     err = parlio_tx_unit_transmit(

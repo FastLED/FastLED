@@ -25,6 +25,16 @@ namespace fl {
 #define FL_WARN(X) fl::println((fl::StrStream() << "WARN: " << X).c_str())
 #define FL_WARN_IF(COND, MSG) do { if (COND) FL_WARN(MSG); } while(0)
 
+// FL_WARN_ONCE: Emits warning only once per unique location (static flag per call site)
+// Uses static bool flag initialized to false - first call prints, subsequent calls no-op
+#define FL_WARN_ONCE(X) do { \
+    static bool _warned = false; \
+    if (!_warned) { \
+        _warned = true; \
+        FL_WARN(X); \
+    } \
+} while(0)
+
 // FL_WARN_FMT: Alias for FL_WARN (kept for backwards compatibility)
 #define FL_WARN_FMT(X) FL_WARN(X)
 #define FL_WARN_FMT_IF(COND, MSG) FL_WARN_IF(COND, MSG)
@@ -32,6 +42,7 @@ namespace fl {
 // No-op macros for memory-constrained platforms
 #define FL_WARN(X) do { } while(0)
 #define FL_WARN_IF(COND, MSG) do { } while(0)
+#define FL_WARN_ONCE(X) do { } while(0)
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
 #endif
