@@ -4,11 +4,11 @@
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
 // Stdlib headers included first
-#include <map>
 #include <random>
 
 #include "./Arduino.h"  // ok include
 
+#include "fl/stl/map.h"
 #include "fl/stl/stdio.h"
 
 // fl namespace functions
@@ -46,7 +46,7 @@ long random(long max) {
 
 // Analog value storage for test injection
 // Key: pin number, Value: analog value (or -1 for unset/random)
-static std::map<int, int> g_analog_values;
+static fl::fl_map<int, int> g_analog_values;
 
 int analogRead(int pin) {
     // Check if a test value has been set for this pin
