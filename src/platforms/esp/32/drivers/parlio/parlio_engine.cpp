@@ -514,8 +514,12 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             self->mWorkerTimerHandle &&
             ctx->mWorkerIsrEnabled) {
 
-            // Arm one-shot timer to fire BEFORE next buffer is consumed
-            // Timer will fire once after 10µs, populate next buffer, then stop automatically
+            // Reset counter to 0 before starting (workerIsr stops timer without resetting count)
+            // Without this reset, counter resumes from stopped value (>10) and alarm never fires
+            gptimer_set_raw_count(self->mWorkerTimerHandle, 0);
+
+            // Arm one-shot timer to fire after 10µs (count reaches alarm_count=10)
+            // Timer will fire once, workerIsrCallback stops it, cycle repeats
             gptimer_start(self->mWorkerTimerHandle);
         }
 
@@ -571,36 +575,44 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
                                 const void *edata,
                                 void *user_ctx) {
     // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED - SEE FUNCTION HEADER ⚠️
-    (void)timer;
     (void)edata;
 
+    // ✅ CRITICAL FIX: Stop timer FIRST, before ANY other operations
+    // One-shot timers with auto_reload_on_alarm=false continue counting after alarm fires
+    // Must manually stop to implement true one-shot behavior
+    // MUST be placed BEFORE early-exit checks to ensure timer stops on ALL code paths
+    // Timer will be re-armed by txDoneCallback when next buffer needed
+    gptimer_stop(timer);
+
+    // Now safe to do null checks and early exits - timer already stopped above
     auto *self = static_cast<ParlioEngine *>(user_ctx);
     if (!self || !self->mIsrContext) {
-        return false;
+        return false;  // Timer already stopped
     }
 
     ParlioIsrContext *ctx = self->mIsrContext;
 
     // CRITICAL: Early exit checks (in order of likelihood)
+    // All these exits are safe because timer was stopped at top
 
     // Check 0: Not actively transmitting (timer should be stopped, but be defensive)
     if (!ctx->mTransmitting) {
-        return false;  // No active transmission
+        return false;  // Timer already stopped
     }
 
     // Check 1: Worker ISR disabled by destructor or completion
     if (!ctx->mWorkerIsrEnabled) {
-        return false;  // ISR disabled, no work to do
+        return false;  // Timer already stopped
     }
 
     // Check 2: Ring buffer full (no space to populate)
     if (ctx->mRingCount >= ParlioEngine::RING_BUFFER_COUNT) {
-        return false;  // Wait for txDoneCallback to free buffers
+        return false;  // Timer already stopped
     }
 
     // Check 3: All data already processed
     if (ctx->mNextByteOffset >= ctx->mTotalBytes) {
-        return false;  // All buffers populated, wait for completion
+        return false;  // Timer already stopped
     }
 
     // Work available - populate ONE buffer
@@ -905,7 +917,7 @@ bool ParlioEngine::allocateWorkerTimer() {
         .alarm_count = 10,  // 10µs delay (with 1MHz resolution)
         .reload_count = 0,
         .flags = {
-            .auto_reload_on_alarm = false,  // One-shot: fires once, then stops
+            .auto_reload_on_alarm = false,  // One-shot: fires once, continues counting (must manually stop in ISR)
         },
     };
     err = gptimer_set_alarm_action(mWorkerTimerHandle, &alarm_config);
@@ -1111,6 +1123,12 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Allocate ISR context (cache-aligned, 64 bytes)
     if (!mIsrContext) {
         mIsrContext = new ParlioIsrContext();
+    }
+
+    // CRITICAL: Disable worker ISR during initialization to prevent spurious timer firings
+    // Timer is enabled during allocateWorkerTimer(), but should NOT fire until beginTransmission()
+    if (mIsrContext) {
+        mIsrContext->mWorkerIsrEnabled = false;
     }
 
     // Validate pins
@@ -1335,17 +1353,15 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // Start worker timer ISR for background DMA buffer population
     //=========================================================================
     // Refactored from FreeRTOS task to hardware timer ISR:
-    // - Timer fires every 10µs (hardware timer auto-reload)
-    // - ISR checks if ring has space and data available
-    // - Populates one buffer per invocation (if work available)
     // - Lower latency (~1-2µs vs ~5-10µs task switching)
     // - More deterministic timing (no scheduler overhead)
     //
-    // Timer ISR pattern:
-    // - workerIsrCallback invoked every 10µs by gptimer alarm
+    // Timer ISR pattern (one-shot):
+    // - txDoneCallback arms timer via gptimer_start() when buffer space available
+    // - workerIsrCallback fires 10µs later, stops timer immediately via gptimer_stop()
     // - ISR exits early if mWorkerIsrEnabled=false or no work needed
     // - ISR populates ONE buffer per call (if ring has space)
-    // - Timer stopped when transmission completes (txDoneCallback)
+    // - Timer re-armed by next txDoneCallback (cycle repeats until transmission complete)
     //=========================================================================
 
     // Enable worker ISR (timer will be armed by first txDoneCallback)
