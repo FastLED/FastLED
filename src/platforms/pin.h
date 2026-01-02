@@ -9,43 +9,37 @@
 /// compile-time platform detection. It is included ONLY by fl/pin.cpp to
 /// maintain the compilation boundary.
 ///
-/// Uses compiler-defined builtin macros for platform detection to avoid
-/// circular dependency issues with FL_IS_* macros from is_platform.h.
+/// Uses FL_IS_* macros from is_platform.h for standardized platform detection.
+
+#include "platforms/is_platform.h"
 
 // Platform-specific pin implementations (header-only .hpp files)
-// Uses compiler builtins for detection to avoid circular dependencies
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+// Uses standardized FL_IS_* macros for platform detection
+#if defined(FL_IS_ESP32)
     #include "platforms/esp/32/pin_esp32.hpp"
-#elif defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
+#elif defined(FL_IS_ESP8266)
     #include "platforms/esp/8266/pin_esp8266.hpp"
-#elif defined(__AVR__)
+#elif defined(FL_IS_AVR)
     #include "platforms/avr/pin_avr.hpp"
-#elif defined(TEENSYDUINO) || defined(__MKL26Z64__) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)
+#elif defined(FL_IS_TEENSY)
     #include "platforms/arm/teensy/pin_teensy.hpp"
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-      defined(STM32F2XX) || defined(STM32F2xx) || \
-      defined(STM32F4) || defined(STM32F4xx) || \
-      defined(STM32F7) || defined(STM32F7xx) || \
-      defined(STM32L4) || defined(STM32L4xx) || \
-      defined(STM32H7) || defined(STM32H7xx) || \
-      defined(STM32G4) || defined(STM32G4xx) || \
-      defined(STM32U5) || defined(STM32U5xx)
+#elif defined(FL_IS_STM32)
     #include "platforms/arm/stm32/pin_stm32.hpp"
-#elif defined(ARDUINO_ARCH_SAMD) || defined(__SAMD21__) || defined(__SAMD51__)
+#elif defined(FL_IS_SAMD)
     #include "platforms/arm/samd/pin_samd.hpp"
-#elif defined(__SAM3X8E__)
+#elif defined(FL_IS_SAM)
     #include "platforms/arm/sam/pin_sam.hpp"
-#elif defined(ARDUINO_ARCH_RP2040) || defined(PICO_BOARD)
+#elif defined(FL_IS_RP)
     #include "platforms/arm/rp/pin_rp.hpp"
-#elif defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52) || defined(NRF52832_XXAA) || defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
+#elif defined(FL_IS_NRF52)
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
-#elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_UNOWIFIR4) || defined(ARDUINO_MINIMA)
+#elif defined(FL_IS_RENESAS)
     #include "platforms/arm/renesas/pin_renesas.hpp"
-#elif defined(ARDUINO_ARCH_SILABS) || defined(EFR32MG24) || defined(MGM24) || defined(MGM240) || defined(MGM240SD22VNA) || defined(MGM240PB32VNA) || defined(ARDUINO_NANO_MATTER) || defined(ARDUINO_SILABS_THINGPLUSMATTER) || defined(ARDUINO_SPARKFUN_THINGPLUS_MATTER)
+#elif defined(FL_IS_SILABS)
     #include "platforms/arm/silabs/pin_silabs.hpp"
-#elif defined(ARDUINO_ARCH_APOLLO3)
+#elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
-#elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+#elif defined(FL_IS_STUB)
     // Stub platform for testing (no-op pins)
     #include "platforms/shared/pin_noop.hpp"
 #elif defined(ARDUINO)
