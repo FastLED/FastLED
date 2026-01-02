@@ -12,6 +12,7 @@ For background on the Git Bash compatibility issue, see:
 import atexit
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from running_process import RunningProcess
 
@@ -26,7 +27,7 @@ from ci.util.windows_cmd_runner import format_cmd_for_shell, should_use_cmd_runn
 def create_pio_process(
     cmd: list[str],
     cwd: Path | str,
-    output_formatter=None,
+    output_formatter: Any | None = None,
     auto_run: bool = True,
 ) -> RunningProcess:
     """Create a RunningProcess for PlatformIO commands with Git Bash compatibility.

@@ -65,7 +65,7 @@ def generate_build_info_json_from_existing_build(
         # Stream output while collecting it for JSON parsing
         # Show progress indicators for long-running operations
         # Use per-line timeout of 15 minutes - some packages take a long time to download
-        metadata_lines = []
+        metadata_lines: list[str] = []
         while line := metadata_proc.get_next_line(timeout=900):
             if isinstance(line, EndOfStream):
                 break

@@ -33,7 +33,11 @@ from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
-from ci.util.check_files import MultiCheckerFileProcessor, collect_files_to_check
+from ci.util.check_files import (
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    collect_files_to_check,
+)
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -91,9 +95,9 @@ def collect_all_files_by_directory() -> dict[str, list[str]]:
     return files_by_dir
 
 
-def create_checkers() -> dict[str, list]:
+def create_checkers() -> dict[str, list[FileContentChecker]]:
     """Create all checker instances organized by which files they should check."""
-    checkers_by_scope: dict[str, list] = {}
+    checkers_by_scope: dict[str, list[FileContentChecker]] = {}
 
     # Global checkers (run on all src/, examples/, tests/ files)
     checkers_by_scope["global"] = [
@@ -179,11 +183,12 @@ def create_checkers() -> dict[str, list]:
 
 
 def run_checkers(
-    files_by_dir: dict[str, list[str]], checkers_by_scope: dict[str, list]
-) -> dict[str, dict]:
+    files_by_dir: dict[str, list[str]],
+    checkers_by_scope: dict[str, list[FileContentChecker]],
+) -> dict[str, dict[str, list[tuple[int, str]]]]:
     """Run all checkers - MULTI-PASS approach for performance (minimizes should_process_file() calls)."""
     processor = MultiCheckerFileProcessor()
-    all_results: dict[str, dict] = {}
+    all_results: dict[str, dict[str, list[tuple[int, str]]]] = {}
 
     # MULTI-PASS: Process each scope separately with pre-filtered files
     # This minimizes the number of should_process_file() calls compared to single-pass
@@ -284,7 +289,7 @@ def run_checkers(
         processor.process_files_with_checkers(tests_files, tests_checkers)
 
     # Collect all violations from all checkers
-    all_checkers = []
+    all_checkers: list[FileContentChecker] = []
     for scope_checkers in checkers_by_scope.values():
         all_checkers.extend(scope_checkers)
 
@@ -299,7 +304,9 @@ def run_checkers(
     return all_results
 
 
-def format_and_print_results(results: dict[str, dict]) -> int:
+def format_and_print_results(
+    results: dict[str, dict[str, list[tuple[int, str]]]],
+) -> int:
     """Format and print all violations. Returns exit code (0 = success, 1 = failures)."""
     total_violations = 0
 

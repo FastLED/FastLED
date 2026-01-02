@@ -666,8 +666,8 @@ class PioCompiler(Compiler):
         """Clean all build artifacts (local and global packages) for this platform."""
         print(f"Cleaning all artifacts for platform {self.board.board_name}...")
 
-        # Use context manager for automatic lock release
-        with self._global_package_lock:
+        # Use platform lock for automatic lock release
+        with self.platform_lock:
             # Clean local build artifacts first
             if self.build_dir.exists():
                 print(f"Removing build directory: {self.build_dir}")

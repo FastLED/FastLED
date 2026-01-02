@@ -409,7 +409,7 @@ def run_monitor(
                 trigger_pattern = re.compile(re.escape(trigger_pattern_str))
 
     # Compile regex patterns for fail and expect keywords
-    fail_patterns = []
+    fail_patterns: list[tuple[str, re.Pattern[str]]] = []
     for pattern_str in fail_keywords:
         try:
             fail_patterns.append((pattern_str, re.compile(pattern_str)))
@@ -419,7 +419,7 @@ def run_monitor(
             # Fallback to escaped literal pattern
             fail_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
 
-    expect_patterns = []
+    expect_patterns: list[tuple[str, re.Pattern[str]]] = []
     for pattern_str in expect_keywords:
         try:
             expect_patterns.append((pattern_str, re.compile(pattern_str)))
@@ -537,10 +537,16 @@ def run_monitor(
     formatter = TimestampFormatter()
     formatter.begin()  # Start the timestamp timer
 
-    output_lines = []
-    failing_lines = []  # Track all lines containing fail keywords
-    expect_lines = []  # Track all lines containing expect keywords
-    found_expect_keywords = set()  # Track which expect keywords have been found
+    output_lines: list[str] = []
+    failing_lines: list[
+        tuple[str, str]
+    ] = []  # Track all lines containing fail keywords
+    expect_lines: list[
+        tuple[str, str]
+    ] = []  # Track all lines containing expect keywords
+    found_expect_keywords: set[str] = (
+        set()
+    )  # Track which expect keywords have been found
     start_time = time.time()
     fail_keyword_found = False
     matched_fail_keyword = None
@@ -880,7 +886,7 @@ def run_monitor(
     elif success:
         print("✅ Monitor completed successfully")
     else:
-        print(f"❌ Monitor failed (exit code {proc.returncode})")
+        print("❌ Monitor failed")
 
     return success, output_lines
 

@@ -28,7 +28,7 @@ def _find_build_info(board: str, example: Optional[str] = None) -> Path:
     Raises:
         FileNotFoundError: If no build_info file found
     """
-    candidates = []
+    candidates: list[Path] = []
 
     # If example provided, try example-specific files first
     if example:

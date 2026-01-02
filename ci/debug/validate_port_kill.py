@@ -20,7 +20,7 @@ import serial.tools.list_ports
 from ci.debug_attached import auto_detect_upload_port, kill_port_users
 
 
-def list_all_ports():
+def list_all_ports() -> list[str]:
     """List all available serial ports."""
     ports = serial.tools.list_ports.comports()
     if not ports:
@@ -76,10 +76,11 @@ def main():
     print("=" * 60)
     print()
 
+    detected: ComportResult | None = None
     if args.auto or not args.port:
         print("Auto-detecting upload port...")
         detected = auto_detect_upload_port()
-        if detected:
+        if detected and detected.ok:
             print(f"✅ Auto-detected: {detected}")
             print()
         else:

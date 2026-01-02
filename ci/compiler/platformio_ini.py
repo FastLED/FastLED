@@ -16,6 +16,8 @@ import re
 import subprocess
 import tempfile
 import time
+import urllib.error
+import urllib.request
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -891,7 +893,8 @@ def _resolve_package_url_from_registry(
                 )
 
         except urllib.error.HTTPError as e:
-            if e.code == 404:
+            code: int = e.code
+            if code == 404:
                 # Package not found with this owner, try next
                 continue
             logger.warning(

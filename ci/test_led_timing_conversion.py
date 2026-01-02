@@ -412,7 +412,7 @@ def print_chipset_summary() -> None:
     print("=" * 70 + "\n")
 
 
-def main() -> None:
+def main() -> int:
     """Run test suite with verbose output."""
     # Run tests
     loader = unittest.TestLoader()

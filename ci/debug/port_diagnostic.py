@@ -31,7 +31,7 @@ def format_cmdline(cmdline: list[str] | None, max_length: int = 80) -> str:
 
 def get_process_tree(proc: psutil.Process) -> list[psutil.Process]:
     """Get the process tree (parents) for a process."""
-    tree = []
+    tree: list[psutil.Process] = []
     current = proc
     try:
         while current:
@@ -50,7 +50,7 @@ def check_matches_kill_patterns(
     Returns:
         Tuple of (matches, list of matching patterns)
     """
-    matches = []
+    matches: list[str] = []
     proc_name_lower = proc_name.lower()
 
     # Check Phase 1: pio.exe processes
@@ -136,7 +136,7 @@ def find_processes_with_open_files(
     Returns:
         List of tuples (process, list of open file paths matching port)
     """
-    results = []
+    results: list[tuple[psutil.Process, list[str]]] = []
 
     # Skip on Windows - open_files() is too slow and COM ports don't show as files
     import platform

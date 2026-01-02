@@ -89,9 +89,9 @@ class DockerConfig:
             output_dir = output_dir.resolve()
 
         # Security check: only allow directories within or relative to project root
+        cwd = Path.cwd().resolve()
         try:
             # Check if output_dir is relative to project_root or current working directory
-            cwd = Path.cwd().resolve()
             try:
                 output_dir.relative_to(project_root)
                 # Output dir is under project root - OK
@@ -136,6 +136,7 @@ class DockerConfig:
             get_platform_for_board,
         )
 
+        platform: str | None = None
         try:
             # Look up which platform family this board belongs to
             platform = get_platform_for_board(board_name)
