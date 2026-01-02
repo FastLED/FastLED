@@ -1,5 +1,7 @@
-/// @file platforms/arm/teensy/isr_teensy.cpp
+/// @file platforms/arm/teensy/isr_teensy.hpp
 /// @brief Teensy ISR timer implementation using IntervalTimer
+
+#pragma once
 
 #if FL_IS_TEENSY
 

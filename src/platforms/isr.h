@@ -15,21 +15,21 @@
 
 // Platform detection
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
-    #include "platforms/stub/isr_stub.h"
+    #include "platforms/stub/isr_stub.hpp"
 #elif defined(ESP32)
-    #include "platforms/esp/32/isr_esp32.h"
+    #include "platforms/esp/32/isr_esp32.hpp"
 #elif defined(FL_IS_TEENSY)
-    #include "platforms/arm/teensy/isr_teensy.h"
+    #include "platforms/arm/teensy/isr_teensy.hpp"
 #elif defined(FL_IS_STM32)
-    #include "platforms/arm/stm32/isr_stm32.h"
+    #include "platforms/arm/stm32/isr_stm32.hpp"
 #elif defined(FL_IS_NRF52)
-    #include "platforms/arm/nrf52/isr_nrf52.h"
+    #include "platforms/arm/nrf52/isr_nrf52.hpp"
 #elif defined(FL_IS_AVR)
-    #include "platforms/avr/isr_avr.h"
+    #include "platforms/avr/isr_avr.hpp"
 #elif defined(FL_IS_RP2040)
-    #include "platforms/arm/rp/isr_rp2040.h"
+    #include "platforms/arm/rp/isr_rp2040.hpp"
 #elif defined(FL_IS_SAMD)
-    #include "platforms/arm/samd/isr_samd.h"
+    #include "platforms/arm/samd/isr_samd.hpp"
 #else
-    #include "platforms/isr_null.h"
+    #include "platforms/isr_null.hpp"
 #endif

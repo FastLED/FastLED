@@ -7,6 +7,8 @@
   License: MIT (FastLED)
 */
 
+#pragma once
+
 // Only compile this implementation for stub/host platform builds
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
 

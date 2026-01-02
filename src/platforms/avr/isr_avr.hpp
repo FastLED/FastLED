@@ -15,6 +15,8 @@
   License: MIT (FastLED)
 */
 
+#pragma once
+
 #ifdef FL_IS_AVR
 
 #include "fl/isr.h"

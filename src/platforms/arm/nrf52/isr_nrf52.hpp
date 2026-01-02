@@ -9,6 +9,8 @@
   License: MIT (FastLED)
 */
 
+#pragma once
+
 #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
     defined(FL_IS_NRF52) || defined(FL_IS_NRF52832) || defined(FL_IS_NRF52833) || defined(FL_IS_NRF52840)
 

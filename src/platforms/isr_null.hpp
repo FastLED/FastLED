@@ -10,6 +10,8 @@
   License: MIT (FastLED)
 */
 
+#pragma once
+
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
 

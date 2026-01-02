@@ -10,6 +10,8 @@
   License: MIT (FastLED)
 */
 
+#pragma once
+
 #if defined(ESP32)
 
 #include "fl/isr.h"

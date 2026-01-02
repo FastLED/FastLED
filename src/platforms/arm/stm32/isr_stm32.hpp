@@ -1,9 +1,11 @@
-/// @file platforms/arm/stm32/isr_stm32.cpp
+/// @file platforms/arm/stm32/isr_stm32.hpp
 /// @brief STM32 ISR timer implementation using STM32 HAL
+
+#pragma once
 
 #ifdef FL_IS_STM32
 
-#include "isr_stm32.h"
+#include "fl/isr.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 
