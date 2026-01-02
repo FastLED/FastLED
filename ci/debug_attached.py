@@ -435,7 +435,9 @@ def run_monitor(
         print("✅ Expect patterns: None")
 
     if stop_pattern:
-        print(f"🛑 Stop pattern: /{stop_pattern.pattern}/ - early exit on match (success if all expects found)")
+        print(
+            f"🛑 Stop pattern: /{stop_pattern.pattern}/ - early exit on match (success if all expects found)"
+        )
     else:
         print("🛑 Stop pattern: None")
 
@@ -606,12 +608,17 @@ def run_monitor(
                                     )
                                     print(f"   Matched line: {formatted_line}")
                                     if expect_patterns:
-                                        missing = set(p for p, _ in expect_patterns) - found_expect_keywords
+                                        missing = (
+                                            set(p for p, _ in expect_patterns)
+                                            - found_expect_keywords
+                                        )
                                         if missing:
                                             print(
                                                 f"   ⚠️  Stop pattern found, but not all expect patterns matched yet"
                                             )
-                                            print(f"   Missing {len(missing)} pattern(s), continuing to monitor...")
+                                            print(
+                                                f"   Missing {len(missing)} pattern(s), continuing to monitor..."
+                                            )
                                         else:
                                             print(
                                                 f"   ✅ All expect patterns found - early successful exit\n"
@@ -699,7 +706,9 @@ def run_monitor(
     elif stop_keyword_found:
         # Stop pattern found - success if all expect patterns found (or no expect patterns)
         if expect_patterns:
-            missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
+            missing_patterns = (
+                set(p for p, _ in expect_patterns) - found_expect_keywords
+            )
             if missing_patterns:
                 # Stop found but not all expects - this shouldn't happen (we check in loop)
                 success = False
@@ -771,8 +780,12 @@ def run_monitor(
         print(f"❌ Monitor failed - fail pattern /{matched_fail_keyword}/ detected")
         print(f"   Matched line: {matched_fail_line}")
     elif stop_pattern and not stop_keyword_found:
-        print(f"❌ Monitor failed - stop pattern /{stop_pattern.pattern}/ was specified but not found")
-        print(f"   The test did not complete successfully or the stop word was not emitted")
+        print(
+            f"❌ Monitor failed - stop pattern /{stop_pattern.pattern}/ was specified but not found"
+        )
+        print(
+            f"   The test did not complete successfully or the stop word was not emitted"
+        )
     elif expect_patterns:
         # Check if all expect patterns were found
         missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords

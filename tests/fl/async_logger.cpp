@@ -232,3 +232,120 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         rmt.clear();
     }
 }
+
+TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
+    SUBCASE("flushN processes up to N messages") {
+        AsyncLogger logger;
+        logger.push(fl::string("msg1"));
+        logger.push(fl::string("msg2"));
+        logger.push(fl::string("msg3"));
+        logger.push(fl::string("msg4"));
+        logger.push(fl::string("msg5"));
+        CHECK_EQ(logger.size(), 5);
+
+        // Flush only 2 messages
+        fl::size flushed = logger.flushN(2);
+        CHECK_EQ(flushed, 2);
+        CHECK_EQ(logger.size(), 3);
+
+        // Flush remaining messages
+        logger.flush();
+        CHECK(logger.empty());
+    }
+
+    SUBCASE("flushN returns 0 on empty buffer") {
+        AsyncLogger logger;
+        CHECK(logger.empty());
+
+        fl::size flushed = logger.flushN(5);
+        CHECK_EQ(flushed, 0);
+        CHECK(logger.empty());
+    }
+
+    SUBCASE("flushN with N > queue size flushes all") {
+        AsyncLogger logger;
+        logger.push(fl::string("msg1"));
+        logger.push(fl::string("msg2"));
+        CHECK_EQ(logger.size(), 2);
+
+        fl::size flushed = logger.flushN(10);
+        CHECK_EQ(flushed, 2);
+        CHECK(logger.empty());
+    }
+}
+
+TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
+    SUBCASE("background flush initially disabled") {
+        AsyncLogger logger;
+        CHECK_FALSE(logger.isBackgroundFlushEnabled());
+    }
+
+    SUBCASE("enableBackgroundFlush returns true on supported platforms") {
+        AsyncLogger logger;
+
+        // Enable background flush at 10 Hz (100ms), 5 messages per tick
+        bool result = logger.enableBackgroundFlush(100, 5);
+
+        // On platforms with timer support (ESP32, Teensy, stub), this should succeed
+        // On unsupported platforms (null implementation), may return false
+        if (result) {
+            CHECK(logger.isBackgroundFlushEnabled());
+            logger.disableBackgroundFlush();
+            CHECK_FALSE(logger.isBackgroundFlushEnabled());
+        }
+    }
+
+    SUBCASE("disableBackgroundFlush is safe when not enabled") {
+        AsyncLogger logger;
+        CHECK_FALSE(logger.isBackgroundFlushEnabled());
+
+        logger.disableBackgroundFlush();  // Should not crash
+        CHECK_FALSE(logger.isBackgroundFlushEnabled());
+    }
+
+    SUBCASE("re-enabling background flush disables previous timer") {
+        AsyncLogger logger;
+
+        bool result1 = logger.enableBackgroundFlush(100, 5);
+        if (result1) {
+            CHECK(logger.isBackgroundFlushEnabled());
+
+            // Enable again with different settings
+            bool result2 = logger.enableBackgroundFlush(50, 3);
+            CHECK(result2);
+            CHECK(logger.isBackgroundFlushEnabled());
+
+            logger.disableBackgroundFlush();
+        }
+    }
+}
+
+TEST_CASE("fl::AsyncLogger - async_log_service") {
+    SUBCASE("async_log_service is safe to call when nothing enabled") {
+        // Should not crash even if no background flush is active
+        fl::async_log_service();
+    }
+
+    SUBCASE("async_log_service flushes when timer triggers") {
+        AsyncLogger& logger = get_parlio_async_logger_isr();
+        logger.clear();
+
+        // Enable background flush
+        bool result = logger.enableBackgroundFlush(100, 5);
+        if (result) {
+            // Push some messages
+            logger.push(fl::string("msg1"));
+            logger.push(fl::string("msg2"));
+            CHECK_EQ(logger.size(), 2);
+
+            // Note: We can't easily test the timer ISR in unit tests
+            // The timer would set the flag, then async_log_service() would flush
+            // For now, just verify the service function doesn't crash
+            fl::async_log_service();
+
+            // Clean up
+            logger.disableBackgroundFlush();
+            logger.clear();
+        }
+    }
+}

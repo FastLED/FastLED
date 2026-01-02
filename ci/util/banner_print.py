@@ -78,9 +78,7 @@ class BannerPrinter:
         print(separator)
 
     @staticmethod
-    def print_tree_status(
-        root: str, items: list[tuple[str, str, str | None]]
-    ) -> None:
+    def print_tree_status(root: str, items: list[tuple[str, str, str | None]]) -> None:
         """Print tree-style status messages.
 
         Example output:

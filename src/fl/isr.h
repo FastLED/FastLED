@@ -210,15 +210,7 @@ bool esp32_requires_assembly_handler(uint8_t priority);
  * - STM32: Uses hardware timer, frequency depends on system clock
  * - Stub: Uses software simulation, unlimited frequency
  */
-inline int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullptr) {
-#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
-    return stub_attach_timer_handler(config, handle);
-#elif defined(ESP32)
-    return esp32_attach_timer_handler(config, handle);
-#else
-    return null_attach_timer_handler(config, handle);
-#endif
-}
+int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullptr);
 
 /**
  * Attach an external interrupt handler (GPIO-based).
@@ -266,6 +258,18 @@ inline int detachHandler(isr_handle_t& handle) {
     return stub_detach_handler(handle);
 #elif defined(ESP32)
     return esp32_detach_handler(handle);
+#elif defined(FL_IS_TEENSY)
+    return teensy_detach_handler(handle);
+#elif defined(FL_IS_STM32)
+    return stm32_detach_handler(handle);
+#elif defined(FL_IS_NRF52)
+    return nrf52_detach_handler(handle);
+#elif defined(FL_IS_AVR)
+    return avr_detach_handler(handle);
+#elif defined(FL_IS_RP2040)
+    return rp2040_detach_handler(handle);
+#elif defined(FL_IS_SAMD)
+    return samd_detach_handler(handle);
 #else
     return null_detach_handler(handle);
 #endif
@@ -282,6 +286,18 @@ inline int enableHandler(const isr_handle_t& handle) {
     return stub_enable_handler(handle);
 #elif defined(ESP32)
     return esp32_enable_handler(handle);
+#elif defined(FL_IS_TEENSY)
+    return teensy_enable_handler(handle);
+#elif defined(FL_IS_STM32)
+    return stm32_enable_handler(handle);
+#elif defined(FL_IS_NRF52)
+    return nrf52_enable_handler(handle);
+#elif defined(FL_IS_AVR)
+    return avr_enable_handler(handle);
+#elif defined(FL_IS_RP2040)
+    return rp2040_enable_handler(handle);
+#elif defined(FL_IS_SAMD)
+    return samd_enable_handler(handle);
 #else
     return null_enable_handler(handle);
 #endif
@@ -298,6 +314,18 @@ inline int disableHandler(const isr_handle_t& handle) {
     return stub_disable_handler(handle);
 #elif defined(ESP32)
     return esp32_disable_handler(handle);
+#elif defined(FL_IS_TEENSY)
+    return teensy_disable_handler(handle);
+#elif defined(FL_IS_STM32)
+    return stm32_disable_handler(handle);
+#elif defined(FL_IS_NRF52)
+    return nrf52_disable_handler(handle);
+#elif defined(FL_IS_AVR)
+    return avr_disable_handler(handle);
+#elif defined(FL_IS_RP2040)
+    return rp2040_disable_handler(handle);
+#elif defined(FL_IS_SAMD)
+    return samd_disable_handler(handle);
 #else
     return null_disable_handler(handle);
 #endif
@@ -314,6 +342,18 @@ inline bool isHandlerEnabled(const isr_handle_t& handle) {
     return stub_is_handler_enabled(handle);
 #elif defined(ESP32)
     return esp32_is_handler_enabled(handle);
+#elif defined(FL_IS_TEENSY)
+    return teensy_is_handler_enabled(handle);
+#elif defined(FL_IS_STM32)
+    return stm32_is_handler_enabled(handle);
+#elif defined(FL_IS_NRF52)
+    return nrf52_is_handler_enabled(handle);
+#elif defined(FL_IS_AVR)
+    return avr_is_handler_enabled(handle);
+#elif defined(FL_IS_RP2040)
+    return rp2040_is_handler_enabled(handle);
+#elif defined(FL_IS_SAMD)
+    return samd_is_handler_enabled(handle);
 #else
     return null_is_handler_enabled(handle);
 #endif
@@ -330,6 +370,18 @@ inline const char* getErrorString(int error_code) {
     return stub_get_error_string(error_code);
 #elif defined(ESP32)
     return esp32_get_error_string(error_code);
+#elif defined(FL_IS_TEENSY)
+    return teensy_get_error_string(error_code);
+#elif defined(FL_IS_STM32)
+    return stm32_get_error_string(error_code);
+#elif defined(FL_IS_NRF52)
+    return nrf52_get_error_string(error_code);
+#elif defined(FL_IS_AVR)
+    return avr_get_error_string(error_code);
+#elif defined(FL_IS_RP2040)
+    return rp2040_get_error_string(error_code);
+#elif defined(FL_IS_SAMD)
+    return samd_get_error_string(error_code);
 #else
     return null_get_error_string(error_code);
 #endif
@@ -348,6 +400,18 @@ inline const char* getPlatformName() {
     return stub_get_platform_name();
 #elif defined(ESP32)
     return esp32_get_platform_name();
+#elif defined(FL_IS_TEENSY)
+    return teensy_get_platform_name();
+#elif defined(FL_IS_STM32)
+    return stm32_get_platform_name();
+#elif defined(FL_IS_NRF52)
+    return nrf52_get_platform_name();
+#elif defined(FL_IS_AVR)
+    return avr_get_platform_name();
+#elif defined(FL_IS_RP2040)
+    return rp2040_get_platform_name();
+#elif defined(FL_IS_SAMD)
+    return samd_get_platform_name();
 #else
     return null_get_platform_name();
 #endif
@@ -362,6 +426,18 @@ inline uint32_t getMaxTimerFrequency() {
     return stub_get_max_timer_frequency();
 #elif defined(ESP32)
     return esp32_get_max_timer_frequency();
+#elif defined(FL_IS_TEENSY)
+    return teensy_get_max_timer_frequency();
+#elif defined(FL_IS_STM32)
+    return stm32_get_max_timer_frequency();
+#elif defined(FL_IS_NRF52)
+    return nrf52_get_max_timer_frequency();
+#elif defined(FL_IS_AVR)
+    return avr_get_max_timer_frequency();
+#elif defined(FL_IS_RP2040)
+    return rp2040_get_max_timer_frequency();
+#elif defined(FL_IS_SAMD)
+    return samd_get_max_timer_frequency();
 #else
     return null_get_max_timer_frequency();
 #endif
@@ -376,6 +452,18 @@ inline uint32_t getMinTimerFrequency() {
     return stub_get_min_timer_frequency();
 #elif defined(ESP32)
     return esp32_get_min_timer_frequency();
+#elif defined(FL_IS_TEENSY)
+    return teensy_get_min_timer_frequency();
+#elif defined(FL_IS_STM32)
+    return stm32_get_min_timer_frequency();
+#elif defined(FL_IS_NRF52)
+    return nrf52_get_min_timer_frequency();
+#elif defined(FL_IS_AVR)
+    return avr_get_min_timer_frequency();
+#elif defined(FL_IS_RP2040)
+    return rp2040_get_min_timer_frequency();
+#elif defined(FL_IS_SAMD)
+    return samd_get_min_timer_frequency();
 #else
     return null_get_min_timer_frequency();
 #endif
@@ -390,6 +478,18 @@ inline uint8_t getMaxPriority() {
     return stub_get_max_priority();
 #elif defined(ESP32)
     return esp32_get_max_priority();
+#elif defined(FL_IS_TEENSY)
+    return teensy_get_max_priority();
+#elif defined(FL_IS_STM32)
+    return stm32_get_max_priority();
+#elif defined(FL_IS_NRF52)
+    return nrf52_get_max_priority();
+#elif defined(FL_IS_AVR)
+    return avr_get_max_priority();
+#elif defined(FL_IS_RP2040)
+    return rp2040_get_max_priority();
+#elif defined(FL_IS_SAMD)
+    return samd_get_max_priority();
 #else
     return null_get_max_priority();
 #endif
@@ -405,6 +505,18 @@ inline bool requiresAssemblyHandler(uint8_t priority) {
     return stub_requires_assembly_handler(priority);
 #elif defined(ESP32)
     return esp32_requires_assembly_handler(priority);
+#elif defined(FL_IS_TEENSY)
+    return teensy_requires_assembly_handler(priority);
+#elif defined(FL_IS_STM32)
+    return stm32_requires_assembly_handler(priority);
+#elif defined(FL_IS_NRF52)
+    return nrf52_requires_assembly_handler(priority);
+#elif defined(FL_IS_AVR)
+    return avr_requires_assembly_handler(priority);
+#elif defined(FL_IS_RP2040)
+    return rp2040_requires_assembly_handler(priority);
+#elif defined(FL_IS_SAMD)
+    return samd_requires_assembly_handler(priority);
 #else
     return null_requires_assembly_handler(priority);
 #endif

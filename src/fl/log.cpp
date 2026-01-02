@@ -4,8 +4,40 @@
 #include "fl/log.h"
 #include "fl/detail/async_log_queue.h"
 #include "fl/stl/cstdio.h"
+#include "fl/isr.h"
+#include "fl/math_macros.h"
 
 namespace fl {
+
+// ============================================================================
+// Background flush infrastructure (timer-based automatic flushing)
+// ============================================================================
+
+namespace detail {
+    // Global state for background flushing
+    struct BackgroundFlushState {
+        volatile bool mNeedsFlush;         // Flag set by ISR, cleared by service function
+        fl::isr::isr_handle_t mTimerHandle; // ISR timer handle
+        fl::size mMessagesPerTick;         // Max messages to flush per timer tick
+        bool mEnabled;                     // Whether background flushing is enabled
+
+        BackgroundFlushState()
+            : mNeedsFlush(false)
+            , mTimerHandle()  // Default constructor
+            , mMessagesPerTick(5)
+            , mEnabled(false) {}
+    };
+
+    BackgroundFlushState& get_flush_state() {
+        static BackgroundFlushState state;
+        return state;
+    }
+
+    void FL_IRAM async_log_flush_timer_isr(void* user_data) {
+        BackgroundFlushState* state = static_cast<BackgroundFlushState*>(user_data);
+        state->mNeedsFlush = true;
+    }
+} // namespace detail
 
 // ============================================================================
 // AsyncLogger implementation using AsyncLogQueue backend
@@ -28,10 +60,31 @@ void AsyncLogger::push(const char* msg) {
 void AsyncLogger::flush() {
     const char* msg;
     fl::u16 len;
+
+    // 256-byte stack buffer - handles most messages in a single chunk
+    // Avoids heap allocation entirely by chunking long messages
+    char buffer[256];
+
     while (mQueue->tryPop(&msg, &len)) {
-        // Create a fl::string from the message (copies data)
-        fl::string str(msg, len);
-        fl::println(str.c_str());
+        fl::u16 offset = 0;
+
+        // Process message in chunks to avoid heap allocation
+        while (offset < len) {
+            fl::u16 chunk_size = fl_min(len - offset, static_cast<fl::u16>(sizeof(buffer) - 1));
+            fl::memcpy(buffer, msg + offset, chunk_size);
+            buffer[chunk_size] = '\0';  // Null-terminate
+
+            offset += chunk_size;
+
+            if (offset >= len) {
+                // Last chunk or whole message - use println (adds newline)
+                fl::println(buffer);
+            } else {
+                // Not last chunk - use print (no newline)
+                fl::print(buffer);
+            }
+        }
+
         mQueue->commit();
     }
 }
@@ -55,6 +108,85 @@ void AsyncLogger::clear() {
 
 fl::u32 AsyncLogger::droppedCount() const {
     return mQueue->droppedCount();
+}
+
+fl::size AsyncLogger::flushN(fl::size maxMessages) {
+    fl::size flushed = 0;
+    const char* msg;
+    fl::u16 len;
+
+    // 256-byte stack buffer - handles most messages in a single chunk
+    // Avoids heap allocation entirely by chunking long messages
+    char buffer[256];
+
+    while (flushed < maxMessages && mQueue->tryPop(&msg, &len)) {
+        fl::u16 offset = 0;
+
+        // Process message in chunks to avoid heap allocation
+        while (offset < len) {
+            fl::u16 chunk_size = fl_min(len - offset, static_cast<fl::u16>(sizeof(buffer) - 1));
+            fl::memcpy(buffer, msg + offset, chunk_size);
+            buffer[chunk_size] = '\0';  // Null-terminate
+
+            offset += chunk_size;
+
+            if (offset >= len) {
+                // Last chunk or whole message - use println (adds newline)
+                fl::println(buffer);
+            } else {
+                // Not last chunk - use print (no newline)
+                fl::print(buffer);
+            }
+        }
+
+        mQueue->commit();
+        flushed++;
+    }
+
+    return flushed;
+}
+
+bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick) {
+    detail::BackgroundFlushState& state = detail::get_flush_state();
+
+    // If already enabled, disable first
+    if (state.mEnabled) {
+        disableBackgroundFlush();
+    }
+
+    // Configure flush parameters
+    state.mMessagesPerTick = messages_per_tick;
+
+    // Setup ISR timer configuration
+    fl::isr::isr_config_t config;
+    config.handler = detail::async_log_flush_timer_isr;
+    config.user_data = &state;
+    config.frequency_hz = 1000 / interval_ms;  // Convert ms to Hz
+    config.priority = fl::isr::ISR_PRIORITY_LOW;  // Low priority to avoid interfering with LED timing
+    config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
+
+    // Attach timer ISR
+    if (!fl::isr::attachTimerHandler(config, &state.mTimerHandle)) {
+        return false;  // Platform doesn't support timers or attachment failed
+    }
+
+    state.mEnabled = true;
+    return true;
+}
+
+void AsyncLogger::disableBackgroundFlush() {
+    detail::BackgroundFlushState& state = detail::get_flush_state();
+
+    if (state.mEnabled && state.mTimerHandle.is_valid()) {
+        fl::isr::detachHandler(state.mTimerHandle);
+        state.mTimerHandle = fl::isr::isr_handle_t();  // Reset to default (invalid) handle
+        state.mEnabled = false;
+        state.mNeedsFlush = false;
+    }
+}
+
+bool AsyncLogger::isBackgroundFlushEnabled() const {
+    return detail::get_flush_state().mEnabled;
 }
 
 // ============================================================================
@@ -140,6 +272,33 @@ AsyncLogger& get_audio_async_logger_isr() {
 
 AsyncLogger& get_audio_async_logger_main() {
     return detail::audio_async_logger_main();
+}
+
+// ============================================================================
+// Background flush service function (call from main loop)
+// ============================================================================
+
+void async_log_service() {
+    detail::BackgroundFlushState& state = detail::get_flush_state();
+
+    // Quick check - return immediately if no flush needed
+    if (!state.mNeedsFlush) {
+        return;
+    }
+
+    // Clear flag
+    state.mNeedsFlush = false;
+
+    // Flush all async loggers (ISR + main thread queues) up to N messages per logger
+    fl::size n = state.mMessagesPerTick;
+    get_parlio_async_logger_isr().flushN(n);
+    get_parlio_async_logger_main().flushN(n);
+    get_rmt_async_logger_isr().flushN(n);
+    get_rmt_async_logger_main().flushN(n);
+    get_spi_async_logger_isr().flushN(n);
+    get_spi_async_logger_main().flushN(n);
+    get_audio_async_logger_isr().flushN(n);
+    get_audio_async_logger_main().flushN(n);
 }
 
 } // namespace fl

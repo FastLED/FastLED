@@ -24,6 +24,23 @@ namespace fl {
         void clear();
         fl::u32 droppedCount() const;
 
+        /// @brief Flush up to N messages from queue (bounded flush)
+        /// @param maxMessages Maximum number of messages to process
+        /// @return Number of messages actually flushed
+        fl::size flushN(fl::size maxMessages);
+
+        /// @brief Enable background timer-based flushing (opt-in)
+        /// @param interval_ms Flush interval in milliseconds (e.g., 100 = 10 Hz)
+        /// @param messages_per_tick Maximum messages to flush per timer tick (default 5)
+        /// @return true if enabled successfully, false if platform doesn't support timers
+        bool enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick = 5);
+
+        /// @brief Disable background flushing
+        void disableBackgroundFlush();
+
+        /// @brief Check if background flushing is enabled
+        bool isBackgroundFlushEnabled() const;
+
     private:
         AsyncLogQueue<128, 4096>* mQueue;  // Pointer to hide implementation details
     };
@@ -56,6 +73,26 @@ namespace fl {
 ///   #include "fl/log.h"
 ///
 ///   FL_LOG_SPI("Initializing SPI bus " << bus_id);
+
+// =============================================================================
+// General Logging Macros
+// =============================================================================
+
+/// @brief Print without prefix (like FL_WARN but without "WARN: " prefix)
+/// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+/// Supports stream-style formatting with << operator
+///
+/// Example:
+///   FL_PRINT("Value: " << x);
+///   FL_PRINT(ss.str());
+#ifndef FL_PRINT
+#if SKETCH_HAS_LOTS_OF_MEMORY
+#define FL_PRINT(X) fl::println((fl::StrStream() << X).c_str())
+#else
+// No-op macro for memory-constrained platforms
+#define FL_PRINT(X) do { } while(0)
+#endif
+#endif
 
 // =============================================================================
 // Hardware Interface Logging Categories
@@ -263,6 +300,17 @@ namespace fl {
 #else
     #define FL_LOG_AUDIO_ASYNC_FLUSH() do {} while(0)
 #endif
+
+// -----------------------------------------------------------------------------
+// Background Flush Service
+// -----------------------------------------------------------------------------
+
+/// @brief Service function to check timer flag and flush all async loggers
+/// Call this from your main loop() if using enableBackgroundFlush()
+/// This function is lightweight - returns immediately if no flush needed
+namespace fl {
+    void async_log_service();
+}
 
 /// @}
 

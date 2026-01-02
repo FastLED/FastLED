@@ -73,14 +73,14 @@
 // ============================================================================
 // AGENT INSTRUCTIONS
 // ============================================================================
-// This sketch is a validation test that uses the "ERROR" keyword in FL_WARN
+// This sketch is a validation test that uses the "ERROR" keyword in FL_ERROR
 // statements to signal test failures. The `bash debug` command monitors for
 // the "ERROR" keyword and fails the test when detected (exit code 1).
 //
 // 🚫 DO NOT "CHEAT" THE TEST:
 //    - DO NOT change "ERROR" to "FAIL", "WARNING", "FAILURE", or any other
 //      keyword to avoid test detection
-//    - DO NOT modify FL_WARN statements unless explicitly requested by the user
+//    - DO NOT modify FL_ERROR statements unless explicitly requested by the user
 //    - The "ERROR" keyword is INTENTIONAL and part of the validation contract
 //
 // ✅ VALID MODIFICATIONS (only if explicitly requested):
@@ -268,7 +268,7 @@ void setup() {
     ss << "  Loopback Mode: " << loop_back_mode << "\n";
     ss << "  Color Order: RGB\n";
     ss << "  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // ========================================================================
     // RX Channel Setup
@@ -278,7 +278,7 @@ void setup() {
     ss << "\n[RX SETUP] Creating RX channel for LED validation\n";
     ss << "[RX CREATE] Creating RX channel on PIN " << PIN_RX
        << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
 
@@ -294,7 +294,7 @@ void setup() {
     ss.clear();
     ss << "[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())\n";
     ss << "[RX SETUP] ✓ RX channel ready for LED validation";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // List all available drivers and store globally
     drivers_available = FastLED.getDriverInfos();
@@ -306,7 +306,7 @@ void setup() {
            << " (priority: " << drivers_available[i].priority
            << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")\n";
     }
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Validate that expected engines are available for this platform
     validateExpectedEngines();
@@ -337,7 +337,7 @@ void setup() {
         // Explicit validation print: "DRIVER_ENABLED: <name>"
         ss << "  DRIVER_ENABLED: " << driver_name << "\n";
     }
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Lane range - machine-parseable for --expect validation
     ss.clear();
@@ -375,7 +375,7 @@ void setup() {
     int total_validation_tests = total_test_cases * 4;  // 4 bit patterns per test case
     ss << "  Total Test Cases: " << total_test_cases << "\n";
     ss << "  Total Validation Tests: " << total_validation_tests << " (" << total_test_cases << " cases × 4 patterns)";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     ss.clear();
     ss << "\n⚠️  [HARDWARE SETUP REQUIRED]\n";
@@ -386,7 +386,7 @@ void setup() {
     ss << "  ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance\n";
     ss << "  → GPIO 11 is SPI2 IO_MUX pin (bypasses GPIO matrix for 80MHz speed)\n";
     ss << "  → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)\n";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Generate all test cases from the matrix
     test_cases = generateTestCases(test_matrix, PIN_TX);
@@ -395,7 +395,7 @@ void setup() {
     ss << "  Generated " << test_cases.size() << " test case(s)\n";
     // Machine-parseable: "TEST_CASES_GENERATED: X"
     ss << "  TEST_CASES_GENERATED: " << test_cases.size();
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Initialize result tracking for each test case
     for (fl::size i = 0; i < test_cases.size(); i++) {
@@ -411,7 +411,7 @@ void setup() {
     ss << "\n[SETUP COMPLETE]\n";
     ss << "  VALIDATION_READY: true\n";
     ss << "Starting test matrix validation loop...";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
     delay(2000);
 }
 
@@ -438,7 +438,7 @@ void runSingleTestCase(
        << " | " << test_case.lane_count << " lane(s)"
        << " | " << test_case.base_strip_size << " LEDs\n";
     ss << "╚════════════════════════════════════════════════════════════════╝";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Set this driver as exclusive for testing
     if (!FastLED.setExclusiveDriver(test_case.driver_name.c_str())) {
@@ -446,13 +446,13 @@ void runSingleTestCase(
         test_result.skipped = true;
         return;
     }
-    FL_WARN(test_case.driver_name.c_str() << " driver enabled exclusively");
+    FL_PRINT(test_case.driver_name.c_str() << " driver enabled exclusively");
 
     // Build TX channel configs for all lanes
     fl::vector<fl::ChannelConfig> tx_configs;
     for (int lane_idx = 0; lane_idx < test_case.lane_count; lane_idx++) {
         auto& lane = test_case.lanes[lane_idx];
-        FL_WARN("[Lane " << lane_idx << "] Pin: " << lane.pin << ", LEDs: " << lane.num_leds);
+        FL_PRINT("[Lane " << lane_idx << "] Pin: " << lane.pin << ", LEDs: " << lane.num_leds);
 
         // Create channel config for this lane
         tx_configs.push_back(fl::ChannelConfig(
@@ -476,18 +476,18 @@ void runSingleTestCase(
     );
 
     // Run warm-up frame (discard results)
-    FL_WARN("\n[INFO] Running warm-up frame (results will be discarded)");
+    FL_PRINT("\n[INFO] Running warm-up frame (results will be discarded)");
     int warmup_total = 0, warmup_passed = 0;
     validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-    FL_WARN("[INFO] Warm-up complete (" << warmup_passed << "/" << warmup_total << " passed - discarding)");
+    FL_PRINT("[INFO] Warm-up complete (" << warmup_passed << "/" << warmup_total << " passed - discarding)");
 
     // Run actual test frame (keep results)
-    FL_WARN("\n[INFO] Running actual test frame");
+    FL_PRINT("\n[INFO] Running actual test frame");
     validateChipsetTiming(validation_config, test_result.total_tests, test_result.passed_tests);
 
     // Log test case result
     if (test_result.allPassed()) {
-        FL_WARN("\n[PASS] Test case " << test_case.driver_name.c_str()
+        FL_PRINT("\n[PASS] Test case " << test_case.driver_name.c_str()
                 << " (" << test_case.lane_count << " lanes, "
                 << test_case.base_strip_size << " LEDs) completed successfully");
     } else {
@@ -514,7 +514,7 @@ void loop() {
             input.trim();
             if (input == "START") {
                 start_command_received = true;
-                FL_WARN("\n[START] Received START command - beginning test matrix");
+                FL_PRINT("\n[START] Received START command - beginning test matrix");
                 break;
             }
         }
@@ -523,7 +523,7 @@ void loop() {
         if (!start_command_received) {
             uint32_t now = millis();
             if (now - last_wait_message_ms >= 5000) {
-                FL_WARN("[WAITING] Waiting for START command on serial input...");
+                FL_PRINT("[WAITING] Waiting for START command on serial input...");
                 last_wait_message_ms = now;
             }
             delay(100);  // Small delay to prevent tight loop
@@ -546,7 +546,7 @@ void loop() {
     ss << "╚════════════════════════════════════════════════════════════════╝\n";
     ss << "\nTest Matrix: " << test_cases.size() << " test case(s)\n";
     ss << "Using persistent RX channel from setup() - not recreated";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Timing configuration to test (WS2812B-V5)
     fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
@@ -564,7 +564,7 @@ void loop() {
         ss << "\n════════════════════════════════════════════════════════════════\n";
         ss << "TEST CASE " << (i+1) << "/" << test_cases.size() << "\n";
         ss << "════════════════════════════════════════════════════════════════";
-        FL_WARN(ss.str());
+        FL_PRINT(ss.str());
 
         // Run this test case
         runSingleTestCase(
@@ -599,9 +599,9 @@ void loop() {
     if (failed_count > 0) {
         halt.error("[TEST MATRIX] See results table and summary above for details");
     } else {
-        FL_WARN("\n[TEST MATRIX] ✓ All test cases PASSED");
+        FL_PRINT("\n[TEST MATRIX] ✓ All test cases PASSED");
         // Signal successful completion for early exit via --stop pattern
-        FL_WARN("\nVALIDATION_SUITE_COMPLETE");
+        FL_PRINT("\nVALIDATION_SUITE_COMPLETE");
     }
 
     ss.clear();
@@ -609,7 +609,7 @@ void loop() {
     ss << "║ TEST MATRIX COMPLETE                                           ║\n";
     ss << "╚════════════════════════════════════════════════════════════════╝\n";
     ss << "\n========== TEST MATRIX COMPLETE - HALTING ==========";
-    FL_WARN(ss.str());
+    FL_PRINT(ss.str());
 
     // Flush any remaining async PARLIO logs before halting
     FL_LOG_PARLIO_ASYNC_FLUSH();
