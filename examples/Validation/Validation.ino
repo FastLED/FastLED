@@ -164,6 +164,7 @@
 #include "Common.h"
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
+#include "ValidationRemote.h"
 #include "SketchHalt.h"
 
 // Watchdog is automatically initialized via FL_INIT (no include needed)
@@ -200,6 +201,10 @@ fl::shared_ptr<fl::RxDevice> rx_channel;
 
 // Sketch halt controller - handles safe halting without watchdog timer resets
 SketchHalt halt;
+
+// Remote RPC system for dynamic test control via JSON commands
+// Using Singleton pattern for thread-safe lazy initialization
+using RemoteControlSingleton = fl::Singleton<ValidationRemoteControl>;
 
 
 // ============================================================================
@@ -407,6 +412,51 @@ void setup() {
         ));
     }
 
+    // ========================================================================
+    // Remote RPC Function Registration
+    // ========================================================================
+
+    ss.clear();
+    ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
+    FL_PRINT(ss.str());
+
+    // Initialize RemoteControl singleton and register all RPC functions
+    RemoteControlSingleton::instance().registerFunctions(
+        drivers_available,
+        test_matrix,
+        test_cases,
+        test_results,
+        start_command_received,
+        test_matrix_complete,
+        frame_counter,
+        rx_channel,
+        fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
+    );
+
+    ss.clear();
+    ss << "[REMOTE RPC] ✓ Registered 16 RPC functions:\n";
+    ss << "  Phase 1 - Basic Control:\n";
+    ss << "    - start()         : Trigger test matrix execution\n";
+    ss << "    - status()        : Query current test state\n";
+    ss << "    - drivers()       : List available drivers\n";
+    ss << "  Phase 2 - Configuration:\n";
+    ss << "    - getConfig()     : Query current test matrix configuration\n";
+    ss << "    - setDrivers()    : Configure enabled drivers\n";
+    ss << "    - setLaneRange()  : Configure lane range\n";
+    ss << "    - setStripSizes() : Configure strip sizes\n";
+    ss << "  Phase 3 - Selective Execution:\n";
+    ss << "    - runTestCase()   : Run single test case by index\n";
+    ss << "    - runDriver()     : Run all tests for specific driver\n";
+    ss << "    - runAll()        : Run full test matrix with JSON results\n";
+    ss << "    - getResults()    : Return all test results\n";
+    ss << "    - getResult()     : Return specific test case result\n";
+    ss << "  Phase 4 - Utility:\n";
+    ss << "    - reset()         : Reset test state without device reboot\n";
+    ss << "    - halt()          : Trigger sketch halt\n";
+    ss << "    - ping()          : Health check with timestamp\n";
+    ss << "    - help()          : List all RPC functions with descriptions";
+    FL_PRINT(ss.str());
+
     ss.clear();
     ss << "\n[SETUP COMPLETE]\n";
     ss << "  VALIDATION_READY: true\n";
@@ -506,18 +556,13 @@ void loop() {
     // IMPORTANT: Must be first line - handles halt state and prevents watchdog resets
     if (halt.check()) return;
 
-    // Check for START command on serial input
+    // Process scheduled RPC commands
+    RemoteControlSingleton::instance().tick(millis());
+
+    // Check for START command or JSON RPC commands on serial input
     if (!start_command_received) {
-        // Read any available serial data
-        while (Serial.available() > 0) {
-            String input = Serial.readStringUntil('\n');
-            input.trim();
-            if (input == "START") {
-                start_command_received = true;
-                FL_PRINT("\n[START] Received START command - beginning test matrix");
-                break;
-            }
-        }
+        // Process serial input via remote control
+        RemoteControlSingleton::instance().processSerialInput();
 
         // If START not received yet, print waiting message every 5 seconds
         if (!start_command_received) {
