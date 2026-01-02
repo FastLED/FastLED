@@ -35,7 +35,13 @@
 #elif defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52) || defined(NRF52832_XXAA) || defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
     #include "platforms/arm/nrf52/isr_nrf52.hpp"
 #elif defined(__AVR__)
+    // AVR platform: Only ATmega chips have Timer1 hardware support
+    // ATtiny chips fall back to null implementation (no compatible Timer1)
     #include "platforms/avr/isr_avr.hpp"
+    // If isr_avr.hpp didn't define the implementation (ATtiny case), include null
+    #ifndef FL_ISR_AVR_IMPLEMENTED
+        #include "platforms/isr_null.hpp"
+    #endif
 #elif defined(ARDUINO_ARCH_RP2040) || defined(PICO_BOARD)
     #include "platforms/arm/rp/isr_rp2040.hpp"
 #elif defined(ARDUINO_ARCH_SAMD) || defined(__SAMD21__) || defined(__SAMD51__)

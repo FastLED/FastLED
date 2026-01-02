@@ -12,12 +12,22 @@
   - No hardware interrupt priority (AVR interrupts are equal priority)
   - External interrupts via Arduino attachInterrupt() API
 
+  Platform Support:
+  - ATmega chips: Full Timer1 support (16-bit timer)
+  - ATtiny chips: Not supported (no compatible Timer1 hardware)
+
   License: MIT (FastLED)
 */
 
 #pragma once
 
-#ifdef __AVR__
+#include "platforms/avr/is_avr.h"
+
+// Only compile this implementation for ATmega chips with Timer1 hardware.
+// ATtiny chips don't have the 16-bit Timer1, so they fall back to null implementation.
+#if defined(__AVR__) && defined(FL_IS_AVR_ATMEGA)
+
+#define FL_ISR_AVR_IMPLEMENTED  // Sentinel macro to indicate this implementation is active
 
 #include "fl/isr.h"
 #include "fl/dbg.h"
@@ -430,4 +440,4 @@ bool requires_assembly_handler(uint8_t priority) {
 } // namespace isr
 } // namespace fl
 
-#endif // __AVR__
+#endif // defined(__AVR__) && defined(FL_IS_AVR_ATMEGA)
