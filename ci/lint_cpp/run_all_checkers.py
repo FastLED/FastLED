@@ -295,11 +295,12 @@ def run_checkers(
 
     for checker in all_checkers:
         checker_name = checker.__class__.__name__
-        if hasattr(checker, "violations") and checker.violations:
+        violations = getattr(checker, "violations", None)
+        if violations:
             # Merge violations from multiple checkers with same name
             if checker_name not in all_results:
                 all_results[checker_name] = {}
-            all_results[checker_name].update(checker.violations)
+            all_results[checker_name].update(violations)
 
     return all_results
 

@@ -17,7 +17,7 @@ import sys
 
 import serial.tools.list_ports
 
-from ci.debug_attached import auto_detect_upload_port, kill_port_users
+from ci.util.port_utils import ComportResult, auto_detect_upload_port, kill_port_users
 
 
 def list_all_ports() -> list[str]:
@@ -94,7 +94,7 @@ def main():
         print("Tip: Run with a port name (e.g., COM3) to check that specific port")
         return
 
-    port_to_check = args.port or detected
+    port_to_check = args.port or (detected.selected_port if detected else None)
     if not port_to_check:
         print("No port specified or detected")
         return

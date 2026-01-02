@@ -134,7 +134,7 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
     return cleaned_count
 
 
-def list_active_locks(cache_dir: Path) -> list[dict]:
+def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool]]:
     """
     List all active locks in cache directory with metadata.
 
@@ -159,7 +159,7 @@ def list_active_locks(cache_dir: Path) -> list[dict]:
     if not cache_dir.exists():
         return []
 
-    locks: list[dict] = []
+    locks: list[dict[str, str | int | bool]] = []
 
     # Find all .lock files recursively
     for lock_file in cache_dir.rglob("*.lock"):
