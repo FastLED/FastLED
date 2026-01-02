@@ -35,6 +35,12 @@ FL_EXTERN_C_END
 #include <Arduino.h>
 #endif
 
+// Compatibility macros for older AVR chips
+// ATmega8A and similar older chips use TIMSK instead of TIMSK1
+#if !defined(TIMSK1) && defined(TIMSK)
+#define TIMSK1 TIMSK
+#endif
+
 namespace fl {
 namespace isr {
 namespace platform {
