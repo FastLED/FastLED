@@ -31,6 +31,8 @@ FL_EXTERN_C_BEGIN
 #include "esp_log.h"
 #include "soc/soc.h"
 #include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 FL_EXTERN_C_END
 
 #include "fl/stl/assert.h"
@@ -39,6 +41,9 @@ FL_EXTERN_C_END
 namespace fl {
 namespace isr {
 namespace platform {
+
+// Spinlock for protecting GPIO ISR service installation (multi-core safety)
+static portMUX_TYPE gpio_isr_service_mutex = portMUX_INITIALIZER_UNLOCKED;
 
 // =============================================================================
 // Platform-Specific Handle Storage
@@ -282,15 +287,22 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
         }
 
         // Install GPIO ISR service if not already installed
+        // Use critical section for multi-core safety
         static bool gpio_isr_service_installed = false;
         if (!gpio_isr_service_installed) {
-            ret = gpio_install_isr_service(0);
-            if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                FL_WARN("attachExternalHandler: gpio_install_isr_service failed: " << esp_err_to_name(ret));
-                delete handle_data;
-                return -10;  // ISR service installation failed
+            taskENTER_CRITICAL(&gpio_isr_service_mutex);
+            // Double-check after acquiring lock (classic double-checked locking pattern)
+            if (!gpio_isr_service_installed) {
+                ret = gpio_install_isr_service(0);
+                if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
+                    taskEXIT_CRITICAL(&gpio_isr_service_mutex);
+                    FL_WARN("attachExternalHandler: gpio_install_isr_service failed: " << esp_err_to_name(ret));
+                    delete handle_data;
+                    return -10;  // ISR service installation failed
+                }
+                gpio_isr_service_installed = true;
             }
-            gpio_isr_service_installed = true;
+            taskEXIT_CRITICAL(&gpio_isr_service_mutex);
         }
 
         // Add ISR handler for specific GPIO pin

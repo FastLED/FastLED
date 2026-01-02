@@ -14,7 +14,8 @@ namespace isr {
 namespace platform {
 
 // Platform ID for STM32
-constexpr uint8_t STM32_PLATFORM_ID = 3;
+// Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
+constexpr uint8_t STM32_PLATFORM_ID = 6;
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     (void)config;

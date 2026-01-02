@@ -55,12 +55,12 @@ int null_detach_handler(isr_handle_t& handle) {
     return ERR_NOT_IMPLEMENTED;  // Not implemented error
 }
 
-int null_enable_handler(const isr_handle_t& handle) {
+int null_enable_handler(isr_handle_t& handle) {
     (void)handle;
     return ERR_NOT_IMPLEMENTED;  // Not implemented error
 }
 
-int null_disable_handler(const isr_handle_t& handle) {
+int null_disable_handler(isr_handle_t& handle) {
     (void)handle;
     return ERR_NOT_IMPLEMENTED;  // Not implemented error
 }
@@ -126,11 +126,11 @@ int detach_handler(isr_handle_t& handle) {
     return null_detach_handler(handle);
 }
 
-int enable_handler(const isr_handle_t& handle) {
+int enable_handler(isr_handle_t& handle) {
     return null_enable_handler(handle);
 }
 
-int disable_handler(const isr_handle_t& handle) {
+int disable_handler(isr_handle_t& handle) {
     return null_disable_handler(handle);
 }
 

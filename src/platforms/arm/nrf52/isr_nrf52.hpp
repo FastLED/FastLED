@@ -4,7 +4,21 @@
   NRF52-specific implementation of the cross-platform ISR API.
   Supports NRF52832, NRF52833, NRF52840 (ARM Cortex-M4F).
 
-  Uses nrfx drivers for timer and GPIOTE interrupts.
+  Uses Nordic nrfx HAL (Hardware Abstraction Layer) for timer and GPIOTE interrupts.
+
+  Thread Safety & Critical Sections:
+  - This implementation uses direct NVIC access (assumes NO SoftDevice)
+  - When BLE SoftDevice is enabled, replace NVIC_* calls with sd_nvic_* equivalents
+  - Nordic SDK provides CRITICAL_REGION_ENTER/EXIT macros for critical sections
+  - CRITICAL_REGION uses ARM CPSID/CPSIE instructions (disables all interrupts)
+  - For finer control, use BASEPRI register on Cortex-M4 (selective interrupt masking)
+  - Avoid long critical sections to prevent interrupt latency issues
+
+  SoftDevice Compatibility:
+  - SoftDevice reserves NVIC priorities 0, 1, and 4 for BLE stack
+  - Application interrupts at priority 0-3 CANNOT call SoftDevice APIs
+  - Application interrupts at priority 5-7 CAN call SoftDevice APIs
+  - Use software interrupts (SWIRQ) to defer work from high-priority ISRs
 
   License: MIT (FastLED)
 */
@@ -177,13 +191,22 @@ static void free_gpiote_channel(int8_t channel) {
 
 // Map ISR priority (1-7) to NVIC priority (0-7, lower = higher)
 // ISR priority 1 (low) -> NVIC 6, ISR priority 2 -> NVIC 5, ..., ISR priority 7 (max) -> NVIC 2
-// Reserve NVIC 0-1 for SoftDevice
+// Reserve NVIC 0-1 for SoftDevice (BLE stack)
+//
+// SoftDevice Compatibility Notes (when BLE is enabled):
+// - SoftDevice uses NVIC priorities 0, 1, and 4
+// - Application can safely use priorities 2, 3, 5, 6, 7
+// - Interrupts at priority 0-3 CANNOT call SoftDevice APIs (use defer to lower priority)
+// - Interrupts at priority 5-7 CAN call SoftDevice APIs
+// - When SoftDevice is enabled, use sd_nvic_* functions instead of NVIC_* functions
+// - This implementation assumes NO SoftDevice (uses direct NVIC access)
 static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
     if (isr_priority > 7) isr_priority = 7;
 
     // Map: ISR 1->NVIC 6, ISR 2->NVIC 5, ..., ISR 7->NVIC 2
+    // This mapping avoids NVIC 0-1 (SoftDevice high priority) and NVIC 7 (lowest)
     return 8 - isr_priority;
 }
 
@@ -191,13 +214,30 @@ static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
 // Timer ISR Handlers
 // =============================================================================
 
+// Map channel index to timer event enum
+static nrf_timer_event_t get_timer_event(uint8_t channel) {
+    // Use proper enum values defined by Nordic SDK (offsetof-based)
+    switch (channel) {
+        case 0: return NRF_TIMER_EVENT_COMPARE0;
+        case 1: return NRF_TIMER_EVENT_COMPARE1;
+        case 2: return NRF_TIMER_EVENT_COMPARE2;
+        case 3: return NRF_TIMER_EVENT_COMPARE3;
+#ifdef NRF_TIMER_EVENT_COMPARE4
+        case 4: return NRF_TIMER_EVENT_COMPARE4;
+#endif
+#ifdef NRF_TIMER_EVENT_COMPARE5
+        case 5: return NRF_TIMER_EVENT_COMPARE5;
+#endif
+        default: return NRF_TIMER_EVENT_COMPARE0;  // Fallback (should never happen)
+    }
+}
+
 // Common timer interrupt handler
 static void timer_interrupt_handler(int timer_idx, uint8_t channel) {
     NRF_TIMER_Type* timer = get_timer_instance(timer_idx);
     if (!timer) return;
 
-    nrf_timer_event_t event = static_cast<nrf_timer_event_t>(
-        NRF_TIMER_EVENT_COMPARE0 + (channel * sizeof(uint32_t)));
+    nrf_timer_event_t event = get_timer_event(channel);
 
     // Check if this channel triggered the interrupt
     if (nrf_timer_event_check(timer, event)) {
@@ -256,13 +296,30 @@ extern "C" {
     }
 #endif
 
+    // Map GPIOTE channel index to event enum
+    static nrf_gpiote_event_t get_gpiote_event(uint8_t channel) {
+        // Use proper enum values defined by Nordic SDK (offsetof-based)
+        switch (channel) {
+            case 0: return NRF_GPIOTE_EVENT_IN_0;
+            case 1: return NRF_GPIOTE_EVENT_IN_1;
+            case 2: return NRF_GPIOTE_EVENT_IN_2;
+            case 3: return NRF_GPIOTE_EVENT_IN_3;
+#if MAX_GPIOTE_CHANNELS > 4
+            case 4: return NRF_GPIOTE_EVENT_IN_4;
+            case 5: return NRF_GPIOTE_EVENT_IN_5;
+            case 6: return NRF_GPIOTE_EVENT_IN_6;
+            case 7: return NRF_GPIOTE_EVENT_IN_7;
+#endif
+            default: return NRF_GPIOTE_EVENT_IN_0;  // Fallback (should never happen)
+        }
+    }
+
     void GPIOTE_IRQHandler(void) {
         for (uint8_t ch = 0; ch < MAX_GPIOTE_CHANNELS; ch++) {
-            nrf_gpiote_event_t event = static_cast<nrf_gpiote_event_t>(
-                NRF_GPIOTE_EVENT_IN_0 + (ch * sizeof(uint32_t)));
+            nrf_gpiote_event_t event = get_gpiote_event(ch);
 
-            if (nrf_gpiote_event_check(event) && gpiote_handles[ch]) {
-                nrf_gpiote_event_clear(event);
+            if (nrf_gpiote_event_check(NRF_GPIOTE, event) && gpiote_handles[ch]) {
+                nrf_gpiote_event_clear(NRF_GPIOTE, event);
 
                 if (gpiote_handles[ch]->user_handler) {
                     gpiote_handles[ch]->user_handler(gpiote_handles[ch]->user_data);
@@ -320,12 +377,25 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     // Store handle for ISR access
     timer_handles[timer_idx][channel] = handle_data;
 
-    // Configure timer
-    nrf_timer_mode_set(timer, NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(timer, NRF_TIMER_BIT_WIDTH_32);
+    // Configure timer (only if this is the first channel on this timer)
+    // WARNING: Timer configuration is shared across all channels on the same timer instance
+    // Reconfiguring an already-running timer could affect other active channels
+    bool timer_already_running = false;
+    for (uint8_t ch = 0; ch < get_timer_max_channels(timer_idx); ch++) {
+        if (ch != channel && timer_allocated[timer_idx][ch]) {
+            timer_already_running = true;
+            break;
+        }
+    }
+
+    if (!timer_already_running) {
+        nrf_timer_mode_set(timer, NRF_TIMER_MODE_TIMER);
+        nrf_timer_bit_width_set(timer, NRF_TIMER_BIT_WIDTH_32);
+    }
 
     // Choose frequency based on requested timer frequency
     // NRF52 timer can run at: 16MHz, 8MHz, 4MHz, 2MHz, 1MHz, 500kHz, 250kHz, 125kHz, 62.5kHz, 31.25kHz
+    // WARNING: Frequency is shared across all channels on the same timer instance
     nrf_timer_frequency_t timer_freq;
     if (config.frequency_hz >= 1000000) {
         timer_freq = NRF_TIMER_FREQ_16MHz;  // 16 MHz for high-frequency timers
@@ -337,7 +407,9 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         timer_freq = NRF_TIMER_FREQ_31250Hz; // 31.25 kHz for very low frequency
     }
 
-    nrf_timer_frequency_set(timer, timer_freq);
+    if (!timer_already_running) {
+        nrf_timer_frequency_set(timer, timer_freq);
+    }
 
     // Calculate compare value based on timer frequency
     uint32_t timer_base_freq;
@@ -361,6 +433,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Set compare value
+    // Note: Function name varies by SDK version (nrf_timer_cc_write in SDK 15.0, nrf_timer_cc_set in newer)
     nrf_timer_cc_t cc_channel = static_cast<nrf_timer_cc_t>(NRF_TIMER_CC_CHANNEL0 + channel);
     nrf_timer_cc_set(timer, cc_channel, compare_value);
 
@@ -371,8 +444,6 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Enable interrupt for this channel
-    nrf_timer_event_t event = static_cast<nrf_timer_event_t>(
-        NRF_TIMER_EVENT_COMPARE0 + (channel * sizeof(uint32_t)));
     nrf_timer_int_enable(timer,
         static_cast<uint32_t>(NRF_TIMER_INT_COMPARE0_MASK << channel));
 
@@ -381,8 +452,10 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     NVIC_SetPriority(handle_data->timer_irq, nvic_priority);
     NVIC_EnableIRQ(handle_data->timer_irq);
 
-    // Start timer
-    nrf_timer_task_trigger(timer, NRF_TIMER_TASK_START);
+    // Start timer (only if not already running)
+    if (!timer_already_running) {
+        nrf_timer_task_trigger(timer, NRF_TIMER_TASK_START);
+    }
 
     FL_DBG("Timer started at " << config.frequency_hz << " Hz on TIMER" << timer_idx
            << " channel " << static_cast<int>(channel));

@@ -1,5 +1,18 @@
 /// @file platforms/arm/teensy/isr_teensy.hpp
 /// @brief Teensy ISR timer implementation using IntervalTimer
+///
+/// Priority Handling:
+/// - Teensy boards use ARM Cortex-M4/M7 with NVIC (Nested Vectored Interrupt Controller)
+/// - NVIC implements 4 priority bits (__NVIC_PRIO_BITS = 4), providing 16 priority levels
+/// - Valid NVIC priorities: 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
+/// - Lower NVIC values = higher priority (0 is highest, 240 is lowest)
+/// - FastLED ISR API uses priority 1-7 (1=lowest, 7=highest)
+/// - Mapping: ISR priority N -> NVIC priority (16 - N*2)*16
+/// - Examples: ISR 1->NVIC 224, ISR 4->NVIC 128, ISR 7->NVIC 32
+///
+/// Hardware Limitations:
+/// - Teensy 4.x (i.MX RT1062): All PIT timers share IRQ_PIT, so priority is global
+/// - Teensy 3.x (Kinetis): Each timer has separate NVIC slot, individual priorities work
 
 #pragma once
 
@@ -18,6 +31,7 @@ struct teensy_isr_handle_data {
     isr_handler_t handler;
     void* user_data;
     uint32_t frequency_hz;
+    uint8_t nvic_priority;  // Stored NVIC priority for re-enable
     bool enabled;
     bool is_timer;  // true for timer, false for external interrupt
 
@@ -25,9 +39,14 @@ struct teensy_isr_handle_data {
         : handler(nullptr)
         , user_data(nullptr)
         , frequency_hz(0)
+        , nvic_priority(128)  // Default NVIC priority
         , enabled(false)
         , is_timer(false) {}
 };
+
+// Platform ID for Teensy
+// Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
+constexpr uint8_t TEENSY_PLATFORM_ID = 5;
 
 // Helper to convert isr_handle_t to platform data
 static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) {
@@ -46,6 +65,12 @@ static void teensy_timer_isr_wrapper() {
 // Note: Teensy IntervalTimer API only supports one active timer at a time
 // due to lack of user_data parameter in ISR callback. This limitation means
 // only a single timer can be registered and active simultaneously.
+//
+// Additional Teensy 4.x limitation: All four PIT timers (0-3) share a single
+// interrupt slot (IRQ_PIT), so they cannot have individual priorities. The
+// IntervalTimer implementation selects the highest priority among all active
+// timers and applies it globally. This is a hardware limitation of the i.MX
+// RT1062 processor. Teensy 3.x boards do not have this limitation.
 static teensy_isr_handle_data* g_active_timer_data = nullptr;
 
 // Actual ISR wrapper that has access to handle data
@@ -98,13 +123,28 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     }
 
     // Set priority if specified
-    if (config.priority != ISR_PRIORITY_DEFAULT) {
-        // Teensy priority: 0-255, where 0 is highest
-        // Our priority: 1-7, where 1 is lowest, 7 is highest
-        // Map: priority 1 -> 255 (lowest), priority 7 -> 0 (highest)
-        uint8_t teensy_priority = 255 - ((config.priority - 1) * 255 / 6);
-        data->timer.priority(teensy_priority);
-    }
+    // Teensy NVIC implementation: 4 priority bits (16 levels), values are multiples of 16
+    // Valid NVIC values: 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
+    // ISR API priority: 1-7, where 1 is lowest, 7 is highest
+    // Map: ISR priority 1 -> NVIC 240 (lowest), ISR priority 7 -> NVIC 16 (highest user priority)
+    // Formula: NVIC = (16 - priority * 2) * 16
+    // Priority 1: (16 - 2) * 16 = 224
+    // Priority 2: (16 - 4) * 16 = 192
+    // Priority 3: (16 - 6) * 16 = 160
+    // Priority 4: (16 - 8) * 16 = 128
+    // Priority 5: (16 - 10) * 16 = 96
+    // Priority 6: (16 - 12) * 16 = 64
+    // Priority 7: (16 - 14) * 16 = 32
+
+    // Clamp priority to valid range [1, 7]
+    uint8_t priority = config.priority;
+    if (priority < 1) priority = 1;
+    if (priority > 7) priority = 7;
+
+    // Map to Teensy NVIC priority (using stepped mapping across available range)
+    uint8_t teensy_priority = (16 - priority * 2) * 16;
+    data->nvic_priority = teensy_priority;  // Store for later use
+    data->timer.priority(teensy_priority);
 
     data->enabled = true;
 
@@ -113,7 +153,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
         handle->platform_handle = data;
         handle->handler = config.handler;
         handle->user_data = config.user_data;
-        handle->platform_id = 1;  // Teensy platform ID
+        handle->platform_id = TEENSY_PLATFORM_ID;
     }
 
     return 0;  // Success
@@ -168,6 +208,8 @@ int teensy_enable_handler(const isr_handle_t& handle) {
         if (!data->timer.begin(teensy_isr_trampoline, interval_us)) {
             return -2;  // Failed to restart
         }
+        // Restore priority setting
+        data->timer.priority(data->nvic_priority);
         data->enabled = true;
     }
 

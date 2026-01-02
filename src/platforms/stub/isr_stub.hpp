@@ -208,7 +208,7 @@ int stub_detach_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int stub_enable_handler(const isr_handle_t& handle) {
+int stub_enable_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -225,7 +225,7 @@ int stub_enable_handler(const isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int stub_disable_handler(const isr_handle_t& handle) {
+int stub_disable_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -305,11 +305,11 @@ int detach_handler(isr_handle_t& handle) {
     return stub_detach_handler(handle);
 }
 
-int enable_handler(const isr_handle_t& handle) {
+int enable_handler(isr_handle_t& handle) {
     return stub_enable_handler(handle);
 }
 
-int disable_handler(const isr_handle_t& handle) {
+int disable_handler(isr_handle_t& handle) {
     return stub_disable_handler(handle);
 }
 
