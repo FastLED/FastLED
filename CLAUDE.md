@@ -82,7 +82,7 @@ The `bash validate` command is the **preferred entry point** for AI agents doing
 **Usage:**
 - `bash validate` - Run full hardware validation suite (recommended for AI agents)
 - `bash validate --skip-lint` - Skip linting for faster iteration
-- `bash validate --timeout 60` - Custom timeout (default: 20s)
+- `bash validate --timeout 120` - Custom timeout (default: 120s)
 - `bash validate --help` - See all options
 
 **What it does:**

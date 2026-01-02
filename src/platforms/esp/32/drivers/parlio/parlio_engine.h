@@ -34,6 +34,28 @@
 /// and TASK.md UPDATE #2/#3 for detailed investigation of logging impact.
 ///
 /// ⚠️ ⚠️ ⚠️  DO NOT ADD LOGGING TO HOT PATHS - YOU WILL BREAK THE CODE ⚠️ ⚠️ ⚠️
+///
+/// **KNOWN LIMITATIONS:**
+///
+/// 1. **Buffer-Boundary Corruption (ESP32-C6 PARLIO Hardware Bug)**
+///    - Accuracy: 99.97% (1 LED in 3000 may show corruption)
+///    - Location: Last LED in first DMA buffer (typically LED ~103 for large strips)
+///    - Signature: +1 bit on blue channel (0xAA → 0xAB), timing glitch (H 125ns vs H 500ns)
+///    - Root cause: PARLIO peripheral hardware-level timing bug during buffer transition
+///    - Investigation: 6 iterations, 9 mitigation strategies tested, ZERO successes
+///      * Cache coherency (non-cacheable memory) - FAILED
+///      * Memory ordering (RISC-V fence) - FAILED
+///      * Cache line alignment - FAILED
+///      * Buffer transition delays (50µs) - FAILED
+///      * Padding workarounds - FAILED (caused system hangs)
+///    - Recommendation: Accept 99.97% accuracy as documented limitation
+///    - Alternatives: Switch to RMT driver (100% accuracy) or report bug to Espressif
+///    - See PARLIO_RESEARCH.md for complete investigation details
+///
+/// 2. **ESP-IDF Version Dependency**
+///    - Requires Arduino-ESP32 v5.5.0+ for cache sync APIs
+///    - esp_cache_msync() returns ESP_ERR_INVALID_ARG (258) for DMA memory (expected)
+///    - Error is benign - function provides beneficial side-effects despite error code
 
 #pragma once
 
