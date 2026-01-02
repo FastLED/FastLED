@@ -121,6 +121,9 @@ endforeach
 # Get stub_main.cpp source file (provides main() that calls setup/loop)
 stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 
+# Cache python program to avoid repeated lookups in the loop
+python_prog = find_program('python')
+
 # List to store all example executables for the alias target
 example_executables = []
 
@@ -162,7 +165,7 @@ foreach example_name : example_paths.keys()
         'wrapper-' + example_name,
         output: 'example-' + example_name + '-wrapper.cpp',
         command: [
-            find_program('python'),
+            python_prog,
             project_root / 'ci' / 'util' / 'generate_wrapper.py',
             '@OUTPUT@',
             example_name,
