@@ -294,13 +294,13 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
 
                     // Parse start and end indices
                     char* endptr;
-                    long startVal = strtol(startStr.c_str(), &endptr, 10);
+                    long startVal = fl::strtol(startStr.c_str(), &endptr, 10);
                     if (endptr == startStr.c_str() || startVal < 0) {
                         FL_WARN("WLED: invalid range start index: " << startStr);
                         continue;
                     }
 
-                    long endVal = strtol(endStr.c_str(), &endptr, 10);
+                    long endVal = fl::strtol(endStr.c_str(), &endptr, 10);
                     if (endptr == endStr.c_str() || endVal < 0) {
                         FL_WARN("WLED: invalid range end index: " << endStr);
                         continue;
@@ -311,7 +311,7 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
                 } else {
                     // Single index format
                     char* endptr;
-                    long idxVal = strtol(indexStr.c_str(), &endptr, 10);
+                    long idxVal = fl::strtol(indexStr.c_str(), &endptr, 10);
                     if (endptr == indexStr.c_str() || idxVal < 0) {
                         FL_WARN("WLED: invalid LED index: " << indexStr);
                         continue;
