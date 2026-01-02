@@ -123,7 +123,12 @@ done
 CMD=(uv run ci/debug_attached.py Validation)
 
 # Add input-on-trigger to auto-send START when VALIDATION_READY appears
-CMD+=(--input-on-trigger "VALIDATION_READY:START")
+# Format: PATTERN:TEXT[:TIMEOUT] (timeout is optional)
+# - Wait for VALIDATION_READY pattern (with 10s timeout)
+# - Send START command when pattern found
+# - If pattern not found in 10s, fail with "DEVICE APPEARS STUCK" error
+# - Without timeout, uses general monitor timeout instead
+CMD+=(--input-on-trigger "VALIDATION_READY:START:10")
 
 # Add default --expect patterns unless disabled
 if [[ "$USE_DEFAULT_EXPECT" == "true" ]]; then

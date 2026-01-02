@@ -360,22 +360,47 @@ def run_monitor(
     # Parse input-on-trigger argument
     trigger_pattern = None
     trigger_text = None
+    trigger_timeout_seconds = None
     if input_on_trigger:
         if ":" not in input_on_trigger:
             print(
                 f"⚠️  Warning: Invalid --input-on-trigger format: '{input_on_trigger}'"
             )
+            print(f"   Expected format: 'PATTERN:TEXT' or 'PATTERN:TEXT:TIMEOUT'")
             print(
-                f"   Expected format: 'PATTERN:TEXT' (e.g., 'VALIDATION_READY:START')"
+                f"   Example: 'VALIDATION_READY:START' or 'VALIDATION_READY:START:10'"
             )
             print(f"   Ignoring input-on-trigger")
         else:
-            trigger_pattern_str, trigger_text = input_on_trigger.split(":", 1)
+            parts = input_on_trigger.split(":", 2)
+            trigger_pattern_str = parts[0]
+            trigger_text = parts[1] if len(parts) > 1 else ""
+
+            # Parse optional timeout for trigger (3rd field)
+            if len(parts) >= 3 and parts[2]:
+                try:
+                    trigger_timeout_seconds = float(parts[2])
+                except ValueError:
+                    print(
+                        f"⚠️  Warning: Invalid timeout value '{parts[2]}' in input-on-trigger"
+                    )
+                    print(f"   Expected numeric value (e.g., '10' or '10.5')")
+                    print(f"   Ignoring trigger timeout")
+                    trigger_timeout_seconds = None
+
             try:
                 trigger_pattern = re.compile(trigger_pattern_str)
-                print(
-                    f"📥 Input-on-trigger enabled: Will send '{trigger_text}' when pattern /{trigger_pattern_str}/ is detected"
-                )
+                if trigger_timeout_seconds is not None:
+                    print(
+                        f"📥 Input-on-trigger enabled: Will send '{trigger_text}' when pattern /{trigger_pattern_str}/ is detected"
+                    )
+                    print(
+                        f"   Trigger timeout: {trigger_timeout_seconds}s (will fail if pattern not found)"
+                    )
+                else:
+                    print(
+                        f"📥 Input-on-trigger enabled: Will send '{trigger_text}' when pattern /{trigger_pattern_str}/ is detected"
+                    )
             except re.error as e:
                 print(
                     f"⚠️  Warning: Invalid regex pattern in input-on-trigger '{trigger_pattern_str}': {e}"
@@ -523,12 +548,31 @@ def run_monitor(
     timeout_reached = False
     device_stuck = False
     trigger_sent = False  # Track if input-on-trigger text has been sent
+    trigger_deadline = None  # Deadline for trigger timeout
+    trigger_timeout_triggered = False  # Track if trigger timeout occurred
     stop_keyword_found = False  # Track if stop keyword was found
     stop_matched_line = None
     line_buffer = ""  # Buffer for incomplete lines
 
+    # Set trigger deadline if trigger timeout is configured
+    if trigger_pattern and trigger_timeout_seconds:
+        trigger_deadline = start_time + trigger_timeout_seconds
+
     try:
         while True:
+            # Check trigger timeout (higher priority than general timeout)
+            if trigger_deadline and not trigger_sent and time.time() > trigger_deadline:
+                trigger_timeout_triggered = True
+                # Print red error banner
+                banner_width = 62
+                border = "═" * (banner_width - 2)
+                print(f"\n{Fore.RED}╔{border}╗")
+                print(f"║ DEVICE APPEARS STUCK!!!                                    ║")
+                print(f"║ DID NOT RESPOND TO A COMMAND TO START!!!                   ║")
+                print(f"║ PLEASE ASK THE USER TO POWER CYCLE THE DEVICE!!!           ║")
+                print(f"╚{border}╝{Style.RESET_ALL}\n")
+                break
+
             # Check timeout (unless in streaming mode)
             if not stream:
                 elapsed = time.time() - start_time
@@ -701,7 +745,10 @@ def run_monitor(
             print(f"\n✓ Closed serial port: {monitor_port}")
 
     # Determine success based on exit conditions
-    if device_stuck:
+    if trigger_timeout_triggered:
+        # Trigger timeout is always a failure
+        success = False
+    elif device_stuck:
         # Device stuck is always a failure
         success = False
     elif fail_keyword_found:
