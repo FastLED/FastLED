@@ -102,16 +102,8 @@ bool null_requires_assembly_handler(uint8_t priority) {
 } // namespace isr
 
 // fl::isr::platform namespace wrappers (call fl::isr:: functions)
-// Only define when this is the active platform (not ESP32, Teensy, Stub, etc.)
-#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL) && \
-    !defined(ESP32) && \
-    !defined(FL_IS_TEENSY) && \
-    !defined(FL_IS_STM32) && \
-    !defined(FL_IS_NRF52) && \
-    !defined(FL_IS_AVR) && \
-    !defined(FL_IS_RP2040) && \
-    !defined(FL_IS_SAMD) && \
-    !defined(__SAM3X8E__) && !defined(ARDUINO_SAM_DUE)
+// The dispatch header (platforms/isr.h) controls when this file is included,
+// so we unconditionally define the platform namespace here.
 namespace isr {
 namespace platform {
 
@@ -165,5 +157,4 @@ bool requires_assembly_handler(uint8_t priority) {
 
 } // namespace platform
 } // namespace isr
-#endif // Platform guard (excludes all platforms with their own ISR implementations)
 } // namespace fl
