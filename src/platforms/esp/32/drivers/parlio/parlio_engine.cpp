@@ -27,8 +27,8 @@
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "driver/gptimer.h"
-#include "esp_cache.h" // For esp_cache_msync (DMA cache coherency)
 #include "driver/parlio_tx.h"
+#include "esp_cache.h" // For esp_cache_msync (DMA cache coherency)
 #include "esp_heap_caps.h" // For DMA-capable memory allocation
 #include "esp_intr_alloc.h" // For software interrupt allocation
 #include "esp_log.h"
@@ -110,20 +110,23 @@ isr_memset_zero(uint8_t* dest, size_t count) {
 /// @brief ISR-safe cache sync for DMA buffers
 /// @param buffer_ptr Pointer to buffer to sync
 /// @param buffer_size Size of buffer in bytes
-/// @param context Context string for async logging (e.g., "workerISR", "populateNext", "beginTx")
+/// @param context Context string for async logging (unused - logging suppressed)
 /// @return esp_err_t result from esp_cache_msync (ESP_OK or error code)
 ///
 /// CRITICAL: This function is callable from ISR context (FL_IRAM attribute)
-/// - Uses FL_LOG_PARLIO_ASYNC_ISR for async logging (ISR-safe)
 /// - Memory barriers ensure proper ordering
-/// - Logs cache sync failures for debugging
+/// - esp_cache_msync errors are suppressed (expected on ESP32-C6 with MALLOC_CAP_INTERNAL)
 ///
 /// Expected behavior on ESP32-C6:
 /// - MALLOC_CAP_INTERNAL buffers: Returns ESP_ERR_INVALID_ARG (258) but still improves accuracy
 /// - MALLOC_CAP_DMA buffers: Returns ESP_ERR_INVALID_ARG (address not cacheable)
 /// - Despite errors, cache sync improves data integrity from 44% corruption to 99.97% accuracy
+/// - Error logging is suppressed to avoid flooding output (errors are expected and benign)
 FL_OPTIMIZE_FUNCTION static inline esp_err_t FL_IRAM
 isr_cache_sync(void* buffer_ptr, size_t buffer_size, const char* context) {
+    // Suppress unused parameter warning
+    (void)context;
+
     // Memory barrier: Ensure all preceding writes complete before cache sync
     FL_MEMORY_BARRIER;
 
@@ -136,13 +139,9 @@ isr_cache_sync(void* buffer_ptr, size_t buffer_size, const char* context) {
     // Memory barrier: Ensure cache sync completes before DMA submission
     FL_MEMORY_BARRIER;
 
-    // Log failures using ISR-safe async logging
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO_ASYNC_ISR("Cache sync FAILED (" << context << ") | err=" << err
-                                << " | ptr=0x" << fl::hex << (uintptr_t)buffer_ptr
-                                << " | size=" << fl::dec << buffer_size
-                                << " | aligned64=" << ((uintptr_t)buffer_ptr % 64 == 0 ? "YES" : "NO"));
-    }
+    // Note: Error logging suppressed - esp_cache_msync returns errors on ESP32-C6 with
+    // MALLOC_CAP_INTERNAL, but the function still has beneficial side effects for
+    // data integrity. Logging hundreds of expected errors clutters output.
 
     return err;
 }
@@ -523,21 +522,12 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
                 gptimer_stop(self->mWorkerTimerHandle);
             }
 
-            BaseType_t higherPriorityTaskWoken = pdFALSE;
+            // ASYNC MODE: No task notifications
+            // - Worker task was removed (uses timer ISR instead)
+            // - Main task polls mStreamComplete flag via poll() method
+            // All task notifications removed to support fully async operation
 
-            // Wake up worker task so it can exit (LEGACY - will be removed after full refactor)
-            if (self->mWorkerTaskHandle) {
-                vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mWorkerTaskHandle),
-                                      &higherPriorityTaskWoken);
-            }
-
-            // Signal main task that transmission is complete
-            if (self->mMainTaskHandle) {
-                vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mMainTaskHandle),
-                                      &higherPriorityTaskWoken);
-            }
-
-            return higherPriorityTaskWoken == pdTRUE;
+            return false; // No tasks woken
         }
 
         // Ring empty but more data pending - ARM WORKER TIMER TO RESUME
@@ -614,18 +604,11 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             gptimer_start(self->mWorkerTimerHandle);
         }
 
-        // LEGACY: Worker task notification (kept for fallback if timer disabled)
-        if (ctx->mRingCount < ParlioEngine::RING_BUFFER_COUNT &&
-            ctx->mNextByteOffset < ctx->mTotalBytes &&
-            self->mWorkerTaskHandle) {
+        // ASYNC MODE: Worker task notification removed
+        // Worker populates buffers via timer ISR (workerIsrCallback), not task notification
+        // Timer is armed above (gptimer_start) when buffers need refilling
 
-            BaseType_t higherPriorityTaskWoken = pdFALSE;
-            vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(self->mWorkerTaskHandle),
-                                  &higherPriorityTaskWoken);
-            return higherPriorityTaskWoken == pdTRUE;
-        }
-
-        return false;
+        return false; // No tasks woken
     } else {
         // Submission failed - set error flag for CPU to detect
         ctx->mRingError = true;
@@ -1545,8 +1528,8 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         return true; // Nothing to transmit
     }
 
-    // Capture main task handle for ISR completion signaling
-    mMainTaskHandle = xTaskGetCurrentTaskHandle();
+    // ASYNC MODE: No task handle capture needed
+    // Completion detected via poll() reading mStreamComplete flag
 
     // Store scratch buffer reference (NOT owned by this class)
     mScratchBuffer = scratchBuffer;
@@ -1665,52 +1648,17 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     FL_LOG_PARLIO("PARLIO: Worker timer ready (one-shot mode, armed by txDoneCallback)"
            << " | buffers_ready=" << buffers_populated);
 
-    // Debug: Print initial counter state before waiting
-    FL_LOG_PARLIO("DEBUG: Starting transmission wait"
+    // Debug: Print initial counter state
+    FL_LOG_PARLIO("DEBUG: Transmission started (async)"
            << " | txDone_count=" << mIsrContext->mDebugTxDoneCount
            << " | worker_count=" << mIsrContext->mDebugWorkerIsrCount);
 
-    // Wait for transmission to complete (block on task notification from ISR)
-    // ISR will signal this task when transmission is complete
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    // PHASE 1: ASYNC MODE - Return immediately without blocking
+    // ISRs will handle buffer population and hardware submission in background
+    // Caller must use poll() to check transmission progress
+    // Cleanup (disable TX unit, stop timer) now handled in poll() when complete
 
-    // Debug: Print final counter state after completion
-    FL_LOG_PARLIO("DEBUG: Transmission completed"
-           << " | txDone_count=" << mIsrContext->mDebugTxDoneCount
-           << " | worker_count=" << mIsrContext->mDebugWorkerIsrCount
-           << " | total_bytes=" << mIsrContext->mBytesTransmitted);
-
-    // Disable PARLIO hardware after completion (only if currently enabled)
-    if (mTxUnitEnabled) {
-        esp_err_t disable_err = parlio_tx_unit_disable(mTxUnit);
-        if (disable_err != ESP_OK) {
-            FL_LOG_PARLIO("PARLIO: Failed to disable TX unit after transmission: " << disable_err);
-        } else {
-            mTxUnitEnabled = false;
-        }
-    }
-
-    //=========================================================================
-    // Cleanup worker task (LEGACY - commented out during refactor to timer ISR)
-    //=========================================================================
-    // NOTE: Worker task cleanup handled by timer stop in txDoneCallback
-    // Worker task code will be removed completely in Step 8 cleanup phase
-    // if (mWorkerTaskHandle) {
-    //     // Disarm worker task (signals task to exit loop)
-    //     mIsrContext->mWorkerIsrEnabled = false;
-    //     FL_MEMORY_BARRIER
-    //
-    //     // Wake up task if it's blocked waiting for notification
-    //     xTaskNotifyGive(static_cast<TaskHandle_t>(mWorkerTaskHandle));
-    //
-    //     // Give task time to exit gracefully (10ms should be plenty)
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    //
-    //     // Task will delete itself via vTaskDelete(NULL) in workerTaskFunction
-    //     mWorkerTaskHandle = nullptr;
-    // }
-
-    return true; // Transmission completed successfully
+    return true; // Transmission started successfully (async)
 }
 
 ParlioEngineState ParlioEngine::poll() {
