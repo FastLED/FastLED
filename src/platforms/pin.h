@@ -41,7 +41,7 @@
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_UNOWIFIR4) || defined(ARDUINO_MINIMA)
     #include "platforms/arm/renesas/pin_renesas.hpp"
-#elif defined(ARDUINO_NANO_MATTER) || defined(ARDUINO_SPARKFUN_THINGPLUS_MATTER)
+#elif defined(ARDUINO_ARCH_SILABS) || defined(EFR32MG24) || defined(MGM24) || defined(MGM240) || defined(MGM240SD22VNA) || defined(MGM240PB32VNA) || defined(ARDUINO_NANO_MATTER) || defined(ARDUINO_SILABS_THINGPLUSMATTER) || defined(ARDUINO_SPARKFUN_THINGPLUS_MATTER)
     #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(ARDUINO_ARCH_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
