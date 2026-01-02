@@ -36,6 +36,7 @@ FL_EXTERN_C_END
 
 namespace fl {
 namespace isr {
+namespace platform {
 
 // =============================================================================
 // Platform-Specific Handle Storage
@@ -48,6 +49,7 @@ struct esp32_isr_handle_data {
     bool is_enabled;                 // Current enable state
     isr_handler_t user_handler;      // User handler function
     void* user_data;                 // User context
+    uint8_t gpio_pin;                // GPIO pin number (0xFF if not GPIO)
 
     esp32_isr_handle_data()
         : timer_handle(nullptr)
@@ -56,6 +58,7 @@ struct esp32_isr_handle_data {
         , is_enabled(true)
         , user_handler(nullptr)
         , user_data(nullptr)
+        , gpio_pin(0xFF)
     {}
 };
 
@@ -105,10 +108,10 @@ static void FL_IRAM gpio_isr_wrapper(void* arg)
 }
 
 // =============================================================================
-// ESP32 ISR Implementation (Free Functions)
+// ESP32 ISR Implementation (fl::platform namespace)
 // =============================================================================
 
-int esp32_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -177,7 +180,7 @@ int esp32_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_han
         gptimer_alarm_config_t alarm_config = {};
         alarm_config.reload_count = 0;
         alarm_config.alarm_count = alarm_count;
-        alarm_config.flags.auto_reload_on_alarm = !(config.flags & ISR_FLAG_ONE_SHOT);
+        alarm_config.flags.auto_reload_on_alarm = !(config.flags & isr::ISR_FLAG_ONE_SHOT);
 
         ret = gptimer_set_alarm_action(handle_data->timer_handle, &alarm_config);
         if (ret != ESP_OK) {
@@ -231,7 +234,7 @@ int esp32_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_han
         return 0;  // Success
 }
 
-int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -256,13 +259,13 @@ int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_h
         io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
 
         // Set interrupt type based on flags
-        if (config.flags & ISR_FLAG_EDGE_RISING) {
+        if (config.flags & isr::ISR_FLAG_EDGE_RISING) {
             io_conf.intr_type = GPIO_INTR_POSEDGE;
-        } else if (config.flags & ISR_FLAG_EDGE_FALLING) {
+        } else if (config.flags & isr::ISR_FLAG_EDGE_FALLING) {
             io_conf.intr_type = GPIO_INTR_NEGEDGE;
-        } else if (config.flags & ISR_FLAG_LEVEL_HIGH) {
+        } else if (config.flags & isr::ISR_FLAG_LEVEL_HIGH) {
             io_conf.intr_type = GPIO_INTR_HIGH_LEVEL;
-        } else if (config.flags & ISR_FLAG_LEVEL_LOW) {
+        } else if (config.flags & isr::ISR_FLAG_LEVEL_LOW) {
             io_conf.intr_type = GPIO_INTR_LOW_LEVEL;
         } else {
             // Default to any edge
@@ -296,6 +299,9 @@ int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_h
             return -11;  // ISR handler add failed
         }
 
+        // Store GPIO pin for cleanup
+        handle_data->gpio_pin = pin;
+
         FL_DBG("GPIO interrupt attached on pin " << pin);
 
         // Populate output handle
@@ -309,7 +315,7 @@ int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_h
         return 0;  // Success
 }
 
-int esp32_detach_handler(isr_handle_t& handle) {
+int detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -335,9 +341,9 @@ int esp32_detach_handler(isr_handle_t& handle) {
             }
         } else {
             // Cleanup GPIO interrupt
-            // Note: We don't have the pin number stored, so we can't remove the handler
-            // This is a limitation of the current design
-            FL_WARN("detachHandler: GPIO interrupt cleanup not fully implemented");
+            if (handle_data->gpio_pin != 0xFF) {
+                gpio_isr_handler_remove(static_cast<gpio_num_t>(handle_data->gpio_pin));
+            }
         }
 
         delete handle_data;
@@ -348,7 +354,7 @@ int esp32_detach_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int esp32_enable_handler(const isr_handle_t& handle) {
+int enable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -367,12 +373,19 @@ int esp32_enable_handler(const isr_handle_t& handle) {
                 return -12;  // Enable failed
             }
             handle_data->is_enabled = true;
+        } else if (!handle_data->is_timer && handle_data->gpio_pin != 0xFF) {
+            esp_err_t ret = gpio_intr_enable(static_cast<gpio_num_t>(handle_data->gpio_pin));
+            if (ret != ESP_OK) {
+                FL_WARN("enableHandler: gpio_intr_enable failed: " << esp_err_to_name(ret));
+                return -14;
+            }
+            handle_data->is_enabled = true;
         }
 
         return 0;  // Success
 }
 
-int esp32_disable_handler(const isr_handle_t& handle) {
+int disable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -391,12 +404,19 @@ int esp32_disable_handler(const isr_handle_t& handle) {
                 return -13;  // Disable failed
             }
             handle_data->is_enabled = false;
+        } else if (!handle_data->is_timer && handle_data->gpio_pin != 0xFF) {
+            esp_err_t ret = gpio_intr_disable(static_cast<gpio_num_t>(handle_data->gpio_pin));
+            if (ret != ESP_OK) {
+                FL_WARN("disableHandler: gpio_intr_disable failed: " << esp_err_to_name(ret));
+                return -15;
+            }
+            handle_data->is_enabled = false;
         }
 
         return 0;  // Success
 }
 
-bool esp32_is_handler_enabled(const isr_handle_t& handle) {
+bool is_handler_enabled(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             return false;
         }
@@ -409,7 +429,7 @@ bool esp32_is_handler_enabled(const isr_handle_t& handle) {
         return handle_data->is_enabled;
 }
 
-const char* esp32_get_error_string(int error_code) {
+const char* get_error_string(int error_code) {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -425,11 +445,13 @@ const char* esp32_get_error_string(int error_code) {
             case -11: return "ISR handler add failed";
             case -12: return "Enable failed";
             case -13: return "Disable failed";
+            case -14: return "GPIO enable failed";
+            case -15: return "GPIO disable failed";
             default: return "Unknown error";
         }
 }
 
-const char* esp32_get_platform_name() {
+const char* get_platform_name() {
 #if defined(CONFIG_IDF_TARGET_ESP32)
     return "ESP32";
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
@@ -445,15 +467,15 @@ const char* esp32_get_platform_name() {
 #endif
 }
 
-uint32_t esp32_get_max_timer_frequency() {
+uint32_t get_max_timer_frequency() {
     return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
 }
 
-uint32_t esp32_get_min_timer_frequency() {
+uint32_t get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-uint8_t esp32_get_max_priority() {
+uint8_t get_max_priority() {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
     // RISC-V: Priority 1-7 (but 4-7 may have limitations)
     return 7;
@@ -463,7 +485,7 @@ uint8_t esp32_get_max_priority() {
 #endif
 }
 
-bool esp32_requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(uint8_t priority) {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
     // RISC-V: All priority levels can use C handlers
     return false;
@@ -473,6 +495,7 @@ bool esp32_requires_assembly_handler(uint8_t priority) {
 #endif
 }
 
+} // namespace platform
 } // namespace isr
 } // namespace fl
 

@@ -40,7 +40,10 @@ static void teensy_timer_isr_wrapper() {
     // The actual user handler will be called via the platform_handle lookup
 }
 
-// Forward declaration for friend access
+// Global timer data pointer
+// Note: Teensy IntervalTimer API only supports one active timer at a time
+// due to lack of user_data parameter in ISR callback. This limitation means
+// only a single timer can be registered and active simultaneously.
 static teensy_isr_handle_data* g_active_timer_data = nullptr;
 
 // Actual ISR wrapper that has access to handle data
@@ -95,19 +98,21 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     // Set priority if specified
     if (config.priority != ISR_PRIORITY_DEFAULT) {
         // Teensy priority: 0-255, where 0 is highest
-        // Our priority: 1-5 (or 1-7 on some platforms), where 1 is highest
-        // Map: priority 1 -> 0, priority 5 -> 255
-        uint8_t teensy_priority = (config.priority - 1) * (255 / 7);
+        // Our priority: 1-7, where 1 is lowest, 7 is highest
+        // Map: priority 1 -> 255 (lowest), priority 7 -> 0 (highest)
+        uint8_t teensy_priority = 255 - ((config.priority - 1) * 255 / 6);
         data->timer.priority(teensy_priority);
     }
 
     data->enabled = true;
 
     // Fill in handle
-    handle->platform_handle = data;
-    handle->handler = config.handler;
-    handle->user_data = config.user_data;
-    handle->platform_id = 1;  // Teensy platform ID
+    if (handle) {
+        handle->platform_handle = data;
+        handle->handler = config.handler;
+        handle->user_data = config.user_data;
+        handle->platform_id = 1;  // Teensy platform ID
+    }
 
     return 0;  // Success
 }
@@ -156,6 +161,8 @@ int teensy_enable_handler(const isr_handle_t& handle) {
 
     if (data->is_timer) {
         uint32_t interval_us = 1000000 / data->frequency_hz;
+        // Restore global pointer for ISR access
+        g_active_timer_data = data;
         if (!data->timer.begin(teensy_isr_trampoline, interval_us)) {
             return -2;  // Failed to restart
         }
@@ -177,6 +184,10 @@ int teensy_disable_handler(const isr_handle_t& handle) {
 
     if (data->is_timer) {
         data->timer.end();
+        // Clear global pointer if this is the active timer
+        if (g_active_timer_data == data) {
+            g_active_timer_data = nullptr;
+        }
         data->enabled = false;
     }
 
@@ -204,19 +215,19 @@ const char* teensy_get_error_string(int error_code) {
 }
 
 const char* teensy_get_platform_name() {
-#if defined(FL_IS_TEENSY_LC)
+#if FL_IS_TEENSY_LC
     return "Teensy LC";
-#elif defined(FL_IS_TEENSY_30)
+#elif FL_IS_TEENSY_30
     return "Teensy 3.0";
-#elif defined(FL_IS_TEENSY_31) || defined(FL_IS_TEENSY_32)
+#elif FL_IS_TEENSY_31 || FL_IS_TEENSY_32
     return "Teensy 3.1/3.2";
-#elif defined(FL_IS_TEENSY_35)
+#elif FL_IS_TEENSY_35
     return "Teensy 3.5";
-#elif defined(FL_IS_TEENSY_36)
+#elif FL_IS_TEENSY_36
     return "Teensy 3.6";
-#elif defined(FL_IS_TEENSY_40)
+#elif FL_IS_TEENSY_40
     return "Teensy 4.0";
-#elif defined(FL_IS_TEENSY_41)
+#elif FL_IS_TEENSY_41
     return "Teensy 4.1";
 #else
     return "Teensy (unknown variant)";
@@ -241,6 +252,58 @@ bool teensy_requires_assembly_handler(uint8_t priority) {
     return false;  // Teensy IntervalTimer handles ISR registration internally
 }
 
+// fl::isr::platform namespace wrappers (call fl::isr:: functions)
+namespace platform {
+
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
+    return teensy_attach_timer_handler(config, handle);
+}
+
+int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+    return teensy_attach_external_handler(pin, config, handle);
+}
+
+int detach_handler(isr_handle_t& handle) {
+    return teensy_detach_handler(handle);
+}
+
+int enable_handler(const isr_handle_t& handle) {
+    return teensy_enable_handler(handle);
+}
+
+int disable_handler(const isr_handle_t& handle) {
+    return teensy_disable_handler(handle);
+}
+
+bool is_handler_enabled(const isr_handle_t& handle) {
+    return teensy_is_handler_enabled(handle);
+}
+
+const char* get_error_string(int error_code) {
+    return teensy_get_error_string(error_code);
+}
+
+const char* get_platform_name() {
+    return teensy_get_platform_name();
+}
+
+uint32_t get_max_timer_frequency() {
+    return teensy_get_max_timer_frequency();
+}
+
+uint32_t get_min_timer_frequency() {
+    return teensy_get_min_timer_frequency();
+}
+
+uint8_t get_max_priority() {
+    return teensy_get_max_priority();
+}
+
+bool requires_assembly_handler(uint8_t priority) {
+    return teensy_requires_assembly_handler(priority);
+}
+
+} // namespace platform
 } // namespace isr
 } // namespace fl
 

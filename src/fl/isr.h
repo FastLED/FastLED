@@ -42,6 +42,21 @@ namespace isr {
 typedef void (*isr_handler_t)(void* user_data);
 
 // =============================================================================
+// Priority Level Constants (Forward Declaration)
+// =============================================================================
+
+// Abstract priority levels (platform-independent, higher value = higher priority)
+// Platforms map these to their native priority schemes internally
+// These are abstract priority levels that map to platform-specific values
+// Declared here so they can be used in isr_config_t constructor
+constexpr uint8_t ISR_PRIORITY_LOW        = 1;  // Lowest priority
+constexpr uint8_t ISR_PRIORITY_DEFAULT    = 1;  // Default priority (alias for LOW)
+constexpr uint8_t ISR_PRIORITY_MEDIUM     = 2;  // Medium priority
+constexpr uint8_t ISR_PRIORITY_HIGH       = 3;  // High priority (recommended max)
+constexpr uint8_t ISR_PRIORITY_CRITICAL   = 4;  // Critical (experimental, platform-dependent)
+constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly, platform-dependent)
+
+// =============================================================================
 // ISR Configuration Structure
 // =============================================================================
 
@@ -63,7 +78,7 @@ struct isr_config_t {
         : handler(nullptr)
         , user_data(nullptr)
         , frequency_hz(0)
-        , priority(1)
+        , priority(ISR_PRIORITY_DEFAULT)
         , flags(0)
     {}
 };
@@ -114,16 +129,10 @@ struct isr_handle_t {
 };
 
 // =============================================================================
-// Priority Level Recommendations
+// Priority Level Documentation
 // =============================================================================
 
-// These are abstract priority levels that map to platform-specific values
-constexpr uint8_t ISR_PRIORITY_LOW        = 1;  // Lowest priority
-constexpr uint8_t ISR_PRIORITY_MEDIUM     = 2;  // Medium priority
-constexpr uint8_t ISR_PRIORITY_HIGH       = 3;  // High priority (recommended max)
-constexpr uint8_t ISR_PRIORITY_CRITICAL   = 4;  // Critical (experimental, platform-dependent)
-constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly, platform-dependent)
-
+// Priority constants are declared earlier in the file (before isr_config_t)
 // Platform-specific priority ranges:
 // - ESP32 (Xtensa): 1-3 (C handlers), 4-5 (assembly required)
 // - ESP32-C3 (RISC-V): 1-7 (C handlers, but 4-7 may have limitations)
@@ -140,7 +149,7 @@ constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly
  * Attach a timer-based ISR handler.
  *
  * @param config: ISR configuration structure
- * @param handle: Output handle for detachment (can be nullptr)
+ * @param handle: Output handle for detachment (can be nullptr if handle not needed)
  * @return: 0 on success, negative error code on failure
  *
  * Example (ESP32):
@@ -168,7 +177,7 @@ int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullpt
  *
  * @param pin: GPIO pin number (platform-specific numbering)
  * @param config: ISR configuration structure (frequency_hz ignored)
- * @param handle: Output handle for detachment (can be nullptr)
+ * @param handle: Output handle for detachment (can be nullptr if handle not needed)
  * @return: 0 on success, negative error code on failure
  *
  * Example:
@@ -204,7 +213,7 @@ int detachHandler(isr_handle_t& handle);
  * @param handle: Handle to the ISR
  * @return: 0 on success, negative error code on failure
  */
-int enableHandler(const isr_handle_t& handle);
+int enableHandler(isr_handle_t& handle);
 
 /**
  * Disable an ISR temporarily (without detaching).
@@ -212,7 +221,7 @@ int enableHandler(const isr_handle_t& handle);
  * @param handle: Handle to the ISR
  * @return: 0 on success, negative error code on failure
  */
-int disableHandler(const isr_handle_t& handle);
+int disableHandler(isr_handle_t& handle);
 
 /**
  * Query if an ISR is currently enabled.
