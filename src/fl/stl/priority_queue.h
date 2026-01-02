@@ -98,4 +98,106 @@ class PriorityQueue {
     Compare _comp;
 };
 
+/**
+ * @brief Stable priority queue that maintains FIFO ordering for equal-priority elements
+ *
+ * This is a wrapper around fl::PriorityQueue that adds a monotonic sequence counter
+ * to ensure stable (FIFO) ordering when elements have equal priority according to
+ * the comparison function.
+ *
+ * Template Parameters:
+ * - T: Element type (must be copyable)
+ * - Compare: Comparison function (default: fl::less<T>)
+ *
+ * Example:
+ * @code
+ * fl::priority_queue_stable<int> queue;
+ * queue.push(3);
+ * queue.push(1);
+ * queue.push(3);  // Same priority as first 3
+ * // Pop order: 1, 3 (first), 3 (second) - FIFO for equal priorities
+ * @endcode
+ */
+template<typename T, typename Compare = fl::less<T>>
+class priority_queue_stable {
+private:
+    struct StableElement {
+        T mValue;
+        uint64_t mSequence;
+
+        // Comparison: primary by value, secondary by sequence (FIFO)
+        bool operator<(const StableElement& other) const {
+            Compare comp;
+            // If values are not equal according to comparator
+            if (comp(mValue, other.mValue)) return true;
+            if (comp(other.mValue, mValue)) return false;
+            // Values are equal - use sequence for FIFO ordering
+            return mSequence > other.mSequence;  // Inverted: smaller sequence = higher priority
+        }
+    };
+
+public:
+    using value_type = T;
+    using size_type = fl::size;
+
+    priority_queue_stable() : mNextSequence(0) {}
+
+    /**
+     * @brief Push an element into the priority queue
+     * @param value Element to insert
+     */
+    void push(const T& value) {
+        mQueue.push({value, mNextSequence++});
+    }
+
+    /**
+     * @brief Remove the top element from the queue
+     *
+     * Precondition: !empty()
+     */
+    void pop() {
+        mQueue.pop();
+    }
+
+    /**
+     * @brief Access the top element (highest priority)
+     * @return Reference to the top element
+     *
+     * Precondition: !empty()
+     */
+    const T& top() const {
+        return mQueue.top().mValue;
+    }
+
+    /**
+     * @brief Check if the queue is empty
+     * @return true if empty, false otherwise
+     */
+    bool empty() const {
+        return mQueue.empty();
+    }
+
+    /**
+     * @brief Get the number of elements in the queue
+     * @return Number of elements
+     */
+    fl::size size() const {
+        return mQueue.size();
+    }
+
+    /**
+     * @brief Clear all elements from the queue
+     */
+    void clear() {
+        while (!empty()) {
+            pop();
+        }
+        mNextSequence = 0;
+    }
+
+private:
+    fl::PriorityQueue<StableElement> mQueue;
+    uint64_t mNextSequence;
+};
+
 } // namespace fl

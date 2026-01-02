@@ -1,0 +1,193 @@
+#include "fl/remote.h"
+
+#if FASTLED_ENABLE_JSON
+
+#include "fl/stl/time.h"
+
+namespace fl {
+
+// Function Registration
+
+void Remote::registerFunction(const fl::string& name, RpcCallback callback) {
+    mCallbacks[name] = CallbackWrapper(callback);
+    FL_DBG("Registered RPC function: " << name);
+}
+
+void Remote::registerFunctionWithReturn(const fl::string& name, RpcCallbackWithReturn callback) {
+    mCallbacks[name] = CallbackWrapper(callback);
+    FL_DBG("Registered RPC function with return: " << name);
+}
+
+bool Remote::unregisterFunction(const fl::string& name) {
+    auto it = mCallbacks.find(name);
+    if (it != mCallbacks.end()) {
+        mCallbacks.erase(it);
+        FL_DBG("Unregistered RPC function: " << name);
+        return true;
+    }
+    return false;
+}
+
+bool Remote::hasFunction(const fl::string& name) const {
+    return mCallbacks.find(name) != mCallbacks.end();
+}
+
+// RPC Processing
+
+Remote::Error Remote::processRpc(const fl::string& jsonStr) {
+    fl::Json result;
+    return processRpc(jsonStr, result);  // Delegate to overload, discard result
+}
+
+Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult) {
+    // Initialize output to null
+    outResult = fl::Json(nullptr);
+
+    // Parse JSON
+    fl::Json doc = fl::Json::parse(jsonStr);
+
+    if (!doc.has_value()) {
+        FL_ERROR("RPC: Invalid JSON - parse failed");
+        return Error::InvalidJson;
+    }
+
+    // Extract function name (required field)
+    fl::string funcName = doc["function"] | fl::string("");
+
+    if (funcName.empty()) {
+        FL_ERROR("RPC: Missing 'function' field");
+        return Error::MissingFunction;
+    }
+
+    // Extract timestamp with validation
+    Error errorCode = Error::None;
+    uint32_t timestamp = 0;
+
+    if (doc.contains("timestamp")) {
+        if (doc["timestamp"].is_int()) {
+            int64_t ts = doc["timestamp"] | 0;
+            if (ts < 0) {
+                FL_WARN("RPC: Invalid timestamp (negative), using immediate execution");
+                timestamp = 0;
+                errorCode = Error::InvalidTimestamp;
+            } else {
+                timestamp = static_cast<uint32_t>(ts);
+            }
+        } else {
+            FL_WARN("RPC: Invalid timestamp type, using immediate execution");
+            timestamp = 0;
+            errorCode = Error::InvalidTimestamp;
+        }
+    }
+    // If timestamp field missing, default to 0 (immediate) - not an error
+
+    // Extract arguments (optional, defaults to empty array)
+    fl::Json args = doc["args"];
+    if (!args.has_value() || !args.is_array()) {
+        FL_DBG("RPC: No args provided, using empty array");
+        args = fl::Json::array();
+    }
+
+    // Check if function exists
+    if (!hasFunction(funcName)) {
+        FL_WARN("RPC: Unknown function '" << funcName << "'");
+        return Error::UnknownFunction;
+    }
+
+    uint32_t receivedAt = fl::time();
+
+    // Execute or schedule
+    if (timestamp == 0) {
+        // Immediate execution - capture return value
+        uint32_t executedAt = fl::time();
+        outResult = executeFunction(funcName, args);
+        recordResult(funcName, outResult, 0, receivedAt, executedAt, false);
+    } else {
+        // Scheduled execution - result will be available after execution via getResults()
+        scheduleFunction(timestamp, receivedAt, funcName, args);
+        FL_DBG("RPC: Scheduled function - result will be available after execution");
+    }
+
+    return errorCode;
+}
+
+// Function Execution
+
+fl::Json Remote::executeFunction(const fl::string& funcName, const fl::Json& args) {
+    auto it = mCallbacks.find(funcName);
+    if (it != mCallbacks.end()) {
+        FL_DBG("Executing RPC: " << funcName);
+        return it->second.execute(args);  // Call the callback wrapper
+    }
+    // Note: We already checked hasFunction() in processRpc(), so this should always succeed
+    return fl::Json(nullptr);
+}
+
+void Remote::scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args) {
+    mScheduled.push({timestamp, funcName, args, receivedAt});
+    FL_DBG("Scheduled RPC: " << funcName << " at " << timestamp);
+}
+
+void Remote::recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled) {
+    mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
+}
+
+// Update Loop
+
+size_t Remote::update(uint32_t currentTimeMs) {
+    size_t executedCount = 0;
+
+    // Clear previous results
+    mResults.clear();
+
+    // Process scheduled calls from stable priority queue (earliest first, FIFO for equal times)
+    // priority_queue_stable ensures FIFO ordering for calls with same execution time
+    while (!mScheduled.empty() && currentTimeMs >= mScheduled.top().mExecuteAt) {
+        const ScheduledCall& call = mScheduled.top();
+
+        uint32_t executedAt = fl::time();
+        fl::Json result = executeFunction(call.mFunctionName, call.mArgs);
+
+        // Record result with timing metadata
+        recordResult(call.mFunctionName, result, call.mExecuteAt, call.mReceivedAt, executedAt, true);
+
+        mScheduled.pop();
+        executedCount++;
+    }
+
+    return executedCount;
+}
+
+fl::vector<Remote::RpcResult> Remote::getResults() const {
+    return mResults;
+}
+
+void Remote::clearResults() {
+    mResults.clear();
+    FL_DBG("Cleared RPC results");
+}
+
+// Utility Methods
+
+size_t Remote::pendingCount() const {
+    return mScheduled.size();
+}
+
+void Remote::clearScheduled() {
+    mScheduled.clear();
+    FL_DBG("Cleared all scheduled RPC calls");
+}
+
+void Remote::clearFunctions() {
+    mCallbacks.clear();
+    FL_DBG("Cleared all registered RPC functions");
+}
+
+void Remote::clear() {
+    clearScheduled();
+    clearFunctions();
+}
+
+} // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

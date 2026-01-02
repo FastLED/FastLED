@@ -1158,6 +1158,7 @@ extern CFastLED FastLED;
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
 #include "fl/stl/sstream.h"  // fl::sstream for string stream operations
+#include "fl/remote.h"  // Remote RPC system for JSON-based function calls (requires FASTLED_ENABLE_JSON)
 
 // provides:
 //   fl::vector<T> - Standard heap vector
