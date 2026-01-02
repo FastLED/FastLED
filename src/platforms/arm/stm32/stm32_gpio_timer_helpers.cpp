@@ -23,12 +23,15 @@
 // Only compile this file if hardware SPI is enabled (requires HAL types)
 #if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
 
-#include <Arduino.h>
-
-// Ensure STM32 HAL types are available (needed for function signatures)
-// Arduino.h on STM32 platforms should include these, but we make it explicit
+// STM32duino core headers - provides HAL includes and pin mapping functions
 #if __has_include("stm32_def.h")
 #include "stm32_def.h"  // STM32duino core - provides HAL includes
+#endif
+#if __has_include("PeripheralPins.h")
+#include "PeripheralPins.h"  // Pin mapping tables
+#endif
+#if __has_include("pinmap.h")
+#include "pinmap.h"  // Pin mapping functions
 #endif
 
 #include "platforms/arm/stm32/stm32_capabilities.h"

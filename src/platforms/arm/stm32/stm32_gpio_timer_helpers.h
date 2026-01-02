@@ -17,9 +17,19 @@
 
 #include "fl/stl/stdint.h"
 
-// STM32 HAL types cannot be forward-declared because they are typedef'd.
-// Include Arduino.h which pulls in the full STM32 HAL headers.
-#include <Arduino.h>
+// STM32duino core headers - provides HAL includes and pin mapping functions
+// These headers provide: PinName, NC, digitalPinToPinName(), STM_PORT(), STM_GPIO_PIN(),
+// STM_PIN_CHANNEL(), STM_PIN_AFNUM(), pinmap_find_function(), pinmap_peripheral(),
+// PinMap_ADC, PinMap_TIM/PinMap_PWM, and all STM32 HAL types
+#if __has_include("stm32_def.h")
+#include "stm32_def.h"       // STM32 HAL types and definitions
+#endif
+#if __has_include("PeripheralPins.h")
+#include "PeripheralPins.h"  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
+#endif
+#if __has_include("pinmap.h")
+#include "pinmap.h"          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
+#endif
 
 namespace fl {
 namespace stm32 {

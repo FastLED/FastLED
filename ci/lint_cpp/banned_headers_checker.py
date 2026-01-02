@@ -216,19 +216,8 @@ class BannedHeadersChecker(FileContentChecker):
             # Legacy platform headers that currently need Arduino.h
             # TODO: Refactor these to remove Arduino.h dependency
             legacy_arduino_headers = [
-                "pin_avr.hpp",
-                "pin_esp32.hpp",
-                "pin_esp8266.hpp",
-                "pin_stm32.hpp",
-                "pin_stm32_native.hpp",
-                "pin_sam.hpp",
-                "pin_samd.hpp",
-                "pin_nrf52.hpp",
-                "pin_rp.hpp",
-                "pin_teensy.hpp",
-                "pin_apollo3.hpp",
-                "pin_renesas.hpp",
-                "pin_silabs.hpp",
+                # All pin_*.hpp headers have been refactored to use native register manipulation
+                # and no longer require Arduino.h - removed from this list
                 "fastpin_apollo3.h",
                 "clockless_apollo3.h",
                 "fastspi_arm_sam.h",

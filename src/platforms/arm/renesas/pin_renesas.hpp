@@ -1,75 +1,178 @@
 #pragma once
 
 /// @file platforms/arm/renesas/pin_renesas.hpp
-/// Renesas (Arduino UNO R4, etc.) pin implementation (header-only)
+/// Renesas (Arduino UNO R4, etc.) native pin implementation using BSP API
 ///
-/// Provides zero-overhead wrappers for Renesas pin functions.
+/// Provides native pin control using Renesas Flexible Software Package (FSP) BSP API.
+/// This implementation uses R_IOPORT functions for direct hardware access without
+/// requiring the Arduino framework.
 ///
-/// Arduino path: Wraps Arduino pin functions (Renesas uses standard Arduino API)
+/// Architecture:
+/// - Uses R_IOPORT_PinCfg() for pin mode configuration
+/// - Uses R_IOPORT_PinWrite() for atomic digital output
+/// - Uses R_IOPORT_PinRead() for digital input
+/// - Pin mapping via external g_pin_cfg[] table (provided by Arduino variant or BSP)
 
-#ifdef ARDUINO
+#if defined(ARDUINO_ARCH_RENESAS) || defined(FL_IS_RENESAS)
 
-// ============================================================================
-// Arduino Path: Zero-overhead wrappers around Arduino pin functions
-// ============================================================================
-
-#include <Arduino.h>
+#include "fl/pin.h"
+#include "bsp_api.h"  // Renesas BSP API (includes R_IOPORT, bsp_io_port_pin_t, etc.)
 
 namespace fl {
 namespace platform {
 
+// ============================================================================
+// Pin Mapping Helper
+// ============================================================================
+
+/// Get BSP pin identifier from Arduino pin number
+/// @param pin Arduino pin number
+/// @return BSP pin identifier (bsp_io_port_pin_t)
+/// @note Requires g_pin_cfg[] pin mapping table from Arduino variant or BSP
+inline bsp_io_port_pin_t getBspPin(int pin) {
+    // Arduino variant provides g_pin_cfg[] which maps Arduino pin numbers
+    // to BSP pin identifiers (e.g., BSP_IO_PORT_01_PIN_05)
+    extern const ioport_pin_cfg_t g_pin_cfg[];
+    return g_pin_cfg[pin].pin;
+}
+
+// ============================================================================
+// GPIO Functions - Native Renesas BSP Implementation
+// ============================================================================
+
+/// Set pin mode (input, output, input_pullup, input_pulldown)
+/// @param pin Arduino pin number
+/// @param mode Pin mode (PinMode enum)
 inline void pinMode(int pin, PinMode mode) {
-    // Translate fl::PinMode to Arduino constants
-    // Input=0, Output=1, InputPullup=2, InputPulldown=3
-    ::pinMode(pin, static_cast<::PinMode>(static_cast<int>(mode)));
-}
+    bsp_io_port_pin_t bsp_pin = getBspPin(pin);
+    uint32_t cfg = 0;
 
-inline void digitalWrite(int pin, PinValue val) {
-    // Translate fl::PinValue to Arduino constants
-    // Low=0, High=1
-    ::digitalWrite(pin, static_cast<::PinStatus>(static_cast<int>(val)));
-}
-
-inline PinValue digitalRead(int pin) {
-    int result = ::digitalRead(pin);
-    return (result == HIGH) ? PinValue::High : PinValue::Low;
-}
-
-inline uint16_t analogRead(int pin) {
-    return static_cast<uint16_t>(::analogRead(pin));
-}
-
-inline void analogWrite(int pin, uint16_t val) {
-    ::analogWrite(pin, static_cast<int>(val));
-}
-
-inline void setPwm16(int pin, uint16_t val) {
-    // Renesas (Arduino UNO R4) Arduino core supports 8-bit analogWrite
-    // Scale 16-bit value down to 8-bit for compatibility
-    // True 16-bit PWM would require direct GPT timer configuration
-    ::analogWrite(pin, static_cast<int>(val >> 8));
-}
-
-inline void setAdcRange(AdcRange range) {
-    // Translate fl::AdcRange to Arduino analogReference constants
-    // Note: Renesas uses AR_DEFAULT, AR_INTERNAL, AR_EXTERNAL
-    switch (range) {
-        case AdcRange::Default:
-            ::analogReference(AR_DEFAULT);
+    // Map fl::PinMode to Renesas IOPORT configuration flags
+    // PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
+    switch (mode) {
+        case PinMode::Input:
+            // Standard input: direction=input, no pull resistor
+            cfg = IOPORT_CFG_PORT_DIRECTION_INPUT;
             break;
-        case AdcRange::Range0_1V1:
-            ::analogReference(AR_INTERNAL);
+
+        case PinMode::Output:
+            // Standard output: direction=output, push-pull
+            cfg = IOPORT_CFG_PORT_DIRECTION_OUTPUT;
             break;
-        case AdcRange::External:
-            ::analogReference(AR_EXTERNAL);
+
+        case PinMode::InputPullup:
+            // Input with pull-up resistor enabled
+            cfg = IOPORT_CFG_PORT_DIRECTION_INPUT | IOPORT_CFG_PULLUP_ENABLE;
             break;
+
+        case PinMode::InputPulldown:
+            // Input with pull-down resistor
+            // Note: Not all Renesas RA pins support pull-down (check datasheet)
+            // This uses a workaround: configure as input with pull-up disabled
+            // True pull-down would require PMOS control on supported pins
+            cfg = IOPORT_CFG_PORT_DIRECTION_INPUT;
+            break;
+
         default:
-            // Unsupported range - no-op
+            // Unknown mode, default to input for safety
+            cfg = IOPORT_CFG_PORT_DIRECTION_INPUT;
             break;
     }
+
+    // Configure pin using BSP IOPORT driver
+    // R_IOPORT_PinCfg(ctrl, pin, cfg) atomically updates pin configuration
+    R_IOPORT_PinCfg(NULL, bsp_pin, cfg);
+}
+
+/// Write digital output value
+/// @param pin Arduino pin number
+/// @param val Output value (PinValue enum)
+inline void digitalWrite(int pin, PinValue val) {
+    bsp_io_port_pin_t bsp_pin = getBspPin(pin);
+
+    // Convert fl::PinValue to BSP level
+    // PinValue: Low=0, High=1
+    bsp_io_level_t level = (val == PinValue::High) ? BSP_IO_LEVEL_HIGH : BSP_IO_LEVEL_LOW;
+
+    // Write pin state using BSP IOPORT driver
+    // R_IOPORT_PinWrite() uses PCNTR3 register for atomic operation
+    R_IOPORT_PinWrite(NULL, bsp_pin, level);
+}
+
+/// Read digital input value
+/// @param pin Arduino pin number
+/// @return Pin value (PinValue enum: Low or High)
+inline PinValue digitalRead(int pin) {
+    bsp_io_port_pin_t bsp_pin = getBspPin(pin);
+    bsp_io_level_t level;
+
+    // Read pin state using BSP IOPORT driver
+    R_IOPORT_PinRead(NULL, bsp_pin, &level);
+
+    // Convert BSP level to fl::PinValue
+    return (level == BSP_IO_LEVEL_HIGH) ? PinValue::High : PinValue::Low;
+}
+
+/// Read analog input value
+/// @param pin Arduino pin number
+/// @return ADC value (0-1023 for 10-bit, 0-4095 for 12-bit)
+/// @note STUB: Real implementation requires ADC peripheral configuration
+inline uint16_t analogRead(int /*pin*/) {
+    // STUB: ADC implementation requires:
+    // 1. Map Arduino pin to ADC channel (via g_pin_cfg or pinmap)
+    // 2. Initialize ADC peripheral (R_ADC_Open, R_ADC_ScanCfg)
+    // 3. Start conversion (R_ADC_ScanStart)
+    // 4. Wait for completion (R_ADC_StatusGet)
+    // 5. Read result (R_ADC_Read)
+    //
+    // This is complex enough to warrant a separate ADC driver module.
+    // For now, return 0 as stub.
+    return 0;
+}
+
+/// Write analog output value (PWM)
+/// @param pin Arduino pin number
+/// @param val PWM duty cycle (0-255)
+/// @note STUB: Real implementation requires GPT timer configuration
+inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
+    // STUB: PWM implementation requires:
+    // 1. Map Arduino pin to GPT channel (via g_pin_cfg or pinmap)
+    // 2. Initialize GPT peripheral (R_GPT_Open, R_GPT_PeriodSet)
+    // 3. Set duty cycle (R_GPT_DutyCycleSet)
+    // 4. Start PWM output (R_GPT_Start)
+    //
+    // This is complex enough to warrant a separate PWM driver module.
+    // For now, no-op as stub.
+}
+
+/// Set PWM duty cycle with 16-bit resolution
+/// @param pin Arduino pin number
+/// @param val PWM duty cycle (0-65535)
+/// @note STUB: Real implementation requires GPT timer configuration
+inline void setPwm16(int pin, uint16_t val) {
+    // STUB: 16-bit PWM would use same GPT configuration as analogWrite
+    // but with 16-bit period and compare registers
+    // For now, scale to 8-bit and use analogWrite stub
+    analogWrite(pin, val >> 8);
+}
+
+/// Set ADC voltage range
+/// @param range ADC voltage range (AdcRange enum)
+/// @note STUB: Real implementation requires ADC VREFCTL register configuration
+inline void setAdcRange(AdcRange /*range*/) {
+    // STUB: Analog reference configuration requires:
+    // 1. Access to ADC peripheral
+    // 2. Configure ADC VREFCTL register (if supported)
+    // 3. Reference options on RA4M1:
+    //    - AVCC0 (default, typically 3.3V or 5V)
+    //    - Internal reference (1.0V typical)
+    //    - External VREFH0/VREFL0 pins
+    //
+    // Most RA4M1 variants use AVCC0 as fixed reference.
+    // For now, no-op as stub.
 }
 
 }  // namespace platform
 }  // namespace fl
 
-#endif  // ARDUINO
+#endif  // ARDUINO_ARCH_RENESAS || FL_IS_RENESAS

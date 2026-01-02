@@ -6,7 +6,7 @@
 /// Provides zero-overhead wrappers for Teensy pin functions.
 ///
 /// Two paths:
-/// 1. Arduino path (#ifdef ARDUINO): Wraps Arduino pin functions
+/// 1. Arduino path (#ifdef ARDUINO): Wraps Teensy core pin functions
 /// 2. Native Teensy path (#else): Uses pin_teensy_native.hpp (Teensy core functions)
 ///
 /// IMPORTANT: All functions use enum class types for type safety.
@@ -18,39 +18,41 @@
 #ifdef ARDUINO
 
 // ============================================================================
-// Arduino Path: Zero-overhead wrappers around Arduino pin functions
+// Arduino Path: Zero-overhead wrappers around Teensy core pin functions
 // ============================================================================
 
-#include <Arduino.h>
+// Use Teensy's native core_pins.h instead of Arduino.h
+// core_pins.h provides the same pin functions (pinMode, digitalWrite, etc.)
+// and constants (INPUT, OUTPUT, etc.) but works in both Arduino and non-Arduino builds
+#include <core_pins.h>
 
 namespace fl {
 namespace platform {
 
 inline void pinMode(int pin, fl::PinMode mode) {
-    // Translate PinMode to Arduino constants
+    // Translate PinMode to Teensy core constants
     // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
-    // Arduino: INPUT=0, OUTPUT=1, INPUT_PULLUP=2
-    // Teensy also supports INPUT_PULLDOWN (not standard Arduino)
-    int arduino_mode;
+    // Teensy: INPUT=0, OUTPUT=1, INPUT_PULLUP=2, INPUT_PULLDOWN (Teensy-specific)
+    int teensy_mode;
     switch (mode) {
         case fl::PinMode::Input:
-            arduino_mode = INPUT;  // 0
+            teensy_mode = INPUT;  // 0
             break;
         case fl::PinMode::Output:
-            arduino_mode = OUTPUT;  // 1
+            teensy_mode = OUTPUT;  // 1
             break;
         case fl::PinMode::InputPullup:
-            arduino_mode = INPUT_PULLUP;  // 2
+            teensy_mode = INPUT_PULLUP;  // 2
             break;
         case fl::PinMode::InputPulldown:
 #ifdef INPUT_PULLDOWN
-            arduino_mode = INPUT_PULLDOWN;  // Teensy-specific
+            teensy_mode = INPUT_PULLDOWN;  // Teensy-specific
 #else
-            arduino_mode = INPUT_PULLUP;  // Fallback to INPUT_PULLUP
+            teensy_mode = INPUT_PULLUP;  // Fallback to INPUT_PULLUP
 #endif
             break;
     }
-    ::pinMode(pin, arduino_mode);
+    ::pinMode(pin, teensy_mode);
 }
 
 inline void digitalWrite(int pin, fl::PinValue val) {
@@ -83,7 +85,7 @@ inline void setAdcRange(fl::AdcRange range) {
     // No-op: These processors have a fixed 3.3V reference
     (void)range;  // Suppress unused parameter warning
 #else
-    // Teensy 3.x: Translate AdcRange to Arduino analogReference() constants
+    // Teensy 3.x: Translate AdcRange to Teensy core analogReference() constants
     // Supports: DEFAULT (3.3V), INTERNAL (1.2V), EXTERNAL (AREF pin)
     int ref_mode;
     switch (range) {
