@@ -35,8 +35,8 @@
     #ifndef FL_ISR_AVR_IMPLEMENTED
         #include "platforms/isr_null.hpp"
     #endif
-#elif defined(FL_IS_RP2040)
-    #include "platforms/arm/rp/isr_rp2040.hpp"
+#elif defined(FL_IS_RP)
+    #include "platforms/arm/rp/isr_rp.hpp"
 #elif defined(FL_IS_SAMD)
     #include "platforms/arm/samd/isr_samd.hpp"
 #elif defined(FL_IS_SAM)
