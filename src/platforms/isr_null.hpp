@@ -110,7 +110,8 @@ bool null_requires_assembly_handler(uint8_t priority) {
     !defined(FL_IS_NRF52) && \
     !defined(FL_IS_AVR) && \
     !defined(FL_IS_RP2040) && \
-    !defined(FL_IS_SAMD)
+    !defined(FL_IS_SAMD) && \
+    !defined(__SAM3X8E__) && !defined(ARDUINO_SAM_DUE)
 namespace isr {
 namespace platform {
 

@@ -40,6 +40,8 @@
     #include "platforms/arm/rp/isr_rp2040.hpp"
 #elif defined(ARDUINO_ARCH_SAMD) || defined(__SAMD21__) || defined(__SAMD51__)
     #include "platforms/arm/samd/isr_samd.hpp"
+#elif defined(__SAM3X8E__) || defined(ARDUINO_SAM_DUE)
+    #include "platforms/arm/sam/isr_sam.hpp"
 #else
     #include "platforms/isr_null.hpp"
 #endif
