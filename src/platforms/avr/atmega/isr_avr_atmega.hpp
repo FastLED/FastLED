@@ -10,7 +10,7 @@
   - Available prescalers: 1, 8, 64, 256, 1024
   - CTC (Clear Timer on Compare) mode for accurate frequency generation
   - No hardware interrupt priority (AVR interrupts are equal priority)
-  - External interrupts via Arduino attachInterrupt() API
+  - External interrupts not yet implemented
 
   Platform Support:
   - ATmega chips: Full Timer1 support (16-bit timer)
@@ -38,11 +38,6 @@ FL_EXTERN_C_BEGIN
 #include <avr/interrupt.h>
 #include <avr/io.h>
 FL_EXTERN_C_END
-
-// Arduino core for external interrupts
-#if __has_include(<Arduino.h>)
-#include <Arduino.h>
-#endif
 
 // Compatibility macros for older AVR chips
 // ATmega8A and similar older chips use TIMSK instead of TIMSK1

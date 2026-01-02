@@ -207,9 +207,38 @@ class BannedHeadersChecker(FileContentChecker):
                 if header in {"string.h", "stdlib.h"}:
                     return True
 
-        # Platform-specific headers need Arduino.h
-        if "/platforms/" in file_path.replace("\\", "/"):
-            if header == "Arduino.h":
+        # Platform-specific files and Arduino.h handling
+        if "/platforms/" in file_path.replace("\\", "/") and header == "Arduino.h":
+            # Allow in .cpp implementation files
+            if file_path.endswith(".cpp"):
+                return True
+
+            # Legacy platform headers that currently need Arduino.h
+            # TODO: Refactor these to remove Arduino.h dependency
+            legacy_arduino_headers = [
+                "pin_avr.hpp",
+                "pin_esp32.hpp",
+                "pin_esp8266.hpp",
+                "pin_stm32.hpp",
+                "pin_stm32_native.hpp",
+                "pin_sam.hpp",
+                "pin_samd.hpp",
+                "pin_nrf52.hpp",
+                "pin_rp.hpp",
+                "pin_teensy.hpp",
+                "pin_apollo3.hpp",
+                "pin_renesas.hpp",
+                "pin_silabs.hpp",
+                "fastpin_apollo3.h",
+                "clockless_apollo3.h",
+                "fastspi_arm_sam.h",
+                "stm32_gpio_timer_helpers.h",
+                "led_sysdefs_rp_common.h",
+                "io_teensy_lc.h",
+                "audio_input.hpp",
+                "io_esp_arduino.hpp",
+            ]
+            if any(file_path.endswith(legacy) for legacy in legacy_arduino_headers):
                 return True
 
         # Espressif LED strip library code needs C library headers
