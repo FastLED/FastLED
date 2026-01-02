@@ -1071,4 +1071,397 @@ TEST_CASE("Remote: WLED nightlight roundtrip") {
     REQUIRE_EQ(remote.getNightlightTargetBrightness(), 75);
 }
 
+// Test: WLED segment hex color string parsing
+TEST_CASE("Remote: WLED segment hex color strings") {
+    fl::WLED remote;
+
+    // Test basic hex color strings (uppercase)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":["FF0000","00FF00","0000FF"]}]})");
+    remote.setState(state);
+
+    // Retrieve and verify the segment was created
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mColors.size(), 3);
+
+    // Verify red (255, 0, 0)
+    REQUIRE_EQ(segments[0].mColors[0].size(), 3);
+    REQUIRE_EQ(segments[0].mColors[0][0], 255);
+    REQUIRE_EQ(segments[0].mColors[0][1], 0);
+    REQUIRE_EQ(segments[0].mColors[0][2], 0);
+
+    // Verify green (0, 255, 0)
+    REQUIRE_EQ(segments[0].mColors[1][0], 0);
+    REQUIRE_EQ(segments[0].mColors[1][1], 255);
+    REQUIRE_EQ(segments[0].mColors[1][2], 0);
+
+    // Verify blue (0, 0, 255)
+    REQUIRE_EQ(segments[0].mColors[2][0], 0);
+    REQUIRE_EQ(segments[0].mColors[2][1], 0);
+    REQUIRE_EQ(segments[0].mColors[2][2], 255);
+}
+
+// Test: WLED segment hex color strings (lowercase)
+TEST_CASE("Remote: WLED segment hex color strings lowercase") {
+    fl::WLED remote;
+
+    // Test lowercase hex strings
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":["ff00aa","00aaff","aa00ff"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mColors.size(), 3);
+
+    // Verify colors parsed correctly
+    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // ff
+    REQUIRE_EQ(segments[0].mColors[0][1], 0);    // 00
+    REQUIRE_EQ(segments[0].mColors[0][2], 170);  // aa
+
+    REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
+    REQUIRE_EQ(segments[0].mColors[1][1], 170);  // aa
+    REQUIRE_EQ(segments[0].mColors[1][2], 255);  // ff
+}
+
+// Test: WLED segment hex color strings with leading '#'
+TEST_CASE("Remote: WLED segment hex color strings with hash") {
+    fl::WLED remote;
+
+    // Test hex strings with optional leading '#'
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":["#FFFFFF","#000000","#808080"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mColors.size(), 3);
+
+    // Verify white (255, 255, 255)
+    REQUIRE_EQ(segments[0].mColors[0][0], 255);
+    REQUIRE_EQ(segments[0].mColors[0][1], 255);
+    REQUIRE_EQ(segments[0].mColors[0][2], 255);
+
+    // Verify black (0, 0, 0)
+    REQUIRE_EQ(segments[0].mColors[1][0], 0);
+    REQUIRE_EQ(segments[0].mColors[1][1], 0);
+    REQUIRE_EQ(segments[0].mColors[1][2], 0);
+
+    // Verify gray (128, 128, 128)
+    REQUIRE_EQ(segments[0].mColors[2][0], 128);
+    REQUIRE_EQ(segments[0].mColors[2][1], 128);
+    REQUIRE_EQ(segments[0].mColors[2][2], 128);
+}
+
+// Test: WLED segment mixed RGB arrays and hex strings
+TEST_CASE("Remote: WLED segment mixed color formats") {
+    fl::WLED remote;
+
+    // Test mixing RGB arrays and hex strings
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":[[255,0,0],"00FF00",[0,0,255]]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mColors.size(), 3);
+
+    // All should be parsed correctly
+    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Red from array
+    REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Green from hex
+    REQUIRE_EQ(segments[0].mColors[2][2], 255);  // Blue from array
+}
+
+// Test: WLED segment invalid hex strings
+TEST_CASE("Remote: WLED segment invalid hex strings") {
+    fl::WLED remote;
+
+    // Test invalid hex strings (should be rejected with warnings)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":["INVALID","12345","1234567","GGGGGG"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    // Invalid hex strings should be skipped, so colors array should be empty
+    REQUIRE_EQ(segments[0].mColors.size(), 0);
+}
+
+// Test: WLED segment hex string case insensitivity
+TEST_CASE("Remote: WLED segment hex string case insensitivity") {
+    fl::WLED remote;
+
+    // Test mixed case hex strings
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"col":["FfAa00","00FfAa"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mColors.size(), 2);
+
+    // Verify parsing works correctly regardless of case
+    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Ff
+    REQUIRE_EQ(segments[0].mColors[0][1], 170);  // Aa
+    REQUIRE_EQ(segments[0].mColors[0][2], 0);    // 00
+
+    REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
+    REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Ff
+    REQUIRE_EQ(segments[0].mColors[1][2], 170);  // Aa
+}
+
+// Test: WLED individual LED control - simple sequential format
+TEST_CASE("Remote: WLED individual LED control simple format") {
+    fl::WLED remote;
+
+    // Test simple sequential LED colors (no indices)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000","00FF00","0000FF"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
+
+    // Verify LED 0: red (255, 0, 0)
+    REQUIRE_EQ(segments[0].mIndividualLeds[0].size(), 3);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
+
+    // Verify LED 1: green (0, 255, 0)
+    REQUIRE_EQ(segments[0].mIndividualLeds[1][0], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[1][2], 0);
+
+    // Verify LED 2: blue (0, 0, 255)
+    REQUIRE_EQ(segments[0].mIndividualLeds[2][0], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[2][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
+}
+
+// Test: WLED individual LED control - indexed format
+TEST_CASE("Remote: WLED individual LED control indexed format") {
+    fl::WLED remote;
+
+    // Test indexed LED colors (sets specific LED indices)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000|5","00FF00|10","0000FF|15"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 16);  // Size expanded to fit LED 15
+
+    // Verify LED 5: red
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
+
+    // Verify LED 10: green
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
+
+    // Verify LED 15: blue
+    REQUIRE_EQ(segments[0].mIndividualLeds[15][0], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[15][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[15][2], 255);
+}
+
+// Test: WLED individual LED control - range format
+TEST_CASE("Remote: WLED individual LED control range format") {
+    fl::WLED remote;
+
+    // Test range LED colors (sets multiple LEDs at once)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000|0-2","0000FF|5-7"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 8);  // Size expanded to fit LED 7
+
+    // Verify LEDs 0-2: red
+    for (int i = 0; i <= 2; ++i) {
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
+    }
+
+    // Verify LEDs 5-7: blue
+    for (int i = 5; i <= 7; ++i) {
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
+    }
+}
+
+// Test: WLED individual LED control - mixed formats
+TEST_CASE("Remote: WLED individual LED control mixed formats") {
+    fl::WLED remote;
+
+    // Test mixing simple, indexed, and range formats
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FFFFFF","FF0000|10","0000FF|20-22"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 23);  // Size expanded to fit LED 22
+
+    // Verify LED 0: white (sequential format)
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 255);
+
+    // Verify LED 10: red (indexed format)
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
+
+    // Verify LEDs 20-22: blue (range format)
+    for (int i = 20; i <= 22; ++i) {
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
+    }
+}
+
+// Test: WLED individual LED control - hex string with hash
+TEST_CASE("Remote: WLED individual LED control with hash") {
+    fl::WLED remote;
+
+    // Test hex strings with leading '#' (should be stripped)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["#FF0000","#00FF00|5"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+
+    // Verify LED 0: red
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
+
+    // Verify LED 5: green
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
+}
+
+// Test: WLED individual LED control - serialization roundtrip
+TEST_CASE("Remote: WLED individual LED control serialization roundtrip") {
+    fl::WLED remote;
+
+    // Set individual LED colors
+    fl::Json inputState = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000","00FF00","0000FF"]}]})");
+    remote.setState(inputState);
+
+    // Get state back
+    fl::Json outputState = remote.getState();
+    REQUIRE(outputState.contains("seg"));
+    REQUIRE(outputState["seg"].is_array());
+    REQUIRE_EQ(outputState["seg"].size(), 1);
+
+    const fl::Json& seg = outputState["seg"][0];
+    REQUIRE(seg.contains("i"));
+    REQUIRE(seg["i"].is_array());
+    REQUIRE_EQ(seg["i"].size(), 3);
+
+    // Verify serialized values (should be uppercase hex without '#')
+    fl::string led0 = seg["i"][0] | fl::string("");
+    fl::string led1 = seg["i"][1] | fl::string("");
+    fl::string led2 = seg["i"][2] | fl::string("");
+
+    REQUIRE_EQ(led0, "FF0000");
+    REQUIRE_EQ(led1, "00FF00");
+    REQUIRE_EQ(led2, "0000FF");
+
+    // Set state again from output (roundtrip test)
+    remote.setState(outputState);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
+
+    // Verify colors preserved
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
+    REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
+}
+
+// Test: WLED individual LED control - invalid formats
+TEST_CASE("Remote: WLED individual LED control invalid formats") {
+    fl::WLED remote;
+
+    // Test various invalid formats (should be rejected with warnings)
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["INVALID","12345","GGGGGG|5","FF0000|abc","FF0000|10-abc"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    // Invalid entries should be skipped, so array should be empty
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
+}
+
+// Test: WLED individual LED control - case insensitivity
+TEST_CASE("Remote: WLED individual LED control case insensitivity") {
+    fl::WLED remote;
+
+    // Test mixed case hex strings
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FfAa00","00FfAa|5","AaBbCc|10-12"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+
+    // Verify LED 0
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);  // Ff
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 170);  // Aa
+    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);    // 00
+
+    // Verify LED 5
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);    // 00
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);  // Ff
+    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 170);  // Aa
+
+    // Verify LEDs 10-12
+    for (int i = 10; i <= 12; ++i) {
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 170);  // Aa
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 187);  // Bb
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 204);  // Cc
+    }
+}
+
+// Test: WLED individual LED control - empty array
+TEST_CASE("Remote: WLED individual LED control empty array") {
+    fl::WLED remote;
+
+    // Set some LEDs first
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000","00FF00"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 2);
+
+    // Clear with empty array
+    state = fl::Json::parse(R"({"seg":[{"id":0,"i":[]}]})");
+    remote.setState(state);
+
+    // Should be empty now
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
+}
+
+// Test: WLED individual LED control - large range
+TEST_CASE("Remote: WLED individual LED control large range") {
+    fl::WLED remote;
+
+    // Test setting a large range of LEDs
+    fl::Json state = fl::Json::parse(R"({"seg":[{"id":0,"i":["FF0000|0-99"]}]})");
+    remote.setState(state);
+
+    const auto& segments = remote.getSegments();
+    REQUIRE_EQ(segments.size(), 1);
+    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 100);
+
+    // Verify all LEDs in range are red
+    for (int i = 0; i < 100; ++i) {
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
+    }
+}
+
 #endif // FASTLED_ENABLE_JSON
