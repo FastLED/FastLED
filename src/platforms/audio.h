@@ -6,7 +6,7 @@
 
 // Check for Teensy with Audio Library first
 #if !defined(FASTLED_HAS_AUDIO_INPUT)
-  #if FL_IS_TEENSY && FL_HAS_INCLUDE(<Audio.h>)
+  #if defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<Audio.h>)
     #define FASTLED_HAS_AUDIO_INPUT 1
   #endif
 #endif

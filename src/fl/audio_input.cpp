@@ -16,7 +16,7 @@
 // First check for Teensy (before Arduino, since Teensy is Arduino-compatible)
 #include "platforms/arm/teensy/is_teensy.h"
 #ifndef FASTLED_USES_TEENSY_AUDIO_INPUT
-  #if FL_IS_TEENSY
+  #if defined(FL_IS_TEENSY)
     #define FASTLED_USES_TEENSY_AUDIO_INPUT 1
   #else
     #define FASTLED_USES_TEENSY_AUDIO_INPUT 0

@@ -99,7 +99,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const AudioConfigI2S& config)
         return;
     }
 
-#if FL_IS_TEENSY_3X
+#if defined(FL_IS_TEENSY_3X)
     // Teensy 3.x only has I2S1
     if (static_cast<TeensyI2S::I2SPort>(mConfig.mI2sNum) == TeensyI2S::I2S2) {
         mHasError = true;
@@ -119,7 +119,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const AudioConfigI2S& config)
         mConnectionLeft = fl::make_shared<AudioConnection>(*mI2sInput, 0, *mRecorder, 0);   // Left
         mConnectionRight = fl::make_shared<AudioConnection>(*mI2sInput, 1, *mRecorder, 1);  // Right
     }
-#if FL_IS_TEENSY_4X
+#if defined(FL_IS_TEENSY_4X)
     else if (static_cast<TeensyI2S::I2SPort>(mConfig.mI2sNum) == TeensyI2S::I2S2) {
         mI2sInput2 = fl::make_shared<AudioInputI2S2>();
         // Create connections: I2S2 -> Recorder
@@ -162,9 +162,9 @@ void Teensy_I2S_Audio::start() {
 
     FL_WARN("Teensy I2S audio input started (512-sample mono buffering)");
 
-#if FL_IS_TEENSY_3X
+#if defined(FL_IS_TEENSY_3X)
     FL_WARN("  Teensy 3.x I2S1 pins: BCLK=9, MCLK=11, RX=13, LRCLK=23");
-#elif FL_IS_TEENSY_4X
+#elif defined(FL_IS_TEENSY_4X)
     if (static_cast<TeensyI2S::I2SPort>(mConfig.mI2sNum) == TeensyI2S::I2S1) {
         FL_WARN("  Teensy 4.x I2S1 pins: BCLK=21, MCLK=23, RX=8, LRCLK=20");
     } else {

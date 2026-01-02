@@ -23,7 +23,7 @@
 
 #include "platforms/arm/teensy/is_teensy.h"
 
-#if FL_IS_TEENSY_4X
+#if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"

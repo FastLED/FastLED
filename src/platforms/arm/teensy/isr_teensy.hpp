@@ -16,7 +16,7 @@
 
 #pragma once
 
-#if FL_IS_TEENSY
+#if defined(FL_IS_TEENSY)
 
 #include "fl/isr.h"
 #include "fl/warn.h"
@@ -259,19 +259,19 @@ const char* teensy_get_error_string(int error_code) {
 }
 
 const char* teensy_get_platform_name() {
-#if FL_IS_TEENSY_LC
+#if defined(FL_IS_TEENSY_LC)
     return "Teensy LC";
-#elif FL_IS_TEENSY_30
+#elif defined(FL_IS_TEENSY_30)
     return "Teensy 3.0";
-#elif FL_IS_TEENSY_31 || FL_IS_TEENSY_32
+#elif defined(FL_IS_TEENSY_31) || defined(FL_IS_TEENSY_32)
     return "Teensy 3.1/3.2";
-#elif FL_IS_TEENSY_35
+#elif defined(FL_IS_TEENSY_35)
     return "Teensy 3.5";
-#elif FL_IS_TEENSY_36
+#elif defined(FL_IS_TEENSY_36)
     return "Teensy 3.6";
-#elif FL_IS_TEENSY_40
+#elif defined(FL_IS_TEENSY_40)
     return "Teensy 4.0";
-#elif FL_IS_TEENSY_41
+#elif defined(FL_IS_TEENSY_41)
     return "Teensy 4.1";
 #else
     return "Teensy (unknown variant)";

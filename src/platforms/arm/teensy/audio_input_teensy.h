@@ -11,7 +11,7 @@
 #include "platforms/arm/teensy/is_teensy.h"
 
 // Detect Teensy Audio Library availability
-#if FL_IS_TEENSY && FL_HAS_INCLUDE(<Audio.h>)
+#if defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<Audio.h>)
 #define TEENSY_AUDIO_LIBRARY_AVAILABLE 1
 #include <Audio.h>  // ok include
 #else
@@ -24,7 +24,7 @@ namespace fl {
 
 // Type aliases for Teensy Audio Library classes to avoid naming collisions
 using TeensyAudioInputI2S = ::AudioInputI2S;
-#if FL_IS_TEENSY_4X
+#if defined(FL_IS_TEENSY_4X)
 using TeensyAudioInputI2S2 = ::AudioInputI2S2;
 #endif
 using TeensyAudioConnection = ::AudioConnection;
@@ -36,7 +36,7 @@ public:
     virtual ~AudioInputI2S() = default;
 };
 
-#if FL_IS_TEENSY_4X
+#if defined(FL_IS_TEENSY_4X)
 class AudioInputI2S2 : public TeensyAudioInputI2S2 {
 public:
     virtual ~AudioInputI2S2() = default;
@@ -129,7 +129,7 @@ private:
 
     // I2S input objects (created based on port selection)
     fl::shared_ptr<AudioInputI2S> mI2sInput;
-#if FL_IS_TEENSY_4X
+#if defined(FL_IS_TEENSY_4X)
     fl::shared_ptr<AudioInputI2S2> mI2sInput2;
 #endif
 

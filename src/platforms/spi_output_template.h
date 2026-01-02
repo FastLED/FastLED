@@ -30,13 +30,13 @@
 #elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 #include "apollo3/spi_output_template.h"
 
-#elif FL_IS_TEENSY_3X
+#elif defined(FL_IS_TEENSY_3X)
 #include "arm/teensy/teensy3_common/spi_output_template.h"
 
-#elif FL_IS_TEENSY_4X
+#elif defined(FL_IS_TEENSY_4X)
 #include "arm/teensy/teensy4_common/spi_output_template.h"
 
-#elif FL_IS_TEENSY_LC
+#elif defined(FL_IS_TEENSY_LC)
 #include "arm/teensy/teensy_lc/spi_output_template.h"
 
 #elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
