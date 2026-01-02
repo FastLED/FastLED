@@ -28,9 +28,13 @@ STOP_PATTERN="VALIDATION_SUITE_COMPLETE"
 # Default fail-on pattern from Validation.ino (lines 78-98)
 DEFAULT_FAIL_ON="ERROR"
 
-# Exit-on-error pattern for immediate device failure detection
+# Exit-on-error patterns for immediate device failure detection
 # ClearCommError indicates device is stuck (ISR hogging CPU, crashed, etc.)
-EXIT_ON_ERROR_PATTERN="ClearCommError"
+# "register dump" indicates ESP32 panic/crash with register state dump
+EXIT_ON_ERROR_PATTERNS=(
+    "ClearCommError"
+    "register dump"
+)
 
 # Help message
 show_help() {
@@ -62,8 +66,9 @@ Default Patterns:
   1 --fail-on pattern:
     - ERROR (catches test failures via FL_WARN)
 
-  1 --exit-on-error pattern:
+  2 --exit-on-error patterns:
     - ClearCommError (immediate device failure - ISR hang, crash, etc.)
+    - register dump (ESP32 panic/crash with register state dump)
 
 Options:
   -h, --help          Show this help message
@@ -145,8 +150,10 @@ fi
 # Add stop pattern for early exit when test suite completes
 CMD+=(--stop "$STOP_PATTERN")
 
-# Add exit-on-error pattern for immediate device failure detection
-CMD+=(--exit-on-error "$EXIT_ON_ERROR_PATTERN")
+# Add exit-on-error patterns for immediate device failure detection
+for pattern in "${EXIT_ON_ERROR_PATTERNS[@]}"; do
+    CMD+=(--exit-on-error "$pattern")
+done
 
 # Append any extra arguments
 CMD+=("${EXTRA_ARGS[@]}")
@@ -156,7 +163,7 @@ echo "Running validation with patterns:"
 echo "  Expect: ${#DEFAULT_EXPECT[@]} patterns (use --help to see list)"
 echo "  Stop: $STOP_PATTERN (early exit when tests complete)"
 echo "  Fail-on: $DEFAULT_FAIL_ON"
-echo "  Exit-on-error: $EXIT_ON_ERROR_PATTERN (immediate failure)"
+echo "  Exit-on-error: ${#EXIT_ON_ERROR_PATTERNS[@]} patterns (immediate failure)"
 echo ""
 echo "Command: ${CMD[*]}"
 echo ""
