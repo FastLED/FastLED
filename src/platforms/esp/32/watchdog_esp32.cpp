@@ -13,7 +13,8 @@
 
 #include "watchdog_esp32.h"
 
-#ifdef FL_IS_ESP32
+// Platform guard using compiler builtins
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
@@ -94,4 +95,4 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
     FL_DBG("[PANIC HANDLER] ✓ USB disconnected - proceeding with reset");
 }
 
-#endif // FL_IS_ESP32
+#endif // ESP32 (compiler builtin guard)

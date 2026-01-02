@@ -17,7 +17,7 @@
 
 #pragma once
 
-#ifdef FL_IS_AVR
+#ifdef __AVR__
 
 #include "fl/isr.h"
 #include "fl/dbg.h"
@@ -424,4 +424,4 @@ bool requires_assembly_handler(uint8_t priority) {
 } // namespace isr
 } // namespace fl
 
-#endif // FL_IS_AVR
+#endif // __AVR__

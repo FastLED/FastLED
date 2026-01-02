@@ -4,7 +4,7 @@
 
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include <cstdlib>  // For strtol
+#include "fl/stl/cstdlib.h"  // For strtol
 
 namespace fl {
 

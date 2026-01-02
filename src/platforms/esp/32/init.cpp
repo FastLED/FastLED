@@ -14,7 +14,8 @@
 // - Define FL_NO_ESP_WATCHDOG_OVERRIDE to disable automatic watchdog installation
 // - Warnings only appear in debug builds (FL_WARN uses FL_DBG)
 
-#ifdef FL_IS_ESP32
+// Platform guard using compiler builtins
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
 #ifndef FL_NO_ESP_WATCHDOG_OVERRIDE
 
@@ -43,4 +44,4 @@ FL_INIT(fl::detail::esp32_init);
 
 #endif // !defined(FL_NO_ESP_WATCHDOG_OVERRIDE)
 
-#endif // FL_IS_ESP32
+#endif // ESP32 (compiler builtin guard)

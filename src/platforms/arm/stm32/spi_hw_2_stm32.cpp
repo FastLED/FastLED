@@ -13,9 +13,15 @@
 ///
 /// Compatible with: STM32F1, STM32F2, STM32F4, STM32F7, STM32L4, STM32H7, STM32G4, STM32U5
 
-#include "platforms/is_platform.h"
-
-#ifdef FL_IS_STM32
+// Platform guard using compiler builtins
+#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
+    defined(STM32F2XX) || defined(STM32F2xx) || \
+    defined(STM32F4) || defined(STM32F4xx) || \
+    defined(STM32F7) || defined(STM32F7xx) || \
+    defined(STM32L4) || defined(STM32L4xx) || \
+    defined(STM32H7) || defined(STM32H7xx) || \
+    defined(STM32G4) || defined(STM32G4xx) || \
+    defined(STM32U5) || defined(STM32U5xx)
 
 // Platform detection and capability macros
 #include "platforms/arm/stm32/stm32_capabilities.h"
@@ -767,4 +773,4 @@ FL_INIT(init_spi_hw_2_stm32);
 
 #endif  // FL_STM32_HAS_SPI_HW_2
 
-#endif  // FL_IS_STM32
+#endif  // STM32 (compiler builtin guard)

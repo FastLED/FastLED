@@ -8,9 +8,15 @@
 /// which are only available on platforms with hardware SPI support enabled.
 /// It is only compiled when FL_STM32_HAS_SPI_HW_* flags are defined.
 
-#include "platforms/is_platform.h"
-
-#ifdef FL_IS_STM32
+// Platform guard using compiler builtins
+#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
+    defined(STM32F2XX) || defined(STM32F2xx) || \
+    defined(STM32F4) || defined(STM32F4xx) || \
+    defined(STM32F7) || defined(STM32F7xx) || \
+    defined(STM32L4) || defined(STM32L4xx) || \
+    defined(STM32H7) || defined(STM32H7xx) || \
+    defined(STM32G4) || defined(STM32G4xx) || \
+    defined(STM32U5) || defined(STM32U5xx)
 
 #include "platforms/arm/stm32/stm32_capabilities.h"
 
@@ -962,4 +968,4 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
 }  // namespace fl
 
 #endif  // FL_STM32_HAS_SPI_HW_*
-#endif  // FL_IS_STM32
+#endif  // STM32 (compiler builtin guard)
