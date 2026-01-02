@@ -480,7 +480,7 @@ TEST_CASE("Remote: WLED set state on and brightness") {
     fl::WLED remote;
 
     fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
-    remote.setWledState(state);
+    remote.setState(state);
 
     REQUIRE(remote.getOn());
     REQUIRE_EQ(remote.getBrightness(), 128);
@@ -492,12 +492,12 @@ TEST_CASE("Remote: WLED set state off") {
 
     // Initially on (default is false, so turn it on first)
     fl::Json stateOn = fl::Json::parse(R"({"on":true})");
-    remote.setWledState(stateOn);
+    remote.setState(stateOn);
     REQUIRE(remote.getOn());
 
     // Turn off
     fl::Json stateOff = fl::Json::parse(R"({"on":false})");
-    remote.setWledState(stateOff);
+    remote.setState(stateOff);
     REQUIRE_FALSE(remote.getOn());
 }
 
@@ -507,10 +507,10 @@ TEST_CASE("Remote: WLED get state") {
 
     // Set state
     fl::Json stateIn = fl::Json::parse(R"({"on":true,"bri":200})");
-    remote.setWledState(stateIn);
+    remote.setState(stateIn);
 
     // Get state
-    fl::Json stateOut = remote.getWledState();
+    fl::Json stateOut = remote.getState();
     REQUIRE(stateOut.contains("on"));
     REQUIRE(stateOut.contains("bri"));
 
@@ -527,19 +527,19 @@ TEST_CASE("Remote: WLED partial state updates") {
 
     // Set initial state
     fl::Json fullState = fl::Json::parse(R"({"on":true,"bri":100})");
-    remote.setWledState(fullState);
+    remote.setState(fullState);
     REQUIRE(remote.getOn());
     REQUIRE_EQ(remote.getBrightness(), 100);
 
     // Update only brightness (on should remain true)
     fl::Json partialBri = fl::Json::parse(R"({"bri":50})");
-    remote.setWledState(partialBri);
+    remote.setState(partialBri);
     REQUIRE(remote.getOn());  // Should still be true
     REQUIRE_EQ(remote.getBrightness(), 50);
 
     // Update only on (brightness should remain 50)
     fl::Json partialOn = fl::Json::parse(R"({"on":false})");
-    remote.setWledState(partialOn);
+    remote.setState(partialOn);
     REQUIRE_FALSE(remote.getOn());
     REQUIRE_EQ(remote.getBrightness(), 50);  // Should still be 50
 }
@@ -550,40 +550,40 @@ TEST_CASE("Remote: WLED invalid values") {
 
     // Set initial valid state
     fl::Json validState = fl::Json::parse(R"({"on":true,"bri":128})");
-    remote.setWledState(validState);
+    remote.setState(validState);
 
     // Test out-of-range brightness (negative - should clamp to 0)
     fl::Json negativeBri = fl::Json::parse(R"({"bri":-10})");
-    remote.setWledState(negativeBri);
+    remote.setState(negativeBri);
     REQUIRE_EQ(remote.getBrightness(), 0);  // Clamped to 0
 
     // Test out-of-range brightness (too high - should clamp to 255)
     fl::Json highBri = fl::Json::parse(R"({"bri":300})");
-    remote.setWledState(highBri);
+    remote.setState(highBri);
     REQUIRE_EQ(remote.getBrightness(), 255);  // Clamped to 255
 
     // Test invalid type for bri (should keep existing value)
     uint8_t currentBri = remote.getBrightness();
     fl::Json invalidBri = fl::Json::parse(R"({"bri":"invalid"})");
-    remote.setWledState(invalidBri);
+    remote.setState(invalidBri);
     REQUIRE_EQ(remote.getBrightness(), currentBri);  // Should remain unchanged
 
     // Test invalid JSON (should not crash)
     fl::Json invalidJson = fl::Json(nullptr);
-    remote.setWledState(invalidJson);  // Should warn but not crash
+    remote.setState(invalidJson);  // Should warn but not crash
     REQUIRE(remote.getOn());  // State should remain unchanged
 }
 
-// Test: State roundtrip (setWledState -> getWledState preserves values)
+// Test: State roundtrip (setState -> getState preserves values)
 TEST_CASE("Remote: WLED state roundtrip") {
     fl::WLED remote;
 
     // Set state
     fl::Json stateIn = fl::Json::parse(R"({"on":false,"bri":64})");
-    remote.setWledState(stateIn);
+    remote.setState(stateIn);
 
     // Get state
-    fl::Json stateOut = remote.getWledState();
+    fl::Json stateOut = remote.getState();
 
     // Verify roundtrip
     bool on = stateOut["on"] | true;
@@ -593,7 +593,7 @@ TEST_CASE("Remote: WLED state roundtrip") {
     REQUIRE_EQ(bri, 64);
 
     // Set state again from the retrieved JSON
-    remote.setWledState(stateOut);
+    remote.setState(stateOut);
 
     // Verify still correct
     REQUIRE_FALSE(remote.getOn());

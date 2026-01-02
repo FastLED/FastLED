@@ -9,9 +9,9 @@ namespace fl {
 
 // WLED State Management
 
-void WLED::setWledState(const fl::Json& wledState) {
+void WLED::setState(const fl::Json& wledState) {
     if (!wledState.has_value()) {
-        FL_WARN("WLED: setWledState called with invalid JSON");
+        FL_WARN("WLED: setState called with invalid JSON");
         return;
     }
 
@@ -47,7 +47,7 @@ void WLED::setWledState(const fl::Json& wledState) {
     }
 }
 
-fl::Json WLED::getWledState() const {
+fl::Json WLED::getState() const {
     fl::Json state = fl::Json::object();
     state.set("on", mWledOn);
     state.set("bri", static_cast<int64_t>(mWledBri));
