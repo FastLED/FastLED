@@ -276,71 +276,71 @@ public:
      * @brief Get transition duration
      * @return Crossfade duration in units of 100ms (0-65535)
      */
-    uint16_t getTransition() const { return mWledTransition; }
+    uint16_t getTransition() const { return mTransition; }
 
     /**
      * @brief Get active preset ID
      * @return Preset ID (-1 = none, 0-250)
      */
-    int16_t getPreset() const { return mWledPreset; }
+    int16_t getPreset() const { return mPreset; }
 
     /**
      * @brief Get active playlist ID
      * @return Playlist ID (-1 = none, 0-250)
      */
-    int16_t getPlaylist() const { return mWledPlaylist; }
+    int16_t getPlaylist() const { return mPlaylist; }
 
     /**
      * @brief Get live data override setting
      * @return Live override (0=off, 1=override, 2=until reboot)
      */
-    uint8_t getLiveOverride() const { return mWledLiveOverride; }
+    uint8_t getLiveOverride() const { return mLiveOverride; }
 
     /**
      * @brief Get main segment index
      * @return Main segment ID for global controls
      */
-    uint8_t getMainSegment() const { return mWledMainSeg; }
+    uint8_t getMainSegment() const { return mMainSegment; }
 
     /**
      * @brief Get nightlight active state
      * @return true if nightlight is active
      */
-    bool getNightlightOn() const { return mWledNightlightOn; }
+    bool getNightlightOn() const { return mNightlightOn; }
 
     /**
      * @brief Get nightlight duration
      * @return Duration in minutes (1-255)
      */
-    uint8_t getNightlightDuration() const { return mWledNightlightDur; }
+    uint8_t getNightlightDuration() const { return mNightlightDuration; }
 
     /**
      * @brief Get nightlight mode
      * @return Mode (0=instant off, 1=fade, 2=color fade, 3=sunrise)
      */
-    uint8_t getNightlightMode() const { return mWledNightlightMode; }
+    uint8_t getNightlightMode() const { return mNightlightMode; }
 
     /**
      * @brief Get nightlight target brightness
      * @return Target brightness (0-255)
      */
-    uint8_t getNightlightTargetBrightness() const { return mWledNightlightTbri; }
+    uint8_t getNightlightTargetBrightness() const { return mNightlightTargetBrightness; }
 
 private:
     // WLED state (runtime-only, no persistence)
     bool mWledOn = false;           // WLED on/off state
     uint8_t mWledBri = 255;         // WLED brightness (0-255)
-    uint16_t mWledTransition = 7;   // Crossfade duration (×100ms, default 700ms)
-    int16_t mWledPreset = -1;       // Active preset ID (-1 = none)
-    int16_t mWledPlaylist = -1;     // Active playlist ID (-1 = none)
-    uint8_t mWledLiveOverride = 0;  // Live data override (0=off, 1=override, 2=until reboot)
-    uint8_t mWledMainSeg = 0;       // Main segment for global controls
+    uint16_t mTransition = 7;       // Crossfade duration (×100ms, default 700ms)
+    int16_t mPreset = -1;           // Active preset ID (-1 = none)
+    int16_t mPlaylist = -1;         // Active playlist ID (-1 = none)
+    uint8_t mLiveOverride = 0;      // Live data override (0=off, 1=override, 2=until reboot)
+    uint8_t mMainSegment = 0;       // Main segment for global controls
 
     // Nightlight state
-    bool mWledNightlightOn = false;     // Nightlight active
-    uint8_t mWledNightlightDur = 60;    // Nightlight duration in minutes (default 60)
-    uint8_t mWledNightlightMode = 1;    // Nightlight mode (0=instant, 1=fade, 2=color, 3=sunrise)
-    uint8_t mWledNightlightTbri = 0;    // Target brightness for nightlight end
+    bool mNightlightOn = false;          // Nightlight active
+    uint8_t mNightlightDuration = 60;    // Nightlight duration in minutes (default 60)
+    uint8_t mNightlightMode = 1;         // Nightlight mode (0=instant, 1=fade, 2=color, 3=sunrise)
+    uint8_t mNightlightTargetBrightness = 0;  // Target brightness for nightlight end
 };
 
 } // namespace fl
