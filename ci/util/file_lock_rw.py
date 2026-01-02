@@ -21,7 +21,7 @@ import signal
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import ContextManager, Optional
+from typing import Any, ContextManager
 
 import fasteners
 
@@ -88,7 +88,7 @@ def _write_lock_metadata(lock_file_path: Path, operation: str = "lock") -> None:
         logger.warning(f"Failed to write lock metadata {metadata_file}: {e}")
 
 
-def _read_lock_metadata(lock_file_path: Path) -> Optional[dict]:
+def _read_lock_metadata(lock_file_path: Path) -> dict[str, Any] | None:
     """
     Read metadata from lock file.
 

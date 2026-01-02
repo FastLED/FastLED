@@ -223,8 +223,8 @@ class TestListActiveLocks(unittest.TestCase):
         self.assertEqual(len(locks), 2)
 
         # Find each lock
-        stale_info = next((l for l in locks if "artifact1" in l["path"]), None)
-        active_info = next((l for l in locks if "artifact2" in l["path"]), None)
+        stale_info = next((l for l in locks if "artifact1" in str(l["path"])), None)
+        active_info = next((l for l in locks if "artifact2" in str(l["path"])), None)
 
         self.assertIsNotNone(stale_info)
         self.assertIsNotNone(active_info)

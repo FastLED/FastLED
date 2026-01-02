@@ -16,8 +16,8 @@ import re
 import subprocess
 import tempfile
 import time
-import urllib.error
 import urllib.request
+from urllib.error import HTTPError
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -892,7 +892,7 @@ def _resolve_package_url_from_registry(
                     f"Package {owner}/{package_name}@{version_to_log} has no file for system: {system}"
                 )
 
-        except urllib.error.HTTPError as e:
+        except HTTPError as e:
             code: int = e.code
             if code == 404:
                 # Package not found with this owner, try next

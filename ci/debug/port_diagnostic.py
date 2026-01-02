@@ -15,6 +15,7 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 import psutil
 
@@ -176,7 +177,7 @@ def diagnose_port(port_name: str) -> None:
     if processes_with_files:
         for proc, files in processes_with_files:
             try:
-                proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
+                proc_info = cast(dict[str, Any], proc.as_dict(attrs=["pid", "name", "cmdline"]))
                 print(f"  PID {proc_info['pid']}: {proc_info['name']}")
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
                 print(f"    Open files: {', '.join(files)}")
@@ -204,7 +205,7 @@ def diagnose_port(port_name: str) -> None:
     found_any = False
     for proc in psutil.process_iter(["pid", "name", "cmdline", "ppid"]):
         try:
-            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"])
+            proc_info = cast(dict[str, Any], proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"]))
             matches, patterns = check_matches_kill_patterns(
                 proc_info["name"], proc_info["cmdline"], port_name
             )
@@ -224,7 +225,7 @@ def diagnose_port(port_name: str) -> None:
                     for i, ancestor in enumerate(reversed(tree)):
                         try:
                             indent = "      " + "  " * i
-                            ancestor_info = ancestor.as_dict(attrs=["pid", "name"])
+                            ancestor_info = cast(dict[str, Any], ancestor.as_dict(attrs=["pid", "name"]))
                             print(
                                 f"{indent}└─ PID {ancestor_info['pid']}: {ancestor_info['name']}"
                             )
