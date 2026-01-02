@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/remote.h"
+#include "fx/wled.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -476,7 +477,7 @@ TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
 
 // Test: Set WLED state with on=true and bri=128
 TEST_CASE("Remote: WLED set state on and brightness") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
     remote.setWledState(state);
@@ -487,7 +488,7 @@ TEST_CASE("Remote: WLED set state on and brightness") {
 
 // Test: Set WLED state with on=false
 TEST_CASE("Remote: WLED set state off") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     // Initially on (default is false, so turn it on first)
     fl::Json stateOn = fl::Json::parse(R"({"on":true})");
@@ -502,7 +503,7 @@ TEST_CASE("Remote: WLED set state off") {
 
 // Test: Get WLED state returns correct JSON
 TEST_CASE("Remote: WLED get state") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     // Set state
     fl::Json stateIn = fl::Json::parse(R"({"on":true,"bri":200})");
@@ -522,7 +523,7 @@ TEST_CASE("Remote: WLED get state") {
 
 // Test: Partial state updates (missing fields don't corrupt state)
 TEST_CASE("Remote: WLED partial state updates") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     // Set initial state
     fl::Json fullState = fl::Json::parse(R"({"on":true,"bri":100})");
@@ -545,7 +546,7 @@ TEST_CASE("Remote: WLED partial state updates") {
 
 // Test: Invalid values are handled gracefully
 TEST_CASE("Remote: WLED invalid values") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     // Set initial valid state
     fl::Json validState = fl::Json::parse(R"({"on":true,"bri":128})");
@@ -575,7 +576,7 @@ TEST_CASE("Remote: WLED invalid values") {
 
 // Test: State roundtrip (setWledState -> getWledState preserves values)
 TEST_CASE("Remote: WLED state roundtrip") {
-    fl::Remote remote;
+    fl::WLED remote;
 
     // Set state
     fl::Json stateIn = fl::Json::parse(R"({"on":false,"bri":64})");

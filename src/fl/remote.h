@@ -248,42 +248,6 @@ public:
     void clear();
 
     /**
-     * @brief Set WLED state from JSON object
-     * @param wledState JSON object containing "on" (bool) and/or "bri" (0-255) fields
-     *
-     * Extracts WLED control fields and updates internal state:
-     * - "on": boolean on/off state (optional, keeps existing value if missing)
-     * - "bri": brightness 0-255 (optional, keeps existing value if missing)
-     *
-     * Example:
-     *   fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
-     *   remote.setWledState(state);
-     */
-    void setWledState(const fl::Json& wledState);
-
-    /**
-     * @brief Get current WLED state as JSON object
-     * @return JSON object with "on" and "bri" fields
-     *
-     * Example:
-     *   fl::Json state = remote.getWledState();
-     *   // Returns: {"on":true,"bri":128}
-     */
-    fl::Json getWledState() const;
-
-    /**
-     * @brief Get WLED on/off state
-     * @return true if WLED is on, false if off
-     */
-    bool getOn() const { return mWledOn; }
-
-    /**
-     * @brief Get WLED brightness
-     * @return Brightness value 0-255
-     */
-    uint8_t getBrightness() const { return mWledBri; }
-
-    /**
      * @brief Print JSON to output with FASTLED_REMOTE_PREFIX (single-line format)
      * @param json JSON value to output
      *
@@ -301,7 +265,7 @@ public:
      */
     static void printJson(const fl::Json& json);
 
-private:
+protected:
     struct ScheduledCall {
         uint32_t mExecuteAt;        // millis() timestamp when to execute
         fl::string mFunctionName;   // Name of function to call
@@ -341,10 +305,6 @@ private:
     fl::HashMap<fl::string, CallbackWrapper> mCallbacks;
     fl::priority_queue_stable<ScheduledCall> mScheduled;  // Stable min-heap ordered by execution time (FIFO for equal times)
     fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on tick())
-
-    // WLED state (runtime-only, no persistence)
-    bool mWledOn = false;       // WLED on/off state
-    uint8_t mWledBri = 255;     // WLED brightness (0-255)
 };
 
 } // namespace fl
