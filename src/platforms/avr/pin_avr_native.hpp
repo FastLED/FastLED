@@ -240,11 +240,6 @@ static uint8_t analog_reference = DEFAULT;
 // GPIO Functions - Native AVR Implementation
 // ============================================================================
 
-// Forward declarations from fl/pin.h
-enum class PinMode;
-enum class PinValue;
-enum class AdcRange;
-
 inline void pinMode(int pin, PinMode mode) {
     uint8_t port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return;

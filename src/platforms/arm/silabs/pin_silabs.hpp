@@ -23,23 +23,23 @@
 namespace fl {
 namespace platform {
 
-inline void pinMode(int pin, fl::PinMode mode) {
+inline void pinMode(int pin, PinMode mode) {
     // Map fl::PinMode to Arduino PinMode
     // Arduino PinMode: INPUT=0, OUTPUT=1, INPUT_PULLUP=2
     // fl::PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
     ::pinMode(pin, static_cast<::PinMode>(static_cast<int>(mode)));
 }
 
-inline void digitalWrite(int pin, fl::PinValue val) {
+inline void digitalWrite(int pin, PinValue val) {
     // Map fl::PinValue to Arduino PinStatus
     // Arduino PinStatus: LOW=0, HIGH=1
     // fl::PinValue: Low=0, High=1
     ::digitalWrite(pin, static_cast<::PinStatus>(static_cast<int>(val)));
 }
 
-inline fl::PinValue digitalRead(int pin) {
+inline PinValue digitalRead(int pin) {
     int result = ::digitalRead(pin);
-    return result ? fl::PinValue::High : fl::PinValue::Low;
+    return result ? PinValue::High : PinValue::Low;
 }
 
 inline uint16_t analogRead(int pin) {
@@ -66,7 +66,7 @@ inline void setPwm16(int pin, uint16_t val) {
 #endif
 }
 
-inline void setAdcRange(fl::AdcRange range) {
+inline void setAdcRange(AdcRange range) {
     // Silicon Labs Arduino API uses analogReference(uint8_t mode)
     // Map fl::AdcRange to Arduino reference constants
     // Note: Silicon Labs may not support all ranges - platform-specific behavior

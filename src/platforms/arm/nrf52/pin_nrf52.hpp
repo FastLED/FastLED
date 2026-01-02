@@ -20,11 +20,6 @@
 namespace fl {
 namespace platform {
 
-// Forward declarations from fl/pin.h
-enum class PinMode;
-enum class PinValue;
-enum class AdcRange;
-
 inline void pinMode(int pin, PinMode mode) {
     ::pinMode(pin, static_cast<int>(mode));
 }

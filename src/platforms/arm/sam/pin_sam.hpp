@@ -26,6 +26,11 @@
 namespace fl {
 namespace platform {
 
+// Make enum types from fl namespace visible
+using ::fl::PinMode;
+using ::fl::PinValue;
+using ::fl::AdcRange;
+
 inline void pinMode(int pin, PinMode mode) {
     // Translate PinMode to Arduino constants
     // Input = 0, Output = 1, InputPullup = 2, InputPulldown = 3

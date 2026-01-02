@@ -18,8 +18,16 @@
 
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
-#include "soc/usb_serial_jtag_reg.h"
 #include "esp_system.h"
+
+// USB Serial JTAG registers - only available on ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
+// Original ESP32, ESP32-S2 do not have USB Serial JTAG hardware
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+    #include "soc/usb_serial_jtag_reg.h"
+    #define HAS_USB_SERIAL_JTAG 1
+#else
+    #define HAS_USB_SERIAL_JTAG 0
+#endif
 
 namespace fl {
 namespace detail {
@@ -81,7 +89,9 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
     // Print watchdog/panic message
     FL_DBG("\n[PANIC HANDLER] System panic detected - performing safe USB reset");
 
+#if HAS_USB_SERIAL_JTAG
     // Force USB disconnect to prevent phantom device on Windows
+    // This only applies to chips with native USB Serial JTAG (S3, C3, C6, H2)
     // Clear D+ pullup to signal USB disconnect
     CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLUP);
 
@@ -93,6 +103,11 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
     delay(150);
 
     FL_DBG("[PANIC HANDLER] ✓ USB disconnected - proceeding with reset");
+#else
+    // Original ESP32, ESP32-S2: No native USB Serial JTAG
+    // Uses external USB-to-UART chip (CP2102, CH340, etc.) which auto-resets
+    FL_DBG("[PANIC HANDLER] No USB Serial JTAG hardware - using default reset behavior");
+#endif
 }
 
 #endif // ESP32 (compiler builtin guard)

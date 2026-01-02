@@ -11,6 +11,8 @@
 ///
 /// Uses new fl/pin.h API with enum classes (PinMode, PinValue, AdcRange).
 
+#include "fl/pin.h"
+
 #ifndef ARDUINO
 #include "pin_samd_native.hpp"
 #endif

@@ -29,6 +29,7 @@
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || \
     defined(__SAMD51P20A__)
 
+#include "fl/pin.h"
 #include <sam.h>  // SAMD register definitions
 
 namespace fl {

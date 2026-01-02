@@ -37,11 +37,6 @@
 namespace fl {
 namespace platform {
 
-// Forward declarations from fl/pin.h
-enum class PinMode;
-enum class PinValue;
-enum class AdcRange;
-
 inline void pinMode(int pin, PinMode mode) {
     // Translate PinMode to Arduino constants (0=INPUT, 1=OUTPUT, 2=INPUT_PULLUP)
     // PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3

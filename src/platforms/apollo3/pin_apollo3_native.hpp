@@ -30,6 +30,7 @@ FL_EXTERN_C_END
 #include "fl/pin.h"
 
 namespace fl {
+namespace platform {
 
 // ============================================================================
 // Internal State for ADC and PWM
@@ -429,4 +430,5 @@ inline void setAdcRange(AdcRange range) {
     g_adc_state.reference = adc_ref;
 }
 
+}  // namespace platform
 }  // namespace fl

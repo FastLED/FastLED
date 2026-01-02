@@ -26,23 +26,23 @@
 namespace fl {
 namespace platform {
 
-inline void pinMode(int pin, PinMode mode) {
+inline void pinMode(int pin, fl::PinMode mode) {
     // Translate PinMode to Arduino constants
     // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
     // Arduino: INPUT=0, OUTPUT=1, INPUT_PULLUP=2
     // Teensy also supports INPUT_PULLDOWN (not standard Arduino)
     int arduino_mode;
     switch (mode) {
-        case PinMode::Input:
+        case fl::PinMode::Input:
             arduino_mode = INPUT;  // 0
             break;
-        case PinMode::Output:
+        case fl::PinMode::Output:
             arduino_mode = OUTPUT;  // 1
             break;
-        case PinMode::InputPullup:
+        case fl::PinMode::InputPullup:
             arduino_mode = INPUT_PULLUP;  // 2
             break;
-        case PinMode::InputPulldown:
+        case fl::PinMode::InputPulldown:
 #ifdef INPUT_PULLDOWN
             arduino_mode = INPUT_PULLDOWN;  // Teensy-specific
 #else
@@ -53,12 +53,12 @@ inline void pinMode(int pin, PinMode mode) {
     ::pinMode(pin, arduino_mode);
 }
 
-inline void digitalWrite(int pin, PinValue val) {
+inline void digitalWrite(int pin, fl::PinValue val) {
     ::digitalWrite(pin, static_cast<int>(val));  // PinValue::Low=0, High=1
 }
 
-inline PinValue digitalRead(int pin) {
-    return ::digitalRead(pin) ? PinValue::High : PinValue::Low;
+inline fl::PinValue digitalRead(int pin) {
+    return ::digitalRead(pin) ? fl::PinValue::High : fl::PinValue::Low;
 }
 
 inline uint16_t analogRead(int pin) {
@@ -77,7 +77,7 @@ inline void setPwm16(int pin, uint16_t val) {
     ::analogWrite(pin, val);
 }
 
-inline void setAdcRange(AdcRange range) {
+inline void setAdcRange(fl::AdcRange range) {
 #if defined(__IMXRT1062__) || defined(__IMXRT1052__)
     // Teensy 4.x: ADC range is fixed at 3.3V, analogReference() not supported
     // No-op: These processors have a fixed 3.3V reference
@@ -87,13 +87,13 @@ inline void setAdcRange(AdcRange range) {
     // Supports: DEFAULT (3.3V), INTERNAL (1.2V), EXTERNAL (AREF pin)
     int ref_mode;
     switch (range) {
-        case AdcRange::Default:
+        case fl::AdcRange::Default:
             ref_mode = DEFAULT;
             break;
-        case AdcRange::Range0_1V1:
+        case fl::AdcRange::Range0_1V1:
             ref_mode = INTERNAL;  // 1.2V internal reference on Teensy 3.x
             break;
-        case AdcRange::External:
+        case fl::AdcRange::External:
             ref_mode = EXTERNAL;  // External AREF pin
             break;
         default:

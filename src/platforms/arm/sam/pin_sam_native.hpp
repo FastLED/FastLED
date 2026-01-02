@@ -26,6 +26,11 @@
 namespace fl {
 namespace platform {
 
+// Make enum types from fl namespace visible
+using ::fl::PinMode;
+using ::fl::PinValue;
+using ::fl::AdcRange;
+
 // ============================================================================
 // GPIO Functions - Native SAM Implementation (STUBS)
 // ============================================================================
