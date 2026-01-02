@@ -832,7 +832,7 @@ FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
         for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
             uint8_t outputByte = 0;
 
-            #pragma GCC unroll 8
+            FL_UNROLL(8)
             for (size_t t = 0; t < ticksPerByte; t++) {
                 size_t pulse_idx = outputByteIdx * ticksPerByte + t;
                 if (pulse_idx >= pulsesPerByte)
@@ -841,7 +841,7 @@ FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
                 size_t bit_pos = pulse_idx / 8;
                 size_t pulse_bit = pulse_idx % 8;
 
-                #pragma GCC unroll 8
+                FL_UNROLL(8)
                 for (size_t lane = 0; lane < DATA_WIDTH; lane++) {
                     const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
                     uint8_t wave8_byte = laneWaveform[bit_pos];
@@ -862,7 +862,7 @@ FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
             size_t bit_pos = pulse_idx / 8;
             size_t pulse_bit = pulse_idx % 8;
 
-            #pragma GCC unroll 16
+            FL_UNROLL(16)
             for (size_t lane = 0; lane < 16; lane++) {
                 const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
                 uint8_t wave8_byte = laneWaveform[bit_pos];

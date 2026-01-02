@@ -213,6 +213,21 @@
 #define FL_LINK_WEAK __attribute__((weak))
 #endif
 
+// Loop unrolling hint
+// Usage: FL_UNROLL(8) for (int i = 0; i < n; i++) { ... }
+// Note: Some compilers (e.g., AVR-GCC) may not support this pragma and will
+// emit warnings. The macro expands to nothing on unsupported compilers.
+#if defined(__GNUC__) && !defined(__clang__)
+  // GCC supports #pragma GCC unroll N
+  #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(GCC unroll N))
+#elif defined(__clang__)
+  // Clang supports #pragma unroll N (or #pragma clang loop unroll_count(N))
+  #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(unroll N))
+#else
+  // Unsupported compiler: no-op
+  #define FL_UNROLL(N)
+#endif
+
 // Mark functions/variables as maybe unused (for compile-time test functions)
 #if defined(__GNUC__) || defined(__clang__)
   #define FL_MAYBE_UNUSED __attribute__((unused))
