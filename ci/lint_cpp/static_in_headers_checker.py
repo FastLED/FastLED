@@ -148,3 +148,21 @@ class StaticInHeaderChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # MUST return empty list
+
+
+def main() -> None:
+    """Run static in headers checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = StaticInHeaderChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found function-local static variables in headers",
+        extensions=[".h", ".hpp"],
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -67,3 +67,18 @@ class StdNamespaceChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # MUST return empty list
+
+
+def main() -> None:
+    """Run std:: namespace checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = StdNamespaceChecker()
+    run_checker_standalone(
+        checker, [str(PROJECT_ROOT / "src")], "Found std:: namespace usage"
+    )
+
+
+if __name__ == "__main__":
+    main()

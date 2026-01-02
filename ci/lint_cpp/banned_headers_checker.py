@@ -342,3 +342,23 @@ class BannedHeadersChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []
+
+
+def main() -> None:
+    """Run banned headers checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = BannedHeadersChecker(
+        banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True
+    )
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found banned headers",
+        extensions=[".cpp", ".h", ".hpp", ".ino"],
+    )
+
+
+if __name__ == "__main__":
+    main()

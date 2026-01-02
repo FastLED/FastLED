@@ -176,3 +176,21 @@ class GoogleMemberStyleChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # MUST return empty list
+
+
+def main() -> None:
+    """Run Google-style member variable checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = GoogleMemberStyleChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found Google-style member variables",
+        extensions=[".h", ".hpp", ".cpp"],
+    )
+
+
+if __name__ == "__main__":
+    main()

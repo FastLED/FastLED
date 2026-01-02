@@ -63,3 +63,20 @@ class SerialPrintfChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # We collect violations internally
+
+
+def main() -> None:
+    """Run Serial.printf checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+
+    checker = SerialPrintfChecker()
+    run_checker_standalone(
+        checker,
+        [str(EXAMPLES_ROOT)],
+        "Found Serial.printf usage in examples",
+        extensions=[".cpp", ".h", ".hpp", ".ino"],
+    )
+
+
+if __name__ == "__main__":
+    main()

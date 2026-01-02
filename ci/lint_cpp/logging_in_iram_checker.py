@@ -196,3 +196,21 @@ class LoggingInIramChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # MUST return empty list
+
+
+def main() -> None:
+    """Run logging in IRAM checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = LoggingInIramChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src" / "platforms"), str(PROJECT_ROOT / "src" / "fl")],
+        "Found logging macros in FL_IRAM functions",
+        extensions=[".cpp", ".h", ".hpp"],
+    )
+
+
+if __name__ == "__main__":
+    main()

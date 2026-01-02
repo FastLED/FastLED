@@ -188,3 +188,20 @@ class HeadersExistChecker(FileContentChecker):
                 candidates.append(header_path)
 
         return candidates
+
+
+def main() -> None:
+    """Run headers exist checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+
+    checker = HeadersExistChecker()
+    run_checker_standalone(
+        checker,
+        [str(TESTS_ROOT)],
+        "Found test files without corresponding headers",
+        extensions=[".cpp"],
+    )
+
+
+if __name__ == "__main__":
+    main()

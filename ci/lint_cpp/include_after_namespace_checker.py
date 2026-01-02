@@ -89,3 +89,21 @@ class IncludeAfterNamespaceChecker(FileContentChecker):
             self.violations[file_content.path] = violations
 
         return []  # We collect violations internally
+
+
+def main() -> None:
+    """Run include after namespace checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = IncludeAfterNamespaceChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found #include after namespace declarations",
+        extensions=[".cpp", ".h", ".hpp", ".cc", ".ino"],
+    )
+
+
+if __name__ == "__main__":
+    main()

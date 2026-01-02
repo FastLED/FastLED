@@ -180,3 +180,21 @@ class NumericLimitMacroChecker(FileContentChecker):
         }
 
         return type_map.get(macro_name, "fl::numeric_limits<T>::max/min()")
+
+
+def main() -> None:
+    """Run numeric limit macro checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = NumericLimitMacroChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found numeric limit macros",
+        extensions=[".cpp", ".h", ".hpp", ".ino"],
+    )
+
+
+if __name__ == "__main__":
+    main()

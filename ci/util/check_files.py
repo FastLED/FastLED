@@ -220,3 +220,68 @@ def collect_files_to_check(
                 files_to_check.append(file_path)
 
     return files_to_check
+
+
+def run_checker_standalone(
+    checker: FileContentChecker,
+    directories: list[str],
+    description: str,
+    extensions: list[str] | None = None,
+) -> None:
+    """Run a single checker standalone with standard output formatting.
+
+    Args:
+        checker: Checker instance to run
+        directories: List of directories to scan
+        description: Human-readable description of what's being checked
+        extensions: File extensions to check (default: [".cpp", ".h", ".hpp"])
+    """
+    import sys
+
+    # Collect files
+    files_to_check = collect_files_to_check(directories, extensions)
+
+    # Run checker
+    processor = MultiCheckerFileProcessor()
+    processor.process_files_with_checkers(files_to_check, [checker])
+
+    # Get violations (checkers store them in .violations attribute)
+    if not hasattr(checker, "violations"):
+        print(f"✅ {description}: No violations found.")
+        sys.exit(0)
+
+    violations = checker.violations
+
+    if violations:
+        total_violations = sum(len(v) for v in violations.values())
+        file_count = len(violations)
+
+        print(f"❌ {description} ({file_count} files, {total_violations} violations):")
+        print()
+
+        # Sort files by relative path
+        for file_path in sorted(violations.keys()):
+            rel_path = file_path.replace(str(PROJECT_ROOT), "").lstrip("\\/")
+            violation_data = violations[file_path]
+
+            print(f"{rel_path}:")
+
+            # Handle different violation formats
+            if isinstance(violation_data, list):
+                for item in violation_data:
+                    if isinstance(item, tuple) and len(item) >= 2:
+                        line_num, content = item[0], item[1]
+                        print(f"  Line {line_num}: {content}")
+                    else:
+                        print(f"  {item}")
+            elif isinstance(violation_data, str):
+                print(f"  {violation_data}")
+            else:
+                print(f"  {violation_data}")
+
+            print()
+
+        sys.exit(1)
+    else:
+        print(f"✅ {description}: No violations found.")
+        sys.exit(0)
