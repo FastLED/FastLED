@@ -11,7 +11,7 @@
 #include "fl/stl/sstream.h"
 
 
-#if FL_IS_TEENSY
+#if defined(FL_IS_TEENSY)
 #include "TeensyAudioInput.h"
 #else
 #include "ESP32AudioInput.h"
