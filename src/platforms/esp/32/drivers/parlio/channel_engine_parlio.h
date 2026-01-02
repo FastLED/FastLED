@@ -303,6 +303,127 @@ inline size_t calculateChunkSize(size_t data_width) {
 // Class Declaration
 //=============================================================================
 
+//=============================================================================
+// Phase 4: ISR Context - Cache-Aligned Singleton Structure
+//=============================================================================
+// All ISR-related state consolidated into single 64-byte aligned struct for:
+// - Improved cache line performance (single cache line access)
+// - Prevention of false sharing between ISR and main thread
+// - Clear separation between volatile (ISR-shared) and non-volatile fields
+//
+// Memory Synchronization Model:
+// - ISR writes to volatile fields (stream_complete, transmitting, current_led)
+// - Main thread reads volatile fields directly (compiler ensures fresh read)
+// - After detecting stream_complete==true, main thread executes memory barrier
+// - Memory barrier ensures all ISR writes visible before reading other fields
+// - Non-volatile fields (isr_count, etc.) read after barrier are guaranteed consistent
+struct alignas(64) ParlioIsrContext {
+    // === Volatile Fields (shared between ISR and main thread) ===
+    // These fields are written by ISR, read by main thread
+    // Marked volatile to prevent compiler optimizations that would cache values
+
+    volatile bool stream_complete;  ///< ISR sets true when transmission complete (ISR writes, main reads)
+    volatile bool transmitting;     ///< ISR updates during transmission lifecycle (ISR writes, main reads)
+    volatile size_t current_led;    ///< ISR updates LED position marker (ISR writes, main reads)
+
+    // Phase 0: Ring buffer pointers for streaming DMA
+    // ISR reads from read_ptr, CPU writes to write_ptr
+    // Communication protocol: ISR increments read_ptr after consuming buffer (signals CPU)
+    volatile size_t ring_read_ptr;  ///< ISR reads from this index (ISR writes, main reads)
+    volatile size_t ring_write_ptr; ///< CPU writes to this index (main writes, ISR reads)
+    volatile bool ring_error;       ///< Ring underflow/overflow error flag (ISR writes, main reads)
+
+    // === Non-Volatile Fields (main thread synchronization required) ===
+    // These fields are written by ISR but read by main thread ONLY after memory barrier
+    // NOT marked volatile - main thread uses explicit barrier after reading stream_complete
+
+    size_t total_leds;              ///< Total LEDs to transmit (main sets, ISR reads - no race)
+    size_t num_lanes;               ///< Number of parallel lanes (main sets, ISR reads - Phase 5: moved from ParlioState)
+    size_t ring_size;               ///< Number of buffers in ring (main sets, ISR reads - Phase 0)
+
+    // Diagnostic counters (ISR writes, main reads after barrier)
+    // Note: Using simple increment operations, synchronized via memory barrier
+    uint32_t isr_count;             ///< ISR callback invocation count
+    uint32_t bytes_transmitted;     ///< Total bytes transmitted this frame
+    uint32_t chunks_completed;      ///< Number of chunks completed this frame
+
+    // Phase 0: Buffer accounting for simplified ISR
+    uint32_t buffers_submitted;         ///< Total buffers submitted to hardware (main thread writes)
+    volatile uint32_t buffers_completed; ///< ISR increments, CPU polls (volatile required per LOOP.md line 34)
+    uint32_t buffers_total;             ///< Total buffers for entire transmission (main thread sets)
+
+    // ISR Debug Counters (Iteration 1: diagnose why ISR not submitting buffers)
+    volatile uint32_t isr_submit_attempted; ///< ISR attempted to submit buffer
+    volatile uint32_t isr_submit_success;   ///< ISR successfully submitted buffer
+    volatile uint32_t isr_submit_failed;    ///< ISR failed to submit buffer
+    volatile uint32_t isr_ring_empty;       ///< ISR found ring empty (read_ptr == write_ptr)
+    volatile uint32_t isr_all_buffers_done; ///< ISR detected all buffers completed
+
+    // Diagnostic fields (written by ISR, read by main thread after barrier)
+    bool transmission_active;       ///< Debug: Transmission currently active
+    uint64_t end_time_us;           ///< Debug: Transmission end timestamp (microseconds)
+
+    // Debug: DMA buffer output tracking (main thread writes, Validation.ino reads)
+    fl::deque<uint8_t> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
+
+    // Constructor: Initialize all fields to safe defaults
+    ParlioIsrContext()
+        : stream_complete(false)
+        , transmitting(false)
+        , current_led(0)
+        , ring_read_ptr(0)
+        , ring_write_ptr(0)
+        , ring_error(false)
+        , total_leds(0)
+        , num_lanes(0)
+        , ring_size(0)
+        , isr_count(0)
+        , bytes_transmitted(0)
+        , chunks_completed(0)
+        , buffers_submitted(0)
+        , buffers_completed(0)
+        , buffers_total(0)
+        , isr_submit_attempted(0)
+        , isr_submit_success(0)
+        , isr_submit_failed(0)
+        , isr_ring_empty(0)
+        , isr_all_buffers_done(0)
+        , transmission_active(false)
+        , end_time_us(0)
+    {}
+
+    // Singleton accessor for debug metrics
+    static ParlioIsrContext* getInstance() {
+        return s_instance;
+    }
+
+    // Singleton setter (called by ChannelEnginePARLIOImpl)
+    static void setInstance(ParlioIsrContext* instance) {
+        s_instance = instance;
+    }
+
+private:
+    static ParlioIsrContext* s_instance;
+};
+
+// Phase 0: Ring buffer configuration for streaming DMA
+// Testing with fewer, larger buffers to see if buffer size affects transmission
+//
+// CRITICAL: Buffer size formula (from README.md):
+//   buffer_size = (num_leds × 240 bits × data_width + 7) / 8 bytes
+//
+// UNIVERSAL CONSTANT: 30 bytes per LED (RGB) regardless of data_width
+//   - data_width multiplier represents LEDs transmitted in parallel, NOT overhead
+//   - 1-lane: 30 bytes → 1 LED
+//   - 8-lane: 240 bytes → 8 LEDs (30 bytes each)
+//   - 16-lane: 480 bytes → 16 LEDs (30 bytes each)
+//
+// Testing configuration: 8 larger buffers
+//   Each buffer: ~125 LEDs × 30 bytes/LED = ~3750 bytes (~3.7 KB)
+//   Total ring: 8 × 3750 bytes = ~30 KB
+constexpr size_t PARLIO_RING_BUFFER_COUNT = 8;
+
+
 /// @brief Internal PARLIO implementation with fixed data width
 ///
 /// This is the actual hardware driver implementation. It is used internally
