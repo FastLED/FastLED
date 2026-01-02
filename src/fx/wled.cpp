@@ -1,9 +1,10 @@
 #include "fx/wled.h"
+#include "FastLED.h"
+#include "fl/warn.h"
+#include "fl/dbg.h"
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/warn.h"
-#include "fl/dbg.h"
 #include "fl/stl/cstdlib.h"  // For strtol
 
 namespace fl {
@@ -893,10 +894,6 @@ const WLEDSegment* WLED::findSegmentById(uint8_t id) const {
 #endif // FASTLED_ENABLE_JSON
 
 // WLEDClient and FastLED adapter implementations (non-JSON, always available)
-
-#include "FastLED.h"
-#include "fl/warn.h"
-#include "fl/dbg.h"
 
 namespace fl {
 

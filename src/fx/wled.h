@@ -2,6 +2,9 @@
 
 #include "fl/remote.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/span.h"
+#include "fl/stl/memory.h"
+#include "fl/stl/shared_ptr.h"
 
 // WLED-specific Remote extension requires JSON support
 #if FASTLED_ENABLE_JSON
@@ -467,10 +470,6 @@ private:
 #endif // FASTLED_ENABLE_JSON
 
 // WLEDClient and FastLED adapter (non-JSON, always available)
-
-#include "fl/stl/span.h"
-#include "fl/stl/memory.h"
-#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 
