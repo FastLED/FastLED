@@ -183,10 +183,18 @@ void InternalFree(void* ptr) {
 void* DMAAlloc(fl::size size) {
     // MALLOC_CAP_DMA: DMA-capable memory (limited on ESP32)
     // MALLOC_CAP_INTERNAL: Must be in internal SRAM (not PSRAM) for most DMA
-    // MALLOC_CAP_8BIT: Ensure byte-accessible
-    void* ptr = heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    //
+    // CRITICAL: Use 64-byte aligned allocation for cache coherency
+    // ESP32-S3/C3/C6/H2 have data cache with 64-byte cache lines.
+    // Without alignment, esp_cache_msync() may not flush/invalidate correctly,
+    // causing DMA to read stale cached data.
+    //
+    // Round size up to 64-byte multiple for proper cache line alignment
+    fl::size aligned_size = ((size + 63) / 64) * 64;
+
+    void* ptr = heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     if (ptr) {
-        fl::memset(ptr, 0, size);  // Zero-initialize
+        fl::memset(ptr, 0, aligned_size);  // Zero-initialize full aligned buffer
     }
     return ptr;
 }

@@ -33,15 +33,61 @@
 #include "fl/stl/unique_ptr.h"
 #include "network_detector.h"
 #include "rmt_memory_manager.h"
+#include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "driver/rmt_tx.h"
+#include "esp_cache.h" // For esp_cache_msync (DMA cache coherency)
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h" // For pdMS_TO_TICKS
 FL_EXTERN_C_END
 
 namespace fl {
+
+//=============================================================================
+// Cache Synchronization for DMA Buffers
+//=============================================================================
+
+/// @brief Cache sync for RMT DMA buffers (non-ISR context)
+/// @param buffer_ptr Pointer to buffer to sync
+/// @param buffer_size Size of buffer in bytes
+/// @return esp_err_t result from esp_cache_msync (ESP_OK or error code)
+///
+/// CRITICAL: This function ensures CPU writes to the LED buffer are flushed
+/// to SRAM before RMT DMA reads the data. Without this, DMA may read stale
+/// cache data, causing LED color corruption.
+///
+/// Platform behavior:
+/// - ESP32-S3/C3/C6/H2: Have data cache, require explicit synchronization
+/// - ESP32/S2: No data cache, cache sync is a no-op
+/// - MALLOC_CAP_DMA buffers: May return ESP_ERR_INVALID_ARG on some platforms
+///   but memory barriers still ensure ordering
+static esp_err_t rmt_cache_sync(void* buffer_ptr, size_t buffer_size) {
+    if (!buffer_ptr || buffer_size == 0) {
+        return ESP_OK;
+    }
+
+    // Memory barrier: Ensure all preceding writes complete before cache sync
+    FL_MEMORY_BARRIER;
+
+    // Cache sync: Writeback cache to memory (Cache-to-Memory)
+    esp_err_t err = esp_cache_msync(
+        buffer_ptr,
+        buffer_size,
+        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+
+    // Memory barrier: Ensure cache sync completes before DMA submission
+    FL_MEMORY_BARRIER;
+
+    // Log failures for debugging (non-critical on some platforms)
+    if (err != ESP_OK) {
+        FL_LOG_RMT("RMT cache sync returned error: " << esp_err_to_name(err)
+                   << " (may be expected on this platform, continuing)");
+    }
+
+    return err;
+}
 
 //=============================================================================
 // Rmt5EncoderImpl - RMT5 encoder implementation (inlined from
@@ -1103,6 +1149,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 releaseChannel(channel);
                 ++i;
                 continue;
+            }
+
+            // CRITICAL: Synchronize cache before DMA transmission
+            // This ensures CPU writes to the LED buffer are flushed to SRAM
+            // before RMT DMA reads the data. Without this, DMA may read stale
+            // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
+            // NOTE: Only call esp_cache_msync() for DMA buffers.
+            // Non-DMA buffers use internal SRAM (no cache coherency issues).
+            if (channel->useDMA) {
+                rmt_cache_sync(pooledBuffer.data(), pooledBuffer.size());
             }
 
             rmt_transmit_config_t tx_config = {};
