@@ -2,7 +2,7 @@
   FastLED — AVR ATmega ISR Implementation
   ----------------------------------------
   ATmega-specific implementation of the cross-platform ISR API.
-  Supports ATmega328P (Uno), ATmega2560 (Mega), and other ATmega variants.
+  Supports classic ATmega chips with Timer1 hardware.
 
   Hardware Details:
   - Uses Timer1 (16-bit timer) for precise timing
@@ -13,8 +13,9 @@
   - External interrupts not yet implemented
 
   Platform Support:
-  - ATmega chips: Full Timer1 support (16-bit timer)
-  - This implementation is NOT for ATtiny chips (use null implementation)
+  - Classic ATmega chips: ATmega328P (Uno), ATmega2560 (Mega), ATmega32U4 (Leonardo), etc.
+  - NOT for megaAVR 0-series/1-series (e.g., ATmega4809/Nano Every - different timer architecture)
+  - NOT for ATtiny chips (use null implementation)
 
   License: MIT (FastLED)
 */

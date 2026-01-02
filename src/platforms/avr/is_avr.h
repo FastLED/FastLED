@@ -15,8 +15,9 @@
 #endif
 
 // ============================================================================
-// FL_IS_AVR_ATMEGA - ATmega family detection
-// Includes all ATmega variants: ATmega328P, ATmega2560, ATmega32U4, etc.
+// FL_IS_AVR_ATMEGA - ATmega family detection (classic Timer1-based chips)
+// Includes all classic ATmega variants: ATmega328P, ATmega2560, ATmega32U4, etc.
+// EXCLUDES megaAVR 0-series/1-series (e.g., ATmega4809) - they use TCB timers
 // ============================================================================
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || \
     defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || \
@@ -28,7 +29,6 @@
     defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__) || \
     defined(__AVR_ATmega32__) || defined(__AVR_ATmega16__) || \
     defined(__AVR_ATmega128__) || defined(__AVR_ATmega64__) || \
-    defined(__AVR_ATmega4809__) || \
     defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || \
     defined(__AVR_ATmega8U2__) || \
     defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB646__) || \
@@ -46,6 +46,19 @@
     defined(__AVR_ATmega168__) || defined(__AVR_ATmega8__) || \
     defined(__AVR_ATmega8A__)
 #define FL_IS_AVR_ATMEGA_328P
+#endif
+
+// ============================================================================
+// FL_IS_AVR_MEGAAVR - megaAVR 0-series/1-series detection
+// These are modern AVR chips with different peripherals (TCB timers, no Timer1)
+// Includes: ATmega4809 (Nano Every), ATmega4808, ATmega3209, etc.
+// These chips are NOT compatible with classic ATmega Timer1-based code
+// ============================================================================
+#if defined(__AVR_ATmega4809__) || defined(__AVR_ATmega4808__) || \
+    defined(__AVR_ATmega3209__) || defined(__AVR_ATmega3208__) || \
+    defined(__AVR_ATmega1609__) || defined(__AVR_ATmega1608__) || \
+    defined(__AVR_ATmega809__) || defined(__AVR_ATmega808__)
+#define FL_IS_AVR_MEGAAVR
 #endif
 
 // ============================================================================
