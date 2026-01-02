@@ -96,6 +96,7 @@ from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.pio_runner import create_pio_process
 from ci.util.port_utils import ComportResult, auto_detect_upload_port, kill_port_users
 from ci.util.serial_monitor import (
     ExpectHandler,
@@ -181,6 +182,9 @@ def run_compile(
 ) -> bool:
     """Compile the PlatformIO project.
 
+    On Windows Git Bash: Runs via cmd.exe with clean environment (no Git Bash indicators)
+    On other platforms: Runs directly with UTF-8 environment
+
     Args:
         build_dir: Project directory containing platformio.ini
         environment: PlatformIO environment to build (None = default)
@@ -200,12 +204,12 @@ def run_compile(
     print("=" * 60)
 
     formatter = TimestampFormatter()
-    proc = RunningProcess(
+    # Use create_pio_process() for Git Bash compatibility
+    proc = create_pio_process(
         cmd,
         cwd=build_dir,
-        auto_run=True,
         output_formatter=formatter,
-        env=get_utf8_env(),
+        auto_run=True,
     )
 
     try:
@@ -243,6 +247,9 @@ def run_upload(
     PlatformIO's incremental build system only rebuilds if source files changed
     since the last compilation, making this fast when nothing changed.
 
+    On Windows Git Bash: Runs via cmd.exe with clean environment (no Git Bash indicators)
+    On other platforms: Runs directly with UTF-8 environment
+
     Args:
         build_dir: Project directory containing platformio.ini
         environment: PlatformIO environment to upload (None = default)
@@ -272,12 +279,12 @@ def run_upload(
     print("=" * 60)
 
     formatter = TimestampFormatter()
-    proc = RunningProcess(
+    # Use create_pio_process() for Git Bash compatibility
+    proc = create_pio_process(
         cmd,
         cwd=build_dir,
-        auto_run=True,
         output_formatter=formatter,
-        env=get_utf8_env(),
+        auto_run=True,
     )
 
     try:

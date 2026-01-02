@@ -9,10 +9,38 @@ def get_utf8_env() -> dict[str, str]:
 
     PlatformIO outputs Unicode characters (checkmarks, etc.) that fail on Windows
     when using the default CP1252 console encoding. This ensures UTF-8 is used.
+
+    Note: This function inherits Git Bash environment variables. For PlatformIO
+    operations that must run via CMD (e.g., ESP32-C6 compilation), use
+    get_pio_execution_env() instead.
     """
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
     return env
+
+
+def get_pio_execution_env() -> dict[str, str]:
+    """Get environment suitable for PlatformIO execution.
+
+    On Windows Git Bash: Returns clean environment without Git Bash indicators
+    (strips MSYSTEM, TERM, SHELL, etc.) to prevent ESP-IDF toolchain errors.
+
+    On other platforms: Returns UTF-8 environment (same as get_utf8_env()).
+
+    This function solves the ESP-IDF v5.5.x incompatibility with Git Bash:
+        "ERROR: MSys/Mingw is not supported. Please follow the getting started guide"
+
+    Returns:
+        Environment dict suitable for running PlatformIO commands
+    """
+    from ci.util.windows_cmd_runner import get_clean_windows_env, should_use_cmd_runner
+
+    if should_use_cmd_runner():
+        # Windows Git Bash: Use clean environment without Git Bash indicators
+        return get_clean_windows_env()
+    else:
+        # Linux/Mac or native Windows shell: Use UTF-8 environment
+        return get_utf8_env()
 
 
 def create_building_banner(example: str) -> str:
