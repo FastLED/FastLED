@@ -37,6 +37,7 @@ from typing import Any
 import psutil
 from daemoniker import Daemonizer
 
+from ci.util.build_process_tracker import BuildProcessTracker
 from ci.util.pio_package_messages import DaemonState, DaemonStatus, PackageRequest
 
 
@@ -47,6 +48,8 @@ PID_FILE = DAEMON_DIR / f"{DAEMON_NAME}.pid"
 STATUS_FILE = DAEMON_DIR / "package_status.json"
 REQUEST_FILE = DAEMON_DIR / "package_request.json"
 LOG_FILE = DAEMON_DIR / "daemon.log"
+BUILD_REGISTRY_FILE = DAEMON_DIR / "build_processes.json"
+ORPHAN_CHECK_INTERVAL = 5  # Check for orphaned processes every 5 seconds
 IDLE_TIMEOUT = 43200  # 12 hours
 
 # Global state to track installation status and daemon info
@@ -769,10 +772,14 @@ def run_daemon_loop() -> None:
     _daemon_pid = os.getpid()
     _daemon_started_at = time.time()
 
+    # Initialize build process tracker
+    build_tracker = BuildProcessTracker(BUILD_REGISTRY_FILE)
+
     logging.info(f"Daemon started with PID {_daemon_pid}")
     update_status(DaemonState.IDLE, "Daemon ready")
 
     last_activity = time.time()
+    last_orphan_check = time.time()
 
     while True:
         try:
@@ -784,6 +791,18 @@ def run_daemon_loop() -> None:
             if time.time() - last_activity > IDLE_TIMEOUT:
                 logging.info(f"Idle timeout reached ({IDLE_TIMEOUT}s), shutting down")
                 cleanup_and_exit()
+
+            # Periodically check for and cleanup orphaned build processes
+            if time.time() - last_orphan_check >= ORPHAN_CHECK_INTERVAL:
+                try:
+                    orphaned_clients = build_tracker.cleanup_orphaned_processes()
+                    if orphaned_clients:
+                        logging.info(
+                            f"Cleaned up orphaned processes for {len(orphaned_clients)} dead clients: {orphaned_clients}"
+                        )
+                    last_orphan_check = time.time()
+                except Exception as e:
+                    logging.error(f"Error during orphan cleanup: {e}", exc_info=True)
 
             # Check for new requests
             request = read_request_file()

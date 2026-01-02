@@ -9,12 +9,17 @@ For background on the Git Bash compatibility issue, see:
     ci/util/windows_cmd_runner.py
 """
 
+import atexit
 import subprocess
 from pathlib import Path
 
 from running_process import RunningProcess
 
 from ci.compiler.build_utils import get_pio_execution_env
+from ci.util.build_process_client import (
+    register_build_process,
+    unregister_build_process,
+)
 from ci.util.windows_cmd_runner import format_cmd_for_shell, should_use_cmd_runner
 
 
@@ -43,7 +48,7 @@ def create_pio_process(
     if should_use_cmd_runner():
         # Windows Git Bash: Convert to shell command for cmd.exe
         cmd_str = format_cmd_for_shell(cmd)
-        return RunningProcess(
+        proc = RunningProcess(
             cmd_str,
             cwd=cwd,
             auto_run=auto_run,
@@ -53,13 +58,24 @@ def create_pio_process(
         )
     else:
         # Linux/Mac or native Windows shell: Direct execution
-        return RunningProcess(
+        proc = RunningProcess(
             cmd,
             cwd=cwd,
             auto_run=auto_run,
             output_formatter=output_formatter,
             env=env,
         )
+
+    # Register process for orphan cleanup by daemon
+    if auto_run and hasattr(proc, "pid") and proc.pid:
+        register_build_process(
+            root_pid=proc.pid,
+            project_dir=str(cwd),
+        )
+        # Unregister on normal exit
+        atexit.register(unregister_build_process)
+
+    return proc
 
 
 def run_pio_command(
