@@ -600,4 +600,475 @@ TEST_CASE("Remote: WLED state roundtrip") {
     REQUIRE_EQ(remote.getBrightness(), 64);
 }
 
+// Test: WLED transition field
+TEST_CASE("Remote: WLED transition field") {
+    fl::WLED remote;
+
+    // Default transition should be 7 (700ms)
+    REQUIRE_EQ(remote.getTransition(), 7);
+
+    // Set transition to 0 (instant)
+    fl::Json state = fl::Json::parse(R"({"transition":0})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getTransition(), 0);
+
+    // Set transition to max value (65535)
+    state = fl::Json::parse(R"({"transition":65535})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getTransition(), 65535);
+
+    // Test clamping: negative value
+    state = fl::Json::parse(R"({"transition":-100})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getTransition(), 0);  // Clamped to 0
+
+    // Test clamping: too high value
+    state = fl::Json::parse(R"({"transition":70000})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getTransition(), 65535);  // Clamped to 65535
+
+    // Test invalid type (should keep existing value)
+    uint16_t currentTrans = remote.getTransition();
+    state = fl::Json::parse(R"({"transition":"invalid"})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getTransition(), currentTrans);  // Unchanged
+}
+
+// Test: WLED preset field (ps)
+TEST_CASE("Remote: WLED preset field") {
+    fl::WLED remote;
+
+    // Default preset should be -1 (none)
+    REQUIRE_EQ(remote.getPreset(), -1);
+
+    // Set preset to 0
+    fl::Json state = fl::Json::parse(R"({"ps":0})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), 0);
+
+    // Set preset to max value (250)
+    state = fl::Json::parse(R"({"ps":250})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), 250);
+
+    // Set preset back to none
+    state = fl::Json::parse(R"({"ps":-1})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), -1);
+
+    // Test clamping: below -1
+    state = fl::Json::parse(R"({"ps":-100})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), -1);  // Clamped to -1
+
+    // Test clamping: above 250
+    state = fl::Json::parse(R"({"ps":500})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), 250);  // Clamped to 250
+
+    // Test invalid type (should keep existing value)
+    int16_t currentPreset = remote.getPreset();
+    state = fl::Json::parse(R"({"ps":"invalid"})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPreset(), currentPreset);  // Unchanged
+}
+
+// Test: WLED playlist field (pl)
+TEST_CASE("Remote: WLED playlist field") {
+    fl::WLED remote;
+
+    // Default playlist should be -1 (none)
+    REQUIRE_EQ(remote.getPlaylist(), -1);
+
+    // Set playlist to 5
+    fl::Json state = fl::Json::parse(R"({"pl":5})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), 5);
+
+    // Set playlist to max value (250)
+    state = fl::Json::parse(R"({"pl":250})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), 250);
+
+    // Set playlist back to none
+    state = fl::Json::parse(R"({"pl":-1})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), -1);
+
+    // Test clamping: below -1
+    state = fl::Json::parse(R"({"pl":-50})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), -1);  // Clamped to -1
+
+    // Test clamping: above 250
+    state = fl::Json::parse(R"({"pl":300})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), 250);  // Clamped to 250
+
+    // Test invalid type (should keep existing value)
+    int16_t currentPlaylist = remote.getPlaylist();
+    state = fl::Json::parse(R"({"pl":"invalid"})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getPlaylist(), currentPlaylist);  // Unchanged
+}
+
+// Test: WLED live override field (lor)
+TEST_CASE("Remote: WLED live override field") {
+    fl::WLED remote;
+
+    // Default live override should be 0 (off)
+    REQUIRE_EQ(remote.getLiveOverride(), 0);
+
+    // Set to override (1)
+    fl::Json state = fl::Json::parse(R"({"lor":1})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), 1);
+
+    // Set to until reboot (2)
+    state = fl::Json::parse(R"({"lor":2})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), 2);
+
+    // Set back to off (0)
+    state = fl::Json::parse(R"({"lor":0})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), 0);
+
+    // Test clamping: negative value
+    state = fl::Json::parse(R"({"lor":-5})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), 0);  // Clamped to 0
+
+    // Test clamping: above 2
+    state = fl::Json::parse(R"({"lor":10})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), 2);  // Clamped to 2
+
+    // Test invalid type (should keep existing value)
+    uint8_t currentLor = remote.getLiveOverride();
+    state = fl::Json::parse(R"({"lor":"invalid"})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getLiveOverride(), currentLor);  // Unchanged
+}
+
+// Test: WLED main segment field (mainseg)
+TEST_CASE("Remote: WLED main segment field") {
+    fl::WLED remote;
+
+    // Default main segment should be 0
+    REQUIRE_EQ(remote.getMainSegment(), 0);
+
+    // Set to segment 5
+    fl::Json state = fl::Json::parse(R"({"mainseg":5})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getMainSegment(), 5);
+
+    // Set to max value (255)
+    state = fl::Json::parse(R"({"mainseg":255})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getMainSegment(), 255);
+
+    // Test clamping: negative value
+    state = fl::Json::parse(R"({"mainseg":-10})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getMainSegment(), 0);  // Clamped to 0
+
+    // Test clamping: above 255
+    state = fl::Json::parse(R"({"mainseg":500})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getMainSegment(), 255);  // Clamped to 255
+
+    // Test invalid type (should keep existing value)
+    uint8_t currentMainseg = remote.getMainSegment();
+    state = fl::Json::parse(R"({"mainseg":"invalid"})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getMainSegment(), currentMainseg);  // Unchanged
+}
+
+// Test: WLED complete state with all fields
+TEST_CASE("Remote: WLED complete state with all fields") {
+    fl::WLED remote;
+
+    // Set all fields at once
+    fl::Json fullState = fl::Json::parse(R"({
+        "on": true,
+        "bri": 180,
+        "transition": 15,
+        "ps": 42,
+        "pl": 10,
+        "lor": 1,
+        "mainseg": 3
+    })");
+    remote.setState(fullState);
+
+    // Verify all fields
+    REQUIRE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 180);
+    REQUIRE_EQ(remote.getTransition(), 15);
+    REQUIRE_EQ(remote.getPreset(), 42);
+    REQUIRE_EQ(remote.getPlaylist(), 10);
+    REQUIRE_EQ(remote.getLiveOverride(), 1);
+    REQUIRE_EQ(remote.getMainSegment(), 3);
+
+    // Get state and verify roundtrip
+    fl::Json retrievedState = remote.getState();
+    REQUIRE(retrievedState.contains("on"));
+    REQUIRE(retrievedState.contains("bri"));
+    REQUIRE(retrievedState.contains("transition"));
+    REQUIRE(retrievedState.contains("ps"));
+    REQUIRE(retrievedState.contains("pl"));
+    REQUIRE(retrievedState.contains("lor"));
+    REQUIRE(retrievedState.contains("mainseg"));
+
+    // Verify values in retrieved state
+    REQUIRE((retrievedState["on"] | false) == true);
+    REQUIRE_EQ(retrievedState["bri"] | 0, 180);
+    REQUIRE_EQ(retrievedState["transition"] | 0, 15);
+    REQUIRE_EQ(retrievedState["ps"] | 0, 42);
+    REQUIRE_EQ(retrievedState["pl"] | 0, 10);
+    REQUIRE_EQ(retrievedState["lor"] | 0, 1);
+    REQUIRE_EQ(retrievedState["mainseg"] | 0, 3);
+}
+
+// Test: WLED partial updates preserve all fields
+TEST_CASE("Remote: WLED partial updates preserve all fields") {
+    fl::WLED remote;
+
+    // Set initial complete state
+    fl::Json initialState = fl::Json::parse(R"({
+        "on": true,
+        "bri": 200,
+        "transition": 10,
+        "ps": 5,
+        "pl": 2,
+        "lor": 1,
+        "mainseg": 1
+    })");
+    remote.setState(initialState);
+
+    // Update only transition
+    fl::Json partialUpdate = fl::Json::parse(R"({"transition":20})");
+    remote.setState(partialUpdate);
+
+    // Verify only transition changed, others preserved
+    REQUIRE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 200);
+    REQUIRE_EQ(remote.getTransition(), 20);  // Changed
+    REQUIRE_EQ(remote.getPreset(), 5);
+    REQUIRE_EQ(remote.getPlaylist(), 2);
+    REQUIRE_EQ(remote.getLiveOverride(), 1);
+    REQUIRE_EQ(remote.getMainSegment(), 1);
+
+    // Update only preset
+    partialUpdate = fl::Json::parse(R"({"ps":50})");
+    remote.setState(partialUpdate);
+
+    // Verify only preset changed
+    REQUIRE_EQ(remote.getTransition(), 20);  // Still 20 from previous
+    REQUIRE_EQ(remote.getPreset(), 50);  // Changed
+    REQUIRE_EQ(remote.getPlaylist(), 2);  // Still 2
+
+    // Update multiple fields
+    partialUpdate = fl::Json::parse(R"({"on":false,"bri":50,"lor":2})");
+    remote.setState(partialUpdate);
+
+    // Verify specified fields changed, others preserved
+    REQUIRE_FALSE(remote.getOn());  // Changed
+    REQUIRE_EQ(remote.getBrightness(), 50);  // Changed
+    REQUIRE_EQ(remote.getTransition(), 20);  // Preserved
+    REQUIRE_EQ(remote.getPreset(), 50);  // Preserved
+    REQUIRE_EQ(remote.getPlaylist(), 2);  // Preserved
+    REQUIRE_EQ(remote.getLiveOverride(), 2);  // Changed
+    REQUIRE_EQ(remote.getMainSegment(), 1);  // Preserved
+}
+
+// Test: WLED nightlight object parsing
+TEST_CASE("Remote: WLED nightlight object") {
+    fl::WLED remote;
+
+    // Default nightlight state
+    REQUIRE_FALSE(remote.getNightlightOn());
+    REQUIRE_EQ(remote.getNightlightDuration(), 60);
+    REQUIRE_EQ(remote.getNightlightMode(), 1);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);
+
+    // Set nightlight with all fields
+    fl::Json state = fl::Json::parse(R"({"nl":{"on":true,"dur":30,"mode":2,"tbri":50}})");
+    remote.setState(state);
+
+    REQUIRE(remote.getNightlightOn());
+    REQUIRE_EQ(remote.getNightlightDuration(), 30);
+    REQUIRE_EQ(remote.getNightlightMode(), 2);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 50);
+}
+
+// Test: WLED nightlight partial updates
+TEST_CASE("Remote: WLED nightlight partial updates") {
+    fl::WLED remote;
+
+    // Set initial nightlight state
+    fl::Json state = fl::Json::parse(R"({"nl":{"on":true,"dur":45,"mode":1,"tbri":100}})");
+    remote.setState(state);
+
+    // Update only duration
+    state = fl::Json::parse(R"({"nl":{"dur":10}})");
+    remote.setState(state);
+
+    REQUIRE(remote.getNightlightOn());  // Preserved
+    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Changed
+    REQUIRE_EQ(remote.getNightlightMode(), 1);  // Preserved
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 100);  // Preserved
+
+    // Update only mode
+    state = fl::Json::parse(R"({"nl":{"mode":3}})");
+    remote.setState(state);
+
+    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
+    REQUIRE_EQ(remote.getNightlightMode(), 3);  // Changed
+
+    // Turn off nightlight
+    state = fl::Json::parse(R"({"nl":{"on":false}})");
+    remote.setState(state);
+
+    REQUIRE_FALSE(remote.getNightlightOn());  // Changed
+    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
+}
+
+// Test: WLED nightlight field clamping
+TEST_CASE("Remote: WLED nightlight field clamping") {
+    fl::WLED remote;
+
+    // Test dur clamping: below 1
+    fl::Json state = fl::Json::parse(R"({"nl":{"dur":0}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightDuration(), 1);  // Clamped to 1
+
+    // Test dur clamping: above 255
+    state = fl::Json::parse(R"({"nl":{"dur":300}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightDuration(), 255);  // Clamped to 255
+
+    // Test mode clamping: negative
+    state = fl::Json::parse(R"({"nl":{"mode":-1}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightMode(), 0);  // Clamped to 0
+
+    // Test mode clamping: above 3
+    state = fl::Json::parse(R"({"nl":{"mode":10}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightMode(), 3);  // Clamped to 3
+
+    // Test tbri clamping: negative
+    state = fl::Json::parse(R"({"nl":{"tbri":-50}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);  // Clamped to 0
+
+    // Test tbri clamping: above 255
+    state = fl::Json::parse(R"({"nl":{"tbri":500}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 255);  // Clamped to 255
+}
+
+// Test: WLED nightlight invalid types
+TEST_CASE("Remote: WLED nightlight invalid types") {
+    fl::WLED remote;
+
+    // Set valid initial state
+    fl::Json state = fl::Json::parse(R"({"nl":{"on":true,"dur":20,"mode":2,"tbri":128}})");
+    remote.setState(state);
+
+    // Test invalid type for dur (should keep existing value)
+    uint8_t currentDur = remote.getNightlightDuration();
+    state = fl::Json::parse(R"({"nl":{"dur":"invalid"}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightDuration(), currentDur);  // Unchanged
+
+    // Test invalid type for mode (should keep existing value)
+    uint8_t currentMode = remote.getNightlightMode();
+    state = fl::Json::parse(R"({"nl":{"mode":"invalid"}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightMode(), currentMode);  // Unchanged
+
+    // Test invalid type for tbri (should keep existing value)
+    uint8_t currentTbri = remote.getNightlightTargetBrightness();
+    state = fl::Json::parse(R"({"nl":{"tbri":"invalid"}})");
+    remote.setState(state);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), currentTbri);  // Unchanged
+
+    // Test invalid type for nl object (should warn, state unchanged)
+    state = fl::Json::parse(R"({"nl":"invalid"})");
+    remote.setState(state);
+    REQUIRE(remote.getNightlightOn());  // State should remain unchanged
+    REQUIRE_EQ(remote.getNightlightDuration(), 20);
+}
+
+// Test: WLED nightlight in getState
+TEST_CASE("Remote: WLED nightlight in getState") {
+    fl::WLED remote;
+
+    // Set nightlight state
+    fl::Json inputState = fl::Json::parse(R"({"nl":{"on":true,"dur":15,"mode":3,"tbri":200}})");
+    remote.setState(inputState);
+
+    // Get state and verify nightlight is present
+    fl::Json outputState = remote.getState();
+    REQUIRE(outputState.contains("nl"));
+    REQUIRE(outputState["nl"].is_object());
+
+    const fl::Json& nl = outputState["nl"];
+    REQUIRE(nl.contains("on"));
+    REQUIRE(nl.contains("dur"));
+    REQUIRE(nl.contains("mode"));
+    REQUIRE(nl.contains("tbri"));
+
+    // Verify values
+    REQUIRE((nl["on"] | false) == true);
+    REQUIRE_EQ(nl["dur"] | 0, 15);
+    REQUIRE_EQ(nl["mode"] | 0, 3);
+    REQUIRE_EQ(nl["tbri"] | 0, 200);
+}
+
+// Test: WLED nightlight roundtrip
+TEST_CASE("Remote: WLED nightlight roundtrip") {
+    fl::WLED remote;
+
+    // Set complex state with nightlight
+    fl::Json inputState = fl::Json::parse(R"({
+        "on": true,
+        "bri": 150,
+        "nl": {
+            "on": true,
+            "dur": 25,
+            "mode": 2,
+            "tbri": 75
+        }
+    })");
+    remote.setState(inputState);
+
+    // Get state
+    fl::Json outputState = remote.getState();
+
+    // Verify main state
+    REQUIRE((outputState["on"] | false) == true);
+    REQUIRE_EQ(outputState["bri"] | 0, 150);
+
+    // Verify nightlight
+    const fl::Json& nl = outputState["nl"];
+    REQUIRE((nl["on"] | false) == true);
+    REQUIRE_EQ(nl["dur"] | 0, 25);
+    REQUIRE_EQ(nl["mode"] | 0, 2);
+    REQUIRE_EQ(nl["tbri"] | 0, 75);
+
+    // Set state again from output
+    remote.setState(outputState);
+
+    // Verify everything is still correct
+    REQUIRE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 150);
+    REQUIRE(remote.getNightlightOn());
+    REQUIRE_EQ(remote.getNightlightDuration(), 25);
+    REQUIRE_EQ(remote.getNightlightMode(), 2);
+    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 75);
+}
+
 #endif // FASTLED_ENABLE_JSON
