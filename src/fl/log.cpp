@@ -6,6 +6,7 @@
 #include "fl/stl/cstdio.h"
 #include "fl/isr.h"
 #include "fl/math_macros.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 
@@ -190,88 +191,76 @@ bool AsyncLogger::isBackgroundFlushEnabled() const {
 }
 
 // ============================================================================
-// Global async logger instances (separate ISR and main thread queues)
+// Global async logger registry (lazy instantiation with fl::vector_fixed)
 // ============================================================================
 // NOTE: SPSC queue design requires separate queues for ISR vs main thread
 //       to avoid race conditions when both contexts call push() concurrently
 
 namespace detail {
-    // PARLIO loggers (ISR + main)
-    AsyncLogger& parlio_async_logger_isr() {
-        static AsyncLogger logger;
-        return logger;
-    }
+    /// @brief Registry for async loggers with lazy instantiation
+    /// Uses fl::vector_fixed<AsyncLogger*, 16> to hold up to 16 logger categories
+    /// Each pointer is null until first access, enabling memory-efficient growth
+    class AsyncLoggerRegistry {
+    public:
+        static constexpr fl::size MAX_LOGGERS = 16;
 
-    AsyncLogger& parlio_async_logger_main() {
-        static AsyncLogger logger;
-        return logger;
-    }
+        AsyncLoggerRegistry() {
+            // Initialize all slots to nullptr
+            for (fl::size i = 0; i < MAX_LOGGERS; ++i) {
+                mLoggers.push_back(nullptr);
+            }
+        }
 
-    // RMT loggers (ISR + main)
-    AsyncLogger& rmt_async_logger_isr() {
-        static AsyncLogger logger;
-        return logger;
-    }
+        ~AsyncLoggerRegistry() {
+            // Clean up all allocated loggers
+            for (fl::size i = 0; i < mLoggers.size(); ++i) {
+                delete mLoggers[i];
+            }
+        }
 
-    AsyncLogger& rmt_async_logger_main() {
-        static AsyncLogger logger;
-        return logger;
-    }
+        /// @brief Get logger for given category, creating it lazily if needed
+        /// @param category Logger category index (must be < MAX_LOGGERS)
+        /// @return Reference to AsyncLogger instance
+        AsyncLogger& get(fl::size category) {
+            // Bounds check
+            if (category >= MAX_LOGGERS) {
+                // Fallback to slot 0 to avoid nullptr deref (should never happen)
+                category = 0;
+            }
 
-    // SPI loggers (ISR + main)
-    AsyncLogger& spi_async_logger_isr() {
-        static AsyncLogger logger;
-        return logger;
-    }
+            // Lazy instantiation: create logger on first access
+            if (mLoggers[category] == nullptr) {
+                mLoggers[category] = new AsyncLogger();
+            }
 
-    AsyncLogger& spi_async_logger_main() {
-        static AsyncLogger logger;
-        return logger;
-    }
+            return *mLoggers[category];
+        }
 
-    // AUDIO loggers (ISR + main)
-    AsyncLogger& audio_async_logger_isr() {
-        static AsyncLogger logger;
-        return logger;
-    }
+        /// @brief Iterate over all instantiated loggers (for service functions)
+        /// @param func Callback function receiving AsyncLogger& reference
+        template <typename Func>
+        void forEach(Func func) {
+            for (fl::size i = 0; i < mLoggers.size(); ++i) {
+                if (mLoggers[i] != nullptr) {
+                    func(*mLoggers[i]);
+                }
+            }
+        }
 
-    AsyncLogger& audio_async_logger_main() {
-        static AsyncLogger logger;
-        return logger;
+    private:
+        fl::vector_fixed<AsyncLogger*, MAX_LOGGERS> mLoggers;
+    };
+
+    /// @brief Get global logger registry singleton
+    AsyncLoggerRegistry& getLoggerRegistry() {
+        static AsyncLoggerRegistry registry;
+        return registry;
     }
 } // namespace detail
 
-// Public accessor functions
-AsyncLogger& get_parlio_async_logger_isr() {
-    return detail::parlio_async_logger_isr();
-}
-
-AsyncLogger& get_parlio_async_logger_main() {
-    return detail::parlio_async_logger_main();
-}
-
-AsyncLogger& get_rmt_async_logger_isr() {
-    return detail::rmt_async_logger_isr();
-}
-
-AsyncLogger& get_rmt_async_logger_main() {
-    return detail::rmt_async_logger_main();
-}
-
-AsyncLogger& get_spi_async_logger_isr() {
-    return detail::spi_async_logger_isr();
-}
-
-AsyncLogger& get_spi_async_logger_main() {
-    return detail::spi_async_logger_main();
-}
-
-AsyncLogger& get_audio_async_logger_isr() {
-    return detail::audio_async_logger_isr();
-}
-
-AsyncLogger& get_audio_async_logger_main() {
-    return detail::audio_async_logger_main();
+// Public accessor function - registry-based lookup with lazy instantiation
+AsyncLogger& get_async_logger(LogCategory category) {
+    return detail::getLoggerRegistry().get(static_cast<fl::size>(category));
 }
 
 // ============================================================================
@@ -289,16 +278,12 @@ void async_log_service() {
     // Clear flag
     state.mNeedsFlush = false;
 
-    // Flush all async loggers (ISR + main thread queues) up to N messages per logger
+    // Flush all instantiated async loggers (registry-based iteration)
+    // This automatically handles all registered categories without hardcoding
     fl::size n = state.mMessagesPerTick;
-    get_parlio_async_logger_isr().flushN(n);
-    get_parlio_async_logger_main().flushN(n);
-    get_rmt_async_logger_isr().flushN(n);
-    get_rmt_async_logger_main().flushN(n);
-    get_spi_async_logger_isr().flushN(n);
-    get_spi_async_logger_main().flushN(n);
-    get_audio_async_logger_isr().flushN(n);
-    get_audio_async_logger_main().flushN(n);
+    detail::getLoggerRegistry().forEach([n](AsyncLogger& logger) {
+        logger.flushN(n);
+    });
 }
 
 } // namespace fl

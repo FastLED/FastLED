@@ -45,16 +45,34 @@ namespace fl {
         AsyncLogQueue<128, 4096>* mQueue;  // Pointer to hide implementation details
     };
 
+    /// @brief Logger category identifiers for registry-based access
+    /// Each category has separate ISR and main thread loggers (SPSC requirement)
+    enum class LogCategory : fl::u8 {
+        PARLIO_ISR = 0,
+        PARLIO_MAIN = 1,
+        RMT_ISR = 2,
+        RMT_MAIN = 3,
+        SPI_ISR = 4,
+        SPI_MAIN = 5,
+        AUDIO_ISR = 6,
+        AUDIO_MAIN = 7,
+        // Add new categories here (max 16 total)
+        MAX_CATEGORIES = 8
+    };
+
     // Global async logger accessor functions (defined in log.cpp)
-    // Separate queues for ISR and main thread contexts (SPSC requirement)
-    AsyncLogger& get_parlio_async_logger_isr();
-    AsyncLogger& get_parlio_async_logger_main();
-    AsyncLogger& get_rmt_async_logger_isr();
-    AsyncLogger& get_rmt_async_logger_main();
-    AsyncLogger& get_spi_async_logger_isr();
-    AsyncLogger& get_spi_async_logger_main();
-    AsyncLogger& get_audio_async_logger_isr();
-    AsyncLogger& get_audio_async_logger_main();
+    // Registry-based lazy instantiation - loggers created on first access
+    AsyncLogger& get_async_logger(LogCategory category);
+
+    // Convenience wrappers for backward compatibility
+    inline AsyncLogger& get_parlio_async_logger_isr() { return get_async_logger(LogCategory::PARLIO_ISR); }
+    inline AsyncLogger& get_parlio_async_logger_main() { return get_async_logger(LogCategory::PARLIO_MAIN); }
+    inline AsyncLogger& get_rmt_async_logger_isr() { return get_async_logger(LogCategory::RMT_ISR); }
+    inline AsyncLogger& get_rmt_async_logger_main() { return get_async_logger(LogCategory::RMT_MAIN); }
+    inline AsyncLogger& get_spi_async_logger_isr() { return get_async_logger(LogCategory::SPI_ISR); }
+    inline AsyncLogger& get_spi_async_logger_main() { return get_async_logger(LogCategory::SPI_MAIN); }
+    inline AsyncLogger& get_audio_async_logger_isr() { return get_async_logger(LogCategory::AUDIO_ISR); }
+    inline AsyncLogger& get_audio_async_logger_main() { return get_async_logger(LogCategory::AUDIO_MAIN); }
 }
 
 /// @file fl/log.h
