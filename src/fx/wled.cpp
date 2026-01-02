@@ -891,3 +891,281 @@ const WLEDSegment* WLED::findSegmentById(uint8_t id) const {
 } // namespace fl
 
 #endif // FASTLED_ENABLE_JSON
+
+// WLEDClient and FastLED adapter implementations (non-JSON, always available)
+
+#include "FastLED.h"
+#include "fl/warn.h"
+#include "fl/dbg.h"
+
+namespace fl {
+
+// FastLEDAdapter implementation
+
+FastLEDAdapter::FastLEDAdapter(uint8_t controllerIndex)
+    : mControllerIndex(controllerIndex)
+    , mSegmentStart(0)
+    , mSegmentEnd(0)
+    , mHasSegment(false)
+{
+    // Initialize segment end to the number of LEDs in the controller
+    CLEDController& controller = FastLED[mControllerIndex];
+    mSegmentEnd = controller.size();
+}
+
+fl::span<CRGB> FastLEDAdapter::getLEDs() {
+    CLEDController& controller = FastLED[mControllerIndex];
+    CRGB* leds = controller.leds();
+    if (!leds) {
+        return fl::span<CRGB>();
+    }
+
+    if (mHasSegment) {
+        return fl::span<CRGB>(leds + mSegmentStart, mSegmentEnd - mSegmentStart);
+    }
+    return fl::span<CRGB>(leds, controller.size());
+}
+
+size_t FastLEDAdapter::getNumLEDs() const {
+    if (mHasSegment) {
+        return mSegmentEnd - mSegmentStart;
+    }
+
+    CLEDController& controller = FastLED[mControllerIndex];
+    return controller.size();
+}
+
+void FastLEDAdapter::show() {
+    FastLED.show();
+}
+
+void FastLEDAdapter::show(uint8_t brightness) {
+    FastLED.show(brightness);
+}
+
+void FastLEDAdapter::clear(bool writeToStrip) {
+    CLEDController& controller = FastLED[mControllerIndex];
+    CRGB* leds = controller.leds();
+    if (!leds) {
+        return;
+    }
+
+    if (mHasSegment) {
+        // Clear only the segment
+        for (size_t i = mSegmentStart; i < mSegmentEnd; i++) {
+            leds[i] = CRGB::Black;
+        }
+    } else {
+        // Clear all LEDs
+        size_t numLeds = controller.size();
+        for (size_t i = 0; i < numLeds; i++) {
+            leds[i] = CRGB::Black;
+        }
+    }
+
+    if (writeToStrip) {
+        FastLED.show();
+    }
+}
+
+void FastLEDAdapter::setBrightness(uint8_t brightness) {
+    FastLED.setBrightness(brightness);
+}
+
+uint8_t FastLEDAdapter::getBrightness() const {
+    return FastLED.getBrightness();
+}
+
+void FastLEDAdapter::setCorrection(CRGB correction) {
+    FastLED.setCorrection(correction);
+}
+
+void FastLEDAdapter::setTemperature(CRGB temperature) {
+    FastLED.setTemperature(temperature);
+}
+
+void FastLEDAdapter::delay(unsigned long ms) {
+    FastLED.delay(ms);
+}
+
+void FastLEDAdapter::setMaxRefreshRate(uint16_t fps) {
+    FastLED.setMaxRefreshRate(fps);
+}
+
+uint16_t FastLEDAdapter::getMaxRefreshRate() const {
+    // CFastLED doesn't expose the max refresh rate setting
+    // Return 0 to indicate no limit
+    return 0;
+}
+
+void FastLEDAdapter::setSegment(size_t start, size_t end) {
+    CLEDController& controller = FastLED[mControllerIndex];
+    size_t numLeds = controller.size();
+
+    // Validate bounds
+    if (start >= numLeds) {
+        start = numLeds > 0 ? numLeds - 1 : 0;
+    }
+    if (end > numLeds) {
+        end = numLeds;
+    }
+    if (end <= start) {
+        end = start + 1;
+        if (end > numLeds) {
+            end = numLeds;
+            start = end > 0 ? end - 1 : 0;
+        }
+    }
+
+    mSegmentStart = start;
+    mSegmentEnd = end;
+    mHasSegment = true;
+}
+
+void FastLEDAdapter::clearSegment() {
+    CLEDController& controller = FastLED[mControllerIndex];
+    mSegmentEnd = controller.size();
+    mSegmentStart = 0;
+    mHasSegment = false;
+}
+
+// Helper function implementation
+fl::shared_ptr<IFastLED> createFastLEDController(uint8_t controllerIndex) {
+    return fl::make_shared<FastLEDAdapter>(controllerIndex);
+}
+
+// WLEDClient implementation
+
+WLEDClient::WLEDClient(fl::shared_ptr<IFastLED> controller)
+    : mController(controller), mBrightness(255), mOn(false) {
+    if (!mController) {
+        FL_WARN("WLEDClient: constructed with null controller");
+    }
+}
+
+void WLEDClient::setBrightness(uint8_t brightness) {
+    mBrightness = brightness;
+    FL_DBG("WLEDClient: setBrightness(" << static_cast<int>(mBrightness) << ")");
+
+    // Apply brightness to controller if we're on
+    if (mOn && mController) {
+        mController->setBrightness(mBrightness);
+    }
+}
+
+void WLEDClient::setOn(bool on) {
+    mOn = on;
+    FL_DBG("WLEDClient: setOn(" << (mOn ? "true" : "false") << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    if (mOn) {
+        // Turning on: apply current brightness
+        mController->setBrightness(mBrightness);
+    } else {
+        // Turning off: set brightness to 0 (but preserve internal brightness)
+        mController->setBrightness(0);
+    }
+}
+
+void WLEDClient::clear(bool writeToStrip) {
+    FL_DBG("WLEDClient: clear(writeToStrip=" << (writeToStrip ? "true" : "false") << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->clear(writeToStrip);
+}
+
+void WLEDClient::update() {
+    FL_DBG("WLEDClient: update()");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->show();
+}
+
+fl::span<CRGB> WLEDClient::getLEDs() {
+    if (!mController) {
+        return fl::span<CRGB>();
+    }
+
+    return mController->getLEDs();
+}
+
+size_t WLEDClient::getNumLEDs() const {
+    if (!mController) {
+        return 0;
+    }
+
+    return mController->getNumLEDs();
+}
+
+void WLEDClient::setSegment(size_t start, size_t end) {
+    FL_DBG("WLEDClient: setSegment(" << start << ", " << end << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->setSegment(start, end);
+}
+
+void WLEDClient::clearSegment() {
+    FL_DBG("WLEDClient: clearSegment()");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->clearSegment();
+}
+
+void WLEDClient::setCorrection(CRGB correction) {
+    FL_DBG("WLEDClient: setCorrection(r=" << static_cast<int>(correction.r)
+           << ", g=" << static_cast<int>(correction.g)
+           << ", b=" << static_cast<int>(correction.b) << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->setCorrection(correction);
+}
+
+void WLEDClient::setTemperature(CRGB temperature) {
+    FL_DBG("WLEDClient: setTemperature(r=" << static_cast<int>(temperature.r)
+           << ", g=" << static_cast<int>(temperature.g)
+           << ", b=" << static_cast<int>(temperature.b) << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->setTemperature(temperature);
+}
+
+void WLEDClient::setMaxRefreshRate(uint16_t fps) {
+    FL_DBG("WLEDClient: setMaxRefreshRate(" << fps << ")");
+
+    if (!mController) {
+        return;
+    }
+
+    mController->setMaxRefreshRate(fps);
+}
+
+uint16_t WLEDClient::getMaxRefreshRate() const {
+    if (!mController) {
+        return 0;
+    }
+
+    return mController->getMaxRefreshRate();
+}
+
+} // namespace fl

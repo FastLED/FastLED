@@ -465,3 +465,359 @@ private:
 } // namespace fl
 
 #endif // FASTLED_ENABLE_JSON
+
+// WLEDClient and FastLED adapter (non-JSON, always available)
+
+#include "fl/stl/span.h"
+#include "fl/stl/memory.h"
+#include "fl/stl/shared_ptr.h"
+
+namespace fl {
+
+/**
+ * @brief Pure virtual interface for FastLED operations
+ *
+ * This interface abstracts FastLED operations to enable dependency injection
+ * and testing. It represents the core LED control operations that WLED and
+ * other integrations need to perform.
+ *
+ * This interface allows:
+ * - Real implementations that delegate to the global FastLED singleton
+ * - Mock implementations for unit testing without hardware
+ * - Custom implementations for specialized control scenarios
+ *
+ * @see FastLEDAdapter for the real implementation
+ * @see MockFastLEDController for the test mock implementation
+ */
+class IFastLED {
+public:
+    virtual ~IFastLED() = default;
+
+    // LED array access
+
+    /**
+     * @brief Get the LED array as a span
+     * @return Span over the LED array (may be full array or current segment)
+     */
+    virtual fl::span<CRGB> getLEDs() = 0;
+
+    /**
+     * @brief Get the number of LEDs
+     * @return Number of LEDs in the current context (full array or segment)
+     */
+    virtual size_t getNumLEDs() const = 0;
+
+    // Output control
+
+    /**
+     * @brief Send the LED data to the strip
+     * Uses the current brightness setting
+     */
+    virtual void show() = 0;
+
+    /**
+     * @brief Send the LED data to the strip with a specific brightness
+     * @param brightness Brightness level (0-255)
+     */
+    virtual void show(uint8_t brightness) = 0;
+
+    /**
+     * @brief Clear all LEDs (set to black)
+     * @param writeToStrip If true, immediately write to strip (call show())
+     */
+    virtual void clear(bool writeToStrip = false) = 0;
+
+    // Brightness
+
+    /**
+     * @brief Set the global brightness
+     * @param brightness Brightness level (0-255)
+     */
+    virtual void setBrightness(uint8_t brightness) = 0;
+
+    /**
+     * @brief Get the current global brightness
+     * @return Brightness level (0-255)
+     */
+    virtual uint8_t getBrightness() const = 0;
+
+    // Color correction
+
+    /**
+     * @brief Set color correction
+     * @param correction Color correction RGB values
+     */
+    virtual void setCorrection(CRGB correction) = 0;
+
+    /**
+     * @brief Set color temperature
+     * @param temperature Color temperature RGB values
+     */
+    virtual void setTemperature(CRGB temperature) = 0;
+
+    // Timing
+
+    /**
+     * @brief Delay for a specified number of milliseconds
+     * @param ms Delay duration in milliseconds
+     */
+    virtual void delay(unsigned long ms) = 0;
+
+    /**
+     * @brief Set the maximum refresh rate
+     * @param fps Maximum frames per second (0 = no limit)
+     */
+    virtual void setMaxRefreshRate(uint16_t fps) = 0;
+
+    /**
+     * @brief Get the maximum refresh rate
+     * @return Maximum frames per second (0 = no limit)
+     */
+    virtual uint16_t getMaxRefreshRate() const = 0;
+
+    // Advanced features (segment support for WLED)
+
+    /**
+     * @brief Set a segment range for subsequent operations
+     * @param start Starting LED index (inclusive)
+     * @param end Ending LED index (exclusive)
+     *
+     * After calling this, getLEDs() and getNumLEDs() will operate on the
+     * specified segment only.
+     */
+    virtual void setSegment(size_t start, size_t end) = 0;
+
+    /**
+     * @brief Clear the segment range (operate on full LED array)
+     */
+    virtual void clearSegment() = 0;
+};
+
+/**
+ * @brief Real FastLED implementation adapter
+ *
+ * This class adapts the global FastLED singleton to the IFastLED interface.
+ * It provides a thin wrapper that delegates all operations to the global
+ * FastLED object while optionally managing segment control for specific
+ * LED controller indices.
+ *
+ * This adapter allows WLED and other integrations to work with FastLED through
+ * a standard interface while maintaining full compatibility with the existing
+ * FastLED API.
+ *
+ * Example usage:
+ * @code
+ * CRGB leds[100];
+ * FastLED.addLeds<WS2812, 5>(leds, 100);
+ *
+ * auto controller = fl::make_shared<FastLEDAdapter>();
+ * controller->setBrightness(128);
+ * controller->show();
+ * @endcode
+ *
+ * @see IFastLED for the interface definition
+ * @see createFastLEDController() for helper functions to create adapters
+ */
+class FastLEDAdapter : public IFastLED {
+public:
+    /**
+     * @brief Construct adapter wrapping the global FastLED object
+     * @param controllerIndex Index of the LED controller to use (default: 0)
+     *                        Use 0 for the first controller, 1 for second, etc.
+     */
+    explicit FastLEDAdapter(uint8_t controllerIndex = 0);
+
+    /**
+     * @brief Destructor
+     */
+    ~FastLEDAdapter() override = default;
+
+    // IFastLED interface implementation
+
+    fl::span<CRGB> getLEDs() override;
+    size_t getNumLEDs() const override;
+
+    void show() override;
+    void show(uint8_t brightness) override;
+    void clear(bool writeToStrip = false) override;
+
+    void setBrightness(uint8_t brightness) override;
+    uint8_t getBrightness() const override;
+
+    void setCorrection(CRGB correction) override;
+    void setTemperature(CRGB temperature) override;
+
+    void delay(unsigned long ms) override;
+    void setMaxRefreshRate(uint16_t fps) override;
+    uint16_t getMaxRefreshRate() const override;
+
+    void setSegment(size_t start, size_t end) override;
+    void clearSegment() override;
+
+private:
+    uint8_t mControllerIndex; // Index of the LED controller in FastLED
+    size_t mSegmentStart;     // Start of current segment (0 if no segment)
+    size_t mSegmentEnd;       // End of current segment (numLeds if no segment)
+    bool mHasSegment;         // True if a segment is active
+};
+
+/**
+ * @brief Create a FastLED controller adapter
+ * @param controllerIndex Index of the LED controller to use (default: 0)
+ * @return Shared pointer to the adapter
+ *
+ * Example:
+ * @code
+ * CRGB leds[100];
+ * FastLED.addLeds<WS2812, 5>(leds, 100);
+ * auto controller = createFastLEDController();  // Uses controller index 0
+ * @endcode
+ */
+fl::shared_ptr<IFastLED> createFastLEDController(uint8_t controllerIndex = 0);
+
+/**
+ * @brief WLED Client for controlling LEDs through FastLED interface
+ *
+ * Provides a simplified interface for controlling LEDs with WLED-style
+ * operations (brightness, on/off, clear). Uses dependency injection to
+ * allow both real FastLED control and mock implementations for testing.
+ *
+ * Example usage:
+ *   // Real usage
+ *   auto controller = createFastLEDController(leds, NUM_LEDS);
+ *   WLEDClient client(controller);
+ *   client.setBrightness(128);
+ *   client.setOn(true);
+ *
+ *   // Test usage
+ *   auto mock = fl::make_shared<MockFastLEDController>(100);
+ *   WLEDClient client(mock);
+ *   client.setBrightness(128);
+ *   REQUIRE(mock->getLastBrightness() == 128);
+ */
+class WLEDClient {
+public:
+    /**
+     * @brief Construct WLEDClient with FastLED controller
+     * @param controller Shared pointer to IFastLED implementation
+     */
+    explicit WLEDClient(fl::shared_ptr<IFastLED> controller);
+
+    /**
+     * @brief Set brightness level
+     * @param brightness Brightness value (0-255)
+     *
+     * Updates the brightness and applies to controller if client is on.
+     */
+    void setBrightness(uint8_t brightness);
+
+    /**
+     * @brief Get current brightness level
+     * @return Brightness value (0-255)
+     */
+    uint8_t getBrightness() const { return mBrightness; }
+
+    /**
+     * @brief Set on/off state
+     * @param on True to turn on, false to turn off
+     *
+     * When turning on, applies current brightness to controller.
+     * When turning off, sets controller brightness to 0 but preserves internal brightness.
+     */
+    void setOn(bool on);
+
+    /**
+     * @brief Get on/off state
+     * @return True if on, false if off
+     */
+    bool getOn() const { return mOn; }
+
+    /**
+     * @brief Clear all LEDs
+     * @param writeToStrip If true, immediately writes to strip (calls show)
+     *
+     * Sets all LEDs to black/off. If writeToStrip is true, also calls
+     * controller->show() to update the physical strip.
+     */
+    void clear(bool writeToStrip = false);
+
+    /**
+     * @brief Update physical LED strip
+     *
+     * Calls controller->show() to write LED data to the physical strip.
+     * Typically called after making changes to LED colors.
+     */
+    void update();
+
+    /**
+     * @brief Get access to LED array
+     * @return Span view of LED array
+     *
+     * Allows direct manipulation of LED colors through the controller.
+     */
+    fl::span<CRGB> getLEDs();
+
+    /**
+     * @brief Get number of LEDs
+     * @return LED count
+     */
+    size_t getNumLEDs() const;
+
+    /**
+     * @brief Set a segment range for subsequent operations
+     * @param start Starting LED index (inclusive)
+     * @param end Ending LED index (exclusive)
+     *
+     * After calling this, operations will affect only the specified segment.
+     * Delegates to controller's setSegment method.
+     */
+    void setSegment(size_t start, size_t end);
+
+    /**
+     * @brief Clear the segment range (operate on full LED array)
+     *
+     * Restores operations to affect the entire LED array.
+     * Delegates to controller's clearSegment method.
+     */
+    void clearSegment();
+
+    /**
+     * @brief Set color correction
+     * @param correction Color correction RGB values
+     *
+     * Adjusts color output to compensate for LED characteristics.
+     * Delegates to controller's setCorrection method.
+     */
+    void setCorrection(CRGB correction);
+
+    /**
+     * @brief Set color temperature
+     * @param temperature Color temperature RGB values
+     *
+     * Adjusts color output for perceived color temperature.
+     * Delegates to controller's setTemperature method.
+     */
+    void setTemperature(CRGB temperature);
+
+    /**
+     * @brief Set maximum refresh rate
+     * @param fps Maximum frames per second (0 = no limit)
+     *
+     * Limits how often the LED strip can be updated.
+     * Delegates to controller's setMaxRefreshRate method.
+     */
+    void setMaxRefreshRate(uint16_t fps);
+
+    /**
+     * @brief Get maximum refresh rate
+     * @return Maximum frames per second (0 = no limit)
+     */
+    uint16_t getMaxRefreshRate() const;
+
+private:
+    fl::shared_ptr<IFastLED> mController;  // FastLED controller interface
+    uint8_t mBrightness;                    // Current brightness (0-255)
+    bool mOn;                                // On/off state
+};
+
+} // namespace fl
