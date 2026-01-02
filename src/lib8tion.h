@@ -8,9 +8,8 @@
 
 #include "fl/compiler_control.h"
 
-#ifndef __INC_LED_SYSDEFS_H
-#error WTH?  led_sysdefs needs to be included first
-#endif
+#include "led_sysdefs.h"
+
 
 /// @file lib8tion.h
 /// Fast, efficient 8-bit math functions specifically
