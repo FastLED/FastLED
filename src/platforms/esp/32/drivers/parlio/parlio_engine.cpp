@@ -8,6 +8,7 @@
 #ifdef ESP32
 
 #include "fl/compiler_control.h"
+#include "fl/unused.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_PARLIO
@@ -41,6 +42,10 @@ FL_EXTERN_C_END
 #warning \
     "PARLIO: CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is not defined! Add 'build_flags = -DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1' to platformio.ini or your build system"
 #endif
+
+#define FL_PARLIO_DMA_MALLOC_FLAGS  (MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)
+#define FL_PARLIO_DMA_NEEDS_SYNC !(MALLOC_CAP_INTERNAL & FL_PARLIO_DMA_MALLOC_FLAGS)
+
 
 namespace fl {
 namespace detail {
@@ -125,7 +130,10 @@ isr_memset_zero(uint8_t* dest, size_t count) {
 FL_OPTIMIZE_FUNCTION static inline esp_err_t FL_IRAM
 isr_cache_sync(void* buffer_ptr, size_t buffer_size, const char* context) {
     // Suppress unused parameter warning
-    (void)context;
+    FL_UNUSED(context);
+    if (!FL_PARLIO_DMA_NEEDS_SYNC) {
+        return ESP_OK;
+    }
 
     // Memory barrier: Ensure all preceding writes complete before cache sync
     FL_MEMORY_BARRIER;
@@ -559,8 +567,10 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     // CRITICAL: Flush CPU cache to memory before DMA reads buffer
     // This is the ONLY place cache sync happens (in ISR context after txDone)
+    // NOTE: isr_cache_sync() handles MALLOC_CAP_INTERNAL gracefully by using memory barriers
+    // instead of esp_cache_msync() when buffer is not in cacheable DMA region
     (void)isr_cache_sync(const_cast<void*>(reinterpret_cast<const void*>(buffer_ptr)),
-                         buffer_size, "txDoneCallback");
+                        buffer_size, "txDoneCallback");
 
     // SYNCHRONIZATION: Additional memory barriers after cache sync
     // Hypothesis: Ensure all memory operations complete before DMA submission
@@ -1079,6 +1089,7 @@ bool ParlioEngine::hasRingSpace() const {
     return count < RING_BUFFER_COUNT;
 }
 
+
 bool ParlioEngine::allocateRingBuffers() {
     // One-time ring buffer allocation and initialization
     // Called once during initialize(), NOT per transmission
@@ -1092,20 +1103,20 @@ bool ParlioEngine::allocateRingBuffers() {
     // Allocate all ring buffers with cache alignment
     // CRITICAL FINDING: ESP32-C6 DMA memory architecture
     // - MALLOC_CAP_DMA allocates from NON-cacheable memory region (SRAM1)
-    // - esp_cache_msync() returns ESP_ERR_INVALID_ARG for non-cacheable addresses
+    // - esp_cache_msync() returns ESP_ERR_INVALID_ARG for cacheable addresses
     // - MALLOC_CAP_INTERNAL allocates from cacheable memory region (SRAM0)
     // - PARLIO DMA can access both regions via system bus
     //
-    // SOLUTION: Use MALLOC_CAP_INTERNAL (cacheable) WITHOUT esp_cache_msync
+    // SOLUTION: Use MALLOC_CAP_DMA (non-cacheable) to eliminate cache sync errors
+    // - Non-cacheable memory eliminates need for esp_cache_msync()
+    // - Eliminates ESP-IDF cache errors that lead to system crashes
     // - Memory barriers (FL_MEMORY_BARRIER) provide ordering guarantees
-    // - ESP32-C6 L1 cache uses write-through policy (automatic coherency)
-    // - Achieves 99.97% accuracy without explicit cache sync calls
     for (size_t i = 0; i < RING_BUFFER_COUNT; i++) {
         fl::unique_ptr<uint8_t[], HeapCapsDeleter> buffer(
             static_cast<uint8_t *>(heap_caps_aligned_alloc(
                 64,  // ESP32-C6 cache line size (64 bytes)
                 mRingBufferCapacity,
-                MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
+                FL_PARLIO_DMA_MALLOC_FLAGS)));
 
         if (!buffer) {
             FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer "
@@ -1484,8 +1495,10 @@ bool ParlioEngine::initialize(size_t dataWidth,
     const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
     const size_t waveform_buffer_size = mDataWidth * bytes_per_lane;
 
+    // NOTE: I don't think this needs malloc cap flags. Please experiment with removing
+    // if unnecessary.
     mWaveformExpansionBuffer.reset(static_cast<uint8_t *>(
-        heap_caps_malloc(waveform_buffer_size, MALLOC_CAP_INTERNAL)));
+        heap_caps_malloc(waveform_buffer_size, FL_PARLIO_DMA_MALLOC_FLAGS)));
 
     if (!mWaveformExpansionBuffer) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
@@ -1607,6 +1620,8 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // CRITICAL: Flush CPU cache for FIRST buffer only (before initial DMA submission)
     // All subsequent buffers are synced in txDoneCallback
+    // NOTE: isr_cache_sync() handles MALLOC_CAP_INTERNAL gracefully by using memory barriers
+    // instead of esp_cache_msync() when buffer is not in cacheable DMA region
     (void)isr_cache_sync(mRingBufferPtrs[0], first_buffer_size, "beginTx");
 
     err = parlio_tx_unit_transmit(
