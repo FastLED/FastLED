@@ -19,6 +19,8 @@
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
 #include "esp_system.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 // USB Serial JTAG registers - only available on ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
 // Original ESP32, ESP32-S2 do not have USB Serial JTAG hardware
@@ -49,7 +51,11 @@ void watchdog_setup(uint32_t timeout_ms,
     detail::s_user_data = user_data;
 
     // Deinitialize default watchdog first to clear any existing configuration
-    esp_task_wdt_deinit();
+    // ONLY if FreeRTOS scheduler is running (esp_task_wdt_deinit uses FreeRTOS APIs)
+    // xTaskGetSchedulerState returns: 0=suspended, 1=not started, 2=running
+    if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
+        esp_task_wdt_deinit();
+    }
 
     // Configure watchdog with reset on timeout
     // idle_core_mask = (1 << 0) monitors the main loop task on core 0
@@ -100,7 +106,7 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
 
     // Give Windows time to detect disconnect (150ms minimum)
     // Note: This delay is safe in panic handler context
-    delay(150);
+    fl::delayMicroseconds(150000);  // 150ms = 150000 microseconds
 
     FL_DBG("[PANIC HANDLER] ✓ USB disconnected - proceeding with reset");
 #else

@@ -166,8 +166,7 @@
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
 #include "SketchHalt.h"
-
-// Watchdog is automatically initialized via FL_INIT (no include needed)
+#include "platforms/esp/32/watchdog_esp32.h"  // For fl::watchdog_setup()
 
 // ============================================================================
 // Configuration
@@ -238,10 +237,12 @@ uint32_t last_wait_message_ms = 0;
 
 void setup() {
     Serial.begin(115200);
+    // Initialize watchdog with 5 second timeout (ESP32 only)
+    // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
+    fl::watchdog_setup(5000);
     while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
 
-    // Watchdog timer automatically initialized via FL_INIT in platforms/esp/32/init.cpp
-    // No need to call fl::watchdog_setup() here - it's already active (ESP32 only, 5s timeout)
+
 
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
