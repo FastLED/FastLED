@@ -13,6 +13,12 @@
 #include "fl/error.h"
 #include "fl/dbg.h"
 
+// Compile-time prefix for Remote JSON output
+// Define as empty string to disable: -DFASTLED_REMOTE_PREFIX=\"\"
+#ifndef FASTLED_REMOTE_PREFIX
+#define FASTLED_REMOTE_PREFIX "REMOTE: "
+#endif
+
 namespace fl {
 
 /**
@@ -60,6 +66,22 @@ public:
         uint32_t receivedAt;        // Timestamp when RPC request received
         uint32_t executedAt;        // Timestamp when function executed
         bool wasScheduled;          // true if scheduled, false if immediate
+
+        /**
+         * @brief Serialize result to JSON object (compact single-line format)
+         * @return JSON object with all result fields
+         *
+         * Output format:
+         * {
+         *   "function": "functionName",
+         *   "result": <returnValue>,
+         *   "scheduledAt": 1000,
+         *   "receivedAt": 500,
+         *   "executedAt": 1005,
+         *   "wasScheduled": true
+         * }
+         */
+        fl::Json to_json() const;
     };
 
     Remote() = default;
@@ -224,6 +246,24 @@ public:
      * @brief Clear everything (scheduled calls + registered functions)
      */
     void clear();
+
+    /**
+     * @brief Print JSON to output with FASTLED_REMOTE_PREFIX (single-line format)
+     * @param json JSON value to output
+     *
+     * Outputs JSON in compact single-line format with configured prefix.
+     * Useful for structured responses that need to be filtered on host side.
+     *
+     * Example:
+     *   fl::Json response = fl::Json::object();
+     *   response.set("status", "ok");
+     *   fl::Remote::printJson(response);
+     *   // Output: "REMOTE: {"status":"ok"}"
+     *
+     * To filter on host side:
+     *   grep "^REMOTE: " /dev/ttyUSB0 | sed 's/^REMOTE: //' | jq .
+     */
+    static void printJson(const fl::Json& json);
 
 private:
     struct ScheduledCall {

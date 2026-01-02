@@ -3,8 +3,43 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/time.h"
+#include "fl/stl/cstdio.h"
 
 namespace fl {
+
+// RpcResult Serialization
+
+fl::Json Remote::RpcResult::to_json() const {
+    fl::Json obj = fl::Json::object();
+    obj.set("function", functionName);
+    obj.set("result", result);
+    obj.set("scheduledAt", static_cast<int64_t>(scheduledAt));
+    obj.set("receivedAt", static_cast<int64_t>(receivedAt));
+    obj.set("executedAt", static_cast<int64_t>(executedAt));
+    obj.set("wasScheduled", wasScheduled);
+    return obj;
+}
+
+// Static Helper: Print prefixed single-line JSON
+
+void Remote::printJson(const fl::Json& json) {
+    fl::string jsonStr = json.to_string();
+
+    // Ensure single-line (replace any newlines/carriage returns with spaces)
+    // Note: fl::Json::to_string() should already produce compact output, but this is defensive
+    for (size_t i = 0; i < jsonStr.size(); ++i) {
+        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
+            jsonStr[i] = ' ';
+        }
+    }
+
+    // Output with prefix
+    constexpr const char* prefix = FASTLED_REMOTE_PREFIX;
+    if (prefix[0] != '\0') {  // Only add prefix if non-empty
+        fl::print(prefix);
+    }
+    fl::println(jsonStr.c_str());
+}
 
 // Function Registration
 

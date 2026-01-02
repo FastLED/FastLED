@@ -6,6 +6,7 @@
 /// - Execute functions immediately or schedule them for later
 /// - Query system state and return JSON values
 /// - Track execution timing with metadata
+/// - Use FASTLED_REMOTE_PREFIX for host-side output filtering
 ///
 /// Send JSON commands via serial, for example:
 ///   Commands (no return):
@@ -16,6 +17,16 @@
 ///     {"function":"millis","args":[]} -> returns current time
 ///     {"function":"getStatus","args":[]} -> returns system status
 ///     {"function":"getLed","args":[0]} -> returns LED color
+///
+/// Host-side filtering:
+///   All structured JSON output is prefixed with "REMOTE: " (configurable via FASTLED_REMOTE_PREFIX).
+///   This allows easy filtering on the host side to separate structured data from debug output:
+///
+///   # Read only structured JSON responses (filter out debug noise):
+///   grep "^REMOTE: " /dev/ttyUSB0 | sed 's/^REMOTE: //' | jq .
+///
+///   # Disable prefix (define empty string):
+///   build_flags = -DFASTLED_REMOTE_PREFIX=\"\"
 ///
 /// @see fl/remote.h for full API documentation
 
@@ -111,21 +122,11 @@ void loop() {
     remote.update(millis());
 
     // Check for executed function results (includes timing metadata)
+    // Output as prefixed single-line JSON for easy host-side filtering
     auto results = remote.getResults();
     for (const auto& r : results) {
-        if (r.wasScheduled) {
-            uint32_t delay = r.executedAt - r.receivedAt;
-            Serial.print("Scheduled [");
-            Serial.print(r.functionName.c_str());
-            Serial.print("] executed after ");
-            Serial.print(delay);
-            Serial.print("ms");
-            if (r.result.has_value()) {
-                Serial.print(": ");
-                Serial.print(r.result.to_string().c_str());
-            }
-            Serial.println();
-        }
+        // Serialize result to JSON with all metadata (timing, return value, etc.)
+        fl::Remote::printJson(r.to_json());
     }
 
     // Check for incoming JSON RPC via serial
@@ -135,29 +136,39 @@ void loop() {
         fl::Json result;
         auto err = remote.processRpc(jsonRpc, result);
 
+        // Build structured JSON response for all cases
+        fl::Json response = fl::Json::object();
+
         switch (err) {
             case fl::Remote::Error::None:
+                response.set("status", "ok");
                 if (result.has_value()) {
-                    // Function returned a value - send it back
-                    Serial.println(result.to_string().c_str());
-                } else {
-                    // Function executed successfully, no return value
-                    Serial.println("OK");
+                    response.set("result", result);
                 }
                 break;
             case fl::Remote::Error::InvalidJson:
-                Serial.println("ERROR: Invalid JSON");
+                response.set("status", "error");
+                response.set("error", "Invalid JSON");
                 break;
             case fl::Remote::Error::MissingFunction:
-                Serial.println("ERROR: Missing function field");
+                response.set("status", "error");
+                response.set("error", "Missing function field");
                 break;
             case fl::Remote::Error::UnknownFunction:
-                Serial.println("ERROR: Unknown function");
+                response.set("status", "error");
+                response.set("error", "Unknown function");
                 break;
             case fl::Remote::Error::InvalidTimestamp:
-                Serial.println("WARNING: Invalid timestamp, executed immediately");
+                response.set("status", "warning");
+                response.set("warning", "Invalid timestamp, executed immediately");
+                if (result.has_value()) {
+                    response.set("result", result);
+                }
                 break;
         }
+
+        // Output prefixed single-line JSON response
+        fl::Remote::printJson(response);
     }
 
     FastLED.show();
