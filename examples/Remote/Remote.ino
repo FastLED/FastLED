@@ -119,7 +119,7 @@ void setup() {
 
 void loop() {
     // Process scheduled RPC calls
-    remote.update(millis());
+    remote.tick(millis());
 
     // Check for executed function results (includes timing metadata)
     // Output as prefixed single-line JSON for easy host-side filtering

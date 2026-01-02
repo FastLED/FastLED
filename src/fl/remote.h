@@ -183,14 +183,14 @@ public:
      * Return values from scheduled functions are stored and can be retrieved
      * via getResults().
      */
-    size_t update(uint32_t currentTimeMs);
+    size_t tick(uint32_t currentTimeMs);
 
     /**
      * @brief Get results from recently executed functions (both immediate and scheduled)
      * @return Vector of RpcResult objects containing execution metadata and return values
      *
-     * After calling processRpc() or update(), this returns all functions that executed
-     * and returned values. The vector is cleared on each update() call.
+     * After calling processRpc() or tick(), this returns all functions that executed
+     * and returned values. The vector is cleared on each tick() call.
      *
      * Each RpcResult contains:
      * - functionName: Name of the function that executed
@@ -201,7 +201,7 @@ public:
      * - wasScheduled: true if function was scheduled, false if immediate
      *
      * Example:
-     *   remote.update(millis());
+     *   remote.tick(millis());
      *   auto results = remote.getResults();
      *   for (const auto& r : results) {
      *       if (r.wasScheduled) {
@@ -246,6 +246,42 @@ public:
      * @brief Clear everything (scheduled calls + registered functions)
      */
     void clear();
+
+    /**
+     * @brief Set WLED state from JSON object
+     * @param wledState JSON object containing "on" (bool) and/or "bri" (0-255) fields
+     *
+     * Extracts WLED control fields and updates internal state:
+     * - "on": boolean on/off state (optional, keeps existing value if missing)
+     * - "bri": brightness 0-255 (optional, keeps existing value if missing)
+     *
+     * Example:
+     *   fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
+     *   remote.setWledState(state);
+     */
+    void setWledState(const fl::Json& wledState);
+
+    /**
+     * @brief Get current WLED state as JSON object
+     * @return JSON object with "on" and "bri" fields
+     *
+     * Example:
+     *   fl::Json state = remote.getWledState();
+     *   // Returns: {"on":true,"bri":128}
+     */
+    fl::Json getWledState() const;
+
+    /**
+     * @brief Get WLED on/off state
+     * @return true if WLED is on, false if off
+     */
+    bool getOn() const { return mWledOn; }
+
+    /**
+     * @brief Get WLED brightness
+     * @return Brightness value 0-255
+     */
+    uint8_t getBrightness() const { return mWledBri; }
 
     /**
      * @brief Print JSON to output with FASTLED_REMOTE_PREFIX (single-line format)
@@ -304,7 +340,11 @@ private:
 
     fl::HashMap<fl::string, CallbackWrapper> mCallbacks;
     fl::priority_queue_stable<ScheduledCall> mScheduled;  // Stable min-heap ordered by execution time (FIFO for equal times)
-    fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on update())
+    fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on tick())
+
+    // WLED state (runtime-only, no persistence)
+    bool mWledOn = false;       // WLED on/off state
+    uint8_t mWledBri = 255;     // WLED brightness (0-255)
 };
 
 } // namespace fl

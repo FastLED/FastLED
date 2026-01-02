@@ -49,10 +49,10 @@ TEST_CASE("Remote: Scheduled execution") {
     REQUIRE_EQ(callCount, 0);  // Not executed yet
     REQUIRE_EQ(remote.pendingCount(), 1);
 
-    remote.update(999);  // Before scheduled time
+    remote.tick(999);  // Before scheduled time
     REQUIRE_EQ(callCount, 0);
 
-    remote.update(1000);  // At scheduled time
+    remote.tick(1000);  // At scheduled time
     REQUIRE_EQ(callCount, 1);
     REQUIRE_EQ(remote.pendingCount(), 0);
 }
@@ -112,15 +112,15 @@ TEST_CASE("Remote: Multiple scheduled calls") {
 
     REQUIRE_EQ(remote.pendingCount(), 3);
 
-    remote.update(1500);
+    remote.tick(1500);
     REQUIRE_EQ(executed.size(), 1);  // Only 'a' should execute
     REQUIRE_EQ(executed[0], "a");
 
-    remote.update(2500);
+    remote.tick(2500);
     REQUIRE_EQ(executed.size(), 2);  // 'b' should execute
     REQUIRE_EQ(executed[1], "b");
 
-    remote.update(3500);
+    remote.tick(3500);
     REQUIRE_EQ(executed.size(), 3);  // 'c' should execute
     REQUIRE_EQ(executed[2], "c");
 
@@ -207,7 +207,7 @@ TEST_CASE("Remote: Scheduled functions with return values and timing metadata") 
     REQUIRE_EQ(remote.pendingCount(), 1);
 
     // Execute scheduled function
-    remote.update(1000);
+    remote.tick(1000);
 
     // Check results are available with metadata
     auto results = remote.getResults();
@@ -247,7 +247,7 @@ TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
     REQUIRE_EQ(remote.pendingCount(), 4);
 
     // Execute all scheduled functions
-    remote.update(1000);
+    remote.tick(1000);
 
     // Verify FIFO execution order (stable ordering)
     REQUIRE_EQ(executionOrder.size(), 4);
@@ -319,7 +319,7 @@ TEST_CASE("Remote: Scheduled execution results") {
     remote.processRpc(R"({"timestamp":1000,"function":"task","args":[]})");
 
     // Execute first scheduled task
-    size_t executed = remote.update(500);
+    size_t executed = remote.tick(500);
     REQUIRE_EQ(executed, 1);
 
     auto results = remote.getResults();
@@ -327,8 +327,8 @@ TEST_CASE("Remote: Scheduled execution results") {
     REQUIRE(results[0].wasScheduled);
     REQUIRE_EQ(results[0].scheduledAt, 500);
 
-    // Execute second scheduled task (results should be cleared from previous update)
-    executed = remote.update(1000);
+    // Execute second scheduled task (results should be cleared from previous tick)
+    executed = remote.tick(1000);
     REQUIRE_EQ(executed, 1);
 
     results = remote.getResults();
@@ -382,7 +382,7 @@ TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
     });
 
     remote.processRpc(R"({"timestamp":1000,"function":"getCounter","args":[]})");
-    remote.update(1000);
+    remote.tick(1000);
 
     auto results = remote.getResults();
     REQUIRE_EQ(results.size(), 1);
@@ -470,6 +470,133 @@ TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
     fl::string jsonPart = captured.substr(jsonStart, jsonEnd - jsonStart + 1);
     REQUIRE(jsonPart.find('\n') == fl::string::npos);
     REQUIRE(jsonPart.find('\r') == fl::string::npos);
+}
+
+// WLED State Tests
+
+// Test: Set WLED state with on=true and bri=128
+TEST_CASE("Remote: WLED set state on and brightness") {
+    fl::Remote remote;
+
+    fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
+    remote.setWledState(state);
+
+    REQUIRE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 128);
+}
+
+// Test: Set WLED state with on=false
+TEST_CASE("Remote: WLED set state off") {
+    fl::Remote remote;
+
+    // Initially on (default is false, so turn it on first)
+    fl::Json stateOn = fl::Json::parse(R"({"on":true})");
+    remote.setWledState(stateOn);
+    REQUIRE(remote.getOn());
+
+    // Turn off
+    fl::Json stateOff = fl::Json::parse(R"({"on":false})");
+    remote.setWledState(stateOff);
+    REQUIRE_FALSE(remote.getOn());
+}
+
+// Test: Get WLED state returns correct JSON
+TEST_CASE("Remote: WLED get state") {
+    fl::Remote remote;
+
+    // Set state
+    fl::Json stateIn = fl::Json::parse(R"({"on":true,"bri":200})");
+    remote.setWledState(stateIn);
+
+    // Get state
+    fl::Json stateOut = remote.getWledState();
+    REQUIRE(stateOut.contains("on"));
+    REQUIRE(stateOut.contains("bri"));
+
+    bool on = stateOut["on"] | false;
+    int64_t bri = stateOut["bri"] | 0;
+
+    REQUIRE(on);
+    REQUIRE_EQ(bri, 200);
+}
+
+// Test: Partial state updates (missing fields don't corrupt state)
+TEST_CASE("Remote: WLED partial state updates") {
+    fl::Remote remote;
+
+    // Set initial state
+    fl::Json fullState = fl::Json::parse(R"({"on":true,"bri":100})");
+    remote.setWledState(fullState);
+    REQUIRE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 100);
+
+    // Update only brightness (on should remain true)
+    fl::Json partialBri = fl::Json::parse(R"({"bri":50})");
+    remote.setWledState(partialBri);
+    REQUIRE(remote.getOn());  // Should still be true
+    REQUIRE_EQ(remote.getBrightness(), 50);
+
+    // Update only on (brightness should remain 50)
+    fl::Json partialOn = fl::Json::parse(R"({"on":false})");
+    remote.setWledState(partialOn);
+    REQUIRE_FALSE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 50);  // Should still be 50
+}
+
+// Test: Invalid values are handled gracefully
+TEST_CASE("Remote: WLED invalid values") {
+    fl::Remote remote;
+
+    // Set initial valid state
+    fl::Json validState = fl::Json::parse(R"({"on":true,"bri":128})");
+    remote.setWledState(validState);
+
+    // Test out-of-range brightness (negative - should clamp to 0)
+    fl::Json negativeBri = fl::Json::parse(R"({"bri":-10})");
+    remote.setWledState(negativeBri);
+    REQUIRE_EQ(remote.getBrightness(), 0);  // Clamped to 0
+
+    // Test out-of-range brightness (too high - should clamp to 255)
+    fl::Json highBri = fl::Json::parse(R"({"bri":300})");
+    remote.setWledState(highBri);
+    REQUIRE_EQ(remote.getBrightness(), 255);  // Clamped to 255
+
+    // Test invalid type for bri (should keep existing value)
+    uint8_t currentBri = remote.getBrightness();
+    fl::Json invalidBri = fl::Json::parse(R"({"bri":"invalid"})");
+    remote.setWledState(invalidBri);
+    REQUIRE_EQ(remote.getBrightness(), currentBri);  // Should remain unchanged
+
+    // Test invalid JSON (should not crash)
+    fl::Json invalidJson = fl::Json(nullptr);
+    remote.setWledState(invalidJson);  // Should warn but not crash
+    REQUIRE(remote.getOn());  // State should remain unchanged
+}
+
+// Test: State roundtrip (setWledState -> getWledState preserves values)
+TEST_CASE("Remote: WLED state roundtrip") {
+    fl::Remote remote;
+
+    // Set state
+    fl::Json stateIn = fl::Json::parse(R"({"on":false,"bri":64})");
+    remote.setWledState(stateIn);
+
+    // Get state
+    fl::Json stateOut = remote.getWledState();
+
+    // Verify roundtrip
+    bool on = stateOut["on"] | true;
+    int64_t bri = stateOut["bri"] | 0;
+
+    REQUIRE_FALSE(on);
+    REQUIRE_EQ(bri, 64);
+
+    // Set state again from the retrieved JSON
+    remote.setWledState(stateOut);
+
+    // Verify still correct
+    REQUIRE_FALSE(remote.getOn());
+    REQUIRE_EQ(remote.getBrightness(), 64);
 }
 
 #endif // FASTLED_ENABLE_JSON
