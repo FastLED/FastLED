@@ -33,6 +33,7 @@
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
 #include "fl/dbg.h"
+#include "fl/stl/charconv.h"
 
 // Pico SDK headers
 FL_EXTERN_C_BEGIN
@@ -87,15 +88,15 @@ struct rp2040_isr_handle_data {
 constexpr uint8_t RP2040_PLATFORM_ID = 4;
 
 // Maximum hardware alarms
-constexpr uint8_t NUM_ALARMS = 4;
+constexpr uint8_t FL_NUM_ALARMS = 4;
 
 // Track allocated alarms
-static bool alarm_allocated[NUM_ALARMS] = {};
+static bool alarm_allocated[FL_NUM_ALARMS] = {};
 static critical_section_t alarm_lock;
 static bool alarm_lock_initialized = false;
 
 // Storage for alarm handles (to allow ISR to find user handler)
-static rp2040_isr_handle_data* alarm_handles[NUM_ALARMS] = {};
+static rp2040_isr_handle_data* alarm_handles[FL_NUM_ALARMS] = {};
 
 // =============================================================================
 // Helper Functions
@@ -116,7 +117,7 @@ static int8_t allocate_alarm() {
     critical_section_enter_blocking(&alarm_lock);
 
     int8_t alarm_num = -1;
-    for (uint8_t i = 0; i < NUM_ALARMS; i++) {
+    for (uint8_t i = 0; i < FL_NUM_ALARMS; i++) {
         if (!alarm_allocated[i]) {
             alarm_allocated[i] = true;
             alarm_num = i;
@@ -130,7 +131,7 @@ static int8_t allocate_alarm() {
 
 // Free a hardware alarm (thread-safe, multi-core safe)
 static void free_alarm(int8_t alarm_num) {
-    if (alarm_num < 0 || alarm_num >= NUM_ALARMS) {
+    if (alarm_num < 0 || alarm_num >= FL_NUM_ALARMS) {
         return;
     }
 
@@ -352,7 +353,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     }
 
     FL_DBG("GPIO interrupt attached on pin " << static_cast<int>(pin)
-           << " with events 0x" << fl::string::to_hex_string(events));
+           << " with events 0x" << fl::to_hex(events));
 
     // Populate output handle
     if (out_handle) {
