@@ -22,6 +22,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+// ESP-IDF version detection (handles legacy platforms automatically)
+// Provides: ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_5_OR_HIGHER, etc.
+#include "platforms/esp/esp_version.h"
+
 // USB Serial JTAG registers - only available on ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
 // Original ESP32, ESP32-S2 do not have USB Serial JTAG hardware
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
@@ -41,6 +45,11 @@ static void* s_user_data = nullptr;
 
 } // namespace detail
 
+// Forward declaration of shutdown handler (ESP-IDF v5.0+)
+#if ESP_IDF_VERSION_5_OR_HIGHER
+static void watchdog_shutdown_handler(void);
+#endif
+
 void watchdog_setup(uint32_t timeout_ms,
                     watchdog_callback_t callback,
                     void* user_data) {
@@ -49,6 +58,14 @@ void watchdog_setup(uint32_t timeout_ms,
     // Store user callback and data for panic handler (defined in init.cpp)
     detail::s_user_callback = callback;
     detail::s_user_data = user_data;
+
+#if ESP_IDF_VERSION_5_OR_HIGHER
+    // ESP-IDF v5.0+: Register shutdown handler for safe USB disconnect before reset
+    // This is the proper ESP-IDF API for pre-reset cleanup
+    // (panic handler override no longer possible - panic API made private)
+    esp_register_shutdown_handler(watchdog_shutdown_handler);
+#endif
+    // ESP-IDF v4.x and earlier: Uses weak symbol override below (esp_panic_handler_reconfigure_wdts)
 
     // Deinitialize default watchdog first to clear any existing configuration
     // ONLY if FreeRTOS scheduler is running (esp_task_wdt_deinit uses FreeRTOS APIs)
@@ -80,20 +97,15 @@ void watchdog_setup(uint32_t timeout_ms,
 
 } // namespace fl
 
-// ESP32 panic hook to perform safe USB disconnect before reset
-// This runs when the watchdog triggers a panic or any system panic occurs
-//
-// IMPORTANT: This function overrides a weak symbol in ESP-IDF's panic handler.
-// The function signature and behavior must match ESP-IDF expectations.
-// See: esp-idf/components/esp_system/panic.c
-extern "C" void esp_panic_handler_reconfigure_wdts(void) {
+// Common USB disconnect logic shared between v4 and v5
+static void perform_safe_usb_disconnect(const char* handler_name) {
     // Call user callback first if provided (from watchdog setup)
     if (fl::detail::s_user_callback != nullptr) {
         fl::detail::s_user_callback(fl::detail::s_user_data);
     }
 
-    // Print watchdog/panic message
-    FL_DBG("\n[PANIC HANDLER] System panic detected - performing safe USB reset");
+    // Print handler message
+    FL_DBG("\n[" << handler_name << "] System reset detected - performing safe USB disconnect");
 
 #if HAS_USB_SERIAL_JTAG
     // Force USB disconnect to prevent phantom device on Windows
@@ -105,15 +117,37 @@ extern "C" void esp_panic_handler_reconfigure_wdts(void) {
     SET_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLDOWN);
 
     // Give Windows time to detect disconnect (150ms minimum)
-    // Note: This delay is safe in panic handler context
+    // Note: This delay is safe in reset handler context
     fl::delayMicroseconds(150000);  // 150ms = 150000 microseconds
 
-    FL_DBG("[PANIC HANDLER] ✓ USB disconnected - proceeding with reset");
+    FL_DBG("[" << handler_name << "] ✓ USB disconnected - proceeding with reset");
 #else
     // Original ESP32, ESP32-S2: No native USB Serial JTAG
     // Uses external USB-to-UART chip (CP2102, CH340, etc.) which auto-resets
-    FL_DBG("[PANIC HANDLER] No USB Serial JTAG hardware - using default reset behavior");
+    FL_DBG("[" << handler_name << "] No USB Serial JTAG hardware - using default reset behavior");
 #endif
 }
+
+#if ESP_IDF_VERSION_5_OR_HIGHER
+// ESP-IDF v5.0+ shutdown handler (uses official shutdown handler API)
+// This runs when the system is shutting down (watchdog, panic, or esp_restart)
+//
+// IMPORTANT: ESP-IDF v5.0+ made panic handler functions private, so we use
+// the official shutdown handler API (esp_register_shutdown_handler).
+// See: esp-idf/components/esp_system/include/esp_system.h
+static void watchdog_shutdown_handler(void) {
+    perform_safe_usb_disconnect("SHUTDOWN v5");
+}
+#else
+// ESP-IDF v4.x and earlier panic handler override (weak symbol override)
+// This runs when the watchdog triggers a panic or any system panic occurs
+//
+// IMPORTANT: ESP-IDF v4.x and earlier allow overriding weak symbols in panic handler.
+// This function signature must match ESP-IDF v4.x expectations.
+// See: esp-idf v4.x components/esp_system/panic.c
+extern "C" void esp_panic_handler_reconfigure_wdts(void) {
+    perform_safe_usb_disconnect("PANIC v4");
+}
+#endif
 
 #endif // ESP32 (compiler builtin guard)
