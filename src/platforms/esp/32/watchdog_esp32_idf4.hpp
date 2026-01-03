@@ -44,7 +44,7 @@ constexpr uint32_t USB_DISCONNECT_DELAY_US = 150000;
 // USB Disconnect Logic
 // ============================================================================
 
-namespace {
+namespace detail {
 
 // Performs hardware-level USB disconnect sequence
 void disconnect_usb_hardware() {
@@ -56,14 +56,14 @@ void disconnect_usb_hardware() {
     SET_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLDOWN);
 
     // Wait for Windows to detect disconnect
-    fl::delayMicroseconds(detail::USB_DISCONNECT_DELAY_US);
+    fl::delayMicroseconds(USB_DISCONNECT_DELAY_US);
 #endif
 }
 
 // Invokes user callback if registered
 void invoke_user_callback() {
-    if (detail::s_user_callback != nullptr) {
-        detail::s_user_callback(detail::s_user_data);
+    if (s_user_callback != nullptr) {
+        s_user_callback(s_user_data);
     }
 }
 
@@ -82,7 +82,7 @@ void handle_system_reset(const char* handler_name) {
 #endif
 }
 
-} // anonymous namespace
+} // namespace detail
 
 // ============================================================================
 // Watchdog Configuration
@@ -151,8 +151,9 @@ void watchdog_setup(uint32_t timeout_ms,
 
 // ESP-IDF v4.x panic handler override
 // Overrides weak symbol in esp-idf/components/esp_system/panic.c
+// IMPORTANT: Must qualify with fl::detail:: to access function in detail namespace
 extern "C" void esp_panic_handler_reconfigure_wdts(void) {
-    handle_system_reset("PANIC FastLED idfv4");
+    fl::detail::handle_system_reset("PANIC FastLED idfv4");
 }
 
 #endif // ESP32

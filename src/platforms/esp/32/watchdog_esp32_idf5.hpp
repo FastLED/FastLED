@@ -82,15 +82,19 @@ void handle_system_reset(const char* handler_name) {
 #endif
 }
 
+} // anonymous namespace
+
 // ESP-IDF v5.0+ shutdown handler
 // Uses official shutdown handler API (esp_register_shutdown_handler)
 // See: esp-idf/components/esp_system/include/esp_system.h
-// Forward declared for use in watchdog_setup below
+// IMPORTANT: Defined in fl namespace scope so it can be registered with ESP-IDF
+// and can access helper functions from the anonymous namespace above
+namespace {
 static void watchdog_shutdown_handler_v5(void) {
     handle_system_reset("SHUTDOWN FastLED idfv5");
 }
-
 } // anonymous namespace
+
 
 // ============================================================================
 // Watchdog Configuration
@@ -131,8 +135,6 @@ void log_watchdog_status(uint32_t timeout_ms, watchdog_callback_t callback) {
     FL_DBG("[WATCHDOG] ℹ️  Automatically monitors loop() execution - no manual feeding needed");
 }
 
-// Forward declaration from first anonymous namespace (for use in watchdog_setup)
-static void watchdog_shutdown_handler_v5(void);
 
 } // anonymous namespace
 
