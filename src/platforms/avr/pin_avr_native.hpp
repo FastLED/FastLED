@@ -215,6 +215,116 @@ static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
     8, 9, 10, 11, 12, 13, 14, 15, // A8-A15
 };
 
+#elif defined(__AVR_ATmega4809__) || defined(ARDUINO_AVR_NANO_EVERY)
+
+// ATmega4809 (Arduino Nano Every) - megaAVR architecture
+// This chip uses a different port register structure: PORTB.DIR instead of DDRB
+// The Arduino core provides compatibility macros, but we need to ensure proper addressing
+
+// Arduino Nano Every pin mapping (same physical layout as Nano/Uno)
+static const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+    PD, // 0 - PORTD
+    PD, // 1 - PORTD
+    PD, // 2 - PORTD (was PA in earlier revisions)
+    PD, // 3 - PORTD (was PF in earlier revisions)
+    PD, // 4 - PORTD (was PC in earlier revisions)
+    PD, // 5 - PORTD (was PB in earlier revisions)
+    PD, // 6 - PORTD (was PF in earlier revisions)
+    PD, // 7 - PORTD (was PA in earlier revisions)
+    PB, // 8 - PORTB (was PE in earlier revisions)
+    PB, // 9 - PORTB
+    PB, // 10 - PORTB
+    PB, // 11 - PORTB (was PE in earlier revisions)
+    PB, // 12 - PORTB (was PE in earlier revisions)
+    PB, // 13 - PORTB (was PE in earlier revisions)
+    PC, // 14 - PORTC (A0)
+    PC, // 15 - PORTC (A1)
+    PC, // 16 - PORTC (A2)
+    PC, // 17 - PORTC (A3)
+    PC, // 18 - PORTC (A4 / SDA)
+    PC, // 19 - PORTC (A5 / SCL)
+};
+
+// Maps Arduino digital pin numbers to bit masks
+static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
+    _BV(0), // 0, port D
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(6),
+    _BV(7),
+    _BV(0), // 8, port B
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(0), // 14, port C
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+};
+
+// For ATmega4809, we use the .DIR, .OUT, .IN members of PORT structures
+// The Arduino core provides compatibility macros that map DDRB -> PORTB.DIR, etc.
+static const uint16_t PROGMEM port_to_mode_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+#if defined(DDRB)
+    (uint16_t) &DDRB,  // Arduino core provides compatibility macro
+    (uint16_t) &DDRC,
+    (uint16_t) &DDRD,
+#else
+    (uint16_t) &PORTB.DIR,  // Native megaAVR register access
+    (uint16_t) &PORTC.DIR,
+    (uint16_t) &PORTD.DIR,
+#endif
+};
+
+static const uint16_t PROGMEM port_to_output_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+#if defined(PORTB)
+    (uint16_t) &PORTB,  // Arduino core provides compatibility macro
+    (uint16_t) &PORTC,
+    (uint16_t) &PORTD,
+#else
+    (uint16_t) &PORTB.OUT,  // Native megaAVR register access
+    (uint16_t) &PORTC.OUT,
+    (uint16_t) &PORTD.OUT,
+#endif
+};
+
+static const uint16_t PROGMEM port_to_input_PGM[] = {
+    NOT_A_PORT,
+    NOT_A_PORT,
+#if defined(PINB)
+    (uint16_t) &PINB,  // Arduino core provides compatibility macro
+    (uint16_t) &PINC,
+    (uint16_t) &PIND,
+#else
+    (uint16_t) &PORTB.IN,  // Native megaAVR register access
+    (uint16_t) &PORTC.IN,
+    (uint16_t) &PORTD.IN,
+#endif
+};
+
+// Analog pin to ADC channel mapping (A0-A5 -> ADC0-ADC5)
+static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
+    0, // A0 -> ADC0
+    1, // A1 -> ADC1
+    2, // A2 -> ADC2
+    3, // A3 -> ADC3
+    4, // A4 -> ADC4
+    5, // A5 -> ADC5
+    6, // A6 (internal only on some variants)
+    7, // A7 (internal only on some variants)
+};
+
 #else
 // Fallback for other AVR variants (minimal implementation)
 static const uint8_t PROGMEM digital_pin_to_port_PGM[] = { PB, PB, PB, PB, PB, PB };
