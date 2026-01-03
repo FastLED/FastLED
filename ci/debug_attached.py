@@ -37,7 +37,7 @@ Phase 4: Monitor
     - --expect: Monitors until timeout, exits 0 if ALL regex patterns match, exits 1 if any missing
     - --fail-on: Terminates immediately on regex match, exits 1
     - --stop: Early exit on regex match, exits 0 if all expects found (saves time on long tests)
-    - --exit-on-error: Terminates immediately on regex match (default: \bERROR\b), accepts custom pattern
+    - --exit-on-error: Terminates immediately on regex match, exits 1 (can specify multiple patterns)
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
@@ -65,8 +65,8 @@ Usage:
     uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
     uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
     uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
-    uv run ci/debug_attached.py --exit-on-error          # Exit 1 immediately if \bERROR\b pattern matches (default)
-    uv run ci/debug_attached.py --exit-on-error "ClearCommError"  # Exit 1 immediately if custom pattern found
+    uv run ci/debug_attached.py --exit-on-error "ERROR"  # Exit 1 immediately if ERROR pattern found
+    uv run ci/debug_attached.py --exit-on-error "ClearCommError" --exit-on-error "register dump"  # Multiple exit patterns
     uv run ci/debug_attached.py --fail-on "PANIC"        # Exit 1 immediately if "PANIC" pattern found
     uv run ci/debug_attached.py --fail-on "ERROR" --fail-on "CRASH"  # Exit 1 on any pattern match
     uv run ci/debug_attached.py --no-fail-on             # Explicitly disable all failure patterns
@@ -909,8 +909,8 @@ Examples:
   %(prog)s --timeout 120            # Monitor for 120 seconds (default: 60s)
   %(prog)s --timeout 2m             # Monitor for 2 minutes
   %(prog)s --timeout 5000ms         # Monitor for 5 seconds
-  %(prog)s --exit-on-error          # Exit 1 immediately if \bERROR\b pattern matches (default)
-  %(prog)s --exit-on-error "ClearCommError"  # Exit 1 immediately if custom pattern found
+  %(prog)s --exit-on-error "ERROR"  # Exit 1 immediately if ERROR pattern found
+  %(prog)s --exit-on-error "ClearCommError" --exit-on-error "register dump"  # Multiple exit patterns
   %(prog)s --fail-on "PANIC"        # Exit 1 immediately if "PANIC" pattern found
   %(prog)s --fail-on "ERROR" --fail-on "CRASH"  # Exit 1 on any pattern match
   %(prog)s --no-fail-on             # Explicitly disable all failure patterns
@@ -967,10 +967,10 @@ Examples:
     )
     parser.add_argument(
         "--exit-on-error",
-        nargs="?",
-        const=r"\bERROR\b",
+        action="append",
+        dest="exit_on_error_patterns",
         metavar="PATTERN",
-        help=r"Exit 1 immediately if pattern found. Default pattern: \bERROR\b (word boundary). Accepts custom regex pattern.",
+        help=r"Exit 1 immediately if pattern found (can be specified multiple times). If specified without value, uses default pattern: \bERROR\b (word boundary). Accepts custom regex patterns.",
     )
     parser.add_argument(
         "--fail-on",
@@ -1080,7 +1080,7 @@ def main() -> int:
             return 1
 
     # Validate --fail-on and --no-fail-on conflict
-    if args.no_fail_on and (args.fail_keywords or args.exit_on_error):
+    if args.no_fail_on and (args.fail_keywords or args.exit_on_error_patterns):
         print(
             "❌ Error: Cannot specify both --no-fail-on and --fail-on/--exit-on-error"
         )
@@ -1094,9 +1094,9 @@ def main() -> int:
         # Start with empty list (new default: no immediate fail)
         fail_keywords: list[str] = []
 
-        # Add regex pattern if --exit-on-error specified (with optional custom pattern)
-        if args.exit_on_error:
-            fail_keywords.append(args.exit_on_error)
+        # Add regex patterns from --exit-on-error (can be specified multiple times)
+        if args.exit_on_error_patterns:
+            fail_keywords.extend(args.exit_on_error_patterns)
 
         # Add custom patterns from --fail-on
         if args.fail_keywords:
