@@ -10,11 +10,20 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
 #include "fl/trace.h"
+#include "platforms/init_channel_engine.h"
 
 namespace fl {
 
 ChannelBusManager& ChannelBusManager::instance() {
-    return Singleton<ChannelBusManager>::instance();
+    auto& out = Singleton<ChannelBusManager>::instance();
+    // Lazy initialization of platform-specific channel engines
+    // C++11 guarantees thread-safe static initialization
+    static bool sInitialized = false;
+    if (!sInitialized) {
+        sInitialized = true;
+        platform::initChannelEngines();
+    }
+    return out;
 }
 
 ChannelBusManager::ChannelBusManager() {

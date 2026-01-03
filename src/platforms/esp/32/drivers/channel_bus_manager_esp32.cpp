@@ -1,8 +1,9 @@
 /// @file channel_bus_manager_esp32.cpp
-/// @brief ESP32-specific ChannelBusManager singleton and initialization
+/// @brief ESP32-specific channel engine initialization
 ///
-/// This file provides the ESP32 singleton accessor and configures it with
-/// ESP32-specific engines (PARLIO, SPI, RMT) in priority order.
+/// This file provides lazy initialization of ESP32-specific channel engines
+/// (PARLIO, SPI, RMT) in priority order. Engines are registered on first
+/// access to ChannelBusManager::instance().
 ///
 /// Priority Order:
 /// - PARLIO (100): Highest performance, best timing (ESP32-P4, C6, H2, C5)
@@ -92,27 +93,28 @@ static void addRmtIfPossible(ChannelBusManager& manager) {
 #endif
 }
 
-/// @brief Initialize ESP32 channel bus manager with platform-specific engines
+} // namespace detail
+
+namespace platform {
+
+/// @brief Initialize channel engines for ESP32
 ///
-/// This function is called automatically during C++ static initialization (before main())
-/// to configure the ChannelBusManager singleton with ESP32-specific engines.
-void initializeChannelBusManager() {
-    FL_DBG("ESP32: Initializing ChannelBusManager with platform engines");
+/// Called lazily on first access to ChannelBusManager::instance().
+/// Registers platform-specific engines (PARLIO, SPI, RMT) with the bus manager.
+void initChannelEngines() {
+    FL_DBG("ESP32: Lazy initialization of channel engines");
 
     auto& manager = channelBusManager();
 
     // Add engines in priority order (each function handles platform-specific ifdefs)
-    addParlioIfPossible(manager);
-    addSpiIfPossible(manager);
-    addRmtIfPossible(manager);
+    detail::addParlioIfPossible(manager);
+    detail::addSpiIfPossible(manager);
+    detail::addRmtIfPossible(manager);
 
-    FL_DBG("ESP32: ChannelBusManager initialization complete");
+    FL_DBG("ESP32: Channel engines initialized");
 }
 
-// Register initialization function to run before main()
-FL_INIT(initializeChannelBusManager);
-
-} // namespace detail
+} // namespace platform
 
 } // namespace fl
 
