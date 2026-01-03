@@ -60,6 +60,14 @@ def get_cpp_files() -> list[Path]:
                 if not skip:
                     files.append(file_path)
 
+    # Also monitor linter scripts in ci/lint_cpp/
+    # If linter logic changes, we should re-run linting
+    lint_cpp_dir = Path("ci/lint_cpp")
+    if lint_cpp_dir.exists():
+        for py_file in lint_cpp_dir.glob("*.py"):
+            if py_file.is_file():
+                files.append(py_file)
+
     return sorted(files, key=str)
 
 

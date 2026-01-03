@@ -97,37 +97,35 @@ if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
     uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
     PYTHON_LINT_DURATION=$(get_elapsed_seconds $PYTHON_LINT_START)
 
-    # Check if pyright needs to run using Meson's dependency tracking
-    echo "Checking if pyright needs to run..."
-
-    # Ensure Meson has generated the timestamp (tracks ci/** + test.py + pyproject.toml)
-    meson compile -C .build/meson python_lint_tracker > /dev/null 2>&1 || true
-
-    PYTHON_LINT_TIMESTAMP=".build/meson/python_lint.timestamp"
-    PYTHON_LINT_MARKER=".cache/python_lint.marker"
-
-    # Run pyright if:
-    # - No marker file exists (first time)
-    # - Meson timestamp is newer than marker (Python code changed)
-    # - --no-fingerprint flag is set
+    # Check if pyright needs to run using fingerprint cache
     PYRIGHT_START=$(date +%s)
     PYRIGHT_SKIPPED=false
-    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$PYTHON_LINT_MARKER" ] || [ "$PYTHON_LINT_TIMESTAMP" -nt "$PYTHON_LINT_MARKER" ] 2>/dev/null; then
-        if [ "$NO_FINGERPRINT" = true ]; then
-            echo "Running pyright (--no-fingerprint flag set)"
+
+    if [ "$NO_FINGERPRINT" = true ]; then
+        echo "Running pyright (--no-fingerprint flag set)"
+        NEEDS_PYRIGHT=true
+    else
+        # Use Python fingerprint cache to check if files changed
+        # Exit code 0 = needs run, Exit code 1 = skip
+        if uv run python ci/python_lint_cache.py check; then
+            NEEDS_PYRIGHT=true
         else
-            echo "Running pyright (Python files changed)"
+            NEEDS_PYRIGHT=false
         fi
+    fi
+
+    if [ "$NEEDS_PYRIGHT" = true ]; then
         if uv run pyright; then
             # Mark pyright as successful
-            touch "$PYTHON_LINT_MARKER"
+            uv run python ci/python_lint_cache.py success
             echo "✅ pyright passed"
         else
+            # Invalidate cache on failure so it reruns next time
+            uv run python ci/python_lint_cache.py failure
             echo "❌ pyright failed"
             exit 1
         fi
     else
-        echo "✅ No Python changes detected - skipping pyright"
         PYRIGHT_SKIPPED=true
     fi
     PYRIGHT_DURATION=$(get_elapsed_seconds $PYRIGHT_START)
@@ -140,42 +138,28 @@ fi
 if [ "$JS_ONLY" = false ]; then
     export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
-    # C++ linting with Meson dependency tracking
+    # C++ linting with fingerprint cache
     echo ""
     echo "🔧 C++ LINTING"
     echo "---------------"
 
-    # Check if C++ linting needs to run using Meson's dependency tracking
-    # Ensure Meson has generated the timestamp (tracks src/** + examples/**)
-    meson compile -C .build/meson cpp_lint_tracker > /dev/null 2>&1 || true
-
-    CPP_LINT_TIMESTAMP=".build/meson/cpp_lint.timestamp"
-    CPP_LINT_MARKER=".cache/cpp_lint.marker"
-
-    # Check if any linter scripts in ci/lint_cpp/ have changed
-    LINTER_CHANGED=false
-    if [ -f "$CPP_LINT_MARKER" ]; then
-        for linter_script in ci/lint_cpp/*.py; do
-            if [ -f "$linter_script" ] && [ "$linter_script" -nt "$CPP_LINT_MARKER" ]; then
-                LINTER_CHANGED=true
-                break
-            fi
-        done
-    else
-        LINTER_CHANGED=true
-    fi
-
     CPP_LINT_START=$(date +%s)
     CPP_LINT_SKIPPED=false
-    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null || [ "$LINTER_CHANGED" = true ]; then
-        if [ "$NO_FINGERPRINT" = true ]; then
-            echo "Running C++ linting (--no-fingerprint flag set)"
-        elif [ "$LINTER_CHANGED" = true ]; then
-            echo "Linter scripts in ci/lint_cpp/ changed - running C++ linting"
-        else
-            echo "Source or example files changed - running C++ linting"
-        fi
 
+    if [ "$NO_FINGERPRINT" = true ]; then
+        echo "Running C++ linting (--no-fingerprint flag set)"
+        NEEDS_CPP_LINT=true
+    else
+        # Use C++ fingerprint cache to check if files changed
+        # Exit code 0 = needs run, Exit code 1 = skip
+        if uv run python ci/cpp_lint_cache.py check; then
+            NEEDS_CPP_LINT=true
+        else
+            NEEDS_CPP_LINT=false
+        fi
+    fi
+
+    if [ "$NEEDS_CPP_LINT" = true ]; then
         folders=(
             #"src/lib8tion"
             #"src/platforms/stub"
@@ -197,25 +181,28 @@ if [ "$JS_ONLY" = false ]; then
         echo "🔍 C++ CUSTOM LINTERS (UNIFIED)"
         echo "-------------------------------"
         echo "Running unified C++ checker (all content-based linters in one pass)"
-        uv run python ci/lint_cpp/run_all_checkers.py || {
+        if uv run python ci/lint_cpp/run_all_checkers.py; then
+            # Check for relative includes (paths with "..")
+            # Only enforce strict no-relative-includes rule for src/, not examples/
+            echo ""
+            echo "Running cpp_lint.py (relative includes check for src/ only)"
+            if uv run python cpp_lint.py src/; then
+                # Mark C++ linting as successful
+                uv run python ci/cpp_lint_cache.py success
+                echo "✅ C++ linting passed"
+            else
+                # Invalidate cache on failure so it reruns next time
+                uv run python ci/cpp_lint_cache.py failure
+                echo "❌ cpp_lint.py failed: Found relative includes in src/"
+                exit 1
+            fi
+        else
+            # Invalidate cache on failure so it reruns next time
+            uv run python ci/cpp_lint_cache.py failure
             echo "❌ Unified C++ linter failed"
             exit 1
-        }
-
-        # Check for relative includes (paths with "..")
-        # Only enforce strict no-relative-includes rule for src/, not examples/
-        echo ""
-        echo "Running cpp_lint.py (relative includes check for src/ only)"
-        uv run python cpp_lint.py src/ || {
-            echo "❌ cpp_lint.py failed: Found relative includes in src/"
-            exit 1
-        }
-
-        # Mark C++ linting as successful
-        mkdir -p .cache
-        touch "$CPP_LINT_MARKER"
+        fi
     else
-        echo "✅ No C++ changes detected - skipping C++ linting"
         CPP_LINT_SKIPPED=true
     fi
     CPP_LINT_DURATION=$(get_elapsed_seconds $CPP_LINT_START)
