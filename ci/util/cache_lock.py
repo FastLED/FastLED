@@ -7,20 +7,37 @@ Handles fine-grained per-artifact locking for concurrent downloads.
 """
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 from ci.util.file_lock_rw import (
     FileLock,
     _read_lock_metadata,
     break_stale_lock,
-    download_lock,
     is_lock_stale,
 )
 from ci.util.url_utils import sanitize_url_for_path
 
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class LockInfo:
+    """Container for lock metadata information."""
+
+    path: str
+    pid: int | None
+    operation: str
+    timestamp: str | None
+    is_stale: bool
+    hostname: str | None
+
+    def __str__(self) -> str:
+        """Human-readable lock information."""
+        status = "STALE" if self.is_stale else "ACTIVE"
+        pid_str = f"PID {self.pid}" if self.pid else "unknown PID"
+        return f"{status}: {self.path} ({pid_str}, {self.operation})"
 
 
 def acquire_artifact_lock(
@@ -134,7 +151,7 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
     return cleaned_count
 
 
-def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None]]:
+def list_active_locks(cache_dir: Path) -> list[LockInfo]:
     """
     List all active locks in cache directory with metadata.
 
@@ -142,7 +159,7 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None
         cache_dir: Global cache directory
 
     Returns:
-        List of dictionaries with lock information:
+        List of LockInfo objects containing:
         - path: Path to lock file
         - pid: Process ID holding lock (None if unknown)
         - operation: Operation name
@@ -153,13 +170,12 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None
     Example:
         locks = list_active_locks(Path("~/.platformio/global_cache"))
         for lock in locks:
-            status = "STALE" if lock["is_stale"] else "ACTIVE"
-            print(f"{status}: {lock['path']} (PID {lock['pid']}, {lock['operation']})")
+            print(lock)  # Uses LockInfo.__str__ for formatting
     """
     if not cache_dir.exists():
         return []
 
-    locks: list[dict[str, str | int | bool | None]] = []
+    locks: list[LockInfo] = []
 
     # Find all .lock files recursively
     for lock_file in cache_dir.rglob("*.lock"):
@@ -168,14 +184,14 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None
             if metadata is None:
                 # Lock exists but no metadata
                 locks.append(
-                    {
-                        "path": str(lock_file),
-                        "pid": None,
-                        "operation": "unknown",
-                        "timestamp": None,
-                        "is_stale": False,  # Can't determine, assume active
-                        "hostname": None,
-                    }
+                    LockInfo(
+                        path=str(lock_file),
+                        pid=None,
+                        operation="unknown",
+                        timestamp=None,
+                        is_stale=False,  # Can't determine, assume active
+                        hostname=None,
+                    )
                 )
                 continue
 
@@ -183,14 +199,14 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None
             stale = is_lock_stale(lock_file)
 
             locks.append(
-                {
-                    "path": str(lock_file),
-                    "pid": metadata.get("pid"),
-                    "operation": metadata.get("operation", "unknown"),
-                    "timestamp": metadata.get("timestamp"),
-                    "is_stale": stale,
-                    "hostname": metadata.get("hostname"),
-                }
+                LockInfo(
+                    path=str(lock_file),
+                    pid=metadata.get("pid"),
+                    operation=metadata.get("operation", "unknown"),
+                    timestamp=metadata.get("timestamp"),
+                    is_stale=stale,
+                    hostname=metadata.get("hostname"),
+                )
             )
 
         except Exception as e:

@@ -34,6 +34,7 @@ from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.util.check_files import (
+    CheckerResults,
     FileContentChecker,
     MultiCheckerFileProcessor,
     collect_files_to_check,
@@ -185,10 +186,10 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
 def run_checkers(
     files_by_dir: dict[str, list[str]],
     checkers_by_scope: dict[str, list[FileContentChecker]],
-) -> dict[str, dict[str, list[tuple[int, str]]]]:
+) -> dict[str, CheckerResults]:
     """Run all checkers - MULTI-PASS approach for performance (minimizes should_process_file() calls)."""
     processor = MultiCheckerFileProcessor()
-    all_results: dict[str, dict[str, list[tuple[int, str]]]] = {}
+    all_results: dict[str, CheckerResults] = {}
 
     # MULTI-PASS: Process each scope separately with pre-filtered files
     # This minimizes the number of should_process_file() calls compared to single-pass
@@ -297,49 +298,61 @@ def run_checkers(
         checker_name = checker.__class__.__name__
         violations = getattr(checker, "violations", None)
         if violations:
+            # Convert legacy dict format to CheckerResults
+            if isinstance(violations, CheckerResults):
+                results = violations
+            else:
+                # Legacy dict format
+                results = CheckerResults()
+                for file_path, violation_list in violations.items():
+                    if isinstance(violation_list, list):
+                        for item in violation_list:  # type: ignore[misc]
+                            if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[arg-type]
+                                line_num: int = int(item[0])  # type: ignore[misc]
+                                content: str = str(item[1])  # type: ignore[misc]
+                                results.add_violation(file_path, line_num, content)
+                    elif isinstance(violation_list, str):
+                        results.add_violation(file_path, 0, violation_list)
+
             # Merge violations from multiple checkers with same name
             if checker_name not in all_results:
-                all_results[checker_name] = {}
-            all_results[checker_name].update(violations)
+                all_results[checker_name] = results
+            else:
+                # Merge into existing results
+                for file_path, file_violations in results.violations.items():
+                    for violation in file_violations.violations:
+                        all_results[checker_name].add_violation(
+                            file_path, violation.line_number, violation.content
+                        )
 
     return all_results
 
 
-def format_and_print_results(
-    results: dict[str, dict[str, list[tuple[int, str]]]],
-) -> int:
+def format_and_print_results(results: dict[str, CheckerResults]) -> int:
     """Format and print all violations. Returns exit code (0 = success, 1 = failures)."""
     total_violations = 0
 
-    for checker_name, violations in sorted(results.items()):
-        violation_count = len(violations)
-        if violation_count == 0:
+    for checker_name, checker_results in sorted(results.items()):
+        if not checker_results.has_violations():
             continue
 
+        file_count = checker_results.file_count()
+        violation_count = checker_results.total_violations()
         total_violations += violation_count
+
         print(f"\n{'=' * 80}")
-        print(f"[{checker_name}] Found {violation_count} violation(s):")
+        print(
+            f"[{checker_name}] Found {violation_count} violation(s) in {file_count} file(s):"
+        )
         print("=" * 80)
 
-        for file_path, details in sorted(violations.items()):
+        for file_path in sorted(checker_results.violations.keys()):
             rel_path = os.path.relpath(file_path, PROJECT_ROOT)
-            print(f"\n{rel_path}:")
+            file_violations = checker_results.violations[file_path]
 
-            # Handle different violation formats
-            if isinstance(details, list):
-                # List of (line_num, content) tuples
-                for item in details:
-                    if isinstance(item, tuple) and len(item) >= 2:
-                        line_num, content = item[0], item[1]
-                        print(f"  Line {line_num}: {content}")
-                    else:
-                        print(f"  {item}")
-            elif isinstance(details, str):
-                # Simple string message
-                print(f"  {details}")
-            else:
-                # Unknown format
-                print(f"  {details}")
+            print(f"\n{rel_path}:")
+            for violation in file_violations.violations:
+                print(f"  Line {violation.line_number}: {violation.content}")
 
     if total_violations > 0:
         print(f"\n{'=' * 80}")

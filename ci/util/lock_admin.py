@@ -44,19 +44,19 @@ def list_locks(cache_dir: Path) -> int:
     stale_count = 0
 
     for lock in locks:
-        status_icon = "🔴 STALE" if lock["is_stale"] else "🟢 ACTIVE"
-        pid = lock["pid"] if lock["pid"] else "unknown"
-        operation = lock["operation"]
-        timestamp = lock["timestamp"] if lock["timestamp"] else "unknown"
-        hostname = lock["hostname"] if lock["hostname"] else "unknown"
+        status_icon = "🔴 STALE" if lock.is_stale else "🟢 ACTIVE"
+        pid = lock.pid if lock.pid else "unknown"
+        operation = lock.operation
+        timestamp = lock.timestamp if lock.timestamp else "unknown"
+        hostname = lock.hostname if lock.hostname else "unknown"
 
-        if lock["is_stale"]:
+        if lock.is_stale:
             stale_count += 1
         else:
             active_count += 1
 
         print(f"\n{status_icon}")
-        print(f"  Path: {lock['path']}")
+        print(f"  Path: {lock.path}")
         print(f"  PID: {pid}")
         print(f"  Operation: {operation}")
         print(f"  Timestamp: {timestamp}")

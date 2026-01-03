@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, cast
+from typing import cast
 
 from ci.util.paths import PROJECT_ROOT
 
@@ -28,6 +28,68 @@ class FileContent:
     def __post_init__(self):
         if not self.lines:
             self.lines = self.content.splitlines()
+
+
+@dataclass
+class Violation:
+    """Container for a single violation at a specific line."""
+
+    line_number: int
+    content: str
+
+
+@dataclass
+class FileViolations:
+    """Container for violations in a single file."""
+
+    file_path: str
+    violations: list[Violation]
+
+    def __init__(self, file_path: str):
+        """Initialize with empty violations list."""
+        self.file_path = file_path
+        self.violations = []
+
+    def add_violation(self, line_number: int, content: str) -> None:
+        """Add a violation to this file."""
+        self.violations.append(Violation(line_number, content))
+
+    def violation_count(self) -> int:
+        """Get the number of violations in this file."""
+        return len(self.violations)
+
+    def has_violations(self) -> bool:
+        """Check if there are any violations."""
+        return len(self.violations) > 0
+
+
+@dataclass
+class CheckerResults:
+    """Container for all violations found by a checker."""
+
+    violations: dict[str, FileViolations]
+
+    def __init__(self):
+        """Initialize with empty violations dict."""
+        self.violations = {}
+
+    def add_violation(self, file_path: str, line_number: int, content: str) -> None:
+        """Add a violation for a file."""
+        if file_path not in self.violations:
+            self.violations[file_path] = FileViolations(file_path)
+        self.violations[file_path].add_violation(line_number, content)
+
+    def total_violations(self) -> int:
+        """Get total number of violations across all files."""
+        return sum(fv.violation_count() for fv in self.violations.values())
+
+    def file_count(self) -> int:
+        """Get number of files with violations."""
+        return len(self.violations)
+
+    def has_violations(self) -> bool:
+        """Check if any violations were found."""
+        return len(self.violations) > 0
 
 
 class FileContentChecker(ABC):
@@ -131,7 +193,7 @@ class FileProcessorCallback(FileContentChecker):
 class GenericFileSearcher:
     """Generic file searcher that processes files using a callback pattern."""
 
-    def __init__(self, max_workers: Optional[int] = None):
+    def __init__(self, max_workers: int | None = None):
         self.max_workers = max_workers or NUM_WORKERS
 
     def search_directory(
@@ -189,7 +251,7 @@ class GenericFileSearcher:
 
 
 def collect_files_to_check(
-    test_directories: list[str], extensions: Optional[list[str]] = None
+    test_directories: list[str], extensions: list[str] | None = None
 ) -> list[str]:
     """Collect all files to check from the given directories."""
     if extensions is None:
@@ -250,40 +312,39 @@ def run_checker_standalone(
         print(f"✅ {description}: No violations found.")
         sys.exit(0)
 
-    # Violations can be dict[str, list[tuple[int, str]]] or dict[str, str]
-    violations = cast(
-        dict[str, list[tuple[int, str]] | str], getattr(checker, "violations")
-    )
+    violations = getattr(checker, "violations")
 
-    if violations:
-        total_violations = sum(
-            len(v) if isinstance(v, list) else 1 for v in violations.values()
-        )
-        file_count = len(violations)
+    # Support both legacy dict format and new CheckerResults format
+    if isinstance(violations, CheckerResults):
+        results = violations
+    else:
+        # Legacy format - convert to CheckerResults
+        results = CheckerResults()
+        for file_path, violation_list in violations.items():
+            if isinstance(violation_list, list):
+                for item in violation_list:  # type: ignore[misc]
+                    if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[arg-type]
+                        line_num: int = int(item[0])  # type: ignore[misc]
+                        content: str = str(item[1])  # type: ignore[misc]
+                        results.add_violation(file_path, line_num, content)
+            elif isinstance(violation_list, str):
+                results.add_violation(file_path, 0, violation_list)
+
+    if results.has_violations():
+        total_violations = results.total_violations()
+        file_count = results.file_count()
 
         print(f"❌ {description} ({file_count} files, {total_violations} violations):")
         print()
 
         # Sort files by relative path
-        for file_path in sorted(violations.keys()):
+        for file_path in sorted(results.violations.keys()):
             rel_path = file_path.replace(str(PROJECT_ROOT), "").lstrip("\\/")
-            violation_data = violations[file_path]
+            file_violations = results.violations[file_path]
 
             print(f"{rel_path}:")
-
-            # Handle different violation formats
-            if isinstance(violation_data, list):
-                for item in violation_data:
-                    if isinstance(item, tuple) and len(item) >= 2:
-                        line_num, content = item[0], item[1]
-                        print(f"  Line {line_num}: {content}")
-                    else:
-                        print(f"  {item}")
-            elif isinstance(violation_data, str):
-                print(f"  {violation_data}")
-            else:
-                print(f"  {violation_data}")
-
+            for violation in file_violations.violations:
+                print(f"  Line {violation.line_number}: {violation.content}")
             print()
 
         sys.exit(1)

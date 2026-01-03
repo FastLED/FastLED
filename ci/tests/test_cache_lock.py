@@ -223,8 +223,8 @@ class TestListActiveLocks(unittest.TestCase):
         self.assertEqual(len(locks), 2)
 
         # Find each lock
-        stale_info = next((l for l in locks if "artifact1" in str(l["path"])), None)
-        active_info = next((l for l in locks if "artifact2" in str(l["path"])), None)
+        stale_info = next((l for l in locks if "artifact1" in str(l.path)), None)
+        active_info = next((l for l in locks if "artifact2" in str(l.path)), None)
 
         self.assertIsNotNone(stale_info)
         self.assertIsNotNone(active_info)
@@ -233,14 +233,14 @@ class TestListActiveLocks(unittest.TestCase):
         assert active_info is not None
 
         # Check stale lock info
-        self.assertTrue(stale_info["is_stale"])
-        self.assertEqual(stale_info["pid"], 999999)
-        self.assertEqual(stale_info["operation"], "stale_op")
+        self.assertTrue(stale_info.is_stale)
+        self.assertEqual(stale_info.pid, 999999)
+        self.assertEqual(stale_info.operation, "stale_op")
 
         # Check active lock info
-        self.assertFalse(active_info["is_stale"])
-        self.assertEqual(active_info["pid"], os.getpid())
-        self.assertEqual(active_info["operation"], "active_op")
+        self.assertFalse(active_info.is_stale)
+        self.assertEqual(active_info.pid, os.getpid())
+        self.assertEqual(active_info.operation, "active_op")
 
 
 class TestIsArtifactLocked(unittest.TestCase):
