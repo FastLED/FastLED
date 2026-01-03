@@ -167,6 +167,7 @@ test_specific_args = [
   '-DFASTLED_UNIT_TEST=1',
   '-DFASTLED_USE_JSON_UI=1',
   '-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS',
+  '-DFASTLED_DEBUG_STACK_TRACE',
 ]
 
 # Example-specific compilation flags (reserved for future use)
