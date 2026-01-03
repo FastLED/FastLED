@@ -8,9 +8,10 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from running_process import RunningProcess
 
@@ -936,7 +937,7 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
         return False
 
 
-def _create_error_context_filter(context_lines: int = 20) -> callable:
+def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], None]:
     """
     Create a filter function that only shows output when errors are detected.
 
@@ -1105,7 +1106,9 @@ def run_meson_test(
             # If test failed and we didn't see individual test results, show error context
             if returncode != 0 and num_run == 0:
                 # Create error-detecting filter
-                error_filter = _create_error_context_filter(context_lines=20)
+                error_filter: Callable[[str], None] = _create_error_context_filter(
+                    context_lines=20
+                )
 
                 # Process accumulated output to show error context
                 output_lines = proc.stdout.splitlines()
@@ -1277,10 +1280,10 @@ def run_meson_build_and_test(
     # No manual staleness checking needed - Ninja rebuilds PCH when any dependency changes.
 
     # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
-    meson_test_name = None
+    meson_test_name: Optional[str] = None
     if test_name:
         # Convert to lowercase to match Meson target naming convention
-        test_name_lower = test_name.lower()
+        test_name_lower: str = test_name.lower()
         if not test_name_lower.startswith("test_"):
             meson_test_name = f"test_{test_name_lower}"
         else:
@@ -1290,7 +1293,7 @@ def run_meson_build_and_test(
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
             # In unity mode, always build all_tests target (no individual test targets exist)
-            compile_target = None
+            compile_target: Optional[str] = None
             if unity:
                 compile_target = "all_tests"
             elif meson_test_name:
@@ -1316,7 +1319,7 @@ def run_meson_build_and_test(
         ]
 
         # Find which category executables exist
-        category_executables = []
+        category_executables: list[tuple[str, Path]] = []
         for category in test_categories:
             # Try Windows .exe first, then Unix variant
             exe_path = build_dir / "tests" / f"{category}.exe"
@@ -1334,7 +1337,7 @@ def run_meson_build_and_test(
             return MesonTestResult(success=False, duration=time.time() - start_time)
 
         # If specific test requested, filter categories or prepare doctest filter
-        filter_name = None
+        filter_name: Optional[str] = None
         if meson_test_name:
             filter_name = meson_test_name.replace("test_", "")
             _ts_print(
@@ -1389,7 +1392,9 @@ def run_meson_build_and_test(
                             f"[MESON] Category {category_name} failed:", file=sys.stderr
                         )
                         # Create error-detecting filter
-                        error_filter = _create_error_context_filter(context_lines=20)
+                        error_filter: Callable[[str], None] = (
+                            _create_error_context_filter(context_lines=20)
+                        )
 
                         # Process accumulated output to show error context
                         output_lines = proc.stdout.splitlines()

@@ -140,15 +140,17 @@ def check_lock(lock_file: Path) -> int:
     print("=" * 80)
 
     # Offer to break stale lock
-    if metadata and not is_process_alive(metadata.get("pid")):
-        response = input("\nThis lock is stale. Break it? (yes/no): ")
-        if response.lower() == "yes":
-            if break_stale_lock(lock_file):
-                print("✅ Lock broken successfully")
-                return 0
-            else:
-                print("❌ Failed to break lock")
-                return 1
+    if metadata:
+        pid = metadata.get("pid")
+        if pid is not None and isinstance(pid, int) and not is_process_alive(pid):
+            response = input("\nThis lock is stale. Break it? (yes/no): ")
+            if response.lower() == "yes":
+                if break_stale_lock(lock_file):
+                    print("✅ Lock broken successfully")
+                    return 0
+                else:
+                    print("❌ Failed to break lock")
+                    return 1
 
     return 0
 
