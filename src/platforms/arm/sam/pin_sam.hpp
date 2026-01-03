@@ -31,6 +31,10 @@
 // 2. This ensures compatibility with Arduino Due builds
 // 3. Non-Arduino builds use pin_sam_native.hpp instead
 
+// Include SAM device headers for Pio type and PIOA/PIOB/PIOC/PIOD register definitions
+// chip.h includes sam.h which in turn includes the device-specific headers (sam3x8e.h, etc.)
+#include <chip.h>
+
 namespace fl {
 namespace platform {
 
@@ -58,22 +62,20 @@ inline void pinMode(int pin, PinMode mode) {
         case PinMode::Output:
             pio->PIO_OER = mask;   // Enable output
             pio->PIO_PUDR = mask;  // Disable pull-up
-            pio->PIO_PPDDR = mask; // Disable pull-down
             break;
         case PinMode::Input:
             pio->PIO_ODR = mask;   // Disable output (input mode)
             pio->PIO_PUDR = mask;  // Disable pull-up
-            pio->PIO_PPDDR = mask; // Disable pull-down
             break;
         case PinMode::InputPullup:
             pio->PIO_ODR = mask;   // Disable output (input mode)
             pio->PIO_PUER = mask;  // Enable pull-up
-            pio->PIO_PPDDR = mask; // Disable pull-down
             break;
         case PinMode::InputPulldown:
+            // SAM3X8E does not support internal pull-down resistors
+            // Fall back to standard input mode
             pio->PIO_ODR = mask;   // Disable output (input mode)
             pio->PIO_PUDR = mask;  // Disable pull-up
-            pio->PIO_PPDER = mask; // Enable pull-down
             break;
     }
 }
