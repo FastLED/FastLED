@@ -117,6 +117,8 @@ uint8_t getTimerChannel(uint8_t pin, TIM_TypeDef* timer);
 // ============================================================================
 // These functions are only available when FASTLED_STM32_HAS_DMA_STREAMS is defined
 
+#ifdef FASTLED_STM32_HAS_DMA_STREAMS
+
 /// @brief Enable RCC clock for DMA controller
 /// @param dma DMA controller (DMA1 or DMA2)
 void enableDMAClock(DMA_TypeDef* dma);
@@ -164,6 +166,8 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream);
 /// @brief Stop DMA transfer
 /// @param stream DMA stream
 void stopDMA(DMA_Stream_TypeDef* stream);
+
+#endif  // FASTLED_STM32_HAS_DMA_STREAMS
 
 }  // namespace stm32
 }  // namespace fl

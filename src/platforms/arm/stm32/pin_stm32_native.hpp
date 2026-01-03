@@ -21,6 +21,7 @@
 #endif
 #if __has_include("pinmap.h")
 #include "pinmap.h"          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
+#define FL_STM32_HAS_PINMAP 1  // Marker that pinmap functions are available
 #endif
 
 #include "fl/warn.h"
@@ -36,17 +37,12 @@ namespace platform {
 
 inline void pinMode(int pin, PinMode mode) {
 #ifdef HAL_GPIO_MODULE_ENABLED
-    PinName pin_name = digitalPinToPinName(pin);
-    if (pin_name == NC) {
+    // Use native helper functions instead of Arduino-specific digitalPinToPinName()
+    GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
+    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
+
+    if (port == nullptr || pin_mask == 0) {
         FL_WARN("STM32: Invalid pin " << pin);
-        return;
-    }
-
-    GPIO_TypeDef* port = get_GPIO_Port(STM_PORT(pin_name));
-    uint32_t pin_mask = STM_GPIO_PIN(pin_name);
-
-    if (port == nullptr) {
-        FL_WARN("STM32: Failed to get GPIO port for pin " << pin);
         return;
     }
 
@@ -128,15 +124,11 @@ inline void pinMode(int pin, PinMode mode) {
 
 inline void digitalWrite(int pin, PinValue val) {
 #ifdef HAL_GPIO_MODULE_ENABLED
-    PinName pin_name = digitalPinToPinName(pin);
-    if (pin_name == NC) {
-        return;
-    }
+    // Use native helper functions instead of Arduino-specific digitalPinToPinName()
+    GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
+    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
 
-    GPIO_TypeDef* port = get_GPIO_Port(STM_PORT(pin_name));
-    uint32_t pin_mask = STM_GPIO_PIN(pin_name);
-
-    if (port == nullptr) {
+    if (port == nullptr || pin_mask == 0) {
         return;
     }
 
@@ -151,15 +143,11 @@ inline void digitalWrite(int pin, PinValue val) {
 
 inline PinValue digitalRead(int pin) {
 #ifdef HAL_GPIO_MODULE_ENABLED
-    PinName pin_name = digitalPinToPinName(pin);
-    if (pin_name == NC) {
-        return PinValue::Low;
-    }
+    // Use native helper functions instead of Arduino-specific digitalPinToPinName()
+    GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
+    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
 
-    GPIO_TypeDef* port = get_GPIO_Port(STM_PORT(pin_name));
-    uint32_t pin_mask = STM_GPIO_PIN(pin_name);
-
-    if (port == nullptr) {
+    if (port == nullptr || pin_mask == 0) {
         return PinValue::Low;
     }
 
@@ -176,10 +164,20 @@ inline PinValue digitalRead(int pin) {
 // ============================================================================
 
 inline uint16_t analogRead(int pin) {
-#ifdef HAL_ADC_MODULE_ENABLED
+    // NOTE: analogRead requires STM32duino pinmap functions for ADC channel mapping
+    // This is because there's no direct way to map Arduino pin numbers to ADC channels
+    // without the pinmap tables provided by STM32duino core.
+    // For non-Arduino STM32 builds, ADC must be configured manually using HAL APIs.
+    (void)pin;
+    FL_WARN("STM32: analogRead not available without STM32duino core");
+    return 0;
+#if 0  // Disabled: requires STM32duino pinmap functions
+#if defined(HAL_ADC_MODULE_ENABLED) && defined(FL_STM32_HAS_PINMAP)
     // Implementation based on STM32duino analog.cpp adc_read_value()
     // Uses HAL ADC APIs for single-shot 12-bit ADC conversion
 
+    // Note: ADC pinmapping requires STM32duino pinmap functions (pinmap_find_function, pinmap_peripheral)
+    // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
         FL_WARN("STM32: Invalid pin " << pin);
@@ -210,8 +208,19 @@ inline uint16_t analogRead(int pin) {
     AdcHandle.Lock = HAL_UNLOCKED;
 
     // ADC initialization parameters (12-bit resolution, single conversion)
+    // Note: STM32F1 has different ADC struct members than F2/F4/F7
+#if defined(STM32F1) || defined(STM32F1xx) || defined(STM32F10X_MD)
+    // STM32F1 ADC configuration (no ClockPrescaler, Resolution, EOCSelection, etc.)
+    AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    AdcHandle.Init.ScanConvMode = DISABLE;
+    AdcHandle.Init.ContinuousConvMode = DISABLE;
+    AdcHandle.Init.NbrOfConversion = 1;
+    AdcHandle.Init.DiscontinuousConvMode = DISABLE;
+    AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+#else
+    // STM32F2/F4/F7/L4/H7 ADC configuration
     AdcHandle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
-    AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;  // 10-bit Arduino compatibility scaled later
+    AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
     AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
     AdcHandle.Init.ScanConvMode = DISABLE;
     AdcHandle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -221,6 +230,7 @@ inline uint16_t analogRead(int pin) {
     AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
     AdcHandle.Init.DMAContinuousRequests = DISABLE;
+#endif
 
     // Initialize ADC peripheral
     if (HAL_ADC_Init(&AdcHandle) != HAL_OK) {
@@ -281,14 +291,25 @@ inline uint16_t analogRead(int pin) {
 #else
     (void)pin;
     return 0;
-#endif
+#endif  // HAL_ADC_MODULE_ENABLED && FL_STM32_HAS_PINMAP
+#endif  // #if 0 - disabled code
 }
 
 inline void analogWrite(int pin, uint16_t val) {
-#ifdef HAL_TIM_MODULE_ENABLED
+    // NOTE: analogWrite requires STM32duino pinmap functions for Timer channel mapping
+    // This is because there's no direct way to map Arduino pin numbers to Timer channels
+    // without the pinmap tables provided by STM32duino core.
+    // For non-Arduino STM32 builds, PWM must be configured manually using HAL TIM APIs.
+    (void)pin;
+    (void)val;
+    FL_WARN("STM32: analogWrite not available without STM32duino core");
+#if 0  // Disabled: requires STM32duino pinmap functions
+#if defined(HAL_TIM_MODULE_ENABLED) && defined(FL_STM32_HAS_PINMAP)
     // Implementation based on STM32duino analog.cpp pwm_start()
     // Uses HAL Timer PWM APIs for 8-bit PWM output (Arduino-compatible)
 
+    // Note: PWM pinmapping requires STM32duino pinmap functions (pinmap_find_function, pinmap_peripheral)
+    // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
         FL_WARN("STM32: Invalid pin " << pin);
@@ -302,8 +323,8 @@ inline void analogWrite(int pin, uint16_t val) {
     uint32_t function = pinmap_find_function(pin_name, PinMap_TIM);
     if (function == (uint32_t)NC) {
         // Pin doesn't support PWM - fall back to digital write
-        fl::pinMode(pin, 1);  // OUTPUT mode
-        fl::digitalWrite(pin, val >= 128 ? 1 : 0);
+        fl::pinMode(pin, PinMode::Output);
+        fl::digitalWrite(pin, val >= 128 ? PinValue::High : PinValue::Low);
         return;
     }
 
@@ -445,7 +466,8 @@ inline void analogWrite(int pin, uint16_t val) {
 #else
     (void)pin;
     (void)val;
-#endif
+#endif  // HAL_TIM_MODULE_ENABLED && FL_STM32_HAS_PINMAP
+#endif  // #if 0 - disabled code
 }
 
 inline void setPwm16(int pin, uint16_t val) {
