@@ -814,7 +814,7 @@ inline bool transpose_strips(
 ///
 /// @tparam DATA_WIDTH Number of parallel lanes (1, 2, 4, 8, or 16) - compile-time constant
 template<size_t DATA_WIDTH>
-FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_parlio_template(
     const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
     uint8_t* FL_RESTRICT_PARAM outputBuffer
 ) {
@@ -912,7 +912,7 @@ FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio_template(
 /// uint8_t output[16];              // Max output size
 /// size_t written = transpose_wave8byte_parlio(laneWaveforms, 8, output);
 /// ```
-FASTLED_FORCE_INLINE size_t transpose_wave8byte_parlio(
+FASTLED_FORCE_INLINE FL_IRAM size_t transpose_wave8byte_parlio(
     const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
     size_t data_width,
     uint8_t* FL_RESTRICT_PARAM outputBuffer

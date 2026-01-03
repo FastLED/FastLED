@@ -14,7 +14,7 @@ namespace fl {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 
-void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
+void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) {
     uint32_t x, y, t;
 
     // Load the array and pack it into x and y.

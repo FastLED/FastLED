@@ -14,6 +14,10 @@
 #if FASTLED_ESP32_HAS_PARLIO
 
 #include "parlio_engine.h"
+#include "parlio_isr_context.h"
+#include "parlio_buffer_calc.h"
+#include "parlio_debug.h"
+#include "parlio_ring_buffer.h"
 #include "fl/delay.h"
 #include "fl/error.h"
 #include "fl/log.h"
@@ -42,10 +46,6 @@ FL_EXTERN_C_END
 #warning \
     "PARLIO: CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is not defined! Add 'build_flags = -DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1' to platformio.ini or your build system"
 #endif
-
-#define FL_PARLIO_DMA_MALLOC_FLAGS  (MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)
-#define FL_PARLIO_DMA_NEEDS_SYNC !(MALLOC_CAP_INTERNAL & FL_PARLIO_DMA_MALLOC_FLAGS)
-
 
 namespace fl {
 namespace detail {
@@ -78,94 +78,16 @@ namespace detail {
 #define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
-// Total DMA ring buffer memory cap (all 3 ring buffers combined)
-// Prevents OOM on constrained platforms while allowing streaming for large LED counts
-// Override via build flags: -DFASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES=<bytes>
-#ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES
-  #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    // ESP32-C6/S3: 256 KB total (fits in ~512 KB SRAM, leaves room for other allocations)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
-  #elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    // ESP32-P4: 512 KB total (better performance, larger SRAM available)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (512 * 1024)
-  #else
-    // Conservative default for unknown platforms
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
-  #endif
+// Worker timer configuration (for ISR-based buffer population)
+// - Resolution: 1MHz = 1µs per tick (sufficient for 10µs timer period)
+// - Interrupt priority: Level 3 for timely response without blocking critical ISRs
+#ifndef FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ
+#define FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ 1000000  // 1MHz = 1µs resolution
 #endif
 
-// Minimum cap validation (supports at least 1 LED × 16 lanes)
-static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12 * 1024,
-              "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES too small (minimum 12 KB)");
-
-//=============================================================================
-// ISR-Safe Memory Operations
-//=============================================================================
-
-/// @brief ISR-safe memset replacement (manual loop copy)
-/// fl::memset is not allowed in ISR context on some platforms
-/// This function uses a simple loop to zero memory
-FL_OPTIMIZE_FUNCTION static inline void FL_IRAM
-isr_memset_zero(uint8_t* dest, size_t count) {
-    for (size_t i = 0; i < count; i++) {
-        dest[i] = 0x00;
-    }
-}
-
-/// @brief ISR-safe cache sync for DMA buffers
-/// @param buffer_ptr Pointer to buffer to sync
-/// @param buffer_size Size of buffer in bytes
-/// @param context Context string for async logging (unused - logging suppressed)
-/// @return esp_err_t result from esp_cache_msync (ESP_OK or error code)
-///
-/// CRITICAL: This function is callable from ISR context (FL_IRAM attribute)
-/// - Memory barriers ensure proper ordering
-/// - esp_cache_msync errors are suppressed (expected on ESP32-C6 with MALLOC_CAP_INTERNAL)
-///
-/// Expected behavior on ESP32-C6:
-/// - MALLOC_CAP_INTERNAL buffers: Returns ESP_ERR_INVALID_ARG (258) but still improves accuracy
-/// - MALLOC_CAP_DMA buffers: Returns ESP_ERR_INVALID_ARG (address not cacheable)
-/// - Despite errors, cache sync improves data integrity from 44% corruption to 99.97% accuracy
-/// - Error logging is suppressed to avoid flooding output (errors are expected and benign)
-FL_OPTIMIZE_FUNCTION static inline esp_err_t FL_IRAM
-isr_cache_sync(void* buffer_ptr, size_t buffer_size, const char* context) {
-    // Suppress unused parameter warning
-    FL_UNUSED(context);
-    if (!FL_PARLIO_DMA_NEEDS_SYNC) {
-        return ESP_OK;
-    }
-
-    // Memory barrier: Ensure all preceding writes complete before cache sync
-    FL_MEMORY_BARRIER;
-
-    // Cache sync (may return ESP_ERR_INVALID_ARG on ESP32-C6, but still essential for data integrity)
-    esp_err_t err = esp_cache_msync(
-        buffer_ptr,
-        buffer_size,
-        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
-
-    // Memory barrier: Ensure cache sync completes before DMA submission
-    FL_MEMORY_BARRIER;
-
-    // Note: Error logging suppressed - esp_cache_msync returns errors on ESP32-C6 with
-    // MALLOC_CAP_INTERNAL, but the function still has beneficial side effects for
-    // data integrity. Logging hundreds of expected errors clutters output.
-
-    return err;
-}
-
-//=============================================================================
-// ParlioIsrContext Implementation
-//=============================================================================
-
-ParlioIsrContext::ParlioIsrContext()
-    : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
-      mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
-      mHardwareIdle(false), mNextByteOffset(0), mWorkerIsrEnabled(false),
-      mTotalBytes(0), mNumLanes(0), mIsrCount(0),
-      mBytesTransmitted(0), mChunksCompleted(0),
-      mTransmissionActive(false), mEndTimeUs(0) {
-}
+#ifndef FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY
+#define FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY 3  // Priority level 3
+#endif
 
 //=============================================================================
 // Pin Validation Using FastLED's _FL_PIN_VALID System
@@ -200,141 +122,6 @@ static inline bool isParlioPinValid(int pin) {
 }
 
 //=============================================================================
-// Buffer Size Calculator - Unified DMA Buffer Size Calculations
-//=============================================================================
-
-/// @brief Unified calculator for PARLIO buffer sizes
-///
-/// Consolidates all buffer size calculations into a single, tested utility.
-/// Wave8 expands each input byte to 64 pulses (8 bits × 8 pulses per bit).
-/// Transposition packs pulses into bytes based on data_width.
-struct ParlioBufferCalculator {
-    size_t mDataWidth;
-
-    /// @brief Calculate output bytes per input byte after wave8 + transpose
-    /// @return Output bytes per input byte (8 for width≤8, 128 for width=16)
-    size_t outputBytesPerInputByte() const {
-        if (mDataWidth <= 8) {
-            // Bit-packed: 64 pulses packed into (8 / mDataWidth) ticks per byte
-            // For data_width=1: 64 pulses / 8 ticks = 8 bytes
-            // For data_width=2: 64 pulses / 4 ticks = 16 bytes
-            // For data_width=4: 64 pulses / 2 ticks = 32 bytes
-            // For data_width=8: 64 pulses / 1 tick = 64 bytes
-            size_t ticksPerByte = 8 / mDataWidth;
-            return (64 + ticksPerByte - 1) / ticksPerByte;
-        } else if (mDataWidth == 16) {
-            // 16-bit mode: 64 pulses × 2 bytes per pulse = 128 bytes
-            return 128;
-        }
-        return 8; // Fallback
-    }
-
-    /// @brief Calculate DMA buffer size for given input bytes (includes reset padding)
-    /// @param inputBytes Number of input bytes to transmit
-    /// @param reset_us Reset time in microseconds (default: 0)
-    /// @return Total DMA buffer size in bytes (pixel data + reset padding)
-    size_t dmaBufferSize(size_t inputBytes, uint32_t reset_us = 0) const {
-        size_t pixel_bytes = inputBytes * outputBytesPerInputByte();
-        size_t padding_bytes = resetPaddingBytes(reset_us);
-        return pixel_bytes + padding_bytes;
-    }
-
-    /// @brief Calculate transpose output block size for populateDmaBuffer
-    /// @return Block size in bytes for transpose operation
-    size_t FL_IRAM transposeBlockSize() const {
-        if (mDataWidth <= 8) {
-            size_t ticksPerByte = 8 / mDataWidth;
-            size_t pulsesPerByte = 64;
-            return (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
-        } else if (mDataWidth == 16) {
-            return 128; // 64 pulses × 2 bytes per pulse
-        }
-        return 8; // Fallback
-    }
-
-    /// @brief Calculate additional bytes needed for reset time padding
-    /// @param reset_us Reset time in microseconds
-    /// @return Bytes to append for reset padding (all-zero Wave8Bytes)
-    ///
-    /// Calculation:
-    /// - Each Wave8Byte = 64 pulses × 125ns (8MHz clock) = 8µs
-    /// - Reset padding bytes = ceil(reset_us / 8µs) × 8 bytes
-    /// - Example: 280µs reset ÷ 8µs = 35 Wave8Bytes = 280 bytes
-    size_t resetPaddingBytes(uint32_t reset_us) const {
-        if (reset_us == 0) {
-            return 0;
-        }
-
-        // Each Wave8Byte covers 8µs (64 ticks at 8MHz)
-        constexpr size_t US_PER_WAVE8BYTE = 8;
-
-        // Calculate number of Wave8Bytes needed (round up)
-        size_t num_wave8bytes = (reset_us + US_PER_WAVE8BYTE - 1) / US_PER_WAVE8BYTE;
-
-        // Convert to byte count (8 bytes per Wave8Byte)
-        return num_wave8bytes * 8;
-    }
-
-    /// @brief Calculate optimal ring buffer capacity based on LED frame boundaries
-    /// @param maxLedsPerChannel Maximum LEDs per channel (strip size)
-    /// @param reset_us Reset time in microseconds (for padding calculation)
-    /// @param numRingBuffers Number of ring buffers (default: 3)
-    /// @return DMA buffer capacity in bytes, aligned to LED boundaries
-    ///
-    /// Algorithm:
-    /// 1. Calculate LEDs per buffer: maxLedsPerChannel / numRingBuffers
-    /// 2. Convert to input bytes: LEDs × 3 bytes/LED × mDataWidth (multi-lane)
-    /// 3. Apply wave8 expansion (8:1 ratio): input_bytes × outputBytesPerInputByte()
-    /// 4. Add reset padding bytes (only to last buffer in stream)
-    /// 5. Add safety margin for boundary checks
-    /// 6. Result is DMA buffer capacity per ring buffer
-    ///
-    /// Example (3000 LEDs, 1 lane, 3 ring buffers, 280µs reset):
-    /// - LEDs per buffer: 3000 / 3 = 1000 LEDs
-    /// - Input bytes per buffer: 1000 × 3 × 1 = 3000 bytes
-    /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
-    /// - Reset padding: 280 bytes (35 Wave8Bytes × 8 bytes)
-    /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
-    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, uint32_t reset_us, size_t numRingBuffers = 3) const {
-        // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
-        size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
-
-        // Step 2: Calculate input bytes per buffer
-        // - 3 bytes per LED (RGB)
-        // - Multiply by mDataWidth for multi-lane (each lane gets same LED count)
-        size_t inputBytesPerBuffer = ledsPerBuffer * 3 * mDataWidth;
-
-        // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
-        //         and add reset padding bytes (for last buffer in stream)
-        size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer, reset_us);
-
-        // Step 4: Apply total ring buffer memory cap (prevent OOM on C6/S3)
-        // When cap exceeded, system uses streaming mode (multiple buffer iterations)
-        constexpr size_t TOTAL_CAP = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES;
-        size_t perBufferCap = TOTAL_CAP / numRingBuffers;
-
-        if (dmaBufferCapacity > perBufferCap) {
-            size_t uncappedCapacity = dmaBufferCapacity;
-            dmaBufferCapacity = perBufferCap;
-
-            // Debug logging (enabled via FL_LOG_PARLIO macro)
-            FL_LOG_PARLIO("PARLIO: Ring buffer capped at " << dmaBufferCapacity
-                   << " bytes/buffer (uncapped: " << uncappedCapacity
-                   << ", total cap: " << TOTAL_CAP << " bytes)");
-        }
-
-        // Step 5: Add safety margin to prevent boundary check failures
-        // The populateDmaBuffer() boundary check at line 505 tests (outputIdx + blockSize > capacity)
-        // When buffer is filled exactly to capacity, we need extra space for the final block
-        // Safety margin = max(transposeBlockSize) = 128 bytes (for 16-bit mode)
-        size_t safetyMargin = 128;
-        dmaBufferCapacity += safetyMargin;
-
-        return dmaBufferCapacity;
-    }
-};
-
-//=============================================================================
 // ParlioEngine - Singleton Implementation
 //=============================================================================
 
@@ -352,10 +139,10 @@ ParlioEngine::ParlioEngine()
       mMainTaskHandle(nullptr),
       mWorkerTaskHandle(nullptr),
       mWorkerTimerHandle(nullptr),
+      mRingBuffer(),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
       mLaneStride(0),
-      mWaveformExpansionBufferSize(0),
       mErrorOccurred(false),
       mTxUnitEnabled(false) {
 }
@@ -422,6 +209,9 @@ ParlioEngine::~ParlioEngine() {
     //     // Task will delete itself via vTaskDelete(NULL) in workerTaskFunction
     //     mWorkerTaskHandle = nullptr;
     // }
+
+    // Clean up ring buffer (unique_ptr handles deletion automatically)
+    mRingBuffer.reset();
 
     // Clean up IsrContext
     if (mIsrContext) {
@@ -496,12 +286,12 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     // The buffer that completed is the one BEFORE the current read_idx
     // (CPU or previous ISR call advanced read_idx after submitting)
     volatile size_t read_idx = ctx->mRingReadIdx;
-    size_t completed_buffer_idx = (read_idx + ParlioEngine::RING_BUFFER_COUNT - 1) % ParlioEngine::RING_BUFFER_COUNT;
+    size_t completed_buffer_idx = (read_idx + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
 
     // Track transmitted bytes (using input byte count, not expanded DMA bytes)
     // Calculate input bytes from DMA buffer size
     ParlioBufferCalculator calc{self->mDataWidth};
-    size_t dma_bytes = self->mRingBufferSizes[completed_buffer_idx];
+    size_t dma_bytes = self->mRingBuffer->sizes[completed_buffer_idx];
     size_t input_bytes = dma_bytes / calc.outputBytesPerInputByte();
     ctx->mBytesTransmitted += input_bytes;
     ctx->mCurrentByte += input_bytes;
@@ -556,8 +346,8 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     // Next buffer is ready - submit it to hardware
     size_t buffer_idx = read_idx;
-    uint8_t *buffer_ptr = self->mRingBufferPtrs[buffer_idx];  // Use cached pointer (ISR optimization)
-    size_t buffer_size = self->mRingBufferSizes[buffer_idx];
+    uint8_t *buffer_ptr = self->mRingBuffer->ptrs[buffer_idx];  // Use cached pointer (ISR optimization)
+    size_t buffer_size = self->mRingBuffer->sizes[buffer_idx];
 
     // Invalid buffer - set error flag
     if (!buffer_ptr || buffer_size == 0) {
@@ -588,7 +378,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
 
     if (err == ESP_OK) {
         // Successfully submitted - advance read index (modulo-3) and decrement count
-        ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % ParlioEngine::RING_BUFFER_COUNT;
+        ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
 
         // RACE CONDITION (TOLERATED BY DESIGN):
         // This read-modify-write on mRingCount is NOT atomic. If workerIsrCallback (lower priority)
@@ -600,7 +390,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         ctx->mHardwareIdle = false; // Hardware is active again
 
         // ARM ONE-SHOT TIMER if buffers need refilling (replaces worker task notification)
-        if (ctx->mRingCount < ParlioEngine::RING_BUFFER_COUNT &&
+        if (ctx->mRingCount < ParlioRingBuffer3::RING_BUFFER_COUNT &&
             ctx->mNextByteOffset < ctx->mTotalBytes &&
             self->mWorkerTimerHandle &&
             ctx->mWorkerIsrEnabled) {
@@ -679,7 +469,7 @@ ParlioEngine::workerTaskFunction(void* arg) {
         }
 
         // Check 2: Ring buffer full (no space to populate)
-        if (ctx->mRingCount >= ParlioEngine::RING_BUFFER_COUNT) {
+        if (ctx->mRingCount >= ParlioRingBuffer3::RING_BUFFER_COUNT) {
             continue;  // Wait for next notification
         }
 
@@ -693,14 +483,14 @@ ParlioEngine::workerTaskFunction(void* arg) {
         size_t ring_index = ctx->mRingWriteIdx;
 
         // Get ring buffer pointer (use cached pointer for optimization)
-        uint8_t *outputBuffer = self->mRingBufferPtrs[ring_index];
+        uint8_t *outputBuffer = self->mRingBuffer->ptrs[ring_index];
         if (!outputBuffer) {
             continue;  // Invalid buffer - wait for next notification
         }
 
         // Calculate byte range for this buffer
         size_t bytes_remaining = ctx->mTotalBytes - ctx->mNextByteOffset;
-        size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioEngine::RING_BUFFER_COUNT - 1) / ParlioEngine::RING_BUFFER_COUNT;
+        size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) / ParlioRingBuffer3::RING_BUFFER_COUNT;
 
         // LED boundary alignment constant
         size_t bytes_per_led_all_lanes = 3 * ctx->mNumLanes;
@@ -731,7 +521,7 @@ ParlioEngine::workerTaskFunction(void* arg) {
         // For LAST buffer, take ALL remaining bytes
         size_t byte_count;
         size_t buffers_already_populated = ctx->mRingCount;
-        bool is_last_buffer = (buffers_already_populated >= ParlioEngine::RING_BUFFER_COUNT - 1) ||
+        bool is_last_buffer = (buffers_already_populated >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
                               (bytes_remaining <= bytes_per_buffer);
         if (is_last_buffer) {
             byte_count = bytes_remaining;
@@ -753,11 +543,11 @@ ParlioEngine::workerTaskFunction(void* arg) {
         }
 
         // Store actual size of this buffer
-        self->mRingBufferSizes[ring_index] = outputBytesWritten;
+        self->mRingBuffer->sizes[ring_index] = outputBytesWritten;
 
         // Update state for next buffer
         ctx->mNextByteOffset += byte_count;
-        ctx->mRingWriteIdx = (ctx->mRingWriteIdx + 1) % ParlioEngine::RING_BUFFER_COUNT;
+        ctx->mRingWriteIdx = (ctx->mRingWriteIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
         ctx->mRingCount = ctx->mRingCount + 1;
 
         // Memory barrier to ensure state visible to on-done callback ISR
@@ -845,7 +635,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     }
 
     // Check 2: Ring buffer full (no space to populate)
-    if (ctx->mRingCount >= ParlioEngine::RING_BUFFER_COUNT) {
+    if (ctx->mRingCount >= ParlioRingBuffer3::RING_BUFFER_COUNT) {
         return false;  // Timer already stopped
     }
 
@@ -859,14 +649,14 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     size_t ring_index = ctx->mRingWriteIdx;
 
     // Get ring buffer pointer (use cached pointer for optimization)
-    uint8_t *outputBuffer = self->mRingBufferPtrs[ring_index];
+    uint8_t *outputBuffer = self->mRingBuffer->ptrs[ring_index];
     if (!outputBuffer) {
         return false;  // Invalid buffer - should never happen
     }
 
     // Calculate byte range for this buffer
     size_t bytes_remaining = ctx->mTotalBytes - ctx->mNextByteOffset;
-    size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioEngine::RING_BUFFER_COUNT - 1) / ParlioEngine::RING_BUFFER_COUNT;
+    size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) / ParlioRingBuffer3::RING_BUFFER_COUNT;
 
     // LED boundary alignment constant
     size_t bytes_per_led_all_lanes = 3 * ctx->mNumLanes;
@@ -897,7 +687,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     // For LAST buffer, take ALL remaining bytes
     size_t byte_count;
     size_t buffers_already_populated = ctx->mRingCount;
-    bool is_last_buffer = (buffers_already_populated >= ParlioEngine::RING_BUFFER_COUNT - 1) ||
+    bool is_last_buffer = (buffers_already_populated >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
                           (bytes_remaining <= bytes_per_buffer);
     if (is_last_buffer) {
         byte_count = bytes_remaining;
@@ -919,7 +709,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     }
 
     // Store actual size of this buffer
-    self->mRingBufferSizes[ring_index] = outputBytesWritten;
+    self->mRingBuffer->sizes[ring_index] = outputBytesWritten;
 
     // SYNCHRONIZATION: Additional memory barriers after buffer population
     // Ensures writes complete before txDoneCallback reads buffer for DMA submission
@@ -930,14 +720,14 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
 
     // Update state for next buffer
     ctx->mNextByteOffset += byte_count;
-    ctx->mRingWriteIdx = (ctx->mRingWriteIdx + 1) % ParlioEngine::RING_BUFFER_COUNT;
+    ctx->mRingWriteIdx = (ctx->mRingWriteIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
 
     // RACE CONDITION (TOLERATED BY DESIGN):
     // This read-modify-write on mRingCount is NOT atomic. If txDoneCallback (higher priority ISR)
     // interrupts between the read and write, the count can be temporarily incorrect by ±1.
     //
     // WHY THIS IS SAFE:
-    // 1. Bounded by Design: Worker ISR checks "mRingCount >= RING_BUFFER_COUNT" BEFORE populating (line 750).
+    // 1. Bounded by Design: Worker ISR checks "mRingCount >= ParlioRingBuffer3::RING_BUFFER_COUNT" BEFORE populating (line 750).
     //    Maximum overshoot is limited to +1 (we only increment by 1, never more).
     // 2. Self-Correcting: Race resolves on next ISR cycle. Temporary ±1 error does not propagate.
     // 3. No Buffer Corruption: Worker operates on mRingWriteIdx, txDone operates on mRingReadIdx.
@@ -983,7 +773,7 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
     // Staging buffer for wave8 output before transposition
     // Holds wave8bytes for all lanes (data_width × 8 bytes)
     // Each lane produces Wave8Byte (8 bytes) for each input byte
-    uint8_t* laneWaveforms = mWaveformExpansionBuffer.get();
+    uint8_t* laneWaveforms = mWaveformExpansionBuffer.data();
     constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
 
     size_t outputIdx = 0;
@@ -1085,8 +875,8 @@ bool ParlioEngine::hasRingSpace() const {
     // Use count to determine if ring has space (distinguishes full vs empty)
     volatile size_t count = mIsrContext->mRingCount;
 
-    // Ring has space if count is less than RING_BUFFER_COUNT
-    return count < RING_BUFFER_COUNT;
+    // Ring has space if count is less than ParlioRingBuffer3::RING_BUFFER_COUNT
+    return count < ParlioRingBuffer3::RING_BUFFER_COUNT;
 }
 
 
@@ -1095,12 +885,7 @@ bool ParlioEngine::allocateRingBuffers() {
     // Called once during initialize(), NOT per transmission
     // Buffers remain allocated, only POPULATED on-demand during transmission
 
-    // Clear any existing ring buffers
-    mRingBuffers.clear();
-    mRingBufferPtrs.clear();  // Clear cached pointers
-    mRingBufferSizes.clear();
-
-    // Allocate all ring buffers with cache alignment
+    // Allocate 3 DMA buffers with cache alignment
     // CRITICAL FINDING: ESP32-C6 DMA memory architecture
     // - MALLOC_CAP_DMA allocates from NON-cacheable memory region (SRAM1)
     // - esp_cache_msync() returns ESP_ERR_INVALID_ARG for cacheable addresses
@@ -1111,31 +896,47 @@ bool ParlioEngine::allocateRingBuffers() {
     // - Non-cacheable memory eliminates need for esp_cache_msync()
     // - Eliminates ESP-IDF cache errors that lead to system crashes
     // - Memory barriers (FL_MEMORY_BARRIER) provide ordering guarantees
-    for (size_t i = 0; i < RING_BUFFER_COUNT; i++) {
-        fl::unique_ptr<uint8_t[], HeapCapsDeleter> buffer(
-            static_cast<uint8_t *>(heap_caps_aligned_alloc(
-                64,  // ESP32-C6 cache line size (64 bytes)
-                mRingBufferCapacity,
-                FL_PARLIO_DMA_MALLOC_FLAGS)));
 
-        if (!buffer) {
+    uint8_t* buffers[3] = {nullptr, nullptr, nullptr};
+
+    // Allocate all 3 buffers
+    for (size_t i = 0; i < 3; i++) {
+        buffers[i] = static_cast<uint8_t*>(heap_caps_aligned_alloc(
+            64,  // ESP32-C6 cache line size (64 bytes)
+            mRingBufferCapacity,
+            FL_PARLIO_DMA_MALLOC_FLAGS));
+
+        if (!buffers[i]) {
             FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer "
-                    << i << "/" << RING_BUFFER_COUNT << " (requested "
-                    << mRingBufferCapacity << " bytes)");
-            // Clean up already allocated ring buffers (automatic via unique_ptr destructors)
-            mRingBuffers.clear();
-            mRingBufferSizes.clear();
+                    << i << "/3 (requested " << mRingBufferCapacity << " bytes)");
+
+            // Clean up any buffers we already allocated
+            for (size_t j = 0; j < i; j++) {
+                heap_caps_free(buffers[j]);
+            }
             return false;
         }
 
         // Zero-initialize buffer to prevent garbage data
-        fl::memset(buffer.get(), 0x00, mRingBufferCapacity);
+        fl::memset(buffers[i], 0x00, mRingBufferCapacity);
+    }
 
-        // Cache raw pointer before moving (optimization: avoid unique_ptr deref in hot paths)
-        uint8_t* raw_ptr = buffer.get();
-        mRingBuffers.push_back(fl::move(buffer));
-        mRingBufferPtrs.push_back(raw_ptr);
-        mRingBufferSizes.push_back(0); // Will be set during population
+    // Create ring buffer with unique_ptr and cleanup callback
+    mRingBuffer.reset(new ParlioRingBuffer3(
+        buffers[0], buffers[1], buffers[2],
+        mRingBufferCapacity,
+        [](uint8_t* ptr) {
+            heap_caps_free(ptr);
+        }
+    ));
+
+    if (!mRingBuffer) {
+        FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer structure");
+        // Clean up DMA buffers
+        for (size_t i = 0; i < 3; i++) {
+            heap_caps_free(buffers[i]);
+        }
+        return false;
     }
 
     return true;
@@ -1145,12 +946,12 @@ bool ParlioEngine::allocateWorkerTimer() {
     // Allocate and configure hardware timer for ISR-based background buffer population
     // Timer fires every 10µs to check for ring buffer space and populate next buffer
 
-    // Configure timer: 1MHz resolution (1µs per tick)
+    // Configure timer using defined constants
     gptimer_config_t timer_config = {
         .clk_src = GPTIMER_CLK_SRC_DEFAULT,
         .direction = GPTIMER_COUNT_UP,
-        .resolution_hz = 1000000,  // 1MHz = 1µs resolution
-        .intr_priority = 3,  // Priority level 3 for timely response
+        .resolution_hz = FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ,
+        .intr_priority = FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY,
     };
 
     esp_err_t err = gptimer_new_timer(&timer_config, &mWorkerTimerHandle);
@@ -1242,7 +1043,7 @@ ParlioEngine::populateNextDMABuffer() {
     size_t ring_index = mIsrContext->mRingWriteIdx;
 
     // Get ring buffer pointer (use cached pointer for optimization)
-    uint8_t *outputBuffer = mRingBufferPtrs[ring_index];
+    uint8_t *outputBuffer = mRingBuffer->ptrs[ring_index];
     if (!outputBuffer) {
         //FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
         mErrorOccurred = true;
@@ -1251,7 +1052,7 @@ ParlioEngine::populateNextDMABuffer() {
 
     // Calculate byte range for this buffer (divide total bytes into chunks)
     size_t bytes_remaining = mIsrContext->mTotalBytes - mIsrContext->mNextByteOffset;
-    size_t bytes_per_buffer = (mIsrContext->mTotalBytes + RING_BUFFER_COUNT - 1) / RING_BUFFER_COUNT;
+    size_t bytes_per_buffer = (mIsrContext->mTotalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) / ParlioRingBuffer3::RING_BUFFER_COUNT;
 
     // LED boundary alignment constant: 3 bytes (RGB) × lane count
     // Used for both capacity calculation and alignment rounding
@@ -1283,7 +1084,7 @@ ParlioEngine::populateNextDMABuffer() {
     // FIX: For the LAST buffer, take ALL remaining bytes (don't round down and lose data)
     size_t byte_count;
     size_t buffers_already_populated = mIsrContext->mRingCount;
-    bool is_last_buffer = (buffers_already_populated >= RING_BUFFER_COUNT - 1) ||
+    bool is_last_buffer = (buffers_already_populated >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
                           (bytes_remaining <= bytes_per_buffer);
     if (is_last_buffer) {
         byte_count = bytes_remaining;  // Last buffer takes all remaining bytes
@@ -1309,21 +1110,21 @@ ParlioEngine::populateNextDMABuffer() {
     }
 
     // Store actual size of this buffer
-    mRingBufferSizes[ring_index] = outputBytesWritten;
+    mRingBuffer->sizes[ring_index] = outputBytesWritten;
 
     // NOTE: Cache sync removed - only happens in txDoneCallback before DMA submission
 
     // Update state for next buffer (ISR context owns the state now)
     mIsrContext->mNextByteOffset += byte_count;
-    mIsrContext->mRingWriteIdx = (mIsrContext->mRingWriteIdx + 1) % RING_BUFFER_COUNT;
+    mIsrContext->mRingWriteIdx = (mIsrContext->mRingWriteIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
     mIsrContext->mRingCount = mIsrContext->mRingCount + 1;
 
     // CRITICAL: Check if hardware went idle while we were populating
     if (mIsrContext->mHardwareIdle) {
         // Get the buffer that was just populated (read_idx points to next buffer to transmit)
         size_t buffer_idx = mIsrContext->mRingReadIdx;
-        uint8_t *buffer_ptr = mRingBufferPtrs[buffer_idx];  // Use cached pointer for optimization
-        size_t buffer_size = mRingBufferSizes[buffer_idx];
+        uint8_t *buffer_ptr = mRingBuffer->ptrs[buffer_idx];  // Use cached pointer for optimization
+        size_t buffer_size = mRingBuffer->sizes[buffer_idx];
 
         if (buffer_ptr && buffer_size > 0) {
             // NOTE: Cache sync removed - only happens in txDoneCallback before DMA submission
@@ -1337,7 +1138,7 @@ ParlioEngine::populateNextDMABuffer() {
 
             if (err == ESP_OK) {
                 // Successfully restarted - advance read index and decrement count
-                mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % RING_BUFFER_COUNT;
+                mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
                 mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
                 mIsrContext->mHardwareIdle = false;
                 mIsrContext->mTransmitting = true;
@@ -1462,7 +1263,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Calculate ring buffer capacity
     ParlioBufferCalculator calc{mDataWidth};
-    size_t raw_capacity = calc.calculateRingBufferCapacity(maxLedsPerChannel, mResetUs, RING_BUFFER_COUNT);
+    size_t raw_capacity = calc.calculateRingBufferCapacity(maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT);
 
     // NEEDS REVIEW!!! are we potentially accessing memory outside of the cache??
     // Please invesatigate
@@ -1491,23 +1292,20 @@ bool ParlioEngine::initialize(size_t dataWidth,
         return false;
     }
 
-    // Allocate waveform expansion buffer
+    // Allocate waveform expansion buffer (staging buffer - CPU only, no DMA)
+    // This buffer holds intermediate wave8 data before transposition to DMA buffers
     const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
     const size_t waveform_buffer_size = mDataWidth * bytes_per_lane;
 
-    // NOTE: I don't think this needs malloc cap flags. Please experiment with removing
-    // if unnecessary.
-    mWaveformExpansionBuffer.reset(static_cast<uint8_t *>(
-        heap_caps_malloc(waveform_buffer_size, FL_PARLIO_DMA_MALLOC_FLAGS)));
+    // Use regular heap vector (not DMA) - this is a CPU-only staging buffer
+    mWaveformExpansionBuffer.resize(waveform_buffer_size);
 
-    if (!mWaveformExpansionBuffer) {
+    if (mWaveformExpansionBuffer.empty()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
         parlio_del_tx_unit(mTxUnit);
         mTxUnit = nullptr;
         return false;
     }
-
-    mWaveformExpansionBufferSize = waveform_buffer_size;
 
     // Initialize ISR context state
     if (mIsrContext) {
@@ -1607,12 +1405,12 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // Queue first buffer to start transmission
     FL_LOG_PARLIO("PARLIO: Starting ISR-based streaming | first_buffer_size="
-           << mRingBufferSizes[0] << " | buffers_ready=" << buffers_populated);
+           << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
 
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x0000;
 
-    size_t first_buffer_size = mRingBufferSizes[0];
+    size_t first_buffer_size = mRingBuffer->sizes[0];
 
     // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
     // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
@@ -1622,10 +1420,10 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // All subsequent buffers are synced in txDoneCallback
     // NOTE: isr_cache_sync() handles MALLOC_CAP_INTERNAL gracefully by using memory barriers
     // instead of esp_cache_msync() when buffer is not in cacheable DMA region
-    (void)isr_cache_sync(mRingBufferPtrs[0], first_buffer_size, "beginTx");
+    (void)isr_cache_sync(mRingBuffer->ptrs[0], first_buffer_size, "beginTx");
 
     err = parlio_tx_unit_transmit(
-        mTxUnit, mRingBufferPtrs[0],  // Use cached pointer for optimization
+        mTxUnit, mRingBuffer->ptrs[0],  // Use cached pointer for optimization
         first_buffer_size * 8, &tx_config);
 
     if (err != ESP_OK) {

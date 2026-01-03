@@ -69,6 +69,12 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
 
+// Include extracted headers
+#include "parlio_isr_context.h"
+#include "parlio_buffer_calc.h"
+#include "parlio_debug.h"
+#include "parlio_ring_buffer.h"
+
 // Forward declarations
 struct parlio_tx_unit_t;
 typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
@@ -80,66 +86,6 @@ namespace fl {
 namespace detail {
 
 //=============================================================================
-// Custom Deleter for heap_caps_malloc'd Memory
-//=============================================================================
-
-struct HeapCapsDeleter {
-    void operator()(uint8_t *ptr) const {
-        if (ptr) {
-            heap_caps_free(ptr);
-        }
-    }
-};
-
-//=============================================================================
-// ISR Context Structure
-//=============================================================================
-
-/// @brief Cache-aligned ISR context for PARLIO transmission state
-///
-/// ⚠️  ISR SAFETY RULES - READ BEFORE MODIFYING:
-/// 1. ❌ NO LOGGING in ISR (txDoneCallback) - causes watchdog timeouts
-/// 2. ❌ NO BLOCKING in ISR - mutex, delay, heap allocation forbidden
-/// 3. ✅ ONLY ISR-SAFE FreeRTOS functions (xSemaphoreGiveFromISR, etc.)
-/// 4. ✅ MINIMIZE execution time (ideally <10µs)
-///
-/// Memory Synchronization Model:
-/// - ISR writes to volatile fields (mStreamComplete, mTransmitting, etc.)
-/// - Main thread reads volatile fields directly (compiler ensures fresh read)
-/// - After detecting mStreamComplete==true, main executes memory barrier
-/// - Memory barrier ensures all ISR writes visible before reading non-volatile fields
-struct alignas(64) ParlioIsrContext {
-    // === Volatile Fields (ISR writes, main reads) ===
-    volatile bool mStreamComplete;
-    volatile bool mTransmitting;
-    volatile size_t mCurrentByte;
-    volatile size_t mRingReadIdx;    // 0-2 (for 3-buffer ring)
-    volatile size_t mRingWriteIdx;   // 0-2 (for 3-buffer ring)
-    volatile size_t mRingCount;      // 0-3 (distinguishes full vs empty)
-    volatile bool mRingError;
-    volatile bool mHardwareIdle;
-    volatile size_t mNextByteOffset; // Next byte offset in source data (Worker ISR updates)
-    volatile bool mWorkerIsrEnabled; // Worker ISR armed state
-
-    // === Non-Volatile Fields (read after barrier only) ===
-    size_t mTotalBytes;
-    size_t mNumLanes;
-    uint32_t mIsrCount;
-    uint32_t mBytesTransmitted;
-    uint32_t mChunksCompleted;
-    bool mTransmissionActive;
-    uint64_t mEndTimeUs;
-
-    // === Debug Counters (volatile for ISR access) ===
-    volatile uint32_t mDebugTxDoneCount;       // Count of txDoneCallback invocations
-    volatile uint32_t mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
-    volatile uint64_t mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
-    volatile uint64_t mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
-
-    ParlioIsrContext();
-};
-
-//=============================================================================
 // Engine State Enum
 //=============================================================================
 
@@ -147,22 +93,6 @@ enum class ParlioEngineState {
     READY,      ///< Engine ready for new transmission
     BUSY,       ///< Transmission in progress
     ERROR       ///< Error occurred during transmission
-};
-
-//=============================================================================
-// Debug Metrics Structure
-//=============================================================================
-
-struct ParlioDebugMetrics {
-    uint64_t mStartTimeUs;
-    uint64_t mEndTimeUs;
-    uint32_t mIsrCount;
-    uint32_t mChunksQueued;
-    uint32_t mChunksCompleted;
-    uint32_t mBytesTotal;
-    uint32_t mBytesTransmitted;
-    uint32_t mErrorCode;
-    bool mTransmissionActive;
 };
 
 //=============================================================================
@@ -336,20 +266,17 @@ private:
     // Worker timer for ISR-based background buffer population (gptimer_handle_t)
     gptimer_handle_t mWorkerTimerHandle;
 
-    // Ring buffer architecture (3 buffers for streaming - ISR-based cooperative streaming)
-    static constexpr size_t RING_BUFFER_COUNT = 3;
-    fl::vector<fl::unique_ptr<uint8_t[], HeapCapsDeleter>> mRingBuffers;
-    fl::vector<uint8_t*> mRingBufferPtrs;  // Cached raw pointers (avoids unique_ptr deref in hot paths)
-    fl::vector<size_t> mRingBufferSizes;
-    size_t mRingBufferCapacity;
+    // Ring buffer for DMA streaming (fixed 3-buffer architecture)
+    fl::unique_ptr<ParlioRingBuffer3> mRingBuffer;
+    size_t mRingBufferCapacity;  // Capacity of each ring buffer (64-byte aligned)
 
     // Scratch buffer pointer (owned by caller, NOT by this class)
     const uint8_t* mScratchBuffer;
     size_t mLaneStride;
 
-    // Waveform expansion buffer (pre-allocated, IRAM-safe)
-    fl::unique_ptr<uint8_t[], HeapCapsDeleter> mWaveformExpansionBuffer;
-    size_t mWaveformExpansionBufferSize;
+    // Waveform expansion buffer (staging buffer for wave8 before transpose)
+    // Does NOT need DMA flags - this is a CPU-only intermediate buffer
+    fl::vector<uint8_t> mWaveformExpansionBuffer;
 
     // Error state
     bool mErrorOccurred;
