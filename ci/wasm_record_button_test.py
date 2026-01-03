@@ -17,8 +17,9 @@ import os
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
-from playwright.async_api import ConsoleMessage, Page, async_playwright
+from playwright.async_api import ConsoleMessage, Page, ViewportSize, async_playwright
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -212,7 +213,7 @@ async def check_record_button_state(page: Page) -> dict[str, bool | None]:
         return {"exists": False}
 
 
-def print_state_table(worker_state: dict, button_state: dict):
+def print_state_table(worker_state: dict[str, Any], button_state: dict[str, Any]):
     """Print a formatted table of worker and button states"""
     table = Table(title="Worker & Button State", show_header=True, header_style="bold")
     table.add_column("Component", style="cyan")
@@ -223,47 +224,53 @@ def print_state_table(worker_state: dict, button_state: dict):
     table.add_row(
         "WorkerManager",
         "exists",
-        str(worker_state.get("workerManagerExists", "unknown")),
+        str(worker_state.get("workerManagerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "WorkerManager",
         "isWorkerActive",
-        str(worker_state.get("isWorkerActive", "unknown")),
+        str(worker_state.get("isWorkerActive", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "Controller",
         "exists",
-        str(worker_state.get("controllerExists", "unknown")),
+        str(worker_state.get("controllerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "Controller",
         "workerMode",
-        str(worker_state.get("controllerWorkerMode", "unknown")),
+        str(worker_state.get("controllerWorkerMode", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "AsyncController",
         "exists",
-        str(worker_state.get("asyncControllerExists", "unknown")),
+        str(worker_state.get("asyncControllerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "AsyncController",
         "workerMode",
-        str(worker_state.get("asyncControllerWorkerMode", "unknown")),
+        str(worker_state.get("asyncControllerWorkerMode", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
 
     # Button state
-    table.add_row("RecordButton", "exists", str(button_state.get("exists", "unknown")))
+    table.add_row("RecordButton", "exists", str(button_state.get("exists", "unknown")))  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     if button_state.get("exists"):
         table.add_row(
-            "RecordButton", "visible", str(button_state.get("visible", "unknown"))
+            "RecordButton",
+            "visible",
+            str(button_state.get("visible", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
         table.add_row(
-            "RecordButton", "enabled", str(button_state.get("enabled", "unknown"))
+            "RecordButton",
+            "enabled",
+            str(button_state.get("enabled", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
         table.add_row(
-            "RecordButton", "clickable", str(button_state.get("clickable", "unknown"))
+            "RecordButton",
+            "clickable",
+            str(button_state.get("clickable", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
-        table.add_row("RecordButton", "text", str(button_state.get("text", "")))
+        table.add_row("RecordButton", "text", str(button_state.get("text", "")))  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
 
     console.print()
     console.print(table)
@@ -401,7 +408,7 @@ async def main() -> int:
         # Launch browser
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=args.headless)
-            page = await browser.new_page(viewport=viewport_config)
+            page = await browser.new_page(viewport=viewport_config)  # pyright: ignore[reportArgumentType]
 
             # Setup console log capture
             log_capture = ConsoleLogCapture()

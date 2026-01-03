@@ -347,7 +347,7 @@ def get_clean_windows_env() -> dict[str, str]:
     logging.info("Created clean Windows environment (removed Git Bash indicators)")
     logging.debug(f"Excluded variables: {', '.join(sorted(git_bash_vars))}")
 
-    return clean_env
+    return clean_env  # type: ignore[reportUnknownVariableType]
 
 
 def validate_request(request: PackageRequest) -> bool:
@@ -462,7 +462,7 @@ def run_package_install_with_retry(
         for line in proc.stdout:  # type: ignore
             line_stripped = line.strip()
             if line_stripped:
-                output_lines.append(line)
+                output_lines.append(line)  # type: ignore[reportUnknownMemberType]
                 logging.info(f"PlatformIO: {line_stripped}")
 
                 # Extract operation details for better status visibility
@@ -506,7 +506,7 @@ def run_package_install_with_retry(
                 "Check if kill_lingering_processes() killed the daemon subprocess."
             )
 
-        full_output = "".join(output_lines)
+        full_output = "".join(output_lines)  # type: ignore[reportUnknownArgumentType]
 
         if returncode == 0:
             return returncode, full_output
@@ -521,7 +521,7 @@ def run_package_install_with_retry(
         # Non-network error or out of retries
         return returncode, full_output
 
-    return 1, full_output
+    return 1, full_output  # type: ignore[reportPossiblyUnboundVariable]
 
 
 def get_default_environment(project_dir: str) -> str | None:
@@ -902,7 +902,7 @@ def main() -> int:
 
     # Use daemoniker to properly daemonize
     try:
-        with Daemonizer() as (is_setup, daemonizer):
+        with Daemonizer() as (is_setup, daemonizer):  # type: ignore[reportUnknownVariableType]
             if is_setup:
                 # Pre-daemon setup (runs as parent process)
                 logging.info("Initializing daemon")

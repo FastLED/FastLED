@@ -546,14 +546,14 @@ def get_daemon_status() -> dict[str, Any]:
     if PID_FILE.exists():
         try:
             with open(PID_FILE, "r") as f:
-                status["pid"] = int(f.read().strip())
+                status["pid"] = int(f.read().strip())  # type: ignore[reportArgumentType]
         except Exception:
-            status["pid"] = None
+            status["pid"] = None  # type: ignore[reportArgumentType]
 
     if STATUS_FILE.exists():
         daemon_status = read_status_file()
         # Convert DaemonStatus to dict for JSON serialization
-        status["current_status"] = daemon_status.to_dict()
+        status["current_status"] = daemon_status.to_dict()  # type: ignore[reportArgumentType]
 
     return status
 

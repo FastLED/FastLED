@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from ci.util.paths import PROJECT_ROOT
 
@@ -250,10 +250,15 @@ def run_checker_standalone(
         print(f"✅ {description}: No violations found.")
         sys.exit(0)
 
-    violations = checker.violations
+    # Violations can be dict[str, list[tuple[int, str]]] or dict[str, str]
+    violations = cast(
+        dict[str, list[tuple[int, str]] | str], getattr(checker, "violations")
+    )
 
     if violations:
-        total_violations = sum(len(v) for v in violations.values())
+        total_violations = sum(
+            len(v) if isinstance(v, list) else 1 for v in violations.values()
+        )
         file_count = len(violations)
 
         print(f"❌ {description} ({file_count} files, {total_violations} violations):")

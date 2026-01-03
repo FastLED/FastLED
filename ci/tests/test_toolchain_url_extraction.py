@@ -47,6 +47,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         # Extract platform information with enhanced resolution
         platform_name = esp32c3_env.platform
         self.assertIsNotNone(platform_name, "esp32c3 environment missing platform")
+        assert platform_name is not None  # Type narrowing for type checker
 
         # Resolve platform to get package/toolchain information
         # force_resolve=True ensures we query PlatformIO even if platform_name is already a URL
@@ -138,6 +139,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         # Extract platform information
         platform_name = esp32s3_env.platform
         self.assertIsNotNone(platform_name, "esp32s3 environment missing platform")
+        assert platform_name is not None  # Type narrowing for type checker
 
         # Resolve platform to get package/toolchain information
         # force_resolve=True ensures we query PlatformIO even if platform_name is already a URL

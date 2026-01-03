@@ -85,7 +85,7 @@ def _check_wsl2_docker_backend() -> tuple[bool, str]:
 
         # Handle WSL output encoding issues (spaces between characters in Git Bash)
         # Clean up the output by removing extra spaces
-        cleaned_lines = []
+        cleaned_lines: list[str] = []
         for line in output.split("\n"):
             # Remove null bytes and collapse multiple spaces
             cleaned = line.replace("\x00", "").strip()

@@ -54,7 +54,7 @@ class TimingSpec:
         Returns:
             Tuple of (is_valid, list of error messages)
         """
-        errors = []
+        errors: list[str] = []
 
         if not (self.T0H_min <= ds.T0H <= self.T0H_max):
             errors.append(

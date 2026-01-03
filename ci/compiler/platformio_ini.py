@@ -17,12 +17,12 @@ import subprocess
 import tempfile
 import time
 import urllib.request
-from urllib.error import HTTPError
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from urllib.error import HTTPError
 
 
 if TYPE_CHECKING:

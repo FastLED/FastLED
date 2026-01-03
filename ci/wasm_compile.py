@@ -200,7 +200,7 @@ def main() -> int:
         ):
             # Get relative path from example directory
             rel_path = file_path.relative_to(example_dir)
-            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})
+            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})  # pyright: ignore[reportUnknownMemberType]
 
     # Write files.json to output directory
     files_json_path = output_dir / "files.json"
@@ -209,7 +209,7 @@ def main() -> int:
 
     if data_files:
         console.print(
-            f"[dim]Generated files.json with {len(data_files)} data file(s)[/dim]"
+            f"[dim]Generated files.json with {len(data_files)} data file(s)[/dim]"  # pyright: ignore[reportUnknownArgumentType]
         )
     else:
         console.print(f"[dim]Generated empty files.json (no data files found)[/dim]")

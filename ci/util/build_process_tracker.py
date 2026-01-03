@@ -40,7 +40,7 @@ class ProcessTreeInfo:
 
     client_pid: int
     root_pid: int
-    child_pids: list[int] = field(default_factory=list)
+    child_pids: list[int] = field(default_factory=list)  # pyright: ignore[reportUnknownVariableType]
     request_id: str = ""
     project_dir: str = ""
     started_at: float = field(default_factory=time.time)
@@ -239,7 +239,7 @@ class BuildProcessTracker:
                 )
 
                 killed_count = self._kill_process_tree(info)
-                orphaned_clients.append(client_pid)
+                orphaned_clients.append(client_pid)  # pyright: ignore[reportUnknownMemberType]
 
                 logging.info(
                     f"Cleaned up {killed_count} processes for dead client {client_pid}"
@@ -251,7 +251,7 @@ class BuildProcessTracker:
         if orphaned_clients:
             self._save_registry()
 
-        return orphaned_clients
+        return orphaned_clients  # pyright: ignore[reportUnknownVariableType]
 
     def _kill_process_tree(self, info: ProcessTreeInfo) -> int:
         """Kill an entire process tree (root + all children).
@@ -282,7 +282,7 @@ class BuildProcessTracker:
         for pid in reversed(all_pids):  # Reverse to kill children before parents
             try:
                 proc = psutil.Process(pid)
-                processes_to_kill.append(proc)
+                processes_to_kill.append(proc)  # pyright: ignore[reportUnknownMemberType]
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
@@ -291,20 +291,20 @@ class BuildProcessTracker:
                 logging.warning(f"Failed to get process {pid}: {e}")
 
         # Terminate all processes
-        for proc in processes_to_kill:
+        for proc in processes_to_kill:  # pyright: ignore[reportUnknownVariableType]
             try:
-                proc.terminate()
+                proc.terminate()  # pyright: ignore[reportUnknownMemberType]
                 killed_count += 1
-                logging.debug(f"Terminated process {proc.pid} ({proc.name()})")
+                logging.debug(f"Terminated process {proc.pid} ({proc.name()})")  # pyright: ignore[reportUnknownMemberType]
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                logging.warning(f"Failed to terminate process {proc.pid}: {e}")
+                logging.warning(f"Failed to terminate process {proc.pid}: {e}")  # pyright: ignore[reportUnknownMemberType]
 
         # Wait for graceful termination
-        gone, alive = psutil.wait_procs(processes_to_kill, timeout=3)
+        gone, alive = psutil.wait_procs(processes_to_kill, timeout=3)  # pyright: ignore[reportUnknownArgumentType]
 
         # Force kill any stragglers
         for proc in alive:

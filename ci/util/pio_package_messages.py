@@ -279,7 +279,7 @@ class BuildRequest:
     timestamp: float = field(default_factory=time.time)
     request_id: str = field(default_factory=lambda: f"build_{int(time.time() * 1000)}")
     upload_port: str | None = None
-    additional_args: list[str] = field(default_factory=list)
+    additional_args: list[str] = field(default_factory=list)  # type: ignore[reportUnknownVariableType]
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization.
@@ -345,10 +345,10 @@ class BuildStatus:
     state: BuildState
     message: str
     updated_at: float
-    output_lines: list[str] = field(default_factory=list)
+    output_lines: list[str] = field(default_factory=list)  # type: ignore[reportUnknownVariableType]
     exit_code: int | None = None
     root_pid: int | None = None
-    child_pids: list[int] = field(default_factory=list)
+    child_pids: list[int] = field(default_factory=list)  # type: ignore[reportUnknownVariableType]
     started_at: float | None = None
     completed_at: float | None = None
 

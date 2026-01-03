@@ -51,7 +51,7 @@ def create_pio_process(
         cmd_str = format_cmd_for_shell(cmd)
         proc = RunningProcess(
             cmd_str,
-            cwd=cwd,
+            cwd=cwd,  # type: ignore[reportArgumentType]
             auto_run=auto_run,
             output_formatter=output_formatter,
             env=env,
@@ -61,16 +61,16 @@ def create_pio_process(
         # Linux/Mac or native Windows shell: Direct execution
         proc = RunningProcess(
             cmd,
-            cwd=cwd,
+            cwd=cwd,  # type: ignore[reportArgumentType]
             auto_run=auto_run,
             output_formatter=output_formatter,
             env=env,
         )
 
     # Register process for orphan cleanup by daemon
-    if auto_run and hasattr(proc, "pid") and proc.pid:
+    if auto_run and hasattr(proc, "pid") and proc.pid:  # type: ignore[reportUnknownMemberType]
         register_build_process(
-            root_pid=proc.pid,
+            root_pid=proc.pid,  # type: ignore[reportUnknownMemberType, reportUnknownArgumentType]
             project_dir=str(cwd),
         )
         # Unregister on normal exit
@@ -79,12 +79,12 @@ def create_pio_process(
     return proc
 
 
-def run_pio_command(
+def run_pio_command(  # type: ignore[reportUnknownParameterType]
     cmd: list[str],
     cwd: Path | str | None = None,
     capture_output: bool = False,
     timeout: int | None = None,
-) -> subprocess.CompletedProcess:
+) -> subprocess.CompletedProcess:  # type: ignore[reportMissingTypeArgument]
     """Run a PlatformIO command with Git Bash compatibility.
 
     This is a simpler alternative to create_pio_process() for commands that
@@ -114,7 +114,7 @@ def run_pio_command(
         )
     else:
         # Linux/Mac or native Windows shell: Direct execution
-        return subprocess.run(
+        return subprocess.run(  # type: ignore[reportMissingTypeArgument]
             cmd,
             env=env,
             cwd=cwd,

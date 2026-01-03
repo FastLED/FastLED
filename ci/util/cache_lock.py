@@ -134,7 +134,7 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
     return cleaned_count
 
 
-def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool]]:
+def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool | None]]:
     """
     List all active locks in cache directory with metadata.
 
@@ -144,11 +144,11 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool]]:
     Returns:
         List of dictionaries with lock information:
         - path: Path to lock file
-        - pid: Process ID holding lock
+        - pid: Process ID holding lock (None if unknown)
         - operation: Operation name
-        - timestamp: When lock was acquired
+        - timestamp: When lock was acquired (None if unknown)
         - is_stale: Whether lock is from dead process
-        - hostname: Host where lock was created
+        - hostname: Host where lock was created (None if unknown)
 
     Example:
         locks = list_active_locks(Path("~/.platformio/global_cache"))
@@ -159,7 +159,7 @@ def list_active_locks(cache_dir: Path) -> list[dict[str, str | int | bool]]:
     if not cache_dir.exists():
         return []
 
-    locks: list[dict[str, str | int | bool]] = []
+    locks: list[dict[str, str | int | bool | None]] = []
 
     # Find all .lock files recursively
     for lock_file in cache_dir.rglob("*.lock"):
