@@ -296,7 +296,7 @@
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 #define FL_INIT(func) \
-  namespace { \
+  namespace static_init { \
     FL_CONSTRUCTOR FL_KEEP_ALIVE \
     void __fl_init_at_line_##__LINE__() { func(); } \
   }
