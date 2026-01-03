@@ -14,7 +14,7 @@ from typing import List
 
 from ci.util.color_output import print_cache_hit, print_cache_miss
 from ci.util.dependency_loader import DependencyManifest
-from ci.util.hash_fingerprint_cache import HashFingerprintCache
+from ci.util.two_layer_fingerprint_cache import TwoLayerFingerprintCache
 
 
 def get_cpp_files() -> list[Path]:
@@ -71,10 +71,10 @@ def get_cpp_files() -> list[Path]:
     return sorted(files, key=str)
 
 
-def _get_cpp_lint_cache() -> HashFingerprintCache:
-    """Get the hash fingerprint cache for C++ linting."""
+def _get_cpp_lint_cache() -> TwoLayerFingerprintCache:
+    """Get the two-layer fingerprint cache for C++ linting."""
     cache_dir = Path(".cache")
-    return HashFingerprintCache(cache_dir, "cpp_lint")
+    return TwoLayerFingerprintCache(cache_dir, "cpp_lint")
 
 
 def check_cpp_files_changed() -> bool:

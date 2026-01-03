@@ -15,8 +15,8 @@ from typing import List
 
 from ci.util.color_output import print_cache_hit, print_cache_miss
 
-# Import the new hash-based cache system
-from ci.util.hash_fingerprint_cache import HashFingerprintCache
+# Import the two-layer fingerprint cache (mtime + content hash)
+from ci.util.two_layer_fingerprint_cache import TwoLayerFingerprintCache
 
 
 def get_directory_files(directory: Path) -> list[Path]:
@@ -40,10 +40,10 @@ def get_directory_files(directory: Path) -> list[Path]:
     return sorted(all_files, key=str)
 
 
-def _get_js_lint_cache() -> HashFingerprintCache:
-    """Get the hash fingerprint cache for JS linting."""
+def _get_js_lint_cache() -> TwoLayerFingerprintCache:
+    """Get the two-layer fingerprint cache for JS linting."""
     cache_dir = Path(".cache")
-    return HashFingerprintCache(cache_dir, "js_lint")
+    return TwoLayerFingerprintCache(cache_dir, "js_lint")
 
 
 def check_js_files_changed() -> bool:
