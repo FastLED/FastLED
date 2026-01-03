@@ -285,7 +285,7 @@ def get_clean_windows_env() -> dict[str, str]:
         Clean environment dict suitable for running pio via cmd.exe
     """
     # Start with minimal system environment
-    clean_env = {}
+    clean_env: dict[str, str] = {}
 
     # Git Bash environment variables to EXCLUDE (these cause ESP-IDF to abort)
     git_bash_vars = {
@@ -347,7 +347,7 @@ def get_clean_windows_env() -> dict[str, str]:
     logging.info("Created clean Windows environment (removed Git Bash indicators)")
     logging.debug(f"Excluded variables: {', '.join(sorted(git_bash_vars))}")
 
-    return clean_env  # type: ignore[reportUnknownVariableType]
+    return clean_env
 
 
 def validate_request(request: PackageRequest) -> bool:
@@ -902,7 +902,8 @@ def main() -> int:
 
     # Use daemoniker to properly daemonize
     try:
-        with Daemonizer() as (is_setup, daemonizer):  # type: ignore[reportUnknownVariableType]
+        daemonizer_context = Daemonizer()
+        with daemonizer_context as (is_setup, daemonizer):  # type: ignore[reportUnknownVariableType]
             if is_setup:
                 # Pre-daemon setup (runs as parent process)
                 logging.info("Initializing daemon")

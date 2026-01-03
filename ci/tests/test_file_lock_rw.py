@@ -23,8 +23,8 @@ from ci.util.file_lock_rw import (
     break_stale_lock,
     is_lock_stale,
     is_process_alive,
-    read_lock,  # type: ignore[reportUnknownVariableType]
-    write_lock,  # type: ignore[reportUnknownVariableType]
+    read_lock,
+    write_lock,
 )
 
 

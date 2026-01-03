@@ -46,12 +46,15 @@ def create_pio_process(
     """
     env = get_pio_execution_env()
 
+    # Convert cwd to Path if it's a string (RunningProcess expects Path | None)
+    cwd_path = Path(cwd) if isinstance(cwd, str) else cwd
+
     if should_use_cmd_runner():
         # Windows Git Bash: Convert to shell command for cmd.exe
         cmd_str = format_cmd_for_shell(cmd)
         proc = RunningProcess(
             cmd_str,
-            cwd=cwd,  # type: ignore[reportArgumentType]
+            cwd=cwd_path,
             auto_run=auto_run,
             output_formatter=output_formatter,
             env=env,
@@ -61,7 +64,7 @@ def create_pio_process(
         # Linux/Mac or native Windows shell: Direct execution
         proc = RunningProcess(
             cmd,
-            cwd=cwd,  # type: ignore[reportArgumentType]
+            cwd=cwd_path,
             auto_run=auto_run,
             output_formatter=output_formatter,
             env=env,

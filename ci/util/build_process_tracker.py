@@ -278,11 +278,11 @@ class BuildProcessTracker:
             pass  # Use cached PID list
 
         # Kill children first (bottom-up to avoid orphans)
-        processes_to_kill = []
+        processes_to_kill: list[psutil.Process] = []
         for pid in reversed(all_pids):  # Reverse to kill children before parents
             try:
                 proc = psutil.Process(pid)
-                processes_to_kill.append(proc)  # pyright: ignore[reportUnknownMemberType]
+                processes_to_kill.append(proc)
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
@@ -291,20 +291,20 @@ class BuildProcessTracker:
                 logging.warning(f"Failed to get process {pid}: {e}")
 
         # Terminate all processes
-        for proc in processes_to_kill:  # pyright: ignore[reportUnknownVariableType]
+        for proc in processes_to_kill:
             try:
-                proc.terminate()  # pyright: ignore[reportUnknownMemberType]
+                proc.terminate()
                 killed_count += 1
-                logging.debug(f"Terminated process {proc.pid} ({proc.name()})")  # pyright: ignore[reportUnknownMemberType]
+                logging.debug(f"Terminated process {proc.pid} ({proc.name()})")
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                logging.warning(f"Failed to terminate process {proc.pid}: {e}")  # pyright: ignore[reportUnknownMemberType]
+                logging.warning(f"Failed to terminate process {proc.pid}: {e}")
 
         # Wait for graceful termination
-        gone, alive = psutil.wait_procs(processes_to_kill, timeout=3)  # pyright: ignore[reportUnknownArgumentType]
+        gone, alive = psutil.wait_procs(processes_to_kill, timeout=3)
 
         # Force kill any stragglers
         for proc in alive:

@@ -21,7 +21,17 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 from urllib.error import HTTPError
 
 
@@ -281,9 +291,9 @@ class PlatformShowResponse:
     title: Optional[str] = None
     version: Optional[str] = None
     repository: Optional[str] = None
-    frameworks: list[str] = field(default_factory=list)  # type: ignore
-    packages: list[dict[str, Any]] = field(  # type: ignore[reportUnknownVariableType]
-        default_factory=list
+    frameworks: list[str] = field(default_factory=lambda: [])
+    packages: list[dict[str, Any]] = field(
+        default_factory=lambda: []
     )  # Raw package data from CLI
     homepage: Optional[str] = None
     description: Optional[str] = None
@@ -1570,9 +1580,9 @@ class PlatformIOIni:
                     parsed_output = json.loads(result.stdout)
                     # Return parsed output if it's a dict or list
                     if isinstance(parsed_output, dict):
-                        return parsed_output  # type: ignore[reportUnknownVariableType]
+                        return cast(dict[str, Any], parsed_output)
                     elif isinstance(parsed_output, list):
-                        return parsed_output  # type: ignore[reportUnknownVariableType]
+                        return cast(list[dict[str, Any]], parsed_output)
                     else:
                         logger.warning(f"Unexpected JSON type: {type(parsed_output)}")
                         return None

@@ -537,7 +537,7 @@ def get_daemon_status() -> dict[str, Any]:
     Returns:
         Dictionary with daemon status information
     """
-    status = {
+    status: dict[str, Any] = {
         "running": is_daemon_running(),
         "pid_file_exists": PID_FILE.exists(),
         "status_file_exists": STATUS_FILE.exists(),
@@ -546,14 +546,14 @@ def get_daemon_status() -> dict[str, Any]:
     if PID_FILE.exists():
         try:
             with open(PID_FILE, "r") as f:
-                status["pid"] = int(f.read().strip())  # type: ignore[reportArgumentType]
+                status["pid"] = int(f.read().strip())
         except Exception:
-            status["pid"] = None  # type: ignore[reportArgumentType]
+            status["pid"] = None
 
     if STATUS_FILE.exists():
         daemon_status = read_status_file()
         # Convert DaemonStatus to dict for JSON serialization
-        status["current_status"] = daemon_status.to_dict()  # type: ignore[reportArgumentType]
+        status["current_status"] = daemon_status.to_dict()
 
     return status
 
