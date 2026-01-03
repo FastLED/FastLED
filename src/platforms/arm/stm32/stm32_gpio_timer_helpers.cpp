@@ -1,12 +1,11 @@
 /// @file stm32_gpio_timer_helpers.cpp
-/// @brief Shared GPIO and Timer helper implementations for STM32 parallel SPI
+/// @brief Shared GPIO and Timer helper implementations for STM32
 ///
 /// This file centralizes common GPIO and Timer utility functions used across
-/// all STM32 SPI implementations (dual, quad, and octal) to eliminate code duplication.
+/// STM32 implementations.
 ///
 /// IMPORTANT: This file requires STM32 HAL types (GPIO_TypeDef, TIM_TypeDef, etc.)
-/// which are only available on platforms with hardware SPI support enabled.
-/// It is only compiled when FL_STM32_HAS_SPI_HW_* flags are defined.
+/// which are available when STM32duino core is present.
 
 // Platform guard using compiler builtins
 #if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
@@ -19,9 +18,6 @@
     defined(STM32U5) || defined(STM32U5xx)
 
 #include "platforms/arm/stm32/stm32_capabilities.h"
-
-// Only compile this file if hardware SPI is enabled (requires HAL types)
-#if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
 
 // STM32duino core headers - provides HAL includes and pin mapping functions
 #if __has_include("stm32_def.h")
@@ -296,6 +292,9 @@ bool isValidPin(uint8_t pin) {
 // ============================================================================
 // Timer Helper Functions
 // ============================================================================
+// These functions are only needed for hardware SPI implementations
+
+#if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
 
 TIM_TypeDef* selectTimer(int bus_id) {
 #if defined(HAL_TIM_MODULE_ENABLED)
@@ -584,11 +583,14 @@ uint8_t getTimerChannel(uint8_t pin, TIM_TypeDef* timer) {
 #endif
 }
 
+#endif  // FL_STM32_HAS_SPI_HW_*
+
 // ============================================================================
 // DMA Helper Functions (Stream-based DMA for F2/F4/F7/H7/L4)
 // ============================================================================
+// These functions are only available when DMA streams are supported
 
-#ifdef FASTLED_STM32_HAS_DMA_STREAMS
+#if defined(FASTLED_STM32_HAS_DMA_STREAMS) && (defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8))
 
 void enableDMAClock(DMA_TypeDef* dma) {
 #if defined(HAL_DMA_MODULE_ENABLED)
@@ -965,10 +967,9 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
 #endif
 }
 
-#endif  // FASTLED_STM32_HAS_DMA_STREAMS
+#endif  // FASTLED_STM32_HAS_DMA_STREAMS && FL_STM32_HAS_SPI_HW_*
 
 }  // namespace stm32
 }  // namespace fl
 
-#endif  // FL_STM32_HAS_SPI_HW_*
 #endif  // STM32 (compiler builtin guard)

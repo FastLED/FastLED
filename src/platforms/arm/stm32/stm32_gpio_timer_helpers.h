@@ -1,12 +1,17 @@
 /// @file stm32_gpio_timer_helpers.h
-/// @brief Common GPIO and Timer helper functions for STM32 parallel SPI implementations
+/// @brief Common GPIO and Timer helper functions for STM32 platforms
 ///
 /// This header provides shared utility functions for GPIO pin configuration,
-/// timer setup, and peripheral clock management used across all STM32 SPI implementations
-/// (dual, quad, and octal).
+/// timer setup, and peripheral clock management used across STM32 implementations.
 ///
-/// These helpers abstract away the STM32 HAL complexity and provide a consistent
-/// interface for pin mapping, clock configuration, and timer initialization.
+/// GPIO Functions (always available):
+///   - getGPIOPort(), getGPIOPin() - Pin number to HAL types
+///   - enableGPIOClock() - Enable GPIO port clocks
+///   - configurePinAsOutput(), configurePinAsTimerAF() - Pin configuration
+///   - isValidPin() - Pin validation
+///
+/// Timer/DMA Functions (only when FL_STM32_HAS_SPI_HW_* is defined):
+///   - Timer and DMA helpers for hardware SPI implementations
 ///
 /// Usage:
 ///   #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"
