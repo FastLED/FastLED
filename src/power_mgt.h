@@ -28,7 +28,7 @@ struct PowerModelRGB {
 
     /// Default constructor - WS2812 @ 5V (16mA/11mA/15mA @ 5V)
     constexpr PowerModelRGB()
-        : red_mW(80), green_mW(55), blue_mW(75), dark_mW(5) {}
+        : red_mW(5 * 16), green_mW(5 * 11), blue_mW(5 * 15), dark_mW(5 * 1) {}
 
     /// Custom RGB power model
     /// @param r Red channel power (mW)
