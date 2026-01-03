@@ -1265,8 +1265,24 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
 
         bool networkActive = networkTracker.isActive();
+        bool wasNetworkActive = !networkActive;  // Previous state is opposite of current
         FL_DBG("Network state changed: " << (networkActive ? "ACTIVE" : "INACTIVE")
-               << " (was: " << (!networkActive ? "ACTIVE" : "INACTIVE") << ")");
+               << " (was: " << (wasNetworkActive ? "ACTIVE" : "INACTIVE") << ")");
+
+        // Check if memory allocation size would actually change
+        // On platforms like ESP32-C3/C6/H2 with limited memory, network state doesn't affect memory blocks
+        auto& memMgr = RmtMemoryManager::instance();
+        size_t oldMemBlocks = RmtMemoryManager::calculateMemoryBlocks(wasNetworkActive);
+        size_t newMemBlocks = RmtMemoryManager::calculateMemoryBlocks(networkActive);
+
+        if (oldMemBlocks == newMemBlocks) {
+            FL_DBG("Network state changed but memory allocation size unchanged ("
+                   << newMemBlocks << "× blocks) - skipping reconfiguration");
+            return;  // Memory allocation size doesn't change - no need to reconfigure
+        }
+
+        FL_DBG("Memory allocation changing from " << oldMemBlocks << "× to "
+               << newMemBlocks << "× blocks due to network state change");
 
         // Calculate target channel count for new Network state
         size_t targetChannels = calculateTargetChannelCount(networkActive);
@@ -1281,7 +1297,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         // PHASE 2: Reconfigure remaining idle channels with new memory allocation
         // This ensures existing channels use Network-appropriate memory (2× vs 3× blocks)
-        auto& memMgr = RmtMemoryManager::instance();
         size_t reconfigured = 0;
 
         for (size_t i = 0; i < mChannels.size(); ++i) {
@@ -1327,6 +1342,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                         state.channel = nullptr;
                     }
                     state.encoder.reset();
+                    // Free memory allocation that createChannel() made
+                    if (state.useDMA) {
+                        memMgr.freeDMA(state.memoryChannelId, true);
+                        mDMAChannelsInUse--;
+                        state.useDMA = false;
+                    }
+                    memMgr.free(state.memoryChannelId, true);
                 } else {
                     reconfigured++;
                     FL_DBG("Successfully reconfigured channel " << i);
@@ -1440,9 +1462,13 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
         ChannelState *stablePtr = &mChannels.back();
         if (!registerChannelCallback(stablePtr)) {
             FL_WARN("Failed to register callback for new channel");
+            // Free memory allocation that createChannel() made
+            auto &memMgr = RmtMemoryManager::instance();
             if (stablePtr->useDMA) {
+                memMgr.freeDMA(stablePtr->memoryChannelId, true);
                 mDMAChannelsInUse--;
             }
+            memMgr.free(stablePtr->memoryChannelId, true);
             rmt_del_channel(stablePtr->channel);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
