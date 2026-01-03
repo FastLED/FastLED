@@ -42,6 +42,7 @@ import sys
 import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Any
 
 
 # Project root
@@ -219,7 +220,7 @@ def get_source_files(unity_chunks: int = 0) -> list[Path]:
     """
     if unity_chunks > 0:
         # Unity build mode: Return generated unity files
-        unity_files = []
+        unity_files: list[Path] = []
         for i in range(unity_chunks):
             unity_file = UNITY_DIR / f"unity{i}.cpp"
             if unity_file.exists():
@@ -228,7 +229,7 @@ def get_source_files(unity_chunks: int = 0) -> list[Path]:
 
     # Normal mode: Return individual source files
     src_dir = PROJECT_ROOT / "src"
-    sources = []
+    sources: list[Path] = []
     for cpp_file in src_dir.rglob("*.cpp"):
         # Exclude entry_point.cpp (it's compiled separately in wasm_compile_native.py)
         if cpp_file.name == "entry_point.cpp":
@@ -292,7 +293,7 @@ def needs_rebuild(
     depfile_path: Path,
     pch_path: Path,
     flags_hash: str,
-    metadata: dict[str, str],
+    metadata: dict[str, Any],
     force: bool = False,
 ) -> tuple[bool, str]:
     """
@@ -569,20 +570,20 @@ def create_thin_archive(
     return 0
 
 
-def load_metadata() -> dict[str, str]:
+def load_metadata() -> dict[str, Any]:
     """Load library build metadata from previous build."""
     if not LIBRARY_METADATA.exists():
         return {}
 
     try:
         with open(LIBRARY_METADATA) as f:
-            return json.load(f)
+            return json.load(f)  # type: ignore[no-any-return]
     except Exception as e:
         print(f"Warning: Could not load library metadata: {e}")
         return {}
 
 
-def save_metadata(metadata: dict[str, str]) -> None:
+def save_metadata(metadata: dict[str, Any]) -> None:
     """Save library build metadata for future builds."""
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     with open(LIBRARY_METADATA, "w") as f:
@@ -733,7 +734,7 @@ def build_library(
 
         # Step 8: Determine which sources need compilation (detailed check)
         print("Checking which sources need compilation...")
-        sources_to_compile = []
+        sources_to_compile: list[tuple[Path, Path, Path]] = []
         up_to_date_count = 0
 
         for source in sources:
@@ -787,7 +788,7 @@ def build_library(
 
             # Use ThreadPoolExecutor for parallel compilation
             max_workers = parallel if parallel else None
-            failed_compilations = []
+            failed_compilations: list[str] = []
 
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit all compilation tasks
@@ -835,7 +836,7 @@ def build_library(
 
         # Step 10: Collect all object files
         print("Collecting object files...")
-        all_objects = []
+        all_objects: list[Path] = []
         for source in sources:
             if unity_mode:
                 # Unity files: use basename only
@@ -925,13 +926,13 @@ def build_library(
             return archive_result
 
         # Step 13: Save metadata for future builds
-        metadata = {
+        metadata_to_save: dict[str, Any] = {
             "flags_hash": flags_hash,
             "build_mode": build_mode,
             "source_count": len(sources),
             "object_count": len(all_objects),
         }
-        save_metadata(metadata)
+        save_metadata(metadata_to_save)
 
         # Summary
         elapsed = time.time() - start_time
