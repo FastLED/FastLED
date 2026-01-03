@@ -1042,6 +1042,41 @@ public:
 	/// @param milliwatts the max power draw desired, in milliwatts
 	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) { m_pPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW); m_nPowerData = milliwatts; }
 
+	/// @name Power Model Configuration
+	/// Configure LED power consumption for accurate power management
+	/// @{
+
+	/// Set custom RGB LED power consumption model
+	/// @param model RGB power consumption model
+	/// @example FastLED.setPowerModel(PowerModelRGB(40, 40, 40, 2));
+	inline void setPowerModel(const PowerModelRGB& model) {
+		set_power_model(model);
+	}
+
+	/// Set custom RGBW LED power consumption model
+	/// @param model RGBW power consumption model
+	/// @note Future API enhancement - currently uses RGB components only
+	/// @example FastLED.setPowerModel(PowerModelRGBW(90, 70, 90, 100, 5));
+	inline void setPowerModel(const PowerModelRGBW& model) {
+		set_power_model(model);
+	}
+
+	/// Set custom RGBWW LED power consumption model
+	/// @param model RGBWW power consumption model
+	/// @note Future API enhancement - currently uses RGB components only
+	/// @example FastLED.setPowerModel(PowerModelRGBWW(85, 65, 85, 95, 95, 5));
+	inline void setPowerModel(const PowerModelRGBWW& model) {
+		set_power_model(model);
+	}
+
+	/// Get current RGB power model
+	/// @returns Current RGB power consumption model
+	inline PowerModelRGB getPowerModel() {
+		return get_power_model();
+	}
+
+	/// @} Power Model Configuration
+
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale the brightness value to use in place of the stored value
 	void show(fl::u8 scale);

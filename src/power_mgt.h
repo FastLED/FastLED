@@ -14,6 +14,123 @@
 /// @{
 
 
+/// @defgroup PowerModel LED Power Consumption Models
+/// Configurable power consumption models for different LED types
+/// @{
+
+/// RGB LED power consumption model
+/// Used for standard 3-channel LEDs (WS2812, WS2812B, APA102, etc.)
+struct PowerModelRGB {
+    uint8_t red_mW;    ///< Red channel power at full brightness (255), in milliwatts
+    uint8_t green_mW;  ///< Green channel power at full brightness (255), in milliwatts
+    uint8_t blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
+    uint8_t dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
+
+    /// Default constructor - WS2812 @ 5V (16mA/11mA/15mA @ 5V)
+    constexpr PowerModelRGB()
+        : red_mW(80), green_mW(55), blue_mW(75), dark_mW(5) {}
+
+    /// Custom RGB power model
+    /// @param r Red channel power (mW)
+    /// @param g Green channel power (mW)
+    /// @param b Blue channel power (mW)
+    /// @param d Dark state power (mW)
+    constexpr PowerModelRGB(uint8_t r, uint8_t g, uint8_t b, uint8_t d)
+        : red_mW(r), green_mW(g), blue_mW(b), dark_mW(d) {}
+};
+
+/// RGBW LED power consumption model
+/// @note Future API enhancement - not yet implemented in power calculations
+/// @note Currently forwards to PowerModelRGB, ignoring white channel
+struct PowerModelRGBW {
+    uint8_t red_mW;    ///< Red channel power at full brightness (255), in milliwatts
+    uint8_t green_mW;  ///< Green channel power at full brightness (255), in milliwatts
+    uint8_t blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
+    uint8_t white_mW;  ///< White channel power at full brightness (255), in milliwatts
+    uint8_t dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
+
+    /// Default constructor - SK6812 RGBW @ 5V estimate
+    constexpr PowerModelRGBW()
+        : red_mW(90), green_mW(70), blue_mW(90), white_mW(100), dark_mW(5) {}
+
+    /// Custom RGBW power model
+    /// @param r Red channel power (mW)
+    /// @param g Green channel power (mW)
+    /// @param b Blue channel power (mW)
+    /// @param w White channel power (mW)
+    /// @param d Dark state power (mW)
+    constexpr PowerModelRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t d)
+        : red_mW(r), green_mW(g), blue_mW(b), white_mW(w), dark_mW(d) {}
+
+    /// Convert to RGB model (extracts RGB components only)
+    /// @note Used internally until RGBW power calculations are implemented
+    constexpr PowerModelRGB toRGB() const {
+        return PowerModelRGB(red_mW, green_mW, blue_mW, dark_mW);
+    }
+};
+
+/// RGBWW LED power consumption model (RGB + Cool White + Warm White)
+/// @note Future API enhancement - not yet implemented in power calculations
+/// @note Currently forwards to PowerModelRGB, ignoring white channels
+struct PowerModelRGBWW {
+    uint8_t red_mW;        ///< Red channel power at full brightness (255), in milliwatts
+    uint8_t green_mW;      ///< Green channel power at full brightness (255), in milliwatts
+    uint8_t blue_mW;       ///< Blue channel power at full brightness (255), in milliwatts
+    uint8_t white_mW;      ///< Cool white channel power at full brightness (255), in milliwatts
+    uint8_t warm_white_mW; ///< Warm white channel power at full brightness (255), in milliwatts
+    uint8_t dark_mW;       ///< Dark LED baseline power consumption, in milliwatts
+
+    /// Default constructor - Hypothetical RGBWW @ 5V estimate
+    constexpr PowerModelRGBWW()
+        : red_mW(85), green_mW(65), blue_mW(85),
+          white_mW(95), warm_white_mW(95), dark_mW(5) {}
+
+    /// Custom RGBWW power model
+    /// @param r Red channel power (mW)
+    /// @param g Green channel power (mW)
+    /// @param b Blue channel power (mW)
+    /// @param w Cool white channel power (mW)
+    /// @param ww Warm white channel power (mW)
+    /// @param d Dark state power (mW)
+    constexpr PowerModelRGBWW(uint8_t r, uint8_t g, uint8_t b,
+                              uint8_t w, uint8_t ww, uint8_t d)
+        : red_mW(r), green_mW(g), blue_mW(b),
+          white_mW(w), warm_white_mW(ww), dark_mW(d) {}
+
+    /// Convert to RGB model (extracts RGB components only)
+    /// @note Used internally until RGBWW power calculations are implemented
+    constexpr PowerModelRGB toRGB() const {
+        return PowerModelRGB(red_mW, green_mW, blue_mW, dark_mW);
+    }
+};
+
+/// Set custom RGB LED power consumption model
+/// @param model RGB power consumption model
+void set_power_model(const PowerModelRGB& model);
+
+/// Set custom RGBW LED power consumption model
+/// @param model RGBW power consumption model
+/// @note Future API enhancement - currently extracts RGB components only
+/// @note White channel power is stored but not yet used in calculations
+inline void set_power_model(const PowerModelRGBW& model) {
+    set_power_model(model.toRGB());  // TODO: Implement RGBW power model.
+}
+
+/// Set custom RGBWW LED power consumption model
+/// @param model RGBWW power consumption model
+/// @note Future API enhancement - currently extracts RGB components only
+/// @note White channel power is stored but not yet used in calculations
+inline void set_power_model(const PowerModelRGBWW& model) {
+    set_power_model(model.toRGB());  // TODO: Implement RGBWW power model.
+}
+
+/// Get current RGB power model
+/// @returns Current RGB power consumption model
+PowerModelRGB get_power_model();
+
+/// @} PowerModel
+
+
 /// @name Power Control Setup Functions
 /// Functions to initialize the power control system
 /// @{
@@ -102,5 +219,3 @@ uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u
 
 
 /// @} Power
-
-
