@@ -134,9 +134,9 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     FastLED.show();
 
-    // Wait for RX completion (10ms timeout - fast fail without hardware)
-    // Reduced from 100ms to make tests complete faster and prevent auto-exit timeout
-    auto wait_result = rx_channel->wait(10);
+    // Wait for RX completion (150ms timeout for 3000 LEDs @ WS2812B timing)
+    // WS2812B: ~30μs per LED → 3000 LEDs = 90ms minimum, use 150ms for safety
+    auto wait_result = rx_channel->wait(150);
 
     // PARLIO debug metrics only shown on errors (controlled via PARLIO_DEBUG_VERBOSE)
     // To enable verbose PARLIO debugging, define PARLIO_DEBUG_VERBOSE in ValidationConfig.h

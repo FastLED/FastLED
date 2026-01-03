@@ -5,7 +5,7 @@
 #pragma once
 
 // ============================================================================
-// PARLIO Single-Lane Test: Debugging ISR worker issues
+// PARLIO Dual-Lane Test: Phase 2 - Testing 2 lanes @ 3000 LEDs
 // ============================================================================
 
 // Driver selection
@@ -14,8 +14,8 @@
 // #define JUST_SPI
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1  // Single lane for debugging
-#define MAX_LANES 1  // Single lane for debugging
+#define MIN_LANES 2  // Phase 2: Dual lane testing
+#define MAX_LANES 2  // Phase 2: Dual lane testing
 
 // Strip size selection
 // #define JUST_SMALL_STRIPS  // Phase 1: Baseline with small strips (10 LEDs)

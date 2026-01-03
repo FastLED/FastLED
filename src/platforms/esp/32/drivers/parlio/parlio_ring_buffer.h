@@ -118,9 +118,10 @@ struct ParlioRingBuffer3 {
     static constexpr size_t RING_BUFFER_COUNT = 3;
 
     // Ring buffer storage (POD C arrays - no dynamic allocation)
-    uint8_t* ptrs[RING_BUFFER_COUNT];     // Buffer pointers (not owned)
-    size_t sizes[RING_BUFFER_COUNT];      // Actual data size in each buffer
-    size_t capacity;                      // Capacity of each buffer (bytes)
+    uint8_t* ptrs[RING_BUFFER_COUNT];       // Buffer pointers (not owned)
+    size_t sizes[RING_BUFFER_COUNT];        // Actual DMA buffer size in each buffer (includes reset padding)
+    size_t input_sizes[RING_BUFFER_COUNT];  // Input byte count (source data, excludes reset padding)
+    size_t capacity;                        // Capacity of each buffer (bytes)
 
     // Destructor callback for buffer cleanup (set by owner)
     // Called once per buffer (3 times total)
@@ -137,6 +138,7 @@ struct ParlioRingBuffer3 {
                       fl::function<void(uint8_t*)> destroy_callback)
         : ptrs{buffer0, buffer1, buffer2},
           sizes{0, 0, 0},
+          input_sizes{0, 0, 0},
           capacity(buffer_capacity),
           on_destroy(fl::move(destroy_callback)) {
     }

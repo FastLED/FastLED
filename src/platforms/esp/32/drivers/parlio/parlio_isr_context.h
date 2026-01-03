@@ -164,6 +164,7 @@ struct alignas(64) ParlioIsrContext {
     volatile bool mHardwareIdle;
     volatile size_t mNextByteOffset; // Next byte offset in source data (Worker ISR updates)
     volatile bool mWorkerIsrEnabled; // Worker ISR armed state
+    volatile bool mWorkerDoorbell;   // Doorbell flag: txDone sets, workerIsr clears (continuous timer mode)
 
     // === Non-Volatile Fields (read after barrier only) ===
     size_t mTotalBytes;
@@ -179,16 +180,22 @@ struct alignas(64) ParlioIsrContext {
     volatile uint32_t mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
     volatile uint64_t mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
     volatile uint64_t mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
+    volatile uint32_t mDebugDoorbellRingCount; // Count of doorbell rings (txDone sets flag)
+    volatile uint32_t mDebugDoorbellCheckCount; // Count of worker ISR firings (total, includes no-work exits)
+    volatile uint32_t mDebugWorkerEarlyExitCount; // Count of worker ISR early exits (doorbell not set)
 
     ParlioIsrContext()
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
           mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
           mHardwareIdle(false), mNextByteOffset(0), mWorkerIsrEnabled(false),
+          mWorkerDoorbell(false),
           mTotalBytes(0), mNumLanes(0), mIsrCount(0),
           mBytesTransmitted(0), mChunksCompleted(0),
           mTransmissionActive(false), mEndTimeUs(0),
           mDebugTxDoneCount(0), mDebugWorkerIsrCount(0),
-          mDebugLastTxDoneTime(0), mDebugLastWorkerIsrTime(0) {
+          mDebugLastTxDoneTime(0), mDebugLastWorkerIsrTime(0),
+          mDebugDoorbellRingCount(0), mDebugDoorbellCheckCount(0),
+          mDebugWorkerEarlyExitCount(0) {
     }
 };
 

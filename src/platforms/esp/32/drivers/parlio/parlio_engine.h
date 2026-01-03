@@ -208,6 +208,11 @@ private:
                                           const void* edata,
                                           void* user_ctx);
 
+    /// @brief Debug task function for periodic ISR state logging
+    /// @param arg ParlioEngine instance pointer
+    /// @note Runs at low priority (1), logs ISR state every 500ms during transmission
+    static void debugTaskFunction(void* arg);
+
     /// @brief Populate a DMA buffer with waveform data
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
     bool populateDmaBuffer(uint8_t* outputBuffer,
@@ -265,6 +270,9 @@ private:
 
     // Worker timer for ISR-based background buffer population (gptimer_handle_t)
     gptimer_handle_t mWorkerTimerHandle;
+
+    // Debug task handle for periodic ISR state logging (TaskHandle_t)
+    void* mDebugTaskHandle;
 
     // Ring buffer for DMA streaming (fixed 3-buffer architecture)
     fl::unique_ptr<ParlioRingBuffer3> mRingBuffer;

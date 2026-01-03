@@ -177,8 +177,11 @@
 
 const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 
-#define PIN_TX 0
-#define PIN_RX 1
+#define PIN_RX 0  // GPIO 3 to avoid conflict with 2-lane TX (GPIO 0, 1)
+#define PIN_TX 1  // This pin is what we always test.
+// For multi-lane testing use GPIO 2,3..., but keep in mind they won't
+// be directly tested.
+
 
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
@@ -239,7 +242,8 @@ void setup() {
     Serial.begin(115200);
     // Initialize watchdog with 5 second timeout (ESP32 only)
     // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
-    fl::watchdog_setup(5000);
+    // DISABLED FOR DEBUGGING: Investigating if watchdog causes crash at 7.69s
+    // fl::watchdog_setup(5000);
     while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
 
 
@@ -386,7 +390,8 @@ void setup() {
     ss.clear();
     ss << "\n⚠️  [HARDWARE SETUP REQUIRED]\n";
     ss << "  If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):\n";
-    ss << "  → Connect GPIO " << PIN_TX << " to GPIO " << PIN_RX << " with a physical jumper wire\n";
+    ss << "  → Connect GPIO " << PIN_TX << " (Lane 0 TX) to GPIO " << PIN_RX << " (RX) with a physical jumper wire\n";
+    ss << "  → Multi-lane: Only Lane 0 is validated via RX (other lanes transmit but not verified)\n";
     ss << "  → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input\n";
     ss << "\n";
     ss << "  ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance\n";
@@ -564,6 +569,15 @@ void loop() {
     if (!start_command_received) {
         // Process serial input via remote control
         RemoteControlSingleton::instance().processSerialInput();
+
+        // DEBUGGING: Auto-send START command after 1 second to skip idle waiting
+        // This helps isolate whether crash is timing-related or test-execution-related
+        static bool auto_start_sent = false;
+        if (!auto_start_sent && millis() > 1000) {
+            FL_PRINT("[DEBUG] Auto-sending START command after 1 second");
+            start_command_received = true;
+            auto_start_sent = true;
+        }
 
         // If START not received yet, print waiting message every 5 seconds
         if (!start_command_received) {
