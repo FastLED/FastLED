@@ -33,6 +33,15 @@ FL_EXTERN_C_END
 #define FASTLED_RMT_ETHERNET_CAPABLE_PLATFORM SOC_EMAC_SUPPORTED
 #define FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM SOC_BT_SUPPORTED
 
+// Bluetooth enabled requires both hardware support AND build config enabled
+#ifndef FL_ESP_32_BLUETOOTH_ENABLED
+#if FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM && defined(CONFIG_BT_ENABLED)
+#define FL_ESP_32_BLUETOOTH_ENABLED 1
+#else
+#define FL_ESP_32_BLUETOOTH_ENABLED 0
+#endif
+#endif
+
 //=============================================================================
 // ESP-IDF Includes (Platform-Specific)
 //=============================================================================
@@ -50,7 +59,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 #endif
 
-#if FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM
+#if FL_ESP_32_BLUETOOTH_ENABLED
 FL_EXTERN_C_BEGIN
 #include "esp_bt.h"
 FL_EXTERN_C_END
@@ -212,7 +221,7 @@ bool NetworkDetector::isEthernetConnected() {
 // Bluetooth Detection (Bluetooth-capable platforms only)
 //=============================================================================
 
-#if FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM
+#if FL_ESP_32_BLUETOOTH_ENABLED
 
 // Weak symbol declaration for Bluetooth controller function
 FL_EXTERN_C_BEGIN
@@ -233,14 +242,14 @@ bool NetworkDetector::isBluetoothActive() {
     return (status == ESP_BT_CONTROLLER_STATUS_ENABLED);
 }
 
-#else  // !FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM
+#else  // !FL_ESP_32_BLUETOOTH_ENABLED
 
-// Non-Bluetooth platforms (ESP32-S2) - stub implementation
+// Non-Bluetooth platforms (ESP32-S2) or Bluetooth disabled in build config - stub implementation
 bool NetworkDetector::isBluetoothActive() {
-    return false;  // No Bluetooth hardware
+    return false;  // No Bluetooth hardware or Bluetooth disabled in project configuration
 }
 
-#endif  // FASTLED_RMT_BLUETOOTH_CAPABLE_PLATFORM
+#endif  // FL_ESP_32_BLUETOOTH_ENABLED
 
 //=============================================================================
 // Convenience Methods (All Platforms)

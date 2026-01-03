@@ -32,6 +32,7 @@
 #include "fl/stl/time.h"
 #include "fl/stl/unique_ptr.h"
 #include "network_detector.h"
+#include "network_state_tracker.h"
 #include "rmt_memory_manager.h"
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
@@ -351,7 +352,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
   public:
     ChannelEngineRMTImpl()
         : mDMAChannelsInUse(0), mAllocationFailed(false),
-          mLastKnownNetworkState(false), mMemoryReductionOffset(0),
+          mMemoryReductionOffset(0),
           mConsecutiveAllocationFailures(0), mRecoveryWarningShown(false) {
         // Suppress ESP-IDF RMT "no free channels" errors (expected during
         // time-multiplexing) Only show critical RMT errors (ESP_LOG_ERROR and
@@ -541,8 +542,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         // Network-aware channel reconfiguration (once per frame)
         #if FASTLED_RMT_NETWORK_REDUCE_CHANNELS
-            bool networkActive = NetworkDetector::isAnyNetworkActive();
-            reconfigureForNetwork(networkActive);
+            reconfigureForNetwork();
         #endif
 
         // Reset allocation failure flag at start of each frame to allow retry
@@ -607,9 +607,21 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // channels.
         // ============================================================================
 
-        // Set memory channel ID (will be the index in mChannels vector after
-        // push_back)
-        state->memoryChannelId = static_cast<uint8_t>(mChannels.size());
+        // Assign memory channel ID only for NEW channels (not during reconfiguration)
+        // Check if this state already exists in mChannels vector by comparing addresses
+        bool isExistingState = false;
+        for (const auto& ch : mChannels) {
+            if (&ch == state) {
+                isExistingState = true;
+                break;
+            }
+        }
+
+        if (!isExistingState) {
+            // New channel: assign next available ID (will be index after push_back)
+            state->memoryChannelId = static_cast<uint8_t>(mChannels.size());
+        }
+        // else: Existing channel being reconfigured - keep existing memoryChannelId
 
         // Get memory manager reference
         auto &memMgr = RmtMemoryManager::instance();
@@ -1243,16 +1255,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Reconfigure channels for network state change (destroy/recreate
     /// as needed)
-    /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth)
-    /// is currently active
-    void reconfigureForNetwork(bool networkActive) {
-        // Check if Network state changed
-        if (networkActive == mLastKnownNetworkState) {
+    void reconfigureForNetwork() {
+        // Check if Network state changed using singleton tracker
+        auto& networkTracker = NetworkStateTracker::instance();
+        if (!networkTracker.hasChanged()) {
             return;  // No change - nothing to do
         }
 
+        bool networkActive = networkTracker.isActive();
         FL_DBG("Network state changed: " << (networkActive ? "ACTIVE" : "INACTIVE")
-               << " (was: " << (mLastKnownNetworkState ? "ACTIVE" : "INACTIVE") << ")");
+               << " (was: " << (!networkActive ? "ACTIVE" : "INACTIVE") << ")");
 
         // Calculate target channel count for new Network state
         size_t targetChannels = calculateTargetChannelCount(networkActive);
@@ -1322,8 +1334,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             }
         }
 
-        // Update last known state
-        mLastKnownNetworkState = networkActive;
         FL_DBG("Network reconfiguration complete - " << reconfigured << " channels reconfigured");
     }
 
@@ -1360,9 +1370,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
-
-    /// @brief Track last known network state for change detection
-    bool mLastKnownNetworkState;
 
     /// @brief Progressive retry: Memory reduction offset (symbols to reduce per retry)
     /// When RMT allocation fails, progressively reduce memory allocation by this amount
