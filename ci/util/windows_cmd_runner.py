@@ -60,7 +60,7 @@ def get_clean_windows_env() -> dict[str, str]:
         Clean environment dict suitable for running pio via cmd.exe
     """
     # Start with minimal system environment
-    clean_env = {}
+    clean_env: dict[str, str] = {}
 
     # Git Bash environment variables to EXCLUDE (these cause ESP-IDF to abort)
     git_bash_vars = {
@@ -133,7 +133,7 @@ def format_cmd_for_shell(cmd: list[str]) -> str:
     Returns:
         Command string suitable for shell=True execution
     """
-    quoted_parts = []
+    quoted_parts: list[str] = []
     for part in cmd:
         # Quote if contains spaces or special characters
         if " " in part or any(c in part for c in "&|<>^"):

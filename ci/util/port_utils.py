@@ -18,6 +18,7 @@ from pathlib import Path
 
 import psutil
 import serial.tools.list_ports
+from psutil import Process
 from serial.tools.list_ports_common import ListPortInfo
 
 
@@ -35,7 +36,7 @@ class ComportResult:
     ok: bool
     selected_port: str | None
     error_message: str | None = None
-    all_ports: list[ListPortInfo] = field(default_factory=list)
+    all_ports: list[ListPortInfo] = field(default_factory=list)  # pyright: ignore[reportUnknownVariableType]
 
 
 def auto_detect_upload_port() -> ComportResult:
@@ -81,7 +82,7 @@ def auto_detect_upload_port() -> ComportResult:
 
     if not usb_ports:
         # No USB ports found - only non-USB ports available
-        non_usb_types = set()
+        non_usb_types: set[str] = set()
         for port in all_ports:
             if "BTHENUM" in port.hwid.upper():
                 non_usb_types.add("Bluetooth")
@@ -168,7 +169,7 @@ def kill_port_users(port: str) -> None:
         port: Serial port name (e.g., "COM4", "/dev/ttyUSB0")
     """
     port_lower = port.lower()
-    processes_to_kill = []
+    processes_to_kill: list[tuple[Process, str, list[str]]] = []
 
     # Get current process and its entire process tree (ancestors)
     # We must NEVER kill ourselves or any parent process
@@ -217,10 +218,10 @@ def kill_port_users(port: str) -> None:
     # Find processes using the port
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
-            proc_pid = proc_info["pid"]
-            proc_name = proc_info["name"]
-            cmdline = proc_info["cmdline"]
+            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])  # pyright: ignore[reportUnknownMemberType]
+            proc_pid: int = proc_info["pid"]
+            proc_name: str = proc_info["name"]
+            cmdline: list[str] | None = proc_info["cmdline"]
             proc_name_lower = proc_name.lower()
 
             # NEVER kill ourselves or parent processes
@@ -237,7 +238,9 @@ def kill_port_users(port: str) -> None:
                     cmdline_str = " ".join(cmdline).lower()
                     # Check if command line contains port or serial patterns
                     if any(pattern in cmdline_str for pattern in cmdline_patterns):
-                        processes_to_kill.append((proc, proc_name, cmdline))
+                        processes_to_kill.append(
+                            (proc, proc_name, cmdline)
+                        )  # cmdline is guaranteed non-None here
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             # Process may have terminated or access denied

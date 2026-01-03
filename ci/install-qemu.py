@@ -6,11 +6,6 @@ This script pulls the Docker QEMU image required for ESP32 testing.
 """
 
 import sys
-from pathlib import Path
-
-
-# Add parent directory to path to import ci modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ci.docker_utils.qemu_test_integration import QEMUTestIntegration
 

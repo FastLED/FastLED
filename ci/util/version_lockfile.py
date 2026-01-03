@@ -14,9 +14,9 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
-from ci.util.file_lock_rw import write_lock
+from ci.util.file_lock_rw import FileLock, write_lock
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,9 @@ class VersionLockfile:
 
         try:
             with open(self.lockfile_path, "r") as f:
-                self._data = json.load(f)
+                data = json.load(f)
+                assert isinstance(data, dict), "Lockfile must contain a JSON object"
+                self._data = cast(dict[str, Any], data)
                 return self._data
         except (json.JSONDecodeError, OSError) as e:
             logger.warning(f"Failed to load lockfile {self.lockfile_path}: {e}")
@@ -79,7 +81,8 @@ class VersionLockfile:
             self._data["updated_at"] = datetime.now().isoformat()
 
             # Use write lock to prevent concurrent modifications
-            with write_lock(self.lockfile_path):
+            lock: FileLock = write_lock(self.lockfile_path)
+            with lock:
                 with open(self.lockfile_path, "w") as f:
                     json.dump(self._data, f, indent=2, sort_keys=True)
 
@@ -142,7 +145,7 @@ class VersionLockfile:
         packages = data.get("packages", {})
 
         key = f"{package_type}/{package_name}"
-        entry = {
+        entry: dict[str, Any] = {
             "requirement": requirement,
             "resolved_version": resolved_version,
             "pinned_at": datetime.now().isoformat(),

@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ci.util.file_lock_rw import write_lock
+from ci.util.file_lock_rw import FileLock, write_lock
 from ci.util.url_utils import sanitize_url_for_path
 
 
@@ -158,7 +158,7 @@ def update_breadcrumb_status(
     """
     data = read_breadcrumb(breadcrumb_path)
     if data is None:
-        data: dict[str, Any] = {}
+        data = {}
 
     data["status"] = status
     data["updated_at"] = datetime.now().isoformat()

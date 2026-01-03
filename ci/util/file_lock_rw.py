@@ -21,6 +21,7 @@ import signal
 import time
 from datetime import datetime
 from pathlib import Path
+from types import TracebackType
 from typing import Any, ContextManager
 
 import fasteners
@@ -218,7 +219,7 @@ class FileLock:
     def __init__(
         self,
         lock_file_path: Path,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         operation: str = "lock",
     ):
         """
@@ -232,7 +233,7 @@ class FileLock:
         self.lock_file_path = Path(lock_file_path)
         self.timeout = timeout
         self.operation = operation
-        self._lock: Optional[fasteners.InterProcessLock] = None
+        self._lock: fasteners.InterProcessLock | None = None
 
     def __enter__(self) -> "FileLock":
         """Acquire the lock with stale lock detection and retry."""
@@ -291,7 +292,12 @@ class FileLock:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool:
         """Release the lock and clean up metadata."""
         if self._lock:
             # Remove metadata before releasing lock
@@ -304,7 +310,7 @@ class FileLock:
 
 
 def write_lock(
-    file_path: Path, timeout: Optional[float] = None, operation: str = "write"
+    file_path: Path, timeout: float | None = None, operation: str = "write"
 ) -> FileLock:
     """
     Create a write lock for a file.
@@ -328,7 +334,7 @@ def write_lock(
 
 
 def read_lock(
-    file_path: Path, timeout: Optional[float] = None, operation: str = "read"
+    file_path: Path, timeout: float | None = None, operation: str = "read"
 ) -> FileLock:
     """
     Create a read lock for a file.
@@ -356,7 +362,7 @@ def read_lock(
 
 
 def custom_lock(
-    lock_file_path: Path, timeout: Optional[float] = None, operation: str = "custom"
+    lock_file_path: Path, timeout: float | None = None, operation: str = "custom"
 ) -> FileLock:
     """
     Create a lock with a custom lock file path.
