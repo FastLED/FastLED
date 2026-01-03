@@ -398,3 +398,29 @@ FL_DISABLE_WARNING_POP
   // C99 has native 'restrict' keyword
   #define FL_RESTRICT_PARAM restrict
 #endif
+
+// Function name macro for debugging and tracing
+// Provides the current function name in a portable way across compilers.
+//
+// Usage: FL_DBG("Entering " << FL_FUNCTION);
+//        FL_SCOPED_TRACE() uses this internally
+//
+// Compiler support:
+//   - C++11+: __func__ (standard)
+//   - GCC/Clang: __FUNCTION__ (extension, same as __func__ in most cases)
+//   - MSVC: __FUNCTION__ (non-standard but widely supported)
+//
+// Note: __PRETTY_FUNCTION__ (GCC/Clang) includes full signature but is too verbose
+#if defined(__cplusplus)
+  // C++11 standard: __func__ is a predefined identifier
+  #define FL_FUNCTION __func__
+#elif defined(__GNUC__) || defined(__clang__)
+  // GCC/Clang C: Use __FUNCTION__ extension
+  #define FL_FUNCTION __FUNCTION__
+#elif defined(_MSC_VER)
+  // MSVC: __FUNCTION__ is supported
+  #define FL_FUNCTION __FUNCTION__
+#else
+  // Fallback: Use __func__ (C99 standard)
+  #define FL_FUNCTION __func__
+#endif

@@ -26,6 +26,7 @@
 #include "fl/warn.h"
 #include "fl/log.h"
 #include "fl/stl/algorithm.h"
+#include "fl/trace.h"
 
     // The test may have 3000 LEDs, but we use streaming buffers for large strips
 #ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
@@ -80,6 +81,7 @@ void ChannelEnginePARLIOImpl::enqueue(ChannelDataPtr channelData) {
 }
 
 void ChannelEnginePARLIOImpl::show() {
+    FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
@@ -254,6 +256,7 @@ void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
 }
 
 void ChannelEnginePARLIO::show() {
+    FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);

@@ -8,6 +8,7 @@
 #include "fl/channels/channel.h"
 #include "fl/channels/config.h"
 #include "fl/channels/bus_manager.h"
+#include "fl/trace.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -115,6 +116,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
+	FL_SCOPED_TRACE;
 #if !FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
 #endif

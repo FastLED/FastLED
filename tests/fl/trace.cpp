@@ -115,15 +115,15 @@ TEST_CASE("StackTrace - null function handling") {
     CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - macro FL_SCOPED_TRACE") {
+TEST_CASE("StackTrace - macro FL_SCOPED_TRACE_NAMED") {
     ScopedTrace::clear();
 
     {
-        FL_SCOPED_TRACE("macro_test");
+        FL_SCOPED_TRACE_NAMED("macro_test");
         CHECK(ScopedTrace::depth() == 1);
 
         {
-            FL_SCOPED_TRACE("nested_macro");
+            FL_SCOPED_TRACE_NAMED("nested_macro");
             CHECK(ScopedTrace::depth() == 2);
         }
 
@@ -138,9 +138,9 @@ TEST_CASE("StackTrace - dump output") {
 
     // This test just verifies dump doesn't crash
     // Visual inspection of output needed to verify formatting
-    FL_SCOPED_TRACE("outer");
-    FL_SCOPED_TRACE("middle");
-    FL_SCOPED_TRACE("inner");
+    FL_SCOPED_TRACE_NAMED("outer");
+    FL_SCOPED_TRACE_NAMED("middle");
+    FL_SCOPED_TRACE_NAMED("inner");
 
     CHECK(ScopedTrace::depth() == 3);
     FL_TRACE_DUMP();  // Should print stack trace via FL_DBG

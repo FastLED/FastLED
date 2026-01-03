@@ -15,12 +15,18 @@ The trace system provides source location information and call stack tracking fo
 ### Stack Trace Usage:
 ```cpp
 void criticalFunction() {
-    FL_SCOPED_TRACE("criticalFunction");
+    FL_SCOPED_TRACE;  // Automatically uses function name
     // Function body - trace automatically pushed/popped
 
     if (error) {
         FL_TRACE_DUMP();  // Print call stack for debugging
     }
+}
+
+// For custom trace names:
+void helper() {
+    FL_SCOPED_TRACE_NAMED("custom_trace_name");
+    // ...
 }
 ```
 
@@ -35,6 +41,7 @@ void criticalFunction() {
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
+#include "fl/compiler_control.h"  // For FL_FUNCTION
 
 namespace fl {
 
@@ -94,15 +101,21 @@ public:
 #define FL_TRACE fl::make_tuple(__FILE__, int(__LINE__), fl::time())
 
 #ifdef FASTLED_DEBUG_STACK_TRACE
-/// @brief Token pasting helper for FL_SCOPED_TRACE - innermost macro
+/// @brief Token pasting helper for FL_SCOPED_TRACE_NAMED - innermost macro
 #define FL_SCOPED_TRACE_CONCAT(name, line) fl::ScopedTrace __fl_trace_##line(name, line)
 
-/// @brief Helper macro for FL_SCOPED_TRACE to ensure __LINE__ expansion
+/// @brief Helper macro for FL_SCOPED_TRACE_NAMED to ensure __LINE__ expansion
 #define FL_SCOPED_TRACE_IMPL(name, line) FL_SCOPED_TRACE_CONCAT(name, line)
 
-/// @brief Convenience macro for automatic stack tracing via RAII
+/// @brief Convenience macro for automatic stack tracing via RAII with custom name
 /// Creates a ScopedTrace object with unique name per line, capturing line number
-#define FL_SCOPED_TRACE(name) FL_SCOPED_TRACE_IMPL(name, __LINE__)
+/// @param name Custom trace name (must be string literal or have static lifetime)
+#define FL_SCOPED_TRACE_NAMED(name) FL_SCOPED_TRACE_IMPL(name, __LINE__)
+
+/// @brief Convenience macro for automatic stack tracing via RAII
+/// Automatically uses the current function name via FL_FUNCTION
+/// Creates a ScopedTrace object with unique name per line, capturing line number
+#define FL_SCOPED_TRACE FL_SCOPED_TRACE_IMPL(FL_FUNCTION, __LINE__)
 
 /// @brief Dump the current call stack to debug output
 /// Prints the stack trace using FL_DBG
@@ -110,6 +123,7 @@ public:
 
 #else
 // No-op macros when stack tracing is disabled
-#define FL_SCOPED_TRACE(name) do {} while(0)
+#define FL_SCOPED_TRACE_NAMED(name) do {} while(0)
+#define FL_SCOPED_TRACE do {} while(0)
 #define FL_TRACE_DUMP() do {} while(0)
 #endif // FASTLED_DEBUG_STACK_TRACE

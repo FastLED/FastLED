@@ -31,6 +31,7 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/time.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/trace.h"
 #include "network_detector.h"
 #include "network_state_tracker.h"
 #include "rmt_memory_manager.h"
@@ -407,6 +408,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
     void show() override {
+        FL_SCOPED_TRACE;
         if (mEnqueuedChannels.empty()) {
             return;
         }

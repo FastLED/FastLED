@@ -13,6 +13,7 @@
 #include "fl/channels/options.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
+#include "fl/trace.h"
 
 #ifdef ESP32
 FL_EXTERN_C_BEGIN
@@ -159,6 +160,7 @@ int Channel::getClockPin() const {
 
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+    FL_SCOPED_TRACE;
     // Safety check: don't modify buffer if engine is currently transmitting it
     if (mChannelData->isInUse()) {
         FL_ASSERT(false, "Channel " << mId << ": Skipping update - buffer in use by engine");

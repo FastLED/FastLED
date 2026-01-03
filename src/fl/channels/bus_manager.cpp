@@ -9,6 +9,7 @@
 #include "fl/delay.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
+#include "fl/trace.h"
 
 namespace fl {
 
@@ -168,6 +169,7 @@ void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
 }
 
 void ChannelBusManager::show() {
+    FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
@@ -179,6 +181,7 @@ void ChannelBusManager::show() {
 }
 
 IChannelEngine::EngineState ChannelBusManager::poll() {
+    FL_SCOPED_TRACE;
     // Poll all registered engines to allow buffer cleanup
     // even when mActiveEngine is nullptr (after onEndFrame reset)
     bool anyBusy = false;
@@ -208,6 +211,7 @@ void ChannelBusManager::onBeginFrame() {
 }
 
 void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+    FL_SCOPED_TRACE;
     if (channelData.size() == 0) {
         return;
     }
