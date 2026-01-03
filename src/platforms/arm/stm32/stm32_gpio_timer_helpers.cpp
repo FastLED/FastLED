@@ -7,15 +7,11 @@
 /// IMPORTANT: This file requires STM32 HAL types (GPIO_TypeDef, TIM_TypeDef, etc.)
 /// which are available when STM32duino core is present.
 
-// Platform guard using compiler builtins
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-    defined(STM32F2XX) || defined(STM32F2xx) || \
-    defined(STM32F4) || defined(STM32F4xx) || \
-    defined(STM32F7) || defined(STM32F7xx) || \
-    defined(STM32L4) || defined(STM32L4xx) || \
-    defined(STM32H7) || defined(STM32H7xx) || \
-    defined(STM32G4) || defined(STM32G4xx) || \
-    defined(STM32U5) || defined(STM32U5xx)
+// Include platform detection header for FL_IS_STM32
+#include "platforms/arm/stm32/is_stm32.h"
+
+// Platform guard using standardized FL_IS_STM32 macro
+#if defined(FL_IS_STM32)
 
 #include "platforms/arm/stm32/stm32_capabilities.h"
 
@@ -972,4 +968,4 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
 }  // namespace stm32
 }  // namespace fl
 
-#endif  // STM32 (compiler builtin guard)
+#endif  // FL_IS_STM32
