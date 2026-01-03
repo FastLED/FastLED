@@ -14,12 +14,6 @@ Usage:
 import sys
 from pathlib import Path
 
-
-# Add project root to path to import ci modules
-script_dir = Path(__file__).parent
-project_root = script_dir.parent.parent
-sys.path.insert(0, str(project_root))
-
 from ci.boards import Board
 from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch
 

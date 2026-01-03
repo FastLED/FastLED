@@ -90,7 +90,7 @@ def get_required_packages(project_dir: Path, environment: str) -> list[str]:
         # - toolchain-<platform>
         # - framework-<platform>
         # - tool-<name>
-        package_prefixes = []
+        package_prefixes: list[str] = []
 
         if "espressif32" in platform:
             package_prefixes.extend(
@@ -129,7 +129,7 @@ def get_required_packages(project_dir: Path, environment: str) -> list[str]:
         if not pio_packages_dir.exists():
             return []
 
-        packages = []
+        packages: list[str] = []
         for pkg_dir in pio_packages_dir.iterdir():
             if pkg_dir.is_dir():
                 for prefix in package_prefixes:
@@ -156,7 +156,7 @@ def check_all_packages(project_dir: Path, environment: str) -> tuple[bool, list[
     Returns:
         (all_valid, list_of_errors)
     """
-    errors = []
+    errors: list[str] = []
 
     # Get list of required packages
     required_packages = get_required_packages(project_dir, environment)
