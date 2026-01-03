@@ -297,8 +297,8 @@ inline void analogWrite(int pin, uint16_t val) {
         case 19: timer_num = 3; segment = AM_HAL_CTIMER_TIMERA; output_cfg = AM_HAL_CTIMER_OUTPUT_NORMAL; break;
         default:
             // Pin doesn't support PWM - fall back to digital write
-            pinMode(pin, PinMode::Output);
-            digitalWrite(pin, clamped_val >= 128 ? PinValue::High : PinValue::Low);
+            fl::platform::pinMode(pin, PinMode::Output);
+            fl::platform::digitalWrite(pin, clamped_val >= 128 ? PinValue::High : PinValue::Low);
             return;
     }
 
