@@ -4,17 +4,16 @@
 #include "fl/warn.h"
 #include "fl/str.h"
 #include "fl/stl/stdint.h"
+#include "fl/detail/async_log_queue.h"  // Full definition needed for embedded storage
 
 namespace fl {
-    // Forward declarations
-    template <fl::size, fl::size> class AsyncLogQueue;
-
-    /// @brief ISR-safe async logger wrapper
+    /// @brief ISR-safe async logger wrapper (zero heap allocation)
     /// Implementation in log.cpp
+    /// Uses embedded AsyncLogQueue instead of heap-allocated pointer
     class AsyncLogger {
     public:
         AsyncLogger();
-        ~AsyncLogger();
+        ~AsyncLogger() = default;  // No cleanup needed (embedded storage)
 
         void push(const fl::string& msg);
         void push(const char* msg);
@@ -42,7 +41,7 @@ namespace fl {
         bool isBackgroundFlushEnabled() const;
 
     private:
-        AsyncLogQueue<128, 4096>* mQueue;  // Pointer to hide implementation details
+        AsyncLogQueue<128, 4096> mQueue;  // Embedded storage (zero heap allocation)
     };
 
     /// @brief Logger category identifiers for registry-based access
@@ -177,10 +176,11 @@ namespace fl {
 /// }
 /// ```
 ///
-/// **Memory Footprint:**
-/// - Each logger uses ~1KB per 128 messages (configurable via FASTLED_ASYNC_LOG_CAPACITY)
-/// - ISR messages: Stored as const char* (zero heap allocation, string literals only)
-/// - Main thread messages: Stored as fl::string (heap-allocated via StrStream)
+/// **Memory Footprint (Zero Heap Allocation):**
+/// - Each logger uses ~5KB static storage (128 descriptors + 4KB arena)
+/// - Singletons instantiated lazily on first access (linker removes unused loggers)
+/// - ISR messages: Stored as const char* (zero overhead, string literals only)
+/// - Main thread messages: Stored as fl::string (arena-allocated, no heap)
 /// - Ring buffer auto-evicts oldest messages when full (FIFO overflow)
 ///
 /// **Thread Safety:**

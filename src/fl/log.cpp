@@ -7,6 +7,7 @@
 #include "fl/isr.h"
 #include "fl/math_macros.h"
 #include "fl/stl/vector.h"
+#include "fl/singleton.h"
 
 namespace fl {
 
@@ -41,21 +42,17 @@ namespace detail {
 } // namespace detail
 
 // ============================================================================
-// AsyncLogger implementation using AsyncLogQueue backend
+// AsyncLogger implementation using AsyncLogQueue backend (zero heap allocation)
 // ============================================================================
 
-AsyncLogger::AsyncLogger() : mQueue(new AsyncLogQueue<128, 4096>()) {}
-
-AsyncLogger::~AsyncLogger() {
-    delete mQueue;
-}
+AsyncLogger::AsyncLogger() : mQueue() {}
 
 void AsyncLogger::push(const fl::string& msg) {
-    mQueue->push(msg);
+    mQueue.push(msg);
 }
 
 void AsyncLogger::push(const char* msg) {
-    mQueue->push(msg);
+    mQueue.push(msg);
 }
 
 void AsyncLogger::flush() {
@@ -66,7 +63,7 @@ void AsyncLogger::flush() {
     // Avoids heap allocation entirely by chunking long messages
     char buffer[256];
 
-    while (mQueue->tryPop(&msg, &len)) {
+    while (mQueue.tryPop(&msg, &len)) {
         fl::u16 offset = 0;
 
         // Process message in chunks to avoid heap allocation
@@ -86,29 +83,29 @@ void AsyncLogger::flush() {
             }
         }
 
-        mQueue->commit();
+        mQueue.commit();
     }
 }
 
 fl::size AsyncLogger::size() const {
-    return mQueue->size();
+    return mQueue.size();
 }
 
 bool AsyncLogger::empty() const {
-    return mQueue->empty();
+    return mQueue.empty();
 }
 
 void AsyncLogger::clear() {
     // Drain queue without printing
     const char* msg;
     fl::u16 len;
-    while (mQueue->tryPop(&msg, &len)) {
-        mQueue->commit();
+    while (mQueue.tryPop(&msg, &len)) {
+        mQueue.commit();
     }
 }
 
 fl::u32 AsyncLogger::droppedCount() const {
-    return mQueue->droppedCount();
+    return mQueue.droppedCount();
 }
 
 fl::size AsyncLogger::flushN(fl::size maxMessages) {
@@ -120,7 +117,7 @@ fl::size AsyncLogger::flushN(fl::size maxMessages) {
     // Avoids heap allocation entirely by chunking long messages
     char buffer[256];
 
-    while (flushed < maxMessages && mQueue->tryPop(&msg, &len)) {
+    while (flushed < maxMessages && mQueue.tryPop(&msg, &len)) {
         fl::u16 offset = 0;
 
         // Process message in chunks to avoid heap allocation
@@ -140,7 +137,7 @@ fl::size AsyncLogger::flushN(fl::size maxMessages) {
             }
         }
 
-        mQueue->commit();
+        mQueue.commit();
         flushed++;
     }
 
@@ -191,36 +188,32 @@ bool AsyncLogger::isBackgroundFlushEnabled() const {
 }
 
 // ============================================================================
-// Global async logger registry (lazy instantiation with fl::vector_fixed)
+// Global async logger registry (zero heap allocation with Singleton pattern)
 // ============================================================================
 // NOTE: SPSC queue design requires separate queues for ISR vs main thread
 //       to avoid race conditions when both contexts call push() concurrently
+//
+// Each logger category uses Singleton<AsyncLogger, N> for static storage.
+// The registry tracks which singletons have been instantiated for iteration.
 
 namespace detail {
-    /// @brief Registry for async loggers with lazy instantiation
-    /// Uses fl::vector_fixed<AsyncLogger*, 16> to hold up to 16 logger categories
-    /// Each pointer is null until first access, enabling memory-efficient growth
+    /// @brief Registry for async loggers with lazy instantiation (zero heap allocation)
+    /// Uses Singleton<AsyncLogger, N> for each category instead of new/delete
+    /// Tracks instantiated loggers via fl::vector_fixed<AsyncLogger*, 16>
     class AsyncLoggerRegistry {
     public:
         static constexpr fl::size MAX_LOGGERS = 16;
 
         AsyncLoggerRegistry() {
-            // Initialize all slots to nullptr
+            // Initialize all slots to nullptr (singletons not yet accessed)
             for (fl::size i = 0; i < MAX_LOGGERS; ++i) {
                 mLoggers.push_back(nullptr);
             }
         }
 
-        ~AsyncLoggerRegistry() {
-            // Clean up all allocated loggers
-            for (fl::size i = 0; i < mLoggers.size(); ++i) {
-                delete mLoggers[i];
-            }
-        }
-
-        /// @brief Get logger for given category, creating it lazily if needed
+        /// @brief Get logger for given category, creating it lazily via Singleton
         /// @param category Logger category index (must be < MAX_LOGGERS)
-        /// @return Reference to AsyncLogger instance
+        /// @return Reference to AsyncLogger instance (from Singleton static storage)
         AsyncLogger& get(fl::size category) {
             // Bounds check
             if (category >= MAX_LOGGERS) {
@@ -228,9 +221,29 @@ namespace detail {
                 category = 0;
             }
 
-            // Lazy instantiation: create logger on first access
+            // Lazy instantiation: get singleton instance and register it
             if (mLoggers[category] == nullptr) {
-                mLoggers[category] = new AsyncLogger();
+                // Use switch to map category index to compile-time Singleton<T, N>
+                // This allows linker to remove unused singletons
+                switch (category) {
+                    case 0: mLoggers[0] = &Singleton<AsyncLogger, 0>::instance(); break;
+                    case 1: mLoggers[1] = &Singleton<AsyncLogger, 1>::instance(); break;
+                    case 2: mLoggers[2] = &Singleton<AsyncLogger, 2>::instance(); break;
+                    case 3: mLoggers[3] = &Singleton<AsyncLogger, 3>::instance(); break;
+                    case 4: mLoggers[4] = &Singleton<AsyncLogger, 4>::instance(); break;
+                    case 5: mLoggers[5] = &Singleton<AsyncLogger, 5>::instance(); break;
+                    case 6: mLoggers[6] = &Singleton<AsyncLogger, 6>::instance(); break;
+                    case 7: mLoggers[7] = &Singleton<AsyncLogger, 7>::instance(); break;
+                    case 8: mLoggers[8] = &Singleton<AsyncLogger, 8>::instance(); break;
+                    case 9: mLoggers[9] = &Singleton<AsyncLogger, 9>::instance(); break;
+                    case 10: mLoggers[10] = &Singleton<AsyncLogger, 10>::instance(); break;
+                    case 11: mLoggers[11] = &Singleton<AsyncLogger, 11>::instance(); break;
+                    case 12: mLoggers[12] = &Singleton<AsyncLogger, 12>::instance(); break;
+                    case 13: mLoggers[13] = &Singleton<AsyncLogger, 13>::instance(); break;
+                    case 14: mLoggers[14] = &Singleton<AsyncLogger, 14>::instance(); break;
+                    case 15: mLoggers[15] = &Singleton<AsyncLogger, 15>::instance(); break;
+                    default: mLoggers[0] = &Singleton<AsyncLogger, 0>::instance(); break;  // Fallback
+                }
             }
 
             return *mLoggers[category];
@@ -248,7 +261,7 @@ namespace detail {
         }
 
     private:
-        fl::vector_fixed<AsyncLogger*, MAX_LOGGERS> mLoggers;
+        fl::vector_fixed<AsyncLogger*, MAX_LOGGERS> mLoggers;  // Pointers to singleton instances (zero heap)
     };
 
     /// @brief Get global logger registry singleton
@@ -258,7 +271,7 @@ namespace detail {
     }
 } // namespace detail
 
-// Public accessor function - registry-based lookup with lazy instantiation
+// Public accessor function - registry-based lookup with lazy Singleton instantiation
 AsyncLogger& get_async_logger(LogCategory category) {
     return detail::getLoggerRegistry().get(static_cast<fl::size>(category));
 }
