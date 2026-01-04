@@ -67,6 +67,45 @@ struct ParlioPeripheralConfig {
     size_t max_transfer_size;       ///< Max DMA transfer size (default: 65534)
 };
 
+/// @brief Task configuration for peripheral task creation
+///
+/// Platform-agnostic task configuration structure for creating background tasks.
+/// Used to abstract FreeRTOS/OS-specific task creation from engine code.
+struct TaskConfig {
+    void (*task_function)(void* arg);  ///< Task entry point
+    const char* name;                  ///< Task name (for debugging)
+    size_t stack_size;                 ///< Stack size in bytes
+    void* user_data;                   ///< User context (passed to task_function)
+    uint8_t priority;                  ///< Task priority (0-N, platform-specific)
+};
+
+/// @brief Opaque task handle (platform-specific)
+///
+/// Platform-agnostic task handle type:
+/// - ESP32: FreeRTOS TaskHandle_t cast to void*
+/// - Mock: Synthetic handle or nullptr
+typedef void* task_handle_t;
+
+/// @brief Opaque timer handle (platform-specific)
+///
+/// Platform-agnostic timer handle type:
+/// - ESP32: gptimer_handle_t cast to void*
+/// - Mock: Synthetic handle or nullptr
+typedef void* timer_handle_t;
+
+/// @brief Timer configuration for hardware timer creation
+///
+/// Platform-agnostic timer configuration structure for creating background timers.
+/// Used to abstract ESP-IDF gptimer / OS-specific timer creation from engine code.
+struct TimerConfig {
+    void* callback;              ///< Timer callback (cast to platform-specific type)
+    void* user_data;             ///< User context (passed to callback)
+    uint32_t resolution_hz;      ///< Timer resolution in Hz (e.g., 1MHz = 1µs ticks)
+    uint8_t priority;            ///< Interrupt priority (0-N, platform-specific)
+    uint32_t period_us;          ///< Timer period in microseconds (e.g., 50µs)
+    bool auto_reload;            ///< Auto-reload mode (true = continuous, false = one-shot)
+};
+
 //=============================================================================
 // Virtual Peripheral Interface
 //=============================================================================
@@ -266,6 +305,178 @@ public:
     /// ⚠️  NOT for timing-critical operations. Use hardware timers or busy-wait
     /// for sub-millisecond precision requirements.
     virtual void delay(uint32_t ms) = 0;
+
+    //=========================================================================
+    // Task Management
+    //=========================================================================
+
+    /// @brief Create a new task
+    /// @param config Task configuration
+    /// @return Task handle on success, nullptr on failure
+    ///
+    /// Maps to:
+    /// - ESP32/FreeRTOS: xTaskCreate()
+    /// - Mock: Simulated task (thread or no-op)
+    ///
+    /// The task runs immediately after creation. Call deleteTask() to stop.
+    ///
+    /// Platform-specific notes:
+    /// - ESP32: Task runs with specified priority (0-24)
+    /// - Mock: May run synchronously or as no-op (test-specific)
+    ///
+    /// Safe to call from non-ISR context only.
+    virtual task_handle_t createTask(const TaskConfig& config) = 0;
+
+    /// @brief Delete a task
+    /// @param task_handle Task handle from createTask()
+    ///
+    /// Maps to:
+    /// - ESP32/FreeRTOS: vTaskDelete()
+    /// - Mock: Cleanup simulated task
+    ///
+    /// Safe to call with nullptr (no-op). Task must not be currently executing
+    /// (use signaling to coordinate shutdown before calling deleteTask).
+    ///
+    /// ⚠️  For self-deleting tasks, use deleteCurrentTask() instead.
+    virtual void deleteTask(task_handle_t task_handle) = 0;
+
+    /// @brief Delete the currently executing task (self-deletion)
+    ///
+    /// Maps to:
+    /// - ESP32/FreeRTOS: vTaskDelete(NULL)
+    /// - Mock: Exit task simulation
+    ///
+    /// This method MUST be called from within the task that wants to self-delete.
+    /// It should be the last operation in the task function. The task function
+    /// should NOT return after calling this method.
+    ///
+    /// Typical pattern:
+    /// ```cpp
+    /// void myTaskFunction(void* arg) {
+    ///     // ... task work ...
+    ///     peripheral->deleteCurrentTask();
+    ///     // UNREACHABLE CODE
+    /// }
+    /// ```
+    ///
+    /// ⚠️  This method does NOT return on real hardware (ESP32/FreeRTOS).
+    /// On mock implementations, it may throw an exception or set a flag to
+    /// terminate task simulation.
+    virtual void deleteCurrentTask() = 0;
+
+    //=========================================================================
+    // Timer Management
+    //=========================================================================
+
+    /// @brief Create and configure a hardware timer
+    /// @param config Timer configuration
+    /// @return Timer handle on success, nullptr on failure
+    ///
+    /// Maps to:
+    /// - ESP32: gptimer_new_timer(), gptimer_register_event_callbacks(), gptimer_set_alarm_action()
+    /// - Mock: Simulated timer (thread-based or no-op)
+    ///
+    /// The timer is created in disabled state. Call enableTimer() and startTimer()
+    /// to begin generating timer interrupts.
+    ///
+    /// Callback signature (cast from void*):
+    /// ```cpp
+    /// bool callback(void* timer, const void* edata, void* user_ctx);
+    /// ```
+    ///
+    /// The callback:
+    /// - Runs in ISR context (MUST be ISR-safe)
+    /// - Receives opaque timer handle (implementation-specific)
+    /// - Receives event data (implementation-specific)
+    /// - Receives user context pointer (from TimerConfig::user_data)
+    /// - Returns true if high-priority task woken, false otherwise
+    ///
+    /// ⚠️  ISR SAFETY RULES:
+    /// - NO logging (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
+    /// - NO blocking operations (mutex, delay, heap allocation)
+    /// - MINIMIZE execution time (<10µs ideal)
+    /// - Use atomic operations and memory barriers for shared state
+    virtual timer_handle_t createTimer(const TimerConfig& config) = 0;
+
+    /// @brief Enable hardware timer
+    /// @param handle Timer handle from createTimer()
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: gptimer_enable()
+    ///
+    /// Must be called before startTimer(). The timer remains enabled until
+    /// disableTimer() is called.
+    virtual bool enableTimer(timer_handle_t handle) = 0;
+
+    /// @brief Start hardware timer (begin generating interrupts)
+    /// @param handle Timer handle from createTimer()
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: gptimer_start()
+    ///
+    /// Timer must be enabled before calling. Timer callback will fire at
+    /// configured period (TimerConfig::period_us).
+    virtual bool startTimer(timer_handle_t handle) = 0;
+
+    /// @brief Stop hardware timer (stop generating interrupts)
+    /// @param handle Timer handle from createTimer()
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: gptimer_stop()
+    ///
+    /// Safe to call multiple times. Does not disable timer (call disableTimer()
+    /// to fully power down).
+    virtual bool stopTimer(timer_handle_t handle) = 0;
+
+    /// @brief Disable hardware timer
+    /// @param handle Timer handle from createTimer()
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: gptimer_disable()
+    ///
+    /// Timer must be stopped before disabling. Call after stopTimer().
+    virtual bool disableTimer(timer_handle_t handle) = 0;
+
+    /// @brief Delete hardware timer
+    /// @param handle Timer handle from createTimer()
+    ///
+    /// Maps to ESP-IDF: gptimer_del_timer()
+    ///
+    /// Timer must be disabled before deletion. Safe to call with nullptr (no-op).
+    virtual void deleteTimer(timer_handle_t handle) = 0;
+
+    //=========================================================================
+    // Time Utilities
+    //=========================================================================
+
+    /// @brief Get current timestamp in microseconds
+    /// @return Current timestamp in microseconds (monotonic clock)
+    ///
+    /// Maps to:
+    /// - ESP32: esp_timer_get_time()
+    /// - Mock: std::chrono::high_resolution_clock or simulated time
+    ///
+    /// Used for debug timestamps and performance measurement. Monotonic clock
+    /// (does not jump backwards). Precision varies by platform (ESP32: ~1µs).
+    virtual uint64_t getMicroseconds() = 0;
+
+    //=========================================================================
+    // Memory Management
+    //=========================================================================
+
+    /// @brief Free DMA-capable memory allocated by allocateDma()
+    /// @param ptr Pointer to DMA memory to free (nullptr is safe, no-op)
+    ///
+    /// Maps to:
+    /// - ESP32: heap_caps_free()
+    /// - Mock: free() or delete[]
+    ///
+    /// MUST be used to free memory allocated by allocateDma(). Using standard
+    /// free() on DMA memory may cause undefined behavior on some platforms.
+    ///
+    /// Thread-safe: Yes (can be called from any context)
+    /// ISR-safe: No (may allocate/deallocate memory internally)
+    virtual void freeDmaBuffer(void* ptr) = 0;
 };
 
 } // namespace detail

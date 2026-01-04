@@ -60,7 +60,6 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
 
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
@@ -82,11 +81,6 @@
 #else
 #include "parlio_peripheral_esp.h"
 #endif
-
-// Forward declarations
-struct gptimer_t;
-typedef struct gptimer_t *gptimer_handle_t;
-extern "C" void heap_caps_free(void *ptr);
 
 namespace fl {
 namespace detail {
@@ -197,12 +191,6 @@ private:
                               const void* edata,
                               void* user_ctx);
 
-    /// @brief Worker task function for background DMA buffer population
-    /// ⚠️  CRITICAL: NO LOGGING IN THIS FUNCTION - Runs in high-priority task context
-    /// ⚠️  Priority: configMAX_PRIORITIES - 1 (highest user priority, below ISRs)
-    /// @note This is a FreeRTOS task, not a true ISR, for better portability and debugging
-    static void workerTaskFunction(void* arg);
-
     /// @brief Worker ISR callback for hardware timer-based DMA buffer population
     /// ⚠️  CRITICAL ISR SAFETY RULES:
     /// ⚠️  1. NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
@@ -213,7 +201,7 @@ private:
     /// @param edata Event data (unused)
     /// @param user_ctx ParlioEngine instance pointer
     /// @return true if high-priority task woken, false otherwise
-    static bool FL_IRAM workerIsrCallback(struct gptimer_t* timer,
+    static bool FL_IRAM workerIsrCallback(void* timer,
                                           const void* edata,
                                           void* user_ctx);
 
@@ -254,7 +242,7 @@ private:
     size_t mDummyLanes;
 
     // PARLIO peripheral interface (real hardware or mock)
-    IParlioPeripheral* mPeripheral;
+    fl::unique_ptr<IParlioPeripheral> mPeripheral;
 
     // GPIO pin assignments
     fl::vector<int> mPins;
@@ -269,7 +257,7 @@ private:
     fl::Wave8BitExpansionLut mWave8Lut;
 
     // ISR context (cache-aligned, 64 bytes)
-    ParlioIsrContext* mIsrContext;
+    fl::unique_ptr<ParlioIsrContext> mIsrContext;
 
     // Main task handle for transmission completion signaling (TaskHandle_t)
     void* mMainTaskHandle;
@@ -277,8 +265,8 @@ private:
     // Worker task handle for background buffer population (TaskHandle_t)
     void* mWorkerTaskHandle;
 
-    // Worker timer for ISR-based background buffer population (gptimer_handle_t)
-    gptimer_handle_t mWorkerTimerHandle;
+    // Worker timer for ISR-based background buffer population (timer_handle_t)
+    timer_handle_t mWorkerTimerHandle;
 
     // Debug task handle for periodic ISR state logging (TaskHandle_t)
     void* mDebugTaskHandle;
@@ -304,5 +292,3 @@ private:
 
 } // namespace detail
 } // namespace fl
-
-#endif // ESP32

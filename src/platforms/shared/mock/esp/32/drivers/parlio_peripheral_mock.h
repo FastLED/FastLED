@@ -98,6 +98,17 @@ public:
     uint8_t* allocateDmaBuffer(size_t size) override;
     void freeDmaBuffer(uint8_t* buffer) override;
     void delay(uint32_t ms) override;
+    task_handle_t createTask(const TaskConfig& config) override;
+    void deleteTask(task_handle_t task_handle) override;
+    void deleteCurrentTask() override;
+    timer_handle_t createTimer(const TimerConfig& config) override;
+    bool enableTimer(timer_handle_t handle) override;
+    bool startTimer(timer_handle_t handle) override;
+    bool stopTimer(timer_handle_t handle) override;
+    bool disableTimer(timer_handle_t handle) override;
+    void deleteTimer(timer_handle_t handle) override;
+    uint64_t getMicroseconds() override;
+    void freeDmaBuffer(void* ptr) override;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -203,6 +214,9 @@ private:
 
     // Pending transmission state (for waitAllDone simulation)
     size_t mPendingTransmissions;
+
+    // Task tracking (for cleanup)
+    fl::vector<task_handle_t> mMockTasks;
 };
 
 //=============================================================================

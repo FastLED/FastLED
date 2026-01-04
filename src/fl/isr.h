@@ -381,6 +381,59 @@ void memcpy(void* FL_RESTRICT_PARAM dst,
     }
 }
 
+// =============================================================================
+// ISR-Safe Memory Zero Utilities
+// =============================================================================
+
+/// @brief ISR-safe memset replacement (byte-by-byte zero)
+/// @param dest Destination pointer
+/// @param count Number of bytes to zero
+/// @note fl::memset is not allowed in ISR context on some platforms
+/// @note This function uses a simple loop to zero memory
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memset_zero_byte(uint8_t* dest, size_t count) {
+    for (size_t i = 0; i < count; i++) {
+        dest[i] = 0x0;
+    }
+}
+
+/// @brief ISR-safe word-aligned memset (4-byte writes)
+/// @param dest Destination pointer (must be 4-byte aligned)
+/// @param count Number of bytes to zero (will process in 4-byte chunks)
+/// @note Handles remainder bytes using byte writes
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memset_zero_word(uint8_t* dest, size_t count) {
+    uint32_t* dest32 = reinterpret_cast<uint32_t*>(dest);
+    size_t count32 = count / 4;
+    size_t remainder = count % 4;
+
+    for (size_t i = 0; i < count32; i++) {
+        dest32[i] = 0;
+    }
+
+    if (remainder > 0) {
+        uint8_t* remainder_ptr = dest + (count32 * 4);
+        memset_zero_byte(remainder_ptr, remainder);
+    }
+}
+
+/// @brief ISR-safe memset with alignment optimization
+/// @param dest Destination pointer
+/// @param count Number of bytes to zero
+/// @note Automatically selects word or byte writes based on alignment
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memset_zero(uint8_t* dest, size_t count) {
+    uintptr_t address = reinterpret_cast<uintptr_t>(dest);
+
+    // If aligned AND large enough, use fast word writes
+    if ((address % 4 == 0) && (count >= 4)) {
+        memset_zero_word(dest, count);
+    } else {
+        // Unaligned or small: use byte writes
+        memset_zero_byte(dest, count);
+    }
+}
+
 
 } // namespace isr
 } // namespace fl

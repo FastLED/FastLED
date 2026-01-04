@@ -229,6 +229,101 @@ void ParlioPeripheralMock::delay(uint32_t ms) {
 }
 
 //=============================================================================
+// Task Management
+//=============================================================================
+
+task_handle_t ParlioPeripheralMock::createTask(const TaskConfig& config) {
+    // Mock implementation - no actual task creation
+    // Return a non-null synthetic handle to indicate success
+    // Use a unique value by encoding the task count in the pointer
+
+    // Suppress unused parameter warning - config is intentionally ignored in mock
+    (void)config;
+
+    task_handle_t handle = reinterpret_cast<task_handle_t>(
+        static_cast<uintptr_t>(0xDEAD0000 + mMockTasks.size())
+    );
+
+    mMockTasks.push_back(handle);
+    return handle;
+}
+
+void ParlioPeripheralMock::deleteTask(task_handle_t task_handle) {
+    if (task_handle == nullptr) {
+        return;
+    }
+
+    // Remove from tracking vector
+    auto it = fl::find(mMockTasks.begin(), mMockTasks.end(), task_handle);
+    if (it != mMockTasks.end()) {
+        mMockTasks.erase(it);
+    }
+}
+
+void ParlioPeripheralMock::deleteCurrentTask() {
+    // Mock implementation for self-deleting tasks
+    // In a real implementation, this would terminate the current thread/task
+    // For now, this is a no-op (tasks are expected to exit normally)
+}
+
+//=============================================================================
+// Timer Management
+//=============================================================================
+
+timer_handle_t ParlioPeripheralMock::createTimer(const TimerConfig& config) {
+    // Mock implementation - no actual timer creation
+    // Return a non-null synthetic handle to indicate success
+
+    // Suppress unused parameter warning - config is intentionally ignored in mock
+    (void)config;
+
+    // Return a synthetic handle (use a different base address than tasks)
+    timer_handle_t handle = reinterpret_cast<timer_handle_t>(
+        static_cast<uintptr_t>(0xF1FE0000)  // "FIFE" (timer) marker
+    );
+
+    return handle;
+}
+
+bool ParlioPeripheralMock::enableTimer(timer_handle_t handle) {
+    // Mock implementation - always succeeds if handle is non-null
+    return handle != nullptr;
+}
+
+bool ParlioPeripheralMock::startTimer(timer_handle_t handle) {
+    // Mock implementation - always succeeds if handle is non-null
+    return handle != nullptr;
+}
+
+bool ParlioPeripheralMock::stopTimer(timer_handle_t handle) {
+    // Mock implementation - always succeeds (even for null handles, matching ESP implementation)
+    (void)handle;
+    return true;
+}
+
+bool ParlioPeripheralMock::disableTimer(timer_handle_t handle) {
+    // Mock implementation - always succeeds if handle is non-null
+    return handle != nullptr;
+}
+
+void ParlioPeripheralMock::deleteTimer(timer_handle_t handle) {
+    // Mock implementation - no-op (nothing to clean up)
+    (void)handle;
+}
+
+uint64_t ParlioPeripheralMock::getMicroseconds() {
+    // Use the same timestamp source as transmit() for consistency
+    return micros();
+}
+
+void ParlioPeripheralMock::freeDmaBuffer(void* ptr) {
+    // Mock uses standard heap allocation, so use standard free()
+    if (ptr) {
+        free(ptr);
+    }
+}
+
+//=============================================================================
 // Mock-Specific API (for unit tests)
 //=============================================================================
 
