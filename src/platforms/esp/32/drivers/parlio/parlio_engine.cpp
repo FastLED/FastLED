@@ -889,13 +889,37 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
     size_t outputIdx = 0;
     size_t byteOffset = 0;
 
+    // Use calculator for padding and transpose block size
+    ParlioBufferCalculator calc{mDataWidth};
+    size_t blockSize = calc.transposeBlockSize();
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 1: Insert front padding (1 Wave8Byte per lane = 8 bytes)
+    // ═══════════════════════════════════════════════════════════════
+    // Only add front padding on the FIRST byte of transmission
+    bool is_first_byte = (startByte == 0);
+
+    if (is_first_byte) {
+        constexpr size_t FRONT_PAD_BYTES = 8;  // 1 Wave8Byte per lane
+        size_t front_padding_total = FRONT_PAD_BYTES * mDataWidth;
+
+        // Boundary check
+        if (outputIdx + front_padding_total > outputBufferCapacity) {
+            FL_LOG_PARLIO("PARLIO: Front padding overflow - needed "
+                   << front_padding_total << " bytes, available "
+                   << (outputBufferCapacity - outputIdx));
+            outputBytesWritten = outputIdx;
+            return false;
+        }
+
+        // Buffer is already pre-zeroed by caller (isr_memset_zero)
+        // Just advance the index to skip over the front padding region
+        outputIdx += front_padding_total;
+    }
+
     // Two-stage architecture: Process one byte position at a time
     // Stage 1: Generate wave8bytes for ALL lanes → staging buffer
     // Stage 2: Transpose staging buffer → DMA output buffer
-
-    // Use calculator for transpose block size
-    ParlioBufferCalculator calc{mDataWidth};
-    size_t blockSize = calc.transposeBlockSize();
 
     while (byteOffset < byteCount) {
         // Check if enough space for this block
@@ -944,11 +968,34 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // STAGE 3: Append reset time padding (all-zero Wave8Bytes)
+    // STAGE 3: Append back padding (1 Wave8Byte per lane = 8 bytes)
+    // ═══════════════════════════════════════════════════════════════
+    // Only append back padding on the LAST byte of transmission
+    // (when processing the final byte in the total byte range)
+    bool is_last_byte = (startByte + byteCount >= mIsrContext->mTotalBytes);
+
+    if (is_last_byte) {
+        constexpr size_t BACK_PAD_BYTES = 8;  // 1 Wave8Byte per lane
+        size_t back_padding_total = BACK_PAD_BYTES * mDataWidth;
+
+        // Boundary check
+        if (outputIdx + back_padding_total > outputBufferCapacity) {
+            FL_LOG_PARLIO("PARLIO: Back padding overflow - needed "
+                   << back_padding_total << " bytes, available "
+                   << (outputBufferCapacity - outputIdx));
+            outputBytesWritten = outputIdx;
+            return false;
+        }
+
+        // Buffer is already pre-zeroed by caller, just advance index
+        outputIdx += back_padding_total;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STAGE 4: Append reset time padding (all-zero Wave8Bytes)
     // ═══════════════════════════════════════════════════════════════
     // Only append reset padding on the LAST byte of transmission
     // (when processing the final byte in the total byte range)
-    bool is_last_byte = (startByte + byteCount >= mIsrContext->mTotalBytes);
 
     if (is_last_byte && mResetUs > 0) {
         // Calculate reset padding bytes needed
@@ -1501,6 +1548,13 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // Get actual number of buffers populated
     size_t buffers_populated = mIsrContext->mRingCount;
 
+    // Debug: Log input_sizes array
+    FL_LOG_PARLIO("PARLIO: DEBUG input_sizes[0]=" << mRingBuffer->input_sizes[0]
+         << " [1]=" << mRingBuffer->input_sizes[1]
+         << " [2]=" << mRingBuffer->input_sizes[2]
+         << " buffers=" << buffers_populated
+         << " total=" << totalBytes);
+
     // Verify at least one buffer was populated
     if (buffers_populated == 0) {
         FL_LOG_PARLIO("PARLIO: No buffers populated - cannot start transmission");
@@ -1533,6 +1587,13 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
     mIsrContext->mTransmitting = true;
 
+    // CRITICAL FIX (Iteration 2): Advance read index BEFORE submitting first buffer
+    // This prevents race condition where txDone fires before index is advanced
+    // Root cause: If txDone fires with read_idx=0, it calculates wrong completed_buffer_idx
+    mIsrContext->mRingReadIdx = 1;
+    mIsrContext->mRingCount = buffers_populated - 1;
+    FL_MEMORY_BARRIER;
+
     // CRITICAL: Flush CPU cache for FIRST buffer only (before initial DMA submission)
     // All subsequent buffers are synced in txDoneCallback
     // NOTE: isr_cache_sync() handles MALLOC_CAP_INTERNAL gracefully by using memory barriers
@@ -1550,6 +1611,8 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     if (err != ESP_OK) {
         FL_LOG_PARLIO("PARLIO: Failed to queue first buffer: " << err);
         mIsrContext->mTransmitting = false;  // Rollback flag on error
+        mIsrContext->mRingReadIdx = 0;  // Rollback index on error
+        mIsrContext->mRingCount = buffers_populated;  // Rollback count on error
         mErrorOccurred = true;
         return false;
     }
@@ -1612,12 +1675,11 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         }
     }
 
-    // Advance read index to consume the first buffer
-    mIsrContext->mRingReadIdx = 1;
-    mIsrContext->mRingCount = buffers_populated - 1;
-
     // Debug: Print initial counter state
+    // Note: read_idx and ring_count already advanced before buffer submission (Iteration 2 fix)
     FL_LOG_PARLIO("DEBUG: Transmission started (async)"
+           << " | read_idx=" << mIsrContext->mRingReadIdx
+           << " | ring_count=" << mIsrContext->mRingCount
            << " | txDone_count=" << mIsrContext->mDebugTxDoneCount
            << " | worker_count=" << mIsrContext->mDebugWorkerIsrCount);
 

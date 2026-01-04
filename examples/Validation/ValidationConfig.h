@@ -5,7 +5,7 @@
 #pragma once
 
 // ============================================================================
-// PARLIO Single-Lane Test: Phase 1 - Testing 1 lane @ 3000 LEDs
+// PARLIO Single-Lane Test: Phase 1 Iteration 6 - Scale Isolation @ 10 LEDs
 // ============================================================================
 
 // Driver selection
@@ -17,10 +17,10 @@
 #define MIN_LANES 1  // Phase 1: Single lane testing
 #define MAX_LANES 1  // Phase 1: Single lane testing
 
-// Strip size selection
-#define JUST_SMALL_STRIPS  // Phase 1: Testing 10 LEDs to isolate phase shift bug (Iteration 10)
+// Strip size selection - Phase 1 Iteration 6: Isolate scale issue (revert to 10 LEDs)
 // #define JUST_LARGE_STRIPS
+#define JUST_SMALL_STRIPS  // Phase 1 Iteration 6: Test padding fix at baseline scale (10 LEDs)
 
 // Strip size constants (MUST be defined BEFORE Common.h)
-#define SHORT_STRIP_SIZE 10
-#define LONG_STRIP_SIZE 300  // Iteration 9: Testing strip size dependency (300 LEDs = original buffer capacity)
+#define SHORT_STRIP_SIZE 10  // Phase 1 Iteration 6: Verify padding eliminates boundary bit-flips at small scale
+#define LONG_STRIP_SIZE 3000  // (Not used in Iteration 6, testing JUST_SMALL_STRIPS)

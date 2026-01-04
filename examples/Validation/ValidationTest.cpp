@@ -233,18 +233,31 @@ void runTest(const char* test_name,
 
         size_t bytes_expected = num_leds * 3;
 
-        if (bytes_captured > bytes_expected) {
-            FL_WARN("Info: Captured " << bytes_captured << " bytes (" << bytes_expected
-                    << " LED data + " << (bytes_captured - bytes_expected) << " RESET)");
+        // Phase 1 Iteration 9: Account for front padding in RX buffer
+        // PARLIO TX sends: [front_pad (8 bytes)] + [LED_data] + [back_pad (8 bytes)] + [reset]
+        // RX decoder captures EVERYTHING, so rx_buffer layout is:
+        //   rx_buffer[0-7] = front padding (decoded to zeros)
+        //   rx_buffer[8...] = actual LED data
+        // We need to skip the first 8 bytes (1 Wave8Byte per lane) when validating
+        const size_t front_padding_bytes = 8; // 1 Wave8Byte = 8 bytes per lane
+        const size_t rx_buffer_offset = front_padding_bytes;
+
+        if (bytes_captured > bytes_expected + front_padding_bytes) {
+            FL_WARN("Info: Captured " << bytes_captured << " bytes ("
+                    << front_padding_bytes << " front pad + "
+                    << bytes_expected << " LED data + "
+                    << (bytes_captured - bytes_expected - front_padding_bytes) << " back pad/RESET)");
         }
 
         // Validate: byte-level comparison (COLOR_ORDER is RGB, so no reordering)
         int mismatches = 0;
-        size_t bytes_to_check = bytes_captured < bytes_expected ? bytes_captured : bytes_expected;
+        size_t bytes_to_check = (bytes_captured < bytes_expected + rx_buffer_offset) ?
+                                 (bytes_captured > rx_buffer_offset ? bytes_captured - rx_buffer_offset : 0) :
+                                 bytes_expected;
 
         for (size_t i = 0; i < num_leds; i++) {
-            size_t byte_offset = i * 3;
-            if (byte_offset + 2 >= bytes_to_check) {
+            size_t byte_offset = rx_buffer_offset + i * 3; // Skip front padding
+            if (byte_offset + 2 >= bytes_captured) { // Check against total captured bytes
                 FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
                         << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
                         << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "

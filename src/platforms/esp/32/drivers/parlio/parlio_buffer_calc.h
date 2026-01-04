@@ -64,14 +64,37 @@ struct ParlioBufferCalculator {
         return 8; // Fallback
     }
 
-    /// @brief Calculate DMA buffer size for given input bytes (includes reset padding)
+    /// @brief Calculate boundary padding bytes (front/back padding for signal stability)
+    /// @return Bytes needed for boundary padding (1 Wave8Byte per lane = 8 bytes)
+    ///
+    /// Phase 1: Adds front and back padding to eliminate boundary bit-flips.
+    /// - Front padding: 1 Wave8Byte (8 bytes) of zeros before LED data
+    /// - Back padding: 1 Wave8Byte (8 bytes) of zeros after LED data
+    /// - Total: 16 bytes per lane (8 front + 8 back)
+    ///
+    /// For multi-lane (mDataWidth > 1), each lane gets its own padding.
+    size_t boundaryPaddingBytes() const {
+        // Phase 1: 1 Wave8Byte per lane, front and back
+        constexpr size_t BYTES_PER_WAVE8 = 8;
+        constexpr size_t FRONT_PAD_PER_LANE = BYTES_PER_WAVE8;  // 1 Wave8Byte
+        constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE8;   // 1 Wave8Byte
+
+        // After transposition, padding is interleaved with lanes
+        // For 1 lane: front=8, back=8 → total=16
+        // For N lanes: Each lane contributes to transposed output
+        // After transpose: still 8 bytes front + 8 bytes back per lane
+        return (FRONT_PAD_PER_LANE + BACK_PAD_PER_LANE) * mDataWidth;
+    }
+
+    /// @brief Calculate DMA buffer size for given input bytes (includes boundary + reset padding)
     /// @param inputBytes Number of input bytes to transmit
     /// @param reset_us Reset time in microseconds (default: 0)
-    /// @return Total DMA buffer size in bytes (pixel data + reset padding)
+    /// @return Total DMA buffer size in bytes (front_pad + pixel data + back_pad + reset_pad)
     size_t dmaBufferSize(size_t inputBytes, uint32_t reset_us = 0) const {
+        size_t front_back_padding = boundaryPaddingBytes();
         size_t pixel_bytes = inputBytes * outputBytesPerInputByte();
-        size_t padding_bytes = resetPaddingBytes(reset_us);
-        return pixel_bytes + padding_bytes;
+        size_t reset_padding = resetPaddingBytes(reset_us);
+        return front_back_padding + pixel_bytes + reset_padding;
     }
 
     /// @brief Calculate transpose output block size for populateDmaBuffer
