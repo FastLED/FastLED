@@ -75,9 +75,15 @@
 #include "parlio_debug.h"
 #include "parlio_ring_buffer.h"
 
+// Include peripheral interface
+#include "iparlio_peripheral.h"
+#ifdef FASTLED_STUB
+#include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
+#else
+#include "parlio_peripheral_esp.h"
+#endif
+
 // Forward declarations
-struct parlio_tx_unit_t;
-typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
 struct gptimer_t;
 typedef struct gptimer_t *gptimer_handle_t;
 extern "C" void heap_caps_free(void *ptr);
@@ -184,7 +190,10 @@ private:
     /// @brief ISR callback for transmission completion
     /// ⚠️  CRITICAL: NO LOGGING IN THIS FUNCTION - Runs in interrupt context
     /// ⚠️  See ISR SAFETY RULES in ParlioIsrContext documentation
-    static bool txDoneCallback(parlio_tx_unit_handle_t tx_unit,
+    /// @param tx_unit Opaque handle to TX unit (void* for interface compatibility)
+    /// @param edata Event data (unused)
+    /// @param user_ctx User context (ParlioEngine* instance)
+    static bool txDoneCallback(void* tx_unit,
                               const void* edata,
                               void* user_ctx);
 
@@ -244,8 +253,8 @@ private:
     size_t mActualChannels;
     size_t mDummyLanes;
 
-    // PARLIO hardware handle
-    parlio_tx_unit_handle_t mTxUnit;
+    // PARLIO peripheral interface (real hardware or mock)
+    IParlioPeripheral* mPeripheral;
 
     // GPIO pin assignments
     fl::vector<int> mPins;

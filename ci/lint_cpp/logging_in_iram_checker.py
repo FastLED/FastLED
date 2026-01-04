@@ -96,7 +96,7 @@ class LoggingInIramChecker(FileContentChecker):
         # Pattern explanation:
         # 1. Match FL_IRAM keyword
         # 2. Handle optional modifiers/attributes/return type after FL_IRAM (may span lines)
-        # 3. Extract function name
+        # 3. Extract function name (including ClassName:: prefix for methods)
         # 4. Find opening brace
         iram_func_pattern = re.compile(
             r"FL_IRAM"  # FL_IRAM marker
@@ -107,7 +107,7 @@ class LoggingInIramChecker(FileContentChecker):
             r"(?:const\s+)?"  # Optional const
             r"(?:(\w+(?:\s*<[^>]+>)?)\s+)?"  # Optional return type (group 1)
             r"(?:__attribute__\s*\([^)]*\)\s+)?"  # Optional __attribute__(...)
-            r"(\w+)\s*\("  # Function name (group 2) + opening paren
+            r"([\w:]+)\s*\("  # Function name (group 2) + opening paren (includes ClassName::)
             r"[^)]*\)"  # Parameters
             r"(?:\s*(?:const|override|final))?"  # Optional trailing qualifiers
             r"[^{]*\{",  # Anything up to opening brace (handles multi-line params)

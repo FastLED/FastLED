@@ -136,7 +136,7 @@ ParlioEngine::ParlioEngine()
       mDataWidth(0),
       mActualChannels(0),
       mDummyLanes(0),
-      mTxUnit(nullptr),
+      mPeripheral(nullptr),
       mTimingT1Ns(0),
       mTimingT2Ns(0),
       mTimingT3Ns(0),
@@ -160,32 +160,24 @@ ParlioEngine::~ParlioEngine() {
         fl::delayMicroseconds(100);
     }
 
-    // Clean up PARLIO TX unit resources
-    if (mTxUnit != nullptr) {
+    // Clean up PARLIO peripheral
+    if (mPeripheral != nullptr) {
         // Wait for any pending transmissions (with timeout)
-        esp_err_t err =
-            parlio_tx_unit_wait_all_done(mTxUnit, pdMS_TO_TICKS(1000));
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("PARLIO: Wait for transmission timeout during cleanup: "
-                    << err);
+        if (!mPeripheral->waitAllDone(1000)) {
+            FL_LOG_PARLIO("PARLIO: Wait for transmission timeout during cleanup");
         }
 
-        // Disable TX unit (only if currently enabled)
+        // Disable peripheral (only if currently enabled)
         if (mTxUnitEnabled) {
-            err = parlio_tx_unit_disable(mTxUnit);
-            if (err != ESP_OK) {
-                FL_LOG_PARLIO("PARLIO: Failed to disable TX unit: " << err);
+            if (!mPeripheral->disable()) {
+                FL_LOG_PARLIO("PARLIO: Failed to disable peripheral");
             }
             mTxUnitEnabled = false;
         }
 
-        // Delete TX unit
-        err = parlio_del_tx_unit(mTxUnit);
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("PARLIO: Failed to delete TX unit: " << err);
-        }
-
-        mTxUnit = nullptr;
+        // Delete peripheral (destructor cleans up resources)
+        delete mPeripheral;
+        mPeripheral = nullptr;
     }
 
     // DMA buffers and waveform expansion buffer are automatically freed
@@ -203,7 +195,9 @@ ParlioEngine::~ParlioEngine() {
 
         // Give time for any in-flight ISR to complete (gptimer_stop is asynchronous)
         // Without this delay, an ISR could fire after stop but before delete completes
-        vTaskDelay(pdMS_TO_TICKS(10));
+        if (mPeripheral) {
+            mPeripheral->delay(10);
+        }
     }
 
     // Clean up debug task (now safe - timer ISR won't access mIsrContext anymore)
@@ -217,7 +211,10 @@ ParlioEngine::~ParlioEngine() {
         // Give task time to self-delete (task calls vTaskDelete(NULL) at end of debugTaskFunction)
         // Task sleeps for 500ms, so we need to wait at least 500ms for it to wake up and check flags
         // Use 600ms to be safe
-        vTaskDelay(pdMS_TO_TICKS(600));
+        if (mPeripheral) {
+            // AI - THIS LOOKS WRONG!!!
+            mPeripheral->delay(600);
+        }
 
         // Task should have self-deleted by now
         // DO NOT call eTaskGetState() or vTaskDelete() on the handle - it's likely invalid
@@ -281,7 +278,10 @@ void ParlioEngine::debugTaskFunction(void* arg) {
     // Loop while transmission is active
     while (ctx->mTransmitting || ctx->mStreamComplete) {
         // Wait 500ms between prints
-        vTaskDelay(pdMS_TO_TICKS(500));
+        if (self->mPeripheral) {
+            // AI - THIS LOOKS WRONG!!!
+            self->mPeripheral->delay(500);
+        }
 
         // Memory barrier to ensure we see latest ISR state
         FL_MEMORY_BARRIER;
@@ -354,9 +354,10 @@ void ParlioEngine::debugTaskFunction(void* arg) {
 //
 // ============================================================================
 FL_OPTIMIZE_FUNCTION bool FL_IRAM
-ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
+ParlioEngine::txDoneCallback(void* tx_unit,
                               const void *edata, void *user_ctx) {
     // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED - SEE FUNCTION HEADER ⚠️
+    (void)tx_unit;  // Opaque handle (not used in this callback)
     (void)edata;
 
     auto *self = static_cast<ParlioEngine *>(user_ctx);
@@ -368,7 +369,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     ParlioIsrContext *ctx = self->mIsrContext;
 
     // Debug: Increment txDoneCallback counter and timestamp
-    ctx->mDebugTxDoneCount++;
+    ctx->mDebugTxDoneCount = ctx->mDebugTxDoneCount + 1;
     ctx->mDebugLastTxDoneTime = esp_timer_get_time();
 
     // Increment ISR call counter
@@ -435,7 +436,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
         // DOORBELL PATTERN: Set flag to signal worker ISR (continuous timer will see it)
         // Continuous timer fires every 20µs and checks this flag
         ctx->mWorkerDoorbell = true;
-        ctx->mDebugDoorbellRingCount++;  // Debug: Track doorbell rings
+        ctx->mDebugDoorbellRingCount = ctx->mDebugDoorbellRingCount + 1;  // Debug: Track doorbell rings
         FL_MEMORY_BARRIER;
 
         return false;
@@ -466,14 +467,10 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
     // Solution: Single barrier sufficient - isr_cache_sync already includes barriers
     FL_MEMORY_BARRIER;
 
-    // Submit buffer to hardware
-    parlio_transmit_config_t tx_config = {};
-    tx_config.idle_value = 0x0000; // Keep pins LOW between chunks
+    // Submit buffer to hardware via peripheral interface
+    bool success = self->mPeripheral->transmit(buffer_ptr, buffer_size * 8, 0x0000);
 
-    esp_err_t err = parlio_tx_unit_transmit(tx_unit, buffer_ptr,
-                                            buffer_size * 8, &tx_config);
-
-    if (err == ESP_OK) {
+    if (success) {
         // Successfully submitted - advance read index (modulo-3) and decrement count
         ctx->mRingReadIdx = (ctx->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
 
@@ -492,7 +489,7 @@ ParlioEngine::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
             ctx->mNextByteOffset < ctx->mTotalBytes &&
             ctx->mWorkerIsrEnabled) {
             ctx->mWorkerDoorbell = true;
-            ctx->mDebugDoorbellRingCount++;  // Debug: Track doorbell rings
+            ctx->mDebugDoorbellRingCount = ctx->mDebugDoorbellRingCount + 1;  // Debug: Track doorbell rings
             FL_MEMORY_BARRIER;
         }
 
@@ -705,7 +702,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     ParlioIsrContext *ctx = self->mIsrContext;
 
     // Debug: Increment workerIsrCallback counter and timestamp
-    ctx->mDebugDoorbellCheckCount++;  // Track total ISR firings
+    ctx->mDebugDoorbellCheckCount = ctx->mDebugDoorbellCheckCount + 1;  // Track total ISR firings
     ctx->mDebugLastWorkerIsrTime = esp_timer_get_time();
 
     // CRITICAL: Early exit checks (in order of likelihood)
@@ -713,24 +710,24 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
 
     // Check 0: Worker ISR disabled by destructor or completion
     if (!ctx->mWorkerIsrEnabled) {
-        ctx->mDebugWorkerEarlyExitCount++;
+        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return false;
     }
 
     // Check 1: Doorbell not rung (no work requested)
     if (!ctx->mWorkerDoorbell) {
-        ctx->mDebugWorkerEarlyExitCount++;  // Most common early exit
+        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;  // Most common early exit
         return false;  // Exit early, timer will check again in 50µs
     }
 
     // Doorbell is set - real work available
-    ctx->mDebugWorkerIsrCount++;  // Track actual work ISR invocations
+    ctx->mDebugWorkerIsrCount = ctx->mDebugWorkerIsrCount + 1;  // Track actual work ISR invocations
 
     // Check 2: Not actively transmitting
     if (!ctx->mTransmitting) {
         // Clear doorbell and exit
         ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount++;
+        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return false;
     }
 
@@ -738,7 +735,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     if (ctx->mRingCount >= ParlioRingBuffer3::RING_BUFFER_COUNT) {
         // Clear doorbell and exit (will be rung again when space available)
         ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount++;
+        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return false;
     }
 
@@ -746,7 +743,7 @@ ParlioEngine::workerIsrCallback(gptimer_handle_t timer,
     if (ctx->mNextByteOffset >= ctx->mTotalBytes) {
         // Clear doorbell and exit
         ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount++;
+        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return false;
     }
 
@@ -905,9 +902,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
 
         // Boundary check
         if (outputIdx + front_padding_total > outputBufferCapacity) {
-            FL_LOG_PARLIO("PARLIO: Front padding overflow - needed "
-                   << front_padding_total << " bytes, available "
-                   << (outputBufferCapacity - outputIdx));
+            // Buffer overflow - cannot log in hot path (causes 98× slowdown)
+            // Error will be detected by caller via return false
             outputBytesWritten = outputIdx;
             return false;
         }
@@ -980,9 +976,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
 
         // Boundary check
         if (outputIdx + back_padding_total > outputBufferCapacity) {
-            FL_LOG_PARLIO("PARLIO: Back padding overflow - needed "
-                   << back_padding_total << " bytes, available "
-                   << (outputBufferCapacity - outputIdx));
+            // Buffer overflow - cannot log in hot path (causes 98× slowdown)
+            // Error will be detected by caller via return false
             outputBytesWritten = outputIdx;
             return false;
         }
@@ -1004,9 +999,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
 
         // Boundary check: Ensure padding fits in output buffer
         if (outputIdx + reset_padding_bytes > outputBufferCapacity) {
-            FL_LOG_PARLIO("PARLIO: Reset padding overflow - needed "
-                    << reset_padding_bytes << " bytes, available "
-                    << (outputBufferCapacity - outputIdx));
+            // Buffer overflow - cannot log in hot path (causes 98× slowdown)
+            // Error will be detected by caller via return false
             outputBytesWritten = outputIdx;
             return false;
         }
@@ -1056,12 +1050,9 @@ bool ParlioEngine::allocateRingBuffers() {
 
     uint8_t* buffers[3] = {nullptr, nullptr, nullptr};
 
-    // Allocate all 3 buffers
+    // Allocate all 3 buffers via peripheral interface (handles DMA requirements)
     for (size_t i = 0; i < 3; i++) {
-        buffers[i] = static_cast<uint8_t*>(heap_caps_aligned_alloc(
-            64,  // ESP32-C6 cache line size (64 bytes)
-            mRingBufferCapacity,
-            FL_PARLIO_DMA_MALLOC_FLAGS));
+        buffers[i] = mPeripheral->allocateDmaBuffer(mRingBufferCapacity);
 
         if (!buffers[i]) {
             FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer "
@@ -1069,7 +1060,7 @@ bool ParlioEngine::allocateRingBuffers() {
 
             // Clean up any buffers we already allocated
             for (size_t j = 0; j < i; j++) {
-                heap_caps_free(buffers[j]);
+                mPeripheral->freeDmaBuffer(buffers[j]);
             }
             return false;
         }
@@ -1079,11 +1070,13 @@ bool ParlioEngine::allocateRingBuffers() {
     }
 
     // Create ring buffer with unique_ptr and cleanup callback
+    // Capture mPeripheral pointer for cleanup lambda
+    auto* peripheral = mPeripheral;
     mRingBuffer.reset(new ParlioRingBuffer3(
         buffers[0], buffers[1], buffers[2],
         mRingBufferCapacity,
-        [](uint8_t* ptr) {
-            heap_caps_free(ptr);
+        [peripheral](uint8_t* ptr) {
+            peripheral->freeDmaBuffer(ptr);
         }
     ));
 
@@ -1289,14 +1282,10 @@ ParlioEngine::populateNextDMABuffer() {
         if (buffer_ptr && buffer_size > 0) {
             // NOTE: Cache sync removed - only happens in txDoneCallback before DMA submission
 
-            // Submit buffer to hardware to restart transmission
-            parlio_transmit_config_t tx_config = {};
-            tx_config.idle_value = 0x0000;
+            // Submit buffer to hardware to restart transmission via peripheral interface
+            bool success = mPeripheral->transmit(buffer_ptr, buffer_size * 8, 0x0000);
 
-            esp_err_t err = parlio_tx_unit_transmit(
-                mTxUnit, buffer_ptr, buffer_size * 8, &tx_config);
-
-            if (err == ESP_OK) {
+            if (success) {
                 // Successfully restarted - advance read index and decrement count
                 mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
                 mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
@@ -1379,45 +1368,40 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
 
-    // Configure PARLIO TX unit
-    parlio_tx_unit_config_t config = {};
-    config.clk_src = PARLIO_CLK_SRC_DEFAULT;
-    config.clk_in_gpio_num = static_cast<gpio_num_t>(-1);
-    config.output_clk_freq_hz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
-    config.data_width = mDataWidth;
-    config.trans_queue_depth = FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH;
-    config.max_transfer_size = 65534;
-    config.bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB;
-    config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
+    // Allocate peripheral implementation (real hardware or mock)
+#ifdef FASTLED_STUB
+    mPeripheral = new ParlioPeripheralMock();
+#else
+    mPeripheral = new ParlioPeripheralESP();
+#endif
 
-    // Assign GPIO pins
+    // Configure peripheral
+    ParlioPeripheralConfig config = {};
+    config.data_width = mDataWidth;
     for (size_t i = 0; i < mDataWidth; i++) {
-        config.data_gpio_nums[i] = static_cast<gpio_num_t>(mPins[i]);
+        config.gpio_pins[i] = mPins[i];
     }
     for (size_t i = mDataWidth; i < 16; i++) {
-        config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
+        config.gpio_pins[i] = -1;
     }
+    config.clock_freq_hz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
+    config.queue_depth = FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH;
+    config.max_transfer_size = 65534;
 
-    config.clk_out_gpio_num = static_cast<gpio_num_t>(-1);
-    config.valid_gpio_num = static_cast<gpio_num_t>(-1);
-
-    // Create TX unit
-    esp_err_t err = parlio_new_tx_unit(&config, &mTxUnit);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO: Failed to create TX unit: " << err);
+    // Initialize peripheral
+    if (!mPeripheral->initialize(config)) {
+        FL_LOG_PARLIO("PARLIO: Failed to initialize peripheral");
+        delete mPeripheral;
+        mPeripheral = nullptr;
         return false;
     }
 
     // Register ISR callback
-    parlio_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done =
-        reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
-
-    err = parlio_tx_unit_register_event_callbacks(mTxUnit, &callbacks, this);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO: Failed to register callbacks: " << err);
-        parlio_del_tx_unit(mTxUnit);
-        mTxUnit = nullptr;
+    if (!mPeripheral->registerTxDoneCallback(
+            reinterpret_cast<void*>(txDoneCallback), this)) {
+        FL_LOG_PARLIO("PARLIO: Failed to register callbacks");
+        delete mPeripheral;
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1439,16 +1423,16 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Allocate ring buffers
     if (!allocateRingBuffers()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffers");
-        parlio_del_tx_unit(mTxUnit);
-        mTxUnit = nullptr;
+        delete mPeripheral;
+        mPeripheral = nullptr;
         return false;
     }
 
     // Allocate worker timer
     if (!allocateWorkerTimer()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate worker timer");
-        parlio_del_tx_unit(mTxUnit);
-        mTxUnit = nullptr;
+        delete mPeripheral;
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1462,8 +1446,8 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     if (mWaveformExpansionBuffer.empty()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
-        parlio_del_tx_unit(mTxUnit);
-        mTxUnit = nullptr;
+        delete mPeripheral;
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1484,7 +1468,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
                                      size_t totalBytes,
                                      size_t numLanes,
                                      size_t laneStride) {
-    if (!mInitialized || !mTxUnit || !mIsrContext) {
+    if (!mInitialized || !mPeripheral || !mIsrContext) {
         FL_LOG_PARLIO("PARLIO: Cannot transmit - not initialized");
         return false;
     }
@@ -1562,12 +1546,10 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         return false;
     }
 
-    // Enable PARLIO TX unit for this transmission (only if not already enabled)
-    esp_err_t err = ESP_OK;
+    // Enable PARLIO peripheral for this transmission (only if not already enabled)
     if (!mTxUnitEnabled) {
-        err = parlio_tx_unit_enable(mTxUnit);
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("PARLIO: Failed to enable TX unit: " << err);
+        if (!mPeripheral->enable()) {
+            FL_LOG_PARLIO("PARLIO: Failed to enable peripheral");
             mErrorOccurred = true;
             return false;
         }
@@ -1604,12 +1586,8 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     FL_MEMORY_BARRIER;
     FL_MEMORY_BARRIER;
 
-    err = parlio_tx_unit_transmit(
-        mTxUnit, mRingBuffer->ptrs[0],  // Use cached pointer for optimization
-        first_buffer_size * 8, &tx_config);
-
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO: Failed to queue first buffer: " << err);
+    if (!mPeripheral->transmit(mRingBuffer->ptrs[0], first_buffer_size * 8, 0x0000)) {
+        FL_LOG_PARLIO("PARLIO: Failed to queue first buffer");
         mIsrContext->mTransmitting = false;  // Rollback flag on error
         mIsrContext->mRingReadIdx = 0;  // Rollback index on error
         mIsrContext->mRingCount = buffers_populated;  // Rollback count on error
@@ -1643,7 +1621,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     FL_MEMORY_BARRIER;
 
     // Start continuous timer (fires every 50µs) - AFTER first buffer submitted
-    err = gptimer_start(mWorkerTimerHandle);
+    esp_err_t err = gptimer_start(mWorkerTimerHandle);
     if (err != ESP_OK) {
         FL_LOG_PARLIO("PARLIO: Failed to start worker timer: " << err);
         mIsrContext->mTransmitting = false;  // Rollback flag on error
@@ -1692,7 +1670,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 }
 
 ParlioEngineState ParlioEngine::poll() {
-    if (!mInitialized || !mTxUnit || !mIsrContext) {
+    if (!mInitialized || !mPeripheral || !mIsrContext) {
         return ParlioEngineState::READY;
     }
 
@@ -1718,15 +1696,12 @@ ParlioEngineState ParlioEngine::poll() {
             gptimer_stop(mWorkerTimerHandle);
         }
 
-        // Wait for final chunk to complete
-        esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, 0);
-
-        if (err == ESP_OK) {
-            // Disable PARLIO to reset peripheral state (only if currently enabled)
+        // Wait for final chunk to complete (non-blocking poll)
+        if (mPeripheral->waitAllDone(0)) {
+            // All transmissions complete - disable peripheral (only if currently enabled)
             if (mTxUnitEnabled) {
-                err = parlio_tx_unit_disable(mTxUnit);
-                if (err != ESP_OK) {
-                    FL_LOG_PARLIO("PARLIO: Failed to disable TX unit: " << err);
+                if (!mPeripheral->disable()) {
+                    FL_LOG_PARLIO("PARLIO: Failed to disable peripheral");
                 } else {
                     mTxUnitEnabled = false;
                 }
@@ -1736,11 +1711,9 @@ ParlioEngineState ParlioEngine::poll() {
             fl::delayMicroseconds(100);
 
             return ParlioEngineState::READY;
-        } else if (err == ESP_ERR_TIMEOUT) {
-            return ParlioEngineState::BUSY;
         } else {
-            FL_LOG_PARLIO("PARLIO: Error waiting for final chunk: " << err);
-            return ParlioEngineState::ERROR;
+            // Still busy transmitting
+            return ParlioEngineState::BUSY;
         }
     }
 
