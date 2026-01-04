@@ -212,7 +212,6 @@ ParlioEngine::~ParlioEngine() {
         // Task sleeps for 500ms, so we need to wait at least 500ms for it to wake up and check flags
         // Use 600ms to be safe
         if (mPeripheral) {
-            // AI - THIS LOOKS WRONG!!!
             mPeripheral->delay(600);
         }
 
@@ -279,7 +278,6 @@ void ParlioEngine::debugTaskFunction(void* arg) {
     while (ctx->mTransmitting || ctx->mStreamComplete) {
         // Wait 500ms between prints
         if (self->mPeripheral) {
-            // AI - THIS LOOKS WRONG!!!
             self->mPeripheral->delay(500);
         }
 
