@@ -317,7 +317,8 @@ class BannedHeadersChecker(FileContentChecker):
                         violations.append(
                             (
                                 line_number,
-                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (banned in header files)",
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (banned in header files). "
+                                f"Try moving the #include to the corresponding .cpp implementation file, or find the equivalent header in fl/stl in the fl:: namespace.",
                             )
                         )
                     # Strict mode: no bypass allowed (for fl/ directory)
@@ -325,7 +326,8 @@ class BannedHeadersChecker(FileContentChecker):
                         violations.append(
                             (
                                 line_number,
-                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (strict mode, no bypass allowed)",
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead (strict mode, no bypass allowed). "
+                                f"Try moving the #include to a .cpp implementation file, or find the equivalent header in fl/stl in the fl:: namespace.",
                             )
                         )
                     # Non-strict: allow bypass
@@ -333,7 +335,8 @@ class BannedHeadersChecker(FileContentChecker):
                         violations.append(
                             (
                                 line_number,
-                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead",
+                                f"Found banned header '{header}' - Use {self._get_recommendation(header)} instead. "
+                                f"Try finding the equivalent header in fl/stl in the fl:: namespace, or if you need this header in a .cpp file, add '// ok include' comment to suppress this warning.",
                             )
                         )
 
