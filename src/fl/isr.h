@@ -11,6 +11,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 namespace fl {
 namespace isr {
@@ -273,6 +274,113 @@ uint8_t getMaxPriority();
  * @return: true if assembly handler required, false if C handler allowed
  */
 bool requiresAssemblyHandler(uint8_t priority);
+
+// =============================================================================
+// ISR-Optimized Memory Copy Utilities
+// =============================================================================
+
+/// @brief Check if a pointer is aligned to a specific byte boundary
+/// @param ptr Pointer to check
+/// @param alignment Alignment requirement in bytes (must be power of 2)
+/// @return true if aligned, false otherwise
+FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) {
+    return (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1)) == 0;
+}
+
+/// @brief ISR-optimized 32-bit block copy for 4-byte aligned memory
+/// @param dst Destination pointer (must be 4-byte aligned)
+/// @param src Source pointer (must be 4-byte aligned)
+/// @param count Number of 32-bit words to copy (NOT bytes)
+/// @note Only call with 4-byte aligned pointers and valid count
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memcpy32(uint32_t* FL_RESTRICT_PARAM dst,
+              const uint32_t* FL_RESTRICT_PARAM src,
+              size_t count) {
+    // Optimized 32-bit word copy - compiler will often vectorize this
+    for (size_t i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+}
+
+/// @brief ISR-optimized 16-bit block copy for 2-byte aligned memory
+/// @param dst Destination pointer (must be 2-byte aligned)
+/// @param src Source pointer (must be 2-byte aligned)
+/// @param count Number of 16-bit words to copy (NOT bytes)
+/// @note Only call with 2-byte aligned pointers and valid count
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memcpy16(uint16_t* FL_RESTRICT_PARAM dst,
+              const uint16_t* FL_RESTRICT_PARAM src,
+              size_t count) {
+    // Optimized 16-bit word copy
+    for (size_t i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+}
+
+/// @brief ISR-optimized byte copy
+/// @param dst Destination pointer
+/// @param src Source pointer
+/// @param count Number of bytes to copy
+/// @note No alignment requirements
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memcpybyte(uint8_t* FL_RESTRICT_PARAM dst,
+                const uint8_t* FL_RESTRICT_PARAM src,
+                size_t count) {
+    // Byte-by-byte copy
+    for (size_t i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+}
+
+/// @brief ISR-optimized memcpy with alignment detection and switch dispatch
+/// @param dst Destination pointer
+/// @param src Source pointer
+/// @param num_bytes Number of bytes to copy
+/// @note Automatically uses 32-bit, 16-bit, or byte copy based on alignment
+/// @note Uses switch for dispatch (compiler may optimize to jump table)
+FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+void memcpy(void* FL_RESTRICT_PARAM dst,
+            const void* FL_RESTRICT_PARAM src,
+            size_t num_bytes) {
+    // Branchless index calculation (but switch still has branches):
+    // - Both 4-byte aligned AND size multiple of 4: index 2 (memcpy32)
+    // - Both 2-byte aligned AND size multiple of 2: index 1 (memcpy16)
+    // - Otherwise: index 0 (memcpybyte)
+
+    uintptr_t dst_addr = reinterpret_cast<uintptr_t>(dst);
+    uintptr_t src_addr = reinterpret_cast<uintptr_t>(src);
+
+    // Branchless: Convert boolean to integer (0 or 1) using bitwise ops
+    // Check if all are 2-byte aligned (LSB is 0)
+    size_t align2 = (((dst_addr | src_addr | num_bytes) & 1) == 0);
+    // Check if all are 4-byte aligned (lower 2 bits are 0)
+    size_t align4 = (((dst_addr | src_addr | num_bytes) & 3) == 0);
+
+    // Branchless index calculation using arithmetic
+    int index = align2 + align4;
+
+    // Switch dispatch (compiler optimizes to jump table on most platforms)
+    // Note: This introduces a branch, but it's a predicted indirect jump
+    switch (index) {
+        case 2:
+            memcpy32(static_cast<uint32_t*>(dst),
+                     static_cast<const uint32_t*>(src),
+                     num_bytes >> 2);
+            break;
+        case 1:
+            memcpy16(static_cast<uint16_t*>(dst),
+                     static_cast<const uint16_t*>(src),
+                     num_bytes >> 1);
+            break;
+        case 0:
+        default:
+            memcpybyte(static_cast<uint8_t*>(dst),
+                       static_cast<const uint8_t*>(src),
+                       num_bytes);
+            break;
+    }
+}
+
 
 } // namespace isr
 } // namespace fl

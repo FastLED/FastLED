@@ -5,6 +5,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
+#include "fl/isr.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 
@@ -63,17 +64,17 @@ FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 static void convertByteToWave8Byte_inline(uint8_t byte_value,
                                            const Wave8BitExpansionLut &lut,
                                            Wave8Byte *output) {
-    // Cache pointer to high nibble data to avoid repeated indexing
+    // ISR-optimized copy: Copy high nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
-    for (int i = 0; i < 4; i++) {
-        output->symbols[i] = high_nibble_data[i];
-    }
+    isr::memcpy32(reinterpret_cast<uint32_t*>(&output->symbols[0]),
+                  reinterpret_cast<const uint32_t*>(high_nibble_data),
+                  1); // 4 bytes = 1 x uint32_t
 
-    // Cache pointer to low nibble data to avoid repeated indexing
+    // ISR-optimized copy: Copy low nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
-    for (int i = 0; i < 4; i++) {
-        output->symbols[4 + i] = low_nibble_data[i];
-    }
+    isr::memcpy32(reinterpret_cast<uint32_t*>(&output->symbols[4]),
+                  reinterpret_cast<const uint32_t*>(low_nibble_data),
+                  1); // 4 bytes = 1 x uint32_t
 }
 
 /// @brief Convert byte to 8 Wave8Bit structures using nibble LUT
@@ -87,11 +88,11 @@ void wave8(uint8_t lane,
     Wave8Byte waveformSymbol;
     convertByteToWave8Byte_inline(lane, lut, &waveformSymbol);
 
-    // Copy to output array byte-by-byte (sizeof(Wave8Byte) = 8)
-    const uint8_t* src = &waveformSymbol.symbols[0].data;
-    for (size_t i = 0; i < sizeof(Wave8Byte); i++) {
-        output[i] = src[i];
-    }
+    // ISR-optimized 32-bit copy: Copy 8 bytes as 2 x uint32_t words
+    // Wave8Byte is 8-byte aligned (alignas(8)), guaranteeing 4-byte alignment
+    isr::memcpy32(reinterpret_cast<uint32_t*>(output),
+                  reinterpret_cast<const uint32_t*>(&waveformSymbol.symbols[0].data),
+                  2); // 8 bytes = 2 x uint32_t
 }
 
 FL_IRAM void wave8Transpose_2(
