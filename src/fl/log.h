@@ -168,17 +168,19 @@ namespace fl {
 /// **Usage Pattern:**
 /// ```cpp
 /// void IRAM_ATTR my_isr_handler() {
-///     FL_LOG_PARLIO_ASYNC("ISR event " << counter);  // Safe in ISR context
+///     FL_LOG_PARLIO_ASYNC_ISR("DMA complete");  // ISR-safe (const char* only, zero heap allocation)
 /// }
 ///
 /// void loop() {
+///     FL_LOG_PARLIO_ASYNC_MAIN("Processing batch " << batch_id);  // Main thread (supports stream expressions)
 ///     FL_LOG_PARLIO_ASYNC_FLUSH();  // Drain queued messages (blocking)
 /// }
 /// ```
 ///
 /// **Memory Footprint:**
 /// - Each logger uses ~1KB per 128 messages (configurable via FASTLED_ASYNC_LOG_CAPACITY)
-/// - Messages stored as fl::string (heap-allocated, but allocated before ISR)
+/// - ISR messages: Stored as const char* (zero heap allocation, string literals only)
+/// - Main thread messages: Stored as fl::string (heap-allocated via StrStream)
 /// - Ring buffer auto-evicts oldest messages when full (FIFO overflow)
 ///
 /// **Thread Safety:**
@@ -190,19 +192,33 @@ namespace fl {
 /// @brief Generic async logging macro (captures stream expression into string)
 /// @param logger Reference to AsyncLogger instance (e.g., get_parlio_async_logger())
 /// @param X Stream-style expression (e.g., "msg " << var)
+/// @warning This macro uses heap allocation (fl::string) and should NOT be used in ISR context
+/// @see FL_LOG_ASYNC_ISR for ISR-safe const char* only variant
 #define FL_LOG_ASYNC(logger, X) \
     do { \
         (logger).push((fl::StrStream() << X).str()); \
+    } while(0)
+
+/// @brief ISR-safe async logging macro (const char* literals only, zero heap allocation)
+/// @param logger Reference to AsyncLogger instance (e.g., get_parlio_async_logger_isr())
+/// @param msg Compile-time const char* literal (e.g., "event occurred")
+/// @warning msg MUST be a string literal or const char* - NO stream expressions or fl::string
+/// @note This is the ONLY safe async logging method for ISR context (no heap allocations)
+/// @example FL_LOG_ASYNC_ISR(fl::get_parlio_async_logger_isr(), "DMA complete")
+#define FL_LOG_ASYNC_ISR(logger, msg) \
+    do { \
+        (logger).push(msg); \
     } while(0)
 
 // -----------------------------------------------------------------------------
 // SPI Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async SPI logging from ISR context (ISR-safe, single producer)
+/// @brief Async SPI logging from ISR context (ISR-safe, single producer, const char* only)
 /// Queues SPI log messages for deferred output from interrupt handlers
+/// @warning X MUST be a const char* literal (e.g., "event") - NO stream expressions or heap allocations
 #ifdef FASTLED_LOG_SPI_ASYNC_ENABLED
-    #define FL_LOG_SPI_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_spi_async_logger_isr(), X)
+    #define FL_LOG_SPI_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_spi_async_logger_isr(), X)
 #else
     #define FL_LOG_SPI_ASYNC_ISR(X) FL_DBG_NO_OP(X)
 #endif
@@ -230,10 +246,11 @@ namespace fl {
 // RMT Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async RMT logging from ISR context (ISR-safe, single producer)
+/// @brief Async RMT logging from ISR context (ISR-safe, single producer, const char* only)
 /// Queues RMT log messages for deferred output from interrupt handlers
+/// @warning X MUST be a const char* literal (e.g., "event") - NO stream expressions or heap allocations
 #ifdef FASTLED_LOG_RMT_ASYNC_ENABLED
-    #define FL_LOG_RMT_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_rmt_async_logger_isr(), X)
+    #define FL_LOG_RMT_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_rmt_async_logger_isr(), X)
 #else
     #define FL_LOG_RMT_ASYNC_ISR(X) FL_DBG_NO_OP(X)
 #endif
@@ -261,10 +278,11 @@ namespace fl {
 // PARLIO Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async PARLIO logging from ISR context (ISR-safe, single producer)
+/// @brief Async PARLIO logging from ISR context (ISR-safe, single producer, const char* only)
 /// Queues PARLIO log messages for deferred output from interrupt handlers
+/// @warning X MUST be a const char* literal (e.g., "event") - NO stream expressions or heap allocations
 #ifdef FASTLED_LOG_PARLIO_ASYNC_ENABLED
-    #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_parlio_async_logger_isr(), X)
+    #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_parlio_async_logger_isr(), X)
 #else
     #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
 #endif
@@ -292,10 +310,11 @@ namespace fl {
 // AUDIO Async Logging
 // -----------------------------------------------------------------------------
 
-/// @brief Async AUDIO logging from ISR context (ISR-safe, single producer)
+/// @brief Async AUDIO logging from ISR context (ISR-safe, single producer, const char* only)
 /// Queues AUDIO log messages for deferred output from interrupt handlers
+/// @warning X MUST be a const char* literal (e.g., "event") - NO stream expressions or heap allocations
 #ifdef FASTLED_LOG_AUDIO_ASYNC_ENABLED
-    #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_LOG_ASYNC(fl::get_audio_async_logger_isr(), X)
+    #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_audio_async_logger_isr(), X)
 #else
     #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
 #endif
