@@ -68,6 +68,15 @@ namespace detail {
 #define FL_ESP_PARLIO_CLOCK_FREQ_HZ 8000000 // 8.0 MHz
 #endif // defined(FL_ESP_PARLIO_CLOCK_FREQ_HZ)
 
+// PARLIO ISR priority level
+// - Level 3 is the highest priority for C interrupt handlers on ESP32
+// - Level 4+ requires assembly handlers and is not supported by ESP-IDF PARLIO driver
+// - WiFi runs at level 4, so PARLIO ISRs may be preempted during WiFi activity
+// - Configurable via build flag: -DFL_ESP_PARLIO_ISR_PRIORITY=<level>
+#ifndef FL_ESP_PARLIO_ISR_PRIORITY
+#define FL_ESP_PARLIO_ISR_PRIORITY 3  // Priority level 3 (recommended max for C handlers)
+#endif
+
 #ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
 #define FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL 300 // Support up to 300 LEDs per channel (configurable)
 #endif // defined(FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL)
@@ -84,21 +93,8 @@ namespace detail {
 #define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
-// Worker timer configuration (for ISR-based buffer population)
-// - Resolution: 1MHz = 1µs per tick (sufficient for 50µs timer period)
-// - Interrupt priority: Level 3 for timely response without blocking critical ISRs
-// - Period: 50µs continuous firing (doorbell pattern) - reduced from 20µs to lower ISR load during setup
-#ifndef FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ
-#define FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ 1000000  // 1MHz = 1µs resolution
-#endif
-
-#ifndef FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY
-#define FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY 3  // Priority level 3
-#endif
-
-#ifndef FL_ESP_PARLIO_WORKER_TIMER_PERIOD_US
-#define FL_ESP_PARLIO_WORKER_TIMER_PERIOD_US 50  // 50µs continuous period (reduced from 20µs for stability)
-#endif
+// Worker function is now called directly from txDoneCallback (no timer needed)
+// This eliminates the 50µs periodic timer overhead
 
 //=============================================================================
 // Pin Validation Using FastLED's _FL_PIN_VALID System
@@ -148,8 +144,6 @@ ParlioEngine::ParlioEngine()
       mResetUs(0),
       mIsrContext(),
       mMainTaskHandle(nullptr),
-      mWorkerTaskHandle(nullptr),
-      mWorkerTimerHandle(),
       mRingBuffer(),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
@@ -186,21 +180,7 @@ ParlioEngine::~ParlioEngine() {
     // DMA buffers and waveform expansion buffer are automatically freed
     // by fl::unique_ptr destructors (RAII)
 
-    // CRITICAL: Clean up worker timer FIRST to prevent ISR callbacks after mIsrContext is deleted
-    // The timer ISR (workerIsrCallback) accesses mIsrContext, so timer must be detached
-    // before we signal the debug task to exit and before we delete mIsrContext
-    if (mWorkerTimerHandle.is_valid()) {
-        // Detach timer (disables and removes ISR handler)
-        fl::isr::detachHandler(mWorkerTimerHandle);
-
-        // Give time for any in-flight ISR to complete (timer detach is asynchronous)
-        // Without this delay, an ISR could fire after detach but before handle cleanup
-        if (mPeripheral) {
-            mPeripheral->delay(10);
-        }
-    }
-
-    // Clean up debug task (now safe - timer ISR won't access mIsrContext anymore)
+    // Clean up debug task
     if (mDebugTask.is_valid()) {
         // Signal task to exit by setting flags to false (task checks: while (mTransmitting || mStreamComplete))
         if (mIsrContext) {
@@ -267,16 +247,11 @@ void ParlioEngine::debugTaskFunction(void* arg) {
         FL_LOG_PARLIO("ISR_STATE:"
                << " txDone=" << ctx->mDebugTxDoneCount
                << " worker=" << ctx->mDebugWorkerIsrCount
-               << " doorbell_ring=" << ctx->mDebugDoorbellRingCount
-               << " doorbell_check=" << ctx->mDebugDoorbellCheckCount
-               << " early_exit=" << ctx->mDebugWorkerEarlyExitCount
                << " ring_count=" << ctx->mRingCount
                << " bytes_tx=" << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes
                << " transmitting=" << (ctx->mTransmitting ? "YES" : "NO")
                << " complete=" << (ctx->mStreamComplete ? "YES" : "NO")
-               << " hw_idle=" << (ctx->mHardwareIdle ? "YES" : "NO")
-               << " worker_enabled=" << (ctx->mWorkerIsrEnabled ? "YES" : "NO")
-               << " doorbell=" << (ctx->mWorkerDoorbell ? "SET" : "CLEAR"));
+               << " hw_idle=" << (ctx->mHardwareIdle ? "YES" : "NO"));
 
         // Check for ring buffer underrun (CRITICAL ERROR per LOOP.md)
         if (ctx->mHardwareIdle && ctx->mRingCount == 0 && ctx->mTransmitting) {
@@ -390,15 +365,6 @@ ParlioEngine::txDoneCallback(void* tx_unit,
             ctx->mStreamComplete = true;
             ctx->mTransmitting = false;
 
-            // DISARM WORKER ISR on last transmission (stop continuous timer)
-            ctx->mWorkerIsrEnabled = false;
-            FL_MEMORY_BARRIER;
-
-            // Stop continuous timer (save power after transmission complete)
-            if (self->mWorkerTimerHandle.is_valid()) {
-                fl::isr::disableHandler(self->mWorkerTimerHandle);
-            }
-
             // ASYNC MODE: No task notifications
             // - Worker task was removed (uses timer ISR instead)
             // - Main task polls mStreamComplete flag via poll() method
@@ -407,15 +373,13 @@ ParlioEngine::txDoneCallback(void* tx_unit,
             return false; // No tasks woken
         }
 
-        // Ring empty but more data pending - RING DOORBELL for worker ISR
+        // Ring empty but more data pending - call worker function directly
         ctx->mHardwareIdle = true; // Signal that hardware needs restart
         ctx->mTransmitting = false; // Hardware is idle, not transmitting
 
-        // DOORBELL PATTERN: Set flag to signal worker ISR (continuous timer will see it)
-        // Continuous timer fires every 20µs and checks this flag
-        ctx->mWorkerDoorbell = true;
-        ctx->mDebugDoorbellRingCount = ctx->mDebugDoorbellRingCount + 1;  // Debug: Track doorbell rings
-        FL_MEMORY_BARRIER;
+        // ONE-SHOT PATTERN: Call worker function directly to populate next buffer
+        // This eliminates the 50µs periodic timer overhead
+        workerIsrCallback(user_ctx);
 
         return false;
     }
@@ -447,14 +411,12 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         ctx->mRingCount = ctx->mRingCount - 1;
         ctx->mHardwareIdle = false; // Hardware is active again
 
-        // DOORBELL PATTERN: Signal worker ISR if buffers need refilling
-        // Continuous timer fires every 20µs and checks mWorkerDoorbell flag
+        // ONE-SHOT PATTERN: Call worker function directly if more buffers needed
+        // This eliminates the 50µs periodic timer overhead
         if (ctx->mRingCount < ParlioRingBuffer3::RING_BUFFER_COUNT &&
-            ctx->mNextByteOffset < ctx->mTotalBytes &&
-            ctx->mWorkerIsrEnabled) {
-            ctx->mWorkerDoorbell = true;
-            ctx->mDebugDoorbellRingCount = ctx->mDebugDoorbellRingCount + 1;  // Debug: Track doorbell rings
-            FL_MEMORY_BARRIER;
+            ctx->mNextByteOffset < ctx->mTotalBytes) {
+            // Populate next buffer immediately
+            workerIsrCallback(user_ctx);
         }
 
         // ASYNC MODE: Worker task notification removed
@@ -474,14 +436,15 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 // ============================================================================
 
 //=============================================================================
-// Worker ISR Callback - Hardware Timer-Based DMA Buffer Population
+// Worker Function - DMA Buffer Population (called from txDoneCallback)
 //=============================================================================
 
 // ============================================================================
 // ⚠️ ⚠️ ⚠️  CRITICAL ISR SAFETY RULES - READ BEFORE MODIFYING ⚠️ ⚠️ ⚠️
 // ============================================================================
 //
-// This function runs in INTERRUPT CONTEXT with EXTREMELY strict constraints:
+// This function runs in INTERRUPT CONTEXT (called from txDoneCallback ISR)
+// with EXTREMELY strict constraints:
 //
 // 1. ❌ ABSOLUTELY NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_ERROR, printf, etc.)
 //    - Logging can cause watchdog timeouts, crashes, or system instability
@@ -493,13 +456,13 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 //    - Any blocking operation will crash the system
 //
 // 3. ✅ MINIMIZE EXECUTION TIME
-//    - Keep ISR as short as possible (ideally <10µs)
+//    - Keep execution as short as possible (ideally <10µs)
 //    - Early exit if no work available
 //    - Populate only ONE buffer per invocation
 //
 // 4. ✅ MEMORY BARRIERS
 //    - Use FL_MEMORY_BARRIER after state updates
-//    - Ensures visibility to txDoneCallback ISR
+//    - Ensures visibility across ISR invocations
 //
 // If the system crashes after you modify this function:
 // - First suspect: Did you add logging?
@@ -520,53 +483,20 @@ ParlioEngine::workerIsrCallback(void *user_data) {
     ParlioIsrContext *ctx = self->mIsrContext.get();
 
     // Debug: Increment workerIsrCallback counter and timestamp
-    ctx->mDebugDoorbellCheckCount = ctx->mDebugDoorbellCheckCount + 1;  // Track total ISR firings
+    ctx->mDebugWorkerIsrCount = ctx->mDebugWorkerIsrCount + 1;
     ctx->mDebugLastWorkerIsrTime = self->mPeripheral->getMicroseconds();
 
     // CRITICAL: Early exit checks (in order of likelihood)
-    // Continuous timer fires every 50µs - exit early if no work needed
 
-    // Check 0: Worker ISR disabled by destructor or completion
-    if (!ctx->mWorkerIsrEnabled) {
-        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return;
-    }
-
-    // Check 1: Doorbell not rung (no work requested)
-    if (!ctx->mWorkerDoorbell) {
-        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;  // Most common early exit
-        return;  // Exit early, timer will check again in 50µs
-    }
-
-    // Doorbell is set - real work available
-    ctx->mDebugWorkerIsrCount = ctx->mDebugWorkerIsrCount + 1;  // Track actual work ISR invocations
-
-    // Check 2: Not actively transmitting
-    if (!ctx->mTransmitting) {
-        // Clear doorbell and exit
-        ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return;
-    }
-
-    // Check 3: Ring buffer full (no space to populate)
+    // Check 1: Ring buffer full (no space to populate)
     if (ctx->mRingCount >= ParlioRingBuffer3::RING_BUFFER_COUNT) {
-        // Clear doorbell and exit (will be rung again when space available)
-        ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return;
     }
 
-    // Check 4: All data already processed
+    // Check 2: All data already processed
     if (ctx->mNextByteOffset >= ctx->mTotalBytes) {
-        // Clear doorbell and exit
-        ctx->mWorkerDoorbell = false;
-        ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
         return;
     }
-
-    // CLEAR DOORBELL before processing (txDone will ring again if needed)
-    ctx->mWorkerDoorbell = false;
 
     // Work available - populate ONE buffer
     // Get next ring buffer index (0-2)
@@ -933,29 +863,6 @@ bool ParlioEngine::allocateRingBuffers() {
     return true;
 }
 
-bool ParlioEngine::allocateWorkerTimer() {
-    // Allocate and configure hardware timer for ISR-based background buffer population
-    // Timer fires continuously every 50µs (doorbell pattern - checks flag for work)
-    // Reduced from 20µs to 50µs for stability during initialization
-
-    // Configure timer using fl::isr API
-    fl::isr::isr_config_t config;
-    config.handler = workerIsrCallback;
-    config.user_data = this;
-    config.frequency_hz = 1000000 / FL_ESP_PARLIO_WORKER_TIMER_PERIOD_US;  // Convert period to frequency
-    config.priority = FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY;
-    config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
-
-    int result = fl::isr::attachTimerHandler(config, &mWorkerTimerHandle);
-    if (result != 0) {
-        FL_LOG_PARLIO("PARLIO: Failed to attach worker timer: " << result);
-        return false;
-    }
-
-    FL_LOG_PARLIO("PARLIO: Worker timer attached successfully (continuous mode, 50µs period)");
-    return true;
-}
-
 //=============================================================================
 // ⚠️  AI AGENT WARNING: CRITICAL PERFORMANCE HOT PATH - NO LOGGING ALLOWED ⚠️
 //=============================================================================
@@ -1137,12 +1044,6 @@ bool ParlioEngine::initialize(size_t dataWidth,
         mIsrContext = fl::make_unique<ParlioIsrContext>();
     }
 
-    // CRITICAL: Disable worker ISR during initialization to prevent spurious timer firings
-    // Timer is enabled during allocateWorkerTimer(), but should NOT fire until beginTransmission()
-    if (mIsrContext) {
-        mIsrContext->mWorkerIsrEnabled = false;
-    }
-
     // Validate pins
     if (pins.size() != dataWidth) {
         FL_LOG_PARLIO("PARLIO: Pin configuration error - expected "
@@ -1219,13 +1120,6 @@ bool ParlioEngine::initialize(size_t dataWidth,
         return false;
     }
 
-    // Allocate worker timer
-    if (!allocateWorkerTimer()) {
-        FL_LOG_PARLIO("PARLIO: Failed to allocate worker timer");
-        mPeripheral = nullptr;
-        return false;
-    }
-
     // Initialize ISR context state
     if (mIsrContext) {
         mIsrContext->mTransmitting = false;
@@ -1280,8 +1174,6 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mRingError = false;
     mIsrContext->mHardwareIdle = false;
     mIsrContext->mNextByteOffset = 0;
-    mIsrContext->mWorkerIsrEnabled = false;
-    mIsrContext->mWorkerDoorbell = false;
 
     // Initialize counters
     mIsrContext->mIsrCount = 0;
@@ -1295,9 +1187,6 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mDebugWorkerIsrCount = 0;
     mIsrContext->mDebugLastTxDoneTime = 0;
     mIsrContext->mDebugLastWorkerIsrTime = 0;
-    mIsrContext->mDebugDoorbellRingCount = 0;
-    mIsrContext->mDebugDoorbellCheckCount = 0;
-    mIsrContext->mDebugWorkerEarlyExitCount = 0;
 
     // Pre-populate ring buffers (fill all buffers if possible)
     while (hasRingSpace() && populateNextDMABuffer()) {
@@ -1358,42 +1247,36 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     }
 
     //=========================================================================
-    // Start worker timer ISR for background DMA buffer population
+    // Worker function now called directly from txDoneCallback (one-shot pattern)
     //=========================================================================
-    // Refactored from FreeRTOS task to hardware timer ISR:
-    // - Lower latency (~1-2µs vs ~5-10µs task switching)
-    // - More deterministic timing (no scheduler overhead)
-    //
-    // Timer ISR pattern (continuous, doorbell):
-    // - Timer fires continuously every 50µs (reduced from 20µs for stability)
-    // - workerIsrCallback checks mWorkerDoorbell flag for work
-    // - txDoneCallback sets mWorkerDoorbell when buffer space available
-    // - ISR exits early if doorbell not rung or no work needed
-    // - ISR populates ONE buffer per call (if ring has space and doorbell set)
-    // - Timer stopped when transmission complete
-    //
-    // CRITICAL ORDERING: Start timer AFTER first buffer is submitted (defensive)
-    // - Prevents timer ISR from firing before hardware is fully initialized
-    // - First txDoneCallback will ring doorbell to start worker ISR activity
+    // Refactored from periodic timer ISR to direct invocation:
+    // - Eliminates 50µs periodic timer overhead
+    // - Worker function called only when buffer population is needed
+    // - txDoneCallback directly invokes workerIsrCallback when ring has space
+    // - Simpler code path with lower latency
     //=========================================================================
 
-    // Enable worker ISR (set flag BEFORE starting timer)
-    mIsrContext->mWorkerIsrEnabled = true;
-    mIsrContext->mWorkerDoorbell = false;  // Clear doorbell (txDone will ring it)
-    FL_MEMORY_BARRIER;
+    FL_LOG_PARLIO("PARLIO: Worker function configured (one-shot mode, called from txDoneCallback)"
+           << " | buffers_ready=" << buffers_populated);
 
-    // Enable continuous timer (fires every 50µs) - AFTER first buffer submitted
-    // Timer was already started when attached via fl::isr::attachTimerHandler
-    // Just need to enable it now that transmission is ready
-    if (fl::isr::enableHandler(mWorkerTimerHandle) != 0) {
-        FL_LOG_PARLIO("PARLIO: Failed to enable worker timer");
-        mIsrContext->mTransmitting = false;  // Rollback flag on error
-        mErrorOccurred = true;
-        return false;
+    // For test/mock environments, block and wait for completion
+    // Real hardware uses async mode where caller polls via poll() method
+    #ifdef FASTLED_STUB_IMPL
+    // Block until transmission completes by polling
+    while (!mIsrContext->mStreamComplete && !mErrorOccurred) {
+        ParlioEngineState state = poll();
+        if (state == ParlioEngineState::READY || state == ParlioEngineState::ERROR) {
+            break;
+        }
+        // Small delay to avoid busy-wait
+        mPeripheral->delay(1);
     }
 
-    FL_LOG_PARLIO("PARLIO: Worker timer started (continuous mode, 50µs period, doorbell pattern)"
-           << " | buffers_ready=" << buffers_populated);
+    if (mErrorOccurred) {
+        FL_LOG_PARLIO("PARLIO: Error occurred during transmission");
+        return false;
+    }
+    #endif
 
     // Debug task: Logs ISR state every 500ms for diagnostics
     // Iteration 7 confirmed: Debug task is NOT the cause of crash
@@ -1447,11 +1330,6 @@ ParlioEngineState ParlioEngine::poll() {
         // Clear completion flags
         mIsrContext->mTransmitting = false;
         mIsrContext->mStreamComplete = false;
-
-        // Stop worker timer to save power and prevent spurious ISR firings
-        if (mWorkerTimerHandle.is_valid()) {
-            fl::isr::disableHandler(mWorkerTimerHandle);
-        }
 
         // Wait for final chunk to complete (non-blocking poll)
         if (mPeripheral->waitAllDone(0)) {

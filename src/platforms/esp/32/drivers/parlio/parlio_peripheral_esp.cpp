@@ -27,6 +27,12 @@ FL_EXTERN_C_END
 
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
+    // Set interrupt priority (configurable via FL_ESP_PARLIO_ISR_PRIORITY)
+    // Default is level 3 (highest for C handlers on ESP32)
+#ifndef FL_ESP_PARLIO_ISR_PRIORITY
+#define FL_ESP_PARLIO_ISR_PRIORITY 3
+#endif
+
 namespace fl {
 namespace detail {
 
@@ -136,6 +142,9 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     esp_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB;
     esp_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
 
+
+    esp_config.intr_priority = FL_ESP_PARLIO_ISR_PRIORITY;
+
     // Assign GPIO pins
     for (size_t i = 0; i < 16; i++) {
         esp_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.gpio_pins[i]);
@@ -152,6 +161,10 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
         mTxUnit = nullptr;
         return false;
     }
+
+    FL_LOG_PARLIO("PARLIO: Initialized with ISR priority level " << FL_ESP_PARLIO_ISR_PRIORITY
+                  << " (data_width=" << config.data_width
+                  << ", clock=" << config.clock_freq_hz << " Hz)");
 
     return true;
 }

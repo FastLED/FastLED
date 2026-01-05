@@ -295,6 +295,46 @@ config.is_rgbw = false;            // Auto-detected from chipset type
 config.auto_clock_adjustment = true; // Enable dynamic clock tuning
 ```
 
+### Build-Time Configuration
+
+Advanced users can override defaults via build flags:
+
+#### ISR Priority Level
+
+The PARLIO ISR priority can be configured at compile time:
+
+```ini
+# platformio.ini
+[env:esp32c6]
+platform = espressif32
+board = esp32-c6-devkitc-1
+build_flags =
+    -DFL_ESP_PARLIO_ISR_PRIORITY=3  # Set ISR priority (default: 3)
+```
+
+**Priority Levels:**
+- **Level 1**: Lowest priority (can be preempted by all higher interrupts)
+- **Level 2**: Medium priority
+- **Level 3**: Highest priority for C handlers (default, recommended)
+- **Level 4+**: Requires assembly handlers (not supported by ESP-IDF PARLIO driver)
+
+**Important Notes:**
+- WiFi interrupts run at level 4, so PARLIO ISRs at level 3 may be preempted during WiFi activity
+- Levels 4-7 require assembly interrupt handlers which are not supported by the ESP-IDF PARLIO driver
+- Level 3 is the maximum supported priority for C-based interrupt handlers
+- The default (level 3) provides the best balance of performance and compatibility
+
+**Usage Example:**
+```bash
+# Compile with custom ISR priority
+pio run -e esp32c6 -t upload --build-flag='-DFL_ESP_PARLIO_ISR_PRIORITY=2'
+```
+
+The driver will log the configured priority during initialization:
+```
+PARLIO: Initialized with ISR priority level 3 (data_width=8, clock=8000000 Hz)
+```
+
 ## Performance Characteristics
 
 ### Expected Frame Rates

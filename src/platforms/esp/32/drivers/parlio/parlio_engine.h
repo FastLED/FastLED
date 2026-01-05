@@ -130,6 +130,13 @@ enum class ParlioEngineState {
 /// - Performance impact: ~30 µs overhead per streaming iteration
 /// - Prevents OOM on constrained platforms while maintaining functionality
 ///
+/// ## Interrupt Priority Configuration
+/// - Default ISR priority: Level 3 (highest for C handlers on ESP32)
+/// - Override via build flag: -DFL_ESP_PARLIO_ISR_PRIORITY=<level>
+/// - Level 3 is recommended maximum (Level 4+ requires assembly handlers)
+/// - WiFi runs at level 4, so PARLIO ISRs may be preempted during WiFi activity
+/// - Supported range: 1 (low) to 3 (high) for C handlers
+///
 /// ## Thread Safety
 /// - initialize() is NOT thread-safe (call once during setup)
 /// - beginTransmission() blocks until complete (no concurrent calls)
@@ -196,14 +203,12 @@ private:
                               const void* edata,
                               void* user_ctx);
 
-    /// @brief Worker ISR callback for hardware timer-based DMA buffer population
+    /// @brief Worker function for DMA buffer population (called from txDoneCallback)
     /// ⚠️  CRITICAL ISR SAFETY RULES:
     /// ⚠️  1. NO LOGGING (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
     /// ⚠️  2. NO BLOCKING operations (mutex, delay, heap alloc)
     /// ⚠️  3. MINIMIZE execution time (<10µs ideal)
     /// ⚠️  4. ONLY ISR-safe operations
-    /// @param timer Timer handle
-    /// @param edata Event data (unused)
     /// @param user_data ParlioEngine instance pointer
     static void FL_IRAM workerIsrCallback(void* user_data);
 
@@ -232,10 +237,6 @@ private:
     /// @brief Allocate and initialize all ring buffers (one-time)
     bool allocateRingBuffers();
 
-    /// @brief Allocate and configure worker timer for ISR-based buffer population
-    /// @return true on success, false on error
-    bool allocateWorkerTimer();
-
 private:
     // Initialization state
     bool mInitialized;
@@ -263,12 +264,6 @@ private:
 
     // Main task handle for transmission completion signaling (TaskHandle_t)
     void* mMainTaskHandle;
-
-    // Worker task handle for background buffer population (TaskHandle_t)
-    void* mWorkerTaskHandle;
-
-    // Worker timer for ISR-based background buffer population (fl::isr::isr_handle_t)
-    fl::isr::isr_handle_t mWorkerTimerHandle;
 
     // Debug task for periodic ISR state logging (unified task API)
     fl::task mDebugTask;
