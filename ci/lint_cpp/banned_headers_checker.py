@@ -5,10 +5,15 @@ FastLED uses custom fl/ alternatives instead of standard library headers
 to ensure consistent behavior across all platforms and reduce code size.
 """
 
+from dataclasses import dataclass
+
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
 
-# Configuration constants
+# ============================================================================
+# CONFIGURATION CONSTANTS
+# ============================================================================
+
 ENABLE_PARANOID_GNU_HEADER_INSPECTION = False
 
 if ENABLE_PARANOID_GNU_HEADER_INSPECTION:
@@ -69,55 +74,207 @@ BANNED_HEADERS_CORE = BANNED_HEADERS_COMMON + BANNED_HEADERS_ESP + ["Arduino.h"]
 BANNED_HEADERS_PLATFORMS = BANNED_HEADERS_COMMON
 
 
+# ============================================================================
+# HEADER RECOMMENDATIONS
+# ============================================================================
+# Suggestions for which fl/ alternative to use for each banned header
+
+HEADER_RECOMMENDATIONS = {
+    "pthread.h": "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
+    "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
+    "iostream": "fl/stl/iostream.h or fl/str.h",
+    "stdio.h": "fl/str.h for string operations",
+    "cstdio": "fl/str.h for string operations",
+    "cstdlib": "fl/stl/cstdlib.h or fl/string operations",
+    "vector": "fl/stl/vector.h",
+    "list": "fl/stl/list.h or fl/stl/vector.h",
+    "map": "fl/stl/map.h (check fl/stl/hash_map.h for hash-based)",
+    "set": "fl/stl/set.h",
+    "queue": "fl/stl/queue.h or fl/stl/vector.h with manual queue semantics",
+    "deque": "fl/stl/deque.h",
+    "algorithm": "fl/stl/algorithm.h",
+    "memory": "fl/stl/shared_ptr.h or fl/stl/unique_ptr.h",
+    "thread": "fl/stl/thread.h",
+    "mutex": "fl/stl/mutex.h",
+    "chrono": "fl/time.h",
+    "fstream": "fl/file.h or platform file operations",
+    "sstream": "fl/stl/sstream.h",
+    "iomanip": "fl/stl/iostream.h stream manipulators",
+    "exception": "Use error codes or fl/stl/exception.h if available",
+    "stdexcept": "Use error codes instead",
+    "typeinfo": "Use fl/stl/type_traits.h or RTTI if unavoidable",
+    "ctime": "fl/time.h",
+    "cmath": "fl/math.h",
+    "math.h": "fl/math.h",
+    "complex": "Custom complex number class or fl/geometry.h",
+    "valarray": "fl/stl/vector.h",
+    "cfloat": "fl/numeric_limits.h or platform-specific headers",
+    "cassert": "FL_CHECK macros from fl/compiler_control.h",
+    "cerrno": "Error handling through return codes",
+    "cctype": "Character classification (implement if needed)",
+    "cwctype": "Wide character classification (implement if needed)",
+    "cstring": "fl/str.h or fl/stl/cstring.h",
+    "cwchar": "Wide character support (implement if needed)",
+    "cuchar": "Character support (implement if needed)",
+    "cstdint": "fl/stl/stdint.h or fl/stl/cstdint.h",
+    "stdint.h": "fl/stl/stdint.h",
+    "stddef.h": "fl/stl/stddef.h or fl/stl/cstddef.h",
+    "cstddef": "fl/stl/cstddef.h",
+    "string.h": "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
+    "type_traits": "fl/stl/type_traits.h",
+    "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
+}
+
+
+# ============================================================================
+# EXCEPTION RULES
+# ============================================================================
+# All exceptions to banned header rules are defined here for easy maintenance.
+# Optimized structure: Maps banned headers to list of HeaderException instances.
+# This enables O(1) average-case lookup instead of O(n) iteration through all rules.
+
+
+@dataclass(frozen=True)
+class HeaderException:
+    """Represents an exception to a banned header rule.
+
+    Attributes:
+        file_pattern: Glob pattern matching allowed file paths (e.g., "**/*.cpp", "inplacenew.h")
+        reason: Human-readable explanation for why this exception exists
+    """
+
+    file_pattern: str
+    reason: str
+
+
+EXCEPTION_RULES: dict[str, list[HeaderException]] = {
+    # Core placement new operator support
+    "new": [
+        HeaderException("inplacenew.h", "Placement new operator definition"),
+        HeaderException(
+            "platforms/**/new.h", "Platform-specific placement new wrapper"
+        ),
+    ],
+    # Core system definitions and platform headers
+    "Arduino.h": [
+        HeaderException(
+            "led_sysdefs.h", "Core system definitions need platform headers"
+        ),
+        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException(
+            "platforms/**/*.cpp", "Platform implementations can use Arduino.h"
+        ),
+        # platforms/ - Legacy headers that need Arduino.h (TODO: refactor these)
+        HeaderException("**/fastpin_apollo3.h", "TODO: Refactor to remove dependency"),
+        HeaderException(
+            "**/clockless_apollo3.h", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException("**/fastspi_arm_sam.h", "TODO: Refactor to remove dependency"),
+        HeaderException(
+            "**/stm32_gpio_timer_helpers.h", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException(
+            "**/led_sysdefs_rp_common.h", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException("**/io_teensy_lc.h", "TODO: Refactor to remove dependency"),
+        HeaderException("**/audio_input.hpp", "TODO: Refactor to remove dependency"),
+        HeaderException("**/io_esp_arduino.hpp", "TODO: Refactor to remove dependency"),
+        HeaderException("third_party/**/*", "Third-party library needs Arduino.h"),
+    ],
+    # Threading and synchronization
+    "pthread.h": [
+        HeaderException("**/thread_local.h", "Platform threading abstraction"),
+    ],
+    "mutex": [
+        HeaderException("**/stl/mutex.h", "Wrapper for platform mutex"),
+        HeaderException("**/thread_stub_stl.h", "STL threading wrapper for tests"),
+    ],
+    "thread": [
+        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
+        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
+        HeaderException("**/time_stub.cpp", "Test time simulation"),
+        HeaderException("**/thread_stub_stl.h", "STL threading wrapper for tests"),
+        HeaderException("wasm/**/timer.cpp", "WASM timer implementation"),
+    ],
+    # I/O and streams
+    "iostream": [
+        HeaderException("**/stub_main.cpp", "Testing entry point needs stdout"),
+        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
+        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
+        HeaderException("**/time_stub.cpp", "Test time simulation"),
+    ],
+    # Algorithms and utilities
+    "algorithm": [
+        HeaderException("**/stl/mutex.h", "Dependency from <string_view> in <mutex>"),
+        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
+    ],
+    # Integer types
+    "stdint.h": [
+        HeaderException("**/stl/cstdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
+        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
+    ],
+    # Time and timing
+    "chrono": [
+        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
+        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
+        HeaderException("**/time_stub.cpp", "Test time simulation"),
+    ],
+    # String operations
+    "string.h": [
+        HeaderException(
+            "**/stl/str.cpp", "C string implementation (memcpy, strlen, etc.)"
+        ),
+        HeaderException("led_strip/**/*", "Third-party Espressif library"),
+    ],
+    "stdlib.h": [
+        HeaderException(
+            "**/stl/str.cpp", "C string implementation (malloc, free, etc.)"
+        ),
+        HeaderException("led_strip/**/*", "Third-party Espressif library"),
+    ],
+    "sys/cdefs.h": [
+        HeaderException("led_strip/**/*", "Third-party Espressif library"),
+    ],
+    # Math operations
+    "math.h": [
+        HeaderException(
+            "**/stl/math.cpp", "Platform math functions (sin, cos, sqrt, etc.)"
+        ),
+        HeaderException("**/audio_reactive.cpp", "Audio FFT and signal processing"),
+        HeaderException(
+            "**/colorutils.cpp", "Color interpolation and gamma correction"
+        ),
+        HeaderException("**/transform.cpp", "Matrix transformations"),
+        HeaderException("**/xypath.cpp", "Path geometry calculations"),
+        HeaderException("**/xypath_impls.cpp", "Path rendering algorithms"),
+        HeaderException("**/xypath_renderer.cpp", "Path rendering algorithms"),
+        HeaderException("**/beat_detector.cpp", "Audio beat detection FFT"),
+        HeaderException("**/frame_interpolator.cpp", "Video frame interpolation"),
+    ],
+    "cmath": [
+        HeaderException("wasm/**/timer.cpp", "WASM timer implementation"),
+    ],
+    # File operations
+    "fstream": [
+        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
+    ],
+    "cstdio": [
+        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
+        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
+    ],
+    # WASM-specific headers
+    "vector": [
+        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
+    ],
+    "stdio.h": [
+        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
+    ],
+}
+
+
 class BannedHeadersChecker(FileContentChecker):
     """Checker class for banned headers."""
-
-    # Header recommendations
-    HEADER_RECOMMENDATIONS = {
-        "pthread.h": "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
-        "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
-        "iostream": "fl/stl/iostream.h or fl/str.h",
-        "stdio.h": "fl/str.h for string operations",
-        "cstdio": "fl/str.h for string operations",
-        "cstdlib": "fl/stl/cstdlib.h or fl/string operations",
-        "vector": "fl/stl/vector.h",
-        "list": "fl/stl/list.h or fl/stl/vector.h",
-        "map": "fl/stl/map.h (check fl/stl/hash_map.h for hash-based)",
-        "set": "fl/stl/set.h",
-        "queue": "fl/stl/queue.h or fl/stl/vector.h with manual queue semantics",
-        "deque": "fl/stl/deque.h",
-        "algorithm": "fl/stl/algorithm.h",
-        "memory": "fl/stl/shared_ptr.h or fl/stl/unique_ptr.h",
-        "thread": "fl/stl/thread.h",
-        "mutex": "fl/stl/mutex.h",
-        "chrono": "fl/time.h",
-        "fstream": "fl/file.h or platform file operations",
-        "sstream": "fl/stl/sstream.h",
-        "iomanip": "fl/stl/iostream.h stream manipulators",
-        "exception": "Use error codes or fl/stl/exception.h if available",
-        "stdexcept": "Use error codes instead",
-        "typeinfo": "Use fl/stl/type_traits.h or RTTI if unavoidable",
-        "ctime": "fl/time.h",
-        "cmath": "fl/math.h",
-        "math.h": "fl/math.h",
-        "complex": "Custom complex number class or fl/geometry.h",
-        "valarray": "fl/stl/vector.h",
-        "cfloat": "fl/numeric_limits.h or platform-specific headers",
-        "cassert": "FL_CHECK macros from fl/compiler_control.h",
-        "cerrno": "Error handling through return codes",
-        "cctype": "Character classification (implement if needed)",
-        "cwctype": "Wide character classification (implement if needed)",
-        "cstring": "fl/str.h or fl/stl/cstring.h",
-        "cwchar": "Wide character support (implement if needed)",
-        "cuchar": "Character support (implement if needed)",
-        "cstdint": "fl/stl/stdint.h or fl/stl/cstdint.h",
-        "stdint.h": "fl/stl/stdint.h",
-        "stddef.h": "fl/stl/stddef.h or fl/stl/cstddef.h",
-        "cstddef": "fl/stl/cstddef.h",
-        "string.h": "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
-        "type_traits": "fl/stl/type_traits.h",
-        "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
-    }
 
     def __init__(self, banned_headers_list: list[str], strict_mode: bool = False):
         """Initialize with the list of banned headers to check for.
@@ -142,140 +299,87 @@ class BannedHeadersChecker(FileContentChecker):
 
         return True
 
+    @classmethod
+    def _matches_pattern(cls, file_path: str, pattern: str) -> bool:
+        """Check if file path matches a wildcard pattern.
+
+        Supports:
+        - Exact filename matches: "file.cpp"
+        - Wildcard suffix: "*.cpp" (any .cpp file)
+        - Directory wildcard: "platforms/*/*.cpp" (any .cpp in platforms subdirs)
+        - Recursive wildcard: "platforms/**/*.cpp" (any .cpp in platforms tree)
+        """
+        normalized_path = file_path.replace("\\", "/")
+
+        # Exact match
+        if pattern == normalized_path or normalized_path.endswith("/" + pattern):
+            return True
+
+        # Recursive wildcard: "dir/**/*.ext" matches "dir/a/b/c/file.ext"
+        if "**" in pattern:
+            parts = pattern.split("/")
+            pattern_prefix = "/".join(parts[: parts.index("**")])
+            pattern_suffix = parts[-1] if parts[-1] != "**" else ""
+
+            if pattern_prefix and pattern_prefix not in normalized_path:
+                return False
+
+            if pattern_suffix:
+                if pattern_suffix.startswith("*"):
+                    # Suffix match like "*.cpp"
+                    return normalized_path.endswith(pattern_suffix[1:])
+                else:
+                    # Exact filename match
+                    return normalized_path.endswith("/" + pattern_suffix)
+            return True
+
+        # Single-level wildcard: "platforms/*/file.cpp"
+        if "*" in pattern:
+            parts = pattern.split("/")
+            path_parts = normalized_path.split("/")
+
+            # Check if path has enough parts
+            if len(path_parts) < len(parts):
+                return False
+
+            # Match from the end (most specific part)
+            for i in range(1, len(parts) + 1):
+                pattern_part = parts[-i]
+                path_part = path_parts[-i]
+
+                if pattern_part == "*":
+                    continue  # Wildcard matches anything
+                elif pattern_part.startswith("*"):
+                    # Suffix match like "*.cpp"
+                    if not path_part.endswith(pattern_part[1:]):
+                        return False
+                elif pattern_part != path_part:
+                    return False
+
+            return True
+
+        # Substring match for simple patterns
+        return pattern in normalized_path
+
     def _is_allowed_exception(self, file_path: str, header: str) -> bool:
-        """Check if this is an allowed exception to the banned header rule."""
-        # Allow <new> in inplacenew.h for placement new operator
-        if header == "new" and "inplacenew.h" in file_path:
-            return True
+        """Check if this is an allowed exception to the banned header rule.
 
-        # Allow <new> in platform new.h files - they are wrappers for placement new
-        if header == "new" and file_path.endswith("new.h"):
-            if "/platforms/" in file_path.replace("\\", "/"):
+        Optimized for O(1) average-case lookup instead of O(n) iteration.
+        """
+        # O(1) lookup: Check if header has any exceptions defined
+        if header not in EXCEPTION_RULES:
+            return False
+
+        # Check each file pattern for this header
+        for exception in EXCEPTION_RULES[header]:
+            if self._matches_pattern(file_path, exception.file_pattern):
                 return True
-
-        # Allow Arduino.h in led_sysdefs.h - core system definitions need platform headers
-        if header == "Arduino.h" and "led_sysdefs.h" in file_path:
-            return True
-
-        # For fl/ directory, allow specific platform headers that have no alternatives
-        # These are genuinely needed for platform-specific implementations
-        if "/fl/" in file_path.replace("\\", "/"):
-            # Allow iostream in stub_main.cpp for testing entry point
-            if header == "iostream" and "stub_main.cpp" in file_path:
-                return True
-
-            # Allow pthread.h in thread_local.h - needed for platform threading abstraction
-            if header == "pthread.h" and "thread_local.h" in file_path:
-                return True
-
-            # Allow mutex in mutex.h - this is the wrapper for platform mutex
-            if header == "mutex" and "mutex.h" in file_path:
-                return True
-
-            # Allow algorithm in mutex.h - needed for <string_view> dependency in <mutex>
-            if header == "algorithm" and "mutex.h" in file_path:
-                return True
-
-            # Allow stdint.h in cstdint.h - needed for limit macros (INT8_MAX, UINT64_MAX, etc.)
-            if header == "stdint.h" and "cstdint.h" in file_path:
-                return True
-
-            # Allow math.h in math implementation files (cpp files)
-            if header == "math.h" and file_path.endswith(".cpp"):
-                # math.h is only used in implementation files for platform math functions
-                if any(
-                    x in file_path
-                    for x in [
-                        "math.cpp",
-                        "audio_reactive.cpp",
-                        "colorutils.cpp",
-                        "transform.cpp",
-                        "xypath.cpp",
-                        "xypath_impls.cpp",
-                        "xypath_renderer.cpp",
-                    ]
-                ):
-                    return True
-
-            # Allow platform-specific time headers in time.cpp
-            if "time.cpp" in file_path:
-                if header in {"stdint.h", "Arduino.h", "chrono"}:
-                    return True
-
-            # Allow C library headers in str.cpp for string implementation
-            if "str.cpp" in file_path:
-                if header in {"string.h", "stdlib.h"}:
-                    return True
-
-        # Platform-specific files and Arduino.h handling
-        if "/platforms/" in file_path.replace("\\", "/") and header == "Arduino.h":
-            # Allow in .cpp implementation files
-            if file_path.endswith(".cpp"):
-                return True
-
-            # Legacy platform headers that currently need Arduino.h
-            # TODO: Refactor these to remove Arduino.h dependency
-            legacy_arduino_headers = [
-                # All pin_*.hpp headers have been refactored to use native register manipulation
-                # and no longer require Arduino.h - removed from this list
-                "fastpin_apollo3.h",
-                "clockless_apollo3.h",
-                "fastspi_arm_sam.h",
-                "stm32_gpio_timer_helpers.h",
-                "led_sysdefs_rp_common.h",
-                "io_teensy_lc.h",
-                "audio_input.hpp",
-                "io_esp_arduino.hpp",
-            ]
-            if any(file_path.endswith(legacy) for legacy in legacy_arduino_headers):
-                return True
-
-        # Espressif LED strip library code needs C library headers
-        if "/led_strip/" in file_path.replace("\\", "/"):
-            if header in {"string.h", "stdlib.h", "sys/cdefs.h"}:
-                return True
-
-        # Testing stub implementations need stdlib headers for file/thread operations
-        if "/stub/" in file_path.replace("\\", "/") or "/wasm/" in file_path.replace(
-            "\\", "/"
-        ):
-            # fs_stub.hpp needs algorithm, fstream, cstdio for test filesystem
-            if "fs_stub" in file_path and header in {"algorithm", "fstream", "cstdio"}:
-                return True
-            # isr_stub.cpp and time_stub.cpp need chrono, thread, iostream for testing
-            if ("isr_stub" in file_path or "time_stub" in file_path) and header in {
-                "chrono",
-                "thread",
-                "iostream",
-            }:
-                return True
-            # thread_stub_stl.h needs thread and mutex for STL threading wrapper
-            if "thread_stub_stl.h" in file_path and header in {"thread", "mutex"}:
-                return True
-            # WASM platform implementations need stdlib headers for I/O and threading
-            if "/wasm/" in file_path.replace("\\", "/"):
-                # WASM platform headers need vector, cstdio, stdio.h for platform-specific implementation
-                if file_path.endswith(".h"):
-                    if header in {"vector", "cstdio", "stdio.h"}:
-                        return True
-                # WASM timer.cpp needs thread and cmath for timer implementation
-                elif "timer.cpp" in file_path and header in {"thread", "cmath"}:
-                    return True
-
-        # FX audio/video files need math.h for specialized calculations
-        if "/fx/" in file_path.replace("\\", "/"):
-            if header == "math.h" and file_path.endswith(".cpp"):
-                if any(
-                    x in file_path
-                    for x in ["beat_detector.cpp", "frame_interpolator.cpp"]
-                ):
-                    return True
 
         return False
 
     def _get_recommendation(self, header: str) -> str:
         """Get recommendation for a banned header."""
-        return self.HEADER_RECOMMENDATIONS.get(
+        return HEADER_RECOMMENDATIONS.get(
             header, "Use fl/ alternatives instead of standard library headers"
         )
 
