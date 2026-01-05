@@ -186,8 +186,8 @@ void wave8Untranspose_2(const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof
     }
 
     // Copy de-interleaved data to output
-    fl::memcpy(output, &lane_waves[0], sizeof(Wave8Byte));
-    fl::memcpy(output + sizeof(Wave8Byte), &lane_waves[1], sizeof(Wave8Byte));
+    fl::isr::memcpy(output, &lane_waves[0], sizeof(Wave8Byte));
+    fl::isr::memcpy(output + sizeof(Wave8Byte), &lane_waves[1], sizeof(Wave8Byte));
 }
 
 FL_OPTIMIZE_FUNCTION
@@ -232,7 +232,7 @@ void wave8Untranspose_4(const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof
 
     // Copy de-interleaved data to output
     for (int lane = 0; lane < 4; lane++) {
-        fl::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
+        fl::isr::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
     }
 }
 
@@ -275,7 +275,7 @@ void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof
 
     // Copy de-interleaved data to output
     for (int lane = 0; lane < 8; lane++) {
-        fl::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
+        fl::isr::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
     }
 }
 
@@ -325,7 +325,7 @@ void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * size
 
     // Copy de-interleaved data to output
     for (int lane = 0; lane < 16; lane++) {
-        fl::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
+        fl::isr::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
     }
 }
 
