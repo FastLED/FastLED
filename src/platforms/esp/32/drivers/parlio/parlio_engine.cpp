@@ -5,15 +5,15 @@
 /// from channel_engine_parlio.cpp. It handles all hardware-specific operations
 /// including ISR callbacks, DMA buffer generation, and ring buffer streaming.
 
+#ifdef ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#endif
+
 // Compile on ESP32 with PARLIO support OR on stub platform for testing
 #if (defined(ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/compiler_control.h"
 #include "fl/unused.h"
-
-#ifdef ESP32
-#include "platforms/esp/32/feature_flags/enabled.h"
-#endif
 
 #include "parlio_engine.h"
 #include "parlio_isr_context.h"
@@ -1324,12 +1324,6 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // Queue first buffer to start transmission
     FL_LOG_PARLIO("PARLIO: Starting ISR-based streaming | first_buffer_size="
            << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
-
-#ifdef ESP32
-    parlio_transmit_config_t tx_config = {};
-    tx_config.idle_value = 0x0000;
-    (void)tx_config;  // Unused on some code paths
-#endif
 
     size_t first_buffer_size = mRingBuffer->sizes[0];
 

@@ -30,10 +30,6 @@ FL_EXTERN_C_END
 namespace fl {
 namespace detail {
 
-// Forward declarations for ESP-IDF types (avoid exposing in header)
-struct parlio_tx_unit_t;
-typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
-
 //=============================================================================
 // Implementation Class (internal)
 //=============================================================================
@@ -61,8 +57,8 @@ public:
     void freeDmaBuffer(void* ptr) override;
 
 private:
-    parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
-    bool mEnabled;                     ///< Track enable state (for cleanup)
+    ::parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
+    bool mEnabled;                       ///< Track enable state (for cleanup)
 };
 
 //=============================================================================

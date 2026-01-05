@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "platforms/itask_coroutine.h"
 #include "fl/stl/string.h"
 #include "fl/stl/functional.h"
 
