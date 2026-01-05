@@ -1,10 +1,143 @@
 #pragma once
 
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/sketch_macros.h"
+#include "fl/stl/strstream.h"
 #include "fl/str.h"
+#include "fl/int.h"
 #include "fl/stl/stdint.h"
 #include "fl/detail/async_log_queue.h"  // Full definition needed for embedded storage
+
+// =============================================================================
+// Forward Declarations
+// =============================================================================
+
+// Forward declare println to avoid pulling in full fl/stl/cstdio.h machinery
+// This prevents ~5KB memory bloat for simple applications
+#ifndef FL_PRINTLN_DECLARED
+#define FL_PRINTLN_DECLARED
+namespace fl {
+    void println(const char* str);
+}
+#endif
+
+// =============================================================================
+// Debug Output Helpers
+// =============================================================================
+
+namespace fl {
+// ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
+// "blah/blah/blah.h" -> "blah.h"
+const char *fastled_file_offset(const char *file);
+} // namespace fl
+
+// =============================================================================
+// Error Macros (FL_ERROR)
+// =============================================================================
+
+#ifndef FASTLED_ERROR
+// FASTLED_ERROR: Supports stream-style formatting with << operator
+// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+#define FASTLED_ERROR(MSG) fl::println((fl::StrStream() << "ERROR: " << MSG).c_str())
+#define FASTLED_ERROR_IF(COND, MSG) do { if (COND) FASTLED_ERROR(MSG); } while(0)
+#endif
+
+#ifndef FL_ERROR
+#if SKETCH_HAS_LOTS_OF_MEMORY
+// FL_ERROR: Supports both string literals and stream-style formatting with << operator
+// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+#define FL_ERROR(X) fl::println((fl::StrStream() << "ERROR: " << X).c_str())
+#define FL_ERROR_IF(COND, MSG) do { if (COND) FL_ERROR(MSG); } while(0)
+#else
+// No-op macros for memory-constrained platforms
+#define FL_ERROR(X) do { } while(0)
+#define FL_ERROR_IF(COND, MSG) do { } while(0)
+#endif
+#endif
+
+// =============================================================================
+// Warning Macros (FL_WARN)
+// =============================================================================
+
+#ifndef FASTLED_WARN
+// FASTLED_WARN: Supports stream-style formatting with << operator
+// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+#define FASTLED_WARN(MSG) fl::println((fl::StrStream() << "WARN: " << MSG).c_str())
+#define FASTLED_WARN_IF(COND, MSG) do { if (COND) FASTLED_WARN(MSG); } while(0)
+#endif
+
+#ifndef FL_WARN
+#if SKETCH_HAS_LOTS_OF_MEMORY
+// FL_WARN: Supports both string literals and stream-style formatting with << operator
+// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+#define FL_WARN(X) fl::println((fl::StrStream() << "WARN: " << X).c_str())
+#define FL_WARN_IF(COND, MSG) do { if (COND) FL_WARN(MSG); } while(0)
+
+// FL_WARN_ONCE: Emits warning only once per unique location (static flag per call site)
+// Uses static bool flag initialized to false - first call prints, subsequent calls no-op
+#define FL_WARN_ONCE(X) do { \
+    static bool _warned = false; \
+    if (!_warned) { \
+        _warned = true; \
+        FL_WARN(X); \
+    } \
+} while(0)
+
+// FL_WARN_FMT: Alias for FL_WARN (kept for backwards compatibility)
+#define FL_WARN_FMT(X) FL_WARN(X)
+#define FL_WARN_FMT_IF(COND, MSG) FL_WARN_IF(COND, MSG)
+#else
+// No-op macros for memory-constrained platforms
+#define FL_WARN(X) do { } while(0)
+#define FL_WARN_IF(COND, MSG) do { } while(0)
+#define FL_WARN_ONCE(X) do { } while(0)
+#define FL_WARN_FMT(X) do { } while(0)
+#define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
+#endif
+#endif
+
+// =============================================================================
+// Debug Macros (FL_DBG)
+// =============================================================================
+
+#if __EMSCRIPTEN__ || !defined(RELEASE) || defined(FASTLED_TESTING)
+#define FASTLED_FORCE_DBG 1
+#endif
+
+// Reusable no-op macro for disabled debug output - avoids linker symbol pollution
+#define FL_DBG_NO_OP(X) do { if (false) { fl::FakeStrStream() << X; } } while(0)
+
+// Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
+#if !defined(FASTLED_FORCE_DBG) && !SKETCH_HAS_LOTS_OF_MEMORY
+// By default, debug printing is disabled to prevent memory bloat in simple applications
+#define FASTLED_HAS_DBG 0
+#define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
+#else
+// Explicit debug mode enabled - uses fl::println()
+#define FASTLED_HAS_DBG 1
+#define _FASTLED_DGB(X)                                                        \
+    fl::println(                                                               \
+        (fl::StrStream() << (fl::fastled_file_offset(__FILE__))                \
+                         << "(" << int(__LINE__) << "): " << X)                     \
+            .c_str())
+#endif
+
+#define FASTLED_DBG(X) _FASTLED_DGB(X)
+
+#ifndef FASTLED_DBG_IF
+#define FASTLED_DBG_IF(COND, MSG)                                              \
+    if (COND)                                                                  \
+    FASTLED_DBG(MSG)
+#endif // FASTLED_DBG_IF
+
+// Short-form aliases for convenience (following pattern from warn.h)
+#ifndef FL_DBG
+#define FL_DBG FASTLED_DBG
+#define FL_DBG_IF FASTLED_DBG_IF
+#endif
+
+// =============================================================================
+// AsyncLogger Class
+// =============================================================================
 
 namespace fl {
     /// @brief ISR-safe async logger wrapper (zero heap allocation)
