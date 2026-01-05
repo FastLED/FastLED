@@ -13,6 +13,9 @@
 #include "parlio_peripheral_esp.h"
 #include "fl/log.h"
 #include "fl/warn.h"
+#include "fl/error.h"
+#include "fl/stl/sstream.h"
+#include "fl/stl/charconv.h"  // For fl::to_hex
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -125,6 +128,8 @@ ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
 //=============================================================================
 
 bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
+    FL_LOG_PARLIO("PARLIO_PERIPH: initialize() called - data_width=" << config.data_width << " clock=" << config.clock_freq_hz);
+
     // Validate not already initialized
     if (mTxUnit != nullptr) {
         FL_WARN("ParlioPeripheralESP: Already initialized");
@@ -139,15 +144,23 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     esp_config.data_width = config.data_width;
     esp_config.trans_queue_depth = config.queue_depth;
     esp_config.max_transfer_size = config.max_transfer_size;
-    esp_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB;
+    esp_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;  // ITERATION 17: Match RMT MSB-first transmission
     esp_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
 
-
+    // Set interrupt priority (only if supported by ESP-IDF version)
+    #ifdef PARLIO_TX_UNIT_CONFIG_HAS_INTR_PRIORITY
     esp_config.intr_priority = FL_ESP_PARLIO_ISR_PRIORITY;
+    #else
+    FL_LOG_PARLIO("PARLIO_PERIPH: NOTE - intr_priority not supported by this ESP-IDF version (using default)");
+    #endif
 
     // Assign GPIO pins
+    FL_DBG("PARLIO_PERIPH: GPIO pins:");
     for (size_t i = 0; i < 16; i++) {
         esp_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.gpio_pins[i]);
+        if (config.gpio_pins[i] >= 0) {
+            FL_LOG_PARLIO("  [" << i << "] = GPIO " << config.gpio_pins[i]);
+        }
     }
 
     // No external clock or valid signal
@@ -155,12 +168,15 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     esp_config.valid_gpio_num = static_cast<gpio_num_t>(-1);
 
     // Create TX unit (delegate to ESP-IDF)
+    FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_new_tx_unit()");
     esp_err_t err = parlio_new_tx_unit(&esp_config, &mTxUnit);
     if (err != ESP_OK) {
+        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_new_tx_unit() - ESP-IDF error code: " << err);
         FL_LOG_PARLIO("ParlioPeripheralESP: Failed to create TX unit: " << err);
         mTxUnit = nullptr;
         return false;
     }
+    FL_LOG_PARLIO("PARLIO_PERIPH: parlio_new_tx_unit() SUCCESS - handle=" << (void*)mTxUnit);
 
     FL_LOG_PARLIO("PARLIO: Initialized with ISR priority level " << FL_ESP_PARLIO_ISR_PRIORITY
                   << " (data_width=" << config.data_width
@@ -170,19 +186,24 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
 }
 
 bool ParlioPeripheralESPImpl::enable() {
+    FL_LOG_PARLIO("PARLIO_PERIPH: enable() called");
     if (mTxUnit == nullptr) {
+        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED enable - not initialized");
         FL_WARN("ParlioPeripheralESP: Cannot enable - not initialized");
         return false;
     }
 
     // Delegate to ESP-IDF
+    FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_tx_unit_enable()");
     esp_err_t err = parlio_tx_unit_enable(mTxUnit);
     if (err != ESP_OK) {
+        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_tx_unit_enable() - ESP-IDF error code: " << err);
         FL_LOG_PARLIO("ParlioPeripheralESP: Failed to enable TX unit: " << err);
         return false;
     }
 
     mEnabled = true;
+    FL_LOG_PARLIO("PARLIO_PERIPH: enable() SUCCESS");
     return true;
 }
 
@@ -227,6 +248,18 @@ bool ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, 
     // This is the ONLY place cache sync happens (before DMA submission)
     // Calculate buffer size in bytes (bit_count / 8)
     size_t buffer_size = (bit_count + 7) / 8;
+
+    // DIAGNOSTIC: Dump first 16 bytes of buffer to verify content before transmission
+    // ONLY log on first 2 transmissions to avoid watchdog timeout from excessive logging
+    static int tx_count = 0;
+    if (tx_count < 2) {
+        FL_LOG_PARLIO("PARLIO_TX_BUF [" << tx_count << "]: " << buffer_size << " bytes, idle=" << idle_value);
+        FL_LOG_PARLIO("PARLIO_TX_BUF [" << tx_count << "]: First 8 bytes:");
+        for (size_t i = 0; i < 8 && i < buffer_size; i++) {
+            FL_DBG("  [" << i << "] = 0x" << fl::to_hex(buffer[i]));
+        }
+        tx_count++;
+    }
 
     // Memory barrier: Ensure all preceding writes complete before DMA submission
     FL_MEMORY_BARRIER;
@@ -281,7 +314,9 @@ bool ParlioPeripheralESPImpl::waitAllDone(uint32_t timeout_ms) {
 //=============================================================================
 
 bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_ctx) {
+    FL_LOG_PARLIO("PARLIO_PERIPH: registerTxDoneCallback() called");
     if (mTxUnit == nullptr) {
+        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED register callback - not initialized");
         FL_WARN("ParlioPeripheralESP: Cannot register callback - not initialized");
         return false;
     }
@@ -291,12 +326,15 @@ bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_
     callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(callback);
 
     // Delegate to ESP-IDF
+    FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_tx_unit_register_event_callbacks()");
     esp_err_t err = parlio_tx_unit_register_event_callbacks(mTxUnit, &callbacks, user_ctx);
     if (err != ESP_OK) {
+        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_tx_unit_register_event_callbacks() - ESP-IDF error code: " << err);
         FL_LOG_PARLIO("ParlioPeripheralESP: Failed to register callbacks: " << err);
         return false;
     }
 
+    FL_LOG_PARLIO("PARLIO_PERIPH: registerTxDoneCallback() SUCCESS");
     return true;
 }
 

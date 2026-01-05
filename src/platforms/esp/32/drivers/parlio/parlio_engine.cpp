@@ -48,6 +48,30 @@
 // - DMA memory: allocateDmaBuffer(), freeDmaBuffer()
 // - PARLIO operations: initialize(), enable(), transmit(), waitAllDone(), etc.
 
+namespace {
+// Helper: Reverse bits in a byte (for PARLIO LSB bit packing)
+// PARLIO with LSB packing sends bit 0 first, but Wave8Bit stores pulses MSB-first
+// So we need to reverse each byte: bit 7→0, bit 6→1, ..., bit 0→7
+inline uint8_t reverseBits(uint8_t byte) {
+    byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;  // Swap nibbles
+    byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;  // Swap pairs
+    byte = (byte & 0xAA) >> 1 | (byte & 0x55) << 1;  // Swap adjacent bits
+    return byte;
+}
+
+fl::detail::IParlioPeripheral* getParlioPeripheral() {
+    // Get peripheral singleton instance
+    #ifdef FASTLED_STUB_IMPL
+        return &fl::detail::ParlioPeripheralMock::instance();
+        FL_LOG_PARLIO("PARLIO_INIT: Using mock peripheral");
+    #else
+        return &fl::detail::ParlioPeripheralESP::instance();
+        FL_LOG_PARLIO("PARLIO_INIT: Using ESP peripheral (real hardware)");
+    #endif
+}
+
+} // anonymous namespace
+
 #ifndef CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM
 #warning \
     "PARLIO: CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is not defined! Add 'build_flags = -DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1' to platformio.ini or your build system"
@@ -150,6 +174,7 @@ ParlioEngine::ParlioEngine()
       mLaneStride(0),
       mErrorOccurred(false),
       mTxUnitEnabled(false) {
+    FL_LOG_PARLIO("PARLIO_INIT: Constructor entered");
 }
 
 ParlioEngine::~ParlioEngine() {
@@ -637,7 +662,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
     bool is_first_byte = (startByte == 0);
 
     if (is_first_byte) {
-        constexpr size_t FRONT_PAD_BYTES = 8;  // 1 Wave8Byte per lane
+        // ITERATION 18: Testing zero padding to check for phase shift issues
+        constexpr size_t FRONT_PAD_BYTES = 0;  // NO front padding
         size_t front_padding_total = FRONT_PAD_BYTES * mDataWidth;
 
         // Boundary check
@@ -668,7 +694,24 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
         // Use stack-allocated temporary arrays sized for the actual data width
         // Dispatch to appropriate wave8Transpose function based on data width
 
-        if (mDataWidth == 1 || mDataWidth == 2) {
+        if (mDataWidth == 1) {
+            // Single-lane mode: Convert byte directly to Wave8Byte WITHOUT interleaving
+            // For single-lane, we don't want 2-lane transpose which would interleave
+            // lane[0] with dummy lane[1] padding
+            uint8_t byte_value = (mActualChannels > 0)
+                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
+                : 0;
+
+            Wave8Byte wave8_output;
+            fl::detail::wave8_convert_byte_to_wave8byte(byte_value, mWave8Lut, &wave8_output);
+
+            // ITERATION 17: Changed to MSB bit packing - no bit reversal needed
+            // Wave8Bit stores pulses MSB-first, PARLIO MSB packing sends MSB first
+
+            fl::memcpy(outputBuffer + outputIdx, &wave8_output, sizeof(Wave8Byte));
+            outputIdx += sizeof(Wave8Byte);
+        } else if (mDataWidth == 2) {
+            // Two-lane mode: Use 2-lane transpose to interleave lanes
             uint8_t lanes[2];
             lanes[0] = (mActualChannels > 0)
                 ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
@@ -677,8 +720,14 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                 ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                 : 0;
 
+            // PARLIO MSB hardware requirement: Swap lanes before transpose
+            // PARLIO with MSB bit packing expects GPIO[0]=odd bits, GPIO[1]=even bits
+            // But wave8_transpose_2 uses natural order (lane[0]=even, lane[1]=odd)
+            // So we swap the lane order here to match PARLIO hardware expectations
+            uint8_t lanes_swapped[2] = {lanes[1], lanes[0]};
+
             uint8_t transposed[2 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut,
+            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes_swapped), mWave8Lut,
                                 reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed));
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -742,7 +791,7 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
     bool is_last_byte = (startByte + byteCount >= mIsrContext->mTotalBytes);
 
     if (is_last_byte) {
-        constexpr size_t BACK_PAD_BYTES = 8;  // 1 Wave8Byte per lane
+        constexpr size_t BACK_PAD_BYTES = 8;  // 1 Wave8Byte per lane (REQUIRED)
         size_t back_padding_total = BACK_PAD_BYTES * mDataWidth;
 
         // Boundary check
@@ -1016,15 +1065,20 @@ bool ParlioEngine::initialize(size_t dataWidth,
                               const fl::vector<int>& pins,
                               const ChipsetTimingConfig& timing,
                               size_t maxLedsPerChannel) {
+    FL_LOG_PARLIO("PARLIO_INIT: initialize() called - dataWidth=" << dataWidth << " pins=" << pins.size());
+
     if (mInitialized) {
+        FL_LOG_PARLIO("PARLIO_INIT: Already initialized, returning true");
         return true; // Already initialized
     }
-
+    mPeripheral = getParlioPeripheral();
     // Store data width and pins
     mDataWidth = dataWidth;
     mPins = pins;
     mActualChannels = pins.size();
     mDummyLanes = mDataWidth - mActualChannels;
+
+    FL_LOG_PARLIO("PARLIO_INIT: mDataWidth=" << mDataWidth << " mActualChannels=" << mActualChannels << " mDummyLanes=" << mDummyLanes);
 
     // Store timing parameters
     mTimingT1Ns = timing.t1_ns;
@@ -1068,12 +1122,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
 
-    // Get peripheral singleton instance
-#ifdef FASTLED_STUB_IMPL
-    mPeripheral = &ParlioPeripheralMock::instance();
-#else
-    mPeripheral = &ParlioPeripheralESP::instance();
-#endif
+
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
     ParlioPeripheralConfig config(
@@ -1082,21 +1131,27 @@ bool ParlioEngine::initialize(size_t dataWidth,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
         65534
     );
+    FL_DBG("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
 
     // Initialize peripheral
+    FL_LOG_PARLIO("PARLIO_INIT: Calling mPeripheral->initialize()");
     if (!mPeripheral->initialize(config)) {
-        FL_LOG_PARLIO("PARLIO: Failed to initialize peripheral");
+        FL_LOG_PARLIO("PARLIO_INIT: FAILED to initialize peripheral");
         mPeripheral = nullptr;
         return false;
     }
+    FL_LOG_PARLIO("PARLIO_INIT: Peripheral initialized successfully");
 
     // Register ISR callback
+    FL_LOG_PARLIO("PARLIO_INIT: Registering ISR callback");
     if (!mPeripheral->registerTxDoneCallback(
             reinterpret_cast<void*>(txDoneCallback), this)) {
+        FL_LOG_PARLIO("PARLIO_INIT: FAILED to register ISR callback");
         FL_LOG_PARLIO("PARLIO: Failed to register callbacks");
         mPeripheral = nullptr;
         return false;
     }
+    FL_LOG_PARLIO("PARLIO_INIT: ISR callback registered successfully");
 
     // Calculate ring buffer capacity
     ParlioBufferCalculator calc{mDataWidth};
@@ -1114,11 +1169,13 @@ bool ParlioEngine::initialize(size_t dataWidth,
     }
 
     // Allocate ring buffers
+    FL_LOG_PARLIO("PARLIO_INIT: Allocating ring buffers (capacity=" << mRingBufferCapacity << ")");
     if (!allocateRingBuffers()) {
-        FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffers");
+        FL_DBG("PARLIO_INIT: FAILED to allocate ring buffers");
         mPeripheral = nullptr;
         return false;
     }
+    FL_LOG_PARLIO("PARLIO_INIT: Ring buffers allocated successfully");
 
     // Initialize ISR context state
     if (mIsrContext) {
@@ -1130,6 +1187,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     mErrorOccurred = false;
 
     mInitialized = true;
+    FL_DBG("PARLIO_INIT: Initialization COMPLETE - mInitialized=true");
     return true;
 }
 
@@ -1137,18 +1195,22 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
                                      size_t totalBytes,
                                      size_t numLanes,
                                      size_t laneStride) {
+    FL_LOG_PARLIO("PARLIO_TX: beginTransmission() called - totalBytes=" << totalBytes << " numLanes=" << numLanes);
+
     if (!mInitialized || !mPeripheral || !mIsrContext) {
-        FL_LOG_PARLIO("PARLIO: Cannot transmit - not initialized");
+        FL_LOG_PARLIO("PARLIO_TX: FAILED - not initialized (mInit=" << mInitialized << " mPeripheral=" << (mPeripheral?1:0) << " mIsr=" << (mIsrContext?1:0) << ")");
         return false;
     }
 
     // Check if already transmitting
     if (mIsrContext->mTransmitting) {
+        FL_LOG_PARLIO("PARLIO_TX: FAILED - transmission already in progress");
         FL_LOG_PARLIO("PARLIO: Transmission already in progress");
         return false;
     }
 
     if (totalBytes == 0) {
+        FL_LOG_PARLIO("PARLIO_TX: Zero bytes - returning success");
         return true; // Nothing to transmit
     }
 
@@ -1189,12 +1251,14 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mDebugLastWorkerIsrTime = 0;
 
     // Pre-populate ring buffers (fill all buffers if possible)
+    FL_LOG_PARLIO("PARLIO_TX: Pre-populating ring buffers - mScratchBuffer=" << (void*)mScratchBuffer << " stride=" << mLaneStride);
     while (hasRingSpace() && populateNextDMABuffer()) {
         // Buffer populated into ring
     }
 
     // Get actual number of buffers populated
     size_t buffers_populated = mIsrContext->mRingCount;
+    FL_LOG_PARLIO("PARLIO_TX: Ring buffers populated - count=" << buffers_populated);
 
     // Debug: Log input_sizes array
     FL_LOG_PARLIO("PARLIO: DEBUG input_sizes[0]=" << mRingBuffer->input_sizes[0]
@@ -1212,12 +1276,16 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // Enable PARLIO peripheral for this transmission (only if not already enabled)
     if (!mTxUnitEnabled) {
+        FL_DBG("PARLIO_TX: Enabling peripheral");
         if (!mPeripheral->enable()) {
             FL_LOG_PARLIO("PARLIO: Failed to enable peripheral");
             mErrorOccurred = true;
             return false;
         }
         mTxUnitEnabled = true;
+        FL_LOG_PARLIO("PARLIO_TX: Peripheral enabled successfully");
+    } else {
+        FL_LOG_PARLIO("PARLIO_TX: Peripheral already enabled");
     }
 
     // Queue first buffer to start transmission
@@ -1225,6 +1293,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
            << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
 
     size_t first_buffer_size = mRingBuffer->sizes[0];
+    FL_DBG("PARLIO_TX: Starting transmission - first_buffer=" << first_buffer_size << " bytes, buffers_ready=" << buffers_populated);
 
     // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
     // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
@@ -1245,6 +1314,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         mErrorOccurred = true;
         return false;
     }
+    FL_LOG_PARLIO("PARLIO_TX: First buffer submitted successfully - transmission started");
 
     //=========================================================================
     // Worker function now called directly from txDoneCallback (one-shot pattern)

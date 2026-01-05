@@ -81,19 +81,21 @@ void wave8_convert_byte_to_wave8byte(uint8_t byte_value,
 // ============================================================================
 
 /// @brief Transpose 2 lanes of Wave8Byte data into interleaved format
-/// @param lane_waves Array of 2 Wave8Byte structures
+/// @param lane_waves Array of 2 Wave8Byte structures (lane[0]=even bits, lane[1]=odd bits)
 /// @param output Output buffer (16 bytes)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_2(const Wave8Byte lane_waves[2],
                        uint8_t output[2 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         uint16_t interleaved = 0;
+        // Natural lane order: lane[0] becomes even bits, lane[1] becomes odd bits
+        // The FL_WAVE8_SPREAD_TO_16 macro treats first param as even, second as odd
         FL_WAVE8_SPREAD_TO_16(lane_waves[0].symbols[symbol_idx].data,
                               lane_waves[1].symbols[symbol_idx].data,
                               interleaved);
 
-        output[symbol_idx * 2] = (uint8_t)(interleaved >> 8);
-        output[symbol_idx * 2 + 1] = (uint8_t)(interleaved & 0xFF);
+        output[symbol_idx * 2] = (uint8_t)(interleaved & 0xFF);      // Low byte first
+        output[symbol_idx * 2 + 1] = (uint8_t)(interleaved >> 8);    // High byte second
     }
 }
 

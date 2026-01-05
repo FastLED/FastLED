@@ -7,6 +7,7 @@
 
 // Include FL_WARN for both RMT5 and RMT4 paths
 #include "fl/warn.h"
+#include "fl/error.h"
 
 #if FASTLED_RMT5
 
@@ -704,9 +705,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Check timeout
             if (elapsed_us >= timeout_us) {
-                FL_WARN("wait(): timeout after "
+                FL_ERROR("RMT RX timeout after "
                         << elapsed_us << "us, received " << mSymbolsReceived
-                        << " symbols");
+                        << " symbols (expected " << mBufferSize << ")");
+                FL_ERROR("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
                 return RxWaitResult::TIMEOUT;
             }
 

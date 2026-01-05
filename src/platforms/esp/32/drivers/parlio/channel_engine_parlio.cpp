@@ -24,6 +24,7 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/delay.h"
 #include "fl/warn.h"
+#include "fl/error.h"
 #include "fl/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/trace.h"
@@ -323,6 +324,19 @@ void ChannelEnginePARLIOImpl::prepareScratchBuffer(
         uint8_t* laneDst = mScratchBuffer.data() + (i * maxChannelSize);
 
         const auto& srcData = channelData[i]->getData();
+
+        // [ITERATION 4 DIAGNOSTIC] Check if srcData contains LED pixel data or zeros
+        // FL_ERROR("CHANNEL[" << i << "]: dataSize=" << dataSize << " maxChannelSize=" << maxChannelSize);
+        // if (srcData.size() >= 8) {
+        //     FL_ERROR("CHANNEL[" << i << "]: srcData[0-7]="
+        //         << (int)srcData[0] << " " << (int)srcData[1] << " "
+        //         << (int)srcData[2] << " " << (int)srcData[3] << " "
+        //         << (int)srcData[4] << " " << (int)srcData[5] << " "
+        //         << (int)srcData[6] << " " << (int)srcData[7]);
+        // } else {
+        //     FL_ERROR("CHANNEL[" << i << "]: srcData.size()=" << srcData.size() << " (too small to dump)");
+        // }
+
         if (dataSize < maxChannelSize) {
             // Right-pad with zeros
             fl::memcpy(laneDst, srcData.data(), dataSize);

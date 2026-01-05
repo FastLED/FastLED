@@ -72,15 +72,17 @@ struct ParlioBufferCalculator {
     ///
     /// For multi-lane (mDataWidth > 1), each lane gets its own padding.
     size_t boundaryPaddingBytes() const {
-        // Phase 1: 1 Wave8Byte per lane, front and back
+        // ITERATION 18: Zero front padding, keep back padding
+        // Front padding caused phase shift (75% improvement when removed)
+        // Back padding is REQUIRED for stable transmission (removing it makes things worse)
         constexpr size_t BYTES_PER_WAVE8 = 8;
-        constexpr size_t FRONT_PAD_PER_LANE = BYTES_PER_WAVE8;  // 1 Wave8Byte
-        constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE8;   // 1 Wave8Byte
+        constexpr size_t FRONT_PAD_PER_LANE = 0;  // NO front padding (causes phase shift)
+        constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE8;   // 1 Wave8Byte (REQUIRED)
 
         // After transposition, padding is interleaved with lanes
-        // For 1 lane: front=8, back=8 → total=16
+        // For 1 lane: front=0, back=8 → total=8
         // For N lanes: Each lane contributes to transposed output
-        // After transpose: still 8 bytes front + 8 bytes back per lane
+        // After transpose: 0 bytes front + 8 bytes back per lane
         return (FRONT_PAD_PER_LANE + BACK_PAD_PER_LANE) * mDataWidth;
     }
 

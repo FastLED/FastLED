@@ -306,6 +306,30 @@ void setup() {
     ss << "[RX SETUP] ✓ RX channel ready for LED validation";
     FL_PRINT(ss.str());
 
+    // ========================================================================
+    // GPIO Baseline Test - Verify GPIO→GPIO path works before testing PARLIO
+    // ========================================================================
+    ss.clear();
+    ss << "\n[GPIO BASELINE TEST] Testing GPIO " << PIN_TX << " → GPIO " << PIN_RX << " connectivity";
+    FL_PRINT(ss.str());
+
+    // Test RX channel with manual GPIO toggle to confirm hardware path works
+    // This isolates GPIO/hardware issues from PARLIO driver issues
+    // Buffer size = 100 symbols, hz = 40MHz (same as LED validation)
+    if (!testRxChannel(rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
+        FL_ERROR("[GPIO BASELINE TEST] FAILED - RX did not capture manual GPIO toggles");
+        FL_ERROR("[GPIO BASELINE TEST] Possible causes:");
+        FL_ERROR("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
+        FL_ERROR("  2. RX channel initialization failed");
+        FL_ERROR("  3. GPIO conflict with other peripherals (USB Serial JTAG on C6 uses certain GPIOs)");
+        halt.error("GPIO baseline test failed - check hardware connections");
+        return;
+    }
+
+    FL_WARN("\n[GPIO BASELINE TEST] ✓ PASSED - GPIO path confirmed working");
+    FL_WARN("[GPIO BASELINE TEST] ✓ RX successfully captured manual GPIO toggles");
+    FL_WARN("[GPIO BASELINE TEST] ✓ Hardware connectivity verified (GPIO " << PIN_TX << " → GPIO " << PIN_RX << ")");
+
     // List all available drivers and store globally
     drivers_available = FastLED.getDriverInfos();
     ss.clear();

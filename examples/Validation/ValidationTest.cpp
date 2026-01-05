@@ -529,6 +529,11 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     FastLED.show();
     FL_WARN("[INFO] TX engine pre-initialized for " << config.timing_name);
 
+    // CRITICAL: Wait for PARLIO streaming transmission to complete before starting tests
+    // Without this delay, the RX will capture the pre-initialization BLACK frame instead of the test pattern
+    // PARLIO is a streaming engine with ring buffers - need time to drain the initial frame
+    delay(100);  // 100ms should be enough for 10 LEDs @ WS2812B timing (~300μs)
+
     // Run test patterns (mixed bit patterns to test MSB vs LSB handling)
     int total = 0;
     int passed = 0;
