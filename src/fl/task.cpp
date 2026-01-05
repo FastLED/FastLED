@@ -1,197 +1,302 @@
 #include "fl/task.h"
 #include "fl/numeric_limits.h"
 #include "fl/async.h"
-#include "fl/stl/time.h"
 #include "fl/stl/sstream.h"
-#include "fl/stl/unique_ptr.h"  // For make_unique
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/atomic.h"
 
 namespace fl {
 
 namespace {
-// Helper to generate a trace label from a TracePoint
-fl::string make_trace_label(const fl::TracePoint& trace) {
-    // Basic implementation: "file:line"
-    // More advanced version could strip common path prefixes
-    fl::sstream ss;
+// Generate trace label from TracePoint
+string make_trace_label(const TracePoint& trace) {
+    sstream ss;
     ss << fl::get<0>(trace) << ":" << fl::get<1>(trace);
     return ss.str();
 }
+
+// Task ID generator (atomic for thread safety)
+int next_task_id() {
+    static fl::atomic<int> id(0);
+    return id.fetch_add(1) + 1;
+}
 } // namespace
 
-// TaskImpl implementation
-TaskImpl::TaskImpl(TaskType type, int interval_ms)
-    : mType(type),
-      mIntervalMs(interval_ms),
-      mCanceled(false),
-      mTraceLabel(),
-      mHasThen(false),
-      mHasCatch(false),
-      mLastRunTime(fl::numeric_limits<uint32_t>::max()) {  // Use fl::numeric_limits<uint32_t>::max() to indicate "never run"
-}
+//=============================================================================
+// TaskCoroutine - OS-level task wrapper (implementation detail)
+//=============================================================================
 
-TaskImpl::TaskImpl(TaskType type, int interval_ms, const fl::TracePoint& trace)
-    : mType(type),
-      mIntervalMs(interval_ms),
-      mCanceled(false),
-      mTraceLabel(fl::make_unique<string>(make_trace_label(trace))),  // Optional. Put it in the heap.
-      mHasThen(false),
-      mHasCatch(false),
-      mLastRunTime(fl::numeric_limits<uint32_t>::max()) {  // Use fl::numeric_limits<uint32_t>::max() to indicate "never run"
-}
+class TaskCoroutine {
+public:
+    using TaskFunction = fl::function<void()>;
+    using Handle = void*;
 
-// TaskImpl static builders
-fl::shared_ptr<TaskImpl> TaskImpl::create_every_ms(int interval_ms) {
-    return fl::make_shared<TaskImpl>(TaskType::kEveryMs, interval_ms);
-}
+    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, uint8_t priority = 5);
+    ~TaskCoroutine();
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_every_ms(int interval_ms, const fl::TracePoint& trace) {
-    return fl::make_shared<TaskImpl>(TaskType::kEveryMs, interval_ms, trace);
-}
+    TaskCoroutine(const TaskCoroutine&) = delete;
+    TaskCoroutine& operator=(const TaskCoroutine&) = delete;
+    TaskCoroutine(TaskCoroutine&&) = delete;
+    TaskCoroutine& operator=(TaskCoroutine&&) = delete;
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_at_framerate(int fps) {
-    return fl::make_shared<TaskImpl>(TaskType::kAtFramerate, 1000 / fps);
-}
+    void stop();
+    bool isRunning() const { return mHandle != nullptr; }
+    Handle getHandle() const { return mHandle; }
+    static void exitCurrent();
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_at_framerate(int fps, const fl::TracePoint& trace) {
-    return fl::make_shared<TaskImpl>(TaskType::kAtFramerate, 1000 / fps, trace);
-}
+private:
+    static Handle createTaskImpl(const fl::string& name, const TaskFunction& function, size_t stack_size, uint8_t priority);
+    static void deleteTaskImpl(Handle handle);
+    static void exitCurrentImpl();
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_before_frame() {
-    return fl::make_shared<TaskImpl>(TaskType::kBeforeFrame, 0);
-}
+    Handle mHandle;
+    fl::string mName;
+    TaskFunction mFunction;
+};
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_before_frame(const fl::TracePoint& trace) {
-    return fl::make_shared<TaskImpl>(TaskType::kBeforeFrame, 0, trace);
-}
+} // namespace fl
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame() {
-    return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0);
-}
+// Platform dispatch for TaskCoroutine inline implementations (outside fl namespace)
+#include "platforms/coroutine.h"  // allow-include-after-namespace
 
+namespace fl {
 
-fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame(const fl::TracePoint& trace) {
-    return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0, trace);
-}
+//=============================================================================
+// ITaskImpl - Virtual Interface
+//=============================================================================
 
-// TaskImpl fluent API
-void TaskImpl::set_then(fl::function<void()> on_then) {
-    mThenCallback = fl::move(on_then);
-    mHasThen = true;
-}
+class ITaskImpl {
+public:
+    virtual ~ITaskImpl() = default;
+    virtual void set_then(function<void()> on_then) = 0;
+    virtual void set_catch(function<void(const Error&)> on_catch) = 0;
+    virtual void set_canceled() = 0;
+    virtual int id() const = 0;
+    virtual void set_id(int id) = 0;
+    virtual bool has_then() const = 0;
+    virtual bool has_catch() const = 0;
+    virtual string trace_label() const = 0;
+    virtual TaskType type() const = 0;
+    virtual int interval_ms() const = 0;
+    virtual uint32_t last_run_time() const = 0;
+    virtual void set_last_run_time(uint32_t time) = 0;
+    virtual bool ready_to_run(uint32_t current_time) const = 0;
+    virtual bool ready_to_run_frame_task(uint32_t current_time) const = 0;
+    virtual bool is_canceled() const = 0;
+    virtual bool is_auto_registered() const = 0;
+    virtual void execute_then() = 0;
+    virtual void execute_catch(const Error& error) = 0;
+    virtual void auto_register_with_scheduler() = 0;
 
-void TaskImpl::set_catch(fl::function<void(const Error&)> on_catch) {
-    mCatchCallback = fl::move(on_catch);
-    mHasCatch = true;
-}
+    // Coroutine methods (no-op for non-coroutine tasks)
+    virtual void stop() = 0;
+    virtual bool isRunning() const = 0;
+};
 
-void TaskImpl::set_canceled() {
-    mCanceled = true;
-}
+//=============================================================================
+// TimeTask - Time-based task implementation
+//=============================================================================
 
-void TaskImpl::auto_register_with_scheduler() {
-    // Auto-registration is now handled at the task wrapper level
-    // Mark as registered to prevent duplicate registrations
-    mAutoRegistered = true;
-}
+class TimeTask : public ITaskImpl {
+public:
+    TimeTask(TaskType type, int interval_ms, optional<TracePoint> trace = nullopt)
+        : mTaskId(next_task_id())
+        , mType(type)
+        , mIntervalMs(interval_ms)
+        , mTraceLabel(trace ? make_unique<string>(make_trace_label(*trace)) : nullptr)
+        , mLastRunTime(numeric_limits<uint32_t>::max()) {}
 
-bool TaskImpl::ready_to_run(uint32_t current_time) const {
-    // For frame-based tasks, they're only ready when explicitly called in frame context
-    // Regular scheduler updates should NOT run frame tasks
-    if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
-        return false;  // Changed: frame tasks are not ready during regular updates
+    void set_then(function<void()> on_then) override {
+        mThenCallback = fl::move(on_then);
+        mHasThen = true;
     }
-    
-    // For time-based tasks, check if enough time has passed
-    if (mIntervalMs <= 0) {
-        return true;
-    }
-    
-    // Use fl::numeric_limits<uint32_t>::max() to indicate "never run" instead of 0 to handle cases where time() returns 0
-    if (mLastRunTime == fl::numeric_limits<uint32_t>::max()) {
-        return true;
-    }
-    
-    // Check if enough time has passed since last run
-    return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
-}
 
-// New method to check if frame tasks are ready (used only during frame events)
-bool TaskImpl::ready_to_run_frame_task(uint32_t current_time) const {
-    // Only frame-based tasks are ready in frame context
-    FL_UNUSED(current_time);
-    if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
-        return true;
+    void set_catch(function<void(const Error&)> on_catch) override {
+        mCatchCallback = fl::move(on_catch);
+        mHasCatch = true;
     }
-    // Non-frame tasks are not run in frame context
-    return false;
-}
 
-void TaskImpl::execute_then() {
-    if (mHasThen && mThenCallback) {
-        mThenCallback();
+    void set_canceled() override { mCanceled = true; }
+
+    int id() const override { return mTaskId; }
+    void set_id(int id) override { mTaskId = id; }
+    bool has_then() const override { return mHasThen; }
+    bool has_catch() const override { return mHasCatch; }
+    string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
+    TaskType type() const override { return mType; }
+    int interval_ms() const override { return mIntervalMs; }
+    uint32_t last_run_time() const override { return mLastRunTime; }
+    void set_last_run_time(uint32_t time) override { mLastRunTime = time; }
+    bool is_canceled() const override { return mCanceled; }
+    bool is_auto_registered() const override { return mAutoRegistered; }
+
+    bool ready_to_run(uint32_t current_time) const override {
+        if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
+            return false;  // Frame tasks not ready during regular updates
+        }
+        if (mIntervalMs <= 0) return true;
+        if (mLastRunTime == fl::numeric_limits<uint32_t>::max()) return true;
+        return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
     }
-}
 
-void TaskImpl::execute_catch(const Error& error) {
-    if (mHasCatch && mCatchCallback) {
-        mCatchCallback(error);
+    bool ready_to_run_frame_task(uint32_t /*current_time*/) const override {
+        return mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame;
     }
-}
 
-// task wrapper implementation
-task::task(shared_ptr<TaskImpl> impl) : mImpl(fl::move(impl)) {}
+    void execute_then() override {
+        if (mHasThen && mThenCallback) {
+            mThenCallback();
+        }
+    }
 
-// task static builders
+    void execute_catch(const Error& error) override {
+        if (mHasCatch && mCatchCallback) {
+            mCatchCallback(error);
+        }
+    }
+
+    void auto_register_with_scheduler() override {
+        mAutoRegistered = true;
+    }
+
+    void stop() override {
+        mRunning = false;
+        mCanceled = true;  // Mark as canceled so scheduler removes it
+    }
+
+    bool isRunning() const override {
+        return mRunning && !mCanceled;
+    }
+
+private:
+    int mTaskId;
+    TaskType mType;
+    int mIntervalMs;
+    bool mCanceled = false;
+    bool mAutoRegistered = false;
+    bool mRunning = true;  // Time tasks start running immediately
+    unique_ptr<string> mTraceLabel;
+    bool mHasThen = false;
+    bool mHasCatch = false;
+    uint32_t mLastRunTime;
+    function<void()> mThenCallback;
+    function<void(const Error&)> mCatchCallback;
+};
+
+//=============================================================================
+// CoroutineTask - OS-level coroutine task
+//=============================================================================
+
+class CoroutineTask : public ITaskImpl {
+public:
+    CoroutineTask(const CoroutineConfig& config)
+        : mTaskId(next_task_id())
+        , mTraceLabel(config.trace ? make_unique<string>(make_trace_label(*config.trace)) : nullptr)
+        , mCoroutine(make_unique<TaskCoroutine>(config.name, config.function, config.stack_size, config.priority)) {}
+
+    void set_then(function<void()>) override { /* Coroutine tasks don't use then */ }
+    void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }
+    void set_canceled() override { mCanceled = true; }
+
+    int id() const override { return mTaskId; }
+    void set_id(int id) override { mTaskId = id; }
+    bool has_then() const override { return false; }
+    bool has_catch() const override { return false; }
+    string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
+    TaskType type() const override { return TaskType::kCoroutine; }
+    int interval_ms() const override { return 0; }
+    uint32_t last_run_time() const override { return 0; }
+    void set_last_run_time(uint32_t) override {}
+    bool is_canceled() const override { return mCanceled; }
+    bool is_auto_registered() const override { return mAutoRegistered; }
+
+    bool ready_to_run(uint32_t) const override { return false; }
+    bool ready_to_run_frame_task(uint32_t) const override { return false; }
+
+    void execute_then() override {}
+    void execute_catch(const Error&) override {}
+
+    void auto_register_with_scheduler() override {
+        mAutoRegistered = true;
+    }
+
+    void stop() override {
+        if (mCoroutine) {
+            mCoroutine->stop();
+        }
+    }
+
+    bool isRunning() const override {
+        return mCoroutine ? mCoroutine->isRunning() : false;
+    }
+
+private:
+    int mTaskId;
+    bool mCanceled = false;
+    bool mAutoRegistered = false;
+    unique_ptr<string> mTraceLabel;
+    unique_ptr<TaskCoroutine> mCoroutine;
+};
+
+//=============================================================================
+// task - Public API Implementation
+//=============================================================================
+
+task::task(shared_ptr<ITaskImpl> impl) : mImpl(fl::move(impl)) {}
+
+// Static builders
 task task::every_ms(int interval_ms) {
-    return task(TaskImpl::create_every_ms(interval_ms));
+    return task(fl::make_shared<TimeTask>(TaskType::kEveryMs, interval_ms));
 }
 
-task task::every_ms(int interval_ms, const fl::TracePoint& trace) {
-    return task(TaskImpl::create_every_ms(interval_ms, trace));
+task task::every_ms(int interval_ms, const TracePoint& trace) {
+    return task(fl::make_shared<TimeTask>(TaskType::kEveryMs, interval_ms, trace));
 }
 
 task task::at_framerate(int fps) {
-    return task(TaskImpl::create_at_framerate(fps));
+    return task(fl::make_shared<TimeTask>(TaskType::kAtFramerate, 1000 / fps));
 }
 
-task task::at_framerate(int fps, const fl::TracePoint& trace) {
-    return task(TaskImpl::create_at_framerate(fps, trace));
+task task::at_framerate(int fps, const TracePoint& trace) {
+    return task(fl::make_shared<TimeTask>(TaskType::kAtFramerate, 1000 / fps, trace));
 }
 
 task task::before_frame() {
-    return task(TaskImpl::create_before_frame());
+    return task(fl::make_shared<TimeTask>(TaskType::kBeforeFrame, 0));
 }
 
-task task::before_frame(const fl::TracePoint& trace) {
-    return task(TaskImpl::create_before_frame(trace));
+task task::before_frame(const TracePoint& trace) {
+    return task(fl::make_shared<TimeTask>(TaskType::kBeforeFrame, 0, trace));
 }
 
 task task::after_frame() {
-    return task(TaskImpl::create_after_frame());
+    return task(fl::make_shared<TimeTask>(TaskType::kAfterFrame, 0));
 }
 
-task task::after_frame(const fl::TracePoint& trace) {
-    return task(TaskImpl::create_after_frame(trace));
+task task::after_frame(const TracePoint& trace) {
+    return task(fl::make_shared<TimeTask>(TaskType::kAfterFrame, 0, trace));
 }
 
 task task::after_frame(function<void()> on_then) {
-    task out = task::after_frame();
-    out.then(on_then);
-    return out;
+    task t = task::after_frame();
+    t.then(fl::move(on_then));
+    return t;
 }
 
-task task::after_frame(function<void()> on_then, const fl::TracePoint& trace) {
-    task out = task::after_frame(trace);
-    out.then(on_then);
-    return out;
+task task::after_frame(function<void()> on_then, const TracePoint& trace) {
+    task t = task::after_frame(trace);
+    t.then(fl::move(on_then));
+    return t;
 }
 
-// task fluent API
-task& task::then(fl::function<void()> on_then) {
+task task::coroutine(const CoroutineConfig& config) {
+    return task(fl::make_shared<CoroutineTask>(config));
+}
+
+// Fluent API
+task& task::then(function<void()> on_then) {
     if (mImpl) {
         mImpl->set_then(fl::move(on_then));
-        
-        // Auto-register with scheduler when callback is set
         if (!mImpl->is_auto_registered()) {
             mImpl->auto_register_with_scheduler();
             fl::Scheduler::instance().add_task(*this);
@@ -200,7 +305,7 @@ task& task::then(fl::function<void()> on_then) {
     return *this;
 }
 
-task& task::catch_(fl::function<void(const Error&)> on_catch) {
+task& task::catch_(function<void(const Error&)> on_catch) {
     if (mImpl) {
         mImpl->set_catch(fl::move(on_catch));
     }
@@ -214,43 +319,35 @@ task& task::cancel() {
     return *this;
 }
 
-// task getters
-int task::id() const {
-    return mImpl ? mImpl->id() : 0;
-}
+// Getters
+int task::id() const { return mImpl ? mImpl->id() : 0; }
+bool task::has_then() const { return mImpl ? mImpl->has_then() : false; }
+bool task::has_catch() const { return mImpl ? mImpl->has_catch() : false; }
+string task::trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
+TaskType task::type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
+int task::interval_ms() const { return mImpl ? mImpl->interval_ms() : 0; }
+uint32_t task::last_run_time() const { return mImpl ? mImpl->last_run_time() : 0; }
+void task::set_last_run_time(uint32_t time) { if (mImpl) mImpl->set_last_run_time(time); }
+bool task::ready_to_run(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
+bool task::is_valid() const { return mImpl != nullptr; }
+bool task::isCoroutine() const { return mImpl && mImpl->type() == TaskType::kCoroutine; }
 
-bool task::has_then() const {
-    return mImpl ? mImpl->has_then() : false;
-}
+// Coroutine control
+void task::stop() { if (mImpl) mImpl->stop(); }
+bool task::isRunning() const { return mImpl ? mImpl->isRunning() : false; }
+void task::exitCurrent() { TaskCoroutine::exitCurrent(); }
 
-bool task::has_catch() const {
-    return mImpl ? mImpl->has_catch() : false;
-}
-
-string task::trace_label() const {
-    return mImpl ? mImpl->trace_label() : "";
-}
-
-TaskType task::type() const {
-    return mImpl ? mImpl->type() : TaskType::kEveryMs;
-}
-
-int task::interval_ms() const {
-    return mImpl ? mImpl->interval_ms() : 0;
-}
-
-uint32_t task::last_run_time() const {
-    return mImpl ? mImpl->last_run_time() : 0;
-}
-
-void task::set_last_run_time(uint32_t time) {
-    if (mImpl) {
-        mImpl->set_last_run_time(time);
-    }
-}
-
-bool task::ready_to_run(uint32_t current_time) const {
-    return mImpl ? mImpl->ready_to_run(current_time) : false;
-}
+// Internal methods for Scheduler (friend access only)
+void task::_set_id(int id) { if (mImpl) mImpl->set_id(id); }
+int task::_id() const { return mImpl ? mImpl->id() : 0; }
+bool task::_is_canceled() const { return mImpl ? mImpl->is_canceled() : true; }
+bool task::_ready_to_run(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
+bool task::_ready_to_run_frame_task(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run_frame_task(current_time) : false; }
+void task::_set_last_run_time(uint32_t time) { if (mImpl) mImpl->set_last_run_time(time); }
+bool task::_has_then() const { return mImpl ? mImpl->has_then() : false; }
+void task::_execute_then() { if (mImpl) mImpl->execute_then(); }
+void task::_execute_catch(const Error& error) { if (mImpl) mImpl->execute_catch(error); }
+TaskType task::_type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
+string task::_trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
 
 } // namespace fl

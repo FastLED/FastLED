@@ -45,8 +45,8 @@ namespace fl {
 
 namespace {
     // Thread-safe storage for injected time provider
-    fl::mutex& get_time_mutex() {
-        static fl::mutex mutex;
+    fl::recursive_mutex& get_time_mutex() {
+        static fl::recursive_mutex mutex;
         return mutex;
     }
     
@@ -57,12 +57,12 @@ namespace {
 }
 
 void inject_time_provider(const time_provider_t& provider) {
-    fl::lock_guard<fl::mutex> lock(get_time_mutex());
+    fl::unique_lock<fl::recursive_mutex> lock(get_time_mutex());
     get_time_provider() = provider;
 }
 
 void clear_time_provider() {
-    fl::lock_guard<fl::mutex> lock(get_time_mutex());
+    fl::unique_lock<fl::recursive_mutex> lock(get_time_mutex());
     get_time_provider() = time_provider_t{}; // Clear the function
 }
 
@@ -137,7 +137,7 @@ fl::u32 time() {
 #ifdef FASTLED_TESTING
     // Check for injected time provider first
     {
-        fl::lock_guard<fl::mutex> lock(get_time_mutex());
+        fl::unique_lock<fl::recursive_mutex> lock(get_time_mutex());
         const auto& provider = get_time_provider();
         if (provider) {
             return provider();

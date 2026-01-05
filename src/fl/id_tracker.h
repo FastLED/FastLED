@@ -84,7 +84,7 @@ public:
 private:
 
     // Thread synchronization
-    mutable fl::mutex mMutex;
+    mutable fl::recursive_mutex mMutex;
     
     // ID mapping and counter
     fl::hash_map<void*, int> mPointerToId;

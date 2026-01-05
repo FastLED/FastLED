@@ -23,7 +23,7 @@ struct AudioSamplePool {
     void put(AudioSampleImplPtr&& impl) {
         if (impl.unique()) {
             // There is no more shared_ptr to this object, so we can recycle it.
-            fl::lock_guard<fl::mutex> lock(mutex);
+            fl::unique_lock<fl::recursive_mutex> lock(mutex);
             if (impl && pool.size() < MAX_POOL_SIZE) {
                 // Reset the impl for reuse (clear internal state)
                 impl->reset();
@@ -36,7 +36,7 @@ struct AudioSamplePool {
     }
     AudioSampleImplPtr getOrCreate() {
         {
-            fl::lock_guard<fl::mutex> lock(mutex);
+            fl::unique_lock<fl::recursive_mutex> lock(mutex);
             if (!pool.empty()) {
                 AudioSampleImplPtr impl = pool.back();
                 pool.pop_back();
@@ -48,7 +48,7 @@ struct AudioSamplePool {
 
     fl::vector<AudioSampleImplPtr> pool;
     static constexpr fl::size MAX_POOL_SIZE = 8;
-    fl::mutex mutex;
+    fl::recursive_mutex mutex;
 };
 
 } // namespace

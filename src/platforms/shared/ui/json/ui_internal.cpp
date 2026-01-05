@@ -16,27 +16,27 @@ const fl::string &JsonUiInternal::name() const { return mName; }
 int JsonUiInternal::id() const { return mId; }
 
 void JsonUiInternal::setGroup(const fl::string &groupName) { 
-    fl::lock_guard<fl::mutex> lock(mMutex);
+    fl::unique_lock<fl::recursive_mutex> lock(mMutex);
     mGroup = groupName; 
 }
 
 const fl::string &JsonUiInternal::groupName() const { 
-    fl::lock_guard<fl::mutex> lock(mMutex);
+    fl::unique_lock<fl::recursive_mutex> lock(mMutex);
     return mGroup; 
 }
 
 bool JsonUiInternal::hasChanged() const {
-    fl::lock_guard<fl::mutex> lock(mMutex);
+    fl::unique_lock<fl::recursive_mutex> lock(mMutex);
     return mHasChanged;
 }
 
 void JsonUiInternal::markChanged() {
-    fl::lock_guard<fl::mutex> lock(mMutex);
+    fl::unique_lock<fl::recursive_mutex> lock(mMutex);
     mHasChanged = true;
 }
 
 void JsonUiInternal::clearChanged() {
-    fl::lock_guard<fl::mutex> lock(mMutex);
+    fl::unique_lock<fl::recursive_mutex> lock(mMutex);
     mHasChanged = false;
 }
 

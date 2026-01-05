@@ -6,10 +6,10 @@
 TEST_CASE("Mutex reentrant") {
     // Tests that the lock can be acquired multiple times by the same thread.
     {
-        fl::mutex m;
-        fl::lock_guard<fl::mutex> lock(m);
+        fl::recursive_mutex m;
+        fl::unique_lock<fl::recursive_mutex> lock(m);
         {
-            // This will deadlock.
+            // This should succeed with recursive_mutex
             bool acquired_recursively = m.try_lock();
             CHECK_EQ(acquired_recursively, true);
             m.unlock();

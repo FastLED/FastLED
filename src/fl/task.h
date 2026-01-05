@@ -16,7 +16,7 @@ void setup() {
         .catch_([](const fl::Error& e) {
             // Error handling here
         });
-    
+
     // Add task to scheduler
     fl::Scheduler::instance().add_task(task);
 }
@@ -24,19 +24,97 @@ void setup() {
 void loop() {
     // Execute ready tasks
     fl::Scheduler::instance().update();
-    
+
     // Yield for other operations
     fl::async_yield();
 }
 ```
+
+## TaskCoroutine (OS-Level Task Management)
+
+This file also provides a LOW-LEVEL OS/RTOS task wrapper for hardware drivers
+and platform-specific threading needs. This is separate from the high-level
+task scheduler above.
+
+### TaskCoroutine Usage Example
+
+```cpp
+#include "fl/task.h"
+
+void myTaskFunction() {
+    while (true) {
+        // Task work...
+        if (shouldShutdown) {
+            fl::task::exitCurrent();  // Self-delete
+            // UNREACHABLE on ESP32
+        }
+    }
+}
+
+// Create and start OS-level task (RAII - auto-cleanup on destruction)
+auto task = fl::task::coroutine({
+    .function = myTaskFunction,
+    .name = "MyTask"
+});
+
+// Task is automatically cleaned up when 'task' goes out of scope
+// Or manually: task.stop();
+```
+
+### TaskCoroutine with Async/Await (ESP32 only)
+
+On ESP32 platforms, coroutines can use `fl::await()` to efficiently block on
+promises without busy-waiting. This provides zero-CPU-overhead asynchronous
+operations perfect for network requests, timers, or sensor readings.
+
+```cpp
+#include "fl/task.h"
+#include "fl/async.h"
+
+// Create a coroutine that performs sequential async operations
+auto task = fl::task::coroutine({
+    .function = []() {
+        // Fetch data from an API (zero CPU usage while waiting)
+        auto result = fl::await(fl::fetch_get("http://api.example.com/data"));
+
+        if (result.ok()) {
+            fl::string data = result.value().text();
+
+            // Process the data
+            process_data(data);
+
+            // Post results back (another zero-CPU await)
+            auto post_result = fl::await(fl::fetch_post("http://api.example.com/results", data));
+
+            if (post_result.ok()) {
+                FL_DBG("Successfully posted results");
+            } else {
+                FL_WARN("Failed to post: " << post_result.error().message);
+            }
+        } else {
+            FL_WARN("Fetch failed: " << result.error().message);
+        }
+
+        // Task completes and automatically cleans up
+    },
+    .name = "AsyncWorker"
+});
+```
+
+**Platform support:**
+- ESP32: FreeRTOS tasks via xTaskCreate/vTaskDelete + fl::await() support
+- Host/Stub: std::thread + fl::await() support (for testing)
+- Other platforms: Null implementation (no-op, fl::await() not available)
 */
+
+// allow-include-after-namespace
 
 #include "fl/stl/functional.h"
 #include "fl/stl/string.h"
 #include "fl/trace.h"
 #include "fl/promise.h"
-#include "fl/stl/time.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/cstddef.h"
 
 namespace fl {
 
@@ -44,12 +122,24 @@ enum class TaskType {
     kEveryMs,
     kAtFramerate,
     kBeforeFrame,
-    kAfterFrame
+    kAfterFrame,
+    kCoroutine
 };
 
-// Forward declaration
-class TaskImpl;
+// Forward declarations
+class ITaskImpl;
+class TaskCoroutine;
 
+/// @brief Configuration for OS-level coroutine tasks
+struct CoroutineConfig {
+    fl::function<void()> function;
+    fl::string name = "task";
+    size_t stack_size = 4096;
+    uint8_t priority = 5;
+    fl::optional<TracePoint> trace;
+};
+
+/// @brief Task handle with fluent API
 class task {
 public:
 
@@ -83,6 +173,7 @@ public:
     // Example: auto task = fl::task::after_frame([]() {...}
     static task after_frame(function<void()> on_then);
     static task after_frame(function<void()> on_then, const fl::TracePoint& trace);
+    static task coroutine(const CoroutineConfig& config);
 
     // Fluent API
     task& then(function<void()> on_then);
@@ -99,90 +190,39 @@ public:
     uint32_t last_run_time() const;
     void set_last_run_time(uint32_t time);
     bool ready_to_run(uint32_t current_time) const;
-    bool is_valid() const { return mImpl != nullptr; }
+    bool is_valid() const;
+    bool isCoroutine() const;
+
+    // Coroutine control (only valid if isCoroutine() == true)
+    void stop();
+    bool isRunning() const;
+
+    // Static coroutine control
+    static void exitCurrent();
 
 private:
     friend class Scheduler;
-    
-    // Private constructor for internal use
-    explicit task(shared_ptr<TaskImpl> impl);
-    
-    // Access to implementation for Scheduler
-    shared_ptr<TaskImpl> get_impl() const { return mImpl; }
 
-    shared_ptr<TaskImpl> mImpl;
+    explicit task(shared_ptr<ITaskImpl> impl);
+
+    // Internal methods for Scheduler (friend access only)
+    void _set_id(int id);
+    int _id() const;
+    bool _is_canceled() const;
+    bool _ready_to_run(uint32_t current_time) const;
+    bool _ready_to_run_frame_task(uint32_t current_time) const;
+    void _set_last_run_time(uint32_t time);
+    bool _has_then() const;
+    void _execute_then();
+    void _execute_catch(const Error& error);
+    TaskType _type() const;
+    string _trace_label() const;
+
+    shared_ptr<ITaskImpl> mImpl;
 };
 
-// Private implementation class
-class TaskImpl {
-private:
-    // Constructors
-    TaskImpl(TaskType type, int interval_ms);
-    TaskImpl(TaskType type, int interval_ms, const fl::TracePoint& trace);
-
-    // Friend declaration to allow make_shared to access private constructors
-    template<typename T, typename... Args>
-    friend shared_ptr<T> make_shared(Args&&... args);
-
-public:
-    // Non-copyable but moveable
-    TaskImpl(const TaskImpl&) = delete;
-    TaskImpl& operator=(const TaskImpl&) = delete;
-    TaskImpl(TaskImpl&&) = default;
-    TaskImpl& operator=(TaskImpl&&) = default;
-
-    // Static builders for internal use
-    static shared_ptr<TaskImpl> create_every_ms(int interval_ms);
-    static shared_ptr<TaskImpl> create_every_ms(int interval_ms, const fl::TracePoint& trace);
-    static shared_ptr<TaskImpl> create_at_framerate(int fps);
-    static shared_ptr<TaskImpl> create_at_framerate(int fps, const fl::TracePoint& trace);
-    static shared_ptr<TaskImpl> create_before_frame();
-    static shared_ptr<TaskImpl> create_before_frame(const fl::TracePoint& trace);
-    static shared_ptr<TaskImpl> create_after_frame();
-    static shared_ptr<TaskImpl> create_after_frame(const fl::TracePoint& trace);
-
-    // Fluent API
-    void set_then(function<void()> on_then);
-    void set_catch(function<void(const Error&)> on_catch);
-    void set_canceled();
-
-    // Getters
-    int id() const { return mTaskId; }
-    bool has_then() const { return mHasThen; }
-    bool has_catch() const { return mHasCatch; }
-    string trace_label() const { return mTraceLabel ? *mTraceLabel : ""; }
-    TaskType type() const { return mType; }
-    int interval_ms() const { return mIntervalMs; }
-    uint32_t last_run_time() const { return mLastRunTime; }
-    void set_last_run_time(uint32_t time) { mLastRunTime = time; }
-    bool ready_to_run(uint32_t current_time) const;
-    bool ready_to_run_frame_task(uint32_t current_time) const;  // New method for frame tasks
-    bool is_canceled() const { return mCanceled; }
-    bool is_auto_registered() const { return mAutoRegistered; }
-
-    // Execution
-    void execute_then();
-    void execute_catch(const Error& error);
-
-private:
-    friend class Scheduler;
-    friend class task;
-
-    // Auto-registration with scheduler
-    void auto_register_with_scheduler();
-
-    int mTaskId = 0;
-    TaskType mType;
-    int mIntervalMs;
-    bool mCanceled = false;
-    bool mAutoRegistered = false; // Track if task auto-registered with scheduler
-    unique_ptr<string> mTraceLabel; // Optional trace label (default big so we put it in the heap)
-    bool mHasThen = false;
-    bool mHasCatch = false;
-    uint32_t mLastRunTime = 0; // Last time the task was run
-
-    function<void()> mThenCallback;
-    function<void(const Error&)> mCatchCallback;
-};
+/// @brief Internal RAII wrapper for OS-level tasks (implementation detail)
+/// @note Users should use task::coroutine() instead of TaskCoroutine directly
+class TaskCoroutine;
 
 } // namespace fl
