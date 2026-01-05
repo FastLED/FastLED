@@ -383,24 +383,31 @@ inline void transpose_8lane_inline(
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
-        uint8_t lane_bytes[8];
-        for (int lane = 0; lane < 8; lane++) {
-            lane_bytes[lane] = lanes[lane][byte_idx];
-        }
+        // Pack 8 bytes into a single 64-bit register
+        // This reduces register pressure and enables parallel bit extraction
+        uint64_t packed =
+            ((uint64_t)lanes[0][byte_idx] << 0)  |
+            ((uint64_t)lanes[1][byte_idx] << 8)  |
+            ((uint64_t)lanes[2][byte_idx] << 16) |
+            ((uint64_t)lanes[3][byte_idx] << 24) |
+            ((uint64_t)lanes[4][byte_idx] << 32) |
+            ((uint64_t)lanes[5][byte_idx] << 40) |
+            ((uint64_t)lanes[6][byte_idx] << 48) |
+            ((uint64_t)lanes[7][byte_idx] << 56);
 
         uint8_t* dest = &output[byte_idx * 8];
 
-        // Process each bit position (7 = MSB, 0 = LSB)
-        for (int bit_pos = 7; bit_pos >= 0; bit_pos--) {
-            uint8_t output_byte = 0;
-
-            // Extract bit from each lane and pack into output byte
-            for (int lane = 0; lane < 8; lane++) {
-                uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
-                output_byte |= (bit << lane);
-            }
-
-            dest[7 - bit_pos] = output_byte;
+        // Extract bits in parallel (compiler can optimize independent shifts)
+        for (int bit = 7; bit >= 0; bit--) {
+            dest[7 - bit] =
+                ((packed >> (bit + 0))  & 0x01) << 0 |
+                ((packed >> (bit + 8))  & 0x01) << 1 |
+                ((packed >> (bit + 16)) & 0x01) << 2 |
+                ((packed >> (bit + 24)) & 0x01) << 3 |
+                ((packed >> (bit + 32)) & 0x01) << 4 |
+                ((packed >> (bit + 40)) & 0x01) << 5 |
+                ((packed >> (bit + 48)) & 0x01) << 6 |
+                ((packed >> (bit + 56)) & 0x01) << 7;
         }
     }
 }
@@ -411,32 +418,51 @@ inline void transpose_16lane_inline(
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
-        uint8_t lane_bytes[16];
-        for (int lane = 0; lane < 16; lane++) {
-            lane_bytes[lane] = lanes[lane][byte_idx];
-        }
+        // Pack lanes 0-7 into first 64-bit register
+        uint64_t packed_lo =
+            ((uint64_t)lanes[0][byte_idx] << 0)  |
+            ((uint64_t)lanes[1][byte_idx] << 8)  |
+            ((uint64_t)lanes[2][byte_idx] << 16) |
+            ((uint64_t)lanes[3][byte_idx] << 24) |
+            ((uint64_t)lanes[4][byte_idx] << 32) |
+            ((uint64_t)lanes[5][byte_idx] << 40) |
+            ((uint64_t)lanes[6][byte_idx] << 48) |
+            ((uint64_t)lanes[7][byte_idx] << 56);
+
+        // Pack lanes 8-15 into second 64-bit register
+        uint64_t packed_hi =
+            ((uint64_t)lanes[8][byte_idx]  << 0)  |
+            ((uint64_t)lanes[9][byte_idx]  << 8)  |
+            ((uint64_t)lanes[10][byte_idx] << 16) |
+            ((uint64_t)lanes[11][byte_idx] << 24) |
+            ((uint64_t)lanes[12][byte_idx] << 32) |
+            ((uint64_t)lanes[13][byte_idx] << 40) |
+            ((uint64_t)lanes[14][byte_idx] << 48) |
+            ((uint64_t)lanes[15][byte_idx] << 56);
 
         uint8_t* dest = &output[byte_idx * 16];
 
-        // Process bit positions 7 down to 0
-        for (int bit_pos = 7; bit_pos >= 0; bit_pos--) {
-            uint8_t output_byte_lo = 0;
-            uint8_t output_byte_hi = 0;
+        // Extract bits in parallel from both packed registers
+        for (int bit = 7; bit >= 0; bit--) {
+            dest[7 - bit] =
+                ((packed_lo >> (bit + 0))  & 0x01) << 0 |
+                ((packed_lo >> (bit + 8))  & 0x01) << 1 |
+                ((packed_lo >> (bit + 16)) & 0x01) << 2 |
+                ((packed_lo >> (bit + 24)) & 0x01) << 3 |
+                ((packed_lo >> (bit + 32)) & 0x01) << 4 |
+                ((packed_lo >> (bit + 40)) & 0x01) << 5 |
+                ((packed_lo >> (bit + 48)) & 0x01) << 6 |
+                ((packed_lo >> (bit + 56)) & 0x01) << 7;
 
-            // Extract bit from lanes 0-7
-            for (int lane = 0; lane < 8; lane++) {
-                uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
-                output_byte_lo |= (bit << lane);
-            }
-
-            // Extract bit from lanes 8-15
-            for (int lane = 8; lane < 16; lane++) {
-                uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
-                output_byte_hi |= (bit << (lane - 8));
-            }
-
-            dest[7 - bit_pos] = output_byte_lo;
-            dest[15 - bit_pos] = output_byte_hi;
+            dest[15 - bit] =
+                ((packed_hi >> (bit + 0))  & 0x01) << 0 |
+                ((packed_hi >> (bit + 8))  & 0x01) << 1 |
+                ((packed_hi >> (bit + 16)) & 0x01) << 2 |
+                ((packed_hi >> (bit + 24)) & 0x01) << 3 |
+                ((packed_hi >> (bit + 32)) & 0x01) << 4 |
+                ((packed_hi >> (bit + 40)) & 0x01) << 5 |
+                ((packed_hi >> (bit + 48)) & 0x01) << 6 |
+                ((packed_hi >> (bit + 56)) & 0x01) << 7;
         }
     }
 }
@@ -824,7 +850,37 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
 
     // Note: Using regular if statements (C++11 compatible)
     // Compiler optimizes away dead branches for constant template parameters
-    if (DATA_WIDTH <= 8) {
+    if (DATA_WIDTH == 8) {
+        // Special optimized case for 8 lanes with bit packing
+        // Optimized: Hoist packing outside inner loop to reduce redundant operations
+        for (size_t bit_pos = 0; bit_pos < 8; bit_pos++) {
+            // Pack 8 wave8_byte values into a single 64-bit register for parallel extraction
+            // This packing is done once per bit_pos (8 times) instead of 64 times
+            uint64_t packed =
+                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos] << 0)  |
+                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos] << 8)  |
+                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos] << 16) |
+                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos] << 24) |
+                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos] << 32) |
+                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos] << 40) |
+                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos] << 48) |
+                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos] << 56);
+
+            // Inner loop: extract 8 pulses from the packed data
+            for (size_t pulse_bit = 0; pulse_bit < 8; pulse_bit++) {
+                // Extract pulse bits in parallel (compiler can optimize independent shifts)
+                outputBuffer[outputIdx++] =
+                    ((packed >> (7 - pulse_bit + 0))  & 0x01) << 0 |
+                    ((packed >> (7 - pulse_bit + 8))  & 0x01) << 1 |
+                    ((packed >> (7 - pulse_bit + 16)) & 0x01) << 2 |
+                    ((packed >> (7 - pulse_bit + 24)) & 0x01) << 3 |
+                    ((packed >> (7 - pulse_bit + 32)) & 0x01) << 4 |
+                    ((packed >> (7 - pulse_bit + 40)) & 0x01) << 5 |
+                    ((packed >> (7 - pulse_bit + 48)) & 0x01) << 6 |
+                    ((packed >> (7 - pulse_bit + 56)) & 0x01) << 7;
+            }
+        }
+    } else if (DATA_WIDTH <= 8) {
         // Pack into single bytes (compile-time branch elimination via template instantiation)
         const size_t ticksPerByte = 8 / DATA_WIDTH;
         const size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
@@ -856,22 +912,54 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         }
     } else if (DATA_WIDTH == 16) {
         // Pack into 16-bit words (compile-time branch)
-        for (size_t pulse_idx = 0; pulse_idx < pulsesPerByte; pulse_idx++) {
-            uint16_t outputWord = 0;
+        // Optimized: Hoist packing outside inner loop to reduce redundant operations
+        for (size_t bit_pos = 0; bit_pos < 8; bit_pos++) {
+            // Pack 16 wave8_byte values into two 64-bit registers for parallel extraction
+            // This packing is done once per bit_pos (8 times) instead of 64 times
+            uint64_t packed_lo =
+                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos] << 0)  |
+                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos] << 8)  |
+                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos] << 16) |
+                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos] << 24) |
+                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos] << 32) |
+                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos] << 40) |
+                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos] << 48) |
+                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos] << 56);
 
-            size_t bit_pos = pulse_idx / 8;
-            size_t pulse_bit = pulse_idx % 8;
+            uint64_t packed_hi =
+                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos] << 0)  |
+                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos] << 8)  |
+                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos] << 16) |
+                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos] << 24) |
+                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos] << 32) |
+                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos] << 40) |
+                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos] << 48) |
+                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos] << 56);
 
-            FL_UNROLL(16)
-            for (size_t lane = 0; lane < 16; lane++) {
-                const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                uint8_t wave8_byte = laneWaveform[bit_pos];
-                uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;
-                outputWord |= (pulse << lane);
+            // Inner loop: extract 8 pulses from the packed data
+            for (size_t pulse_bit = 0; pulse_bit < 8; pulse_bit++) {
+                // Extract pulse bits in parallel (compiler can optimize independent shifts)
+                uint16_t outputWord =
+                    ((packed_lo >> (7 - pulse_bit + 0))  & 0x01) << 0  |
+                    ((packed_lo >> (7 - pulse_bit + 8))  & 0x01) << 1  |
+                    ((packed_lo >> (7 - pulse_bit + 16)) & 0x01) << 2  |
+                    ((packed_lo >> (7 - pulse_bit + 24)) & 0x01) << 3  |
+                    ((packed_lo >> (7 - pulse_bit + 32)) & 0x01) << 4  |
+                    ((packed_lo >> (7 - pulse_bit + 40)) & 0x01) << 5  |
+                    ((packed_lo >> (7 - pulse_bit + 48)) & 0x01) << 6  |
+                    ((packed_lo >> (7 - pulse_bit + 56)) & 0x01) << 7  |
+                    ((packed_hi >> (7 - pulse_bit + 0))  & 0x01) << 8  |
+                    ((packed_hi >> (7 - pulse_bit + 8))  & 0x01) << 9  |
+                    ((packed_hi >> (7 - pulse_bit + 16)) & 0x01) << 10 |
+                    ((packed_hi >> (7 - pulse_bit + 24)) & 0x01) << 11 |
+                    ((packed_hi >> (7 - pulse_bit + 32)) & 0x01) << 12 |
+                    ((packed_hi >> (7 - pulse_bit + 40)) & 0x01) << 13 |
+                    ((packed_hi >> (7 - pulse_bit + 48)) & 0x01) << 14 |
+                    ((packed_hi >> (7 - pulse_bit + 56)) & 0x01) << 15;
+
+                outputBuffer[outputIdx++] = outputWord & 0xFF;
+                outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
             }
-
-            outputBuffer[outputIdx++] = outputWord & 0xFF;
-            outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
         }
     } else {
         // Invalid DATA_WIDTH (compile-time error if template instantiated with wrong value)
