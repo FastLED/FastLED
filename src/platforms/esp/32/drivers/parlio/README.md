@@ -301,7 +301,7 @@ Advanced users can override defaults via build flags:
 
 #### ISR Priority Level
 
-The PARLIO ISR priority can be configured at compile time:
+The `FL_ESP_PARLIO_ISR_PRIORITY` macro defines the desired interrupt priority level for the PARLIO peripheral's ISR callbacks:
 
 ```ini
 # platformio.ini
@@ -318,22 +318,21 @@ build_flags =
 - **Level 3**: Highest priority for C handlers (default, recommended)
 - **Level 4+**: Requires assembly handlers (not supported by ESP-IDF PARLIO driver)
 
-**Important Notes:**
-- WiFi interrupts run at level 4, so PARLIO ISRs at level 3 may be preempted during WiFi activity
-- Levels 4-7 require assembly interrupt handlers which are not supported by the ESP-IDF PARLIO driver
-- Level 3 is the maximum supported priority for C-based interrupt handlers
-- The default (level 3) provides the best balance of performance and compatibility
+**⚠️ Current Status:**
+**This configuration is NOT currently functional** due to ESP-IDF PARLIO driver limitations:
+- ESP-IDF's `parlio_tx_unit_config_t` does NOT expose an `intr_priority` field
+- ESP-IDF's `parlio_tx_unit_register_event_callbacks()` does NOT accept priority configuration
+- The PARLIO peripheral uses default interrupt allocation internally
 
-**Usage Example:**
-```bash
-# Compile with custom ISR priority
-pio run -e esp32c6 -t upload --build-flag='-DFL_ESP_PARLIO_ISR_PRIORITY=2'
-```
+The macro is defined for:
+- **Documentation purposes**: Clearly indicates intended priority level
+- **Future compatibility**: Will be used if ESP-IDF adds priority configuration support
 
-The driver will log the configured priority during initialization:
-```
-PARLIO: Initialized with ISR priority level 3 (data_width=8, clock=8000000 Hz)
-```
+**One-Shot ISR Worker Pattern:**
+The PARLIO driver uses a one-shot ISR pattern where:
+- `txDoneCallback`: Fired on transmission completion (ISR context)
+- `workerIsrCallback`: Called directly from `txDoneCallback` to populate next DMA buffer
+- No periodic timer overhead (refactored from 50µs periodic ISR to on-demand invocation)
 
 ## Performance Characteristics
 

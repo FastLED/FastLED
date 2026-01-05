@@ -49,15 +49,7 @@
 // - PARLIO operations: initialize(), enable(), transmit(), waitAllDone(), etc.
 
 namespace {
-// Helper: Reverse bits in a byte (for PARLIO LSB bit packing)
-// PARLIO with LSB packing sends bit 0 first, but Wave8Bit stores pulses MSB-first
-// So we need to reverse each byte: bit 7→0, bit 6→1, ..., bit 0→7
-inline uint8_t reverseBits(uint8_t byte) {
-    byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;  // Swap nibbles
-    byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;  // Swap pairs
-    byte = (byte & 0xAA) >> 1 | (byte & 0x55) << 1;  // Swap adjacent bits
-    return byte;
-}
+
 
 fl::detail::IParlioPeripheral* getParlioPeripheral() {
     // Get peripheral singleton instance
