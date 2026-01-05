@@ -11,6 +11,26 @@ WebAssembly/browser platform with C++ ↔ JavaScript bridges and a pure data‑e
 
 **FastLED WASM uses dedicated Web Workers** (PROXY_TO_PTHREAD) for background execution. Asyncify was removed in 2025-01 to reduce binary size (44.4% reduction) and fix audio reactive mode issues.
 
+### Multithreading Support
+
+WASM uses the **stub platform threading profile** (identical to host testing builds):
+
+- **Threading detection**: Defers to `fl/stl/thread.h` default logic (`FASTLED_TESTING` + `pthread.h` availability)
+- **When enabled** (`FASTLED_MULTITHREADED=1`):
+  - **Real mutexes**: `fl::mutex` → `std::mutex` (POSIX pthread mutexes via Web Workers)
+  - **Real atomics**: `fl::atomic<T>` → `AtomicReal<T>` (using `__atomic` compiler builtins)
+  - **Condition variables**: `fl::condition_variable` → `std::condition_variable`
+  - **Thread-safe primitives**: All FastLED synchronization primitives are thread-safe
+- **When disabled** (`FASTLED_MULTITHREADED=0`):
+  - Falls back to fake mutex/atomic implementations (single-threaded mode)
+
+Build flags in `compiler/build_flags.toml` provide pthread support:
+- `-pthread` (compiler and linker)
+- `-sUSE_PTHREADS=1` (Emscripten pthread implementation)
+- `-sPROXY_TO_PTHREAD` (run main() on a pthread)
+
+**Design principle**: WASM and stub platform share identical threading configuration, ensuring consistent behavior between WASM browser builds and desktop testing environments.
+
 When adding or modifying C++ ↔ JS bridge functions:
 
 - **Synchronous execution**: All C++ ↔ JS bridge functions execute synchronously in the worker thread. No Asyncify.handleAsync or async/await needed for WASM calls.
@@ -31,6 +51,7 @@ Recommended exported patterns:
 ## Optional feature defines
 
 - **`FASTLED_STUB_IMPL`**: Enables stubbed Arduino/system behaviors for WASM builds (set in `led_sysdefs_wasm.h`).
+- **`FASTLED_MULTITHREADED`**: Inherits stub platform's detection (based on `FASTLED_TESTING` + `pthread.h`). Can be overridden before including FastLED.h.
 - **`FASTLED_HAS_MILLIS`**: Default `1`.
 - **`FASTLED_USE_PROGMEM`**: Default `0`.
 - **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`.

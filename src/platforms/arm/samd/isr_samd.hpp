@@ -803,6 +803,21 @@ bool requires_assembly_handler(uint8_t priority) {
 
 } // namespace platform
 } // namespace isr
+
+// =============================================================================
+// Global Interrupt Control (noInterrupts/interrupts)
+// =============================================================================
+
+/// Disable interrupts on ARM Cortex-M (SAMD)
+inline void noInterrupts() {
+    __asm__ __volatile__("cpsid i" ::: "memory");
+}
+
+/// Enable interrupts on ARM Cortex-M (SAMD)
+inline void interrupts() {
+    __asm__ __volatile__("cpsie i" ::: "memory");
+}
+
 } // namespace fl
 
 #endif // SAMD platform guards

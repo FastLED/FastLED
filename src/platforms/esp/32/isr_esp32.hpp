@@ -511,6 +511,21 @@ bool requires_assembly_handler(uint8_t priority) {
 
 } // namespace platform
 } // namespace isr
+
+// =============================================================================
+// Global Interrupt Control (noInterrupts/interrupts)
+// =============================================================================
+
+/// Disable interrupts on ESP32
+inline void noInterrupts() {
+    portDISABLE_INTERRUPTS();
+}
+
+/// Enable interrupts on ESP32
+inline void interrupts() {
+    portENABLE_INTERRUPTS();
+}
+
 } // namespace fl
 
 #endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)

@@ -2,7 +2,7 @@
 /// @brief High-performance ISR-safe async logging queue implementation
 
 #include "fl/detail/async_log_queue.h"
-#include "fl/interrupt.h"
+#include "fl/isr.h"
 #include "fl/math_macros.h"
 
 namespace fl {

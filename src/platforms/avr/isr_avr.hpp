@@ -29,3 +29,27 @@
     // Unknown AVR variant - no implementation
     // FL_ISR_AVR_IMPLEMENTED will not be defined, triggering null fallback in main isr.h
 #endif
+
+// =============================================================================
+// Global Interrupt Control (noInterrupts/interrupts) - All AVR variants
+// =============================================================================
+
+#ifdef __AVR__
+
+#include <avr/interrupt.h>
+
+namespace fl {
+
+/// Disable interrupts on AVR
+inline void noInterrupts() {
+    cli();
+}
+
+/// Enable interrupts on AVR
+inline void interrupts() {
+    sei();
+}
+
+} // namespace fl
+
+#endif // __AVR__

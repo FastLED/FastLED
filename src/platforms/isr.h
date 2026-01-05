@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "fl/isr.h"
 #include "platforms/is_platform.h"
 
 // ok no namespace fl - dispatch header includes platform-specific implementations

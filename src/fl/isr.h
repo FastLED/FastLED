@@ -9,6 +9,8 @@
 
 #pragma once
 
+// allow-include-after-namespace
+
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
@@ -436,4 +438,13 @@ void memset_zero(uint8_t* dest, size_t count) {
 
 
 } // namespace isr
+
 } // namespace fl
+
+// =============================================================================
+// Platform-Specific ISR Implementation (includes noInterrupts/interrupts)
+// =============================================================================
+
+// Include platform-specific ISR implementation after API declaration
+// This provides both ISR handler functions AND interrupt control functions
+#include "platforms/isr.h"  // nolint

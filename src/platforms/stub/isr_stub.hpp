@@ -220,7 +220,7 @@ private:
 // Stub ISR Implementation (Free Functions)
 // =============================================================================
 
-int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
+inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             STUB_LOG("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -260,7 +260,7 @@ int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_hand
         return 0;  // Success
 }
 
-int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             STUB_LOG("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -290,7 +290,7 @@ int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_ha
         return 0;  // Success
 }
 
-int stub_detach_handler(isr_handle_t& handle) {
+inline int stub_detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -315,7 +315,7 @@ int stub_detach_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int stub_enable_handler(isr_handle_t& handle) {
+inline int stub_enable_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -339,7 +339,7 @@ int stub_enable_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int stub_disable_handler(isr_handle_t& handle) {
+inline int stub_disable_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -356,7 +356,7 @@ int stub_disable_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-bool stub_is_handler_enabled(const isr_handle_t& handle) {
+inline bool stub_is_handler_enabled(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             return false;
         }
@@ -369,7 +369,7 @@ bool stub_is_handler_enabled(const isr_handle_t& handle) {
         return handle_data->mIsEnabled;
 }
 
-const char* stub_get_error_string(int error_code) {
+inline const char* stub_get_error_string(int error_code) {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -380,7 +380,7 @@ const char* stub_get_error_string(int error_code) {
         }
 }
 
-const char* stub_get_platform_name() {
+inline const char* stub_get_platform_name() {
 #if defined(FL_IS_WASM)
     return "WASM";
 #else
@@ -388,19 +388,19 @@ const char* stub_get_platform_name() {
 #endif
 }
 
-uint32_t stub_get_max_timer_frequency() {
+inline uint32_t stub_get_max_timer_frequency() {
     return 0;  // Unlimited in host-based simulation
 }
 
-uint32_t stub_get_min_timer_frequency() {
+inline uint32_t stub_get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-uint8_t stub_get_max_priority() {
+inline uint8_t stub_get_max_priority() {
     return 1;  // No priority in host-based platforms
 }
 
-bool stub_requires_assembly_handler(uint8_t priority) {
+inline bool stub_requires_assembly_handler(uint8_t priority) {
     (void)priority;
     return false;  // Host-based platforms never require assembly
 }
@@ -411,56 +411,71 @@ bool stub_requires_assembly_handler(uint8_t priority) {
 namespace isr {
 namespace platform {
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
+inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return stub_attach_timer_handler(config, handle);
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
     return stub_attach_external_handler(pin, config, handle);
 }
 
-int detach_handler(isr_handle_t& handle) {
+inline int detach_handler(isr_handle_t& handle) {
     return stub_detach_handler(handle);
 }
 
-int enable_handler(isr_handle_t& handle) {
+inline int enable_handler(isr_handle_t& handle) {
     return stub_enable_handler(handle);
 }
 
-int disable_handler(isr_handle_t& handle) {
+inline int disable_handler(isr_handle_t& handle) {
     return stub_disable_handler(handle);
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) {
+inline bool is_handler_enabled(const isr_handle_t& handle) {
     return stub_is_handler_enabled(handle);
 }
 
-const char* get_error_string(int error_code) {
+inline const char* get_error_string(int error_code) {
     return stub_get_error_string(error_code);
 }
 
-const char* get_platform_name() {
+inline const char* get_platform_name() {
     return stub_get_platform_name();
 }
 
-uint32_t get_max_timer_frequency() {
+inline uint32_t get_max_timer_frequency() {
     return stub_get_max_timer_frequency();
 }
 
-uint32_t get_min_timer_frequency() {
+inline uint32_t get_min_timer_frequency() {
     return stub_get_min_timer_frequency();
 }
 
-uint8_t get_max_priority() {
+inline uint8_t get_max_priority() {
     return stub_get_max_priority();
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(uint8_t priority) {
     return stub_requires_assembly_handler(priority);
 }
 
 } // namespace platform
 } // namespace isr
+
+// =============================================================================
+// Global Interrupt Control (noInterrupts/interrupts)
+// =============================================================================
+
+/// No-op for stub/host platform
+inline void noInterrupts() {
+    // No-op: stub platform doesn't have hardware interrupts
+}
+
+/// No-op for stub/host platform
+inline void interrupts() {
+    // No-op: stub platform doesn't have hardware interrupts
+}
+
 } // namespace fl
 
 #endif // STUB_PLATFORM || FASTLED_STUB_IMPL || FL_IS_WASM

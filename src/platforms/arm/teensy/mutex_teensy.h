@@ -1,204 +1,310 @@
+/// @file mutex_teensy.h
+/// @brief Optional mutex support for Teensy platforms with automatic detection
+///
+/// This file provides mutex implementations for Teensy platforms with three modes:
+/// 1. FreeRTOS (Teensy 4.x): Preemptive multitasking with real mutexes
+/// 2. TeensyThreads: Cooperative multitasking (yield-based, not preemptive)
+/// 3. Interrupt-based fallback: ISR-safe mutex for bare metal (no RTOS)
+///
+/// Detection Priority:
+/// 1. FreeRTOS (if INC_FREERTOS_H is defined) - preemptive, recommended
+/// 2. TeensyThreads (if TeensyThreads.h is detected) - cooperative
+/// 3. Interrupt-based fallback (bare metal, ISR-safe)
+///
+/// Usage:
+/// To enable real mutex support, include the threading library before FastLED:
+///
+/// @code
+/// // For FreeRTOS on Teensy 4.x:
+/// #include <Arduino_FreeRTOS_ARM.h>  // or your FreeRTOS variant
+/// #include <FastLED.h>
+///
+/// // For TeensyThreads:
+/// #include <TeensyThreads.h>
+/// #include <FastLED.h>
+/// @endcode
+///
+/// Important Notes:
+/// - TeensyThreads uses COOPERATIVE scheduling - threads only switch at yield points
+/// - FreeRTOS uses PREEMPTIVE scheduling - true concurrent thread safety
+/// - Interrupt-based fallback provides ISR protection but NOT thread safety
+/// - All Teensy platforms have ARM DMB support for memory barriers (even Cortex-M0+ on LC)
+
 // ok no namespace fl
 // allow-include-after-namespace
 #pragma once
 
-/// @file platforms/arm/teensy/mutex_teensy.h
-/// @brief Teensy interrupt-based mutex implementation
-///
-/// This header provides Teensy-specific mutex implementations using interrupt
-/// disable/restore for critical sections. Since Teensy platforms are single-core
-/// bare metal (no threading), the mutex is ISR-safe but NOT thread-safe.
-///
-/// IMPORTANT: These are ISR-protection primitives, NOT threading primitives.
-/// - lock() will ASSERT/PANIC if mutex is already locked (would deadlock)
-/// - Use try_lock() for ISR-safe non-blocking locking
-/// - Protects against ISR preemption using CMSIS __disable_irq()/__enable_irq()
-///
-/// Supported platforms:
-/// - Teensy LC (ARM Cortex-M0+, 48 MHz)
-/// - Teensy 3.x (ARM Cortex-M4/M4F, 48-180 MHz)
-/// - Teensy 4.x (ARM Cortex-M7, 600 MHz)
-
+#include "platforms/arm/teensy/is_teensy.h"
 #include "fl/stl/assert.h"
 
+// Only compile this header on Teensy platforms
+#if defined(FL_IS_TEENSY)
+
+//=============================================================================
+// Detection: Check for FreeRTOS or TeensyThreads availability
+//=============================================================================
+
+// FreeRTOS detection (check for FreeRTOS.h inclusion via INC_FREERTOS_H guard)
+// Priority: FreeRTOS first (preemptive > cooperative)
+#if __has_include(<FreeRTOS.h>)
+    #ifndef INC_FREERTOS_H
+        #include <FreeRTOS.h>
+    #endif
+    #define FASTLED_TEENSY_HAS_FREERTOS 1
+#elif __has_include(<Arduino_FreeRTOS_ARM.h>)
+    #ifndef INC_FREERTOS_H
+        #include <Arduino_FreeRTOS_ARM.h>
+    #endif
+    #define FASTLED_TEENSY_HAS_FREERTOS 1
+#else
+    #define FASTLED_TEENSY_HAS_FREERTOS 0
+#endif
+
+// TeensyThreads detection (only enable if FreeRTOS is not available)
+#if __has_include(<TeensyThreads.h>) && !FASTLED_TEENSY_HAS_FREERTOS
+    #ifndef TEENSY_THREADS_H
+        #include <TeensyThreads.h>
+    #endif
+    #define FASTLED_TEENSY_HAS_THREADS 1
+#else
+    #define FASTLED_TEENSY_HAS_THREADS 0
+#endif
+
+// Overall threading support detection
+#if FASTLED_TEENSY_HAS_FREERTOS || FASTLED_TEENSY_HAS_THREADS
+    #define FASTLED_TEENSY_REAL_MUTEX 1
+#else
+    #define FASTLED_TEENSY_REAL_MUTEX 0
+#endif
+
 namespace fl {
-namespace platforms {
 
-// Forward declarations
-class MutexTeensy;
-class RecursiveMutexTeensy;
+//=============================================================================
+// FreeRTOS Mutex Implementation (Preemptive)
+//=============================================================================
 
-// Platform implementation aliases for Teensy
-using mutex = MutexTeensy;
-using recursive_mutex = RecursiveMutexTeensy;
+#if FASTLED_TEENSY_HAS_FREERTOS
 
-// Lock constructor tag types (define at platform namespace level)
-struct defer_lock_t { explicit defer_lock_t() = default; };
-struct try_to_lock_t { explicit try_to_lock_t() = default; };
-struct adopt_lock_t { explicit adopt_lock_t() = default; };
-
-inline constexpr defer_lock_t defer_lock{};
-inline constexpr try_to_lock_t try_to_lock{};
-inline constexpr adopt_lock_t adopt_lock{};
-
-// Simple unique_lock implementation for Teensy
-template<typename Mutex>
-class unique_lock {
+/// @brief Real mutex implementation using FreeRTOS semaphores (preemptive)
+/// @note This provides true concurrent thread safety with preemptive scheduling
+class MutexTeensyFreeRTOS {
 private:
-    Mutex* mMutex;
-    bool mOwnsLock;
+    void* mHandle;  // SemaphoreHandle_t (opaque pointer to avoid FreeRTOS header dependency)
 
 public:
-    // Default constructor
-    unique_lock() noexcept : mMutex(nullptr), mOwnsLock(false) {}
+    MutexTeensyFreeRTOS();
+    ~MutexTeensyFreeRTOS();
 
-    // Lock on construction
-    explicit unique_lock(Mutex& m) : mMutex(&m), mOwnsLock(false) {
-        lock();
-    }
+    // Non-copyable and non-movable
+    MutexTeensyFreeRTOS(const MutexTeensyFreeRTOS&) = delete;
+    MutexTeensyFreeRTOS& operator=(const MutexTeensyFreeRTOS&) = delete;
+    MutexTeensyFreeRTOS(MutexTeensyFreeRTOS&&) = delete;
+    MutexTeensyFreeRTOS& operator=(MutexTeensyFreeRTOS&&) = delete;
 
-    // Defer locking
-    unique_lock(Mutex& m, defer_lock_t) noexcept : mMutex(&m), mOwnsLock(false) {}
+    void lock();
+    void unlock();
+    bool try_lock();
+};
 
-    // Try to lock
-    unique_lock(Mutex& m, try_to_lock_t) : mMutex(&m), mOwnsLock(false) {
-        try_lock();
-    }
+/// @brief Real recursive mutex implementation using FreeRTOS recursive semaphores (preemptive)
+/// @note Allows the same thread to lock the mutex multiple times
+class RecursiveMutexTeensyFreeRTOS {
+private:
+    void* mHandle;  // SemaphoreHandle_t (opaque pointer)
 
-    // Adopt existing lock
-    unique_lock(Mutex& m, adopt_lock_t) noexcept : mMutex(&m), mOwnsLock(true) {}
+public:
+    RecursiveMutexTeensyFreeRTOS();
+    ~RecursiveMutexTeensyFreeRTOS();
 
-    // Destructor
-    ~unique_lock() {
-        if (mOwnsLock) {
-            unlock();
-        }
-    }
+    // Non-copyable and non-movable
+    RecursiveMutexTeensyFreeRTOS(const RecursiveMutexTeensyFreeRTOS&) = delete;
+    RecursiveMutexTeensyFreeRTOS& operator=(const RecursiveMutexTeensyFreeRTOS&) = delete;
+    RecursiveMutexTeensyFreeRTOS(RecursiveMutexTeensyFreeRTOS&&) = delete;
+    RecursiveMutexTeensyFreeRTOS& operator=(RecursiveMutexTeensyFreeRTOS&&) = delete;
 
-    // Non-copyable but movable
-    unique_lock(const unique_lock&) = delete;
-    unique_lock& operator=(const unique_lock&) = delete;
+    void lock();
+    void unlock();
+    bool try_lock();
+};
 
-    unique_lock(unique_lock&& other) noexcept
-        : mMutex(other.mMutex), mOwnsLock(other.mOwnsLock) {
-        other.mMutex = nullptr;
-        other.mOwnsLock = false;
-    }
+// Alias to the real implementations
+using MutexTeensy = MutexTeensyFreeRTOS;
+using RecursiveMutexTeensy = RecursiveMutexTeensyFreeRTOS;
 
-    unique_lock& operator=(unique_lock&& other) noexcept {
-        if (mOwnsLock) {
-            unlock();
-        }
-        mMutex = other.mMutex;
-        mOwnsLock = other.mOwnsLock;
-        other.mMutex = nullptr;
-        other.mOwnsLock = false;
-        return *this;
-    }
+//=============================================================================
+// TeensyThreads Mutex Implementation (Cooperative)
+//=============================================================================
+
+#elif FASTLED_TEENSY_HAS_THREADS
+
+/// @brief Real mutex implementation using TeensyThreads (cooperative)
+/// @warning TeensyThreads uses COOPERATIVE scheduling - threads only switch at
+///          yield points. This is NOT preemptive multitasking.
+class MutexTeensyThreads {
+private:
+    Threads::Mutex mMutex;  // TeensyThreads mutex object
+
+public:
+    MutexTeensyThreads() = default;
+    ~MutexTeensyThreads() = default;
+
+    // Non-copyable and non-movable
+    MutexTeensyThreads(const MutexTeensyThreads&) = delete;
+    MutexTeensyThreads& operator=(const MutexTeensyThreads&) = delete;
+    MutexTeensyThreads(MutexTeensyThreads&&) = delete;
+    MutexTeensyThreads& operator=(MutexTeensyThreads&&) = delete;
 
     void lock() {
-        FL_ASSERT(mMutex != nullptr, "unique_lock::lock() called with null mutex");
-        FL_ASSERT(!mOwnsLock, "unique_lock::lock() called when already owning lock");
-        mMutex->lock();
-        mOwnsLock = true;
-    }
-
-    bool try_lock() {
-        FL_ASSERT(mMutex != nullptr, "unique_lock::try_lock() called with null mutex");
-        FL_ASSERT(!mOwnsLock, "unique_lock::try_lock() called when already owning lock");
-        mOwnsLock = mMutex->try_lock();
-        return mOwnsLock;
+        // Blocks the current thread until lock is acquired (yields to other threads)
+        int result = mMutex.lock();
+        FL_ASSERT(result == 0, "TeensyThreads mutex lock failed");
+        (void)result;  // Suppress unused warning in release builds
     }
 
     void unlock() {
-        FL_ASSERT(mOwnsLock, "unique_lock::unlock() called when not owning lock");
-        FL_ASSERT(mMutex != nullptr, "unique_lock::unlock() called with null mutex");
-        mMutex->unlock();
-        mOwnsLock = false;
+        int result = mMutex.unlock();
+        FL_ASSERT(result == 0, "TeensyThreads mutex unlock failed");
+        (void)result;  // Suppress unused warning
     }
 
-    bool owns_lock() const noexcept {
-        return mOwnsLock;
-    }
-
-    explicit operator bool() const noexcept {
-        return mOwnsLock;
-    }
-
-    Mutex* mutex() const noexcept {
-        return mMutex;
-    }
-
-    Mutex* release() noexcept {
-        Mutex* result = mMutex;
-        mMutex = nullptr;
-        mOwnsLock = false;
-        return result;
+    bool try_lock() {
+        // Returns immediately: true if acquired, false if already locked
+        return mMutex.try_lock() == 0;
     }
 };
 
-/// @brief Teensy interrupt-based mutex
-///
-/// This class provides a mutex implementation using interrupt disable/restore
-/// for critical sections. Compatible with standard mutex interface, but optimized
-/// for single-core bare metal.
+/// @brief Recursive mutex implementation using TeensyThreads (cooperative)
+/// @warning TeensyThreads is cooperative - see MutexTeensyThreads warning above
+class RecursiveMutexTeensyThreads {
+private:
+    Threads::Mutex mMutex;      // Underlying mutex
+    int mLockCount;             // Number of times the owner has locked
+    int mOwnerThreadId;         // Thread ID of the current owner (-1 if unlocked)
+
+public:
+    RecursiveMutexTeensyThreads() : mLockCount(0), mOwnerThreadId(-1) {}
+    ~RecursiveMutexTeensyThreads() {
+        FL_ASSERT(mLockCount == 0, "RecursiveMutexTeensyThreads destroyed while locked");
+    }
+
+    // Non-copyable and non-movable
+    RecursiveMutexTeensyThreads(const RecursiveMutexTeensyThreads&) = delete;
+    RecursiveMutexTeensyThreads& operator=(const RecursiveMutexTeensyThreads&) = delete;
+    RecursiveMutexTeensyThreads(RecursiveMutexTeensyThreads&&) = delete;
+    RecursiveMutexTeensyThreads& operator=(RecursiveMutexTeensyThreads&&) = delete;
+
+    void lock() {
+        int currentThreadId = Threads::id();
+
+        // Fast path: already own the lock
+        if (mOwnerThreadId == currentThreadId) {
+            mLockCount++;
+            return;
+        }
+
+        // Slow path: acquire the underlying mutex
+        mMutex.lock();
+        mOwnerThreadId = currentThreadId;
+        mLockCount = 1;
+    }
+
+    void unlock() {
+        FL_ASSERT(mOwnerThreadId == Threads::id(),
+                  "RecursiveMutexTeensyThreads unlock called by non-owner thread");
+        FL_ASSERT(mLockCount > 0,
+                  "RecursiveMutexTeensyThreads unlock called when not locked");
+
+        mLockCount--;
+        if (mLockCount == 0) {
+            mOwnerThreadId = -1;
+            mMutex.unlock();
+        }
+    }
+
+    bool try_lock() {
+        int currentThreadId = Threads::id();
+
+        // Fast path: already own the lock
+        if (mOwnerThreadId == currentThreadId) {
+            mLockCount++;
+            return true;
+        }
+
+        // Slow path: try to acquire the underlying mutex
+        if (mMutex.try_lock() == 0) {
+            mOwnerThreadId = currentThreadId;
+            mLockCount = 1;
+            return true;
+        }
+        return false;
+    }
+};
+
+// Alias to the real implementations
+using MutexTeensy = MutexTeensyThreads;
+using RecursiveMutexTeensy = RecursiveMutexTeensyThreads;
+
+//=============================================================================
+// Interrupt-Based Mutex Implementation (Bare Metal Fallback)
+//=============================================================================
+
+#else
+
+/// @brief Teensy interrupt-based mutex for bare metal (ISR-safe, NOT thread-safe)
 ///
 /// CRITICAL LIMITATIONS:
 /// - lock() on locked mutex will ASSERT (would deadlock)
 /// - Use try_lock() for safe non-blocking operation
+/// - Protects against ISR preemption using CMSIS __disable_irq()/__enable_irq()
 /// - No actual blocking - this is ISR protection, not thread synchronization
-class MutexTeensy {
+class MutexTeensyInterrupt {
 private:
     bool mLocked;
 
 public:
-    MutexTeensy();
-    ~MutexTeensy() = default;
+    MutexTeensyInterrupt();
+    ~MutexTeensyInterrupt() = default;
 
     // Non-copyable and non-movable
-    MutexTeensy(const MutexTeensy&) = delete;
-    MutexTeensy& operator=(const MutexTeensy&) = delete;
-    MutexTeensy(MutexTeensy&&) = delete;
-    MutexTeensy& operator=(MutexTeensy&&) = delete;
+    MutexTeensyInterrupt(const MutexTeensyInterrupt&) = delete;
+    MutexTeensyInterrupt& operator=(const MutexTeensyInterrupt&) = delete;
+    MutexTeensyInterrupt(MutexTeensyInterrupt&&) = delete;
+    MutexTeensyInterrupt& operator=(MutexTeensyInterrupt&&) = delete;
 
     void lock();
     void unlock();
     bool try_lock();
 };
 
-/// @brief Teensy interrupt-based recursive mutex
+/// @brief Teensy interrupt-based recursive mutex for bare metal
 ///
-/// This class provides a recursive mutex implementation using interrupt disable/restore
-/// for critical sections. Allows the same "thread" (actually same execution context)
-/// to lock the mutex multiple times.
-///
-/// CRITICAL LIMITATIONS:
-/// - lock() on locked mutex (by different context) will ASSERT (would deadlock)
-/// - Use try_lock() for safe non-blocking operation
-/// - Recursion is tracked by depth counter, not thread ID (single-threaded)
-class RecursiveMutexTeensy {
+/// Allows the same "thread" (actually same execution context) to lock multiple times.
+/// Uses interrupt disable/restore for critical sections.
+class RecursiveMutexTeensyInterrupt {
 private:
     uint32_t mLockDepth;
 
 public:
-    RecursiveMutexTeensy();
-    ~RecursiveMutexTeensy() = default;
+    RecursiveMutexTeensyInterrupt();
+    ~RecursiveMutexTeensyInterrupt() = default;
 
     // Non-copyable and non-movable
-    RecursiveMutexTeensy(const RecursiveMutexTeensy&) = delete;
-    RecursiveMutexTeensy& operator=(const RecursiveMutexTeensy&) = delete;
-    RecursiveMutexTeensy(RecursiveMutexTeensy&&) = delete;
-    RecursiveMutexTeensy& operator=(RecursiveMutexTeensy&&) = delete;
+    RecursiveMutexTeensyInterrupt(const RecursiveMutexTeensyInterrupt&) = delete;
+    RecursiveMutexTeensyInterrupt& operator=(const RecursiveMutexTeensyInterrupt&) = delete;
+    RecursiveMutexTeensyInterrupt(RecursiveMutexTeensyInterrupt&&) = delete;
+    RecursiveMutexTeensyInterrupt& operator=(RecursiveMutexTeensyInterrupt&&) = delete;
 
     void lock();
     void unlock();
     bool try_lock();
 };
 
-// Define FASTLED_MULTITHREADED for Teensy (single-threaded, but ISR-safe)
-#ifndef FASTLED_MULTITHREADED
-#define FASTLED_MULTITHREADED 0
-#endif
+// Alias to interrupt-based implementations
+using MutexTeensy = MutexTeensyInterrupt;
+using RecursiveMutexTeensy = RecursiveMutexTeensyInterrupt;
 
-} // namespace platforms
+#endif  // FASTLED_TEENSY_HAS_FREERTOS / FASTLED_TEENSY_HAS_THREADS
+
 } // namespace fl
+
+#endif  // FL_IS_TEENSY

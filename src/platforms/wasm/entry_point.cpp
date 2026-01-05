@@ -77,8 +77,8 @@ void fastled_setup_once() {
     EngineListener::Init();
     EngineEvents::addListener(&gEndFrameListener);
     
-    // Note: Thread-safe frame buffer manager not needed in WASM single-threaded environment
-    // Using existing ActiveStripData system for frame data management
+    // Note: Using ActiveStripData system for frame data management
+    // WASM inherits stub platform's threading profile (defers to FASTLED_TESTING + pthread.h detection)
     
     printf("FastLED WASM: Calling user setup()...\n");
     

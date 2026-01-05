@@ -23,3 +23,25 @@
 #else
     #error "RP ISR: Unknown RP variant - FL_IS_RP is defined but neither FL_IS_RP2040 nor FL_IS_RP2350"
 #endif
+
+// =============================================================================
+// Global Interrupt Control (noInterrupts/interrupts) - All RP variants
+// =============================================================================
+
+#ifdef FL_IS_RP
+
+namespace fl {
+
+/// Disable interrupts on ARM Cortex-M (RP2040/RP2350)
+inline void noInterrupts() {
+    __asm__ __volatile__("cpsid i" ::: "memory");
+}
+
+/// Enable interrupts on ARM Cortex-M (RP2040/RP2350)
+inline void interrupts() {
+    __asm__ __volatile__("cpsie i" ::: "memory");
+}
+
+} // namespace fl
+
+#endif // FL_IS_RP
