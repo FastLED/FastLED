@@ -27,19 +27,19 @@ public:
     
     // Generate unique request ID
     uint32_t generateRequestId() {
-        fl::unique_lock<fl::recursive_mutex> lock(mCallbacksMutex);
+        fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         return mNextRequestId++;
     }
-    
+
     // Store callback for a request ID (using move semantics)
     void storeCallback(uint32_t request_id, FetchResponseCallback callback) {
-        fl::unique_lock<fl::recursive_mutex> lock(mCallbacksMutex);
+        fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         mPendingCallbacks[request_id] = fl::move(callback);
     }
-    
+
     // Retrieve and remove callback for a request ID (using move semantics)
     fl::optional<FetchResponseCallback> takeCallback(uint32_t request_id) {
-        fl::unique_lock<fl::recursive_mutex> lock(mCallbacksMutex);
+        fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         auto it = mPendingCallbacks.find(request_id);
         if (it != mPendingCallbacks.end()) {
             // Move the callback directly from the map entry to avoid double-move
@@ -53,7 +53,7 @@ public:
 private:
     // Thread-safe storage for pending callbacks using request IDs
     fl::hash_map<uint32_t, FetchResponseCallback> mPendingCallbacks;
-    fl::recursive_mutex mCallbacksMutex;
+    fl::mutex mCallbacksMutex;
     uint32_t mNextRequestId;
 };
 

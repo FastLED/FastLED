@@ -49,7 +49,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     Callback mUpdateJs;
     JsonUIRefSet mComponents;
-    fl::recursive_mutex mMutex;
+    fl::mutex mMutex;
 
     bool mItemsAdded = false;
     fl::Json mPendingJsonUpdate;

@@ -43,7 +43,7 @@ class JsonUiInternal {
     fl::string mName;
     int mId;
     fl::string mGroup;
-    mutable fl::recursive_mutex mMutex;
+    mutable fl::mutex mMutex;
     mutable bool mHasChanged = false; // Track if component has changed since last poll
 };
 

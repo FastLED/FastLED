@@ -69,12 +69,12 @@ public:
     CoroutineRunnerImpl() = default;
 
     void enqueue(CoroutineContext* ctx) override {
-        fl::unique_lock<fl::recursive_mutex> lock(mQueueMutex);
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
         mQueue.push(ctx);
     }
 
     void signal_next() override {
-        fl::unique_lock<fl::recursive_mutex> lock(mQueueMutex);
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
 
         // Remove completed coroutines from front of queue
         while (!mQueue.empty() && mQueue.front()->is_completed()) {
@@ -103,7 +103,7 @@ public:
     }
 
     void stop_all() override {
-        fl::unique_lock<fl::recursive_mutex> lock(mQueueMutex);
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
 
         // Signal all coroutines to stop
         fl::queue<CoroutineContext*> temp = mQueue;
@@ -121,7 +121,7 @@ public:
     }
 
 private:
-    fl::recursive_mutex mQueueMutex;
+    fl::mutex mQueueMutex;
     fl::queue<CoroutineContext*> mQueue;
 };
 
@@ -139,7 +139,7 @@ public:
     bool try_lock() { return mMutex.try_lock(); }
 
 private:
-    fl::recursive_mutex mMutex;
+    fl::mutex mMutex;
 };
 
 class GlobalConditionVariable {
