@@ -1,29 +1,34 @@
 /*
-  FastLED — Stub ISR Implementation
-  ----------------------------------
-  Stub/simulation implementation of the cross-platform ISR API.
-  Used for testing, host simulation, and platforms without hardware timers.
+  FastLED — Stub/WASM ISR Implementation
+  ---------------------------------------
+  Host-based implementation of the cross-platform ISR API using POSIX threads.
+  Used for testing, host simulation, WASM, and platforms without hardware timers.
 
   License: MIT (FastLED)
 */
 
 #pragma once
 
-// Only compile this implementation for stub/host platform builds
-#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+// Only compile this implementation for stub/host/WASM platform builds
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)
 
 #include "fl/isr.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/mutex.h"
+#include "fl/stl/condition_variable.h"
 
 #include <chrono>
 #include <thread>
 
-// Simple logging for stub platform (avoid FL_WARN/FL_DBG due to exception issues)
+// Simple logging for stub/WASM platforms (avoid FL_WARN/FL_DBG due to exception issues)
 #include <iostream>
-#define STUB_LOG(msg) std::cerr << "[fl::isr::stub] " << msg << std::endl  // okay std namespace
+#if defined(FL_IS_WASM)
+    #define STUB_LOG(msg) std::cerr << "[fl::isr::wasm] " << msg << std::endl  // okay std namespace
+#else
+    #define STUB_LOG(msg) std::cerr << "[fl::isr::stub] " << msg << std::endl  // okay std namespace
+#endif
 
 namespace fl {
 namespace isr {
@@ -54,8 +59,12 @@ struct stub_isr_handle_data {
     {}
 };
 
-// Platform ID for stub
-constexpr uint8_t STUB_PLATFORM_ID = 0;
+// Platform ID for stub/WASM
+#if defined(FL_IS_WASM)
+    constexpr uint8_t STUB_PLATFORM_ID = 200;  // WASM platform
+#else
+    constexpr uint8_t STUB_PLATFORM_ID = 0;    // Stub platform
+#endif
 
 // =============================================================================
 // Global Timer Thread Manager
@@ -85,7 +94,19 @@ public:
         if (!mTimerThread) {
             mShouldStop = false;
             mTimerThread = fl::make_unique<std::thread>(&TimerThreadManager::timer_thread_func, this);  // okay std namespace
+        } else {
+            // Wake up the timer thread to process the new handler
+            mCondVar.notify_one();
         }
+    }
+
+    void reschedule_handler(stub_isr_handle_data* handler) {
+        fl::unique_lock<fl::mutex> lock(mMutex);
+        uint64_t now = get_time_us();
+        uint64_t period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
+        handler->mNextTickUs = now + period_us;
+        // Wake up the timer thread to process the rescheduled handler
+        mCondVar.notify_one();
     }
 
     void remove_handler(stub_isr_handle_data* handler) {
@@ -102,6 +123,7 @@ public:
         // Stop thread if no more handlers
         if (mHandlers.empty() && mTimerThread) {
             mShouldStop = true;
+            mCondVar.notify_one();  // Wake the thread so it can exit
             lock.unlock();  // Unlock before joining
             if (mTimerThread->joinable()) {
                 mTimerThread->join();
@@ -112,7 +134,11 @@ public:
 
     ~TimerThreadManager() {
         if (mTimerThread) {
-            mShouldStop = true;
+            {
+                fl::unique_lock<fl::mutex> lock(mMutex);
+                mShouldStop = true;
+                mCondVar.notify_one();  // Wake the thread so it can exit
+            }
             if (mTimerThread->joinable()) {
                 mTimerThread->join();
             }
@@ -132,51 +158,58 @@ private:
     }
 
     void timer_thread_func() {
+        fl::unique_lock<fl::mutex> lock(mMutex);
+
         while (!mShouldStop) {
             uint64_t now = get_time_us();
-            uint64_t next_wake = now + 1000000ULL;  // Default: sleep 1 second if no handlers
+            uint64_t next_wake = fl::numeric_limits<uint64_t>::max();  // Initialize to max value
+            bool has_enabled_handlers = false;
 
-            {
-                fl::unique_lock<fl::mutex> lock(mMutex);
+            // Execute all handlers that are due
+            for (auto* handler : mHandlers) {
+                if (!handler->mIsEnabled || !handler->mIsTimer) {
+                    continue;
+                }
 
-                // Execute all handlers that are due
-                for (auto* handler : mHandlers) {
-                    if (!handler->mIsEnabled || !handler->mIsTimer) {
-                        continue;
+                has_enabled_handlers = true;
+
+                // Check if this handler should fire
+                if (now >= handler->mNextTickUs) {
+                    // Execute handler
+                    if (handler->mUserHandler) {
+                        handler->mUserHandler(handler->mUserData);
                     }
 
-                    // Check if this handler should fire
-                    if (now >= handler->mNextTickUs) {
-                        // Execute handler
-                        if (handler->mUserHandler) {
-                            handler->mUserHandler(handler->mUserData);
-                        }
-
-                        // Schedule next tick or disable if one-shot
-                        if (handler->mIsOneShot) {
-                            handler->mIsEnabled = false;
-                        } else {
-                            uint64_t period_us = 1000000ULL / handler->mFrequencyHz;
-                            handler->mNextTickUs = now + period_us;
-                        }
+                    // Schedule next tick or disable if one-shot
+                    if (handler->mIsOneShot) {
+                        handler->mIsEnabled = false;
+                    } else {
+                        uint64_t period_us = 1000000ULL / handler->mFrequencyHz;
+                        handler->mNextTickUs = now + period_us;
                     }
+                }
 
-                    // Track earliest next tick for sleep duration
-                    if (handler->mIsEnabled && handler->mNextTickUs < next_wake) {
-                        next_wake = handler->mNextTickUs;
-                    }
+                // Track earliest next tick for sleep duration
+                if (handler->mIsEnabled && handler->mNextTickUs < next_wake) {
+                    next_wake = handler->mNextTickUs;
                 }
             }
 
-            // Sleep until next handler should fire
-            if (next_wake > now) {
+            // Sleep until next handler should fire (or until notified)
+            if (has_enabled_handlers && next_wake > now) {
+                // Wait for exact duration until next handler fires
+                // Will wake immediately if notify_one() is called (handler added/removed/rescheduled)
                 uint64_t sleep_us = next_wake - now;
-                std::this_thread::sleep_for(std::chrono::microseconds(sleep_us));  // okay std namespace
+                mCondVar.wait_for(lock, std::chrono::microseconds(sleep_us));  // okay std namespace
+            } else if (!has_enabled_handlers) {
+                // No enabled handlers - wait indefinitely until notified (handler added/rescheduled)
+                mCondVar.wait(lock);  // okay std namespace
             }
         }
     }
 
     fl::mutex mMutex;
+    fl::condition_variable mCondVar;
     fl::vector<stub_isr_handle_data*> mHandlers;
     fl::unique_ptr<std::thread> mTimerThread;  // okay std namespace
     fl::atomic<bool> mShouldStop;
@@ -216,8 +249,6 @@ int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_hand
             TimerThreadManager::instance().add_handler(handle_data);
         }
 
-        STUB_LOG("Stub timer started at " << config.frequency_hz << " Hz");
-
         // Populate output handle
         if (out_handle) {
             out_handle->platform_handle = handle_data;
@@ -246,7 +277,7 @@ int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_ha
         handle_data->mUserHandler = config.handler;
         handle_data->mUserData = config.user_data;
 
-        STUB_LOG("Stub GPIO interrupt attached on pin " << static_cast<int>(pin));
+        //STUB_LOG("GPIO interrupt attached on pin " << static_cast<int>(pin));
 
         // Populate output handle
         if (out_handle) {
@@ -280,7 +311,7 @@ int stub_detach_handler(isr_handle_t& handle) {
         handle.platform_handle = nullptr;
         handle.platform_id = 0;
 
-        STUB_LOG("Stub handler detached");
+        //STUB_LOG("Handler detached");
         return 0;  // Success
 }
 
@@ -296,8 +327,15 @@ int stub_enable_handler(isr_handle_t& handle) {
             return -1;  // Invalid handle
         }
 
+        // Enable first, then reschedule
         handle_data->mIsEnabled = true;
-        STUB_LOG("Stub handler enabled");
+
+        // Reschedule the handler to start from current time
+        if (handle_data->mIsTimer) {
+            TimerThreadManager::instance().reschedule_handler(handle_data);
+        }
+
+        STUB_LOG("Handler enabled");
         return 0;  // Success
 }
 
@@ -314,7 +352,7 @@ int stub_disable_handler(isr_handle_t& handle) {
         }
 
         handle_data->mIsEnabled = false;
-        STUB_LOG("Stub handler disabled");
+        //STUB_LOG("Handler disabled");
         return 0;  // Success
 }
 
@@ -343,11 +381,15 @@ const char* stub_get_error_string(int error_code) {
 }
 
 const char* stub_get_platform_name() {
+#if defined(FL_IS_WASM)
+    return "WASM";
+#else
     return "Stub";
+#endif
 }
 
 uint32_t stub_get_max_timer_frequency() {
-    return 0;  // Unlimited in simulation
+    return 0;  // Unlimited in host-based simulation
 }
 
 uint32_t stub_get_min_timer_frequency() {
@@ -355,12 +397,12 @@ uint32_t stub_get_min_timer_frequency() {
 }
 
 uint8_t stub_get_max_priority() {
-    return 1;  // No priority in stub
+    return 1;  // No priority in host-based platforms
 }
 
 bool stub_requires_assembly_handler(uint8_t priority) {
     (void)priority;
-    return false;  // Stub never requires assembly
+    return false;  // Host-based platforms never require assembly
 }
 
 } // namespace isr
@@ -421,4 +463,4 @@ bool requires_assembly_handler(uint8_t priority) {
 } // namespace isr
 } // namespace fl
 
-#endif // STUB_PLATFORM || FASTLED_STUB_IMPL
+#endif // STUB_PLATFORM || FASTLED_STUB_IMPL || FL_IS_WASM

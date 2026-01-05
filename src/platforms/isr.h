@@ -19,6 +19,8 @@
 // Platform detection using FL_IS_* macros
 #if defined(FL_IS_STUB)
     #include "platforms/stub/isr_stub.hpp"
+#elif defined(FL_IS_WASM)
+    #include "platforms/wasm/isr_wasm.hpp"
 #elif defined(FL_IS_ESP32)
     #include "platforms/esp/32/isr_esp32.hpp"
 #elif defined(FL_IS_TEENSY)
