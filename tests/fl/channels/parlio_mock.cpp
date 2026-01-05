@@ -564,4 +564,200 @@ TEST_CASE("ParlioEngine mock - maximum data width") {
     }
 }
 
+//=============================================================================
+// Test Suite: Parlio Mock Untransposition
+//=============================================================================
+
+TEST_CASE("parlio_mock_untransposition") {
+    // This test validates that the mock parlio peripheral correctly untransposes
+    // transposed waveform data back to per-pin waveforms
+
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Prepare test data: 2 lanes with different patterns
+    // lane0: 0xff (all bits set)
+    // lane1: 0x00 (all bits clear)
+    uint8_t lanes[2] = {0xff, 0x00};
+    uint8_t transposed_output[2 * sizeof(Wave8Byte)]; // 16 bytes
+
+    // Transpose the data (simulates what the DMA engine would send)
+    wave8Transpose_2(lanes, lut, transposed_output);
+
+    // Verify transposed output is 0xAA pattern (sanity check)
+    for (int i = 0; i < 16; i++) {
+        REQUIRE(transposed_output[i] == 0xAA);
+    }
+
+    // Now test the mock peripheral's untransposition
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+
+    // Reset mock to clean state
+    mock.reset();
+
+    // Initialize with 2-lane configuration
+    fl::vector<int> pins = {1, 2};  // GPIO pin numbers: 1 and 2
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);  // 8MHz, queue depth 4, 2 pins
+    REQUIRE(mock.initialize(config));
+    REQUIRE(mock.enable());
+
+    // Transmit the transposed data
+    size_t bit_count = 16 * 8;  // 16 bytes * 8 bits/byte = 128 bits
+    REQUIRE(mock.transmit(transposed_output, bit_count, 0));
+
+    // Get per-pin data using the convenience function (use actual GPIO pin numbers)
+    fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
+    fl::span<const uint8_t> pin2_data = mock.getTransmissionDataForPin(2);
+
+    // Each pin should have 8 bytes (64 bits per pin, since 128 bits / 2 pins = 64 bits)
+    REQUIRE(pin1_data.size() == 8);
+    REQUIRE(pin2_data.size() == 8);
+
+    // GPIO pin 1 (lane0) should have all 0xFF (all bits set, from lane0 = 0xff)
+    for (size_t i = 0; i < pin1_data.size(); i++) {
+        REQUIRE(pin1_data[i] == 0xFF);
+    }
+
+    // GPIO pin 2 (lane1) should have all 0x00 (all bits clear, from lane1 = 0x00)
+    for (size_t i = 0; i < pin2_data.size(); i++) {
+        REQUIRE(pin2_data[i] == 0x00);
+    }
+}
+
+TEST_CASE("parlio_mock_untransposition_complex_pattern") {
+    // Test with more complex bit patterns to ensure untransposition works correctly
+
+    ChipsetTiming timing;
+    timing.T1 = 1;
+    timing.T2 = 999;
+    timing.T3 = 1;
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with different patterns
+    // lane0: 0xAA = 0b10101010
+    // lane1: 0x55 = 0b01010101
+    uint8_t lanes[2] = {0xAA, 0x55};
+    uint8_t transposed_output[2 * sizeof(Wave8Byte)]; // 16 bytes
+
+    wave8Transpose_2(lanes, lut, transposed_output);
+
+    // Setup mock
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+    mock.reset();
+
+    fl::vector<int> pins = {1, 2};  // GPIO pin numbers: 1 and 2
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);
+    REQUIRE(mock.initialize(config));
+    REQUIRE(mock.enable());
+
+    // Transmit
+    size_t bit_count = 16 * 8;  // 128 bits
+    REQUIRE(mock.transmit(transposed_output, bit_count, 0));
+
+    // Get per-pin data using the convenience function (use actual GPIO pin numbers)
+    fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
+    fl::span<const uint8_t> pin2_data = mock.getTransmissionDataForPin(2);
+
+    // Verify size
+    REQUIRE(pin1_data.size() == 8);
+    REQUIRE(pin2_data.size() == 8);
+
+    // GPIO pin 1 (lane0) should reconstruct the waveform for 0xAA
+    // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
+    // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
+    uint8_t expected_pin1[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    for (size_t i = 0; i < pin1_data.size(); i++) {
+        REQUIRE(pin1_data[i] == expected_pin1[i]);
+    }
+
+    // GPIO pin 2 (lane1) should reconstruct the waveform for 0x55
+    // With the LUT (bit0=0x00, bit1=0xFF), 0x55 (01010101) expands to:
+    // [0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF]
+    uint8_t expected_pin2[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
+    for (size_t i = 0; i < pin2_data.size(); i++) {
+        REQUIRE(pin2_data[i] == expected_pin2[i]);
+    }
+}
+
+TEST_CASE("parlio_mock_untransposition_with_span_api") {
+    // Test the new span-based untransposition API with pin mapping
+
+    ChipsetTiming timing;
+    timing.T1 = 1;
+    timing.T2 = 999;
+    timing.T3 = 1;
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with different patterns
+    // lane0: 0xAA = 0b10101010
+    // lane1: 0x55 = 0b01010101
+    uint8_t lanes[2] = {0xAA, 0x55};
+    uint8_t transposed_output[2 * sizeof(Wave8Byte)]; // 16 bytes
+
+    wave8Transpose_2(lanes, lut, transposed_output);
+
+    // Use the new static API with span inputs
+    fl::vector<int> pins = {10, 20};  // Use different GPIO pin numbers
+    fl::span<const uint8_t> transposed_span(transposed_output, 16);
+    fl::span<const int> pins_span(pins);
+
+    // Call the new static function
+    fl::unordered_map<int, fl::vector<uint8_t>> result =
+        fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(transposed_span, pins_span);
+
+    // Verify we have data for both pins
+    REQUIRE(result.size() == 2);
+    REQUIRE(result.find(10) != result.end());
+    REQUIRE(result.find(20) != result.end());
+
+    // Verify size
+    REQUIRE(result[10].size() == 8);
+    REQUIRE(result[20].size() == 8);
+
+    // GPIO pin 10 (lane0) should reconstruct the waveform for 0xAA
+    // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
+    // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
+    uint8_t expected_pin10[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    for (size_t i = 0; i < result[10].size(); i++) {
+        REQUIRE(result[10][i] == expected_pin10[i]);
+    }
+
+    // GPIO pin 20 (lane1) should reconstruct the waveform for 0x55
+    // With the LUT (bit0=0x00, bit1=0xFF), 0x55 (01010101) expands to:
+    // [0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF]
+    uint8_t expected_pin20[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
+    for (size_t i = 0; i < result[20].size(); i++) {
+        REQUIRE(result[20][i] == expected_pin20[i]);
+    }
+}
+
+TEST_CASE("parlio_mock_untransposition_empty_inputs") {
+    // Test edge cases with empty inputs
+
+    // Empty transposed data
+    fl::vector<uint8_t> empty_data;
+    fl::vector<int> pins = {1, 2};
+    fl::span<const uint8_t> empty_span(empty_data);
+    fl::span<const int> pins_span(pins);
+
+    auto result = fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(empty_span, pins_span);
+    REQUIRE(result.empty());
+
+    // Empty pins
+    fl::vector<uint8_t> data = {0xAA, 0x55};
+    fl::vector<int> empty_pins;
+    fl::span<const uint8_t> data_span(data);
+    fl::span<const int> empty_pins_span(empty_pins);
+
+    result = fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(data_span, empty_pins_span);
+    REQUIRE(result.empty());
+}
+
 #endif // FASTLED_STUB_IMPL

@@ -63,6 +63,8 @@
 #include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/span.h"
+#include "fl/stl/hash_map.h"
 
 namespace fl {
 namespace detail {
@@ -171,6 +173,43 @@ public:
 
     /// @brief Clear transmission history (reset for next test)
     virtual void clearTransmissionHistory() = 0;
+
+    /// @brief Get transmission data for a specific GPIO pin from the most recent transmission
+    /// @param gpio_pin GPIO pin number (e.g., 1, 2, 4, 8 - actual pin numbers from config)
+    /// @return Span of transmission data for the specified pin (empty if no transmission or invalid pin)
+    ///
+    /// Returns the untransposed waveform data for a specific GPIO pin from the most recent
+    /// transmission. This is useful for validating per-pin output patterns in tests.
+    ///
+    /// Example:
+    /// ```cpp
+    /// auto& mock = ParlioPeripheralMock::instance();
+    /// // ... initialize with pins {1, 2} and perform transmission ...
+    /// fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
+    /// REQUIRE(pin1_data[0] == 0xFF);  // Check first byte of GPIO pin 1 waveform
+    /// ```
+    virtual fl::span<const uint8_t> getTransmissionDataForPin(int gpio_pin) const = 0;
+
+    /// @brief Untranspose interleaved bit-parallel data to per-pin waveforms
+    /// @param transposed_data Interleaved bit data (output from wave8Transpose_N)
+    /// @param pins GPIO pin numbers corresponding to lanes in the transposed data
+    /// @return Map of GPIO pin number to waveform data
+    ///
+    /// This function reverses the transposition performed by wave8Transpose_N to extract
+    /// the original waveform for each pin. The transposed data is in bit-parallel format
+    /// where bits from multiple pins are interleaved.
+    ///
+    /// Example for 2-lane:
+    /// ```cpp
+    /// fl::vector_fixed<int, 2> pins = {1, 2};
+    /// fl::vector<uint8_t> transposed = {0xAA, 0xAA, ...};  // Alternating bits
+    /// auto result = untransposeParlioBitstream(transposed, pins);
+    /// // result[1] = {0xFF, 0xFF, ...}  // Lane 0 waveform (all high)
+    /// // result[2] = {0x00, 0x00, ...}  // Lane 1 waveform (all low)
+    /// ```
+    static fl::unordered_map<int, fl::vector<uint8_t>> untransposeParlioBitstream(
+        fl::span<const uint8_t> transposed_data,
+        fl::span<const int> pins);
 
     //-------------------------------------------------------------------------
     // State Inspection

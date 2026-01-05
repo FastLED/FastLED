@@ -6,6 +6,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
 #include "fl/stl/atomic.h"
+#include "fl/stl/hash_map.h"
 
 #include <thread>  // ok include
 #include <chrono>  // ok include
@@ -15,6 +16,67 @@
 #else
 #include "platforms/stub/time_stub.h"  // For micros() and delay() on host tests
 #endif
+
+
+namespace {
+/// @brief Untranspose interleaved bit-parallel data to per-pin waveforms (internal helper)
+/// @param transposed_data Interleaved bit data (output from wave8Transpose_2)
+/// @param bit_count Total number of bits transmitted
+/// @param num_pins Number of parallel pins (data_width)
+/// @return Vector of per-pin waveforms (one vector per pin)
+///
+/// The transposed data is in bit-parallel format where bits from multiple pins
+/// are interleaved. This function reverses the transposition to extract the
+/// original waveform for each pin.
+///
+/// For 2-lane example:
+/// - Input (transposed): [0xAA, 0xAA, ...] where bits alternate between lane0 and lane1
+/// - Output: [[0xFF, 0xFF, ...], [0x00, 0x00, ...]] for lane0 and lane1 respectively
+fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
+    const uint8_t* transposed_data,
+    size_t bit_count,
+    size_t num_pins) {
+
+    // Initialize per-pin storage
+    fl::vector<fl::vector<uint8_t>> per_pin_data(num_pins);
+
+    // Calculate number of bytes per pin's waveform
+    // Each bit in the LED protocol expands to 8 pulses (Wave8Bit format)
+    // For transposed data: bit_count is the total bits in the transposed buffer
+
+    // Each pin gets a sequence of bytes
+    size_t bits_per_pin = bit_count / num_pins;
+    size_t bytes_per_pin = (bits_per_pin + 7) / 8;
+
+    for (size_t pin = 0; pin < num_pins; pin++) {
+        per_pin_data[pin].resize(bytes_per_pin, 0);
+    }
+
+    // Untranspose bit-by-bit
+    for (size_t bit_idx = 0; bit_idx < bit_count; bit_idx++) {
+        // Get bit from transposed buffer
+        size_t byte_idx = bit_idx / 8;
+        size_t bit_pos = 7 - (bit_idx % 8);  // MSB first
+        bool bit_value = (transposed_data[byte_idx] >> bit_pos) & 1;
+
+        // Determine which pin this bit belongs to
+        size_t pin_idx = bit_idx % num_pins;
+
+        // Determine position in the pin's waveform
+        size_t pin_bit_idx = bit_idx / num_pins;
+        size_t pin_byte_idx = pin_bit_idx / 8;
+        size_t pin_bit_pos = 7 - (pin_bit_idx % 8);  // MSB first
+
+        // Set the bit in the pin's waveform
+        if (bit_value) {
+            per_pin_data[pin_idx][pin_byte_idx] |= (1 << pin_bit_pos);
+        }
+    }
+
+    return per_pin_data;
+}
+} // anonymous namespace
+
 
 namespace fl {
 namespace detail {
@@ -61,6 +123,7 @@ public:
     void setTransmitFailure(bool should_fail) override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const override;
     void clearTransmissionHistory() override;
+    fl::span<const uint8_t> getTransmissionDataForPin(int gpio_pin) const override;
     bool isInitialized() const override;
     bool isEnabled() const override;
     bool isTransmitting() const override;
@@ -90,6 +153,10 @@ private:
 
     // Waveform capture
     fl::vector<TransmissionRecord> mHistory;
+
+    // Untransposed per-pin waveform data (stored separately from transmission records)
+    // Maps actual GPIO pin numbers to their waveform data for the most recent transmission
+    fl::unordered_map<int, fl::vector<uint8_t>> mPerPinData;
 
     // Pending transmission state (for waitAllDone simulation)
     size_t mPendingTransmissions;
@@ -123,6 +190,7 @@ ParlioPeripheralMockImpl::ParlioPeripheralMockImpl()
       mTransmitDelayUs(0),
       mShouldFailTransmit(false),
       mHistory(),
+      mPerPinData(),
       mPendingTransmissions(0),
       mSimulationThread(),
       mSimulationThreadShouldStop(false) {
@@ -227,6 +295,21 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
 
     // Store in history
     mHistory.push_back(fl::move(record));
+
+    // Untranspose the data to extract per-pin waveforms
+    // Store separately to avoid bloating transmission records
+    fl::vector<fl::vector<uint8_t>> per_pin_waveforms = untransposeParlioBitstreamInternal(
+        buffer,
+        bit_count,
+        mConfig.data_width
+    );
+
+    // Map pin indices to actual GPIO pin numbers
+    mPerPinData.clear();
+    for (size_t i = 0; i < per_pin_waveforms.size() && i < static_cast<size_t>(mConfig.data_width); i++) {
+        int gpio_pin = mConfig.gpio_pins[i];
+        mPerPinData[gpio_pin] = fl::move(per_pin_waveforms[i]);
+    }
 
     // Update state
     mTransmitCount++;
@@ -412,9 +495,27 @@ const ParlioPeripheralConfig& ParlioPeripheralMockImpl::getConfig() const {
 
 void ParlioPeripheralMockImpl::clearTransmissionHistory() {
     mHistory.clear();
+    mPerPinData.clear();
     mTransmitCount = 0;
     mPendingTransmissions = 0;
     mTransmitting = false;
+}
+
+fl::span<const uint8_t> ParlioPeripheralMockImpl::getTransmissionDataForPin(int gpio_pin) const {
+    // Return empty span if no per-pin data available
+    if (mPerPinData.empty()) {
+        return fl::span<const uint8_t>();
+    }
+
+    // Look up the GPIO pin in the map
+    auto it = mPerPinData.find(gpio_pin);
+    if (it == mPerPinData.end()) {
+        FL_WARN("ParlioPeripheralMock: GPIO pin " << gpio_pin << " not found in transmission data");
+        return fl::span<const uint8_t>();
+    }
+
+    // Return span of the pin's data
+    return fl::span<const uint8_t>(it->second);
 }
 
 void ParlioPeripheralMockImpl::reset() {
@@ -431,6 +532,7 @@ void ParlioPeripheralMockImpl::reset() {
     mTransmitDelayUs = 0;
     mShouldFailTransmit = false;
     mHistory.clear();
+    mPerPinData.clear();
     mPendingTransmissions = 0;
 }
 
@@ -439,8 +541,6 @@ void ParlioPeripheralMockImpl::reset() {
 //=============================================================================
 
 void ParlioPeripheralMockImpl::simulationThreadFunc() {
-    using clock = std::chrono::steady_clock;  // okay std namespace
-
     while (!mSimulationThreadShouldStop) {
         // Check if there are pending transmissions
         if (mPendingTransmissions > 0 && mTransmitDelayUs > 0) {
@@ -467,6 +567,40 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
             std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
         }
     }
+}
+
+//=============================================================================
+// Public Untranspose Function
+//=============================================================================
+
+fl::unordered_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBitstream(
+    fl::span<const uint8_t> transposed_data,
+    fl::span<const int> pins) {
+
+    fl::unordered_map<int, fl::vector<uint8_t>> result;
+
+    // Validate inputs
+    if (transposed_data.empty() || pins.empty()) {
+        return result;
+    }
+
+    size_t num_pins = pins.size();
+    size_t bit_count = transposed_data.size() * 8;
+
+    // Use internal helper to perform untransposition
+    fl::vector<fl::vector<uint8_t>> per_pin_waveforms = untransposeParlioBitstreamInternal(
+        transposed_data.data(),
+        bit_count,
+        num_pins
+    );
+
+    // Map lane indices to GPIO pin numbers
+    for (size_t i = 0; i < per_pin_waveforms.size() && i < pins.size(); i++) {
+        int gpio_pin = pins[i];
+        result[gpio_pin] = fl::move(per_pin_waveforms[i]);
+    }
+
+    return result;
 }
 
 } // namespace detail
