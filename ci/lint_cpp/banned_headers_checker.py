@@ -308,6 +308,14 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
         HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
         HeaderException("platforms/stub/time_stub.cpp", "Test time simulation"),
+        HeaderException(
+            "platforms/esp/32/condition_variable_esp32.h",
+            "ESP32 condition_variable needs std::chrono types for C++11 compatibility",
+        ),
+        HeaderException(
+            "platforms/esp/32/semaphore_esp32.h",
+            "ESP32 semaphore needs std::chrono types for C++20 compatibility",
+        ),
     ],
     # String operations
     "string.h": [

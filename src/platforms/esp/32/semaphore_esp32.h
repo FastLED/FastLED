@@ -11,13 +11,8 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/cstddef.h"
 
-// Forward declare std::chrono types to avoid including <chrono> in header
-namespace std {
-    namespace chrono {
-        template<typename Rep, typename Period> class duration;
-        template<typename Clock, typename Duration> class time_point;
-    }
-}
+// CRITICAL: Include <chrono> BEFORE opening namespace to avoid polluting std::
+#include <chrono>  // ok include
 
 namespace fl {
 namespace platforms {

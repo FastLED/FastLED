@@ -10,23 +10,15 @@
 
 #include "fl/stl/assert.h"
 
-// Forward declare std::chrono types to avoid including <chrono> in header
-namespace std {
-    namespace chrono {
-        template<typename Rep, typename Period> class duration;
-        template<typename Clock, typename Duration> class time_point;
-    }
-}
+// CRITICAL: Include mutex_esp32.h BEFORE opening namespace to avoid polluting std::
+// mutex_esp32.h includes <mutex> which defines types in global std:: namespace
+#include "mutex_esp32.h"
 
 namespace fl {
 namespace platforms {
 
 // Forward declarations
 class ConditionVariableESP32;
-
-// We need unique_lock from mutex_esp32.h for the template methods
-// Forward declare it here to avoid circular dependency in the header
-#include "mutex_esp32.h"
 
 // Platform implementation alias for ESP32
 using condition_variable = ConditionVariableESP32;
