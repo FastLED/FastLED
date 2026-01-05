@@ -156,32 +156,43 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
     // Each symbol (Wave8Bit) has 8 pulses
     // With 8 lanes, we produce 8 bytes per symbol (1 pulse per byte × 8 lanes)
     // Output format: [L7_P7, L6_P7, ..., L0_P7, L7_P6, L6_P6, ..., L0_P6, ...]
+    //
+    // This implementation uses the Hacker's Delight 8x8 bit matrix transpose algorithm
+    // for optimal performance. For 8 lanes, this is the perfect fit since the output is
+    // exactly 8 bits wide (one bit per lane).
 
+    // Process each of the 8 symbols (Wave8Bit structures)
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        // Load 8 lane bytes for this symbol into a temporary array
         uint8_t lane_bytes[8];
         for (int lane = 0; lane < 8; lane++) {
             lane_bytes[lane] = lane_waves[lane].symbols[symbol_idx].data;
         }
 
-        // Process 8 output bytes (1 pulse per byte)
-        for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
-            // Extract 1 pulse from bit position (7 - byte_idx)
-            int pulse_bit = 7 - byte_idx;
+        // Apply Hacker's Delight 8x8 transpose algorithm inline
+        // This transposes the 8x8 bit matrix in ~6 XOR-shift operations
+        uint32_t x, y, t;
 
-            uint8_t output_byte = 0;
+        // Load the array and pack it into x and y (little-endian)
+        y = *(uint32_t*)(lane_bytes);      // lanes 0-3
+        x = *(uint32_t*)(lane_bytes + 4);  // lanes 4-7
 
-            // Interleave 8 lanes for this pulse
-            // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]
-            for (int lane = 0; lane < 8; lane++) {
-                // Extract 1-bit pattern for this lane
-                uint8_t pulse = (lane_bytes[lane] >> pulse_bit) & 1;
+        // Pre-transform x
+        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+        t = (x ^ (x >> 14)) & 0x0000CCCC;  x = x ^ t ^ (t << 14);
 
-                // Place bit at lane position (lane 0 = LSB, lane 7 = MSB)
-                output_byte |= (pulse << lane);
-            }
+        // Pre-transform y
+        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+        t = (y ^ (y >> 14)) & 0x0000CCCC;  y = y ^ t ^ (t << 14);
 
-            output[symbol_idx * 8 + byte_idx] = output_byte;
-        }
+        // Final transform
+        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+        x = t;
+
+        // Store result directly to output (little-endian)
+        *((uint32_t*)(output + symbol_idx * 8)) = y;
+        *((uint32_t*)(output + symbol_idx * 8 + 4)) = x;
     }
 }
 
