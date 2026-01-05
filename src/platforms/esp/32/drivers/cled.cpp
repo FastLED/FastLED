@@ -15,11 +15,6 @@
 #endif
 
 #include "platforms/esp/32/feature_flags/enabled.h"
-
-#if FASTLED_RMT5
-    #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
-#endif
-
 #include "fl/dbg.h"
 
 namespace fl {
@@ -27,8 +22,7 @@ namespace esp32 {
 
 CLED::CLED()
     : mMaxDuty(0)
-    , mInitialized(false)
-    , mRmtChannelId(0) {
+    , mInitialized(false) {
 }
 
 CLED::~CLED() {
@@ -43,7 +37,6 @@ bool CLED::begin(const CLEDConfig& config) {
 
     mConfig = config;
     mMaxDuty = (1 << config.resolution_bits) - 1;
-    mRmtChannelId = config.channel;
 
     // Validate parameters
     if (config.resolution_bits > 20) {
@@ -51,23 +44,6 @@ bool CLED::begin(const CLEDConfig& config) {
         FL_WARN("CLED: resolution_bits > 20 not supported (requested: " << config.resolution_bits << ")");
         return false;
     }
-
-#if FASTLED_RMT5
-    // Allocate RMT TX channel and 1 symbol of memory
-    // Note: LEDC doesn't actually use RMT hardware, but this reserves a channel
-    // for potential future migration to RMT-based PWM
-    auto& mgr = fl::RmtMemoryManager::instance();
-
-    // Allocate TX unit (non-DMA, no network mode)
-    auto tx_result = mgr.allocateTx(mRmtChannelId, false, false);
-    if (!tx_result.ok()) {
-        FL_WARN("CLED: Failed to allocate RMT TX channel " << static_cast<int>(mRmtChannelId));
-        return false;
-    }
-
-    FL_DBG("CLED: Allocated RMT TX channel " << static_cast<int>(mRmtChannelId)
-           << " (" << tx_result.value() << " words)");
-#endif
 
     // Arduino LEDC setup - API differs between Arduino Core 2.x and 3.x
 #ifndef ESP_ARDUINO_VERSION_MAJOR
@@ -78,10 +54,6 @@ bool CLED::begin(const CLEDConfig& config) {
     // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
     uint8_t assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
     if (assigned_channel == 0) {
-#if FASTLED_RMT5
-        // Release RMT resources on failure
-        fl::RmtMemoryManager::instance().free(mRmtChannelId, true);
-#endif
         FL_WARN("CLED: LEDC attach failed for pin " << config.pin);
         return false;
     }
@@ -98,10 +70,6 @@ bool CLED::begin(const CLEDConfig& config) {
     uint32_t freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
 
     if (freq == 0) {
-#if FASTLED_RMT5
-        // Release RMT resources on failure
-        fl::RmtMemoryManager::instance().free(mRmtChannelId, true);
-#endif
         FL_WARN("CLED: LEDC setup failed for channel " << config.channel);
         return false;
     }
@@ -123,13 +91,7 @@ void CLED::end() {
         return;
     }
 
-#if FASTLED_RMT5
-    // Release RMT TX channel
-    fl::RmtMemoryManager::instance().free(mRmtChannelId, true);
-    FL_DBG("CLED: Released RMT TX channel " << static_cast<int>(mRmtChannelId));
-#endif
-
-    // TODO: Add LEDC cleanup (ledcDetachPin?) when available in Arduino core
+    // TODO: Add LEDC cleanup (ledcDetach?) when available in Arduino core
 
     mInitialized = false;
 }
@@ -177,9 +139,10 @@ uint8_t CLED::getResolutionBits() const {
 
 uint32_t CLED::mapToDutyCycle(uint16_t val16) const {
     // Map 16-bit input (0-65535) to current resolution
-    // Formula: (val16 * maxDuty) / 65535
+    // Formula: (val16 * maxDuty + 32767) / 65535 (with rounding)
     // Use 32-bit math to avoid overflow
-    return (uint32_t(val16) * mMaxDuty) / 65535;
+    // Adding 32767 (half of 65535) provides proper rounding to nearest integer
+    return ((uint32_t(val16) * mMaxDuty) + 32767) / 65535;
 }
 
 }  // namespace esp32

@@ -31,7 +31,7 @@ public:
     /// Default constructor
     CLED();
 
-    /// Destructor - releases RMT resources
+    /// Destructor - releases LEDC resources
     ~CLED();
 
     /// Initialize CLED with configuration
@@ -60,7 +60,6 @@ private:
     CLEDConfig mConfig;
     uint32_t mMaxDuty;
     bool mInitialized;
-    uint8_t mRmtChannelId;
 
     /// Map 16-bit value to current resolution
     /// @param val16 16-bit input value (0-65535)
