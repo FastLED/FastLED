@@ -169,6 +169,12 @@ class NamespaceIncludesChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for includes after namespace declarations."""
+        # Check for allow directive first
+        allow_directive_pattern = re.compile(r"//\s*allow-include-after-namespace")
+        for line in file_content.lines:
+            if allow_directive_pattern.search(line):
+                return []  # Return empty if directive is found
+
         violations: list[tuple[int, str, Optional[tuple[int, str]]]] = []
         current_namespace: Optional[tuple[int, str]] = None
 
