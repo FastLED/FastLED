@@ -10,7 +10,7 @@
 ///
 /// Supported platforms:
 /// - ESP32: FreeRTOS task notifications
-/// - Host/Stub: std::condition_variable
+/// - Host/Stub: fl::condition_variable
 /// - Other: No await() support (use fl::await_top_level() instead)
 ///
 /// This header is included from fl/async.h. The public API fl::await() in
@@ -84,7 +84,7 @@ fl::result<T> await(fl::promise<T> promise) {
 #endif // ESP32
 
 // ============================================================================
-// Host/Stub: True Blocking Await using std::condition_variable
+// Host/Stub: True Blocking Await using fl::condition_variable
 // ============================================================================
 
 #ifdef FASTLED_STUB_IMPL
@@ -93,7 +93,7 @@ fl::result<T> await(fl::promise<T> promise) {
 } // namespace fl
 
 // Host-platform includes must be OUTSIDE namespaces
-#include <condition_variable>  // ok include (no fl wrapper)
+#include "fl/stl/condition_variable.h"  // fl::condition_variable
 #include "fl/stl/mutex.h"  // fl::mutex and fl::unique_lock (aliases std::mutex/std::unique_lock in multithreaded mode)
 #include "platforms/stub/coroutine_runner.h"  // Global coordination
 
@@ -105,7 +105,7 @@ namespace platforms {
 /// @param promise The promise to await
 /// @return A result<T> containing either the resolved value or an error
 ///
-/// Implementation uses std::condition_variable for efficient suspension.
+/// Implementation uses fl::condition_variable for efficient suspension.
 /// This is called by fl::await() as a trampoline. See fl/async.h for full documentation.
 template<typename T>
 fl::result<T> await(fl::promise<T> promise) {
@@ -124,9 +124,9 @@ fl::result<T> await(fl::promise<T> promise) {
     // Create synchronization primitives for local coordination
     // Note: fl::mutex is MutexReal (inherits std::mutex) in multithreaded mode
     // fl::unique_lock is aliased to std::unique_lock in multithreaded mode for
-    // compatibility with std::condition_variable
+    // compatibility with fl::condition_variable
     fl::mutex mtx;
-    std::condition_variable cv;  // okay std namespace (no fl wrapper available)
+    fl::condition_variable cv;
     fl::atomic<bool> completed(false);
 
     // Register completion callbacks
@@ -142,7 +142,7 @@ fl::result<T> await(fl::promise<T> promise) {
     fl::detail::CoroutineRunner::instance().signal_next();
 
     // Wait on local condition variable for promise completion
-    // fl::unique_lock<fl::mutex> is fully compatible with std::condition_variable because:
+    // fl::unique_lock<fl::mutex> is fully compatible with fl::condition_variable because:
     // - In multithreaded mode: fl::unique_lock = std::unique_lock, fl::mutex = std::mutex
     fl::unique_lock<fl::mutex> local_lock(mtx);
     cv.wait(local_lock, [&]() { return completed.load(); });

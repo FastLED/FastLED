@@ -277,7 +277,7 @@ fl::result<T> await_top_level(fl::promise<T> promise) {
 //
 // Supported platforms (true OS-level blocking):
 // - ESP32: FreeRTOS task notifications
-// - Host/Stub: std::condition_variable
+// - Host/Stub: fl::condition_variable
 //
 // Unsupported platforms will get a static_assert error if await() is used.
 // Use fl::await_top_level() instead on platforms without coroutine support.

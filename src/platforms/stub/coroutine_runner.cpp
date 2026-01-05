@@ -7,10 +7,9 @@
 #include "fl/singleton.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"  // Provides fl::mutex, fl::recursive_mutex, fl::unique_lock
+#include "fl/stl/condition_variable.h"  // Provides fl::condition_variable
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/queue.h"
-#include <mutex>               // ok include (std::unique_lock required for std::condition_variable)
-#include <condition_variable>  // ok include (no fl wrapper, works with fl::mutex via std::unique_lock)
 
 namespace fl {
 namespace detail {
@@ -23,13 +22,13 @@ public:
         : mReady(false), mShouldStop(false), mCompleted(false) {}
 
     void wait() override {
-        std::unique_lock<std::mutex> lock(mMutex);  // okay std namespace
+        fl::unique_lock<fl::mutex> lock(mMutex);
         mCv.wait(lock, [this]() { return mReady.load() || mShouldStop.load(); });
         mReady.store(false);  // Reset for next time
     }
 
     void signal() override {
-        std::unique_lock<std::mutex> lock(mMutex);  // okay std namespace
+        fl::unique_lock<fl::mutex> lock(mMutex);
         mReady.store(true);
         mCv.notify_one();
     }
@@ -51,8 +50,8 @@ public:
     }
 
 private:
-    std::mutex mMutex;                  // okay std namespace - std::mutex required for std::condition_variable compatibility
-    std::condition_variable mCv;        // okay std namespace
+    fl::mutex mMutex;
+    fl::condition_variable mCv;
     fl::atomic<bool> mReady;            // Signaled when this coroutine can run
     fl::atomic<bool> mShouldStop;       // Signal for graceful shutdown
     fl::atomic<bool> mCompleted;        // Set when coroutine finishes
@@ -153,14 +152,8 @@ public:
         mCv.wait(lock, pred);
     }
 
-    // Overload for std::mutex specifically (required by std::condition_variable)
-    template<typename Predicate>
-    void wait(std::unique_lock<std::mutex>& lock, Predicate pred) {  // okay std namespace
-        mCv.wait(lock, pred);
-    }
-
 private:
-    std::condition_variable mCv;        // okay std namespace
+    fl::condition_variable mCv;
 };
 
 GlobalMutex& global_execution_mutex() {
