@@ -23,13 +23,13 @@ public:
         : mReady(false), mShouldStop(false), mCompleted(false) {}
 
     void wait() override {
-        std::unique_lock<std::mutex> lock(mMutex);
+        std::unique_lock<std::mutex> lock(mMutex);  // okay std namespace
         mCv.wait(lock, [this]() { return mReady.load() || mShouldStop.load(); });
         mReady.store(false);  // Reset for next time
     }
 
     void signal() override {
-        std::unique_lock<std::mutex> lock(mMutex);
+        std::unique_lock<std::mutex> lock(mMutex);  // okay std namespace
         mReady.store(true);
         mCv.notify_one();
     }
@@ -51,8 +51,8 @@ public:
     }
 
 private:
-    std::mutex mMutex;                  // std::mutex required for std::condition_variable compatibility
-    std::condition_variable mCv;
+    std::mutex mMutex;                  // okay std namespace - std::mutex required for std::condition_variable compatibility
+    std::condition_variable mCv;        // okay std namespace
     fl::atomic<bool> mReady;            // Signaled when this coroutine can run
     fl::atomic<bool> mShouldStop;       // Signal for graceful shutdown
     fl::atomic<bool> mCompleted;        // Set when coroutine finishes
@@ -155,12 +155,12 @@ public:
 
     // Overload for std::mutex specifically (required by std::condition_variable)
     template<typename Predicate>
-    void wait(std::unique_lock<std::mutex>& lock, Predicate pred) {
+    void wait(std::unique_lock<std::mutex>& lock, Predicate pred) {  // okay std namespace
         mCv.wait(lock, pred);
     }
 
 private:
-    std::condition_variable mCv;
+    std::condition_variable mCv;        // okay std namespace
 };
 
 GlobalMutex& global_execution_mutex() {

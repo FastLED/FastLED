@@ -1,43 +1,36 @@
-/// @file task_coroutine_freertos.h
-/// @brief ESP32 FreeRTOS TaskCoroutine implementation (inline methods)
+/// @file task_coroutine_esp32.h
+/// @brief ESP32 FreeRTOS TaskCoroutine implementation
 ///
-/// This file provides inline implementations of TaskCoroutine methods for ESP32.
-/// It's included from fl/task.h AFTER the TaskCoroutine class is declared.
+/// This file provides the ESP32-specific implementation of ITaskCoroutine.
 
 #pragma once
 
-// Note: This file is included from fl/task.h, so TaskCoroutine is already declared
-// No need to include fl/task.h (would create circular dependency)
+#include "fl/stl/string.h"
+#include "fl/stl/functional.h"
 
 namespace fl {
+namespace platforms {
 
 //=============================================================================
-// TaskCoroutine Implementation (ESP32/FreeRTOS)
+// TaskCoroutineESP32 - FreeRTOS-based implementation
 //=============================================================================
 
-inline TaskCoroutine::TaskCoroutine(fl::string name,
-                                     TaskFunction function,
-                                     size_t stack_size,
-                                     uint8_t priority)
-    : mHandle(nullptr)
-    , mName(fl::move(name))
-    , mFunction(fl::move(function)) {
-    mHandle = createTaskImpl(mName, mFunction, stack_size, priority);
-}
+class TaskCoroutineESP32 : public ITaskCoroutine {
+public:
+    TaskCoroutineESP32(fl::string name,
+                       TaskFunction function,
+                       size_t stack_size,
+                       uint8_t priority);
+    ~TaskCoroutineESP32() override;
 
-inline TaskCoroutine::~TaskCoroutine() {
-    stop();
-}
+    void stop() override;
+    bool isRunning() const override;
 
-inline void TaskCoroutine::stop() {
-    if (mHandle) {
-        deleteTaskImpl(mHandle);
-        mHandle = nullptr;
-    }
-}
+private:
+    void* mHandle;
+    fl::string mName;
+    TaskFunction mFunction;
+};
 
-inline void TaskCoroutine::exitCurrent() {
-    exitCurrentImpl();
-}
-
+} // namespace platforms
 } // namespace fl

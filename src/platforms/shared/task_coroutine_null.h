@@ -1,57 +1,83 @@
 /// @file task_coroutine_null.h
-/// @brief Null TaskCoroutine implementation for platforms without OS support
+/// @brief Null TaskCoroutine interface for platforms without OS support
 ///
-/// This file provides inline no-op implementations of TaskCoroutine methods
-/// for platforms that don't have OS/RTOS support.
+/// This provides a no-op implementation of ITaskCoroutine for platforms
+/// that don't have OS/RTOS support (e.g., bare-metal AVR, STM32 without FreeRTOS).
+///
+/// ## Design Pattern
+///
+/// Follows the single-dispatch interface pattern:
+/// - TaskCoroutineNull: Abstract interface (pure virtual methods)
+/// - TaskCoroutineNullImpl: Concrete no-op implementation (in .cpp file)
+/// - createTaskCoroutine(): Factory function for instantiation
+///
+/// ## Usage
+///
+/// ```cpp
+/// // Create via factory function (task won't actually run on null platform)
+/// auto* task = fl::platforms::createTaskCoroutine(
+///     "MyTask",
+///     []() { /* task code - won't execute */ },
+///     4096,  // stack_size (ignored)
+///     1      // priority (ignored)
+/// );
+///
+/// // Stop and cleanup
+/// task->stop();  // No-op
+/// delete task;
+/// ```
 
 #pragma once
 
-// Note: This file is included from fl/task.h, so TaskCoroutine is already declared
-// No need to include fl/task.h (would create circular dependency)
+#include "platforms/itask_coroutine.h"
 
 namespace fl {
+namespace platforms {
 
 //=============================================================================
-// TaskCoroutine Implementation (Null/No-Op)
+// TaskCoroutineNull - Abstract interface for null platform
 //=============================================================================
 
-inline TaskCoroutine::TaskCoroutine(fl::string name,
-                                     TaskFunction function,
-                                     size_t /*stack_size*/,
-                                     uint8_t /*priority*/)
-    : mHandle(nullptr)
-    , mName(fl::move(name))
-    , mFunction(fl::move(function)) {
-    // No OS support - task is not created
-}
+/// @brief Null task coroutine interface for platforms without OS support
+///
+/// This is an abstract interface - use create() factory method or createTaskCoroutine() to instantiate.
+///
+/// The null implementation provides no-op stubs for all methods, allowing
+/// code to compile on platforms without OS/RTOS support. Tasks are never
+/// actually created or executed.
+class TaskCoroutineNull : public ITaskCoroutine {
+public:
+    //=========================================================================
+    // Factory Method
+    //=========================================================================
 
-inline TaskCoroutine::~TaskCoroutine() {
-    // No cleanup needed (no task was created)
-}
+    /// @brief Create a new null task coroutine instance
+    /// @param name Task name (ignored)
+    /// @param function Task function (ignored, never executed)
+    /// @param stack_size Stack size in bytes (ignored)
+    /// @param priority Task priority (ignored)
+    /// @return Pointer to new TaskCoroutineNull instance (caller owns)
+    ///
+    /// Creates a no-op task coroutine. The task is never actually created
+    /// or executed - all operations are no-ops.
+    static TaskCoroutineNull* create(fl::string name,
+                                      TaskFunction function,
+                                      size_t stack_size = 4096,
+                                      uint8_t priority = 5);
 
-inline void TaskCoroutine::stop() {
-    // No-op: No task to stop
-    mHandle = nullptr;
-}
+    //=========================================================================
+    // Lifecycle
+    //=========================================================================
 
-inline void TaskCoroutine::exitCurrent() {
-    // No-op: No task exists on platforms without OS support
-}
+    ~TaskCoroutineNull() override = default;
 
-inline TaskCoroutine::Handle TaskCoroutine::createTaskImpl(const fl::string& /*name*/,
-                                                            const TaskFunction& /*function*/,
-                                                            size_t /*stack_size*/,
-                                                            uint8_t /*priority*/) {
-    // No OS support - return nullptr
-    return nullptr;
-}
+    //=========================================================================
+    // ITaskCoroutine Interface Implementation
+    //=========================================================================
 
-inline void TaskCoroutine::deleteTaskImpl(Handle /*handle*/) {
-    // No-op: No tasks to delete
-}
+    void stop() override = 0;
+    bool isRunning() const override = 0;
+};
 
-inline void TaskCoroutine::exitCurrentImpl() {
-    // No-op: No tasks exist
-}
-
+} // namespace platforms
 } // namespace fl

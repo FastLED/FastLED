@@ -4,6 +4,7 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/atomic.h"
+#include "platforms/itask_coroutine.h"
 
 namespace fl {
 
@@ -22,36 +23,49 @@ int next_task_id() {
 }
 } // namespace
 
+} // namespace fl
+
+namespace fl {
+
 //=============================================================================
-// TaskCoroutine - OS-level task wrapper (implementation detail)
+// TaskCoroutine - RAII wrapper around platform-specific implementation
 //=============================================================================
 
 class TaskCoroutine {
 public:
     using TaskFunction = fl::function<void()>;
-    using Handle = void*;
 
-    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, uint8_t priority = 5);
-    ~TaskCoroutine();
+    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, uint8_t priority = 5)
+        : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority)) {
+    }
+
+    ~TaskCoroutine() {
+        if (mImpl) {
+            delete mImpl;
+        }
+    }
 
     TaskCoroutine(const TaskCoroutine&) = delete;
     TaskCoroutine& operator=(const TaskCoroutine&) = delete;
     TaskCoroutine(TaskCoroutine&&) = delete;
     TaskCoroutine& operator=(TaskCoroutine&&) = delete;
 
-    void stop();
-    bool isRunning() const { return mHandle != nullptr; }
-    Handle getHandle() const { return mHandle; }
-    static void exitCurrent();
+    void stop() {
+        if (mImpl) {
+            mImpl->stop();
+        }
+    }
+
+    bool isRunning() const {
+        return mImpl ? mImpl->isRunning() : false;
+    }
+
+    static void exitCurrent() {
+        platforms::ITaskCoroutine::exitCurrent();
+    }
 
 private:
-    static Handle createTaskImpl(const fl::string& name, const TaskFunction& function, size_t stack_size, uint8_t priority);
-    static void deleteTaskImpl(Handle handle);
-    static void exitCurrentImpl();
-
-    Handle mHandle;
-    fl::string mName;
-    TaskFunction mFunction;
+    platforms::ITaskCoroutine* mImpl;
 };
 
 } // namespace fl
