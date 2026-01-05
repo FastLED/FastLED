@@ -41,12 +41,12 @@
 namespace fl {
 
 /// Disable interrupts on AVR
-inline void noInterrupts() {
+inline void interruptsDisable() {
     cli();
 }
 
 /// Enable interrupts on AVR
-inline void interrupts() {
+inline void interruptsEnable() {
     sei();
 }
 

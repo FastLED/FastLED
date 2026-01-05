@@ -12,11 +12,11 @@ namespace fl {
 // ============================================================================
 
 CriticalSection::CriticalSection() {
-    fl::noInterrupts();
+    fl::interruptsDisable();
 }
 
 CriticalSection::~CriticalSection() {
-    fl::interrupts();
+    fl::interruptsEnable();
 }
 
 // ============================================================================

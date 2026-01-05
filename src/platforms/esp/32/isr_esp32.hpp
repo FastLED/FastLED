@@ -118,7 +118,7 @@ static void FL_IRAM gpio_isr_wrapper(void* arg)
 // ESP32 ISR Implementation (fl::platform namespace)
 // =============================================================================
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
+inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -241,7 +241,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         return 0;  // Success
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -329,7 +329,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
         return 0;  // Success
 }
 
-int detach_handler(isr_handle_t& handle) {
+inline int detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -368,7 +368,7 @@ int detach_handler(isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int enable_handler(const isr_handle_t& handle) {
+inline int enable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -399,7 +399,7 @@ int enable_handler(const isr_handle_t& handle) {
         return 0;  // Success
 }
 
-int disable_handler(const isr_handle_t& handle) {
+inline int disable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -430,7 +430,7 @@ int disable_handler(const isr_handle_t& handle) {
         return 0;  // Success
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) {
+inline bool is_handler_enabled(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             return false;
         }
@@ -443,7 +443,7 @@ bool is_handler_enabled(const isr_handle_t& handle) {
         return handle_data->is_enabled;
 }
 
-const char* get_error_string(int error_code) {
+inline const char* get_error_string(int error_code) {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -465,7 +465,7 @@ const char* get_error_string(int error_code) {
         }
 }
 
-const char* get_platform_name() {
+inline const char* get_platform_name() {
 #if defined(CONFIG_IDF_TARGET_ESP32)
     return "ESP32";
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
@@ -481,15 +481,15 @@ const char* get_platform_name() {
 #endif
 }
 
-uint32_t get_max_timer_frequency() {
+inline uint32_t get_max_timer_frequency() {
     return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
 }
 
-uint32_t get_min_timer_frequency() {
+inline uint32_t get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-uint8_t get_max_priority() {
+inline uint8_t get_max_priority() {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
     // RISC-V: Priority 1-7 (but 4-7 may have limitations)
     return 7;
@@ -499,7 +499,7 @@ uint8_t get_max_priority() {
 #endif
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(uint8_t priority) {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
     // RISC-V: All priority levels can use C handlers
     return false;
@@ -517,12 +517,12 @@ bool requires_assembly_handler(uint8_t priority) {
 // =============================================================================
 
 /// Disable interrupts on ESP32
-inline void noInterrupts() {
+inline void interruptsDisable() {
     portDISABLE_INTERRUPTS();
 }
 
 /// Enable interrupts on ESP32
-inline void interrupts() {
+inline void interruptsEnable() {
     portENABLE_INTERRUPTS();
 }
 

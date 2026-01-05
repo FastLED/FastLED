@@ -163,12 +163,12 @@ inline bool requires_assembly_handler(uint8_t priority) {
 // =============================================================================
 
 /// No-op for null/unsupported platform
-inline void noInterrupts() {
+inline void interruptsDisable() {
     // No-op: platform doesn't have ISR support
 }
 
 /// No-op for null/unsupported platform
-inline void interrupts() {
+inline void interruptsEnable() {
     // No-op: platform doesn't have ISR support
 }
 

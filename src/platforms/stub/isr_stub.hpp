@@ -18,6 +18,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/condition_variable.h"
+#include "fl/numeric_limits.h"
 
 #include <chrono>
 #include <thread>
@@ -467,12 +468,12 @@ inline bool requires_assembly_handler(uint8_t priority) {
 // =============================================================================
 
 /// No-op for stub/host platform
-inline void noInterrupts() {
+inline void interruptsDisable() {
     // No-op: stub platform doesn't have hardware interrupts
 }
 
 /// No-op for stub/host platform
-inline void interrupts() {
+inline void interruptsEnable() {
     // No-op: stub platform doesn't have hardware interrupts
 }
 

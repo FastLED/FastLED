@@ -205,22 +205,27 @@ bool ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, 
         return false;
     }
 
+    if (buffer == nullptr) {
+        FL_WARN("ParlioPeripheralESP: Cannot transmit - null buffer");
+        return false;
+    }
+
     // CRITICAL: Flush CPU cache to memory before DMA reads buffer
     // This is the ONLY place cache sync happens (before DMA submission)
     // Calculate buffer size in bytes (bit_count / 8)
     size_t buffer_size = (bit_count + 7) / 8;
 
-    // Memory barrier: Ensure all preceding writes complete before cache sync
+    // Memory barrier: Ensure all preceding writes complete before DMA submission
     FL_MEMORY_BARRIER;
 
-    // Cache sync: Writeback cache to memory for DMA access
-    // May return ESP_ERR_INVALID_ARG on some platforms (non-cacheable memory), but still beneficial
-    (void)esp_cache_msync(
-        const_cast<void*>(reinterpret_cast<const void*>(buffer)),
-        buffer_size,
-        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+    // Cache sync: SKIP for DMA buffers
+    // Buffers are allocated with MALLOC_CAP_DMA (non-cacheable SRAM1 on ESP32-C6)
+    // esp_cache_msync() is unnecessary for non-cacheable memory and causes:
+    //   E (xxxx) cache: esp_cache_msync(103): invalid addr or null pointer
+    // on ESP32-C6. Memory barriers provide sufficient ordering guarantees.
+    // See parlio_engine.cpp lines 881-891 for buffer allocation details.
 
-    // Memory barrier: Ensure cache sync completes before DMA submission
+    // Memory barrier: Ensure writes complete before DMA submission
     FL_MEMORY_BARRIER;
 
     // Prepare transmission payload

@@ -92,12 +92,12 @@ bool requires_assembly_handler(uint8_t priority) {
 // =============================================================================
 
 /// Disable interrupts on ARM Cortex-M (STM32)
-inline void noInterrupts() {
+inline void interruptsDisable() {
     __asm__ __volatile__("cpsid i" ::: "memory");
 }
 
 /// Enable interrupts on ARM Cortex-M (STM32)
-inline void interrupts() {
+inline void interruptsEnable() {
     __asm__ __volatile__("cpsie i" ::: "memory");
 }
 
