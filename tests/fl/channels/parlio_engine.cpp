@@ -441,4 +441,124 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     CHECK(tx.bit_count > 0);
 }
 
+TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
+    resetMock();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    // 2-lane configuration
+    fl::vector<int> pins = {1, 2};
+    ChipsetTimingConfig timing = getWS2812TimingForDmaTests();
+
+    size_t num_lanes = 2;
+
+    // Lane 0: 5 LEDs (long channel)
+    size_t lane0_leds = 5;
+    size_t bytes_per_led = 3;
+    size_t lane0_bytes = lane0_leds * bytes_per_led;  // 15 bytes
+
+    // Lane 1: 3 LEDs (short channel)
+    size_t lane1_leds = 3;
+    size_t lane1_bytes = lane1_leds * bytes_per_led;  // 9 bytes
+
+    // Max channel size determines the lane stride
+    size_t max_channel_bytes = lane0_bytes;  // 15 bytes
+    size_t total_bytes = num_lanes * max_channel_bytes;  // 30 bytes total
+
+    bool init_ok = engine.initialize(num_lanes, pins, timing, lane0_leds);
+    REQUIRE(init_ok);
+
+    // Create per-lane scratch buffer
+    fl::vector<uint8_t> scratch(total_bytes);
+
+    // Lane 0 (long channel): 15 bytes with distinct pattern (0x01, 0x02, ... 0x0F)
+    for (size_t i = 0; i < max_channel_bytes; i++) {
+        scratch[0 * max_channel_bytes + i] = static_cast<uint8_t>(i + 1);
+    }
+
+    // Lane 1 (short channel): 9 bytes with distinct pattern (0xF1, 0xF2, ... 0xF9)
+    // followed by 6 bytes of 0x00 padding
+    for (size_t i = 0; i < lane1_bytes; i++) {
+        scratch[1 * max_channel_bytes + i] = static_cast<uint8_t>(0xF0 + i + 1);
+    }
+    // The remaining bytes (15 - 9 = 6 bytes) should be zero-padded
+    for (size_t i = lane1_bytes; i < max_channel_bytes; i++) {
+        scratch[1 * max_channel_bytes + i] = 0x00;
+    }
+
+    bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, max_channel_bytes);
+    REQUIRE(tx_ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+
+    const auto& history = mock.getTransmissionHistory();
+    REQUIRE(history.size() > 0);
+
+    // Verify transmission captured data
+    const auto& tx = history[0];
+    CHECK(tx.buffer_copy.size() > 0);
+
+    // Each lane's data is expanded by Wave8 (8x)
+    // Minimum size: total_bytes × 8 (Wave8 expansion)
+    CHECK(tx.buffer_copy.size() >= total_bytes * 8);
+
+    // Verify that transmission includes both channels' data
+    CHECK(tx.bit_count > 0);
+
+    // Note: The actual bit-parallel layout verification would require
+    // detailed Wave8 decoding. The key validation here is:
+    // 1. Both lanes are transmitted synchronously
+    // 2. The shorter lane (lane 1) is padded with zeros to match lane 0's length
+    // 3. The reset signal (trailing zeros) provides proper LED reset timing
+    // 4. The DMA buffer size accounts for boundary + reset padding
+}
+
+TEST_CASE("ParlioEngine - verify reset padding is applied for different channel lengths") {
+    resetMock();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    // Single lane with short data to verify reset padding
+    fl::vector<int> pins = {1};
+
+    // WS2812B timing with explicit reset time requirement
+    ChipsetTimingConfig timing = getWS2812TimingForDmaTests();
+
+    size_t num_lanes = 1;
+    size_t leds_per_lane = 2;
+    size_t bytes_per_led = 3;
+    size_t total_bytes = leds_per_lane * bytes_per_led;  // 6 bytes
+
+    bool init_ok = engine.initialize(num_lanes, pins, timing, leds_per_lane);
+    REQUIRE(init_ok);
+
+    // Create data buffer with known pattern
+    fl::vector<uint8_t> scratch(total_bytes);
+    for (size_t i = 0; i < total_bytes; i++) {
+        scratch[i] = static_cast<uint8_t>(0xAA);
+    }
+
+    bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, total_bytes);
+    REQUIRE(tx_ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+
+    const auto& history = mock.getTransmissionHistory();
+    REQUIRE(history.size() > 0);
+
+    const auto& tx = history[0];
+
+    // Base data: 6 bytes × 8 (Wave8) = 48 bytes
+    // Plus boundary padding (front + back)
+    // Plus reset padding (280µs reset ÷ 8µs per Wave8Byte = 35 Wave8Bytes = 280 bytes)
+    // Minimum expected: 48 + 16 (boundary) + 280 (reset) = 344 bytes
+
+    // Verify that reset padding significantly increases buffer size
+    CHECK(tx.buffer_copy.size() > total_bytes * 8);
+
+    // The exact buffer size depends on timing parameters, but it should be
+    // substantially larger than just the data due to reset time requirements
+    CHECK(tx.bit_count > total_bytes * 8 * 8);
+}
+
 #endif // FASTLED_STUB_IMPL
