@@ -607,15 +607,21 @@ def setup_meson_build(
     # For sccache integration, use clang-tool-chain's built-in sccache wrappers
     import shutil
 
-    # TODO: sccache integration with clang-tool-chain needs fixing
-    # For now, use plain wrappers without sccache
-    # The issue is that clang-tool-chain-sccache-* bypasses the GNU ABI setup
-    sccache_available = False  # Temporarily disable sccache
-    use_sccache = False
+    # Check if sccache-enabled wrappers are available
+    sccache_c_wrapper = shutil.which("clang-tool-chain-sccache-c")
+    sccache_cpp_wrapper = shutil.which("clang-tool-chain-sccache-cpp")
+    sccache_available = (
+        sccache_c_wrapper is not None and sccache_cpp_wrapper is not None
+    )
+    use_sccache = sccache_available
 
-    # Use plain clang-tool-chain wrappers
-    clang_wrapper = shutil.which("clang-tool-chain-c")
-    clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
+    # Use sccache wrappers if available, otherwise fall back to plain wrappers
+    if use_sccache:
+        clang_wrapper = sccache_c_wrapper
+        clangxx_wrapper = sccache_cpp_wrapper
+    else:
+        clang_wrapper = shutil.which("clang-tool-chain-c")
+        clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
 
     llvm_ar_wrapper = shutil.which("clang-tool-chain-ar")
 
@@ -626,15 +632,11 @@ def setup_meson_build(
         )
         _ts_print("[MESON] Missing commands:")
         if not clang_wrapper:
-            if sccache_available:
-                _ts_print("[MESON]   - clang-tool-chain-sccache-c")
-            else:
-                _ts_print("[MESON]   - clang-tool-chain-c")
+            _ts_print("[MESON]   - clang-tool-chain-c (or clang-tool-chain-sccache-c)")
         if not clangxx_wrapper:
-            if sccache_available:
-                _ts_print("[MESON]   - clang-tool-chain-sccache-cpp")
-            else:
-                _ts_print("[MESON]   - clang-tool-chain-cpp")
+            _ts_print(
+                "[MESON]   - clang-tool-chain-cpp (or clang-tool-chain-sccache-cpp)"
+            )
         if not llvm_ar_wrapper:
             _ts_print("[MESON]   - clang-tool-chain-ar")
         raise RuntimeError("clang-tool-chain wrapper commands not available")
