@@ -5,7 +5,6 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
-#include "fl/isr.h"  // For fl::isr::CriticalSection
 
 namespace fl {
 

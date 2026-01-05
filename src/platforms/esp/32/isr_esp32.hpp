@@ -36,7 +36,6 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include "fl/stl/assert.h"
-#include "fl/dbg.h"
 
 namespace fl {
 namespace isr {
@@ -120,19 +119,19 @@ static void FL_IRAM gpio_isr_wrapper(void* arg)
 
 inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
-            FL_WARN("attachTimerHandler: handler is null");
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
         }
 
         if (config.frequency_hz == 0) {
-            FL_WARN("attachTimerHandler: frequency_hz is 0");
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: frequency_hz is 0");
             return -2;  // Invalid frequency
         }
 
         // Allocate handle data
         esp32_isr_handle_data* handle_data = new esp32_isr_handle_data();
         if (!handle_data) {
-            FL_WARN("attachTimerHandler: failed to allocate handle data");
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: failed to allocate handle data");
             return -3;  // Out of memory
         }
 
@@ -162,8 +161,8 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
 
         // Ensure alarm_count is at least 1 to avoid ESP_ERR_INVALID_ARG
         if (alarm_count == 0) {
-            FL_WARN("attachTimerHandler: frequency too high (" << config.frequency_hz
-                    << " Hz), maximum is " << timer_resolution_hz << " Hz");
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: frequency too high (%lu Hz), maximum is %lu Hz",
+                     (unsigned long)config.frequency_hz, (unsigned long)timer_resolution_hz);
             delete handle_data;
             return -2;  // Invalid frequency
         }
@@ -175,13 +174,13 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
 
         esp_err_t ret = gptimer_new_timer(&timer_config, &handle_data->timer_handle);
         if (ret != ESP_OK) {
-            FL_WARN("attachTimerHandler: gptimer_new_timer failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: gptimer_new_timer failed: %s", esp_err_to_name(ret));
             delete handle_data;
             return -4;  // Timer creation failed
         }
 
-        FL_DBG("Timer config: " << config.frequency_hz << " Hz using "
-               << timer_resolution_hz << " Hz resolution → " << alarm_count << " ticks");
+        ESP_LOGD(ESP32_ISR_TAG, "Timer config: %lu Hz using %lu Hz resolution → %llu ticks",
+                 (unsigned long)config.frequency_hz, (unsigned long)timer_resolution_hz, (unsigned long long)alarm_count);
 
         // Configure alarm
         gptimer_alarm_config_t alarm_config = {};
@@ -191,7 +190,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
 
         ret = gptimer_set_alarm_action(handle_data->timer_handle, &alarm_config);
         if (ret != ESP_OK) {
-            FL_WARN("attachTimerHandler: gptimer_set_alarm_action failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: gptimer_set_alarm_action failed: %s", esp_err_to_name(ret));
             gptimer_del_timer(handle_data->timer_handle);
             delete handle_data;
             return -5;  // Alarm config failed
@@ -203,7 +202,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
 
         ret = gptimer_register_event_callbacks(handle_data->timer_handle, &cbs, handle_data);
         if (ret != ESP_OK) {
-            FL_WARN("attachTimerHandler: gptimer_register_event_callbacks failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: gptimer_register_event_callbacks failed: %s", esp_err_to_name(ret));
             gptimer_del_timer(handle_data->timer_handle);
             delete handle_data;
             return -6;  // Callback registration failed
@@ -212,7 +211,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
         // Enable timer
         ret = gptimer_enable(handle_data->timer_handle);
         if (ret != ESP_OK) {
-            FL_WARN("attachTimerHandler: gptimer_enable failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: gptimer_enable failed: %s", esp_err_to_name(ret));
             gptimer_del_timer(handle_data->timer_handle);
             delete handle_data;
             return -7;  // Timer enable failed
@@ -221,14 +220,14 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
         // Start timer
         ret = gptimer_start(handle_data->timer_handle);
         if (ret != ESP_OK) {
-            FL_WARN("attachTimerHandler: gptimer_start failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachTimerHandler: gptimer_start failed: %s", esp_err_to_name(ret));
             gptimer_disable(handle_data->timer_handle);
             gptimer_del_timer(handle_data->timer_handle);
             delete handle_data;
             return -8;  // Timer start failed
         }
 
-        FL_DBG("Timer started at " << config.frequency_hz << " Hz");
+        ESP_LOGD(ESP32_ISR_TAG, "Timer started at %lu Hz", (unsigned long)config.frequency_hz);
 
         // Populate output handle
         if (out_handle) {
@@ -243,14 +242,14 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
 
 inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
-            FL_WARN("attachExternalHandler: handler is null");
+            ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
         }
 
         // Allocate handle data
         esp32_isr_handle_data* handle_data = new esp32_isr_handle_data();
         if (!handle_data) {
-            FL_WARN("attachExternalHandler: failed to allocate handle data");
+            ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: failed to allocate handle data");
             return -3;  // Out of memory
         }
 
@@ -281,7 +280,7 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
 
         esp_err_t ret = gpio_config(&io_conf);
         if (ret != ESP_OK) {
-            FL_WARN("attachExternalHandler: gpio_config failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: gpio_config failed: %s", esp_err_to_name(ret));
             delete handle_data;
             return -9;  // GPIO config failed
         }
@@ -296,7 +295,7 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
                 ret = gpio_install_isr_service(0);
                 if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
                     taskEXIT_CRITICAL(&gpio_isr_service_mutex);
-                    FL_WARN("attachExternalHandler: gpio_install_isr_service failed: " << esp_err_to_name(ret));
+                    ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: gpio_install_isr_service failed: %s", esp_err_to_name(ret));
                     delete handle_data;
                     return -10;  // ISR service installation failed
                 }
@@ -308,7 +307,7 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
         // Add ISR handler for specific GPIO pin
         ret = gpio_isr_handler_add(static_cast<gpio_num_t>(pin), gpio_isr_wrapper, handle_data);
         if (ret != ESP_OK) {
-            FL_WARN("attachExternalHandler: gpio_isr_handler_add failed: " << esp_err_to_name(ret));
+            ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: gpio_isr_handler_add failed: %s", esp_err_to_name(ret));
             delete handle_data;
             return -11;  // ISR handler add failed
         }
@@ -316,7 +315,7 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
         // Store GPIO pin for cleanup
         handle_data->gpio_pin = pin;
 
-        FL_DBG("GPIO interrupt attached on pin " << pin);
+        ESP_LOGD(ESP32_ISR_TAG, "GPIO interrupt attached on pin %d", pin);
 
         // Populate output handle
         if (out_handle) {
@@ -331,13 +330,13 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
 
 inline int detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
-            FL_WARN("detachHandler: invalid handle");
+            ESP_LOGW(ESP32_ISR_TAG, "detachHandler: invalid handle");
             return -1;  // Invalid handle
         }
 
         esp32_isr_handle_data* handle_data = static_cast<esp32_isr_handle_data*>(handle.platform_handle);
         if (!handle_data) {
-            FL_WARN("detachHandler: null handle data");
+            ESP_LOGW(ESP32_ISR_TAG, "detachHandler: null handle data");
             return -1;  // Invalid handle
         }
 
@@ -350,7 +349,7 @@ inline int detach_handler(isr_handle_t& handle) {
                 gptimer_disable(handle_data->timer_handle);
                 ret = gptimer_del_timer(handle_data->timer_handle);
                 if (ret != ESP_OK) {
-                    FL_WARN("detachHandler: gptimer_del_timer failed: " << esp_err_to_name(ret));
+                    ESP_LOGW(ESP32_ISR_TAG, "detachHandler: gptimer_del_timer failed: %s", esp_err_to_name(ret));
                 }
             }
         } else {
@@ -364,33 +363,33 @@ inline int detach_handler(isr_handle_t& handle) {
         handle.platform_handle = nullptr;
         handle.platform_id = 0;
 
-        FL_DBG("Handler detached");
+        ESP_LOGD(ESP32_ISR_TAG, "Handler detached");
         return 0;  // Success
 }
 
 inline int enable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
-            FL_WARN("enableHandler: invalid handle");
+            ESP_LOGW(ESP32_ISR_TAG, "enableHandler: invalid handle");
             return -1;  // Invalid handle
         }
 
         esp32_isr_handle_data* handle_data = static_cast<esp32_isr_handle_data*>(handle.platform_handle);
         if (!handle_data) {
-            FL_WARN("enableHandler: null handle data");
+            ESP_LOGW(ESP32_ISR_TAG, "enableHandler: null handle data");
             return -1;  // Invalid handle
         }
 
         if (handle_data->is_timer && handle_data->timer_handle) {
             esp_err_t ret = gptimer_start(handle_data->timer_handle);
             if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                FL_WARN("enableHandler: gptimer_start failed: " << esp_err_to_name(ret));
+                ESP_LOGW(ESP32_ISR_TAG, "enableHandler: gptimer_start failed: %s", esp_err_to_name(ret));
                 return -12;  // Enable failed
             }
             handle_data->is_enabled = true;
         } else if (!handle_data->is_timer && handle_data->gpio_pin != 0xFF) {
             esp_err_t ret = gpio_intr_enable(static_cast<gpio_num_t>(handle_data->gpio_pin));
             if (ret != ESP_OK) {
-                FL_WARN("enableHandler: gpio_intr_enable failed: " << esp_err_to_name(ret));
+                ESP_LOGW(ESP32_ISR_TAG, "enableHandler: gpio_intr_enable failed: %s", esp_err_to_name(ret));
                 return -14;
             }
             handle_data->is_enabled = true;
@@ -401,27 +400,27 @@ inline int enable_handler(const isr_handle_t& handle) {
 
 inline int disable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
-            FL_WARN("disableHandler: invalid handle");
+            ESP_LOGW(ESP32_ISR_TAG, "disableHandler: invalid handle");
             return -1;  // Invalid handle
         }
 
         esp32_isr_handle_data* handle_data = static_cast<esp32_isr_handle_data*>(handle.platform_handle);
         if (!handle_data) {
-            FL_WARN("disableHandler: null handle data");
+            ESP_LOGW(ESP32_ISR_TAG, "disableHandler: null handle data");
             return -1;  // Invalid handle
         }
 
         if (handle_data->is_timer && handle_data->timer_handle) {
             esp_err_t ret = gptimer_stop(handle_data->timer_handle);
             if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                FL_WARN("disableHandler: gptimer_stop failed: " << esp_err_to_name(ret));
+                ESP_LOGW(ESP32_ISR_TAG, "disableHandler: gptimer_stop failed: %s", esp_err_to_name(ret));
                 return -13;  // Disable failed
             }
             handle_data->is_enabled = false;
         } else if (!handle_data->is_timer && handle_data->gpio_pin != 0xFF) {
             esp_err_t ret = gpio_intr_disable(static_cast<gpio_num_t>(handle_data->gpio_pin));
             if (ret != ESP_OK) {
-                FL_WARN("disableHandler: gpio_intr_disable failed: " << esp_err_to_name(ret));
+                ESP_LOGW(ESP32_ISR_TAG, "disableHandler: gpio_intr_disable failed: %s", esp_err_to_name(ret));
                 return -15;
             }
             handle_data->is_enabled = false;

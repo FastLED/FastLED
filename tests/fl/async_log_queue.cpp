@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/detail/async_log_queue.h"
+#include "fl/isr.h"  // For fl::isr::CriticalSection
 #include "fl/str.h"
 
 using namespace fl;
