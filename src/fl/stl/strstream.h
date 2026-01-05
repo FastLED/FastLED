@@ -91,7 +91,7 @@ class StrStream {
         mTreatCharAsInt = treatCharAsInt;
     }
 
-    const string &str() const { return mStr; }
+    string str() const { return mStr; }
     const char *c_str() const { return mStr.c_str(); }
 
     StrStream &operator<<(const CRGB &rgb) {
