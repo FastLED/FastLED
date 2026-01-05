@@ -198,6 +198,72 @@ TEST_CASE("test_isr_error_handling") {
     REQUIRE(!isr::isHandlerEnabled(invalid_handle));
 }
 
+TEST_CASE("test_interrupts_global_state") {
+    // Interrupts should start enabled
+    REQUIRE(interruptsEnabled());
+    REQUIRE(!interruptsDisabled());
+
+    // Disable interrupts
+    interruptsDisable();
+    REQUIRE(interruptsDisabled());
+    REQUIRE(!interruptsEnabled());
+
+    // Re-enable interrupts
+    interruptsEnable();
+    REQUIRE(interruptsEnabled());
+    REQUIRE(!interruptsDisabled());
+}
+
+TEST_CASE("test_interrupts_global_disable_blocks_isr") {
+    g_isr_call_count = 0;
+
+    // Ensure interrupts are enabled initially
+    interruptsEnable();
+
+    // Configure timer
+    isr::isr_config_t config;
+    config.handler = test_isr_handler;
+    config.user_data = nullptr;
+    config.frequency_hz = 100;  // 100 Hz
+    config.priority = isr::ISR_PRIORITY_MEDIUM;
+    config.flags = isr::ISR_FLAG_IRAM_SAFE;
+
+    isr::isr_handle_t handle;
+    int result = isr::attachTimerHandler(config, &handle);
+    REQUIRE(result == 0);
+
+    // Wait and verify timer is firing
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    int count_enabled = g_isr_call_count.load();
+    REQUIRE(count_enabled > 0);
+
+    // Globally disable interrupts
+    interruptsDisable();
+    REQUIRE(interruptsDisabled());
+
+    // Small delay to ensure any in-flight handler call completes
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    int count_after_disable_immediate = g_isr_call_count.load();
+
+    // Wait and verify NO new calls (global interrupts disabled)
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    int count_disabled = g_isr_call_count.load();
+    REQUIRE(count_after_disable_immediate == count_disabled);
+
+    // Re-enable global interrupts
+    interruptsEnable();
+    REQUIRE(interruptsEnabled());
+
+    // Wait and verify new calls resume
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    int count_reenabled = g_isr_call_count.load();
+    REQUIRE(count_reenabled > count_disabled);
+
+    // Cleanup
+    result = isr::detachHandler(handle);
+    REQUIRE(result == 0);
+}
+
 // =============================================================================
 // Test Main
 // =============================================================================

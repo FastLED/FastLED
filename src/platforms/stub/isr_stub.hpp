@@ -68,6 +68,17 @@ struct stub_isr_handle_data {
 #endif
 
 // =============================================================================
+// Global Interrupt State
+// =============================================================================
+
+// Track interrupt enable state for stub platform (starts enabled)
+// Uses function-local static to ensure single instance across translation units (C++11 compatible)
+inline fl::atomic<bool>& getGlobalInterruptState() {
+    static fl::atomic<bool> g_interrupts_enabled(true);  // okay static in header
+    return g_interrupts_enabled;
+}
+
+// =============================================================================
 // Global Timer Thread Manager
 // =============================================================================
 
@@ -166,6 +177,9 @@ private:
             uint64_t next_wake = fl::numeric_limits<uint64_t>::max();  // Initialize to max value
             bool has_enabled_handlers = false;
 
+            // Check global interrupt state
+            bool interrupts_enabled = getGlobalInterruptState().load();
+
             // Execute all handlers that are due
             for (auto* handler : mHandlers) {
                 if (!handler->mIsEnabled || !handler->mIsTimer) {
@@ -175,7 +189,8 @@ private:
                 has_enabled_handlers = true;
 
                 // Check if this handler should fire
-                if (now >= handler->mNextTickUs) {
+                // Only fire if global interrupts are enabled
+                if (interrupts_enabled && now >= handler->mNextTickUs) {
                     // Execute handler
                     if (handler->mUserHandler) {
                         handler->mUserHandler(handler->mUserData);
@@ -467,14 +482,24 @@ inline bool requires_assembly_handler(uint8_t priority) {
 // Global Interrupt Control (noInterrupts/interrupts)
 // =============================================================================
 
-/// No-op for stub/host platform
+/// Disable interrupts on stub/host platform (simulated)
 inline void interruptsDisable() {
-    // No-op: stub platform doesn't have hardware interrupts
+    isr::getGlobalInterruptState() = false;
 }
 
-/// No-op for stub/host platform
+/// Enable interrupts on stub/host platform (simulated)
 inline void interruptsEnable() {
-    // No-op: stub platform doesn't have hardware interrupts
+    isr::getGlobalInterruptState() = true;
+}
+
+/// Query if interrupts are currently enabled
+inline bool interruptsEnabled() {
+    return isr::getGlobalInterruptState().load();
+}
+
+/// Query if interrupts are currently disabled
+inline bool interruptsDisabled() {
+    return !isr::getGlobalInterruptState().load();
 }
 
 } // namespace fl
