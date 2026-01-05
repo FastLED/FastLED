@@ -912,53 +912,111 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         }
     } else if (DATA_WIDTH == 16) {
         // Pack into 16-bit words (compile-time branch)
-        // Optimized: Hoist packing outside inner loop to reduce redundant operations
-        for (size_t bit_pos = 0; bit_pos < 8; bit_pos++) {
-            // Pack 16 wave8_byte values into two 64-bit registers for parallel extraction
-            // This packing is done once per bit_pos (8 times) instead of 64 times
-            uint64_t packed_lo =
-                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos] << 0)  |
-                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos] << 8)  |
-                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos] << 16) |
-                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos] << 24) |
-                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos] << 32) |
-                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos] << 40) |
-                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos] << 48) |
-                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos] << 56);
+        // Optimized: Software pipelining + output buffering
+        // Process 2 bit positions in parallel for better ILP, and batch writes for better cache efficiency
 
-            uint64_t packed_hi =
-                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos] << 0)  |
-                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos] << 8)  |
-                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos] << 16) |
-                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos] << 24) |
-                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos] << 32) |
-                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos] << 40) |
-                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos] << 48) |
-                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos] << 56);
+        // Output buffer: accumulate 16 words (32 bytes) before writing
+        // This aligns with typical 32-byte cache lines and reduces memory write overhead
+        uint8_t writeBuffer[32];
+        size_t writeIdx = 0;
 
-            // Inner loop: extract 8 pulses from the packed data
+        for (size_t bit_pos = 0; bit_pos < 8; bit_pos += 2) {
+            // Pack 16 wave8_byte values for TWO bit positions simultaneously
+            // This enables instruction-level parallelism and better register utilization
+            uint64_t packed_lo_0 =
+                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos + 0] << 0)  |
+                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos + 0] << 8)  |
+                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos + 0] << 16) |
+                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos + 0] << 24) |
+                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos + 0] << 32) |
+                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos + 0] << 40) |
+                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos + 0] << 48) |
+                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos + 0] << 56);
+
+            uint64_t packed_hi_0 =
+                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos + 0] << 0)  |
+                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos + 0] << 8)  |
+                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos + 0] << 16) |
+                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos + 0] << 24) |
+                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos + 0] << 32) |
+                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos + 0] << 40) |
+                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos + 0] << 48) |
+                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos + 0] << 56);
+
+            uint64_t packed_lo_1 =
+                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos + 1] << 0)  |
+                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos + 1] << 8)  |
+                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos + 1] << 16) |
+                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos + 1] << 24) |
+                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos + 1] << 32) |
+                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos + 1] << 40) |
+                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos + 1] << 48) |
+                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos + 1] << 56);
+
+            uint64_t packed_hi_1 =
+                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos + 1] << 0)  |
+                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos + 1] << 8)  |
+                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos + 1] << 16) |
+                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos + 1] << 24) |
+                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos + 1] << 32) |
+                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos + 1] << 40) |
+                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos + 1] << 48) |
+                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos + 1] << 56);
+
+            // Inner loop: interleave extraction from both bit positions
+            // This allows CPU to execute independent operations in parallel
             for (size_t pulse_bit = 0; pulse_bit < 8; pulse_bit++) {
-                // Extract pulse bits in parallel (compiler can optimize independent shifts)
-                uint16_t outputWord =
-                    ((packed_lo >> (7 - pulse_bit + 0))  & 0x01) << 0  |
-                    ((packed_lo >> (7 - pulse_bit + 8))  & 0x01) << 1  |
-                    ((packed_lo >> (7 - pulse_bit + 16)) & 0x01) << 2  |
-                    ((packed_lo >> (7 - pulse_bit + 24)) & 0x01) << 3  |
-                    ((packed_lo >> (7 - pulse_bit + 32)) & 0x01) << 4  |
-                    ((packed_lo >> (7 - pulse_bit + 40)) & 0x01) << 5  |
-                    ((packed_lo >> (7 - pulse_bit + 48)) & 0x01) << 6  |
-                    ((packed_lo >> (7 - pulse_bit + 56)) & 0x01) << 7  |
-                    ((packed_hi >> (7 - pulse_bit + 0))  & 0x01) << 8  |
-                    ((packed_hi >> (7 - pulse_bit + 8))  & 0x01) << 9  |
-                    ((packed_hi >> (7 - pulse_bit + 16)) & 0x01) << 10 |
-                    ((packed_hi >> (7 - pulse_bit + 24)) & 0x01) << 11 |
-                    ((packed_hi >> (7 - pulse_bit + 32)) & 0x01) << 12 |
-                    ((packed_hi >> (7 - pulse_bit + 40)) & 0x01) << 13 |
-                    ((packed_hi >> (7 - pulse_bit + 48)) & 0x01) << 14 |
-                    ((packed_hi >> (7 - pulse_bit + 56)) & 0x01) << 15;
+                // Extract pulse bits for first bit position
+                uint16_t outputWord_0 =
+                    ((packed_lo_0 >> (7 - pulse_bit + 0))  & 0x01) << 0  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 8))  & 0x01) << 1  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 16)) & 0x01) << 2  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 24)) & 0x01) << 3  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 32)) & 0x01) << 4  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 40)) & 0x01) << 5  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 48)) & 0x01) << 6  |
+                    ((packed_lo_0 >> (7 - pulse_bit + 56)) & 0x01) << 7  |
+                    ((packed_hi_0 >> (7 - pulse_bit + 0))  & 0x01) << 8  |
+                    ((packed_hi_0 >> (7 - pulse_bit + 8))  & 0x01) << 9  |
+                    ((packed_hi_0 >> (7 - pulse_bit + 16)) & 0x01) << 10 |
+                    ((packed_hi_0 >> (7 - pulse_bit + 24)) & 0x01) << 11 |
+                    ((packed_hi_0 >> (7 - pulse_bit + 32)) & 0x01) << 12 |
+                    ((packed_hi_0 >> (7 - pulse_bit + 40)) & 0x01) << 13 |
+                    ((packed_hi_0 >> (7 - pulse_bit + 48)) & 0x01) << 14 |
+                    ((packed_hi_0 >> (7 - pulse_bit + 56)) & 0x01) << 15;
 
-                outputBuffer[outputIdx++] = outputWord & 0xFF;
-                outputBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;
+                // Extract pulse bits for second bit position
+                uint16_t outputWord_1 =
+                    ((packed_lo_1 >> (7 - pulse_bit + 0))  & 0x01) << 0  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 8))  & 0x01) << 1  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 16)) & 0x01) << 2  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 24)) & 0x01) << 3  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 32)) & 0x01) << 4  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 40)) & 0x01) << 5  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 48)) & 0x01) << 6  |
+                    ((packed_lo_1 >> (7 - pulse_bit + 56)) & 0x01) << 7  |
+                    ((packed_hi_1 >> (7 - pulse_bit + 0))  & 0x01) << 8  |
+                    ((packed_hi_1 >> (7 - pulse_bit + 8))  & 0x01) << 9  |
+                    ((packed_hi_1 >> (7 - pulse_bit + 16)) & 0x01) << 10 |
+                    ((packed_hi_1 >> (7 - pulse_bit + 24)) & 0x01) << 11 |
+                    ((packed_hi_1 >> (7 - pulse_bit + 32)) & 0x01) << 12 |
+                    ((packed_hi_1 >> (7 - pulse_bit + 40)) & 0x01) << 13 |
+                    ((packed_hi_1 >> (7 - pulse_bit + 48)) & 0x01) << 14 |
+                    ((packed_hi_1 >> (7 - pulse_bit + 56)) & 0x01) << 15;
+
+                // Write to buffer instead of directly to output
+                writeBuffer[writeIdx++] = outputWord_0 & 0xFF;
+                writeBuffer[writeIdx++] = (outputWord_0 >> 8) & 0xFF;
+                writeBuffer[writeIdx++] = outputWord_1 & 0xFF;
+                writeBuffer[writeIdx++] = (outputWord_1 >> 8) & 0xFF;
+            }
+
+            // Flush buffer when full (16 words = 32 bytes)
+            // This triggers efficient burst writes that align with cache lines
+            if (writeIdx == 32) {
+                fl::memcpy(&outputBuffer[outputIdx], writeBuffer, 32);
+                outputIdx += 32;
+                writeIdx = 0;
             }
         }
     } else {
