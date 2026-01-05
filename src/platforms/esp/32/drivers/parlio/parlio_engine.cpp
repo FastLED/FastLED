@@ -1286,7 +1286,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
         CoroutineConfig config;
         config.function = [this]() { debugTaskFunction(this); };
         config.name = "parlio_debug";
-        config.stack_size = 2048;  // 2KB stack
+        config.stack_size = 4096;  // 4KB stack (increased for ESP32-C6 RISC-V - stack overflow at 2KB)
         config.priority = 1;       // Low priority (tskIDLE_PRIORITY + 1)
         mDebugTask = fl::task::coroutine(config);
 
