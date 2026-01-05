@@ -22,12 +22,12 @@
 // Platform dispatch
 #ifdef FL_IS_STUB
     #include "platforms/stub/semaphore_stub.h"
+#elif defined(ESP32)
+    #include "platforms/esp/32/semaphore_esp32.h"
 #else
     // Default fallback: Use stub implementation for all platforms
     // TODO: Add platform-specific implementations here
     // Example:
-    // #elif defined(FL_IS_ESP32)
-    //     #include "platforms/esp/semaphore_esp.h"
     // #elif defined(FL_IS_AVR)
     //     #include "platforms/avr/semaphore_avr.h"
     #include "platforms/stub/semaphore_stub.h"
