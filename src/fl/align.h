@@ -12,11 +12,27 @@
 #endif
 
 // ============================================================================
+// FL_ALIGNAS(N) - Numeric alignment specifier
+// ============================================================================
+// Aligns storage to N bytes (must be a power of 2).
+// Usage: struct FL_ALIGNAS(8) AlignedStruct { char data[10]; };
+#if defined(__AVR__)
+    // AVR (8-bit): No alignment required - make it a no-op to save RAM
+    #define FL_ALIGNAS(N) /* nothing */
+#elif defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
+    // GCC 4.x: Use __attribute__ syntax (more reliable than alignas)
+    #define FL_ALIGNAS(N) __attribute__((aligned(N)))
+#else
+    // Modern compilers (GCC 5.0+, Clang, MSVC): Use C++11 alignas
+    #define FL_ALIGNAS(N) alignas(N)
+#endif
+
+// ============================================================================
 // FL_ALIGN - Fixed alignment (Emscripten: 8 bytes, others: no-op)
 // ============================================================================
 #ifdef __EMSCRIPTEN__
     #define FL_ALIGN_BYTES 8
-    #define FL_ALIGN alignas(FL_ALIGN_BYTES)
+    #define FL_ALIGN FL_ALIGNAS(FL_ALIGN_BYTES)
 #else
     #define FL_ALIGN_BYTES 1
     #define FL_ALIGN

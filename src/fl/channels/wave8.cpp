@@ -1,46 +1,56 @@
 /// @file wave8.cpp
 /// @brief Waveform generation and transposition implementation
+///
+/// This file contains:
+/// - Non-ISR LUT builder (buildWave8ExpansionLUT)
+/// - Public transposition functions (wave8Transpose_2, wave8Transpose_4)
+///
+/// Note: Inline helper functions are in detail/wave8.hpp
 
 #include "wave8.h"
 
 namespace fl {
 
-constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
-                                            0x14, 0x15, 0x40, 0x41, 0x44, 0x45,
-                                            0x50, 0x51, 0x54, 0x55};
+// ============================================================================
+// Public Transposition Functions
+// ============================================================================
 
-#define FL_WAVE8_SPREAD_TO_16(lane_u8_0, lane_u8_1, out_16)                            \
-    do {                                                                       \
-        const uint8_t _a = (uint8_t)(lane_u8_0);                               \
-        const uint8_t _b = (uint8_t)(lane_u8_1);                               \
-        const uint16_t _even =                                                 \
-            (uint16_t)((uint16_t)kTranspose4_16_LUT[_b & 0x0Fu] |              \
-                       ((uint16_t)kTranspose4_16_LUT[_b >> 4] << 8));          \
-        const uint16_t _odd =                                                  \
-            (uint16_t)(((uint16_t)kTranspose4_16_LUT[_a & 0x0Fu] |             \
-                        ((uint16_t)kTranspose4_16_LUT[_a >> 4] << 8))          \
-                       << 1);                                                  \
-        (out_16) |= (uint16_t)(_even | _odd);                                  \
-    } while (0)
-
-// Special optimized transpose function for ISR/DMA contexts.
 FL_OPTIMIZE_FUNCTION FL_IRAM
-static void detail_transpose_2(const Wave8Byte lane_waves[2],
-                               uint8_t output[2 * sizeof(Wave8Byte)]) {
-    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint16_t interleaved = 0;
-        FL_WAVE8_SPREAD_TO_16(lane_waves[0].symbols[symbol_idx].data,
-                              lane_waves[1].symbols[symbol_idx].data,
-                              interleaved);
+void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
+                      const Wave8BitExpansionLut &lut,
+                      uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
+    // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
+    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
+    Wave8Byte laneWaveformSymbols[2];
 
-        output[symbol_idx * 2] = (uint8_t)(interleaved >> 8);
-        output[symbol_idx * 2 + 1] = (uint8_t)(interleaved & 0xFF);
+    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
+    detail::wave8_convert_byte_to_wave8byte(lanes[0], lut, &laneWaveformSymbols[0]);
+    detail::wave8_convert_byte_to_wave8byte(lanes[1], lut, &laneWaveformSymbols[1]);
+
+    // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
+    detail::wave8_transpose_2(laneWaveformSymbols, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_4(const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
+                      const Wave8BitExpansionLut &lut,
+                      uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+    // Allocate waveform buffers on stack (32 Wave8Bit total: 8 packed bytes per lane × 4 lanes)
+    Wave8Byte laneWaveformSymbols[4];
+
+    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
+    for (int lane = 0; lane < 4; lane++) {
+        detail::wave8_convert_byte_to_wave8byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
     }
+
+    // Transpose waveforms to DMA format (interleave 32 packed bytes to 32 bytes)
+    detail::wave8_transpose_4(laneWaveformSymbols, output);
 }
 
 // ============================================================================
 // LUT Builder from Timing Data
-// Doesn't this is not designed to be called from ISR handlers.
+// Note: This is not designed to be called from ISR handlers.
 // ============================================================================
 FL_OPTIMIZE_FUNCTION
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
@@ -102,27 +112,5 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 
     return lut;
 }
-
-// Note: wave8() implementation moved to header file for FASTLED_FORCE_INLINE compatibility
-
-// GCC-specific optimization attribute (Clang ignores it)
-FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
-                      const Wave8BitExpansionLut &lut,
-                      uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-    // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
-    // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
-    // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
-    Wave8Byte laneWaveformSymbols[2];
-
-    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
-    convertByteToWave8Byte_inline(lanes[0], lut, &laneWaveformSymbols[0]);
-    convertByteToWave8Byte_inline(lanes[1], lut, &laneWaveformSymbols[1]);
-
-    // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
-    detail_transpose_2(laneWaveformSymbols, output);
-}
-
-
 
 } // namespace fl

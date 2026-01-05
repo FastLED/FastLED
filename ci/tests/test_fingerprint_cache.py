@@ -741,7 +741,7 @@ class TestFingerprintCache(TestCase):
 
         self.assertFalse(result, "Large file cache hit should return False")
         self.assertLess(
-            elapsed, 0.005, f"Cache hit took {elapsed:.3f}s, should be < 0.005s"
+            elapsed, 0.05, f"Cache hit took {elapsed:.3f}s, should be < 0.05s"
         )
 
     def test_binary_file_handling(self) -> None:

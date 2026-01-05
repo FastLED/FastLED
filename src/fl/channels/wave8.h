@@ -2,6 +2,9 @@
 
 #pragma once
 
+// allow-include-after-namespace
+
+#include "fl/align.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
@@ -26,7 +29,7 @@ struct Wave8Bit {
 ///
 /// Holds 8 Wave8Bit structures (1 byte each = 8 bytes total).
 /// The struct is 8-byte aligned for optimized memory access.
-struct alignas(8) Wave8Byte {
+struct FL_ALIGNAS(8) Wave8Byte {
     Wave8Bit symbols[8];  // 8 bytes total (8 symbols × 1 byte each)
 };
 
@@ -41,7 +44,7 @@ struct alignas(8) Wave8Byte {
 /// (nibble-level).
 ///
 /// Total size: 16 nibbles × 4 Wave8Bit × 1 byte = 64 bytes
-struct alignas(8) Wave8BitExpansionLut {
+struct FL_ALIGNAS(8) Wave8BitExpansionLut {
     Wave8Bit lut[16][4]; // nibble -> 4 Wave8Bit (4 bytes per nibble)
 };
 
@@ -58,46 +61,24 @@ struct alignas(8) Wave8BitExpansionLut {
 /// @return Populated Wave8BitExpansionLut lookup table (64 bytes)
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 
-/// @brief Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)
-/// @note Inline implementation for ISR performance
-FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-static void convertByteToWave8Byte_inline(uint8_t byte_value,
-                                           const Wave8BitExpansionLut &lut,
-                                           Wave8Byte *output) {
-    // ISR-optimized copy: Copy high nibble (4 bytes = 1 x uint32_t)
-    const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
-    isr::memcpy32(reinterpret_cast<uint32_t*>(&output->symbols[0]),
-                  reinterpret_cast<const uint32_t*>(high_nibble_data),
-                  1); // 4 bytes = 1 x uint32_t
-
-    // ISR-optimized copy: Copy low nibble (4 bytes = 1 x uint32_t)
-    const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
-    isr::memcpy32(reinterpret_cast<uint32_t*>(&output->symbols[4]),
-                  reinterpret_cast<const uint32_t*>(low_nibble_data),
-                  1); // 4 bytes = 1 x uint32_t
-}
-
-/// @brief Convert byte to 8 Wave8Bit structures using nibble LUT
-/// @note Inline implementation for ISR performance (always_inline requires visible body)
-FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
+// Forward declaration for inline function (implementation in detail/wave8.hpp)
 void wave8(uint8_t lane,
            const Wave8BitExpansionLut &lut,
-           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
-    // Convert single lane byte to wave pulse symbols (8 bytes packed)
-    // Use properly aligned local variable to avoid alignment issues
-    Wave8Byte waveformSymbol;
-    convertByteToWave8Byte_inline(lane, lut, &waveformSymbol);
+           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
 
-    // ISR-optimized 32-bit copy: Copy 8 bytes as 2 x uint32_t words
-    // Wave8Byte is 8-byte aligned (alignas(8)), guaranteeing 4-byte alignment
-    isr::memcpy32(reinterpret_cast<uint32_t*>(output),
-                  reinterpret_cast<const uint32_t*>(&waveformSymbol.symbols[0].data),
-                  2); // 8 bytes = 2 x uint32_t
-}
-
-FL_IRAM void wave8Transpose_2(
+// Public transposition functions (implementations in wave8.cpp)
+void wave8Transpose_2(
     const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
 
+void wave8Transpose_4(
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
+    const Wave8BitExpansionLut &lut,
+    uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
+
 } // namespace fl
+
+// Include inline implementations for optimal performance
+// This must be after the namespace to avoid the include-after-namespace linter error
+#include "detail/wave8.hpp"
