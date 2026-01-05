@@ -185,6 +185,54 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
     }
 }
 
+// ============================================================================
+// 16-Lane Transposition (Force Inline)
+// ============================================================================
+
+/// @brief Transpose 16 lanes of Wave8Byte data into interleaved format
+/// @param lane_waves Array of 16 Wave8Byte structures
+/// @param output Output buffer (128 bytes)
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_16(const Wave8Byte lane_waves[16],
+                        uint8_t output[16 * sizeof(Wave8Byte)]) {
+    // Each symbol (Wave8Bit) has 8 pulses
+    // With 16 lanes, we produce 16 bytes per symbol (1 pulse across 16 lanes = 2 bytes)
+    // Output format: 16 lanes interleaved, 8 bits per lane, 2 bytes per pulse
+    // [L15_P7, ..., L0_P7, L15_P6, ..., L0_P6, ...]
+
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        uint8_t lane_bytes[16];
+        for (int lane = 0; lane < 16; lane++) {
+            lane_bytes[lane] = lane_waves[lane].symbols[symbol_idx].data;
+        }
+
+        // Process 16 output bytes (8 pulses × 2 bytes per pulse)
+        for (int byte_idx = 0; byte_idx < 16; byte_idx++) {
+            // Each pair of bytes represents one pulse across all 16 lanes
+            int pulse_bit = 7 - (byte_idx / 2);
+
+            uint8_t output_byte = 0;
+
+            // Determine which 8 lanes to process (high byte = lanes 8-15, low byte = lanes 0-7)
+            if (byte_idx % 2 == 0) {
+                // High byte: lanes 8-15
+                for (int lane = 8; lane < 16; lane++) {
+                    uint8_t pulse = (lane_bytes[lane] >> pulse_bit) & 1;
+                    output_byte |= (pulse << (lane - 8));
+                }
+            } else {
+                // Low byte: lanes 0-7
+                for (int lane = 0; lane < 8; lane++) {
+                    uint8_t pulse = (lane_bytes[lane] >> pulse_bit) & 1;
+                    output_byte |= (pulse << lane);
+                }
+            }
+
+            output[symbol_idx * 16 + byte_idx] = output_byte;
+        }
+    }
+}
+
 } // namespace detail
 
 // ============================================================================

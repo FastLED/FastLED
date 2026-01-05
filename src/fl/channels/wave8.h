@@ -82,6 +82,11 @@ void wave8Transpose_8(
     const Wave8BitExpansionLut &lut,
     uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
 
+void wave8Transpose_16(
+    const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
+    const Wave8BitExpansionLut &lut,
+    uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
+
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave8Untranspose_2(
     const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
@@ -94,6 +99,10 @@ void wave8Untranspose_4(
 void wave8Untranspose_8(
     const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
     uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
+
+void wave8Untranspose_16(
+    const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
+    uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
 
 } // namespace fl
 

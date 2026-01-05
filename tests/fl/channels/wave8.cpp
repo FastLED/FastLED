@@ -654,3 +654,206 @@ TEST_CASE("wave8Untranspose_8_distinct_patterns") {
         }
     }
 }
+
+TEST_CASE("wave8Transpose_16_all_ones") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test case: All lanes 0xFF
+    uint8_t lanes[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t output[16 * sizeof(Wave8Byte)]; // 128 bytes
+    fl::memset(output, 0, sizeof(output));
+
+    wave8Transpose_16(lanes, lut, output);
+
+    // All lanes have 1s → all bits set in output
+    // Expected: 0xFF for all 128 output bytes
+    for (int i = 0; i < 128; i++) {
+        REQUIRE(output[i] == 0xFF);
+    }
+}
+
+TEST_CASE("wave8Transpose_16_all_zeros") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test case: All lanes 0x00
+    uint8_t lanes[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t output[16 * sizeof(Wave8Byte)]; // 128 bytes
+    fl::memset(output, 0xFF, sizeof(output)); // Pre-fill to verify clearing
+
+    wave8Transpose_16(lanes, lut, output);
+
+    // All lanes have 0s → all bits clear in output
+    // Expected: 0x00 for all 128 output bytes
+    for (int i = 0; i < 128; i++) {
+        REQUIRE(output[i] == 0x00);
+    }
+}
+
+TEST_CASE("wave8Transpose_16_alternating_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test case: Alternating pattern
+    uint8_t lanes[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
+                         0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    uint8_t output[16 * sizeof(Wave8Byte)]; // 128 bytes
+    fl::memset(output, 0, sizeof(output));
+
+    wave8Transpose_16(lanes, lut, output);
+
+    // Lane pattern: [L15=0x00, L14=0xFF, ..., L1=0x00, L0=0xFF]
+    // Even lanes (0, 2, 4, ..., 14) = 0xFF → contribute bit
+    // Odd lanes (1, 3, 5, ..., 15) = 0x00 → no contribution
+    // Result: 0b01010101 = 0x55 for low byte (lanes 0-7)
+    //         0b01010101 = 0x55 for high byte (lanes 8-15)
+    for (int i = 0; i < 128; i++) {
+        REQUIRE(output[i] == 0x55);
+    }
+}
+
+TEST_CASE("wave8Transpose_16_distinct_patterns") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test case: Each lane has single bit set at different positions
+    uint8_t lanes[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+                         0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint8_t output[16 * sizeof(Wave8Byte)]; // 128 bytes
+    fl::memset(output, 0, sizeof(output));
+
+    wave8Transpose_16(lanes, lut, output);
+
+    // Symbol 0 (bit 7): Only lanes 7 and 15 have bit 7 set (0x80)
+    // Expected: low byte = 0x80 (lane 7), high byte = 0x80 (lane 15)
+    REQUIRE(output[0] == 0x80);  // High byte (lanes 8-15)
+    REQUIRE(output[1] == 0x80);  // Low byte (lanes 0-7)
+
+    // Symbol 7 (bit 0): Only lanes 0 and 8 have bit 0 set (0x01)
+    // Expected: low byte = 0x01 (lane 0), high byte = 0x01 (lane 8)
+    REQUIRE(output[112] == 0x01); // High byte (lanes 8-15)
+    REQUIRE(output[113] == 0x01); // Low byte (lanes 0-7)
+}
+
+TEST_CASE("wave8Untranspose_16_all_ones") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with all 0xFF
+    uint8_t lanes[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t transposed[16 * sizeof(Wave8Byte)]; // 128 bytes
+    uint8_t untransposed[16 * sizeof(Wave8Byte)]; // 128 bytes
+
+    // Transpose
+    wave8Transpose_16(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_16(transposed, untransposed);
+
+    // Verify: all lanes should be 0xFF (8 bytes per lane × 16 lanes)
+    for (int i = 0; i < 128; i++) {
+        REQUIRE(untransposed[i] == 0xFF);
+    }
+}
+
+TEST_CASE("wave8Untranspose_16_alternating_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with alternating pattern
+    uint8_t lanes[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
+                         0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    uint8_t transposed[16 * sizeof(Wave8Byte)];
+    uint8_t untransposed[16 * sizeof(Wave8Byte)];
+
+    // Transpose
+    wave8Transpose_16(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_16(transposed, untransposed);
+
+    // Verify each lane
+    for (int lane = 0; lane < 16; lane++) {
+        uint8_t expected = (lane % 2 == 0) ? 0xFF : 0x00;
+        for (int i = 0; i < 8; i++) {
+            REQUIRE(untransposed[lane * 8 + i] == expected);
+        }
+    }
+}
+
+TEST_CASE("wave8Untranspose_16_distinct_patterns") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with distinct values per lane
+    uint8_t lanes[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+                         0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint8_t transposed[16 * sizeof(Wave8Byte)];
+    uint8_t untransposed[16 * sizeof(Wave8Byte)];
+
+    // Transpose
+    wave8Transpose_16(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_16(transposed, untransposed);
+
+    // Verify each lane has the expected pattern
+    const uint8_t expected_patterns[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+                                           0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+    for (int lane = 0; lane < 16; lane++) {
+        // Find which bit is set in the expected pattern
+        int set_bit = -1;
+        for (int bit = 0; bit < 8; bit++) {
+            if (expected_patterns[lane] & (1 << bit)) {
+                set_bit = bit;
+                break;
+            }
+        }
+
+        // Verify the wave pattern
+        for (int symbol = 0; symbol < 8; symbol++) {
+            uint8_t expected = (symbol == (7 - set_bit)) ? 0xFF : 0x00;
+            REQUIRE(untransposed[lane * 8 + symbol] == expected);
+        }
+    }
+}

@@ -64,6 +64,22 @@ void wave8Transpose_8(const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
     detail::wave8_transpose_8(laneWaveformSymbols, output);
 }
 
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16(const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
+                       const Wave8BitExpansionLut &lut,
+                       uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+    // Allocate waveform buffers on stack (128 Wave8Bit total: 8 packed bytes per lane × 16 lanes)
+    Wave8Byte laneWaveformSymbols[16];
+
+    // Convert each lane byte to wave pulse symbols (8 packed bytes each)
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_convert_byte_to_wave8byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
+    }
+
+    // Transpose waveforms to DMA format (interleave 128 packed bytes to 128 bytes)
+    detail::wave8_transpose_16(laneWaveformSymbols, output);
+}
+
 // ============================================================================
 // LUT Builder from Timing Data
 // Note: This is not designed to be called from ISR handlers.
@@ -259,6 +275,56 @@ void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof
 
     // Copy de-interleaved data to output
     for (int lane = 0; lane < 8; lane++) {
+        fl::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
+    }
+}
+
+FL_OPTIMIZE_FUNCTION
+void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
+                         uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+    // Reverse the 16-lane transposition
+    // Input: 128 bytes of interleaved data (16 bytes per symbol, 8 symbols)
+    // Output: 16 Wave8Byte structures (128 bytes total, de-interleaved)
+
+    Wave8Byte lane_waves[16];
+
+    // Process each of the 8 symbols
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        uint8_t lane_bytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        // Process 16 input bytes (8 pulses × 2 bytes per pulse)
+        for (int byte_idx = 0; byte_idx < 16; byte_idx++) {
+            uint8_t input_byte = transposed[symbol_idx * 16 + byte_idx];
+
+            // Calculate which pulse bit this corresponds to
+            int pulse_bit = 7 - (byte_idx / 2);
+
+            // Determine which 8 lanes to process based on byte position
+            if (byte_idx % 2 == 0) {
+                // High byte: lanes 8-15
+                // Bit layout: [L15, L14, L13, L12, L11, L10, L9, L8]
+                for (int lane = 8; lane < 16; lane++) {
+                    uint8_t pulse = (input_byte >> (lane - 8)) & 1;
+                    lane_bytes[lane] |= (pulse << pulse_bit);
+                }
+            } else {
+                // Low byte: lanes 0-7
+                // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]
+                for (int lane = 0; lane < 8; lane++) {
+                    uint8_t pulse = (input_byte >> lane) & 1;
+                    lane_bytes[lane] |= (pulse << pulse_bit);
+                }
+            }
+        }
+
+        // Store de-interleaved bytes
+        for (int lane = 0; lane < 16; lane++) {
+            lane_waves[lane].symbols[symbol_idx].data = lane_bytes[lane];
+        }
+    }
+
+    // Copy de-interleaved data to output
+    for (int lane = 0; lane < 16; lane++) {
         fl::memcpy(output + lane * sizeof(Wave8Byte), &lane_waves[lane], sizeof(Wave8Byte));
     }
 }

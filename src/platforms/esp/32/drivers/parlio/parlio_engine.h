@@ -281,10 +281,6 @@ private:
     const uint8_t* mScratchBuffer;
     size_t mLaneStride;
 
-    // Waveform expansion buffer (staging buffer for wave8 before transpose)
-    // Does NOT need DMA flags - this is a CPU-only intermediate buffer
-    fl::vector<uint8_t> mWaveformExpansionBuffer;
-
     // Error state
     bool mErrorOccurred;
 

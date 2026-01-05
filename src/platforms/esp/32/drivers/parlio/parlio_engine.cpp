@@ -23,7 +23,6 @@
 #include "fl/delay.h"
 #include "fl/error.h"
 #include "fl/log.h"
-#include "fl/transposition.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"
@@ -694,12 +693,6 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                                  size_t startByte,
                                  size_t byteCount,
                                  size_t& outputBytesWritten) {
-    // Staging buffer for wave8 output before transposition
-    // Holds wave8bytes for all lanes (data_width × 8 bytes)
-    // Each lane produces Wave8Byte (8 bytes) for each input byte
-    uint8_t* laneWaveforms = mWaveformExpansionBuffer.data();
-    constexpr size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
-
     size_t outputIdx = 0;
     size_t byteOffset = 0;
 
@@ -730,9 +723,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
         outputIdx += front_padding_total;
     }
 
-    // Two-stage architecture: Process one byte position at a time
-    // Stage 1: Generate wave8bytes for ALL lanes → staging buffer
-    // Stage 2: Transpose staging buffer → DMA output buffer
+    // Process one byte position at a time using wave8 transpose functions
+    // These functions combine expansion + transposition in one step with minimal memory overhead
 
     while (byteOffset < byteCount) {
         // Check if enough space for this block
@@ -742,41 +734,73 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             return false;
         }
 
-        // ═══════════════════════════════════════════════════════════════
-        // STAGE 1: Generate wave8bytes for ALL lanes into staging buffer
-        // ═══════════════════════════════════════════════════════════════
-        // Split real and dummy lane processing to eliminate branch in inner loop
+        // Prepare lane bytes for transposition
+        // Use stack-allocated temporary arrays sized for the actual data width
+        // Dispatch to appropriate wave8Transpose function based on data width
 
-        // Process real channels first (no branch mispredictions)
-        for (size_t lane = 0; lane < mActualChannels; lane++) {
-            uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-            const uint8_t* laneData = mScratchBuffer + (lane * mLaneStride);
-            uint8_t byte = laneData[startByte + byteOffset];
+        if (mDataWidth == 1 || mDataWidth == 2) {
+            uint8_t lanes[2];
+            lanes[0] = (mActualChannels > 0)
+                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
+                : 0;
+            lanes[1] = (mActualChannels > 1)
+                ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
+                : 0;
 
-            // wave8() outputs Wave8Byte (8 bytes) in bit-packed format
-            // Cast pointer to array reference for wave8 API
-            uint8_t (*wave8Array)[8] = reinterpret_cast<uint8_t (*)[8]>(laneWaveform);
-            fl::wave8(byte, mWave8Lut, *wave8Array);
+            uint8_t transposed[2 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut,
+                                reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed));
+
+            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+            outputIdx += blockSize;
+        } else if (mDataWidth == 4) {
+            uint8_t lanes[4];
+            for (size_t lane = 0; lane < 4; lane++) {
+                lanes[lane] = (lane < mActualChannels)
+                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                    : 0;
+            }
+
+            uint8_t transposed[4 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_4(reinterpret_cast<const uint8_t(&)[4]>(lanes), mWave8Lut,
+                                reinterpret_cast<uint8_t(&)[4 * sizeof(Wave8Byte)]>(transposed));
+
+            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+            outputIdx += blockSize;
+        } else if (mDataWidth == 8) {
+            uint8_t lanes[8];
+            for (size_t lane = 0; lane < 8; lane++) {
+                lanes[lane] = (lane < mActualChannels)
+                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                    : 0;
+            }
+
+            uint8_t transposed[8 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_8(reinterpret_cast<const uint8_t(&)[8]>(lanes), mWave8Lut,
+                                reinterpret_cast<uint8_t(&)[8 * sizeof(Wave8Byte)]>(transposed));
+
+            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+            outputIdx += blockSize;
+        } else if (mDataWidth == 16) {
+            uint8_t lanes[16];
+            for (size_t lane = 0; lane < 16; lane++) {
+                lanes[lane] = (lane < mActualChannels)
+                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                    : 0;
+            }
+
+            uint8_t transposed[16 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_16(reinterpret_cast<const uint8_t(&)[16]>(lanes), mWave8Lut,
+                                 reinterpret_cast<uint8_t(&)[16 * sizeof(Wave8Byte)]>(transposed));
+
+            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+            outputIdx += blockSize;
+        } else {
+            // Invalid data width - should never happen (validated in initialize())
+            outputBytesWritten = outputIdx;
+            return false;
         }
 
-        // Bulk-zero dummy lanes separately (more efficient than per-lane zeroing)
-        if (mActualChannels < mDataWidth) {
-            uint8_t* firstDummyLane = laneWaveforms + (mActualChannels * bytes_per_lane);
-            size_t dummyLaneBytes = (mDataWidth - mActualChannels) * bytes_per_lane;
-            fl::isr::memset_zero(firstDummyLane, dummyLaneBytes);
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // STAGE 2: Transpose staging buffer → DMA output buffer
-        // ═══════════════════════════════════════════════════════════════
-        // Transpose wave8bytes from all lanes (laneWaveforms staging buffer)
-        // into bit-packed format for PARLIO hardware transmission
-        size_t bytesWritten = fl::transpose_wave8byte_parlio(
-            laneWaveforms,        // Input: staging buffer (all lanes' wave8bytes)
-            mDataWidth,    // Number of lanes (1-16)
-            outputBuffer + outputIdx);  // Output: DMA buffer
-
-        outputIdx += bytesWritten;
         byteOffset++;
     }
 
@@ -1198,20 +1222,6 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Allocate worker timer
     if (!allocateWorkerTimer()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate worker timer");
-        mPeripheral = nullptr;
-        return false;
-    }
-
-    // Allocate waveform expansion buffer (staging buffer - CPU only, no DMA)
-    // This buffer holds intermediate wave8 data before transposition to DMA buffers
-    const size_t bytes_per_lane = sizeof(Wave8Byte); // 8 bytes per input byte
-    const size_t waveform_buffer_size = mDataWidth * bytes_per_lane;
-
-    // Use regular heap vector (not DMA) - this is a CPU-only staging buffer
-    mWaveformExpansionBuffer.resize(waveform_buffer_size);
-
-    if (mWaveformExpansionBuffer.empty()) {
-        FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
         mPeripheral = nullptr;
         return false;
     }
