@@ -10,6 +10,7 @@ This is used in CI/CD to prevent bad code patterns.
 import os
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -20,6 +21,23 @@ from ci.util.check_files import (
     collect_files_to_check,
 )
 from ci.util.paths import PROJECT_ROOT
+
+
+@dataclass
+class NamespaceInfo:
+    """Information about a namespace declaration."""
+
+    line_number: int
+    snippet: str
+
+
+@dataclass
+class IncludeViolation:
+    """Represents an include directive that appears after a namespace declaration."""
+
+    include_line: int
+    include_snippet: str
+    namespace_info: NamespaceInfo | None
 
 
 def strip_comments(content: str) -> str:
@@ -65,24 +83,124 @@ def is_bracket_balanced(file_path: Path) -> bool:
         return True  # Assume balanced if we can't read
 
 
-def find_includes_after_namespace(
+def find_includes_after_namespace_thorough(
     file_path: Path,
-) -> list[tuple[int, str, Optional[tuple[int, str]]]]:
+) -> list[IncludeViolation]:
     """
-    Check if a C++ file has #include directives after namespace declarations.
+    Thorough check that tracks namespace depth to avoid false positives.
+    This is more expensive but accurate when includes appear after namespaces.
 
     Args:
         file_path (Path): Path to the C++ file to check
 
     Returns:
-        List[Tuple[int, str, Optional[Tuple[int, str]]]]: List of (include_line, include_snippet, (namespace_line, namespace_snippet))
+        List[IncludeViolation]: List of violations found
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Strip comments to avoid false positives from commented code
+        content_no_comments = strip_comments(content)
+        lines = content.splitlines()
+        lines_no_comments = content_no_comments.splitlines()
+
+        violations: list[IncludeViolation] = []
+        namespace_stack: list[NamespaceInfo] = []  # Track nested namespaces
+        last_namespace: NamespaceInfo | None = None
+
+        # Compiled regex patterns
+        using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
+        namespace_open_pattern = re.compile(r"^\s*namespace\s+\w+\s*\{")
+        include_pattern = re.compile(r"^\s*#\s*include")
+
+        def truncate_snippet(text: str, max_len: int = 50) -> str:
+            """Truncate text to max_len characters."""
+            text = text.strip()
+            if len(text) <= max_len:
+                return text
+            return text[: max_len - 3] + "..."
+
+        for i, (line, line_no_comments) in enumerate(zip(lines, lines_no_comments), 1):
+            line_stripped = line_no_comments.strip()
+
+            # Skip empty lines
+            if not line_stripped:
+                continue
+
+            # Track namespace depth by counting braces
+            open_braces = line_no_comments.count("{")
+            close_braces = line_no_comments.count("}")
+
+            # Check for namespace opening
+            if "using namespace" in line_stripped:
+                if using_namespace_pattern.match(line_stripped):
+                    last_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(line)
+                    )
+                    # using namespace is at global scope, treat as depth 1
+                    if not namespace_stack:
+                        namespace_stack.append(last_namespace)
+
+            if "namespace" in line_stripped and "{" in line_stripped:
+                if namespace_open_pattern.match(line_stripped):
+                    last_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(line)
+                    )
+                    namespace_stack.append(last_namespace)
+
+            # Check for includes OUTSIDE all namespaces (stack empty but we've seen a namespace)
+            if "#include" in line_stripped:
+                if include_pattern.match(line_stripped):
+                    # Violation if we've seen a namespace but are now outside all namespaces
+                    if last_namespace and not namespace_stack:
+                        include_snippet = truncate_snippet(line)
+                        violations.append(
+                            IncludeViolation(
+                                include_line=i,
+                                include_snippet=include_snippet,
+                                namespace_info=last_namespace,
+                            )
+                        )
+
+            # Update namespace stack based on brace count
+            # This handles closing braces that end namespaces
+            net_braces = open_braces - close_braces
+            if net_braces < 0:
+                # Closing braces - pop from stack
+                for _ in range(abs(net_braces)):
+                    if namespace_stack:
+                        namespace_stack.pop()
+
+        return violations
+    except (UnicodeDecodeError, IOError):
+        # Skip files that can't be read
+        return []
+
+
+def find_includes_after_namespace(
+    file_path: Path,
+) -> list[IncludeViolation]:
+    """
+    Check if a C++ file has #include directives after namespace declarations.
+    Uses a fast check first, then falls back to thorough check if needed.
+
+    Args:
+        file_path (Path): Path to the C++ file to check
+
+    Returns:
+        List[IncludeViolation]: List of violations found
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.readlines()
 
-        violations: list[tuple[int, str, Optional[tuple[int, str]]]] = []
-        current_namespace: Optional[tuple[int, str]] = None
+        violations: list[IncludeViolation] = []
+        current_namespace: NamespaceInfo | None = None
+        seen_namespace = False  # Track if we've ever seen a namespace
+        seen_include_after_namespace = (
+            False  # Track if include appears after any namespace
+        )
 
         # Compiled regex patterns for validation (only used after fast string search)
         using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
@@ -111,27 +229,45 @@ def find_includes_after_namespace(
             # Fast string search for "using namespace" before regex validation
             if "using namespace" in line:
                 if using_namespace_pattern.match(line):
-                    current_namespace = (i, truncate_snippet(original_line))
+                    current_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(original_line)
+                    )
+                    seen_namespace = True
 
             # Fast string search for "namespace X {" before regex validation
             if "namespace" in line and "{" in line:
                 if namespace_open_pattern.match(line):
-                    current_namespace = (i, truncate_snippet(original_line))
+                    current_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(original_line)
+                    )
+                    seen_namespace = True
 
             # Fast string search for "#include" before regex validation
-            if current_namespace and "#include" in line:
+            if "#include" in line:
                 if include_pattern.match(line):
-                    include_snippet = truncate_snippet(original_line)
-                    violations.append((i, include_snippet, current_namespace))
+                    # If we're inside a namespace, add as potential violation
+                    if current_namespace:
+                        include_snippet = truncate_snippet(original_line)
+                        violations.append(
+                            IncludeViolation(
+                                include_line=i,
+                                include_snippet=include_snippet,
+                                namespace_info=current_namespace,
+                            )
+                        )
+                    # If we've seen a namespace before (even if not currently in one),
+                    # flag for thorough check
+                    if seen_namespace:
+                        seen_include_after_namespace = True
 
-        # Second pass: if we found violations, verify with bracket counting
-        if violations:
+        # Second pass: if we've seen both a namespace and an include,
+        # use the thorough check to determine real violations
+        if seen_namespace and seen_include_after_namespace:
             if not is_bracket_balanced(file_path):
-                # Brackets are unbalanced, keep violations as they might be false positives
-                # But file has syntax errors, so just clear violations to avoid noise
+                # Brackets are unbalanced - file has syntax errors, ignore
                 return []
-            # Brackets are balanced, violations are real
-            return violations
+            # Use thorough check to verify these are real violations
+            return find_includes_after_namespace_thorough(file_path)
 
         return violations
     except (UnicodeDecodeError, IOError):
@@ -143,9 +279,7 @@ class NamespaceIncludesChecker(FileContentChecker):
     """FileContentChecker implementation for detecting includes after namespace declarations."""
 
     def __init__(self):
-        self.violations: dict[
-            str, list[tuple[int, str, Optional[tuple[int, str]]]]
-        ] = {}
+        self.violations: dict[str, list[IncludeViolation]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed (only .h and .hpp files in src/)."""
@@ -175,8 +309,12 @@ class NamespaceIncludesChecker(FileContentChecker):
             if allow_directive_pattern.search(line):
                 return []  # Return empty if directive is found
 
-        violations: list[tuple[int, str, Optional[tuple[int, str]]]] = []
-        current_namespace: Optional[tuple[int, str]] = None
+        violations: list[IncludeViolation] = []
+        current_namespace: NamespaceInfo | None = None
+        seen_namespace = False  # Track if we've ever seen a namespace
+        seen_include_after_namespace = (
+            False  # Track if include appears after any namespace
+        )
 
         # Compiled regex patterns for validation (only used after fast string search)
         using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
@@ -214,27 +352,47 @@ class NamespaceIncludesChecker(FileContentChecker):
             # Fast string search for "using namespace" before regex validation
             if "using namespace" in line_stripped:
                 if using_namespace_pattern.match(line_stripped):
-                    current_namespace = (i, truncate_snippet(original_line))
+                    current_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(original_line)
+                    )
+                    seen_namespace = True
 
             # Fast string search for "namespace X {" before regex validation
             if "namespace" in line_stripped and "{" in line_stripped:
                 if namespace_open_pattern.match(line_stripped):
-                    current_namespace = (i, truncate_snippet(original_line))
+                    current_namespace = NamespaceInfo(
+                        line_number=i, snippet=truncate_snippet(original_line)
+                    )
+                    seen_namespace = True
 
             # Fast string search for "#include" before regex validation
-            if current_namespace and "#include" in line_stripped:
+            if "#include" in line_stripped:
                 if include_pattern.match(line_stripped):
-                    include_snippet = truncate_snippet(original_line)
-                    violations.append((i, include_snippet, current_namespace))
+                    # If we're inside a namespace, add as potential violation
+                    if current_namespace:
+                        include_snippet = truncate_snippet(original_line)
+                        violations.append(
+                            IncludeViolation(
+                                include_line=i,
+                                include_snippet=include_snippet,
+                                namespace_info=current_namespace,
+                            )
+                        )
+                    # If we've seen a namespace before (even if not currently in one),
+                    # flag for thorough check
+                    if seen_namespace:
+                        seen_include_after_namespace = True
 
-        # Second pass: if we found violations, verify with bracket counting
-        if violations:
+        # Second pass: if we've seen both a namespace and an include,
+        # use the thorough check to determine real violations
+        if seen_namespace and seen_include_after_namespace:
             if not is_bracket_balanced(Path(file_content.path)):
-                # Brackets are unbalanced, keep violations as they might be false positives
-                # But file has syntax errors, so just clear violations to avoid noise
+                # Brackets are unbalanced - file has syntax errors, ignore
                 return []
-            # Brackets are balanced, violations are real
-            self.violations[file_content.path] = violations
+            # Use thorough check to verify these are real violations
+            violations = find_includes_after_namespace_thorough(Path(file_content.path))
+            if violations:
+                self.violations[file_content.path] = violations
 
         return []  # We collect violations internally
 
@@ -318,17 +476,21 @@ def main() -> None:
             print(f"{rel_path}:")
 
             # Group violations by namespace
-            namespace_groups: dict[Optional[str], list[tuple[int, str]]] = {}
+            namespace_groups: dict[str | None, list[tuple[int, str]]] = {}
 
-            for include_line, include_snippet, namespace_info in violation_data:
+            for violation in violation_data:
                 namespace_key = None
-                if namespace_info:
-                    namespace_line, namespace_snippet = namespace_info
-                    namespace_key = f"{namespace_line}: {namespace_snippet}"
+                if violation.namespace_info:
+                    namespace_key = (
+                        f"{violation.namespace_info.line_number}: "
+                        f"{violation.namespace_info.snippet}"
+                    )
 
                 if namespace_key not in namespace_groups:
                     namespace_groups[namespace_key] = []
-                namespace_groups[namespace_key].append((include_line, include_snippet))
+                namespace_groups[namespace_key].append(
+                    (violation.include_line, violation.include_snippet)
+                )
 
             # Print each namespace group
             for namespace_key, includes in namespace_groups.items():
