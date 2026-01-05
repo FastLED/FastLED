@@ -25,6 +25,20 @@ struct ChipsetTimingConfig {
     constexpr uint32_t total_period_ns() const {
         return t1_ns + t2_ns + t3_ns;
     }
+
+    /// @brief Equality operator for chipset grouping
+    /// @note Ignores name field - only timing parameters matter for grouping
+    constexpr bool operator==(const ChipsetTimingConfig& other) const {
+        return t1_ns == other.t1_ns &&
+               t2_ns == other.t2_ns &&
+               t3_ns == other.t3_ns &&
+               reset_us == other.reset_us;
+    }
+
+    /// @brief Inequality operator
+    constexpr bool operator!=(const ChipsetTimingConfig& other) const {
+        return !(*this == other);
+    }
 };
 
 /// @brief Convert compile-time CHIPSET type to runtime timing config

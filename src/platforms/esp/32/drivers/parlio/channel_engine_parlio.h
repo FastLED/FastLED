@@ -466,6 +466,12 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
                              size_t maxChannelSize);
 
   private:
+    /// @brief Group of channels sharing the same chipset timing
+    struct ChipsetGroup {
+        ChipsetTimingConfig mTiming;              ///< Shared timing configuration
+        fl::vector<ChannelDataPtr> mChannels;     ///< Channels in this group
+    };
+
     /// @brief HAL engine reference (singleton)
     detail::ParlioEngine& mEngine;
 
@@ -485,6 +491,10 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     fl::vector<ChannelDataPtr>
         mTransmittingChannels; ///< Channels currently transmitting (for
                                ///< cleanup)
+
+    /// @brief Chipset grouping state for sequential transmission
+    fl::vector<ChipsetGroup> mChipsetGroups;      ///< Groups of channels by timing
+    size_t mCurrentGroupIndex;                     ///< Index of currently transmitting group
 };
 
 //=============================================================================
