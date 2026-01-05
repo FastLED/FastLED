@@ -70,5 +70,17 @@ bool requiresAssemblyHandler(uint8_t priority) {
     return isr::platform::requires_assembly_handler(priority);
 }
 
+// ============================================================================
+// CriticalSection implementation
+// ============================================================================
+
+CriticalSection::CriticalSection() {
+    interruptsDisable();
+}
+
+CriticalSection::~CriticalSection() {
+    interruptsEnable();
+}
+
 } // namespace isr
 } // namespace fl

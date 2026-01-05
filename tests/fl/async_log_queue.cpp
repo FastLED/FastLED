@@ -8,11 +8,11 @@ using namespace fl;
 constexpr fl::size TEST_DESC_COUNT = 8;  // Power of 2
 constexpr fl::size TEST_ARENA_SIZE = 64; // Power of 2
 
-TEST_CASE("fl::CriticalSection - RAII interrupt control") {
+TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
     SUBCASE("constructor disables interrupts, destructor enables") {
         // This is hard to test directly without mocking, but we can verify it compiles
         {
-            CriticalSection cs;
+            fl::isr::CriticalSection cs;
             // Interrupts should be disabled here
         }
         // Interrupts should be re-enabled here
@@ -24,8 +24,8 @@ TEST_CASE("fl::CriticalSection - RAII interrupt control") {
     SUBCASE("non-copyable") {
         // This is a compile-time check
         // If this compiles, the test fails (should not be copyable)
-        // CriticalSection cs1;
-        // CriticalSection cs2 = cs1;  // Should not compile
+        // fl::isr::CriticalSection cs1;
+        // fl::isr::CriticalSection cs2 = cs1;  // Should not compile
         CHECK(true);
     }
 }

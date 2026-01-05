@@ -437,6 +437,28 @@ void memset_zero(uint8_t* dest, size_t count) {
 }
 
 
+// =============================================================================
+// CriticalSection RAII Helper
+// =============================================================================
+
+/// @brief RAII helper for critical sections (interrupt disable/enable)
+/// Automatically disables interrupts on construction and enables on destruction
+/// Use this for protecting shared data accessed from both ISR and main context
+///
+/// Example:
+///   {
+///       CriticalSection cs;  // Interrupts disabled here
+///       shared_data = new_value;
+///   }  // Interrupts automatically re-enabled here
+class CriticalSection {
+public:
+    CriticalSection();
+    ~CriticalSection();
+    // Non-copyable
+    CriticalSection(const CriticalSection&) = delete;
+    CriticalSection& operator=(const CriticalSection&) = delete;
+};
+
 } // namespace isr
 
 } // namespace fl

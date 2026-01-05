@@ -2,22 +2,11 @@
 /// @brief High-performance ISR-safe async logging queue implementation
 
 #include "fl/detail/async_log_queue.h"
-#include "fl/isr.h"
 #include "fl/math_macros.h"
 
 namespace fl {
 
-// ============================================================================
-// CriticalSection implementation
-// ============================================================================
-
-CriticalSection::CriticalSection() {
-    fl::interruptsDisable();
-}
-
-CriticalSection::~CriticalSection() {
-    fl::interruptsEnable();
-}
+// NOTE: CriticalSection implementation moved to fl/isr.cpp
 
 // ============================================================================
 // AsyncLogQueue::Descriptor implementation
@@ -84,7 +73,7 @@ void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
     fl::u32 newArenaTail = (mArenaTail + desc.mLength) & (ArenaSize - 1);
 
     {
-        CriticalSection cs;  // Protect arena tail update
+        fl::isr::CriticalSection cs;  // Protect arena tail update
         mArenaTail = newArenaTail;
     }
 
@@ -95,7 +84,7 @@ void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
     fl::u32 newTail = (tail + 1) & (DescriptorCount - 1);
 
     {
-        CriticalSection cs;  // Protect tail update
+        fl::isr::CriticalSection cs;  // Protect tail update
         mTail = newTail;
     }
 }
@@ -175,7 +164,7 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 le
     // Advance arena head by message length
     fl::u32 newArenaHead = (aHead + len) & (ArenaSize - 1);
     {
-        CriticalSection cs;  // Protect arena head update
+        fl::isr::CriticalSection cs;  // Protect arena head update
         mArenaHead = newArenaHead;
     }
 
@@ -185,7 +174,7 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 le
 
     // Publish by advancing head (critical section for memory ordering)
     {
-        CriticalSection cs;
+        fl::isr::CriticalSection cs;
         mHead = next;
     }
 
@@ -212,25 +201,25 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl:
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
 fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
-    CriticalSection cs;
+    fl::isr::CriticalSection cs;
     return mHead;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
 fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
-    CriticalSection cs;
+    fl::isr::CriticalSection cs;
     return mTail;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
 fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
-    CriticalSection cs;
+    fl::isr::CriticalSection cs;
     return mArenaTail;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
 void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
-    CriticalSection cs;
+    fl::isr::CriticalSection cs;
     mDropped = mDropped + 1;  // C++20-compliant volatile increment
 }
 

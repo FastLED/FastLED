@@ -5,7 +5,7 @@
 #include "fl/str.h"
 #include "fl/int.h"
 #include "fl/stl/stdint.h"
-#include "fl/detail/async_log_queue.h"  // Full definition needed for embedded storage
+#include "fl/detail/async_logger.h"  // AsyncLogger class and template-based access
 
 // =============================================================================
 // Forward Declarations
@@ -136,76 +136,10 @@ const char *fastled_file_offset(const char *file);
 #endif
 
 // =============================================================================
-// AsyncLogger Class
+// AsyncLogger Class (in fl/detail/async_logger.h)
 // =============================================================================
-
-namespace fl {
-    /// @brief ISR-safe async logger wrapper (zero heap allocation)
-    /// Implementation in log.cpp
-    /// Uses embedded AsyncLogQueue instead of heap-allocated pointer
-    class AsyncLogger {
-    public:
-        AsyncLogger();
-        ~AsyncLogger() = default;  // No cleanup needed (embedded storage)
-
-        void push(const fl::string& msg);
-        void push(const char* msg);
-        void flush();
-        fl::size size() const;
-        bool empty() const;
-        void clear();
-        fl::u32 droppedCount() const;
-
-        /// @brief Flush up to N messages from queue (bounded flush)
-        /// @param maxMessages Maximum number of messages to process
-        /// @return Number of messages actually flushed
-        fl::size flushN(fl::size maxMessages);
-
-        /// @brief Enable background timer-based flushing (opt-in)
-        /// @param interval_ms Flush interval in milliseconds (e.g., 100 = 10 Hz)
-        /// @param messages_per_tick Maximum messages to flush per timer tick (default 5)
-        /// @return true if enabled successfully, false if platform doesn't support timers
-        bool enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick = 5);
-
-        /// @brief Disable background flushing
-        void disableBackgroundFlush();
-
-        /// @brief Check if background flushing is enabled
-        bool isBackgroundFlushEnabled() const;
-
-    private:
-        AsyncLogQueue<128, 4096> mQueue;  // Embedded storage (zero heap allocation)
-    };
-
-    /// @brief Logger category identifiers for registry-based access
-    /// Each category has separate ISR and main thread loggers (SPSC requirement)
-    enum class LogCategory : fl::u8 {
-        PARLIO_ISR = 0,
-        PARLIO_MAIN = 1,
-        RMT_ISR = 2,
-        RMT_MAIN = 3,
-        SPI_ISR = 4,
-        SPI_MAIN = 5,
-        AUDIO_ISR = 6,
-        AUDIO_MAIN = 7,
-        // Add new categories here (max 16 total)
-        MAX_CATEGORIES = 8
-    };
-
-    // Global async logger accessor functions (defined in log.cpp)
-    // Registry-based lazy instantiation - loggers created on first access
-    AsyncLogger& get_async_logger(LogCategory category);
-
-    // Convenience wrappers for backward compatibility
-    inline AsyncLogger& get_parlio_async_logger_isr() { return get_async_logger(LogCategory::PARLIO_ISR); }
-    inline AsyncLogger& get_parlio_async_logger_main() { return get_async_logger(LogCategory::PARLIO_MAIN); }
-    inline AsyncLogger& get_rmt_async_logger_isr() { return get_async_logger(LogCategory::RMT_ISR); }
-    inline AsyncLogger& get_rmt_async_logger_main() { return get_async_logger(LogCategory::RMT_MAIN); }
-    inline AsyncLogger& get_spi_async_logger_isr() { return get_async_logger(LogCategory::SPI_ISR); }
-    inline AsyncLogger& get_spi_async_logger_main() { return get_async_logger(LogCategory::SPI_MAIN); }
-    inline AsyncLogger& get_audio_async_logger_isr() { return get_async_logger(LogCategory::AUDIO_ISR); }
-    inline AsyncLogger& get_audio_async_logger_main() { return get_async_logger(LogCategory::AUDIO_MAIN); }
-}
+// AsyncLogger, LogCategory enum, and accessor functions are now in fl/detail/async_logger.h
+// This provides template-based lazy instantiation with linker-friendly auto-registration
 
 /// @file fl/log.h
 /// @brief Centralized logging categories for FastLED hardware interfaces and subsystems

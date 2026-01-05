@@ -5,18 +5,9 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
+#include "fl/isr.h"  // For fl::isr::CriticalSection
 
 namespace fl {
-
-/// RAII helper for critical sections (interrupt disable/enable)
-class CriticalSection {
-public:
-    CriticalSection();
-    ~CriticalSection();
-    // Non-copyable
-    CriticalSection(const CriticalSection&) = delete;
-    CriticalSection& operator=(const CriticalSection&) = delete;
-};
 
 /// @brief High-performance SPSC async log queue
 /// @tparam DescriptorCount Number of message descriptors (must be power of 2)
