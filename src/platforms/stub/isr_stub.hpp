@@ -15,6 +15,8 @@
 #include "fl/isr.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/atomic.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/mutex.h"
 
 #include <chrono>
 #include <thread>
@@ -31,73 +33,155 @@ namespace isr {
 // =============================================================================
 
 struct stub_isr_handle_data {
-    fl::unique_ptr<std::thread> mTimerThread;  // Thread for timer simulation  // okay std namespace
-    fl::atomic<bool> mShouldStop;              // Stop flag for thread
     fl::atomic<bool> mIsEnabled;               // Current enable state
     isr_handler_t mUserHandler;                // User handler function
     void* mUserData;                           // User context
     uint32_t mFrequencyHz;                     // Timer frequency
+    uint64_t mNextTickUs;                      // Next scheduled tick (microseconds since epoch)
     bool mIsOneShot;                           // One-shot vs auto-reload
     bool mIsTimer;                             // true = timer, false = external
+    uint32_t mHandleId;                        // Unique ID for this handler
 
     stub_isr_handle_data()
-        : mShouldStop(false)
-        , mIsEnabled(true)
+        : mIsEnabled(true)
         , mUserHandler(nullptr)
         , mUserData(nullptr)
         , mFrequencyHz(0)
+        , mNextTickUs(0)
         , mIsOneShot(false)
         , mIsTimer(false)
+        , mHandleId(0)
     {}
-
-    ~stub_isr_handle_data() {
-        if (mTimerThread && mTimerThread->joinable()) {
-            mShouldStop = true;
-            mTimerThread->join();
-        }
-    }
 };
 
 // Platform ID for stub
 constexpr uint8_t STUB_PLATFORM_ID = 0;
 
 // =============================================================================
-// Timer Thread Function
+// Global Timer Thread Manager
 // =============================================================================
 
-static void timer_thread_func(stub_isr_handle_data* handle_data)
-{
-    if (!handle_data || !handle_data->mUserHandler) {
-        return;
+class TimerThreadManager {
+public:
+    static TimerThreadManager& instance() {
+        static TimerThreadManager inst;
+        return inst;
     }
 
-    const uint64_t period_us = 1000000ULL / handle_data->mFrequencyHz;
+    void add_handler(stub_isr_handle_data* handler) {
+        fl::unique_lock<fl::mutex> lock(mMutex);
 
-    // Use high-resolution clock for accurate timing
-    using clock = std::chrono::high_resolution_clock;  // okay std namespace
-    auto next_tick = clock::now() + std::chrono::microseconds(period_us);  // okay std namespace
+        // Assign unique ID
+        handler->mHandleId = mNextHandleId++;
 
-    while (!handle_data->mShouldStop) {
-        // Execute handler first (if enabled)
-        if (handle_data->mIsEnabled) {
-            // Call user handler
-            handle_data->mUserHandler(handle_data->mUserData);
+        // Calculate initial tick time
+        auto now = get_time_us();
+        uint64_t period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
+        handler->mNextTickUs = now + period_us;
 
-            if (handle_data->mIsOneShot) {
-                handle_data->mIsEnabled = false;
+        mHandlers.push_back(handler);
+
+        // Start timer thread if not already running
+        if (!mTimerThread) {
+            mShouldStop = false;
+            mTimerThread = fl::make_unique<std::thread>(&TimerThreadManager::timer_thread_func, this);  // okay std namespace
+        }
+    }
+
+    void remove_handler(stub_isr_handle_data* handler) {
+        fl::unique_lock<fl::mutex> lock(mMutex);
+
+        // Remove from vector
+        for (size_t i = 0; i < mHandlers.size(); ++i) {
+            if (mHandlers[i] == handler) {
+                mHandlers.erase(mHandlers.begin() + i);
                 break;
             }
         }
 
-        if (handle_data->mShouldStop) {
-            break;
+        // Stop thread if no more handlers
+        if (mHandlers.empty() && mTimerThread) {
+            mShouldStop = true;
+            lock.unlock();  // Unlock before joining
+            if (mTimerThread->joinable()) {
+                mTimerThread->join();
+            }
+            mTimerThread.reset();
         }
-
-        // Sleep until next tick using precise timing
-        std::this_thread::sleep_until(next_tick);  // okay std namespace
-        next_tick += std::chrono::microseconds(period_us);  // okay std namespace
     }
-}
+
+    ~TimerThreadManager() {
+        if (mTimerThread) {
+            mShouldStop = true;
+            if (mTimerThread->joinable()) {
+                mTimerThread->join();
+            }
+        }
+    }
+
+private:
+    TimerThreadManager() : mShouldStop(false), mNextHandleId(1) {}
+    TimerThreadManager(const TimerThreadManager&) = delete;
+    TimerThreadManager& operator=(const TimerThreadManager&) = delete;
+
+    static uint64_t get_time_us() {
+        using clock = std::chrono::high_resolution_clock;  // okay std namespace
+        auto now = clock::now();
+        auto duration = now.time_since_epoch();
+        return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();  // okay std namespace
+    }
+
+    void timer_thread_func() {
+        while (!mShouldStop) {
+            uint64_t now = get_time_us();
+            uint64_t next_wake = now + 1000000ULL;  // Default: sleep 1 second if no handlers
+
+            {
+                fl::unique_lock<fl::mutex> lock(mMutex);
+
+                // Execute all handlers that are due
+                for (auto* handler : mHandlers) {
+                    if (!handler->mIsEnabled || !handler->mIsTimer) {
+                        continue;
+                    }
+
+                    // Check if this handler should fire
+                    if (now >= handler->mNextTickUs) {
+                        // Execute handler
+                        if (handler->mUserHandler) {
+                            handler->mUserHandler(handler->mUserData);
+                        }
+
+                        // Schedule next tick or disable if one-shot
+                        if (handler->mIsOneShot) {
+                            handler->mIsEnabled = false;
+                        } else {
+                            uint64_t period_us = 1000000ULL / handler->mFrequencyHz;
+                            handler->mNextTickUs = now + period_us;
+                        }
+                    }
+
+                    // Track earliest next tick for sleep duration
+                    if (handler->mIsEnabled && handler->mNextTickUs < next_wake) {
+                        next_wake = handler->mNextTickUs;
+                    }
+                }
+            }
+
+            // Sleep until next handler should fire
+            if (next_wake > now) {
+                uint64_t sleep_us = next_wake - now;
+                std::this_thread::sleep_for(std::chrono::microseconds(sleep_us));  // okay std namespace
+            }
+        }
+    }
+
+    fl::mutex mMutex;
+    fl::vector<stub_isr_handle_data*> mHandlers;
+    fl::unique_ptr<std::thread> mTimerThread;  // okay std namespace
+    fl::atomic<bool> mShouldStop;
+    uint32_t mNextHandleId;
+};
 
 // =============================================================================
 // Stub ISR Implementation (Free Functions)
@@ -127,14 +211,9 @@ int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_hand
         handle_data->mFrequencyHz = config.frequency_hz;
         handle_data->mIsOneShot = (config.flags & ISR_FLAG_ONE_SHOT) != 0;
 
-        // Start timer thread (unless manual tick mode)
+        // Add to global timer thread manager (unless manual tick mode)
         if (!(config.flags & ISR_FLAG_MANUAL_TICK)) {
-            handle_data->mTimerThread = fl::make_unique<std::thread>(timer_thread_func, handle_data);  // okay std namespace
-            if (!handle_data->mTimerThread) {
-                STUB_LOG("attachTimerHandler: failed to create timer thread");
-                delete handle_data;
-                return -4;  // Thread creation failed
-            }
+            TimerThreadManager::instance().add_handler(handle_data);
         }
 
         STUB_LOG("Stub timer started at " << config.frequency_hz << " Hz");
@@ -192,12 +271,9 @@ int stub_detach_handler(isr_handle_t& handle) {
             return -1;  // Invalid handle
         }
 
-        // Stop timer thread if running
-        if (handle_data->mTimerThread) {
-            handle_data->mShouldStop = true;
-            if (handle_data->mTimerThread->joinable()) {
-                handle_data->mTimerThread->join();
-            }
+        // Remove from global timer thread manager if it's a timer
+        if (handle_data->mIsTimer) {
+            TimerThreadManager::instance().remove_handler(handle_data);
         }
 
         delete handle_data;
