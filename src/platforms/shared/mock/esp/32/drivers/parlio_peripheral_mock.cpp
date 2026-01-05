@@ -5,6 +5,10 @@
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
+#include "fl/stl/atomic.h"
+
+#include <thread>  // ok include
+#include <chrono>  // ok include
 
 #ifdef ARDUINO
 #include <Arduino.h>  // For micros() and delay() on Arduino platforms
@@ -30,7 +34,7 @@ public:
     //=========================================================================
 
     ParlioPeripheralMockImpl();
-    ~ParlioPeripheralMockImpl() override = default;
+    ~ParlioPeripheralMockImpl() override;
 
     //=========================================================================
     // IParlioPeripheral Interface Implementation
@@ -89,6 +93,11 @@ private:
 
     // Pending transmission state (for waitAllDone simulation)
     size_t mPendingTransmissions;
+
+    // Simulation thread for automatic ISR callback
+    void simulationThreadFunc();
+    fl::unique_ptr<std::thread> mSimulationThread;  // okay std namespace
+    fl::atomic<bool> mSimulationThreadShouldStop;
 };
 
 //=============================================================================
@@ -114,7 +123,19 @@ ParlioPeripheralMockImpl::ParlioPeripheralMockImpl()
       mTransmitDelayUs(0),
       mShouldFailTransmit(false),
       mHistory(),
-      mPendingTransmissions(0) {
+      mPendingTransmissions(0),
+      mSimulationThread(),
+      mSimulationThreadShouldStop(false) {
+    // Start simulation thread
+    mSimulationThread = fl::make_unique<std::thread>([this]() { simulationThreadFunc(); });  // okay std namespace
+}
+
+ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
+    // Stop simulation thread
+    mSimulationThreadShouldStop = true;
+    if (mSimulationThread && mSimulationThread->joinable()) {
+        mSimulationThread->join();
+    }
 }
 
 //=============================================================================
@@ -180,6 +201,19 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
         return false;
     }
 
+    // Calculate realistic transmission delay based on clock frequency and bit count
+    // clock_freq_hz is stored in mConfig.clock_freq_hz (e.g., 8 MHz = 8000000 Hz for WS2812)
+    // Transmission time = (bit_count / clock_freq_hz) seconds = (bit_count * 1000000 / clock_freq_hz) microseconds
+    if (mConfig.clock_freq_hz > 0) {
+        // Calculate transmission time in microseconds
+        uint64_t transmission_time_us = (static_cast<uint64_t>(bit_count) * 1000000ULL) / mConfig.clock_freq_hz;
+        // Add small overhead for buffer switching (10 microseconds)
+        mTransmitDelayUs = static_cast<uint32_t>(transmission_time_us) + 10;
+    } else {
+        // Fallback: Use a small default delay if clock not configured
+        mTransmitDelayUs = 100;  // 100 microseconds default
+    }
+
     // Calculate buffer size in bytes
     size_t byte_count = (bit_count + 7) / 8;
 
@@ -198,6 +232,8 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
     mTransmitCount++;
     mTransmitting = true;
     mPendingTransmissions++;
+
+    // Simulation thread will automatically call ISR callback after mTransmitDelayUs
 
     return true;
 }
@@ -396,6 +432,41 @@ void ParlioPeripheralMockImpl::reset() {
     mShouldFailTransmit = false;
     mHistory.clear();
     mPendingTransmissions = 0;
+}
+
+//=============================================================================
+// Simulation Thread
+//=============================================================================
+
+void ParlioPeripheralMockImpl::simulationThreadFunc() {
+    using clock = std::chrono::steady_clock;  // okay std namespace
+
+    while (!mSimulationThreadShouldStop) {
+        // Check if there are pending transmissions
+        if (mPendingTransmissions > 0 && mTransmitDelayUs > 0) {
+            // Sleep for the transmission delay
+            std::this_thread::sleep_for(std::chrono::microseconds(mTransmitDelayUs));  // okay std namespace
+
+            // After delay, simulate transmission complete by calling ISR callback
+            if (mCallback && mPendingTransmissions > 0) {
+                // Decrement pending count
+                mPendingTransmissions--;
+
+                // Update state
+                if (mPendingTransmissions == 0) {
+                    mTransmitting = false;
+                }
+
+                // Call ISR callback
+                using CallbackType = bool (*)(void*, const void*, void*);
+                auto callback_fn = reinterpret_cast<CallbackType>(mCallback);
+                callback_fn(nullptr, nullptr, mUserCtx);
+            }
+        } else {
+            // No pending transmissions - sleep briefly to avoid busy-wait
+            std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
+        }
+    }
 }
 
 } // namespace detail

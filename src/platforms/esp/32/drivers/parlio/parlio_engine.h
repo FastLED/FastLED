@@ -92,8 +92,9 @@ namespace detail {
 //=============================================================================
 
 enum class ParlioEngineState {
-    READY,      ///< Engine ready for new transmission
-    BUSY,       ///< Transmission in progress
+    READY,      ///< Engine ready for new transmission (idle)
+    BUSY,       ///< Engine actively blocked (never happens in current async implementation)
+    DRAINING,   ///< Transmission in progress (ISR-driven, async)
     ERROR       ///< Error occurred during transmission
 };
 

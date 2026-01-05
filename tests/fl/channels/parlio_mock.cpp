@@ -64,6 +64,28 @@ TEST_CASE("ParlioEngine mock - basic initialization") {
     CHECK(mock.getConfig().gpio_pins[1] == -1);  // Unused lanes marked -1
 }
 
+TEST_CASE("ParlioEngine mock - two-lane initialization") {
+    resetMockState();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    // Two lane configuration
+    fl::vector<int> pins = {1, 2};
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    bool success = engine.initialize(2, pins, timing, 100);
+    CHECK(success);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.isInitialized());
+
+    const auto& config = mock.getConfig();
+    CHECK(config.data_width == 2);
+    CHECK(config.gpio_pins[0] == 1);
+    CHECK(config.gpio_pins[1] == 2);
+    CHECK(config.gpio_pins[2] == -1);  // Unused lanes
+}
+
 TEST_CASE("ParlioEngine mock - multi-lane initialization") {
     resetMockState();
 
@@ -150,8 +172,80 @@ TEST_CASE("ParlioEngine mock - multiple LEDs transmission") {
     auto& mock = ParlioPeripheralMock::instance();
     CHECK(mock.getTransmitCount() > 0);
 
-    // Verify transmission completed (should be in READY state)
-    CHECK(engine.poll() == ParlioEngineState::READY);
+    // Poll until transmission completes (async execution)
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 5000 && state != ParlioEngineState::READY; i++) {
+        state = engine.poll();
+        if (state == ParlioEngineState::ERROR) {
+            break;
+        }
+        if (state == ParlioEngineState::DRAINING) {
+            delay(10);
+        }
+    }
+    CHECK(state == ParlioEngineState::READY);
+}
+
+TEST_CASE("ParlioEngine mock - two-lane transmission") {
+    // Clear mock transmission history (don't fully reset - engine may be initialized)
+    auto& mock = ParlioPeripheralMock::instance();
+    mock.clearTransmissionHistory();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    // Two lane configuration
+    fl::vector<int> pins = {1, 2};
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    // 10 LEDs per lane = 60 bytes total (2 lanes × 10 LEDs × 3 bytes/LED)
+    size_t num_leds = 10;
+    size_t num_lanes = 2;
+
+    // Initialize engine (may already be initialized - that's OK for transmission test)
+    bool init_result = engine.initialize(num_lanes, pins, timing, num_leds);
+    REQUIRE(init_result);  // Ensure initialization succeeded
+
+    // Prepare scratch buffer with per-lane layout
+    // [lane0_data (30 bytes)][lane1_data (30 bytes)]
+    fl::vector<uint8_t> scratch(num_leds * num_lanes * 3);
+    for (size_t lane = 0; lane < num_lanes; lane++) {
+        for (size_t led = 0; led < num_leds; led++) {
+            size_t base_idx = lane * num_leds * 3 + led * 3;
+            scratch[base_idx + 0] = static_cast<uint8_t>((lane * 100 + led) & 0xFF);  // R
+            scratch[base_idx + 1] = static_cast<uint8_t>((lane * 50 + led) & 0xFF);   // G
+            scratch[base_idx + 2] = static_cast<uint8_t>((lane * 25 + led) & 0xFF);   // B
+        }
+    }
+
+    size_t lane_stride = num_leds * 3;  // 30 bytes per lane
+    bool success = engine.beginTransmission(scratch.data(), scratch.size(), num_lanes, lane_stride);
+    CHECK(success);
+
+    // mock already declared at top of test
+    CHECK(mock.getTransmitCount() > 0);
+
+    // Poll until transmission completes (async execution via stub timer thread)
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 5000 && state != ParlioEngineState::READY; i++) {
+        state = engine.poll();
+        if (state == ParlioEngineState::ERROR) {
+            break;
+        }
+        if (state == ParlioEngineState::DRAINING) {
+            delay(10);  // Give ISR thread time to progress
+        }
+    }
+    CHECK(state == ParlioEngineState::READY);
+
+    // Verify mock recorded transmissions
+    const auto& history = mock.getTransmissionHistory();
+    CHECK(history.size() > 0);
+
+    if (history.size() > 0) {
+        // Verify first transmission has non-zero data
+        CHECK(history[0].bit_count > 0);
+        CHECK(history[0].buffer_copy.size() > 0);
+    }
 }
 
 //=============================================================================
@@ -252,8 +346,18 @@ TEST_CASE("ParlioEngine mock - large buffer streaming") {
     // Verify at least one transmission occurred
     CHECK(mock.getTransmitCount() > 0);
 
-    // Verify final state
-    CHECK(engine.poll() == ParlioEngineState::READY);
+    // Poll until transmission completes
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+        state = engine.poll();
+        if (state == ParlioEngineState::ERROR) {
+            break;
+        }
+        if (state == ParlioEngineState::DRAINING) {
+            delay(1);
+        }
+    }
+    CHECK(state == ParlioEngineState::READY);
 }
 
 TEST_CASE("ParlioEngine mock - multi-lane streaming") {
@@ -286,8 +390,18 @@ TEST_CASE("ParlioEngine mock - multi-lane streaming") {
     auto& mock = ParlioPeripheralMock::instance();
     CHECK(mock.getTransmitCount() > 0);
 
-    // Verify completion
-    CHECK(engine.poll() == ParlioEngineState::READY);
+    // Poll until transmission completes
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+        state = engine.poll();
+        if (state == ParlioEngineState::ERROR) {
+            break;
+        }
+        if (state == ParlioEngineState::DRAINING) {
+            delay(1);
+        }
+    }
+    CHECK(state == ParlioEngineState::READY);
 }
 
 //=============================================================================
@@ -322,8 +436,18 @@ TEST_CASE("ParlioEngine mock - state inspection") {
     CHECK(mock.isEnabled());
     CHECK(mock.getTransmitCount() > 0);
 
-    // After completion
-    CHECK(engine.poll() == ParlioEngineState::READY);
+    // Poll until transmission completes
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+        state = engine.poll();
+        if (state == ParlioEngineState::ERROR) {
+            break;
+        }
+        if (state == ParlioEngineState::DRAINING) {
+            delay(1);
+        }
+    }
+    CHECK(state == ParlioEngineState::READY);
 }
 
 //=============================================================================

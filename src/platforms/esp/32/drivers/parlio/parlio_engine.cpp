@@ -1459,8 +1459,8 @@ ParlioEngineState ParlioEngine::poll() {
 
             return ParlioEngineState::READY;
         } else {
-            // Still busy transmitting
-            return ParlioEngineState::BUSY;
+            // Still draining final transmission
+            return ParlioEngineState::DRAINING;
         }
     }
 
@@ -1474,7 +1474,8 @@ ParlioEngineState ParlioEngine::poll() {
         // Continue populating buffers
     }
 
-    return ParlioEngineState::BUSY;
+    // Transmission in progress (ISR-driven, async)
+    return ParlioEngineState::DRAINING;
 }
 
 bool ParlioEngine::isTransmitting() const {
