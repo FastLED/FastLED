@@ -24,7 +24,7 @@
 
 namespace {
 /// @brief Untranspose interleaved bit-parallel data to per-pin waveforms (internal helper)
-/// @param transposed_data Interleaved bit data (output from wave8Transpose_2)
+/// @param transposed_data Interleaved bit data (output from wave8Transpose_2/4/8/16)
 /// @param bit_count Total number of bits transmitted
 /// @param num_pins Number of parallel pins (data_width)
 /// @return Vector of per-pin waveforms (one vector per pin)
@@ -33,9 +33,26 @@ namespace {
 /// are interleaved. This function reverses the transposition to extract the
 /// original waveform for each pin.
 ///
+/// **CRITICAL: 2-lane transposition quirk**
+///
+/// The wave8Transpose functions create different bit orderings:
+/// - **2-lane**: FL_WAVE8_SPREAD_TO_16 macro maps:
+///               - Lane 0 → even bit positions (0,2,4,6,...)
+///               - Lane 1 → odd bit positions (1,3,5,7,...)
+///               When PARLIO sends bits sequentially (bit N → Pin N%2):
+///               - Pin 0 (receives even bits) gets Lane 0 data
+///               - Pin 1 (receives odd bits) gets Lane 1 data
+///               However, due to bit ordering within bytes (LSB-first transmission),
+///               we need a swap during untransposition to present the logical API
+///               where Pin 0 → Lane 0, Pin 1 → Lane 1
+///
+/// - **4/8/16-lane**: Bit-to-pin mapping works correctly with no swap needed:
+///                    - Pin i receives Lane i data (direct mapping)
+///
 /// For 2-lane example:
-/// - Input (transposed): [0xAA, 0xAA, ...] where bits alternate between lane0 and lane1
-/// - Output: [[0xFF, 0xFF, ...], [0x00, 0x00, ...]] for lane0 and lane1 respectively
+/// - Input: Lane 0 = 0xFF, Lane 1 = 0x00
+/// - After transposition: [0xAA, 0xAA, ...] (Lane 0 at even bits, Lane 1 at odd bits)
+/// - After untransposition with swap: Pin 0 → Lane 0 (0xFF), Pin 1 → Lane 1 (0x00)
 fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
     const uint8_t* transposed_data,
     size_t bit_count,
@@ -45,10 +62,6 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
     fl::vector<fl::vector<uint8_t>> per_pin_data(num_pins);
 
     // Calculate number of bytes per pin's waveform
-    // Each bit in the LED protocol expands to 8 pulses (Wave8Bit format)
-    // For transposed data: bit_count is the total bits in the transposed buffer
-
-    // Each pin gets a sequence of bytes
     size_t bits_per_pin = bit_count / num_pins;
     size_t bytes_per_pin = (bits_per_pin + 7) / 8;
 
@@ -57,23 +70,37 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
     }
 
     // Untranspose bit-by-bit
+    // PARLIO hardware sends bits sequentially: bit 0 → pin 0, bit 1 → pin 1, etc.
     for (size_t bit_idx = 0; bit_idx < bit_count; bit_idx++) {
         // Get bit from transposed buffer
         size_t byte_idx = bit_idx / 8;
-        size_t bit_pos = 7 - (bit_idx % 8);  // MSB first
+        size_t bit_pos = bit_idx % 8;  // LSB first
         bool bit_value = (transposed_data[byte_idx] >> bit_pos) & 1;
 
-        // Determine which pin this bit belongs to
-        size_t pin_idx = bit_idx % num_pins;
+        // Determine which pin this bit belongs to (cycles through pins)
+        size_t hardware_pin_idx = bit_idx % num_pins;
 
-        // Determine position in the pin's waveform
-        size_t pin_bit_idx = bit_idx / num_pins;
-        size_t pin_byte_idx = pin_bit_idx / 8;
-        size_t pin_bit_pos = 7 - (pin_bit_idx % 8);  // MSB first
+        // Map hardware pin to lane
+        // Lane mapping differs by lane count:
+        // - 2-lane: needs swap compensation
+        // - 4/8/16-lane: direct mapping
+        size_t lane_idx;
+        if (num_pins == 2) {
+            // 2-lane: swap to compensate for transposition quirk
+            lane_idx = 1 - hardware_pin_idx;
+        } else {
+            // 4/8/16-lane: no swap needed
+            lane_idx = hardware_pin_idx;
+        }
 
-        // Set the bit in the pin's waveform
+        // Determine position in the lane's waveform
+        size_t lane_bit_idx = bit_idx / num_pins;
+        size_t lane_byte_idx = lane_bit_idx / 8;
+        size_t lane_bit_pos = lane_bit_idx % 8;  // LSB first
+
+        // Set the bit in the lane's waveform
         if (bit_value) {
-            per_pin_data[pin_idx][pin_byte_idx] |= (1 << pin_bit_pos);
+            per_pin_data[lane_idx][lane_byte_idx] |= (1 << lane_bit_pos);
         }
     }
 

@@ -618,12 +618,12 @@ TEST_CASE("parlio_mock_untransposition") {
     REQUIRE(pin1_data.size() == 8);
     REQUIRE(pin2_data.size() == 8);
 
-    // GPIO pin 1 (lane0) should have all 0xFF (all bits set, from lane0 = 0xff)
+    // GPIO pin 1 should have all 0xFF (Lane 0 data)
     for (size_t i = 0; i < pin1_data.size(); i++) {
         REQUIRE(pin1_data[i] == 0xFF);
     }
 
-    // GPIO pin 2 (lane1) should have all 0x00 (all bits clear, from lane1 = 0x00)
+    // GPIO pin 2 should have all 0x00 (Lane 1 data)
     for (size_t i = 0; i < pin2_data.size(); i++) {
         REQUIRE(pin2_data[i] == 0x00);
     }
@@ -668,7 +668,7 @@ TEST_CASE("parlio_mock_untransposition_complex_pattern") {
     REQUIRE(pin1_data.size() == 8);
     REQUIRE(pin2_data.size() == 8);
 
-    // GPIO pin 1 (lane0) should reconstruct the waveform for 0xAA
+    // GPIO pin 1 should reconstruct waveform for Lane 0 (0xAA)
     // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
     // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
     uint8_t expected_pin1[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
@@ -676,7 +676,7 @@ TEST_CASE("parlio_mock_untransposition_complex_pattern") {
         REQUIRE(pin1_data[i] == expected_pin1[i]);
     }
 
-    // GPIO pin 2 (lane1) should reconstruct the waveform for 0x55
+    // GPIO pin 2 should reconstruct waveform for Lane 1 (0x55)
     // With the LUT (bit0=0x00, bit1=0xFF), 0x55 (01010101) expands to:
     // [0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF]
     uint8_t expected_pin2[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
@@ -721,7 +721,7 @@ TEST_CASE("parlio_mock_untransposition_with_span_api") {
     REQUIRE(result[10].size() == 8);
     REQUIRE(result[20].size() == 8);
 
-    // GPIO pin 10 (lane0) should reconstruct the waveform for 0xAA
+    // GPIO pin 10 should reconstruct waveform for Lane 0 (0xAA)
     // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
     // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
     uint8_t expected_pin10[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
@@ -729,7 +729,7 @@ TEST_CASE("parlio_mock_untransposition_with_span_api") {
         REQUIRE(result[10][i] == expected_pin10[i]);
     }
 
-    // GPIO pin 20 (lane1) should reconstruct the waveform for 0x55
+    // GPIO pin 20 should reconstruct waveform for Lane 1 (0x55)
     // With the LUT (bit0=0x00, bit1=0xFF), 0x55 (01010101) expands to:
     // [0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF]
     uint8_t expected_pin20[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
