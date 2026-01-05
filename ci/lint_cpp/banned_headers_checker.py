@@ -74,7 +74,7 @@ class BannedHeadersChecker(FileContentChecker):
 
     # Header recommendations
     HEADER_RECOMMENDATIONS = {
-        "pthread.h": "fl/thread.h or fl/mutex.h (depending on what you need)",
+        "pthread.h": "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
         "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
         "iostream": "fl/stl/iostream.h or fl/str.h",
         "stdio.h": "fl/str.h for string operations",
@@ -88,8 +88,8 @@ class BannedHeadersChecker(FileContentChecker):
         "deque": "fl/stl/deque.h",
         "algorithm": "fl/stl/algorithm.h",
         "memory": "fl/stl/shared_ptr.h or fl/stl/unique_ptr.h",
-        "thread": "fl/thread.h",
-        "mutex": "fl/mutex.h",
+        "thread": "fl/stl/thread.h",
+        "mutex": "fl/stl/mutex.h",
         "chrono": "fl/time.h",
         "fstream": "fl/file.h or platform file operations",
         "sstream": "fl/stl/sstream.h",
@@ -248,6 +248,9 @@ class BannedHeadersChecker(FileContentChecker):
                 "thread",
                 "iostream",
             }:
+                return True
+            # thread_stub_stl.h needs thread and mutex for STL threading wrapper
+            if "thread_stub_stl.h" in file_path and header in {"thread", "mutex"}:
                 return True
             # WASM platform implementations need stdlib headers for I/O and threading
             if "/wasm/" in file_path.replace("\\", "/"):
