@@ -1,6 +1,10 @@
 /// @file parlio_peripheral_mock.cpp
 /// @brief Mock PARLIO peripheral implementation for unit testing
 
+// This mock is only for host testing (uses std::thread which is not available on embedded platforms)
+// Compile for stub platform testing OR non-Arduino host platforms
+#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
+
 #include "parlio_peripheral_mock.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
@@ -605,3 +609,6 @@ fl::unordered_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposePar
 
 } // namespace detail
 } // namespace fl
+
+
+#endif // FASTLED_STUB_IMPL || (!ARDUINO && (linux/apple/win32))

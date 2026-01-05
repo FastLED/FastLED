@@ -268,6 +268,18 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
             "platforms/esp/32/mutex_esp32.h",
             "ESP32 mutex implementation using std::unique_lock",
         ),
+        HeaderException(
+            "platforms/arm/stm32/mutex_stm32.h",
+            "STM32 mutex implementation using std::unique_lock",
+        ),
+        HeaderException(
+            "platforms/arm/d21/mutex_samd.h",
+            "SAMD mutex implementation using std::unique_lock",
+        ),
+        HeaderException(
+            "platforms/arm/rp/mutex_rp.h",
+            "RP2040/RP2350 mutex implementation using std::unique_lock",
+        ),
     ],
     "thread": [
         HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),

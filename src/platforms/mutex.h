@@ -11,6 +11,10 @@
 ///
 /// Supported platforms:
 /// - ESP32: FreeRTOS mutex wrappers
+/// - RP2040/RP2350: Pico SDK spinlock-based mutexes
+/// - STM32: FreeRTOS mutex wrappers (when FreeRTOS is available)
+/// - SAMD21/SAMD51: CMSIS interrupt-based mutex
+/// - Teensy: Interrupt-based mutex using critical sections
 /// - Stub: std::mutex wrapper or fake mutex based on pthread availability
 /// - Other platforms: Use stub implementation as fallback
 ///
@@ -23,8 +27,16 @@
 // Platform dispatch
 #ifdef FL_IS_ESP32
     #include "platforms/esp/32/mutex_esp32.h"
+#elif defined(FL_IS_RP2040)
+    #include "platforms/arm/rp/mutex_rp.h"
+#elif defined(FL_IS_STM32) && __has_include("FreeRTOS.h")
+    #include "platforms/arm/stm32/mutex_stm32.h"
 #elif defined(FL_IS_STUB)
     #include "platforms/stub/mutex_stub.h"
+#elif defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+    #include "platforms/arm/d21/mutex_samd.h"
+#elif defined(FL_IS_TEENSY)
+    #include "platforms/arm/teensy/mutex_teensy.h"
 #else
     // Default fallback: Use stub implementation for all platforms
     // TODO: Add platform-specific implementations here as needed

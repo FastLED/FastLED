@@ -101,9 +101,8 @@ def run_qemu_tests(args: TestArgs) -> None:
     """Run examples in QEMU emulation using Docker."""
     from pathlib import Path
 
-    from running_process import RunningProcess
-
     from ci.docker.qemu_esp32_docker import DockerQEMURunner
+    from running_process import RunningProcess
 
     if not args.qemu or len(args.qemu) < 1:
         ts_print("Error: --qemu requires a platform (e.g., esp32s3)")
@@ -350,9 +349,8 @@ def run_avr8js_tests(args: TestArgs) -> None:
     """Run AVR examples in avr8js emulation using Docker."""
     from pathlib import Path
 
-    from running_process import RunningProcess
-
     from ci.docker.avr8js_docker import DockerAVR8jsRunner
+    from running_process import RunningProcess
 
     if not args.run or len(args.run) < 1:
         ts_print("Error: --run requires a board (e.g., uno)")

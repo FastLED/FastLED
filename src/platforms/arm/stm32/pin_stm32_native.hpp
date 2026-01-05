@@ -16,6 +16,9 @@
 #if __has_include("stm32_def.h")
 #include "stm32_def.h"       // STM32 HAL types and definitions
 #endif
+#if __has_include("pins_arduino.h")
+#include "pins_arduino.h"    // Arduino pin mapping - provides digitalPinToPinName macro
+#endif
 #if __has_include("PeripheralPins.h")
 #include "PeripheralPins.h"  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
 #endif

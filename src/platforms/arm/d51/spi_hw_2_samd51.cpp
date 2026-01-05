@@ -549,14 +549,9 @@ void SPIDualSAMD51::cleanup() {
 ///   - Hybrid SERCOM + GPIO bit-banging with precise timing
 ///   - Hardware-synchronized dual-SERCOM with event system
 ///
-/// Until true dual-lane is implemented, SAMD51 should not claim Dual-SPI support.
+/// Until true dual-lane is implemented, SAMD51 does not register any SpiHw2 instances.
 /// This allows the bus manager to correctly fall back to single-lane SPI.
-///
-/// Strong definition overrides weak default (which also returns empty vector).
-fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    // Return empty - SAMD51 does not support true Dual-SPI yet
-    return fl::vector<SpiHw2*>();
-}
+/// (No instances registered via SpiHw2::registerInstance())
 
 }  // namespace fl
 

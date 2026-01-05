@@ -435,8 +435,15 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     tc_wait_sync(timer);
 
     // Set match frequency waveform mode
+#if defined(__SAMD21__)
+    // SAMD21: Waveform generation mode is part of CTRLA register
+    timer->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
+    tc_wait_sync(timer);
+#elif defined(__SAMD51__)
+    // SAMD51: Separate WAVE register
     timer->COUNT16.WAVE.reg = TC_WAVE_WAVEGEN_MFRQ;
     tc_wait_sync(timer);
+#endif
 
     // Choose prescaler based on requested frequency
     // SystemCoreClock is typically 48 MHz (SAMD21) or 120 MHz (SAMD51)
@@ -565,6 +572,22 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     }
 
     // Enable EIC if not already enabled
+#if defined(__SAMD21__)
+    // SAMD21 uses CTRL instead of CTRLA, and STATUS.SYNCBUSY instead of SYNCBUSY
+    if (!EIC->CTRL.bit.ENABLE) {
+        EIC->CTRL.bit.ENABLE = 0;
+        while (EIC->STATUS.bit.SYNCBUSY) {
+            // Wait for sync
+        }
+
+        // Configure EIC
+        EIC->CTRL.bit.ENABLE = 1;
+        while (EIC->STATUS.bit.SYNCBUSY) {
+            // Wait for sync
+        }
+    }
+#elif defined(__SAMD51__)
+    // SAMD51 uses CTRLA and dedicated SYNCBUSY register
     if (!EIC->CTRLA.bit.ENABLE) {
         EIC->CTRLA.bit.ENABLE = 0;
         while (EIC->SYNCBUSY.bit.ENABLE) {
@@ -577,6 +600,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
             // Wait for sync
         }
     }
+#endif
 
     // Determine sense configuration from flags
     uint8_t sense;
