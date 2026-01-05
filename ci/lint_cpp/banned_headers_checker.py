@@ -260,6 +260,14 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "platforms/stub/thread_stub_stl.h", "STL threading wrapper for tests"
         ),
+        HeaderException(
+            "platforms/stub/mutex_stub_stl.h",
+            "STL mutex wrapper for multithreaded platforms",
+        ),
+        HeaderException(
+            "platforms/esp/32/mutex_esp32.h",
+            "ESP32 mutex implementation using std::unique_lock",
+        ),
     ],
     "thread": [
         HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
