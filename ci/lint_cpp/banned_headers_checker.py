@@ -152,7 +152,16 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     "new": [
         HeaderException("inplacenew.h", "Placement new operator definition"),
         HeaderException(
-            "platforms/**/new.h", "Platform-specific placement new wrapper"
+            "platforms/wasm/new.h", "Platform-specific placement new wrapper"
+        ),
+        HeaderException(
+            "platforms/arm/new.h", "Platform-specific placement new wrapper"
+        ),
+        HeaderException(
+            "platforms/esp/new.h", "Platform-specific placement new wrapper"
+        ),
+        HeaderException(
+            "platforms/shared/new.h", "Platform-specific placement new wrapper"
         ),
     ],
     # Core system definitions and platform headers
@@ -160,115 +169,165 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "led_sysdefs.h", "Core system definitions need platform headers"
         ),
-        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
+        # platforms/ - .cpp files that need Arduino.h for platform functionality
+        HeaderException("platforms/avr/io_avr.cpp", "AVR platform I/O implementation"),
+        HeaderException("platforms/stub/Arduino.cpp", "Stub Arduino implementation"),
         HeaderException(
-            "platforms/**/*.cpp", "Platform implementations can use Arduino.h"
+            "platforms/esp/32/drivers/cled.cpp", "ESP32 LED driver implementation"
+        ),
+        HeaderException(
+            "platforms/arm/d21/spi_hw_2_samd21.cpp",
+            "SAMD21 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/d51/spi_hw_4_samd51.cpp",
+            "SAMD51 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/d51/spi_hw_2_samd51.cpp",
+            "SAMD51 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/stm32/spi_hw_2_stm32.cpp",
+            "STM32 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/stm32/spi_hw_8_stm32.cpp",
+            "STM32 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/stm32/spi_hw_4_stm32.cpp",
+            "STM32 SPI hardware implementation",
+        ),
+        HeaderException(
+            "platforms/arm/rp/rp2040/delay.cpp", "RP2040 delay implementation"
+        ),
+        HeaderException(
+            "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.cpp",
+            "ESP32 PARLIO mock for testing",
         ),
         # platforms/ - Legacy headers that need Arduino.h (TODO: refactor these)
-        HeaderException("**/fastpin_apollo3.h", "TODO: Refactor to remove dependency"),
         HeaderException(
-            "**/clockless_apollo3.h", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException("**/fastspi_arm_sam.h", "TODO: Refactor to remove dependency"),
-        HeaderException(
-            "**/stm32_gpio_timer_helpers.h", "TODO: Refactor to remove dependency"
+            "platforms/apollo3/fastpin_apollo3.h", "TODO: Refactor to remove dependency"
         ),
         HeaderException(
-            "**/led_sysdefs_rp_common.h", "TODO: Refactor to remove dependency"
+            "platforms/apollo3/clockless_apollo3.h",
+            "TODO: Refactor to remove dependency",
         ),
-        HeaderException("**/io_teensy_lc.h", "TODO: Refactor to remove dependency"),
-        HeaderException("**/audio_input.hpp", "TODO: Refactor to remove dependency"),
-        HeaderException("**/io_esp_arduino.hpp", "TODO: Refactor to remove dependency"),
-        HeaderException("third_party/**/*", "Third-party library needs Arduino.h"),
+        HeaderException(
+            "platforms/arm/sam/fastspi_arm_sam.h", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException(
+            "platforms/arm/rp/rpcommon/led_sysdefs_rp_common.h",
+            "TODO: Refactor to remove dependency",
+        ),
+        HeaderException(
+            "platforms/io_teensy_lc.h", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException(
+            "platforms/arm/teensy/common/io_teensy_lc.h",
+            "TODO: Refactor to remove dependency",
+        ),
+        HeaderException(
+            "platforms/arduino/audio_input.hpp", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException(
+            "platforms/esp/io_esp_arduino.hpp", "TODO: Refactor to remove dependency"
+        ),
+        HeaderException(
+            "platforms/wasm/led_sysdefs_wasm.h", "WASM wrapper for stub Arduino.h"
+        ),
+        HeaderException(
+            "platforms/wasm/compiler/Arduino.h", "WASM stub Arduino.h implementation"
+        ),
+        # third_party/ - External libraries that need Arduino.h
+        HeaderException(
+            "third_party/ezws2812/ezWS2812.h", "Third-party SPI driver library"
+        ),
+        HeaderException("third_party/arduinojson/json.hpp", "Third-party JSON library"),
+        HeaderException(
+            "third_party/object_fled/src/ObjectFLEDDmaManager.h",
+            "Third-party DMA manager library",
+        ),
     ],
     # Threading and synchronization
     "pthread.h": [
-        HeaderException("**/thread_local.h", "Platform threading abstraction"),
+        HeaderException("fl/thread_local.h", "Platform threading abstraction"),
     ],
     "mutex": [
-        HeaderException("**/stl/mutex.h", "Wrapper for platform mutex"),
-        HeaderException("**/thread_stub_stl.h", "STL threading wrapper for tests"),
+        HeaderException("fl/stl/mutex.h", "Wrapper for platform mutex"),
+        HeaderException(
+            "platforms/stub/thread_stub_stl.h", "STL threading wrapper for tests"
+        ),
     ],
     "thread": [
-        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
-        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
-        HeaderException("**/time_stub.cpp", "Test time simulation"),
-        HeaderException("**/thread_stub_stl.h", "STL threading wrapper for tests"),
-        HeaderException("wasm/**/timer.cpp", "WASM timer implementation"),
+        HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
+        HeaderException("platforms/stub/time_stub.cpp", "Test time simulation"),
+        HeaderException(
+            "platforms/stub/thread_stub_stl.h", "STL threading wrapper for tests"
+        ),
+        HeaderException("platforms/wasm/timer.cpp", "WASM timer implementation"),
     ],
     # I/O and streams
     "iostream": [
-        HeaderException("**/stub_main.cpp", "Testing entry point needs stdout"),
-        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
-        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
-        HeaderException("**/time_stub.cpp", "Test time simulation"),
+        HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
     ],
     # Algorithms and utilities
     "algorithm": [
-        HeaderException("**/stl/mutex.h", "Dependency from <string_view> in <mutex>"),
-        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
+        HeaderException("fl/stl/mutex.h", "Dependency from <string_view> in <mutex>"),
+        HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
     ],
     # Integer types
     "stdint.h": [
-        HeaderException("**/stl/cstdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
-        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException("fl/stl/cstdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
+        HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
     ],
     # Time and timing
     "chrono": [
-        HeaderException("**/stl/time.cpp", "Platform-specific time implementation"),
-        HeaderException("**/isr_stub.cpp", "Test ISR timing simulation"),
-        HeaderException("**/isr_stub.hpp", "Test ISR timing simulation"),
-        HeaderException("**/time_stub.cpp", "Test time simulation"),
+        HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
+        HeaderException("platforms/stub/time_stub.cpp", "Test time simulation"),
     ],
     # String operations
     "string.h": [
         HeaderException(
-            "**/stl/str.cpp", "C string implementation (memcpy, strlen, etc.)"
-        ),
-        HeaderException("led_strip/**/*", "Third-party Espressif library"),
+            "fl/stl/str.cpp", "C string implementation (memcpy, strlen, etc.)"
+        )
     ],
     "stdlib.h": [
         HeaderException(
-            "**/stl/str.cpp", "C string implementation (malloc, free, etc.)"
-        ),
-        HeaderException("led_strip/**/*", "Third-party Espressif library"),
-    ],
-    "sys/cdefs.h": [
-        HeaderException("led_strip/**/*", "Third-party Espressif library"),
+            "fl/stl/str.cpp", "C string implementation (malloc, free, etc.)"
+        )
     ],
     # Math operations
     "math.h": [
         HeaderException(
-            "**/stl/math.cpp", "Platform math functions (sin, cos, sqrt, etc.)"
+            "fl/stl/math.cpp", "Platform math functions (sin, cos, sqrt, etc.)"
         ),
-        HeaderException("**/audio_reactive.cpp", "Audio FFT and signal processing"),
+        HeaderException("fl/audio_reactive.cpp", "Audio FFT and signal processing"),
         HeaderException(
-            "**/colorutils.cpp", "Color interpolation and gamma correction"
+            "fl/colorutils.cpp", "Color interpolation and gamma correction"
         ),
-        HeaderException("**/transform.cpp", "Matrix transformations"),
-        HeaderException("**/xypath.cpp", "Path geometry calculations"),
-        HeaderException("**/xypath_impls.cpp", "Path rendering algorithms"),
-        HeaderException("**/xypath_renderer.cpp", "Path rendering algorithms"),
-        HeaderException("**/beat_detector.cpp", "Audio beat detection FFT"),
-        HeaderException("**/frame_interpolator.cpp", "Video frame interpolation"),
+        HeaderException("fl/transform.cpp", "Matrix transformations"),
+        HeaderException("fl/xypath.cpp", "Path geometry calculations"),
+        HeaderException("fl/xypath_impls.cpp", "Path rendering algorithms"),
+        HeaderException("fl/xypath_renderer.cpp", "Path rendering algorithms"),
+        HeaderException("fx/video/frame_interpolator.cpp", "Video frame interpolation"),
     ],
     "cmath": [
-        HeaderException("wasm/**/timer.cpp", "WASM timer implementation"),
+        HeaderException("platforms/wasm/timer.cpp", "WASM timer implementation"),
     ],
     # File operations
     "fstream": [
-        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
+        HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
     ],
     "cstdio": [
-        HeaderException("**/fs_stub.hpp", "Test filesystem implementation"),
-        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
-    ],
-    # WASM-specific headers
-    "vector": [
-        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
-    ],
-    "stdio.h": [
-        HeaderException("wasm/**/*.h", "WASM platform I/O implementation"),
+        HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
+        HeaderException("platforms/wasm/io_wasm.h", "WASM platform I/O implementation"),
+        HeaderException(
+            "platforms/wasm/compiler/wasm_pch.h", "WASM precompiled header"
+        ),
     ],
 }
 
@@ -301,65 +360,25 @@ class BannedHeadersChecker(FileContentChecker):
 
     @classmethod
     def _matches_pattern(cls, file_path: str, pattern: str) -> bool:
-        """Check if file path matches a wildcard pattern.
+        r"""Check if file path matches the pattern.
 
-        Supports:
-        - Exact filename matches: "file.cpp"
-        - Wildcard suffix: "*.cpp" (any .cpp file)
-        - Directory wildcard: "platforms/*/*.cpp" (any .cpp in platforms subdirs)
-        - Recursive wildcard: "platforms/**/*.cpp" (any .cpp in platforms tree)
+        Since all exception patterns are now exact file paths (no wildcards),
+        this performs a simple exact match after normalizing path separators.
+
+        Args:
+            file_path: The file path to check (may use \ or / separators)
+            pattern: The pattern to match (uses / separators)
+
+        Returns:
+            True if the file path matches the pattern
         """
         normalized_path = file_path.replace("\\", "/")
 
-        # Exact match
-        if pattern == normalized_path or normalized_path.endswith("/" + pattern):
-            return True
-
-        # Recursive wildcard: "dir/**/*.ext" matches "dir/a/b/c/file.ext"
-        if "**" in pattern:
-            parts = pattern.split("/")
-            pattern_prefix = "/".join(parts[: parts.index("**")])
-            pattern_suffix = parts[-1] if parts[-1] != "**" else ""
-
-            if pattern_prefix and pattern_prefix not in normalized_path:
-                return False
-
-            if pattern_suffix:
-                if pattern_suffix.startswith("*"):
-                    # Suffix match like "*.cpp"
-                    return normalized_path.endswith(pattern_suffix[1:])
-                else:
-                    # Exact filename match
-                    return normalized_path.endswith("/" + pattern_suffix)
-            return True
-
-        # Single-level wildcard: "platforms/*/file.cpp"
-        if "*" in pattern:
-            parts = pattern.split("/")
-            path_parts = normalized_path.split("/")
-
-            # Check if path has enough parts
-            if len(path_parts) < len(parts):
-                return False
-
-            # Match from the end (most specific part)
-            for i in range(1, len(parts) + 1):
-                pattern_part = parts[-i]
-                path_part = path_parts[-i]
-
-                if pattern_part == "*":
-                    continue  # Wildcard matches anything
-                elif pattern_part.startswith("*"):
-                    # Suffix match like "*.cpp"
-                    if not path_part.endswith(pattern_part[1:]):
-                        return False
-                elif pattern_part != path_part:
-                    return False
-
-            return True
-
-        # Substring match for simple patterns
-        return pattern in normalized_path
+        # Exact match: pattern equals the full path or just the suffix
+        # Examples:
+        #   pattern="fl/stl/mutex.h" matches "src/fl/stl/mutex.h"
+        #   pattern="inplacenew.h" matches "src/inplacenew.h"
+        return pattern == normalized_path or normalized_path.endswith("/" + pattern)
 
     def _is_allowed_exception(self, file_path: str, header: str) -> bool:
         """Check if this is an allowed exception to the banned header rule.
