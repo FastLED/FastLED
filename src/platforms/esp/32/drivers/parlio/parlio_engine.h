@@ -60,6 +60,8 @@
 #pragma once
 
 #include "fl/compiler_control.h"
+#include "fl/isr.h"
+#include "fl/singleton.h"
 
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
@@ -76,7 +78,7 @@
 
 // Include peripheral interface
 #include "iparlio_peripheral.h"
-#ifdef FASTLED_STUB
+#ifdef FASTLED_STUB_IMPL
 #include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
 #else
 #include "parlio_peripheral_esp.h"
@@ -176,7 +178,9 @@ public:
     ~ParlioEngine();
 
 private:
-    // Singleton pattern
+    // Singleton pattern - allow Singleton<T> to construct instance
+    friend class fl::Singleton<ParlioEngine>;
+
     ParlioEngine();
     ParlioEngine(const ParlioEngine&) = delete;
     ParlioEngine& operator=(const ParlioEngine&) = delete;
@@ -199,11 +203,8 @@ private:
     /// ⚠️  4. ONLY ISR-safe operations
     /// @param timer Timer handle
     /// @param edata Event data (unused)
-    /// @param user_ctx ParlioEngine instance pointer
-    /// @return true if high-priority task woken, false otherwise
-    static bool FL_IRAM workerIsrCallback(void* timer,
-                                          const void* edata,
-                                          void* user_ctx);
+    /// @param user_data ParlioEngine instance pointer
+    static void FL_IRAM workerIsrCallback(void* user_data);
 
     /// @brief Debug task function for periodic ISR state logging
     /// @param arg ParlioEngine instance pointer
@@ -241,8 +242,8 @@ private:
     size_t mActualChannels;
     size_t mDummyLanes;
 
-    // PARLIO peripheral interface (real hardware or mock)
-    fl::unique_ptr<IParlioPeripheral> mPeripheral;
+    // PARLIO peripheral interface (singleton - real hardware or mock)
+    IParlioPeripheral* mPeripheral;
 
     // GPIO pin assignments
     fl::vector<int> mPins;
@@ -265,11 +266,11 @@ private:
     // Worker task handle for background buffer population (TaskHandle_t)
     void* mWorkerTaskHandle;
 
-    // Worker timer for ISR-based background buffer population (timer_handle_t)
-    timer_handle_t mWorkerTimerHandle;
+    // Worker timer for ISR-based background buffer population (fl::isr::isr_handle_t)
+    fl::isr::isr_handle_t mWorkerTimerHandle;
 
-    // Debug task handle for periodic ISR state logging (TaskHandle_t)
-    void* mDebugTaskHandle;
+    // Debug task for periodic ISR state logging (unified task API)
+    fl::task mDebugTask;
 
     // Ring buffer for DMA streaming (fixed 3-buffer architecture)
     fl::unique_ptr<ParlioRingBuffer3> mRingBuffer;

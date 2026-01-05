@@ -1,9 +1,8 @@
 /// @file parlio_peripheral_esp.h
-/// @brief Real ESP32 PARLIO peripheral implementation (thin hardware wrapper)
+/// @brief Real ESP32 PARLIO peripheral interface (thin header)
 ///
-/// This class is a thin delegation layer around ESP-IDF PARLIO APIs.
-/// It implements the IParlioPeripheral interface by directly calling
-/// ESP-IDF functions with minimal overhead.
+/// This header provides a thin interface to the ESP32 PARLIO hardware.
+/// All implementation details and ESP-IDF dependencies are in the .cpp file.
 ///
 /// ## Design Philosophy
 ///
@@ -38,50 +37,31 @@
 #if FASTLED_ESP32_HAS_PARLIO
 
 #include "iparlio_peripheral.h"
-
-// Forward declarations (avoid including ESP-IDF headers in .h file)
-struct parlio_tx_unit_t;
-typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
+#include "fl/singleton.h"
 
 namespace fl {
 namespace detail {
 
+// Forward declaration for Singleton friendship
+class ParlioPeripheralESPImpl;
+
 //=============================================================================
-// Real Hardware Peripheral Implementation
+// Real Hardware Peripheral Interface
 //=============================================================================
 
-/// @brief Real ESP32 PARLIO peripheral implementation
+/// @brief Real ESP32 PARLIO peripheral interface
 ///
 /// Thin wrapper around ESP-IDF PARLIO TX APIs. All methods delegate
 /// directly to ESP-IDF with minimal overhead.
 ///
-/// ## Lifecycle
-/// ```cpp
-/// ParlioPeripheralESP peripheral;
-///
-/// // Initialize
-/// ParlioPeripheralConfig config = {...};
-/// peripheral.initialize(config);
-///
-/// // Register callback
-/// peripheral.registerTxDoneCallback(callback, ctx);
-///
-/// // Transmit
-/// peripheral.enable();
-/// peripheral.transmit(buffer, bits, idle);
-/// peripheral.waitAllDone(timeout);
-/// peripheral.disable();
-/// ```
-///
-/// ## Memory Management
-///
-/// - Constructor: No allocation
-/// - initialize(): Allocates ESP-IDF PARLIO TX unit handle
-/// - Destructor: Frees TX unit handle automatically
+/// This is an abstract interface - use instance() to access the singleton.
 class ParlioPeripheralESP : public IParlioPeripheral {
 public:
-    /// @brief Constructor - no allocation
-    ParlioPeripheralESP();
+    /// @brief Get the singleton instance
+    /// @return Reference to the singleton peripheral
+    ///
+    /// Mirrors the hardware constraint that there is only one PARLIO peripheral.
+    static ParlioPeripheralESP& instance();
 
     /// @brief Destructor - frees ESP-IDF TX unit handle
     ~ParlioPeripheralESP() override;
@@ -94,30 +74,22 @@ public:
     // IParlioPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const ParlioPeripheralConfig& config) override;
-    bool enable() override;
-    bool disable() override;
-    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override;
-    bool waitAllDone(uint32_t timeout_ms) override;
-    bool registerTxDoneCallback(void* callback, void* user_ctx) override;
-    uint8_t* allocateDmaBuffer(size_t size) override;
-    void freeDmaBuffer(uint8_t* buffer) override;
-    void delay(uint32_t ms) override;
-    task_handle_t createTask(const TaskConfig& config) override;
-    void deleteTask(task_handle_t task_handle) override;
-    void deleteCurrentTask() override;
-    timer_handle_t createTimer(const TimerConfig& config) override;
-    bool enableTimer(timer_handle_t handle) override;
-    bool startTimer(timer_handle_t handle) override;
-    bool stopTimer(timer_handle_t handle) override;
-    bool disableTimer(timer_handle_t handle) override;
-    void deleteTimer(timer_handle_t handle) override;
-    uint64_t getMicroseconds() override;
-    void freeDmaBuffer(void* ptr) override;
+    bool initialize(const ParlioPeripheralConfig& config) override = 0;
+    bool enable() override = 0;
+    bool disable() override = 0;
+    bool isInitialized() const override = 0;
+    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override = 0;
+    bool waitAllDone(uint32_t timeout_ms) override = 0;
+    bool registerTxDoneCallback(void* callback, void* user_ctx) override = 0;
+    uint8_t* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(uint8_t* buffer) override = 0;
+    void delay(uint32_t ms) override = 0;
+    uint64_t getMicroseconds() override = 0;
+    void freeDmaBuffer(void* ptr) override = 0;
 
-private:
-    parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
-    bool mEnabled;                     ///< Track enable state (for cleanup)
+protected:
+    /// @brief Protected constructor for singleton
+    ParlioPeripheralESP() = default;
 };
 
 } // namespace detail

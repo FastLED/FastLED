@@ -47,6 +47,8 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/task.h"  // For OS-level task management (fl::os_task namespace)
+#include "fl/stl/vector.h"  // For fl::vector_fixed
 
 namespace fl {
 namespace detail {
@@ -60,51 +62,54 @@ namespace detail {
 /// Encapsulates all parameters needed to initialize the PARLIO hardware.
 /// Maps directly to ESP-IDF's parlio_tx_unit_config_t structure.
 struct ParlioPeripheralConfig {
-    size_t data_width;              ///< PARLIO data width (1, 2, 4, 8, or 16)
-    int gpio_pins[16];              ///< GPIO pin assignments (-1 for unused)
-    uint32_t clock_freq_hz;         ///< Clock frequency (default: 8MHz)
-    size_t queue_depth;             ///< Hardware queue depth (default: 3)
-    size_t max_transfer_size;       ///< Max DMA transfer size (default: 65534)
+    size_t data_width;                  ///< PARLIO data width (1, 2, 4, 8, or 16)
+    fl::vector_fixed<int, 16> gpio_pins;///< GPIO pin assignments (-1 for unused)
+    uint32_t clock_freq_hz;             ///< Clock frequency (Hz)
+    size_t queue_depth;                 ///< Hardware queue depth
+    size_t max_transfer_size;           ///< Max DMA transfer size (bytes)
+
+    /// @brief Default constructor (for mock testing)
+    ParlioPeripheralConfig()
+        : data_width(0),
+          gpio_pins(),
+          clock_freq_hz(0),
+          queue_depth(0),
+          max_transfer_size(0) {}
+
+    /// @brief Constructor with mandatory parameters
+    /// @tparam PinContainer Any container with .size() and operator[] (e.g., fl::vector, fl::vector_fixed)
+    /// @param pins GPIO pin assignments (unused slots automatically filled with -1)
+    /// @param clock_freq Clock frequency in Hz
+    /// @param queue_depth Hardware queue depth
+    /// @param max_transfer Maximum DMA transfer size in bytes
+    template<typename PinContainer>
+    ParlioPeripheralConfig(const PinContainer& pins,
+                           uint32_t clock_freq,
+                           size_t queue_depth_val,
+                           size_t max_transfer)
+        : data_width(pins.size()),
+          gpio_pins(),
+          clock_freq_hz(clock_freq),
+          queue_depth(queue_depth_val),
+          max_transfer_size(max_transfer) {
+        // Resize to full 16 slots
+        gpio_pins.resize(16);
+
+        // Copy provided pins
+        for (size_t i = 0; i < pins.size() && i < 16; i++) {
+            gpio_pins[i] = pins[i];
+        }
+
+        // Fill remaining slots with -1 (unused)
+        for (size_t i = pins.size(); i < 16; i++) {
+            gpio_pins[i] = -1;
+        }
+    }
 };
 
-/// @brief Task configuration for peripheral task creation
-///
-/// Platform-agnostic task configuration structure for creating background tasks.
-/// Used to abstract FreeRTOS/OS-specific task creation from engine code.
-struct TaskConfig {
-    void (*task_function)(void* arg);  ///< Task entry point
-    const char* name;                  ///< Task name (for debugging)
-    size_t stack_size;                 ///< Stack size in bytes
-    void* user_data;                   ///< User context (passed to task_function)
-    uint8_t priority;                  ///< Task priority (0-N, platform-specific)
-};
-
-/// @brief Opaque task handle (platform-specific)
-///
-/// Platform-agnostic task handle type:
-/// - ESP32: FreeRTOS TaskHandle_t cast to void*
-/// - Mock: Synthetic handle or nullptr
-typedef void* task_handle_t;
-
-/// @brief Opaque timer handle (platform-specific)
-///
-/// Platform-agnostic timer handle type:
-/// - ESP32: gptimer_handle_t cast to void*
-/// - Mock: Synthetic handle or nullptr
-typedef void* timer_handle_t;
-
-/// @brief Timer configuration for hardware timer creation
-///
-/// Platform-agnostic timer configuration structure for creating background timers.
-/// Used to abstract ESP-IDF gptimer / OS-specific timer creation from engine code.
-struct TimerConfig {
-    void* callback;              ///< Timer callback (cast to platform-specific type)
-    void* user_data;             ///< User context (passed to callback)
-    uint32_t resolution_hz;      ///< Timer resolution in Hz (e.g., 1MHz = 1µs ticks)
-    uint8_t priority;            ///< Interrupt priority (0-N, platform-specific)
-    uint32_t period_us;          ///< Timer period in microseconds (e.g., 50µs)
-    bool auto_reload;            ///< Auto-reload mode (true = continuous, false = one-shot)
-};
+// Task management removed from peripheral interface
+// Use fl::TaskCoroutine directly instead of peripheral->createTask()
+// Timer types removed - use fl::isr::isr_handle_t and fl::isr::isr_config_t instead
 
 //=============================================================================
 // Virtual Peripheral Interface
@@ -182,6 +187,14 @@ public:
     /// Call after waitAllDone() completes. Disabling while transmission
     /// is active may cause data corruption or hardware errors.
     virtual bool disable() = 0;
+
+    /// @brief Check if peripheral is initialized
+    /// @return true if initialized, false otherwise
+    ///
+    /// Used by ParlioEngine to detect if peripheral was reset (for testing).
+    /// Production hardware: Always returns true after initialize() succeeds.
+    /// Mock implementation: Returns false after reset() is called.
+    virtual bool isInitialized() const = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -307,143 +320,28 @@ public:
     virtual void delay(uint32_t ms) = 0;
 
     //=========================================================================
-    // Task Management
+    // Task Management (REMOVED - Use fl::TaskCoroutine directly)
     //=========================================================================
-
-    /// @brief Create a new task
-    /// @param config Task configuration
-    /// @return Task handle on success, nullptr on failure
-    ///
-    /// Maps to:
-    /// - ESP32/FreeRTOS: xTaskCreate()
-    /// - Mock: Simulated task (thread or no-op)
-    ///
-    /// The task runs immediately after creation. Call deleteTask() to stop.
-    ///
-    /// Platform-specific notes:
-    /// - ESP32: Task runs with specified priority (0-24)
-    /// - Mock: May run synchronously or as no-op (test-specific)
-    ///
-    /// Safe to call from non-ISR context only.
-    virtual task_handle_t createTask(const TaskConfig& config) = 0;
-
-    /// @brief Delete a task
-    /// @param task_handle Task handle from createTask()
-    ///
-    /// Maps to:
-    /// - ESP32/FreeRTOS: vTaskDelete()
-    /// - Mock: Cleanup simulated task
-    ///
-    /// Safe to call with nullptr (no-op). Task must not be currently executing
-    /// (use signaling to coordinate shutdown before calling deleteTask).
-    ///
-    /// ⚠️  For self-deleting tasks, use deleteCurrentTask() instead.
-    virtual void deleteTask(task_handle_t task_handle) = 0;
-
-    /// @brief Delete the currently executing task (self-deletion)
-    ///
-    /// Maps to:
-    /// - ESP32/FreeRTOS: vTaskDelete(NULL)
-    /// - Mock: Exit task simulation
-    ///
-    /// This method MUST be called from within the task that wants to self-delete.
-    /// It should be the last operation in the task function. The task function
-    /// should NOT return after calling this method.
-    ///
-    /// Typical pattern:
-    /// ```cpp
-    /// void myTaskFunction(void* arg) {
-    ///     // ... task work ...
-    ///     peripheral->deleteCurrentTask();
-    ///     // UNREACHABLE CODE
-    /// }
-    /// ```
-    ///
-    /// ⚠️  This method does NOT return on real hardware (ESP32/FreeRTOS).
-    /// On mock implementations, it may throw an exception or set a flag to
-    /// terminate task simulation.
-    virtual void deleteCurrentTask() = 0;
+    //
+    // Task management has been removed from this interface.
+    // Use fl::task::coroutine() instead of peripheral->createTask().
+    //
+    // Migration guide:
+    // - OLD: task_handle_t h = peripheral->createTask(config);
+    // - NEW: auto task = fl::task::coroutine({.function = func, .name = name});
+    // - Self-deletion: fl::task::exitCurrent();
 
     //=========================================================================
-    // Timer Management
+    // Timer Management (REMOVED - Use fl/isr.h directly)
     //=========================================================================
-
-    /// @brief Create and configure a hardware timer
-    /// @param config Timer configuration
-    /// @return Timer handle on success, nullptr on failure
-    ///
-    /// Maps to:
-    /// - ESP32: gptimer_new_timer(), gptimer_register_event_callbacks(), gptimer_set_alarm_action()
-    /// - Mock: Simulated timer (thread-based or no-op)
-    ///
-    /// The timer is created in disabled state. Call enableTimer() and startTimer()
-    /// to begin generating timer interrupts.
-    ///
-    /// Callback signature (cast from void*):
-    /// ```cpp
-    /// bool callback(void* timer, const void* edata, void* user_ctx);
-    /// ```
-    ///
-    /// The callback:
-    /// - Runs in ISR context (MUST be ISR-safe)
-    /// - Receives opaque timer handle (implementation-specific)
-    /// - Receives event data (implementation-specific)
-    /// - Receives user context pointer (from TimerConfig::user_data)
-    /// - Returns true if high-priority task woken, false otherwise
-    ///
-    /// ⚠️  ISR SAFETY RULES:
-    /// - NO logging (FL_LOG_PARLIO, FL_WARN, FL_DBG, printf, etc.)
-    /// - NO blocking operations (mutex, delay, heap allocation)
-    /// - MINIMIZE execution time (<10µs ideal)
-    /// - Use atomic operations and memory barriers for shared state
-    virtual timer_handle_t createTimer(const TimerConfig& config) = 0;
-
-    /// @brief Enable hardware timer
-    /// @param handle Timer handle from createTimer()
-    /// @return true on success, false on error
-    ///
-    /// Maps to ESP-IDF: gptimer_enable()
-    ///
-    /// Must be called before startTimer(). The timer remains enabled until
-    /// disableTimer() is called.
-    virtual bool enableTimer(timer_handle_t handle) = 0;
-
-    /// @brief Start hardware timer (begin generating interrupts)
-    /// @param handle Timer handle from createTimer()
-    /// @return true on success, false on error
-    ///
-    /// Maps to ESP-IDF: gptimer_start()
-    ///
-    /// Timer must be enabled before calling. Timer callback will fire at
-    /// configured period (TimerConfig::period_us).
-    virtual bool startTimer(timer_handle_t handle) = 0;
-
-    /// @brief Stop hardware timer (stop generating interrupts)
-    /// @param handle Timer handle from createTimer()
-    /// @return true on success, false on error
-    ///
-    /// Maps to ESP-IDF: gptimer_stop()
-    ///
-    /// Safe to call multiple times. Does not disable timer (call disableTimer()
-    /// to fully power down).
-    virtual bool stopTimer(timer_handle_t handle) = 0;
-
-    /// @brief Disable hardware timer
-    /// @param handle Timer handle from createTimer()
-    /// @return true on success, false on error
-    ///
-    /// Maps to ESP-IDF: gptimer_disable()
-    ///
-    /// Timer must be stopped before disabling. Call after stopTimer().
-    virtual bool disableTimer(timer_handle_t handle) = 0;
-
-    /// @brief Delete hardware timer
-    /// @param handle Timer handle from createTimer()
-    ///
-    /// Maps to ESP-IDF: gptimer_del_timer()
-    ///
-    /// Timer must be disabled before deletion. Safe to call with nullptr (no-op).
-    virtual void deleteTimer(timer_handle_t handle) = 0;
+    //
+    // Timer management has been removed from this interface.
+    // Use fl::isr::attachTimerHandler() and related functions from fl/isr.h instead.
+    //
+    // Migration guide:
+    // - createTimer() + enableTimer() + startTimer() → fl::isr::attachTimerHandler()
+    // - stopTimer() + disableTimer() + deleteTimer() → fl::isr::detachHandler()
+    // - Temporary disable/enable → fl::isr::disableHandler() / fl::isr::enableHandler()
 
     //=========================================================================
     // Time Utilities

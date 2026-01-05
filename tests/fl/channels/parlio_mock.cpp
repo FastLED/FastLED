@@ -14,7 +14,7 @@
 #include "test.h"
 #include "FastLED.h"
 
-#ifdef FASTLED_STUB  // Mock tests only run on stub platform
+#ifdef FASTLED_STUB_IMPL  // Mock tests only run on stub platform
 
 #include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
@@ -26,21 +26,15 @@ namespace {
 
 /// @brief Helper to create default timing config for WS2812
 ChipsetTimingConfig getWS2812Timing() {
-    ChipsetTimingConfig timing = {};
-    timing.t1_ns = 350;   // T1H: 350ns ± 150ns
-    timing.t2_ns = 800;   // T2H: 800ns ± 150ns
-    timing.t3_ns = 450;   // T0L + T1L total
-    timing.reset_us = 50; // Reset: 50µs
-    return timing;
+    return ChipsetTimingConfig(350, 800, 450, 50, "WS2812B");
 }
 
 /// @brief Reset mock state between tests
 void resetMockState() {
-    auto* mock = getParlioMockInstance();
-    if (mock) {
-        mock->clearTransmissionHistory();
-        mock->setTransmitFailure(false);
-        mock->setTransmitDelay(0);
+    auto& mock = ParlioPeripheralMock::instance();
+    {
+        // Full reset instead of partial - resets all state including initialization
+        mock.reset();
     }
 }
 
@@ -63,12 +57,11 @@ TEST_CASE("ParlioEngine mock - basic initialization") {
     CHECK(success);
 
     // Verify mock received correct config
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
-    CHECK(mock->isInitialized());
-    CHECK(mock->getConfig().data_width == 1);
-    CHECK(mock->getConfig().gpio_pins[0] == 1);
-    CHECK(mock->getConfig().gpio_pins[1] == -1);  // Unused lanes marked -1
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.isInitialized());
+    CHECK(mock.getConfig().data_width == 1);
+    CHECK(mock.getConfig().gpio_pins[0] == 1);
+    CHECK(mock.getConfig().gpio_pins[1] == -1);  // Unused lanes marked -1
 }
 
 TEST_CASE("ParlioEngine mock - multi-lane initialization") {
@@ -83,11 +76,10 @@ TEST_CASE("ParlioEngine mock - multi-lane initialization") {
     bool success = engine.initialize(4, pins, timing, 100);
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
-    CHECK(mock->isInitialized());
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.isInitialized());
 
-    const auto& config = mock->getConfig();
+    const auto& config = mock.getConfig();
     CHECK(config.data_width == 4);
     CHECK(config.gpio_pins[0] == 1);
     CHECK(config.gpio_pins[1] == 2);
@@ -116,17 +108,16 @@ TEST_CASE("ParlioEngine mock - single LED transmission") {
     CHECK(success);
 
     // Verify mock recorded transmission
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // Verify peripheral was enabled
-    CHECK(mock->isEnabled());
+    CHECK(mock.isEnabled());
 
     // Verify at least one transmission occurred
-    CHECK(mock->getTransmitCount() > 0);
+    CHECK(mock.getTransmitCount() > 0);
 
     // Check transmission history
-    const auto& history = mock->getTransmissionHistory();
+    const auto& history = mock.getTransmissionHistory();
     CHECK(history.size() > 0);
 
     if (history.size() > 0) {
@@ -156,8 +147,8 @@ TEST_CASE("ParlioEngine mock - multiple LEDs transmission") {
     bool success = engine.beginTransmission(scratch.data(), scratch.size(), 1, scratch.size());
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    CHECK(mock->getTransmitCount() > 0);
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.getTransmitCount() > 0);
 
     // Verify transmission completed (should be in READY state)
     CHECK(engine.poll() == ParlioEngineState::READY);
@@ -185,12 +176,11 @@ TEST_CASE("ParlioEngine mock - ISR callback simulation") {
     bool success = engine.beginTransmission(scratch, 30, 1, 30);
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // At this point, transmission should be in progress or complete
     // The mock should have recorded transmissions
-    size_t initial_count = mock->getTransmitCount();
+    size_t initial_count = mock.getTransmitCount();
     CHECK(initial_count > 0);
 
     // Poll engine status - should be READY since transmission is synchronous
@@ -213,11 +203,10 @@ TEST_CASE("ParlioEngine mock - transmit failure injection") {
 
     uint8_t scratch[30];
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // Inject transmit failure
-    mock->setTransmitFailure(true);
+    mock.setTransmitFailure(true);
 
     bool success = engine.beginTransmission(scratch, 30, 1, 30);
     CHECK_FALSE(success);  // Should fail
@@ -226,7 +215,7 @@ TEST_CASE("ParlioEngine mock - transmit failure injection") {
     CHECK(engine.poll() == ParlioEngineState::ERROR);
 
     // Clear failure and reinitialize for next transmission
-    mock->setTransmitFailure(false);
+    mock.setTransmitFailure(false);
 
     // Note: After error, engine might need reinitialization
     // This tests error detection, not recovery
@@ -257,12 +246,11 @@ TEST_CASE("ParlioEngine mock - large buffer streaming") {
     bool success = engine.beginTransmission(scratch.data(), scratch.size(), 1, scratch.size());
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // Large transmissions may require multiple DMA buffer submissions
     // Verify at least one transmission occurred
-    CHECK(mock->getTransmitCount() > 0);
+    CHECK(mock.getTransmitCount() > 0);
 
     // Verify final state
     CHECK(engine.poll() == ParlioEngineState::READY);
@@ -295,8 +283,8 @@ TEST_CASE("ParlioEngine mock - multi-lane streaming") {
     );
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    CHECK(mock->getTransmitCount() > 0);
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.getTransmitCount() > 0);
 
     // Verify completion
     CHECK(engine.poll() == ParlioEngineState::READY);
@@ -314,26 +302,25 @@ TEST_CASE("ParlioEngine mock - state inspection") {
     fl::vector<int> pins = {1, 2};
     ChipsetTimingConfig timing = getWS2812Timing();
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // Before initialization
-    CHECK_FALSE(mock->isInitialized());
-    CHECK_FALSE(mock->isEnabled());
-    CHECK_FALSE(mock->isTransmitting());
-    CHECK(mock->getTransmitCount() == 0);
+    CHECK_FALSE(mock.isInitialized());
+    CHECK_FALSE(mock.isEnabled());
+    CHECK_FALSE(mock.isTransmitting());
+    CHECK(mock.getTransmitCount() == 0);
 
     // After initialization
     engine.initialize(2, pins, timing, 50);
-    CHECK(mock->isInitialized());
-    CHECK_FALSE(mock->isEnabled());  // Not enabled until transmission
+    CHECK(mock.isInitialized());
+    CHECK_FALSE(mock.isEnabled());  // Not enabled until transmission
 
     // After transmission
     fl::vector<uint8_t> scratch(50 * 2 * 3);  // 50 LEDs × 2 lanes × 3 bytes
     engine.beginTransmission(scratch.data(), scratch.size(), 2, scratch.size());
 
-    CHECK(mock->isEnabled());
-    CHECK(mock->getTransmitCount() > 0);
+    CHECK(mock.isEnabled());
+    CHECK(mock.getTransmitCount() > 0);
 
     // After completion
     CHECK(engine.poll() == ParlioEngineState::READY);
@@ -361,10 +348,9 @@ TEST_CASE("ParlioEngine mock - waveform data capture") {
 
     engine.beginTransmission(scratch, 9, 1, 9);
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
-    const auto& history = mock->getTransmissionHistory();
+    const auto& history = mock.getTransmissionHistory();
     REQUIRE(history.size() > 0);
 
     // Verify first transmission captured data
@@ -389,24 +375,23 @@ TEST_CASE("ParlioEngine mock - transmission history clearing") {
 
     uint8_t scratch[15] = {0};
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
+    auto& mock = ParlioPeripheralMock::instance();
 
     // First transmission
     engine.beginTransmission(scratch, 15, 1, 15);
-    size_t count1 = mock->getTransmissionHistory().size();
+    size_t count1 = mock.getTransmissionHistory().size();
     CHECK(count1 > 0);
 
     // Clear history
-    mock->clearTransmissionHistory();
-    CHECK(mock->getTransmissionHistory().size() == 0);
-    CHECK(mock->getTransmitCount() == count1);  // Counter not reset
+    mock.clearTransmissionHistory();
+    CHECK(mock.getTransmissionHistory().size() == 0);
+    CHECK(mock.getTransmitCount() == count1);  // Counter not reset
 
     // Second transmission
     engine.beginTransmission(scratch, 15, 1, 15);
-    size_t count2 = mock->getTransmissionHistory().size();
+    size_t count2 = mock.getTransmissionHistory().size();
     CHECK(count2 > 0);
-    CHECK(mock->getTransmitCount() > count1);  // Counter incremented
+    CHECK(mock.getTransmitCount() > count1);  // Counter incremented
 }
 
 //=============================================================================
@@ -425,12 +410,13 @@ TEST_CASE("ParlioEngine mock - zero LEDs") {
     // Empty transmission (edge case)
     uint8_t scratch[1] = {0};
     bool success = engine.beginTransmission(scratch, 0, 1, 0);
+    (void)success;  // Suppress unused warning - behavior is implementation-defined
 
     // Behavior depends on implementation - either succeeds with no-op
     // or fails gracefully. Both are acceptable.
-    // Just verify no crash occurs.
-    auto* mock = getParlioMockInstance();
-    CHECK(mock != nullptr);  // Mock should still exist
+    // Just verify no crash occurs by accessing the mock.
+    auto& mock = ParlioPeripheralMock::instance();
+    (void)mock;  // Suppress unused warning
 }
 
 TEST_CASE("ParlioEngine mock - maximum data width") {
@@ -445,14 +431,13 @@ TEST_CASE("ParlioEngine mock - maximum data width") {
     bool success = engine.initialize(16, pins, timing, 10);
     CHECK(success);
 
-    auto* mock = getParlioMockInstance();
-    REQUIRE(mock != nullptr);
-    CHECK(mock->getConfig().data_width == 16);
+    auto& mock = ParlioPeripheralMock::instance();
+    CHECK(mock.getConfig().data_width == 16);
 
     // Verify all pins configured
     for (size_t i = 0; i < 16; i++) {
-        CHECK(mock->getConfig().gpio_pins[i] == static_cast<int>(i + 1));
+        CHECK(mock.getConfig().gpio_pins[i] == static_cast<int>(i + 1));
     }
 }
 
-#endif // FASTLED_STUB
+#endif // FASTLED_STUB_IMPL

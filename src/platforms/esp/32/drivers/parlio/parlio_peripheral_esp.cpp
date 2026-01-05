@@ -30,16 +30,67 @@ FL_EXTERN_C_END
 namespace fl {
 namespace detail {
 
+// Forward declarations for ESP-IDF types (avoid exposing in header)
+struct parlio_tx_unit_t;
+typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
+
 //=============================================================================
-// Constructor / Destructor
+// Implementation Class (internal)
 //=============================================================================
 
-ParlioPeripheralESP::ParlioPeripheralESP()
+/// @brief Internal implementation of ParlioPeripheralESP
+///
+/// This class contains all ESP-IDF-specific implementation details.
+class ParlioPeripheralESPImpl : public ParlioPeripheralESP {
+public:
+    ParlioPeripheralESPImpl();
+    ~ParlioPeripheralESPImpl() override;
+
+    // IParlioPeripheral Interface Implementation
+    bool initialize(const ParlioPeripheralConfig& config) override;
+    bool enable() override;
+    bool disable() override;
+    bool isInitialized() const override;
+    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override;
+    bool waitAllDone(uint32_t timeout_ms) override;
+    bool registerTxDoneCallback(void* callback, void* user_ctx) override;
+    uint8_t* allocateDmaBuffer(size_t size) override;
+    void freeDmaBuffer(uint8_t* buffer) override;
+    void delay(uint32_t ms) override;
+    uint64_t getMicroseconds() override;
+    void freeDmaBuffer(void* ptr) override;
+
+private:
+    parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
+    bool mEnabled;                     ///< Track enable state (for cleanup)
+};
+
+//=============================================================================
+// Singleton Instance
+//=============================================================================
+
+ParlioPeripheralESP& ParlioPeripheralESP::instance() {
+    return Singleton<ParlioPeripheralESPImpl>::instance();
+}
+
+//=============================================================================
+// Destructor (base class)
+//=============================================================================
+
+ParlioPeripheralESP::~ParlioPeripheralESP() {
+    // Empty - implementation in ParlioPeripheralESPImpl
+}
+
+//=============================================================================
+// Constructor / Destructor (implementation)
+//=============================================================================
+
+ParlioPeripheralESPImpl::ParlioPeripheralESPImpl()
     : mTxUnit(nullptr),
       mEnabled(false) {
 }
 
-ParlioPeripheralESP::~ParlioPeripheralESP() {
+ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
     // Clean up TX unit if initialized
     if (mTxUnit != nullptr) {
         // Wait for any pending transmissions (with timeout)
@@ -71,7 +122,7 @@ ParlioPeripheralESP::~ParlioPeripheralESP() {
 // Lifecycle Methods
 //=============================================================================
 
-bool ParlioPeripheralESP::initialize(const ParlioPeripheralConfig& config) {
+bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     // Validate not already initialized
     if (mTxUnit != nullptr) {
         FL_WARN("ParlioPeripheralESP: Already initialized");
@@ -109,7 +160,7 @@ bool ParlioPeripheralESP::initialize(const ParlioPeripheralConfig& config) {
     return true;
 }
 
-bool ParlioPeripheralESP::enable() {
+bool ParlioPeripheralESPImpl::enable() {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot enable - not initialized");
         return false;
@@ -126,7 +177,7 @@ bool ParlioPeripheralESP::enable() {
     return true;
 }
 
-bool ParlioPeripheralESP::disable() {
+bool ParlioPeripheralESPImpl::disable() {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot disable - not initialized");
         return false;
@@ -143,11 +194,16 @@ bool ParlioPeripheralESP::disable() {
     return true;
 }
 
+bool ParlioPeripheralESPImpl::isInitialized() const {
+    // Real hardware: initialized if TX unit handle is valid
+    return mTxUnit != nullptr;
+}
+
 //=============================================================================
 // Transmission Methods
 //=============================================================================
 
-bool ParlioPeripheralESP::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
+bool ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot transmit - not initialized");
         return false;
@@ -185,7 +241,7 @@ bool ParlioPeripheralESP::transmit(const uint8_t* buffer, size_t bit_count, uint
     return true;
 }
 
-bool ParlioPeripheralESP::waitAllDone(uint32_t timeout_ms) {
+bool ParlioPeripheralESPImpl::waitAllDone(uint32_t timeout_ms) {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot wait - not initialized");
         return false;
@@ -210,7 +266,7 @@ bool ParlioPeripheralESP::waitAllDone(uint32_t timeout_ms) {
 // ISR Callback Registration
 //=============================================================================
 
-bool ParlioPeripheralESP::registerTxDoneCallback(void* callback, void* user_ctx) {
+bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_ctx) {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot register callback - not initialized");
         return false;
@@ -234,7 +290,7 @@ bool ParlioPeripheralESP::registerTxDoneCallback(void* callback, void* user_ctx)
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* ParlioPeripheralESP::allocateDmaBuffer(size_t size) {
+uint8_t* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
     // Round up to 64-byte multiple for cache line alignment
     size_t aligned_size = ((size + 63) / 64) * 64;
 
@@ -251,185 +307,34 @@ uint8_t* ParlioPeripheralESP::allocateDmaBuffer(size_t size) {
     return buffer;
 }
 
-void ParlioPeripheralESP::freeDmaBuffer(uint8_t* buffer) {
+void ParlioPeripheralESPImpl::freeDmaBuffer(uint8_t* buffer) {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
 }
 
-void ParlioPeripheralESP::delay(uint32_t ms) {
+void ParlioPeripheralESPImpl::delay(uint32_t ms) {
     // Map to FreeRTOS vTaskDelay
     // pdMS_TO_TICKS converts milliseconds to RTOS ticks
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
 //=============================================================================
-// Task Management
+// Task Management (REMOVED - Use fl::TaskCoroutine directly)
 //=============================================================================
-
-task_handle_t ParlioPeripheralESP::createTask(const TaskConfig& config) {
-    TaskHandle_t handle = nullptr;
-    BaseType_t result = xTaskCreate(
-        config.task_function,
-        config.name,
-        config.stack_size,
-        config.user_data,
-        config.priority,
-        &handle);
-
-    if (result != pdPASS) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to create task '" << config.name << "'");
-        return nullptr;
-    }
-
-    return static_cast<task_handle_t>(handle);
-}
-
-void ParlioPeripheralESP::deleteTask(task_handle_t task_handle) {
-    if (task_handle == nullptr) {
-        return;
-    }
-
-    TaskHandle_t handle = static_cast<TaskHandle_t>(task_handle);
-    vTaskDelete(handle);
-}
-
-void ParlioPeripheralESP::deleteCurrentTask() {
-    // Self-delete the currently executing task
-    // This function does NOT return on ESP32/FreeRTOS
-    vTaskDelete(NULL);
-}
+// Task methods removed. Use fl::TaskCoroutine directly from engine code.
 
 //=============================================================================
-// Timer Management
+// Timer Management (REMOVED - Use fl/isr.h directly)
 //=============================================================================
+// Timer methods removed. Use fl::isr::attachTimerHandler() and related
+// functions from fl/isr.h instead.
 
-timer_handle_t ParlioPeripheralESP::createTimer(const TimerConfig& config) {
-    // Configure gptimer
-    gptimer_config_t timer_config = {};
-    timer_config.clk_src = GPTIMER_CLK_SRC_DEFAULT;
-    timer_config.direction = GPTIMER_COUNT_UP;
-    timer_config.resolution_hz = config.resolution_hz;
-    timer_config.intr_priority = config.priority;
-
-    // Create timer
-    gptimer_handle_t timer_handle = nullptr;
-    esp_err_t err = gptimer_new_timer(&timer_config, &timer_handle);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to create timer: " << err);
-        return nullptr;
-    }
-
-    // Register callback if provided
-    if (config.callback != nullptr) {
-        gptimer_event_callbacks_t callbacks = {};
-        callbacks.on_alarm = reinterpret_cast<gptimer_alarm_cb_t>(config.callback);
-
-        err = gptimer_register_event_callbacks(timer_handle, &callbacks, config.user_data);
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("ParlioPeripheralESP: Failed to register timer callbacks: " << err);
-            gptimer_del_timer(timer_handle);
-            return nullptr;
-        }
-    }
-
-    // Configure alarm
-    gptimer_alarm_config_t alarm_config = {};
-    alarm_config.alarm_count = config.period_us * (config.resolution_hz / 1000000);
-    alarm_config.reload_count = 0;
-    alarm_config.flags.auto_reload_on_alarm = config.auto_reload;
-
-    err = gptimer_set_alarm_action(timer_handle, &alarm_config);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to set timer alarm: " << err);
-        gptimer_del_timer(timer_handle);
-        return nullptr;
-    }
-
-    return static_cast<timer_handle_t>(timer_handle);
-}
-
-bool ParlioPeripheralESP::enableTimer(timer_handle_t handle) {
-    if (handle == nullptr) {
-        FL_WARN("ParlioPeripheralESP: Cannot enable null timer");
-        return false;
-    }
-
-    gptimer_handle_t timer = static_cast<gptimer_handle_t>(handle);
-    esp_err_t err = gptimer_enable(timer);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to enable timer: " << err);
-        return false;
-    }
-
-    return true;
-}
-
-bool ParlioPeripheralESP::startTimer(timer_handle_t handle) {
-    if (handle == nullptr) {
-        FL_WARN("ParlioPeripheralESP: Cannot start null timer");
-        return false;
-    }
-
-    gptimer_handle_t timer = static_cast<gptimer_handle_t>(handle);
-    esp_err_t err = gptimer_start(timer);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to start timer: " << err);
-        return false;
-    }
-
-    return true;
-}
-
-bool ParlioPeripheralESP::stopTimer(timer_handle_t handle) {
-    if (handle == nullptr) {
-        // Stopping a null timer is a no-op (not an error)
-        return true;
-    }
-
-    gptimer_handle_t timer = static_cast<gptimer_handle_t>(handle);
-    esp_err_t err = gptimer_stop(timer);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to stop timer: " << err);
-        return false;
-    }
-
-    return true;
-}
-
-bool ParlioPeripheralESP::disableTimer(timer_handle_t handle) {
-    if (handle == nullptr) {
-        FL_WARN("ParlioPeripheralESP: Cannot disable null timer");
-        return false;
-    }
-
-    gptimer_handle_t timer = static_cast<gptimer_handle_t>(handle);
-    esp_err_t err = gptimer_disable(timer);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to disable timer: " << err);
-        return false;
-    }
-
-    return true;
-}
-
-void ParlioPeripheralESP::deleteTimer(timer_handle_t handle) {
-    if (handle == nullptr) {
-        return;
-    }
-
-    gptimer_handle_t timer = static_cast<gptimer_handle_t>(handle);
-    esp_err_t err = gptimer_del_timer(timer);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to delete timer: " << err);
-    }
-}
-
-uint64_t ParlioPeripheralESP::getMicroseconds() {
+uint64_t ParlioPeripheralESPImpl::getMicroseconds() {
     return esp_timer_get_time();
 }
 
-void ParlioPeripheralESP::freeDmaBuffer(void* ptr) {
+void ParlioPeripheralESPImpl::freeDmaBuffer(void* ptr) {
     if (ptr) {
         heap_caps_free(ptr);
     }

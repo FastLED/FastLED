@@ -19,25 +19,25 @@
 /// ## Usage in Unit Tests
 ///
 /// ```cpp
-/// // Create mock peripheral
-/// auto mock = new ParlioPeripheralMock();
+/// // Get singleton mock peripheral instance
+/// auto& mock = ParlioPeripheralMock::instance();
 ///
 /// // Configure
 /// ParlioPeripheralConfig config = {...};
-/// mock->initialize(config);
+/// mock.initialize(config);
 ///
 /// // Register callback
-/// mock->registerTxDoneCallback(callback, ctx);
+/// mock.registerTxDoneCallback(callback, ctx);
 ///
 /// // Transmit
-/// mock->enable();
-/// mock->transmit(buffer, bits, idle);
+/// mock.enable();
+/// mock.transmit(buffer, bits, idle);
 ///
 /// // Simulate transmission complete (trigger ISR)
-/// mock->simulateTransmitComplete();
+/// mock.simulateTransmitComplete();
 ///
 /// // Inspect captured waveform
-/// const auto& history = mock->getTransmissionHistory();
+/// const auto& history = mock.getTransmissionHistory();
 /// REQUIRE(history.size() == 1);
 /// CHECK(history[0].bit_count == expected_bits);
 /// ```
@@ -49,13 +49,12 @@
 /// ParlioEngine& engine = ParlioEngine::getInstance();
 /// engine.initialize(...);
 ///
-/// // Get mock instance via singleton accessor
-/// auto* mock = getParlioMockInstance();
-/// REQUIRE(mock != nullptr);
+/// // Get mock instance via singleton
+/// auto& mock = ParlioPeripheralMock::instance();
 ///
 /// // Inspect mock state
-/// CHECK(mock->isInitialized());
-/// CHECK(mock->getConfig().data_width == 4);
+/// CHECK(mock.isInitialized());
+/// CHECK(mock.getConfig().data_width == 4);
 /// ```
 
 #pragma once
@@ -69,46 +68,49 @@ namespace fl {
 namespace detail {
 
 //=============================================================================
-// Mock Peripheral Implementation
+// Mock Peripheral Interface
 //=============================================================================
 
 /// @brief Mock PARLIO peripheral for unit testing
 ///
 /// Simulates PARLIO hardware with data capture and ISR simulation.
 /// Designed for host-based testing without real ESP32 hardware.
+///
+/// This is an abstract interface - use instance() to access the singleton.
 class ParlioPeripheralMock : public IParlioPeripheral {
 public:
+    //=========================================================================
+    // Singleton Access
+    //=========================================================================
+
+    /// @brief Get the singleton mock peripheral instance
+    /// @return Reference to the singleton mock peripheral
+    ///
+    /// This mirrors the hardware constraint that there is only one PARLIO peripheral.
+    /// The instance is created on first access and persists for the program lifetime.
+    static ParlioPeripheralMock& instance();
+
     //=========================================================================
     // Lifecycle
     //=========================================================================
 
-    ParlioPeripheralMock();
     ~ParlioPeripheralMock() override = default;
 
     //=========================================================================
     // IParlioPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const ParlioPeripheralConfig& config) override;
-    bool enable() override;
-    bool disable() override;
-    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override;
-    bool waitAllDone(uint32_t timeout_ms) override;
-    bool registerTxDoneCallback(void* callback, void* user_ctx) override;
-    uint8_t* allocateDmaBuffer(size_t size) override;
-    void freeDmaBuffer(uint8_t* buffer) override;
-    void delay(uint32_t ms) override;
-    task_handle_t createTask(const TaskConfig& config) override;
-    void deleteTask(task_handle_t task_handle) override;
-    void deleteCurrentTask() override;
-    timer_handle_t createTimer(const TimerConfig& config) override;
-    bool enableTimer(timer_handle_t handle) override;
-    bool startTimer(timer_handle_t handle) override;
-    bool stopTimer(timer_handle_t handle) override;
-    bool disableTimer(timer_handle_t handle) override;
-    void deleteTimer(timer_handle_t handle) override;
-    uint64_t getMicroseconds() override;
-    void freeDmaBuffer(void* ptr) override;
+    bool initialize(const ParlioPeripheralConfig& config) override = 0;
+    bool enable() override = 0;
+    bool disable() override = 0;
+    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override = 0;
+    bool waitAllDone(uint32_t timeout_ms) override = 0;
+    bool registerTxDoneCallback(void* callback, void* user_ctx) override = 0;
+    uint8_t* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(uint8_t* buffer) override = 0;
+    void delay(uint32_t ms) override = 0;
+    uint64_t getMicroseconds() override = 0;
+    void freeDmaBuffer(void* ptr) override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -130,7 +132,7 @@ public:
     /// @param microseconds Delay in microseconds (0 = instant)
     ///
     /// Simulates hardware transmission time. Affects waitAllDone() behavior.
-    void setTransmitDelay(uint32_t microseconds);
+    virtual void setTransmitDelay(uint32_t microseconds) = 0;
 
     /// @brief Manually trigger transmission completion (fire ISR callback)
     ///
@@ -143,7 +145,7 @@ public:
     /// mock->simulateTransmitComplete();  // Trigger ISR
     /// engine.poll();  // Process completion
     /// ```
-    void simulateTransmitComplete();
+    virtual void simulateTransmitComplete() = 0;
 
     /// @brief Inject transmission failure for negative testing
     /// @param should_fail true = fail next transmit(), false = succeed
@@ -154,7 +156,7 @@ public:
     /// bool result = engine.beginTransmission(...);
     /// CHECK_FALSE(result);  // Should fail
     /// ```
-    void setTransmitFailure(bool should_fail);
+    virtual void setTransmitFailure(bool should_fail) = 0;
 
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
@@ -165,84 +167,41 @@ public:
     ///
     /// Each record contains a copy of the transmitted buffer, allowing
     /// tests to validate waveform correctness.
-    const fl::vector<TransmissionRecord>& getTransmissionHistory() const;
+    virtual const fl::vector<TransmissionRecord>& getTransmissionHistory() const = 0;
 
     /// @brief Clear transmission history (reset for next test)
-    void clearTransmissionHistory();
+    virtual void clearTransmissionHistory() = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection
     //-------------------------------------------------------------------------
 
     /// @brief Check if peripheral is initialized
-    bool isInitialized() const { return mInitialized; }
+    bool isInitialized() const override = 0;
 
     /// @brief Check if peripheral is enabled
-    bool isEnabled() const { return mEnabled; }
+    virtual bool isEnabled() const = 0;
 
     /// @brief Check if transmission is in progress
-    bool isTransmitting() const { return mTransmitting; }
+    virtual bool isTransmitting() const = 0;
 
     /// @brief Get total number of transmit() calls
-    size_t getTransmitCount() const { return mTransmitCount; }
+    /// @note Waits for all pending transmissions to complete before returning
+    virtual size_t getTransmitCount() const = 0;
 
     /// @brief Get current configuration
-    const ParlioPeripheralConfig& getConfig() const { return mConfig; }
+    virtual const ParlioPeripheralConfig& getConfig() const = 0;
 
-private:
-    //=========================================================================
-    // Internal State
-    //=========================================================================
-
-    // Lifecycle state
-    bool mInitialized;
-    bool mEnabled;
-    bool mTransmitting;
-    size_t mTransmitCount;
-    ParlioPeripheralConfig mConfig;
-
-    // ISR callback
-    void* mCallback;
-    void* mUserCtx;
-
-    // Simulation settings
-    uint32_t mTransmitDelayUs;
-    bool mShouldFailTransmit;
-
-    // Waveform capture
-    fl::vector<TransmissionRecord> mHistory;
-
-    // Pending transmission state (for waitAllDone simulation)
-    size_t mPendingTransmissions;
-
-    // Task tracking (for cleanup)
-    fl::vector<task_handle_t> mMockTasks;
+    /// @brief Reset mock to uninitialized state (for testing)
+    /// @note Waits for worker thread to finish pending transmissions
+    /// @note Does NOT stop or restart the worker thread
+    virtual void reset() = 0;
 };
 
 //=============================================================================
 // Singleton Access for Tests
 //=============================================================================
 
-/// @brief Get the global mock instance (for unit tests)
-/// @return Pointer to mock instance, or nullptr if not using mock
-///
-/// This function allows unit tests to access the mock peripheral even after
-/// ParlioEngine has encapsulated it. Use ONLY in test code, not production.
-///
-/// Example:
-/// ```cpp
-/// TEST_CASE("ParlioEngine waveform validation") {
-///     ParlioEngine& engine = ParlioEngine::getInstance();
-///     engine.initialize(...);
-///     engine.beginTransmission(...);
-///
-///     auto* mock = getParlioMockInstance();
-///     REQUIRE(mock != nullptr);
-///     const auto& history = mock->getTransmissionHistory();
-///     CHECK(history[0].bit_count == expected);
-/// }
-/// ```
-ParlioPeripheralMock* getParlioMockInstance();
 
 } // namespace detail
 } // namespace fl

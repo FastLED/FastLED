@@ -4,8 +4,6 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
-
 #include "fl/stl/stdint.h"
 
 namespace fl {
@@ -29,5 +27,3 @@ struct ParlioDebugMetrics {
 
 } // namespace detail
 } // namespace fl
-
-#endif // ESP32

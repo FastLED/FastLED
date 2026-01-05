@@ -105,5 +105,3 @@ struct alignas(64) ParlioIsrContext {
 
 } // namespace detail
 } // namespace fl
-
-#endif // ESP32

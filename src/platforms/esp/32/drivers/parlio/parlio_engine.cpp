@@ -5,13 +5,15 @@
 /// from channel_engine_parlio.cpp. It handles all hardware-specific operations
 /// including ISR callbacks, DMA buffer generation, and ring buffer streaming.
 
-#ifdef ESP32
+// Compile on ESP32 with PARLIO support OR on stub platform for testing
+#if (defined(ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/compiler_control.h"
 #include "fl/unused.h"
-#include "platforms/esp/32/feature_flags/enabled.h"
 
-#if FASTLED_ESP32_HAS_PARLIO
+#ifdef ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#endif
 
 #include "parlio_engine.h"
 #include "parlio_isr_context.h"
@@ -26,13 +28,24 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/time.h"
+
+#ifdef ESP32
 #include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
+#else
+// Stub platform definitions
+#ifndef FL_MEMORY_BARRIER
+#define FL_MEMORY_BARRIER do {} while(0)
+#endif
+#ifndef _FL_VALID_PIN_MASK
+#define _FL_VALID_PIN_MASK 0xFFFFFFFFFFFFFFFFULL  // All pins valid on stub
+#endif
+#endif
 
 // All ESP-IDF dependencies have been abstracted through IParlioPeripheral interface
-// - Timer operations: createTimer(), enableTimer(), startTimer(), stopTimer(), etc.
+// - Timer operations: fl::isr::attachTimerHandler(), etc. (via fl/isr.h)
 // - Timestamp operations: getMicroseconds()
-// - Task self-deletion: deleteCurrentTask()
+// - Task management: TaskCoroutine (via fl/task.h)
 // - DMA memory: allocateDmaBuffer(), freeDmaBuffer()
 // - PARLIO operations: initialize(), enable(), transmit(), waitAllDone(), etc.
 
@@ -137,14 +150,13 @@ ParlioEngine::ParlioEngine()
       mIsrContext(),
       mMainTaskHandle(nullptr),
       mWorkerTaskHandle(nullptr),
-      mWorkerTimerHandle(nullptr),
+      mWorkerTimerHandle(),
       mRingBuffer(),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
       mLaneStride(0),
       mErrorOccurred(false),
-      mTxUnitEnabled(false),
-      mDebugTaskHandle(nullptr) {
+      mTxUnitEnabled(false) {
 }
 
 ParlioEngine::~ParlioEngine() {
@@ -169,48 +181,44 @@ ParlioEngine::~ParlioEngine() {
         }
 
         // Delete peripheral (unique_ptr handles cleanup automatically)
-        mPeripheral.reset();
+        mPeripheral = nullptr;
     }
 
     // DMA buffers and waveform expansion buffer are automatically freed
     // by fl::unique_ptr destructors (RAII)
 
     // CRITICAL: Clean up worker timer FIRST to prevent ISR callbacks after mIsrContext is deleted
-    // The timer ISR (workerIsrCallback) accesses mIsrContext, so timer must be stopped
+    // The timer ISR (workerIsrCallback) accesses mIsrContext, so timer must be detached
     // before we signal the debug task to exit and before we delete mIsrContext
-    if (mWorkerTimerHandle) {
-        // Stop, disable, and delete timer (prevents further ISR callbacks)
-        mPeripheral->stopTimer(mWorkerTimerHandle);
-        mPeripheral->disableTimer(mWorkerTimerHandle);
-        mPeripheral->deleteTimer(mWorkerTimerHandle);
-        mWorkerTimerHandle = nullptr;
+    if (mWorkerTimerHandle.is_valid()) {
+        // Detach timer (disables and removes ISR handler)
+        fl::isr::detachHandler(mWorkerTimerHandle);
 
-        // Give time for any in-flight ISR to complete (gptimer_stop is asynchronous)
-        // Without this delay, an ISR could fire after stop but before delete completes
+        // Give time for any in-flight ISR to complete (timer detach is asynchronous)
+        // Without this delay, an ISR could fire after detach but before handle cleanup
         if (mPeripheral) {
             mPeripheral->delay(10);
         }
     }
 
     // Clean up debug task (now safe - timer ISR won't access mIsrContext anymore)
-    if (mDebugTaskHandle) {
+    if (mDebugTask.is_valid()) {
         // Signal task to exit by setting flags to false (task checks: while (mTransmitting || mStreamComplete))
         if (mIsrContext) {
             mIsrContext->mTransmitting = false;
             mIsrContext->mStreamComplete = false;  // Ensure loop exits (both conditions false)
             FL_MEMORY_BARRIER;
         }
-        // Give task time to self-delete (task calls vTaskDelete(NULL) at end of debugTaskFunction)
+        // Give task time to self-delete (task calls fl::task::exitCurrent() at end)
         // Task sleeps for 500ms, so we need to wait at least 500ms for it to wake up and check flags
         // Use 600ms to be safe
         if (mPeripheral) {
             mPeripheral->delay(600);
         }
 
-        // Task should have self-deleted by now
-        // DO NOT call eTaskGetState() or vTaskDelete() on the handle - it's likely invalid
-        // The task handle becomes invalid after vTaskDelete(NULL) is called from within the task
-        mDebugTaskHandle = nullptr;
+        // Task should have self-deleted by now (via fl::task::exitCurrent())
+        // Cancel the task to release resources (task object cleaned up automatically)
+        mDebugTask.cancel();
     }
 
     // Clean up ring buffer (unique_ptr handles deletion automatically)
@@ -224,8 +232,7 @@ ParlioEngine::~ParlioEngine() {
 }
 
 ParlioEngine& ParlioEngine::getInstance() {
-    static ParlioEngine instance;
-    return instance;
+    return fl::Singleton<ParlioEngine>::instance();
 }
 
 //=============================================================================
@@ -241,13 +248,11 @@ void ParlioEngine::debugTaskFunction(void* arg) {
     auto *self = static_cast<ParlioEngine *>(arg);
     if (!self || !self->mIsrContext || !self->mPeripheral) {
         // Cannot proceed without valid context - self-delete
-        if (self && self->mPeripheral) {
-            self->mPeripheral->deleteCurrentTask();
-        }
-        return;
+        fl::task::exitCurrent();
+        return;  // UNREACHABLE on ESP32
     }
 
-    ParlioIsrContext *ctx = self->mIsrContext;
+    ParlioIsrContext *ctx = self->mIsrContext.get();
 
     // Loop while transmission is active
     while (ctx->mTransmitting || ctx->mStreamComplete) {
@@ -290,7 +295,8 @@ void ParlioEngine::debugTaskFunction(void* arg) {
     }
 
     // Task is shutting down - self-delete
-    self->mPeripheral->deleteCurrentTask();
+    fl::task::exitCurrent();
+    // UNREACHABLE CODE on ESP32
 }
 
 //=============================================================================
@@ -339,7 +345,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
     }
 
     // Access ISR state via cache-aligned ParlioIsrContext struct
-    ParlioIsrContext *ctx = self->mIsrContext;
+    ParlioIsrContext *ctx = self->mIsrContext.get();
 
     // Debug: Increment txDoneCallback counter and timestamp
     ctx->mDebugTxDoneCount = ctx->mDebugTxDoneCount + 1;
@@ -390,8 +396,8 @@ ParlioEngine::txDoneCallback(void* tx_unit,
             FL_MEMORY_BARRIER;
 
             // Stop continuous timer (save power after transmission complete)
-            if (self->mWorkerTimerHandle) {
-                self->mPeripheral->stopTimer(self->mWorkerTimerHandle);
+            if (self->mWorkerTimerHandle.is_valid()) {
+                fl::isr::disableHandler(self->mWorkerTimerHandle);
             }
 
             // ASYNC MODE: No task notifications
@@ -502,21 +508,17 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 // - Third suspect: Did you increase execution time?
 //
 // ============================================================================
-FL_OPTIMIZE_FUNCTION bool FL_IRAM
-ParlioEngine::workerIsrCallback(void* timer,
-                                const void *edata,
-                                void *user_ctx) {
+FL_OPTIMIZE_FUNCTION void FL_IRAM
+ParlioEngine::workerIsrCallback(void *user_data) {
     // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED - SEE FUNCTION HEADER ⚠️
-    (void)edata;
-    (void)timer;  // Continuous timer - no stop/start needed
 
     // Null checks first
-    auto *self = static_cast<ParlioEngine *>(user_ctx);
+    auto *self = static_cast<ParlioEngine *>(user_data);
     if (!self || !self->mIsrContext) {
-        return false;
+        return;
     }
 
-    ParlioIsrContext *ctx = self->mIsrContext;
+    ParlioIsrContext *ctx = self->mIsrContext.get();
 
     // Debug: Increment workerIsrCallback counter and timestamp
     ctx->mDebugDoorbellCheckCount = ctx->mDebugDoorbellCheckCount + 1;  // Track total ISR firings
@@ -528,13 +530,13 @@ ParlioEngine::workerIsrCallback(void* timer,
     // Check 0: Worker ISR disabled by destructor or completion
     if (!ctx->mWorkerIsrEnabled) {
         ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return false;
+        return;
     }
 
     // Check 1: Doorbell not rung (no work requested)
     if (!ctx->mWorkerDoorbell) {
         ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;  // Most common early exit
-        return false;  // Exit early, timer will check again in 50µs
+        return;  // Exit early, timer will check again in 50µs
     }
 
     // Doorbell is set - real work available
@@ -545,7 +547,7 @@ ParlioEngine::workerIsrCallback(void* timer,
         // Clear doorbell and exit
         ctx->mWorkerDoorbell = false;
         ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return false;
+        return;
     }
 
     // Check 3: Ring buffer full (no space to populate)
@@ -553,7 +555,7 @@ ParlioEngine::workerIsrCallback(void* timer,
         // Clear doorbell and exit (will be rung again when space available)
         ctx->mWorkerDoorbell = false;
         ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return false;
+        return;
     }
 
     // Check 4: All data already processed
@@ -561,7 +563,7 @@ ParlioEngine::workerIsrCallback(void* timer,
         // Clear doorbell and exit
         ctx->mWorkerDoorbell = false;
         ctx->mDebugWorkerEarlyExitCount = ctx->mDebugWorkerEarlyExitCount + 1;
-        return false;
+        return;
     }
 
     // CLEAR DOORBELL before processing (txDone will ring again if needed)
@@ -574,7 +576,7 @@ ParlioEngine::workerIsrCallback(void* timer,
     // Get ring buffer pointer (use cached pointer for optimization)
     uint8_t *outputBuffer = self->mRingBuffer->ptrs[ring_index];
     if (!outputBuffer) {
-        return false;  // Invalid buffer - should never happen
+        return;  // Invalid buffer - should never happen
     }
 
     // Calculate byte range for this buffer
@@ -628,7 +630,7 @@ ParlioEngine::workerIsrCallback(void* timer,
     size_t outputBytesWritten = 0;
     if (!self->populateDmaBuffer(outputBuffer, self->mRingBufferCapacity,
                                   ctx->mNextByteOffset, byte_count, outputBytesWritten)) {
-        return false;  // Buffer overflow - skip this iteration
+        return;  // Buffer overflow - skip this iteration
     }
 
     // Store actual DMA buffer size and input byte count
@@ -665,8 +667,6 @@ ParlioEngine::workerIsrCallback(void* timer,
 
     // Memory barrier to ensure state visible to txDoneCallback ISR
     FL_MEMORY_BARRIER;
-
-    return false;  // No high-priority task woken (pure background work)
 }
 // ============================================================================
 // END OF WORKER ISR - Remember: NO LOGGING, NO BLOCKING, MINIMIZE EXECUTION TIME
@@ -914,29 +914,21 @@ bool ParlioEngine::allocateWorkerTimer() {
     // Timer fires continuously every 50µs (doorbell pattern - checks flag for work)
     // Reduced from 20µs to 50µs for stability during initialization
 
-    // Configure timer using defined constants
-    TimerConfig config = {};
-    config.callback = reinterpret_cast<void*>(workerIsrCallback);
+    // Configure timer using fl::isr API
+    fl::isr::isr_config_t config;
+    config.handler = workerIsrCallback;
     config.user_data = this;
-    config.resolution_hz = FL_ESP_PARLIO_WORKER_TIMER_RESOLUTION_HZ;
+    config.frequency_hz = 1000000 / FL_ESP_PARLIO_WORKER_TIMER_PERIOD_US;  // Convert period to frequency
     config.priority = FL_ESP_PARLIO_WORKER_TIMER_INTR_PRIORITY;
-    config.period_us = FL_ESP_PARLIO_WORKER_TIMER_PERIOD_US;
-    config.auto_reload = true;
+    config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
 
-    mWorkerTimerHandle = mPeripheral->createTimer(config);
-    if (!mWorkerTimerHandle) {
-        FL_LOG_PARLIO("PARLIO: Failed to create worker timer");
+    int result = fl::isr::attachTimerHandler(config, &mWorkerTimerHandle);
+    if (result != 0) {
+        FL_LOG_PARLIO("PARLIO: Failed to attach worker timer: " << result);
         return false;
     }
 
-    if (!mPeripheral->enableTimer(mWorkerTimerHandle)) {
-        FL_LOG_PARLIO("PARLIO: Failed to enable timer");
-        mPeripheral->deleteTimer(mWorkerTimerHandle);
-        mWorkerTimerHandle = nullptr;
-        return false;
-    }
-
-    FL_LOG_PARLIO("PARLIO: Worker timer allocated successfully (continuous mode, 50µs period)");
+    FL_LOG_PARLIO("PARLIO: Worker timer attached successfully (continuous mode, 50µs period)");
     return true;
 }
 
@@ -1151,30 +1143,25 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
 
-    // Allocate peripheral implementation (real hardware or mock)
-#ifdef FASTLED_STUB
-    mPeripheral.reset(new ParlioPeripheralMock());
+    // Get peripheral singleton instance
+#ifdef FASTLED_STUB_IMPL
+    mPeripheral = &ParlioPeripheralMock::instance();
 #else
-    mPeripheral.reset(new ParlioPeripheralESP());
+    mPeripheral = &ParlioPeripheralESP::instance();
 #endif
 
-    // Configure peripheral
-    ParlioPeripheralConfig config = {};
-    config.data_width = mDataWidth;
-    for (size_t i = 0; i < mDataWidth; i++) {
-        config.gpio_pins[i] = mPins[i];
-    }
-    for (size_t i = mDataWidth; i < 16; i++) {
-        config.gpio_pins[i] = -1;
-    }
-    config.clock_freq_hz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
-    config.queue_depth = FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH;
-    config.max_transfer_size = 65534;
+    // Configure peripheral (constructor handles -1 filling for unused pins)
+    ParlioPeripheralConfig config(
+        pins,  // Uses actual pin vector (size = dataWidth)
+        FL_ESP_PARLIO_CLOCK_FREQ_HZ,
+        FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
+        65534
+    );
 
     // Initialize peripheral
     if (!mPeripheral->initialize(config)) {
         FL_LOG_PARLIO("PARLIO: Failed to initialize peripheral");
-        mPeripheral.reset();
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1182,7 +1169,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     if (!mPeripheral->registerTxDoneCallback(
             reinterpret_cast<void*>(txDoneCallback), this)) {
         FL_LOG_PARLIO("PARLIO: Failed to register callbacks");
-        mPeripheral.reset();
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1204,14 +1191,14 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Allocate ring buffers
     if (!allocateRingBuffers()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffers");
-        mPeripheral.reset();
+        mPeripheral = nullptr;
         return false;
     }
 
     // Allocate worker timer
     if (!allocateWorkerTimer()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate worker timer");
-        mPeripheral.reset();
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1225,7 +1212,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     if (mWaveformExpansionBuffer.empty()) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate waveform expansion buffer");
-        mPeripheral.reset();
+        mPeripheral = nullptr;
         return false;
     }
 
@@ -1338,8 +1325,11 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     FL_LOG_PARLIO("PARLIO: Starting ISR-based streaming | first_buffer_size="
            << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
 
+#ifdef ESP32
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x0000;
+    (void)tx_config;  // Unused on some code paths
+#endif
 
     size_t first_buffer_size = mRingBuffer->sizes[0];
 
@@ -1388,9 +1378,11 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     mIsrContext->mWorkerDoorbell = false;  // Clear doorbell (txDone will ring it)
     FL_MEMORY_BARRIER;
 
-    // Start continuous timer (fires every 50µs) - AFTER first buffer submitted
-    if (!mPeripheral->startTimer(mWorkerTimerHandle)) {
-        FL_LOG_PARLIO("PARLIO: Failed to start worker timer");
+    // Enable continuous timer (fires every 50µs) - AFTER first buffer submitted
+    // Timer was already started when attached via fl::isr::attachTimerHandler
+    // Just need to enable it now that transmission is ready
+    if (fl::isr::enableHandler(mWorkerTimerHandle) != 0) {
+        FL_LOG_PARLIO("PARLIO: Failed to enable worker timer");
         mIsrContext->mTransmitting = false;  // Rollback flag on error
         mErrorOccurred = true;
         return false;
@@ -1401,20 +1393,17 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // Debug task: Logs ISR state every 500ms for diagnostics
     // Iteration 7 confirmed: Debug task is NOT the cause of crash
-    if (!mDebugTaskHandle) {
-        TaskConfig config = {};
-        config.task_function = debugTaskFunction;
+    if (!mDebugTask.is_valid()) {
+        // Create debug task using unified task API (wraps TaskCoroutine)
+        // Lambda captures 'this' to access ParlioEngine instance
+        CoroutineConfig config;
+        config.function = [this]() { debugTaskFunction(this); };
         config.name = "parlio_debug";
-        config.stack_size = 2048;  // Stack size (2KB should be sufficient for logging)
-        config.user_data = this;
-        config.priority = 1;  // Low priority (tskIDLE_PRIORITY + 1)
+        config.stack_size = 2048;  // 2KB stack
+        config.priority = 1;       // Low priority (tskIDLE_PRIORITY + 1)
+        mDebugTask = fl::task::coroutine(config);
 
-        mDebugTaskHandle = mPeripheral->createTask(config);
-        if (!mDebugTaskHandle) {
-            FL_WARN("PARLIO: Failed to create debug task (non-critical)");
-        } else {
-            FL_LOG_PARLIO("PARLIO: Debug task started (500ms logging interval)");
-        }
+        FL_LOG_PARLIO("PARLIO: Debug task created (500ms logging interval)");
     }
 
     // Debug: Print initial counter state
@@ -1456,8 +1445,8 @@ ParlioEngineState ParlioEngine::poll() {
         mIsrContext->mStreamComplete = false;
 
         // Stop worker timer to save power and prevent spurious ISR firings
-        if (mWorkerTimerHandle) {
-            mPeripheral->stopTimer(mWorkerTimerHandle);
+        if (mWorkerTimerHandle.is_valid()) {
+            fl::isr::disableHandler(mWorkerTimerHandle);
         }
 
         // Wait for final chunk to complete (non-blocking poll)
@@ -1527,5 +1516,4 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const {
 } // namespace detail
 } // namespace fl
 
-#endif // FASTLED_ESP32_HAS_PARLIO
-#endif // ESP32
+#endif // (ESP32 && FASTLED_ESP32_HAS_PARLIO) || FASTLED_STUB_IMPL

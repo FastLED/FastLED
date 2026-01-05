@@ -80,8 +80,6 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
-
 #include "fl/stl/function.h"
 
 // Forward declarations
@@ -165,5 +163,3 @@ struct ParlioRingBuffer3 {
 
 } // namespace detail
 } // namespace fl
-
-#endif // ESP32

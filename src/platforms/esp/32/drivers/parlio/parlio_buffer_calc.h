@@ -7,8 +7,6 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
-
 #include "fl/log.h"
 
 namespace fl {
@@ -194,5 +192,3 @@ struct ParlioBufferCalculator {
 
 } // namespace detail
 } // namespace fl
-
-#endif // ESP32

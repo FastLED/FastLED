@@ -3,8 +3,8 @@
 
 #include "parlio_peripheral_mock.h"
 #include "fl/warn.h"
-#include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
+#include "fl/singleton.h"
 
 #ifdef ARDUINO
 #include <Arduino.h>  // For micros() and delay() on Arduino platforms
@@ -16,21 +16,94 @@ namespace fl {
 namespace detail {
 
 //=============================================================================
-// Singleton Instance (for test access)
+// Implementation Class (internal)
 //=============================================================================
 
-// Global pointer to the last created mock instance (for getParlioMockInstance())
-static ParlioPeripheralMock* g_mock_instance = nullptr;
+/// @brief Internal implementation of ParlioPeripheralMock
+///
+/// This class contains all the actual implementation details.
+/// It's a simple synchronous mock without threading.
+class ParlioPeripheralMockImpl : public ParlioPeripheralMock {
+public:
+    //=========================================================================
+    // Lifecycle
+    //=========================================================================
 
-ParlioPeripheralMock* getParlioMockInstance() {
-    return g_mock_instance;
+    ParlioPeripheralMockImpl();
+    ~ParlioPeripheralMockImpl() override = default;
+
+    //=========================================================================
+    // IParlioPeripheral Interface Implementation
+    //=========================================================================
+
+    bool initialize(const ParlioPeripheralConfig& config) override;
+    bool enable() override;
+    bool disable() override;
+    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override;
+    bool waitAllDone(uint32_t timeout_ms) override;
+    bool registerTxDoneCallback(void* callback, void* user_ctx) override;
+    uint8_t* allocateDmaBuffer(size_t size) override;
+    void freeDmaBuffer(uint8_t* buffer) override;
+    void delay(uint32_t ms) override;
+    uint64_t getMicroseconds() override;
+    void freeDmaBuffer(void* ptr) override;
+
+    //=========================================================================
+    // Mock-Specific API
+    //=========================================================================
+
+    void setTransmitDelay(uint32_t microseconds) override;
+    void simulateTransmitComplete() override;
+    void setTransmitFailure(bool should_fail) override;
+    const fl::vector<TransmissionRecord>& getTransmissionHistory() const override;
+    void clearTransmissionHistory() override;
+    bool isInitialized() const override;
+    bool isEnabled() const override;
+    bool isTransmitting() const override;
+    size_t getTransmitCount() const override;
+    const ParlioPeripheralConfig& getConfig() const override;
+    void reset() override;
+
+private:
+    //=========================================================================
+    // Internal State
+    //=========================================================================
+
+    // Lifecycle state
+    bool mInitialized;
+    bool mEnabled;
+    bool mTransmitting;
+    size_t mTransmitCount;
+    ParlioPeripheralConfig mConfig;
+
+    // ISR callback
+    void* mCallback;
+    void* mUserCtx;
+
+    // Simulation settings
+    uint32_t mTransmitDelayUs;
+    bool mShouldFailTransmit;
+
+    // Waveform capture
+    fl::vector<TransmissionRecord> mHistory;
+
+    // Pending transmission state (for waitAllDone simulation)
+    size_t mPendingTransmissions;
+};
+
+//=============================================================================
+// Singleton Instance
+//=============================================================================
+
+ParlioPeripheralMock& ParlioPeripheralMock::instance() {
+    return Singleton<ParlioPeripheralMockImpl>::instance();
 }
 
 //=============================================================================
-// Constructor / Destructor
+// Constructor
 //=============================================================================
 
-ParlioPeripheralMock::ParlioPeripheralMock()
+ParlioPeripheralMockImpl::ParlioPeripheralMockImpl()
     : mInitialized(false),
       mEnabled(false),
       mTransmitting(false),
@@ -42,15 +115,13 @@ ParlioPeripheralMock::ParlioPeripheralMock()
       mShouldFailTransmit(false),
       mHistory(),
       mPendingTransmissions(0) {
-    // Register this instance as the global singleton (for test access)
-    g_mock_instance = this;
 }
 
 //=============================================================================
 // Lifecycle Methods
 //=============================================================================
 
-bool ParlioPeripheralMock::initialize(const ParlioPeripheralConfig& config) {
+bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) {
     if (mInitialized) {
         FL_WARN("ParlioPeripheralMock: Already initialized");
         return false;
@@ -69,7 +140,7 @@ bool ParlioPeripheralMock::initialize(const ParlioPeripheralConfig& config) {
     return true;
 }
 
-bool ParlioPeripheralMock::enable() {
+bool ParlioPeripheralMockImpl::enable() {
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot enable - not initialized");
         return false;
@@ -79,7 +150,7 @@ bool ParlioPeripheralMock::enable() {
     return true;
 }
 
-bool ParlioPeripheralMock::disable() {
+bool ParlioPeripheralMockImpl::disable() {
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot disable - not initialized");
         return false;
@@ -93,7 +164,7 @@ bool ParlioPeripheralMock::disable() {
 // Transmission Methods
 //=============================================================================
 
-bool ParlioPeripheralMock::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
+bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot transmit - not initialized");
         return false;
@@ -131,7 +202,7 @@ bool ParlioPeripheralMock::transmit(const uint8_t* buffer, size_t bit_count, uin
     return true;
 }
 
-bool ParlioPeripheralMock::waitAllDone(uint32_t timeout_ms) {
+bool ParlioPeripheralMockImpl::waitAllDone(uint32_t timeout_ms) {
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot wait - not initialized");
         return false;
@@ -173,7 +244,7 @@ bool ParlioPeripheralMock::waitAllDone(uint32_t timeout_ms) {
 // ISR Callback Registration
 //=============================================================================
 
-bool ParlioPeripheralMock::registerTxDoneCallback(void* callback, void* user_ctx) {
+bool ParlioPeripheralMockImpl::registerTxDoneCallback(void* callback, void* user_ctx) {
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot register callback - not initialized");
         return false;
@@ -188,7 +259,7 @@ bool ParlioPeripheralMock::registerTxDoneCallback(void* callback, void* user_ctx
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* ParlioPeripheralMock::allocateDmaBuffer(size_t size) {
+uint8_t* ParlioPeripheralMockImpl::allocateDmaBuffer(size_t size) {
     // Round up to 64-byte multiple (same as real implementation)
     size_t aligned_size = ((size + 63) / 64) * 64;
 
@@ -211,7 +282,7 @@ uint8_t* ParlioPeripheralMock::allocateDmaBuffer(size_t size) {
     return static_cast<uint8_t*>(buffer);
 }
 
-void ParlioPeripheralMock::freeDmaBuffer(uint8_t* buffer) {
+void ParlioPeripheralMockImpl::freeDmaBuffer(uint8_t* buffer) {
     if (buffer != nullptr) {
 #if defined(_WIN32) || defined(_WIN64)
         _aligned_free(buffer);
@@ -221,102 +292,19 @@ void ParlioPeripheralMock::freeDmaBuffer(uint8_t* buffer) {
     }
 }
 
-void ParlioPeripheralMock::delay(uint32_t ms) {
+void ParlioPeripheralMockImpl::delay(uint32_t ms) {
     // Use portable delay abstraction:
     // - Arduino: Arduino delay() function
     // - Host: time_stub.h delay() (can be fast-forwarded for testing)
     ::delay(static_cast<int>(ms));
 }
 
-//=============================================================================
-// Task Management
-//=============================================================================
-
-task_handle_t ParlioPeripheralMock::createTask(const TaskConfig& config) {
-    // Mock implementation - no actual task creation
-    // Return a non-null synthetic handle to indicate success
-    // Use a unique value by encoding the task count in the pointer
-
-    // Suppress unused parameter warning - config is intentionally ignored in mock
-    (void)config;
-
-    task_handle_t handle = reinterpret_cast<task_handle_t>(
-        static_cast<uintptr_t>(0xDEAD0000 + mMockTasks.size())
-    );
-
-    mMockTasks.push_back(handle);
-    return handle;
-}
-
-void ParlioPeripheralMock::deleteTask(task_handle_t task_handle) {
-    if (task_handle == nullptr) {
-        return;
-    }
-
-    // Remove from tracking vector
-    auto it = fl::find(mMockTasks.begin(), mMockTasks.end(), task_handle);
-    if (it != mMockTasks.end()) {
-        mMockTasks.erase(it);
-    }
-}
-
-void ParlioPeripheralMock::deleteCurrentTask() {
-    // Mock implementation for self-deleting tasks
-    // In a real implementation, this would terminate the current thread/task
-    // For now, this is a no-op (tasks are expected to exit normally)
-}
-
-//=============================================================================
-// Timer Management
-//=============================================================================
-
-timer_handle_t ParlioPeripheralMock::createTimer(const TimerConfig& config) {
-    // Mock implementation - no actual timer creation
-    // Return a non-null synthetic handle to indicate success
-
-    // Suppress unused parameter warning - config is intentionally ignored in mock
-    (void)config;
-
-    // Return a synthetic handle (use a different base address than tasks)
-    timer_handle_t handle = reinterpret_cast<timer_handle_t>(
-        static_cast<uintptr_t>(0xF1FE0000)  // "FIFE" (timer) marker
-    );
-
-    return handle;
-}
-
-bool ParlioPeripheralMock::enableTimer(timer_handle_t handle) {
-    // Mock implementation - always succeeds if handle is non-null
-    return handle != nullptr;
-}
-
-bool ParlioPeripheralMock::startTimer(timer_handle_t handle) {
-    // Mock implementation - always succeeds if handle is non-null
-    return handle != nullptr;
-}
-
-bool ParlioPeripheralMock::stopTimer(timer_handle_t handle) {
-    // Mock implementation - always succeeds (even for null handles, matching ESP implementation)
-    (void)handle;
-    return true;
-}
-
-bool ParlioPeripheralMock::disableTimer(timer_handle_t handle) {
-    // Mock implementation - always succeeds if handle is non-null
-    return handle != nullptr;
-}
-
-void ParlioPeripheralMock::deleteTimer(timer_handle_t handle) {
-    // Mock implementation - no-op (nothing to clean up)
-    (void)handle;
-}
-
-uint64_t ParlioPeripheralMock::getMicroseconds() {
+uint64_t ParlioPeripheralMockImpl::getMicroseconds() {
     // Use the same timestamp source as transmit() for consistency
     return micros();
 }
 
-void ParlioPeripheralMock::freeDmaBuffer(void* ptr) {
+void ParlioPeripheralMockImpl::freeDmaBuffer(void* ptr) {
     // Mock uses standard heap allocation, so use standard free()
     if (ptr) {
         free(ptr);
@@ -327,11 +315,11 @@ void ParlioPeripheralMock::freeDmaBuffer(void* ptr) {
 // Mock-Specific API (for unit tests)
 //=============================================================================
 
-void ParlioPeripheralMock::setTransmitDelay(uint32_t microseconds) {
+void ParlioPeripheralMockImpl::setTransmitDelay(uint32_t microseconds) {
     mTransmitDelayUs = microseconds;
 }
 
-void ParlioPeripheralMock::simulateTransmitComplete() {
+void ParlioPeripheralMockImpl::simulateTransmitComplete() {
     if (mPendingTransmissions == 0) {
         // No pending transmissions - nothing to complete
         return;
@@ -357,20 +345,57 @@ void ParlioPeripheralMock::simulateTransmitComplete() {
     }
 }
 
-void ParlioPeripheralMock::setTransmitFailure(bool should_fail) {
+void ParlioPeripheralMockImpl::setTransmitFailure(bool should_fail) {
     mShouldFailTransmit = should_fail;
 }
 
 const fl::vector<ParlioPeripheralMock::TransmissionRecord>&
-ParlioPeripheralMock::getTransmissionHistory() const {
+ParlioPeripheralMockImpl::getTransmissionHistory() const {
     return mHistory;
 }
 
-void ParlioPeripheralMock::clearTransmissionHistory() {
+bool ParlioPeripheralMockImpl::isInitialized() const {
+    return mInitialized;
+}
+
+bool ParlioPeripheralMockImpl::isEnabled() const {
+    return mEnabled;
+}
+
+bool ParlioPeripheralMockImpl::isTransmitting() const {
+    return mTransmitting;
+}
+
+size_t ParlioPeripheralMockImpl::getTransmitCount() const {
+    return mTransmitCount;
+}
+
+const ParlioPeripheralConfig& ParlioPeripheralMockImpl::getConfig() const {
+    return mConfig;
+}
+
+void ParlioPeripheralMockImpl::clearTransmissionHistory() {
     mHistory.clear();
     mTransmitCount = 0;
     mPendingTransmissions = 0;
     mTransmitting = false;
+}
+
+void ParlioPeripheralMockImpl::reset() {
+    mInitialized = false;
+    mEnabled = false;
+    mTransmitting = false;
+    mTransmitCount = 0;
+
+    fl::vector<int> empty_pins;  // Empty vector (size = 0)
+    mConfig = ParlioPeripheralConfig(empty_pins, 0, 0, 0);
+
+    mCallback = nullptr;
+    mUserCtx = nullptr;
+    mTransmitDelayUs = 0;
+    mShouldFailTransmit = false;
+    mHistory.clear();
+    mPendingTransmissions = 0;
 }
 
 } // namespace detail
