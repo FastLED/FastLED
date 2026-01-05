@@ -232,3 +232,222 @@ TEST_CASE("wave8Transpose_4_incremental_verification") {
         REQUIRE(output[i] == 0x00);
     }
 }
+
+TEST_CASE("wave8Untranspose_2_simple_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with known pattern
+    uint8_t lanes[2] = {0xff, 0x00};
+    uint8_t transposed[2 * sizeof(Wave8Byte)]; // 16 bytes
+    uint8_t untransposed[2 * sizeof(Wave8Byte)]; // 16 bytes
+
+    // Transpose
+    wave8Transpose_2(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_2(transposed, untransposed);
+
+    // Verify: untransposed should match the original Wave8Byte structures
+    // The first 8 bytes should be all 0xFF (lane0 = 0xff)
+    for (int i = 0; i < 8; i++) {
+        REQUIRE(untransposed[i] == 0xFF);
+    }
+
+    // The second 8 bytes should be all 0x00 (lane1 = 0x00)
+    for (int i = 8; i < 16; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+}
+
+TEST_CASE("wave8Untranspose_2_complex_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with alternating pattern
+    uint8_t lanes[2] = {0xAA, 0x55}; // 0b10101010, 0b01010101
+    uint8_t transposed[2 * sizeof(Wave8Byte)];
+    uint8_t untransposed[2 * sizeof(Wave8Byte)];
+
+    // Transpose
+    wave8Transpose_2(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_2(transposed, untransposed);
+
+    // Verify: Each symbol should match the expected wave pattern
+    // For 0xAA (10101010): alternating 0xFF and 0x00 bytes
+    // Symbol 0 (bit 7 = 1): 0xFF
+    REQUIRE(untransposed[0] == 0xFF);
+    // Symbol 1 (bit 6 = 0): 0x00
+    REQUIRE(untransposed[1] == 0x00);
+    // Symbol 2 (bit 5 = 1): 0xFF
+    REQUIRE(untransposed[2] == 0xFF);
+    // Symbol 3 (bit 4 = 0): 0x00
+    REQUIRE(untransposed[3] == 0x00);
+    // Symbol 4 (bit 3 = 1): 0xFF
+    REQUIRE(untransposed[4] == 0xFF);
+    // Symbol 5 (bit 2 = 0): 0x00
+    REQUIRE(untransposed[5] == 0x00);
+    // Symbol 6 (bit 1 = 1): 0xFF
+    REQUIRE(untransposed[6] == 0xFF);
+    // Symbol 7 (bit 0 = 0): 0x00
+    REQUIRE(untransposed[7] == 0x00);
+
+    // For 0x55 (01010101): alternating 0x00 and 0xFF bytes
+    // Symbol 0 (bit 7 = 0): 0x00
+    REQUIRE(untransposed[8] == 0x00);
+    // Symbol 1 (bit 6 = 1): 0xFF
+    REQUIRE(untransposed[9] == 0xFF);
+    // Symbol 2 (bit 5 = 0): 0x00
+    REQUIRE(untransposed[10] == 0x00);
+    // Symbol 3 (bit 4 = 1): 0xFF
+    REQUIRE(untransposed[11] == 0xFF);
+    // Symbol 4 (bit 3 = 0): 0x00
+    REQUIRE(untransposed[12] == 0x00);
+    // Symbol 5 (bit 2 = 1): 0xFF
+    REQUIRE(untransposed[13] == 0xFF);
+    // Symbol 6 (bit 1 = 0): 0x00
+    REQUIRE(untransposed[14] == 0x00);
+    // Symbol 7 (bit 0 = 1): 0xFF
+    REQUIRE(untransposed[15] == 0xFF);
+}
+
+TEST_CASE("wave8Untranspose_4_simple_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with all 0xFF
+    uint8_t lanes[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t transposed[4 * sizeof(Wave8Byte)]; // 32 bytes
+    uint8_t untransposed[4 * sizeof(Wave8Byte)]; // 32 bytes
+
+    // Transpose
+    wave8Transpose_4(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_4(transposed, untransposed);
+
+    // Verify: all lanes should be 0xFF (8 bytes per lane × 4 lanes)
+    for (int i = 0; i < 32; i++) {
+        REQUIRE(untransposed[i] == 0xFF);
+    }
+}
+
+TEST_CASE("wave8Untranspose_4_alternating_pattern") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with alternating pattern
+    uint8_t lanes[4] = {0xFF, 0x00, 0xFF, 0x00};
+    uint8_t transposed[4 * sizeof(Wave8Byte)];
+    uint8_t untransposed[4 * sizeof(Wave8Byte)];
+
+    // Transpose
+    wave8Transpose_4(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_4(transposed, untransposed);
+
+    // Verify: Lane 0 (bytes 0-7) should be all 0xFF
+    for (int i = 0; i < 8; i++) {
+        REQUIRE(untransposed[i] == 0xFF);
+    }
+
+    // Verify: Lane 1 (bytes 8-15) should be all 0x00
+    for (int i = 8; i < 16; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+
+    // Verify: Lane 2 (bytes 16-23) should be all 0xFF
+    for (int i = 16; i < 24; i++) {
+        REQUIRE(untransposed[i] == 0xFF);
+    }
+
+    // Verify: Lane 3 (bytes 24-31) should be all 0x00
+    for (int i = 24; i < 32; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+}
+
+TEST_CASE("wave8Untranspose_4_distinct_patterns") {
+    // Build LUT where bit0 = all LOW, bit1 = all HIGH
+    ChipsetTiming timing;
+    timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
+    timing.T2 = 999; // bit1: ~8 HIGH pulses (rounds to 8)
+    timing.T3 = 1;   // period = 1001ns
+
+    Wave8BitExpansionLut lut = buildWave8ExpansionLUT(timing);
+
+    // Test with distinct values per lane
+    uint8_t lanes[4] = {0x01, 0x02, 0x04, 0x08};
+    uint8_t transposed[4 * sizeof(Wave8Byte)];
+    uint8_t untransposed[4 * sizeof(Wave8Byte)];
+
+    // Transpose
+    wave8Transpose_4(lanes, lut, transposed);
+
+    // Untranspose
+    wave8Untranspose_4(transposed, untransposed);
+
+    // Verify lane 0: 0x01 (0b00000001)
+    // Symbols 0-6 should be 0x00 (bits 7-1 are 0)
+    for (int i = 0; i < 7; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+    // Symbol 7 should be 0xFF (bit 0 is 1)
+    REQUIRE(untransposed[7] == 0xFF);
+
+    // Verify lane 1: 0x02 (0b00000010)
+    // Symbols 0-5 should be 0x00 (bits 7-2 are 0)
+    for (int i = 8; i < 8 + 6; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+    // Symbol 6 should be 0xFF (bit 1 is 1)
+    REQUIRE(untransposed[14] == 0xFF);
+    // Symbol 7 should be 0x00 (bit 0 is 0)
+    REQUIRE(untransposed[15] == 0x00);
+
+    // Verify lane 2: 0x04 (0b00000100)
+    // Symbols 0-4 should be 0x00 (bits 7-3 are 0)
+    for (int i = 16; i < 16 + 5; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+    // Symbol 5 should be 0xFF (bit 2 is 1)
+    REQUIRE(untransposed[21] == 0xFF);
+    // Symbols 6-7 should be 0x00 (bits 1-0 are 0)
+    REQUIRE(untransposed[22] == 0x00);
+    REQUIRE(untransposed[23] == 0x00);
+
+    // Verify lane 3: 0x08 (0b00001000)
+    // Symbols 0-3 should be 0x00 (bits 7-4 are 0)
+    for (int i = 24; i < 24 + 4; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+    // Symbol 4 should be 0xFF (bit 3 is 1)
+    REQUIRE(untransposed[28] == 0xFF);
+    // Symbols 5-7 should be 0x00 (bits 2-0 are 0)
+    for (int i = 29; i < 32; i++) {
+        REQUIRE(untransposed[i] == 0x00);
+    }
+}
