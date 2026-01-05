@@ -277,6 +277,7 @@ inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* o
 }
 
 inline int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+        (void)pin;  // Unused in stub implementation
         if (!config.handler) {
             STUB_LOG("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
