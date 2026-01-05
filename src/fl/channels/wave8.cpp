@@ -290,30 +290,25 @@ void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * size
 
     // Process each of the 8 symbols
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint8_t lane_bytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        uint8_t lane_bytes[16] = {0};
 
-        // Process 16 input bytes (8 pulses × 2 bytes per pulse)
-        for (int byte_idx = 0; byte_idx < 16; byte_idx++) {
-            uint8_t input_byte = transposed[symbol_idx * 16 + byte_idx];
+        // Process 8 pulses (16 bytes total: 2 bytes per pulse)
+        for (int pulse_idx = 0; pulse_idx < 8; pulse_idx++) {
+            int pulse_bit = 7 - pulse_idx;
 
-            // Calculate which pulse bit this corresponds to
-            int pulse_bit = 7 - (byte_idx / 2);
+            // Read 16-bit word for this pulse
+            int input_offset = symbol_idx * 16 + pulse_idx * 2;
+            uint16_t input_word = (uint16_t)transposed[input_offset] |
+                                  ((uint16_t)transposed[input_offset + 1] << 8);
 
-            // Determine which 8 lanes to process based on byte position
-            if (byte_idx % 2 == 0) {
-                // High byte: lanes 8-15
-                // Bit layout: [L15, L14, L13, L12, L11, L10, L9, L8]
-                for (int lane = 8; lane < 16; lane++) {
-                    uint8_t pulse = (input_byte >> (lane - 8)) & 1;
-                    lane_bytes[lane] |= (pulse << pulse_bit);
-                }
-            } else {
-                // Low byte: lanes 0-7
-                // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]
-                for (int lane = 0; lane < 8; lane++) {
-                    uint8_t pulse = (input_byte >> lane) & 1;
-                    lane_bytes[lane] |= (pulse << pulse_bit);
-                }
+            // De-interleave 16 lanes from this word
+            // Bit layout: [L15, L14, L13, ..., L1, L0]
+            for (int lane = 0; lane < 16; lane++) {
+                // Extract bit for this lane (lane 0 = LSB, lane 15 = MSB)
+                uint8_t pulse = (input_word >> lane) & 1;
+
+                // Reconstruct lane byte
+                lane_bytes[lane] |= (pulse << pulse_bit);
             }
         }
 

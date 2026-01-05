@@ -105,6 +105,7 @@ TEST_CASE("fl::condition_variable with predicate") {
 TEST_CASE("fl::condition_variable single-threaded mode") {
     fl::mutex mtx;
     fl::condition_variable cv;
+    (void)mtx;  // Suppress unused variable warning
 
     SUBCASE("notify operations are no-ops") {
         // These should compile and run without error in single-threaded mode
