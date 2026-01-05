@@ -143,6 +143,48 @@ void wave8_transpose_4(const Wave8Byte lane_waves[4],
     }
 }
 
+// ============================================================================
+// 8-Lane Transposition (Force Inline)
+// ============================================================================
+
+/// @brief Transpose 8 lanes of Wave8Byte data into interleaved format
+/// @param lane_waves Array of 8 Wave8Byte structures
+/// @param output Output buffer (64 bytes)
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_8(const Wave8Byte lane_waves[8],
+                       uint8_t output[8 * sizeof(Wave8Byte)]) {
+    // Each symbol (Wave8Bit) has 8 pulses
+    // With 8 lanes, we produce 8 bytes per symbol (1 pulse per byte × 8 lanes)
+    // Output format: [L7_P7, L6_P7, ..., L0_P7, L7_P6, L6_P6, ..., L0_P6, ...]
+
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        uint8_t lane_bytes[8];
+        for (int lane = 0; lane < 8; lane++) {
+            lane_bytes[lane] = lane_waves[lane].symbols[symbol_idx].data;
+        }
+
+        // Process 8 output bytes (1 pulse per byte)
+        for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
+            // Extract 1 pulse from bit position (7 - byte_idx)
+            int pulse_bit = 7 - byte_idx;
+
+            uint8_t output_byte = 0;
+
+            // Interleave 8 lanes for this pulse
+            // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]
+            for (int lane = 0; lane < 8; lane++) {
+                // Extract 1-bit pattern for this lane
+                uint8_t pulse = (lane_bytes[lane] >> pulse_bit) & 1;
+
+                // Place bit at lane position (lane 0 = LSB, lane 7 = MSB)
+                output_byte |= (pulse << lane);
+            }
+
+            output[symbol_idx * 8 + byte_idx] = output_byte;
+        }
+    }
+}
+
 } // namespace detail
 
 // ============================================================================
