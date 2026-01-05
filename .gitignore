@@ -85,3 +85,4 @@ ci/docker/avr8js/*.js
 
 # Docker build timestamp cache (persisted via GitHub Actions artifacts)
 ci/docker/.build_timestamps.json
+examples/**/*.ino.cpp
