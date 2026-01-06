@@ -25,7 +25,7 @@ using namespace fl::detail;
 namespace {
 
 /// @brief Helper to create default timing config for WS2812
-ChipsetTimingConfig getWS2812Timing() {
+static ChipsetTimingConfig getWS2812Timing_mock() {
     return ChipsetTimingConfig(350, 800, 450, 50, "WS2812B");
 }
 
@@ -51,7 +51,7 @@ TEST_CASE("ParlioEngine mock - basic initialization") {
 
     // Single lane configuration
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     bool success = engine.initialize(1, pins, timing, 10);
     CHECK(success);
@@ -71,7 +71,7 @@ TEST_CASE("ParlioEngine mock - two-lane initialization") {
 
     // Two lane configuration
     fl::vector<int> pins = {1, 2};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     bool success = engine.initialize(2, pins, timing, 100);
     CHECK(success);
@@ -93,7 +93,7 @@ TEST_CASE("ParlioEngine mock - multi-lane initialization") {
 
     // Four lane configuration
     fl::vector<int> pins = {1, 2, 4, 8};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     bool success = engine.initialize(4, pins, timing, 100);
     CHECK(success);
@@ -120,7 +120,7 @@ TEST_CASE("ParlioEngine mock - single LED transmission") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 1);
 
     // Single LED: RGB = 3 bytes
@@ -155,7 +155,7 @@ TEST_CASE("ParlioEngine mock - multiple LEDs transmission") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     // 10 LEDs = 30 bytes
     size_t num_leds = 10;
@@ -195,7 +195,7 @@ TEST_CASE("ParlioEngine mock - two-lane transmission") {
 
     // Two lane configuration
     fl::vector<int> pins = {1, 2};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     // 10 LEDs per lane = 60 bytes total (2 lanes × 10 LEDs × 3 bytes/LED)
     size_t num_leds = 10;
@@ -258,7 +258,7 @@ TEST_CASE("ParlioEngine mock - ISR callback simulation") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 10);
 
     uint8_t scratch[30];
@@ -292,7 +292,7 @@ TEST_CASE("ParlioEngine mock - transmit failure injection") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 10);
 
     uint8_t scratch[30];
@@ -325,7 +325,7 @@ TEST_CASE("ParlioEngine mock - large buffer streaming") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     // Use a large LED count to potentially trigger streaming mode
     // (actual streaming depends on buffer size limits)
@@ -367,7 +367,7 @@ TEST_CASE("ParlioEngine mock - multi-lane streaming") {
 
     // Test with 4 lanes
     fl::vector<int> pins = {1, 2, 4, 8};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     size_t num_leds = 200;  // 200 LEDs per lane
     size_t num_lanes = 4;
@@ -414,7 +414,7 @@ TEST_CASE("ParlioEngine mock - state inspection") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1, 2};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     auto& mock = ParlioPeripheralMock::instance();
 
@@ -460,7 +460,7 @@ TEST_CASE("ParlioEngine mock - waveform data capture") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 3);
 
     // Three LEDs with known pattern
@@ -494,7 +494,7 @@ TEST_CASE("ParlioEngine mock - transmission history clearing") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 5);
 
     uint8_t scratch[15] = {0};
@@ -528,7 +528,7 @@ TEST_CASE("ParlioEngine mock - zero LEDs") {
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
     engine.initialize(1, pins, timing, 1);
 
     // Empty transmission (edge case)
@@ -550,7 +550,7 @@ TEST_CASE("ParlioEngine mock - maximum data width") {
 
     // Test maximum PARLIO data width (16 lanes)
     fl::vector<int> pins = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_mock();
 
     bool success = engine.initialize(16, pins, timing, 10);
     CHECK(success);

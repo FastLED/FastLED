@@ -13,7 +13,8 @@ from typing import List, Set
 # ============================================================================
 
 # Files to exclude from test discovery (special tests with custom build rules)
-EXCLUDED_TEST_FILES: Set[str] = set()
+# Includes infrastructure files like test runner and doctest main
+EXCLUDED_TEST_FILES: Set[str] = {"test_runner.cpp", "doctest_main.cpp"}
 
 # Subdirectories containing tests that should be discovered
 TEST_SUBDIRS: List[str] = ["fl", "fl/channels", "fl/detail", "fl/sensors", "fx", "ftl", "lib8tion", "platforms"]

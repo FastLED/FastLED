@@ -38,12 +38,13 @@ test_pch = custom_target('test_pch',
   install: false
 )
 
-# Doctest main object
-doctest_main = static_library('doctest_main',
+# Doctest main for DLL mode - compiled separately without PCH to avoid namespace conflicts
+# This creates a static library that provides the run_tests() export function
+doctest_dll_main = static_library('doctest_dll_main',
   'doctest_main.cpp',
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args,
-  override_options: ['unity=off'],  # Don't apply unity builds to this single-file library
+  include_directories: [tests_dir],
+  cpp_args: ['-DTEST_DLL_MODE', '-DENABLE_CRASH_HANDLER'],  # Minimal flags, no PCH
+  override_options: ['unity=off'],  # Don't unity build this single file
   install: false
 )
 
@@ -103,16 +104,16 @@ if unity_enabled
   # Track all test executables for alias
   all_test_executables = []
 
-  # Build test executables for each category
+  # Build test category DLLs
+  test_dlls = []
   foreach category_name, test_sources : category_files
     if test_sources.length() > 0
-      # Add PCH to sources
+      # Add PCH and test sources (doctest_dll_main is linked separately)
       category_sources = [test_pch] + test_sources
 
-      # Build test executable
-      # Unity builds enabled: Meson will combine multiple .cpp files into unity
-      # compilation units, significantly speeding up compilation
-      test_exe = executable(category_name,
+      # Build test category as a shared library (DLL)
+      # Each DLL links against libfastled.a and doctest_dll_main, exports run_tests()
+      test_dll = shared_library(category_name,
         category_sources,
         include_directories: [src_dir, tests_dir, stub_dir],
         cpp_args: unit_test_compile_args + [
@@ -121,22 +122,35 @@ if unity_enabled
           '-fpch-validate-input-files-content',       # Validate based on content, not mtime
         ],
         link_args: unit_test_link_args,
-        link_with: [fastled_lib, doctest_main],
+        link_with: [fastled_lib, doctest_dll_main],  # Link doctest DLL entry point
+        gnu_symbol_visibility: 'default',             # Export all symbols
         install: false
       )
 
-      # Register test target
-      test(category_name, test_exe, workdir: meson.project_source_root())
+      # Track DLLs for dependencies
+      test_dlls += test_dll
 
-      # Track for all_tests alias
-      all_test_executables += test_exe
-
-      message('Unity test category: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
+      message('Unity test category DLL: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
     endif
   endforeach
 
-  # Create alias target that builds all test executables
-  alias_target('all_tests', all_test_executables)
+  # Build the test runner executable (lightweight, no libfastled.a link)
+  test_runner = executable('test_runner',
+    'test_runner.cpp',
+    include_directories: [tests_dir],
+    cpp_args: ['-std=c++11'],  # Minimal flags for runner
+    dependencies: [],           # No FastLED dependency
+    install: false
+  )
+
+  # Register single test that runs all categories via the runner
+  test('all_unity_tests', test_runner,
+    workdir: meson.current_build_dir(),  # Run from build dir where DLLs are
+    depends: test_dlls                    # Ensure DLLs are built first
+  )
+
+  # Create alias target that builds the test runner and all DLLs
+  alias_target('all_tests', test_runner, test_dlls)
 
   message('Unity test build enabled: tests organized into categories')
 

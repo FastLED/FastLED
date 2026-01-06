@@ -21,7 +21,7 @@ using namespace fl::detail;
 namespace {
 
 /// @brief Helper to create WS2812B timing config
-ChipsetTimingConfig getWS2812Timing() {
+static ChipsetTimingConfig getWS2812Timing_chipset_grouping() {
     return ChipsetTimingConfig(350, 800, 450, 50, "WS2812B");
 }
 
@@ -37,7 +37,7 @@ ChipsetTimingConfig getWS2812Timing() {
 // }
 
 /// @brief Reset mock and engine between tests
-void resetMock() {
+static void resetMock_chipset_grouping() {
     auto& mock = ParlioPeripheralMock::instance();
     mock.clearTransmissionHistory();
     mock.setTransmitFailure(false);
@@ -61,13 +61,13 @@ void resetMock() {
 //=============================================================================
 
 TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
-    resetMock();
+    resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();
 
     // 4 channels, all using WS2812B timing
     fl::vector<int> pins = {1, 2, 4, 8};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_chipset_grouping();
 
     size_t num_lanes = 4;
     size_t leds_per_lane = 5;
@@ -96,7 +96,7 @@ TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
 
 TEST_CASE("ParlioEngine - chipset timing equality operator") {
     // Test the ChipsetTimingConfig equality operator
-    ChipsetTimingConfig ws2812_timing = getWS2812Timing();
+    ChipsetTimingConfig ws2812_timing = getWS2812Timing_chipset_grouping();
     ChipsetTimingConfig ws2812_timing2(350, 800, 450, 50, "WS2812B_ALT");
     ChipsetTimingConfig sk6812_timing(300, 900, 600, 80, "SK6812");
 
@@ -144,12 +144,12 @@ TEST_CASE("ParlioEngine - chipset timing equality operator") {
 //=============================================================================
 
 TEST_CASE("ParlioEngine - READY state before transmission") {
-    resetMock();
+    resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {1};
-    ChipsetTimingConfig timing = getWS2812Timing();
+    ChipsetTimingConfig timing = getWS2812Timing_chipset_grouping();
 
     bool init_ok = engine.initialize(1, pins, timing, 10);
     REQUIRE(init_ok);
@@ -180,7 +180,7 @@ TEST_CASE("ParlioEngine - READY state before transmission") {
 // These tests document the expected behavior for future implementation.
 
 TEST_CASE("ParlioEngine - document current single-timing constraint") {
-    resetMock();
+    resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -189,7 +189,7 @@ TEST_CASE("ParlioEngine - document current single-timing constraint") {
     // This test documents this constraint.
 
     fl::vector<int> pins = {1, 2};
-    ChipsetTimingConfig timing_ws2812 = getWS2812Timing();
+    ChipsetTimingConfig timing_ws2812 = getWS2812Timing_chipset_grouping();
 
     size_t num_lanes = 2;
     size_t leds_per_lane = 5;

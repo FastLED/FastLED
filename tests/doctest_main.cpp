@@ -45,6 +45,28 @@
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
+//
+// When building as a DLL (TEST_DLL_MODE defined), it exports a run_tests() function
+// instead of defining main()
+
+#ifdef TEST_DLL_MODE
+// DLL mode: Export run_tests function
+#ifdef _WIN32
+    #define TEST_DLL_EXPORT __declspec(dllexport)
+#else
+    #define TEST_DLL_EXPORT __attribute__((visibility("default")))
+#endif
+
+extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
+#ifdef ENABLE_CRASH_HANDLER
+    setup_crash_handler();
+#endif
+    // Const cast is safe here - doctest doesn't modify argv
+    return doctest::Context(argc, const_cast<char**>(argv)).run();
+}
+
+#else
+// Standard mode: Define main function
 
 #ifdef _WIN32
 // Windows-specific entry point
@@ -75,3 +97,5 @@ int main(int argc, char** argv) {
     return doctest::Context(argc, argv).run();
 }
 #endif
+
+#endif // TEST_DLL_MODE

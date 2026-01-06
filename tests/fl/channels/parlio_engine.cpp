@@ -31,7 +31,7 @@ ChipsetTimingConfig getWS2812TimingForDmaTests() {
 }
 
 /// @brief Reset mock between tests
-void resetMock() {
+static void resetMock_engine() {
     auto& mock = ParlioPeripheralMock::instance();
     mock.clearTransmissionHistory();
     mock.setTransmitFailure(false);
@@ -45,7 +45,7 @@ void resetMock() {
 //=============================================================================
 
 TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -78,7 +78,7 @@ TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
 }
 
 TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -118,7 +118,7 @@ TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
 }
 
 TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -177,7 +177,7 @@ TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
 }
 
 TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -210,7 +210,7 @@ TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
 }
 
 TEST_CASE("ParlioEngine - verify bit count matches expected") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -247,7 +247,7 @@ TEST_CASE("ParlioEngine - verify bit count matches expected") {
 }
 
 TEST_CASE("ParlioEngine - verify idle value is captured") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -273,7 +273,7 @@ TEST_CASE("ParlioEngine - verify idle value is captured") {
 }
 
 TEST_CASE("ParlioEngine - large buffer streaming with capture") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -318,7 +318,7 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
 //=============================================================================
 
 TEST_CASE("ParlioEngine - verify timing parameters are applied") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -348,7 +348,7 @@ TEST_CASE("ParlioEngine - verify timing parameters are applied") {
 }
 
 TEST_CASE("ParlioEngine - zero-length transmission edge case") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -371,7 +371,7 @@ TEST_CASE("ParlioEngine - zero-length transmission edge case") {
 }
 
 TEST_CASE("ParlioEngine - single byte transmission") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -399,7 +399,7 @@ TEST_CASE("ParlioEngine - single byte transmission") {
 }
 
 TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -442,7 +442,7 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
 }
 
 TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
@@ -514,7 +514,7 @@ TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
 }
 
 TEST_CASE("ParlioEngine - verify reset padding is applied for different channel lengths") {
-    resetMock();
+    resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
 
