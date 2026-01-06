@@ -15,6 +15,7 @@
 #include <thread>  // ok include
 #include <chrono>  // ok include
 #include <mutex>   // ok include
+#include <condition_variable>  // ok include
 
 #ifdef ARDUINO
 #include <Arduino.h>  // For micros() and delay() on Arduino platforms
@@ -89,18 +90,8 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
         // Determine which pin this bit belongs to (cycles through pins)
         size_t hardware_pin_idx = bit_idx % num_pins;
 
-        // Map hardware pin to lane
-        // Lane mapping differs by lane count:
-        // - 2-lane: needs swap compensation
-        // - 4/8/16-lane: direct mapping
-        size_t lane_idx;
-        if (num_pins == 2) {
-            // 2-lane: swap to compensate for transposition quirk
-            lane_idx = 1 - hardware_pin_idx;
-        } else {
-            // 4/8/16-lane: no swap needed
-            lane_idx = hardware_pin_idx;
-        }
+        // Direct mapping (no swap) - hardware pin index directly maps to lane
+        size_t lane_idx = hardware_pin_idx;
 
         // Determine position in the lane's waveform
         size_t lane_bit_idx = bit_idx / num_pins;
@@ -111,6 +102,15 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
         if (bit_value) {
             per_pin_data[lane_idx][lane_byte_idx] |= (1 << lane_bit_pos);
         }
+    }
+
+    // Apply 2-lane swap to match real hardware behavior
+    // Real PARLIO hardware swaps lanes before transpose (see parlio_engine.cpp:742)
+    // This creates: gpio_pins[0] → ODD bits (lane[0]), gpio_pins[1] → EVEN bits (lane[1])
+    // But untranspose extracted: per_pin_data[0] = EVEN bits, per_pin_data[1] = ODD bits
+    // So we swap to get: per_pin_data[0] = ODD bits (lane[0]), per_pin_data[1] = EVEN bits (lane[1])
+    if (num_pins == 2) {
+        fl::swap(per_pin_data[0], per_pin_data[1]);
     }
 
     return per_pin_data;
@@ -207,16 +207,24 @@ private:
     };
     fl::vector<PendingTransmission> mPendingQueue;
 
-    // Simulation thread for automatic ISR callback
-    void simulationThreadFunc();
-    fl::unique_ptr<std::thread> mSimulationThread;  // okay std namespace
-    fl::atomic<bool> mSimulationThreadShouldStop;
+    // CRITICAL: Thread synchronization primitives MUST be declared BEFORE mSimulationThread
+    // because the constructor body starts the thread, and the thread immediately accesses
+    // these members. Member initialization happens in declaration order, so declaring these
+    // first ensures they are fully initialized before the thread starts.
 
     // Mutex for thread-safe access to shared state
     std::mutex mMutex;  // okay std namespace
 
+    // Condition variable for efficient thread synchronization
+    std::condition_variable mCondVar;  // okay std namespace
+
     // Flag to indicate callback is currently executing (outside mutex)
     fl::atomic<bool> mCallbackExecuting{false};
+
+    // Simulation thread for automatic ISR callback
+    void simulationThreadFunc();
+    fl::unique_ptr<std::thread> mSimulationThread;  // okay std namespace
+    fl::atomic<bool> mSimulationThreadShouldStop;
 };
 
 //=============================================================================
@@ -244,15 +252,32 @@ ParlioPeripheralMockImpl::ParlioPeripheralMockImpl()
       mHistory(),
       mPerPinData(),
       mPendingTransmissions(0),
+      mPendingQueue(),
+      // Thread synchronization primitives initialized here (in declaration order)
+      mMutex(),
+      mCondVar(),
+      mCallbackExecuting(false),
       mSimulationThread(),
       mSimulationThreadShouldStop(false) {
-    // Start simulation thread
+    // CRITICAL: Start simulation thread AFTER all members are initialized
+    // Member initialization happens in DECLARATION ORDER (not initializer list order):
+    // 1. All primitive members (mInitialized, mEnabled, etc.) are initialized
+    // 2. Collections (mHistory, mPerPinData, mPendingQueue) are initialized
+    // 3. Thread synchronization (mMutex, mCondVar, mCallbackExecuting) are initialized
+    // 4. Thread members (mSimulationThread, mSimulationThreadShouldStop) are initialized
+    // 5. Constructor body executes (we are here)
+    // 6. Thread starts and can safely access all members
+    //
+    // By declaring mMutex/mCondVar/mCallbackExecuting BEFORE mSimulationThread in the class,
+    // we ensure they are fully constructed before the thread starts accessing them.
     mSimulationThread = fl::make_unique<std::thread>([this]() { simulationThreadFunc(); });  // okay std namespace
 }
 
 ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
     // Stop simulation thread
     mSimulationThreadShouldStop = true;
+    // Wake up simulation thread so it can exit cleanly
+    mCondVar.notify_one();
     if (mSimulationThread && mSimulationThread->joinable()) {
         mSimulationThread->join();
     }
@@ -263,10 +288,9 @@ ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
 //=============================================================================
 
 bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) {
-    if (mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Already initialized");
-        return false;
-    }
+    // Allow re-initialization (tests may need to reconfigure the mock)
+    // This is safe because we're just updating configuration, not tearing down
+    // the simulation thread or other infrastructure
 
     // Validate config
     if (config.data_width == 0 || config.data_width > 16) {
@@ -274,7 +298,7 @@ bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) 
         return false;
     }
 
-    // Store configuration
+    // Store configuration (thread-safe - no lock needed as config is only read during transmit)
     mConfig = config;
     mInitialized = true;
 
@@ -362,6 +386,11 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
     );
 
     // Map pin indices to actual GPIO pin numbers
+    // per_pin_waveforms is indexed by lane_idx (after swap in untranspose)
+    // For 2-lane: lane 0 data is from odd bits, lane 1 data is from even bits
+    // GPIO pins[0] should get data from lane 0, pins[1] should get data from lane 1
+    // But untranspose swapped: even bit positions → lane 1, odd bit positions → lane 0
+    // So we need to reverse: gpio_pins[0] → per_pin_waveforms[0] (lane 0 from odd bits)
     mPerPinData.clear();
     for (size_t i = 0; i < per_pin_waveforms.size() && i < static_cast<size_t>(mConfig.data_width); i++) {
         int gpio_pin = mConfig.gpio_pins[i];
@@ -380,6 +409,9 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
         pending.completion_time_us = micros() + transmission_delay_us;
         mPendingQueue.push_back(pending);
     }
+
+    // Wake up simulation thread to process the new transmission
+    mCondVar.notify_one();
 
     // Simulation thread will automatically call ISR callback after transmission_delay_us
 
@@ -602,21 +634,37 @@ fl::span<const uint8_t> ParlioPeripheralMockImpl::getTransmissionDataForPin(int 
 }
 
 void ParlioPeripheralMockImpl::reset() {
-    // First, acquire lock and clear pending work to stop simulation thread from processing
+    // CRITICAL: This function must be thread-safe because the simulation thread
+    // may be accessing state while reset() is called from another thread.
+
+    // Step 1: Acquire lock and signal simulation thread to stop processing
     {
         std::lock_guard<std::mutex> lock(mMutex);  // okay std namespace
+        // Clear queue first so simulation thread has nothing to process
         mPendingQueue.clear();
         mPendingTransmissions = 0;
         mTransmitting = false;
     }
 
-    // Now wait for any callback currently executing to finish
-    // This prevents race where simulation thread captured callback before we acquired lock above
-    while (mCallbackExecuting) {
+    // Step 2: Wake up simulation thread so it sees the empty queue
+    // This ensures it exits any wait_for() calls and goes back to waiting
+    mCondVar.notify_one();
+
+    // Step 3: Wait for any callback currently executing to finish
+    // This prevents race where simulation thread captured callback before we cleared queue
+    // Use explicit atomic load with acquire ordering to prevent compiler optimization caching
+    while (mCallbackExecuting.load(fl::memory_order_acquire)) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));  // okay std namespace
     }
 
-    // Lock mutex again to reset all state
+    // Step 4: Small delay to ensure simulation thread has seen the empty queue
+    // and is now waiting in mCondVar.wait_for()
+    // This prevents a race where the thread is between checking mPendingQueue.empty()
+    // and calling mCondVar.wait_for()
+    std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
+
+    // Step 5: Lock mutex again and reset all state
+    // At this point, simulation thread should be safely waiting in mCondVar.wait_for()
     std::lock_guard<std::mutex> lock(mMutex);  // okay std namespace
 
     mInitialized = false;
@@ -642,22 +690,24 @@ void ParlioPeripheralMockImpl::reset() {
 //=============================================================================
 
 void ParlioPeripheralMockImpl::simulationThreadFunc() {
-    FL_DBG("Parlio Mock: Simulation thread starting");
     while (!mSimulationThreadShouldStop) {
         // Lock mutex for thread-safe access to shared state
         std::unique_lock<std::mutex> lock(mMutex);  // okay std namespace
+
+        // Wait efficiently when queue is empty, instead of busy-polling
+        if (mPendingQueue.empty()) {
+            // Wait for up to 10ms, or until notified by transmit()
+            mCondVar.wait_for(lock, std::chrono::milliseconds(10));  // okay std namespace
+            continue;  // Recheck condition after waking
+        }
 
         // Check if there are pending transmissions in the queue
         if (!mPendingQueue.empty()) {
             // Get current time
             uint64_t now_us = micros();
 
-            FL_DBG("Parlio Mock: Checking transmission - now=" << now_us << " completion=" << mPendingQueue[0].completion_time_us);
-
             // Check if the first transmission has completed
             if (now_us >= mPendingQueue[0].completion_time_us) {
-                FL_DBG("Parlio Mock: Transmission completed, firing ISR callback");
-
                 // Remove from queue
                 mPendingQueue.erase(mPendingQueue.begin());
 
@@ -675,44 +725,40 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
                 auto callback = mCallback;
                 auto user_ctx = mUserCtx;
 
-                // Set flag to indicate callback is executing
-                mCallbackExecuting = true;
+                // Set flag to indicate callback is executing (use explicit store with release ordering)
+                mCallbackExecuting.store(true, fl::memory_order_release);
 
                 // Unlock before calling callback (avoid holding lock during callback)
                 lock.unlock();
 
                 // Call ISR callback if registered
                 if (callback) {
-                    FL_DBG("Parlio Mock: Calling ISR callback");
                     using CallbackType = bool (*)(void*, const void*, void*);
                     auto callback_fn = reinterpret_cast<CallbackType>(callback);
                     callback_fn(nullptr, nullptr, user_ctx);
-                    FL_DBG("Parlio Mock: ISR callback returned");
                 } else {
                     FL_WARN("Parlio Mock: No callback registered!");
                 }
 
-                // Clear flag to indicate callback finished
-                mCallbackExecuting = false;
+                // Reacquire lock before updating shared state
+                lock.lock();
+
+                // Clear flag to indicate callback finished (use explicit store with release ordering)
+                mCallbackExecuting.store(false, fl::memory_order_release);
 
                 // Continue loop immediately to check for more completed transmissions
                 continue;
             } else {
-                // Sleep until next transmission completes (or check every 100us, whichever is shorter)
+                // Wait efficiently until next transmission should complete
                 uint64_t time_until_next = mPendingQueue[0].completion_time_us - now_us;
-                uint64_t sleep_time = time_until_next < 100 ? time_until_next : 100;
 
-                // Unlock before sleeping
-                lock.unlock();
-                std::this_thread::sleep_for(std::chrono::microseconds(sleep_time));  // okay std namespace
+                // Use condition variable with timeout for efficient waiting
+                // This avoids busy-polling while still waking up when the transmission should complete
+                mCondVar.wait_for(lock, std::chrono::microseconds(time_until_next));  // okay std namespace
+                // Loop will continue and recheck if transmission is ready
             }
-        } else {
-            // No pending transmissions - unlock before sleeping
-            lock.unlock();
-            std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
         }
     }
-    FL_DBG("Parlio Mock: Simulation thread stopping");
 }
 
 //=============================================================================
