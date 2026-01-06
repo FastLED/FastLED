@@ -91,6 +91,4 @@ int main(int argc, char** argv) {
 #endif
     return doctest::Context(argc, argv).run();
 }
-#endif
-
 #endif // TEST_DLL_MODE

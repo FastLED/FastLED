@@ -38,13 +38,8 @@ test_pch = custom_target('test_pch',
   install: false
 )
 
-<<<<<<< Updated upstream
 # Doctest main for normal mode - compiled separately without PCH
 # This creates a static library that provides the doctest main() function
-=======
-# Doctest main object (always exports run_tests() for DLL mode)
-# TEST_DLL_MODE flag removed - doctest_main.cpp now always exports run_tests()
->>>>>>> Stashed changes
 doctest_main = static_library('doctest_main',
   'doctest_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
@@ -139,26 +134,16 @@ if unity_enabled
   # Track all test executables for alias
   all_test_executables = []
 
-<<<<<<< Updated upstream
   # Build test category DLLs
   test_dlls = []
-=======
-  # Build test DLLs for each category
->>>>>>> Stashed changes
   foreach category_name, test_sources : category_files
     if test_sources.length() > 0
       # Add PCH, test sources, and doctest_main.cpp
       # doctest_main.cpp is compiled directly into each test DLL (not as a separate static lib)
       category_sources = [test_pch] + test_sources + files('doctest_main.cpp')
 
-<<<<<<< Updated upstream
       # Build test category as a shared library (DLL)
       # Each DLL links against libfastled.a ONLY, exports ONLY run_tests()
-=======
-      # Build test DLL (shared library)
-      # Unity builds enabled: Meson will combine multiple .cpp files into unity
-      # compilation units, significantly speeding up compilation
->>>>>>> Stashed changes
       test_dll = shared_library(category_name,
         category_sources,
         include_directories: [src_dir, tests_dir, stub_dir],
@@ -175,36 +160,10 @@ if unity_enabled
         install: false
       )
 
-<<<<<<< Updated upstream
       # Track DLLs for dependencies
       test_dlls += test_dll
 
       message('Unity test category DLL: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
-=======
-      # Deploy test (copy runner.exe + test.dll to tests/bin/<category_name>/)
-      deploy_test = custom_target(
-        'deploy_' + category_name,
-        output: category_name + '_deployed',
-        input: [runner_exe, test_dll],
-        command: [
-          'python', meson.project_source_root() / 'ci/deploy_test.py',
-          '@INPUT0@',  # runner.exe
-          '@INPUT1@',  # test.dll
-          category_name,
-          meson.project_source_root() / 'tests/bin',
-        ],
-        build_by_default: true
-      )
-
-      # Register test target - now runs the deployed executable
-      test_exe_path = meson.project_source_root() / 'tests/bin' / category_name / (category_name + '.exe')
-      test(category_name, deploy_test, workdir: meson.project_source_root())
-
-      # Track for all_tests alias
-      all_test_executables += deploy_test
-
-      message('Unity test category: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
->>>>>>> Stashed changes
     endif
   endforeach
 
