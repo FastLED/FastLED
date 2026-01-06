@@ -532,7 +532,10 @@ TEST_CASE("Device busy state and waitComplete") {
 
         uint8_t data[4] = {1, 2, 3, 4};
         fl::Result<Transaction, SPIError> result = spi.writeAsync(data, 4);
-        CHECK(result.ok());
+        if (!result.ok()) {
+            FL_DBG("writeAsync failed with error: " << result.error());
+        }
+        REQUIRE(result.ok());  // REQUIRE instead of CHECK to stop if fails
         Transaction txn = fl::move(result.value());
         CHECK(txn.wait());  // Wait for completion (blocking)
         CHECK(!spi.isBusy());

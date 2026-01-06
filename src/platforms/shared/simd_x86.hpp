@@ -134,7 +134,8 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, uint8_t amount) noexcept {
-    // SSE2 implementation: result = a + ((b - a) * amount) / 256
+    // SSE2 implementation: result = a + ((b - a) * amount) >> 8
+    // We use mulhi to get the high byte of the 32-bit product directly
 
     // Unpack a and b to 16-bit (low 8 bytes)
     __m128i a_low_16 = _mm_unpacklo_epi8(a, _mm_setzero_si128());
@@ -144,24 +145,32 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     __m128i a_high_16 = _mm_unpackhi_epi8(a, _mm_setzero_si128());
     __m128i b_high_16 = _mm_unpackhi_epi8(b, _mm_setzero_si128());
 
-    // Compute (b - a) for low and high
+    // Compute (b - a) for low and high (as signed 16-bit to handle negative diffs)
     __m128i diff_low = _mm_sub_epi16(b_low_16, a_low_16);
     __m128i diff_high = _mm_sub_epi16(b_high_16, a_high_16);
 
-    // Multiply by amount (broadcast to 16-bit)
+    // Multiply by amount and extract high byte using mulhi
+    // For signed multiply: (diff * amount) >> 8 = mulhi(diff, amount << 8) OR we can use (mullo >> 8) + (mulhi << 8)
     __m128i amount_16 = _mm_set1_epi16(static_cast<int16_t>(amount));
-    __m128i scaled_low = _mm_mullo_epi16(diff_low, amount_16);
-    __m128i scaled_high = _mm_mullo_epi16(diff_high, amount_16);
 
-    // Shift right by 8 to divide by 256 (arithmetic shift for signed values)
-    scaled_low = _mm_srai_epi16(scaled_low, 8);
-    scaled_high = _mm_srai_epi16(scaled_high, 8);
+    // mulhi gives us bits [31:16] of the 32-bit product
+    // We want bits [15:8], so: (mullo >> 8) | (mulhi << 8) in 16-bit
+    // But actually for 16-bit * 16-bit, we want the result >> 8
+    // That's byte 1 of the 32-bit result, which is byte 1 of mullo or byte 0 of (mulhi shifted)
+    __m128i mulhi_low = _mm_mulhi_epi16(diff_low, amount_16);
+    __m128i mulhi_high = _mm_mulhi_epi16(diff_high, amount_16);
+    __m128i mullo_low = _mm_mullo_epi16(diff_low, amount_16);
+    __m128i mullo_high = _mm_mullo_epi16(diff_high, amount_16);
+
+    // Extract bits [15:8] from 32-bit product: (mullo >> 8) | (mulhi << 8)
+    __m128i scaled_low = _mm_or_si128(_mm_srli_epi16(mullo_low, 8), _mm_slli_epi16(mulhi_low, 8));
+    __m128i scaled_high = _mm_or_si128(_mm_srli_epi16(mullo_high, 8), _mm_slli_epi16(mulhi_high, 8));
 
     // Add back to a
     __m128i result_low = _mm_add_epi16(a_low_16, scaled_low);
     __m128i result_high = _mm_add_epi16(a_high_16, scaled_high);
 
-    // Pack back to 8-bit
+    // Pack back to 8-bit with saturation
     return _mm_packus_epi16(result_low, result_high);
 }
 

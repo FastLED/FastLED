@@ -1073,11 +1073,25 @@ bool ParlioEngine::initialize(size_t dataWidth,
                               size_t maxLedsPerChannel) {
     FL_LOG_PARLIO("PARLIO_INIT: initialize() called - dataWidth=" << dataWidth << " pins=" << pins.size());
 
-    if (mInitialized) {
+    // Get peripheral first (needed for both initial and re-initialization)
+    if (mPeripheral == nullptr) {
+        mPeripheral = getParlioPeripheral();
+    }
+
+    // Check if already initialized AND peripheral is still initialized
+    // This handles the case where mock.reset() was called but engine still thinks it's initialized
+    if (mInitialized && mPeripheral && mPeripheral->isInitialized()) {
         FL_LOG_PARLIO("PARLIO_INIT: Already initialized, returning true");
         return true; // Already initialized
     }
-    mPeripheral = getParlioPeripheral();
+
+    // If we reach here, either first initialization or peripheral was reset
+    // Reset engine state to allow re-initialization
+    if (mInitialized && mPeripheral && !mPeripheral->isInitialized()) {
+        FL_LOG_PARLIO("PARLIO_INIT: Peripheral was reset, re-initializing");
+        mInitialized = false;
+        mTxUnitEnabled = false;  // Reset enable state to match peripheral
+    }
     // Store data width and pins
     mDataWidth = dataWidth;
     mPins = pins;

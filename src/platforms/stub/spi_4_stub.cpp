@@ -202,13 +202,14 @@ fl::shared_ptr<SpiHw4Stub>& getController3_Spi4() {
 }
 
 /// Register instances at static initialization time via constructor attribute
-FL_CONSTRUCTOR
-static void registerSpiHw4Instances() {
+void registerSpiHw4Instances() {
     SpiHw4::registerInstance(getController2_Spi4());
     SpiHw4::registerInstance(getController3_Spi4());
 }
 
 }  // anonymous namespace
+
+FL_INIT(registerSpiHw4Instances);
 
 }  // namespace fl
 

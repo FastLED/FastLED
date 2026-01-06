@@ -33,12 +33,14 @@ void Remote::printJson(const fl::Json& json) {
         }
     }
 
-    // Output with prefix
+    // Output with prefix - combine into single string for atomic output
     constexpr const char* prefix = FASTLED_REMOTE_PREFIX;
     if (prefix[0] != '\0') {  // Only add prefix if non-empty
-        fl::print(prefix);
+        fl::string output = fl::string(prefix) + jsonStr;
+        fl::println(output.c_str());
+    } else {
+        fl::println(jsonStr.c_str());
     }
-    fl::println(jsonStr.c_str());
 }
 
 // Function Registration
@@ -134,7 +136,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
     // Execute or schedule
     if (timestamp == 0) {
         // Immediate execution - capture return value
-        uint32_t executedAt = fl::time();
+        uint32_t executedAt = receivedAt;  // Immediate execution happens at receive time
         outResult = executeFunction(funcName, args);
         recordResult(funcName, outResult, 0, receivedAt, executedAt, false);
     } else {
@@ -180,7 +182,7 @@ size_t Remote::tick(uint32_t currentTimeMs) {
     while (!mScheduled.empty() && currentTimeMs >= mScheduled.top().mExecuteAt) {
         const ScheduledCall& call = mScheduled.top();
 
-        uint32_t executedAt = fl::time();
+        uint32_t executedAt = currentTimeMs;  // Use the tick time, not wall clock time
         fl::Json result = executeFunction(call.mFunctionName, call.mArgs);
 
         // Record result with timing metadata

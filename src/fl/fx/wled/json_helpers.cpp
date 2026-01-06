@@ -50,8 +50,8 @@ fl::string rgbToHex(uint8_t r, uint8_t g, uint8_t b) {
     auto byteToHex = [](uint8_t val) -> fl::string {
         const char hexChars[] = "0123456789ABCDEF";
         fl::string result;
-        result += hexChars[val >> 4];
-        result += hexChars[val & 0x0F];
+        result.push_back(hexChars[val >> 4]);
+        result.push_back(hexChars[val & 0x0F]);
         return result;
     };
 

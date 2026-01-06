@@ -478,7 +478,7 @@ fl::Json WLED::getState() const {
                 for (const auto& led : seg.mIndividualLeds) {
                     if (led.size() >= 3) {
                         fl::string hexColor = wled::rgbToHex(led[0], led[1], led[2]);
-                        leds.push_back(fl::Json(hexColor));
+                        leds.push_back(fl::Json(hexColor.c_str()));
                     }
                 }
                 segJson.set("i", leds);

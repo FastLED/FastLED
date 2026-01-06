@@ -19,16 +19,18 @@ namespace fl {
 /// @tparam T Integral type
 /// @param value The integer value to convert
 /// @param uppercase If true, use uppercase hex digits (A-F), otherwise lowercase (a-f)
+/// @param pad_to_width If true, pad with leading zeros to full type width (default: false for minimal representation)
 /// @return Hexadecimal string representation of the value
 ///
 /// Example usage:
 /// @code
-/// fl::string hex = fl::to_hex(255, false);        // "ff"
-/// fl::string hex_upper = fl::to_hex(255, true);   // "FF"
-/// fl::string hex_neg = fl::to_hex(-16, false);    // "-10"
+/// fl::string hex = fl::to_hex(255, false);              // "ff" (minimal)
+/// fl::string hex_upper = fl::to_hex(255, true);         // "FF" (minimal uppercase)
+/// fl::string hex_padded = fl::to_hex(255, false, true); // "000000ff" (padded to int width)
+/// fl::string hex_neg = fl::to_hex(-16, false);          // "-10"
 /// @endcode
 template<typename T>
-fl::string to_hex(T value, bool uppercase = false);
+fl::string to_hex(T value, bool uppercase = false, bool pad_to_width = false);
 
 namespace detail {
 
@@ -45,8 +47,9 @@ enum class HexIntWidth : uint8_t {
 /// @param width The bit width classification of the original type
 /// @param is_negative Whether the original value was negative (for signed types)
 /// @param uppercase If true, use uppercase hex digits (A-F), otherwise lowercase (a-f)
+/// @param pad_to_width If true, pad with leading zeros to full type width
 /// @return Hexadecimal string representation
-fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase);
+fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width);
 
 /// @brief Compile-time integer width determination (default - triggers error)
 template<size_t Size>
@@ -83,7 +86,7 @@ constexpr HexIntWidth get_hex_int_width<8>() {
 
 // Implementation of to_hex template function
 template<typename T>
-fl::string to_hex(T value, bool uppercase) {
+fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
     // Determine width classification at compile time
     constexpr auto width = detail::get_hex_int_width<sizeof(T)>();
 
@@ -101,7 +104,7 @@ fl::string to_hex(T value, bool uppercase) {
         unsigned_value = static_cast<uint64_t>(value);
     }
 
-    return detail::hex(unsigned_value, width, is_negative, uppercase);
+    return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);
 }
 
 } // namespace fl

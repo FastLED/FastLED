@@ -162,13 +162,16 @@ fl::shared_ptr<SpiHw1Stub>& getController1_Spi1() {
 }
 
 /// Register instances at static initialization time via constructor attribute
-FL_CONSTRUCTOR
-static void registerSpiHw1Instances() {
+void registerSpiHw1Instances() {
+    FL_WARN("Registering SpiHw1 stub instances...");
     SpiHw1::registerInstance(getController0_Spi1());
     SpiHw1::registerInstance(getController1_Spi1());
+    FL_WARN("SpiHw1 stub instances registered!");
 }
 
 }  // anonymous namespace
+
+FL_INIT(registerSpiHw1Instances);
 
 }  // namespace fl
 
