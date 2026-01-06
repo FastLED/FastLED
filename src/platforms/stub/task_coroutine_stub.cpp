@@ -10,7 +10,11 @@
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
 #include "coroutine_runner.h"  // Global coordination for thread safety
+<<<<<<< Updated upstream
 #include "fl/dbg.h"  // Debug output
+=======
+#include "fl/warn.h"  // For FL_DBG
+>>>>>>> Stashed changes
 
 namespace fl {
 namespace platforms {
@@ -85,15 +89,20 @@ public:
         mContext = fl::detail::CoroutineContext::create();
         // FL_DBG("TaskCoroutineStub: Created context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()) << " for task '" << mName << "'");
 
+<<<<<<< Updated upstream
         // Register in global executor queue (queue stores weak_ptr)
         // FL_DBG("TaskCoroutineStub: Before getting runner instance");
         auto& runner = fl::detail::CoroutineRunner::instance();
         // FL_DBG("TaskCoroutineStub: Got runner instance at " << fl::hex << reinterpret_cast<uintptr_t>(&runner));
+=======
+        FL_DBG("[TaskCoroutineStubImpl] Creating coroutine '" << name << "'");
+>>>>>>> Stashed changes
 
         // FL_DBG("TaskCoroutineStub: About to enqueue context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()));
         runner.enqueue(mContext);
         // FL_DBG("TaskCoroutineStub: Enqueued context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()));
 
+<<<<<<< Updated upstream
         // Launch std::thread with queue-based coordination
         // CRITICAL: Must capture mFunction (not parameter 'function' which was moved-from)
         // Capture shared_ptr by value to keep context alive for thread lifetime
@@ -102,28 +111,58 @@ public:
         fl::shared_ptr<fl::detail::CoroutineContext> ctx_shared = mContext;
         std::thread t([ctx_shared, func]() {  // okay std namespace (stub platform only)
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " started, waiting...");
+=======
+        // Use a synchronization flag to ensure thread starts before we return
+        fl::atomic<bool> thread_started(false);
+
+        // Launch detached std::thread with queue-based coordination
+        // Thread is detached (daemon-like) but context remains for cleanup
+        std::thread([ctx_ptr, function, name, &thread_started]() {  // okay std namespace (stub platform only)
+            FL_DBG("[TaskCoroutineStubImpl] Thread started for '" << name << "', about to wait");
+
+            // Signal that thread has started, BEFORE we wait
+            thread_started.store(true);
+
+>>>>>>> Stashed changes
             // Wait for executor to signal us
             ctx_shared->wait();
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " woke up from wait");
 
+            FL_DBG("[TaskCoroutineStubImpl] Thread woke up for '" << name << "', checking should_stop");
+
             // Check if we should stop before even starting
+<<<<<<< Updated upstream
             if (ctx_shared->should_stop()) {
                 // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " got stop signal, exiting");
                 ctx_shared->set_completed(true);
+=======
+            if (ctx_ptr->should_stop()) {
+                FL_DBG("[TaskCoroutineStubImpl] Thread stopping early for '" << name << "'");
+                ctx_ptr->set_completed(true);
+>>>>>>> Stashed changes
                 fl::detail::CoroutineRunner::instance().signal_next();
                 return;
             }
 
+<<<<<<< Updated upstream
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " executing user function");
+=======
+            FL_DBG("[TaskCoroutineStubImpl] Executing function for '" << name << "'");
+>>>>>>> Stashed changes
             // Execute the user's coroutine function
             // FL_DBG("TaskCoroutineStub: About to call user function");
             func();
             // FL_DBG("TaskCoroutineStub: User function returned");
 
+<<<<<<< Updated upstream
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " completed, signaling next");
+=======
+            FL_DBG("[TaskCoroutineStubImpl] Function completed for '" << name << "', marking as completed");
+>>>>>>> Stashed changes
             // Mark as completed and signal next coroutine
             ctx_shared->set_completed(true);
             fl::detail::CoroutineRunner::instance().signal_next();
+<<<<<<< Updated upstream
         });
 
 #ifdef TEST_DLL_MODE
@@ -133,6 +172,20 @@ public:
         // In normal mode: Detach thread (daemon-like, won't block exit)
         t.detach();
 #endif
+=======
+        }).detach();  // Detach - daemon thread, won't block exit
+
+        // Wait for thread to start and reach wait() before we return
+        // This prevents a race where async_yield() signals before thread is ready
+        while (!thread_started.load()) {
+            std::this_thread::yield();  // okay std namespace (stub platform only)
+        }
+
+        FL_DBG("[TaskCoroutineStubImpl] Thread confirmed started, enqueueing context");
+
+        // NOW enqueue the context, after thread is guaranteed to be waiting
+        fl::detail::CoroutineRunner::instance().enqueue(ctx_ptr);
+>>>>>>> Stashed changes
     }
 
     ~TaskCoroutineStubImpl() override {

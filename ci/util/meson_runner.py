@@ -1306,6 +1306,7 @@ def run_meson_build_and_test(
 
     # Run tests
     if unity:
+<<<<<<< Updated upstream
         # Unity mode: Use the test_runner executable
         # The test_runner loads and executes test DLLs dynamically
         test_runner_path = build_dir / "tests" / "test_runner.exe"
@@ -1316,6 +1317,38 @@ def run_meson_build_and_test(
         if not test_runner_path.exists():
             _ts_print(
                 f"[MESON] Error: test_runner executable not found in {build_dir / 'tests'}",
+=======
+        # Unity mode: Run category test executables
+        # Categories are dynamically determined by organize_tests.py
+        test_categories = [
+            "core_tests",
+            "fl_tests_1",
+            "fl_tests_2",
+            "ftl_tests",
+            "fx_tests",
+            "noise_tests",
+            "platform_tests",
+            "codec_tests",
+        ]
+
+        # Find which category executables exist in deployed tests/bin directory
+        category_executables: list[tuple[str, Path]] = []
+        deployed_tests_dir = source_dir / "tests" / "bin"
+
+        for category in test_categories:
+            # Look for deployed test executable: tests/bin/<category>/<category>.exe
+            exe_path = deployed_tests_dir / category / f"{category}.exe"
+            if not exe_path.exists():
+                # Try Unix variant (no .exe extension)
+                exe_path = deployed_tests_dir / category / category
+
+            if exe_path.exists():
+                category_executables.append((category, exe_path))
+
+        if not category_executables:
+            _ts_print(
+                f"[MESON] Error: No unity test executables found in {deployed_tests_dir}",
+>>>>>>> Stashed changes
                 file=sys.stderr,
             )
             return MesonTestResult(success=False, duration=time.time() - start_time)

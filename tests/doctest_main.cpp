@@ -45,6 +45,7 @@
 #include "crash_handler.h"
 #endif
 
+<<<<<<< Updated upstream
 
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
@@ -81,27 +82,27 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
 
 #else
 // Standard mode: Define main function
+=======
+// This file contains the run_tests() function for doctest
+// All tests are now built as DLLs that export this function
+// runner.exe will load the DLL and call run_tests()
+>>>>>>> Stashed changes
 
-#ifdef _WIN32
-// Windows-specific entry point
-#include <windows.h>
+// DLL mode: Export run_tests() function that can be called by runner.exe
+extern "C" __declspec(dllexport) int run_tests() {
+    int argc = 0;
+    char** argv = nullptr;
 
-// Define the main entry point for Windows
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow) {
-    (void)hInstance; (void)hPrevInstance; (void)lpCmdLine; (void)nCmdShow; // Suppress unused parameter warnings
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
 #endif
-    return doctest::Context().run();
-}
 
-// Also provide a standard main for compatibility
-int main(int argc, char** argv) {
-#ifdef ENABLE_CRASH_HANDLER
-    setup_crash_handler();
-#endif
-    return doctest::Context(argc, argv).run();
+    doctest::Context context(argc, argv);
+    int result = context.run();
+
+    return result;
 }
+<<<<<<< Updated upstream
 #else
 // Standard entry point for non-Windows platforms
 int main(int argc, char** argv) {
@@ -113,3 +114,5 @@ int main(int argc, char** argv) {
 #endif
 
 #endif // TEST_DLL_MODE
+=======
+>>>>>>> Stashed changes
