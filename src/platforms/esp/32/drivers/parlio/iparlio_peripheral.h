@@ -54,6 +54,19 @@ namespace fl {
 namespace detail {
 
 //=============================================================================
+// Enums
+//=============================================================================
+
+/// @brief PARLIO bit packing order
+///
+/// Controls how bits are mapped to GPIO pins during parallel transmission.
+/// See ESP32-C6 Technical Reference Manual for detailed bit mapping.
+enum class ParlioBitPackOrder {
+    FL_PARLIO_LSB = 0,  ///< LSB packing: bits sent in order [0,1,2,3,4,5,6,7]
+    FL_PARLIO_MSB = 1   ///< MSB packing: bits sent in order [7,6,5,4,3,2,1,0] (time-reversed)
+};
+
+//=============================================================================
 // Configuration Structures
 //=============================================================================
 
@@ -67,6 +80,7 @@ struct ParlioPeripheralConfig {
     uint32_t clock_freq_hz;             ///< Clock frequency (Hz)
     size_t queue_depth;                 ///< Hardware queue depth
     size_t max_transfer_size;           ///< Max DMA transfer size (bytes)
+    ParlioBitPackOrder packing;         ///< Bit packing order (ParlioBitPackOrder::FL_PARLIO_LSB or ParlioBitPackOrder::FL_PARLIO_MSB)
 
     /// @brief Default constructor (for mock testing)
     ParlioPeripheralConfig()
@@ -74,7 +88,8 @@ struct ParlioPeripheralConfig {
           gpio_pins(),
           clock_freq_hz(0),
           queue_depth(0),
-          max_transfer_size(0) {}
+          max_transfer_size(0),
+          packing(ParlioBitPackOrder::FL_PARLIO_MSB) {}  ///< Default to MSB packing (Wave8 format)
 
     /// @brief Constructor with mandatory parameters
     /// @tparam PinContainer Any container with .size() and operator[] (e.g., fl::vector, fl::vector_fixed)
@@ -82,16 +97,19 @@ struct ParlioPeripheralConfig {
     /// @param clock_freq Clock frequency in Hz
     /// @param queue_depth Hardware queue depth
     /// @param max_transfer Maximum DMA transfer size in bytes
+    /// @param pack_order Bit packing order (default: ParlioBitPackOrder::FL_PARLIO_MSB)
     template<typename PinContainer>
     ParlioPeripheralConfig(const PinContainer& pins,
                            uint32_t clock_freq,
                            size_t queue_depth_val,
-                           size_t max_transfer)
+                           size_t max_transfer,
+                           ParlioBitPackOrder pack_order = ParlioBitPackOrder::FL_PARLIO_MSB)
         : data_width(pins.size()),
           gpio_pins(),
           clock_freq_hz(clock_freq),
           queue_depth(queue_depth_val),
-          max_transfer_size(max_transfer) {
+          max_transfer_size(max_transfer),
+          packing(pack_order) {
         // Resize to full 16 slots
         gpio_pins.resize(16);
 

@@ -697,8 +697,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             Wave8Byte wave8_output;
             fl::detail::wave8_convert_byte_to_wave8byte(byte_value, mWave8Lut, &wave8_output);
 
-            // ITERATION 17: Changed to MSB bit packing - no bit reversal needed
-            // Wave8Bit stores pulses MSB-first, PARLIO MSB packing sends MSB first
+            // MSB bit packing: Wave8Bit stores pulses MSB-first, PARLIO MSB packing required
+            // (Hardware validation confirms MSB packing is correct for Wave8 format)
 
             fl::memcpy(outputBuffer + outputIdx, &wave8_output, sizeof(Wave8Byte));
             outputIdx += sizeof(Wave8Byte);
@@ -712,14 +712,9 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                 ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                 : 0;
 
-            // PARLIO MSB hardware requirement: Swap lanes before transpose
-            // PARLIO with MSB bit packing expects GPIO[0]=odd bits, GPIO[1]=even bits
-            // But wave8_transpose_2 uses natural order (lane[0]=even, lane[1]=odd)
-            // So we swap the lane order here to match PARLIO hardware expectations
-            uint8_t lanes_swapped[2] = {lanes[1], lanes[0]};
-
+            // MSB bit packing: Use natural lane order (no swap needed)
             uint8_t transposed[2 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes_swapped), mWave8Lut,
+            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut,
                                 reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed));
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -1117,13 +1112,30 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
+    // DIAGNOSTIC: Allow compile-time override to LSB mode for waveform inspection
+    #ifndef PARLIO_FORCE_LSB_MODE
+        #define PARLIO_FORCE_LSB_MODE 0  // Default: use MSB (correct mode)
+    #endif
+
     ParlioPeripheralConfig config(
         pins,  // Uses actual pin vector (size = dataWidth)
         FL_ESP_PARLIO_CLOCK_FREQ_HZ,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
-        65534
+        65534,
+        #if PARLIO_FORCE_LSB_MODE
+        ParlioBitPackOrder::FL_PARLIO_LSB  // DIAGNOSTIC: LSB mode for waveform inspection
+        #else
+        ParlioBitPackOrder::FL_PARLIO_MSB  // MSB packing required - Wave8 data is MSB-ordered
+        #endif
     );
     FL_DBG("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
+
+    // DIAGNOSTIC: Log bit packing mode
+    #if PARLIO_FORCE_LSB_MODE
+        FL_WARN("PARLIO_INIT: ⚠️ LSB MODE ENABLED (DIAGNOSTIC) - expect waveform failures!");
+    #else
+        FL_DBG("PARLIO_INIT: MSB mode enabled (correct for Wave8)");
+    #endif
 
     // Initialize peripheral
     FL_LOG_PARLIO("PARLIO_INIT: Calling mPeripheral->initialize()");

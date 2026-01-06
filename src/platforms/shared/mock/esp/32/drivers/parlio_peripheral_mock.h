@@ -209,7 +209,8 @@ public:
     /// ```
     static fl::unordered_map<int, fl::vector<uint8_t>> untransposeParlioBitstream(
         fl::span<const uint8_t> transposed_data,
-        fl::span<const int> pins);
+        fl::span<const int> pins,
+        ParlioBitPackOrder packing = ParlioBitPackOrder::FL_PARLIO_MSB);
 
     //-------------------------------------------------------------------------
     // State Inspection

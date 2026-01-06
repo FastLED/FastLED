@@ -77,8 +77,7 @@ void validateExpectedEngines() {
     fl::vector<const char*> expected_engines;
 
 #if defined(FL_IS_ESP_32C6)
-    // ESP32-C6 should have: SPI, PARLIO, RMT
-    expected_engines.push_back("SPI");
+    // ESP32-C6 should have: PARLIO, RMT (SPI disabled - only 1 host, RMT5 preferred)
     expected_engines.push_back("PARLIO");
     expected_engines.push_back("RMT");
     FL_WARN("\n[VALIDATION] Platform: ESP32-C6");

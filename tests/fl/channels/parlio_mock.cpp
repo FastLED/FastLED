@@ -600,9 +600,9 @@ TEST_CASE("parlio_mock_untransposition") {
     // Reset mock to clean state
     mock.reset();
 
-    // Initialize with 2-lane configuration
+    // Initialize with 2-lane configuration (using MSB packing to match original test expectations)
     fl::vector<int> pins = {1, 2};  // GPIO pin numbers: 1 and 2
-    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);  // 8MHz, queue depth 4, 2 pins
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
     REQUIRE(mock.initialize(config));
     REQUIRE(mock.enable());
 
@@ -647,12 +647,12 @@ TEST_CASE("parlio_mock_untransposition_complex_pattern") {
 
     wave8Transpose_2(lanes, lut, transposed_output);
 
-    // Setup mock
+    // Setup mock (using MSB packing to match original test expectations)
     auto& mock = fl::detail::ParlioPeripheralMock::instance();
     mock.reset();
 
     fl::vector<int> pins = {1, 2};  // GPIO pin numbers: 1 and 2
-    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
     REQUIRE(mock.initialize(config));
     REQUIRE(mock.enable());
 
@@ -758,6 +758,107 @@ TEST_CASE("parlio_mock_untransposition_empty_inputs") {
 
     result = fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(data_span, empty_pins_span);
     REQUIRE(result.empty());
+}
+
+//=============================================================================
+// Test Suite: LSB vs MSB Bit Packing Modes
+//=============================================================================
+
+TEST_CASE("parlio_mock_lsb_packing") {
+    // Test LSB bit packing mode
+    // LSB packing: bits sent in order [0,1,2,3,4,5,6,7] (forward in time)
+
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+    mock.reset();
+
+    // Initialize with LSB packing
+    fl::vector<int> pins = {1, 2};
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+    REQUIRE(mock.initialize(config));
+    REQUIRE(mock.enable());
+
+    // Test data: simple bit pattern
+    // Byte 0xAA = 0b10101010
+    // With LSB packing: bit0 sent first, bit7 sent last
+    uint8_t test_data[2] = {0xAA, 0x55};
+    size_t bit_count = 2 * 8;  // 2 bytes * 8 bits/byte = 16 bits
+
+    REQUIRE(mock.transmit(test_data, bit_count, 0));
+
+    // Verify the packing mode was correctly set
+    REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+
+    // Get transmission history
+    const auto& history = mock.getTransmissionHistory();
+    REQUIRE(history.size() == 1);
+    REQUIRE(history[0].bit_count == 16);
+}
+
+TEST_CASE("parlio_mock_msb_packing") {
+    // Test MSB bit packing mode
+    // MSB packing: bits sent in order [7,6,5,4,3,2,1,0] (reversed in time)
+
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+    mock.reset();
+
+    // Initialize with MSB packing
+    fl::vector<int> pins = {1, 2};
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
+    REQUIRE(mock.initialize(config));
+    REQUIRE(mock.enable());
+
+    // Test data: simple bit pattern
+    uint8_t test_data[2] = {0xAA, 0x55};
+    size_t bit_count = 2 * 8;  // 16 bits
+
+    REQUIRE(mock.transmit(test_data, bit_count, 0));
+
+    // Verify the packing mode was correctly set
+    REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
+
+    // Get transmission history
+    const auto& history = mock.getTransmissionHistory();
+    REQUIRE(history.size() == 1);
+    REQUIRE(history[0].bit_count == 16);
+}
+
+TEST_CASE("parlio_mock_default_packing_is_lsb") {
+    // Verify that default packing mode is LSB
+
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+    mock.reset();
+
+    // Initialize without specifying packing (should default to LSB)
+    fl::vector<int> pins = {1};
+    fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);
+    REQUIRE(mock.initialize(config));
+
+    // Verify default is LSB
+    REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+}
+
+TEST_CASE("parlio_mock_packing_mode_persistence") {
+    // Verify that packing mode persists correctly through initialization
+
+    auto& mock = fl::detail::ParlioPeripheralMock::instance();
+
+    // Test MSB packing
+    {
+        mock.reset();
+        fl::vector<int> pins = {1, 2};
+        fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
+        REQUIRE(mock.initialize(config));
+        REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
+    }
+
+    // Test LSB packing
+    {
+        mock.reset();
+        fl::vector<int> pins = {1, 2};
+        fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2, fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+        REQUIRE(mock.initialize(config));
+        REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+    }
 }
 
 #endif // FASTLED_STUB_IMPL

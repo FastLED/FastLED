@@ -56,7 +56,8 @@ namespace {
 fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
     const uint8_t* transposed_data,
     size_t bit_count,
-    size_t num_pins) {
+    size_t num_pins,
+    fl::detail::ParlioBitPackOrder packing) {
 
     // Initialize per-pin storage
     fl::vector<fl::vector<uint8_t>> per_pin_data(num_pins);
@@ -70,11 +71,18 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
     }
 
     // Untranspose bit-by-bit
-    // PARLIO hardware sends bits sequentially: bit 0 → pin 0, bit 1 → pin 1, etc.
+    // PARLIO hardware sends bits based on packing order
     for (size_t bit_idx = 0; bit_idx < bit_count; bit_idx++) {
         // Get bit from transposed buffer
         size_t byte_idx = bit_idx / 8;
-        size_t bit_pos = bit_idx % 8;  // LSB first
+        size_t bit_pos;
+        if (packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB) {
+            // LSB packing: bits sent LSB-first within each byte
+            bit_pos = bit_idx % 8;
+        } else {
+            // MSB packing: bits sent MSB-first within each byte (reversed)
+            bit_pos = 7 - (bit_idx % 8);
+        }
         bool bit_value = (transposed_data[byte_idx] >> bit_pos) & 1;
 
         // Determine which pin this bit belongs to (cycles through pins)
@@ -332,7 +340,8 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
     fl::vector<fl::vector<uint8_t>> per_pin_waveforms = untransposeParlioBitstreamInternal(
         buffer,
         bit_count,
-        mConfig.data_width
+        mConfig.data_width,
+        mConfig.packing
     );
 
     // Map pin indices to actual GPIO pin numbers
@@ -556,7 +565,7 @@ void ParlioPeripheralMockImpl::reset() {
     mTransmitCount = 0;
 
     fl::vector<int> empty_pins;  // Empty vector (size = 0)
-    mConfig = ParlioPeripheralConfig(empty_pins, 0, 0, 0);
+    mConfig = ParlioPeripheralConfig(empty_pins, 0, 0, 0, ParlioBitPackOrder::FL_PARLIO_MSB);
 
     mCallback = nullptr;
     mUserCtx = nullptr;
@@ -606,7 +615,8 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
 
 fl::unordered_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBitstream(
     fl::span<const uint8_t> transposed_data,
-    fl::span<const int> pins) {
+    fl::span<const int> pins,
+    ParlioBitPackOrder packing) {
 
     fl::unordered_map<int, fl::vector<uint8_t>> result;
 
@@ -622,7 +632,8 @@ fl::unordered_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposePar
     fl::vector<fl::vector<uint8_t>> per_pin_waveforms = untransposeParlioBitstreamInternal(
         transposed_data.data(),
         bit_count,
-        num_pins
+        num_pins,
+        packing
     );
 
     // Map lane indices to GPIO pin numbers
