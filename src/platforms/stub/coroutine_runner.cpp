@@ -11,11 +11,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/queue.h"
-<<<<<<< Updated upstream
 #include "fl/dbg.h"  // Debug output
-=======
-#include "fl/warn.h"  // For FL_DBG
->>>>>>> Stashed changes
 
 namespace fl {
 namespace detail {
@@ -28,7 +24,6 @@ public:
         : mReady(false), mShouldStop(false), mCompleted(false) {}
 
     void wait() override {
-<<<<<<< Updated upstream
         // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Entering wait()");
         fl::unique_lock<fl::mutex> lock(mMutex);
         // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Acquired lock, waiting on condition...");
@@ -43,25 +38,11 @@ public:
         }
 
         // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Woke from wait, ready=" << mReady.load() << " stop=" << mShouldStop.load());
-=======
-        FL_DBG("[CoroutineContext::wait] Entering wait, mReady=" << mReady.load());
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        mCv.wait(lock, [this]() {
-            bool ready = mReady.load() || mShouldStop.load();
-            FL_DBG("[CoroutineContext::wait] In predicate: mReady=" << mReady.load() << " mShouldStop=" << mShouldStop.load() << " ready=" << ready);
-            return ready;
-        });
-        FL_DBG("[CoroutineContext::wait] Woke up, mReady=" << mReady.load());
->>>>>>> Stashed changes
         mReady.store(false);  // Reset for next time
     }
 
     void signal() override {
-<<<<<<< Updated upstream
         // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Signaling");
-=======
-        FL_DBG("[CoroutineContext::signal] Setting mReady=true and notifying");
->>>>>>> Stashed changes
         fl::unique_lock<fl::mutex> lock(mMutex);
         mReady.store(true);
         mCv.notify_one();
@@ -105,19 +86,13 @@ public:
 
     void enqueue(fl::shared_ptr<CoroutineContext> ctx) override {
         fl::unique_lock<fl::mutex> lock(mQueueMutex);
-<<<<<<< Updated upstream
         // FL_DBG("CoroutineRunner: Enqueuing context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()) << ", queue size before: " << mQueue.size());
         mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
         // FL_DBG("CoroutineRunner: Queue size after enqueue: " << mQueue.size());
-=======
-        mQueue.push(ctx);
-        FL_DBG("[CoroutineRunner::enqueue] Enqueued context, queue size=" << mQueue.size());
->>>>>>> Stashed changes
     }
 
     void signal_next() override {
         fl::unique_lock<fl::mutex> lock(mQueueMutex);
-<<<<<<< Updated upstream
         // FL_DBG("CoroutineRunner::signal_next: Called, queue size: " << mQueue.size());
 
         // Remove expired/completed coroutines from front of queue
@@ -134,19 +109,10 @@ public:
             } else {
                 break;  // Found live context, stop cleaning
             }
-=======
-        FL_DBG("[CoroutineRunner::signal_next] Called, queue size=" << mQueue.size());
-
-        // Remove completed coroutines from front of queue
-        while (!mQueue.empty() && mQueue.front()->is_completed()) {
-            FL_DBG("[CoroutineRunner::signal_next] Removing completed coroutine from queue");
-            mQueue.pop();
->>>>>>> Stashed changes
         }
 
         // Signal next waiting coroutine
         if (!mQueue.empty()) {
-<<<<<<< Updated upstream
             fl::shared_ptr<CoroutineContext> ctx = mQueue.front().lock();
             if (ctx) {  // Context still alive
                 // FL_DBG("CoroutineRunner::signal_next: Signaling context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
@@ -169,21 +135,6 @@ public:
             }
         } else {
             // FL_DBG("CoroutineRunner::signal_next: Queue is empty, no context to signal");
-=======
-            CoroutineContext* ctx = mQueue.front();
-            mQueue.pop();
-            FL_DBG("[CoroutineRunner::signal_next] Found coroutine to signal, queue size after pop=" << mQueue.size());
-
-            // Re-enqueue at back for next execution cycle
-            mQueue.push(ctx);
-            FL_DBG("[CoroutineRunner::signal_next] Re-enqueued at back, queue size=" << mQueue.size());
-
-            // Signal this coroutine to run
-            lock.unlock();  // Unlock before signaling to avoid holding mutex
-            ctx->signal();
-        } else {
-            FL_DBG("[CoroutineRunner::signal_next] Queue is empty, nothing to signal");
->>>>>>> Stashed changes
         }
     }
 

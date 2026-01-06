@@ -45,7 +45,6 @@
 #include "crash_handler.h"
 #endif
 
-<<<<<<< Updated upstream
 
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
@@ -74,6 +73,10 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();
     std::cout << "CoroutineRunner singleton pre-initialized successfully" << std::endl;
+
+    doctest::Context context(argc, argv);
+    int result = context.run();
+
     // Clean up all background threads before DLL unload to prevent access violations
     // This includes both coroutine threads and promise resolver threads
     fl::platforms::cleanup_coroutine_threads();
@@ -82,29 +85,6 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
 
 #else
 // Standard mode: Define main function
-=======
-// This file contains the run_tests() function for doctest
-// All tests are now built as DLLs that export this function
-// runner.exe will load the DLL and call run_tests()
->>>>>>> Stashed changes
-
-// DLL mode: Export run_tests() function that can be called by runner.exe
-extern "C" __declspec(dllexport) int run_tests() {
-    int argc = 0;
-    char** argv = nullptr;
-
-#ifdef ENABLE_CRASH_HANDLER
-    setup_crash_handler();
-#endif
-
-    doctest::Context context(argc, argv);
-    int result = context.run();
-
-    return result;
-}
-<<<<<<< Updated upstream
-#else
-// Standard entry point for non-Windows platforms
 int main(int argc, char** argv) {
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
@@ -114,5 +94,3 @@ int main(int argc, char** argv) {
 #endif
 
 #endif // TEST_DLL_MODE
-=======
->>>>>>> Stashed changes
