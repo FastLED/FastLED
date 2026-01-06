@@ -21,20 +21,28 @@ namespace fl {
 template <typename T, int N = 0> class Singleton {
   public:
     static T &instance() {
+        // Thread-safe initialization using C++11 magic statics
+        // The compiler and runtime ensure that the static local variable is initialized
+        // exactly once, even if multiple threads call instance() simultaneously.
+        // C++11 guarantees that if control enters the declaration concurrently while
+        // the variable is being initialized, the concurrent execution shall wait for
+        // completion of the initialization.
+        //
         // Aligned char buffer storage - never destroyed
         // Use a struct wrapper to apply alignment attributes (alignas cannot be used directly on static variables)
         struct FL_ALIGN_AS_T(alignof(T)) AlignedStorage {
             char data[sizeof(T)];
         };
-        static AlignedStorage storage;
-        static bool initialized = false;
 
-        if (!initialized) {
+        // Use a static flag to track initialization (C++11 magic statics make this thread-safe)
+        static AlignedStorage storage;
+        static bool init = []() -> bool {
             // Placement new: construct instance in pre-allocated storage
             // INTENTIONAL: Destructor is NEVER called - this is a permanent leak
             new (&storage.data) T();
-            initialized = true;
-        }
+            return true;
+        }();
+        (void)init;  // Suppress unused warning
 
         // Safe type-punning from char* to T* using bit_cast_ptr
         return *fl::bit_cast_ptr<T>(&storage.data[0]);
