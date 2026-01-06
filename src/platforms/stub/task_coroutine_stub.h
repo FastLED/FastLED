@@ -82,5 +82,19 @@ public:
     bool isRunning() const override = 0;
 };
 
+//=============================================================================
+// Global cleanup function for DLL mode
+//=============================================================================
+
+/// @brief Clean up all coroutine threads before DLL unload
+///
+/// This function must be called before the DLL unloads to ensure all
+/// coroutine threads are properly joined. Otherwise, detached threads
+/// will continue executing code from the unloaded DLL, causing access violations.
+///
+/// This is only necessary in DLL mode - in normal builds, threads can
+/// safely continue running as daemon threads.
+void cleanup_coroutine_threads();
+
 } // namespace platforms
 } // namespace fl

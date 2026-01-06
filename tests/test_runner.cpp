@@ -1,10 +1,9 @@
 // Test runner - loads test category DLLs and executes tests
 // This executable is lightweight and doesn't link against libfastled.a
+// CRITICAL: NO STL USAGE - prevents CRT boundary issues across DLLs
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -12,11 +11,11 @@
 #include <dlfcn.h>
 #endif
 
-using run_tests_fn = int(*)(int, const char**);
+typedef int(*run_tests_fn)(int, const char**);
 
 struct TestCategory {
-    std::string name;
-    std::string dll_name;
+    const char* name;
+    const char* dll_name;
 };
 
 // List of test category DLLs to load
@@ -72,53 +71,49 @@ int main(int argc, char** argv) {
     int categories_run = 0;
     int categories_passed = 0;
 
-    std::cout << "[TEST_RUNNER] Running " << (sizeof(test_categories) / sizeof(test_categories[0]))
-              << " test categories\n";
+    int num_categories = sizeof(test_categories) / sizeof(test_categories[0]);
+    printf("[TEST_RUNNER] Running %d test categories\n", num_categories);
 
-    for (const auto& category : test_categories) {
-        std::cout << "[TEST_RUNNER] Loading " << category.name << "...\n";
+    for (int i = 0; i < num_categories; i++) {
+        const TestCategory* category = &test_categories[i];
+        printf("[TEST_RUNNER] Loading %s...\n", category->name);
 
-        void* lib = load_library(category.dll_name.c_str());
+        void* lib = load_library(category->dll_name);
         if (!lib) {
-            std::cerr << "[TEST_RUNNER] ERROR: Failed to load " << category.dll_name
-                     << ": " << get_error() << "\n";
+            fprintf(stderr, "[TEST_RUNNER] ERROR: Failed to load %s: %s\n",
+                    category->dll_name, get_error());
             total_failures++;
             continue;
         }
 
-        auto run_tests = (run_tests_fn)get_function(lib, "run_tests");
+        run_tests_fn run_tests = (run_tests_fn)get_function(lib, "run_tests");
         if (!run_tests) {
-            std::cerr << "[TEST_RUNNER] ERROR: Failed to find run_tests in " << category.dll_name
-                     << ": " << get_error() << "\n";
+            fprintf(stderr, "[TEST_RUNNER] ERROR: Failed to find run_tests in %s: %s\n",
+                    category->dll_name, get_error());
             free_library(lib);
             total_failures++;
             continue;
         }
 
-        std::cout << "[TEST_RUNNER] Running tests in " << category.name << "...\n";
+        printf("[TEST_RUNNER] Running tests in %s...\n", category->name);
 
-        // Convert argv to const char** for the DLL
-        std::vector<const char*> args;
-        for (int i = 0; i < argc; i++) {
-            args.push_back(argv[i]);
-        }
-
-        int result = run_tests(argc, args.data());
+        // Pass argv directly to the DLL
+        int result = run_tests(argc, (const char**)argv);
         categories_run++;
 
         if (result == 0) {
-            std::cout << "[TEST_RUNNER] ✓ " << category.name << " PASSED\n";
+            printf("[TEST_RUNNER] ✓ %s PASSED\n", category->name);
             categories_passed++;
         } else {
-            std::cout << "[TEST_RUNNER] ✗ " << category.name << " FAILED (exit code " << result << ")\n";
+            printf("[TEST_RUNNER] ✗ %s FAILED (exit code %d)\n", category->name, result);
             total_failures++;
         }
 
         free_library(lib);
     }
 
-    std::cout << "\n[TEST_RUNNER] Summary: " << categories_passed << "/" << categories_run
-              << " test categories passed\n";
+    printf("\n[TEST_RUNNER] Summary: %d/%d test categories passed\n",
+           categories_passed, categories_run);
 
     return total_failures > 0 ? 1 : 0;
 }

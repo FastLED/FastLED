@@ -65,16 +65,13 @@ inline std::string demangle_symbol(const char* symbol_name) {
 }
 
 inline std::string get_symbol_with_gdb(DWORD64 address) {
-    printf("[DEBUG] get_symbol_with_gdb called with address: 0x%llx\n", address);
-    
     // Get the module base address to calculate file offset
     HMODULE hModule = nullptr;
-    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, 
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
                            (LPCSTR)address, &hModule)) {
-        printf("[DEBUG] GetModuleHandleExA failed\n");
         return "-- module not found";
     }
-    
+
     // Calculate file offset by subtracting module base
     DWORD64 fileOffset = address - (DWORD64)hModule;
     (void)fileOffset;  // Currently unused, but may be needed for future debug output
@@ -82,73 +79,59 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
     // Get module filename
     char modulePath[MAX_PATH];
     if (!GetModuleFileNameA(hModule, modulePath, MAX_PATH)) {
-        printf("[DEBUG] GetModuleFileNameA failed\n");
         return "-- module path not found";
     }
-    
-    printf("[DEBUG] Module path: %s\n", modulePath);
-    
+
     // Use addr2line for all test executables (anything starting with "test_")
     char* fileName = strrchr(modulePath, '\\');
     if (!fileName) fileName = modulePath;
     else fileName++;
-    
-    printf("[DEBUG] File name: %s\n", fileName);
-    
+
     if (strncmp(fileName, "test_", 5) != 0) {
-        printf("[DEBUG] Not a test executable, filename doesn't start with 'test_'\n");
-        return "-- not a test executable";
+        return "-- no symbol resolution available";
     }
-    
-    printf("[DEBUG] Test executable detected, proceeding with GDB\n");
-    
+
     // Build gdb command for symbol resolution (much better with PE+DWARF than addr2line)
     // Use a temporary script file to avoid quoting issues
     static int script_counter = 0; // okay static in header
     char script_name[256];
     snprintf(script_name, sizeof(script_name), "gdb_temp_%d.gdb", ++script_counter);
-    
+
     // Create temporary GDB script
     FILE* script = fopen(script_name, "w");
     if (!script) {
-        printf("[DEBUG] Failed to create GDB script file\n");
         return "-- gdb script creation failed";
     }
-    
+
     fprintf(script, "file %s\n", modulePath);
     fprintf(script, "info symbol 0x%llx\n", address);
     fprintf(script, "info line *0x%llx\n", address);
     fprintf(script, "quit\n");
     fclose(script);
-    
-    printf("[DEBUG] Created GDB script: %s\n", script_name);
-    
+
     // Build command using script file
     char command[1024];
     snprintf(command, sizeof(command), "gdb -batch -x %s 2>nul", script_name);
-    
-    printf("[DEBUG] Executing command: %s\n", command);
-    
+
     // Execute gdb
     FILE* pipe = _popen(command, "r");
     if (!pipe) {
-        printf("[DEBUG] _popen failed\n");
         return "-- gdb failed";
     }
-    
+
     char output[512] = {0};
     std::string symbol_result;
     std::string line_result;
-    
+
     // Read gdb output
     while (fgets(output, sizeof(output), pipe)) {
         std::string line(output);
-        
+
         // Remove newline
         if (!line.empty() && line.back() == '\n') {
             line.pop_back();
         }
-        
+
         // Skip copyright and other non-symbol lines
         if (line.find("Copyright") != std::string::npos ||
             line.find("This GDB") != std::string::npos ||
@@ -156,7 +139,7 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
             line.empty()) {
             continue;
         }
-        
+
         // Look for symbol information
         if (line.find(" in section ") != std::string::npos) {
             // Parse gdb "info symbol" output format: "symbol_name in section .text"
@@ -173,15 +156,12 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
             line_result = "-- no line info";
         }
     }
-    
+
     _pclose(pipe);
-    
+
     // Clean up temporary script file
     remove(script_name);
-    
-    printf("[DEBUG] GDB symbol_result: '%s'\n", symbol_result.c_str());
-    printf("[DEBUG] GDB line_result: '%s'\n", line_result.c_str());
-    
+
     // Combine symbol and line information for comprehensive debugging
     std::string result;
     if (!symbol_result.empty() && symbol_result != "-- symbol not found") {
@@ -194,8 +174,7 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
     } else {
         result = "-- no debug information available";
     }
-    
-    printf("[DEBUG] Final result: '%s'\n", result.c_str());
+
     return result;
 }
 

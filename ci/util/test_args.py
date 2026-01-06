@@ -237,10 +237,44 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     #     test_args.verbose = True
     #     ts_print("Auto-enabled --verbose mode for unit tests")
 
-    # Auto-enable --unity unless --no-unity is specified
-    if not test_args.no_unity and not test_args.unity:
-        test_args.unity = True
-        ts_print("Auto-enabled --unity mode (use --no-unity to disable)")
+    # Unity builds are DISABLED for unit tests due to DLL singleton issues
+    # Unity builds can still be used for libfastled.a (controlled via --unity-chunks)
+    # Do NOT auto-enable --unity for tests
+
+    # Validate: reject --unity flag for unit tests
+    if test_args.unity and (test_args.unit or test_args.cpp):
+        # Display error banner in red
+        RED = "\033[91m"
+        RESET = "\033[0m"
+        ts_print(f"{RED}{'=' * 80}", file=sys.stderr)
+        ts_print(f"ERROR: Unity builds are DISABLED for unit tests", file=sys.stderr)
+        ts_print(f"{'=' * 80}{RESET}", file=sys.stderr)
+        ts_print("", file=sys.stderr)
+        ts_print(
+            "Unity builds for tests have been disabled due to DLL singleton issues",
+            file=sys.stderr,
+        )
+        ts_print(
+            "that cause heap corruption and crashes (multiple CoroutineRunner instances).",
+            file=sys.stderr,
+        )
+        ts_print("", file=sys.stderr)
+        ts_print(
+            "Unity builds are still available for libfastled.a via --unity-chunks.",
+            file=sys.stderr,
+        )
+        ts_print("", file=sys.stderr)
+        ts_print(
+            "Please remove the --unity flag from your test.py invocation.",
+            file=sys.stderr,
+        )
+        ts_print("", file=sys.stderr)
+        sys.exit(1)
+
+    # Informational message about unity builds (only show once, not for every test)
+    # Skip this message - it's not critical and clutters output
+    # if not test_args.unity and (test_args.unit or test_args.cpp):
+    #     ts_print("ℹ️  Note: Unity builds are disabled for unit tests (use --unity-chunks for libfastled.a)")
 
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:

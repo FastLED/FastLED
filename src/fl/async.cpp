@@ -5,6 +5,7 @@
 #include "fl/task.h"
 #include "fl/stl/time.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
 
 // Platform-specific includes
 #ifdef __EMSCRIPTEN__
@@ -82,6 +83,7 @@ void async_run() {
 }
 
 void async_yield() {
+    // FL_DBG("async_yield: Called from main thread");
     // Always pump all async tasks first
     async_run();
 
@@ -94,7 +96,11 @@ void async_yield() {
 
 #ifdef FASTLED_STUB_IMPL
     // Signal next coroutine in executor queue to run
-    fl::detail::CoroutineRunner::instance().signal_next();
+    auto& runner = fl::detail::CoroutineRunner::instance();
+    // FL_DBG("async_yield: CoroutineRunner instance at " << fl::hex << reinterpret_cast<uintptr_t>(&runner));
+    // FL_DBG("async_yield: Calling signal_next()");
+    runner.signal_next();
+    // FL_DBG("async_yield: signal_next() returned");
 
     // Yield CPU to allow coroutine threads to actually execute
     std::this_thread::yield();  // okay std namespace
@@ -105,6 +111,7 @@ void async_yield() {
     for (int i = 0; i < 5; ++i) {
         async_run(); // Give other async tasks a chance
     }
+    // FL_DBG("async_yield: Returning");
 }
 
 size_t async_active_tasks() {

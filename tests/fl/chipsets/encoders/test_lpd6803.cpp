@@ -6,10 +6,10 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/algorithm.h"
 
+using namespace fl;
+
 // Named namespace to avoid unity build conflicts
 namespace test_lpd6803 {
-
-using namespace fl;
 
 // Helper: Verify start boundary (4 bytes of 0x00)
 static void verifyStartBoundary(const vector<u8>& data) {
@@ -55,9 +55,9 @@ static void verifyLEDFrame(const vector<u8>& data, size_t offset, u8 r, u8 g, u8
     CHECK((actual & 0x8000) == 0x8000);
 }
 
-using namespace test_lpd6803;
-
 } // namespace test_lpd6803
+
+using namespace test_lpd6803;
 
 // ============================================================================
 // Helper Function Tests

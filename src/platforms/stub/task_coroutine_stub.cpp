@@ -5,12 +5,62 @@
 
 #include "task_coroutine_stub.h"
 #include <thread>  // ok include (stub platform only)
+#include <chrono>  // ok include (stub platform only)
 #include <memory>  // ok include (stub platform only)
 #include "fl/stl/atomic.h"
+#include "fl/stl/mutex.h"
 #include "coroutine_runner.h"  // Global coordination for thread safety
+#include "fl/dbg.h"  // Debug output
 
 namespace fl {
 namespace platforms {
+
+//=============================================================================
+// Global thread registry for DLL cleanup
+//=============================================================================
+
+#ifdef TEST_DLL_MODE
+namespace {
+    fl::vector<std::thread> g_coroutine_threads;  // okay std namespace (stub platform only)
+    fl::mutex g_coroutine_mutex;
+
+    void register_coroutine_thread(std::thread&& t) {  // okay std namespace (stub platform only)
+        fl::unique_lock<fl::mutex> lock(g_coroutine_mutex);
+        g_coroutine_threads.push_back(std::move(t));  // okay std namespace (stub platform only)
+    }
+}
+#endif
+
+/// @brief Clean up all coroutine threads before DLL unload
+///
+/// This function must be called before the DLL unloads to ensure all
+/// coroutine threads are properly joined. Otherwise, detached threads
+/// will continue executing code from the unloaded DLL, causing access violations.
+///
+/// This function is only needed in DLL mode. In normal mode, threads are
+/// detached and will continue running as daemon threads.
+void cleanup_coroutine_threads() {
+#ifdef TEST_DLL_MODE
+    // FL_DBG("cleanup_coroutine_threads: Starting cleanup");
+    // First, signal all coroutines to stop
+    fl::detail::CoroutineRunner::instance().stop_all();
+    // FL_DBG("cleanup_coroutine_threads: Called stop_all()");
+
+    // Join all threads (they should exit quickly after stop signal)
+    fl::unique_lock<fl::mutex> lock(g_coroutine_mutex);
+    // FL_DBG("cleanup_coroutine_threads: Joining " << g_coroutine_threads.size() << " threads");
+    for (size_t i = 0; i < g_coroutine_threads.size(); ++i) {
+        auto& t = g_coroutine_threads[i];
+        if (t.joinable()) {
+            // FL_DBG("cleanup_coroutine_threads: Joining thread " << i);
+            t.join();  // Wait for thread to exit
+            // FL_DBG("cleanup_coroutine_threads: Thread " << i << " joined");
+        }
+    }
+    g_coroutine_threads.clear();
+    // FL_DBG("cleanup_coroutine_threads: Cleanup complete");
+#endif
+}
 
 //=============================================================================
 // TaskCoroutineStubImpl - Concrete implementation
@@ -27,40 +77,62 @@ public:
                           TaskFunction function,
                           size_t /*stack_size*/,   // Ignored on host
                           uint8_t /*priority*/)    // Ignored on host
-        : mHandle(nullptr)
-        , mName(fl::move(name))
+        : mName(fl::move(name))
         , mFunction(fl::move(function)) {
 
         // Create context for this coroutine using factory method
-        auto ctx = fl::detail::CoroutineContext::create();
-        fl::detail::CoroutineContext* ctx_ptr = ctx.release();  // Transfer ownership to raw pointer
+        // IMPORTANT: Keep shared_ptr ownership - do NOT convert to raw pointer
+        mContext = fl::detail::CoroutineContext::create();
+        // FL_DBG("TaskCoroutineStub: Created context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()) << " for task '" << mName << "'");
 
-        // Register in global executor queue
-        fl::detail::CoroutineRunner::instance().enqueue(ctx_ptr);
+        // Register in global executor queue (queue stores weak_ptr)
+        // FL_DBG("TaskCoroutineStub: Before getting runner instance");
+        auto& runner = fl::detail::CoroutineRunner::instance();
+        // FL_DBG("TaskCoroutineStub: Got runner instance at " << fl::hex << reinterpret_cast<uintptr_t>(&runner));
 
-        // Store context as handle (for cleanup)
-        mHandle = ctx_ptr;
+        // FL_DBG("TaskCoroutineStub: About to enqueue context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()));
+        runner.enqueue(mContext);
+        // FL_DBG("TaskCoroutineStub: Enqueued context " << fl::hex << reinterpret_cast<uintptr_t>(mContext.get()));
 
-        // Launch detached std::thread with queue-based coordination
-        // Thread is detached (daemon-like) but context remains for cleanup
-        std::thread([ctx_ptr, function]() {  // okay std namespace (stub platform only)
+        // Launch std::thread with queue-based coordination
+        // CRITICAL: Must capture mFunction (not parameter 'function' which was moved-from)
+        // Capture shared_ptr by value to keep context alive for thread lifetime
+        // C++11 workaround: Create local copy since init-captures require C++14
+        TaskFunction func = mFunction;
+        fl::shared_ptr<fl::detail::CoroutineContext> ctx_shared = mContext;
+        std::thread t([ctx_shared, func]() {  // okay std namespace (stub platform only)
+            // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " started, waiting...");
             // Wait for executor to signal us
-            ctx_ptr->wait();
+            ctx_shared->wait();
+            // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " woke up from wait");
 
             // Check if we should stop before even starting
-            if (ctx_ptr->should_stop()) {
-                ctx_ptr->set_completed(true);
+            if (ctx_shared->should_stop()) {
+                // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " got stop signal, exiting");
+                ctx_shared->set_completed(true);
                 fl::detail::CoroutineRunner::instance().signal_next();
                 return;
             }
 
+            // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " executing user function");
             // Execute the user's coroutine function
-            function();
+            // FL_DBG("TaskCoroutineStub: About to call user function");
+            func();
+            // FL_DBG("TaskCoroutineStub: User function returned");
 
+            // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " completed, signaling next");
             // Mark as completed and signal next coroutine
-            ctx_ptr->set_completed(true);
+            ctx_shared->set_completed(true);
             fl::detail::CoroutineRunner::instance().signal_next();
-        }).detach();  // Detach - daemon thread, won't block exit
+        });
+
+#ifdef TEST_DLL_MODE
+        // In DLL mode: Store thread for cleanup (must join before DLL unload)
+        register_coroutine_thread(std::move(t));  // okay std namespace (stub platform only)
+#else
+        // In normal mode: Detach thread (daemon-like, won't block exit)
+        t.detach();
+#endif
     }
 
     ~TaskCoroutineStubImpl() override {
@@ -68,23 +140,32 @@ public:
     }
 
     void stop() override {
-        if (!mHandle) return;
+        if (!mContext) return;
 
-        // Get context and stop it
-        auto* ctx_ptr = static_cast<fl::detail::CoroutineContext*>(mHandle);
-        fl::detail::CoroutineRunner::instance().stop(ctx_ptr);
+        // Get runner
+        auto& runner = fl::detail::CoroutineRunner::instance();
 
-        // Clean up handle (delete the context we own)
-        delete ctx_ptr;
-        mHandle = nullptr;
+        // Signal the context to stop and wake it up
+        runner.stop(mContext);
+
+        // Wait briefly for thread to acknowledge stop signal
+        // This gives the thread time to set completed flag and exit cleanly
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));  // okay std namespace
+
+        // Remove from queue (prevents dangling weak_ptr)
+        runner.remove(mContext);
+
+        // Release our shared_ptr ownership
+        // Thread may still hold a reference, so context won't be deleted until thread exits
+        mContext.reset();
     }
 
     bool isRunning() const override {
-        return mHandle != nullptr;
+        return mContext != nullptr;
     }
 
 private:
-    void* mHandle;
+    fl::shared_ptr<fl::detail::CoroutineContext> mContext;
     fl::string mName;
     TaskFunction mFunction;
 };

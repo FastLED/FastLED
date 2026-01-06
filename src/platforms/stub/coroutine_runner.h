@@ -21,7 +21,8 @@
 
 #ifdef FASTLED_STUB_IMPL
 
-#include "fl/stl/unique_ptr.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/export.h"
 
 namespace fl {
 namespace detail {
@@ -34,10 +35,13 @@ class CoroutineRunnerImpl;
 ///
 /// Each coroutine has its own synchronization state.
 /// The runner queue manages when each coroutine is allowed to run.
+///
+/// Note: No FASTLED_EXPORT - this is internal to stub platform, not part of public API
 class CoroutineContext {
 public:
     /// @brief Factory method to create a new coroutine context
-    static fl::unique_ptr<CoroutineContext> create();
+    /// @return shared_ptr to allow shared ownership between queue and owner
+    static fl::shared_ptr<CoroutineContext> create();
 
     virtual ~CoroutineContext() = default;
     /// @brief Wait until this coroutine is signaled to run
@@ -62,18 +66,25 @@ public:
 /// @brief Global coroutine runner queue interface
 ///
 /// Manages FIFO queue of waiting coroutines and signals them in order.
+/// Uses weak_ptr to avoid keeping contexts alive - contexts are owned by their creators.
 class CoroutineRunner {
 public:
     virtual ~CoroutineRunner() = default;
 
     /// @brief Register a coroutine context in the queue
-    virtual void enqueue(CoroutineContext* ctx) = 0;
+    /// @param ctx shared_ptr to the context (queue stores weak_ptr)
+    virtual void enqueue(fl::shared_ptr<CoroutineContext> ctx) = 0;
 
     /// @brief Signal the next waiting coroutine to run
     virtual void signal_next() = 0;
 
     /// @brief Stop a specific coroutine context
-    virtual void stop(CoroutineContext* ctx) = 0;
+    /// @param ctx shared_ptr to the context to stop
+    virtual void stop(fl::shared_ptr<CoroutineContext> ctx) = 0;
+
+    /// @brief Remove a context from the queue (for cleanup)
+    /// @param ctx shared_ptr to the context to remove
+    virtual void remove(fl::shared_ptr<CoroutineContext> ctx) = 0;
 
     /// @brief Stop all coroutines
     virtual void stop_all() = 0;

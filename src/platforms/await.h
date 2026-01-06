@@ -148,16 +148,20 @@ fl::result<T> await(fl::promise<T> promise) {
     cv.wait(local_lock, [&]() { return completed.load(); });
 
     // Create a one-time context to wait for our turn to resume
-    auto resume_ctx = fl::detail::CoroutineContext::create();
-    fl::detail::CoroutineContext* resume_ctx_ptr = resume_ctx.get();
-    fl::detail::CoroutineRunner::instance().enqueue(resume_ctx_ptr);
+    // IMPORTANT: Keep shared_ptr ownership throughout this scope
+    fl::shared_ptr<fl::detail::CoroutineContext> resume_ctx = fl::detail::CoroutineContext::create();
+    fl::detail::CoroutineRunner::instance().enqueue(resume_ctx);
 
     // Wait for executor to signal us
     local_lock.unlock();  // Release local lock before waiting
-    resume_ctx_ptr->wait();
+    resume_ctx->wait();
 
     // Mark context as completed so it gets cleaned from queue
-    resume_ctx_ptr->set_completed(true);
+    resume_ctx->set_completed(true);
+
+    // Remove from queue to clean up weak_ptr reference
+    // The shared_ptr will automatically delete the context when this function returns
+    fl::detail::CoroutineRunner::instance().remove(resume_ctx);
 
     // Promise completed (we now hold global lock again), return result
     return promise.is_resolved()

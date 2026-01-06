@@ -26,6 +26,8 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
+#include <chrono>
+#include <thread>
 
 #ifdef _WIN32
 #ifdef __clang__
@@ -42,6 +44,12 @@
 #ifdef ENABLE_CRASH_HANDLER
 #include "crash_handler.h"
 #endif
+
+
+#include "platforms/stub/task_coroutine_stub.h"
+#include "platforms/stub/coroutine_runner.h"
+#include <iostream>  // For debug output
+
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
@@ -61,8 +69,14 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
 #endif
-    // Const cast is safe here - doctest doesn't modify argv
-    return doctest::Context(argc, const_cast<char**>(argv)).run();
+    // Pre-initialize CoroutineRunner singleton to avoid DLL hang on first access
+    std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
+    fl::detail::CoroutineRunner::instance();
+    std::cout << "CoroutineRunner singleton pre-initialized successfully" << std::endl;
+    // Clean up all background threads before DLL unload to prevent access violations
+    // This includes both coroutine threads and promise resolver threads
+    fl::platforms::cleanup_coroutine_threads();
+    return result;
 }
 
 #else

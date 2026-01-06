@@ -1,18 +1,12 @@
 #include "test.h"
 #include "fl/log.h"
 #include "fl/str.h"
-#include <sstream>
+#include "fl/stl/sstream.h"
 
 using namespace fl;
 
-// Helper to capture fl::println output for testing
-namespace {
-    fl::vector<fl::string> captured_output;
-    bool capture_enabled = false;
-
-    // Override fl::println for testing (simple approach - just append to vector)
-    // Note: This is a test-only helper, not the actual override mechanism
-}
+// Note: fl::println output is not captured in these tests
+// The tests verify buffer state management, not actual output
 
 TEST_CASE("fl::AsyncLogger - basic operations") {
     SUBCASE("push and flush single message") {

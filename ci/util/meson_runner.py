@@ -1281,15 +1281,12 @@ def run_meson_build_and_test(
     # and Ninja loads these dependencies into .ninja_deps database (897 headers tracked).
     # No manual staleness checking needed - Ninja rebuilds PCH when any dependency changes.
 
-    # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
+    # Convert test name to executable name (convert to lowercase to match Meson target naming)
+    # DO NOT add test_ prefix - organize_tests.py already provides the correct test name
     meson_test_name: Optional[str] = None
     if test_name:
         # Convert to lowercase to match Meson target naming convention
-        test_name_lower: str = test_name.lower()
-        if not test_name_lower.startswith("test_"):
-            meson_test_name = f"test_{test_name_lower}"
-        else:
-            meson_test_name = test_name_lower
+        meson_test_name = test_name.lower()
 
     # Compile with build lock to prevent conflicts with example builds
     try:
@@ -1309,143 +1306,103 @@ def run_meson_build_and_test(
 
     # Run tests
     if unity:
-        # Unity mode: Run category test executables
-        # Categories: core_tests, fl_tests, ftl_tests, fx_tests, noise_tests, codec_tests
-        test_categories = [
-            "core_tests",
-            "fl_tests",
-            "ftl_tests",
-            "fx_tests",
-            "noise_tests",
-            "codec_tests",
-        ]
+        # Unity mode: Use the test_runner executable
+        # The test_runner loads and executes test DLLs dynamically
+        test_runner_path = build_dir / "tests" / "test_runner.exe"
+        if not test_runner_path.exists():
+            # Try Unix variant (no .exe extension)
+            test_runner_path = build_dir / "tests" / "test_runner"
 
-        # Find which category executables exist
-        category_executables: list[tuple[str, Path]] = []
-        for category in test_categories:
-            # Try Windows .exe first, then Unix variant
-            exe_path = build_dir / "tests" / f"{category}.exe"
-            if not exe_path.exists():
-                exe_path = build_dir / "tests" / category
-
-            if exe_path.exists():
-                category_executables.append((category, exe_path))
-
-        if not category_executables:
+        if not test_runner_path.exists():
             _ts_print(
-                f"[MESON] Error: No unity test executables found in {build_dir / 'tests'}",
+                f"[MESON] Error: test_runner executable not found in {build_dir / 'tests'}",
                 file=sys.stderr,
             )
             return MesonTestResult(success=False, duration=time.time() - start_time)
 
-        # If specific test requested, filter categories or prepare doctest filter
-        filter_name: Optional[str] = None
+        # Build test command
+        test_cmd = [str(test_runner_path)]
+
+        # If specific test requested, add doctest filter
         if meson_test_name:
             filter_name = meson_test_name.replace("test_", "")
-            _ts_print(
-                f"[MESON] Running unity test categories with filter: {filter_name}"
-            )
+            test_cmd.extend(["--test-case", f"*{filter_name}*"])
+            _ts_print(f"[MESON] Running unity tests with filter: {filter_name}")
         else:
-            _ts_print(
-                f"[MESON] Running {len(category_executables)} unity test categories"
+            _ts_print("[MESON] Running all unity tests...")
+
+        # Execute test runner
+        try:
+            proc = RunningProcess(
+                test_cmd,
+                cwd=build_dir / "tests",  # Run from tests dir where DLLs are located
+                timeout=600,  # 10 minute timeout for tests
+                auto_run=True,
+                check=False,
+                env=os.environ.copy(),
+                output_formatter=TimestampFormatter(),
             )
 
-        # Run each category executable
-        overall_success = True
-        num_unity_tests_run = 0
-        num_unity_tests_passed = 0
-        num_unity_tests_failed = 0
+            # In verbose mode, show all output
+            # In normal mode, only show errors with context
+            if verbose:
+                returncode = proc.wait(echo=True)
+            else:
+                # Wait silently, capturing all output
+                returncode = proc.wait(echo=False)
 
-        for category_name, exe_path in category_executables:
-            num_unity_tests_run += 1
-            # Build command
-            test_cmd = [str(exe_path)]
-
-            # Add doctest filter if specific test requested
-            if filter_name:
-                test_cmd.extend(["--test-case", f"*{filter_name}*"])
-
-            # Always show which category is being tested (even in non-verbose mode)
-            _ts_print(f"[MESON] Running {category_name}...")
-
-            # Execute test
-            try:
-                proc = RunningProcess(
-                    test_cmd,
-                    cwd=source_dir,
-                    timeout=600,  # 10 minute timeout for tests
-                    auto_run=True,
-                    check=False,
-                    env=os.environ.copy(),
-                    output_formatter=TimestampFormatter(),
-                )
-
-                # In verbose mode, show all output
-                # In normal mode, only show errors with context
-                if verbose:
-                    returncode = proc.wait(echo=True)
-                else:
-                    # Wait silently, capturing all output
-                    returncode = proc.wait(echo=False)
-
-                    # If test failed, show error context from accumulated output
-                    if returncode != 0:
-                        _ts_print(
-                            f"[MESON] Category {category_name} failed:", file=sys.stderr
-                        )
-                        # Create error-detecting filter
-                        error_filter: Callable[[str], None] = (
-                            _create_error_context_filter(context_lines=20)
-                        )
-
-                        # Process accumulated output to show error context
-                        output_lines = proc.stdout.splitlines()
-                        for line in output_lines:
-                            error_filter(line)
-
+                # If test failed, show error context from accumulated output
                 if returncode != 0:
-                    _ts_print(
-                        f"[MESON] Unity test category '{category_name}' failed with return code {returncode}",
-                        file=sys.stderr,
+                    _ts_print("[MESON] Unity tests failed:", file=sys.stderr)
+                    # Create error-detecting filter
+                    error_filter: Callable[[str], None] = _create_error_context_filter(
+                        context_lines=20
                     )
-                    overall_success = False
-                    num_unity_tests_failed += 1
-                    # Continue running other categories to get full test results
-                else:
-                    # Always show success status (even in non-verbose mode)
-                    _ts_print(f"[MESON] ✓ {category_name} passed")
-                    num_unity_tests_passed += 1
 
-            except KeyboardInterrupt:
-                raise
-            except Exception as e:
+                    # Process accumulated output to show error context
+                    output_lines = proc.stdout.splitlines()
+                    for line in output_lines:
+                        error_filter(line)
+
+            duration = time.time() - start_time
+
+            if returncode != 0:
                 _ts_print(
-                    f"[MESON] Unity test category '{category_name}' execution failed with exception: {e}",
+                    f"[MESON] Unity tests failed with return code {returncode}",
                     file=sys.stderr,
                 )
-                overall_success = False
-                num_unity_tests_failed += 1
+                return MesonTestResult(
+                    success=False,
+                    duration=duration,
+                    num_tests_run=1,
+                    num_tests_passed=0,
+                    num_tests_failed=1,
+                )
 
-        duration = time.time() - start_time
+            _ts_print("[MESON] All unity tests passed")
+            return MesonTestResult(
+                success=True,
+                duration=duration,
+                num_tests_run=1,
+                num_tests_passed=1,
+                num_tests_failed=0,
+            )
 
-        if not overall_success:
-            _ts_print("[MESON] Some unity test categories failed", file=sys.stderr)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            duration = time.time() - start_time
+            _ts_print(
+                f"[MESON] Unity test execution failed with exception: {e}",
+                file=sys.stderr,
+            )
             return MesonTestResult(
                 success=False,
                 duration=duration,
-                num_tests_run=num_unity_tests_run,
-                num_tests_passed=num_unity_tests_passed,
-                num_tests_failed=num_unity_tests_failed,
+                num_tests_run=1,
+                num_tests_passed=0,
+                num_tests_failed=1,
             )
-
-        _ts_print(f"[MESON] All unity test categories passed")
-        return MesonTestResult(
-            success=True,
-            duration=duration,
-            num_tests_run=num_unity_tests_run,
-            num_tests_passed=num_unity_tests_passed,
-            num_tests_failed=num_unity_tests_failed,
-        )
     else:
         # Normal mode: Use Meson's test runner
         return run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose)
