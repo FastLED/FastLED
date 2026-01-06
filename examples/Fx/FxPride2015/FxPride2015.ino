@@ -11,7 +11,7 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
-#include "fx/1d/pride2015.h"
+#include "fl/fx/1d/pride2015.h"
 #include "fl/screenmap.h"
 
 using namespace fl;

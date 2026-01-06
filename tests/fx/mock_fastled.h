@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/wled.h"
+#include "fl/fx/wled.h"
 #include "fl/stl/vector.h"
 
 namespace fl {

@@ -4,7 +4,7 @@
 
 #include "test.h"
 #include "fl/bytestreammemory.h"
-#include "fx/video/pixel_stream.h"
+#include "fl/fx/video/pixel_stream.h"
 
 TEST_CASE("ByteStreamMemory basic operations") {
 

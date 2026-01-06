@@ -1,8 +1,8 @@
 #include "test.h"
 
-#include "fx/audio/detectors/backbeat.h"
-#include "fx/audio/detectors/beat.h"
-#include "fx/audio/detectors/downbeat.h"
+#include "fl/fx/audio/detectors/backbeat.h"
+#include "fl/fx/audio/detectors/beat.h"
+#include "fl/fx/audio/detectors/downbeat.h"
 #include "fl/audio/audio_context.h"
 #include "fl/stl/math.h"
 

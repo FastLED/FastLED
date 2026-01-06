@@ -23,7 +23,7 @@
 // Note: FASTLED_ALLOW_INTERRUPTS improves performance on AVR platforms
 // Commented out to enable precompiled headers for faster compilation
 // #define FASTLED_ALLOW_INTERRUPTS 0
-#include "fx/1d/pacifica.h"
+#include "fl/fx/1d/pacifica.h"
 #include "fl/screenmap.h"
 
 using namespace fl;

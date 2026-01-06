@@ -16,8 +16,8 @@
 
 #define FASTLED_OVERCLOCK 1.1 // Overclocks by 10%, I've seen 25% work fine.
 
-#include "fx/2d/noisepalette.h"
-#include "fx/fx.h"
+#include "fl/fx/2d/noisepalette.h"
+#include "fl/fx/fx.h"
 
 
 using namespace fl;

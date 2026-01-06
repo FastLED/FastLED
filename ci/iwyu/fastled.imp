@@ -33,10 +33,17 @@
   { include: ['"fl/force_inline.h"', 'public', '"fl/force_inline.h"', 'public'] },
   
   # FX headers - effects system
-  { include: ['"fx/fx.h"', 'public', '"fx/fx.h"', 'public'] },
-  { include: ['"fx/fx_engine.h"', 'public', '"fx/fx_engine.h"', 'public'] },
-  { include: ['"fx/frame.h"', 'public', '"fx/frame.h"', 'public'] },
-  { include: ['"fx/detail/*"', 'private', '"fx/fx.h"', 'public'] },
+  { include: ['"fl/fx/fx.h"', 'public', '"fl/fx/fx.h"', 'public'] },
+  { include: ['"fx/fx.h"', 'public', '"fl/fx/fx.h"', 'public'] },
+  { include: ['"fl/fx/fx1d.h"', 'public', '"fl/fx/fx1d.h"', 'public'] },
+  { include: ['"fx/fx1d.h"', 'public', '"fl/fx/fx1d.h"', 'public'] },
+  { include: ['"fl/fx/fx2d.h"', 'public', '"fl/fx/fx2d.h"', 'public'] },
+  { include: ['"fx/fx2d.h"', 'public', '"fl/fx/fx2d.h"', 'public'] },
+  { include: ['"fl/fx/fx_engine.h"', 'public', '"fl/fx/fx_engine.h"', 'public'] },
+  { include: ['"fx/fx_engine.h"', 'public', '"fl/fx/fx_engine.h"', 'public'] },
+  { include: ['"fl/fx/frame.h"', 'public', '"fl/fx/frame.h"', 'public'] },
+  { include: ['"fx/frame.h"', 'public', '"fl/fx/frame.h"', 'public'] },
+  { include: ['"fx/detail/*"', 'private', '"fl/fx/fx.h"', 'public'] },
   
   # Third-party headers should not be suggested for user code
   { include: ['"third_party/*/*"', 'private', '"FastLED.h"', 'public'] },

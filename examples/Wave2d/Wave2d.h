@@ -24,7 +24,7 @@ all the UI elements you see below.
 */
 
 #include "fl/ui.h"
-#include "fx/2d/wave.h"
+#include "fl/fx/2d/wave.h"
 #include <Arduino.h>
 #include <FastLED.h>
 

@@ -5,9 +5,9 @@
 
 
 #include "test.h"
-#include "fx/fx.h"
-#include "fx/fx_engine.h"
-#include "fx/fx2d.h"
+#include "fl/fx/fx.h"
+#include "fl/fx/fx_engine.h"
+#include "fl/fx/fx2d.h"
 #include "fl/stl/vector.h"
 #include "FastLED.h"
 

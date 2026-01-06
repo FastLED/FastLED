@@ -9,7 +9,7 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
-#include "fx/1d/cylon.h"
+#include "fl/fx/1d/cylon.h"
 #include "fl/screenmap.h"
 
 // How many leds in your strip?

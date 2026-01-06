@@ -8,7 +8,7 @@
 #include "fl/stl/span.h"
 #include "fl/str.h"
 #include "fl/codec/pixel.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 #include "fl/bytestream.h"
 #include "src/tjpgd.h"
 

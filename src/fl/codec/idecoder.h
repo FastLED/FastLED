@@ -7,7 +7,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
 #include "fl/audio.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 
 namespace fl {
 

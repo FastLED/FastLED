@@ -5,9 +5,9 @@
 
 #include "test.h"
 
-#include "fx/2d/blend.h"
-#include "fx/fx.h"
-#include "fx/time.h"
+#include "fl/fx/2d/blend.h"
+#include "fl/fx/fx.h"
+#include "fl/fx/time.h"
 #include "test.h"
 
 #include "fl/scoped_array.h"

@@ -2,9 +2,9 @@
 
 #include "test.h"
 
-#include "fx/fx.h"
-#include "fx/fx2d.h"
-#include "fx/video.h"
+#include "fl/fx/fx.h"
+#include "fl/fx/fx2d.h"
+#include "fl/fx/video.h"
 #include "fl/stl/vector.h"
 #include "FastLED.h"
 

@@ -34,10 +34,10 @@ Workflow:
 #include "fl/warn.h"
 #include "noise.h"
 #include "fl/stl/array.h"
-#include "fx/2d/wave.h"
-#include "fx/2d/blend.h"
-#include "fx/fx_engine.h"
-#include "fx/2d/animartrix.hpp"
+#include "fl/fx/2d/wave.h"
+#include "fl/fx/2d/blend.h"
+#include "fl/fx/fx_engine.h"
+#include "fl/fx/2d/animartrix.hpp"
 
 // #include "vec3.h"
 

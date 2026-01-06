@@ -15,9 +15,9 @@
 
 #include <FastLED.h>
 #include "fl/bytestreammemory.h"
-#include "fx/fx_engine.h"
+#include "fl/fx/fx_engine.h"
 #include "fl/stl/memory.h"
-#include "fx/video.h"
+#include "fl/fx/video.h"
 #include "fl/dbg.h"
 
 using namespace fl;

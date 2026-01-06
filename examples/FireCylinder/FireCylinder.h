@@ -36,7 +36,7 @@ with colors transitioning from black to red/yellow/white (or other palettes).
 #include "FastLED.h"     // Main FastLED library for controlling LEDs
 #include "fl/ui.h"       // UI components for the FastLED web compiler (sliders, buttons, etc.)
 #include "fl/xymap.h"    // Mapping between 1D LED array and 2D coordinates
-#include "fx/time.h"     // Time manipulation utilities for animations
+#include "fl/fx/time.h"     // Time manipulation utilities for animations
 
 using namespace fl;      // Use the FastLED namespace for convenience
 

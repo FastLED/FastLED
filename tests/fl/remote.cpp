@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/remote.h"
-#include "fx/wled.h"
+#include "fl/fx/wled.h"
 
 #if FASTLED_ENABLE_JSON
 

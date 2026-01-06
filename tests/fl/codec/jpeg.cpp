@@ -2,7 +2,7 @@
 #include "fl/file_system.h"
 #include "fl/codec/jpeg.h"
 #include "fl/bytestreammemory.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 #include "platforms/stub/fs_stub.hpp"
 
 

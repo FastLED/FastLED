@@ -18,8 +18,8 @@ Based on works and code by Shawn Silverman.
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/supersample.h"
 #include "fl/xymap.h"
-#include "fx/fx.h"
-#include "fx/fx2d.h"
+#include "fl/fx/fx.h"
+#include "fl/fx/fx2d.h"
 
 namespace fl {
 

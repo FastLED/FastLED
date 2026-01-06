@@ -7,7 +7,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/scoped_array.h"
 #include "fl/stl/vector.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 
 // Include the actual nsgif header
 

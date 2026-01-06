@@ -11,7 +11,7 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
-#include "fx/2d/noisepalette.h"
+#include "fl/fx/2d/noisepalette.h"
 #include "fl/ui.h"
 
 using namespace fl;

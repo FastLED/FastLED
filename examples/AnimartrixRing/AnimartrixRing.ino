@@ -16,10 +16,10 @@
 #include "fl/screenmap.h"
 #include "fl/ui.h"
 #include "fl/stl/math.h"
-#include "fx/2d/animartrix.hpp"
-#include "fx/audio/audio_processor.h"
-#include "fx/fx2d_to_1d.h"
-#include "fx/fx_engine.h"
+#include "fl/fx/2d/animartrix.hpp"
+#include "fl/fx/audio/audio_processor.h"
+#include "fl/fx/fx2d_to_1d.h"
+#include "fl/fx/fx_engine.h"
 #include <FastLED.h>
 
 #ifndef TWO_PI

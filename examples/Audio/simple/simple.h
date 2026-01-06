@@ -35,7 +35,7 @@ all the UI elements you see below.
 #include "fl/ui.h"
 #include "fl/xypath.h"
 #include "fl/unused.h"
-#include "fx/time.h"
+#include "fl/fx/time.h"
 #include "fl/stl/function.h"
 
 // Sketch.

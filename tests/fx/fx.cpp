@@ -13,10 +13,10 @@
 #include "fx/1d/pride2015.h" // needs XY defined or linker error.
 #include "fx/1d/twinklefox.h"
 #include "fx/2d/animartrix.hpp"
-#include "fx/2d/noisepalette.h"
-#include "fx/2d/scale_up.h"
-#include "fx/2d/redsquare.h"
-#include "fx/video.h"
+#include "fl/fx/2d/noisepalette.h"
+#include "fl/fx/2d/scale_up.h"
+#include "fl/fx/2d/redsquare.h"
+#include "fl/fx/video.h"
 using namespace fl;
 uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.
 

@@ -7,7 +7,7 @@
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str_fwd.h"     // Lightweight forward declarations for string
-#include "fx/video.h"
+#include "fl/fx/video.h"
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"

@@ -5,7 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
 #include "fl/scoped_array.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 #include "fl/codec/idecoder.h"
 
 namespace fl {

@@ -8,8 +8,8 @@
 #include "crgb.h"
 #include "fl/bytestreammemory.h"
 #include "fl/stl/shared_ptr.h"
-#include "fx/video.h"
-#include "fx/video/pixel_stream.h"
+#include "fl/fx/video.h"
+#include "fl/fx/video/pixel_stream.h"
 #include "lib8tion/intmap.h"
 #include "test.h"
 

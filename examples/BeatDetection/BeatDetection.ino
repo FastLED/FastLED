@@ -13,7 +13,7 @@ void setup() {}
 void loop() {}
 #else
 
-#include "fx/audio/audio_processor.h"
+#include "fl/fx/audio/audio_processor.h"
 #include "fl/ui.h"
 
 using namespace fl;

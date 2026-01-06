@@ -3,7 +3,7 @@
 #include "third_party/TJpg_Decoder/driver.h"
 #include "fl/stl/utility.h"
 #include "fl/stl/vector.h"
-#include "fx/frame.h"
+#include "fl/fx/frame.h"
 #include "fl/stl/stdio.h"
 #include "fl/warn.h"
 #include "fl/bytestreammemory.h"

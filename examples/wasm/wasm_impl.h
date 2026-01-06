@@ -12,12 +12,12 @@
 
 
 #include <FastLED.h>
-#include "fx/2d/noisepalette.h"
+#include "fl/fx/2d/noisepalette.h"
 #include "fl/json.h"
 #include "fl/slice.h"
-#include "fx/fx_engine.h"
+#include "fl/fx/fx_engine.h"
 
-#include "fx/2d/animartrix.hpp"
+#include "fl/fx/2d/animartrix.hpp"
 #include "fl/ui.h"
 
 using namespace fl;
