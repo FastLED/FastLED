@@ -61,8 +61,9 @@ struct ScheduledCall {
     int mId;  // Used to track FIFO order
 
     // Comparison operator for min-heap (earlier times have higher priority)
+    // priority_queue_stable uses fl::greater by default, so use natural comparison
     bool operator<(const ScheduledCall& other) const {
-        return mExecuteAt > other.mExecuteAt;  // Inverted: smaller time = higher priority
+        return mExecuteAt < other.mExecuteAt;  // Natural: smaller time = higher priority
     }
 };
 

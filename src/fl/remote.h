@@ -273,8 +273,9 @@ protected:
         uint32_t mReceivedAt;       // Timestamp when RPC was received
 
         // Comparison operator for stable priority queue (earlier times have higher priority)
+        // priority_queue_stable uses fl::greater by default, so use natural comparison
         bool operator<(const ScheduledCall& other) const {
-            return mExecuteAt > other.mExecuteAt;  // Inverted: smaller time = higher priority
+            return mExecuteAt < other.mExecuteAt;  // Natural: smaller time = higher priority
         }
     };
 

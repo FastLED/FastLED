@@ -153,9 +153,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     __m128i scaled_low = _mm_mullo_epi16(diff_low, amount_16);
     __m128i scaled_high = _mm_mullo_epi16(diff_high, amount_16);
 
-    // Shift right by 8 to divide by 256
-    scaled_low = _mm_srli_epi16(scaled_low, 8);
-    scaled_high = _mm_srli_epi16(scaled_high, 8);
+    // Shift right by 8 to divide by 256 (arithmetic shift for signed values)
+    scaled_low = _mm_srai_epi16(scaled_low, 8);
+    scaled_high = _mm_srai_epi16(scaled_high, 8);
 
     // Add back to a
     __m128i result_low = _mm_add_epi16(a_low_16, scaled_low);

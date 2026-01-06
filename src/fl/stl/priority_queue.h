@@ -118,7 +118,7 @@ class PriorityQueue {
  * // Pop order: 1, 3 (first), 3 (second) - FIFO for equal priorities
  * @endcode
  */
-template<typename T, typename Compare = fl::less<T>>
+template<typename T, typename Compare = fl::greater<T>>
 class priority_queue_stable {
 private:
     struct StableElement {
@@ -128,11 +128,12 @@ private:
         // Comparison: primary by value, secondary by sequence (FIFO)
         bool operator<(const StableElement& other) const {
             Compare comp;
-            // If values are not equal according to comparator
+            // Use the Compare function to determine ordering
             if (comp(mValue, other.mValue)) return true;
             if (comp(other.mValue, mValue)) return false;
-            // Values are equal - use sequence for FIFO ordering
-            return mSequence > other.mSequence;  // Inverted: smaller sequence = higher priority
+            // Values are equal according to comparator - use sequence for FIFO ordering
+            // INVERTED: smaller sequence should be "greater" (pop first)
+            return mSequence > other.mSequence;
         }
     };
 

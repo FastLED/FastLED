@@ -99,6 +99,7 @@ class StringFormatter {
     // Decimal formatting (base 10)
     static void append(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
@@ -106,6 +107,7 @@ class StringFormatter {
     // Hexadecimal formatting (base 16)
     static void appendHex(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendHex(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void appendHex(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendHex(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendHex(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendHex(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
@@ -113,6 +115,7 @@ class StringFormatter {
     // Octal formatting (base 8)
     static void appendOct(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendOct(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void appendOct(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendOct(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendOct(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void appendOct(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);

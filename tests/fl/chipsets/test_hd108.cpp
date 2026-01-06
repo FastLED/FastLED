@@ -32,25 +32,34 @@ u16 getBigEndian16(const fl::span<const u8>& bytes, size_t offset) {
     return (u16(bytes[offset]) << 8) | u16(bytes[offset + 1]);
 }
 
-/// Helper to decode 5-bit brightness from header bytes
-u8 decodeBrightness(u8 f0, u8 f1) {
-    // Extract brightness from f0 (bits 6-2)
-    return (f0 & 0x7C) >> 2;
+/// Helper to decode RGB gains from HD108 header bytes
+void decodeGains(u8 f0, u8 f1, u8* r_gain, u8* g_gain, u8* b_gain) {
+    // f0: [1][RRRRR][GG] - marker bit, 5-bit R gain, 2 MSBs of G gain
+    *r_gain = (f0 >> 2) & 0x1F;
+    u8 g_msb = f0 & 0x03;
+
+    // f1: [GGG][BBBBB] - 3 LSBs of G gain, 5-bit B gain
+    u8 g_lsb = (f1 >> 5) & 0x07;
+    *g_gain = (g_msb << 3) | g_lsb;
+    *b_gain = f1 & 0x1F;
 }
 
-/// Helper to verify header bytes match expected 5-bit brightness
-void checkHeaderBytes(u8 f0, u8 f1, u8 expected_bri5) {
-    // Verify f0 encoding: 0x80 | (bri5 << 2)
-    u8 expected_f0 = 0x80 | ((expected_bri5 & 0x1F) << 2);
+/// Helper to verify header bytes match expected RGB gains
+void checkHeaderBytes(u8 f0, u8 f1, u8 expected_r, u8 expected_g, u8 expected_b) {
+    // Verify f0 encoding: 0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03)
+    u8 expected_f0 = 0x80 | ((expected_r & 0x1F) << 2) | ((expected_g >> 3) & 0x03);
     CHECK_EQ(f0, expected_f0);
 
-    // Verify f1 encoding: ((bri5 & 0x07) << 5) | (bri5 & 0x1F)
-    u8 expected_f1 = ((expected_bri5 & 0x07) << 5) | (expected_bri5 & 0x1F);
+    // Verify f1 encoding: ((g_gain & 0x07) << 5) | (b_gain & 0x1F)
+    u8 expected_f1 = ((expected_g & 0x07) << 5) | (expected_b & 0x1F);
     CHECK_EQ(f1, expected_f1);
 
-    // Verify decoded brightness matches
-    u8 decoded = decodeBrightness(f0, f1);
-    CHECK_EQ(decoded, expected_bri5);
+    // Verify decoded gains match
+    u8 r_decoded, g_decoded, b_decoded;
+    decodeGains(f0, f1, &r_decoded, &g_decoded, &b_decoded);
+    CHECK_EQ(r_decoded, expected_r);
+    CHECK_EQ(g_decoded, expected_g);
+    CHECK_EQ(b_decoded, expected_b);
 }
 
 /// Test fixture that exposes protected showPixels method
@@ -119,7 +128,7 @@ TEST_CASE("HD108 - Protocol format verification") {
 
     const fl::u8 expected_byte_sequence[] = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // Start frame
-        0xFC, 0xFF,                                        // Header (brightness=31)
+        0xFF, 0xFF,                                        // Header (all gains=31)
         0xFF, 0xFF,                                        // Red channel (gamma_2_8(255))
         0x00, 0x00,                                        // Green channel (gamma_2_8(0))
         0x00, 0x00,                                        // Blue channel (gamma_2_8(0))
@@ -133,8 +142,8 @@ TEST_CASE("HD108 - Protocol format verification") {
         CHECK_EQ(capturedBytes[i], expected_byte_sequence[i]);
     }
 
-    // Verify brightness encoding in header
-    checkHeaderBytes(capturedBytes[8], capturedBytes[9], 31);
+    // Verify gain encoding in header (all gains = 31)
+    checkHeaderBytes(capturedBytes[8], capturedBytes[9], 31, 31, 31);
 
     // Verify gamma correction applied
     CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(255));
@@ -159,8 +168,8 @@ TEST_CASE("HD108 - Multi-LED with brightness and color order") {
     // Total: 8 (start) + 24 (3 LEDs * 8) + 5 (end: 3/2 + 4) = 37 bytes
     CHECK_EQ(capturedBytes.size(), 37);
 
-    // Verify brightness mapping (128 -> bri5=16) on first LED
-    checkHeaderBytes(capturedBytes[8], capturedBytes[9], 16);
+    // Verify gain encoding in header (all gains = 31, brightness applied to PWM values)
+    checkHeaderBytes(capturedBytes[8], capturedBytes[9], 31, 31, 31);
 
     // Verify LED 1 (Red) with GRB order: G=0, R=255, B=0
     CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(0));   // Green first

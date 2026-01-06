@@ -9,22 +9,19 @@ namespace fl {
 namespace detail {
 
 fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase) {
-    // Calculate expected number of hex characters based on bit width
-    size_t expected_chars = static_cast<uint8_t>(width) / 4;
+    // Note: width parameter kept for API compatibility but not used for padding
+    // Standard printf("%x") doesn't zero-pad by default
+    (void)width; // Suppress unused parameter warning
 
-    // Handle zero case - pad to expected width
+    // Handle zero case - single '0' character (no padding)
     if (value == 0) {
-        fl::string result;
-        for (size_t i = 0; i < expected_chars; ++i) {
-            result += "0";
-        }
-        return result;
+        return fl::string("0");
     }
 
     fl::string result;
     const char* digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
 
-    // Convert value to hex string
+    // Convert value to hex string (minimal representation, no padding)
     while (value > 0) {
         char ch = digits[value % 16];
         // Convert char to string since fl::string::append treats char as number
@@ -35,13 +32,6 @@ fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool upperca
         temp += result;
         result = temp;
         value /= 16;
-    }
-
-    // Pad with leading zeros to reach expected width
-    while (result.size() < expected_chars) {
-        fl::string temp = "0";
-        temp += result;
-        result = temp;
     }
 
     // Add negative sign if needed

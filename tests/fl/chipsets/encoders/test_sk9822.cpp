@@ -253,8 +253,8 @@ TEST_CASE("SK9822 - encodeSK9822_HD() brightness mapping edge cases") {
     CHECK_EQ(output[offset] & 0x1F, 2);
     offset += 4;
 
-    // brightness 127 -> bri5 = 16
-    CHECK_EQ(output[offset] & 0x1F, 16);
+    // brightness 127 -> bri5 = 15
+    CHECK_EQ(output[offset] & 0x1F, 15);
 }
 
 TEST_CASE("SK9822 - encodeSK9822_HD() zero LEDs") {

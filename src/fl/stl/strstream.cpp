@@ -81,11 +81,13 @@ void StrStream::appendFormatted(fl::i32 val) {
 void StrStream::appendFormatted(fl::i64 val) {
     fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
     if (mBase == 16) {
+        // For hex/oct, treat as unsigned bit pattern
         fl::StringFormatter::appendHex(static_cast<uint64_t>(val), &temp);
     } else if (mBase == 8) {
         fl::StringFormatter::appendOct(static_cast<uint64_t>(val), &temp);
     } else {
-        fl::StringFormatter::append(static_cast<uint64_t>(val), &temp);
+        // For decimal, keep as signed for proper negative number formatting
+        fl::StringFormatter::append(val, &temp);
     }
     mStr.append(temp.c_str(), temp.size());
 }

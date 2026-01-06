@@ -351,6 +351,18 @@ void StringFormatter::append(u32 val, StrN<64> *dst) {
     dst->write(buf, strlen(buf));
 }
 
+void StringFormatter::append(int64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    // For signed 64-bit, handle negative numbers manually
+    if (val < 0) {
+        dst->write("-", 1);
+        string_functions::utoa64(static_cast<uint64_t>(-val), buf, 10);
+    } else {
+        string_functions::utoa64(static_cast<uint64_t>(val), buf, 10);
+    }
+    dst->write(buf, strlen(buf));
+}
+
 void StringFormatter::append(uint64_t val, StrN<64> *dst) {
     char buf[63] = {0};
     string_functions::utoa64(val, buf, 10);
@@ -378,6 +390,13 @@ void StringFormatter::appendHex(u32 val, StrN<64> *dst) {
     dst->write(buf, strlen(buf));
 }
 
+void StringFormatter::appendHex(int64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    // For hex, treat signed as bit pattern (cast to unsigned)
+    string_functions::utoa64(static_cast<uint64_t>(val), buf, 16);
+    dst->write(buf, strlen(buf));
+}
+
 void StringFormatter::appendHex(uint64_t val, StrN<64> *dst) {
     char buf[63] = {0};
     string_functions::utoa64(val, buf, 16);
@@ -402,6 +421,13 @@ void StringFormatter::appendOct(i32 val, StrN<64> *dst) {
 void StringFormatter::appendOct(u32 val, StrN<64> *dst) {
     char buf[63] = {0};
     string_functions::utoa32(val, buf, 8);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendOct(int64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    // For octal, treat signed as bit pattern (cast to unsigned)
+    string_functions::utoa64(static_cast<uint64_t>(val), buf, 8);
     dst->write(buf, strlen(buf));
 }
 
