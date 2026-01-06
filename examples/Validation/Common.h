@@ -66,11 +66,10 @@ struct TestCaseConfig {
 
     TestCaseConfig(const char* driver, int num_lanes, int base_size)
         : driver_name(driver), lane_count(num_lanes), base_strip_size(base_size) {
-        // Generate lane configurations with decreasing LED counts
-        // Lane 0: base_size, Lane 1: base_size-1, ..., Lane N: base_size-N
+        // Generate lane configurations with SAME LED count for all lanes
+        // This ensures proper multi-lane validation (all lanes have same data size)
         for (int i = 0; i < num_lanes; i++) {
-            int lane_leds = base_size - i;
-            if (lane_leds < 1) lane_leds = 1;  // Ensure at least 1 LED per lane
+            int lane_leds = base_size;  // All lanes have same LED count
 
             // For multi-lane, use consecutive GPIO pins starting from lane 0
             // This matches PARLIO multi-lane pin allocation

@@ -712,10 +712,29 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                 ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                 : 0;
 
+            // DIAGNOSTIC: Log LED[2] data (bytes 6-8: RGB channels)
+            size_t absolute_byte = startByte + byteOffset;
+            if (absolute_byte >= 6 && absolute_byte <= 8) {
+                // FL_WARN("PARLIO 2-lane byte[" << absolute_byte << "]: "
+                //        << "lane[0]=" << (int)lanes[0] << " "
+                //        << "lane[1]=" << (int)lanes[1] << " "
+                //        << "stride=" << mLaneStride << " "
+                //        << "offset[0]=" << (0 * mLaneStride + startByte + byteOffset) << " "
+                //        << "offset[1]=" << (1 * mLaneStride + startByte + byteOffset));
+            }
+
             // MSB bit packing: Use natural lane order (no swap needed)
             uint8_t transposed[2 * sizeof(Wave8Byte)];
             fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut,
                                 reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed));
+
+            // DIAGNOSTIC: Log transposed output for LED[2] (16 bytes for 2-lane Wave8)
+            // if (absolute_byte >= 6 && absolute_byte <= 8) {
+            //     FL_WARN("PARLIO 2-lane transposed[" << absolute_byte << "]: ");
+            //     for (size_t i = 0; i < 16; i++) {
+            //         FL_WARN("  [" << i << "]=" << (int)transposed[i]);
+            //     }
+            // }
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;

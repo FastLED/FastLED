@@ -15,6 +15,9 @@ First section of this document will be read only, the next section will be writa
 
 ## Objective: Test parlio driver with multiple lanes
 
+  * Make Parlio only USE MSB
+  * when something goes wrong, re-read the tests and then on the next test dump out the raw edge timings from the RX device to see what the signal looks like.
+
 ## First agent instructions
 
   * before works begins, please modify validation.ino to JUST_PARLIO (this will disable SPI and RMT)
@@ -23,12 +26,14 @@ First section of this document will be read only, the next section will be writa
 
 ## Phases
 
-  * Phase 1: Test parlio driver with 2 lanes and small leds (10 leds)
-  * Phase 2: Test parlio driver with 2 lanes and large leds (300 leds)
-  * Phase 3: Test parlio driver with 4 lanes and small leds (10 leds)
-  * Phase 4: Test parlio driver with 4 lanes and large leds (300 leds)
-  * Phase 5: Test parlio driver with 8 lanes and small leds (10 leds)
-  * Phase 6: Test parlio driver with 8 lanes and large leds (300 leds)
+  * Phase 1: Test parlio driver with 1 lanes and small leds (10 leds)
+    * 1a: test with 3000 leds
+  * Phase 2: Test parlio driver with 2 lanes and small leds (10 leds)
+  * Phase 3: Test parlio driver with 2 lanes and large leds (3000 leds)
+  * Phase 4: Test parlio driver with 4 lanes and small leds (10 leds)
+  * Phase 5: Test parlio driver with 4 lanes and large leds (3000 leds)
+  * Phase 6: Test parlio driver with 8 lanes and small leds (10 leds)
+  * Phase 7: Test parlio driver with 8 lanes and large leds (3000 leds)
 
 
 For each of these phases, i want a sub document in .agent_task/phase/1.md, etc..
@@ -112,7 +117,7 @@ Then after this purging has been done, check to see if the current transition re
 
   * Launch sub agents for each file that needs to be fixed.
   * Then compile the code with this command:
-    * `bash compile esp32c6 Validation` and fix any errors that occur
+    * `bash validate` and fix any errors that occur
 
 
 After the compile state is clean, clear the error by setting:
@@ -155,36 +160,3 @@ Iterations 1 and 2 need to use multiple parallel sub agents and research the PAR
 ## First task:
 
 First iteration agent shall change validation.ino so that it is multilane == 2, SPI and RMT are disabled. No other changes are necessary. Once this is done then mark this as complete.
-
-
-## Important Links
-
-### Thread linking to PARLIO driver on WLED-MM
-
-The link can be found from here:
-  https://github.com/FastLED/FastLED/issues/2095
-
-First agent should find the link and add it to the .agent_task/PARLIO_RESEARCH.md file.
-
-Subsequent agents can give a brief summary of the WLED-MM-P4 Parallel IO driver.
-
-### Comments on Parlios 20us random delay glitch
-
-Byte boundaries are super important! If we split on say the nibble, then this can trigger a corruption on any order bit. If we split on the byte boundary, the worst that can happen is that the low order byte is possibly corrupted. What does the data manual say about this? It should be investigated by one of the agents.
-
-
-Someone said...
-
-This is a demo of the WLED-MM-P4 Parallel IO driver in action with 16x512 pixels driven:
-
-https://www.reddit.com/r/WLED/s/q1pZg1mnwZ
-
-Which looking at the FastLED Parallel IO code should be essentially the same.
-
-@zackees the benefit I found to supporting 1/2/4/8/16-bit depths is the idle period.
-
-For example - if you have 2 pins it's better to use 2-bit widths because it's ~5460 RGB LEDs per transmit no matter what your bit width is - so at 1/2/4-bit widths you're almost guaranteed to never have a glitch because of a DMA delay between transmits (assuming like 1024 LEDs max per pin). Transmits are also faster if you match bit-width to pin counts.
-
-My demo has 512x16 so it's 2 buffers being sent and there's a small gap visible on my logic analyzer. As long as that's below about 20us (even tho the spec sheets say 50us) it doesn't glitch - but above that I've had to work hard to keep things from making the pause longer.
-
-I also break my buffers so it's after the LSB of the triplet (or quad). In case that pause is misnterpreted as a 1 vs 0, it's not going to cause a visual disruption. At worst 0,0,0 becomes 0,0,1.

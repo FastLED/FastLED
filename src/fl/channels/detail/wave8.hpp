@@ -88,8 +88,8 @@ void wave8_transpose_2(const Wave8Byte lane_waves[2],
                        uint8_t output[2 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         uint16_t interleaved = 0;
-        // Natural lane order: lane[0] becomes even bits, lane[1] becomes odd bits
-        // The FL_WAVE8_SPREAD_TO_16 macro treats first param as even, second as odd
+        // NOTE: FL_WAVE8_SPREAD_TO_16 macro treats first param as ODD bits, second as EVEN bits
+        // This matches wave8Untranspose_2 expectations: lane[0]→odd, lane[1]→even
         FL_WAVE8_SPREAD_TO_16(lane_waves[0].symbols[symbol_idx].data,
                               lane_waves[1].symbols[symbol_idx].data,
                               interleaved);

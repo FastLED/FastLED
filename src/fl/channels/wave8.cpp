@@ -8,6 +8,7 @@
 /// Note: Inline helper functions are in detail/wave8.hpp
 
 #include "wave8.h"
+#include "fl/stl/charconv.h"  // For fl::to_hex
 
 namespace fl {
 
@@ -24,12 +25,47 @@ void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
     // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
     Wave8Byte laneWaveformSymbols[2];
 
+    // DIAGNOSTIC: Log input bytes for debugging
+    FL_DBG("wave8Transpose_2 INPUT: lane[0]=0x" << fl::to_hex(lanes[0])
+           << " lane[1]=0x" << fl::to_hex(lanes[1]));
+
     // Convert each lane byte to wave pulse symbols (8 packed bytes each)
     detail::wave8_convert_byte_to_wave8byte(lanes[0], lut, &laneWaveformSymbols[0]);
     detail::wave8_convert_byte_to_wave8byte(lanes[1], lut, &laneWaveformSymbols[1]);
 
+    // DIAGNOSTIC: Log Wave8Byte symbols before transpose
+    FL_DBG("wave8Transpose_2 WAVE8: L0[0-7]="
+           << fl::to_hex(laneWaveformSymbols[0].symbols[0].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[1].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[2].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[3].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[4].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[5].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[6].data) << " "
+           << fl::to_hex(laneWaveformSymbols[0].symbols[7].data));
+    FL_DBG("wave8Transpose_2 WAVE8: L1[0-7]="
+           << fl::to_hex(laneWaveformSymbols[1].symbols[0].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[1].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[2].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[3].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[4].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[5].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[6].data) << " "
+           << fl::to_hex(laneWaveformSymbols[1].symbols[7].data));
+
     // Transpose waveforms to DMA format (interleave 8 packed bytes to 16 bytes)
     detail::wave8_transpose_2(laneWaveformSymbols, output);
+
+    // DIAGNOSTIC: Log transposed output
+    FL_DBG("wave8Transpose_2 OUTPUT[0-15]: "
+           << fl::to_hex(output[0]) << " " << fl::to_hex(output[1]) << " "
+           << fl::to_hex(output[2]) << " " << fl::to_hex(output[3]) << " "
+           << fl::to_hex(output[4]) << " " << fl::to_hex(output[5]) << " "
+           << fl::to_hex(output[6]) << " " << fl::to_hex(output[7]) << " "
+           << fl::to_hex(output[8]) << " " << fl::to_hex(output[9]) << " "
+           << fl::to_hex(output[10]) << " " << fl::to_hex(output[11]) << " "
+           << fl::to_hex(output[12]) << " " << fl::to_hex(output[13]) << " "
+           << fl::to_hex(output[14]) << " " << fl::to_hex(output[15]));
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM

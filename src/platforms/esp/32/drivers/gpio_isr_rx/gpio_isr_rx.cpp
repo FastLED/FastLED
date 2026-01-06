@@ -137,6 +137,12 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
 
     FL_LOG_RX("decodeEdgeTimestamps: decoding " << edge_count << " edges into buffer of " << bytes_capacity << " bytes");
 
+    // Log first 100 edges for detailed analysis (using FL_WARN to ensure output)
+    size_t log_edge_limit = (edge_count < 100) ? edge_count : 100;
+    for (size_t idx = 0; idx < log_edge_limit; idx++) {
+        FL_WARN("Edge[" << idx << "]: time_ns=" << edges[idx].time_ns << " level=" << static_cast<int>(edges[idx].level));
+    }
+
     // Decoding state
     size_t error_count = 0;
     uint32_t bytes_decoded = 0;
@@ -176,18 +182,6 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
             break;
         }
 
-        // Check for gap pulse (transmission gap like PARLIO DMA gap)
-        // Gap tolerance check: skip long LOW pulses that are within gap tolerance
-        // Gap must be longer than t0l_max_ns but shorter than gap_tolerance_ns
-        if (timing.gap_tolerance_ns > 0 && edge1.level == 0) {
-            uint32_t low_duration = edge2.time_ns - edge1.time_ns;
-            if (low_duration > timing.t0l_max_ns && low_duration <= timing.gap_tolerance_ns) {
-                FL_LOG_RX("decodeEdgeTimestamps: gap pulse detected at edge " << i << " (duration=" << low_duration << "ns), skipping");
-                i++;  // Skip this edge, continue with next
-                continue;
-            }
-        }
-
         // WS2812B protocol: expect HIGH -> LOW pattern
         if (edge0.level != 1 || edge1.level != 0) {
             FL_LOG_RX("decodeEdgeTimestamps: unexpected edge pattern at " << i);
@@ -200,28 +194,37 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         uint32_t high_ns = edge1.time_ns - edge0.time_ns;
         uint32_t low_ns = edge2.time_ns - edge1.time_ns;
 
-        // Check if LOW duration is a gap (tolerated long LOW pulse)
-        bool is_gap = (timing.gap_tolerance_ns > 0 &&
-                       low_ns > timing.t0l_max_ns &&
-                       low_ns <= timing.gap_tolerance_ns);
-
         // Inline bit decoding for speed
         int bit = -1;
 
-        // Check bit 0 pattern (allow gap in LOW portion)
+        // Check bit 0 pattern
         if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns &&
-            ((low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) || is_gap)) {
+            low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) {
             bit = 0;
         }
-        // Check bit 1 pattern (allow gap in LOW portion)
+        // Check bit 1 pattern
         else if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns &&
-                 ((low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) || is_gap)) {
+                 low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) {
             bit = 1;
+        }
+        // Check for gap pulse (transmission gap like PARLIO DMA gap)
+        // Gap tolerance: LOW duration extended beyond normal but within tolerance
+        // Decode bit using only HIGH duration, ignore extended LOW
+        else if (timing.gap_tolerance_ns > 0 && low_ns > timing.t0l_max_ns && low_ns <= timing.gap_tolerance_ns) {
+            // Try to decode bit from HIGH duration only (LOW is extended by gap)
+            if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+                bit = 0;
+                FL_LOG_RX("decodeEdgeTimestamps: gap detected at edge " << i << " (low=" << low_ns << "ns), decoded bit 0 from high duration");
+            }
+            else if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+                bit = 1;
+                FL_LOG_RX("decodeEdgeTimestamps: gap detected at edge " << i << " (low=" << low_ns << "ns), decoded bit 1 from high duration");
+            }
         }
 
         if (bit < 0) {
             error_count++;
-            FL_LOG_RX("decodeEdgeTimestamps: invalid pulse at edge " << i);
+            FL_LOG_RX("decodeEdgeTimestamps: invalid pulse at edge " << i << " (high=" << high_ns << "ns, low=" << low_ns << "ns)");
             i += 2;
             continue;
         }
@@ -230,6 +233,13 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
         bit_index++;
 
+        // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - using FL_WARN to ensure output
+        if (bytes_decoded < 3) {
+            FL_WARN("Bit[byte=" << bytes_decoded << ", bit=" << (bit_index-1) << "]: value=" << bit
+                   << " (high=" << high_ns << "ns, low=" << low_ns << "ns) current_byte=0x"
+                   << fl::hex << static_cast<int>(current_byte) << fl::dec);
+        }
+
         // Byte complete?
         if (bit_index == 8) {
             if (bytes_decoded >= bytes_capacity) {
@@ -237,6 +247,12 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
                 return fl::Result<uint32_t, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
             }
             out_ptr[bytes_decoded++] = current_byte;
+
+            // Log completed byte for first 3 bytes - using FL_WARN to ensure output
+            if (bytes_decoded <= 3) {
+                FL_WARN("Byte[" << (bytes_decoded-1) << "] completed: 0x" << fl::hex << static_cast<int>(current_byte) << fl::dec);
+            }
+
             current_byte = 0;
             bit_index = 0;
         }

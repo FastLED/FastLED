@@ -92,9 +92,13 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Reset pulse should have level=0 (low) for the long duration
     // Check duration0 with level0=0, or duration1 with level1=0
     if (rmt_sym.level0 == 0 && duration0_ns >= reset_min_ns) {
+        FL_WARN("isResetPulse DETECTED: duration0=" << duration0_ns << "ns (level0=0), reset_min="
+               << reset_min_ns << "ns (" << timing.reset_min_us << "us)");
         return true;
     }
     if (rmt_sym.level1 == 0 && duration1_ns >= reset_min_ns) {
+        FL_WARN("isResetPulse DETECTED: duration1=" << duration1_ns << "ns (level1=0), reset_min="
+               << reset_min_ns << "ns (" << timing.reset_min_us << "us)");
         return true;
     }
 
@@ -142,12 +146,16 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check duration1 (most common case - gap at end of bit sequence)
     if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns &&
         duration1_ns <= timing.gap_tolerance_ns) {
+        FL_WARN("isGapPulse DETECTED: duration1=" << duration1_ns << "ns (level1=0), t0l_max="
+               << timing.t0l_max_ns << "ns, gap_tolerance=" << timing.gap_tolerance_ns << "ns");
         return true;
     }
 
     // Check duration0 (less common - gap at start)
     if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns &&
         duration0_ns <= timing.gap_tolerance_ns) {
+        FL_WARN("isGapPulse DETECTED: duration0=" << duration0_ns << "ns (level0=0), t0l_max="
+               << timing.t0l_max_ns << "ns, gap_tolerance=" << timing.gap_tolerance_ns << "ns");
         return true;
     }
 
@@ -177,12 +185,10 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check if levels match expected pattern (high=1, low=0)
     if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
         // Unexpected level pattern - possibly inverted signal or noise
+        FL_WARN("decodeBit REJECTED: Invalid level pattern (level0=" << static_cast<int>(rmt_sym.level0)
+               << ", level1=" << static_cast<int>(rmt_sym.level1) << ") - expected level0=1, level1=0");
         return -1;
     }
-
-    // Check if LOW duration is a gap (tolerated long LOW pulse)
-    bool is_gap = (timing.gap_tolerance_ns > 0 && low_ns > timing.t0l_max_ns &&
-                   low_ns <= timing.gap_tolerance_ns);
 
     // Decision logic: check if timing matches bit 0 pattern
     bool t0h_match =
@@ -190,8 +196,8 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     bool t0l_match =
         (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
 
-    if (t0h_match && (t0l_match || is_gap)) {
-        return 0; // Bit 0 (LOW matches normal timing or is a tolerated gap)
+    if (t0h_match && t0l_match) {
+        return 0; // Bit 0
     }
 
     // Check if timing matches bit 1 pattern
@@ -200,11 +206,19 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     bool t1l_match =
         (low_ns >= timing.t1l_min_ns) && (low_ns <= timing.t1l_max_ns);
 
-    if (t1h_match && (t1l_match || is_gap)) {
-        return 1; // Bit 1 (LOW matches normal timing or is a tolerated gap)
+    if (t1h_match && t1l_match) {
+        return 1; // Bit 1
     }
 
-    // Timing doesn't match either pattern
+    // Timing doesn't match either pattern - log detailed rejection reason
+    FL_WARN("decodeBit REJECTED: Timing mismatch (high=" << high_ns << "ns, low=" << low_ns << "ns)");
+    FL_WARN("  Bit0 thresholds: t0h=[" << timing.t0h_min_ns << "-" << timing.t0h_max_ns
+           << "]ns (match=" << t0h_match << "), t0l=[" << timing.t0l_min_ns << "-" << timing.t0l_max_ns
+           << "]ns (match=" << t0l_match << ")");
+    FL_WARN("  Bit1 thresholds: t1h=[" << timing.t1h_min_ns << "-" << timing.t1h_max_ns
+           << "]ns (match=" << t1h_match << "), t1l=[" << timing.t1l_min_ns << "-" << timing.t1l_max_ns
+           << "]ns (match=" << t1l_match << ")");
+
     return -1; // Invalid
 }
 
@@ -257,6 +271,17 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
     const auto *rmt_symbols =
         reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
+
+    // Log first 30 symbols for detailed analysis (using FL_WARN to ensure output)
+    size_t log_symbol_limit = (symbols.size() < 30) ? symbols.size() : 30;
+    for (size_t idx = 0; idx < log_symbol_limit; idx++) {
+        uint32_t high_ns = ticksToNs(rmt_symbols[idx].duration0, ns_per_tick);
+        uint32_t low_ns = ticksToNs(rmt_symbols[idx].duration1, ns_per_tick);
+        FL_WARN("Symbol[" << idx << "]: duration0=" << rmt_symbols[idx].duration0
+               << " (" << high_ns << "ns) level0=" << static_cast<int>(rmt_symbols[idx].level0)
+               << ", duration1=" << rmt_symbols[idx].duration1
+               << " (" << low_ns << "ns) level1=" << static_cast<int>(rmt_symbols[idx].level1));
+    }
 
     // Note: Edge detection is now handled by filterSpuriousSymbols() before
     // decode() is called. The symbols array passed here already starts at the
@@ -318,6 +343,13 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
             break; // End of frame
         }
 
+        // Check for gap pulse (DMA transfer gap, e.g., PARLIO ~20us gaps)
+        // Skip gap pulses without decoding them as bits
+        if (isGapPulse(symbols[i], timing, ns_per_tick)) {
+            FL_LOG_RX("decodeRmtSymbols: gap pulse detected at symbol " << i << ", skipping");
+            continue; // Skip to next symbol
+        }
+
         // Decode symbol to bit
         int bit = decodeBit(symbols[i], timing, ns_per_tick);
         if (bit < 0) {
@@ -371,12 +403,26 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
         bit_index++;
 
+        // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - using FL_WARN to ensure output
+        if (bytes_decoded < 3) {
+            uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
+            uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
+            FL_WARN("Bit[byte=" << bytes_decoded << ", bit=" << (bit_index-1) << "]: value=" << bit
+                   << " (symbol " << i << ": high=" << high_ns << "ns, low=" << low_ns << "ns) current_byte=0x"
+                   << fl::hex << static_cast<int>(current_byte) << fl::dec);
+        }
+
         // Byte complete?
         if (bit_index == 8) {
             // Check buffer space
             if (bytes_decoded < bytes_out.size()) {
                 bytes_out[bytes_decoded] = current_byte;
                 bytes_decoded++;
+
+                // Log completed byte for first 3 bytes - using FL_WARN to ensure output
+                if (bytes_decoded <= 3) {
+                    FL_WARN("Byte[" << (bytes_decoded-1) << "] completed: 0x" << fl::hex << static_cast<int>(current_byte) << fl::dec);
+                }
             } else {
                 // Buffer full, stop decoding
                 FL_WARN("decodeRmtSymbols: output buffer overflow at byte "
