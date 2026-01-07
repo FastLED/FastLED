@@ -205,7 +205,6 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
 // ============================================================================
 
 namespace {
-
 // Singleton getters for mock controller instances (Meyer's Singleton pattern)
 fl::shared_ptr<SpiHw2Stub>& getController0_Spi2() {
     static fl::shared_ptr<SpiHw2Stub> instance = fl::make_shared<SpiHw2Stub>(0, "MockDual0");
@@ -216,14 +215,13 @@ fl::shared_ptr<SpiHw2Stub>& getController1_Spi2() {
     static fl::shared_ptr<SpiHw2Stub> instance = fl::make_shared<SpiHw2Stub>(1, "MockDual1");
     return instance;
 }
+}  // anonymous namespace
 
 /// Register instances at static initialization time via constructor attribute
-void registerSpiHw2Instances() {
+static void registerSpiHw2Instances() {
     SpiHw2::registerInstance(getController0_Spi2());
     SpiHw2::registerInstance(getController1_Spi2());
 }
-
-}  // anonymous namespace
 
 FL_INIT(registerSpiHw2Instances);
 

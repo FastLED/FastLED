@@ -149,7 +149,6 @@ void SpiHw1Stub::reset() {
 // ============================================================================
 
 namespace {
-
 // Singleton getters for mock controller instances (Meyer's Singleton pattern)
 fl::shared_ptr<SpiHw1Stub>& getController0_Spi1() {
     static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(0, "MockSingle0");
@@ -160,16 +159,15 @@ fl::shared_ptr<SpiHw1Stub>& getController1_Spi1() {
     static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(1, "MockSingle1");
     return instance;
 }
+}  // anonymous namespace
 
 /// Register instances at static initialization time via constructor attribute
-void registerSpiHw1Instances() {
+static void registerSpiHw1Instances() {
     FL_WARN("Registering SpiHw1 stub instances...");
     SpiHw1::registerInstance(getController0_Spi1());
     SpiHw1::registerInstance(getController1_Spi1());
     FL_WARN("SpiHw1 stub instances registered!");
 }
-
-}  // anonymous namespace
 
 FL_INIT(registerSpiHw1Instances);
 
