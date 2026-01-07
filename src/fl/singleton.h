@@ -34,18 +34,21 @@ template <typename T, int N = 0> class Singleton {
             char data[sizeof(T)];
         };
 
-        // Use a static flag to track initialization (C++11 magic statics make this thread-safe)
-        static AlignedStorage storage;
-        static bool init = []() -> bool {
-            // Placement new: construct instance in pre-allocated storage
-            // INTENTIONAL: Destructor is NEVER called - this is a permanent leak
-            new (&storage.data) T();
-            return true;
-        }();
-        (void)init;  // Suppress unused warning
+        // Use a struct with constructor to ensure initialization happens exactly once
+        // This leverages C++11 magic statics for thread-safe initialization
+        struct InitializedStorage {
+            AlignedStorage storage;
+            InitializedStorage() {
+                // Placement new: construct instance in pre-allocated storage
+                // INTENTIONAL: Destructor is NEVER called - this is a permanent leak
+                new (&storage.data) T();
+            }
+        };
+
+        static InitializedStorage init;
 
         // Safe type-punning from char* to T* using bit_cast_ptr
-        return *fl::bit_cast_ptr<T>(&storage.data[0]);
+        return *fl::bit_cast_ptr<T>(&init.storage.data[0]);
     }
 
     static T *instanceRef() { return &instance(); }

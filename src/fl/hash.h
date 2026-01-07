@@ -148,7 +148,8 @@ template <typename T> struct Hash<T *> {
             u32 key_u = reinterpret_cast<fl::uptr>(key);
             return fast_hash32(key_u);
         } else {
-            return MurmurHash3_x86_32(key, sizeof(T *));
+            // Hash the pointer value (address), not the data it points to
+            return MurmurHash3_x86_32(&key, sizeof(T *));
         }
     }
 };

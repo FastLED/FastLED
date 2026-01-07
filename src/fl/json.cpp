@@ -60,14 +60,13 @@ FL_DISABLE_WARNING_POP
 
 
 JsonValue& get_null_value() {
-    static ThreadLocal<JsonValue> null_value;
-    return null_value.access();
+    static JsonValue null_value;
+    return null_value;
 }
 
 JsonObject& get_empty_json_object() {
-    // thread_local JsonObject empty_object;
-    static ThreadLocal<JsonObject> empty_object;
-    return empty_object.access();
+    static JsonObject empty_object;
+    return empty_object;
 }
 
 fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
@@ -80,7 +79,8 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
     FLArduinoJson::DeserializationError error = FLArduinoJson::deserializeJson(doc, txt.c_str());
 
     if (error) {
-        FL_WARN("JSON parsing failed: " << error.c_str());
+        const char* errorMsg = error.c_str();
+        FL_WARN("JSON parsing failed: " << (errorMsg ? errorMsg : "<null error message>"));
         return fl::make_shared<JsonValue>(nullptr); // Return null on error
     }
 

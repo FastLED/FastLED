@@ -2155,7 +2155,12 @@ public:
         auto objPtr = m_value->data.ptr<JsonObject>();
         if (objPtr) {
             // Create or update the entry directly
-            (*objPtr)[key] = value.m_value;
+            if (value.m_value) {
+                (*objPtr)[key] = value.m_value;
+            } else {
+                // If value has null m_value, create a null JsonValue
+                (*objPtr)[key] = fl::make_shared<JsonValue>(nullptr);
+            }
         }
     }
     
