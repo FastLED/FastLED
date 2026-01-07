@@ -4,6 +4,7 @@
 
 #include "fl/stl/charconv.h"
 #include "fl/str.h"
+#include "fl/stl/stdio.h"
 
 namespace fl {
 namespace detail {
@@ -60,4 +61,100 @@ fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool upperca
 }
 
 } // namespace detail
+
+// Public API implementations for integer to string conversion
+// Moved from string_functions namespace in str.cpp for better organization
+
+int itoa(int32_t value, char *sp, int radix) {
+    char tmp[16]; // be careful with the length of the buffer
+    char *tp = tmp;
+    int i;
+    unsigned v;
+
+    int sign = (radix == 10 && value < 0);
+    if (sign)
+        v = -value;
+    else
+        v = (unsigned)value;
+
+    while (v || tp == tmp) {
+        i = v % radix;
+        v = radix ? v / radix : 0;
+        if (i < 10)
+            *tp++ = i + '0';
+        else
+            *tp++ = i + 'a' - 10;
+    }
+
+    int len = tp - tmp;
+
+    if (sign) {
+        *sp++ = '-';
+        len++;
+    }
+
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+    return len;
+}
+
+int utoa32(uint32_t value, char *sp, int radix) {
+    char tmp[16]; // be careful with the length of the buffer
+    char *tp = tmp;
+    int i;
+    uint32_t v = value;
+
+    while (v || tp == tmp) {
+        i = v % radix;
+        v = radix ? v / radix : 0;
+        if (i < 10)
+            *tp++ = i + '0';
+        else
+            *tp++ = i + 'a' - 10;
+    }
+
+    int len = tp - tmp;
+
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+    return len;
+}
+
+int utoa64(uint64_t value, char *sp, int radix) {
+    char tmp[32]; // larger buffer for 64-bit values
+    char *tp = tmp;
+    int i;
+    uint64_t v = value;
+
+    while (v || tp == tmp) {
+        i = v % radix;
+        v = radix ? v / radix : 0;
+        if (i < 10)
+            *tp++ = i + '0';
+        else
+            *tp++ = i + 'a' - 10;
+    }
+
+    int len = tp - tmp;
+
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+    return len;
+}
+
+void ftoa(float value, char *buffer, int precision) {
+    // Forward to printf_detail for now - implementation in str.cpp will be updated
+    // to use this function instead of duplicating the logic
+    fl::string result = fl::printf_detail::format_float(value, precision);
+    fl::size len = result.length();
+    if (len > 63) len = 63; // Leave room for null terminator
+    for (fl::size i = 0; i < len; ++i) {
+        buffer[i] = result[i];
+    }
+    buffer[len] = '\0';
+}
+
 } // namespace fl

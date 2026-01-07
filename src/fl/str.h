@@ -96,29 +96,50 @@ FASTLED_SHARED_PTR(StringHolder);
 
 class StringFormatter {
   public:
+    // Generic template methods that work with any StrN<SIZE>
+    // These are the primary implementations that all code should use
+
     // Decimal formatting (base 10)
-    static void append(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void append(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void append(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void append(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void append(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void append(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(i32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(u32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(int64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(uint64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(i16 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void append(u16 val, StrN<SIZE> *dst);
 
     // Hexadecimal formatting (base 16)
-    static void appendHex(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendHex(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendHex(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendHex(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendHex(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendHex(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(i32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(u32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(int64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(uint64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(i16 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendHex(u16 val, StrN<SIZE> *dst);
 
     // Octal formatting (base 8)
-    static void appendOct(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendOct(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendOct(int64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendOct(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendOct(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendOct(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(i32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(u32 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(int64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(uint64_t val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(i16 val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendOct(u16 val, StrN<SIZE> *dst);
 
     // Utility methods
     static bool isSpace(char c) {
@@ -128,9 +149,163 @@ class StringFormatter {
     static int parseInt(const char *str, fl::size len);
     static int parseInt(const char *str);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
-    static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
-    static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst, int precision);
+
+    template<fl::size SIZE>
+    static void appendFloat(const float &val, StrN<SIZE> *dst);
+    template<fl::size SIZE>
+    static void appendFloat(const float &val, StrN<SIZE> *dst, int precision);
 };
+
+// Forward declarations for charconv functions (avoid circular dependency with charconv.h)
+// These are already in the fl namespace, so no additional namespace wrapper needed
+// Note: Default arguments must only be specified in charconv.h, not here
+int itoa(int32_t value, char *buffer, int radix);
+int utoa32(uint32_t value, char *buffer, int radix);
+int utoa64(uint64_t value, char *buffer, int radix);
+void ftoa(float value, char *buffer, int precision);
+
+// Inline template implementations for StringFormatter
+// These must be defined in the header to avoid template instantiation order issues
+
+// Float formatting
+template<fl::size SIZE>
+inline void StringFormatter::appendFloat(const float &val, StrN<SIZE> *dst) {
+    char buf[64] = {0};
+    ftoa(val, buf, 2);  // Default precision = 2
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendFloat(const float &val, StrN<SIZE> *dst, int precision) {
+    char buf[64] = {0};
+    ftoa(val, buf, precision);
+    dst->write(buf, ::strlen(buf));
+}
+
+// Decimal (base 10) formatting
+template<fl::size SIZE>
+inline void StringFormatter::append(i32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    itoa(val, buf, 10);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::append(u32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa32(val, buf, 10);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::append(int64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    // For signed 64-bit, handle negative numbers manually
+    if (val < 0) {
+        dst->write("-", 1);
+        utoa64(static_cast<uint64_t>(-val), buf, 10);
+    } else {
+        utoa64(static_cast<uint64_t>(val), buf, 10);
+    }
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::append(uint64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa64(val, buf, 10);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::append(i16 val, StrN<SIZE> *dst) {
+    append(static_cast<i32>(val), dst);
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::append(u16 val, StrN<SIZE> *dst) {
+    append(static_cast<u32>(val), dst);
+}
+
+// Hexadecimal (base 16) formatting
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(i32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    itoa(val, buf, 16);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(u32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa32(val, buf, 16);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(int64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    // For hex, treat signed as bit pattern (cast to unsigned)
+    utoa64(static_cast<uint64_t>(val), buf, 16);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(uint64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa64(val, buf, 16);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(i16 val, StrN<SIZE> *dst) {
+    appendHex(static_cast<i32>(val), dst);
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendHex(u16 val, StrN<SIZE> *dst) {
+    appendHex(static_cast<u32>(val), dst);
+}
+
+// Octal (base 8) formatting
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(i32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    itoa(val, buf, 8);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(u32 val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa32(val, buf, 8);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(int64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    // For octal, treat signed as bit pattern (cast to unsigned)
+    utoa64(static_cast<uint64_t>(val), buf, 8);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(uint64_t val, StrN<SIZE> *dst) {
+    char buf[63] = {0};
+    utoa64(val, buf, 8);
+    dst->write(buf, ::strlen(buf));
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(i16 val, StrN<SIZE> *dst) {
+    appendOct(static_cast<i32>(val), dst);
+}
+
+template<fl::size SIZE>
+inline void StringFormatter::appendOct(u16 val, StrN<SIZE> *dst) {
+    appendOct(static_cast<u32>(val), dst);
+}
 
 class StringHolder {
   public:

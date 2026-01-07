@@ -107,4 +107,34 @@ fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
     return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);
 }
 
+// Low-level integer to string conversion functions
+// These provide the foundational conversion logic for fl::string and fl::sstream
+
+/// @brief Convert signed 32-bit integer to string buffer in given radix
+/// @param value The integer value to convert
+/// @param buffer Output buffer (must be at least 34 bytes for base 2, 12 for base 10, 12 for base 16)
+/// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
+/// @return Number of characters written (excluding null terminator)
+int itoa(int32_t value, char *buffer, int radix);
+
+/// @brief Convert unsigned 32-bit integer to string buffer in given radix
+/// @param value The unsigned integer value to convert
+/// @param buffer Output buffer (must be at least 33 bytes for base 2, 11 for base 10, 9 for base 16)
+/// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
+/// @return Number of characters written (excluding null terminator)
+int utoa32(uint32_t value, char *buffer, int radix);
+
+/// @brief Convert unsigned 64-bit integer to string buffer in given radix
+/// @param value The unsigned 64-bit integer value to convert
+/// @param buffer Output buffer (must be at least 65 bytes for base 2, 21 for base 10, 17 for base 16)
+/// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
+/// @return Number of characters written (excluding null terminator)
+int utoa64(uint64_t value, char *buffer, int radix);
+
+/// @brief Convert floating point number to string buffer
+/// @param value The float value to convert
+/// @param buffer Output buffer (must be at least 64 bytes)
+/// @param precision Number of decimal places (default: 2)
+void ftoa(float value, char *buffer, int precision = 2);
+
 } // namespace fl
