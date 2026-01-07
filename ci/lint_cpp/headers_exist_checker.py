@@ -40,6 +40,7 @@ EXCLUDED_TEST_FILES = {
     "test_spi_batching_logic.cpp",  # Self-contained algorithm validation test
     "serial_printf.cpp",  # Tests Arduino Serial API, not a FastLED header
     "test_runner.cpp",  # Test runner executable that loads test DLLs
+    "runner.cpp",  # Windows DLL loader for test execution
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)

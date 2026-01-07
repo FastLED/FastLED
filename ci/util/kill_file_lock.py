@@ -25,7 +25,10 @@ def kill_process_holding_file(file_path: Path) -> bool:
     try:
         import psutil
     except ImportError:
-        print("Warning: psutil not available, cannot kill locked processes", file=sys.stderr)
+        print(
+            "Warning: psutil not available, cannot kill locked processes",
+            file=sys.stderr,
+        )
         return False
 
     if not file_path.exists():
@@ -37,16 +40,19 @@ def kill_process_holding_file(file_path: Path) -> bool:
 
     # Strategy 1: Kill processes by matching executable name
     # This is the most reliable approach on Windows
-    for proc in psutil.process_iter(['pid', 'name', 'exe']):
+    for proc in psutil.process_iter(["pid", "name", "exe"]):
         try:
-            proc_name = proc.info['name']
+            proc_name = proc.info["name"]
             if proc_name and proc_name.lower() == exe_name.lower():
                 # Found a process with matching name
-                proc_exe = proc.info.get('exe')
+                proc_exe = proc.info.get("exe")
                 if proc_exe:
                     proc_exe_path = Path(proc_exe).resolve()
                     if proc_exe_path == file_path:
-                        print(f"Found process holding lock: {proc_name} (PID {proc.info['pid']})", file=sys.stderr)
+                        print(
+                            f"Found process holding lock: {proc_name} (PID {proc.info['pid']})",
+                            file=sys.stderr,
+                        )
                         proc.kill()
                         proc.wait(timeout=5)
                         print(f"Killed process {proc.info['pid']}", file=sys.stderr)
@@ -60,13 +66,16 @@ def kill_process_holding_file(file_path: Path) -> bool:
 
     # Strategy 2: Try to find by open file handles (may not work on Windows without admin)
     if not killed:
-        for proc in psutil.process_iter(['pid', 'name']):
+        for proc in psutil.process_iter(["pid", "name"]):
             try:
                 # Get open files for this process
                 open_files = proc.open_files()
                 for open_file in open_files:
                     if Path(open_file.path).resolve() == file_path:
-                        print(f"Found process holding lock: {proc.info['name']} (PID {proc.info['pid']})", file=sys.stderr)
+                        print(
+                            f"Found process holding lock: {proc.info['name']} (PID {proc.info['pid']})",
+                            file=sys.stderr,
+                        )
                         proc.kill()
                         proc.wait(timeout=5)
                         print(f"Killed process {proc.info['pid']}", file=sys.stderr)

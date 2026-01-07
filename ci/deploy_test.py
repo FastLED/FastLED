@@ -7,10 +7,11 @@ It creates the directory structure: tests/bin/<test_name>/
 And copies: runner.exe (renamed to <test_name>.exe) and <test_name>.dll
 """
 
-import sys
 import shutil
+import sys
 import time
 from pathlib import Path
+
 
 # Import kill_file_lock utility
 sys.path.insert(0, str(Path(__file__).parent))
@@ -33,7 +34,10 @@ def safe_copy(src: Path, dest: Path, max_retries: int = 3) -> None:
                     dest.unlink()
                 except PermissionError:
                     # File is locked - try to kill the process holding it
-                    print(f"Warning: {dest} is locked, attempting to kill process...", file=sys.stderr)
+                    print(
+                        f"Warning: {dest} is locked, attempting to kill process...",
+                        file=sys.stderr,
+                    )
                     if kill_process_holding_file(dest):
                         # Wait a moment for the process to fully release the file
                         time.sleep(0.2)
@@ -61,7 +65,10 @@ def safe_copy(src: Path, dest: Path, max_retries: int = 3) -> None:
         except PermissionError as e:
             if attempt < max_retries - 1:
                 # Wait and retry
-                print(f"Warning: {dest} is locked, retrying in {0.5 * (attempt + 1)}s...", file=sys.stderr)
+                print(
+                    f"Warning: {dest} is locked, retrying in {0.5 * (attempt + 1)}s...",
+                    file=sys.stderr,
+                )
                 time.sleep(0.5 * (attempt + 1))
             else:
                 raise PermissionError(
@@ -72,7 +79,10 @@ def safe_copy(src: Path, dest: Path, max_retries: int = 3) -> None:
 
 def main():
     if len(sys.argv) < 5:
-        print("Usage: deploy_test.py <runner_exe> <test_dll> <test_name> <bin_dir>", file=sys.stderr)
+        print(
+            "Usage: deploy_test.py <runner_exe> <test_dll> <test_name> <bin_dir>",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     runner_exe = Path(sys.argv[1])

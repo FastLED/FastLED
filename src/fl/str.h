@@ -507,6 +507,17 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(dst.c_str(), dst.size());
     }
 
+    // Generic write for multi-byte integer types not covered by explicit overloads
+    template <typename T>
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, fl::size>::type
+    write(const T &val) {
+        // Cast to appropriate target type based on size/signedness
+        using target_t = typename int_cast_detail::cast_target<T>::type;
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
+        StringFormatter::append(static_cast<target_t>(val), &dst);
+        return write(dst.c_str(), dst.size());
+    }
+
     // Destructor
     ~StrN() {}
 
@@ -2092,13 +2103,19 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(c);
     }
 
-    // Generic integral append: only enabled if T is an integral type. This is
-    // needed because on some platforms type(int) is not one of the integral
-    // types like i8, i16, i32, int64_t etc. In such a has just case
-    // the value to i32 and then append it.
-    template <typename T, typename = fl::enable_if_t<fl::is_integral<T>::value>>
-    string &append(const T &val) {
-        write(i32(val));
+    //-------------------------------------------------------------------------
+    // Generic integer append using SFINAE and type traits
+    //-------------------------------------------------------------------------
+    // Handles all multi-byte integer types (excludes char types)
+    // Converts to appropriate target type based on size/signedness
+    // This is needed because on some platforms type(int) is not one of the standard
+    // integral types like i8, i16, i32, int64_t etc.
+    template <typename T>
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, string&>::type
+    append(const T &val) {
+        // Cast to appropriate type for display (handles platform differences)
+        using target_t = typename int_cast_detail::cast_target<T>::type;
+        write(static_cast<target_t>(val));
         return *this;
     }
 
@@ -2135,38 +2152,25 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(str, len);
         return *this;
     }
-    string &append(long long val) {
-        write(i32(val));
+
+    // Explicit overload for char to avoid ambiguity with template overloads
+    string &append(char c) {
+        write(&c, 1);
         return *this;
     }
-    // string& append(char c) { write(&c, 1); return *this; }
+
+    // i8 is treated as a single character, not a number
     string &append(const i8 &c) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
         write(str, 1);
         return *this;
     }
-    string &append(const u8 &c) {
-        write(static_cast<u32>(c));
-        return *this;
-    }
-    string &append(const u16 &val) {
-        write(val);
-        return *this;
-    }
-    string &append(const i16 &val) {
-        write(i32(val));
-        return *this;
-    }
-    string &append(const u32 &val) {
-        write(val);
-        return *this;
-    }
-    string &append(const uint64_t &val) {
-        write(val);
-        return *this;
-    }
-    string &append(const i32 &c) {
-        write(c);
+
+    // u8 append - displays as number (0-255), not ASCII character
+    // This overload is needed to avoid ambiguity with the generic integer template
+    // when appending CRGB members (r, g, b which are u8 types)
+    string &append(const u8 &val) {
+        write(fl::u16(val));  // Promote to u16 for numeric display
         return *this;
     }
 

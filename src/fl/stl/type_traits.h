@@ -411,6 +411,41 @@ template <typename T> struct is_integral<T &> {
 };
 
 //-------------------------------------------------------------------------------
+// is_char_type trait - detects char, signed char, unsigned char
+//-------------------------------------------------------------------------------
+template <typename T> struct is_char_type {
+    enum : bool { value = false };
+};
+template <> struct is_char_type<char> {
+    enum : bool { value = true };
+};
+template <> struct is_char_type<signed char> {
+    enum : bool { value = true };
+};
+template <> struct is_char_type<unsigned char> {
+    enum : bool { value = true };
+};
+
+template <typename T> struct is_char_type<const T> {
+    static constexpr bool value = is_char_type<T>::value;
+};
+
+template <typename T> struct is_char_type<volatile T> {
+    static constexpr bool value = is_char_type<T>::value;
+};
+
+template <typename T> struct is_char_type<T &> {
+    static constexpr bool value = is_char_type<T>::value;
+};
+
+//-------------------------------------------------------------------------------
+// is_multi_byte_integer trait - integral types excluding char types
+//-------------------------------------------------------------------------------
+template <typename T> struct is_multi_byte_integer {
+    static constexpr bool value = is_integral<T>::value && !is_char_type<T>::value;
+};
+
+//-------------------------------------------------------------------------------
 // is_floating_point trait
 //-------------------------------------------------------------------------------
 template <typename T> struct is_floating_point {
@@ -878,5 +913,70 @@ using underlying_type_t = typename underlying_type<T>::type;
         const CLASS &obj, const T &pod) {                                      \
         return obj OP pod;                                                     \
     }
+
+//-------------------------------------------------------------------------------
+// Integer type casting helper for string formatting
+//-------------------------------------------------------------------------------
+// Helper to determine target type for integer conversion based on size/signedness
+// Used by both StrN::append and StrStream::operator<< for consistent formatting
+namespace int_cast_detail {
+    // Primary template: generic fallback using size/signedness
+    // This handles any integer type by selecting the appropriate fl:: type based on its characteristics
+    template<typename T, fl::size Size = sizeof(T), bool IsSigned = fl::is_signed<T>::value>
+    struct cast_target {
+        // Generic implementation based on size and signedness
+        // Selects appropriate fl:: integer type (i8/u8/i16/u16/i32/u32/i64/u64)
+        using type = typename fl::conditional<
+            IsSigned,
+            // Signed integer path
+            typename fl::conditional<Size == 1, fl::i8,
+                typename fl::conditional<Size == 2, fl::i16,
+                    typename fl::conditional<Size == 4, fl::i32,
+                        typename fl::conditional<Size == 8, fl::i64,
+                            fl::i64  // Fallback to i64 for >8 byte types (rare)
+                        >::type
+                    >::type
+                >::type
+            >::type,
+            // Unsigned integer path (note: 1-byte unsigned promotes to u16 for readability)
+            typename fl::conditional<Size == 1, fl::u16,  // u8 → u16 (avoid char display)
+                typename fl::conditional<Size == 2, fl::u16,
+                    typename fl::conditional<Size == 4, fl::u32,
+                        typename fl::conditional<Size == 8, fl::u64,
+                            fl::u64  // Fallback to u64 for >8 byte types (rare)
+                        >::type
+                    >::type
+                >::type
+            >::type
+        >::type;
+    };
+
+    // Explicit specializations for common cases (optimization - avoids nested conditionals)
+    // These provide the same mapping as the generic template but compile faster
+
+    // 1-byte unsigned → u16 (ergonomic: displays uint8_t as number, not char)
+    template<typename T> struct cast_target<T, 1, false> { using type = fl::u16; };
+
+    // 1-byte signed → i8
+    template<typename T> struct cast_target<T, 1, true> { using type = fl::i8; };
+
+    // 2-byte unsigned → u16
+    template<typename T> struct cast_target<T, 2, false> { using type = fl::u16; };
+
+    // 2-byte signed → i16
+    template<typename T> struct cast_target<T, 2, true> { using type = fl::i16; };
+
+    // 4-byte unsigned → u32
+    template<typename T> struct cast_target<T, 4, false> { using type = fl::u32; };
+
+    // 4-byte signed → i32
+    template<typename T> struct cast_target<T, 4, true> { using type = fl::i32; };
+
+    // 8-byte unsigned → u64
+    template<typename T> struct cast_target<T, 8, false> { using type = fl::u64; };
+
+    // 8-byte signed → i64
+    template<typename T> struct cast_target<T, 8, true> { using type = fl::i64; };
+}
 
 } // namespace fl
