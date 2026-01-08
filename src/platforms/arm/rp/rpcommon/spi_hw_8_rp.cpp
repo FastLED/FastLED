@@ -552,7 +552,7 @@ namespace {
         SpiHw8::registerInstance(controller1);
     }
 }
-FL_INIT(init_spi_hw_8_rp);
+FL_INIT(init_spi_hw_8_rp_wrapper, init_spi_hw_8_rp);
 
 }  // namespace fl
 

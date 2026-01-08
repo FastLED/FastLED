@@ -397,7 +397,7 @@ namespace {
         SpiHw4::registerInstance(controller2);
     }
 }
-FL_INIT(init_spi_hw_4_mxrt1062);
+FL_INIT(init_spi_hw_4_mxrt1062_wrapper, init_spi_hw_4_mxrt1062);
 
 }  // namespace fl
 

@@ -207,8 +207,7 @@ static void registerSpiHw8Instances() {
     SpiHw8::registerInstance(getController3_Spi8());
 }
 
-// Avoid line number collision with spi_4_stub.cpp FL_INIT
-FL_INIT(registerSpiHw8Instances);
+FL_INIT(init_spi_hw_8_stub, registerSpiHw8Instances);
 
 }  // namespace fl
 

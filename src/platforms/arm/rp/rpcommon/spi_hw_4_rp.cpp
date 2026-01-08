@@ -569,7 +569,7 @@ namespace {
         SpiHw4::registerInstance(controller1);
     }
 }
-FL_INIT(init_spi_hw_4_rp);
+FL_INIT(init_spi_hw_4_rp_wrapper, init_spi_hw_4_rp);
 
 }  // namespace fl
 

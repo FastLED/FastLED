@@ -290,18 +290,15 @@
 // Registers a function to run during C++ static initialization (before main())
 // Usage:
 //   namespace detail { void init_my_feature() { /* code */ } }
-//   FL_INIT(detail::init_my_feature);
-// Generates unique constructor function names based on line number to support
-// namespaced functions (e.g., detail::func, myns::impl::func)
+//   FL_INIT(init_my_feature_wrapper, detail::init_my_feature);
+// The first parameter provides a unique name for the generated wrapper function,
+// ensuring no symbol collisions across the codebase
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-// Helper macro to ensure __LINE__ is expanded before concatenation
-#define FL_INIT_CONCAT_IMPL(prefix, line) prefix##line
-#define FL_INIT_CONCAT(prefix, line) FL_INIT_CONCAT_IMPL(prefix, line)
-#define FL_INIT(func) \
+#define FL_INIT(wrapper_name, func) \
   namespace static_init { \
     FL_CONSTRUCTOR FL_KEEP_ALIVE \
-    void FL_INIT_CONCAT(__fl_init_at_line_, __LINE__)() { func(); } \
+    void wrapper_name() { func(); } \
   }
 FL_DISABLE_WARNING_POP
 

@@ -399,7 +399,7 @@ namespace {
         SpiHw16::registerInstance(i2s0_controller);
     }
 }
-FL_INIT(init_spi_i2s_esp32);
+FL_INIT(init_spi_i2s_esp32_wrapper, init_spi_i2s_esp32);
 
 } // namespace fl
 

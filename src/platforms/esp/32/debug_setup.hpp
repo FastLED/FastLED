@@ -28,6 +28,6 @@ void fastled_debug_init() {
 }  // namespace detail
 }  // namespace fl
 
-FL_INIT(fl::detail::fastled_debug_init);
+FL_INIT(fastled_debug_init_wrapper, fl::detail::fastled_debug_init);
 
 #endif  // defined(ESP32) && defined(FASTLED_DEBUG)

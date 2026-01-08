@@ -220,7 +220,7 @@ static void registerSpiHw16Instances() {
     SpiHw16::registerInstance(getController3_Spi16());
 }
 
-FL_INIT(registerSpiHw16Instances);
+FL_INIT(init_spi_hw_16_stub, registerSpiHw16Instances);
 
 }  // namespace fl
 

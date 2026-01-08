@@ -480,7 +480,7 @@ namespace {
         SpiHw2::registerInstance(controller0);
     }
 }
-FL_INIT(init_spi_hw_2_nrf52);
+FL_INIT(init_spi_hw_2_nrf52_wrapper, init_spi_hw_2_nrf52);
 
 }  // namespace fl
 

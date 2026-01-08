@@ -169,7 +169,7 @@ static void registerSpiHw1Instances() {
     FL_WARN("SpiHw1 stub instances registered!");
 }
 
-FL_INIT(registerSpiHw1Instances);
+FL_INIT(init_spi_hw_1_stub, registerSpiHw1Instances);
 
 }  // namespace fl
 

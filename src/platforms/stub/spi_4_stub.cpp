@@ -207,7 +207,7 @@ static void registerSpiHw4Instances() {
     SpiHw4::registerInstance(getController3_Spi4());
 }
 
-FL_INIT(registerSpiHw4Instances);
+FL_INIT(init_spi_hw_4_stub, registerSpiHw4Instances);
 
 }  // namespace fl
 
