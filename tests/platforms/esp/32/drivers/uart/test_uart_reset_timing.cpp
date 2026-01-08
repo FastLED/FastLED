@@ -6,11 +6,18 @@
 /// This simulates the WS2812 reset signal requirement (>50us low period)
 /// which UART cannot send as zeros due to start/stop bit framing.
 
-#include "test.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
-#include <thread>
-#include <chrono>
-#include <cstdio>
+#include <stdint.h>
+#include "__chrono/duration.h"
+#include "__chrono/steady_clock.h"
+#include "__chrono/time_point.h"
+#include "__new/placement_new_delete.h"
+#include "__thread/this_thread.h"
+#include "doctest.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
+#include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
+#include "ratio"
 
 using namespace fl;
 
@@ -143,6 +150,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         }
         auto reset_duration_small = std::chrono::steady_clock::now() - reset_start;
         auto reset_us_small = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_small).count();
+        (void)reset_us_small;  // Calculated for documentation/debugging purposes
 
         // Large transmission (1000 bytes)
         // Expected: transmission ~3125us, reset period 3125us
@@ -162,6 +170,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         }
         auto reset_duration_large = std::chrono::steady_clock::now() - reset_start;
         auto reset_us_large = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_large).count();
+        (void)reset_us_large;  // Calculated for documentation/debugging purposes
 
         // Reset period for larger transmission should be longer (proportional to transmission time)
         // Expected: ~50us for small (1 byte) vs ~322us for large (100 bytes) at 3.2 Mbps

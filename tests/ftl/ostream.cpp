@@ -1,6 +1,6 @@
 #include "fl/stl/ostream.h"
-#include "test.h"
-#include <cstring>
+#include <stdint.h>
+#include "doctest.h"
 
 // Since we can't override the fl::print function easily in this test setup,
 // we'll just verify that the ostream compiles and basic functionality works

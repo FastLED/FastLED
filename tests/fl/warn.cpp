@@ -1,5 +1,7 @@
-#include "test.h"
-#include "fl/warn.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/sketch_macros.h"
+#include "fl/stl/strstream.h"
 
 using namespace fl;
 

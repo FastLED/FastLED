@@ -11,9 +11,10 @@
 
 // allow-include-after-namespace
 
-#include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/cstddef.h"
 
 namespace fl {
 namespace isr {
@@ -469,4 +470,3 @@ public:
 
 // Include platform-specific ISR implementation after API declaration
 // This provides both ISR handler functions AND interrupt control functions
-#include "platforms/isr.h"  // nolint

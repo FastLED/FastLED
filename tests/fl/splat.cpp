@@ -1,10 +1,11 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "fl/splat.h"
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/tile2x2.h"
 
 TEST_CASE("splat simple test") {
     // Define a simple input coordinate

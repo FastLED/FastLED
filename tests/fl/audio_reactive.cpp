@@ -1,8 +1,14 @@
-#include "test.h"
 #include "fl/audio_reactive.h"
 #include "fl/stl/math.h"
-#include "fl/stl/memory.h"
 #include "fl/circular_buffer.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/audio.h"
+#include "fl/math_macros.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 

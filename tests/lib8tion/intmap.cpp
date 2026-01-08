@@ -1,8 +1,8 @@
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
-#include "fl/stl/math.h"
-#include "lib8tion/intmap.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "platforms/intmap.h"
 using namespace fl;
 
 TEST_CASE("map8_to_16") {

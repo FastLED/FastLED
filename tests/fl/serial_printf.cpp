@@ -1,5 +1,7 @@
 // Test for Serial.printf functionality on stub platform
-#include "test.h"
+#include "platforms/stub/Arduino.h"
+#include "doctest.h"
+#include "fl/stl/string.h"
 
 TEST_CASE("Serial.printf basic") {
     Serial.begin(9600);

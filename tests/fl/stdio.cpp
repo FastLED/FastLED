@@ -1,11 +1,18 @@
 #include "doctest.h"
 #include "fl/stl/stdio.h"
-#include "fl/stl/strstream.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/string.h"
 #include "fl/compiler_control.h"
 #include <iostream>
 #include <cstdio> // For std::sprintf and std::snprintf
+#include "__algorithm/min.h"
+#include "__new/placement_new_delete.h"
+#include "__ostream/basic_ostream.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/move.h"
+#include "fl/unused.h"
+#include "ios"
+#include "stdio.h"
 
 
 

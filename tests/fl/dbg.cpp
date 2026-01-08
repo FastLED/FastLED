@@ -1,5 +1,7 @@
-#include "test.h"
-#include "fl/dbg.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/strstream.h"
 
 using namespace fl;
 

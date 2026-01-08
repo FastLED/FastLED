@@ -11,11 +11,19 @@
 /// This encoder converts high-definition 16-bit pixels into dual 8-bit pixels
 /// for transmission through standard WS2812 controllers.
 
-#include "test.h"
 #include "fl/chipsets/encoders/ws2816.h"
 #include "crgb.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/rgb8.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/array.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/pair.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

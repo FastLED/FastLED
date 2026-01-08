@@ -1,8 +1,6 @@
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "fl/ui.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/ui_internal.h"
@@ -20,6 +18,22 @@
 #include <cstring>
 #include "fl/json.h"
 #include "fl/unused.h"
+#include <stdio.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/sketch_macros.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/function.h"
+#include "fl/stl/move.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/weak_ptr.h"
 using namespace fl;
 class MockJsonUiInternal : public fl::JsonUiInternal {
 public:

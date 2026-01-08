@@ -1,7 +1,18 @@
-#include "test.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/atomic.h"
+#include "__algorithm/max.h"
+#include "__algorithm/min.h"
+#include "__ostream/basic_ostream.h"
+#include "__thread/id.h"
+#include "__thread/this_thread.h"
+#include "__thread/thread.h"
+#include "__type_traits/invoke.h"
+#include "__utility/move.h"
+#include "doctest.h"
+#include "fl/stl/move.h"
+#include "ios"
+#include "mutex_stub_stl.h"
 
 TEST_CASE("fl::thread - basic construction and joinable") {
     // Default constructed thread is not joinable

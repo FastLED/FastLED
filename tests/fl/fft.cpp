@@ -1,7 +1,6 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
 // Include precision header first to ensure FASTLED_FFT_PRECISION is defined
 #include "third_party/cq_kernel/fft_precision.h"
@@ -9,6 +8,17 @@
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
 #include "fl/stl/math.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/map_range.h"
+#include "fl/math_macros.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/vector.h"
 
 // FFT tests adapt to the build-time FASTLED_FFT_PRECISION setting.
 // Test expectations are provided for all three precision modes:

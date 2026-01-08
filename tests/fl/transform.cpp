@@ -1,14 +1,13 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "lib8tion/intmap.h"
 #include "fl/transform.h"
-#include "fl/stl/vector.h"
-#include "fl/unused.h"
-#include <string>
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/math_macros.h"
 
 
 

@@ -5,14 +5,12 @@
 // allow-include-after-namespace
 
 #include "fl/align.h"
-#include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
-#include "fl/force_inline.h"
-#include "fl/isr.h"
-#include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {
+
+struct ChipsetTiming;
 
 /// @brief Type-safe container for packed 8-bit wave pulse pattern
 ///
@@ -108,4 +106,3 @@ void wave8Untranspose_16(
 
 // Include inline implementations for optimal performance
 // This must be after the namespace to avoid the include-after-namespace linter error
-#include "detail/wave8.hpp"

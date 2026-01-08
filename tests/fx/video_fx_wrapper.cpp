@@ -1,12 +1,20 @@
 
 
-#include "test.h"
 
 #include "fl/fx/fx.h"
 #include "fl/fx/fx2d.h"
 #include "fl/fx/video.h"
 #include "fl/stl/vector.h"
 #include "FastLED.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/rgb8.h"
+#include "fl/stl/move.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/string.h"
+#include "fl/xymap.h"
 
 namespace {
 

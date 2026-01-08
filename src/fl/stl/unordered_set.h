@@ -1,10 +1,11 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
 
-#include "fl/stl/vector.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/stl/allocator.h"
+#include "fl/hash.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/int_windows.h"
 
 namespace fl {
 

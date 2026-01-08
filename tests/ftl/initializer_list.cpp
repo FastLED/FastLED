@@ -1,6 +1,6 @@
-#include "test.h"
-#include "fl/stl/initializer_list.h"
-#include "fl/stl/array.h"
+#include "doctest.h"
+#include "initializer_list"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

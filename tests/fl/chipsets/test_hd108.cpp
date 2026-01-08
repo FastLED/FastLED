@@ -13,15 +13,25 @@
 /// - f0 = 0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03)
 /// - f1 = ((g_gain & 0x07) << 5) | (b_gain & 0x1F)
 
-#include "test.h"
-#include "FastLED.h"
-#include "chipsets.h"
 #include "crgb.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "fl/ease.h"
-#include "fl/stl/span.h"
-#include "fl/dbg.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "dither_mode.h"
+#include "doctest.h"
+#include "eorder.h"
+#include "fl/chipsets/hd108.h"
+#include "fl/engine_events.h"
+#include "fl/eorder.h"
+#include "fl/int.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/utility.h"
+#include "fl/stl/vector.h"
+#include "pixel_controller.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

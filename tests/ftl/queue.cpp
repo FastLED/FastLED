@@ -1,9 +1,10 @@
 // Test file for fl::queue
 
-#include "test.h"
 #include "fl/stl/queue.h"
-#include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/move.h"
 
 
 TEST_CASE("Basic Queue Operations") {

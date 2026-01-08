@@ -1,8 +1,10 @@
 /// @file tests/fl/detail/async_logger.cpp
 /// @brief Tests for AsyncLogger lazy instantiation and auto-registration
 
-#include "test.h"
 #include "fl/detail/async_logger.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
 
 using namespace fl;
 

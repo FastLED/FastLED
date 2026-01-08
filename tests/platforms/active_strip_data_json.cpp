@@ -1,10 +1,27 @@
-#include "test.h"
 #include "fl/json.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "FastLED.h"
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/eorder.h"
+#include "fl/log.h"
+#include "fl/rgb8.h"
+#include "fl/rgbw.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/vector.h"
+#include "rgbw.h"
 using namespace fl;
 TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("Testing ActiveStripData JSON round-trip...");

@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "fl/stl/stdint.h"
-
+#include "fl/int.h"
+#include "platforms/shared/int_windows.h"
 #include "fl/clamp.h"
 #include "fl/force_inline.h"
 #include "fl/math_macros.h"
@@ -19,8 +19,6 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 
 namespace fl {
-
-template <typename T> struct vec2;
 
 //////////////////////////////////// IMPLEMENTATION DETAILS
 //////////////////////////////////////////

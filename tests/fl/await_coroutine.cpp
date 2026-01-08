@@ -1,4 +1,3 @@
-#include "test.h"
 #include "fl/async.h"
 #include "fl/task.h"
 #include "fl/promise.h"
@@ -6,10 +5,25 @@
 #include "fl/stl/mutex.h"
 #include "fl/stl/vector.h"
 #include "fl/math_macros.h"
-#include <chrono>  // For std::chrono::milliseconds
+#include <stdint.h>
+#include <stdio.h>
+#include "__chrono/duration.h"
+#include "__new/placement_new_delete.h"
+#include "__thread/this_thread.h"
+#include "__thread/thread.h"
+#include "__type_traits/invoke.h"
+#include "__utility/move.h"
+#include "doctest.h"
+#include "fl/promise_result.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/atomic.h"
+#include "fl/stl/function.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "mutex_stub_stl.h"
+#include "thread_stub_stl.h"
 
 #ifdef FASTLED_STUB_IMPL
-#include "platforms/stub/coroutine_runner.h"
 #endif
 
 using namespace fl;
@@ -58,11 +72,11 @@ promise<T> delayed_resolve(const T& value, uint32_t delay_ms) {
 
         // Only complete if not shutting down
         if (!g_shutdown_requested.load()) {
-            fl::printf("    [Background] Promise resolving with value %d after %u ms\n", (int)value, delay_ms);
+            printf("    [Background] Promise resolving with value %d after %u ms\n", (int)value, delay_ms);
             // Complete promise WITHOUT acquiring global lock
             // The promise callbacks (cv.notify) can run from any thread
             p.complete_with_value(value);
-            fl::printf("    [Background] Promise completed with value %d\n", (int)value);
+            printf("    [Background] Promise completed with value %d\n", (int)value);
         }
     });
 
@@ -205,7 +219,7 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     fl::atomic<int> completed_count(0);
     fl::atomic<int> sum(0);
 
-    fl::printf("Test: Spawning 5 coroutines\n");
+    printf("Test: Spawning 5 coroutines\n");
 
     // Store task objects to keep coroutines alive
     fl::vector<task> tasks;
@@ -214,37 +228,37 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     for (int i = 0; i < 5; i++) {
         CoroutineConfig config;
         config.function = [&, i]() {
-            fl::printf("  Coroutine %d: Started\n", i);
-            // Each promise resolves to i*10 after (i*1)ms (reduced from i*10)
-            auto p = delayed_resolve<int>(i * 10, i * 1);
-            fl::printf("  Coroutine %d: Created promise, calling await()\n", i);
+            printf("  Coroutine %d: Started\n", i);
+            // Each promise resolves to i*10 after (i*10)ms
+            auto p = delayed_resolve<int>(i * 10, i * 10);
+            printf("  Coroutine %d: Created promise, calling await()\n", i);
             auto result = fl::await(p);
-            fl::printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
+            printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
 
             if (result.ok()) {
-                fl::printf("  Coroutine %d: Adding value %d to sum\n", i, result.value());
+                printf("  Coroutine %d: Adding value %d to sum\n", i, result.value());
                 sum.fetch_add(result.value());
             }
 
             completed_count.fetch_add(1);
-            fl::printf("  Coroutine %d: Completed\n", i);
+            printf("  Coroutine %d: Completed\n", i);
         };
         config.name = fl::string("TestCoro") + fl::to_string(i);
         tasks.push_back(task::coroutine(config));
-        fl::printf("Test: Spawned coroutine %d\n", i);
+        printf("Test: Spawned coroutine %d\n", i);
     }
 
     // Wait for all coroutines to complete
     int timeout = 0;
-    fl::printf("Test: Waiting for coroutines to complete...\n");
-    while (completed_count.load() < 5 && timeout < 200) {
+    printf("Test: Waiting for coroutines to complete...\n");
+    while (completed_count.load() < 5 && timeout < 2000) {
         if (timeout % 200 == 0) {
-            fl::printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
+            printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 10;
     }
-    fl::printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
+    printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
 
     CHECK(completed_count.load() == 5);
     CHECK(sum.load() == 0 + 10 + 20 + 30 + 40);  // Sum of 0, 10, 20, 30, 40

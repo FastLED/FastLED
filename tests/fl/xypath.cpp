@@ -1,14 +1,18 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
-#include "lib8tion/intmap.h"
 #include "fl/xypath.h"
-#include "fl/stl/vector.h"
-#include "fl/unused.h"
-#include <string>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/math_macros.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/tile2x2.h"
+#include "fl/transform.h"
+#include "fl/xypath_impls.h"
 
 
 #define MESSAGE_TILE(TILE) \

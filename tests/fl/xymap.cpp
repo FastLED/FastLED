@@ -1,7 +1,9 @@
 // Unit tests for XYMap basic functionality and LUT vs user-function compatibility
 
-#include "test.h"
 #include "FastLED.h"
+#include "doctest.h"
+#include "fl/xymap.h"
+#include "platforms/shared/int_windows.h"
 
 
 namespace {

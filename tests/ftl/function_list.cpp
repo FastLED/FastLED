@@ -1,9 +1,14 @@
 /// @file function_list.cpp
 /// @brief Comprehensive tests for function_list class
 
-#include "test.h"
 #include "fl/stl/function.h"
 #include "fl/unused.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/move.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 

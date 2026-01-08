@@ -1,10 +1,16 @@
-#include "test.h"
-#include "FastLED.h"
 #include "hsv2rgb.h"
-#include <vector>
-#include <algorithm>
-#include <numeric>
-#include <cmath>
+#include <stddef.h>
+#include "__algorithm/sort.h"
+#include "__new/placement_new_delete.h"
+#include "__numeric/accumulate.h"
+#include "__utility/pair.h"
+#include "__vector/vector.h"
+#include "chsv.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/stl/math.h"
+#include "fl/stl/strstream.h"
 using namespace fl;
 struct AccuracyStats {
     float average;

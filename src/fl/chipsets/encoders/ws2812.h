@@ -18,6 +18,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
+#include "fl/rgbw.h"
 
 namespace fl {
 

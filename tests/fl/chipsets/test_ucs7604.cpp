@@ -6,12 +6,28 @@
 /// - LED data: 3 bytes (RGB 8-bit) per LED
 /// - Padding: 0-2 zero bytes to ensure total size divisible by 3
 
-#include "test.h"
-#include "FastLED.h"
 #include "fl/chipsets/ucs7604.h"
 #include "crgb.h"
 #include "fl/stl/vector.h"
 #include "fl/ease.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "cled_controller.h"
+#include "cpixel_ledcontroller.h"
+#include "dither_mode.h"
+#include "doctest.h"
+#include "eorder.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/chipsets/encoders/ucs7604.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/eorder.h"
+#include "fl/rgb8.h"
+#include "fl/rgbw.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "pixel_controller.h"
+#include "rgbw.h"
 
 using namespace fl;
 

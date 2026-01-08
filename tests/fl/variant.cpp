@@ -1,12 +1,15 @@
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
-#include "fl/ui.h"
 #include "fl/stl/variant.h"
-#include "fl/stl/optional.h"
-#include "fl/str.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/hash.h"
+#include "fl/log.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/unordered_map.h"
 
 
 // Test object that tracks construction/destruction for move semantics testing

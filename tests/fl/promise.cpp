@@ -1,7 +1,12 @@
-#include "test.h"
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 #include "fl/unused.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/function.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/variant.h"
 
 
 TEST_CASE("fl::promise - Basic Operations") {

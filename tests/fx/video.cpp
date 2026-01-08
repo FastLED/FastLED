@@ -1,17 +1,19 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include <vector>
 
 #include "crgb.h"
 #include "fl/bytestreammemory.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/fx/video.h"
-#include "fl/fx/video/pixel_stream.h"
-#include "lib8tion/intmap.h"
-#include "test.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "__vector/vector.h"
+#include "doctest.h"
+#include "fl/file_system.h"
+#include "fl/rgb8.h"
 
 #define FPS 30
 #define FRAME_TIME 1000 / FPS

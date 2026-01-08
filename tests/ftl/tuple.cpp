@@ -1,6 +1,11 @@
 #include "test.h"
 #include "fl/stl/tuple.h"
 #include "fl/stl/string.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
 
 using namespace fl;
 

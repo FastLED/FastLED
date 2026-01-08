@@ -12,8 +12,9 @@
 // Note: PROGMEM functions (_P variants) are platform-specific (AVR only)
 // and are not tested in this host-based test suite.
 
-#include "test.h"
 #include "fl/stl/cstring.h"
+#include <stddef.h>
+#include "doctest.h"
 
 // Note: We do NOT use "using namespace fl;" because string functions
 // would conflict with system C library functions (strcmp, strcpy, etc.)

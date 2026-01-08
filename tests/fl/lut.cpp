@@ -1,11 +1,11 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "lib8tion/intmap.h"
 #include "fl/lut.h"
+#include <stdint.h>
+#include "doctest.h"
 
 
 

@@ -11,14 +11,18 @@
 /// Unlike parlio_mock.cpp (which tests engine lifecycle), this file focuses on
 /// validating the actual DMA output data matches expected waveform parameters.
 
-#include "test.h"
-#include "FastLED.h"
 
 #ifdef FASTLED_STUB_IMPL  // Mock tests only run on stub platform
 
 #include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
-#include "fl/channels/wave8.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 using namespace fl::detail;

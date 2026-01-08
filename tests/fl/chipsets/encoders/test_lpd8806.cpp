@@ -10,12 +10,17 @@
 /// - lpd8806Encode(): Maps 8-bit (0-255) to 7-bit (0x80-0xFF) with MSB set
 /// - Scaling: (value >> 1) preserves proportions, special rounding for non-extremes
 
-#include "test.h"
-#include "FastLED.h"
 #include "fl/chipsets/encoders/lpd8806.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/array.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/iterator.h"
 
 using namespace fl;
 

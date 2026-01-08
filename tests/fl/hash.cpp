@@ -1,7 +1,10 @@
-#include "test.h"
 #include "fl/hash.h"
 #include "fl/stl/string.h"
-#include "fl/point.h"  // For vec2
+#include <stddef.h>
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/int.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

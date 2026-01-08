@@ -9,8 +9,17 @@
 #include "fl/channels/data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "platforms/esp/32/drivers/uart/channel_engine_uart.h"
-#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "fl/channels/engine.h"
+#include "fl/delay.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/move.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 
 // WS2812 timing constants for testing
 namespace {

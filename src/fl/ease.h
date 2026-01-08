@@ -8,9 +8,8 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 
 */
 
-#include "fl/stl/stdint.h"
 #include "fl/int.h"
-#include "fastled_progmem.h"
+#include "platforms/shared/int_windows.h"
 
 namespace fl {
 

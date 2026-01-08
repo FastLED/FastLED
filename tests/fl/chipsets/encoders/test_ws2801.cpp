@@ -19,12 +19,17 @@
 /// - Encoder now handles all protocol details (no frame overhead for WS2801)
 /// - Controller just manages timing and SPI communication
 
-#include "test.h"
 #include "fl/chipsets/encoders/ws2801.h"
-#include "fl/chipsets/encoders/encoder_constants.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "initializer_list"
 
 using namespace fl;
 

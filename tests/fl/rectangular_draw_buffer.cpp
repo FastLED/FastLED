@@ -3,7 +3,11 @@
 
 #include "fl/rectangular_draw_buffer.h"
 #include "rgbw.h"
-#include "test.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/rgbw.h"
+#include "fl/stl/span.h"
 
 
 TEST_CASE("Rectangular Buffer") {

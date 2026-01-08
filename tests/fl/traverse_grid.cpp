@@ -1,10 +1,10 @@
-#include "fl/time_alpha.h"
 #include "fl/traverse_grid.h"
-#include "test.h"
 
 #include <set>
-#include <utility>
-#include <iostream>
+#include "__new/placement_new_delete.h"
+#include "__utility/pair.h"
+#include "doctest.h"
+#include "fl/geometry.h"
 
 
 struct CollectingVisitor {

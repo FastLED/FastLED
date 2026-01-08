@@ -1,10 +1,14 @@
 // Compile with: g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "fl/bytestreammemory.h"
 #include "fl/fx/video/pixel_stream.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/fx/video.h"
+#include "fl/stl/shared_ptr.h"
 
 TEST_CASE("ByteStreamMemory basic operations") {
 

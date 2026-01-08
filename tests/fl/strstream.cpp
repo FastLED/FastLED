@@ -32,14 +32,15 @@
 // All tests designed to compile without ambiguous overload errors and produce
 // valid output across all supported platforms (AVR, ARM, ESP32, Desktop, WebAssembly).
 
-#include "test.h"
 
-#include "test.h"
-#include "fl/str.h"
 #include "fl/stl/strstream.h"
-#include "fl/stl/vector.h"
 #include "crgb.h"
-#include <sstream>
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/ios.h"
+#include "fl/stl/string.h"
+#include "platforms/shared/int_windows.h"
 
 TEST_CASE("StrStream basic operations") {
     SUBCASE("Construction and assignment") {

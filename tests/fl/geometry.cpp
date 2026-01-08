@@ -1,5 +1,9 @@
-#include "test.h"
 #include "fl/geometry.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/math.h"
+#include "fl/stl/move.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

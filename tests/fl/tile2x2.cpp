@@ -1,12 +1,10 @@
 // Test file for Tile2x2 functionality
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
-#include "lib8tion/intmap.h"
-#include "fl/transform.h"
-#include "fl/stl/vector.h"
 #include "fl/tile2x2.h"
-#include <string>
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/geometry.h"
 
 
 // Test basic fl::Tile2x2_u8 functionality

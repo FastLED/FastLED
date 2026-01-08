@@ -1,4 +1,3 @@
-#include "test.h"
 
 // BeatDetectorEDM is not yet implemented - disable these tests
 #if 0  // Was: #if SKETCH_HAS_LOTS_OF_MEMORY

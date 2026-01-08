@@ -1,11 +1,18 @@
 // g++ --std=c++11 test.cpp
 
-#include <random>
 
-#include "test.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/initializer_list.h"
 #include "fl/slice.h"  // For fl::span
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/insert_result.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
+#include "fl/unused.h"
+#include "stdlib.h"
 
 
 

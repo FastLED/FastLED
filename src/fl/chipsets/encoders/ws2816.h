@@ -16,6 +16,7 @@
 /// @note This encoder produces 2x CRGB output for each input pixel
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/array.h"
 #include "fl/stl/pair.h"
 #include "fl/force_inline.h"
 #include "crgb.h"

@@ -1,13 +1,26 @@
-#include "test.h"
-#include "fl/spi.h"
-#include "fl/spi/impl.h"
 #include "platforms/shared/spi_types.h"
-#include "platforms/shared/spi_bus_manager.h"
 #include "platforms/shared/spi_hw_1.h"
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/shared/spi_hw_16.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/promise.h"
+#include "fl/result.h"
+#include "fl/slice.h"
+#include "fl/spi/config.h"
+#include "fl/spi/device.h"
+#include "fl/spi/transaction.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/move.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/strstream.h"
 
 using namespace fl::spi;
 using fl::SPIError;

@@ -40,6 +40,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --no-fingerprint  Force re-run all linters (skip timestamp checks)"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
+            echo "C++ linting includes: clang-format, custom checkers, and IWYU (Include-What-You-Use)."
             echo "JavaScript linting: FAST ONLY (skips if not available)."
             exit 0
             ;;
@@ -209,6 +210,30 @@ if [ "$JS_ONLY" = false ]; then
 
     # Record C++ linting stage
     record_stage "cpp_linting" "$CPP_LINT_DURATION" "$CPP_LINT_SKIPPED"
+
+    # IWYU analysis - separate stage with its own timing
+    echo ""
+    echo "🔍 INCLUDE-WHAT-YOU-USE ANALYSIS"
+    echo "---------------------------------"
+
+    IWYU_START=$(date +%s)
+    IWYU_SKIPPED=false
+
+    if [ "$NEEDS_CPP_LINT" = true ]; then
+        echo "Running IWYU on C++ test suite..."
+        if uv run python ci/ci-iwyu.py --quiet; then
+            echo "✅ IWYU analysis passed"
+        else
+            echo "❌ IWYU analysis failed"
+            exit 1
+        fi
+    else
+        IWYU_SKIPPED=true
+    fi
+    IWYU_DURATION=$(get_elapsed_seconds $IWYU_START)
+
+    # Record IWYU stage
+    record_stage "iwyu" "$IWYU_DURATION" "$IWYU_SKIPPED"
 fi
 
 if [ "$CPP_ONLY" = false ]; then
@@ -335,7 +360,8 @@ echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"
 echo "  - Use 'bash lint --js' for JavaScript linting only"
-echo "  - Use 'bash lint --cpp' for C++ linting only"
+echo "  - Use 'bash lint --cpp' for C++ linting only (includes IWYU analysis)"
+echo "  - C++ linting includes: clang-format, custom checkers, and IWYU"
 echo "  - JavaScript linting: FAST ONLY (no slow fallback)"
 echo "  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py"
 echo "  - Use 'bash lint --help' for usage information"

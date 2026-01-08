@@ -1,5 +1,7 @@
 #include "test.h"
 #include "fl/stl/move.h"
+#include "doctest.h"
+#include "fl/stl/type_traits.h"
 
 using namespace fl;
 

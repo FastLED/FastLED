@@ -11,7 +11,10 @@
 ///
 /// The actual SPI hardware transmission is tested via integration tests.
 
-#include "test.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/math_macros.h"
 
 using namespace fl;
 

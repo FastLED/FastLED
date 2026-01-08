@@ -20,12 +20,16 @@
 /// - All protocol behavior is identical
 /// - Tests verify that the alias works correctly
 
-#include "test.h"
 #include "fl/chipsets/encoders/ws2803.h"
-#include "fl/chipsets/encoders/encoder_constants.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/allocator.h"
+#include "initializer_list"
 
 using namespace fl;
 

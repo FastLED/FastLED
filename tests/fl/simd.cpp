@@ -1,7 +1,10 @@
 // Test for fl::simd atomic operations
 
-#include "test.h"
 #include "fl/simd.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "doctest.h"
+#include "platforms/shared/simd_x86.hpp"
 
 using namespace fl;
 

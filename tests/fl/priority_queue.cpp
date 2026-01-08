@@ -1,6 +1,10 @@
-#include "test.h"
 #include "fl/stl/priority_queue.h"
 #include "fl/stl/vector.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/utility.h"
 
 TEST_CASE("priority_queue_stable: basic operations") {
     fl::priority_queue_stable<int> queue;

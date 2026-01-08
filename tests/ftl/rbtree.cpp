@@ -1,12 +1,24 @@
-#include "test.h"
 #include <map>
 #include <string>
-#include <vector>
-#include <random>
-#include <algorithm>
-#include <climits>  // ok INT_MAX (testing edge cases with extreme values)
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/string.h"
+#include <stddef.h>
+#include "__algorithm/reverse.h"
+#include "__algorithm/shuffle.h"
+#include "__fwd/string.h"
+#include "__iterator/reverse_iterator.h"
+#include "__new/placement_new_delete.h"
+#include "__random/mersenne_twister_engine.h"
+#include "__random/random_device.h"
+#include "__utility/move.h"
+#include "__utility/pair.h"
+#include "__vector/comparison.h"
+#include "__vector/vector.h"
+#include "doctest.h"
+#include "fl/stl/move.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/utility.h"
+#include "limits.h"
 
 namespace {
 

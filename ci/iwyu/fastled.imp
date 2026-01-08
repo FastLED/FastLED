@@ -60,4 +60,11 @@
   # Testing headers - keep as-is for test files
   { include: ['"test_*.h"', 'public', '"test_*.h"', 'public'] },
   { include: ['"doctest.h"', 'public', '"doctest.h"', 'public'] },
+
+  # FastLED uses custom stdint.h replacement to avoid 500ms compile-time penalty
+  # Map standard headers to FastLED equivalents
+  { include: ['<stdint.h>', 'public', '"fl/stl/stdint.h"', 'public'] },
+  { include: ['<stddef.h>', 'public', '"fl/stl/cstddef.h"', 'public'] },
+  { include: ['<cstdint>', 'public', '"fl/stl/stdint.h"', 'public'] },
+  { include: ['<cstddef>', 'public', '"fl/stl/cstddef.h"', 'public'] },
 ]

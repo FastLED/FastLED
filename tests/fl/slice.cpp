@@ -1,6 +1,8 @@
-#include "test.h"
 #include "fl/slice.h"
 #include "fl/stl/array.h"
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

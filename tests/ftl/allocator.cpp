@@ -1,6 +1,10 @@
-#include "test.h"
-#include "fl/stl/allocator.h"
-#include "fl/stl/vector.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 
@@ -1207,9 +1211,6 @@ TEST_CASE("fl::allocator integration with vector") {
         CHECK_EQ(vec[4], 5);
     }
 }
-#include "test.h"
-#include "fl/stl/allocator.h"
-#include "fl/stl/vector.h"
 
 
 // Global variables to track hook calls

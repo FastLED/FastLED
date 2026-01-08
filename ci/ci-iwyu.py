@@ -31,6 +31,11 @@ def parse_args() -> argparse.Namespace:
         help="Maximum line length for suggestions (default: 100)",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress verbose output (show only essential status)",
+    )
     return parser.parse_args()
 
 
@@ -62,8 +67,14 @@ def find_platformio_project_dir(board_dir: Path) -> Path | None:
     return None
 
 
-def check_iwyu_available() -> bool:
-    """Check if include-what-you-use is available in the system"""
+def check_iwyu_available() -> tuple[bool, str]:
+    """Check if include-what-you-use is available in the system
+
+    Returns:
+        Tuple of (is_available, command_prefix)
+        command_prefix is empty string for system IWYU, or "uv run " for clang-tool-chain
+    """
+    # First try system include-what-you-use
     try:
         result = subprocess.run(
             ["include-what-you-use", "--version"],
@@ -71,13 +82,40 @@ def check_iwyu_available() -> bool:
             text=True,
             timeout=10,
         )
-        return result.returncode == 0
+        if result.returncode == 0:
+            return (True, "")
     except (
         subprocess.CalledProcessError,
         FileNotFoundError,
         subprocess.TimeoutExpired,
     ):
-        return False
+        pass
+
+    # Fall back to clang-tool-chain-iwyu via uv
+    try:
+        # Note: clang-tool-chain-iwyu doesn't support --version, so we just check if it exists
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "python",
+                "-c",
+                "from clang_tool_chain.wrapper import iwyu_main",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            return (True, "uv run ")
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
+        pass
+
+    return (False, "")
 
 
 def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
@@ -85,7 +123,8 @@ def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
     here = Path(__file__).parent
     project_root = here.parent
 
-    print("Running include-what-you-use on C++ test suite...")
+    if not args.quiet:
+        print("Running include-what-you-use on C++ test suite...")
 
     # Use the existing test infrastructure with --check flag
     cmd = [
@@ -96,16 +135,35 @@ def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
         "--check",  # This enables IWYU
         "--clang",
         "--no-interactive",
+        "--no-fingerprint",  # Force re-run to ensure IWYU checks all files
     ]
 
     if args.verbose:
         cmd.append("--verbose")
 
     try:
-        result = subprocess.run(cmd, cwd=project_root)
+        # Suppress output in quiet mode
+        if args.quiet:
+            result = subprocess.run(
+                cmd,
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            # Only show output if there was an error
+            if result.returncode != 0:
+                if result.stdout:
+                    print(result.stdout)
+                if result.stderr:
+                    print(result.stderr, file=sys.stderr)
+        else:
+            result = subprocess.run(cmd, cwd=project_root)
         return result.returncode
     except subprocess.CalledProcessError as e:
-        print(f"IWYU analysis failed with return code {e.returncode}")
+        if not args.quiet:
+            print(f"IWYU analysis failed with return code {e.returncode}")
         return e.returncode
 
 
@@ -214,19 +272,27 @@ def main() -> int:
     project_root = here.parent
 
     # Check if IWYU is available
-    if not check_iwyu_available():
-        print("Error: include-what-you-use not found in PATH")
+    iwyu_available, iwyu_prefix = check_iwyu_available()
+    if not iwyu_available:
+        print("Error: include-what-you-use not found")
         print("Install it with:")
         print("  Ubuntu/Debian: sudo apt install iwyu")
         print("  macOS: brew install include-what-you-use")
-        print("  Or build from source: https://include-what-you-use.org/")
+        print("  Or it should be available via: uv run clang-tool-chain-iwyu")
         return 1
 
-    print("Found include-what-you-use")
+    if not args.quiet:
+        if iwyu_prefix:
+            print(
+                f"Found include-what-you-use via clang-tool-chain (using: {iwyu_prefix}clang-tool-chain-iwyu)"
+            )
+        else:
+            print("Found system include-what-you-use")
 
     # If no board specified, run on C++ test suite
     if not args.board:
-        print("No board specified, running IWYU on C++ test suite")
+        if not args.quiet:
+            print("No board specified, running IWYU on C++ test suite")
         return run_iwyu_on_cpp_tests(args)
 
     # Run on specific board

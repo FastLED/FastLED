@@ -1,8 +1,9 @@
 /// @file log.cpp
 /// @brief Test for logging utility functions
 
-#include "test.h"
 #include "fl/log.h"
+#include "doctest.h"
+#include "fl/stl/cstring.h"
 
 using namespace fl;
 

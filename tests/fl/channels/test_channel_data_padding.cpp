@@ -4,12 +4,17 @@
 /// Demonstrates how padding generators can be used to extend buffers
 /// for protocols that require alignment (e.g., UCS7604's divisible-by-3 requirement)
 
-#include "test.h"
 #include "fl/channels/data.h"
-#include "fl/chipsets/led_timing.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/vector.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/slice.h"
+#include "fl/stl/move.h"
 
 using namespace fl;
 

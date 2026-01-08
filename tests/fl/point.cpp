@@ -1,7 +1,13 @@
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 #include "fl/geometry.h"
+#include <string>
+#include "__algorithm/min.h"
+#include "__ostream/basic_ostream.h"
+#include "doctest.h"
+#include "fl/exit.h"
+#include "fl/stl/math.h"
+#include "iostream"
 
 
 

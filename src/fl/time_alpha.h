@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include "fl/stl/stdint.h"
 
 #include "fl/math_macros.h"
-#include "fl/warn.h"
+#include "fl/int.h"
+#include "platforms/shared/int_windows.h"
 
 namespace fl {
 

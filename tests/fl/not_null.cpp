@@ -1,7 +1,7 @@
 /// @file not_null.cpp
 /// @brief Test for fl::not_null<T> pointer wrapper
 
-#include "test.h"
+#include "doctest.h"
 #include "fl/stl/not_null.h"
 
 using namespace fl;
@@ -195,6 +195,8 @@ TEST_CASE("not_null - modify through smart pointer") {
 // ============================================================================
 
 #include "fl/rgb8.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
 
 TEST_CASE("not_null - works with CRGB pointer") {
     fl::CRGB pixel(255, 128, 64);

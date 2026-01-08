@@ -1,7 +1,7 @@
 /// @file engine.cpp
 /// @brief Tests for the Channel and IChannelEngine API
 
-#include "test.h"
+#include "FastLED.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/config.h"
 #include "fl/channels/engine.h"
@@ -10,6 +10,21 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
+#include "fl/fill.h"
+#include "__new/placement_new_delete.h"
+#include "colorutils.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "eorder.h"
+#include "fl/channels/options.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/eorder.h"
+#include "fl/log.h"
+#include "fl/rgb8.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/strstream.h"
 
 namespace channel_engine_test {
 

@@ -1,6 +1,7 @@
-#include "test.h"
 #include "platforms/cycle_type.h"
-#include "fl/int.h"
+#include "doctest.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

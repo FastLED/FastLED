@@ -12,12 +12,16 @@
 /// Flag Byte Calculation:
 /// flag = 0xC0 | (~b & 0xC0) >> 2 | (~g & 0xC0) >> 4 | (~r & 0xC0) >> 6
 
-#include "test.h"
 #include "fl/chipsets/encoders/p9813.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
 
 using namespace fl;
 

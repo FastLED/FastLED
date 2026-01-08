@@ -1,6 +1,13 @@
 #include "fl/stl/istream.h"
-#include "test.h"
-#include <cstring>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/function.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
 
 // Test that fl::cin and fl::istream compile without errors
 

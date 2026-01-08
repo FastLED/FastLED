@@ -1,13 +1,23 @@
 // test.cpp
 // g++ --std=c++11 test.cpp -o test && ./test
 
-#include <vector>
 #include <set>
-#include <unordered_map>
 
 #include "fl/stl/unordered_map.h"
-#include "fl/str.h"
-#include "test.h"
+#include <cstddef>
+#include "__new/placement_new_delete.h"
+#include "__tree"
+#include "__vector/vector.h"
+#include "doctest.h"
+#include "fl/compiler_control.h"
+#include "fl/hash.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/move.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "initializer_list"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

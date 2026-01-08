@@ -1,10 +1,15 @@
 /// @file rx_device.cpp
 /// @brief Unit tests for RxDevice interface and factory
 
-#include "test.h"
 #include "fl/rx_device.h"
-#include "platforms/shared/rx_device_dummy.h"
 #include "fl/stl/cstring.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/slice.h"
+#include "fl/stl/move.h"
+#include "fl/stl/shared_ptr.h"
 
 using namespace fl;
 

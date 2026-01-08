@@ -2,11 +2,10 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
-#include "fl/fx/frame.h"
 #include "fl/fx/video/frame_tracker.h"
+#include <stdint.h>
+#include "doctest.h"
 using namespace fl;
 TEST_CASE("FrameTracker basic frame advancement") {
     FrameTracker tracker(1.0f);  // 1fps == 1000ms per frame

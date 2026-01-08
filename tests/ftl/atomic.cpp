@@ -1,5 +1,6 @@
-#include "test.h"
 #include "fl/stl/atomic.h"
+#include "doctest.h"
+#include "platforms/shared/atomic.h"
 
 using namespace fl;
 

@@ -5,13 +5,16 @@
 // Remote RPC system requires JSON support
 #if FASTLED_ENABLE_JSON
 
+#include "fl/stl/stdint.h"
+#include "__new/placement_new_delete.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/priority_queue.h"
-#include "fl/warn.h"
-#include "fl/error.h"
-#include "fl/dbg.h"
 
 // Compile-time prefix for Remote JSON output
 // Define as empty string to disable: -DFASTLED_REMOTE_PREFIX=\"\"

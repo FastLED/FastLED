@@ -1,12 +1,14 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "FastLED.h"
-#include "fl/raster.h"
 #include "fl/tile2x2.h"
 #include "fl/xypath.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/raster_sparse.h"
+#include "fl/slice.h"
 
 TEST_CASE("XYRasterU8SparseTest should match bounds of pixels draw area") {
     fl::XYPathPtr path = fl::XYPath::NewLinePath(-1, -1, 1, 1);

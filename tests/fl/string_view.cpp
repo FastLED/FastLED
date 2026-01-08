@@ -1,9 +1,10 @@
 /// @file string_view.cpp
 /// @brief Test for fl::string_view - non-owning string view
 
-#include "test.h"
 #include "fl/string_view.h"
-#include "fl/str.h"
+#include "doctest.h"
+#include "fl/stl/string.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

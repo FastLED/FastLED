@@ -1,9 +1,10 @@
 // Test for fl::back_inserter and iterator utilities
 
-#include "test.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/algorithm.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/detail/heap_vector.h"
 
 TEST_CASE("back_inserter with HeapVector") {
     fl::HeapVector<int> vec;

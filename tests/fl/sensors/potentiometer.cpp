@@ -1,9 +1,12 @@
 /// @file potentiometer.cpp
 /// @brief Unit tests for Potentiometer class
 
-#include "test.h"
 #include "fl/sensors/potentiometer.h"
-#include "fl/ui.h"
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/function.h"
+#include "fl/stl/move.h"
 
 using namespace fl;
 

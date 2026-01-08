@@ -1,10 +1,16 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "FastLED.h"
+#include "chsv.h"
+#include "colorutils.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "eorder.h"
+#include "fl/colorutils_misc.h"
+#include "fl/eorder.h"
+#include "fl/fill.h"
 
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000

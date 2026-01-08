@@ -9,6 +9,9 @@
 /// devices to focus purely on byte I/O.
 
 #include "fl/stl/stdint.h"
+#include "pixel_controller.h"
+#include "eorder.h"
+#include "fastspi_types.h"
 
 // Forward declarations - these should be defined by the including header
 // (e.g., chipsets.h includes pixel_iterator.h and eorder.h before this header)

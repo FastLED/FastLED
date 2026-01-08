@@ -1,11 +1,7 @@
 #pragma once
 
 #include "fl/sketch_macros.h"
-#include "fl/stl/strstream.h"
-#include "fl/str.h"
-#include "fl/int.h"
-#include "fl/stl/stdint.h"
-#include "fl/detail/async_logger.h"  // AsyncLogger class and template-based access
+#include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
 
 // =============================================================================
 // Forward Declarations

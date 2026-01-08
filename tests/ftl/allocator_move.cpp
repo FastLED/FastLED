@@ -1,11 +1,22 @@
 // Test allocator move semantics for all containers
 // Verifies that allocators are properly moved during move construction and move assignment
 
-#include "test.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/map.h"
 #include "fl/stl/set.h"
 #include "fl/stl/allocator.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/move.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/utility.h"
+#include "fl/unused.h"
+#include "new"
+#include "platforms/shared/int_windows.h"
 
 namespace {
 

@@ -1,8 +1,8 @@
 /// @file test_delay_ns.cpp
 /// Unit tests for nanosecond-precision delay functionality (fl/delay.h)
 
-#include "test.h"
 #include "fl/delay.h"
+#include "doctest.h"
 
 // ============================================================================
 // Test Suite: Compile-time Template Delays

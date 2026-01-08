@@ -1,5 +1,6 @@
-#include "test.h"
 #include "fl/clamp.h"
+#include <stdint.h>
+#include "doctest.h"
 
 using namespace fl;
 

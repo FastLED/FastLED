@@ -8,11 +8,13 @@
 
 #define FASTLED_INTERNAL
 #include "fl/isr.h"
-#include "test.h"
+#include "__atomic/atomic.h"
+#include "__atomic/support/c11.h"
+#include "__chrono/duration.h"
+#include "__thread/this_thread.h"
+#include "doctest.h"
+#include "isr_stub.hpp"
 
-#include <atomic>
-#include <chrono>
-#include <thread>
 using namespace fl;
 // Test counters
 static std::atomic<int> g_isr_call_count{0};

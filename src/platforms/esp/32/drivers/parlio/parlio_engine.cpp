@@ -16,6 +16,7 @@
 #include "fl/unused.h"
 
 #include "parlio_engine.h"
+#include "fl/channels/detail/wave8.hpp"
 #include "parlio_isr_context.h"
 #include "parlio_buffer_calc.h"
 #include "parlio_debug.h"

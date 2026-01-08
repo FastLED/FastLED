@@ -1,7 +1,11 @@
-#include "test.h"
 #include "fl/stl/strstream.h"
-#include "fl/str.h"
 #include <cstdint>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "platforms/shared/int_windows.h"
 
 TEST_CASE("StrStream handles all integer types generically") {
     fl::StrStream ss;

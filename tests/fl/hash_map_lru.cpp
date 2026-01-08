@@ -1,13 +1,12 @@
 // test.cpp
 // g++ --std=c++11 test.cpp -o test && ./test
 
-#include <vector>
-#include <set>
-#include <unordered_map>
 
 #include "fl/hash_map_lru.h"
-#include "fl/str.h"
-#include "test.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
 
 
 TEST_CASE("Test HashMapLRU") {

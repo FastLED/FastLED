@@ -1,10 +1,12 @@
 #include "fl/ease.h"
-#include "fl/stl/array.h"
 #include "fl/stl/pair.h"
 #include "lib8tion/intmap.h"
 #include "test.h"
 #include <cmath>
 #include <cstdlib>
+#include <stdint.h>
+#include "doctest.h"
+#include "stdlib.h"
 using namespace fl;
 // Common array of easing types with names used across multiple test cases
 static const fl::pair<fl::EaseType, const char*> ALL_EASING_TYPES[10] = {

@@ -1434,6 +1434,7 @@ def runner(
                 verbose=args.verbose,
                 unity=args.unity,
                 debug=args.debug,
+                check=args.check,
             )
 
             # Print summary with timing
@@ -1476,6 +1477,7 @@ def runner(
                 verbose=args.verbose,
                 unity=args.unity,
                 debug=args.debug,
+                check=args.check,
             )
 
             # Create timing entry for summary

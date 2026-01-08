@@ -178,6 +178,15 @@ class HeadersExistChecker(FileContentChecker):
             )
             candidates.append(SRC_ROOT / "fl" / rest_of_path.parent / base_name)
             candidates.append(SRC_ROOT / "ftl" / rest_of_path.parent / base_name)
+        # For tests/ftl/*.cpp, check both src/ftl/ and src/fl/stl/
+        elif relative_path.parts[0] == "ftl":
+            rest_of_path = (
+                Path(*relative_path.parts[1:])
+                if len(relative_path.parts) > 1
+                else Path(".")
+            )
+            candidates.append(SRC_ROOT / "ftl" / rest_of_path.parent / base_name)
+            candidates.append(SRC_ROOT / "fl" / "stl" / rest_of_path.parent / base_name)
         else:
             # For other directories, use the same structure
             candidates.append(SRC_ROOT / relative_path.parent / base_name)

@@ -1,12 +1,15 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "fl/fx/frame.h"
 #include <cstdlib>
 #include "fl/stl/allocator.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/draw_mode.h"
+#include "fl/rgb8.h"
+#include "fl/stl/shared_ptr.h"
 using namespace fl;
 namespace {
     int allocation_count = 0;

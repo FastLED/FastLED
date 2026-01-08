@@ -11,13 +11,26 @@
 ///
 /// These tests run ONLY on stub platforms (host-based testing).
 
-#include "test.h"
-#include "FastLED.h"
 
 #ifdef FASTLED_STUB_IMPL  // Mock tests only run on stub platform
 
 #include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/channels/wave8.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/slice.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/move.h"
+#include "fl/stl/unordered_map.h"
+#include "fl/stl/vector.h"
+#include "led_sysdefs_stub_generic.h"
+#include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 
 using namespace fl;
 using namespace fl::detail;

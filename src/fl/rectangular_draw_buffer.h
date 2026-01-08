@@ -15,13 +15,16 @@
 // Data access is achieved through a span<u8> representing the pixel data
 // for that pin.
 
-#include "fl/stl/stdint.h"
 
 #include "fl/int.h"
 #include "fl/stl/map.h"
 #include "fl/scoped_array.h"
-#include "fl/stl/span.h"
-#include "fl/stl/vector.h"
+#include "__new/placement_new_delete.h"
+#include "fl/slice.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/utility.h"
+#include "platforms/shared/int_windows.h"
 
 namespace fl {
 

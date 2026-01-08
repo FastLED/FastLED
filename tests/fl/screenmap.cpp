@@ -1,10 +1,15 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
-#include "test.h"
 #include "fl/screenmap.h"
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/stl/map.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/utility.h"
 using namespace fl;
 using fl::string;
 

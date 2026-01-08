@@ -5,7 +5,8 @@
 
 #include "fl/channels/wave8.h"
 #include "fl/stl/cstring.h"
-#include "test.h"
+#include "doctest.h"
+#include "fl/chipsets/led_timing.h"
 
 using namespace fl;
 

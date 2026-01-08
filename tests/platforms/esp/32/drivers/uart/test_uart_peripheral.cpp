@@ -1,8 +1,16 @@
 /// @file uart_peripheral.cpp
 /// @brief Unit tests for UartPeripheralMock
 
-#include "test.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "__chrono/duration.h"
+#include "__new/placement_new_delete.h"
+#include "__thread/this_thread.h"
+#include "doctest.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
+#include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 
 using namespace fl;
 

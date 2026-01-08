@@ -7,7 +7,6 @@
 // code structure and documentation rather than runtime behavior.
 // Actual hardware/QEMU testing is done separately.
 
-#include "test.h"
 
 // Simplified test that works on host platform
 TEST_CASE("riscv_interrupts_documentation_exists") {
@@ -27,6 +26,7 @@ TEST_CASE("riscv_interrupts_documentation_exists") {
 #include "platforms/esp/32/interrupts/riscv.hpp"
 #include "esp_err.h"
 #include "esp_intr_alloc.h"
+#include "doctest.h"
 
 // Mock handler for testing
 static void FL_IRAM test_interrupt_handler(void *arg) {

@@ -1,12 +1,16 @@
 // Tests for fl/set.h
 // Combined from test_fixed_set.cpp and test_set_inlined.cpp
 
-#include "test.h"
 #include "fl/stl/set.h"
-#include "fl/stl/allocator.h"
-#include "fl/int.h"
 #include "fl/stl/bit_cast.h"
-#include <algorithm>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/log.h"
+#include "fl/stl/move.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

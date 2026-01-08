@@ -1,17 +1,20 @@
 
 // g++ --std=c++11 test.cpp
 
-#include <iostream>
 
-#include "test.h"
 
 #include "fl/fx/2d/blend.h"
 #include "fl/fx/fx.h"
-#include "fl/fx/time.h"
-#include "test.h"
 
 #include "fl/scoped_array.h"
 #include "fl/stl/ostream.h"
+#include <stdint.h>
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/fx/fx2d.h"
+#include "fl/rgb8.h"
+#include "fl/stl/string.h"
+#include "fl/xymap.h"
 
 
 // Simple test effect that fills with a solid color
@@ -63,7 +66,7 @@ class TestFx2D : public fl::Fx2d {
 TEST_CASE("Test FX2d Layered Blending") {
     const uint16_t width = 1;
     const uint16_t height = 1;
-    XYMap xyMap = XYMap::constructRectangularGrid(width, height);
+    fl::XYMap xyMap = fl::XYMap::constructRectangularGrid(width, height);
 
     // Create a red layer
     SolidColorFx2d redLayer(width, height, CRGB(255, 0, 0));
@@ -92,8 +95,8 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         height = 2,
     };
 
-    XYMap xyMapSerp = XYMap::constructSerpentine(width, height);
-    XYMap xyRect = XYMap::constructRectangularGrid(width, height);
+    fl::XYMap xyMapSerp = fl::XYMap::constructSerpentine(width, height);
+    fl::XYMap xyRect = fl::XYMap::constructRectangularGrid(width, height);
 
     SUBCASE("Rectangular Grid") {
         // Create a blue layer

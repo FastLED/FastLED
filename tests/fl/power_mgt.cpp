@@ -1,9 +1,11 @@
 /// @file power_model.cpp
 /// Unit tests for PowerModel API (RGB, RGBW, RGBWW)
 
-#include "test.h"
 #include "FastLED.h"
 #include "power_mgt.h"
+#include <stdint.h>
+#include "crgb.h"
+#include "doctest.h"
 
 TEST_CASE("PowerModelRGB - constructor") {
     PowerModelRGB model(40, 40, 40, 2);

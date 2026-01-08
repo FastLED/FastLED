@@ -1,7 +1,10 @@
-#include "test.h"
 #include "fl/detail/async_log_queue.h"
 #include "fl/isr.h"  // For fl::isr::CriticalSection
-#include "fl/str.h"
+#include "fl/stl/sstream.h"
+#include "doctest.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

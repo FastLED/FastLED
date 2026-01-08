@@ -1,6 +1,8 @@
-#include "test.h"
 #include "fl/map_range.h"
 #include "fl/geometry.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

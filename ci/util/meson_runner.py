@@ -258,6 +258,7 @@ def setup_meson_build(
     reconfigure: bool = False,
     unity: bool = False,
     debug: bool = False,
+    check: bool = False,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -268,6 +269,7 @@ def setup_meson_build(
         reconfigure: Force reconfiguration of existing build
         unity: Enable unity builds (default: False)
         debug: Enable debug mode with full symbols and sanitizers (default: False)
+        check: Enable IWYU static analysis (default: False)
 
     Returns:
         True if setup successful, False otherwise
@@ -354,6 +356,7 @@ def setup_meson_build(
     unity_marker = build_dir / ".unity_config"
     source_files_marker = build_dir / ".source_files_hash"
     debug_marker = build_dir / ".debug_config"
+    check_marker = build_dir / ".check_config"
     force_reconfigure = False
 
     # Get current source file hash (used for change detection and saving after setup)
@@ -549,6 +552,28 @@ def setup_meson_build(
                 f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, {deleted_exe_count} executables"
             )
 
+        # Check if IWYU check setting has changed since last configure
+        # When check mode changes, we must reconfigure to update the C++ compiler wrapper
+        if check_marker.exists():
+            try:
+                last_check_setting = check_marker.read_text().strip() == "True"
+                if last_check_setting != check:
+                    _ts_print(
+                        f"[MESON] ⚠️  IWYU check mode changed: {last_check_setting} → {check}"
+                    )
+                    _ts_print(
+                        "[MESON] 🔄 Forcing reconfigure to update C++ compiler wrapper"
+                    )
+                    force_reconfigure = True
+            except (OSError, IOError):
+                # If we can't read the marker, force reconfigure to be safe
+                _ts_print("[MESON] ⚠️  Could not read check marker, forcing reconfigure")
+                force_reconfigure = True
+        else:
+            # No marker file exists from previous configure
+            # This can happen on first run after updating to this version
+            _ts_print("[MESON] ℹ️  No check marker found, will create after setup")
+
     # Check if any meson.build files are newer than build.ninja (requires reconfigure)
     build_ninja_path = build_dir / "build.ninja"
     meson_build_modified = False
@@ -706,6 +731,12 @@ def setup_meson_build(
     else:
         _ts_print("[MESON] Debug mode disabled (using -g1 for stack traces)")
 
+    # Print IWYU check mode status
+    if check:
+        _ts_print("[MESON] ✅ IWYU static analysis ENABLED (--check flag)")
+    else:
+        _ts_print("[MESON] IWYU static analysis disabled (use --check to enable)")
+
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
     # Thin archives configuration (faster builds, smaller disk usage when supported)
@@ -811,7 +842,14 @@ def setup_meson_build(
         # Use clang-tool-chain wrapper commands directly (they already include sccache if requested)
         # Do NOT wrap with external sccache - clang-tool-chain handles that internally
         c_compiler = f"['{clang_wrapper}']"
+
+        # IWYU wrapper is NOT added to native file (causes meson probe issues)
+        # Instead, IWYU is injected via CXX environment variable during ninja phase
+        # This allows meson setup to probe the compiler without IWYU interference
         cpp_compiler = f"['{clangxx_wrapper}']"
+
+        # Store check flag for later use during compilation phase
+        # IWYU will be injected via environment if check=True
 
         # Use llvm-ar wrapper from clang-tool-chain
         ar_tool = f"['{llvm_ar_wrapper}']"
@@ -965,6 +1003,14 @@ endian = 'little'
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
 
+        # Write marker file to track check setting for future runs
+        try:
+            check_marker.write_text(str(check), encoding="utf-8")
+            _ts_print(f"[MESON] ✅ Saved check configuration: {check}")
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            _ts_print(f"[MESON] Warning: Could not write check marker: {e}")
+
         # Write marker file to track source/test file list for future runs
         if current_source_hash:
             try:
@@ -985,13 +1031,16 @@ endian = 'little'
         return False
 
 
-def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
+def compile_meson(
+    build_dir: Path, target: Optional[str] = None, check: bool = False
+) -> bool:
     """
     Compile using Meson.
 
     Args:
         build_dir: Meson build directory
         target: Specific target to build (None = all)
+        check: Enable IWYU static analysis during compilation (default: False)
 
     Returns:
         True if compilation successful, False otherwise
@@ -1004,15 +1053,103 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
     else:
         _ts_print(f"[MESON] Compiling all targets...")
 
+    # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
+    # This avoids meson setup probe issues while still running IWYU during compilation
+    env = os.environ.copy()
+    if check:
+        # Use custom IWYU wrapper (fixes clang-tool-chain-iwyu argument forwarding issues)
+        from pathlib import Path
+
+        iwyu_wrapper_path = Path(__file__).parent.parent / "iwyu_wrapper.py"
+        if iwyu_wrapper_path.exists():
+            # Use Python to invoke our custom wrapper
+            python_exe = sys.executable
+            iwyu_wrapper = f'"{python_exe}" "{iwyu_wrapper_path}"'
+            _ts_print(f"[MESON] Using custom IWYU wrapper: {iwyu_wrapper_path.name}")
+        else:
+            iwyu_wrapper = None
+            _ts_print(f"[MESON] ⚠️ Custom IWYU wrapper not found: {iwyu_wrapper_path}")
+
+        if iwyu_wrapper:
+            # Modify build.ninja to wrap C++ compiler with IWYU
+            # This is done after meson setup (which uses normal compiler) but before ninja runs
+            build_ninja_path = build_dir / "build.ninja"
+            if build_ninja_path.exists():
+                try:
+                    # Read build.ninja
+                    build_ninja_content = build_ninja_path.read_text(encoding="utf-8")
+
+                    # Replace C++ compiler command in cpp_COMPILER rule with IWYU wrapper
+                    # Pattern matches EITHER:
+                    #   1. Single executable: command = "path\to\clang++.EXE" $ARGS
+                    #   2. Python wrapper: command = "python.exe" "wrapper.py" $ARGS
+                    import re
+
+                    # Flexible pattern that captures the entire compiler command before $ARGS
+                    # Group 1: "rule cpp_COMPILER\n command = "
+                    # Group 2: The entire compiler command (could be single or multiple quoted strings)
+                    # Group 3: " $ARGS" and rest
+                    pattern = r'(rule cpp_COMPILER\s+command = )((?:"[^"]*"\s*)+)(\$ARGS.*?)(?=\n\s*(?:deps|$))'
+
+                    def replace_compiler(match: re.Match[str]) -> str:
+                        prefix = match.group(1)
+                        compiler_cmd = match.group(2).strip()
+                        args_and_rest = match.group(3)
+
+                        # Escape backslashes in paths for re.sub
+                        iwyu_escaped = iwyu_wrapper.replace("\\", "\\\\")
+
+                        # Wrap the entire compiler command with IWYU
+                        # iwyu_wrapper already contains proper quoting (e.g., "python.exe" "script.py")
+                        # Format: python.exe script.py -- original_compiler_command $ARGS...
+                        return (
+                            f"{prefix}{iwyu_escaped} -- {compiler_cmd} {args_and_rest}"
+                        )
+
+                    modified_content = re.sub(
+                        pattern, replace_compiler, build_ninja_content, flags=re.DOTALL
+                    )
+
+                    # Also strip out PCH flags from all ARGS variables since IWYU doesn't support PCH
+                    # Pattern matches ARGS lines containing PCH flags
+                    # Example: ARGS = ... -include-pch "path.pch" -Werror=invalid-pch -fpch-validate-input-files-content ...
+                    # We need to remove these three flags together
+                    pch_pattern = r'(-include-pch\s+"[^"]+"\s+-Werror=invalid-pch\s+-fpch-validate-input-files-content\s+)'
+                    modified_content = re.sub(
+                        pch_pattern, "", modified_content, flags=re.MULTILINE
+                    )
+
+                    if modified_content != build_ninja_content:
+                        build_ninja_path.write_text(modified_content, encoding="utf-8")
+                        _ts_print(
+                            f"[MESON] ✅ IWYU wrapper injected into build.ninja: {iwyu_wrapper}"
+                        )
+                        _ts_print(
+                            f"[MESON] ✅ PCH flags removed from all compile commands (IWYU does not support PCH)"
+                        )
+                    else:
+                        _ts_print(
+                            f"[MESON] ⚠️ Failed to modify build.ninja (content unchanged)"
+                        )
+                        _ts_print(
+                            f"[MESON] DEBUG: Looking for cpp_COMPILER rule in build.ninja"
+                        )
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] ⚠️ Failed to modify build.ninja: {e}")
+            else:
+                _ts_print(f"[MESON] ⚠️ build.ninja not found, skipping IWYU injection")
+        else:
+            _ts_print(f"[MESON] ⚠️ IWYU wrapper not found, skipping static analysis")
+
     try:
         # Use RunningProcess for streaming output
-        # Inherit environment to ensure compiler wrappers are available
+        # Pass modified environment with IWYU wrapper if check=True
         proc = RunningProcess(
             cmd,
             timeout=600,  # 10 minute timeout for compilation
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=os.environ.copy(),  # Pass current environment with wrapper paths
+            env=env,  # Pass environment with IWYU wrapper
             output_formatter=TimestampFormatter(),
         )
 
@@ -1392,6 +1529,7 @@ def run_meson_build_and_test(
     unity: bool = False,
     debug: bool = False,
     build_mode: Optional[str] = None,
+    check: bool = False,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -1405,6 +1543,7 @@ def run_meson_build_and_test(
         unity: Enable unity builds (default: False)
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
+        check: Enable IWYU static analysis (default: False)
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -1449,7 +1588,12 @@ def run_meson_build_and_test(
     # Pass debug=True when build_mode is "debug" to enable sanitizers and full symbols
     use_debug = build_mode == "debug"
     if not setup_meson_build(
-        source_dir, build_dir, reconfigure=False, unity=unity, debug=use_debug
+        source_dir,
+        build_dir,
+        reconfigure=False,
+        unity=unity,
+        debug=use_debug,
+        check=check,
     ):
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
@@ -1512,7 +1656,9 @@ def run_meson_build_and_test(
             elif meson_test_name:
                 compile_target = meson_test_name
 
-            compilation_success = compile_meson(build_dir, target=compile_target)
+            compilation_success = compile_meson(
+                build_dir, target=compile_target, check=check
+            )
 
             # If compilation failed and we have a fallback name, try the fallback
             if not compilation_success and fallback_test_name and not unity:
@@ -1521,7 +1667,9 @@ def run_meson_build_and_test(
                 )
                 compile_target = fallback_test_name
                 meson_test_name = fallback_test_name
-                compilation_success = compile_meson(build_dir, target=compile_target)
+                compilation_success = compile_meson(
+                    build_dir, target=compile_target, check=check
+                )
 
             # If still failed, try fuzzy matching candidates
             # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
@@ -1544,7 +1692,7 @@ def run_meson_build_and_test(
                         compile_target = candidate
                         meson_test_name = candidate
                         compilation_success = compile_meson(
-                            build_dir, target=compile_target
+                            build_dir, target=compile_target, check=check
                         )
                         if compilation_success:
                             break  # Found a match, stop trying

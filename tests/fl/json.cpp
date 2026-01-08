@@ -6,6 +6,22 @@
 #include "fl/json.h"
 #include "fl/screenmap.h"
 #include "fl/stl/map.h"
+#include <stdint.h>
+#include <stdio.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/geometry.h"
+#include "fl/log.h"
+#include "fl/math_macros.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/math.h"
+#include "fl/stl/move.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/string.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/utility.h"
+#include "fl/stl/vector.h"
 
 
 

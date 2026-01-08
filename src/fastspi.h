@@ -31,6 +31,7 @@
 
 #include "controller.h"
 #include "lib8tion.h"
+#include "fastspi_types.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
 

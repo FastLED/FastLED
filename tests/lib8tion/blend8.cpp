@@ -1,8 +1,9 @@
 // Test suite for blend8 function - validates the fix for GitHub issue #1633
 // Tests proper rounding and accurate color interpolation
 
-#include "test.h"
-#include "platforms/math8.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "platforms/shared/math8.h"
 
 using namespace fl;
 

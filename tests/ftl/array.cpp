@@ -1,6 +1,12 @@
-#include "test.h"
 #include "fl/stl/array.h"
 #include "fl/slice.h"  // For fl::span
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/move.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/vector.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

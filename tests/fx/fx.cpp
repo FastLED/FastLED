@@ -1,22 +1,11 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "platforms/shared/int_windows.h"
 
-#include "fl/stl/stdint.h"
 
-#include "test.h"
-#include "fx/1d/cylon.h"
-#include "fx/1d/demoreel100.h"
-#include "fx/1d/noisewave.h"
-#include "fx/1d/pacifica.h"
-#include "fx/1d/pride2015.h" // needs XY defined or linker error.
-#include "fx/1d/twinklefox.h"
-#include "fx/2d/animartrix.hpp"
-#include "fl/fx/2d/noisepalette.h"
-#include "fl/fx/2d/scale_up.h"
-#include "fl/fx/2d/redsquare.h"
-#include "fl/fx/video.h"
 using namespace fl;
 uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.
 

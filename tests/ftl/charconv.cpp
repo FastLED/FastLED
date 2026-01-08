@@ -6,8 +6,9 @@
 // Functions tested:
 // - fl::to_hex(): Convert integer values to hexadecimal string representation
 
-#include "test.h"
-#include "fl/stl/charconv.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "fl/stl/string.h"
 
 using namespace fl;
 

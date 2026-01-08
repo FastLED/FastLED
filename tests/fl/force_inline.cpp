@@ -1,5 +1,5 @@
-#include "test.h"
 #include "fl/force_inline.h"
+#include "doctest.h"
 
 // Test that FASTLED_FORCE_INLINE macro is defined and can be used
 

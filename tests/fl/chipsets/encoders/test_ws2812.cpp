@@ -9,13 +9,16 @@
 ///
 /// This is the simplest encoder - just copies bytes from input to output.
 
-#include "test.h"
 #include "fl/chipsets/encoders/ws2812.h"
-#include "fl/chipsets/encoders/encoder_constants.h"
-#include "fl/rgbw.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+#include <stddef.h>
+#include "__new/placement_new_delete.h"
+#include "doctest.h"
+#include "fl/int.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/detail/heap_vector.h"
 
 using namespace fl;
 

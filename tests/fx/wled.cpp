@@ -1,9 +1,13 @@
 // Unit tests for WLEDClient
 
-#include "test.h"
-#include "fl/fx/wled.h"
 #include "mock_fastled.h"
-#include "fl/stl/memory.h"
+#include <stddef.h>
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/fx/wled/client.h"
+#include "fl/rgb8.h"
+#include "fl/slice.h"
+#include "fl/stl/shared_ptr.h"
 
 using namespace fl;
 

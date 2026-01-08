@@ -1,11 +1,12 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 
 #include "fl/downscale.h"
-#include "fl/dbg.h"
-#include "test.h"
+#include "crgb.h"
+#include "doctest.h"
+#include "fl/rgb8.h"
+#include "fl/xymap.h"
 
 
 TEST_CASE("downscale 2x2 to 1x1") {
@@ -29,8 +30,8 @@ TEST_CASE("downscale 2x2 to 1x1") {
 
     SUBCASE("downscale from 2x2 to 1x1") {
         CRGB dst[1];
-        XYMap srcMap = XYMap::constructRectangularGrid(2, 2);
-        XYMap dstMap = XYMap::constructRectangularGrid(1, 1);
+        fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(2, 2);
+        fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(1, 1);
 
         downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
@@ -52,8 +53,8 @@ TEST_CASE("downscale 2x2 to 1x1") {
 
         CRGB dst[4];
 
-        XYMap srcMap = XYMap::constructRectangularGrid(4, 4);
-        XYMap dstMap = XYMap::constructSerpentine(2, 2);
+        fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(4, 4);
+        fl::XYMap dstMap = fl::XYMap::constructSerpentine(2, 2);
 
         downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
@@ -90,8 +91,8 @@ TEST_CASE("downscale 3x3 to 2x2") {
 
     CRGB dst[4];  // 2x2 result
 
-    XYMap srcMap = XYMap::constructRectangularGrid(3, 3);
-    XYMap dstMap = XYMap::constructRectangularGrid(2, 2);
+    fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(3, 3);
+    fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(2, 2);
 
     downscale(src, srcMap, dst, dstMap);
 
@@ -114,8 +115,8 @@ TEST_CASE("downscale 11x11 to 2x2") {
 
     CRGB dst[4];  // 2x2 result
 
-    XYMap srcMap = XYMap::constructRectangularGrid(11, 11);
-    XYMap dstMap = XYMap::constructRectangularGrid(2, 2);
+    fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(11, 11);
+    fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(2, 2);
 
     downscale(src, srcMap, dst, dstMap);
 

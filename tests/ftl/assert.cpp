@@ -1,5 +1,7 @@
-#include "test.h"
 #include "fl/stl/assert.h"
+#include <stdint.h>
+#include "doctest.h"
+#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

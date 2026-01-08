@@ -1,5 +1,7 @@
-#include "test.h"
 #include "fl/compiler_control.h"
+#include "doctest.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/cstring.h"
 
 // Test helper: Function that would normally trigger a warning
 static int unused_parameter_function(int x, FL_MAYBE_UNUSED int y) {
