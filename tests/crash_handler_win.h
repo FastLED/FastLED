@@ -74,7 +74,6 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
 
     // Calculate file offset by subtracting module base
     DWORD64 fileOffset = address - (DWORD64)hModule;
-    (void)fileOffset;  // Currently unused, but may be needed for future debug output
 
     // Get module filename
     char modulePath[MAX_PATH];
@@ -82,14 +81,32 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
         return "-- module path not found";
     }
 
-    // Use addr2line for all test executables (anything starting with "test_")
-    char* fileName = strrchr(modulePath, '\\');
-    if (!fileName) fileName = modulePath;
-    else fileName++;
+    // Get PE ImageBase from the executable headers
+    // For 64-bit PE files, the standard ImageBase is 0x140000000
+    IMAGE_DOS_HEADER dosHeader;
+    IMAGE_NT_HEADERS64 ntHeaders;
+    DWORD64 peImageBase = 0x140000000;  // Default for 64-bit PE
 
-    if (strncmp(fileName, "test_", 5) != 0) {
-        return "-- no symbol resolution available";
+    FILE* exeFile = fopen(modulePath, "rb");
+    if (exeFile) {
+        // Read DOS header
+        if (fread(&dosHeader, sizeof(IMAGE_DOS_HEADER), 1, exeFile) == 1) {
+            // Seek to NT headers
+            if (fseek(exeFile, dosHeader.e_lfanew, SEEK_SET) == 0) {
+                // Read NT headers
+                if (fread(&ntHeaders, sizeof(IMAGE_NT_HEADERS64), 1, exeFile) == 1) {
+                    if (ntHeaders.Signature == IMAGE_NT_SIGNATURE) {
+                        peImageBase = ntHeaders.OptionalHeader.ImageBase;
+                    }
+                }
+            }
+        }
+        fclose(exeFile);
     }
+
+    // Convert runtime address to PE file address for GDB
+    // GDB expects addresses relative to the PE ImageBase, not the runtime load address
+    DWORD64 peAddress = peImageBase + fileOffset;
 
     // Build gdb command for symbol resolution (much better with PE+DWARF than addr2line)
     // Use a temporary script file to avoid quoting issues
@@ -103,15 +120,22 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
         return "-- gdb script creation failed";
     }
 
-    fprintf(script, "file %s\n", modulePath);
-    fprintf(script, "info symbol 0x%llx\n", address);
-    fprintf(script, "info line *0x%llx\n", address);
+    // Convert backslashes to forward slashes for GDB (GDB on Windows accepts both)
+    char gdbPath[MAX_PATH];
+    strncpy(gdbPath, modulePath, MAX_PATH);
+    for (char* p = gdbPath; *p; p++) {
+        if (*p == '\\') *p = '/';
+    }
+
+    fprintf(script, "file %s\n", gdbPath);
+    fprintf(script, "info symbol 0x%llx\n", peAddress);
+    fprintf(script, "info line *0x%llx\n", peAddress);
     fprintf(script, "quit\n");
     fclose(script);
 
     // Build command using script file
     char command[1024];
-    snprintf(command, sizeof(command), "gdb -batch -x %s 2>nul", script_name);
+    snprintf(command, sizeof(command), "gdb -batch -x %s 2>&1", script_name);
 
     // Execute gdb
     FILE* pipe = _popen(command, "r");

@@ -702,7 +702,7 @@ def setup_meson_build(
 
     # Print debug mode status
     if debug:
-        _ts_print("[MESON] ✅ Debug mode ENABLED (-g3 + sanitizers)")
+        _ts_print("[MESON] ✅ Debug mode ENABLED (-g3 + sanitizers + libunwind)")
     else:
         _ts_print("[MESON] Debug mode disabled (using -g1 for stack traces)")
 

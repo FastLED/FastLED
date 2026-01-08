@@ -142,6 +142,12 @@ if unity_enabled
       # doctest_main.cpp is compiled directly into each test DLL (not as a separate static lib)
       category_sources = [test_pch] + test_sources + files('doctest_main.cpp')
 
+      # Build list of dependencies (libunwind if available)
+      dll_dependencies = []
+      if libunwind_dep.found()
+        dll_dependencies += [libunwind_dep]
+      endif
+
       # Build test category as a shared library (DLL)
       # Each DLL links against libfastled.a ONLY, exports ONLY run_tests()
       test_dll = shared_library(category_name,
@@ -155,6 +161,7 @@ if unity_enabled
         ],
         link_args: unit_test_link_args,
         link_with: [fastled_lib],                     # Link ONLY libfastled.a
+        dependencies: dll_dependencies,               # Add libunwind here
         gnu_symbol_visibility: 'hidden',              # Hide all symbols except explicit exports
         override_options: ['unity=off'],              # Disable unity builds to avoid symbol collisions
         install: false
@@ -212,12 +219,19 @@ else
     # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
     # No need to add it explicitly to individual tests anymore
 
+    # Build list of dependencies (libunwind if available)
+    test_dependencies = []
+    if libunwind_dep.found()
+      test_dependencies += [libunwind_dep]
+    endif
+
     test_exe = executable(test_name,
       test_sources,
       include_directories: [src_dir, tests_dir, stub_dir],
       cpp_args: test_cpp_args,
       link_args: unit_test_link_args,
       link_with: [fastled_lib, doctest_main],
+      dependencies: test_dependencies,  # Add libunwind here
       override_options: ['unity=off'],  # Disable unity builds for tests
       install: false
     )
