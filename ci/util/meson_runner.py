@@ -1282,11 +1282,24 @@ def run_meson_build_and_test(
     # No manual staleness checking needed - Ninja rebuilds PCH when any dependency changes.
 
     # Convert test name to executable name (convert to lowercase to match Meson target naming)
-    # DO NOT add test_ prefix - organize_tests.py already provides the correct test name
+    # Support both test_*.exe and *.exe naming patterns with fallback
+    # Try test_<name> first (for tests like test_async.cpp), then fallback to <name> (for async.cpp)
     meson_test_name: Optional[str] = None
+    fallback_test_name: Optional[str] = None
     if test_name:
         # Convert to lowercase to match Meson target naming convention
-        meson_test_name = test_name.lower()
+        test_name_lower = test_name.lower()
+
+        # Check if test name already starts with "test_"
+        if test_name_lower.startswith("test_"):
+            # Already has test_ prefix, try as-is first, then without prefix as fallback
+            meson_test_name = test_name_lower
+            # Fallback: strip test_ prefix to try bare name
+            fallback_test_name = test_name_lower[5:]  # Remove "test_" prefix
+        else:
+            # Try with test_ prefix first, then fallback to without prefix
+            meson_test_name = f"test_{test_name_lower}"
+            fallback_test_name = test_name_lower
 
     # Compile with build lock to prevent conflicts with example builds
     try:
@@ -1298,7 +1311,18 @@ def run_meson_build_and_test(
             elif meson_test_name:
                 compile_target = meson_test_name
 
-            if not compile_meson(build_dir, target=compile_target):
+            compilation_success = compile_meson(build_dir, target=compile_target)
+
+            # If compilation failed and we have a fallback name, try the fallback
+            if not compilation_success and fallback_test_name and not unity:
+                _ts_print(
+                    f"[MESON] Target '{compile_target}' not found, trying fallback: '{fallback_test_name}'"
+                )
+                compile_target = fallback_test_name
+                meson_test_name = fallback_test_name
+                compilation_success = compile_meson(build_dir, target=compile_target)
+
+            if not compilation_success:
                 return MesonTestResult(success=False, duration=time.time() - start_time)
     except TimeoutError as e:
         _ts_print(f"[MESON] {e}", file=sys.stderr)
