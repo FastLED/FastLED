@@ -967,7 +967,7 @@ class ZeroTerminatedRamString {
     return !str_;
   }
   FORCE_INLINE size_t size() const {
-    return str_ ? ::strlen(str_) : 0;
+    return str_ ? fl::strlen(str_) : 0;
   }
   char operator[](size_t i) const {
     ARDUINOJSON_ASSERT(str_ != 0);
@@ -981,7 +981,7 @@ class ZeroTerminatedRamString {
                            ZeroTerminatedRamString b) {
     ARDUINOJSON_ASSERT(!a.isNull());
     ARDUINOJSON_ASSERT(!b.isNull());
-    return ::strcmp(a.str_, b.str_);
+    return fl::strcmp(a.str_, b.str_);
   }
   friend bool stringEquals(ZeroTerminatedRamString a,
                            ZeroTerminatedRamString b) {
@@ -1063,7 +1063,7 @@ class JsonString {
   enum Ownership { Copied, Linked };
   JsonString() : data_(0), size_(0), ownership_(Linked) {}
   JsonString(const char* data, Ownership ownership = Linked)
-      : data_(data), size_(data ? ::strlen(data) : 0), ownership_(ownership) {}
+      : data_(data), size_(data ? fl::strlen(data) : 0), ownership_(ownership) {}
   JsonString(const char* data, size_t size, Ownership ownership = Linked)
       : data_(data), size_(size), ownership_(ownership) {}
   const char* c_str() const {
@@ -5011,7 +5011,7 @@ class TextFormatter {
     writeRaw(begin, end);
   }
   void writeRaw(const char* s) {
-    writer_.write(reinterpret_cast<const uint8_t*>(s), strlen(s));
+    writer_.write(reinterpret_cast<const uint8_t*>(s), fl::strlen(s));
   }
   void writeRaw(const char* s, size_t n) {
     writer_.write(reinterpret_cast<const uint8_t*>(s), n);
