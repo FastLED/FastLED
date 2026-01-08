@@ -138,7 +138,7 @@ int Scheduler::add_task(task t) {
 }
 
 void Scheduler::update() {
-    uint32_t current_time = fl::time();
+    uint32_t current_time = fl::millis();
     
     // Use index-based iteration to avoid iterator invalidation issues
     for (fl::size i = 0; i < mTasks.size();) {
@@ -188,7 +188,7 @@ void Scheduler::update_after_frame_tasks() {
 }
 
 void Scheduler::update_tasks_of_type(TaskType task_type) {
-    uint32_t current_time = fl::time();
+    uint32_t current_time = fl::millis();
 
     // Use index-based iteration to avoid iterator invalidation issues
     for (fl::size i = 0; i < mTasks.size();) {

@@ -222,7 +222,7 @@ Result<Transaction> Device::writeAsync(const uint8_t* data, size_t size) {
     pImpl->async_state.tx_buffer = data;
     pImpl->async_state.rx_buffer = nullptr;
     pImpl->async_state.size = size;
-    pImpl->async_state.start_time = fl::time();
+    pImpl->async_state.start_time = fl::millis();
 
     // Create Transaction object with proper initialization
     Transaction txn;
@@ -433,7 +433,7 @@ bool Transaction::wait(uint32_t timeout_ms) {
     }
 
     // Wait for the hardware to complete
-    uint32_t start_time = fl::time();
+    uint32_t start_time = fl::millis();
     bool success = pImpl->device->waitComplete(timeout_ms);
 
     if (success) {
@@ -444,7 +444,7 @@ bool Transaction::wait(uint32_t timeout_ms) {
         pImpl->completed = true;
         pImpl->result = fl::nullopt;
 
-        uint32_t elapsed = fl::time() - start_time;
+        uint32_t elapsed = fl::millis() - start_time;
         FL_LOG_SPI("Transaction: Completed successfully (waited " << elapsed << "ms)");
         return true;
     } else {

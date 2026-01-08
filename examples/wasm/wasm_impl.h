@@ -122,7 +122,7 @@ void setup() {
 }
 
 void loop() {
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);

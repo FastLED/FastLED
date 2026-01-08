@@ -132,7 +132,7 @@ void clearLeds() {
 void loop() {
     // Your code here
     clearLeds();
-    const uint32_t now = millis();
+    const uint32_t now = fl::millis();
     uint32_t now_warped = time_warp.update(now);
 
     auto shape = getShape(whichShape.as<int>());

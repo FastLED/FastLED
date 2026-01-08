@@ -39,6 +39,6 @@ void setup() {
 }
 
 void loop() {
-  pride.draw(Fx::DrawContext(millis(), leds));
+  pride.draw(Fx::DrawContext(fl::millis(), leds));
   FastLED.show();  
 }

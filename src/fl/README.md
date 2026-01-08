@@ -818,7 +818,7 @@ This section explains how the major graphics utilities fit together and how to u
     }
 
     void loop() {
-        uint32_t t = fl::time();
+        uint32_t t = fl::millis();
         draw_pattern(t);
         project_to_strip();
         FastLED.show();
@@ -852,7 +852,7 @@ This section explains how the major graphics utilities fit together and how to u
 
         // Register a before_frame task that runs immediately before each render
         fl::task::before_frame().then([&](){
-            uint32_t t = fl::time();
+            uint32_t t = fl::millis();
             draw_pattern(t, rect);
             project_to_strip(cork, rect, leds, NUM_LEDS);
         });

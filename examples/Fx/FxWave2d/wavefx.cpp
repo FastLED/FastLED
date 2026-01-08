@@ -410,9 +410,9 @@ void wavefx_setup() {
 
 void wavefx_loop() {
     // The main program loop that runs continuously
-    
+
     // Get the current time in milliseconds
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
 
     // set the x cyclical
     waveFxLower.setXCylindrical(xCyclical.value());  // Set whether lower wave wraps around x-axis

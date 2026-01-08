@@ -5,30 +5,30 @@ using namespace fl;
 
 TEST_CASE("fl::time - basic functionality") {
     SUBCASE("time returns non-zero values") {
-        fl::u32 t1 = fl::time();
+        fl::u32 t1 = fl::millis();
         CHECK(t1 >= 0); // Always true, but documents expectation
     }
 
     SUBCASE("time is monotonically increasing") {
-        fl::u32 t1 = fl::time();
+        fl::u32 t1 = fl::millis();
         // Small delay to ensure time advances
         volatile int dummy = 0;
         for (int i = 0; i < 10000; ++i) {
             dummy += i;
         }
-        fl::u32 t2 = fl::time();
+        fl::u32 t2 = fl::millis();
         // Time should be >= t1 (may be equal if very fast)
         CHECK(t2 >= t1);
     }
 
     SUBCASE("time difference calculation") {
-        fl::u32 start = fl::time();
+        fl::u32 start = fl::millis();
         // Small delay
         volatile int dummy = 0;
         for (int i = 0; i < 10000; ++i) {
             dummy += i;
         }
-        fl::u32 end = fl::time();
+        fl::u32 end = fl::millis();
         fl::u32 elapsed = end - start;
         // Elapsed should be small but >= 0
         CHECK(elapsed >= 0);
@@ -37,9 +37,9 @@ TEST_CASE("fl::time - basic functionality") {
     }
 
     SUBCASE("multiple calls to time") {
-        fl::u32 t1 = fl::time();
-        fl::u32 t2 = fl::time();
-        fl::u32 t3 = fl::time();
+        fl::u32 t1 = fl::millis();
+        fl::u32 t2 = fl::millis();
+        fl::u32 t3 = fl::millis();
 
         // All should be >= previous
         CHECK(t2 >= t1);
@@ -111,12 +111,12 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         // Need to capture mock by reference in a lambda for it to work
         inject_time_provider([&mock]() { return mock(); });
 
-        // fl::time() should now return mock time
-        CHECK_EQ(fl::time(), 5000);
+        // fl::millis() should now return mock time
+        CHECK_EQ(fl::millis(), 5000);
 
         // Advance mock time
         mock.advance(100);
-        CHECK_EQ(fl::time(), 5100);
+        CHECK_EQ(fl::millis(), 5100);
 
         // Clean up
         clear_time_provider();
@@ -126,12 +126,12 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
-        CHECK_EQ(fl::time(), 1000);
+        CHECK_EQ(fl::millis(), 1000);
 
         clear_time_provider();
 
         // Should now return platform time (non-zero in most cases)
-        fl::u32 platform_time = fl::time();
+        fl::u32 platform_time = fl::millis();
         // Can't assert exact value, but should be different from mock
         // Just verify it's callable
         CHECK(platform_time >= 0);
@@ -140,11 +140,11 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
     SUBCASE("multiple injections") {
         MockTimeProvider mock1(1000);
         inject_time_provider([&mock1]() { return mock1(); });
-        CHECK_EQ(fl::time(), 1000);
+        CHECK_EQ(fl::millis(), 1000);
 
         MockTimeProvider mock2(2000);
         inject_time_provider([&mock2]() { return mock2(); });
-        CHECK_EQ(fl::time(), 2000);
+        CHECK_EQ(fl::millis(), 2000);
 
         clear_time_provider();
     }
@@ -155,7 +155,7 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         clear_time_provider();
 
         // Time should still work
-        fl::u32 t = fl::time();
+        fl::u32 t = fl::millis();
         CHECK(t >= 0);
     }
 }
@@ -172,7 +172,7 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         // Simulate several frames
         for (int i = 0; i < 10; ++i) {
             mock.advance(frame_interval);
-            fl::u32 now = fl::time();
+            fl::u32 now = fl::millis();
 
             if (now - last_frame >= frame_interval) {
                 frame_count++;
@@ -181,7 +181,7 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         }
 
         CHECK_EQ(frame_count, 10);
-        CHECK_EQ(fl::time(), 160);
+        CHECK_EQ(fl::millis(), 160);
 
         clear_time_provider();
     }
@@ -191,17 +191,17 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         inject_time_provider([&mock]() { return mock(); });
 
         fl::u32 timeout_duration = 5000;
-        fl::u32 timeout = fl::time() + timeout_duration;
+        fl::u32 timeout = fl::millis() + timeout_duration;
 
         CHECK_EQ(timeout, 6000);
 
         // Simulate time passing but not reaching timeout
         mock.advance(2000);
-        CHECK(fl::time() < timeout);
+        CHECK(fl::millis() < timeout);
 
         // Advance past timeout
         mock.advance(3001);
-        CHECK(fl::time() >= timeout);
+        CHECK(fl::millis() >= timeout);
 
         clear_time_provider();
     }
@@ -210,15 +210,15 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
-        fl::u32 start = fl::time();
+        fl::u32 start = fl::millis();
         CHECK_EQ(start, 1000);
 
         mock.advance(250);
-        fl::u32 elapsed = fl::time() - start;
+        fl::u32 elapsed = fl::millis() - start;
         CHECK_EQ(elapsed, 250);
 
         mock.advance(750);
-        elapsed = fl::time() - start;
+        elapsed = fl::millis() - start;
         CHECK_EQ(elapsed, 1000);
 
         clear_time_provider();
@@ -230,12 +230,12 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         MockTimeProvider mock(near_max);
         inject_time_provider([&mock]() { return mock(); });
 
-        fl::u32 start = fl::time();
+        fl::u32 start = fl::millis();
         CHECK_EQ(start, near_max);
 
         // Advance past wraparound
         mock.advance(0x20);
-        fl::u32 now = fl::time();
+        fl::u32 now = fl::millis();
 
         // After wraparound, now < start
         CHECK(now < start);
@@ -253,10 +253,10 @@ TEST_CASE("fl::time - edge cases") {
         MockTimeProvider mock(0);
         inject_time_provider([&mock]() { return mock(); });
 
-        CHECK_EQ(fl::time(), 0);
+        CHECK_EQ(fl::millis(), 0);
 
         mock.set_time(0xFFFFFFFF);
-        CHECK_EQ(fl::time(), 0xFFFFFFFF);
+        CHECK_EQ(fl::millis(), 0xFFFFFFFF);
 
         clear_time_provider();
     }
@@ -266,7 +266,7 @@ TEST_CASE("fl::time - edge cases") {
         inject_time_provider([&mock]() { return mock(); });
 
         mock.advance(0);
-        CHECK_EQ(fl::time(), 1000);
+        CHECK_EQ(fl::millis(), 1000);
 
         clear_time_provider();
     }
@@ -276,10 +276,10 @@ TEST_CASE("fl::time - edge cases") {
         MockTimeProvider mock(large_time);
         inject_time_provider([&mock]() { return mock(); });
 
-        CHECK_EQ(fl::time(), large_time);
+        CHECK_EQ(fl::millis(), large_time);
 
         mock.advance(1);
-        CHECK_EQ(fl::time(), large_time + 1);
+        CHECK_EQ(fl::millis(), large_time + 1);
 
         clear_time_provider();
     }
@@ -321,7 +321,7 @@ TEST_CASE("fl::time - integration patterns") {
         fl::u32 last_trigger = 0;
         const fl::u32 debounce_time = 50;
 
-        fl::u32 now = fl::time();
+        fl::u32 now = fl::millis();
         bool can_trigger = (now - last_trigger >= debounce_time);
 
         // First trigger should work (unless we're in first 50ms of system uptime)
@@ -334,7 +334,7 @@ TEST_CASE("fl::time - integration patterns") {
         static fl::u32 last_action = 0;
         const fl::u32 min_interval = 100;
 
-        fl::u32 now = fl::time();
+        fl::u32 now = fl::millis();
         if (now - last_action >= min_interval) {
             last_action = now;
             // Action would be performed here

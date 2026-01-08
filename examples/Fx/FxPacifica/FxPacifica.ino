@@ -48,7 +48,7 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS(20) {
-    pacifica.draw(Fx::DrawContext(millis(), leds));
+    pacifica.draw(Fx::DrawContext(fl::millis(), leds));
     FastLED.show();
   }
 }

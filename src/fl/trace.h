@@ -98,7 +98,7 @@ public:
 } // namespace fl
 
 /// @brief A macro to capture the current source file, line number, and time.
-#define FL_TRACE fl::make_tuple(__FILE__, int(__LINE__), fl::time())
+#define FL_TRACE fl::make_tuple(__FILE__, int(__LINE__), fl::millis())
 
 #ifdef FASTLED_DEBUG_STACK_TRACE
 /// @brief Token pasting helper for FL_SCOPED_TRACE_NAMED - innermost macro

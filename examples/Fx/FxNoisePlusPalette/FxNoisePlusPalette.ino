@@ -88,6 +88,6 @@ void loop() {
     noisePalette.setScale(SCALE);
     EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
-    noisePalette.draw(Fx::DrawContext(millis(), leds));
+    noisePalette.draw(Fx::DrawContext(fl::millis(), leds));
     FastLED.show();
 }

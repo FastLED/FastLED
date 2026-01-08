@@ -682,7 +682,7 @@ LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
 ///
 /// You can also force use of the get_millisecond_timer() function
 /// by \#defining `USE_GET_MILLISECOND_TIMER`.
-#define GET_MILLIS fl::time
+#define GET_MILLIS fl::millis
 #else
 uint32_t get_millisecond_timer();
 #define GET_MILLIS get_millisecond_timer

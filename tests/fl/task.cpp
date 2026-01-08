@@ -203,7 +203,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         CHECK_EQ(execution_count, 1); // Still 1, didn't run again
         
         // Manually advance the task's last run time to simulate 50ms passing
-        uint32_t current_time = fl::time();
+        uint32_t current_time = fl::millis();
         task.set_last_run_time(current_time - 50);
         
         // Update - should still NOT run (only 50ms passed, need 100ms)

@@ -72,7 +72,7 @@ void setup() {
                 .setDither(DISABLE_DITHER)
                 .setScreenMap(xyMap);
     FastLED.setBrightness(brightness);
-    pir.activate(millis());  // Activate the PIR sensor on startup.
+    pir.activate(fl::millis());  // Activate the PIR sensor on startup.
 }
 
 void draw(uint32_t now) {
@@ -106,7 +106,7 @@ void draw(uint32_t now) {
 void loop() {
     // Allow the dither to be enabled and disabled.
     controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     uint8_t bri = pir.transition(now);
     FastLED.setBrightness(bri * brightness.as<float>());
     // Apply leds generation to the leds.

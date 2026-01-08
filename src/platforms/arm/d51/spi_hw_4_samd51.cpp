@@ -479,12 +479,12 @@ bool SPIQuadSAMD51::waitComplete(uint32_t timeout_ms) {
     // This timeout logic is provided for API consistency and future-proofing
     // in case async DMA implementation is added later.
 
-    fl::u32 start_time = fl::time();
+    fl::u32 start_time = fl::millis();
 
     // Poll QSPI status to verify transmission actually completed
     // Check INSTREND (Instruction End) flag in INTFLAG register
     while (!QSPI->INTFLAG.bit.INSTREND) {
-        if ((fl::time() - start_time) >= timeout_ms) {
+        if ((fl::millis() - start_time) >= timeout_ms) {
             FL_WARN("SPIQuadSAMD51: waitComplete timeout");
             return false;  // Timeout
         }

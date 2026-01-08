@@ -46,7 +46,7 @@ Video video(NUM_LEDS, 2.0f);
 void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
-    bool toggle = (millis() / 500) % 2 == 0;
+    bool toggle = (fl::millis() / 500) % 2 == 0;
     FASTLED_DBG("Writing frame data, toggle = " << toggle);
     for (uint32_t i = 0; i < NUM_LEDS; ++i) {
         CRGB color = (toggle ^ i%2) ? CRGB::Black : CRGB::Red;
@@ -83,7 +83,7 @@ void loop() {
     }
     // write_one_frame(memoryStream);  // Write next frame data
     // Draw the frame
-    fxEngine.draw(millis(), leds);
+    fxEngine.draw(fl::millis(), leds);
     // Show the LEDs
     FastLED.show();
     delay(20); // Adjust this delay to control frame rate

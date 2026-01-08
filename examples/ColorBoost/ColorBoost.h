@@ -95,8 +95,8 @@ EaseType getEaseType(int value) {
 void rainbowWave() {
     // Use millis() for consistent timing across different devices
     // Scale down millis() to get appropriate animation speed
-    uint16_t time = millis() / 16;  // Adjust divisor to control wave speed
-    uint8_t hueOffset = millis() / 32; // Adjust divisor to control hue rotation speed
+    uint16_t time = fl::millis() / 16;  // Adjust divisor to control wave speed
+    uint8_t hueOffset = fl::millis() / 32; // Adjust divisor to control hue rotation speed
 
     // Iterate through the entire matrix
     for (uint16_t y = 0; y < HEIGHT; y++) {

@@ -359,8 +359,8 @@ void loop() {
     // TUTORIAL: Cycle between different async approaches every 10 seconds
     // This allows you to see both promise-based and await-based patterns in action
     // The LEDs provide visual feedback about which approach succeeded
-    
-    unsigned long current_time = millis();
+
+    unsigned long current_time = fl::millis();
     
     // Switch approaches every 10 seconds
     // 4 different approaches: Promise, Await, JSON Promise, JSON Await

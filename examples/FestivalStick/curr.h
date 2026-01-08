@@ -450,7 +450,7 @@ void fillFrameBufferNoise() {
     uint8_t noise_speed = noiseSpeed.value();
     
     // Derive noise coordinates from current time instead of forward iteration
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     uint16_t noise_z = now * noise_speed / 10;  // Primary time dimension
     uint16_t noise_x = now * noise_speed / 80;  // Slow drift in x
     uint16_t noise_y = now * noise_speed / 160; // Even slower drift in y (opposite direction)
@@ -765,7 +765,7 @@ void drawAnimartrix(uint32_t now) {
 void loop() {
 
     delay(4);
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     frameBufferPtr->clear();
 
     if (allWhite) {

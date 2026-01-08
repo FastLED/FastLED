@@ -38,7 +38,7 @@ public:
             return false;
         }
 
-        fl::u32 current_time = fl::time();
+        fl::u32 current_time = fl::millis();
         if (mLastPrintTime == 0 || (current_time - mLastPrintTime) >= 5000) {
             if (mIsError) {
                 fl::cout << "ERROR: HALT: " << mMessage.c_str() << "\n";
@@ -57,7 +57,7 @@ public:
         mMessage = message;
         mIsError = true;
         fl::cout << "ERROR: HALT: " << mMessage.c_str() << "\n";
-        mLastPrintTime = fl::time();
+        mLastPrintTime = fl::millis();
     }
 
     /// @brief Halt sketch execution after successful completion
@@ -66,7 +66,7 @@ public:
         mMessage = message;
         mIsError = false;
         fl::cout << "FINISHED: " << mMessage.c_str() << "\n";
-        mLastPrintTime = fl::time();
+        mLastPrintTime = fl::millis();
     }
 
 private:

@@ -34,7 +34,7 @@ public:
             return false;
         }
 
-        fl::u32 current_time = fl::time();
+        fl::u32 current_time = fl::millis();
         if (mLastPrintTime == 0 || (current_time - mLastPrintTime) >= 5000) {
             fl::cout << "ERROR: HALT: " << mMessage.c_str() << "\n";
             mLastPrintTime = current_time;
@@ -48,7 +48,7 @@ public:
         mHalted = true;
         mMessage = message;
         fl::cout << "ERROR: HALT: " << mMessage.c_str() << "\n";
-        mLastPrintTime = fl::time();
+        mLastPrintTime = fl::millis();
     }
 
 private:

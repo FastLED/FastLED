@@ -161,9 +161,9 @@ void loop() {
     
     // Get the selected color palette
     CRGBPalette16 myPal = getPalette();
-    
+
     // Get the current time in milliseconds
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     
     // Update the animation speed from the UI slider
     timeScale.setSpeed(speedY);

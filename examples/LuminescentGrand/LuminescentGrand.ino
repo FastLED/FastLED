@@ -69,7 +69,7 @@ KeyboardState keyboard;
 void HandleNoteOn(byte channel, byte midi_note, byte velocity) {
   FL_UNUSED(channel);
   FASTLED_DBG("HandleNoteOn: midi_note = " << int(midi_note) << ", velocity = " << int(velocity));
-  keyboard.HandleNoteOn(midi_note, velocity, color_selector.curr_val(), millis());
+  keyboard.HandleNoteOn(midi_note, velocity, color_selector.curr_val(), fl::millis());
 }
 
 /////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ void HandleNoteOn(byte channel, byte midi_note, byte velocity) {
 void HandleNoteOff(byte channel, byte midi_note, byte velocity) {
   FL_UNUSED(channel);
   FASTLED_DBG("HandleNoteOn: midi_note = " << int(midi_note) << ", velocity = " << int(velocity));
-  keyboard.HandleNoteOff(midi_note, velocity, millis());
+  keyboard.HandleNoteOff(midi_note, velocity, fl::millis());
 }
 
 /////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ void DbgDoSimulatedKeyboardPress() {
   // Just force it on whenever this function is called.
   is_debugging = true;
 
-  uint32_t now = millis();
+  uint32_t now = fl::millis();
   uint32_t delta_time = now - start_time;
 
 
@@ -178,7 +178,7 @@ void loop() {
   static uint32_t s_prev_time = 0;
   uint32_t prev_time = 0;
   FASTLED_UNUSED(prev_time);  // actually used in perf tests.
-  uint32_t now_ms = millis();
+  uint32_t now_ms = fl::millis();
   uint32_t delta_ms = now_ms - s_prev_time;
   s_prev_time = now_ms;
 
@@ -193,24 +193,24 @@ void loop() {
 
   DbgDoSimulatedKeyboardPress();
 
-  const unsigned long start_time = millis();
+  const unsigned long start_time = fl::millis();
   // Each frame we call the midi processor 100 times to make sure that all notes
   // are processed.
   for (int i = 0; i < 100; ++i) {
     MY_MIDI.read();
   }
 
-  const unsigned long midi_time = millis() - start_time;
+  const unsigned long midi_time = fl::millis() - start_time;
 
   // Updates keyboard: releases sustained keys that.
 
-  const uint32_t keyboard_time_start = millis();
+  const uint32_t keyboard_time_start = fl::millis();
 
   // This is kind of a hack... but give the keyboard a future time
   // so that all keys just pressed get a value > 0 for their time
   // durations.
   keyboard.Update(now_ms + delta_ms, delta_ms);
-  const uint32_t keyboard_delta_time = millis() - keyboard_time_start;
+  const uint32_t keyboard_delta_time = fl::millis() - keyboard_time_start;
 
   ui_state ui_st = ui_update(now_ms, delta_ms);
 
@@ -221,7 +221,7 @@ void loop() {
   // These int values are for desting the performance of the
   // app. If the app ever runs slow then set kShowFps to 1
   // in the settings.h file.
-  const unsigned long start_painting = millis();
+  const unsigned long start_painting = fl::millis();
   FASTLED_UNUSED(start_painting);
 
 
@@ -229,7 +229,7 @@ void loop() {
   Painter::VisState which_vis = Painter::VisState(ui_st.which_visualizer);
   Painter::Paint(now_ms, delta_ms, which_vis, &keyboard, &led_rope);
 
-  const unsigned long paint_time = millis() - start_time;
+  const unsigned long paint_time = fl::millis() - start_time;
   const unsigned long total_time = midi_time + paint_time + keyboard_delta_time;
 
   if (kShowFps) {

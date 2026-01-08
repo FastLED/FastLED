@@ -154,7 +154,7 @@ void setup() {
 
 void loop() {
     FL_WARN("*** LOOP ***");
-    uint32_t start = millis();
+    uint32_t start = fl::millis();
     FastLED.setBrightness(brightness);
     fxEngine.setSpeed(timeSpeed);
     static int lastFxIndex = -1;
@@ -162,10 +162,10 @@ void loop() {
         lastFxIndex = fxIndex.as_int();
         animartrix.fxSet(fxIndex.as_int());
     }
-    fxEngine.draw(millis(), leds);
-    uint32_t end = millis();
+    fxEngine.draw(fl::millis(), leds);
+    uint32_t end = fl::millis();
     FL_WARN("*** DRAW TIME: " << int(end - start) << "ms");
     FastLED.show();
-    uint32_t end2 = millis();
+    uint32_t end2 = fl::millis();
     FL_WARN("*** SHOW + DRAW TIME: " << int(end2 - start) << "ms");
 }

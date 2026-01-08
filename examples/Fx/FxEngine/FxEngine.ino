@@ -68,6 +68,6 @@ void loop() {
             fxEngine.nextFx(500);
         }
     }
-    fxEngine.draw(millis(), leds);
+    fxEngine.draw(fl::millis(), leds);
     FastLED.show();
 }

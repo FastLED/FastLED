@@ -29,6 +29,7 @@ License CC BY-NC 3.0
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/time.h"
 #include "fl/math_macros.h"
 
 #ifndef ANIMARTRIX_INTERNAL
@@ -201,7 +202,7 @@ class ANIMartRIX {
 
     fl::u32 currentTime = 0;
     void setTime(fl::u32 t) { currentTime = t; }
-    fl::u32 getTime() { return currentTime ? currentTime : millis(); }
+    fl::u32 getTime() { return currentTime ? currentTime : fl::millis(); }
 
     void init(int w, int h) {
         animation = render_parameters();
@@ -477,7 +478,7 @@ class ANIMartRIX {
     // find the right led index according to you LED matrix wiring
 
     void get_ready() { // wait until new buffer is ready, measure time
-        a = micros();
+        a = ::micros();
         logOutput();
     }
 
@@ -485,9 +486,9 @@ class ANIMartRIX {
 
     // virtual void setPixelColorInternal(int index, rgb pixel) = 0;
 
-    void logOutput() { b = micros(); }
+    void logOutput() { b = ::micros(); }
 
-    void logFrame() { c = micros(); }
+    void logFrame() { c = ::micros(); }
 
     // Show the current framerate, rendered pixels per second,
     // rendering time & time spend to push the data to the leds.
@@ -1193,7 +1194,7 @@ class ANIMartRIX {
 
         get_ready();
 
-        a = micros(); // for time measurement in report_performance()
+        a = ::micros(); // for time measurement in report_performance()
 
         timings.master_speed = 0.001; // speed ratios for the oscillators
         timings.ratio[0] = 3;         // higher values = faster transitions

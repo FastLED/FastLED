@@ -131,7 +131,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
         return Error::UnknownFunction;
     }
 
-    uint32_t receivedAt = fl::time();
+    uint32_t receivedAt = fl::millis();
 
     // Execute or schedule
     if (timestamp == 0) {

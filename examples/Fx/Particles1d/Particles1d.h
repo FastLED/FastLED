@@ -51,7 +51,7 @@ void setup() {
 }
 
 void loop() {
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
 
     // Update effect parameters from UI
     FastLED.setBrightness(uiBrightness.as<int>());

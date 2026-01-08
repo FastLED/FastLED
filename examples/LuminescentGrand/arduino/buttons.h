@@ -17,7 +17,7 @@ class ToggleButton {
 
   // true - button is pressed.
   bool Read() {
-    Update(millis());
+    Update(fl::millis());
     return mChanged;
   }
 
@@ -101,7 +101,7 @@ typedef MidiShieldButton DigitalButton;
 class CountingButton {
  public:
   explicit CountingButton(int but_pin) : mButton(but_pin), mCurrVal(0), mUIButton("Counting UIButton") {
-    mDebounceTimestamp = millis();
+    mDebounceTimestamp = fl::millis();
     mOn = Read();
   }
 
@@ -148,7 +148,7 @@ class ColorSelector {
   ColorSelector(int sensor_pin) : mBut(sensor_pin) {}
 
   void Update() {
-  	mBut.Update(millis());
+  	mBut.Update(fl::millis());
   }
 
   int curr_val() const { return mBut.curr_val() % 7; }

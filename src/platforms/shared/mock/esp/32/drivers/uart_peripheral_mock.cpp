@@ -293,8 +293,11 @@ bool UartPeripheralMock::isTransmissionComplete() const {
         if (mResetExpireTime == 0) {
             const uint64_t MIN_RESET_DURATION_US = 50;  // Minimum for WS2812
             // Reset period equals transmission time (simulating channel drain time)
-            const uint64_t reset_duration = (mTransmissionDelayUs > MIN_RESET_DURATION_US) ?
-                                           mTransmissionDelayUs : MIN_RESET_DURATION_US;
+            // IMPORTANT: Use the current transmission delay, not a future one
+            // (mTransmissionDelayUs can be overwritten by subsequent writeBytes() calls)
+            const uint64_t current_tx_delay = mTransmissionDelayUs;
+            const uint64_t reset_duration = (current_tx_delay > MIN_RESET_DURATION_US) ?
+                                           current_tx_delay : MIN_RESET_DURATION_US;
             const_cast<UartPeripheralMock*>(this)->mResetExpireTime = now + reset_duration;
         }
         return true;

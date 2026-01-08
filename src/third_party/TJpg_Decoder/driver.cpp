@@ -286,11 +286,11 @@ void TJpgInstanceDecoder::setError(const fl::string& msg) {
 }
 
 bool TJpgInstanceDecoder::shouldYield() const {
-    return (fl::time() - start_time_ms_) >= progressive_config_.max_time_per_tick_ms;
+    return (fl::millis() - start_time_ms_) >= progressive_config_.max_time_per_tick_ms;
 }
 
 void TJpgInstanceDecoder::startTick() {
-    start_time_ms_ = fl::time();
+    start_time_ms_ = fl::millis();
     operations_this_tick_ = 0;
 }
 

@@ -449,9 +449,9 @@ bool SPIDualRP2040::waitComplete(uint32_t timeout_ms) {
         dma_channel_wait_for_finish_blocking(mDMAChannel);
     } else {
         // Timeout-based polling with timestamp checking
-        fl::u32 start_time = fl::time();
+        fl::u32 start_time = fl::millis();
         while (dma_channel_is_busy(mDMAChannel)) {
-            if ((fl::time() - start_time) >= timeout_ms) {
+            if ((fl::millis() - start_time) >= timeout_ms) {
                 return false;  // Timeout
             }
         }

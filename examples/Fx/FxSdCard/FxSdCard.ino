@@ -118,7 +118,7 @@ void loop() {
     vid.setTimeScale(videoSpeed);
 
     // Get the current time and draw the video frame
-    uint32_t now = millis();
+    uint32_t now = fl::millis();
     vid.draw(now, leds);
     FastLED.show();
 }

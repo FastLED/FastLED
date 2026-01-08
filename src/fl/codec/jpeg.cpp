@@ -400,7 +400,7 @@ bool Jpeg::decodeWithTimeout(
         return false;
     }
 
-    fl::u32 start_time = fl::time();
+    fl::u32 start_time = fl::millis();
     fl::u32 deadline = start_time + timeout_ms;
 
     // Use callback-based decode with time budget check
@@ -408,7 +408,7 @@ bool Jpeg::decodeWithTimeout(
         if (mProgressout) {
             *mProgressout = decoder->getProgress();
         }
-        return fl::time() >= deadline; // Yield if time budget exceeded
+        return fl::millis() >= deadline; // Yield if time budget exceeded
     }));
 
     if (result == DecodeResult::Success) {

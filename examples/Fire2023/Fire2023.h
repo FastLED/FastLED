@@ -120,7 +120,7 @@ void Fire2023(uint32_t now);
 
 void loop() {
   EVERY_N_MILLISECONDS(8) {
-    Fire2023(millis());
+    Fire2023(fl::millis());
   }
   FastLED.show();
 }
