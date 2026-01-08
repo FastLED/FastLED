@@ -792,6 +792,10 @@ LIB8STATIC uint16_t beatsin88( accum88 beats_per_minute_88, uint16_t lowest = 0,
     uint16_t rangewidth = highest - lowest;
     uint16_t scaledbeat = scale16( beatsin, rangewidth);
     uint16_t result = lowest + scaledbeat;
+    // With FASTLED_SCALE8_FIXED=1, scale16 can return rangewidth+1, causing overflow
+    if (result > highest) {
+        result = highest;
+    }
     return result;
 }
 
@@ -810,6 +814,10 @@ LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, ui
     uint16_t rangewidth = highest - lowest;
     uint16_t scaledbeat = scale16( beatsin, rangewidth);
     uint16_t result = lowest + scaledbeat;
+    // With FASTLED_SCALE8_FIXED=1, scale16 can return rangewidth+1, causing overflow
+    if (result > highest) {
+        result = highest;
+    }
     return result;
 }
 
@@ -828,6 +836,10 @@ LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8
     uint8_t rangewidth = highest - lowest;
     uint8_t scaledbeat = scale8( beatsin, rangewidth);
     uint8_t result = lowest + scaledbeat;
+    // With FASTLED_SCALE8_FIXED=1, scale8 can return rangewidth+1, causing overflow
+    if (result > highest) {
+        result = highest;
+    }
     return result;
 }
 
