@@ -261,7 +261,8 @@ TEST_CASE("fl::forward") {
     }
 
     SUBCASE("rvalue forward") {
-        int&& rref = forward<int>(42);
+        int temp = 42;
+        int&& rref = forward<int&&>(fl::move(temp));
         CHECK_EQ(rref, 42);
     }
 }
