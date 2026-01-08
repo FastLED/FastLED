@@ -1519,8 +1519,79 @@ def run_meson_build_and_test(
                 num_tests_failed=1,
             )
     else:
-        # Normal mode: Use Meson's test runner
-        return run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose)
+        # Normal mode: When a specific test is requested, run the executable directly
+        # to avoid meson test discovery issues
+        if meson_test_name:
+            # Find the test executable
+            test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
+            if not test_exe_path.exists():
+                # Try Unix variant (no .exe extension)
+                test_exe_path = build_dir / "tests" / meson_test_name
+
+            if not test_exe_path.exists():
+                _ts_print(
+                    f"[MESON] Error: test executable not found: {test_exe_path}",
+                    file=sys.stderr,
+                )
+                return MesonTestResult(success=False, duration=time.time() - start_time)
+
+            _ts_print(f"[MESON] Running test: {meson_test_name}")
+
+            # Run the test executable directly
+            try:
+                proc = RunningProcess(
+                    [str(test_exe_path)],
+                    cwd=source_dir,  # Run from project root
+                    timeout=600,  # 10 minute timeout
+                    auto_run=True,
+                    check=False,
+                    env=os.environ.copy(),
+                    output_formatter=TimestampFormatter(),
+                )
+
+                returncode = proc.wait(echo=verbose)
+                duration = time.time() - start_time
+
+                if returncode != 0:
+                    _ts_print(
+                        f"[MESON] Test failed with return code {returncode}",
+                        file=sys.stderr,
+                    )
+                    return MesonTestResult(
+                        success=False,
+                        duration=duration,
+                        num_tests_run=1,
+                        num_tests_passed=0,
+                        num_tests_failed=1,
+                    )
+
+                _ts_print(f"[MESON] All tests passed (1/1 tests in {duration:.2f}s)")
+                return MesonTestResult(
+                    success=True,
+                    duration=duration,
+                    num_tests_run=1,
+                    num_tests_passed=1,
+                    num_tests_failed=0,
+                )
+
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                duration = time.time() - start_time
+                _ts_print(
+                    f"[MESON] Test execution failed with exception: {e}",
+                    file=sys.stderr,
+                )
+                return MesonTestResult(
+                    success=False,
+                    duration=duration,
+                    num_tests_run=1,
+                    num_tests_passed=0,
+                    num_tests_failed=1,
+                )
+        else:
+            # No specific test - use Meson's test runner for all tests
+            return run_meson_test(build_dir, test_name=None, verbose=verbose)
 
 
 if __name__ == "__main__":
