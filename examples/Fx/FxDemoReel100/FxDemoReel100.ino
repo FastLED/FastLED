@@ -40,7 +40,7 @@ void setup() {
   ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS);
 
   // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS, 2.0f)
+  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip)
     .setScreenMap(screenMap)
     .setRgbw(rgbwMode);
