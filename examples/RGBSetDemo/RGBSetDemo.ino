@@ -5,6 +5,12 @@
 #include <FastLED.h>
 #define NUM_LEDS 40
 
+#ifdef FASTLED_TESTING
+#define DELAY_MILLIS 1
+#else
+#define FASTLED_TESTING 33
+#endif
+
 CRGBArray<NUM_LEDS> leds;
 
 void setup() { FastLED.addLeds<NEOPIXEL,2>(leds, NUM_LEDS); }
@@ -20,7 +26,6 @@ void loop(){
 
     // now, let's first 20 leds to the top 20 leds, 
     leds(NUM_LEDS/2,NUM_LEDS-1) = leds(NUM_LEDS/2 - 1 ,0);
-    FastLED.delay(33);
+    FastLED.delay(FASTLED_TESTING);
   }
 }
-

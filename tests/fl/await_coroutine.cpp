@@ -100,8 +100,8 @@ TEST_CASE("await in coroutine - basic resolution") {
     // Spawn coroutine that awaits a promise
     CoroutineConfig config;
     config.function = [&]() {
-        // Create promise that resolves to 42 after 50ms
-        auto p = delayed_resolve<int>(42, 50);
+        // Create promise that resolves to 42 after 5ms (reduced from 50ms)
+        auto p = delayed_resolve<int>(42, 5);
 
         // Await the promise (should block this coroutine only)
         auto result = fl::await(p);
@@ -117,9 +117,9 @@ TEST_CASE("await in coroutine - basic resolution") {
     config.name = "TestAwait";
     auto coro = task::coroutine(config);
 
-    // Wait for coroutine to complete (max 2 seconds)
+    // Wait for coroutine to complete (max 200ms, reduced from 2000ms)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 2000) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();  // Release lock and pump async tasks
         timeout += 10;
     }
@@ -137,8 +137,8 @@ TEST_CASE("await in coroutine - error handling") {
 
     CoroutineConfig config;
     config.function = [&]() {
-        // Create promise that rejects after 50ms
-        auto p = delayed_reject<int>(Error("Test error"), 50);
+        // Create promise that rejects after 5ms (reduced from 50ms)
+        auto p = delayed_reject<int>(Error("Test error"), 5);
 
         // Await the promise
         auto result = fl::await(p);
@@ -156,7 +156,7 @@ TEST_CASE("await in coroutine - error handling") {
 
     // Wait for completion
     int timeout = 0;
-    while (!test_completed.load() && timeout < 2000) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 10;
     }
@@ -215,8 +215,8 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         CoroutineConfig config;
         config.function = [&, i]() {
             fl::printf("  Coroutine %d: Started\n", i);
-            // Each promise resolves to i*10 after (i*10)ms
-            auto p = delayed_resolve<int>(i * 10, i * 10);
+            // Each promise resolves to i*10 after (i*1)ms (reduced from i*10)
+            auto p = delayed_resolve<int>(i * 10, i * 1);
             fl::printf("  Coroutine %d: Created promise, calling await()\n", i);
             auto result = fl::await(p);
             fl::printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
@@ -237,7 +237,7 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     // Wait for all coroutines to complete
     int timeout = 0;
     fl::printf("Test: Waiting for coroutines to complete...\n");
-    while (completed_count.load() < 5 && timeout < 2000) {
+    while (completed_count.load() < 5 && timeout < 200) {
         if (timeout % 200 == 0) {
             fl::printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
@@ -292,18 +292,18 @@ TEST_CASE("await in coroutine - sequential awaits") {
 
     CoroutineConfig config;
     config.function = [&]() {
-        // First await
-        auto p1 = delayed_resolve<int>(10, 20);
+        // First await (reduced from 20ms to 2ms)
+        auto p1 = delayed_resolve<int>(10, 2);
         auto r1 = fl::await(p1);
         if (r1.ok()) total.fetch_add(r1.value());
 
-        // Second await
-        auto p2 = delayed_resolve<int>(20, 20);
+        // Second await (reduced from 20ms to 2ms)
+        auto p2 = delayed_resolve<int>(20, 2);
         auto r2 = fl::await(p2);
         if (r2.ok()) total.fetch_add(r2.value());
 
-        // Third await
-        auto p3 = delayed_resolve<int>(30, 20);
+        // Third await (reduced from 20ms to 2ms)
+        auto p3 = delayed_resolve<int>(30, 2);
         auto r3 = fl::await(p3);
         if (r3.ok()) total.fetch_add(r3.value());
 
@@ -312,9 +312,9 @@ TEST_CASE("await in coroutine - sequential awaits") {
     config.name = "TestAwaitSequential";
     auto coro = task::coroutine(config);
 
-    // Wait for completion (should take ~60ms + overhead)
+    // Wait for completion (should take ~6ms + overhead, reduced from 2000ms)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 2000) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 10;
     }
@@ -339,7 +339,7 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // Test 1: await in coroutine (should NOT busy-wait)
     CoroutineConfig config;
     config.function = [&]() {
-        auto p = delayed_resolve<int>(42, 50);  // 50ms delay
+        auto p = delayed_resolve<int>(42, 5);  // 5ms delay (reduced from 50ms)
         auto result = fl::await(p);
         CHECK(result.ok());
         if (result.ok()) {
@@ -352,7 +352,7 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
 
     // Wait for coroutine to complete
     int timeout = 0;
-    while (!await_completed.load() && timeout < 2000) {
+    while (!await_completed.load() && timeout < 200) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 10;
     }
@@ -469,8 +469,8 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     config1.function = [&]() {
         coroutine1_progress.store(1);  // Started
 
-        // Await a promise (should release global lock)
-        auto p = delayed_resolve<int>(42, 100);
+        // Await a promise (should release global lock) - reduced from 100ms to 10ms
+        auto p = delayed_resolve<int>(42, 10);
         auto result = fl::await(p);
 
         coroutine1_progress.store(2);  // Completed
@@ -485,8 +485,8 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     config2.function = [&]() {
         coroutine2_progress.store(1);  // Started
 
-        // Await a different promise
-        auto p = delayed_resolve<int>(99, 100);
+        // Await a different promise - reduced from 100ms to 10ms
+        auto p = delayed_resolve<int>(99, 10);
         auto result = fl::await(p);
 
         coroutine2_progress.store(2);  // Completed
@@ -499,9 +499,9 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     config2.name = "TestCoro2";
     auto coro2 = task::coroutine(config2);
 
-    // Wait for both coroutines to complete
+    // Wait for both coroutines to complete (reduced from 5000ms to 500ms)
     int timeout = 0;
-    while (!both_completed.load() && timeout < 5000) {
+    while (!both_completed.load() && timeout < 500) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 10;
     }

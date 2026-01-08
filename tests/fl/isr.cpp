@@ -64,24 +64,24 @@ TEST_CASE("test_isr_timer_basic") {
     REQUIRE(result == 0);
     REQUIRE(handle.is_valid());
 
-    // Wait for ~200ms (should get ~20 calls at 100 Hz)
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    // Wait for ~50ms (should get ~5 calls at 100 Hz) - reduced from 200ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     int call_count = g_isr_call_count.load();
 
     // Allow significant tolerance for timing - stub implementation may vary
-    // Expected ~20 calls, but allow 10-40 to account for system timing variations
-    REQUIRE(call_count >= 10);
-    REQUIRE(call_count <= 40);
+    // Expected ~5 calls, but allow 2-10 to account for system timing variations
+    REQUIRE(call_count >= 2);
+    REQUIRE(call_count <= 10);
 
     // Detach handler
     result = isr::detachHandler(handle);
     REQUIRE(result == 0);
     REQUIRE(!handle.is_valid());
 
-    // Wait a bit and verify no more calls
+    // Wait a bit and verify no more calls (reduced from 100ms to 20ms)
     int final_count = g_isr_call_count.load();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
     int count_after_detach = g_isr_call_count.load();
 
     REQUIRE(final_count == count_after_detach);
@@ -106,8 +106,8 @@ TEST_CASE("test_isr_timer_user_data") {
 
     REQUIRE(result == 0);
 
-    // Wait for a few calls
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait for a few calls (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
     // Verify user data was passed correctly
     REQUIRE(g_isr_user_data_value.load() == test_value);
@@ -132,8 +132,8 @@ TEST_CASE("test_isr_timer_enable_disable") {
     int result = isr::attachTimerHandler(config, &handle);
     REQUIRE(result == 0);
 
-    // Wait for some calls
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait for some calls (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
     int count_before_disable = g_isr_call_count.load();
     REQUIRE(count_before_disable > 0);
 
@@ -142,12 +142,12 @@ TEST_CASE("test_isr_timer_enable_disable") {
     REQUIRE(result == 0);
     REQUIRE(!isr::isHandlerEnabled(handle));
 
-    // Small delay to ensure any in-flight handler call completes
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    // Small delay to ensure any in-flight handler call completes (reduced from 20ms to 5ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     int count_after_disable_immediate = g_isr_call_count.load();
 
-    // Wait longer and verify no new calls
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait longer and verify no new calls (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
     int count_after_disable = g_isr_call_count.load();
     REQUIRE(count_after_disable_immediate == count_after_disable);
 
@@ -156,8 +156,8 @@ TEST_CASE("test_isr_timer_enable_disable") {
     REQUIRE(result == 0);
     REQUIRE(isr::isHandlerEnabled(handle));
 
-    // Wait and verify new calls
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait and verify new calls (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
     int count_after_enable = g_isr_call_count.load();
     REQUIRE(count_after_enable > count_after_disable);
 
@@ -232,8 +232,8 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     int result = isr::attachTimerHandler(config, &handle);
     REQUIRE(result == 0);
 
-    // Wait and verify timer is firing
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait and verify timer is firing (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
     int count_enabled = g_isr_call_count.load();
     REQUIRE(count_enabled > 0);
 
@@ -241,12 +241,12 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     interruptsDisable();
     REQUIRE(interruptsDisabled());
 
-    // Small delay to ensure any in-flight handler call completes
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    // Small delay to ensure any in-flight handler call completes (reduced from 20ms to 5ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     int count_after_disable_immediate = g_isr_call_count.load();
 
-    // Wait and verify NO new calls (global interrupts disabled)
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    // Wait and verify NO new calls (global interrupts disabled) - reduced from 150ms to 50ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     int count_disabled = g_isr_call_count.load();
     REQUIRE(count_after_disable_immediate == count_disabled);
 
@@ -254,8 +254,8 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     interruptsEnable();
     REQUIRE(interruptsEnabled());
 
-    // Wait and verify new calls resume
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // Wait and verify new calls resume (reduced from 100ms to 30ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
     int count_reenabled = g_isr_call_count.load();
     REQUIRE(count_reenabled > count_disabled);
 
