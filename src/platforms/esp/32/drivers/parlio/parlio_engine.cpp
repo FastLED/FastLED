@@ -335,6 +335,9 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         return false;
     }
 
+    // ISR Context - no logging allowed per linter rules
+    // Even in stub mode, ISR functions cannot use FL_WARN/FL_DBG/FL_LOG_PARLIO
+
     // Access ISR state via cache-aligned ParlioIsrContext struct
     ParlioIsrContext *ctx = self->mIsrContext.get();
 
@@ -361,13 +364,6 @@ ParlioEngine::txDoneCallback(void* tx_unit,
     ctx->mCurrentByte += input_bytes;
     ctx->mChunksCompleted++;
 
-    // SAFETY CHECK: Detect byte overflow (should NEVER happen after Iteration 6 fix)
-    // Per LOOP.md: DO NOT RESTART PARLIO, just mark error and let main thread detect
-    if (ctx->mBytesTransmitted > ctx->mTotalBytes) {
-        ctx->mRingError = true;  // Flag overflow error
-        return false;
-    }
-
     // ⚠️  NO LOGGING IN ISR - Logging causes watchdog timeouts and crashes
     // Use GPIO toggling or counters for debug instead
 
@@ -376,11 +372,19 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 
     // Ring empty - check if all data transmitted
     if (count == 0) {
-        // Ring is empty - check if we've transmitted ALL the data
+        // Ring is empty - check if we've transmitted ALL the data (use >= for tolerance)
+        // CRITICAL (Iteration 3): Check completion BEFORE overflow check
+        // Overflow can happen due to LED boundary rounding, but we still need to complete
         if (ctx->mBytesTransmitted >= ctx->mTotalBytes) {
             // All data transmitted - mark transmission complete
             ctx->mStreamComplete = true;
             ctx->mTransmitting = false;
+
+            // SAFETY CHECK: Detect byte overflow (tolerate small overflows from LED rounding)
+            // Flag overflow for debugging, but don't prevent completion
+            if (ctx->mBytesTransmitted > ctx->mTotalBytes) {
+                ctx->mRingError = true;  // Flag overflow for debugging
+            }
 
             // ASYNC MODE: No task notifications
             // - Worker task was removed (uses timer ISR instead)
@@ -502,6 +506,9 @@ ParlioEngine::workerIsrCallback(void *user_data) {
     // Debug: Increment workerIsrCallback counter and timestamp
     ctx->mDebugWorkerIsrCount = ctx->mDebugWorkerIsrCount + 1;
     ctx->mDebugLastWorkerIsrTime = self->mPeripheral->getMicroseconds();
+
+    // ISR Context - no logging allowed per linter rules
+    // Even in stub mode, ISR functions cannot use FL_WARN/FL_DBG/FL_LOG_PARLIO
 
     // CRITICAL: Early exit checks (in order of likelihood)
 
@@ -1013,6 +1020,25 @@ ParlioEngine::populateNextDMABuffer() {
         byte_count = bytes_per_buffer;  // Earlier buffers use aligned size
     }
 
+    // CRITICAL FIX (Iteration 3): Prevent 0-byte buffers when data remains
+    // If bytes_per_buffer rounded down to 0 (e.g., totalBytes=1, LED boundary=3),
+    // we still need to transmit the remaining bytes. This happens when:
+    // 1. Small totalBytes < bytes_per_led_all_lanes (partial LED)
+    // 2. Rounding caused byte_count to become 0
+    // In these cases, take remaining bytes WITHOUT alignment restrictions.
+    if (byte_count == 0 && bytes_remaining > 0 && mIsrContext->mNextByteOffset < mIsrContext->mTotalBytes) {
+        byte_count = bytes_remaining;
+        // Cap at buffer capacity
+        if (byte_count > max_input_bytes_per_buffer) {
+            byte_count = max_input_bytes_per_buffer;
+        }
+    }
+
+    // SAFETY CHECK: Never exceed total bytes (prevents overflow from rounding errors)
+    if (mIsrContext->mNextByteOffset + byte_count > mIsrContext->mTotalBytes) {
+        byte_count = mIsrContext->mTotalBytes - mIsrContext->mNextByteOffset;
+    }
+
     // Zero output buffer to prevent garbage data from previous use
     // Use ISR-safe memset since this function may be called from workerIsr()
     fl::isr::memset_zero(outputBuffer, mRingBufferCapacity);
@@ -1370,14 +1396,30 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     // Real hardware uses async mode where caller polls via poll() method
     #ifdef FASTLED_STUB_IMPL
     // Block until transmission completes by polling
+    FL_LOG_PARLIO("PARLIO STUB: Entering polling loop - totalBytes=" << totalBytes << " streamComplete=" << mIsrContext->mStreamComplete);
+    size_t poll_iterations = 0;
     while (!mIsrContext->mStreamComplete && !mErrorOccurred) {
         ParlioEngineState state = poll();
+        poll_iterations++;
+
+        if (poll_iterations % 100 == 0) {
+            FL_WARN("PARLIO STUB: Poll iteration " << poll_iterations
+                   << " - bytesTransmitted=" << mIsrContext->mBytesTransmitted
+                   << "/" << mIsrContext->mTotalBytes
+                   << " streamComplete=" << mIsrContext->mStreamComplete
+                   << " transmitting=" << mIsrContext->mTransmitting
+                   << " ringCount=" << mIsrContext->mRingCount
+                   << " txDone=" << mIsrContext->mDebugTxDoneCount
+                   << " worker=" << mIsrContext->mDebugWorkerIsrCount);
+        }
+
         if (state == ParlioEngineState::READY || state == ParlioEngineState::ERROR) {
             break;
         }
         // Small delay to avoid busy-wait
         mPeripheral->delay(1);
     }
+    FL_LOG_PARLIO("PARLIO STUB: Exited polling loop after " << poll_iterations << " iterations");
 
     if (mErrorOccurred) {
         FL_LOG_PARLIO("PARLIO: Error occurred during transmission");
