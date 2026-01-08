@@ -539,20 +539,22 @@ void SpiHw8RP2040::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register RP2040/RP2350 SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw8::registerInstance()
-namespace {
-    void init_spi_hw_8_rp() {
-        // Create 2 logical SPI buses (each uses separate PIO state machine)
-        static auto controller0 = fl::make_shared<SpiHw8RP2040>(0, "SPI0");
-        static auto controller1 = fl::make_shared<SpiHw8RP2040>(1, "SPI1");
+namespace platform {
 
-        SpiHw8::registerInstance(controller0);
-        SpiHw8::registerInstance(controller1);
-    }
+/// @brief Initialize RP2040/RP2350 SpiHw8 instances
+///
+/// This function is called lazily by SpiHw8::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw8Instances() {
+    // Create 2 logical SPI buses (each uses separate PIO state machine)
+    static auto controller0 = fl::make_shared<SpiHw8RP2040>(0, "SPI0");
+    static auto controller1 = fl::make_shared<SpiHw8RP2040>(1, "SPI1");
+
+    SpiHw8::registerInstance(controller0);
+    SpiHw8::registerInstance(controller1);
 }
-FL_INIT(init_spi_hw_8_rp_wrapper, init_spi_hw_8_rp);
+
+}  // namespace platform
 
 }  // namespace fl
 

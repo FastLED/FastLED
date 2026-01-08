@@ -1,11 +1,12 @@
 /// @file spi_hw_4.cpp
 /// @brief Direct instance injection for 4-lane hardware SPI
 ///
-/// Platform-specific implementations register their instances directly
-/// during static initialization via registerInstance().
+/// Platform-specific implementations register their instances via lazy initialization
+/// on first access to getAll().
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/compiler_control.h"
+#include "platforms/init_spi_hw_4.h"
 
 namespace fl {
 
@@ -45,6 +46,13 @@ void SpiHw4::clearInstances() {
 /// Get all registered instances
 /// This is moved out of the header to avoid __cxa_guard conflicts on some platforms
 const fl::vector<fl::shared_ptr<SpiHw4>>& SpiHw4::getAll() {
+    // Lazy initialization of platform-specific SPI instances
+    // C++11 guarantees thread-safe static initialization
+    static bool sInitialized = false;
+    if (!sInitialized) {
+        sInitialized = true;
+        platform::initSpiHw4Instances();
+    }
     return getRegistrySpiHw4();
 }
 

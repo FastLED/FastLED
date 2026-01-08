@@ -6,6 +6,7 @@
 
 #include "platforms/stub/spi_8_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "fl/log.h"
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
@@ -201,14 +202,24 @@ fl::shared_ptr<SpiHw8Stub>& getController3_Spi8() {
 }
 }  // anonymous namespace
 
-/// Register instances at static initialization time via constructor attribute
-static void registerSpiHw8Instances() {
+}  // namespace fl
+
+// Platform-specific initialization for stub SPI hardware
+namespace fl {
+namespace platform {
+
+/// @brief Initialize stub SpiHw8 instances for testing
+///
+/// Called lazily on first access to SpiHw8::getAll().
+/// Registers mock SpiHw8 controller instances for testing.
+void initSpiHw8Instances() {
+    FL_WARN("Registering SpiHw8 stub instances...");
     SpiHw8::registerInstance(getController2_Spi8());
     SpiHw8::registerInstance(getController3_Spi8());
+    FL_WARN("SpiHw8 stub instances registered!");
 }
 
-FL_INIT(init_spi_hw_8_stub, registerSpiHw8Instances);
-
+}  // namespace platform
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

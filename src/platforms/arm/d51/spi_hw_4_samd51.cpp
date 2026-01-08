@@ -565,17 +565,19 @@ void SPIQuadSAMD51::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register SAMD51 SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw4::registerInstance()
-namespace {
-    void init_spi_hw_4_samd51() {
-        // SAMD51 has one QSPI peripheral
-        static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "QSPI");
-        SpiHw4::registerInstance(controller0);
-    }
+namespace platform {
+
+/// @brief Initialize SAMD51 SpiHw4 instances
+///
+/// This function is called lazily by SpiHw4::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw4Instances() {
+    // SAMD51 has one QSPI peripheral
+    static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "QSPI");
+    SpiHw4::registerInstance(controller0);
 }
-FL_INIT(init_spi_hw_4_samd51_wrapper, init_spi_hw_4_samd51);
+
+}  // namespace platform
 
 }  // namespace fl
 

@@ -25,12 +25,12 @@ using fl::DMABuffer;
 // };
 
 // ============================================================================
-// FL_INIT Verification Tests
+// Lazy Initialization Verification Tests
 // ============================================================================
 
-TEST_CASE("FL_INIT - SPI stub instances are registered") {
-    // Verify that FL_INIT successfully registered all SPI stub instances
-    // This confirms the static constructor mechanism works correctly
+TEST_CASE("Lazy Init - SPI stub instances are registered") {
+    // Verify that lazy initialization successfully registers all SPI stub instances
+    // This confirms the platform::initSpiHwNInstances() mechanism works correctly
 
     auto spi1_instances = fl::SpiHw1::getAll();
     auto spi2_instances = fl::SpiHw2::getAll();

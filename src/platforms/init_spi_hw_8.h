@@ -1,0 +1,13 @@
+#pragma once
+
+/// @file init_spi_hw_8.h
+/// @brief Platform dispatch header for SpiHw8 initialization
+///
+/// This dispatch header routes to platform-specific SpiHw8 initialization.
+/// Follows FastLED's coarse-to-fine delegation pattern (see platforms/README.md).
+
+#if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
+    #include "platforms/stub/init_spi_hw_8.h"
+#else
+    #include "platforms/shared/init_spi_hw_8.h"
+#endif

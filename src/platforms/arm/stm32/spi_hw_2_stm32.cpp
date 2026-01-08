@@ -740,30 +740,32 @@ void SPIDualSTM32::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register STM32 SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw2::registerInstance()
-namespace {
-    void init_spi_hw_2_stm32() {
-        // Create logical SPI buses based on available Timer/DMA resources
-        // For initial implementation, we provide 2 potential buses
-        // Actual availability depends on:
-        // - Timer peripherals available (TIM2, TIM3, TIM4, etc.)
-        // - DMA channels available (2 per bus)
-        // - GPIO pins available
+namespace platform {
 
-        static auto controller0 = fl::make_shared<SPIDualSTM32>(0, "DSPI0");
-        static auto controller1 = fl::make_shared<SPIDualSTM32>(1, "DSPI1");
+/// @brief Initialize STM32 SpiHw2 instances
+///
+/// This function is called lazily by SpiHw2::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw2Instances() {
+    // Create logical SPI buses based on available Timer/DMA resources
+    // For initial implementation, we provide 2 potential buses
+    // Actual availability depends on:
+    // - Timer peripherals available (TIM2, TIM3, TIM4, etc.)
+    // - DMA channels available (2 per bus)
+    // - GPIO pins available
 
-        SpiHw2::registerInstance(controller0);
-        SpiHw2::registerInstance(controller1);
+    static auto controller0 = fl::make_shared<SPIDualSTM32>(0, "DSPI0");
+    static auto controller1 = fl::make_shared<SPIDualSTM32>(1, "DSPI1");
 
-        // Additional controllers can be added if hardware supports:
-        // static auto controller2 = fl::make_shared<SPIDualSTM32>(2, "DSPI2");
-        // SpiHw2::registerInstance(controller2);
-    }
+    SpiHw2::registerInstance(controller0);
+    SpiHw2::registerInstance(controller1);
+
+    // Additional controllers can be added if hardware supports:
+    // static auto controller2 = fl::make_shared<SPIDualSTM32>(2, "DSPI2");
+    // SpiHw2::registerInstance(controller2);
 }
-FL_INIT(init_spi_hw_2_stm32_wrapper, init_spi_hw_2_stm32);
+
+}  // namespace platform
 
 }  // namespace fl
 

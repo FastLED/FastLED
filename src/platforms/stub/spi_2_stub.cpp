@@ -218,16 +218,24 @@ fl::shared_ptr<SpiHw2Stub>& getController1_Spi2() {
 }
 }  // anonymous namespace
 
-/// Register instances at static initialization time via constructor attribute
-static void registerSpiHw2Instances() {
+}  // namespace fl
+
+// Platform-specific initialization for stub SPI hardware
+namespace fl {
+namespace platform {
+
+/// @brief Initialize stub SpiHw2 instances for testing
+///
+/// Called lazily on first access to SpiHw2::getAll().
+/// Registers mock SpiHw2 controller instances for testing.
+void initSpiHw2Instances() {
     FL_WARN("Registering SpiHw2 stub instances...");
     SpiHw2::registerInstance(getController0_Spi2());
     SpiHw2::registerInstance(getController1_Spi2());
     FL_WARN("SpiHw2 stub instances registered!");
 }
 
-FL_INIT(init_spi_hw_2_stub, registerSpiHw2Instances);
-
+}  // namespace platform
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

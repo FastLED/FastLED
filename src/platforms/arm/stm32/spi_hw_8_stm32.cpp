@@ -596,26 +596,28 @@ void SPIOctalSTM32::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register STM32 SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw8::registerInstance()
-namespace {
-    void init_spi_hw_8_stm32() {
-        // Create 2 logical octal-SPI buses
-        // Note: In practice, STM32 DMA resources may limit this to 1 bus
-        // (8 DMA channels per bus × 2 buses = 16 channels = all available on most STM32)
-        static auto controller0 = fl::make_shared<SPIOctalSTM32>(0, "OSPI0");
-        static auto controller1 = fl::make_shared<SPIOctalSTM32>(1, "OSPI1");
+namespace platform {
 
-        SpiHw8::registerInstance(controller0);
-        SpiHw8::registerInstance(controller1);
+/// @brief Initialize STM32 SpiHw8 instances
+///
+/// This function is called lazily by SpiHw8::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw8Instances() {
+    // Create 2 logical octal-SPI buses
+    // Note: In practice, STM32 DMA resources may limit this to 1 bus
+    // (8 DMA channels per bus × 2 buses = 16 channels = all available on most STM32)
+    static auto controller0 = fl::make_shared<SPIOctalSTM32>(0, "OSPI0");
+    static auto controller1 = fl::make_shared<SPIOctalSTM32>(1, "OSPI1");
 
-        // Note: If your application doesn't need 2 octal buses, consider:
-        // - 1 octal (8 channels) + 1 quad (4 channels) + 1 dual (2 channels) = 14 channels
-        // - Or any other combination that fits within your DMA budget
-    }
+    SpiHw8::registerInstance(controller0);
+    SpiHw8::registerInstance(controller1);
+
+    // Note: If your application doesn't need 2 octal buses, consider:
+    // - 1 octal (8 channels) + 1 quad (4 channels) + 1 dual (2 channels) = 14 channels
+    // - Or any other combination that fits within your DMA budget
 }
-FL_INIT(init_spi_hw_8_stm32_wrapper, init_spi_hw_8_stm32);
+
+}  // namespace platform
 
 }  // namespace fl
 

@@ -2,10 +2,12 @@
 /// @brief Implementation of 16-lane hardware SPI registry
 ///
 /// This provides the static registry for 16-lane SPI hardware instances.
-/// Platform-specific implementations register their instances at static initialization time.
+/// Platform-specific implementations register their instances via lazy initialization
+/// on first access to getAll().
 
 #include "platforms/shared/spi_hw_16.h"
 #include "fl/compiler_control.h"
+#include "platforms/init_spi_hw_16.h"
 
 namespace fl {
 
@@ -19,6 +21,13 @@ namespace {
 
 /// Get all available 16-lane hardware SPI devices on this platform
 const fl::vector<fl::shared_ptr<SpiHw16>>& SpiHw16::getAll() {
+    // Lazy initialization of platform-specific SPI instances
+    // C++11 guarantees thread-safe static initialization
+    static bool sInitialized = false;
+    if (!sInitialized) {
+        sInitialized = true;
+        platform::initSpiHw16Instances();
+    }
     return getRegistrySpiHw16();
 }
 

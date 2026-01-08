@@ -1,11 +1,12 @@
 /// @file spi_hw_1.cpp
 /// @brief Direct instance injection for 1-lane hardware SPI
 ///
-/// Platform-specific implementations register their instances directly
-/// during static initialization via registerInstance().
+/// Platform-specific implementations register their instances via lazy initialization
+/// on first access to getAll().
 
 #include "platforms/shared/spi_hw_1.h"
 #include "fl/compiler_control.h"
+#include "platforms/init_spi_hw_1.h"
 
 namespace fl {
 
@@ -45,6 +46,13 @@ void SpiHw1::clearInstances() {
 /// Get all registered instances
 /// Implementation moved to cpp to avoid Teensy 3.x __cxa_guard linkage issues
 const fl::vector<fl::shared_ptr<SpiHw1>>& SpiHw1::getAll() {
+    // Lazy initialization of platform-specific SPI instances
+    // C++11 guarantees thread-safe static initialization
+    static bool sInitialized = false;
+    if (!sInitialized) {
+        sInitialized = true;
+        platform::initSpiHw1Instances();
+    }
     return getRegistrySpiHw1();
 }
 

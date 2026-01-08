@@ -407,25 +407,27 @@ void SpiHw2MXRT1062::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register Teensy 4.x SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw2::registerInstance()
-namespace {
-    void init_spi_hw_2_mxrt1062() {
-        FL_LOG_SPI("SpiHw2MXRT1062::Registrar - Teensy 4.x hardware SPI registration active");
+namespace platform {
 
-        // Teensy 4.x has 3 LPSPI peripherals available
-        // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
-        static auto controller0 = fl::make_shared<SpiHw2MXRT1062>(0, "SPI");
-        static auto controller1 = fl::make_shared<SpiHw2MXRT1062>(1, "SPI1");
-        static auto controller2 = fl::make_shared<SpiHw2MXRT1062>(2, "SPI2");
+/// @brief Initialize Teensy 4.x SpiHw2 instances
+///
+/// This function is called lazily by SpiHw2::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw2Instances() {
+    FL_LOG_SPI("SpiHw2MXRT1062::Registrar - Teensy 4.x hardware SPI registration active");
 
-        SpiHw2::registerInstance(controller0);
-        SpiHw2::registerInstance(controller1);
-        SpiHw2::registerInstance(controller2);
-    }
+    // Teensy 4.x has 3 LPSPI peripherals available
+    // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
+    static auto controller0 = fl::make_shared<SpiHw2MXRT1062>(0, "SPI");
+    static auto controller1 = fl::make_shared<SpiHw2MXRT1062>(1, "SPI1");
+    static auto controller2 = fl::make_shared<SpiHw2MXRT1062>(2, "SPI2");
+
+    SpiHw2::registerInstance(controller0);
+    SpiHw2::registerInstance(controller1);
+    SpiHw2::registerInstance(controller2);
 }
-FL_INIT(init_spi_hw_2_mxrt1062_wrapper, init_spi_hw_2_mxrt1062);
+
+}  // namespace platform
 
 }  // namespace fl
 

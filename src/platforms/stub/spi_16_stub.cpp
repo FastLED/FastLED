@@ -6,6 +6,7 @@
 
 #include "platforms/stub/spi_16_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "fl/log.h"
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
@@ -194,10 +195,6 @@ fl::vector<fl::vector<uint8_t>> SpiHw16Stub::extractLanes(uint8_t num_lanes, siz
 }
 
 // ============================================================================
-// Factory Implementation
-// ============================================================================
-
-// ============================================================================
 // Instance Registration
 // ============================================================================
 
@@ -214,14 +211,24 @@ fl::shared_ptr<SpiHw16Stub>& getController3_Spi16() {
 }
 }  // anonymous namespace
 
-/// Register instances at static initialization time via constructor attribute
-static void registerSpiHw16Instances() {
+}  // namespace fl
+
+// Platform-specific initialization for stub SPI hardware
+namespace fl {
+namespace platform {
+
+/// @brief Initialize stub SpiHw16 instances for testing
+///
+/// Called lazily on first access to SpiHw16::getAll().
+/// Registers mock SpiHw16 controller instances for testing.
+void initSpiHw16Instances() {
+    FL_WARN("Registering SpiHw16 stub instances...");
     SpiHw16::registerInstance(getController2_Spi16());
     SpiHw16::registerInstance(getController3_Spi16());
+    FL_WARN("SpiHw16 stub instances registered!");
 }
 
-FL_INIT(init_spi_hw_16_stub, registerSpiHw16Instances);
-
+}  // namespace platform
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

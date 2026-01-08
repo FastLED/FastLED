@@ -469,18 +469,20 @@ void SPIDualNRF52::startTransmission() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Register NRF52 SPI hardware instances during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw2::registerInstance()
-namespace {
-    void init_spi_hw_2_nrf52() {
-        // NRF52 has at least SPIM0 and SPIM1 available for dual-SPI
-        // Create one logical dual-SPI controller (using SPIM0+SPIM1)
-        static auto controller0 = fl::make_shared<SPIDualNRF52>(0, "SPIM0+1");
-        SpiHw2::registerInstance(controller0);
-    }
+namespace platform {
+
+/// @brief Initialize nRF52 SpiHw2 instances
+///
+/// This function is called lazily by SpiHw2::getAll() on first access.
+/// It replaces the old FL_INIT-based static initialization.
+void initSpiHw2Instances() {
+    // NRF52 has at least SPIM0 and SPIM1 available for dual-SPI
+    // Create one logical dual-SPI controller (using SPIM0+SPIM1)
+    static auto controller0 = fl::make_shared<SPIDualNRF52>(0, "SPIM0+1");
+    SpiHw2::registerInstance(controller0);
 }
-FL_INIT(init_spi_hw_2_nrf52_wrapper, init_spi_hw_2_nrf52);
+
+}  // namespace platform
 
 }  // namespace fl
 

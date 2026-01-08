@@ -106,53 +106,50 @@ FastLED has evolved its platform directory to contain **dispatch headers** that 
 
 #### Real-world example: SPI hardware registration
 
-**Modern approach** uses centralized static initialization with instance registration:
+**Modern approach** uses lazy initialization with platform-specific implementations:
 
-**Platform-specific implementation** in `platforms/esp/32/drivers/spi/spi_esp32_init.cpp`:
+**Platform-specific implementation** in `platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.cpp`:
 ```cpp
 namespace fl {
 
-// Forward declaration of the ESP32 Single-SPI implementation class
-class SPISingleESP32;
+namespace platform {
 
-namespace {
-
-// Singleton getters for controller instances (Meyer's Singleton pattern)
-fl::shared_ptr<SPISingleESP32>& getController2() {
-    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
-    return instance;
+/// @brief Initialize ESP32 I2S-based SpiHw16 instances
+///
+/// This function is called lazily by SpiHw16::getAll() on first access.
+void initSpiHw16Instances() {
+    // Single static instance (I2S0 only available on ESP32)
+    static auto i2s0_controller = fl::make_shared<SpiHwI2SESP32>(0);
+    SpiHw16::registerInstance(i2s0_controller);
 }
 
-#if SOC_SPI_PERIPH_NUM > 2
-fl::shared_ptr<SPISingleESP32>& getController3() {
-    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
-    return instance;
-}
-#endif
+}  // namespace platform
 
-// Register all ESP32 SPI hardware instances at static initialization time
-
-static void registerAllESP32SpiInstances() {
-    // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
-    SpiHw1::registerInstance(getController2());
-    #if SOC_SPI_PERIPH_NUM > 2
-    SpiHw1::registerInstance(getController3());
-    #endif
-
-    // Note: For parallel strips (2+ strips), ESP32 uses the I2S peripheral via SpiHw16,
-    // which is registered in the I2S driver initialization code.
-}
-
-FL_INIT(static_init_registerAllESP32SpiInstances, registerAllESP32SpiInstances);
-
-}  // anonymous namespace
 }  // namespace fl
 ```
 
+**Platform dispatch header** in `platforms/esp/init_spi_hw_16.h`:
+```cpp
+#pragma once
+
+#include "platforms/esp/is_esp.h"
+
+#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && ...
+namespace fl {
+namespace platform {
+void initSpiHw16Instances();
+}
+}
+#else
+#include "platforms/shared/init_spi_hw_16.h"  // No-op fallback
+#endif
+```
+
 **Key advantages**:
-- **Centralized registration**: All SPI instances registered in one place, easier to understand and maintain
+- **Lazy initialization**: Instances are only created when first accessed via `getAll()`
+- **No static constructors**: Avoids initialization order issues and startup overhead
+- **Platform dispatch**: Clean separation between detection and implementation
 - **Meyer's Singleton**: Thread-safe lazy initialization using static local variables
-- **SOC capability detection**: Automatically adapts to different ESP32 variants (ESP32, ESP32-S3, ESP32-C3, etc.)
 - **Type-safe shared pointers**: Automatic memory management with fl::shared_ptr
 
 ### Controller types in FastLED
