@@ -67,4 +67,16 @@ FL_EXTERN_C_END
 #endif
 #endif
 
+// UART driver availability for LED output
+// UART is available on all ESP32 variants (C3, S3, C6, H2, P4, etc.)
+// Requires ESP-IDF 4.0+ for DMA support
+// Note: Uses wave8 encoding adapted for UART framing (start/stop bits)
+#if !defined(FASTLED_ESP32_HAS_UART)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+#define FASTLED_ESP32_HAS_UART 1  // All ESP32 variants have UART
+#else
+#define FASTLED_ESP32_HAS_UART 0  // Requires ESP-IDF 4.0+ for DMA
+#endif
+#endif
+
 #endif  // ESP32 || ARDUINO_ARCH_ESP32

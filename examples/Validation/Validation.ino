@@ -119,12 +119,13 @@
 //
 // This sketch now supports comprehensive matrix testing with the following dimensions:
 //
-// 1. DRIVER SELECTION (3 options):
+// 1. DRIVER SELECTION (4 options):
 //    - Uncomment to test ONLY a specific driver:
 //    // #define JUST_PARLIO  // Test only PARLIO driver
 //    // #define JUST_RMT     // Test only RMT driver
 //    // #define JUST_SPI     // Test only SPI driver
-//    - Default: Test all available drivers (RMT, SPI, PARLIO)
+//    // #define JUST_UART    // Test only UART driver
+//    - Default: Test all available drivers (RMT, SPI, PARLIO, UART)
 //
 // 2. LANE RANGE (1-8 lanes):
 //    - Uncomment to override lane range:
@@ -186,9 +187,9 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-// RX buffer sized for largest possible strip (LONG_STRIP_SIZE = 300 LEDs)
+// RX buffer sized for largest possible strip (LONG_STRIP_SIZE = 3000 LEDs)
 // Each LED = 24 bits = 24 symbols, plus headroom for RESET pulses
-#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // 300 LEDs × 32:1 expansion + headroom
+#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // 3000 LEDs × 32:1 expansion + headroom
 
 uint8_t rx_buffer[RX_BUFFER_SIZE];  // Shared RX buffer for all test cases
 
@@ -356,6 +357,8 @@ void setup() {
         ss << "  Driver Filter: JUST_RMT (testing RMT only)\n";
     #elif defined(JUST_SPI)
         ss << "  Driver Filter: JUST_SPI (testing SPI only)\n";
+    #elif defined(JUST_UART)
+        ss << "  Driver Filter: JUST_UART (testing UART only)\n";
     #else
         ss << "  Driver Filter: None (testing all available drivers)\n";
     #endif

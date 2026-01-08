@@ -271,6 +271,8 @@ fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_a
             if (fl::strcmp(driver_name, "RMT") == 0) include = true;
         #elif defined(JUST_SPI)
             if (fl::strcmp(driver_name, "SPI") == 0) include = true;
+        #elif defined(JUST_UART)
+            if (fl::strcmp(driver_name, "UART") == 0) include = true;
         #else
             // No filter - include all drivers
             include = true;

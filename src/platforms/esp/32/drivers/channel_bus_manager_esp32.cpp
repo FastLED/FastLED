@@ -9,6 +9,8 @@
 /// - PARLIO (100): Highest performance, best timing (ESP32-P4, C6, H2, C5)
 /// - SPI (50): Good performance, reliable (ESP32-S3, others)
 /// - RMT (10): Fallback, lower performance (all ESP32 variants)
+/// - UART (0): Efficient wave8 encoding, automatic start/stop bits
+///             (all ESP32 variants, lowest priority because it's unused)
 
 #include "fl/compiler_control.h"
 #ifdef ESP32
@@ -25,6 +27,10 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "spi/channel_engine_spi.h"
 #endif
+#if FASTLED_ESP32_HAS_UART
+#include "uart/channel_engine_uart.h"
+#include "uart/uart_peripheral_esp.h"
+#endif
 #if FASTLED_ESP32_HAS_RMT
 // Include the appropriate RMT driver (RMT4 or RMT5) based on platform
 #if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
@@ -39,10 +45,11 @@ namespace fl {
 namespace detail {
 
 /// @brief Engine priority constants for ESP32
-/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > RMT 10)
-constexpr int PRIORITY_PARLIO = 100;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
-constexpr int PRIORITY_SPI = 50;      ///< Medium priority value (SPI engine)
-constexpr int PRIORITY_RMT = 10;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
+/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > UART 30 > RMT 10)
+constexpr int PRIORITY_PARLIO = 3;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
+constexpr int PRIORITY_SPI = 2;      ///< Medium priority value (SPI engine)
+constexpr int PRIORITY_RMT = 1;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
+constexpr int PRIORITY_UART = 0;     ///(Beta) < UART engine with wave8 encoding (all ESP32 variants with ESP-IDF 4.0+)
 
 /// @brief Add PARLIO engine if supported by platform
 static void addParlioIfPossible(ChannelBusManager& manager) {
@@ -74,6 +81,21 @@ static void addSpiIfPossible(ChannelBusManager& manager) {
 #endif
 }
 
+/// @brief Add UART engine if supported by platform
+static void addUartIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_UART
+    // UART engine uses wave8 encoding adapted for UART framing
+    // Available on all ESP32 variants (C3, S3, C6, H2, P4) with ESP-IDF 4.0+
+    // Uses automatic start/stop bit insertion for efficient waveform generation
+    auto peripheral = fl::make_shared<UartPeripheralEsp>();
+    auto engine = fl::make_shared<ChannelEngineUART>(peripheral);
+    manager.addEngine(PRIORITY_UART, engine, "UART");
+    FL_DBG("ESP32: Added UART engine (priority " << PRIORITY_UART << ")");
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
+
 /// @brief Add RMT engine if supported by platform
 static void addRmtIfPossible(ChannelBusManager& manager) {
 #if FASTLED_ESP32_HAS_RMT
@@ -100,7 +122,7 @@ namespace platform {
 /// @brief Initialize channel engines for ESP32
 ///
 /// Called lazily on first access to ChannelBusManager::instance().
-/// Registers platform-specific engines (PARLIO, SPI, RMT) with the bus manager.
+/// Registers platform-specific engines (PARLIO, SPI, UART, RMT) with the bus manager.
 void initChannelEngines() {
     FL_DBG("ESP32: Lazy initialization of channel engines");
 
@@ -109,6 +131,7 @@ void initChannelEngines() {
     // Add engines in priority order (each function handles platform-specific ifdefs)
     detail::addParlioIfPossible(manager);
     detail::addSpiIfPossible(manager);
+    detail::addUartIfPossible(manager);
     detail::addRmtIfPossible(manager);
 
     FL_DBG("ESP32: Channel engines initialized");
