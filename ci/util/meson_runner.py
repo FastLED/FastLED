@@ -1391,23 +1391,46 @@ def run_meson_build_and_test(
     verbose: bool = False,
     unity: bool = False,
     debug: bool = False,
+    build_mode: Optional[str] = None,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
 
     Args:
         source_dir: Project root directory
-        build_dir: Build output directory
+        build_dir: Build output directory (will be modified to be mode-specific)
         test_name: Specific test to run (without test_ prefix, e.g., "json")
         clean: Clean build directory before setup
         verbose: Enable verbose output
         unity: Enable unity builds (default: False)
         debug: Enable debug mode with full symbols and sanitizers (default: False)
+        build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
 
     Returns:
         MesonTestResult with success status, duration, and test counts
     """
     start_time = time.time()
+
+    # Determine build mode: explicit build_mode parameter takes precedence over debug flag
+    if build_mode is None:
+        build_mode = "debug" if debug else "quick"
+
+    # Validate build_mode
+    if build_mode not in ["quick", "debug", "release"]:
+        _ts_print(
+            f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', or 'release'",
+            file=sys.stderr,
+        )
+        return MesonTestResult(success=False, duration=time.time() - start_time)
+
+    # Construct mode-specific build directory
+    # This enables caching libfastled.a per mode when source unchanged but flags differ
+    # Example: .build/meson-quick, .build/meson-debug, .build/meson-release
+    original_build_dir = build_dir
+    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
+
+    _ts_print(f"[MESON] Using mode-specific build directory: {build_dir}")
+    _ts_print(f"[MESON] Build mode: {build_mode}")
 
     # Check if Meson is installed
     if not check_meson_installed():
@@ -1423,8 +1446,10 @@ def run_meson_build_and_test(
         shutil.rmtree(build_dir)
 
     # Setup build
+    # Pass debug=True when build_mode is "debug" to enable sanitizers and full symbols
+    use_debug = build_mode == "debug"
     if not setup_meson_build(
-        source_dir, build_dir, reconfigure=False, unity=unity, debug=debug
+        source_dir, build_dir, reconfigure=False, unity=unity, debug=use_debug
     ):
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
