@@ -295,10 +295,13 @@
 // namespaced functions (e.g., detail::func, myns::impl::func)
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+// Helper macro to ensure __LINE__ is expanded before concatenation
+#define FL_INIT_CONCAT_IMPL(prefix, line) prefix##line
+#define FL_INIT_CONCAT(prefix, line) FL_INIT_CONCAT_IMPL(prefix, line)
 #define FL_INIT(func) \
   namespace static_init { \
     FL_CONSTRUCTOR FL_KEEP_ALIVE \
-    void __fl_init_at_line_##__LINE__() { func(); } \
+    void FL_INIT_CONCAT(__fl_init_at_line_, __LINE__)() { func(); } \
   }
 FL_DISABLE_WARNING_POP
 

@@ -197,15 +197,30 @@ fl::vector<fl::vector<uint8_t>> SpiHw16Stub::extractLanes(uint8_t num_lanes, siz
 // Factory Implementation
 // ============================================================================
 
-/// Register stub instances during static initialization
+// ============================================================================
+// Instance Registration
+// ============================================================================
+
 namespace {
-    void init_spi_16_stub() {
-        // Provide 1 mock 16-lane SPI bus for testing (I2S0)
-        static auto controller0 = fl::make_shared<SpiHw16Stub>(0, "MockHexadecaSPI0");
-        SpiHw16::registerInstance(controller0);
-    }
+// Singleton getters for mock controller instances (Meyer's Singleton pattern)
+fl::shared_ptr<SpiHw16Stub>& getController2_Spi16() {
+    static fl::shared_ptr<SpiHw16Stub> instance = fl::make_shared<SpiHw16Stub>(2, "MockHexadeca2");
+    return instance;
 }
-FL_INIT(init_spi_16_stub);
+
+fl::shared_ptr<SpiHw16Stub>& getController3_Spi16() {
+    static fl::shared_ptr<SpiHw16Stub> instance = fl::make_shared<SpiHw16Stub>(3, "MockHexadeca3");
+    return instance;
+}
+}  // anonymous namespace
+
+/// Register instances at static initialization time via constructor attribute
+static void registerSpiHw16Instances() {
+    SpiHw16::registerInstance(getController2_Spi16());
+    SpiHw16::registerInstance(getController3_Spi16());
+}
+
+FL_INIT(registerSpiHw16Instances);
 
 }  // namespace fl
 

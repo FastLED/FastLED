@@ -3,6 +3,11 @@
 #include "fl/spi/impl.h"
 #include "platforms/shared/spi_types.h"
 #include "platforms/shared/spi_bus_manager.h"
+#include "platforms/shared/spi_hw_1.h"
+#include "platforms/shared/spi_hw_2.h"
+#include "platforms/shared/spi_hw_4.h"
+#include "platforms/shared/spi_hw_8.h"
+#include "platforms/shared/spi_hw_16.h"
 
 using namespace fl::spi;
 using fl::SPIError;
@@ -18,6 +23,27 @@ using fl::DMABuffer;
 //         fl::getSPIBusManager().reset();
 //     }
 // };
+
+// ============================================================================
+// FL_INIT Verification Tests
+// ============================================================================
+
+TEST_CASE("FL_INIT - SPI stub instances are registered") {
+    // Verify that FL_INIT successfully registered all SPI stub instances
+    // This confirms the static constructor mechanism works correctly
+
+    auto spi1_instances = fl::SpiHw1::getAll();
+    auto spi2_instances = fl::SpiHw2::getAll();
+    auto spi4_instances = fl::SpiHw4::getAll();
+    auto spi8_instances = fl::SpiHw8::getAll();
+    auto spi16_instances = fl::SpiHw16::getAll();
+
+    CHECK(spi1_instances.size() == 2);
+    CHECK(spi2_instances.size() == 2);
+    CHECK(spi4_instances.size() == 2);
+    CHECK(spi8_instances.size() == 2);
+    CHECK(spi16_instances.size() == 2);
+}
 
 // ============================================================================
 // fl::Result<T> Tests

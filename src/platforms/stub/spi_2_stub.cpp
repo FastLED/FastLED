@@ -5,6 +5,7 @@
 
 #include "spi_2_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "fl/log.h"
 
 namespace fl {
 
@@ -219,8 +220,10 @@ fl::shared_ptr<SpiHw2Stub>& getController1_Spi2() {
 
 /// Register instances at static initialization time via constructor attribute
 static void registerSpiHw2Instances() {
+    FL_WARN("Registering SpiHw2 stub instances...");
     SpiHw2::registerInstance(getController0_Spi2());
     SpiHw2::registerInstance(getController1_Spi2());
+    FL_WARN("SpiHw2 stub instances registered!");
 }
 
 FL_INIT(registerSpiHw2Instances);
