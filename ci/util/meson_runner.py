@@ -1377,6 +1377,7 @@ def run_meson_build_and_test(
     # Try test_<name> first (for tests like test_async.cpp), then fallback to <name> (for async.cpp)
     meson_test_name: Optional[str] = None
     fallback_test_name: Optional[str] = None
+    fuzzy_candidates: list[str] = []
     if test_name:
         # Convert to lowercase to match Meson target naming convention
         test_name_lower = test_name.lower()
@@ -1391,6 +1392,24 @@ def run_meson_build_and_test(
             # Try with test_ prefix first, then fallback to without prefix
             meson_test_name = f"test_{test_name_lower}"
             fallback_test_name = test_name_lower
+
+        # Build fuzzy candidate list by searching for test executables containing the name
+        # This handles patterns like fl_async.exe when user specifies "async"
+        tests_dir = build_dir / "tests"
+        if tests_dir.exists():
+            # Look for executables matching *<name>*
+            import glob
+
+            exe_pattern = f"*{test_name_lower}*.exe"
+            matches = glob.glob(str(tests_dir / exe_pattern))
+            # Extract just the executable name without path and extension
+            for match_path in matches:
+                exe_name = Path(match_path).stem  # Remove .exe extension
+                # Add to candidates if not already in primary/fallback
+                if exe_name not in [meson_test_name, fallback_test_name]:
+                    fuzzy_candidates.append(exe_name)
+        else:
+            fuzzy_candidates = []
 
     # Compile with build lock to prevent conflicts with example builds
     try:
@@ -1412,6 +1431,20 @@ def run_meson_build_and_test(
                 compile_target = fallback_test_name
                 meson_test_name = fallback_test_name
                 compilation_success = compile_meson(build_dir, target=compile_target)
+
+            # If still failed, try fuzzy matching candidates
+            if not compilation_success and fuzzy_candidates and not unity:
+                for candidate in fuzzy_candidates:
+                    _ts_print(
+                        f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
+                    )
+                    compile_target = candidate
+                    meson_test_name = candidate
+                    compilation_success = compile_meson(
+                        build_dir, target=compile_target
+                    )
+                    if compilation_success:
+                        break  # Found a match, stop trying
 
             if not compilation_success:
                 return MesonTestResult(success=False, duration=time.time() - start_time)
