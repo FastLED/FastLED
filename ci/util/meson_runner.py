@@ -49,10 +49,10 @@ def check_meson_installed() -> bool:
 
 def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
     """
-    Get hash of all .cpp source files in src/ directory.
+    Get hash of all .cpp/.h source and test files in src/ and tests/ directories.
 
-    This detects when source files are added or removed, which requires
-    Meson reconfiguration to update the build graph.
+    This detects when source or test files are added or removed, which requires
+    Meson reconfiguration to update the build graph (especially for test discovery).
 
     Args:
         source_dir: Project root directory
@@ -61,11 +61,30 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         Tuple of (hash_string, sorted_file_list)
     """
     try:
-        # Recursively discover all .cpp files in src/ directory
+        # Recursively discover all .cpp and .h files in src/ directory
         src_path = source_dir / "src"
         source_files = sorted(
             str(p.relative_to(source_dir)) for p in src_path.rglob("*.cpp")
         )
+        source_files.extend(
+            sorted(str(p.relative_to(source_dir)) for p in src_path.rglob("*.h"))
+        )
+
+        # Recursively discover all .cpp and .h files in tests/ directory
+        # This is CRITICAL for detecting when tests are added or removed
+        tests_path = source_dir / "tests"
+        if tests_path.exists():
+            source_files.extend(
+                sorted(
+                    str(p.relative_to(source_dir)) for p in tests_path.rglob("*.cpp")
+                )
+            )
+            source_files.extend(
+                sorted(str(p.relative_to(source_dir)) for p in tests_path.rglob("*.h"))
+            )
+
+        # Re-sort the combined list for consistent ordering
+        source_files = sorted(source_files)
 
         # Hash the list of file paths (not contents - just detect add/remove)
         hasher = hashlib.sha256()
@@ -363,31 +382,32 @@ def setup_meson_build(
                         f"[MESON] 🗑️  Deleted {deleted_count} platforms_shared archives due to unity build change"
                     )
 
-        # Check if source files have changed since last configure
+        # Check if source/test files have changed since last configure
         # This detects when files are added or removed, which requires reconfigure
+        # CRITICAL: Test file tracking ensures organize_tests.py runs with current file list
         if current_source_hash:  # Only check if we successfully got the hash
             if source_files_marker.exists():
                 try:
                     last_hash = source_files_marker.read_text().strip()
                     if last_hash != current_source_hash:
                         _ts_print(
-                            "[MESON] ⚠️  Source file list changed (files added/removed)"
+                            "[MESON] ⚠️  Source/test file list changed (files added/removed)"
                         )
                         _ts_print(
-                            "[MESON] 🔄 Forcing reconfigure to update build graph"
+                            "[MESON] 🔄 Forcing reconfigure to update build graph and test discovery"
                         )
                         force_reconfigure = True
                 except (OSError, IOError):
                     # If we can't read the marker, force reconfigure to be safe
                     _ts_print(
-                        "[MESON] ⚠️  Could not read source files marker, forcing reconfigure"
+                        "[MESON] ⚠️  Could not read source/test files marker, forcing reconfigure"
                     )
                     force_reconfigure = True
             else:
                 # No marker file exists from previous configure
                 # Force reconfigure to ensure build graph matches current source files
                 _ts_print(
-                    "[MESON] ℹ️  No source files marker found, forcing reconfigure"
+                    "[MESON] ℹ️  No source/test files marker found, forcing reconfigure"
                 )
                 force_reconfigure = True
 
@@ -496,6 +516,75 @@ def setup_meson_build(
     # Force reconfigure if meson.build files were modified
     if meson_build_modified:
         _ts_print("[MESON] 🔄 Forcing reconfigure due to meson.build modifications")
+        force_reconfigure = True
+
+    # Check if test files have been added or removed (requires reconfigure)
+    # This ensures Meson discovers new tests and removes deleted tests
+    test_files_changed = False
+    if already_configured:
+        try:
+            # Import test discovery functions
+            tests_py_path = source_dir / "tests"
+            if tests_py_path not in [Path(p) for p in sys.path]:
+                sys.path.insert(0, str(tests_py_path))
+
+            from discover_tests import (  # type: ignore[import-not-found]
+                discover_test_files,  # type: ignore[misc]
+            )
+            from test_config import (  # type: ignore[import-not-found]
+                EXCLUDED_TEST_FILES,  # type: ignore[misc]
+                TEST_SUBDIRS,  # type: ignore[misc]
+            )
+
+            # Get current test files
+            tests_dir = source_dir / "tests"
+            current_test_files: list[str] = sorted(  # type: ignore[misc]
+                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)  # type: ignore[misc]
+            )
+
+            # Check cached test file list
+            test_list_cache = build_dir / "test_list_cache.txt"
+            cached_test_files: list[str] = []
+            if test_list_cache.exists():
+                with open(test_list_cache, "r") as f:
+                    cached_test_files = [
+                        line.strip()
+                        for line in f
+                        if line.strip() and not line.startswith("#")
+                    ]
+
+            # Compare lists
+            if current_test_files != cached_test_files:
+                # Determine what changed
+                added: set[str] = set(current_test_files) - set(cached_test_files)  # type: ignore[misc]
+                removed: set[str] = set(cached_test_files) - set(current_test_files)  # type: ignore[misc]
+
+                _ts_print("[MESON] ⚠️  Detected test file changes:")
+                if added:
+                    _ts_print(f"[MESON]     Added: {', '.join(sorted(added))}")  # type: ignore[misc]
+                if removed:
+                    _ts_print(f"[MESON]     Removed: {', '.join(sorted(removed))}")  # type: ignore[misc]
+
+                test_files_changed = True
+
+                # Update cache
+                with open(test_list_cache, "w") as f:
+                    f.write(
+                        "# Auto-generated test file list cache for Meson reconfiguration\n"
+                    )
+                    f.write(f"# Total tests: {len(current_test_files)}\n")  # type: ignore[misc]
+                    f.write("# Generated by meson_runner.py\n\n")
+                    for test_file in current_test_files:  # type: ignore[misc]
+                        f.write(f"{test_file}\n")
+
+        except Exception as e:
+            _ts_print(f"[MESON] Warning: Could not check test file changes: {e}")
+            # On error, assume files may have changed to be safe
+            test_files_changed = True
+
+    # Force reconfigure if test files were added or removed
+    if test_files_changed:
+        _ts_print("[MESON] 🔄 Forcing reconfigure due to test file additions/removals")
         force_reconfigure = True
 
     # Determine if we need to run meson setup/reconfigure
@@ -811,16 +900,18 @@ endian = 'little'
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
 
-        # Write marker file to track source file list for future runs
+        # Write marker file to track source/test file list for future runs
         if current_source_hash:
             try:
                 source_files_marker.write_text(current_source_hash, encoding="utf-8")
                 _ts_print(
-                    f"[MESON] ✅ Saved source files hash ({len(current_source_files)} files)"
+                    f"[MESON] ✅ Saved source/test files hash ({len(current_source_files)} files)"
                 )
             except (OSError, IOError) as e:
                 # Not critical if marker file write fails
-                _ts_print(f"[MESON] Warning: Could not write source files marker: {e}")
+                _ts_print(
+                    f"[MESON] Warning: Could not write source/test files marker: {e}"
+                )
 
         return True
 
