@@ -1,13 +1,24 @@
+// Consolidated test suite for fl::string
+// Combines tests from: str.cpp, string_comprehensive.cpp, string_memory_bugs.cpp, string_optimization.cpp
+// This tests the fl::string implementation in fl/stl/string.h and fl/stl/string.cpp
 
-// g++ --std=c++11 test.cpp
-
-#include "test.h"
-
-#include "test.h"
-#include "fl/str.h"
-#include "fl/stl/vector.h"
 #include "crgb.h"
+#include "fl/stl/vector.h"
+#include "fl/str.h"
+#include "fl/thread_local.h"
+#include "test.h"
+#include <cstring>
 #include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace fl;
+
+
+//=============================================================================
+// SECTION: Tests from str.cpp
+//=============================================================================
 
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
@@ -401,11 +412,6 @@ TEST_CASE("String erase operations") {
         CHECK(s.size() == 4);
     }
 
-    // Note: Iterator-based erase tests commented out due to ambiguity issues
-    // The problem is that erase(0) is ambiguous: 0 can be fl::size or char* (nullptr)
-    // These can be re-enabled once better type disambiguation is implemented
-
-    /*
     SUBCASE("Iterator-based erase single character") {
         fl::string s = "hello";
         char* it = s.begin() + 1;  // Point to 'e'
@@ -451,7 +457,6 @@ TEST_CASE("String erase operations") {
         CHECK_EQ(s, "hell");
         CHECK(s.size() == 4);
     }
-    */
 
     SUBCASE("Erase and verify null termination") {
         fl::string s = "hello world";
@@ -3113,5 +3118,1547 @@ TEST_CASE("StrN comparison operators") {
         // Mixed: short vs long
         CHECK(short1 < long1);  // "short" < "this is..."
         CHECK(long1 > short1);  // "this is..." > "short"
+    }
+}
+
+//=============================================================================
+// SECTION: Tests from string_comprehensive.cpp
+//=============================================================================
+
+
+TEST_CASE("fl::string - Construction and Assignment") {
+    SUBCASE("Default construction") {
+        fl::string s;
+        CHECK(s.empty());
+        CHECK(s.size() == 0);
+        CHECK(s.length() == 0);
+        CHECK(s.c_str() != nullptr);
+        CHECK(s.c_str()[0] == '\0');
+    }
+
+    SUBCASE("Construction from C-string") {
+        fl::string s("Hello, World!");
+        CHECK(s.size() == 13);
+        CHECK(s.length() == 13);
+        CHECK(fl::strcmp(s.c_str(), "Hello, World!") == 0);
+        CHECK_FALSE(s.empty());
+    }
+
+    SUBCASE("Construction from empty C-string") {
+        fl::string s("");
+        CHECK(s.empty());
+        CHECK(s.size() == 0);
+        CHECK(s.c_str()[0] == '\0');
+    }
+
+    SUBCASE("Copy construction") {
+        fl::string s1("Original string");
+        fl::string s2(s1);
+        CHECK(s2.size() == s1.size());
+        CHECK(fl::strcmp(s2.c_str(), s1.c_str()) == 0);
+        CHECK(s2 == s1);
+    }
+
+    SUBCASE("Assignment from C-string") {
+        fl::string s;
+        s = "Assigned string";
+        CHECK(s.size() == 15);
+        CHECK(fl::strcmp(s.c_str(), "Assigned string") == 0);
+    }
+
+    SUBCASE("Copy assignment") {
+        fl::string s1("Source string");
+        fl::string s2;
+        s2 = s1;
+        CHECK(s2.size() == s1.size());
+        CHECK(s2 == s1);
+    }
+
+    SUBCASE("Self-assignment") {
+        fl::string s("Self assignment test");
+        // Test self-assignment (suppress warning with compiler control macros)
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
+        s = s;
+        FL_DISABLE_WARNING_POP
+        CHECK(fl::strcmp(s.c_str(), "Self assignment test") == 0);
+    }
+}
+
+TEST_CASE("fl::string - Element Access") {
+    SUBCASE("operator[] - non-const") {
+        fl::string s("Hello");
+        CHECK(s[0] == 'H');
+        CHECK(s[1] == 'e');
+        CHECK(s[4] == 'o');
+        
+        s[0] = 'h';
+        CHECK(s[0] == 'h');
+        CHECK(fl::strcmp(s.c_str(), "hello") == 0);
+    }
+
+    SUBCASE("operator[] - const") {
+        const fl::string s("Hello");
+        CHECK(s[0] == 'H');
+        CHECK(s[1] == 'e');
+        CHECK(s[4] == 'o');
+    }
+
+    SUBCASE("operator[] - out of bounds") {
+        fl::string s("Hello");
+        // fl::string returns '\0' for out-of-bounds access
+        CHECK(s[10] == '\0');
+        CHECK(s[100] == '\0');
+    }
+
+    SUBCASE("front() and back()") {
+        fl::string s("Hello");
+        CHECK(s.front() == 'H');
+        CHECK(s.back() == 'o');
+        
+        fl::string empty_str;
+        CHECK(empty_str.front() == '\0');
+        CHECK(empty_str.back() == '\0');
+    }
+
+    SUBCASE("c_str() and data()") {
+        fl::string s("Hello");
+        CHECK(fl::strcmp(s.c_str(), "Hello") == 0);
+        CHECK(s.c_str()[5] == '\0');
+        
+        // For fl::string, c_str() should always be null-terminated
+        fl::string empty_str;
+        CHECK(empty_str.c_str() != nullptr);
+        CHECK(empty_str.c_str()[0] == '\0');
+    }
+}
+
+TEST_CASE("fl::string - Capacity Operations") {
+    SUBCASE("empty()") {
+        fl::string s;
+        CHECK(s.empty());
+        
+        s = "Not empty";
+        CHECK_FALSE(s.empty());
+        
+        s.clear();
+        CHECK(s.empty());
+    }
+
+    SUBCASE("size() and length()") {
+        fl::string s;
+        CHECK(s.size() == 0);
+        CHECK(s.length() == 0);
+        
+        s = "Hello";
+        CHECK(s.size() == 5);
+        CHECK(s.length() == 5);
+        
+        s = "A much longer string to test size calculation";
+        CHECK(s.size() == 45);  // Corrected: actual length is 45
+        CHECK(s.length() == 45);
+    }
+
+    SUBCASE("capacity() and reserve()") {
+        fl::string s;
+        size_t initial_capacity = s.capacity();
+        CHECK(initial_capacity >= 0);
+        
+        s.reserve(100);
+        CHECK(s.capacity() >= 100);
+        CHECK(s.empty()); // reserve shouldn't affect content
+        
+        s = "Short";
+        s.reserve(50);
+        CHECK(s.capacity() >= 50);
+        CHECK(s == "Short"); // content preserved
+        
+        // Reserving less than current capacity should be no-op
+        size_t current_capacity = s.capacity();
+        s.reserve(10);
+        CHECK(s.capacity() >= current_capacity);
+    }
+}
+
+TEST_CASE("fl::string - Modifiers") {
+    SUBCASE("clear()") {
+        fl::string s("Hello World");
+        CHECK_FALSE(s.empty());
+        
+        s.clear();
+        CHECK(s.empty());
+        CHECK(s.size() == 0);
+        // Note: fl::string's clear() only sets length to 0, it doesn't null-terminate
+        // the internal buffer immediately. This is different from std::string behavior.
+        // The string is logically empty even though the raw buffer may contain old data.
+        CHECK(s.size() == 0);  // This is the correct way to check if cleared
+    }
+
+    SUBCASE("clear() with memory management") {
+        fl::string s("Hello World");
+        s.clear(false); // don't free memory
+        CHECK(s.empty());
+        
+        s = "Test";
+        s.clear(true); // free memory
+        CHECK(s.empty());
+    }
+
+    SUBCASE("append() - C-string") {
+        fl::string s("Hello");
+        s.append(" World");
+        CHECK(s == "Hello World");
+        CHECK(s.size() == 11);
+        
+        s.append("!");
+        CHECK(s == "Hello World!");
+    }
+
+    SUBCASE("append() - substring") {
+        fl::string s("Hello");
+        s.append(" World!!!", 6); // append only " World"
+        CHECK(s == "Hello World");
+    }
+
+    SUBCASE("append() - fl::string") {
+        fl::string s1("Hello");
+        fl::string s2(" World");
+        s1.append(s2.c_str(), s2.size());
+        CHECK(s1 == "Hello World");
+    }
+
+    SUBCASE("operator+=") {
+        fl::string s("Hello");
+        s += " World";
+        CHECK(s == "Hello World");
+        
+        fl::string s2("!");
+        s += s2;
+        CHECK(s == "Hello World!");
+    }
+
+    SUBCASE("swap()") {
+        fl::string s1("First");
+        fl::string s2("Second");
+        
+        s1.swap(s2);
+        CHECK(s1 == "Second");
+        CHECK(s2 == "First");
+        
+        // Test with different sizes
+        fl::string s3("A");
+        fl::string s4("Much longer string");
+        s3.swap(s4);
+        CHECK(s3 == "Much longer string");
+        CHECK(s4 == "A");
+    }
+}
+
+TEST_CASE("fl::string - Substring Operations") {
+    SUBCASE("substr() - standard behavior") {
+        fl::string original("http://fastled.io");
+        
+        // Standard substr(pos, length) behavior
+        // substr(0, 4) should return "http"
+        fl::string scheme = original.substr(0, 4);
+        CHECK(fl::strcmp(scheme.c_str(), "http") == 0);
+        
+        // substr(7, 7) should return "fastled" (7 chars starting at pos 7)
+        fl::string host_part = original.substr(7, 7);
+        CHECK(fl::strcmp(host_part.c_str(), "fastled") == 0);
+        
+        // substr(7) should return everything from position 7 onwards
+        fl::string from_host = original.substr(7);
+        CHECK(fl::strcmp(from_host.c_str(), "fastled.io") == 0);
+    }
+
+    SUBCASE("substr() - edge cases") {
+        fl::string original("http://fastled.io");
+        
+        // Start beyond end
+        fl::string empty = original.substr(100, 5);
+        CHECK(empty.empty());
+        
+        // Length beyond end
+        fl::string partial = original.substr(15, 100);
+        CHECK(fl::strcmp(partial.c_str(), "io") == 0);
+        
+        // Zero length
+        fl::string zero_len = original.substr(5, 0);
+        CHECK(zero_len.empty());
+        
+        // Entire string
+        fl::string full = original.substr(0);
+        CHECK(full == original);
+    }
+}
+
+TEST_CASE("fl::string - String Operations") {
+    SUBCASE("find() - character") {
+        fl::string s("Hello World");
+        CHECK(s.find('H') == 0);
+        CHECK(s.find('o') == 4); // first occurrence
+        CHECK(s.find('l') == 2); // first occurrence
+        CHECK(s.find('d') == 10);
+        CHECK(s.find('x') == string::npos);
+    }
+
+    SUBCASE("find() - substring") {
+        fl::string s("Hello World Hello");
+        CHECK(s.find("Hello") == 0);
+        CHECK(s.find("World") == 6);
+        CHECK(s.find("xyz") == string::npos);
+        CHECK(s.find("") == 0); // empty string found at position 0
+    }
+
+    SUBCASE("find() - with position parameter") {
+        fl::string url("http://fastled.io");
+        
+        // Test find operations that were working during debug
+        auto scheme_end = url.find("://");
+        CHECK_EQ(4, scheme_end);  // Position of "://"
+        
+        auto path_start = url.find('/', 7);  // Find '/' after position 7
+        CHECK_EQ(string::npos, path_start);  // No path in this URL
+        
+        // Test with URL that has a path
+        fl::string url_with_path("http://example.com/path");
+        auto path_pos = url_with_path.find('/', 7);
+        CHECK_EQ(18, path_pos);  // Position of '/' in path
+    }
+
+    SUBCASE("find() - edge cases") {
+        fl::string s("abc");
+        CHECK(s.find("abcd") == string::npos); // substring longer than string
+        
+        fl::string empty_str;
+        CHECK(empty_str.find('a') == string::npos);
+        CHECK(empty_str.find("") == 0); // empty string in empty string
+    }
+
+    SUBCASE("npos constant") {
+        CHECK(string::npos == static_cast<size_t>(-1));
+    }
+}
+
+TEST_CASE("fl::string - Comparison Operators") {
+    SUBCASE("Equality operators") {
+        fl::string s1("Hello");
+        fl::string s2("Hello");
+        fl::string s3("World");
+        
+        CHECK(s1 == s2);
+        CHECK_FALSE(s1 == s3);
+        CHECK_FALSE(s1 != s2);
+        CHECK(s1 != s3);
+    }
+
+    SUBCASE("Equality operators - bug fix tests") {
+        // Test basic string equality that was broken
+        fl::string str1("http");
+        fl::string str2("http");
+        fl::string str3("https");
+        
+        // These should return true but were returning false
+        CHECK(str1 == str2);
+        CHECK_FALSE(str1 == str3);
+        
+        // Test with const char*
+        CHECK(str1 == "http");
+        CHECK_FALSE(str1 == "https");
+        
+        // Test edge cases
+        fl::string empty1;
+        fl::string empty2;
+        CHECK(empty1 == empty2);
+        
+        fl::string single1("a");
+        fl::string single2("a");
+        CHECK(single1 == single2);
+        
+        // Test inequality operator
+        CHECK_FALSE(str1 != str2);
+        CHECK(str1 != str3);
+    }
+
+    SUBCASE("Relational operators") {
+        fl::string s1("Apple");
+        fl::string s2("Banana");
+        fl::string s3("Apple");
+        
+        CHECK(s1 < s2);
+        CHECK_FALSE(s2 < s1);
+        CHECK_FALSE(s1 < s3);
+        
+        CHECK(s1 <= s2);
+        CHECK(s1 <= s3);
+        CHECK_FALSE(s2 <= s1);
+        
+        CHECK(s2 > s1);
+        CHECK_FALSE(s1 > s2);
+        CHECK_FALSE(s1 > s3);
+        
+        CHECK(s2 >= s1);
+        CHECK(s1 >= s3);
+        CHECK_FALSE(s1 >= s2);
+    }
+
+    SUBCASE("Comparison with empty strings") {
+        fl::string s1;
+        fl::string s2("");
+        fl::string s3("Hello");
+        
+        CHECK(s1 == s2);
+        CHECK(s1 < s3);
+        CHECK_FALSE(s3 < s1);
+    }
+}
+
+TEST_CASE("fl::string - Stream Operations") {
+    SUBCASE("Stream output") {
+        fl::string test_str("http");
+        
+        // Test stream output - should show characters, not ASCII values
+        fl::StrStream oss;
+        oss << test_str;
+        fl::string result = oss.str();
+        
+        // Should be "http", not "104116116112" (ASCII values)
+        CHECK(fl::strcmp(result.c_str(), "http") == 0);
+        
+        // Test with special characters
+        fl::string special("://");
+        fl::StrStream oss2;
+        oss2 << special;
+        fl::string result2 = oss2.str();
+        CHECK(fl::strcmp(result2.c_str(), "://") == 0);
+    }
+
+    SUBCASE("Stream output - complex") {
+        // Test combining stream operations
+        fl::string scheme("https");
+        fl::string host("192.0.2.0");
+        fl::string path("/test");
+        
+        fl::StrStream oss;
+        oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
+        fl::string full_output = oss.str();
+        CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
+    }
+}
+
+TEST_CASE("fl::string - Copy-on-Write Behavior") {
+    SUBCASE("Shared data after copy") {
+        fl::string s1("Hello World");
+        fl::string s2 = s1;
+        
+        // Both should have the same content
+        CHECK(s1 == s2);
+        CHECK(s1.size() == s2.size());
+    }
+
+    SUBCASE("Copy-on-write on modification") {
+        fl::string s1("Hello World");
+        fl::string s2 = s1;
+        
+        // Modify s2, s1 should remain unchanged
+        s2.append("!");
+        CHECK(s1 == "Hello World");
+        CHECK(s2 == "Hello World!");
+    }
+
+    SUBCASE("Copy-on-write with character modification") {
+        fl::string s1("Hello");
+        fl::string s2 = s1;
+        
+        s2[0] = 'h';
+        CHECK(s1 == "Hello");
+        CHECK(s2 == "hello");
+    }
+}
+
+TEST_CASE("fl::string - Inline vs Heap Storage") {
+    SUBCASE("Short strings (inline storage)") {
+        // Create a string that fits in inline storage
+        fl::string s("Short");
+        CHECK(s.size() == 5);
+        CHECK(s == "Short");
+        
+        // Test modification while staying inline
+        s.append("er");
+        CHECK(s == "Shorter");
+    }
+
+    SUBCASE("Long strings (heap storage)") {
+        // Create a string longer than FASTLED_STR_INLINED_SIZE
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 10, 'a');
+        fl::string s(long_str.c_str());
+        
+        CHECK(s.size() == long_str.length());
+        CHECK(fl::strcmp(s.c_str(), long_str.c_str()) == 0);
+    }
+
+    SUBCASE("Transition from inline to heap") {
+        fl::string s("Short");
+        
+        // Append enough to exceed inline capacity
+        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');
+        s.append(long_append.c_str());
+        
+        CHECK(s.size() == 5 + long_append.length());
+        CHECK(s[0] == 'S');
+        CHECK(s[5] == 'x');
+    }
+
+    SUBCASE("Copy-on-write with heap storage") {
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'b');
+        fl::string s1(long_str.c_str());
+        fl::string s2 = s1;
+        
+        s2.append("extra");
+        CHECK(s1.size() == long_str.length());
+        CHECK(s2.size() == long_str.length() + 5);
+        
+        // Verify copy-on-write behavior: s1 should remain unchanged
+        CHECK(s1.c_str()[0] == 'b');
+        
+        // Note: There appears to be an issue with fl::string heap storage character access
+        // after copy-on-write operations. This is a limitation of the current implementation.
+        // We'll verify that at least the string content and size are correct.
+        CHECK(s2.size() > long_str.length());
+        
+        // Verify that the strings are different (copy-on-write worked)
+        CHECK(s1 != s2);
+    }
+}
+
+TEST_CASE("fl::string - Edge Cases and Special Characters") {
+    SUBCASE("Null characters in string") {
+        // Since fl::string doesn't support (const char*, size_t) constructor,
+        // we'll test null character handling differently
+        fl::string s("Hello");
+        s.append("\0", 1);  // Add null character
+        s.append("World");
+        // Note: The actual behavior may vary since fl::string uses strlen internally
+        CHECK(s.size() >= 5);  // At least the "Hello" part
+        CHECK(s[0] == 'H');
+        CHECK(s[4] == 'o');
+    }
+
+    SUBCASE("Very long strings") {
+        // Test with very long strings
+        std::string very_long(1000, 'z');
+        fl::string s(very_long.c_str());
+        CHECK(s.size() == 1000);
+        CHECK(s[0] == 'z');
+        CHECK(s[999] == 'z');
+    }
+
+    SUBCASE("Repeated operations") {
+        fl::string s;
+        for (int i = 0; i < 100; ++i) {
+            s.append("a");
+        }
+        CHECK(s.size() == 100);
+        CHECK(s[0] == 'a');
+        CHECK(s[99] == 'a');
+    }
+
+    SUBCASE("Multiple consecutive modifications") {
+        fl::string s("Start");
+        s.append(" middle");
+        s.append(" end");
+        s[0] = 's';
+        CHECK(s == "start middle end");
+    }
+}
+
+TEST_CASE("fl::string - Memory Management") {
+    SUBCASE("Reserve and capacity management") {
+        fl::string s;
+        
+        // Test reserve with small capacity
+        s.reserve(10);
+        CHECK(s.capacity() >= 10);
+        s = "Test";
+        CHECK(s == "Test");
+        
+        // Test reserve with large capacity
+        s.reserve(1000);
+        CHECK(s.capacity() >= 1000);
+        CHECK(s == "Test");
+        
+        // Test that content is preserved during capacity changes
+        for (int i = 0; i < 100; ++i) {
+            s.append("x");
+        }
+        CHECK(s.size() == 104); // "Test" + 100 'x'
+        CHECK(s[0] == 'T');
+        CHECK(s[4] == 'x');
+    }
+
+    SUBCASE("Memory efficiency") {
+        // Test that small strings don't allocate heap memory unnecessarily
+        fl::string s1("Small");
+        fl::string s2("Another small string");
+        
+        // These should work without issues
+        fl::string s3 = s1;
+        s3.append(" addition");
+        CHECK(s1 == "Small");
+        CHECK(s3 != s1);
+    }
+}
+
+TEST_CASE("fl::string - Compatibility with std::string patterns") {
+    SUBCASE("Common std::string usage patterns") {
+        // Pattern 1: Build string incrementally
+        fl::string result;
+        result += "Hello";
+        result += " ";
+        result += "World";
+        result += "!";
+        CHECK(result == "Hello World!");
+        
+        // Pattern 2: Copy and modify
+        fl::string original("Template string");
+        fl::string modified = original;
+        modified[0] = 't';
+        CHECK(original == "Template string");
+        CHECK(modified == "template string");
+        
+        // Pattern 3: Clear and reuse
+        fl::string reusable("First content");
+        CHECK(reusable == "First content");
+        reusable.clear();
+        reusable = "Second content";
+        CHECK(reusable == "Second content");
+    }
+
+    SUBCASE("String container behavior") {
+        // Test that fl::string can be used like std::string in containers
+        fl::vector<string> strings;
+        strings.push_back(fl::string("First"));
+        strings.push_back(fl::string("Second"));
+        strings.push_back(fl::string("Third"));
+        
+        CHECK(strings.size() == 3);
+        CHECK(strings[0] == "First");
+        CHECK(strings[1] == "Second");
+        CHECK(strings[2] == "Third");
+        
+        // Test sorting (requires comparison operators)
+        // This would test the < operator implementation
+        CHECK(strings[0] < strings[1]); // "First" < "Second"
+    }
+}
+
+TEST_CASE("fl::string - Performance and Stress Testing") {
+    SUBCASE("Large string operations") {
+        fl::string s;
+        
+        // Build a large string
+        for (int i = 0; i < 1000; ++i) {
+            s.append("X");
+        }
+        CHECK(s.size() == 1000);
+        
+        // Copy the large string
+        fl::string s2 = s;
+        CHECK(s2.size() == 1000);
+        CHECK(s2 == s);
+        
+        // Modify the copy
+        s2.append("Y");
+        CHECK(s.size() == 1000);
+        CHECK(s2.size() == 1001);
+        CHECK(s2[1000] == 'Y');
+    }
+
+    SUBCASE("Repeated copy operations") {
+        fl::string original("Test string for copying");
+        
+        for (int i = 0; i < 100; ++i) {
+            fl::string copy = original;
+            CHECK(copy == original);
+            copy.append("X");
+            CHECK(copy != original);
+        }
+        
+        // Original should be unchanged
+        CHECK(original == "Test string for copying");
+    }
+}
+
+TEST_CASE("fl::string - Integration with FastLED types") {
+    SUBCASE("Append with various numeric types") {
+        fl::string s;
+        
+        s.append(static_cast<int8_t>(127));
+        s.clear();
+        s.append(static_cast<uint8_t>(255));
+        s.clear();
+        s.append(static_cast<int16_t>(32767));
+        s.clear();
+        s.append(static_cast<uint16_t>(65535));
+        s.clear();
+        s.append(static_cast<int32_t>(2147483647));
+        s.clear();
+        s.append(static_cast<uint32_t>(4294967295U));
+        
+        // Just verify they don't crash - exact formatting may vary
+        CHECK(s.size() > 0);
+    }
+
+    SUBCASE("Boolean append") {
+        fl::string s;
+        s.append(true);
+        CHECK(s == "true");
+        
+        s.clear();
+        s.append(false);
+        CHECK(s == "false");
+    }
+}
+
+TEST_CASE("fl::string - Comprehensive Integration Tests") {
+    SUBCASE("URL parsing scenario") {
+        // Comprehensive test combining all operations
+        fl::string url("https://192.0.2.0/test");
+        
+        // Extract scheme
+        fl::string scheme = url.substr(0, 5);  // "https"
+        CHECK(fl::strcmp(scheme.c_str(), "https") == 0);
+        CHECK(scheme == "https");
+        
+        // Extract protocol separator  
+        fl::string proto_sep = url.substr(5, 3);  // "://"
+        CHECK(fl::strcmp(proto_sep.c_str(), "://") == 0);
+        CHECK(proto_sep == "://");
+        
+        // Extract host
+        fl::string host = url.substr(8, 9);  // "192.0.2.0"
+        CHECK(fl::strcmp(host.c_str(), "192.0.2.0") == 0);
+        CHECK(host == "192.0.2.0");
+        
+        // Extract path
+        fl::string path = url.substr(17);  // "/test"
+        CHECK(fl::strcmp(path.c_str(), "/test") == 0);
+        CHECK(path == "/test");
+        
+        // Stream output test
+        fl::StrStream oss;
+        oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
+        fl::string full_output = oss.str();
+        CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
+    }
+}
+
+TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
+    SUBCASE("Debug scenario - exact networking code failure") {
+        // Test the exact scenario that was failing in the networking code
+        fl::string test_url("http://fastled.io");
+        
+        // Debug: Check individual character access
+        CHECK_EQ('h', test_url[0]);
+        CHECK_EQ('t', test_url[1]);
+        CHECK_EQ('t', test_url[2]);
+        CHECK_EQ('p', test_url[3]);
+        
+        // Debug: Check length
+        CHECK_EQ(17, test_url.size());  // "http://fastled.io" is 17 characters
+        
+        // Debug: Check find operation
+        auto pos = test_url.find("://");
+        CHECK_EQ(4, pos);
+        
+        // Debug: Check substring extraction (the failing operation)
+        fl::string scheme = test_url.substr(0, 4);
+        CHECK_EQ(4, scheme.size());
+        CHECK(fl::strcmp(scheme.c_str(), "http") == 0);
+        
+        // The critical test: equality comparison
+        CHECK(scheme == "http");
+        
+        // Manual character comparison that was working
+        bool manual_check = (scheme.size() == 4 && 
+                            scheme[0] == 'h' && scheme[1] == 't' && 
+                            scheme[2] == 't' && scheme[3] == 'p');
+        CHECK(manual_check);
+    }
+}
+
+//=============================================================================
+// SECTION: Tests from string_memory_bugs.cpp
+//=============================================================================
+
+
+TEST_CASE("StringHolder - Capacity off-by-one bugs") {
+    // These tests are designed to expose the bugs where mCapacity is set to mLength
+    // instead of mLength + 1 in StringHolder constructors
+
+    SUBCASE("StringHolder(fl::size length) capacity bug") {
+        // This constructor should allocate length+1 bytes and set mCapacity = length+1
+        // But it incorrectly sets mCapacity = mLength (missing the +1 for null terminator)
+
+        // Create a string that will use StringHolder(fl::size length) constructor
+        // This happens when we create a string with a specific length
+        fl::string s1("x");  // Short string, inline storage
+
+        // Now force it to grow beyond inline storage
+        // This will trigger StringHolder allocation
+        fl::size target_size = FASTLED_STR_INLINED_SIZE + 10;
+        for (fl::size i = 1; i < target_size; ++i) {
+            s1.append("x");
+        }
+
+        CHECK(s1.size() == target_size);
+        CHECK(s1.capacity() >= target_size);  // Should be >= target_size + 1 for null terminator
+
+        // The bug manifests when we try to append more data
+        // With incorrect capacity, buffer overruns can occur
+        s1.append("y");
+        CHECK(s1.size() == target_size + 1);
+        CHECK(s1[target_size] == 'y');
+        CHECK(s1.c_str()[target_size + 1] == '\0');  // Null terminator should be present
+    }
+
+    SUBCASE("StringHolder(const char*, fl::size) capacity bug") {
+        // This constructor has the same bug: mCapacity = mLength instead of mLength + 1
+
+        // Create a long string that will trigger heap allocation
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'a');
+        fl::string s(long_str.c_str());
+
+        CHECK(s.size() == long_str.length());
+
+        // Verify capacity is correct (should include null terminator)
+        // Bug: capacity will be equal to length, missing +1 for null terminator
+
+        // This might not catch the bug directly, but the next operation will
+        CHECK(s.capacity() >= long_str.length());
+
+        // Try to append - this can cause buffer issues with wrong capacity
+        s.append("b");
+        CHECK(s.size() == long_str.length() + 1);
+        CHECK(s[long_str.length()] == 'b');
+
+        // Verify null termination is intact
+        CHECK(s.c_str()[s.size()] == '\0');
+    }
+
+    SUBCASE("StringHolder::grow() fallback path capacity bug") {
+        // In grow(), when realloc fails and malloc is used as fallback,
+        // mCapacity = mLength is used instead of mLength + 1
+
+        // We can't easily force realloc to fail, but we can test the normal path
+        // and document that line 79 in str.cpp has the same bug
+
+        fl::string s("Start");
+
+        // Grow the string multiple times
+        // Note: "_extra_data_to_force_growth" is 27 characters
+        for (int i = 0; i < 10; ++i) {
+            fl::size old_size = s.size();
+            s.append("_extra_data_to_force_growth");
+            CHECK(s.size() == old_size + 27);
+        }
+
+        // Verify final state
+        CHECK(s.size() == 5 + (10 * 27));
+        CHECK(s.capacity() >= s.size());
+        CHECK(s.c_str()[s.size()] == '\0');
+    }
+
+    SUBCASE("Copy with length exactly at inline boundary") {
+        // Test strings that are exactly at the boundary between inline and heap storage
+        // This is where off-by-one errors are most likely to manifest
+
+        fl::size boundary = FASTLED_STR_INLINED_SIZE - 1;
+        std::string boundary_str(boundary, 'b');
+
+        fl::string s1(boundary_str.c_str());
+        CHECK(s1.size() == boundary);
+
+        // This should still fit in inline storage (boundary + 1 for null terminator <= SIZE)
+        // Now push it just over the boundary
+        s1.append("X");
+        CHECK(s1.size() == boundary + 1);
+
+        // At this point, if SIZE = 64 and boundary = 63, then:
+        // - boundary + 1 = 64 characters
+        // - We need 65 bytes total (64 + 1 for null terminator)
+        // - This should trigger heap allocation
+
+        // Verify we can still access and modify the string
+        s1.append("Y");
+        CHECK(s1.size() == boundary + 2);
+        CHECK(s1[boundary] == 'X');
+        CHECK(s1[boundary + 1] == 'Y');
+    }
+
+    SUBCASE("Null terminator preservation after operations") {
+        // Verify that null terminators are always correctly placed
+
+        fl::string s1("Hello");
+        CHECK(s1.c_str()[5] == '\0');
+        CHECK(::strlen(s1.c_str()) == 5);
+
+        s1.append(" World");
+        CHECK(s1.c_str()[11] == '\0');
+        CHECK(::strlen(s1.c_str()) == 11);
+
+        // Force heap allocation
+        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');
+        s1.append(long_append.c_str());
+        CHECK(s1.c_str()[s1.size()] == '\0');
+        CHECK(::strlen(s1.c_str()) == s1.size());
+    }
+
+    SUBCASE("Capacity after copy operations") {
+        // Test that capacity is correctly maintained during copy-on-write operations
+
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 50, 'c');
+        fl::string s1(long_str.c_str());
+        fl::string s2 = s1;  // Copy (copy-on-write)
+
+        // Both should report same size
+        CHECK(s1.size() == s2.size());
+        CHECK(s1.size() == long_str.length());
+
+        // Modify s2 to trigger copy-on-write
+        s2.append("_modified");
+
+        // s1 should be unchanged
+        CHECK(s1.size() == long_str.length());
+
+        // s2 should have grown
+        CHECK(s2.size() == long_str.length() + 9);
+
+        // Both should maintain proper null termination
+        CHECK(s1.c_str()[s1.size()] == '\0');
+        CHECK(s2.c_str()[s2.size()] == '\0');
+        CHECK(::strlen(s1.c_str()) == s1.size());
+        CHECK(::strlen(s2.c_str()) == s2.size());
+    }
+}
+
+TEST_CASE("StringHolder - hasCapacity checks") {
+    // Test the hasCapacity() method which relies on mCapacity being correct
+
+    SUBCASE("Reserve and capacity tracking") {
+        fl::string s;
+
+        // Start with empty string
+        CHECK(s.empty());
+
+        // Reserve space
+        s.reserve(100);
+        CHECK(s.capacity() >= 100);
+
+        // Add content up to reserved capacity
+        for (fl::size i = 0; i < 50; ++i) {
+            s.append("a");
+        }
+        CHECK(s.size() == 50);
+
+        // Capacity should accommodate null terminator
+        // If capacity was set to size (bug), then we'd have buffer issues
+        CHECK(s.capacity() >= 50);
+
+        // Continue appending
+        for (fl::size i = 0; i < 50; ++i) {
+            s.append("b");
+        }
+        CHECK(s.size() == 100);
+
+        // Verify null termination
+        CHECK(s.c_str()[100] == '\0');
+        CHECK(::strlen(s.c_str()) == 100);
+    }
+
+    SUBCASE("Write operations and capacity") {
+        fl::string s;
+
+        // Use write() method which checks capacity
+        const char* data1 = "First chunk of data";
+        s.write(data1, ::strlen(data1));
+        CHECK(s.size() == ::strlen(data1));
+        CHECK(::strcmp(s.c_str(), data1) == 0);
+
+        // Write more data
+        const char* data2 = " and second chunk";
+        s.write(data2, ::strlen(data2));
+
+        fl::size expected_size = ::strlen(data1) + ::strlen(data2);
+        CHECK(s.size() == expected_size);
+        CHECK(s.c_str()[expected_size] == '\0');
+
+        // Force heap allocation by writing a large amount
+        fl::size large_size = FASTLED_STR_INLINED_SIZE + 100;
+        for (fl::size i = s.size(); i < large_size; ++i) {
+            s.write('x');
+        }
+
+        CHECK(s.size() == large_size);
+        CHECK(s.c_str()[large_size] == '\0');
+    }
+}
+
+TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
+    SUBCASE("Exact boundary conditions") {
+        // Test strings of length 0, 1, SIZE-1, SIZE, SIZE+1
+
+        // Length 0
+        fl::string s0;
+        CHECK(s0.size() == 0);
+        CHECK(s0.c_str()[0] == '\0');
+
+        // Length 1
+        fl::string s1("a");
+        CHECK(s1.size() == 1);
+        CHECK(s1.c_str()[1] == '\0');
+        CHECK(::strlen(s1.c_str()) == 1);
+
+        // Length SIZE-1 (should fit inline with null terminator)
+        std::string str_size_minus_1(FASTLED_STR_INLINED_SIZE - 1, 'm');
+        fl::string s_sm1(str_size_minus_1.c_str());
+        CHECK(s_sm1.size() == FASTLED_STR_INLINED_SIZE - 1);
+        CHECK(s_sm1.c_str()[FASTLED_STR_INLINED_SIZE - 1] == '\0');
+
+        // Length SIZE (exactly at boundary, needs heap)
+        std::string str_size(FASTLED_STR_INLINED_SIZE, 's');
+        fl::string s_s(str_size.c_str());
+        CHECK(s_s.size() == FASTLED_STR_INLINED_SIZE);
+        CHECK(s_s.c_str()[FASTLED_STR_INLINED_SIZE] == '\0');
+        CHECK(::strlen(s_s.c_str()) == FASTLED_STR_INLINED_SIZE);
+
+        // Length SIZE+1
+        std::string str_size_plus_1(FASTLED_STR_INLINED_SIZE + 1, 'p');
+        fl::string s_sp1(str_size_plus_1.c_str());
+        CHECK(s_sp1.size() == FASTLED_STR_INLINED_SIZE + 1);
+        CHECK(s_sp1.c_str()[FASTLED_STR_INLINED_SIZE + 1] == '\0');
+        CHECK(::strlen(s_sp1.c_str()) == FASTLED_STR_INLINED_SIZE + 1);
+    }
+
+    SUBCASE("Multiple append operations at boundaries") {
+        fl::string s;
+
+        // Build up to exactly SIZE-1
+        for (fl::size i = 0; i < FASTLED_STR_INLINED_SIZE - 1; ++i) {
+            s.append("a");
+        }
+        CHECK(s.size() == FASTLED_STR_INLINED_SIZE - 1);
+
+        // One more append pushes to exactly SIZE
+        s.append("b");
+        CHECK(s.size() == FASTLED_STR_INLINED_SIZE);
+        CHECK(s.c_str()[FASTLED_STR_INLINED_SIZE] == '\0');
+
+        // One more append forces heap allocation
+        s.append("c");
+        CHECK(s.size() == FASTLED_STR_INLINED_SIZE + 1);
+        CHECK(s.c_str()[FASTLED_STR_INLINED_SIZE + 1] == '\0');
+
+        // Verify content is correct
+        CHECK(s[FASTLED_STR_INLINED_SIZE - 1] == 'b');
+        CHECK(s[FASTLED_STR_INLINED_SIZE] == 'c');
+    }
+
+    SUBCASE("Substr operations preserving null termination") {
+        fl::string original("This is a test string for substring operations");
+
+        fl::string sub1 = original.substr(0, 4);  // "This"
+        CHECK(sub1.size() == 4);
+        CHECK(sub1.c_str()[4] == '\0');
+        CHECK(::strcmp(sub1.c_str(), "This") == 0);
+
+        fl::string sub2 = original.substr(10, 4);  // "test"
+        CHECK(sub2.size() == 4);
+        CHECK(sub2.c_str()[4] == '\0');
+        CHECK(::strcmp(sub2.c_str(), "test") == 0);
+
+        fl::string sub3 = original.substr(original.size() - 10);  // "operations"
+        CHECK(sub3.size() == 10);
+        CHECK(sub3.c_str()[10] == '\0');
+        CHECK(::strcmp(sub3.c_str(), "operations") == 0);
+    }
+}
+
+TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
+    // These tests attempt to expose memory corruption that would occur
+    // if capacity is set incorrectly (missing +1 for null terminator)
+
+    SUBCASE("Rapid growth and access patterns") {
+        fl::string s("initial");
+
+        // Grow in various increments
+        s.append("_1234567890");
+        CHECK(::strlen(s.c_str()) == s.size());
+
+        s.append("_abcdefghijklmnopqrstuvwxyz");
+        CHECK(::strlen(s.c_str()) == s.size());
+
+        // Force transition from inline to heap multiple times
+        s.clear();
+        s = "short";
+        CHECK(::strlen(s.c_str()) == 5);
+
+        std::string long_data(FASTLED_STR_INLINED_SIZE * 2, 'L');
+        s = long_data.c_str();
+        CHECK(::strlen(s.c_str()) == long_data.length());
+
+        s.clear();
+        s = "tiny";
+        CHECK(::strlen(s.c_str()) == 4);
+    }
+
+    SUBCASE("Copy and modify patterns") {
+        std::string base(FASTLED_STR_INLINED_SIZE + 10, 'B');
+        fl::string s1(base.c_str());
+
+        // Create multiple copies
+        fl::string s2 = s1;
+        fl::string s3 = s1;
+        fl::string s4 = s1;
+
+        // Modify each copy differently
+        s2.append("_s2");
+        s3.append("_s3");
+        s4.append("_s4");
+
+        // All should maintain null termination
+        CHECK(::strlen(s1.c_str()) == s1.size());
+        CHECK(::strlen(s2.c_str()) == s2.size());
+        CHECK(::strlen(s3.c_str()) == s3.size());
+        CHECK(::strlen(s4.c_str()) == s4.size());
+
+        // Original should be unchanged
+        CHECK(s1.size() == base.length());
+
+        // Copies should have grown
+        CHECK(s2.size() == base.length() + 3);
+        CHECK(s3.size() == base.length() + 3);
+        CHECK(s4.size() == base.length() + 3);
+    }
+
+    SUBCASE("Insert operations with capacity constraints") {
+        fl::string s("Hello World");
+
+        // Insert in the middle
+        s.insert(5, " Beautiful");
+        CHECK(::strlen(s.c_str()) == s.size());
+        CHECK(::strcmp(s.c_str(), "Hello Beautiful World") == 0);
+
+        // Insert at the beginning
+        s.insert(0, ">> ");
+        CHECK(::strlen(s.c_str()) == s.size());
+
+        // Insert at the end
+        s.insert(s.size(), " <<");
+        CHECK(::strlen(s.c_str()) == s.size());
+
+        // Verify null termination throughout
+        CHECK(s.c_str()[s.size()] == '\0');
+    }
+}
+
+//=============================================================================
+// SECTION: Tests from string_optimization.cpp
+//=============================================================================
+
+
+TEST_CASE("fl::string - Numeric append performance patterns") {
+    // Test numeric append operations that currently allocate temporary StrN<64> buffers
+    // These tests validate that optimizations don't break functionality
+
+    SUBCASE("Integer append operations") {
+        fl::string s;
+
+        // Test various integer types
+        s.append(static_cast<i8>(127));
+        CHECK(s == "127");
+
+        s.clear();
+        s.append(static_cast<u8>(255));
+        CHECK(s == "255");
+
+        s.clear();
+        s.append(static_cast<i16>(-32768));
+        CHECK(s == "-32768");
+
+        s.clear();
+        s.append(static_cast<u16>(65535));
+        CHECK(s == "65535");
+
+        s.clear();
+        s.append(static_cast<i32>(-2147483647));
+        CHECK(s == "-2147483647");
+
+        s.clear();
+        s.append(static_cast<u32>(4294967295U));
+        CHECK(s == "4294967295");
+    }
+
+    SUBCASE("64-bit integer append operations") {
+        fl::string s;
+
+        s.append(static_cast<int64_t>(-9223372036854775807LL));
+        CHECK(s == "-9223372036854775807");
+
+        s.clear();
+        s.append(static_cast<uint64_t>(18446744073709551615ULL));
+        CHECK(s == "18446744073709551615");
+    }
+
+    SUBCASE("Float append operations") {
+        fl::string s;
+
+        s.append(3.14159f);
+        // Check that it contains a decimal representation
+        CHECK(s.size() > 0);
+        CHECK(s.find('.') != string::npos);
+
+        s.clear();
+        s.append(-273.15f);
+        CHECK(s.size() > 0);
+        CHECK(s[0] == '-');
+    }
+
+    SUBCASE("Mixed numeric append operations") {
+        fl::string s;
+
+        s.append("Value: ");
+        s.append(42);
+        s.append(", Float: ");
+        s.append(3.14f);
+        s.append(", Hex: 0x");
+        s.appendHex(static_cast<u32>(255));
+
+        CHECK(s.find("42") != string::npos);
+        CHECK(s.find("3.14") != string::npos);
+        // Check for either lowercase or uppercase hex output
+        bool has_hex = (s.find("ff") != string::npos) || (s.find("FF") != string::npos);
+        CHECK(has_hex);
+    }
+
+    SUBCASE("Rapid numeric append sequence") {
+        fl::string s;
+
+        // Simulate rapid appends that would benefit from buffer reuse
+        for (int i = 0; i < 100; ++i) {
+            s.append(i);
+            if (i < 99) {
+                s.append(",");
+            }
+        }
+
+        CHECK(s.find("0,1,2") != string::npos);
+        CHECK(s.find("98,99") != string::npos);
+    }
+}
+
+TEST_CASE("fl::string - Hexadecimal formatting") {
+    SUBCASE("Hex append basic") {
+        fl::string s;
+
+        s.appendHex(static_cast<u8>(0xFF));
+        CHECK(s.size() > 0);
+
+        s.clear();
+        s.appendHex(static_cast<u32>(0xDEADBEEF));
+        CHECK(s.size() > 0);
+    }
+
+    SUBCASE("Hex append 64-bit") {
+        fl::string s;
+
+        s.appendHex(static_cast<uint64_t>(0xFEEDFACECAFEBEEFULL));
+        CHECK(s.size() > 0);
+    }
+}
+
+TEST_CASE("fl::string - Octal formatting") {
+    SUBCASE("Octal append basic") {
+        fl::string s;
+
+        s.appendOct(static_cast<u32>(8));
+        CHECK(s == "10");  // 8 in octal is "10"
+
+        s.clear();
+        s.appendOct(static_cast<u32>(64));
+        CHECK(s == "100");  // 64 in octal is "100"
+    }
+}
+
+TEST_CASE("fl::string - Thread safety of numeric operations") {
+    // Test that numeric append operations work correctly when called from multiple threads
+    // This is important if we use thread-local buffers for optimization
+
+    SUBCASE("Concurrent numeric appends") {
+        const int kNumThreads = 4;
+        const int kIterations = 100;
+
+        std::vector<std::thread> threads;
+        std::vector<fl::string> results(kNumThreads);
+
+        for (int t = 0; t < kNumThreads; ++t) {
+            threads.emplace_back([t, &results]() {
+                fl::string& s = results[t];
+                for (int i = 0; i < kIterations; ++i) {
+                    s.append(t * 1000 + i);
+                    s.append(",");
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        // Verify each thread produced correct output
+        for (int t = 0; t < kNumThreads; ++t) {
+            const fl::string& s = results[t];
+            CHECK(s.size() > 0);
+
+            // Check that the string starts with the thread's base value
+            char expected_start[32];
+            snprintf(expected_start, sizeof(expected_start), "%d,", t * 1000);
+            CHECK(s.find(expected_start) == 0);
+        }
+    }
+
+    SUBCASE("Concurrent mixed format appends") {
+        const int kNumThreads = 4;
+
+        std::vector<std::thread> threads;
+        std::vector<fl::string> results(kNumThreads);
+
+        for (int t = 0; t < kNumThreads; ++t) {
+            threads.emplace_back([t, &results]() {
+                fl::string& s = results[t];
+
+                // Mix different formatting operations
+                s.append("Dec:");
+                s.append(t);
+                s.append(",Hex:");
+                s.appendHex(t);
+                s.append(",Oct:");
+                s.appendOct(t);
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        // Verify correct output
+        for (int t = 0; t < kNumThreads; ++t) {
+            const fl::string& s = results[t];
+            CHECK(s.find("Dec:") != string::npos);
+            CHECK(s.find("Hex:") != string::npos);
+            CHECK(s.find("Oct:") != string::npos);
+        }
+    }
+}
+
+TEST_CASE("fl::string - Buffer size requirements") {
+    // Test edge cases for numeric formatting buffer sizes
+
+    SUBCASE("Maximum 64-bit value") {
+        fl::string s;
+
+        // Maximum uint64_t requires 20 digits in decimal
+        s.append(static_cast<uint64_t>(18446744073709551615ULL));
+        CHECK(s.size() == 20);
+        CHECK(s == "18446744073709551615");
+    }
+
+    SUBCASE("Minimum int64_t value") {
+        fl::string s;
+
+        // Minimum int64_t: -9223372036854775808 (20 digits + sign)
+        // Note: We use -9223372036854775807 to avoid overflow issues
+        s.append(static_cast<int64_t>(-9223372036854775807LL));
+        CHECK(s.size() == 20);  // 19 digits + sign
+    }
+
+    SUBCASE("Hex formatting maximum") {
+        fl::string s;
+
+        // Maximum uint64_t in hex: 16 hex digits
+        s.appendHex(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL));
+        CHECK(s.size() == 16);
+    }
+
+    SUBCASE("Float formatting buffer requirements") {
+        fl::string s;
+
+        // Test various float edge cases
+        s.append(1.234567890123456789f);  // Precision test
+        CHECK(s.size() > 0);
+
+        s.clear();
+        s.append(-1.234567890123456789f);
+        CHECK(s.size() > 0);
+        CHECK(s[0] == '-');
+
+        s.clear();
+        s.append(0.0f);
+        CHECK(s.size() > 0);
+    }
+}
+
+TEST_CASE("fl::string - Write method numeric variants") {
+    // Test the write() methods that take numeric types
+    // These also use temporary StrN buffers
+
+    SUBCASE("write() with integers") {
+        fl::string s;
+
+        s.write(static_cast<u16>(42));
+        CHECK(s == "42");
+
+        s.clear();
+        s.write(static_cast<u32>(4294967295U));
+        CHECK(s == "4294967295");
+
+        s.clear();
+        s.write(static_cast<uint64_t>(18446744073709551615ULL));
+        CHECK(s == "18446744073709551615");
+    }
+
+    SUBCASE("write() with signed integers") {
+        fl::string s;
+
+        s.write(static_cast<i32>(-2147483647));
+        CHECK(s == "-2147483647");
+
+        s.clear();
+        s.write(static_cast<i8>(-128));
+        CHECK(s == "-128");
+    }
+
+    SUBCASE("Sequential write operations") {
+        fl::string s;
+
+        s.append("Count: ");
+        s.write(static_cast<u32>(100));
+        s.append(", Value: ");
+        s.write(static_cast<i32>(-50));
+
+        CHECK(s.find("100") != string::npos);
+        CHECK(s.find("-50") != string::npos);
+    }
+}
+
+TEST_CASE("fl::string - Memory efficiency improvements") {
+    // Test patterns that could benefit from thread-local buffer optimization
+
+    SUBCASE("Repeated small string builds") {
+        // This pattern creates many temporary StrN<64> buffers
+        std::vector<fl::string> results;
+
+        for (int i = 0; i < 1000; ++i) {
+            fl::string s;
+            s.append("Item ");
+            s.append(i);
+            s.append(": Value=");
+            s.append(i * 2);
+            results.push_back(s);
+        }
+
+        CHECK(results.size() == 1000);
+        CHECK(results[0] == "Item 0: Value=0");
+        CHECK(results[999] == "Item 999: Value=1998");
+    }
+
+    SUBCASE("String builder pattern") {
+        fl::string s;
+
+        // Simulate building a complex string with many numeric appends
+        for (int i = 0; i < 50; ++i) {
+            s.append("Entry[");
+            s.append(i);
+            s.append("]=");
+            s.append(i * i);
+            s.append("; ");
+        }
+
+        CHECK(s.find("Entry[0]=0") != string::npos);
+        CHECK(s.find("Entry[49]=2401") != string::npos);
+    }
+}
+
+TEST_CASE("fl::string - StringFormatter buffer reuse") {
+    // Test that StringFormatter can safely reuse buffers across multiple calls
+
+    SUBCASE("Repeated calls with same formatter") {
+        fl::string results[10];
+
+        for (int i = 0; i < 10; ++i) {
+            results[i].append(i * 111);
+        }
+
+        // Verify all results are independent
+        CHECK(results[0] == "0");
+        CHECK(results[1] == "111");
+        CHECK(results[9] == "999");
+    }
+
+    SUBCASE("Interleaved formatting operations") {
+        fl::string s1, s2;
+
+        // Interleave operations on two strings
+        s1.append(100);
+        s2.append(200);
+        s1.append(300);
+        s2.append(400);
+
+        CHECK(s1.find("100") != string::npos);
+        CHECK(s1.find("300") != string::npos);
+        CHECK(s2.find("200") != string::npos);
+        CHECK(s2.find("400") != string::npos);
+    }
+}
+
+TEST_CASE("fl::string - Precision and accuracy") {
+    // Ensure optimizations don't affect output correctness
+
+    SUBCASE("Float precision") {
+        fl::string s;
+
+        s.append(1.5f);
+        CHECK(s.find("1.5") != string::npos);
+
+        s.clear();
+        s.append(0.123f);
+        CHECK(s.size() > 0);
+    }
+
+    SUBCASE("Negative zero handling") {
+        fl::string s;
+        s.append(-0.0f);
+        CHECK(s.size() > 0);
+    }
+
+    SUBCASE("All integer sizes produce correct output") {
+        fl::string s;
+
+        // Test boundary values for each integer type
+        s.append(static_cast<u8>(255));
+        CHECK(s == "255");
+
+        s.clear();
+        s.append(static_cast<i8>(-128));
+        CHECK(s == "-128");
+
+        s.clear();
+        s.append(static_cast<u16>(65535));
+        CHECK(s == "65535");
+
+        s.clear();
+        s.append(static_cast<i16>(-32768));
+        CHECK(s == "-32768");
     }
 }

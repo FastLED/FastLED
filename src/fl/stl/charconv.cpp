@@ -96,6 +96,7 @@ int itoa(int32_t value, char *sp, int radix) {
     while (tp > tmp)
         *sp++ = *--tp;
 
+    *sp = '\0';  // Null-terminate the string
     return len;
 }
 
@@ -119,6 +120,7 @@ int utoa32(uint32_t value, char *sp, int radix) {
     while (tp > tmp)
         *sp++ = *--tp;
 
+    *sp = '\0';  // Null-terminate the string
     return len;
 }
 
@@ -142,6 +144,7 @@ int utoa64(uint64_t value, char *sp, int radix) {
     while (tp > tmp)
         *sp++ = *--tp;
 
+    *sp = '\0';  // Null-terminate the string
     return len;
 }
 
