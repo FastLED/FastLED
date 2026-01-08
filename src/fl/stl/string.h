@@ -255,10 +255,11 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (!mStorage.template is<InlinedBuffer>()) {
                 mStorage = InlinedBuffer{};
             }
+            char* data = inlineData();  // Cache the pointer
             for (fl::size i = 0; i < count; ++i) {
-                inlineData()[i] = c;
+                data[i] = c;
             }
-            inlineData()[count] = '\0';
+            data[count] = '\0';
         } else {
             // Need heap allocation
             mStorage = fl::make_shared<StringHolder>(count);
@@ -378,20 +379,22 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     fl::size write(const char *str, fl::size n) {
         fl::size newLen = mLength + n;
         if (hasHeapData() && heapData().use_count() <= 1) {
-            if (!heapData()->hasCapacity(newLen)) {
+            StringHolderPtr& heap = heapData();
+            if (!heap->hasCapacity(newLen)) {
                 fl::size grow_length = FL_MAX(3, newLen * 3 / 2);
-                heapData()->grow(grow_length); // Grow by 50%
+                heap->grow(grow_length); // Grow by 50%
             }
-            fl::memcpy(heapData()->data() + mLength, str, n);
+            fl::memcpy(heap->data() + mLength, str, n);
             mLength = newLen;
-            heapData()->data()[mLength] = '\0';
+            heap->data()[mLength] = '\0';
             return mLength;
         } else if (hasHeapData()) {
             // Copy-on-write: shared heap data needs to be copied before modification
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 // Copy existing heap data
-                fl::memcpy(newData->data(), heapData()->data(), mLength);
+                const StringHolderPtr& heap = heapData();
+                fl::memcpy(newData->data(), heap->data(), mLength);
                 // Append new data
                 fl::memcpy(newData->data() + mLength, str, n);
                 newData->data()[newLen] = '\0';
@@ -619,9 +622,11 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // If we already have unshared heap data with sufficient capacity, do
         // nothing
-        if (hasHeapData() && heapData().use_count() <= 1 &&
-            heapData()->hasCapacity(newCapacity)) {
-            return;
+        if (hasHeapData()) {
+            const StringHolderPtr& heap = heapData();
+            if (heap.use_count() <= 1 && heap->hasCapacity(newCapacity)) {
+                return;
+            }
         }
 
         // Need to allocate new storage
@@ -1141,11 +1146,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Handle COW: if shared, make a copy
         if (hasHeapData() && heapData().use_count() > 1) {
+            const StringHolderPtr& heap = heapData();
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 // Copy data before insertion point
                 if (pos > 0) {
-                    fl::memcpy(newData->data(), heapData()->data(), pos);
+                    fl::memcpy(newData->data(), heap->data(), pos);
                 }
                 // Insert new characters
                 for (fl::size i = 0; i < count; ++i) {
@@ -1153,7 +1159,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 }
                 // Copy data after insertion point
                 if (pos < mLength) {
-                    fl::memcpy(newData->data() + pos + count, heapData()->data() + pos, mLength - pos);
+                    fl::memcpy(newData->data() + pos + count, heap->data() + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 heapData() = newData;
@@ -1164,32 +1170,39 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Check if result fits in inline buffer
         if (newLen + 1 <= SIZE && !hasHeapData()) {
+            char* data = inlineData();  // Cache the pointer
             // Shift existing data right
-            if (pos < mLength) {
-                fl::memmove(inlineData() + pos + count, inlineData() + pos, mLength - pos);
-            }
-            // Insert new characters
-            for (fl::size i = 0; i < count; ++i) {
-                inlineData()[pos + i] = ch;
-            }
-            mLength = newLen;
-            inlineData()[mLength] = '\0';
-            return *this;
-        }
-
-        // Need heap allocation or have unshared heap
-        if (hasHeapData() && heapData().use_count() <= 1 && heapData()->hasCapacity(newLen)) {
-            // Can insert in place
-            char* data = heapData()->data();
             if (pos < mLength) {
                 fl::memmove(data + pos + count, data + pos, mLength - pos);
             }
+            // Insert new characters
             for (fl::size i = 0; i < count; ++i) {
                 data[pos + i] = ch;
             }
             mLength = newLen;
             data[mLength] = '\0';
-        } else {
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        bool canInsertInPlace = hasHeapData();
+        if (canInsertInPlace) {
+            StringHolderPtr& heap = heapData();
+            canInsertInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            if (canInsertInPlace) {
+                // Can insert in place
+                char* data = heap->data();
+                if (pos < mLength) {
+                    fl::memmove(data + pos + count, data + pos, mLength - pos);
+                }
+                for (fl::size i = 0; i < count; ++i) {
+                    data[pos + i] = ch;
+                }
+                mLength = newLen;
+                data[mLength] = '\0';
+            }
+        }
+        if (!canInsertInPlace) {
             // Need new allocation
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
@@ -1235,14 +1248,15 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Handle COW: if shared, make a copy
         if (hasHeapData() && heapData().use_count() > 1) {
+            const StringHolderPtr& heap = heapData();
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 if (pos > 0) {
-                    fl::memcpy(newData->data(), heapData()->data(), pos);
+                    fl::memcpy(newData->data(), heap->data(), pos);
                 }
                 fl::memcpy(newData->data() + pos, s, count);
                 if (pos < mLength) {
-                    fl::memcpy(newData->data() + pos + count, heapData()->data() + pos, mLength - pos);
+                    fl::memcpy(newData->data() + pos + count, heap->data() + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 heapData() = newData;
@@ -1253,25 +1267,32 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Check if result fits in inline buffer
         if (newLen + 1 <= SIZE && !hasHeapData()) {
-            if (pos < mLength) {
-                fl::memmove(inlineData() + pos + count, inlineData() + pos, mLength - pos);
-            }
-            fl::memcpy(inlineData() + pos, s, count);
-            mLength = newLen;
-            inlineData()[mLength] = '\0';
-            return *this;
-        }
-
-        // Need heap allocation or have unshared heap
-        if (hasHeapData() && heapData().use_count() <= 1 && heapData()->hasCapacity(newLen)) {
-            char* data = heapData()->data();
+            char* data = inlineData();  // Cache the pointer
             if (pos < mLength) {
                 fl::memmove(data + pos + count, data + pos, mLength - pos);
             }
             fl::memcpy(data + pos, s, count);
             mLength = newLen;
             data[mLength] = '\0';
-        } else {
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        bool canInsertInPlace = hasHeapData();
+        if (canInsertInPlace) {
+            StringHolderPtr& heap = heapData();
+            canInsertInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            if (canInsertInPlace) {
+                char* data = heap->data();
+                if (pos < mLength) {
+                    fl::memmove(data + pos + count, data + pos, mLength - pos);
+                }
+                fl::memcpy(data + pos, s, count);
+                mLength = newLen;
+                data[mLength] = '\0';
+            }
+        }
+        if (!canInsertInPlace) {
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 const char* src = c_str();
@@ -1335,16 +1356,17 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Handle COW: if shared, make a copy first
         if (hasHeapData() && heapData().use_count() > 1) {
+            const StringHolderPtr& heap = heapData();
             StringHolderPtr newData = fl::make_shared<StringHolder>(mLength - actualCount);
             if (newData) {
                 // Copy data before erase point
                 if (pos > 0) {
-                    fl::memcpy(newData->data(), heapData()->data(), pos);
+                    fl::memcpy(newData->data(), heap->data(), pos);
                 }
                 // Copy data after erase range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    fl::memcpy(newData->data() + pos, heapData()->data() + pos + actualCount, remainingLen);
+                    fl::memcpy(newData->data() + pos, heap->data() + pos + actualCount, remainingLen);
                 }
                 mLength = mLength - actualCount;
                 newData->data()[mLength] = '\0';
@@ -1469,11 +1491,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Handle COW: if shared, make a copy with new size
         if (hasHeapData() && heapData().use_count() > 1) {
+            const StringHolderPtr& heap = heapData();
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 // Copy data before replacement point
                 if (pos > 0) {
-                    fl::memcpy(newData->data(), heapData()->data(), pos);
+                    fl::memcpy(newData->data(), heap->data(), pos);
                 }
                 // Copy replacement data
                 fl::memcpy(newData->data() + pos, s, count2);
@@ -1481,7 +1504,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
                     fl::memcpy(newData->data() + pos + count2,
-                           heapData()->data() + pos + actualCount,
+                           heap->data() + pos + actualCount,
                            remainingLen);
                 }
                 newData->data()[newLen] = '\0';
@@ -1493,26 +1516,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Check if result fits in inline buffer
         if (newLen + 1 <= SIZE && !hasHeapData()) {
+            char* data = inlineData();  // Cache the pointer
             // Shift data if necessary
-            if (count2 != actualCount) {
-                fl::size remainingLen = mLength - pos - actualCount;
-                if (remainingLen > 0) {
-                    fl::memmove(inlineData() + pos + count2,
-                            inlineData() + pos + actualCount,
-                            remainingLen);
-                }
-            }
-            // Copy replacement data
-            fl::memcpy(inlineData() + pos, s, count2);
-            mLength = newLen;
-            inlineData()[mLength] = '\0';
-            return *this;
-        }
-
-        // Need heap allocation or have unshared heap
-        if (hasHeapData() && heapData().use_count() <= 1 && heapData()->hasCapacity(newLen)) {
-            // Can replace in place
-            char* data = heapData()->data();
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
@@ -1521,10 +1526,35 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                             remainingLen);
                 }
             }
+            // Copy replacement data
             fl::memcpy(data + pos, s, count2);
             mLength = newLen;
             data[mLength] = '\0';
-        } else {
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        bool canReplaceInPlace = hasHeapData();
+        if (canReplaceInPlace) {
+            StringHolderPtr& heap = heapData();
+            canReplaceInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            if (canReplaceInPlace) {
+                // Can replace in place
+                char* data = heap->data();
+                if (count2 != actualCount) {
+                    fl::size remainingLen = mLength - pos - actualCount;
+                    if (remainingLen > 0) {
+                        fl::memmove(data + pos + count2,
+                                data + pos + actualCount,
+                                remainingLen);
+                    }
+                }
+                fl::memcpy(data + pos, s, count2);
+                mLength = newLen;
+                data[mLength] = '\0';
+            }
+        }
+        if (!canReplaceInPlace) {
             // Need new allocation
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
@@ -1575,11 +1605,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Handle COW: if shared, make a copy with new size
         if (hasHeapData() && heapData().use_count() > 1) {
+            const StringHolderPtr& heap = heapData();
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 // Copy data before replacement point
                 if (pos > 0) {
-                    fl::memcpy(newData->data(), heapData()->data(), pos);
+                    fl::memcpy(newData->data(), heap->data(), pos);
                 }
                 // Fill with replacement character
                 for (fl::size i = 0; i < count2; ++i) {
@@ -1589,7 +1620,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
                     fl::memcpy(newData->data() + pos + count2,
-                           heapData()->data() + pos + actualCount,
+                           heap->data() + pos + actualCount,
                            remainingLen);
                 }
                 newData->data()[newLen] = '\0';
@@ -1602,27 +1633,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Check if result fits in inline buffer
         if (newLen + 1 <= SIZE && !hasHeapData()) {
             // Shift data if necessary
-            if (count2 != actualCount) {
-                fl::size remainingLen = mLength - pos - actualCount;
-                if (remainingLen > 0) {
-                    fl::memmove(inlineData() + pos + count2,
-                            inlineData() + pos + actualCount,
-                            remainingLen);
-                }
-            }
-            // Fill with replacement character
-            for (fl::size i = 0; i < count2; ++i) {
-                inlineData()[pos + i] = ch;
-            }
-            mLength = newLen;
-            inlineData()[mLength] = '\0';
-            return *this;
-        }
-
-        // Need heap allocation or have unshared heap
-        if (hasHeapData() && heapData().use_count() <= 1 && heapData()->hasCapacity(newLen)) {
-            // Can replace in place
-            char* data = heapData()->data();
+            char* data = inlineData();  // Cache the pointer
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
@@ -1631,12 +1642,39 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                             remainingLen);
                 }
             }
+            // Fill with replacement character
             for (fl::size i = 0; i < count2; ++i) {
                 data[pos + i] = ch;
             }
             mLength = newLen;
             data[mLength] = '\0';
-        } else {
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        bool canReplaceInPlace = hasHeapData();
+        if (canReplaceInPlace) {
+            StringHolderPtr& heap = heapData();
+            canReplaceInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            if (canReplaceInPlace) {
+                // Can replace in place
+                char* data = heap->data();
+                if (count2 != actualCount) {
+                    fl::size remainingLen = mLength - pos - actualCount;
+                    if (remainingLen > 0) {
+                        fl::memmove(data + pos + count2,
+                                data + pos + actualCount,
+                                remainingLen);
+                    }
+                }
+                for (fl::size i = 0; i < count2; ++i) {
+                    data[pos + i] = ch;
+                }
+                mLength = newLen;
+                data[mLength] = '\0';
+            }
+        }
+        if (!canReplaceInPlace) {
             // Need new allocation
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
@@ -1920,14 +1958,15 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     void shrink_to_fit() {
         // If using heap data
         if (hasHeapData()) {
+            StringHolderPtr& heap = heapData();
             // Check if we're the sole owner (use_count == 1)
-            if (heapData().use_count() > 1) {
+            if (heap.use_count() > 1) {
                 // Shared data - can't shrink without affecting others
                 return;
             }
 
             // Check if current capacity is larger than needed
-            if (heapData()->capacity() <= mLength + 1) {
+            if (heap->capacity() <= mLength + 1) {
                 // Already tight - no need to shrink
                 return;
             }
@@ -1935,7 +1974,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Check if string now fits in inline buffer
             if (mLength + 1 <= SIZE) {
                 // Copy to inline buffer and release heap
-                fl::memcpy(inlineData(), heapData()->data(), mLength + 1);
+                fl::memcpy(inlineData(), heap->data(), mLength + 1);
                 mStorage = InlinedBuffer{};
                 return;
             }
@@ -1943,7 +1982,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Reallocate heap to exact size needed
             StringHolderPtr newData = fl::make_shared<StringHolder>(mLength);
             if (newData) {
-                fl::memcpy(newData->data(), heapData()->data(), mLength + 1);
+                fl::memcpy(newData->data(), heap->data(), mLength + 1);
                 heapData() = newData;
             }
         }
