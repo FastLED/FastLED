@@ -144,7 +144,7 @@
 
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/hash_map.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/unique_ptr.h"
@@ -170,7 +170,7 @@ struct JsonValue;
 // Define Array and Object as pointers to avoid incomplete type issues
 // We'll use heap-allocated containers for these to avoid alignment issues
 using JsonArray = fl::vector<fl::shared_ptr<JsonValue>>;
-using JsonObject = fl::HashMap<fl::string, fl::shared_ptr<JsonValue>>;
+using JsonObject = fl::unordered_map<fl::string, fl::shared_ptr<JsonValue>>;
 
 // ParseResult struct to replace variant<T, Error>
 template<typename T>

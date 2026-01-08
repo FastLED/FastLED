@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "crgb.h"
-#include "fl/stl/hash_set.h"
+#include "fl/stl/unordered_set.h"
 #include "fl/lut.h"
 #include "fl/stl/optional.h"
 #include "fl/str.h"
@@ -114,9 +114,9 @@ template <typename T> struct StringMaker<fl::rect<T>> {
     }
 };
 
-template <typename Key, typename Hash, typename KeyEqual>
-struct StringMaker<fl::hash_set<Key, Hash, KeyEqual>> {
-    static String convert(const fl::hash_set<Key, Hash, KeyEqual> &value) {
+template <typename Key>
+struct StringMaker<fl::unordered_set<Key>> {
+    static String convert(const fl::unordered_set<Key> &value) {
         fl::string out;
         out.append(value);
         return out.c_str();

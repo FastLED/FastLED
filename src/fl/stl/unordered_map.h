@@ -1,9 +1,9 @@
 #pragma once
 
 /*
-HashMap that is optimized for embedded devices. The hashmap
+unordered_map that is optimized for embedded devices. The unordered_map
 will store upto N elements inline, and will spill over to a heap.
-This hashmap will try not to grow by detecting during rehash that
+This unordered_map will try not to grow by detecting during rehash that
 the number of tombstones is greater than the number of elements.
 This will keep the memory from growing during multiple inserts
 and removals.
@@ -33,7 +33,6 @@ namespace fl {
 
 // // begin using declarations for stl compatibility
 // use fl::equal_to;
-// use fl::hash_map;
 // use fl::unordered_map;
 // // end using declarations for stl compatibility
 
@@ -44,8 +43,8 @@ template <typename T> struct EqualTo {
 };
 FL_DISABLE_WARNING_POP
 
-// -- HashMap class
-// ------------------------------------------------------------- Begin HashMap
+// -- unordered_map class
+// ------------------------------------------------------------- Begin unordered_map
 // class
 
 #ifndef FASTLED_HASHMAP_INLINED_COUNT
@@ -55,12 +54,12 @@ FL_DISABLE_WARNING_POP
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = EqualTo<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
-class FL_ALIGN HashMap {
+class FL_ALIGN unordered_map {
   public:
-    HashMap() : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
-    HashMap(fl::size initial_capacity) : HashMap(initial_capacity, 0.7f) {}
+    unordered_map() : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
+    unordered_map(fl::size initial_capacity) : unordered_map(initial_capacity, 0.7f) {}
 
-    HashMap(fl::size initial_capacity, float max_load)
+    unordered_map(fl::size initial_capacity, float max_load)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0), _occupied(next_power_of_two(initial_capacity)),
           _deleted(next_power_of_two(initial_capacity)) {
@@ -68,7 +67,7 @@ class FL_ALIGN HashMap {
     }
 
     // Copy constructor
-    HashMap(const HashMap& other)
+    unordered_map(const unordered_map& other)
         : _buckets(other._buckets.size()), _size(0), _tombstones(0),
           mLoadFactor(other.mLoadFactor), _occupied(other._buckets.size()),
           _deleted(other._buckets.size()), _hash(other._hash), _equal(other._equal) {
@@ -81,7 +80,7 @@ class FL_ALIGN HashMap {
     }
 
     // Move constructor
-    HashMap(HashMap&& other)
+    unordered_map(unordered_map&& other)
         : _buckets(fl::move(other._buckets)), _size(other._size),
           _tombstones(other._tombstones), mLoadFactor(other.mLoadFactor),
           _occupied(fl::move(other._occupied)), _deleted(fl::move(other._deleted)),
@@ -93,19 +92,19 @@ class FL_ALIGN HashMap {
 
     // Range constructor
     template<typename InputIt>
-    HashMap(InputIt first, InputIt last)
-        : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+    unordered_map(InputIt first, InputIt last)
+        : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
         insert(first, last);
     }
 
     // Initializer list constructor
-    HashMap(fl::initializer_list<pair<Key, T>> init)
-        : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+    unordered_map(fl::initializer_list<pair<Key, T>> init)
+        : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
         insert(init);
     }
 
     // Constructor with hash/equal/allocator parameters
-    HashMap(fl::size n, const Hash& hf, const KeyEqual& eq)
+    unordered_map(fl::size n, const Hash& hf, const KeyEqual& eq)
         : _buckets(next_power_of_two(n)), _size(0), _tombstones(0),
           _occupied(next_power_of_two(n)), _deleted(next_power_of_two(n)),
           _hash(hf), _equal(eq) {
@@ -113,7 +112,7 @@ class FL_ALIGN HashMap {
     }
 
     // Copy assignment operator
-    HashMap& operator=(const HashMap& other) {
+    unordered_map& operator=(const unordered_map& other) {
         if (this != &other) {
             // Clear current content
             clear();
@@ -145,7 +144,7 @@ class FL_ALIGN HashMap {
     }
 
     // Move assignment operator
-    HashMap& operator=(HashMap&& other) {
+    unordered_map& operator=(unordered_map&& other) {
         if (this != &other) {
             _buckets = fl::move(other._buckets);
             _size = other._size;
@@ -164,7 +163,7 @@ class FL_ALIGN HashMap {
     }
 
     // Initializer list assignment operator
-    HashMap& operator=(fl::initializer_list<pair<Key, T>> init) {
+    unordered_map& operator=(fl::initializer_list<pair<Key, T>> init) {
         clear();
         insert(init);
         return *this;
@@ -185,7 +184,7 @@ class FL_ALIGN HashMap {
         // using iterator_category = std::forward_iterator_tag;
 
         iterator() : _map(nullptr), _idx(0) {}
-        iterator(HashMap *m, fl::size idx) : _map(m), _idx(idx) {
+        iterator(unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
 
@@ -240,10 +239,10 @@ class FL_ALIGN HashMap {
         }
 
       private:
-        HashMap *_map;
+        unordered_map *_map;
         fl::size _idx;
         mutable value_type _cached_value;
-        friend class HashMap;
+        friend class unordered_map;
     };
 
     struct const_iterator {
@@ -255,7 +254,7 @@ class FL_ALIGN HashMap {
         // using iterator_category = std::forward_iterator_tag;
 
         const_iterator() : _map(nullptr), _idx(0) {}
-        const_iterator(const HashMap *m, fl::size idx) : _map(m), _idx(idx) {
+        const_iterator(const unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
         const_iterator(const iterator &it) : _map(it._map), _idx(it._idx) {}
@@ -300,10 +299,10 @@ class FL_ALIGN HashMap {
                 ++_idx;
         }
 
-        friend class HashMap;
+        friend class unordered_map;
 
       private:
-        const HashMap *_map;
+        const unordered_map *_map;
         fl::size _idx;
         mutable value_type _cached_value;
     };
@@ -355,7 +354,7 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "HashMap::insert: invalid index at "
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
                                             << idx << " which is " << npos());
             _buckets[idx].value = value;
         }
@@ -386,7 +385,7 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "HashMap::insert: invalid index at "
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
                                             << idx << " which is " << npos());
             _buckets[idx].value = fl::move(value);
         }
@@ -444,7 +443,7 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "HashMap::insert_or_assign: invalid index");
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert_or_assign: invalid index");
             _buckets[idx].value = fl::move(value);
         }
         return {iterator(this, idx), is_new};
@@ -471,7 +470,7 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "HashMap::insert_or_assign: invalid index");
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert_or_assign: invalid index");
             _buckets[idx].value = fl::move(value);
         }
         return {iterator(this, idx), is_new};
@@ -612,8 +611,8 @@ class FL_ALIGN HashMap {
         _size = _tombstones = 0;
     }
 
-    // swap() - swap contents with another HashMap
-    void swap(HashMap& other) {
+    // swap() - swap contents with another unordered_map
+    void swap(unordered_map& other) {
         // Swap all member variables
         _buckets.swap(other._buckets);
         fl::swap(_size, other._size);
@@ -654,13 +653,13 @@ class FL_ALIGN HashMap {
     // at() - bounds-checked access, asserts if key not found
     T &at(const Key &key) {
         T* value = find_value(key);
-        FASTLED_ASSERT(value != nullptr, "HashMap::at: key not found");
+        FASTLED_ASSERT(value != nullptr, "unordered_map::at: key not found");
         return *value;
     }
 
     const T &at(const Key &key) const {
         const T* value = find_value(key);
-        FASTLED_ASSERT(value != nullptr, "HashMap::at: key not found");
+        FASTLED_ASSERT(value != nullptr, "unordered_map::at: key not found");
         return *value;
     }
 
@@ -699,7 +698,7 @@ class FL_ALIGN HashMap {
         idx = p.first;
         is_new = p.second;
         
-        // Check if find_slot failed to find a valid slot (HashMap is full)
+        // Check if find_slot failed to find a valid slot (unordered_map is full)
         if (idx == npos()) {
             // Need to resize to make room
             if (needs_rehash()) {
@@ -724,7 +723,7 @@ class FL_ALIGN HashMap {
             if (idx == npos()) {
                 // This should never happen after a successful resize
                 static T default_value{};
-                FASTLED_ASSERT(false, "HashMap::operator[]: Failed to allocate after rehash");
+                FASTLED_ASSERT(false, "unordered_map::operator[]: Failed to allocate after rehash");
                 return default_value;
             }
         }
@@ -1047,20 +1046,20 @@ class FL_ALIGN HashMap {
             }
             auto &e = _buckets[i];
             // FASTLED_ASSERT(e.state == EntryState::Occupied,
-            //                "HashMap::rehash_inline_no_resize: invalid
+            //                "unordered_map::rehash_inline_no_resize: invalid
             //                state");
 
             fl::size idx = find_unoccupied_index_using_bitset(e.key, occupied);
             if (idx == npos()) {
                 // no more space
                 FASTLED_ASSERT(
-                    false, "HashMap::rehash_inline_no_resize: invalid index at "
+                    false, "unordered_map::rehash_inline_no_resize: invalid index at "
                                << idx << " which is " << npos());
                 return;
             }
             // if idx < pos then we are moving the entry to a new location
             FASTLED_ASSERT(!tmp,
-                           "HashMap::rehash_inline_no_resize: invalid tmp");
+                           "unordered_map::rehash_inline_no_resize: invalid tmp");
             if (idx >= _size) {
                 // directly copy it now
                 _buckets[idx] = e;
@@ -1079,7 +1078,7 @@ class FL_ALIGN HashMap {
                     // no more space
                     FASTLED_ASSERT(
                         false,
-                        "HashMap::rehash_inline_no_resize: invalid index at "
+                        "unordered_map::rehash_inline_no_resize: invalid index at "
                             << new_idx << " which is " << npos());
                     return;
                 }
@@ -1097,9 +1096,9 @@ class FL_ALIGN HashMap {
             }
             FASTLED_ASSERT(
                 occupied.test(i),
-                "HashMap::rehash_inline_no_resize: invalid occupied at " << i);
+                "unordered_map::rehash_inline_no_resize: invalid occupied at " << i);
             FASTLED_ASSERT(
-                tmp.empty(), "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
+                tmp.empty(), "unordered_map::rehash_inline_no_resize: invalid tmp at " << i);
         }
         // Reset tombstones count since we've cleared all deleted entries
         _tombstones = 0;
@@ -1119,13 +1118,10 @@ class FL_ALIGN HashMap {
 // begin using declarations for stl compatibility
 template <typename T> using equal_to = EqualTo<T>;
 
+// Legacy alias for backwards compatibility - use fl::unordered_map instead
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = equal_to<Key>>
-using hash_map = HashMap<Key, T, Hash, KeyEqual>;
-
-template <typename Key, typename T, typename Hash = Hash<Key>,
-          typename KeyEqual = equal_to<Key>>
-using unordered_map = HashMap<Key, T, Hash, KeyEqual>;
+using hash_map = unordered_map<Key, T, Hash, KeyEqual>;
 // end using declarations for stl compatibility
 
 } // namespace fl

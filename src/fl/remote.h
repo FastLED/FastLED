@@ -5,7 +5,7 @@
 // Remote RPC system requires JSON support
 #if FASTLED_ENABLE_JSON
 
-#include "fl/stl/hash_map.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/priority_queue.h"
@@ -303,7 +303,7 @@ protected:
     void scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args);
     void recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled);
 
-    fl::HashMap<fl::string, CallbackWrapper> mCallbacks;
+    fl::unordered_map<fl::string, CallbackWrapper> mCallbacks;
     fl::priority_queue_stable<ScheduledCall> mScheduled;  // Uses default fl::greater for min-heap: earlier times = higher priority (FIFO for equal times)
     fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on tick())
 };

@@ -12,7 +12,7 @@ only a small number of pixels are set.
 #include "fl/int.h"
 #include "fl/geometry.h"
 #include "fl/grid.h"
-#include "fl/stl/hash_map.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/stl/map.h"
 #include "fl/stl/span.h"
 #include "fl/tile2x2.h"
@@ -71,8 +71,8 @@ class XYRasterU8Sparse {
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<u16>, u8>::iterator;
-    using const_iterator = fl::HashMap<vec2<u16>, u8>::const_iterator;
+    using iterator = fl::unordered_map<vec2<u16>, u8>::iterator;
+    using const_iterator = fl::unordered_map<vec2<u16>, u8>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -215,11 +215,11 @@ class XYRasterU8Sparse {
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
-    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey,
+    using HashMapLarge = fl::unordered_map<Key, Value, HashKey, EqualToKey,
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<u16>, u8 *, FastHashKey, EqualToKey, kMaxCacheSize>
+    unordered_map<vec2<u16>, u8 *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<u16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
@@ -264,8 +264,8 @@ class XYRasterSparse_RGB8 {
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<u16>, CRGB>::iterator;
-    using const_iterator = fl::HashMap<vec2<u16>, CRGB>::const_iterator;
+    using iterator = fl::unordered_map<vec2<u16>, CRGB>::iterator;
+    using const_iterator = fl::unordered_map<vec2<u16>, CRGB>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -384,11 +384,11 @@ class XYRasterSparse_RGB8 {
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
-    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey,
+    using HashMapLarge = fl::unordered_map<Key, Value, HashKey, EqualToKey,
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<u16>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
+    unordered_map<vec2<u16>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<u16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;

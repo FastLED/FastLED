@@ -3,19 +3,20 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/stl/vector.h"
-#include "fl/stl/hash_map.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/stl/allocator.h"
 
 namespace fl {
 
 
-template <typename Key>
+template <typename Key, typename Hash,
+          typename KeyEqual>
 class unordered_set {
   public:
     // Iterator support - wrap the underlying map's iterators
     class iterator {
     private:
-        using map_iterator = typename fl::unordered_map<Key, bool>::iterator;
+        using map_iterator = typename fl::unordered_map<Key, bool, Hash, KeyEqual>::iterator;
         map_iterator mIt;
     
     public:
@@ -40,7 +41,7 @@ class unordered_set {
     
     class const_iterator {
     private:
-        using map_const_iterator = typename fl::unordered_map<Key, bool>::const_iterator;
+        using map_const_iterator = typename fl::unordered_map<Key, bool, Hash, KeyEqual>::const_iterator;
         map_const_iterator mIt;
     
     public:
@@ -75,12 +76,12 @@ class unordered_set {
 
     // Insert operations
     bool insert(const Key &key) {
-        return data.insert(key, true);
+        return data.insert(key, true).second;
     }
-    
+
     // Move version of insert
     bool insert(Key &&key) {
-        return data.insert(fl::move(key), true);
+        return data.insert(fl::move(key), true).second;
     }
     
     // Emplace - construct in place
@@ -140,7 +141,7 @@ class unordered_set {
     bool contains(const Key &key) const { return has(key); } // C++20 style
 
   private:
-    fl::unordered_map<Key, bool> data;
+    fl::unordered_map<Key, bool, Hash, KeyEqual> data;
 };
 
 } // namespace fl

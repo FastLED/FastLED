@@ -2,7 +2,7 @@
 
 #include "fl/stl/thread.h"
 #if FASTLED_USE_THREAD_LOCAL
-#include "fl/stl/hash_map.h"
+#include "fl/stl/unordered_map.h"
 #include <pthread.h>  // ok include
 #endif
 
