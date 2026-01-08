@@ -48,7 +48,18 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/move.h"
 #include "fl/stl/cstddef.h"
-#include "fl/stl/assert.h"
+
+// Forward declarations to break circular dependency with assert.h
+// not_null needs assertions, but assert.h might need not_null in the future
+namespace fl {
+namespace detail {
+    // Low-level assertion for not_null - implementation in not_null.cpp
+    // Provides platform-specific failure handling without depending on assert.h
+    void not_null_assert_failed(const char* message);
+} // namespace detail
+} // namespace fl
+
+
 
 namespace fl {
 
@@ -159,9 +170,11 @@ public:
     // Primary constructor - accepts non-null pointer
     // Asserts non-null in debug builds, undefined behavior if null in release
     // Note: Not explicit to allow implicit conversion from T (matching GSL behavior)
-    // Note: Not constexpr in C++11 due to FL_ASSERT limitation
+    // Note: Not constexpr in C++11 due to FL_NOT_NULL_ASSERT limitation
     not_null(T ptr) : mPtr(ptr) {
-        FL_ASSERT(mPtr != nullptr, "not_null constructed with nullptr");
+        if (mPtr == nullptr) {
+            detail::not_null_assert_failed("not_null constructed with nullptr");
+        }
     }
 
     // Copy constructor (defaulted)
@@ -192,7 +205,9 @@ public:
 
     // Assignment from raw pointer - asserts non-null in debug builds
     not_null& operator=(T ptr) {
-        FL_ASSERT(ptr != nullptr, "not_null assigned nullptr");
+        if (ptr == nullptr) {
+            detail::not_null_assert_failed("not_null assigned nullptr");
+        }
         mPtr = ptr;
         return *this;
     }

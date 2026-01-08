@@ -9,6 +9,7 @@
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/charconv.h"
+#include "fl/stl/not_null.h"
 
 #ifdef __EMSCRIPTEN__
 #include <string>
@@ -93,6 +94,7 @@ namespace fl {
 // Define shared_ptr type for StringHolder (must come after class definition)
 // Don't use FASTLED_SHARED_PTR macro as it creates a forward declaration
 using StringHolderPtr = fl::shared_ptr<fl::StringHolder>;
+using NotNullStringHolderPtr = fl::not_null<StringHolderPtr>;
 
 template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
   protected:
@@ -102,7 +104,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     struct InlinedBuffer {
         char data[SIZE] = {0};
     };
-    fl::variant<InlinedBuffer, StringHolderPtr> mStorage;
+    fl::variant<InlinedBuffer, NotNullStringHolderPtr> mStorage;
 
   public:
     // Static constants (like std::string)
@@ -120,7 +122,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             fl::memcpy(inlineData(), str, len + 1); // Copy including null
             // mStorage is already InlinedBuffer from initializer
         } else {
-            mStorage = fl::make_shared<StringHolder>(str);
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str));
         }
     }
     StrN(const StrN &other) : mLength(0), mStorage(InlinedBuffer{}) { copy(other); }
@@ -171,12 +173,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             }
             fl::memcpy(inlineData(), str, len + 1);
         } else {
-            if (hasHeapData() && heapData().use_count() <= 1) {
+            if (hasHeapData() && heapData().get().use_count() <= 1) {
                 // We are the sole owners of this data so we can modify it
                 heapData()->copy(str, len);
                 return;
             }
-            mStorage = fl::make_shared<StringHolder>(str);
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str));
         }
     }
 
@@ -209,7 +211,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             fl::memcpy(inlineData(), str, len + 1);
         } else {
             // StringHolder constructor already copies data and null-terminates
-            mStorage = fl::make_shared<StringHolder>(str, len);
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
         }
     }
 
@@ -262,9 +264,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             data[count] = '\0';
         } else {
             // Need heap allocation
-            mStorage = fl::make_shared<StringHolder>(count);
-            StringHolderPtr& ptr = heapData();
-            if (ptr) {
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(count));
+            NotNullStringHolderPtr& ptr = heapData();
+            { // ptr is not_null, always valid
                 for (fl::size i = 0; i < count; ++i) {
                     ptr->data()[i] = c;
                 }
@@ -316,9 +318,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             data[len] = '\0';
         } else {
             // Need heap allocation
-            mStorage = fl::make_shared<StringHolder>(len);
-            StringHolderPtr& ptr = heapData();
-            if (ptr) {
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(len));
+            NotNullStringHolderPtr& ptr = heapData();
+            { // ptr is not_null, always valid
                 fl::size i = 0;
                 for (auto it = first; it != last; ++it, ++i) {
                     ptr->data()[i] = *it;
@@ -378,8 +380,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     fl::size write(const char *str, fl::size n) {
         fl::size newLen = mLength + n;
-        if (hasHeapData() && heapData().use_count() <= 1) {
-            StringHolderPtr& heap = heapData();
+        if (hasHeapData() && heapData().get().use_count() <= 1) {
+            NotNullStringHolderPtr& heap = heapData();
             if (!heap->hasCapacity(newLen)) {
                 fl::size grow_length = FL_MAX(3, newLen * 3 / 2);
                 heap->grow(grow_length); // Grow by 50%
@@ -390,10 +392,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return mLength;
         } else if (hasHeapData()) {
             // Copy-on-write: shared heap data needs to be copied before modification
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 // Copy existing heap data
-                const StringHolderPtr& heap = heapData();
+                const NotNullStringHolderPtr& heap = heapData();
                 fl::memcpy(newData->data(), heap->data(), mLength);
                 // Append new data
                 fl::memcpy(newData->data() + mLength, str, n);
@@ -419,8 +421,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
         // Need to transition from inline to heap storage
         // Copy current inline data to heap buffer
-        StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-        if (newData) {
+        NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+        { // newData is not_null, always valid
             // Copy existing inline data (we know we're inline at this point)
             fl::memcpy(newData->data(), inlineData(), mLength);
             fl::memcpy(newData->data() + mLength, str, n);
@@ -629,15 +631,15 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // If we already have unshared heap data with sufficient capacity, do
         // nothing
         if (hasHeapData()) {
-            const StringHolderPtr& heap = heapData();
-            if (heap.use_count() <= 1 && heap->hasCapacity(newCapacity)) {
+            const NotNullStringHolderPtr& heap = heapData();
+            if (heap.get().use_count() <= 1 && heap->hasCapacity(newCapacity)) {
                 return;
             }
         }
 
         // Need to allocate new storage
-        StringHolderPtr newData = fl::make_shared<StringHolder>(newCapacity);
-        if (newData) {
+        NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newCapacity));
+        { // newData is not_null, always valid
             // Copy existing content
             fl::memcpy(newData->data(), c_str(), mLength);
             newData->data()[mLength] = '\0';
@@ -1151,10 +1153,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size newLen = mLength + count;
 
         // Handle COW: if shared, make a copy
-        if (hasHeapData() && heapData().use_count() > 1) {
-            const StringHolderPtr& heap = heapData();
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+        if (hasHeapData() && heapData().get().use_count() > 1) {
+            const NotNullStringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 // Copy data before insertion point
                 if (pos > 0) {
                     fl::memcpy(newData->data(), heap->data(), pos);
@@ -1193,8 +1195,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Need heap allocation or have unshared heap
         bool canInsertInPlace = hasHeapData();
         if (canInsertInPlace) {
-            StringHolderPtr& heap = heapData();
-            canInsertInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            NotNullStringHolderPtr& heap = heapData();
+            canInsertInPlace = heap.get().use_count() <= 1 && heap->hasCapacity(newLen);
             if (canInsertInPlace) {
                 // Can insert in place
                 char* data = heap->data();
@@ -1210,8 +1212,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
         if (!canInsertInPlace) {
             // Need new allocation
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 const char* src = c_str();
                 // Copy data before insertion point
                 if (pos > 0) {
@@ -1253,10 +1255,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size newLen = mLength + count;
 
         // Handle COW: if shared, make a copy
-        if (hasHeapData() && heapData().use_count() > 1) {
-            const StringHolderPtr& heap = heapData();
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+        if (hasHeapData() && heapData().get().use_count() > 1) {
+            const NotNullStringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 if (pos > 0) {
                     fl::memcpy(newData->data(), heap->data(), pos);
                 }
@@ -1286,8 +1288,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Need heap allocation or have unshared heap
         bool canInsertInPlace = hasHeapData();
         if (canInsertInPlace) {
-            StringHolderPtr& heap = heapData();
-            canInsertInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            NotNullStringHolderPtr& heap = heapData();
+            canInsertInPlace = heap.get().use_count() <= 1 && heap->hasCapacity(newLen);
             if (canInsertInPlace) {
                 char* data = heap->data();
                 if (pos < mLength) {
@@ -1299,8 +1301,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             }
         }
         if (!canInsertInPlace) {
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 const char* src = c_str();
                 if (pos > 0) {
                     fl::memcpy(newData->data(), src, pos);
@@ -1361,10 +1363,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
 
         // Handle COW: if shared, make a copy first
-        if (hasHeapData() && heapData().use_count() > 1) {
-            const StringHolderPtr& heap = heapData();
-            StringHolderPtr newData = fl::make_shared<StringHolder>(mLength - actualCount);
-            if (newData) {
+        if (hasHeapData() && heapData().get().use_count() > 1) {
+            const NotNullStringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(mLength - actualCount));
+            { // newData is not_null, always valid
                 // Copy data before erase point
                 if (pos > 0) {
                     fl::memcpy(newData->data(), heap->data(), pos);
@@ -1496,10 +1498,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size newLen = mLength - actualCount + count2;
 
         // Handle COW: if shared, make a copy with new size
-        if (hasHeapData() && heapData().use_count() > 1) {
-            const StringHolderPtr& heap = heapData();
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+        if (hasHeapData() && heapData().get().use_count() > 1) {
+            const NotNullStringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 // Copy data before replacement point
                 if (pos > 0) {
                     fl::memcpy(newData->data(), heap->data(), pos);
@@ -1542,8 +1544,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Need heap allocation or have unshared heap
         bool canReplaceInPlace = hasHeapData();
         if (canReplaceInPlace) {
-            StringHolderPtr& heap = heapData();
-            canReplaceInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            NotNullStringHolderPtr& heap = heapData();
+            canReplaceInPlace = heap.get().use_count() <= 1 && heap->hasCapacity(newLen);
             if (canReplaceInPlace) {
                 // Can replace in place
                 char* data = heap->data();
@@ -1562,8 +1564,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
         if (!canReplaceInPlace) {
             // Need new allocation
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 const char* src = c_str();
                 // Copy data before replacement point
                 if (pos > 0) {
@@ -1610,10 +1612,10 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size newLen = mLength - actualCount + count2;
 
         // Handle COW: if shared, make a copy with new size
-        if (hasHeapData() && heapData().use_count() > 1) {
-            const StringHolderPtr& heap = heapData();
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+        if (hasHeapData() && heapData().get().use_count() > 1) {
+            const NotNullStringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 // Copy data before replacement point
                 if (pos > 0) {
                     fl::memcpy(newData->data(), heap->data(), pos);
@@ -1660,8 +1662,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Need heap allocation or have unshared heap
         bool canReplaceInPlace = hasHeapData();
         if (canReplaceInPlace) {
-            StringHolderPtr& heap = heapData();
-            canReplaceInPlace = heap.use_count() <= 1 && heap->hasCapacity(newLen);
+            NotNullStringHolderPtr& heap = heapData();
+            canReplaceInPlace = heap.get().use_count() <= 1 && heap->hasCapacity(newLen);
             if (canReplaceInPlace) {
                 // Can replace in place
                 char* data = heap->data();
@@ -1682,8 +1684,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
         if (!canReplaceInPlace) {
             // Need new allocation
-            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            { // newData is not_null, always valid
                 const char* src = c_str();
                 // Copy data before replacement point
                 if (pos > 0) {
@@ -1964,9 +1966,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     void shrink_to_fit() {
         // If using heap data
         if (hasHeapData()) {
-            StringHolderPtr& heap = heapData();
+            NotNullStringHolderPtr& heap = heapData();
             // Check if we're the sole owner (use_count == 1)
-            if (heap.use_count() > 1) {
+            if (heap.get().use_count() > 1) {
                 // Shared data - can't shrink without affecting others
                 return;
             }
@@ -1986,8 +1988,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             }
 
             // Reallocate heap to exact size needed
-            StringHolderPtr newData = fl::make_shared<StringHolder>(mLength);
-            if (newData) {
+            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(mLength));
+            { // newData is not_null, always valid
                 fl::memcpy(newData->data(), heap->data(), mLength + 1);
                 heapData() = newData;
             }
@@ -2019,21 +2021,22 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
 
     bool hasHeapData() const {
-        return mStorage.template is<StringHolderPtr>() && mStorage.template get<StringHolderPtr>();
+        return mStorage.template is<NotNullStringHolderPtr>();
     }
 
-    StringHolderPtr& heapData() {
-        if (!mStorage.template is<StringHolderPtr>()) {
-            mStorage = StringHolderPtr();
+    NotNullStringHolderPtr& heapData() {
+        if (!mStorage.template is<NotNullStringHolderPtr>()) {
+            // Create a new heap-allocated StringHolder with empty content
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(0));
         }
-        return mStorage.template get<StringHolderPtr>();
+        return mStorage.template get<NotNullStringHolderPtr>();
     }
 
-    const StringHolderPtr& heapData() const {
+    const NotNullStringHolderPtr& heapData() const {
         // For const access, we cannot transition the variant
         // Callers must use hasHeapData() to check first
-        // If not holding StringHolderPtr, this will crash (intentional for fast failure)
-        return mStorage.template get<StringHolderPtr>();
+        // If not holding NotNullStringHolderPtr, this will crash (intentional for fast failure)
+        return mStorage.template get<NotNullStringHolderPtr>();
     }
 };
 

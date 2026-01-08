@@ -33,7 +33,7 @@ class StringHolder {
     }
 
   private:
-    char *mData = nullptr;
+    char* mData;
     size mLength = 0;
     size mCapacity = 0;
 };
