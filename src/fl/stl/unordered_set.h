@@ -9,8 +9,8 @@
 namespace fl {
 
 
-template <typename Key, typename Hash,
-          typename KeyEqual>
+template <typename Key, typename Hash = Hash<Key>,
+          typename KeyEqual = EqualTo<Key>>
 class unordered_set {
   public:
     // Iterator support - wrap the underlying map's iterators

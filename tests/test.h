@@ -114,9 +114,9 @@ template <typename T> struct StringMaker<fl::rect<T>> {
     }
 };
 
-template <typename Key>
-struct StringMaker<fl::unordered_set<Key>> {
-    static String convert(const fl::unordered_set<Key> &value) {
+template <typename Key, typename Hash, typename KeyEqual>
+struct StringMaker<fl::unordered_set<Key, Hash, KeyEqual>> {
+    static String convert(const fl::unordered_set<Key, Hash, KeyEqual> &value) {
         fl::string out;
         out.append(value);
         return out.c_str();
