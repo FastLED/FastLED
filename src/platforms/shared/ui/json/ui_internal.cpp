@@ -20,7 +20,7 @@ void JsonUiInternal::setGroup(const fl::string &groupName) {
     mGroup = groupName;
 }
 
-const fl::string &JsonUiInternal::groupName() const {
+fl::string JsonUiInternal::groupName() const {
     fl::unique_lock<fl::mutex> lock(mMutex);
     return mGroup;
 }

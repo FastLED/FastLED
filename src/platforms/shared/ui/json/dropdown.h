@@ -32,7 +32,7 @@ class JsonDropdownImpl {
     void setSelectedIndex(int index);
     size_t getOptionCount() const;
     fl::string getOption(size_t index) const;
-    const fl::string &groupName() const;
+    fl::string groupName() const;
 
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);

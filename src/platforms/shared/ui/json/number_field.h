@@ -22,7 +22,7 @@ class JsonNumberFieldImpl {
     void toJson(fl::Json &json) const;
     float value() const;
     void setValue(float value);
-    const fl::string &groupName() const;
+    fl::string groupName() const;
     
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);

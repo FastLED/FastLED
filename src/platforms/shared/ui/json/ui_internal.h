@@ -31,7 +31,7 @@ class JsonUiInternal {
 
     // Group functionality
     void setGroup(const fl::string &groupName);
-    const fl::string &groupName() const;
+    fl::string groupName() const;
 
     // Change tracking for polling (eliminates need for manual notifications)
     bool hasChanged() const;

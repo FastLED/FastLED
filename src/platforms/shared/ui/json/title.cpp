@@ -67,7 +67,7 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
 
 const string &JsonTitleImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonTitleImpl::groupName() const {
+fl::string JsonTitleImpl::groupName() const {
     return mInternal->groupName();
 }
 

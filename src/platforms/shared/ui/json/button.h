@@ -22,7 +22,7 @@ class JsonButtonImpl {
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const;
-    const fl::string &groupName() const;
+    fl::string groupName() const;
     
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);

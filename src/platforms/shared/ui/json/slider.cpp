@@ -125,7 +125,7 @@ void JsonSliderImpl::setValue(float value) {
     mInternal->setValue(value);
 }
 
-const fl::string &JsonSliderImpl::groupName() const {
+fl::string JsonSliderImpl::groupName() const {
     return mInternal->groupName();
 }
 

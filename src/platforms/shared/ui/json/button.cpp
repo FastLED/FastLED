@@ -72,7 +72,7 @@ bool JsonButtonImpl::isPressed() const {
 
 int JsonButtonImpl::clickedCount() const { return mClickedCount; }
 
-const fl::string &JsonButtonImpl::groupName() const { return mInternal->groupName(); }
+fl::string JsonButtonImpl::groupName() const { return mInternal->groupName(); }
 
 void JsonButtonImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 

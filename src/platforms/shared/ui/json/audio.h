@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/audio.h"
+#include "fl/audio_input.h"
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
@@ -23,13 +24,14 @@ enum {
 class JsonAudioImpl {
   public:
     JsonAudioImpl(const fl::string &name);
+    JsonAudioImpl(const fl::string &name, const fl::AudioConfig& config);
     ~JsonAudioImpl();
     JsonAudioImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     AudioSample next();
     bool hasNext();
-    const fl::string &groupName() const;
+    fl::string groupName() const;
     
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);

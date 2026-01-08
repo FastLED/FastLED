@@ -68,7 +68,7 @@ void JsonHelpImpl::toJson(fl::Json &json) const { mInternal->toJson(json); }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonHelpImpl::groupName() const {
+fl::string JsonHelpImpl::groupName() const {
     return mInternal->groupName();
 }
 

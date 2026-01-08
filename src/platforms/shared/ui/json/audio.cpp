@@ -4,6 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/thread_local.h"
 #include "fl/warn.h"
+#include "fl/unused.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #include "platforms/shared/ui/json/audio_buffer.h"
@@ -26,6 +27,14 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
+JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::AudioConfig& config) {
+    // JSON UI gets audio from browser, so config is ignored
+    FL_UNUSED(config);
+    mInternal = fl::make_shared<JsonUiAudioInternal>(name);
+    mUpdater.init(this);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
+
 JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
@@ -35,7 +44,7 @@ JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
 
 const fl::string &JsonAudioImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonAudioImpl::groupName() const {
+fl::string JsonAudioImpl::groupName() const {
     return mInternal->groupName();
 }
 

@@ -108,7 +108,7 @@ void JsonNumberFieldImpl::setValue(float value) {
     }
 }
 
-const fl::string &JsonNumberFieldImpl::groupName() const { return mInternal->groupName(); }
+fl::string JsonNumberFieldImpl::groupName() const { return mInternal->groupName(); }
 
 void JsonNumberFieldImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 

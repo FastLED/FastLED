@@ -68,7 +68,7 @@ void JsonDescriptionImpl::toJson(fl::Json &json) const {
 
 const string &JsonDescriptionImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonDescriptionImpl::groupName() const {
+fl::string JsonDescriptionImpl::groupName() const {
     return mInternal->groupName();
 }
 

@@ -24,7 +24,7 @@ class JsonTitleImpl {
     JsonTitleImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    const fl::string &groupName() const;
+    fl::string groupName() const;
     
     // Add accessors for the title text, delegating to mInternal.
     const fl::string& text() const;

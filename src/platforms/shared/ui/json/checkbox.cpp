@@ -72,7 +72,7 @@ void JsonCheckboxImpl::setValue(bool value) {
     }
 }
 
-const fl::string &JsonCheckboxImpl::groupName() const { return mInternal->groupName(); }
+fl::string JsonCheckboxImpl::groupName() const { return mInternal->groupName(); }
 
 void JsonCheckboxImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 

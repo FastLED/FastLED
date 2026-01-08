@@ -147,7 +147,7 @@ fl::string JsonDropdownImpl::getOption(size_t index) const {
     return fl::string();
 }
 
-const fl::string &JsonDropdownImpl::groupName() const { return mInternal->groupName(); }
+fl::string JsonDropdownImpl::groupName() const { return mInternal->groupName(); }
 
 void JsonDropdownImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
