@@ -31,7 +31,7 @@ inline u8 mapBrightness8to5(u8 brightness_8bit) {
     return static_cast<u8>(bri5);
     #else
     // Non-AVR: Use accurate division
-    u16 bri5 = ((u16)brightness_8bit * 31 + 127) / 255;
+    u16 bri5 = ((u16)brightness_8bit * 31 + 128) / 255;
 
     // Ensure non-zero input doesn't map to zero output
     if (bri5 == 0 && brightness_8bit != 0) {

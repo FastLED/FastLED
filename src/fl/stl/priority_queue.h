@@ -107,9 +107,19 @@ class PriorityQueue {
  *
  * Template Parameters:
  * - T: Element type (must be copyable)
- * - Compare: Comparison function (default: fl::less<T>)
+ * - Compare: Comparison function (default: fl::greater<T> for min-heap behavior)
  *
- * Example:
+ * By default, this creates a MIN-HEAP (smallest element has highest priority).
+ * For custom types with special priority ordering, define operator< and use fl::less<T>:
+ * @code
+ * struct Task {
+ *     int priority;
+ *     bool operator<(const Task& o) const { return priority > o.priority; }  // Invert for min-heap
+ * };
+ * fl::priority_queue_stable<Task, fl::less<Task>> queue;  // Use less with inverted operator<
+ * @endcode
+ *
+ * Example (default min-heap for integers):
  * @code
  * fl::priority_queue_stable<int> queue;
  * queue.push(3);

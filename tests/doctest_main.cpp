@@ -73,7 +73,7 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();
     std::cout << "CoroutineRunner singleton pre-initialized successfully" << std::endl;
-
+    // Run doctest
     doctest::Context context(argc, argv);
     int result = context.run();
 

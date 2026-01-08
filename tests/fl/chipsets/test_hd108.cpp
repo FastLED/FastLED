@@ -8,10 +8,10 @@
 ///   * 6 data bytes (16-bit RGB, big-endian)
 /// - End frame: (num_leds / 2) + 4 bytes of 0xFF
 ///
-/// Header Byte Encoding (dual-byte brightness):
-/// For 5-bit brightness value bri5:
-/// - f0 = 0x80 | ((bri5 & 0x1F) << 2)
-/// - f1 = ((bri5 & 0x07) << 5) | (bri5 & 0x1F)
+/// Header Byte Encoding (per-channel gain control):
+/// For per-channel 5-bit gains (r_gain, g_gain, b_gain):
+/// - f0 = 0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03)
+/// - f1 = ((g_gain & 0x07) << 5) | (b_gain & 0x1F)
 
 #include "test.h"
 #include "FastLED.h"
@@ -122,7 +122,7 @@ TEST_CASE("HD108 - Protocol format verification") {
     // - Start frame: 8 bytes of 0x00
     // - LED frame: header (2 bytes) + RGB (6 bytes, 16-bit big-endian per channel)
     // - End frame: (num_leds/2 + 4) bytes of 0xFF
-    // - Brightness encoding in dual-byte header
+    // - Per-channel gain encoding in dual-byte header (all at maximum: 31)
     // - Gamma correction applied to RGB values
     CRGB leds[1] = {CRGB(255, 0, 0)};
 
@@ -153,7 +153,7 @@ TEST_CASE("HD108 - Multi-LED with brightness and color order") {
     // Test multiple LEDs to verify:
     // - Correct byte count scaling with LED count
     // - End frame size calculation: (num_leds/2 + 4)
-    // - Variable brightness mapping (128 -> bri5=16)
+    // - Per-channel gain at maximum (31) regardless of brightness parameter
     // - GRB color ordering
     // - Gamma correction on all channels
     const int NUM_LEDS = 3;

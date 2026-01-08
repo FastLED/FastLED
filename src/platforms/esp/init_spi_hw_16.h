@@ -6,6 +6,8 @@
 /// This header provides lazy initialization for ESP32 I2S-based 16-lane SPI hardware.
 /// Only ESP32 and ESP32-S2 have I2S parallel mode that supports 16-lane output.
 
+// allow-include-after-namespace
+
 #include "platforms/esp/is_esp.h"
 
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2
@@ -23,7 +25,7 @@ void initSpiHw16Instances();
 }  // namespace platform
 }  // namespace fl
 
-#else
+#elif !defined(ESP32) || defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32P4)
 
 // For other ESP variants, use the default no-op implementation
 #include "platforms/shared/init_spi_hw_16.h"

@@ -304,7 +304,7 @@ protected:
     void recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled);
 
     fl::HashMap<fl::string, CallbackWrapper> mCallbacks;
-    fl::priority_queue_stable<ScheduledCall> mScheduled;  // Stable min-heap ordered by execution time (FIFO for equal times)
+    fl::priority_queue_stable<ScheduledCall> mScheduled;  // Uses default fl::greater for min-heap: earlier times = higher priority (FIFO for equal times)
     fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on tick())
 };
 

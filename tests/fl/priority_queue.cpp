@@ -68,7 +68,7 @@ struct ScheduledCall {
 };
 
 TEST_CASE("priority_queue_stable: scheduled calls with different times") {
-    fl::priority_queue_stable<ScheduledCall> queue;
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Schedule calls at different times
     queue.push({1000, 1});
@@ -92,7 +92,7 @@ TEST_CASE("priority_queue_stable: scheduled calls with different times") {
 }
 
 TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
-    fl::priority_queue_stable<ScheduledCall> queue;
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Schedule multiple calls at the same timestamp - should execute in FIFO order
     queue.push({1000, 1});
@@ -114,7 +114,7 @@ TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
 }
 
 TEST_CASE("priority_queue_stable: mixed times") {
-    fl::priority_queue_stable<ScheduledCall> queue;
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Mix of same and different times
     queue.push({1000, 1});
