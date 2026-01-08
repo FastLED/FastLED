@@ -26,14 +26,14 @@ def is_psutil_available() -> bool:
 
 
 def find_processes_locking_path(
-    path: Path, max_processes: int = 200, timeout: float = 3.0
+    path: Path, max_processes: int = 500, timeout: float = 60.0
 ) -> set[int]:
     """Find all process IDs that have open handles to files under the given path.
 
     Args:
         path: Path to check for locks (file or directory)
-        max_processes: Maximum number of processes to check (default: 200)
-        timeout: Maximum time in seconds to spend checking (default: 3.0)
+        max_processes: Maximum number of processes to check (default: 500)
+        timeout: Maximum time in seconds to spend checking (default: 60.0)
 
     Returns:
         Set of process IDs holding locks on the path
