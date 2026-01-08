@@ -457,6 +457,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(buf, len);
     }
 
+    fl::size write(const int64_t &val) {
+        char buf[64] = {0};
+        int len = fl::itoa64(val, buf, 10);
+        return write(buf, len);
+    }
+
     fl::size write(const fl::i32 &val) {
         char buf[64] = {0};
         int len = fl::itoa(val, buf, 10);
