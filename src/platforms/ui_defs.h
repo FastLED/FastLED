@@ -1,16 +1,21 @@
 #pragma once
 
 #ifndef FASTLED_USE_JSON_UI
-#ifdef __EMSCRIPTEN__
+// Enable JSON UI for WASM or stub platform (but not both checks - WASM has priority)
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_STUB_IMPL)
 #define FASTLED_USE_JSON_UI 1
 #else
 #define FASTLED_USE_JSON_UI 0
-#endif  // __EMSCRIPTEN__
+#endif
 #endif  // FASTLED_USE_JSON_UI
 
 
 #if FASTLED_USE_JSON_UI
+// WASM-specific bindings (not needed for stub platform)
+#ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js_bindings.h"
+#endif
+
 #include "platforms/shared/ui/json/button.h"
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/description.h"
