@@ -103,16 +103,6 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
             per_pin_data[lane_idx][lane_byte_idx] |= (1 << lane_bit_pos);
         }
     }
-
-    // Apply 2-lane swap to match real hardware behavior
-    // Real PARLIO hardware swaps lanes before transpose (see parlio_engine.cpp:742)
-    // This creates: gpio_pins[0] → ODD bits (lane[0]), gpio_pins[1] → EVEN bits (lane[1])
-    // But untranspose extracted: per_pin_data[0] = EVEN bits, per_pin_data[1] = ODD bits
-    // So we swap to get: per_pin_data[0] = ODD bits (lane[0]), per_pin_data[1] = EVEN bits (lane[1])
-    if (num_pins == 2) {
-        fl::swap(per_pin_data[0], per_pin_data[1]);
-    }
-
     return per_pin_data;
 }
 } // anonymous namespace

@@ -84,7 +84,7 @@ TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
         scratch[i] = static_cast<uint8_t>((i * 7) & 0xFF);
     }
 
-    // Begin transmission
+    // Begin transmission (lane_stride is bytes per lane, not total_bytes)
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, lane_stride);
     REQUIRE(tx_ok);
 

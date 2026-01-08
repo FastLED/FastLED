@@ -379,11 +379,12 @@ TEST_CASE("ParlioEngine mock - multi-lane streaming") {
         scratch[i] = static_cast<uint8_t>((i * 7 + 13) & 0xFF);  // Pseudo-random pattern
     }
 
+    size_t lane_stride = num_leds * 3;  // 600 bytes per lane
     bool success = engine.beginTransmission(
         scratch.data(),
         scratch.size(),
         num_lanes,
-        scratch.size()
+        lane_stride
     );
     CHECK(success);
 
@@ -822,19 +823,19 @@ TEST_CASE("parlio_mock_msb_packing") {
     REQUIRE(history[0].bit_count == 16);
 }
 
-TEST_CASE("parlio_mock_default_packing_is_lsb") {
-    // Verify that default packing mode is LSB
+TEST_CASE("parlio_mock_default_packing_is_msb") {
+    // Verify that default packing mode is MSB (required for Wave8 format)
 
     auto& mock = fl::detail::ParlioPeripheralMock::instance();
     mock.reset();
 
-    // Initialize without specifying packing (should default to LSB)
+    // Initialize without specifying packing (should default to MSB)
     fl::vector<int> pins = {1};
     fl::detail::ParlioPeripheralConfig config(pins, 8000000, 4, 2);
     REQUIRE(mock.initialize(config));
 
-    // Verify default is LSB
-    REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
+    // Verify default is MSB (Wave8 format requires MSB bit packing)
+    REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);
 }
 
 TEST_CASE("parlio_mock_packing_mode_persistence") {
