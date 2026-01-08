@@ -288,19 +288,49 @@
 
 // FL_INIT: Convenient macro for static initialization functions
 // Registers a function to run during C++ static initialization (before main())
+//
 // Usage:
 //   namespace detail { void init_my_feature() { /* code */ } }
 //   FL_INIT(init_my_feature_wrapper, detail::init_my_feature);
+//
 // The first parameter provides a unique name for the generated wrapper function,
-// ensuring no symbol collisions across the codebase
+// ensuring no symbol collisions across the codebase.
+//
+// Implementation details:
+//   - GCC/Clang: Uses __attribute__((constructor))
+//   - MSVC: Uses .CRT$XCU section to register function pointer at startup
+//
+// MSVC .CRT$XCU mechanism:
+//   - MSVC runs function pointers placed in special CRT sections at startup
+//   - Sections are ordered lexicographically: .CRT$XCA, .CRT$XCU (user code), .CRT$XCZ
+//   - The function pointer must have static linkage to avoid ODR issues
+//   - Works in static libraries if object file is linked (use /WHOLEARCHIVE if needed)
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-#define FL_INIT(wrapper_name, func) \
-  namespace static_init { \
-    FL_CONSTRUCTOR FL_KEEP_ALIVE \
-    void wrapper_name() { func(); } \
-  }
+
+#if defined(_MSC_VER)
+  #pragma section(".CRT$XCU", read)
+
+  #define FL_INIT(wrapper_name, func) \
+    namespace static_init { \
+      static void wrapper_name() { func(); } \
+      __declspec(allocate(".CRT$XCU")) \
+      static void (*wrapper_name##_ptr)(void) = wrapper_name; \
+    }
+
+#elif defined(__GNUC__) || defined(__clang__)
+  #define FL_INIT(wrapper_name, func) \
+    namespace static_init { \
+      FL_CONSTRUCTOR FL_KEEP_ALIVE \
+      void wrapper_name() { func(); } \
+    }
+
+#else
+  #error Unsupported compiler for FL_INIT
+#endif
+
 FL_DISABLE_WARNING_POP
+
 
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus

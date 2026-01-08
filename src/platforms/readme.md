@@ -131,7 +131,7 @@ fl::shared_ptr<SPISingleESP32>& getController3() {
 #endif
 
 // Register all ESP32 SPI hardware instances at static initialization time
-FL_CONSTRUCTOR
+
 static void registerAllESP32SpiInstances() {
     // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
     SpiHw1::registerInstance(getController2());
@@ -142,6 +142,8 @@ static void registerAllESP32SpiInstances() {
     // Note: For parallel strips (2+ strips), ESP32 uses the I2S peripheral via SpiHw16,
     // which is registered in the I2S driver initialization code.
 }
+
+FL_INIT(static_init_registerAllESP32SpiInstances, registerAllESP32SpiInstances);
 
 }  // anonymous namespace
 }  // namespace fl
