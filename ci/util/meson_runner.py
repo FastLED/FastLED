@@ -2,6 +2,7 @@
 """Meson build system integration for FastLED unit tests."""
 
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -45,6 +46,70 @@ def check_meson_installed() -> bool:
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
+
+
+def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
+    """
+    Get fuzzy match candidates for a test name using meson introspect.
+
+    This queries the Meson build system for all test targets containing the
+    test name substring, enabling fuzzy matching even when the build directory
+    is freshly created and no executables exist yet.
+
+    Args:
+        build_dir: Meson build directory
+        test_name: Test name to search for (e.g., "async")
+
+    Returns:
+        List of matching target names (e.g., ["fl_async", "fl_async_logger"])
+    """
+    if not build_dir.exists():
+        return []
+
+    try:
+        # Query Meson for all targets
+        result = subprocess.run(
+            ["meson", "introspect", str(build_dir), "--targets"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+        )
+
+        if result.returncode != 0:
+            return []
+
+        # Parse JSON output
+        targets = json.loads(result.stdout)
+
+        # Filter targets:
+        # 1. Must be an executable (type == "executable")
+        # 2. Must be in tests/ directory
+        # 3. Must contain the test name substring (case-insensitive)
+        test_name_lower = test_name.lower()
+        candidates: list[str] = []
+
+        for target in targets:
+            if target.get("type") != "executable":
+                continue
+
+            target_name = target.get("name", "")
+            # Check if this is a test executable (defined in tests/ directory)
+            defined_in = target.get("defined_in", "")
+            if "tests" not in defined_in.lower():
+                continue
+
+            # Check if target name contains the test name substring
+            if test_name_lower in target_name.lower():
+                candidates.append(target_name)
+
+        return candidates
+
+    except (subprocess.SubprocessError, json.JSONDecodeError, OSError) as e:
+        _ts_print(f"[MESON] Warning: Failed to get fuzzy test candidates: {e}")
+        return []
 
 
 def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
@@ -1393,8 +1458,11 @@ def run_meson_build_and_test(
             meson_test_name = f"test_{test_name_lower}"
             fallback_test_name = test_name_lower
 
-        # Build fuzzy candidate list by searching for test executables containing the name
+        # Build fuzzy candidate list using meson introspect after setup
         # This handles patterns like fl_async.exe when user specifies "async"
+        # Note: We'll populate this after meson setup, since introspect requires
+        # a configured build directory
+        # For now, try legacy file-based approach as fallback
         tests_dir = build_dir / "tests"
         if tests_dir.exists():
             # Look for executables matching *<name>*
@@ -1408,8 +1476,6 @@ def run_meson_build_and_test(
                 # Add to candidates if not already in primary/fallback
                 if exe_name not in [meson_test_name, fallback_test_name]:
                     fuzzy_candidates.append(exe_name)
-        else:
-            fuzzy_candidates = []
 
     # Compile with build lock to prevent conflicts with example builds
     try:
@@ -1433,18 +1499,30 @@ def run_meson_build_and_test(
                 compilation_success = compile_meson(build_dir, target=compile_target)
 
             # If still failed, try fuzzy matching candidates
-            if not compilation_success and fuzzy_candidates and not unity:
-                for candidate in fuzzy_candidates:
-                    _ts_print(
-                        f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
-                    )
-                    compile_target = candidate
-                    meson_test_name = candidate
-                    compilation_success = compile_meson(
-                        build_dir, target=compile_target
-                    )
-                    if compilation_success:
-                        break  # Found a match, stop trying
+            # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
+            if not compilation_success and test_name and not unity:
+                if not fuzzy_candidates:
+                    # Query meson for fuzzy match candidates
+                    fuzzy_candidates = get_fuzzy_test_candidates(build_dir, test_name)
+                    # Remove primary and fallback names from candidates
+                    fuzzy_candidates = [
+                        c
+                        for c in fuzzy_candidates
+                        if c not in [meson_test_name, fallback_test_name]
+                    ]
+
+                if fuzzy_candidates:
+                    for candidate in fuzzy_candidates:
+                        _ts_print(
+                            f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
+                        )
+                        compile_target = candidate
+                        meson_test_name = candidate
+                        compilation_success = compile_meson(
+                            build_dir, target=compile_target
+                        )
+                        if compilation_success:
+                            break  # Found a match, stop trying
 
             if not compilation_success:
                 return MesonTestResult(success=False, duration=time.time() - start_time)
