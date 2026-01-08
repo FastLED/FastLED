@@ -223,6 +223,22 @@ unit_test_link_args = test_link_args
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
+# Add sanitizer flags to link arguments when in debug mode
+if build_mode == 'debug'
+  test_link_args += [
+    '-fsanitize=address',       # Link AddressSanitizer runtime
+    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+  ]
+  unit_test_link_args += [
+    '-fsanitize=address',       # Link AddressSanitizer runtime
+    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+  ]
+  example_link_args += [
+    '-fsanitize=address',       # Link AddressSanitizer runtime
+    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+  ]
+endif
+
 # Build main FastLED static library (includes ALL sources EXCEPT platforms/shared)
 # platforms/shared files are intentionally excluded to avoid weak/strong symbol conflicts
 # in unity builds where both weak defaults and strong overrides end up in same translation unit
