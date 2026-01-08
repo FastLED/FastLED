@@ -18,7 +18,6 @@ class string;
 template <fl::size N> class StrN;
 using Str = fl::string;  // backwards compatibility
 
-class StringFormatter;
 class StringHolder;
 
 } // namespace fl

@@ -7,7 +7,8 @@
 #include "fl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/detail/string_holder.h"
-#include "fl/stl/detail/string_formatter.h"
+#include "fl/stl/cctype.h"
+#include "fl/stl/charconv.h"
 
 #ifdef __EMSCRIPTEN__
 #include <string>
@@ -436,34 +437,33 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
 
     fl::size write(const fl::u16 &n) {
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(n, &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len = fl::utoa32(static_cast<fl::u32>(n), buf, 10);
+        return write(buf, len);
     }
 
     fl::size write(const fl::u32 &val) {
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(val, &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len = fl::utoa32(val, buf, 10);
+        return write(buf, len);
     }
 
     fl::size write(const uint64_t &val) {
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(val, &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len = fl::utoa64(val, buf, 10);
+        return write(buf, len);
     }
 
     fl::size write(const fl::i32 &val) {
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(val, &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len = fl::itoa(val, buf, 10);
+        return write(buf, len);
     }
 
     fl::size write(const fl::i8 val) {
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(i16(val),
-                                &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len = fl::itoa(static_cast<fl::i32>(val), buf, 10);
+        return write(buf, len);
     }
 
     // Generic write for multi-byte integer types not covered by explicit overloads
@@ -472,9 +472,14 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     write(const T &val) {
         // Cast to appropriate target type based on size/signedness
         using target_t = typename int_cast_detail::cast_target<T>::type;
-        StrN<FASTLED_STR_INLINED_SIZE> dst;
-        StringFormatter::append(static_cast<target_t>(val), &dst);
-        return write(dst.c_str(), dst.size());
+        char buf[64] = {0};
+        int len;
+        if (fl::is_signed<target_t>::value) {
+            len = fl::itoa(static_cast<fl::i32>(val), buf, 10);
+        } else {
+            len = fl::utoa32(static_cast<fl::u32>(val), buf, 10);
+        }
+        return write(buf, len);
     }
 
     // Destructor
@@ -1362,14 +1367,15 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
 
     // Iterator-based erase operations
-    // Note: These are commented out to avoid ambiguity with index-based erase
-    // The issue is that erase(0) is ambiguous: 0 can be fl::size or char* (nullptr)
-    // These can be added later with better type disambiguation (SFINAE/enable_if)
+    // Note: Iterator-based erase methods
+    // SFINAE disambiguation: Only enable when argument is actually a pointer type
+    // This prevents ambiguity with erase(0) which should call the fl::size overload
 
-    /*
     // Erase character at iterator position
     // Returns iterator to the character following the erased character
-    char* erase(char* it_pos) {
+    template<typename T>
+    typename fl::enable_if<fl::is_pointer<T>::value && fl::is_same<typename fl::remove_cv<typename fl::remove_pointer<T>::type>::type, char>::value, char*>::type
+    erase(T it_pos) {
         if (!it_pos) {
             return end();
         }
@@ -1391,7 +1397,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     // Erase range [first, last)
     // Returns iterator to the character following the last erased character
-    char* erase(char* first, char* last) {
+    template<typename T>
+    typename fl::enable_if<fl::is_pointer<T>::value && fl::is_same<typename fl::remove_cv<typename fl::remove_pointer<T>::type>::type, char>::value, char*>::type
+    erase(T first, T last) {
         if (!first || !last || first >= last) {
             return end();
         }
@@ -1418,7 +1426,6 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Return iterator to next element
         return begin() + pos;
     }
-    */
 
     // Replace operations (std::string compatibility)
     // Replace count characters starting at pos with string str
@@ -1679,17 +1686,17 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         StrN out;
         fl::size start = 0;
         fl::size end = mLength;
-        while (start < mLength && StringFormatter::isSpace(c_str()[start])) {
+        while (start < mLength && fl::isspace(c_str()[start])) {
             start++;
         }
-        while (end > start && StringFormatter::isSpace(c_str()[end - 1])) {
+        while (end > start && fl::isspace(c_str()[end - 1])) {
             end--;
         }
         return substring(start, end);
     }
 
     float toFloat() const {
-        return StringFormatter::parseFloat(c_str(), mLength);
+        return fl::parseFloat(c_str(), mLength);
     }
 
     // Three-way comparison operations (std::string compatibility)
@@ -2179,6 +2186,21 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 
+    // 64-bit integer append methods
+    string &append(const int64_t &val) {
+        char buf[64] = {0};
+        int len = fl::itoa64(val, buf, 10);
+        write(buf, len);
+        return *this;
+    }
+
+    string &append(const uint64_t &val) {
+        char buf[64] = {0};
+        int len = fl::utoa64(val, buf, 10);
+        write(buf, len);
+        return *this;
+    }
+
     template <typename T> string &append(const rect<T> &rect) {
         append(rect.mMin.x);
         append(",");
@@ -2252,12 +2274,16 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     string &append(const float &_val) {
         // round to nearest hundredth
-        StringFormatter::appendFloat(_val, this);
+        char buf[64] = {0};
+        fl::ftoa(_val, buf, 2);
+        write(buf, fl::strlen(buf));
         return *this;
     }
 
     string &append(const float &_val, int precision) {
-        StringFormatter::appendFloat(_val, this, precision);
+        char buf[64] = {0};
+        fl::ftoa(_val, buf, precision);
+        write(buf, fl::strlen(buf));
         return *this;
     }
 
@@ -2265,69 +2291,101 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     // Hexadecimal formatting methods
     string &appendHex(i32 val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::itoa(val, buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(u32 val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa32(val, buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(int64_t val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa64(static_cast<uint64_t>(val), buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(uint64_t val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa64(val, buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(i16 val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::itoa(static_cast<i32>(val), buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(u16 val) {
-        StringFormatter::appendHex(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa32(static_cast<u32>(val), buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(i8 val) {
-        StringFormatter::appendHex(static_cast<i16>(val), this);
+        char buf[64] = {0};
+        int len = fl::itoa(static_cast<i32>(val), buf, 16);
+        write(buf, len);
         return *this;
     }
     string &appendHex(u8 val) {
-        StringFormatter::appendHex(static_cast<u16>(val), this);
+        char buf[64] = {0};
+        int len = fl::utoa32(static_cast<u32>(val), buf, 16);
+        write(buf, len);
         return *this;
     }
 
     // Octal formatting methods
     string &appendOct(i32 val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::itoa(val, buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(u32 val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa32(val, buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(int64_t val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa64(static_cast<uint64_t>(val), buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(uint64_t val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa64(val, buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(i16 val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::itoa(static_cast<i32>(val), buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(u16 val) {
-        StringFormatter::appendOct(val, this);
+        char buf[64] = {0};
+        int len = fl::utoa32(static_cast<u32>(val), buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(i8 val) {
-        StringFormatter::appendOct(static_cast<i16>(val), this);
+        char buf[64] = {0};
+        int len = fl::itoa(static_cast<i32>(val), buf, 8);
+        write(buf, len);
         return *this;
     }
     string &appendOct(u8 val) {
-        StringFormatter::appendOct(static_cast<u16>(val), this);
+        char buf[64] = {0};
+        int len = fl::utoa32(static_cast<u32>(val), buf, 8);
+        write(buf, len);
         return *this;
     }
 
@@ -2483,6 +2541,38 @@ inline string operator+(const T& lhs, const string& rhs) {
     result.append(lhs);
     result += rhs;
     return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Template Implementation for charconv.h
+//
+// This must be defined HERE (after fl::string class definition) rather than
+// in charconv.h to avoid circular dependency. charconv.h is included by
+// string.h before the string class is defined, so template implementations
+// that return fl::string must be placed here.
+///////////////////////////////////////////////////////////////////////////////
+
+// Implementation of to_hex template function (declared in charconv.h)
+template<typename T>
+fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
+    // Determine width classification at compile time
+    constexpr auto width = detail::get_hex_int_width<sizeof(T)>();
+
+    // Handle signed types
+    bool is_negative = false;
+    uint64_t unsigned_value;
+
+    // Check if type is signed and value is negative
+    if (static_cast<int64_t>(value) < 0 && sizeof(T) <= 8) {
+        // Only handle negative for types that fit in int64_t
+        is_negative = true;
+        // Convert to positive value for hex conversion
+        unsigned_value = static_cast<uint64_t>(-static_cast<int64_t>(value));
+    } else {
+        unsigned_value = static_cast<uint64_t>(value);
+    }
+
+    return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);
 }
 
 } // namespace fl

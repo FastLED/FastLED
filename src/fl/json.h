@@ -150,7 +150,8 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/functional.h"
-#include "fl/str.h" // For StringFormatter
+#include "fl/stl/cctype.h"
+#include "fl/stl/charconv.h"
 #include "fl/promise.h" // For Error type
 
 #include "fl/sketch_macros.h"
@@ -342,7 +343,7 @@ struct IntConversionVisitor {
         
         // Check that all remaining characters are digits
         for (fl::size i = startPos; i < str.length(); i++) {
-            if (!StringFormatter::isDigit(str[i])) {
+            if (!fl::isdigit(str[i])) {
                 isValidInt = false;
                 break;
             }
@@ -350,7 +351,7 @@ struct IntConversionVisitor {
         
         // If it looks like a valid integer, try to parse it
         if (isValidInt && str.length() > 0) {
-            int parsed = StringFormatter::parseInt(str.c_str(), str.length());
+            int parsed = fl::parseInt(str.c_str(), str.length());
             result = static_cast<IntType>(parsed);
         }
     }
@@ -399,7 +400,7 @@ struct IntConversionVisitor<int64_t> {
         
         // Check that all remaining characters are digits
         for (fl::size i = startPos; i < str.length(); i++) {
-            if (!StringFormatter::isDigit(str[i])) {
+            if (!fl::isdigit(str[i])) {
                 isValidInt = false;
                 break;
             }
@@ -407,7 +408,7 @@ struct IntConversionVisitor<int64_t> {
         
         // If it looks like a valid integer, try to parse it
         if (isValidInt && str.length() > 0) {
-            int parsed = StringFormatter::parseInt(str.c_str(), str.length());
+            int parsed = fl::parseInt(str.c_str(), str.length());
             result = static_cast<int64_t>(parsed);
         }
     }
@@ -479,7 +480,7 @@ struct FloatConversionVisitor {
                     break;
                 }
                 hasDecimal = true;
-            } else if (!StringFormatter::isDigit(c) && c != 'e' && c != 'E') {
+            } else if (!fl::isdigit(c) && c != 'e' && c != 'E') {
                 isValidFloat = false;
                 break;
             }
@@ -492,7 +493,7 @@ struct FloatConversionVisitor {
             bool isSimpleDecimal = true;
             for (fl::size i = startPos; i < str.length(); i++) {
                 char c = str[i];
-                if (c != '.' && !StringFormatter::isDigit(c)) {
+                if (c != '.' && !fl::isdigit(c)) {
                     isSimpleDecimal = false;
                     break;
                 }
@@ -500,11 +501,11 @@ struct FloatConversionVisitor {
             
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
-                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<FloatType>(parsed);
             } else {
                 // For complex floats (with exponents), use the standard approach
-                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<FloatType>(parsed);
             }
         }
@@ -567,7 +568,7 @@ struct FloatConversionVisitor<double> {
                     break;
                 }
                 hasDecimal = true;
-            } else if (!StringFormatter::isDigit(c) && c != 'e' && c != 'E') {
+            } else if (!fl::isdigit(c) && c != 'e' && c != 'E') {
                 isValidFloat = false;
                 break;
             }
@@ -580,7 +581,7 @@ struct FloatConversionVisitor<double> {
             bool isSimpleDecimal = true;
             for (fl::size i = startPos; i < str.length(); i++) {
                 char c = str[i];
-                if (c != '.' && !StringFormatter::isDigit(c)) {
+                if (c != '.' && !fl::isdigit(c)) {
                     isSimpleDecimal = false;
                     break;
                 }
@@ -588,11 +589,11 @@ struct FloatConversionVisitor<double> {
             
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
-                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<double>(parsed);
             } else {
                 // For complex floats (with exponents), use the standard approach
-                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<double>(parsed);
             }
         }

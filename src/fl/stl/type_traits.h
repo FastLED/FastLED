@@ -254,6 +254,50 @@ template <typename T> struct remove_cv<const volatile T> {
 
 template <typename T> using remove_cv_t = typename remove_cv<T>::type;
 
+// Define is_pointer trait
+template <typename T> struct is_pointer {
+    enum : bool { value = false };
+};
+
+template <typename T> struct is_pointer<T*> {
+    enum : bool { value = true };
+};
+
+template <typename T> struct is_pointer<T* const> {
+    enum : bool { value = true };
+};
+
+template <typename T> struct is_pointer<T* volatile> {
+    enum : bool { value = true };
+};
+
+template <typename T> struct is_pointer<T* const volatile> {
+    enum : bool { value = true };
+};
+
+// Define remove_pointer trait
+template <typename T> struct remove_pointer {
+    using type = T;
+};
+
+template <typename T> struct remove_pointer<T*> {
+    using type = T;
+};
+
+template <typename T> struct remove_pointer<T* const> {
+    using type = T;
+};
+
+template <typename T> struct remove_pointer<T* volatile> {
+    using type = T;
+};
+
+template <typename T> struct remove_pointer<T* const volatile> {
+    using type = T;
+};
+
+template <typename T> using remove_pointer_t = typename remove_pointer<T>::type;
+
 // Define decay trait
 template <typename T> struct decay {
   private:

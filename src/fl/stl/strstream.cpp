@@ -4,6 +4,7 @@
 #include "fl/fft.h"
 #include "fl/str.h"
 #include "fl/stl/ios.h"
+#include "fl/stl/charconv.h"
 
 namespace fl {
 
@@ -67,29 +68,27 @@ void StrStream::appendFormatted(fl::i16 val) {
 }
 
 void StrStream::appendFormatted(fl::i32 val) {
-    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
-    if (mBase == 16) {
-        fl::StringFormatter::appendHex(val, &temp);
-    } else if (mBase == 8) {
-        fl::StringFormatter::appendOct(val, &temp);
-    } else {
-        fl::StringFormatter::append(val, &temp);
-    }
-    mStr.append(temp.c_str(), temp.size());
+    char buf[64] = {0};
+    int len = fl::itoa(val, buf, mBase);
+    mStr.append(buf, len);
 }
 
 void StrStream::appendFormatted(fl::i64 val) {
-    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
-    if (mBase == 16) {
+    char buf[64] = {0};
+    int len;
+    if (mBase == 16 || mBase == 8) {
         // For hex/oct, treat as unsigned bit pattern
-        fl::StringFormatter::appendHex(static_cast<uint64_t>(val), &temp);
-    } else if (mBase == 8) {
-        fl::StringFormatter::appendOct(static_cast<uint64_t>(val), &temp);
+        len = fl::utoa64(static_cast<uint64_t>(val), buf, mBase);
     } else {
-        // For decimal, keep as signed for proper negative number formatting
-        fl::StringFormatter::append(val, &temp);
+        // For decimal, handle negative sign manually
+        if (val < 0) {
+            mStr.append("-", 1);
+            len = fl::utoa64(static_cast<uint64_t>(-val), buf, mBase);
+        } else {
+            len = fl::utoa64(static_cast<uint64_t>(val), buf, mBase);
+        }
     }
-    mStr.append(temp.c_str(), temp.size());
+    mStr.append(buf, len);
 }
 
 void StrStream::appendFormatted(fl::u16 val) {
@@ -97,27 +96,15 @@ void StrStream::appendFormatted(fl::u16 val) {
 }
 
 void StrStream::appendFormatted(fl::u32 val) {
-    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
-    if (mBase == 16) {
-        fl::StringFormatter::appendHex(val, &temp);
-    } else if (mBase == 8) {
-        fl::StringFormatter::appendOct(val, &temp);
-    } else {
-        fl::StringFormatter::append(val, &temp);
-    }
-    mStr.append(temp.c_str(), temp.size());
+    char buf[64] = {0};
+    int len = fl::utoa32(val, buf, mBase);
+    mStr.append(buf, len);
 }
 
 void StrStream::appendFormatted(fl::u64 val) {
-    fl::StrN<FASTLED_STR_INLINED_SIZE> temp;
-    if (mBase == 16) {
-        fl::StringFormatter::appendHex(val, &temp);
-    } else if (mBase == 8) {
-        fl::StringFormatter::appendOct(val, &temp);
-    } else {
-        fl::StringFormatter::append(val, &temp);
-    }
-    mStr.append(temp.c_str(), temp.size());
+    char buf[64] = {0};
+    int len = fl::utoa64(val, buf, mBase);
+    mStr.append(buf, len);
 }
 
 } // namespace fl

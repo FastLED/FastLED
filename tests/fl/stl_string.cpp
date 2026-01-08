@@ -436,10 +436,10 @@ TEST_CASE("String erase operations") {
     SUBCASE("Iterator-based erase middle range") {
         fl::string s = "hello world";
         char* first = s.begin() + 2;  // Point to first 'l'
-        char* last = s.begin() + 9;   // Point to 'r'
+        char* last = s.begin() + 9;   // Point to second 'l' (end of range is exclusive)
         s.erase(first, last);
-        CHECK_EQ(s, "herld");
-        CHECK(s.size() == 5);
+        CHECK_EQ(s, "held");
+        CHECK(s.size() == 4);
     }
 
     SUBCASE("Iterator-based erase at beginning") {

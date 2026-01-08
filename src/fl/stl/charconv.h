@@ -11,9 +11,11 @@
 
 #include "fl/stl/stdint.h"  // For uint64_t, uint8_t
 #include "fl/stl/cstddef.h" // For fl::size_t
-#include "fl/str.h"      // For fl::string
 
 namespace fl {
+
+// Forward declaration to avoid circular dependency
+class string;
 
 /// @brief Convert an integer value to hexadecimal string representation
 /// @tparam T Integral type
@@ -84,29 +86,6 @@ constexpr HexIntWidth get_hex_int_width<8>() {
 
 } // namespace detail
 
-// Implementation of to_hex template function
-template<typename T>
-fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
-    // Determine width classification at compile time
-    constexpr auto width = detail::get_hex_int_width<sizeof(T)>();
-
-    // Handle signed types
-    bool is_negative = false;
-    uint64_t unsigned_value;
-
-    // Check if type is signed and value is negative
-    if (static_cast<int64_t>(value) < 0 && sizeof(T) <= 8) {
-        // Only handle negative for types that fit in int64_t
-        is_negative = true;
-        // Convert to positive value for hex conversion
-        unsigned_value = static_cast<uint64_t>(-static_cast<int64_t>(value));
-    } else {
-        unsigned_value = static_cast<uint64_t>(value);
-    }
-
-    return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);
-}
-
 // Low-level integer to string conversion functions
 // These provide the foundational conversion logic for fl::string and fl::sstream
 
@@ -116,6 +95,13 @@ fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
 int itoa(int32_t value, char *buffer, int radix);
+
+/// @brief Convert signed 64-bit integer to string buffer in given radix
+/// @param value The signed 64-bit integer value to convert
+/// @param buffer Output buffer (must be at least 66 bytes for base 2 with sign, 21 for base 10)
+/// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
+/// @return Number of characters written (excluding null terminator)
+int itoa64(int64_t value, char *buffer, int radix);
 
 /// @brief Convert unsigned 32-bit integer to string buffer in given radix
 /// @param value The unsigned integer value to convert
@@ -137,4 +123,30 @@ int utoa64(uint64_t value, char *buffer, int radix);
 /// @param precision Number of decimal places (default: 2)
 void ftoa(float value, char *buffer, int precision = 2);
 
+/// @brief Parse a floating point number from a character buffer
+/// @param str The character buffer to parse
+/// @param len The length of the buffer
+/// @return The parsed float value (0.0f if parsing fails)
+float parseFloat(const char *str, fl::size len);
+
+/// @brief Parse an integer from a character buffer
+/// @param str The character buffer to parse
+/// @param len The length of the buffer
+/// @return The parsed integer value (0 if parsing fails)
+int parseInt(const char *str, fl::size len);
+
+/// @brief Parse an integer from a null-terminated string
+/// @param str The null-terminated string to parse
+/// @return The parsed integer value (0 if parsing fails)
+int parseInt(const char *str);
+
 } // namespace fl
+
+///////////////////////////////////////////////////////////////////////////////
+// Template Implementation Section
+//
+// NOTE: The template implementation for to_hex<T>() is defined at the END of
+// fl/stl/string.h (after the fl::string class definition is complete).
+// This avoids circular dependency issues where charconv.h is included by
+// string.h before the string class is fully defined.
+///////////////////////////////////////////////////////////////////////////////
