@@ -1,6 +1,7 @@
 #include "fl/async.h"
 #include "fl/stl/functional.h"
 #include "fl/singleton.h"
+#include "fl/thread_local.h"
 #include "fl/stl/algorithm.h"
 #include "fl/task.h"
 #include "fl/stl/time.h"

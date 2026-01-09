@@ -28,7 +28,7 @@
 #include "doctest.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "initializer_list"
 
 using namespace fl;

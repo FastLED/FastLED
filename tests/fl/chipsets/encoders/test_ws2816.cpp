@@ -12,7 +12,7 @@
 /// for transmission through standard WS2812 controllers.
 
 #include "fl/chipsets/encoders/ws2816.h"
-#include "crgb.h"
+#include "hsv2rgb.h"  // for CRGB
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
 #include "__new/placement_new_delete.h"
@@ -21,7 +21,7 @@
 #include "fl/rgb8.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/array.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/pair.h"
 #include "platforms/shared/int_windows.h"
 

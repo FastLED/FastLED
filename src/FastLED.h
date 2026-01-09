@@ -462,6 +462,19 @@ class CFastLED {
 public:
 	CFastLED();
 
+	/// Initialize platform-specific subsystems
+	///
+	/// Performs one-time initialization of platform-specific hardware and subsystems.
+	/// This is called automatically on first use but can be called explicitly to ensure
+	/// initialization happens at a predictable time.
+	///
+	/// Safe to call multiple times - subsequent calls are no-ops.
+	///
+	/// Platform-specific initialization:
+	/// - ESP32: Initializes channel bus manager (PARLIO/SPI/RMT/UART) and SPI bus manager
+	/// - Other platforms: No-op (no initialization required)
+	void init();
+
 	// Useful when you want to know when an event like onFrameBegin or onFrameEnd is happening.
 	// This is disabled on AVR to save space.
 	void addListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::addListener(listener); }

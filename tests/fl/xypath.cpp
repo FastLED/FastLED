@@ -8,7 +8,7 @@
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/tile2x2.h"
 #include "fl/transform.h"

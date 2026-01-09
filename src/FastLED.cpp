@@ -1,14 +1,18 @@
 #define FASTLED_INTERNAL
+#include <stdint.h>  // for uint8_t, uint32_t, uint16_t
 #include "FastLED.h"
-#include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"
-#include "fl/export.h"
-#include "fl/int.h"
 #include "fl/channels/channel.h"
-#include "fl/channels/config.h"
 #include "fl/channels/bus_manager.h"
 #include "fl/trace.h"
+#include "fl/channels/engine.h"  // for IChannelEngine
+#include "fl/delay.h"  // for delayMicroseconds
+#include "fl/stl/assert.h"  // for FL_ASSERT
+#include "hsv2rgb.h"  // for CRGB
+#include "platforms/shared/int_windows.h"  // for u32, u16
+#include "platforms/init.h"  // IWYU pragma: keep
+#include "fl/channels/config.h"  // for ChannelConfig
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -84,6 +88,13 @@ CFastLED::CFastLED() {
 	m_pPowerFunc = nullptr;
 	m_nPowerData = 0xFFFFFFFF;
 	m_nMinMicros = 0;
+}
+
+void CFastLED::init() {
+	// Call platform-specific initialization once
+	// Uses the trampoline pattern: platforms/init.h dispatches to platform-specific headers
+	// FL_RUN_ONCE ensures this is only called once, even if init() is called multiple times
+	FL_RUN_ONCE(fl::platforms::init());
 }
 
 int CFastLED::size() {

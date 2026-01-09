@@ -873,7 +873,7 @@ class FL_ALIGN InlinedVector {
   private:
     bool mUsingHeap = false;
     FixedVector<T, INLINED_SIZE> mFixed;
-    HeapVector<T> mHeap;
+    HeapVector<T, fl::allocator<T>> mHeap;
 };
 
 template <typename T, typename Allocator = fl::allocator<T>> using vector = HeapVector<T, Allocator>;

@@ -14,7 +14,7 @@
 #include "fl/log.h"
 #include "fl/math_macros.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/move.h"
 #include "fl/stl/optional.h"

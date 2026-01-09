@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"                 // for uint64_t
-#include "fl/stl/detail/heap_vector.h"     // for HeapVector
+#include "fl/stl/vector.h"                 // for vector
 #include "fl/stl/move.h"                   // for remove_reference
 #include "fl/stl/utility.h"                // for greater, less
 #include "platforms/shared/int_windows.h"  // for size
@@ -68,7 +68,7 @@ template <typename Iterator> void pop_heap(Iterator first, Iterator last) {
 }
 
 template <typename T, typename Compare = fl::less<T>,
-          typename VectorT = HeapVector<T>>
+          typename VectorT = vector<T>>
 class PriorityQueue {
   public:
     using value_type = T;

@@ -10,9 +10,16 @@
   { include: ['"lib8tion.h"', 'public', '"lib8tion.h"', 'public'] },
   { include: ['"pixeltypes.h"', 'public', '"pixeltypes.h"', 'public'] },
   { include: ['"hsv2rgb.h"', 'public', '"hsv2rgb.h"', 'public'] },
+  { include: ['"crgb.h"', 'public', '"hsv2rgb.h"', 'public'] },
   { include: ['"colorutils.h"', 'public', '"colorutils.h"', 'public'] },
   { include: ['"colorpalettes.h"', 'public', '"colorpalettes.h"', 'public'] },
   
+  # Platform dispatch headers - keep these as-is (don't suggest platform-specific includes)
+  { include: ['"platforms/init.h"', 'public', '"platforms/init.h"', 'public'] },
+  { include: ['"platforms/stub/init_stub.h"', 'private', '"platforms/init.h"', 'public'] },
+  { include: ['"init_stub.h"', 'private', '"platforms/init.h"', 'public'] },
+  { include: ['"platforms/esp/32/init_esp32.h"', 'private', '"platforms/init.h"', 'public'] },
+
   # Platform-specific headers should not be suggested directly
   { include: ['"platforms/*/fastled_*.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"platforms/*/clockless_*.h"', 'private', '"FastLED.h"', 'public'] },
@@ -20,10 +27,13 @@
   
   # Internal headers should redirect to public API
   { include: ['"controller.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"cled_controller.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"led_sysdefs.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"led_sysdefs_stub_generic.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"fastled_config.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"fastled_delay.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"fastled_progmem.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"power_mgt.h"', 'private', '"FastLED.h"', 'public'] },
   
   # fl/ namespace headers - the modern FastLED API
   { include: ['"fl/ptr.h"', 'public', '"fl/ptr.h"', 'public'] },

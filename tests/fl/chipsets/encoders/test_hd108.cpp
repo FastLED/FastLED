@@ -25,7 +25,7 @@
 #include "fl/ease.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "platforms/shared/int_windows.h"
 
 namespace test_hd108 {

@@ -21,7 +21,7 @@
 #include "fl/scoped_array.h"
 #include "__new/placement_new_delete.h"
 #include "fl/slice.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/utility.h"
 #include "platforms/shared/int_windows.h"
@@ -81,7 +81,7 @@ class RectangularDrawBuffer {
                       u32 *total_bytes) const;
 
 // protected:
-    typedef fl::HeapVector<DrawItem> DrawList;
+    typedef fl::vector<DrawItem> DrawList;
     // We manually manage the memory for the buffer of all LEDs so that it can
     // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
     scoped_array<u8> mAllLedsBufferUint8;

@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "__new/placement_new_delete.h"
 #include "doctest.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/utility.h"
 
 using namespace fl;

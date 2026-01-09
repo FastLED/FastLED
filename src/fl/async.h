@@ -43,22 +43,17 @@
 /// @endcode
 
 #include "fl/stl/vector.h"
-#include "fl/stl/function.h"
-#include "fl/stl/shared_ptr.h"
-#include "fl/stl/variant.h"
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 #include "fl/singleton.h"
-#include "fl/thread_local.h"
-
 #include "fl/task.h"
-#include "fl/stl/time.h"
 #include "platforms/await.h"
+#include "fl/stl/allocator.h"   // for allocator
+#include "fl/stl/atomic.h"      // for atomic
+#include "fl/stl/cstddef.h"     // for size_t
+#include "fl/stl/string.h"      // for string
 
 namespace fl {
-
-// Forward declarations
-class AsyncManager;
 
 namespace detail {
 /// @brief Get reference to thread-local await recursion depth

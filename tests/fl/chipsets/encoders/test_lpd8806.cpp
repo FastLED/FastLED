@@ -19,7 +19,7 @@
 #include "doctest.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
 
 using namespace fl;

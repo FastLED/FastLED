@@ -181,8 +181,21 @@ def main():
     # Run IWYU
     # IWYU writes suggestions to stderr, actual errors to stderr
     # Exit code 0 = no suggestions, non-zero = suggestions or errors
-    result = subprocess.run(iwyu_cmd)
-    sys.exit(result.returncode)
+    iwyu_result = subprocess.run(iwyu_cmd)
+
+    # After IWYU analysis, run the actual compiler to produce the .obj file
+    # The compiler executable and args were saved earlier
+    if compiler_executable and compiler_args:
+        # Run the actual compiler with original arguments
+        compiler_cmd = [compiler_executable] + compiler_args
+        compiler_result = subprocess.run(compiler_cmd)
+
+        # If compiler fails, exit with compiler's error code (more important)
+        if compiler_result.returncode != 0:
+            sys.exit(compiler_result.returncode)
+
+    # Exit with IWYU's return code (for CI checking)
+    sys.exit(iwyu_result.returncode)
 
 
 if __name__ == "__main__":

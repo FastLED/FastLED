@@ -8,7 +8,7 @@
 #include "doctest.h"
 #include "fl/insert_result.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 #include "fl/unused.h"

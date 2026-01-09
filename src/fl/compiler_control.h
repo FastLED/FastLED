@@ -332,6 +332,29 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 FL_DISABLE_WARNING_POP
 
 
+// FL_RUN_ONCE - Ensures a function is called only once (thread-safe on platforms with mutexes)
+//
+// Usage:
+//   void initialize_system() { /* code */ }
+//   FL_RUN_ONCE(initialize_system());
+//
+// This macro uses a static boolean flag to ensure the wrapped code executes only once,
+// even if called multiple times. The implementation is thread-safe on platforms that
+// support multithreading (via FASTLED_MULTITHREADED).
+//
+// Note: This is a runtime guard (checked each call), unlike FL_INIT which runs at
+// static initialization time. FL_RUN_ONCE is useful for lazy initialization or
+// when the caller doesn't know if initialization has occurred.
+#define FL_RUN_ONCE(code) \
+    do { \
+        static bool fl_run_once_flag = false; \
+        if (!fl_run_once_flag) { \
+            fl_run_once_flag = true; \
+            code; \
+        } \
+    } while(0)
+
+
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus
   #define FL_EXTERN_C_BEGIN extern "C" {

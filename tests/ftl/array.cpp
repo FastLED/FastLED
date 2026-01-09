@@ -2,7 +2,6 @@
 #include "fl/slice.h"  // For fl::span
 #include "__new/placement_new_delete.h"
 #include "doctest.h"
-#include "fl/stl/detail/heap_vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
@@ -428,14 +427,14 @@ TEST_CASE("fl::array - to_array() helper function from span") {
         CHECK_EQ(arr[2], 300);
     }
 
-    SUBCASE("from HeapVector via span") {
-        fl::HeapVector<int> heap_vec;
-        heap_vec.push_back(1);
-        heap_vec.push_back(2);
-        heap_vec.push_back(3);
-        heap_vec.push_back(4);
+    SUBCASE("from vector via span") {
+        fl::vector<int> vec;
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+        vec.push_back(4);
 
-        fl::span<const int> s(heap_vec);
+        fl::span<const int> s(vec);
         fl::array<int, 4> arr = fl::to_array<4>(s);
 
         CHECK_EQ(arr.size(), 4);

@@ -9,7 +9,7 @@
 #include "doctest.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/detail/heap_vector.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
