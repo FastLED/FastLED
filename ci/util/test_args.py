@@ -7,6 +7,7 @@ from typing import Optional
 
 from typeguard import typechecked
 
+from ci.util.smart_selector import TestMatch, get_best_match_or_prompt
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
 
@@ -216,21 +217,41 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                     f"Auto-enabled --py mode for specific Python test: {test_args.test}"
                 )
         else:
-            # This is not a Python test - assume it's a C++ test
-            if not test_args.cpp and not test_args.py:
-                test_args.cpp = True
-                ts_print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
-            # Also enable --unit when a specific C++ test is provided without any other flags
-            if (
-                not test_args.unit
-                and not test_args.examples
-                and not test_args.py
-                and not test_args.full
-            ):
-                test_args.unit = True
-                ts_print(
-                    f"Auto-enabled --unit mode for specific test: {test_args.test}"
-                )
+            # Use smart selector to find matching unit test or example
+            ts_print(f"🔍 Smart selector: searching for '{test_args.test}'...")
+            match = get_best_match_or_prompt(test_args.test)
+
+            if match is None:
+                # No match or ambiguous - error message already printed by smart selector
+                sys.exit(1)
+
+            # Found a match - configure based on match type
+            if match.type == "example":
+                ts_print(f"✅ Auto-selected example: {match.name} ({match.path})")
+                # Enable example mode
+                if not test_args.examples:
+                    test_args.examples = [match.name]
+                if not test_args.cpp:
+                    test_args.cpp = True
+                    ts_print(f"Auto-enabled --cpp mode for example: {match.name}")
+            else:  # unit_test
+                ts_print(f"✅ Auto-selected unit test: {match.name} ({match.path})")
+                # Keep the original test name for unit test execution
+                # (test_args.test is used by the unit test runner)
+                if not test_args.cpp and not test_args.py:
+                    test_args.cpp = True
+                    ts_print(f"Auto-enabled --cpp mode for unit test: {test_args.test}")
+                # Also enable --unit when a specific C++ test is provided without any other flags
+                if (
+                    not test_args.unit
+                    and not test_args.examples
+                    and not test_args.py
+                    and not test_args.full
+                ):
+                    test_args.unit = True
+                    ts_print(
+                        f"Auto-enabled --unit mode for specific test: {test_args.test}"
+                    )
 
     # Auto-enable --verbose when running unit tests (disabled)
     # if test_args.unit and not test_args.verbose:
