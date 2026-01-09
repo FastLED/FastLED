@@ -205,6 +205,7 @@ private:
     bool mBusy;                            ///< Transmission in progress
     fl::vector<uint8_t> mCapturedData;     ///< Captured byte history
     uint32_t mTransmissionDelayUs;         ///< Simulated TX delay (microseconds)
+    bool mManualDelaySet;                  ///< True if delay was manually set via setTransmissionDelay()
     uint64_t mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
     uint64_t mResetExpireTime;             ///< Timestamp when reset period expires
 

@@ -21,6 +21,7 @@ UartPeripheralMock::UartPeripheralMock()
       mBusy(false),
       mCapturedData(),
       mTransmissionDelayUs(0),
+      mManualDelaySet(false),
       mLastWriteTimestamp(0),
       mResetExpireTime(0) {
 }
@@ -88,19 +89,22 @@ bool UartPeripheralMock::writeBytes(const uint8_t* data, size_t length) {
     }
 
     // Calculate realistic transmission delay based on baud rate and byte count
+    // UNLESS a manual delay was set via setTransmissionDelay()
     // Pattern from PARLIO: transmission_time_us = (bit_count * 1000000) / clock_freq_hz
     // For UART: transmission_time_us = (byte_count * bits_per_frame * 1000000) / baud_rate
     // bits_per_frame = 1 start bit + 8 data bits + stop bits (10 for 8N1, 11 for 8N2)
-    if (mConfig.mBaudRate > 0) {
-        const size_t bits_per_frame = 10 + (mConfig.mStopBits == 2 ? 1 : 0);  // 10 (8N1) or 11 (8N2)
-        const uint64_t total_bits = static_cast<uint64_t>(length) * bits_per_frame;
-        // Calculate transmission time in microseconds
-        uint64_t transmission_time_us = (total_bits * 1000000ULL) / mConfig.mBaudRate;
-        // Add small overhead for buffer switching (10 microseconds)
-        mTransmissionDelayUs = static_cast<uint32_t>(transmission_time_us) + 10;
-    } else {
-        // Fallback: Use a small default delay if baud rate not configured
-        mTransmissionDelayUs = 100;  // 100 microseconds default
+    if (!mManualDelaySet) {
+        if (mConfig.mBaudRate > 0) {
+            const size_t bits_per_frame = 10 + (mConfig.mStopBits == 2 ? 1 : 0);  // 10 (8N1) or 11 (8N2)
+            const uint64_t total_bits = static_cast<uint64_t>(length) * bits_per_frame;
+            // Calculate transmission time in microseconds
+            uint64_t transmission_time_us = (total_bits * 1000000ULL) / mConfig.mBaudRate;
+            // Add small overhead for buffer switching (10 microseconds)
+            mTransmissionDelayUs = static_cast<uint32_t>(transmission_time_us) + 10;
+        } else {
+            // Fallback: Use a small default delay if baud rate not configured
+            mTransmissionDelayUs = 100;  // 100 microseconds default
+        }
     }
 
     // Mark as busy
@@ -172,6 +176,7 @@ const UartConfig& UartPeripheralMock::getConfig() const {
 
 void UartPeripheralMock::setTransmissionDelay(uint32_t microseconds) {
     mTransmissionDelayUs = microseconds;
+    mManualDelaySet = true;
 }
 
 void UartPeripheralMock::forceTransmissionComplete() {
@@ -184,6 +189,7 @@ void UartPeripheralMock::reset() {
     mBusy = false;
     mCapturedData.clear();
     mTransmissionDelayUs = 0;
+    mManualDelaySet = false;
     mLastWriteTimestamp = 0;
     mResetExpireTime = 0;
     mConfig = UartConfig();

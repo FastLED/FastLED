@@ -3,6 +3,9 @@
 #ifndef __INC_HSV2RGB_H
 #define __INC_HSV2RGB_H
 
+// Forward declarations
+#include "fl/rgb8.h"  // for fl::CRGB
+#include "fl/hsv.h"   // for fl::hsv8
 
 /// @file hsv2rgb.h
 /// Functions to convert from the HSV colorspace to the RGB colorspace
@@ -56,8 +59,9 @@
 
 /// @{
 
-// CRGB and CHSV types are expected to be defined by including files
-// (typically through crgb.h and chsv.h)
+//struct CRGB;  // CRGB is now a typedef in crgb.h, not a struct
+using CRGB = fl::CRGB;  // Bring the typedef into this namespace for consistency
+using CHSV = fl::hsv8;  // Bring the typedef into this namespace for consistency
 
 /// @copybrief hsv2rgb_rainbow(const CHSV&, CRGB&)
 /// @see hsv2rgb_rainbow(const CHSV&, CRGB&)

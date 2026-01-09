@@ -4,14 +4,11 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/cstdio.h"
-#include <stddef.h>
-#include <stdint.h>
 #include "__new/placement_new_delete.h"
 #include "doctest.h"
 #include "fl/fx/wled/segment.h"
 #include "fl/json.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/detail/heap_vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
@@ -21,7 +18,7 @@ TEST_CASE("Remote: Basic function registration") {
     fl::Remote remote;
 
     bool called = false;
-    remote.registerFunction("test", [&](const fl::Json& args) {
+    remote.registerFunction("test", [&](const fl::Json&) {
         called = true;
     });
 
@@ -52,7 +49,7 @@ TEST_CASE("Remote: Scheduled execution") {
     fl::Remote remote;
 
     int callCount = 0;
-    remote.registerFunction("increment", [&](const fl::Json& args) {
+    remote.registerFunction("increment", [&](const fl::Json&) {
         callCount++;
     });
 
@@ -85,7 +82,7 @@ TEST_CASE("Remote: Error handling") {
     REQUIRE_EQ(err, fl::Remote::Error::UnknownFunction);
 
     // Invalid timestamp (should warn but default to 0)
-    remote.registerFunction("test", [](const fl::Json& args) {});
+    remote.registerFunction("test", [](const fl::Json&) {});
     err = remote.processRpc(R"({"timestamp":-5,"function":"test","args":[]})");
     REQUIRE_EQ(err, fl::Remote::Error::InvalidTimestamp);
 }
@@ -113,9 +110,9 @@ TEST_CASE("Remote: Multiple scheduled calls") {
     fl::Remote remote;
 
     fl::vector<fl::string> executed;
-    remote.registerFunction("a", [&](const fl::Json& args) { executed.push_back("a"); });
-    remote.registerFunction("b", [&](const fl::Json& args) { executed.push_back("b"); });
-    remote.registerFunction("c", [&](const fl::Json& args) { executed.push_back("c"); });
+    remote.registerFunction("a", [&](const fl::Json&) { executed.push_back("a"); });
+    remote.registerFunction("b", [&](const fl::Json&) { executed.push_back("b"); });
+    remote.registerFunction("c", [&](const fl::Json&) { executed.push_back("c"); });
 
     remote.processRpc(R"({"timestamp":3000,"function":"c","args":[]})");
     remote.processRpc(R"({"timestamp":1000,"function":"a","args":[]})");
@@ -142,7 +139,7 @@ TEST_CASE("Remote: Multiple scheduled calls") {
 TEST_CASE("Remote: Clear operations") {
     fl::Remote remote;
 
-    remote.registerFunction("test", [](const fl::Json& args) {});
+    remote.registerFunction("test", [](const fl::Json&) {});
     remote.processRpc(R"({"timestamp":1000,"function":"test","args":[]})");
 
     REQUIRE_EQ(remote.pendingCount(), 1);
@@ -167,7 +164,7 @@ TEST_CASE("Remote: Return values") {
     fl::Remote remote;
 
     // Register function with return value (matches Arduino millis())
-    remote.registerFunctionWithReturn("millis", [](const fl::Json& args) -> fl::Json {
+    remote.registerFunctionWithReturn("millis", [](const fl::Json&) -> fl::Json {
         return fl::Json(static_cast<int64_t>(12345));
     });
 
@@ -205,7 +202,7 @@ TEST_CASE("Remote: Scheduled functions with return values and timing metadata") 
     fl::Remote remote;
 
     int counter = 100;
-    remote.registerFunctionWithReturn("getCounter", [&](const fl::Json& args) -> fl::Json {
+    remote.registerFunctionWithReturn("getCounter", [&](const fl::Json&) -> fl::Json {
         return fl::Json(counter++);
     });
 
@@ -243,10 +240,10 @@ TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
 
     fl::vector<fl::string> executionOrder;
 
-    remote.registerFunction("a", [&](const fl::Json& args) { executionOrder.push_back("a"); });
-    remote.registerFunction("b", [&](const fl::Json& args) { executionOrder.push_back("b"); });
-    remote.registerFunction("c", [&](const fl::Json& args) { executionOrder.push_back("c"); });
-    remote.registerFunction("d", [&](const fl::Json& args) { executionOrder.push_back("d"); });
+    remote.registerFunction("a", [&](const fl::Json&) { executionOrder.push_back("a"); });
+    remote.registerFunction("b", [&](const fl::Json&) { executionOrder.push_back("b"); });
+    remote.registerFunction("c", [&](const fl::Json&) { executionOrder.push_back("c"); });
+    remote.registerFunction("d", [&](const fl::Json&) { executionOrder.push_back("d"); });
 
     // Schedule all functions with the SAME timestamp
     // They should execute in the order they were scheduled (FIFO)
@@ -273,7 +270,7 @@ TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
 TEST_CASE("Remote: Unregister function") {
     fl::Remote remote;
 
-    remote.registerFunction("test", [](const fl::Json& args) {});
+    remote.registerFunction("test", [](const fl::Json&) {});
     REQUIRE(remote.hasFunction("test"));
 
     bool removed = remote.unregisterFunction("test");
@@ -289,7 +286,7 @@ TEST_CASE("Remote: Unregister function") {
 TEST_CASE("Remote: Results clearing") {
     fl::Remote remote;
 
-    remote.registerFunctionWithReturn("getValue", [](const fl::Json& args) -> fl::Json {
+    remote.registerFunctionWithReturn("getValue", [](const fl::Json&) -> fl::Json {
         return fl::Json(42);
     });
 
@@ -324,7 +321,7 @@ TEST_CASE("Remote: No args field defaults to empty array") {
 TEST_CASE("Remote: Scheduled execution results") {
     fl::Remote remote;
 
-    remote.registerFunction("task", [](const fl::Json& args) {});
+    remote.registerFunction("task", [](const fl::Json&) {});
 
     remote.processRpc(R"({"timestamp":500,"function":"task","args":[]})");
     remote.processRpc(R"({"timestamp":1000,"function":"task","args":[]})");
@@ -351,7 +348,7 @@ TEST_CASE("Remote: Scheduled execution results") {
 TEST_CASE("Remote: RpcResult to_json serialization") {
     fl::Remote remote;
 
-    remote.registerFunctionWithReturn("getValue", [](const fl::Json& args) -> fl::Json {
+    remote.registerFunctionWithReturn("getValue", [](const fl::Json&) -> fl::Json {
         return fl::Json(42);
     });
 
@@ -388,7 +385,7 @@ TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
     fl::Remote remote;
 
     int counter = 100;
-    remote.registerFunctionWithReturn("getCounter", [&](const fl::Json& args) -> fl::Json {
+    remote.registerFunctionWithReturn("getCounter", [&](const fl::Json&) -> fl::Json {
         return fl::Json(counter++);
     });
 

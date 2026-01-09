@@ -23,6 +23,7 @@
 #include "fl/stl/time.h"
 #include "fl/timeout.h"
 #include "fl/isr.h"
+#include "fl/channels/wave8.h"
 
 // Include ESP-IDF headers for SPI and GPIO types
 #include "driver/spi_master.h"
@@ -237,6 +238,9 @@ private:
         gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1 if unused)
         gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1 if unused)
         gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1 if unused)
+
+        // wave8 encoding LUT (cached to avoid rebuilding in ISR)
+        Wave8BitExpansionLut mWave8Lut;    ///< Precomputed wave8 expansion lookup table
 
         // Event-driven streaming state
         volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction

@@ -16,6 +16,7 @@
 #include "fl/stl/time.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
+#include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h" // wave8 encoding (Stage 6)
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
@@ -640,6 +641,11 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     state->transAInFlight = false;
     state->transBInFlight = false;
 
+    // Build wave8 expansion LUT once during channel creation (not in ISR)
+    ChipsetTiming chipsetTiming = convertSpiTimingToChipsetTiming(timing);
+    state->mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
+    FL_DBG("ChannelEngineSpi: Initialized wave8 LUT for channel");
+
     // Set up timer ISR (4 kHz = 250μs period)
     fl::isr::isr_config_t isr_config;
     isr_config.handler = timerEncodingISR;
@@ -1054,18 +1060,115 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
         // Cannot log in ISR context
     }
 
-    // Encode into staging buffer at current offset
-    uint32_t bit_offset =
-        channel->stagingOffset * 8; // Convert byte offset to bit offset
-    for (size_t i = 0; i < bytes_to_encode; i++) {
-        bit_offset +=
-            encodeLedByte(channel->ledSource[i], channel->currentStaging,
-                          channel->timing, bit_offset);
+    // Encode into staging buffer at current offset using wave8 encoding (fast, lookup-based)
+
+    // Use cached LUT (built once during channel creation)
+    const Wave8BitExpansionLut& lut = channel->mWave8Lut;
+
+    // Create span wrappers for input/output
+    fl::span<const uint8_t> input_span(channel->ledSource, bytes_to_encode);
+    uint8_t* output = channel->currentStaging + channel->stagingOffset;
+    size_t output_capacity = channel->stagingCapacity - channel->stagingOffset;
+    fl::span<uint8_t> output_span(output, output_capacity);
+
+    // Encode based on lane count
+    size_t bytes_written = 0;
+    if (channel->numLanes == 1) {
+        // Single-lane: No transposition (optimized for ESP32-C3)
+        bytes_written = wave8EncodeSingleLane(
+            input_span,
+            output_span,
+            lut
+        );
+    } else if (channel->numLanes == 2) {
+        // Dual-lane: 2-lane transposition
+        // Data is interleaved: [B0, B1, B2, B3, ...] where Lane0=[B0,B2,...], Lane1=[B1,B3,...]
+
+        // Calculate bytes per lane (input must be even number of bytes)
+        const size_t bytes_per_lane = bytes_to_encode / 2;
+        if (bytes_to_encode % 2 != 0) {
+            // Odd byte count - encode the extra byte separately (should be rare)
+            // This ensures we don't read past buffer bounds
+            bytes_to_encode--; // Process one less byte, leave odd byte for next iteration
+        }
+
+        // Validate output buffer size (16 bytes per input byte pair = 8x expansion * 2 lanes)
+        const size_t required_output = bytes_per_lane * 16;
+        if (output_capacity < required_output) {
+            // Buffer overflow protection - reduce chunk size
+            bytes_written = 0;
+        } else {
+            // Manual dual-lane encoding with interleaved input
+            size_t output_idx = 0;
+            for (size_t i = 0; i < bytes_per_lane; i++) {
+                // Extract bytes from interleaved input
+                const uint8_t lane0_byte = channel->ledSource[i * 2];     // Even indices
+                const uint8_t lane1_byte = channel->ledSource[i * 2 + 1]; // Odd indices
+
+                // Convert both lane bytes to Wave8Byte
+                ::fl::Wave8Byte wave8_lane0, wave8_lane1;
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane0_byte, lut, &wave8_lane0);
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane1_byte, lut, &wave8_lane1);
+
+                // Transpose 2 lanes into interleaved format
+                ::fl::Wave8Byte lane_array[2] = {wave8_lane0, wave8_lane1};
+                uint8_t transposed[2 * sizeof(::fl::Wave8Byte)]; // 16 bytes
+                ::fl::detail::wave8_transpose_2(lane_array, transposed);
+
+                // Copy transposed data to output buffer
+                ::fl::memcpy(output + output_idx, transposed, sizeof(transposed));
+                output_idx += sizeof(transposed);
+            }
+            bytes_written = output_idx;
+        }
+    } else if (channel->numLanes == 4) {
+        // Quad-lane: 4-lane transposition
+        // Data is interleaved: [B0, B1, B2, B3, B4, ...] where Lane0=[B0,B4,...], Lane1=[B1,B5,...], etc.
+
+        // Calculate bytes per lane (input must be multiple of 4)
+        const size_t bytes_per_lane = bytes_to_encode / 4;
+        const size_t aligned_bytes = bytes_per_lane * 4;
+        if (bytes_to_encode != aligned_bytes) {
+            // Not aligned to 4-byte boundary - process only aligned portion
+            bytes_to_encode = aligned_bytes;
+        }
+
+        // Validate output buffer size (32 bytes per 4-byte input = 8x expansion * 4 lanes)
+        const size_t required_output = bytes_per_lane * 32;
+        if (output_capacity < required_output) {
+            // Buffer overflow protection - reduce chunk size
+            bytes_written = 0;
+        } else {
+            // Manual quad-lane encoding with interleaved input
+            size_t output_idx = 0;
+            for (size_t i = 0; i < bytes_per_lane; i++) {
+                // Extract bytes from interleaved input
+                const uint8_t lane0_byte = channel->ledSource[i * 4];     // Indices 0, 4, 8, ...
+                const uint8_t lane1_byte = channel->ledSource[i * 4 + 1]; // Indices 1, 5, 9, ...
+                const uint8_t lane2_byte = channel->ledSource[i * 4 + 2]; // Indices 2, 6, 10, ...
+                const uint8_t lane3_byte = channel->ledSource[i * 4 + 3]; // Indices 3, 7, 11, ...
+
+                // Convert all 4 lane bytes to Wave8Byte
+                ::fl::Wave8Byte wave8_lanes[4];
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane0_byte, lut, &wave8_lanes[0]);
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane1_byte, lut, &wave8_lanes[1]);
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane2_byte, lut, &wave8_lanes[2]);
+                ::fl::detail::wave8_convert_byte_to_wave8byte(lane3_byte, lut, &wave8_lanes[3]);
+
+                // Transpose 4 lanes into interleaved format
+                uint8_t transposed[4 * sizeof(::fl::Wave8Byte)]; // 32 bytes
+                ::fl::detail::wave8_transpose_4(wave8_lanes, transposed);
+
+                // Copy transposed data to output buffer
+                ::fl::memcpy(output + output_idx, transposed, sizeof(transposed));
+                output_idx += sizeof(transposed);
+            }
+            bytes_written = output_idx;
+        }
     }
 
-    // Update staging buffer position (convert back to bytes)
-    size_t bytes_written = (bit_offset + 7) / 8;
-    channel->stagingOffset = bytes_written;
+    // Update staging buffer position
+    channel->stagingOffset += bytes_written;
 
     // Update source data position
     channel->ledSource += bytes_to_encode;

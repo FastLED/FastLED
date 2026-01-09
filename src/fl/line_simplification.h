@@ -17,8 +17,8 @@ threshold. The first version is much faster and should be used in most cases.
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/stl/pair.h"
-#include "fl/point.h"
-#include "fl/stl/span.h"
+#include "fl/geometry.h"
+#include "fl/slice.h"
 #include "fl/stl/vector.h"
 
 namespace fl {

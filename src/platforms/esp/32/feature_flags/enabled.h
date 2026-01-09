@@ -31,6 +31,10 @@ FL_EXTERN_C_END
 #endif
 #endif
 
+// SPI wave8 encoding (Stage 6 refactoring)
+// Replaces bit-by-bit encodeLedByte() with fast wave8 lookup tables
+// Note: wave8 encoding is always enabled (FASTLED_SPI_USE_WAVE8 flag removed)
+
 // RMT driver availability - use SoC capability macro
 #define FASTLED_ESP32_HAS_RMT SOC_RMT_SUPPORTED
 
