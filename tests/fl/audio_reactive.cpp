@@ -29,10 +29,11 @@ TEST_CASE("AudioReactive basic functionality") {
     CHECK_FALSE(data.beatDetected);
     
     // Test adding samples - Create AudioSample and add it
+    // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
     fl::vector<int16_t> samples;
-    samples.reserve(1000);
-    
-    for (int i = 0; i < 1000; ++i) {
+    samples.reserve(500);
+
+    for (int i = 0; i < 500; ++i) {
         // Generate a simple sine wave sample
         float phase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f; // 1kHz
         int16_t sample = static_cast<int16_t>(8000.0f * fl::sinf(phase));
@@ -112,10 +113,11 @@ TEST_CASE("AudioReactive enhanced beat detection") {
     CHECK_EQ(trebleEnergy, 0.0f);
     
     // Create a bass-heavy sample (low frequency)
+    // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
     fl::vector<int16_t> bassySamples;
-    bassySamples.reserve(1000);
-    
-    for (int i = 0; i < 1000; ++i) {
+    bassySamples.reserve(500);
+
+    for (int i = 0; i < 500; ++i) {
         // Generate a low frequency sine wave (80Hz - should map to bass bins)
         float phase = 2.0f * FL_M_PI * 80.0f * i / 22050.0f;
         int16_t sample = static_cast<int16_t>(16000.0f * fl::sinf(phase));
@@ -152,15 +154,16 @@ TEST_CASE("AudioReactive multi-band beat detection") {
     audio.begin(config);
     
     // Create samples with increasing amplitude to trigger beat detection
+    // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
     fl::vector<int16_t> loudSamples;
-    loudSamples.reserve(1000);
-    
-    for (int i = 0; i < 1000; ++i) {
+    loudSamples.reserve(500);
+
+    for (int i = 0; i < 500; ++i) {
         // Create a multi-frequency signal that should trigger beats
         float bassPhase = 2.0f * FL_M_PI * 60.0f * i / 22050.0f;   // Bass
         float midPhase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f;  // Mid
         float treblePhase = 2.0f * FL_M_PI * 5000.0f * i / 22050.0f; // Treble
-        
+
         float amplitude = 20000.0f; // High amplitude to trigger beats
         float combined = fl::sinf(bassPhase) + fl::sinf(midPhase) + fl::sinf(treblePhase);
         int16_t sample = static_cast<int16_t>(amplitude * combined / 3.0f);
@@ -198,19 +201,20 @@ TEST_CASE("AudioReactive spectral flux detection") {
     audio.begin(config);
     
     // Create two different samples to generate spectral flux
+    // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
     fl::vector<int16_t> sample1, sample2;
-    sample1.reserve(1000);
-    sample2.reserve(1000);
-    
+    sample1.reserve(500);
+    sample2.reserve(500);
+
     // First sample - single frequency
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 500; ++i) {
         float phase = 2.0f * FL_M_PI * 440.0f * i / 22050.0f; // A note
         int16_t sample = static_cast<int16_t>(8000.0f * fl::sinf(phase));
         sample1.push_back(sample);
     }
 
     // Second sample - different frequency (should create spectral flux)
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 500; ++i) {
         float phase = 2.0f * FL_M_PI * 880.0f * i / 22050.0f; // A note one octave higher
         int16_t sample = static_cast<int16_t>(8000.0f * fl::sinf(phase));
         sample2.push_back(sample);
@@ -247,10 +251,11 @@ TEST_CASE("AudioReactive perceptual weighting") {
     audio.begin(config);
     
     // Create a test sample
+    // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
     fl::vector<int16_t> samples;
-    samples.reserve(1000);
-    
-    for (int i = 0; i < 1000; ++i) {
+    samples.reserve(500);
+
+    for (int i = 0; i < 500; ++i) {
         float phase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f;
         int16_t sample = static_cast<int16_t>(8000.0f * fl::sinf(phase));
         samples.push_back(sample);

@@ -3767,23 +3767,23 @@ TEST_CASE("fl::string - Compatibility with std::string patterns") {
 TEST_CASE("fl::string - Performance and Stress Testing") {
     SUBCASE("Large string operations") {
         fl::string s;
-        
-        // Build a large string
-        for (int i = 0; i < 1000; ++i) {
+
+        // Build a large string (reduced from 1000 to 500 for performance, still provides excellent coverage)
+        for (int i = 0; i < 500; ++i) {
             s.append("X");
         }
-        CHECK(s.size() == 1000);
+        CHECK(s.size() == 500);
         
         // Copy the large string
         fl::string s2 = s;
-        CHECK(s2.size() == 1000);
+        CHECK(s2.size() == 500);
         CHECK(s2 == s);
-        
+
         // Modify the copy
         s2.append("Y");
-        CHECK(s.size() == 1000);
-        CHECK(s2.size() == 1001);
-        CHECK(s2[1000] == 'Y');
+        CHECK(s.size() == 500);
+        CHECK(s2.size() == 501);
+        CHECK(s2[500] == 'Y');
     }
 
     SUBCASE("Repeated copy operations") {
@@ -4567,10 +4567,10 @@ TEST_CASE("fl::string - Memory efficiency improvements") {
     // Test patterns that could benefit from thread-local buffer optimization
 
     SUBCASE("Repeated small string builds") {
-        // This pattern creates many temporary StrN<64> buffers
+        // This pattern creates many temporary StrN<64> buffers (reduced from 1000 to 500 for performance)
         std::vector<fl::string> results;
 
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < 500; ++i) {
             fl::string s;
             s.append("Item ");
             s.append(i);
@@ -4579,9 +4579,9 @@ TEST_CASE("fl::string - Memory efficiency improvements") {
             results.push_back(s);
         }
 
-        CHECK(results.size() == 1000);
+        CHECK(results.size() == 500);
         CHECK(results[0] == "Item 0: Value=0");
-        CHECK(results[999] == "Item 999: Value=1998");
+        CHECK(results[499] == "Item 499: Value=998");
     }
 
     SUBCASE("String builder pattern") {

@@ -185,15 +185,15 @@ TEST_CASE("ParlioEngine mock - multiple LEDs transmission") {
     auto& mock = ParlioPeripheralMock::instance();
     CHECK(mock.getTransmitCount() > 0);
 
-    // Poll until transmission completes (async execution)
+    // Poll until transmission completes (async execution) - reduced from 5000 to 200 for performance
     ParlioEngineState state = ParlioEngineState::DRAINING;
-    for (int i = 0; i < 5000 && state != ParlioEngineState::READY; i++) {
+    for (int i = 0; i < 200 && state != ParlioEngineState::READY; i++) {
         state = engine.poll();
         if (state == ParlioEngineState::ERROR) {
             break;
         }
         if (state == ParlioEngineState::DRAINING) {
-            delay(10);
+            delay(1);  // Minimal delay to allow background thread to progress
         }
     }
     CHECK(state == ParlioEngineState::READY);
@@ -237,15 +237,15 @@ TEST_CASE("ParlioEngine mock - two-lane transmission") {
     // mock already declared at top of test
     CHECK(mock.getTransmitCount() > 0);
 
-    // Poll until transmission completes (async execution via stub timer thread)
+    // Poll until transmission completes (async execution via stub timer thread) - reduced from 5000 to 200 for performance
     ParlioEngineState state = ParlioEngineState::DRAINING;
-    for (int i = 0; i < 5000 && state != ParlioEngineState::READY; i++) {
+    for (int i = 0; i < 200 && state != ParlioEngineState::READY; i++) {
         state = engine.poll();
         if (state == ParlioEngineState::ERROR) {
             break;
         }
         if (state == ParlioEngineState::DRAINING) {
-            delay(10);  // Give ISR thread time to progress
+            delay(1);  // Minimal delay to allow background thread to progress
         }
     }
     CHECK(state == ParlioEngineState::READY);
@@ -359,15 +359,15 @@ TEST_CASE("ParlioEngine mock - large buffer streaming") {
     // Verify at least one transmission occurred
     CHECK(mock.getTransmitCount() > 0);
 
-    // Poll until transmission completes
+    // Poll until transmission completes (reduced from 1000 to 200 for performance)
     ParlioEngineState state = ParlioEngineState::DRAINING;
-    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+    for (int i = 0; i < 200 && state != ParlioEngineState::READY; i++) {
         state = engine.poll();
         if (state == ParlioEngineState::ERROR) {
             break;
         }
         if (state == ParlioEngineState::DRAINING) {
-            delay(1);
+            delay(1);  // Minimal delay to allow background thread to progress
         }
     }
     CHECK(state == ParlioEngineState::READY);
@@ -404,15 +404,15 @@ TEST_CASE("ParlioEngine mock - multi-lane streaming") {
     auto& mock = ParlioPeripheralMock::instance();
     CHECK(mock.getTransmitCount() > 0);
 
-    // Poll until transmission completes
+    // Poll until transmission completes (reduced from 1000 to 200 for performance)
     ParlioEngineState state = ParlioEngineState::DRAINING;
-    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+    for (int i = 0; i < 200 && state != ParlioEngineState::READY; i++) {
         state = engine.poll();
         if (state == ParlioEngineState::ERROR) {
             break;
         }
         if (state == ParlioEngineState::DRAINING) {
-            delay(1);
+            delay(1);  // Minimal delay to allow background thread to progress
         }
     }
     CHECK(state == ParlioEngineState::READY);
@@ -450,15 +450,15 @@ TEST_CASE("ParlioEngine mock - state inspection") {
     CHECK(mock.isEnabled());
     CHECK(mock.getTransmitCount() > 0);
 
-    // Poll until transmission completes
+    // Poll until transmission completes (reduced from 1000 to 200 for performance)
     ParlioEngineState state = ParlioEngineState::DRAINING;
-    for (int i = 0; i < 1000 && state != ParlioEngineState::READY; i++) {
+    for (int i = 0; i < 200 && state != ParlioEngineState::READY; i++) {
         state = engine.poll();
         if (state == ParlioEngineState::ERROR) {
             break;
         }
         if (state == ParlioEngineState::DRAINING) {
-            delay(1);
+            delay(1);  // Minimal delay to allow background thread to progress
         }
     }
     CHECK(state == ParlioEngineState::READY);
@@ -624,6 +624,9 @@ TEST_CASE("parlio_mock_untransposition") {
     size_t bit_count = 16 * 8;  // 16 bytes * 8 bits/byte = 128 bits
     REQUIRE(mock.transmit(transposed_output, bit_count, 0));
 
+    // Wait for background thread to complete transmission
+    delay(5);
+
     // Get per-pin data using the convenience function (use actual GPIO pin numbers)
     fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
     fl::span<const uint8_t> pin2_data = mock.getTransmissionDataForPin(2);
@@ -673,6 +676,9 @@ TEST_CASE("parlio_mock_untransposition_complex_pattern") {
     // Transmit
     size_t bit_count = 16 * 8;  // 128 bits
     REQUIRE(mock.transmit(transposed_output, bit_count, 0));
+
+    // Wait for background thread to complete transmission
+    delay(5);
 
     // Get per-pin data using the convenience function (use actual GPIO pin numbers)
     fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
@@ -799,6 +805,9 @@ TEST_CASE("parlio_mock_lsb_packing") {
 
     REQUIRE(mock.transmit(test_data, bit_count, 0));
 
+    // Wait for background thread to complete transmission
+    delay(5);
+
     // Verify the packing mode was correctly set
     REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_LSB);
 
@@ -826,6 +835,9 @@ TEST_CASE("parlio_mock_msb_packing") {
     size_t bit_count = 2 * 8;  // 16 bits
 
     REQUIRE(mock.transmit(test_data, bit_count, 0));
+
+    // Wait for background thread to complete transmission
+    delay(5);
 
     // Verify the packing mode was correctly set
     REQUIRE(mock.getConfig().packing == fl::detail::ParlioBitPackOrder::FL_PARLIO_MSB);

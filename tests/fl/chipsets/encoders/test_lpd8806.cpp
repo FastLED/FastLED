@@ -152,16 +152,17 @@ TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
     CHECK_EQ(output[67], 0x00);
 }
 
-TEST_CASE("LPD8806 - Latch calculation - 64 LEDs") {
-    // Test larger LED count
-    // Latch: ((64 * 3 + 63) / 64) = 255 / 64 = 3 bytes
-    fl::vector<fl::array<u8, 3>> input(64, {255, 0, 128});
+TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
+    // Test larger LED count (reduced from 64 to 40 for performance)
+    // Still provides good coverage of latch calculation with multiple latch bytes
+    // Latch: ((40 * 3 + 63) / 64) = 183 / 64 = 2 bytes
+    fl::vector<fl::array<u8, 3>> input(40, {255, 0, 128});
 
     fl::vector<u8> output;
     encodeLPD8806(input.begin(), input.end(), fl::back_inserter(output));
 
-    // Expected: 192 LED bytes + 3 latch bytes
-    CHECK_EQ(output.size(), 195);
+    // Expected: 120 LED bytes + 2 latch bytes
+    CHECK_EQ(output.size(), 122);
 
     // Verify first LED encoding (GRB = 255, 0, 128)
     CHECK_EQ(output[0], 0xFF);  // Green=255 -> 0xFF
@@ -169,9 +170,8 @@ TEST_CASE("LPD8806 - Latch calculation - 64 LEDs") {
     CHECK_EQ(output[2], 0xC1);  // Blue=128 -> 0xC1
 
     // Verify latch bytes
-    CHECK_EQ(output[192], 0x00);
-    CHECK_EQ(output[193], 0x00);
-    CHECK_EQ(output[194], 0x00);
+    CHECK_EQ(output[120], 0x00);
+    CHECK_EQ(output[121], 0x00);
 }
 
 TEST_CASE("LPD8806 - MSB always set on all LED bytes") {

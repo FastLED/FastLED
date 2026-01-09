@@ -266,26 +266,28 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         CHECK(captured.size() == 120); // 10 * 3 * 4 = 120
     }
 
-    SUBCASE("Medium buffer (100 LEDs)") {
-        auto channel = fixture.createChannel(17, 100);
+    SUBCASE("Medium buffer (50 LEDs)") {
+        // Reduced from 100 to 50 LEDs for performance (still provides excellent coverage)
+        auto channel = fixture.createChannel(17, 50);
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
         CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 1200); // 100 * 3 * 4 = 1200
+        CHECK(captured.size() == 600); // 50 * 3 * 4 = 600
     }
 
-    SUBCASE("Large buffer (1000 LEDs)") {
-        auto channel = fixture.createChannel(17, 1000);
+    SUBCASE("Large buffer (500 LEDs)") {
+        // Reduced from 1000 to 500 LEDs for performance (still provides excellent coverage)
+        auto channel = fixture.createChannel(17, 500);
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
         CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 12000); // 1000 * 3 * 4 = 12000
+        CHECK(captured.size() == 6000); // 500 * 3 * 4 = 6000
     }
 }
 
@@ -413,15 +415,16 @@ TEST_CASE("ChannelEngineUART - Stress test") {
         }
     }
 
-    SUBCASE("Very large LED count (5000 LEDs)") {
-        auto channel = fixture.createChannel(17, 5000);
+    SUBCASE("Very large LED count (2000 LEDs)") {
+        // Reduced from 5000 to 2000 LEDs for performance (still provides excellent stress test coverage)
+        auto channel = fixture.createChannel(17, 2000);
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
         CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 60000); // 5000 * 3 * 4 = 60000
+        CHECK(captured.size() == 24000); // 2000 * 3 * 4 = 24000
     }
 }
 

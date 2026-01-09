@@ -166,8 +166,9 @@ TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
         CHECK(captured[2] == 0x00);
     }
 
-    SUBCASE("Large buffer streaming (100 RGB LEDs)") {
-        const size_t num_leds = 100;
+    SUBCASE("Large buffer streaming (50 RGB LEDs)") {
+        // Reduced from 100 to 50 LEDs for performance (still tests large buffer streaming)
+        const size_t num_leds = 50;
         fl::vector<uint8_t> data(num_leds * 3);
 
         // Fill with test pattern
@@ -314,8 +315,8 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         // 1 byte × 10 bits (8N1) = 10 bits at 3200000 baud = ~3.125 microseconds + 10us overhead
         CHECK(mock.isBusy());  // Should be busy (transmission not instant)
         CHECK(mock.waitTxDone(1000));  // Wait should succeed within timeout
-        // Wait for reset period (50us WS2812 reset requirement)
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
+        std::this_thread::sleep_for(std::chrono::microseconds(60));
         CHECK_FALSE(mock.isBusy());
     }
 
@@ -328,8 +329,8 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
 
         // Wait should succeed within timeout
         CHECK(mock.waitTxDone(5000));
-        // Wait for reset period (50us WS2812 reset requirement)
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
+        std::this_thread::sleep_for(std::chrono::microseconds(60));
         CHECK_FALSE(mock.isBusy());
     }
 

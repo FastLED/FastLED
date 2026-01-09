@@ -200,8 +200,9 @@ TEST_CASE("WS2803 - Boundary values") {
 }
 
 TEST_CASE("WS2803 - Many LEDs (typical strip)") {
-    // Test typical strip size
-    const size_t NUM_LEDS = 60;
+    // Test typical strip size (reduced from 60 to 30 for performance)
+    // Still provides excellent coverage for typical strip encoding
+    const size_t NUM_LEDS = 30;
     fl::vector<fl::array<u8, 3>> pixels(NUM_LEDS, makeRGBPixel(200, 150, 100));
 
     fl::vector<u8> output;

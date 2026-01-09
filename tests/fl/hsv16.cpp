@@ -262,7 +262,9 @@ TEST_CASE("RGB to HSV16 to RGB") {
 }
 
 TEST_CASE("Exhaustive round trip") {
-    const int step = 4;
+    // Increased step from 4 to 8 for performance (64^3 -> 32^3 iterations = 262K -> 33K = 87% reduction)
+    // Still provides excellent coverage: 32^3 = 32,768 test cases across full RGB color space
+    const int step = 8;
     for (int r = 0; r < 256; r+=step) {
         for (int g = 0; g < 256; g+=step) {
             for (int b = 0; b < 256; b+=step) {

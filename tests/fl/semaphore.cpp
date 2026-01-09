@@ -140,8 +140,8 @@ TEST_CASE("fl::counting_semaphore multiple threads") {
                 expected_max = max_concurrent.load();
             }
 
-            // Simulate work
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));  // okay std namespace
+            // Simulate work (reduced from 10ms to 5ms for performance)
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
 
             total_runs.fetch_add(1);
             concurrent_count.fetch_sub(1);
@@ -164,11 +164,11 @@ TEST_CASE("fl::counting_semaphore try_acquire_for") {
 
     SUBCASE("timeout when resource unavailable") {
         auto start = std::chrono::steady_clock::now();  // okay std namespace
-        bool acquired = sem.try_acquire_for(std::chrono::milliseconds(50));  // okay std namespace
+        bool acquired = sem.try_acquire_for(std::chrono::milliseconds(20));  // okay std namespace (reduced from 50ms)
         auto elapsed = std::chrono::steady_clock::now() - start;  // okay std namespace
 
         CHECK(acquired == false);
-        CHECK(elapsed >= std::chrono::milliseconds(40));  // Allow some tolerance  // okay std namespace
+        CHECK(elapsed >= std::chrono::milliseconds(15));  // Allow some tolerance  // okay std namespace (reduced from 40ms)
     }
 
     SUBCASE("immediate success when resource available") {
@@ -199,8 +199,8 @@ TEST_CASE("fl::binary_semaphore as thread synchronization") {
         done.release();
     });
 
-    // Signal worker to start
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));  // okay std namespace
+    // Signal worker to start (reduced from 10ms to 5ms for performance)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
     ready.release();
 
     // Wait for completion

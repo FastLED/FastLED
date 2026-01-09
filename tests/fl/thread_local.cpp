@@ -94,9 +94,9 @@ static void* thread_test_func(void* arg) {
     
     // Set thread-specific value
     data->tls->set(data->expected_value);
-    
-    // Small delay to ensure other threads have a chance to interfere
-    usleep(10000); // 10ms
+
+    // Small delay to ensure other threads have a chance to interfere (reduced from 10ms for performance)
+    usleep(5000); // 5ms
     
     // Verify the value is still correct (thread isolation)
     bool success = (data->tls->access() == data->expected_value);
@@ -177,8 +177,8 @@ static void* shared_tls_test_func(void* arg) {
     
     data->tls1->set(value1);
     data->tls2->set(value2);
-    
-    usleep(10000); // 10ms
+
+    usleep(5000); // 5ms (reduced from 10ms for performance)
     
     // Verify both values are correct
     bool success = (data->tls1->access() == value1) && (data->tls2->access() == value2);

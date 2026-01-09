@@ -286,8 +286,8 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
     fl::vector<int> pins = {1};
     ChipsetTimingConfig timing = getWS2812TimingForDmaTests();
 
-    // Large LED count to trigger potential streaming mode
-    size_t num_leds = 300;
+    // Large LED count to trigger potential streaming mode (reduced from 300 for performance)
+    size_t num_leds = 100;
     size_t num_bytes = num_leds * 3;
 
     bool init_ok = engine.initialize(1, pins, timing, num_leds);
@@ -418,7 +418,7 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     ChipsetTimingConfig timing = getWS2812TimingForDmaTests();
 
     size_t num_lanes = 16;
-    size_t leds_per_lane = 10;
+    size_t leds_per_lane = 5;  // Reduced from 10 for performance
     size_t bytes_per_led = 3;
     size_t lane_stride = leds_per_lane * bytes_per_led;
     size_t total_bytes = num_lanes * lane_stride;

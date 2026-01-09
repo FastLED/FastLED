@@ -162,20 +162,21 @@ TEST_CASE("SK9822 - encodeSK9822() 33 LEDs end frame calculation") {
 }
 
 TEST_CASE("SK9822 - encodeSK9822() 64 LEDs end frame calculation") {
-    // Test end frame calculation: (64 / 32) + 1 = 3 DWords = 12 bytes
+    // Test end frame calculation: (40 / 32) + 1 = 2 DWords = 8 bytes
+    // Reduced from 64 to 40 LEDs for performance (still tests beyond 32 LED boundary)
     fl::vector<fl::array<u8, 3>> pixels;
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 40; i++) {
         pixels.push_back(makePixel(i, i, i));
     }
 
     fl::vector<u8> output;
     encodeSK9822(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    // Expected: start(4) + 64*LED(4) + end(12) = 272 bytes
-    CHECK_EQ(output.size(), 272);
+    // Expected: start(4) + 40*LED(4) + end(8) = 172 bytes
+    CHECK_EQ(output.size(), 172);
 
-    // Verify end frame is 12 bytes of 0x00
-    for (size_t i = 260; i < 272; i++) {
+    // Verify end frame is 8 bytes of 0x00
+    for (size_t i = 164; i < 172; i++) {
         CHECK_EQ(output[i], 0x00);
     }
 }

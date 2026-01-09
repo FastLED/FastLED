@@ -63,8 +63,8 @@ TEST_CASE("fl::condition_variable basic operations") {
             }));
         }
 
-        // Give threads time to start waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));  // okay std namespace
+        // Give threads time to start waiting (reduced from 10ms to 5ms for performance)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
 
         // Wake all threads
         {
@@ -89,7 +89,7 @@ TEST_CASE("fl::condition_variable with predicate") {
 
     std::thread producer([&]() {  // okay std namespace - fl::thread not available
         for (int i = 1; i <= 5; ++i) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));  // okay std namespace
+            // Removed sleep to reduce test time - producer/consumer synchronization still tested
             {
                 fl::unique_lock<fl::mutex> lock(mtx);
                 value.store(i);

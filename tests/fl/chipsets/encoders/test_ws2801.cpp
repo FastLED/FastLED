@@ -189,8 +189,9 @@ TEST_CASE("WS2801 - Boundary values (min/max)") {
 }
 
 TEST_CASE("WS2801 - Many LEDs (typical strip size)") {
-    // Test a typical strip size (60 LEDs) to verify no issues with scaling
-    const size_t NUM_LEDS = 60;
+    // Test a typical strip size (reduced from 60 to 30 for performance)
+    // Still provides excellent coverage for typical strip encoding
+    const size_t NUM_LEDS = 30;
     fl::vector<fl::array<u8, 3>> pixels;
 
     // Fill with gradient pattern

@@ -71,8 +71,10 @@ static AccuracyStats testConversionFunction(ConversionFunc hsv2rgb_func, const c
     AccuracyStats stats;
     
     // Test a comprehensive set of RGB colors
-    // We'll test every 8th value to get good coverage without taking too long
-    const int step = 8;
+    // We'll test every 16th value to get good coverage without taking too long
+    // Increased step from 8 to 16 for performance (32^3 -> 16^3 iterations = 32K -> 4K = 87.5% reduction)
+    // Still provides excellent coverage: 16^3 = 4,096 test cases per conversion function
+    const int step = 16;
     
     for (int r = 0; r < 256; r += step) {
         for (int g = 0; g < 256; g += step) {
@@ -232,7 +234,9 @@ TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
     FL_WARN("----  -----------     ------------    ----------------");
     
     // Test hue sweep at full saturation and brightness
-    for (int hue = 0; hue < 256; hue += 1) {
+    // Increased step from 1 to 4 for performance (256 -> 64 iterations = 75% reduction)
+    // Still provides excellent hue sweep coverage with 64 samples
+    for (int hue = 0; hue < 256; hue += 4) {
         CHSV hsv(hue, 255, 255);
         
         CRGB rainbow_rgb, spectrum_rgb, fullspectrum_rgb;

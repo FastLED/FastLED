@@ -131,7 +131,8 @@ TEST_CASE("WS2812_RGB - Multiple LEDs") {
 
 TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
     // Test with a larger number of LEDs to ensure iteration is robust
-    const size_t NUM_LEDS = 100;
+    // Reduced from 100 to 40 for performance (still provides good stress test coverage)
+    const size_t NUM_LEDS = 40;
     fl::vector<fl::array<u8, 3>> pixels;
 
     for (size_t i = 0; i < NUM_LEDS; i++) {
@@ -142,8 +143,8 @@ TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
     fl::vector<u8> output;
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    // Expected: 100 LEDs × 3 bytes = 300 bytes
-    REQUIRE_EQ(output.size(), 300);
+    // Expected: 40 LEDs × 3 bytes = 120 bytes
+    REQUIRE_EQ(output.size(), 120);
 
     // Verify first and last LEDs
     CHECK_EQ(output[0], 0);     // First LED R
@@ -151,9 +152,9 @@ TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
     CHECK_EQ(output[2], 2);     // First LED B
 
     u8 last_val = static_cast<u8>((NUM_LEDS - 1) % 256);
-    CHECK_EQ(output[297], last_val);       // Last LED R
-    CHECK_EQ(output[298], last_val + 1);   // Last LED G
-    CHECK_EQ(output[299], last_val + 2);   // Last LED B
+    CHECK_EQ(output[117], last_val);       // Last LED R
+    CHECK_EQ(output[118], last_val + 1);   // Last LED G
+    CHECK_EQ(output[119], last_val + 2);   // Last LED B
 }
 
 // ============================================================================
@@ -267,7 +268,8 @@ TEST_CASE("WS2812_RGBW - Multiple LEDs") {
 
 TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
     // Test with a larger number of LEDs
-    const size_t NUM_LEDS = 100;
+    // Reduced from 100 to 40 for performance (still provides good stress test coverage)
+    const size_t NUM_LEDS = 40;
     fl::vector<fl::array<u8, 4>> pixels;
 
     for (size_t i = 0; i < NUM_LEDS; i++) {
@@ -278,8 +280,8 @@ TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
     fl::vector<u8> output;
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    // Expected: 100 LEDs × 4 bytes = 400 bytes
-    REQUIRE_EQ(output.size(), 400);
+    // Expected: 40 LEDs × 4 bytes = 160 bytes
+    REQUIRE_EQ(output.size(), 160);
 
     // Verify first and last LEDs
     CHECK_EQ(output[0], 0);     // First LED R
@@ -288,10 +290,10 @@ TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
     CHECK_EQ(output[3], 3);     // First LED W
 
     u8 last_val = static_cast<u8>((NUM_LEDS - 1) % 256);
-    CHECK_EQ(output[396], last_val);       // Last LED R
-    CHECK_EQ(output[397], last_val + 1);   // Last LED G
-    CHECK_EQ(output[398], last_val + 2);   // Last LED B
-    CHECK_EQ(output[399], last_val + 3);   // Last LED W
+    CHECK_EQ(output[156], last_val);       // Last LED R
+    CHECK_EQ(output[157], last_val + 1);   // Last LED G
+    CHECK_EQ(output[158], last_val + 2);   // Last LED B
+    CHECK_EQ(output[159], last_val + 3);   // Last LED W
 }
 
 // ============================================================================

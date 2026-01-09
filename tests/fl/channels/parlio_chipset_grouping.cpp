@@ -47,9 +47,9 @@ static void resetMock_chipset_grouping() {
     mock.setTransmitFailure(false);
     mock.setTransmitDelay(0);
 
-    // Wait for any previous transmission to complete
+    // Wait for any previous transmission to complete (reduced from 1000 to 200 for performance)
     auto& engine = ParlioEngine::getInstance();
-    size_t max_polls = 1000;
+    size_t max_polls = 200;
     for (size_t i = 0; i < max_polls; i++) {
         ParlioEngineState state = engine.poll();
         if (state == ParlioEngineState::READY || state == ParlioEngineState::ERROR) {
@@ -212,8 +212,8 @@ TEST_CASE("ParlioEngine - document current single-timing constraint") {
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, lane_stride);
     REQUIRE(tx_ok);
 
-    // Poll until complete
-    size_t max_polls = 1000;
+    // Poll until complete (reduced from 1000 to 200 for performance)
+    size_t max_polls = 200;
     ParlioEngineState final_state = ParlioEngineState::ERROR;
 
     for (size_t i = 0; i < max_polls; i++) {

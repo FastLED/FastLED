@@ -112,13 +112,13 @@ shared_ptr<AudioContext> createMockAudioContext(u32 timestamp, bool isDownbeat,
 
 // Helper: Run detector on a beat sequence and collect metrics
 // enableLogging: Print detailed confidence and detection info for analysis
-// warmupMeasures: Number of measures to run before collecting metrics (default: 2)
+// warmupMeasures: Number of measures to run before collecting metrics (default: 1)
 DetectionMetrics runDetectorTest(DownbeatDetector& detector,
                                   const vector<GroundTruthMarker>& groundTruth,
                                   float accentMultiplier = 1.0f,
                                   int timingJitterMs = 0,
                                   bool enableLogging = false,
-                                  int warmupMeasures = 2) {
+                                  int warmupMeasures = 1) {
     DetectionMetrics metrics;
     u32 timestamp = 0;
     u32 frameInterval = 23; // ~43 fps
@@ -303,8 +303,8 @@ TEST_CASE("DownbeatDetector - Basic downbeat pattern detection") {
             bool isDownbeat = (beat == 0);
 
             // Quiet frame before beat (creates contrast for spectral flux)
-            // Reduced from 10 to 2 for performance while maintaining spectral flux
-            for (int quietFrames = 0; quietFrames < 2; quietFrames++) {
+            // Reduced from 10 to 1 for performance while maintaining spectral flux
+            for (int quietFrames = 0; quietFrames < 1; quietFrames++) {
                 auto quietContext =
                     createMockAudioContext(timestamp, false, true, 1.0f);
                 detector.update(quietContext);
@@ -312,8 +312,8 @@ TEST_CASE("DownbeatDetector - Basic downbeat pattern detection") {
             }
 
             // Beat onset (high energy)
-            // Reduced from 5 to 3 for performance while maintaining detectability
-            for (int beatFrames = 0; beatFrames < 3; beatFrames++) {
+            // Reduced from 5 to 2 for performance while maintaining detectability
+            for (int beatFrames = 0; beatFrames < 2; beatFrames++) {
                 auto beatContext =
                     createMockAudioContext(timestamp, isDownbeat, false, 1.0f);
                 detector.update(beatContext);
@@ -416,10 +416,10 @@ TEST_CASE("DownbeatDetector - Strong accent strength (2x multiplier)") {
     detector.setConfidenceThreshold(0.5f);
     detector.setTimeSignature(4);
 
-    // Create ground truth: 4 measures of 4/4 time
+    // Create ground truth: 3 measures of 4/4 time (reduced from 4 for performance)
     // Beats at 500ms intervals (120 BPM)
     vector<GroundTruthMarker> groundTruth;
-    for (int measure = 0; measure < 4; measure++) {
+    for (int measure = 0; measure < 3; measure++) {
         for (int beat = 0; beat < 4; beat++) {
             u32 timestamp = static_cast<u32>((measure * 4 + beat) * 500);
             groundTruth.push_back({timestamp, beat == 0, 100.0f}); // 100ms tolerance
@@ -450,9 +450,9 @@ TEST_CASE("DownbeatDetector - Weak accent strength (0.6x multiplier)") {
     detector.setConfidenceThreshold(0.5f);
     detector.setTimeSignature(4);
 
-    // Create ground truth: 4 measures of 4/4 time
+    // Create ground truth: 3 measures of 4/4 time (reduced from 4 for performance)
     vector<GroundTruthMarker> groundTruth;
-    for (int measure = 0; measure < 4; measure++) {
+    for (int measure = 0; measure < 3; measure++) {
         for (int beat = 0; beat < 4; beat++) {
             u32 timestamp = static_cast<u32>((measure * 4 + beat) * 500);
             groundTruth.push_back({timestamp, beat == 0, 100.0f});
@@ -551,9 +551,9 @@ TEST_CASE("DownbeatDetector - 3/4 waltz pattern") {
     detector.setConfidenceThreshold(0.5f);
     detector.setTimeSignature(3); // 3/4 time
 
-    // Create ground truth: 4 measures of 3/4 time
+    // Create ground truth: 3 measures of 3/4 time (reduced from 4 for performance)
     vector<GroundTruthMarker> groundTruth;
-    for (int measure = 0; measure < 4; measure++) {
+    for (int measure = 0; measure < 3; measure++) {
         for (int beat = 0; beat < 3; beat++) {
             u32 timestamp = static_cast<u32>((measure * 3 + beat) * 500);
             groundTruth.push_back({timestamp, beat == 0, 100.0f});

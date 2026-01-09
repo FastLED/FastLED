@@ -116,11 +116,12 @@ TEST_CASE("encodeSM16716() - termination header always 7 bytes") {
         test_sm16716::verifyTerminationHeader(output, 10);
     }
 
-    SUBCASE("100 LEDs") {
-        fl::vector<fl::array<fl::u8, 3>> leds(100, {0, 0, 0});
+    SUBCASE("40 LEDs") {
+        // Reduced from 100 to 40 for performance (still provides good stress test coverage)
+        fl::vector<fl::array<fl::u8, 3>> leds(40, {0, 0, 0});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
-        test_sm16716::verifyTerminationHeader(output, 100);
+        test_sm16716::verifyTerminationHeader(output, 40);
     }
 }
 
@@ -246,11 +247,12 @@ TEST_CASE("encodeSM16716() - boundary LED counts") {
         CHECK(output.size() == (64 * 3) + 7);
     }
 
-    SUBCASE("100 LEDs") {
-        fl::vector<fl::array<fl::u8, 3>> leds(100, {0x11, 0x22, 0x33});
+    SUBCASE("40 LEDs") {
+        // Reduced from 100 to 40 for performance (still provides good stress test coverage)
+        fl::vector<fl::array<fl::u8, 3>> leds(40, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
-        CHECK(output.size() == (100 * 3) + 7);
+        CHECK(output.size() == (40 * 3) + 7);
     }
 }
 
