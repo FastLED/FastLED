@@ -7,6 +7,7 @@
 // code structure and documentation rather than runtime behavior.
 // Actual hardware/QEMU testing is done separately.
 
+#include "doctest.h"
 
 // Simplified test that works on host platform
 TEST_CASE("riscv_interrupts_documentation_exists") {
