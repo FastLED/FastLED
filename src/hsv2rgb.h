@@ -56,10 +56,8 @@
 
 /// @{
 
-//struct CRGB;  // CRGB is now a typedef in crgb.h, not a struct
-using CRGB = fl::CRGB;  // Bring the typedef into this namespace for consistency
-
-
+// CRGB and CHSV types are expected to be defined by including files
+// (typically through crgb.h and chsv.h)
 
 /// @copybrief hsv2rgb_rainbow(const CHSV&, CRGB&)
 /// @see hsv2rgb_rainbow(const CHSV&, CRGB&)

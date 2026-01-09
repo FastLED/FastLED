@@ -68,7 +68,7 @@ template <typename Iterator> void pop_heap(Iterator first, Iterator last) {
 }
 
 template <typename T, typename Compare = fl::less<T>,
-          typename VectorT = fl::HeapVector<T>>
+          typename VectorT = HeapVector<T>>
 class PriorityQueue {
   public:
     using value_type = T;

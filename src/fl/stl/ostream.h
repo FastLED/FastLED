@@ -2,7 +2,6 @@
 
 #include "fl/int.h"
 #include "fl/stl/type_traits.h"
-#include "__new/placement_new_delete.h"
 #include "fl/rgb8.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"

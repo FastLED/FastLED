@@ -6,8 +6,6 @@
 
 #include "fl/rgb8.h"
 #include "chsv.h"
-#include "hsv2rgb.h"
-
 
 // Whether to allow HD_COLOR_MIXING
 #ifndef FASTLED_HD_COLOR_MIXING
@@ -24,6 +22,10 @@
 // TODO: AI should scan the database and only use fl::CRGB exclusitively.
 // ::CRGB is a global space version from the frontier age of the embedded revolution.
 using CRGB = fl::CRGB;
+
+// Include hsv2rgb.h AFTER the CRGB and CHSV typedefs are established
+// This is necessary because hsv2rgb.h uses these types in function declarations
+#include "hsv2rgb.h"
 
 
 

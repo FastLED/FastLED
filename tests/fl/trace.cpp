@@ -3,6 +3,7 @@
 
 #include "fl/trace.h"
 #include "doctest.h"
+#include "fl/log.h"
 #include "fl/stl/strstream.h"
 #include "platforms/shared/int_windows.h"
 

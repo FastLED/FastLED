@@ -130,7 +130,7 @@ class FL_ALIGN HeapVector {
 
     // Implicit copy constructor from span
     // Note: dynamic_extent is defined as fl::size(-1) in fl/slice.h
-    HeapVector(fl::span<const T, fl::size(-1)> s) {
+    HeapVector(span<const T, fl::size(-1)> s) {
         reserve(s.size());
         assign(s.begin(), s.end());
     }
