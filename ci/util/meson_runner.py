@@ -4,10 +4,12 @@
 import hashlib
 import json
 import os
+import queue
 import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -17,6 +19,7 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.util.build_lock import libfastled_build_lock
+from ci.util.color_output import print_blue, print_green, print_red, print_yellow
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -30,6 +33,51 @@ class MesonTestResult:
     num_tests_run: int = 0  # Number of tests executed
     num_tests_passed: int = 0  # Number of tests that passed
     num_tests_failed: int = 0  # Number of tests that failed
+
+
+def _get_color_timestamp() -> str:
+    """Get formatted timestamp for colored output using global timestamp."""
+    # Import here to avoid circular dependency
+    from ci.util.timestamp_print import _GLOBAL_START_TIME
+
+    if _GLOBAL_START_TIME is None:
+        # This shouldn't happen as ts_print is called early, but handle it gracefully
+        return "0.00"
+    elapsed = time.time() - _GLOBAL_START_TIME
+    return f"{elapsed:.2f}"
+
+
+# Colored output helpers with timestamps
+def _print_success(msg: str) -> None:
+    """Print success message in green with timestamp."""
+    ts = _get_color_timestamp()
+    print_green(f"{ts} {msg}")
+
+
+def _print_error(msg: str) -> None:
+    """Print error message in red with timestamp."""
+    ts = _get_color_timestamp()
+    print_red(f"{ts} {msg}")
+
+
+def _print_warning(msg: str) -> None:
+    """Print warning message in yellow with timestamp."""
+    ts = _get_color_timestamp()
+    print_yellow(f"{ts} {msg}")
+
+
+def _print_info(msg: str) -> None:
+    """Print info message in blue with timestamp."""
+    ts = _get_color_timestamp()
+    print_blue(f"{ts} {msg}")
+
+
+def _print_banner(title: str, width: int = 70) -> None:
+    """Print a section banner for visual separation."""
+    border = "=" * width
+    _ts_print(f"\n{border}")
+    _ts_print(f"  {title}")
+    _ts_print(f"{border}\n")
 
 
 def check_meson_installed() -> bool:
@@ -649,11 +697,32 @@ def setup_meson_build(
                 added: set[str] = set(current_test_files) - set(cached_test_files)  # type: ignore[misc]
                 removed: set[str] = set(cached_test_files) - set(current_test_files)  # type: ignore[misc]
 
-                _ts_print("[MESON] ⚠️  Detected test file changes:")
+                _print_warning("[MESON] ⚠️  Detected test file changes:")
                 if added:
-                    _ts_print(f"[MESON]     Added: {', '.join(sorted(added))}")  # type: ignore[misc]
+                    added_list = sorted(added)  # type: ignore[misc]
+                    if len(added_list) > 10:
+                        # Summarize long lists
+                        _print_warning(
+                            f"[MESON]     Added: {len(added_list)} test files"
+                        )
+                        _print_warning(
+                            f"[MESON]     (First 10: {', '.join(added_list[:10])}...)"
+                        )
+                    else:
+                        _print_warning(f"[MESON]     Added: {', '.join(added_list)}")
                 if removed:
-                    _ts_print(f"[MESON]     Removed: {', '.join(sorted(removed))}")  # type: ignore[misc]
+                    removed_list = sorted(removed)  # type: ignore[misc]
+                    if len(removed_list) > 10:
+                        _print_warning(
+                            f"[MESON]     Removed: {len(removed_list)} test files"
+                        )
+                        _print_warning(
+                            f"[MESON]     (First 10: {', '.join(removed_list[:10])}...)"
+                        )
+                    else:
+                        _print_warning(
+                            f"[MESON]     Removed: {', '.join(removed_list)}"
+                        )
 
                 test_files_changed = True
 
@@ -1356,8 +1425,9 @@ def run_meson_test(
 
         # Parse output in real-time to show test progress
         # Pattern matches: "1/143 test_name       OK     0.12s"
+        # Note: TimestampFormatter adds "XX.XX " prefix, so we need to skip it
         test_pattern = re.compile(
-            r"^\s*(\d+)/(\d+)\s+(\S+)\s+(OK|FAIL|SKIP|TIMEOUT)\s+([\d.]+)s"
+            r"^[\d.]+\s+(\d+)/(\d+)\s+(\S+)\s+(OK|FAIL|SKIP|TIMEOUT)\s+([\d.]+)s"
         )
 
         if verbose:
@@ -1378,18 +1448,18 @@ def run_meson_test(
                         num_run = current
                         if status == "OK":
                             num_passed += 1
-                            # Show brief progress for passed tests
-                            _ts_print(
+                            # Show brief progress for passed tests in green
+                            _print_success(
                                 f"  [{current}/{total}] ✓ {test_name_match} ({duration_str}s)"
                             )
                         elif status == "FAIL":
                             num_failed += 1
-                            _ts_print(
+                            _print_error(
                                 f"  [{current}/{total}] ✗ {test_name_match} FAILED ({duration_str}s)"
                             )
                         elif status == "TIMEOUT":
                             num_failed += 1
-                            _ts_print(
+                            _print_error(
                                 f"  [{current}/{total}] ⏱ {test_name_match} TIMEOUT ({duration_str}s)"
                             )
                     elif verbose or "FAILED" in line or "ERROR" in line:
@@ -1413,9 +1483,7 @@ def run_meson_test(
         duration = time.time() - start_time
 
         if returncode != 0:
-            _ts_print(
-                f"[MESON] Tests failed with return code {returncode}", file=sys.stderr
-            )
+            _print_error(f"[MESON] ❌ Tests failed with return code {returncode}")
             return MesonTestResult(
                 success=False,
                 duration=duration,
@@ -1424,8 +1492,8 @@ def run_meson_test(
                 num_tests_failed=num_failed,
             )
 
-        _ts_print(
-            f"[MESON] All tests passed ({num_passed}/{num_run} tests in {duration:.2f}s)"
+        _print_success(
+            f"[MESON] ✅ All tests passed ({num_passed}/{num_run} tests in {duration:.2f}s)"
         )
         return MesonTestResult(
             success=True,
@@ -1646,64 +1714,179 @@ def run_meson_build_and_test(
                 if exe_name not in [meson_test_name, fallback_test_name]:
                     fuzzy_candidates.append(exe_name)
 
-    # Compile with build lock to prevent conflicts with example builds
+    # Compile and test with build lock to prevent conflicts with example builds
+    # STREAMING MODE: When no specific test requested, use stream_compile_and_run_tests()
+    # for parallel compilation + execution
+    use_streaming = not unity and not meson_test_name
+
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
-            # In unity mode, always build all_tests target (no individual test targets exist)
-            compile_target: Optional[str] = None
-            if unity:
-                compile_target = "all_tests"
-            elif meson_test_name:
-                compile_target = meson_test_name
-
-            compilation_success = compile_meson(
-                build_dir, target=compile_target, check=check
-            )
-
-            # If compilation failed and we have a fallback name, try the fallback
-            if not compilation_success and fallback_test_name and not unity:
+            if use_streaming:
+                # STREAMING EXECUTION PATH
+                # Compile and run tests in parallel - as soon as a test finishes linking,
+                # it's immediately executed while other tests continue compiling
                 _ts_print(
-                    f"[MESON] Target '{compile_target}' not found, trying fallback: '{fallback_test_name}'"
-                )
-                compile_target = fallback_test_name
-                meson_test_name = fallback_test_name
-                compilation_success = compile_meson(
-                    build_dir, target=compile_target, check=check
+                    "[MESON] Using streaming execution (compile + test in parallel)"
                 )
 
-            # If still failed, try fuzzy matching candidates
-            # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
-            if not compilation_success and test_name and not unity:
-                if not fuzzy_candidates:
-                    # Query meson for fuzzy match candidates
-                    fuzzy_candidates = get_fuzzy_test_candidates(build_dir, test_name)
-                    # Remove primary and fallback names from candidates
-                    fuzzy_candidates = [
-                        c
-                        for c in fuzzy_candidates
-                        if c not in [meson_test_name, fallback_test_name]
-                    ]
-
-                if fuzzy_candidates:
-                    for candidate in fuzzy_candidates:
-                        _ts_print(
-                            f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
+                # Create test callback for streaming execution
+                def test_callback(test_path: Path) -> bool:
+                    """Run a single test executable and return success status"""
+                    try:
+                        proc = RunningProcess(
+                            [str(test_path)],
+                            cwd=source_dir,  # Run from project root
+                            timeout=600,  # 10 minute timeout per test
+                            auto_run=True,
+                            check=False,
+                            env=os.environ.copy(),
+                            output_formatter=TimestampFormatter(),
                         )
-                        compile_target = candidate
-                        meson_test_name = candidate
-                        compilation_success = compile_meson(
-                            build_dir, target=compile_target, check=check
-                        )
-                        if compilation_success:
-                            break  # Found a match, stop trying
 
-            if not compilation_success:
-                return MesonTestResult(success=False, duration=time.time() - start_time)
+                        returncode = proc.wait(echo=verbose)
+                        return returncode == 0
+
+                    except KeyboardInterrupt:
+                        raise
+                    except Exception as e:
+                        _ts_print(f"[MESON] Test execution error: {e}", file=sys.stderr)
+                        return False
+
+                # Run streaming compilation and testing for UNIT TESTS
+                overall_success_tests, num_passed_tests, num_failed_tests = (
+                    stream_compile_and_run_tests(
+                        build_dir=build_dir,
+                        test_callback=test_callback,
+                        target=None,  # Build all default test targets (unit tests)
+                    )
+                )
+
+                # Run streaming compilation and testing for EXAMPLES
+                _ts_print("[MESON] Starting examples compilation and execution...")
+                overall_success_examples, num_passed_examples, num_failed_examples = (
+                    stream_compile_and_run_tests(
+                        build_dir=build_dir,
+                        test_callback=test_callback,
+                        target="examples-host",  # Build examples explicitly
+                    )
+                )
+
+                # Combine results
+                overall_success = overall_success_tests and overall_success_examples
+                num_passed = num_passed_tests + num_passed_examples
+                num_failed = num_failed_tests + num_failed_examples
+
+                duration = time.time() - start_time
+                num_tests_run = num_passed + num_failed
+
+                # Print combined summary
+                _ts_print(
+                    f"[MESON] Combined streaming results: {num_tests_run} total tests"
+                )
+                _ts_print(
+                    f"  Unit tests: {num_passed_tests}/{num_passed_tests + num_failed_tests} passed"
+                )
+                _ts_print(
+                    f"  Examples: {num_passed_examples}/{num_passed_examples + num_failed_examples} passed"
+                )
+                _ts_print(f"  Total: {num_passed} passed, {num_failed} failed")
+
+                # FALLBACK: If no tests were run during streaming (e.g., everything already compiled),
+                # fall back to running all tests via Meson test runner
+                if num_tests_run == 0 and overall_success:
+                    _print_info(
+                        "[MESON] No tests executed during streaming (no compilation needed)"
+                    )
+                    _print_info(
+                        "[MESON] Falling back to Meson test runner for already-compiled tests..."
+                    )
+                    _print_banner("RUNNING TESTS")
+                    result = run_meson_test(build_dir, test_name=None, verbose=verbose)
+                    return result
+
+                if not overall_success:
+                    _print_error(
+                        f"[MESON] ❌ Some tests failed ({num_passed}/{num_tests_run} tests in {duration:.2f}s)"
+                    )
+                    return MesonTestResult(
+                        success=False,
+                        duration=duration,
+                        num_tests_run=num_tests_run,
+                        num_tests_passed=num_passed,
+                        num_tests_failed=num_failed,
+                    )
+
+                _print_success(
+                    f"[MESON] ✅ All tests passed ({num_passed}/{num_tests_run} tests in {duration:.2f}s)"
+                )
+                return MesonTestResult(
+                    success=True,
+                    duration=duration,
+                    num_tests_run=num_tests_run,
+                    num_tests_passed=num_passed,
+                    num_tests_failed=num_failed,
+                )
+
+            else:
+                # TRADITIONAL SEQUENTIAL PATH
+                # Used for unity builds or specific test requests
+                # In unity mode, always build all_tests target (no individual test targets exist)
+                compile_target: Optional[str] = None
+                if unity:
+                    compile_target = "all_tests"
+                elif meson_test_name:
+                    compile_target = meson_test_name
+
+                compilation_success = compile_meson(build_dir, target=compile_target)
+
+                # If compilation failed and we have a fallback name, try the fallback
+                if not compilation_success and fallback_test_name and not unity:
+                    _ts_print(
+                        f"[MESON] Target '{compile_target}' not found, trying fallback: '{fallback_test_name}'"
+                    )
+                    compile_target = fallback_test_name
+                    meson_test_name = fallback_test_name
+                    compilation_success = compile_meson(
+                        build_dir, target=compile_target
+                    )
+
+                # If still failed, try fuzzy matching candidates
+                # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
+                if not compilation_success and test_name and not unity:
+                    if not fuzzy_candidates:
+                        # Query meson for fuzzy match candidates
+                        fuzzy_candidates = get_fuzzy_test_candidates(
+                            build_dir, test_name
+                        )
+                        # Remove primary and fallback names from candidates
+                        fuzzy_candidates = [
+                            c
+                            for c in fuzzy_candidates
+                            if c not in [meson_test_name, fallback_test_name]
+                        ]
+
+                    if fuzzy_candidates:
+                        for candidate in fuzzy_candidates:
+                            _ts_print(
+                                f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
+                            )
+                            compile_target = candidate
+                            meson_test_name = candidate
+                            compilation_success = compile_meson(
+                                build_dir, target=compile_target
+                            )
+                            if compilation_success:
+                                break  # Found a match, stop trying
+
+                if not compilation_success:
+                    return MesonTestResult(
+                        success=False, duration=time.time() - start_time
+                    )
     except TimeoutError as e:
         _ts_print(f"[MESON] {e}", file=sys.stderr)
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
-    # Run tests
+    # Run tests (traditional path only - streaming already ran tests above)
     if unity:
         # Unity mode: Use the test_runner executable
         # The test_runner loads and executes test DLLs dynamically
@@ -1837,10 +2020,14 @@ def run_meson_build_and_test(
                 duration = time.time() - start_time
 
                 if returncode != 0:
-                    _ts_print(
-                        f"[MESON] Test failed with return code {returncode}",
-                        file=sys.stderr,
+                    _print_error(
+                        f"[MESON] ❌ Test failed with return code {returncode}"
                     )
+                    # Show test output for failures (even if not verbose)
+                    if not verbose and proc.stdout:
+                        _print_error("[MESON] Test output:")
+                        for line in proc.stdout.splitlines()[-50:]:  # Last 50 lines
+                            _ts_print(f"  {line}")
                     return MesonTestResult(
                         success=False,
                         duration=duration,
@@ -1849,7 +2036,9 @@ def run_meson_build_and_test(
                         num_tests_failed=1,
                     )
 
-                _ts_print(f"[MESON] All tests passed (1/1 tests in {duration:.2f}s)")
+                _print_success(
+                    f"[MESON] ✅ All tests passed (1/1 tests in {duration:.2f}s)"
+                )
                 return MesonTestResult(
                     success=True,
                     duration=duration,
@@ -1876,6 +2065,188 @@ def run_meson_build_and_test(
         else:
             # No specific test - use Meson's test runner for all tests
             return run_meson_test(build_dir, test_name=None, verbose=verbose)
+
+
+def stream_compile_and_run_tests(
+    build_dir: Path,
+    test_callback: Callable[[Path], bool],
+    target: Optional[str] = None,
+) -> tuple[bool, int, int]:
+    """
+    Stream test compilation and execution in parallel.
+
+    Monitors Ninja output to detect when test executables finish linking,
+    then immediately queues them for execution via the callback.
+
+    Args:
+        build_dir: Meson build directory
+        test_callback: Function called with each completed test path.
+                      Returns True if test passed, False if failed.
+        target: Specific target to build (None = all)
+
+    Returns:
+        Tuple of (overall_success, num_passed, num_failed)
+    """
+    cmd = ["meson", "compile", "-C", str(build_dir)]
+
+    if target:
+        cmd.append(target)
+        _ts_print(f"[MESON] Streaming compilation of target: {target}")
+    else:
+        # Build default targets (unit tests) - no target specified builds defaults
+        # Note: examples have build_by_default: false, so we need to build them separately
+        _ts_print(f"[MESON] Streaming compilation of all test targets...")
+
+    # Pattern to detect test executable linking
+    # Example: "[142/143] Linking target tests/test_foo.exe"
+    link_pattern = re.compile(
+        r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
+    )
+
+    # Track compilation success and test results
+    compilation_failed = False
+    num_passed = 0
+    num_failed = 0
+    tests_run = 0
+
+    # Queue for completed test executables
+    test_queue: queue.Queue[Optional[Path]] = queue.Queue()
+
+    # Sentinel value to signal end of compilation
+    COMPILATION_DONE = None
+
+    def producer_thread() -> None:
+        """Parse Ninja output and queue completed test executables"""
+        nonlocal compilation_failed
+
+        try:
+            # Use RunningProcess for streaming output
+            # Note: No formatter here - we need raw Ninja output for regex pattern matching
+            proc = RunningProcess(
+                cmd,
+                timeout=600,  # 10 minute timeout for compilation
+                auto_run=True,
+                check=False,
+                env=os.environ.copy(),
+            )
+
+            # Stream output line by line
+            with proc.line_iter(timeout=None) as it:
+                for line in it:
+                    # Echo output for visibility
+                    _ts_print(f"[BUILD] {line}")
+
+                    # Check for link completion
+                    match = link_pattern.match(line.strip())
+                    if match:
+                        # Extract test executable path
+                        rel_path = match.group(1)
+                        test_path = build_dir / rel_path
+
+                        # Only queue if it's a test executable (in tests/ or examples/ directory)
+                        if (
+                            "tests/" in rel_path
+                            or "tests\\" in rel_path
+                            or "examples/" in rel_path
+                            or "examples\\" in rel_path
+                        ):
+                            _ts_print(f"[MESON] Test ready: {test_path.name}")
+                            test_queue.put(test_path)
+
+            # Check compilation result
+            returncode = proc.wait()
+            if returncode != 0:
+                _ts_print(
+                    f"[MESON] Compilation failed with return code {returncode}",
+                    file=sys.stderr,
+                )
+                compilation_failed = True
+            else:
+                _ts_print(f"[MESON] Compilation completed successfully")
+
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            _ts_print(f"[MESON] Producer thread error: {e}", file=sys.stderr)
+            compilation_failed = True
+        finally:
+            # Signal end of compilation
+            test_queue.put(COMPILATION_DONE)
+
+    # Start producer thread
+    producer = threading.Thread(
+        target=producer_thread, name="NinjaProducer", daemon=True
+    )
+    producer.start()
+
+    # Consumer: Run tests as they become available
+    try:
+        while True:
+            try:
+                # Get next test from queue (blocking with timeout for responsiveness)
+                test_path = test_queue.get(timeout=1.0)
+
+                if test_path is COMPILATION_DONE:
+                    # Compilation finished
+                    break
+
+                # Type narrowing: test_path is now guaranteed to be Path (not None)
+                assert test_path is not None
+
+                # Run the test
+                tests_run += 1
+                _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
+
+                try:
+                    success = test_callback(test_path)
+                    if success:
+                        num_passed += 1
+                        _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
+                    else:
+                        num_failed += 1
+                        _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
+                except KeyboardInterrupt:
+                    raise
+                except Exception as e:
+                    _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
+                    num_failed += 1
+
+            except queue.Empty:
+                # No test available yet, check if producer is still alive
+                if not producer.is_alive() and test_queue.empty():
+                    # Producer died unexpectedly
+                    _ts_print(
+                        "[MESON] Producer thread died unexpectedly", file=sys.stderr
+                    )
+                    break
+                continue
+
+    except KeyboardInterrupt:
+        _ts_print("[MESON] Interrupted by user", file=sys.stderr)
+        raise
+    finally:
+        # Wait for producer to finish
+        producer.join(timeout=10.0)
+
+    # Determine overall success
+    overall_success = not compilation_failed and num_failed == 0
+
+    _ts_print(f"[MESON] Streaming test execution complete:")
+    _ts_print(f"  Tests run: {tests_run}")
+    if num_passed > 0:
+        _print_success(f"  Passed: {num_passed}")
+    else:
+        _ts_print(f"  Passed: {num_passed}")
+    if num_failed > 0:
+        _print_error(f"  Failed: {num_failed}")
+    else:
+        _ts_print(f"  Failed: {num_failed}")
+    if compilation_failed:
+        _print_error(f"  Compilation: ✗ FAILED")
+    else:
+        _print_success(f"  Compilation: ✓ OK")
+
+    return overall_success, num_passed, num_failed
 
 
 if __name__ == "__main__":
