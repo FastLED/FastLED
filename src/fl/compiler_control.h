@@ -231,7 +231,10 @@
 // Usage: FL_UNROLL(8) for (int i = 0; i < n; i++) { ... }
 // Note: Some compilers (e.g., AVR-GCC) may not support this pragma and will
 // emit warnings. The macro expands to nothing on unsupported compilers.
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__AVR__)
+  // AVR-GCC does not support #pragma GCC unroll
+  #define FL_UNROLL(N)
+#elif defined(__GNUC__) && !defined(__clang__)
   // GCC supports #pragma GCC unroll N
   #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(GCC unroll N))
 #elif defined(__clang__)
