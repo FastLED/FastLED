@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -50,7 +50,7 @@ def run_scraper(
         return result.returncode
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Error running scraper: {e}", file=sys.stderr)

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -69,14 +69,14 @@ def is_daemon_running() -> bool:
             PID_FILE.unlink()
             return False
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         # Corrupted PID file - remove it
         try:
             PID_FILE.unlink(missing_ok=True)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             pass
@@ -128,7 +128,7 @@ def read_status_file() -> DaemonStatus:
             updated_at=time.time(),
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return DaemonStatus(
@@ -208,7 +208,7 @@ def packages_already_installed(project_dir: Path, environment: str | None) -> bo
         return result.returncode == 0
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         # If check fails, assume packages need installation
@@ -499,7 +499,7 @@ def ensure_packages_installed(
             time.sleep(1)
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             print("\n\n⚠️  Interrupted by user")
             print("Note: Daemon will continue installation in background")
             print("      Check progress: bash daemon logs-tail")
@@ -549,7 +549,7 @@ def get_daemon_status() -> dict[str, Any]:
             with open(PID_FILE, "r") as f:
                 status["pid"] = int(f.read().strip())
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             status["pid"] = None
@@ -633,7 +633,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\nInterrupted by user")
         sys.exit(130)

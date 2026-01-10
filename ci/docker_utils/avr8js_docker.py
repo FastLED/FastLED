@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -186,7 +186,7 @@ class DockerAVR8jsRunner:
             return result.returncode
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except subprocess.TimeoutExpired:
             print(f"\n❌ Docker timeout after {timeout}s")
@@ -208,7 +208,7 @@ class DockerAVR8jsRunner:
 
             return True
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"❌ Error checking Docker image: {e}")
@@ -240,7 +240,7 @@ class DockerAVR8jsRunner:
             result = subprocess.run(build_cmd)
             return result.returncode == 0
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"❌ Error building Docker image: {e}")
@@ -283,7 +283,7 @@ def main() -> None:
         sys.exit(returncode)
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n⚠️  Interrupted by user")
         sys.exit(130)

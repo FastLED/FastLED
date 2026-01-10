@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
@@ -32,7 +32,7 @@ def run_symbol_analysis(board_name: str):
             print(f"Error: {result.stderr}")
             return False
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"❌ Error running symbol analysis for {board_name}: {e}")
@@ -70,7 +70,7 @@ def load_and_summarize_results(board_name: str):
             print(f"   {sym_type}: {stats['count']} symbols, {stats['size']} bytes")
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"❌ Error loading results for {board_name}: {e}")

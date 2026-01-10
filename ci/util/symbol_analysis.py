@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportOperatorIssue=false, reportArgumentType=false
@@ -134,7 +134,7 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
         # If demangling failed, c++filt returns the original name
         return demangled if demangled != mangled_name else mangled_name
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Error demangling symbol: {mangled_name}")
@@ -511,7 +511,7 @@ def analyze_map_file(map_file: Path) -> dict[str, list[str]]:
                             dependencies[current_archive].append(symbol)
                     current_archive = None
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Error reading map file: {e}")

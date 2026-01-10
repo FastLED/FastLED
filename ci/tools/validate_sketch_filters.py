@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """Validate @filter/@end-filter blocks in sketch files.
@@ -57,7 +57,7 @@ def validate_sketch(ino_path: Path, examples_dir: Path) -> tuple[bool, list[str]
     try:
         content = ino_path.read_text(encoding="utf-8")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, [f"{relative_path}: Failed to read file: {e}"]
@@ -97,7 +97,7 @@ def validate_sketch(ino_path: Path, examples_dir: Path) -> tuple[bool, list[str]
                             f"(require={req_str}, exclude={exc_str}). This might be unintended."
                         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, [f"{relative_path}: Error validating filter: {e}"]

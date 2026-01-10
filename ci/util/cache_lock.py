@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -147,7 +147,7 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
             if break_stale_lock(lock_file):
                 cleaned_count += 1
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             logger.warning(f"Error checking lock {lock_file}: {e}")
@@ -214,7 +214,7 @@ def list_active_locks(cache_dir: Path) -> list[LockInfo]:
             )
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             logger.warning(f"Error reading lock {lock_file}: {e}")

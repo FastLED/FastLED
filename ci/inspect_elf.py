@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from ci.util.elf import dump_symbol_sizes
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
@@ -80,9 +80,9 @@ def main() -> int:
         nm_path = Path(board_info["aliases"]["nm"])
         symbol_sizes = dump_symbol_sizes(nm_path, cpp_filt_path, firmware_path)
         print(symbol_sizes)
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Error while dumping symbol sizes: {e}")

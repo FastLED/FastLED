@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -85,7 +85,7 @@ def test_basic_functionality(results: StressTestResults) -> None:
             cache.mark_success()
             results.pass_test("mark_success() completes without error")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("mark_success()", str(e))
@@ -140,7 +140,7 @@ def test_file_modification_during_processing(results: StressTestResults) -> None
             cache.mark_success()
             results.pass_test("mark_success() works despite file modifications")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("mark_success() with modified files", str(e))
@@ -164,7 +164,7 @@ def _concurrent_check_worker(
         needs_update = cache.check_needs_update(files)
         result_queue.put(("success", needs_update))
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         result_queue.put(("error", str(e)))
@@ -265,7 +265,7 @@ def test_cross_process_pending_fingerprint(results: StressTestResults) -> None:
             cache2.mark_success()
             results.pass_test("mark_success() reads cross-process pending fingerprint")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("Cross-process mark_success()", str(e))
@@ -453,7 +453,7 @@ def test_race_condition_rapid_operations(results: StressTestResults) -> None:
 
             results.pass_test("50 rapid check/mark/invalidate cycles completed")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("Rapid sequential operations", str(e))
@@ -478,7 +478,7 @@ def test_timestamp_file_optional(results: StressTestResults) -> None:
             cache1.mark_success()
             results.pass_test("Cache works without timestamp_file parameter")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("Cache without timestamp_file", str(e))
@@ -496,7 +496,7 @@ def test_timestamp_file_optional(results: StressTestResults) -> None:
             else:
                 results.fail_test("Timestamp file creation", "File not created")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             results.fail_test("Cache with timestamp_file", str(e))
@@ -526,7 +526,7 @@ def main() -> int:
         return 0 if success else 1
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n\n⚠️  Test suite interrupted by user")
         return 2

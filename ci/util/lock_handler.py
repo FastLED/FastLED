@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -69,7 +69,7 @@ def find_processes_locking_path(
             name = proc.info["name"].lower() if proc.info.get("name") else ""
             return 0 if name in priority_names else 1
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             return 2
@@ -135,7 +135,7 @@ def find_processes_locking_path(
             # Skip processes we can't access
             continue
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             # Skip any other errors (e.g., invalid paths)
@@ -193,7 +193,7 @@ def kill_processes(pids: set[int], force: bool = True) -> bool:
             )
             all_killed = False
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"  ✗ Failed to kill process {pid}: {e}")
@@ -273,7 +273,7 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
                             else:
                                 print(f"  ✗ Windows command failed: {result.stderr}")
                         except KeyboardInterrupt:
-                            notify_main_thread()
+                            handle_keyboard_interrupt_properly()
                             raise
                         except Exception as cmd_error:
                             print(f"  ✗ Windows command error: {cmd_error}")

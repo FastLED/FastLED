@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 # pyright: reportUnknownMemberType=false
 """
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     try:
         cli()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("Exiting...")
         sys.exit(1)

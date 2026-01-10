@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -902,7 +902,7 @@ def _resolve_package_url_from_registry(
                 f"HTTP error querying registry for {owner}/{package_name}: {e}"
             )
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             logger.warning(f"Error resolving package {owner}/{package_name}: {e}")
@@ -1019,7 +1019,7 @@ class PlatformIOIni:
             temp_file.replace(file_path)
             logger.debug(f"Successfully wrote platformio.ini: {file_path}")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             if temp_file.exists():
@@ -1600,7 +1600,7 @@ class PlatformIOIni:
         except FileNotFoundError:
             logger.error("PlatformIO CLI not found. Is it installed and in PATH?")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             cmd_str = " ".join(["pio"] + args)
@@ -1619,7 +1619,7 @@ class PlatformIOIni:
             try:
                 return PlatformShowResponse.from_dict(raw_data)  # type: ignore
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 logger.error(
@@ -1651,14 +1651,14 @@ class PlatformIOIni:
                         framework = FrameworkInfo.from_dict(fw_data)
                         frameworks_list.append(framework)
                     except KeyboardInterrupt:
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception as e:
                         logger.warning(f"Failed to parse framework data: {e}")
                         continue
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             logger.error(f"Failed to parse frameworks list response: {e}")

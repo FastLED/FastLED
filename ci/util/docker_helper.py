@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """Docker helper utilities for FastLED compilation optimization.
@@ -134,7 +134,7 @@ def _check_wsl2_docker_backend() -> tuple[bool, str]:
     except subprocess.TimeoutExpired:
         return False, "WSL2 command timed out"
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"Failed to check WSL2 status: {e}"
@@ -187,7 +187,7 @@ def _kill_docker_desktop_windows() -> bool:
         return True
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return False
@@ -250,7 +250,7 @@ def _restart_docker_desktop_windows() -> tuple[bool, str]:
         )
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"Failed to restart Docker Desktop: {e}"
@@ -316,7 +316,7 @@ def _start_docker_windows() -> tuple[bool, str]:
                 return _restart_docker_desktop_windows()
 
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 return False, f"Failed to start Docker Desktop: {e}"
@@ -326,7 +326,7 @@ def _start_docker_windows() -> tuple[bool, str]:
             "Docker Desktop not found. Please install it from https://www.docker.com/products/docker-desktop",
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"Failed to start Docker: {e}"
@@ -358,7 +358,7 @@ def _start_docker_macos() -> tuple[bool, str]:
             "Docker Desktop started but failed to become available after 30 seconds",
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return (
@@ -419,7 +419,7 @@ def _start_docker_linux() -> tuple[bool, str]:
             "Could not find systemctl or service command. Please ensure Docker is installed.",
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return False, "Failed to start Docker: Unknown error"
@@ -477,7 +477,7 @@ def is_docker_image_available(board_name: str) -> bool:
         )
         return result.returncode == 0
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except (subprocess.TimeoutExpired, ValueError, Exception):
         return False

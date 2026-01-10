@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """
 Work in progress to generate doxygen via a script instead of a GitHub action.
@@ -167,7 +167,7 @@ def main() -> None:
         dot_version = run("dot -V", check=False)
         print(f"Graphviz detected: {dot_version}")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         warnings.warn(

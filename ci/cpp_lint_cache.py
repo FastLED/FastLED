@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -140,7 +140,7 @@ def invalidate_cpp_cache() -> None:
         cache.invalidate()
         print_cache_miss("C++ lint cache invalidated - will re-run linting next time")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print_cache_miss(f"Failed to invalidate C++ cache: {e}")

@@ -33,7 +33,7 @@ from running_process import RunningProcess
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
 
 
@@ -349,7 +349,7 @@ class SerialMonitor:
 
         except KeyboardInterrupt:
             print(f"\n{Fore.YELLOW}⚠️  Interrupted by user{Style.RESET_ALL}")
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         finally:
             if self.mSerialPort:
@@ -479,7 +479,7 @@ class PioDeviceMonitorHandler:
                     # No output within read timeout - continue waiting
                     continue
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     # Check for specific serial port errors indicating device is stuck
@@ -508,7 +508,7 @@ class PioDeviceMonitorHandler:
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt: Stopping monitor")
             proc.terminate()
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
 
         proc.wait()

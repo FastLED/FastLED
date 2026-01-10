@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -63,7 +63,7 @@ def kill_process_holding_file(file_path: Path) -> bool:
             # Process may have exited or we don't have permission
             continue
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             # Ignore other errors and continue
@@ -89,7 +89,7 @@ def kill_process_holding_file(file_path: Path) -> bool:
                 # Process may have exited or we don't have permission
                 continue
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 # Ignore other errors and continue

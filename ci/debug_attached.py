@@ -94,7 +94,7 @@ from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.json_rpc_handler import JsonRpcHandler
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.pio_runner import create_pio_process
@@ -160,7 +160,7 @@ def run_cpp_lint() -> bool:
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping linting")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"❌ Error running C++ linting: {e}")
@@ -213,7 +213,7 @@ def run_compile(
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping compilation")
         proc.terminate()
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
 
     proc.wait()
@@ -289,7 +289,7 @@ def run_upload(
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping upload")
         proc.terminate()
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
 
     proc.wait()
@@ -594,7 +594,7 @@ def run_monitor(
                             f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
                         )
                     except KeyboardInterrupt:
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception as e:
                         print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
@@ -629,7 +629,7 @@ def run_monitor(
                     try:
                         text = data.decode("utf-8", errors="replace")
                     except KeyboardInterrupt:
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception:
                         text = data.decode("latin-1", errors="replace")
@@ -703,7 +703,7 @@ def run_monitor(
                                         ser.flush()
                                         print(f"   ✓ Sent '{trigger_text}' to serial\n")
                                     except KeyboardInterrupt:
-                                        notify_main_thread()
+                                        handle_keyboard_interrupt_properly()
                                         raise
                                     except Exception as e:
                                         print(
@@ -796,7 +796,7 @@ def run_monitor(
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping monitor")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     finally:
         # Close serial port
@@ -1323,7 +1323,7 @@ def main() -> int:
             lock.release()
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n\n⚠️  Interrupted by user")
         return 130

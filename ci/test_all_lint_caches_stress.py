@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -70,7 +70,7 @@ class CacheLintStressTest:
             output = result.stdout + result.stderr
             return needs_update, output
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             return False, str(e)
@@ -99,7 +99,7 @@ class CacheLintStressTest:
             output = result.stdout + result.stderr
             return result.returncode == 0, output
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             return False, str(e)
@@ -311,7 +311,7 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
             test.pass_test("All required operations present in manifest")
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         test.fail_test("Manifest validation", str(e))
@@ -367,7 +367,7 @@ def _concurrent_cache_check(
         )
         result_queue.put(("success", result.returncode))
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         result_queue.put(("error", str(e)))
@@ -426,7 +426,7 @@ def main() -> int:
         return 0 if success else 1
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n\n⚠️  Test suite interrupted by user")
         return 2

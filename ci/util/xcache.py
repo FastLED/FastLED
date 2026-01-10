@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -132,7 +132,7 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
         return script_path_obj
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         # Clean up on error
@@ -140,7 +140,7 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
             os.close(script_fd)
             os.unlink(script_path)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             pass
@@ -181,7 +181,7 @@ def execute_direct(config: XCacheConfig, args: list[str]) -> int:
         print(f"XCACHE ERROR: Command not found: {e}")
         return 127
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"XCACHE ERROR: Execution failed: {e}")
@@ -216,7 +216,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
                 for i, line in enumerate(content.split("\n"), 1):
                     print(f"XCACHE:   {i}: {line}", file=sys.stderr)
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 print(f"XCACHE: Could not read wrapper script: {e}", file=sys.stderr)
@@ -264,7 +264,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
         return return_code
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"XCACHE ERROR: Wrapper execution failed: {e}", file=sys.stderr)
@@ -275,7 +275,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
             try:
                 wrapper_script.unlink()
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 pass

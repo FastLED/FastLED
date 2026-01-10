@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 from typeguard import typechecked
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 class TestResultType(Enum):
@@ -325,7 +325,7 @@ def fingerprint_code_base(
                 except KeyboardInterrupt:
                     # Only notify main thread if we're in a worker thread
                     if threading.current_thread() != threading.main_thread():
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     # If we can't read the file, include the error in the hash
@@ -335,7 +335,7 @@ def fingerprint_code_base(
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return FingerprintResult(hash="", status=f"error: {str(e)}")

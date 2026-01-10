@@ -117,7 +117,7 @@ if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
     uv run black test.py
     find ci -name "*.py" -not -path "ci/tmp/*" -not -path "ci/wasm/*" -not -path "*/.fbuild/*" -not -path "*/.pio/*" -exec uv run black {} +
     echo "Running flake8 (KeyboardInterrupt handling checks)"
-    uv run flake8 test.py ci --exclude ci/tmp,ci/wasm
+    uv run flake8 test.py ci --exclude ci/tmp,ci/wasm,**/.pio
     PYTHON_LINT_DURATION=$(get_elapsed_seconds $PYTHON_LINT_START)
 
     # Check if pyright needs to run using fingerprint cache

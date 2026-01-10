@@ -8,7 +8,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright  # type: ignore
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent.parent.parent  # scrapers is 3 levels down from project root
@@ -25,7 +25,7 @@ def install_playwright_browsers():
         os.system(f"{sys.executable} -m playwright install chromium")
         print("Playwright browsers installed successfully.")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Failed to install Playwright browsers: {e}", file=sys.stderr)
@@ -83,7 +83,7 @@ async def scrape_festival_stick_example():
                         examples_selector = selector
                         break
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
                     continue
@@ -95,7 +95,7 @@ async def scrape_festival_stick_example():
                     await page.wait_for_selector("text=FestivalStick", timeout=5000)
                     print("Found FestivalStick text on page!")
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
                     print(
@@ -127,7 +127,7 @@ async def scrape_festival_stick_example():
                         canvas = canvas_element
                         break
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
                     continue
@@ -153,7 +153,7 @@ async def scrape_festival_stick_example():
                     else:
                         print(f"FestivalStick.ino not found at {festival_stick_path}")
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 print(f"Could not upload file: {e}")
@@ -179,7 +179,7 @@ async def scrape_festival_stick_example():
                     await canvas.screenshot(path=str(canvas_screenshot_path))
                     print(f"Canvas screenshot saved to {canvas_screenshot_path}")
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     print(f"Could not take canvas screenshot: {e}")
@@ -189,7 +189,7 @@ async def scrape_festival_stick_example():
             await page.wait_for_timeout(10000)
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"An error occurred during scraping: {e}", file=sys.stderr)
@@ -203,7 +203,7 @@ async def scrape_festival_stick_example():
                 await page.screenshot(path=str(error_screenshot_path), full_page=True)
                 print(f"Error screenshot saved to {error_screenshot_path}")
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 pass
@@ -219,9 +219,9 @@ async def main():
     try:
         await scrape_festival_stick_example()
         print("FastLED FestivalStick scraping completed successfully!")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Scraping failed: {e}", file=sys.stderr)

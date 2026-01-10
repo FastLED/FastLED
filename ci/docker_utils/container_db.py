@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """Docker container lifecycle database management.
 
@@ -361,7 +361,7 @@ def process_exists(pid: int) -> bool:
         # Process exists but we don't have permission to signal it
         return True
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return False

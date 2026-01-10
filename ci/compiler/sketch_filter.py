@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """Sketch filtering system for selective compilation based on platform/memory constraints.
 
@@ -187,7 +187,7 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
     try:
         content = ino_path.read_text(encoding="utf-8")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return None

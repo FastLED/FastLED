@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """
 Git Historian - Fast code search combining working tree and git history
@@ -35,7 +35,7 @@ def _run(cmd: str, timeout: float = 3.0) -> str:
     except subprocess.TimeoutExpired:
         return ""
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return ""
@@ -53,7 +53,7 @@ def _have(cmd: str) -> bool:
         )
         return result.returncode == 0
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         return False
@@ -257,13 +257,13 @@ def query(keywords: list[str], paths: list[Path]) -> list[str]:
                 try:
                     results.extend(fut.result())
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
                     # keep going even if one branch fails
                     pass
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             # Timeout or other error - just use whatever results we have

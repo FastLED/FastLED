@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """LED Chipset Timing Conversion Utilities.
@@ -554,7 +554,7 @@ def handle_interactive() -> None:
             print(f"Cycle '1': {ds.cycle_1}ns")
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except ValueError:
         print("\nERROR: Invalid input. Please enter integer values.")
@@ -727,7 +727,7 @@ def main() -> int:
         return 0
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

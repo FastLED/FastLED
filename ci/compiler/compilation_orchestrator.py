@@ -17,7 +17,7 @@ from ci.boards import Board
 from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import FastLEDPaths, PioCompiler
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 @typechecked
@@ -191,7 +191,7 @@ def compile_board_examples(
                 for f in futures:
                     f.cancel()
                 print("   ✓ Cleanup complete")
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
             except Exception as e:
                 # Represent unexpected exception as a failed SketchResult for consistency
                 from pathlib import Path as _Path
@@ -231,7 +231,7 @@ def compile_board_examples(
                 print(stats)
                 print("=" * 60)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Warning: Could not retrieve compiler statistics: {e}")
@@ -245,9 +245,9 @@ def compile_board_examples(
         )
     except KeyboardInterrupt:
         print("\n⏹️  Cancelling builds and cleaning up...")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         print("   ✓ Cleanup complete")
-        # Don't re-raise - notify_main_thread() already signaled the main thread
+        # Don't re-raise - handle_keyboard_interrupt_properly() already signaled the main thread
         return BoardCompilationResult(
             ok=False,
             sketch_results=[],

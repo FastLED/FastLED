@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 if TYPE_CHECKING:
     from ci.boards import Board
@@ -81,7 +81,7 @@ def get_platform_required_packages(platform_path: Path) -> list[str]:
         # Return all package names from the platform
         return list(packages.keys())
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not parse platform.json: {e}")
@@ -122,7 +122,7 @@ def get_installed_packages_from_pio() -> dict[str, str]:
 
         return packages
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not get installed packages: {e}")
@@ -192,7 +192,7 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
                 else:
                     print(f"    ✗ Failed to remove {package_name}")
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 print(f"    ✗ Error removing {package_name}: {e}")
@@ -304,9 +304,9 @@ def detect_and_fix_corrupted_packages_dynamic(
                         f"  -> ERROR: Failed to remove {package_name} after all retries"
                     )
                     results[package_name] = False  # Still corrupted
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 print(f"  -> ERROR: Failed to remove {package_name}: {e}")

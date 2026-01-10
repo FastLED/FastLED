@@ -77,7 +77,7 @@ def make_watch_dog_thread(
         try:
             RunningProcessManagerSingleton.dump_active()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             ts_print(f"Failed to dump active processes: {e}")
@@ -401,7 +401,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             ts_print(f"✅ Successfully pulled {avr8js_image}")
             ts_print()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             ts_print(f"❌ Failed to pull avr8js image: {e}")
@@ -983,7 +983,7 @@ def main() -> None:
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)
@@ -995,7 +995,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)

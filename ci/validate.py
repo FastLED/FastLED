@@ -46,7 +46,7 @@ from ci.debug_attached import (
     run_upload,
 )
 from ci.util.build_lock import BuildLock
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import auto_detect_upload_port, kill_port_users
 from ci.util.sketch_resolver import parse_timeout
@@ -525,7 +525,7 @@ def run(args: Args | None = None) -> int:
 
     except KeyboardInterrupt:
         print("\n\n⚠️  Interrupted by user")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         return 130
 
 

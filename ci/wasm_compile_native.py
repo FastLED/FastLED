@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -430,7 +430,7 @@ def compile_wasm(
             return result.returncode
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"✗ Build failed with exception: {e}", file=sys.stderr)
@@ -493,7 +493,7 @@ def main() -> int:
             args.unity_chunks,
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n✗ Build interrupted by user")
         return 130

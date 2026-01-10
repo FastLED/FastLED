@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -59,7 +59,7 @@ def generate_platformio_ini(
         return True, f"Generated platformio.ini for board: {board_name}"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         error_msg = f"Failed to generate platformio.ini for {board_name}: {e}"
@@ -90,7 +90,7 @@ def get_platform_from_ini(ini_path: str = "platformio.ini") -> Optional[str]:
     except FileNotFoundError:
         logger.warning(f"platformio.ini not found at {ini_path}")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         logger.error(f"Error reading platformio.ini: {e}")
@@ -121,7 +121,7 @@ def get_platform_packages_from_ini(ini_path: str = "platformio.ini") -> Optional
     except FileNotFoundError:
         logger.warning(f"platformio.ini not found at {ini_path}")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         logger.error(f"Error reading platformio.ini: {e}")
@@ -154,7 +154,7 @@ def run_command(cmd: list[str], description: str = "") -> bool:
         return True
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         logger.error(f"Error running command: {e}")
@@ -189,7 +189,7 @@ def install_platform(platform: str, skip_dependencies: bool = True) -> tuple[boo
             return True, "Platform installation completed (may already exist)"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         error_msg = f"Failed to install platform {platform}: {e}"
@@ -238,7 +238,7 @@ def install_platform_packages(
         return True, "Platform packages installed successfully"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         error_msg = f"Failed to install platform packages: {e}"
@@ -285,7 +285,7 @@ def compile_board_example(
             return False, f"Failed to compile {board} with {example}"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         error_msg = f"Error during compilation: {e}"

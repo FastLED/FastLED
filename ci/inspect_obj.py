@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import BUILD
 from ci.util.tools import load_tools
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     try:
         cli()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("Exiting...")
         sys.exit(1)

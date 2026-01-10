@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """Docker management for FastLED compilation.
 
@@ -158,7 +158,7 @@ class DockerConfig:
                 image_name = f"niteris/fastled-compiler-{arch}-{board_name}:latest"
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             # Fallback if lookups fail
@@ -893,7 +893,7 @@ class DockerCompilationOrchestrator:
             # Docker command not found or timed out - likely Docker is not running
             return self._handle_docker_not_found()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"❌ Unexpected error checking Docker image: {e}")

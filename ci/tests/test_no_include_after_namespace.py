@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -118,7 +118,7 @@ def scan_cpp_files(directory: str = ".") -> dict[str, list[tuple[int, str]]]:
                     if line_info:
                         violations[file_path] = line_info
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     print(f"Error processing {file_path}: {e}")

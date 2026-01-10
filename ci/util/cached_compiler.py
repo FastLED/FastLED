@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -145,6 +145,7 @@ def main() -> int:
         result = subprocess.run(command, cwd=os.getcwd())
         return result.returncode
     except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
         print(f"Keyboard interrupt in cached compiler {{compiler_name}}", file=sys.stderr)
         return 1
     except Exception as e:
@@ -279,7 +280,7 @@ def get_platform_packages_paths() -> list[str]:
                         if package_dir.is_dir():
                             paths.append(str(package_dir))
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("Keyboard interrupt in get_platform_packages_paths")
         import sys

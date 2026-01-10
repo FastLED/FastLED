@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -177,7 +177,7 @@ def parse_depfile(depfile_path: Path) -> list[Path]:
         return [Path(d) for d in deps]
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not parse dependency file {depfile_path}: {e}")
@@ -337,7 +337,7 @@ def compile_object(
         return True, source_path.name, ""
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, source_path.name, f"Exception during compilation: {e}"
@@ -488,7 +488,7 @@ def load_metadata() -> dict[str, Any]:
         with open(LIBRARY_METADATA) as f:
             return json.load(f)  # type: ignore[no-any-return]
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not load library metadata: {e}")
@@ -845,7 +845,7 @@ def build_library(
         return 0
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"✗ Library build failed with exception: {e}", file=sys.stderr)
@@ -909,7 +909,7 @@ def main() -> int:
         )
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n✗ Build interrupted by user")
         raise

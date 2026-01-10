@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -688,7 +688,7 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
                         return f"{script_name} {' '.join(example_parts)}"
                     return script_name
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             # Fall back to generic extraction on any unexpected parsing issue
@@ -787,7 +787,7 @@ def _handle_process_completion(
                 else:
                     actual_output = "No output captured from failed process"
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
                 actual_output = f"Error capturing output: {e}"
@@ -826,7 +826,7 @@ def _handle_process_completion(
             sys.stdout.flush()
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         test_name = _extract_test_name(cmd)
@@ -843,7 +843,7 @@ def _handle_process_completion(
                 ts_print(actual_output)
                 ts_print("=== END OF OUTPUT ===")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as output_error:
             ts_print(f"Could not capture process output: {output_error}")
@@ -855,7 +855,7 @@ def _handle_process_completion(
             try:
                 process_output = p.stdout if hasattr(p, "stdout") else str(e)
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 process_output = str(e)
@@ -1367,7 +1367,7 @@ def run_test_processes(
             except ImportError:
                 pass  # Fall back to normal execution if display not available
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 pass  # Fall back to normal execution on any display error

@@ -21,7 +21,7 @@ from running_process import RunningProcess
 
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.color_output import print_blue, print_green, print_red, print_yellow
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -255,7 +255,7 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         return (hasher.hexdigest(), source_files)
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hash: {e}")
@@ -722,7 +722,7 @@ def setup_meson_build(
                         f.write(f"{test_file}\n")
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             _ts_print(f"[MESON] Warning: Could not check test file changes: {e}")
@@ -1073,7 +1073,7 @@ endian = 'little'
         return True
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
@@ -1276,7 +1276,7 @@ def compile_meson(
                         file=sys.stderr,
                     )
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception as repair_error:
                 _ts_print(
@@ -1311,7 +1311,7 @@ def compile_meson(
         return True
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
@@ -1529,7 +1529,7 @@ def run_meson_test(
         )
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         duration = time.time() - start_time
@@ -1609,7 +1609,7 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             return True  # Non-fatal, continue anyway
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(
@@ -1775,7 +1775,7 @@ def run_meson_build_and_test(
                         return returncode == 0
 
                     except KeyboardInterrupt:
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception as e:
                         _ts_print(f"[MESON] Test execution error: {e}", file=sys.stderr)
@@ -1989,7 +1989,7 @@ def run_meson_build_and_test(
             )
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             duration = time.time() - start_time
@@ -2136,7 +2136,7 @@ def stream_compile_and_run_tests(
                 _ts_print(f"[MESON] Compilation completed successfully")
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             _ts_print(f"[MESON] Producer thread error: {e}", file=sys.stderr)
@@ -2178,7 +2178,7 @@ def stream_compile_and_run_tests(
                         num_failed += 1
                         _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
@@ -2196,7 +2196,7 @@ def stream_compile_and_run_tests(
 
     except KeyboardInterrupt:
         _ts_print("[MESON] Interrupted by user", file=sys.stderr)
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     finally:
         # Wait for producer to finish

@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 def get_utf8_env() -> dict[str, str]:
@@ -145,7 +145,7 @@ def load_json_metadata(path: Path) -> dict[str, str]:
         with open(path) as f:
             return json.load(f)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not load metadata from {path}: {e}")
@@ -201,9 +201,9 @@ def parse_depfile(depfile_path: Path) -> list[Path]:
         # Convert to Path objects
         return [Path(d) for d in deps]
 
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Warning: Could not parse dependency file {depfile_path}: {e}")

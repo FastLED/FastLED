@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -178,7 +178,7 @@ class DockerQEMURunner:
             returncode = proc.wait(timeout=5)
             return returncode == 0
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except (Exception, FileNotFoundError):
             return False
@@ -205,7 +205,7 @@ class DockerQEMURunner:
             result_stdout = "\n".join(stdout_lines)
             return bool(result_stdout.strip())
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             return False
@@ -225,7 +225,7 @@ class DockerQEMURunner:
             config_hash = generate_config_hash(platform)
             return f"fastled-platformio-{platform}-{config_hash}"
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             # Fallback if hash generation fails
@@ -315,7 +315,7 @@ class DockerQEMURunner:
             return True
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"❌ Error pulling from registry: {e}")
@@ -471,7 +471,7 @@ class DockerQEMURunner:
 
             return temp_dir
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             # Clean up on error
@@ -679,7 +679,7 @@ class DockerQEMURunner:
                 )
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"ERROR: {e}", file=sys.stderr)

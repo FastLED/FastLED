@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -61,7 +61,7 @@ def extract_toolchains_from_platformio_ini(
     try:
         pio_ini = PlatformIOIni.parseFile(platformio_ini_path)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         logger.error(f"Failed to parse {platformio_ini_path}: {e}")
@@ -86,7 +86,7 @@ def extract_toolchains_from_platformio_ini(
                 )
                 all_packages.extend(resolution.packages)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             logger.warning(
@@ -117,7 +117,7 @@ def download_toolchain(
     try:
         download_url = package.get_download_url()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         result.error_message = f"Failed to resolve download URL: {e}"
@@ -189,7 +189,7 @@ def download_toolchain(
         result.error_message = f"Lock timeout: {e}"
         logger.error(f"❌ Failed to acquire lock for {package.name}: {e}")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         result.error_message = str(e)
@@ -261,7 +261,7 @@ def predownload_toolchains(
                     print(format_manual_install_warning(package.name, result.url))
 
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 logger.warning("Download interrupted by user")
                 raise
             except Exception as e:
@@ -357,7 +357,7 @@ def main() -> int:
         return 1 if failed_count > 0 else 0
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         logger.warning("\nInterrupted by user")
         return 130

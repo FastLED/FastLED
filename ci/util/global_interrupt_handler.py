@@ -115,6 +115,12 @@ def notify_main_thread() -> None:
     _handler.notify_main_thread()
 
 
+# Backward compatibility alias for old linter
+def handle_keyboard_interrupt_properly() -> None:
+    """Alias for notify_main_thread() for backward compatibility with old flake8 plugin."""
+    notify_main_thread()
+
+
 def wait_for_cleanup() -> None:
     _handler.wait_for_cleanup()
 

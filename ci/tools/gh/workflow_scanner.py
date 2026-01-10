@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -97,7 +97,7 @@ class WorkflowScanner:
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
@@ -135,7 +135,7 @@ class WorkflowScanner:
             runs = json.loads(result.stdout)
             return runs
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
@@ -174,7 +174,7 @@ class WorkflowScanner:
 
             return job_infos
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting jobs for run {run_id}: {e}", file=sys.stderr)
@@ -269,7 +269,7 @@ class WorkflowScanner:
         except subprocess.TimeoutExpired:
             print(f"Timeout fetching logs for {job.job_name}", file=sys.stderr)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(
@@ -496,7 +496,7 @@ Examples:
             try:
                 scanner.scan()
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 print("\n\nInterrupted by user")
                 sys.exit(1)
 
@@ -512,7 +512,7 @@ Examples:
         try:
             scanner.scan()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
             print("\n\nInterrupted by user")
             sys.exit(1)

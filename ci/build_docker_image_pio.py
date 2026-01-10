@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -130,7 +130,7 @@ def generate_platformio_ini(platform_name: str, framework: Optional[str] = None)
     try:
         board = create_board(platform_name)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         raise ValueError(f"Failed to create board '{platform_name}': {e}") from e
@@ -314,7 +314,7 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
             print(f"Error building base image: {e}", file=sys.stderr)
             raise
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
             raise
 
@@ -401,7 +401,7 @@ def build_docker_image(
         print(f"Error building Docker image: {e}", file=sys.stderr)
         raise
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
         raise
 
@@ -411,7 +411,7 @@ def main() -> int:
     try:
         return _main_impl()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         print("\n\nOperation cancelled by user (Ctrl+C)", file=sys.stderr)
         return 130  # Standard exit code for SIGINT
 
@@ -481,7 +481,7 @@ def _main_impl() -> int:
         try:
             config_hash = generate_config_hash(platform_name, args.framework)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Warning: Could not generate config hash: {e}", file=sys.stderr)
@@ -517,7 +517,7 @@ def _main_impl() -> int:
                 image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             # Final fallback if all lookups fail
@@ -629,7 +629,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         # Double interrupt or interrupt during shutdown
         print("\n\nForced exit", file=sys.stderr)

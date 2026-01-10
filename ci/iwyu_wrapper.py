@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 def find_iwyu_binary() -> str | None:
@@ -85,7 +85,7 @@ def get_compiler_include_paths(compiler_path: str) -> list[str]:
 
         return paths
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise  # MUST re-raise KeyboardInterrupt to allow user to stop execution
     except Exception as e:
         print(

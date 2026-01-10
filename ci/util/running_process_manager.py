@@ -4,7 +4,7 @@ from typing import Optional
 # Import at runtime since this module is part of util package and used broadly
 from running_process import RunningProcess
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 class RunningProcessManager:
@@ -45,9 +45,9 @@ class RunningProcessManager:
             try:
                 if p.proc is not None:
                     pid = p.proc.pid
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 pid = None

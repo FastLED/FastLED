@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """Serial port detection and management utilities.
@@ -62,7 +62,7 @@ def auto_detect_upload_port() -> ComportResult:
         # Scan all available COM ports
         all_ports = list(serial.tools.list_ports.comports())
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         # Failed to scan ports - return error result
@@ -150,7 +150,7 @@ def log_port_cleanup(message: str, log_dir: Path | None = None) -> None:
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {message}\n")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         # Silently ignore logging errors - don't fail the operation

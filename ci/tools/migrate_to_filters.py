@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """Auto-generate @filter/@end-filter blocks from C++ platform guards in sketches.
@@ -111,7 +111,7 @@ def migrate_sketch(ino_path: Path, dry_run: bool = False) -> tuple[bool, str]:
     try:
         content = ino_path.read_text(encoding="utf-8")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"Failed to read: {e}"

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 # pyright: reportUnknownMemberType=false
 """
@@ -62,7 +62,7 @@ def insert_tool_aliases(meta_json: dict[str, dict[str, Any]]) -> None:
                     if which_result:
                         resolved_cc_path = Path(which_result)
             except KeyboardInterrupt:
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except Exception:
                 resolved_cc_path = None
@@ -101,7 +101,7 @@ def insert_tool_aliases(meta_json: dict[str, dict[str, Any]]) -> None:
                         )
                         tool_suffix = gdb_path.suffix
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
                     pass
@@ -149,7 +149,7 @@ def remove_readonly(func: Callable[..., Any], path: str, _: Any) -> None:
         try:
             os.chmod(path, 0o777)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             print(f"Error removing readonly attribute from {path}")
@@ -202,7 +202,7 @@ def robust_rmtree(path: Path, max_retries: int, delay: float) -> bool:
             time.sleep(delay * (2**attempt))  # Exponential backoff
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             locked_print(f"Unexpected error removing directory {path}: {e}")
@@ -249,7 +249,7 @@ def safe_file_removal(file_path: Path, max_retries: int) -> bool:
             time.sleep(0.1 * (attempt + 1))
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             locked_print(f"Unexpected error removing file {file_path}: {e}")
@@ -297,7 +297,7 @@ def create_build_dir(
             f"[Thread {thread_id}] Successfully created build directory: {builddir}"
         )
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         locked_print(
@@ -352,7 +352,7 @@ def create_build_dir(
                 f"[Thread {thread_id}] Successfully copied board directory to {dst_dir}"
             )
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             locked_print(f"[Thread {thread_id}] Error copying board directory: {e}")
@@ -569,7 +569,7 @@ configure_ccache(env)'''
                 ini_contents = f.read()
                 locked_print(f"\n\n{ini_contents}\n\n")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             locked_print(f"Error reading {platformio_ini_path}: {e}")
@@ -608,7 +608,7 @@ configure_ccache(env)'''
             with open(matadata_json, "w") as f:
                 f.write(formatted)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             with open(matadata_json, "w") as f:

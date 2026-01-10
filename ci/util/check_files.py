@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -171,7 +171,7 @@ class MultiCheckerFileProcessor:
                         results[checker_name].extend(issues)
 
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
                     # Add error to all interested checkers
@@ -249,9 +249,9 @@ class GenericFileSearcher:
                 content = f.read()
             file_content = FileContent(path=file_path, content=content, lines=[])
             return callback.check_file_content(file_content)
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             return [f"Error processing file {file_path}: {str(e)}"]

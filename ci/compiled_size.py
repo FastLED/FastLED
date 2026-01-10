@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Optional
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 def _create_board_info(path: Path) -> dict[str, Any]:
@@ -136,7 +136,7 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
             headers = int(m.group(3))
             return code + data + headers
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         pass
@@ -181,9 +181,9 @@ def main(board: str, example: Optional[str] = None):
         print(f"Error: {e}")
     except json.JSONDecodeError:
         print(f"Error: Unable to parse build_info.json for {board}")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -170,7 +170,7 @@ def _dump_post_mortem_stack_trace(
     except FileNotFoundError:
         return "GDB not found - install GDB to enable stack trace analysis"
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return f"Failed to run post-mortem stack trace analysis: {e}"
@@ -436,7 +436,7 @@ def main() -> None:
                             break
 
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     _ABORT_EVENT.set()
                     print("\nTest execution interrupted by user")
                     try:
@@ -531,7 +531,7 @@ def main() -> None:
             )
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\nTest execution interrupted by user")
         sys.exit(1)

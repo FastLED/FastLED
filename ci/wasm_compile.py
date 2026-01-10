@@ -10,7 +10,7 @@ from rich.panel import Panel
 
 from ci.boards import NATIVE
 from ci.compiler.board_example_utils import should_skip_example_for_board
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 console = Console()
 
@@ -76,9 +76,9 @@ def main() -> int:
         console.print(
             f"[bold yellow]⚠️  WARNING:[/bold yellow] Error checking filters for '{example_name}': {e}"
         )
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         # Unexpected error during filter check - log and continue

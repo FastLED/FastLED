@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 
 from ci.util.elf import dump_symbol_sizes
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT
 from ci.util.tools import Tools, load_tools
 
@@ -54,9 +54,9 @@ class TestBinToElf(unittest.TestCase):
         tools: Tools
         try:
             tools = load_tools(BUILD_INFO_PATH)
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             warnings.warn(f"Error while loading tools: {e}")

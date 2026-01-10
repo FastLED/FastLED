@@ -8,7 +8,7 @@ from typing import Protocol, cast
 
 import psutil
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.test_types import TestArgs
 
 
@@ -63,7 +63,7 @@ def get_process_tree_info(pid: int) -> str:
 
         return "\n".join(info)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except:
         return f"Could not get process info for PID {pid}"

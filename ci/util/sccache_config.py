@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -58,7 +58,7 @@ def clear_sccache_stats() -> None:
     except subprocess.TimeoutExpired:
         pass  # Don't fail build if stats clearing times out
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         pass  # Don't fail build if stats clearing fails
@@ -147,7 +147,7 @@ def show_sccache_stats() -> None:
     except subprocess.TimeoutExpired:
         ts_print("Warning: sccache --show-stats timed out")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
@@ -217,7 +217,7 @@ def configure_sccache(env: PlatformIOEnv) -> None:
             ts_print("SCCACHE Statistics:")
             ts_print(result.stdout)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         pass  # Don't fail build if stats aren't available

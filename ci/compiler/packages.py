@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 """
 Enhanced Arduino Package Index Implementation with Pydantic
@@ -460,7 +460,7 @@ class PackageIndexParser:
             return self.parse_package_index(json_str)
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
@@ -477,7 +477,7 @@ class PackageIndexParser:
             return self.parse_package_index(json_str)
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
@@ -571,7 +571,7 @@ def extract_archive(archive_path: Path, extract_to: Path) -> bool:
         return True
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"Error extracting archive {archive_path}: {e}")
@@ -678,7 +678,7 @@ def demo_esp32_parsing() -> Optional[PackageIndex]:
         print(f"❌ Package parsing error: {e}")
         sys.exit(1)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
@@ -791,12 +791,12 @@ def main() -> None:
                 print("👋 Goodbye!")
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
             print("\n👋 Interrupted by user")
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n👋 Interrupted by user")
         sys.exit(1)

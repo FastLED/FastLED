@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -100,7 +100,7 @@ class GitHubDebugger:
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
@@ -125,7 +125,7 @@ class GitHubDebugger:
             )
             return json.loads(result.stdout)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting run info: {e}", file=sys.stderr)
@@ -156,7 +156,7 @@ class GitHubDebugger:
             ]
             return failed_jobs
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting failed jobs: {e}", file=sys.stderr)
@@ -206,7 +206,7 @@ class GitHubDebugger:
             print("Error: Log download timed out", file=sys.stderr)
             return None
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error downloading logs: {e}", file=sys.stderr)
@@ -309,7 +309,7 @@ class GitHubDebugger:
                 self._save_error_block(current_job, error_buffer, is_critical=False)
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"\nError analyzing logs: {e}", file=sys.stderr)
@@ -456,7 +456,7 @@ Examples:
     try:
         debugger.debug()
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n\nInterrupted by user")
         sys.exit(1)

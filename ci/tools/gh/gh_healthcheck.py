@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -118,7 +118,7 @@ class HealthChecker:
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
@@ -145,7 +145,7 @@ class HealthChecker:
             runs = json.loads(result.stdout)
             return runs[0] if runs else None
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
@@ -170,7 +170,7 @@ class HealthChecker:
             )
             return json.loads(result.stdout)
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Error getting run info: {e}", file=sys.stderr)
@@ -208,7 +208,7 @@ class HealthChecker:
             print(f"⚠️  Timeout fetching logs for job {job_id}", file=sys.stderr)
             return []
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"⚠️  Error fetching job logs: {e}", file=sys.stderr)
@@ -538,7 +538,7 @@ Examples:
         exit_code = checker.run_healthcheck()
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
         print("\n\nInterrupted by user")
         sys.exit(1)

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
@@ -137,7 +137,7 @@ def _init_platformio_build(
         # Generate linker map in the board directory (file name is sufficient; PIO writes here)
         board_with_sketch_include.build_flags.append("-Wl,-Map,firmware.map")
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception:
         # Non-fatal: continue without optimization artifacts if path resolution fails
@@ -210,7 +210,7 @@ def _init_platformio_build(
                 for line in f:
                     print(line, end="")
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             warnings.warn(f"Failed to write sdkconfig: {e}")
@@ -386,7 +386,7 @@ class PioCompiler(Compiler):
             cancelled.set()
             for future in futures:
                 future.cancel()
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"Exception: {e}")
@@ -458,7 +458,7 @@ class PioCompiler(Compiler):
             except KeyboardInterrupt:
                 print("KeyboardInterrupt: Cancelling build")
                 running_process.terminate()
-                notify_main_thread()
+                handle_keyboard_interrupt_properly()
                 raise
             except OSError as e:
                 # Handle output encoding issues on Windows
@@ -562,7 +562,7 @@ class PioCompiler(Compiler):
                 return f"Failed to get {cache_name.upper()} statistics: {result.stderr}"
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
@@ -645,7 +645,7 @@ class PioCompiler(Compiler):
         except KeyboardInterrupt:
             print("KeyboardInterrupt: Cancelling build")
             cancelled.set()
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             return SketchResult(
                 success=False,
                 output="Build cancelled by user",
@@ -824,7 +824,7 @@ class PioCompiler(Compiler):
                             break
                         print(line)  # No timestamp for monitor output
                 except KeyboardInterrupt:
-                    notify_main_thread()
+                    handle_keyboard_interrupt_properly()
                     raise
                     print("\n📡 Monitor stopped by user")
                     monitor_process.terminate()
@@ -907,7 +907,7 @@ class PioCompiler(Compiler):
                 return result.stdout.strip().split()
             return []
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             return []
@@ -919,7 +919,7 @@ class PioCompiler(Compiler):
 
             return os.geteuid() == 0
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception:
             return False
@@ -993,7 +993,7 @@ class PioCompiler(Compiler):
             return True
 
         except KeyboardInterrupt:
-            notify_main_thread()
+            handle_keyboard_interrupt_properly()
             raise
         except Exception as e:
             print(f"ERROR: Failed to install udev rules: {e}")
@@ -1238,7 +1238,7 @@ def run_pio_build(
                             print(stats)
                             print("=" * 60)
                     except KeyboardInterrupt:
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception as e:
                         print(f"Warning: Could not retrieve compiler statistics: {e}")
