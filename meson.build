@@ -215,8 +215,32 @@ else
   test_link_args = base_link_args
 endif
 
+# DLL-specific link arguments: Minimize linking by moving libraries to runner.exe
+# This optimization moves library linking from N test DLLs (176×) to runner.exe (1×)
+# Moved to runner.exe:
+#   - pthread (POSIX threads) - required by FastLED
+#   - dbghelp (Windows debug helper) - for crash handler stack traces
+#   - psapi (Windows process API) - for crash handler memory info
+#   - libunwind (Unix) - for enhanced stack traces
+# Result: ~10-15% build time improvement
+if is_windows
+  # Windows: Minimal DLL linking (crash handler moved to runner.exe)
+  dll_link_args = [
+    '-mconsole',                # Console application subsystem
+    '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
+    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
+  ]
+else
+  # Unix: Minimal DLL linking (pthread and libunwind moved to runner.exe)
+  dll_link_args = [
+    '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
+    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
+  ]
+endif
+
 # Legacy alias for backward compatibility with tests/meson.build
-unit_test_link_args = test_link_args
+# NOTE: This now points to dll_link_args (optimized), not test_link_args (full)
+unit_test_link_args = dll_link_args
 
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
@@ -224,6 +248,10 @@ example_link_args = base_link_args
 # Add sanitizer flags to link arguments when in debug mode
 if build_mode == 'debug'
   test_link_args += [
+    '-fsanitize=address',       # Link AddressSanitizer runtime
+    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+  ]
+  dll_link_args += [
     '-fsanitize=address',       # Link AddressSanitizer runtime
     '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
   ]

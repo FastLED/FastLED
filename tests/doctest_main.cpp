@@ -66,9 +66,10 @@
 #endif
 
 extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
-#ifdef ENABLE_CRASH_HANDLER
-    setup_crash_handler();
-#endif
+    // NOTE: Crash handler is setup by runner.exe BEFORE loading this DLL
+    // We do NOT call setup_crash_handler() here to avoid duplicate setup
+    // and to keep crash handler dependencies (dbghelp, psapi) in runner.exe only
+
     // Pre-initialize CoroutineRunner singleton to avoid DLL hang on first access
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();

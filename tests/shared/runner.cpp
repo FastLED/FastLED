@@ -1,61 +1,94 @@
 // Generic test runner that loads and executes test DLLs
-// This executable is copied to each test directory as <test_name>.exe
-// It automatically loads <test_name>.dll and calls run_tests()
+// Usage: runner.exe <test_dll_path> [doctest args...]
+// Or:    <test_name>.exe (auto-loads <test_name>.dll from same directory)
 
 #include <windef.h>
 #include <libloaderapi.h>
 #include <string>
 #include <iostream>
+#include <vector>
 #include <stddef.h>
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"
 
-typedef int (*RunTestsFunc)();
+// Crash handler setup (defined in crash_handler_main.cpp)
+extern "C" void runner_setup_crash_handler();
 
-int main(int /*argc*/, char** /*argv*/) {
-    // Get executable path
-    char exe_path[MAX_PATH];
-    DWORD result = GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+typedef int (*RunTestsFunc)(int argc, const char** argv);
 
-    if (result == 0 || result == MAX_PATH) {
-        std::cerr << "Error: Failed to get executable path" << std::endl;
-        return 1;
+int main(int argc, char** argv) {
+    // Setup crash handler BEFORE loading any DLLs
+    // This ensures crash handling is active for the entire process lifetime
+    runner_setup_crash_handler();
+    std::string dll_path;
+
+    // Determine DLL path: explicit argument or inferred from exe name
+    if (argc > 1 && argv[1][0] != '-') {
+        // First argument is a path (doesn't start with -)
+        dll_path = argv[1];
+    } else {
+        // No explicit path: infer from exe name
+        char exe_path[MAX_PATH];
+        DWORD result = GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+
+        if (result == 0 || result == MAX_PATH) {
+            std::cerr << "Error: Failed to get executable path" << std::endl;
+            return 1;
+        }
+
+        // Extract directory and filename
+        std::string full_path(exe_path);
+        size_t last_slash = full_path.find_last_of("\\/");
+        std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
+        std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
+
+        // Remove .exe extension
+        size_t dot_pos = exe_file.find_last_of('.');
+        std::string exe_name = (dot_pos != std::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
+
+        // Construct DLL path
+        std::string dll_name = exe_name + ".dll";
+        dll_path = exe_dir + "\\" + dll_name;
     }
-
-    // Extract directory and filename using string manipulation
-    std::string full_path(exe_path);
-    size_t last_slash = full_path.find_last_of("\\/");
-    std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
-    std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
-
-    // Remove .exe extension
-    size_t dot_pos = exe_file.find_last_of('.');
-    std::string exe_name = (dot_pos != std::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
-
-    // Construct DLL path
-    std::string dll_name = exe_name + ".dll";
-    std::string dll_path = exe_dir + "\\" + dll_name;
 
     // Load DLL
     HMODULE dll = LoadLibraryA(dll_path.c_str());
     if (!dll) {
         DWORD error = GetLastError();
-        std::cerr << "Error: Failed to load " << dll_name << " (error code: " << error << ")" << std::endl;
-        std::cerr << "Expected path: " << dll_path << std::endl;
+        std::cerr << "Error: Failed to load " << dll_path << " (error code: " << error << ")" << std::endl;
         return 1;
     }
 
     // Get run_tests function
     RunTestsFunc run_tests = (RunTestsFunc)GetProcAddress(dll, "run_tests");
     if (!run_tests) {
-        std::cerr << "Error: Failed to find run_tests() in " << dll_name << std::endl;
+        std::cerr << "Error: Failed to find run_tests() in " << dll_path << std::endl;
         FreeLibrary(dll);
         return 1;
     }
 
-    // Call test function
-    int test_result = run_tests();
+    // Prepare arguments for run_tests (skip DLL path if it was provided)
+    int test_argc;
+    const char** test_argv;
+    std::vector<const char*> adjusted_argv;
+
+    if (argc > 1 && argv[1][0] != '-') {
+        // DLL path was provided: skip it in arguments passed to tests
+        test_argc = argc - 1;
+        adjusted_argv.push_back(argv[0]); // Keep program name
+        for (int i = 2; i < argc; ++i) {
+            adjusted_argv.push_back(argv[i]);
+        }
+        test_argv = adjusted_argv.data();
+    } else {
+        // No DLL path: pass all arguments
+        test_argc = argc;
+        test_argv = const_cast<const char**>(argv);
+    }
+
+    // Call test function with arguments
+    int test_result = run_tests(test_argc, test_argv);
 
     // Cleanup
     FreeLibrary(dll);

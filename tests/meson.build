@@ -49,16 +49,55 @@ doctest_main = static_library('doctest_main',
 
 # Doctest main for DLL mode - compiled separately without PCH to avoid namespace conflicts
 # This creates a static library that provides the run_tests() export function
+# NOTE: ENABLE_CRASH_HANDLER is removed - crash handler setup moved to runner.exe
 doctest_dll_main = static_library('doctest_dll_main',
   'doctest_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
-  cpp_args: ['-DTEST_DLL_MODE', '-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],  # Add FASTLED_STUB_IMPL
+  cpp_args: ['-DTEST_DLL_MODE', '-DFASTLED_STUB_IMPL'],  # Removed -DENABLE_CRASH_HANDLER
+  install: false
+)
+
+# Crash handler library for runner.exe
+# This provides crash handler setup that runs BEFORE any DLL is loaded
+# Links to dbghelp/psapi on Windows, libunwind on Unix (if available)
+crash_handler_deps = []
+if libunwind_dep.found()
+  crash_handler_deps += [libunwind_dep]
+endif
+
+crash_handler_runner = static_library('crash_handler_runner',
+  'shared/crash_handler_main.cpp',
+  include_directories: [tests_dir, src_dir, stub_dir],
+  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
+  dependencies: crash_handler_deps,
   install: false
 )
 
 # Build runner executable (static, generic DLL loader)
 # This executable loads a test DLL and calls its run_tests() function
 # It will be copied to each test directory as <test_name>.exe
+#
+# OPTIMIZATION: System libraries (pthread, dbghelp, psapi) are linked here (once)
+# instead of in each test_X.dll (176 times), significantly reducing build time.
+# The runner.exe provides these symbols to the loaded DLL at runtime.
+# Crash handler is also setup in runner.exe before loading any DLL.
+runner_link_args = ['-static', '-static-libgcc', '-static-libstdc++']
+runner_deps = []
+if build_machine.system() == 'windows'
+  # Windows: Add system libraries that test DLLs depend on
+  runner_link_args += [
+    '-lpthread',    # POSIX threads (winpthreads) - required by FastLED
+    '-ldbghelp',    # Debug helper library (for stack traces in crash handler)
+    '-lpsapi',      # Process status API (for memory info in crash handler)
+  ]
+else
+  # Unix: Add pthread and libunwind (if available)
+  runner_link_args += ['-pthread']
+  if libunwind_dep.found()
+    runner_deps += [libunwind_dep]
+  endif
+endif
+
 runner_exe = executable('runner',
   'shared/runner.cpp',
   cpp_args: [
@@ -68,7 +107,9 @@ runner_exe = executable('runner',
     # Suppress warnings from Windows SDK headers
     '-Wno-pragma-pack',
   ],
-  link_args: ['-static', '-static-libgcc', '-static-libstdc++'],
+  link_args: runner_link_args,
+  link_with: [crash_handler_runner],  # Link crash handler library
+  dependencies: runner_deps,
   install: false
 )
 
@@ -99,12 +140,13 @@ foreach line : test_metadata_output.split('\n')
   endif
 endforeach
 
-# Build individual test executables
+# Build individual test DLLs and runner executables
 
-# Track all test executables for alias
-all_test_executables = []
+# Track all test DLLs and runners for alias
+all_test_dlls = []
+all_test_runners = []
 
-# Build each test executable with shared PCH
+# Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
   test_file = test_file_paths.get(test_name, test_name + '.cpp')
@@ -120,30 +162,42 @@ foreach test_name : test_names
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
 
-  # Build list of dependencies (libunwind if available)
-  test_dependencies = []
-  if libunwind_dep.found()
-    test_dependencies += [libunwind_dep]
-  endif
-
-  test_exe = executable(test_name,
+  # Build test as a shared library (DLL)
+  # NOTE: No dependencies needed - libunwind moved to runner.exe
+  test_dll = shared_library(test_name,
     test_sources,
     include_directories: [src_dir, tests_dir, stub_dir],
     cpp_args: test_cpp_args,
     link_args: unit_test_link_args,
-    link_with: [fastled_lib, doctest_main],
-    dependencies: test_dependencies,  # Add libunwind here
+    link_with: [fastled_lib, doctest_dll_main],  # Use DLL-mode doctest main
+    name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'test.dll' not 'libtest.dll')
     install: false
   )
 
-  # Track test executable for alias
-  all_test_executables += test_exe
+  # Track test DLL for alias
+  all_test_dlls += test_dll
 
-  # Register test with project root as working directory
-  test(test_name, test_exe, workdir: meson.project_source_root())
+  # Copy runner.exe to test directory as <test_name>.exe
+  test_runner = custom_target(test_name + '_runner',
+    input: runner_exe,
+    output: test_name + '.exe',
+    command: ['cp', '@INPUT@', '@OUTPUT@'],
+    depends: [test_dll],  # Ensure DLL is built first
+    build_by_default: true
+  )
+
+  # Track test runner for alias
+  all_test_runners += test_runner
+
+  # Register test: runner.exe loads the DLL and executes it
+  test(test_name, runner_exe,
+    args: [test_dll.full_path()],
+    workdir: meson.project_source_root(),
+    depends: [test_dll]
+  )
 endforeach
 
-# Create alias target that builds all test executables
-alias_target('all_tests', all_test_executables)
+# Create alias target that builds all test DLLs and runners
+alias_target('all_tests', all_test_dlls + all_test_runners)
 
-message('Individual test build enabled: ' + test_names.length().to_string() + ' test executables')
+message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners')
