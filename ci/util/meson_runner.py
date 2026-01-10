@@ -1127,8 +1127,6 @@ def compile_meson(
     env = os.environ.copy()
     if check:
         # Use custom IWYU wrapper (fixes clang-tool-chain-iwyu argument forwarding issues)
-        from pathlib import Path
-
         iwyu_wrapper_path = Path(__file__).parent.parent / "iwyu_wrapper.py"
         if iwyu_wrapper_path.exists():
             # Use Python to invoke our custom wrapper
@@ -1152,7 +1150,6 @@ def compile_meson(
                     # Pattern matches EITHER:
                     #   1. Single executable: command = "path\to\clang++.EXE" $ARGS
                     #   2. Python wrapper: command = "python.exe" "wrapper.py" $ARGS
-                    import re
 
                     # Flexible pattern that captures the entire compiler command before $ARGS
                     # Group 1: "rule cpp_COMPILER\n command = "
@@ -1222,7 +1219,39 @@ def compile_meson(
             output_formatter=TimestampFormatter(),
         )
 
-        returncode = proc.wait(echo=True)
+        # Pattern to detect linking operations (same as streaming path)
+        # Example: "[142/143] Linking target tests/test_foo.exe"
+        # Note: TimestampFormatter already adds timestamp, so line comes with that prefix
+        # We need to match after the TimestampFormatter's output (e.g., "7.11 3.14 [1/1] Linking...")
+        link_pattern = re.compile(
+            r"\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
+        )
+
+        # Stream output line by line to rewrite Ninja paths
+        with proc.line_iter(timeout=None) as it:
+            for line in it:
+                # Rewrite Ninja paths to show full build-relative paths for clarity
+                # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
+                # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
+                display_line = line
+                link_match = link_pattern.search(line)
+                if link_match:
+                    rel_path = link_match.group(1)
+                    # Convert build-relative path to project-relative path
+                    full_path = build_dir / rel_path
+                    try:
+                        # Make path relative to project root for cleaner display
+                        display_path = full_path.relative_to(Path.cwd())
+                        # Rewrite the line with full path
+                        display_line = line.replace(rel_path, str(display_path))
+                    except ValueError:
+                        # If path is outside project, show absolute path
+                        display_line = line.replace(rel_path, str(full_path))
+
+                # Echo the (possibly rewritten) line
+                _ts_print(display_line)
+
+        returncode = proc.wait()
 
         # Check for Ninja dependency database corruption
         # This appears as "ninja: warning: premature end of file; recovering"
@@ -2133,11 +2162,31 @@ def stream_compile_and_run_tests(
             # Stream output line by line
             with proc.line_iter(timeout=None) as it:
                 for line in it:
+                    # Rewrite Ninja paths to show full build-relative paths for clarity
+                    # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
+                    # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
+                    display_line = line
+                    link_match = link_pattern.match(line.strip())
+                    if link_match:
+                        rel_path = link_match.group(1)
+                        # Convert build-relative path to project-relative path
+                        full_path = build_dir / rel_path
+                        try:
+                            # Make path relative to project root for cleaner display
+                            display_path = full_path.relative_to(Path.cwd())
+                            # Rewrite the line with full path
+                            display_line = line.replace(rel_path, str(display_path))
+                        except ValueError:
+                            # If path is outside project, show absolute path
+                            display_line = line.replace(rel_path, str(full_path))
+
                     # Echo output for visibility
-                    _ts_print(f"[BUILD] {line}")
+                    _ts_print(f"[BUILD] {display_line}")
 
                     # Check for link completion
-                    match = link_pattern.match(line.strip())
+                    match = (
+                        link_match if link_match else link_pattern.match(line.strip())
+                    )
                     if match:
                         # Extract test executable path
                         rel_path = match.group(1)
