@@ -206,6 +206,14 @@ The package installation daemon is a singleton background process that ensures P
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
+- **Compiler requirement (Windows)**: The project requires clang for Windows builds. When configuring meson:
+  ```bash
+  CXX=clang-tool-chain-sccache-cpp CC=clang-tool-chain-sccache-c meson setup builddir
+  ```
+  - GCC 12.2.0 on Windows has `_aligned_malloc` errors in ESP32 mock drivers
+  - Clang 21.1.5 provides proper MSVC compatibility layer and resolves these issues
+  - test.py automatically uses clang on Windows (can override with `--gcc` flag)
+  - The clang-tool-chain wrappers include sccache integration for fast builds
 
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`

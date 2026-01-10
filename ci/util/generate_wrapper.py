@@ -20,10 +20,17 @@ def main():
     ino_file = sys.argv[3]
 
     content = f"""// Auto-generated wrapper for example: {example_name}
-// This file includes the Arduino sketch and provides main()
+// This file includes the Arduino sketch and provides main() or DLL export
 
 #include "{ino_file}"
+
+#ifdef EXAMPLE_DLL_MODE
+// DLL mode: Use export function from example_dll_main.hpp
+#include "platforms/example_dll_main.hpp"
+#else
+// Standalone mode: Use standard stub_main.hpp with main()
 #include "platforms/stub_main.hpp"
+#endif
 """
 
     with open(output_file, "w") as f:

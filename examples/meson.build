@@ -121,6 +121,62 @@ endforeach
 # Get stub_main.cpp source file (provides main() that calls setup/loop)
 stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 
+# ============================================================================
+# BUILD EXAMPLE RUNNER (DLL LOADER)
+# ============================================================================
+# Build crash handler library for example_runner.exe
+# Reuse the crash handler from tests (same implementation)
+crash_handler_deps_example = []
+if libunwind_dep.found()
+  crash_handler_deps_example += [libunwind_dep]
+endif
+
+crash_handler_example = static_library('crash_handler_example',
+  project_root / 'tests' / 'shared' / 'crash_handler_main.cpp',
+  include_directories: [src_dir, stub_dir],
+  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
+  dependencies: crash_handler_deps_example,
+  install: false
+)
+
+# Build example_runner.exe (static, generic DLL loader)
+# This executable loads an example DLL and calls its run_example() function
+# It will be copied to each example directory as example-<name>.exe
+#
+# OPTIMIZATION: System libraries (pthread, dbghelp, psapi) are linked here (once)
+# instead of in each example-X.dll (96 times), significantly reducing build time.
+# The example_runner.exe provides these symbols to the loaded DLL at runtime.
+# Crash handler is also setup in example_runner.exe before loading any DLL.
+example_runner_link_args = ['-static', '-static-libgcc', '-static-libstdc++']
+example_runner_deps = []
+if build_machine.system() == 'windows'
+  # Windows: Add system libraries that example DLLs depend on
+  example_runner_link_args += [
+    '-lpthread',    # POSIX threads (winpthreads) - required by FastLED
+    '-ldbghelp',    # Debug helper library (for stack traces in crash handler)
+    '-lpsapi',      # Process status API (for memory info in crash handler)
+  ]
+else
+  # Unix: Add pthread and libunwind (if available)
+  example_runner_link_args += ['-pthread']
+  if libunwind_dep.found()
+    example_runner_deps += [libunwind_dep]
+  endif
+endif
+
+example_runner_exe = executable('example_runner',
+  'shared' / 'example_runner.cpp',
+  cpp_args: [
+    '-std=c++11',
+    '-O2',
+    '-g',
+  ],
+  link_args: example_runner_link_args,
+  link_with: [crash_handler_example],  # Link crash handler library
+  dependencies: example_runner_deps,
+  install: false
+)
+
 # Cache python program to avoid repeated lookups in the loop
 python_prog = find_program('python')
 
@@ -195,23 +251,41 @@ foreach example_name : example_paths.keys()
     # Collect all source files: wrapper + any additional .cpp files from subdirectories
     all_sources = [wrapper_cpp] + additional_sources
 
-    exe = executable(
+    # Build example as a shared library (DLL)
+    # NOTE: System dependencies moved to example_runner.exe
+    example_dll = shared_library(
         'example-' + example_name,
         all_sources,  # Wrapper + additional .cpp files
         include_directories: all_includes,
         link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args,
-        link_args: example_link_args,
+        cpp_args: example_compile_args + debug_cpp_args + ['-DEXAMPLE_DLL_MODE'],
+        link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
+        name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
         build_by_default: false,  # Only build when explicitly requested
         install: false
     )
 
-    # Register as test target so it can be run with `meson test`
-    # Add to 'examples' suite for easy filtering
-    # Note: Some tests may fail due to platform-specific code, but we still include them
-    test('example-' + example_name, exe, suite: 'examples', timeout: 60)
+    # Copy example_runner.exe to example directory as example-<name>.exe
+    # This allows running `example-Blink.exe` which auto-loads `example-Blink.dll`
+    example_runner_copy = custom_target(
+        'example-' + example_name + '_runner',
+        input: example_runner_exe,
+        output: 'example-' + example_name + '.exe',
+        command: ['cp', '@INPUT@', '@OUTPUT@'],
+        depends: [example_dll],  # Ensure DLL is built first
+        build_by_default: false
+    )
 
-    example_executables += exe
+    # Register as test target: runner loads the DLL and executes it
+    # Add to 'examples' suite for easy filtering
+    test('example-' + example_name, example_runner_exe,
+        args: [example_dll.full_path()],
+        suite: 'examples',
+        timeout: 60
+    )
+
+    # Track both DLL and runner for alias target
+    example_executables += [example_dll, example_runner_copy]
 endforeach
 
 # Create alias target to build all examples

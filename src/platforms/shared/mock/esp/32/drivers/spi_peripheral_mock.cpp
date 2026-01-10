@@ -14,6 +14,10 @@
 #include <thread>  // ok include
 #include <chrono>  // ok include
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
+#endif
+
 #ifdef ARDUINO
 #include <Arduino.h>  // ok include - For micros() and delay() on Arduino platforms
 #else

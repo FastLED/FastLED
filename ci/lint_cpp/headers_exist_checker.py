@@ -40,6 +40,7 @@ EXCLUDED_TEST_FILES = {
     "serial_printf.cpp",  # Tests Arduino Serial API, not a FastLED header
     "test_runner.cpp",  # Test runner executable that loads test DLLs
     "runner.cpp",  # Windows DLL loader for test execution
+    "crash_handler_main.cpp",  # Shared infrastructure for crash handling in runner
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)
