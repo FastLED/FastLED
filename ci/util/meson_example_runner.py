@@ -22,11 +22,51 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
+def _prepare_environment(build_mode: str) -> dict[str, str]:
+    """
+    Prepare environment for example execution.
+
+    In debug mode on Windows, adds compiler DLL directory to PATH
+    to ensure ASAN runtime dependencies (libc++.dll, libunwind.dll) are found.
+
+    Args:
+        build_mode: Build mode ("quick", "debug", or "release")
+
+    Returns:
+        Environment dictionary
+    """
+    env = os.environ.copy()
+
+    # Only modify PATH on Windows in debug mode
+    if sys.platform != "win32" or build_mode != "debug":
+        return env
+
+    # Import the DLL finder utility
+    from ci.util.find_compiler_dlls import find_compiler_dll_dir
+
+    # Find compiler DLL directory
+    dll_dir = find_compiler_dll_dir()
+    if dll_dir:
+        # Prepend to PATH (takes priority over system PATH)
+        current_path = env.get("PATH", "")
+        env["PATH"] = f"{dll_dir}{os.pathsep}{current_path}"
+        _ts_print(f"[DEBUG] Added compiler DLL directory to PATH: {dll_dir}")
+    else:
+        # Warn if not found (non-fatal - may still work if DLLs are in system PATH)
+        _ts_print(
+            "[WARN] Could not find compiler DLL directory - ASAN tests may fail",
+            file=sys.stderr,
+        )
+
+    return env
+
+
 def compile_examples(
     build_dir: Path,
     examples: list[str] | None = None,
     verbose: bool = False,
     parallel: bool = True,
+    build_mode: str = "quick",
 ) -> bool:
     """
     Compile FastLED examples using Meson.
@@ -36,6 +76,7 @@ def compile_examples(
         examples: List of example names to compile (None = all)
         verbose: Enable verbose compilation output
         parallel: Enable parallel compilation (default: True)
+        build_mode: Build mode ("quick", "debug", or "release")
 
     Returns:
         True if compilation successful, False otherwise
@@ -68,7 +109,7 @@ def compile_examples(
             timeout=600,  # 10 minute timeout
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=os.environ.copy(),  # Pass current environment
+            env=_prepare_environment(build_mode),  # Add compiler DLL directory to PATH
             output_formatter=TimestampFormatter(),
         )
 
@@ -105,6 +146,7 @@ def run_examples(
     examples: list[str] | None = None,
     verbose: bool = False,
     timeout: int = 30,
+    build_mode: str = "quick",
 ) -> MesonTestResult:
     """
     Run compiled FastLED examples using Meson test runner.
@@ -114,6 +156,7 @@ def run_examples(
         examples: List of example names to run (None = all)
         verbose: Enable verbose test output
         timeout: Timeout per example in seconds (default: 30)
+        build_mode: Build mode ("quick", "debug", or "release")
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -152,7 +195,7 @@ def run_examples(
             timeout=1800,  # 30 minute total timeout
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=os.environ.copy(),
+            env=_prepare_environment(build_mode),  # Add compiler DLL directory to PATH
             output_formatter=TimestampFormatter(),
         )
 
@@ -333,7 +376,11 @@ def run_meson_examples(
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
             if not compile_examples(
-                build_dir, examples=examples, verbose=verbose, parallel=parallel
+                build_dir,
+                examples=examples,
+                verbose=verbose,
+                parallel=parallel,
+                build_mode=build_mode,
             ):
                 return MesonTestResult(success=False, duration=time.time() - start_time)
     except TimeoutError as e:
@@ -342,7 +389,13 @@ def run_meson_examples(
 
     # If full mode, run the examples
     if full:
-        result = run_examples(build_dir, examples=examples, verbose=verbose, timeout=60)
+        result = run_examples(
+            build_dir,
+            examples=examples,
+            verbose=verbose,
+            timeout=60,
+            build_mode=build_mode,
+        )
         return result
     else:
         # Just compilation, return success
