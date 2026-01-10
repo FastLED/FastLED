@@ -2150,6 +2150,13 @@ def stream_compile_and_run_tests(
                             or "examples/" in rel_path
                             or "examples\\" in rel_path
                         ):
+                            # Exclude infrastructure executables that aren't actual tests
+                            # - runner.exe: Generic DLL loader (copied/renamed for each test in unity mode)
+                            # - test_runner.exe: Unity mode test harness that loads test DLLs
+                            test_name = test_path.stem  # Get filename without extension
+                            if test_name in ("runner", "test_runner"):
+                                continue  # Skip these infrastructure executables
+
                             _ts_print(f"[MESON] Test ready: {test_path.name}")
                             test_queue.put(test_path)
 

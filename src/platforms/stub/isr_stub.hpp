@@ -89,6 +89,21 @@ public:
         return inst;
     }
 
+    // Test synchronization support - allows tests to wait for ISR execution
+    // Returns a condition variable that is notified after each ISR handler execution
+    fl::condition_variable& get_test_sync_cv() {
+        return mTestSyncCV;
+    }
+
+    fl::mutex& get_test_sync_mutex() {
+        return mTestSyncMutex;
+    }
+
+    // Notify waiting tests that an ISR has executed
+    void notify_test_waiters() {
+        mTestSyncCV.notify_all();
+    }
+
     void add_handler(stub_isr_handle_data* handler) {
         fl::unique_lock<fl::mutex> lock(mMutex);
 
@@ -182,7 +197,9 @@ private:
 
             // Execute all handlers that are due
             for (auto* handler : mHandlers) {
-                if (!handler->mIsEnabled || !handler->mIsTimer) {
+                // Use acquire memory order to ensure we see the latest mIsEnabled value
+                // This prevents race conditions when handlers are disabled/detached from other threads
+                if (!handler->mIsEnabled.load(fl::memory_order_acquire) || !handler->mIsTimer) {
                     continue;
                 }
 
@@ -196,17 +213,29 @@ private:
                         handler->mUserHandler(handler->mUserData);
                     }
 
+                    // Notify any waiting tests that an ISR has executed
+                    mTestSyncCV.notify_all();
+
                     // Schedule next tick or disable if one-shot
                     if (handler->mIsOneShot) {
-                        handler->mIsEnabled = false;
+                        handler->mIsEnabled.store(false, fl::memory_order_release);
                     } else {
                         uint64_t period_us = 1000000ULL / handler->mFrequencyHz;
-                        handler->mNextTickUs = now + period_us;
+                        // TIMING FIX: Maintain original schedule to prevent drift under heavy load
+                        // Instead of: handler->mNextTickUs = now + period_us;
+                        // We increment from the last scheduled time to avoid cumulative drift
+                        handler->mNextTickUs += period_us;
+
+                        // Safety: If we've fallen too far behind (>10 periods), resync to current time
+                        // This prevents runaway catch-up in extreme cases
+                        if (now > handler->mNextTickUs + (period_us * 10)) {
+                            handler->mNextTickUs = now + period_us;
+                        }
                     }
                 }
 
                 // Track earliest next tick for sleep duration
-                if (handler->mIsEnabled && handler->mNextTickUs < next_wake) {
+                if (handler->mIsEnabled.load(fl::memory_order_acquire) && handler->mNextTickUs < next_wake) {
                     next_wake = handler->mNextTickUs;
                 }
             }
@@ -230,6 +259,10 @@ private:
     fl::unique_ptr<std::thread> mTimerThread;  // okay std namespace
     fl::atomic<bool> mShouldStop;
     uint32_t mNextHandleId;
+
+    // Test synchronization support
+    fl::mutex mTestSyncMutex;
+    fl::condition_variable mTestSyncCV;
 };
 
 // =============================================================================
@@ -344,8 +377,8 @@ inline int stub_enable_handler(isr_handle_t& handle) {
             return -1;  // Invalid handle
         }
 
-        // Enable first, then reschedule
-        handle_data->mIsEnabled = true;
+        // Use release memory order to ensure the enable is visible to the timer thread
+        handle_data->mIsEnabled.store(true, fl::memory_order_release);
 
         // Reschedule the handler to start from current time
         if (handle_data->mIsTimer) {
@@ -368,7 +401,8 @@ inline int stub_disable_handler(isr_handle_t& handle) {
             return -1;  // Invalid handle
         }
 
-        handle_data->mIsEnabled = false;
+        // Use release memory order to ensure the disable is visible to the timer thread
+        handle_data->mIsEnabled.store(false, fl::memory_order_release);
         //STUB_LOG("Handler disabled");
         return 0;  // Success
 }
@@ -383,7 +417,8 @@ inline bool stub_is_handler_enabled(const isr_handle_t& handle) {
             return false;
         }
 
-        return handle_data->mIsEnabled;
+        // Use acquire memory order to ensure we see the latest value
+        return handle_data->mIsEnabled.load(fl::memory_order_acquire);
 }
 
 inline const char* stub_get_error_string(int error_code) {
