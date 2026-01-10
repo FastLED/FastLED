@@ -20,7 +20,7 @@ EXCLUDED_TEST_FILES: Set[str] = {"test_runner.cpp", "doctest_main.cpp"}
 TEST_SUBDIRS: List[str] = ["fl", "fl/channels", "fl/detail", "fl/sensors", "fx", "ftl", "lib8tion", "platforms"]
 
 # ============================================================================
-# Test Categorization Configuration (for Unity Builds)
+# Test Categorization Configuration
 # ============================================================================
 
 # Patterns for identifying platform-specific tests

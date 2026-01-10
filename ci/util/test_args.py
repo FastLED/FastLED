@@ -114,16 +114,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Disable precompiled headers (PCH) when running example compilation tests",
     )
     parser.add_argument(
-        "--unity",
-        action="store_true",
-        help="Enable UNITY build mode for examples - compile all source files as a single unit for improved performance",
-    )
-    parser.add_argument(
-        "--no-unity",
-        action="store_true",
-        help="Disable unity builds for cpp tests and examples",
-    )
-    parser.add_argument(
         "--full",
         action="store_true",
         help="Run full integration tests including compilation + linking + program execution",
@@ -133,12 +123,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         "--no-parallel",
         action="store_true",
         help="Force sequential test execution",
-    )
-    parser.add_argument(
-        "--unity-chunks",
-        type=int,
-        default=1,
-        help="Number of unity chunks when building libfastled.a (default: 1)",
     )
     parser.add_argument(
         "--debug",
@@ -193,11 +177,8 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         check=parsed_args.check,
         examples=parsed_args.examples,
         no_pch=parsed_args.no_pch,
-        unity=parsed_args.unity,
-        no_unity=parsed_args.no_unity,
         full=parsed_args.full,
         no_parallel=parsed_args.no_parallel,
-        unity_chunks=parsed_args.unity_chunks,
         debug=parsed_args.debug,
         run=parsed_args.run,
         qemu=parsed_args.qemu,
@@ -261,45 +242,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     # if test_args.unit and not test_args.verbose:
     #     test_args.verbose = True
     #     ts_print("Auto-enabled --verbose mode for unit tests")
-
-    # Unity builds are DISABLED for unit tests due to DLL singleton issues
-    # Unity builds can still be used for libfastled.a (controlled via --unity-chunks)
-    # Do NOT auto-enable --unity for tests
-
-    # Validate: reject --unity flag for unit tests
-    if test_args.unity and (test_args.unit or test_args.cpp):
-        # Display error banner in red
-        RED = "\033[91m"
-        RESET = "\033[0m"
-        ts_print(f"{RED}{'=' * 80}", file=sys.stderr)
-        ts_print(f"ERROR: Unity builds are DISABLED for unit tests", file=sys.stderr)
-        ts_print(f"{'=' * 80}{RESET}", file=sys.stderr)
-        ts_print("", file=sys.stderr)
-        ts_print(
-            "Unity builds for tests have been disabled due to DLL singleton issues",
-            file=sys.stderr,
-        )
-        ts_print(
-            "that cause heap corruption and crashes (multiple CoroutineRunner instances).",
-            file=sys.stderr,
-        )
-        ts_print("", file=sys.stderr)
-        ts_print(
-            "Unity builds are still available for libfastled.a via --unity-chunks.",
-            file=sys.stderr,
-        )
-        ts_print("", file=sys.stderr)
-        ts_print(
-            "Please remove the --unity flag from your test.py invocation.",
-            file=sys.stderr,
-        )
-        ts_print("", file=sys.stderr)
-        sys.exit(1)
-
-    # Informational message about unity builds (only show once, not for every test)
-    # Skip this message - it's not critical and clutters output
-    # if not test_args.unity and (test_args.unit or test_args.cpp):
-    #     ts_print("ℹ️  Note: Unity builds are disabled for unit tests (use --unity-chunks for libfastled.a)")
 
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:

@@ -323,7 +323,6 @@ def setup_meson_build(
     source_dir: Path,
     build_dir: Path,
     reconfigure: bool = False,
-    unity: bool = False,
     debug: bool = False,
     check: bool = False,
 ) -> bool:
@@ -334,7 +333,6 @@ def setup_meson_build(
         source_dir: Project root directory containing meson.build
         build_dir: Build output directory
         reconfigure: Force reconfiguration of existing build
-        unity: Enable unity builds (default: False)
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         check: Enable IWYU static analysis (default: False)
 
@@ -420,7 +418,6 @@ def setup_meson_build(
     # If it doesn't match the current setting, we force a reconfigure.
     # ============================================================================
     thin_archive_marker = build_dir / ".thin_archive_config"
-    unity_marker = build_dir / ".unity_config"
     source_files_marker = build_dir / ".source_files_hash"
     debug_marker = build_dir / ".debug_config"
     check_marker = build_dir / ".check_config"
@@ -454,68 +451,6 @@ def setup_meson_build(
             _ts_print(
                 "[MESON] ℹ️  No thin archive marker found, will create after setup"
             )
-
-        # Check if unity setting has changed since last configure
-        unity_changed = False
-        if unity_marker.exists():
-            try:
-                last_unity_setting = unity_marker.read_text().strip() == "True"
-                if last_unity_setting != unity:
-                    _ts_print(
-                        f"[MESON] ⚠️  Unity build setting changed: {last_unity_setting} → {unity}"
-                    )
-                    _ts_print("[MESON] 🔄 Forcing reconfigure to update build targets")
-                    force_reconfigure = True
-                    unity_changed = True
-            except (OSError, IOError):
-                # If we can't read the marker, force reconfigure to be safe
-                _ts_print("[MESON] ⚠️  Could not read unity marker, forcing reconfigure")
-                force_reconfigure = True
-        else:
-            # No marker file exists from previous configure
-            # Force reconfigure to ensure Meson is configured with correct unity setting
-            _ts_print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
-            force_reconfigure = True
-
-        # CRITICAL: Delete thin archives when unity build settings change
-        # Thin archives store file paths to object files. When unity builds change,
-        # object file names change (e.g., src_foo.cpp.obj → fastled-unity0.cpp.obj),
-        # causing thin archives to reference non-existent files.
-        # NOTE: We must delete archives regardless of current thin_archives setting,
-        # because old thin archives from previous builds may still exist.
-        if unity_changed:
-            # Delete main FastLED library archive
-            libfastled_a = build_dir / "libfastled.a"
-            if libfastled_a.exists():
-                try:
-                    _ts_print(
-                        "[MESON] 🗑️  Deleting libfastled.a due to unity build change"
-                    )
-                    libfastled_a.unlink()
-                except (OSError, IOError) as e:
-                    _ts_print(f"[MESON] Warning: Could not delete libfastled.a: {e}")
-
-            # Delete all platforms_shared static library archives
-            # These may be thin archives that reference individual object files
-            import glob
-
-            platforms_shared_archives = glob.glob(
-                str(build_dir / "libplatforms_shared_*.a")
-            )
-            if platforms_shared_archives:
-                deleted_count = 0
-                for archive_path in platforms_shared_archives:
-                    try:
-                        Path(archive_path).unlink()
-                        deleted_count += 1
-                    except (OSError, IOError) as e:
-                        _ts_print(
-                            f"[MESON] Warning: Could not delete {archive_path}: {e}"
-                        )
-                if deleted_count > 0:
-                    _ts_print(
-                        f"[MESON] 🗑️  Deleted {deleted_count} platforms_shared archives due to unity build change"
-                    )
 
         # Check if source/test files have changed since last configure
         # This detects when files are added or removed, which requires reconfigure
@@ -767,7 +702,7 @@ def setup_meson_build(
 
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
-    # AND thin archive/unity/source file settings haven't changed
+    # AND thin archive/source file settings haven't changed
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
 
     # Declare native file path early (needed for meson commands)
@@ -794,24 +729,14 @@ def setup_meson_build(
             str(native_file_path),
             str(build_dir),
         ]
-        if unity:
-            cmd.extend(["-Dunity=on"])
         if debug:
             cmd.extend(["-Dbuild_mode=debug"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", "--native-file", str(native_file_path), str(build_dir)]
-        if unity:
-            cmd.extend(["-Dunity=on"])
         if debug:
             cmd.extend(["-Dbuild_mode=debug"])
-
-    # Print unity build status
-    if unity:
-        _ts_print("[MESON] ✅ Unity builds ENABLED (--unity flag)")
-    else:
-        _ts_print("[MESON] Unity builds disabled (use --unity to enable)")
 
     # Print debug mode status
     if debug:
@@ -1075,14 +1000,6 @@ endian = 'little'
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write thin archive marker: {e}")
-
-        # Write marker file to track unity setting for future runs
-        try:
-            unity_marker.write_text(str(unity), encoding="utf-8")
-            _ts_print(f"[MESON] ✅ Saved unity configuration: {unity}")
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write unity marker: {e}")
 
         # Write marker file to track debug setting for future runs
         try:
@@ -1647,7 +1564,6 @@ def run_meson_build_and_test(
     test_name: Optional[str] = None,
     clean: bool = False,
     verbose: bool = False,
-    unity: bool = False,
     debug: bool = False,
     build_mode: Optional[str] = None,
     check: bool = False,
@@ -1661,7 +1577,6 @@ def run_meson_build_and_test(
         test_name: Specific test to run (without test_ prefix, e.g., "json")
         clean: Clean build directory before setup
         verbose: Enable verbose output
-        unity: Enable unity builds (default: False)
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
         check: Enable IWYU static analysis (default: False)
@@ -1712,7 +1627,6 @@ def run_meson_build_and_test(
         source_dir,
         build_dir,
         reconfigure=False,
-        unity=unity,
         debug=use_debug,
         check=check,
     ):
@@ -1770,7 +1684,7 @@ def run_meson_build_and_test(
     # Compile and test with build lock to prevent conflicts with example builds
     # STREAMING MODE: When no specific test requested, use stream_compile_and_run_tests()
     # for parallel compilation + execution
-    use_streaming = not unity and not meson_test_name
+    use_streaming = not meson_test_name
 
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
@@ -1882,18 +1796,15 @@ def run_meson_build_and_test(
 
             else:
                 # TRADITIONAL SEQUENTIAL PATH
-                # Used for unity builds or specific test requests
-                # In unity mode, always build all_tests target (no individual test targets exist)
+                # Used for specific test requests
                 compile_target: Optional[str] = None
-                if unity:
-                    compile_target = "all_tests"
-                elif meson_test_name:
+                if meson_test_name:
                     compile_target = meson_test_name
 
                 compilation_success = compile_meson(build_dir, target=compile_target)
 
                 # If compilation failed and we have a fallback name, try the fallback
-                if not compilation_success and fallback_test_name and not unity:
+                if not compilation_success and fallback_test_name:
                     _ts_print(
                         f"[MESON] Target '{compile_target}' not found, trying fallback: '{fallback_test_name}'"
                     )
@@ -1905,7 +1816,7 @@ def run_meson_build_and_test(
 
                 # If still failed, try fuzzy matching candidates
                 # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
-                if not compilation_success and test_name and not unity:
+                if not compilation_success and test_name:
                     if not fuzzy_candidates:
                         # Query meson for fuzzy match candidates
                         fuzzy_candidates = get_fuzzy_test_candidates(
@@ -1939,73 +1850,63 @@ def run_meson_build_and_test(
         _ts_print(f"[MESON] {e}", file=sys.stderr)
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
-    # Run tests (traditional path only - streaming already ran tests above)
-    if unity:
-        # Unity mode: Use the test_runner executable
-        # The test_runner loads and executes test DLLs dynamically
-        test_runner_path = build_dir / "tests" / "test_runner.exe"
-        if not test_runner_path.exists():
-            # Try Unix variant (no .exe extension)
-            test_runner_path = build_dir / "tests" / "test_runner"
+    # In IWYU check mode, we only compile (to run static analysis)
+    # Skip test execution and return success after successful compilation
+    if check:
+        duration = time.time() - start_time
+        _ts_print(
+            "[MESON] ✅ IWYU analysis complete (test execution skipped in check mode)"
+        )
+        return MesonTestResult(
+            success=True,
+            duration=duration,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
-        if not test_runner_path.exists():
+    # Run tests (traditional path only - streaming already ran tests above)
+    # When a specific test is requested, run the executable directly
+    # to avoid meson test discovery issues
+    if meson_test_name:
+        # Find the test executable
+        test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
+        if not test_exe_path.exists():
+            # Try Unix variant (no .exe extension)
+            test_exe_path = build_dir / "tests" / meson_test_name
+
+        if not test_exe_path.exists():
             _ts_print(
-                f"[MESON] Error: test_runner executable not found in {build_dir / 'tests'}",
+                f"[MESON] Error: test executable not found: {test_exe_path}",
                 file=sys.stderr,
             )
             return MesonTestResult(success=False, duration=time.time() - start_time)
 
-        # Build test command
-        test_cmd = [str(test_runner_path)]
+        _print_banner("RUNNING TESTS", "▶️")
+        _ts_print(f"▶️  Running test: {meson_test_name}")
 
-        # If specific test requested, add doctest filter
-        if meson_test_name:
-            filter_name = meson_test_name.replace("test_", "")
-            test_cmd.extend(["--test-case", f"*{filter_name}*"])
-            _ts_print(f"[MESON] Running unity tests with filter: {filter_name}")
-        else:
-            _ts_print("[MESON] Running all unity tests...")
-
-        # Execute test runner
+        # Run the test executable directly
         try:
             proc = RunningProcess(
-                test_cmd,
-                cwd=build_dir / "tests",  # Run from tests dir where DLLs are located
-                timeout=600,  # 10 minute timeout for tests
+                [str(test_exe_path)],
+                cwd=source_dir,  # Run from project root
+                timeout=600,  # 10 minute timeout
                 auto_run=True,
                 check=False,
                 env=os.environ.copy(),
                 output_formatter=TimestampFormatter(),
             )
 
-            # In verbose mode, show all output
-            # In normal mode, only show errors with context
-            if verbose:
-                returncode = proc.wait(echo=True)
-            else:
-                # Wait silently, capturing all output
-                returncode = proc.wait(echo=False)
-
-                # If test failed, show error context from accumulated output
-                if returncode != 0:
-                    _ts_print("[MESON] Unity tests failed:", file=sys.stderr)
-                    # Create error-detecting filter
-                    error_filter: Callable[[str], None] = _create_error_context_filter(
-                        context_lines=20
-                    )
-
-                    # Process accumulated output to show error context
-                    output_lines = proc.stdout.splitlines()
-                    for line in output_lines:
-                        error_filter(line)
-
+            returncode = proc.wait(echo=verbose)
             duration = time.time() - start_time
 
             if returncode != 0:
-                _ts_print(
-                    f"[MESON] Unity tests failed with return code {returncode}",
-                    file=sys.stderr,
-                )
+                _print_error(f"[MESON] ❌ Test failed with return code {returncode}")
+                # Show test output for failures (even if not verbose)
+                if not verbose and proc.stdout:
+                    _print_error("[MESON] Test output:")
+                    for line in proc.stdout.splitlines()[-50:]:  # Last 50 lines
+                        _ts_print(f"  {line}")
                 return MesonTestResult(
                     success=False,
                     duration=duration,
@@ -2014,7 +1915,9 @@ def run_meson_build_and_test(
                     num_tests_failed=1,
                 )
 
-            _ts_print("[MESON] All unity tests passed")
+            _print_success(
+                f"[MESON] ✅ All tests passed (1/1 tests in {duration:.2f}s)"
+            )
             return MesonTestResult(
                 success=True,
                 duration=duration,
@@ -2028,7 +1931,7 @@ def run_meson_build_and_test(
         except Exception as e:
             duration = time.time() - start_time
             _ts_print(
-                f"[MESON] Unity test execution failed with exception: {e}",
+                f"[MESON] Test execution failed with exception: {e}",
                 file=sys.stderr,
             )
             return MesonTestResult(
@@ -2039,86 +1942,8 @@ def run_meson_build_and_test(
                 num_tests_failed=1,
             )
     else:
-        # Normal mode: When a specific test is requested, run the executable directly
-        # to avoid meson test discovery issues
-        if meson_test_name:
-            # Find the test executable
-            test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
-            if not test_exe_path.exists():
-                # Try Unix variant (no .exe extension)
-                test_exe_path = build_dir / "tests" / meson_test_name
-
-            if not test_exe_path.exists():
-                _ts_print(
-                    f"[MESON] Error: test executable not found: {test_exe_path}",
-                    file=sys.stderr,
-                )
-                return MesonTestResult(success=False, duration=time.time() - start_time)
-
-            _print_banner("RUNNING TESTS", "▶️")
-            _ts_print(f"▶️  Running test: {meson_test_name}")
-
-            # Run the test executable directly
-            try:
-                proc = RunningProcess(
-                    [str(test_exe_path)],
-                    cwd=source_dir,  # Run from project root
-                    timeout=600,  # 10 minute timeout
-                    auto_run=True,
-                    check=False,
-                    env=os.environ.copy(),
-                    output_formatter=TimestampFormatter(),
-                )
-
-                returncode = proc.wait(echo=verbose)
-                duration = time.time() - start_time
-
-                if returncode != 0:
-                    _print_error(
-                        f"[MESON] ❌ Test failed with return code {returncode}"
-                    )
-                    # Show test output for failures (even if not verbose)
-                    if not verbose and proc.stdout:
-                        _print_error("[MESON] Test output:")
-                        for line in proc.stdout.splitlines()[-50:]:  # Last 50 lines
-                            _ts_print(f"  {line}")
-                    return MesonTestResult(
-                        success=False,
-                        duration=duration,
-                        num_tests_run=1,
-                        num_tests_passed=0,
-                        num_tests_failed=1,
-                    )
-
-                _print_success(
-                    f"[MESON] ✅ All tests passed (1/1 tests in {duration:.2f}s)"
-                )
-                return MesonTestResult(
-                    success=True,
-                    duration=duration,
-                    num_tests_run=1,
-                    num_tests_passed=1,
-                    num_tests_failed=0,
-                )
-
-            except KeyboardInterrupt:
-                raise
-            except Exception as e:
-                duration = time.time() - start_time
-                _ts_print(
-                    f"[MESON] Test execution failed with exception: {e}",
-                    file=sys.stderr,
-                )
-                return MesonTestResult(
-                    success=False,
-                    duration=duration,
-                    num_tests_run=1,
-                    num_tests_passed=0,
-                    num_tests_failed=1,
-                )
-        else:
-            # No specific test - use Meson's test runner for all tests
-            return run_meson_test(build_dir, test_name=None, verbose=verbose)
+        # No specific test - use Meson's test runner for all tests
+        return run_meson_test(build_dir, test_name=None, verbose=verbose)
 
 
 def stream_compile_and_run_tests(
@@ -2225,11 +2050,13 @@ def stream_compile_and_run_tests(
                             or "examples\\" in rel_path
                         ):
                             # Exclude infrastructure executables that aren't actual tests
-                            # - runner.exe: Generic DLL loader (copied/renamed for each test in unity mode)
-                            # - test_runner.exe: Unity mode test harness that loads test DLLs
                             test_name = test_path.stem  # Get filename without extension
                             if test_name in ("runner", "test_runner"):
                                 continue  # Skip these infrastructure executables
+
+                            # Skip DLL/shared library files
+                            if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
+                                continue  # Skip DLL/shared library files
 
                             _ts_print(f"[MESON] Test ready: {test_path.name}")
                             test_queue.put(test_path)

@@ -40,9 +40,6 @@ def build_cpp_test_command(args: TestArgs) -> str:
     if args.check:
         cmd_list.append("--check")
 
-    if args.no_unity:
-        cmd_list.append("--no-unity")
-
     return subprocess.list2cmdline(cmd_list)
 
 

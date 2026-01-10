@@ -3,7 +3,7 @@ Helper functions for FastLED test organization.
 
 This module provides utilities for:
 - Extracting test names from file paths
-- Categorizing tests for unity build mode
+- Categorizing tests by directory and type
 - Organizing tests into categories
 """
 
@@ -49,7 +49,7 @@ def extract_test_name(test_file_path: str) -> str:
 
 def categorize_test(test_name: str, test_file_path: str) -> str:
     """
-    Categorize a test for unity build grouping.
+    Categorize a test by directory and type.
 
     Categories:
     - fl_tests: Tests from fl/ directory (legacy stdlib-like utilities)
@@ -111,7 +111,7 @@ def subdivide_category(test_name: str, base_category: str) -> str:
 
 def organize_tests_by_category(test_file_paths: List[str]) -> Dict[str, List[str]]:
     """
-    Organize test files into categories for unity build mode.
+    Organize test files into categories.
 
     Args:
         test_file_paths: List of relative paths to test files (POSIX format)

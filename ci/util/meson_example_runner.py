@@ -290,8 +290,8 @@ def run_meson_examples(
 
         shutil.rmtree(build_dir)
 
-    # Setup build (unity builds disabled for examples)
-    if not setup_meson_build(source_dir, build_dir, reconfigure=False, unity=False):
+    # Setup build
+    if not setup_meson_build(source_dir, build_dir, reconfigure=False):
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Perform periodic maintenance on Ninja dependency database

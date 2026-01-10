@@ -1,8 +1,7 @@
 """
-Collect FastLED source files organized by library for directory-aware unity builds.
+Collect FastLED source files organized by library.
 
-This script discovers C++ source files and organizes them by library/directory,
-ensuring unity builds only combine files from the same directory hierarchy.
+This script discovers C++ source files and organizes them by library/directory.
 
 Output format: LIBRARY:<library_name>:<file_path>
 Example: LIBRARY:fl:src/fl/algorithm.cpp
@@ -15,7 +14,6 @@ from discover_sources import discover_sources
 
 
 # Source directories organized by library
-# Each library will be built separately with directory-aware unity builds
 SOURCE_LIBRARIES: dict[str, list[tuple[str, bool]]] = {
     # Core FastLED library - base functionality (src/*.cpp, src/lib8tion)
     "core": [

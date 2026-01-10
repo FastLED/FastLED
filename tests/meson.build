@@ -44,7 +44,6 @@ doctest_main = static_library('doctest_main',
   'doctest_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
   cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],  # No TEST_DLL_MODE for normal builds
-  override_options: ['unity=off'],  # Don't unity build this single file
   install: false
 )
 
@@ -54,7 +53,6 @@ doctest_dll_main = static_library('doctest_dll_main',
   'doctest_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
   cpp_args: ['-DTEST_DLL_MODE', '-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],  # Add FASTLED_STUB_IMPL
-  override_options: ['unity=off'],  # Don't unity build this single file
   install: false
 )
 
@@ -71,7 +69,6 @@ runner_exe = executable('runner',
     '-Wno-pragma-pack',
   ],
   link_args: ['-static', '-static-libgcc', '-static-libstdc++'],
-  override_options: ['unity=off'],  # Don't apply unity builds to runner
   install: false
 )
 
@@ -102,150 +99,51 @@ foreach line : test_metadata_output.split('\n')
   endif
 endforeach
 
-# Unity builds can be controlled via --unity flag in test.py
-# Unity mode builds tests as categorized DLLs loaded by test_runner for faster compilation
-# Normal mode builds each test as a separate executable
-# FORCE unity builds OFF for tests to avoid DLL singleton issues
-unity_enabled = false  # FORCED OFF - do not use get_option('unity')
+# Build individual test executables
 
-if unity_enabled
-  # UNITY MODE: Combine tests into categorized test executables
-  # Categories are pre-computed by organize_tests.py
+# Track all test executables for alias
+all_test_executables = []
 
-  # Dynamically organize test files by category
-  # Build dictionary on-the-fly based on discovered categories
-  category_files = {}
+# Build each test executable with shared PCH
+foreach test_name : test_names
+  # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
+  test_file = test_file_paths.get(test_name, test_name + '.cpp')
 
-  foreach test_name : test_names
-    test_file = test_file_paths.get(test_name, test_name + '.cpp')
-    test_category = test_categories.get(test_name)
+  # Some tests need additional source files for ESP32 parallel SPI host simulation
+  test_sources = [test_file, test_pch]
+  test_cpp_args = unit_test_compile_args + [
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
+    '-fpch-validate-input-files-content',       # Validate based on content, not mtime
+  ]
 
-    # Initialize category list if not exists, then append
-    if not category_files.has_key(test_category)
-      category_files += {test_category: files(test_file)}
-    else
-      # Get existing list, append, and update
-      existing_files = category_files.get(test_category)
-      updated_files = existing_files + files(test_file)
-      category_files += {test_category: updated_files}
-    endif
-  endforeach
+  # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
+  # No need to add it explicitly to individual tests anymore
 
-  # Track all test executables for alias
-  all_test_executables = []
+  # Build list of dependencies (libunwind if available)
+  test_dependencies = []
+  if libunwind_dep.found()
+    test_dependencies += [libunwind_dep]
+  endif
 
-  # Build test category DLLs
-  test_dlls = []
-  foreach category_name, test_sources : category_files
-    if test_sources.length() > 0
-      # Add PCH, test sources, and doctest_main.cpp
-      # doctest_main.cpp is compiled directly into each test DLL (not as a separate static lib)
-      category_sources = [test_pch] + test_sources + files('doctest_main.cpp')
-
-      # Build list of dependencies (libunwind if available)
-      dll_dependencies = []
-      if libunwind_dep.found()
-        dll_dependencies += [libunwind_dep]
-      endif
-
-      # Build test category as a shared library (DLL)
-      # Each DLL links against libfastled.a ONLY, exports ONLY run_tests()
-      test_dll = shared_library(category_name,
-        category_sources,
-        include_directories: [src_dir, tests_dir, stub_dir],
-        cpp_args: unit_test_compile_args + [
-          '-DTEST_DLL_MODE',                          # Mark tests as running in DLL mode
-          '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-          '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
-          '-fpch-validate-input-files-content',       # Validate based on content, not mtime
-        ],
-        link_args: unit_test_link_args,
-        link_with: [fastled_lib],                     # Link ONLY libfastled.a
-        dependencies: dll_dependencies,               # Add libunwind here
-        gnu_symbol_visibility: 'hidden',              # Hide all symbols except explicit exports
-        override_options: ['unity=off'],              # Disable unity builds to avoid symbol collisions
-        install: false
-      )
-
-      # Track DLLs for dependencies
-      test_dlls += test_dll
-
-      message('Unity test category DLL: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
-    endif
-  endforeach
-
-  # Build the test runner executable (lightweight, no libfastled.a link)
-  # CRITICAL: test_runner must NOT link against libfastled.a to avoid symbol duplication
-  # The runner only needs standard system libraries for DLL loading and console I/O
-  test_runner = executable('test_runner',
-    'test_runner.cpp',
-    include_directories: [tests_dir],
-    cpp_args: ['-std=c++11'],  # Minimal flags for runner
-    link_args: build_machine.system() == 'windows' ? ['-mconsole'] : [],  # Minimal linking
-    dependencies: [],           # No FastLED dependency
+  test_exe = executable(test_name,
+    test_sources,
+    include_directories: [src_dir, tests_dir, stub_dir],
+    cpp_args: test_cpp_args,
+    link_args: unit_test_link_args,
+    link_with: [fastled_lib, doctest_main],
+    dependencies: test_dependencies,  # Add libunwind here
     install: false
   )
 
-  # Register single test that runs all categories via the runner
-  test('all_unity_tests', test_runner,
-    workdir: meson.current_build_dir(),  # Run from build dir where DLLs are
-    depends: test_dlls                    # Ensure DLLs are built first
-  )
+  # Track test executable for alias
+  all_test_executables += test_exe
 
-  # Create alias target that builds the test runner and all DLLs
-  alias_target('all_tests', test_runner, test_dlls)
+  # Register test with project root as working directory
+  test(test_name, test_exe, workdir: meson.project_source_root())
+endforeach
 
-  message('Unity test build enabled: tests organized into categories')
+# Create alias target that builds all test executables
+alias_target('all_tests', all_test_executables)
 
-else
-  # NORMAL MODE: Build individual test executables (current behavior)
-
-  # Track all test executables for alias
-  all_test_executables = []
-
-  # Build each test executable with shared PCH
-  foreach test_name : test_names
-    # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
-    test_file = test_file_paths.get(test_name, test_name + '.cpp')
-
-    # Some tests need additional source files for ESP32 parallel SPI host simulation
-    test_sources = [test_file, test_pch]
-    test_cpp_args = unit_test_compile_args + [
-      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
-      '-fpch-validate-input-files-content',       # Validate based on content, not mtime
-    ]
-
-    # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
-    # No need to add it explicitly to individual tests anymore
-
-    # Build list of dependencies (libunwind if available)
-    test_dependencies = []
-    if libunwind_dep.found()
-      test_dependencies += [libunwind_dep]
-    endif
-
-    test_exe = executable(test_name,
-      test_sources,
-      include_directories: [src_dir, tests_dir, stub_dir],
-      cpp_args: test_cpp_args,
-      link_args: unit_test_link_args,
-      link_with: [fastled_lib, doctest_main],
-      dependencies: test_dependencies,  # Add libunwind here
-      override_options: ['unity=off'],  # Disable unity builds for tests
-      install: false
-    )
-
-    # Track test executable for alias
-    all_test_executables += test_exe
-
-    # Register test with project root as working directory
-    test(test_name, test_exe, workdir: meson.project_source_root())
-  endforeach
-
-  # Create alias target that builds all test executables (matches unity mode behavior)
-  alias_target('all_tests', all_test_executables)
-
-  message('Individual test build enabled: ' + test_names.length().to_string() + ' test executables')
-
-endif  # unity_enabled
+message('Individual test build enabled: ' + test_names.length().to_string() + ' test executables')

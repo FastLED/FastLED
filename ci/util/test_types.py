@@ -78,12 +78,9 @@ class TestArgs:
     check: bool = False
     examples: Optional[list[str]] = None
     no_pch: bool = False
-    unity: bool = False
-    no_unity: bool = False  # Disable unity builds for cpp tests and examples
     full: bool = False
 
     no_parallel: bool = False  # Force sequential test execution
-    unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
     qemu: Optional[list[str]] = (
         None  # Run examples in QEMU emulation (deprecated - use --run)
@@ -401,8 +398,6 @@ def calculate_cpp_test_fingerprint(
 
     # Include build configuration flags that affect compilation
     if args is not None:
-        # Include --unity flag since it fundamentally changes how code is compiled
-        hasher.update(f"unity:{args.unity}".encode("utf-8"))
         # Include --debug flag as it affects build configuration
         hasher.update(f"debug:{args.debug}".encode("utf-8"))
 

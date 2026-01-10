@@ -5,9 +5,7 @@ project('fastled', 'cpp',
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
     'werror=false',
-    'buildtype=debug',
-    'unity=off',      # Unity builds disabled by default (use --unity flag to enable)
-    'unity_size=40'   # Combine 40 translation units per unity build (default is 4)
+    'buildtype=debug'
   ]
 )
 
@@ -33,7 +31,7 @@ discovered_sources = run_command(
 )
 all_sources = discovered_sources.stdout().strip().split('\n')
 
-# Separate platforms/shared sources (need separate unity group for weak/strong linking)
+# Separate platforms/shared sources (to avoid weak/strong symbol conflicts)
 platforms_shared_sources = []
 fastled_sources_list = []
 
@@ -254,12 +252,11 @@ endif
 
 # Build main FastLED static library (includes ALL sources EXCEPT platforms/shared)
 # platforms/shared files are intentionally excluded to avoid weak/strong symbol conflicts
-# in unity builds where both weak defaults and strong overrides end up in same translation unit
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
 
-# Compile platforms/shared files separately without unity build
+# Compile platforms/shared files separately
 platforms_shared_objects = []
 foreach src : platforms_shared_files
   # Create shorter target names by using relative paths from 'src/'

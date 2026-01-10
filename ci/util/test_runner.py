@@ -422,8 +422,6 @@ def create_unit_test_process(
         compile_cmd.append("--clang")
     if args.gcc:
         compile_cmd.append("--gcc")
-    if args.no_unity:
-        compile_cmd.append("--no-unity")
     if args.no_pch:
         compile_cmd.append("--no-pch")
     if args.debug:
@@ -1432,7 +1430,6 @@ def runner(
                 test_name=test_name,
                 clean=args.clean,
                 verbose=args.verbose,
-                unity=args.unity,
                 debug=args.debug,
                 check=args.check,
             )
@@ -1475,7 +1472,6 @@ def runner(
                 test_name=test_name,
                 clean=args.clean,
                 verbose=args.verbose,
-                unity=args.unity,
                 debug=args.debug,
                 check=args.check,
             )
