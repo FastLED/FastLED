@@ -218,6 +218,10 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 )
         else:
             # Use smart selector to find matching unit test or example
+            # Print banner for test discovery phase
+            from ci.util.meson_runner import _print_banner
+
+            _print_banner("TEST DISCOVERY", "🔍")
             ts_print(f"🔍 Smart selector: searching for '{test_args.test}'...")
             match = get_best_match_or_prompt(test_args.test)
 

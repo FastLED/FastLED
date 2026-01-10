@@ -203,7 +203,6 @@ def main():
     if compile_returncode != 0:
         sys.exit(compile_returncode)
 
-
     sys.exit(iwyu_result.returncode)
 
 

@@ -72,12 +72,31 @@ def _print_info(msg: str) -> None:
     print_blue(f"{ts} {msg}")
 
 
-def _print_banner(title: str, width: int = 70) -> None:
-    """Print a section banner for visual separation."""
-    border = "=" * width
-    _ts_print(f"\n{border}")
-    _ts_print(f"  {title}")
-    _ts_print(f"{border}\n")
+def _print_banner(title: str, emoji: str = "", width: int = 62) -> None:
+    """Print a section banner for visual separation using box-drawing characters.
+
+    Args:
+        title: The banner title text
+        emoji: Optional emoji to prefix the title (e.g., "🔧", "📦")
+        width: Total banner width (default 62 for 70-char terminal with timestamps)
+    """
+    # Box-drawing characters for consistent visual style
+    top_border = f"╔{'═' * width}╗"
+    bottom_border = f"╚{'═' * width}╝"
+
+    # Format title with emoji if provided
+    display_title = f"{emoji}  {title}" if emoji else title
+
+    # Center title in banner with proper padding
+    padding = width - len(display_title)
+    left_pad = padding // 2
+    right_pad = padding - left_pad
+    title_line = f"║{' ' * left_pad}{display_title}{' ' * right_pad}║"
+
+    # Print banner
+    _ts_print(f"\n{top_border}")
+    _ts_print(title_line)
+    _ts_print(f"{bottom_border}")
 
 
 def check_meson_installed() -> bool:
@@ -1019,6 +1038,7 @@ endian = 'little'
 
     # Run meson setup using RunningProcess for proper streaming output
     assert cmd is not None, "cmd should be set when not skipping meson setup"
+    _print_banner("MESON CONFIGURATION", "⚙️")
     try:
         # Disable sccache during Meson setup phase to avoid probe command conflicts
         # sccache tries to detect compilers with -E flag which confuses Zig's command structure
@@ -1118,8 +1138,10 @@ def compile_meson(
 
     if target:
         cmd.append(target)
+        _print_banner("COMPILING TARGET", "📦")
         _ts_print(f"[MESON] Compiling target: {target}")
     else:
+        _print_banner("COMPILING ALL TARGETS", "📦")
         _ts_print(f"[MESON] Compiling all targets...")
 
     # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
@@ -1431,8 +1453,10 @@ def run_meson_test(
 
     if test_name:
         cmd.append(test_name)
+        _print_banner("RUNNING TESTS", "▶️")
         _ts_print(f"[MESON] Running test: {test_name}")
     else:
+        _print_banner("RUNNING TESTS", "▶️")
         _ts_print(f"[MESON] Running all tests...")
 
     start_time = time.time()
@@ -1829,7 +1853,7 @@ def run_meson_build_and_test(
                     _print_info(
                         "[MESON] Falling back to Meson test runner for already-compiled tests..."
                     )
-                    _print_banner("RUNNING TESTS")
+                    _print_banner("RUNNING TESTS", "▶️")
                     result = run_meson_test(build_dir, test_name=None, verbose=verbose)
                     return result
 
@@ -2031,7 +2055,8 @@ def run_meson_build_and_test(
                 )
                 return MesonTestResult(success=False, duration=time.time() - start_time)
 
-            _ts_print(f"[MESON] Running test: {meson_test_name}")
+            _print_banner("RUNNING TESTS", "▶️")
+            _ts_print(f"▶️  Running test: {meson_test_name}")
 
             # Run the test executable directly
             try:

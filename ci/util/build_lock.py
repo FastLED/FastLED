@@ -209,14 +209,14 @@ def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, 
 
     lock = BuildLock("libfastled_build")
 
-    ts_print("[BUILD_LOCK] Acquiring libfastled build lock...")
+    ts_print("🔒 Acquiring libfastled build lock...")
     if not lock.acquire(timeout=timeout):
         raise TimeoutError(
             f"Failed to acquire libfastled build lock after {timeout} seconds"
         )
 
     try:
-        ts_print("[BUILD_LOCK] Lock acquired, proceeding with build")
+        ts_print("🔒 Lock acquired, proceeding with build")
         yield lock
     finally:
         ts_print("[BUILD_LOCK] Releasing libfastled build lock")
