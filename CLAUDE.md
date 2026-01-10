@@ -30,22 +30,58 @@ This project uses directory-specific agent guidelines. See:
 ### Example Compilation (Host-Based)
 FastLED supports fast host-based compilation of `.ino` examples using Meson build system:
 
-- `uv run test.py --examples` - Compile and run all examples for host (fast, 96 examples in ~0.2s)
-- `uv run test.py --examples Blink DemoReel100` - Compile and run specific examples
+**Quick Mode (Default - Fast Iteration):**
+- `uv run test.py --examples` - Compile and run all examples (quick mode, 80 examples in ~0.24s)
+- `uv run test.py --examples Blink DemoReel100` - Compile specific examples (quick mode)
 - `uv run test.py --examples --no-parallel` - Sequential compilation (easier debugging)
 - `uv run test.py --examples --verbose` - Show detailed compilation output
 - `uv run test.py --examples --clean` - Clean build cache and recompile
-- `uv run test.py --examples --no-pch` - Disable precompiled headers (ignored - PCH always enabled)
+
+**Debug Mode (Full Symbols + Sanitizers):**
+- `uv run test.py --examples --debug` - Compile all examples with debug symbols and sanitizers
+- `uv run test.py --examples Blink --debug` - Compile specific example in debug mode
+- `uv run test.py --examples Blink --debug --full` - Debug mode with execution
+- `uv run python ci/util/meson_example_runner.py Blink --debug` - Direct invocation (debug)
+
+**Release Mode (Optimized Production Builds):**
+- `uv run test.py --examples --build-mode release` - Compile all examples optimized
+- `uv run test.py --examples Blink --build-mode release` - Compile specific example (release)
+- `uv run python ci/util/meson_example_runner.py Blink --build-mode release` - Direct invocation (release)
+
+**Build Modes:**
+- **quick** (default): Fast compilation with minimal debug info (`-O0 -g1`)
+  - Build directory: `.build/meson-quick/examples/`
+  - Binary size: Baseline (e.g., Blink: 2.8M)
+  - Use case: Fast iteration and testing
+
+- **debug**: Full symbols and sanitizers (`-O0 -g3 -fsanitize=address,undefined`)
+  - Build directory: `.build/meson-debug/examples/`
+  - Binary size: 3.3x larger (e.g., Blink: 9.1M)
+  - Sanitizers: AddressSanitizer (ASan) + UndefinedBehaviorSanitizer (UBSan)
+  - Use case: Debugging crashes, memory issues, undefined behavior
+  - Benefits: Detects buffer overflows, use-after-free, memory leaks, integer overflow, null dereference
+
+- **release**: Optimized production build (`-O0 -g1`)
+  - Build directory: `.build/meson-release/examples/`
+  - Binary size: Smallest, 20% smaller than quick (e.g., Blink: 2.3M)
+  - Use case: Performance testing
+
+**Mode-Specific Directories:**
+- All three modes use separate build directories to enable caching and prevent flag conflicts
+- Switching modes does not invalidate other mode's cache (no cleanup overhead)
+- All modes can coexist simultaneously: `.build/meson-{quick,debug,release}/examples/`
 
 **Performance Notes:**
 - Host compilation is 60x+ faster than PlatformIO (2.2s vs 137s for single example)
-- All 96 examples compile in ~0.24s (394 examples/second) with PCH caching
+- All 80 examples compile in ~0.24s (394 examples/second) with PCH caching in quick/release modes
+- Debug mode is slower due to sanitizer instrumentation but maintains reasonable performance
 - PCH (precompiled headers) dramatically speeds up compilation by caching 986 dependencies
 - Examples execute with limited loop iterations (5 loops) for fast testing
 
 **Direct Invocation:**
-- `uv run python ci/util/meson_example_runner.py` - Compile all examples directly
+- `uv run python ci/util/meson_example_runner.py` - Compile all examples directly (quick mode)
 - `uv run python ci/util/meson_example_runner.py Blink --full` - Compile and execute specific example
+- `uv run python ci/util/meson_example_runner.py Blink --debug --full` - Debug mode with execution
 
 ### WASM Development Workflow
 `bash run wasm <example>` - Compile WASM example and serve with live-server:

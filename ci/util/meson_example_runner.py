@@ -258,6 +258,8 @@ def run_meson_examples(
     examples: list[str] | None = None,
     clean: bool = False,
     verbose: bool = False,
+    debug: bool = False,
+    build_mode: str | None = None,
     no_pch: bool = False,
     parallel: bool = True,
     full: bool = False,
@@ -267,10 +269,12 @@ def run_meson_examples(
 
     Args:
         source_dir: Project root directory
-        build_dir: Build output directory
+        build_dir: Build output directory (will be made mode-specific)
         examples: List of example names to compile/run (None = all)
         clean: Clean build directory before setup
         verbose: Enable verbose output
+        debug: Enable debug mode (full symbols + sanitizers)
+        build_mode: Override build mode ('quick', 'debug', 'release')
         no_pch: Disable precompiled headers (NOT IMPLEMENTED - PCH always enabled)
         parallel: Enable parallel compilation (default: True)
         full: Execute examples after compilation (default: False)
@@ -279,6 +283,29 @@ def run_meson_examples(
         MesonTestResult with success status, duration, and test counts
     """
     start_time = time.time()
+
+    # Determine build mode (build_mode parameter takes precedence over debug flag)
+    if build_mode is None:
+        build_mode = "debug" if debug else "quick"
+
+    # Validate build mode
+    valid_modes = ["quick", "debug", "release"]
+    if build_mode not in valid_modes:
+        _ts_print(
+            f"[MESON] Error: Invalid build mode: {build_mode}. "
+            f"Valid modes: {', '.join(valid_modes)}",
+            file=sys.stderr,
+        )
+        return MesonTestResult(success=False, duration=time.time() - start_time)
+
+    # Construct mode-specific build directory
+    # This enables caching per mode when source unchanged but flags differ
+    # Example: .build/meson -> .build/meson-debug
+    original_build_dir = build_dir
+    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
+
+    _ts_print(f"[EXAMPLES] Using mode-specific build directory: {build_dir}")
+    _ts_print(f"[EXAMPLES] Build mode: {build_mode}")
 
     # Check if Meson is installed
     if not check_meson_installed():
@@ -293,8 +320,10 @@ def run_meson_examples(
 
         shutil.rmtree(build_dir)
 
-    # Setup build
-    if not setup_meson_build(source_dir, build_dir, reconfigure=False):
+    # Setup build (convert mode string to boolean for debug parameter)
+    if not setup_meson_build(
+        source_dir, build_dir, debug=(build_mode == "debug"), reconfigure=False
+    ):
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Perform periodic maintenance on Ninja dependency database
@@ -335,6 +364,18 @@ if __name__ == "__main__":
     parser.add_argument("--clean", action="store_true", help="Clean build directory")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug mode (full symbols + sanitizers)",
+    )
+    parser.add_argument(
+        "--build-mode",
+        type=str,
+        choices=["quick", "debug", "release"],
+        default=None,
+        help="Override build mode (default: quick, or debug if --debug flag set)",
+    )
+    parser.add_argument(
         "--no-pch", action="store_true", help="Disable precompiled headers (ignored)"
     )
     parser.add_argument(
@@ -358,6 +399,8 @@ if __name__ == "__main__":
         examples=examples_list,
         clean=args.clean,
         verbose=args.verbose,
+        debug=args.debug,
+        build_mode=args.build_mode,
         no_pch=args.no_pch,
         parallel=not args.no_parallel,
         full=args.full,

@@ -856,7 +856,7 @@ def main() -> None:
 
                 # Create Python test process (runs first)
                 python_process = create_python_test_process(
-                    enable_stack_trace=False, full_tests=True
+                    enable_stack_trace=False, run_slow=True
                 )
                 python_process.auto_run = False
 

@@ -25,7 +25,8 @@ def main():
 #include "{ino_file}"
 
 #ifdef EXAMPLE_DLL_MODE
-// DLL mode: Use export function from example_dll_main.hpp
+// DLL mode: Use export function from example_dll_main.hpp (located in tests/shared/)
+// Note: tests_dir is in include path, so "shared/" is relative to tests/
 #include "shared/example_dll_main.hpp"
 #else
 // Standalone mode: Use standard stub_main.hpp with main()

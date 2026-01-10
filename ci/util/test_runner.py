@@ -471,6 +471,10 @@ def create_examples_test_process(
         cmd.append("--no-parallel")
     if args.verbose:
         cmd.append("--verbose")
+    if args.debug:
+        cmd.append("--debug")
+    if args.build_mode:
+        cmd.extend(["--build-mode", args.build_mode])
 
     # Auto-enable full mode for examples to include execution
     if args.full or args.examples is not None:

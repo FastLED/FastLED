@@ -83,7 +83,8 @@ class TestArgs:
     full: bool = False
 
     no_parallel: bool = False  # Force sequential test execution
-    debug: bool = False  # Enable debug mode for unit tests
+    debug: bool = False  # Enable debug mode for unit tests and examples
+    build_mode: Optional[str] = None  # Override build mode (quick, debug, release)
     qemu: Optional[list[str]] = (
         None  # Run examples in QEMU emulation (deprecated - use --run)
     )

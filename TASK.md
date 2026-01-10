@@ -1,693 +1,819 @@
-# TASK: Transform Examples to DLL Architecture
-
-> **Note**: This file is historical documentation. As of 2026-01-10, `src/platforms/example_dll_main.hpp` has been moved to `tests/shared/example_dll_main.hpp`.
+# Task: Implement Debug Mode for Examples
 
 ## Executive Summary
 
-**Objective**: Apply the same DLL transformation used for tests (commit b1314eaf8) to example executables, converting ~96 standalone executables into DLLs loaded by a shared runner.
+**Objective**: Add debug mode support to FastLED examples, mirroring the existing implementation for unit tests. Examples should support all three build modes (quick, debug, release) with mode-specific build directories, automatic reconfiguration, and proper cleanup.
 
-**Expected Benefits**:
-- 10-15% build time improvement (system libraries linked once, not 96 times)
-- Reduced total binary size (no library duplication)
-- Consistent architecture with tests
-- Centralized crash handler management
+**Status**: Investigation complete (iteration 1). Planning complete (iteration 2). Ready for implementation (iteration 3+).
 
-**Complexity**: Medium (wrapper generation and setup()/loop() model add complexity beyond tests)
+**Expected Impact**:
+- Enable debugging of examples with full symbols (`-g3`) and sanitizers
+- Maintain parity between test and example compilation capabilities
+- No performance impact on default (quick) mode
+- Seamless mode switching without manual cleanup
 
----
+## Background
 
-## Background Context
+From `INVESTIGATION.md`:
+- ✅ Unit tests have complete debug mode support
+- ❌ Examples lack debug mode support
+- **Solution**: Mirror `ci/util/meson_runner.py` patterns in `ci/util/meson_example_runner.py`
 
-### Current Example Architecture
-```
-example-Blink.exe (links: libfastled.a + pthread + dbghelp + psapi + libunwind)
-example-DemoReel100.exe (links: libfastled.a + pthread + dbghelp + psapi + libunwind)
-...
-example-<name>.exe (links: libfastled.a + pthread + system libs)
-```
+## Implementation Phases
 
-Total: ~96 examples, each with full system library linking
+### Phase 1: Core Infrastructure (Iteration 3)
 
-### Target DLL Architecture
-```
-example_runner.exe (links: pthread + dbghelp + psapi + libunwind + crash_handler)
-  ├─ loads example-Blink.dll (links: libfastled.a only)
-  ├─ loads example-DemoReel100.dll (links: libfastled.a only)
-  └─ loads example-<name>.dll (links: libfastled.a only)
-```
+#### Task 1.1: Add Debug Parameters to run_meson_build_examples()
 
-**Convenience copies**: `example-Blink.exe` (copy of runner) auto-loads `example-Blink.dll`
+**File**: `ci/util/meson_example_runner.py`
 
----
-
-## Implementation Plan
-
-### Phase 1: Create Core Infrastructure (Iteration 3)
-
-#### Step 1.1: Create examples/shared/ directory
-```bash
-mkdir -p examples/shared
-```
-
-#### Step 1.2: Create example_runner.cpp
-**File**: `examples/shared/example_runner.cpp`
-
-**Based on**: `tests/shared/runner.cpp` (exact copy with `run_tests` → `run_example`)
-
-**Key changes from test runner**:
-- Replace `RunTestsFunc` with `RunExampleFunc`
-- Replace `run_tests` function name with `run_example`
-- Keep all other functionality identical (DLL loading, arg parsing, crash handler setup)
-
-**Verification**:
-- Copy `tests/shared/runner.cpp` to `examples/shared/example_runner.cpp`
-- Do find-replace: `run_tests` → `run_example`, `RunTestsFunc` → `RunExampleFunc`
-- Update comment at top to reference "example DLLs" instead of "test DLLs"
-
----
-
-#### Step 1.3: Create example_dll_main.hpp
-**File**: `src/platforms/example_dll_main.hpp`
-
-**Purpose**: Provides `run_example()` export function for DLL mode
-
-**Implementation**:
-```cpp
-/*
- * DLL entry point for Arduino examples.
- * Exports run_example() function that can be called by example_runner.exe
- */
-
-#pragma once
-
-#include "stub_main.hpp"
-
-// Export function for DLL mode - called by example_runner.exe
-extern "C" {
-#ifdef _WIN32
-    __declspec(dllexport)
-#else
-    __attribute__((visibility("default")))
-#endif
-    int run_example(int argc, const char** argv) {
-        (void)argc;  // Suppress unused parameter warning
-        (void)argv;  // Examples don't typically use command-line args
-
-        // Run setup() once, then loop() until keep_going() returns false
-        fl::stub_main::setup();
-        while (fl::stub_main::next_loop()) {
-            // Loop continues based on FASTLED_STUB_MAIN_FAST_EXIT
-        }
-
-        return 0;
-    }
-}
-```
-
-**Verification**:
-- File created at `src/platforms/example_dll_main.hpp`
-- Does NOT modify existing `stub_main.hpp` (minimizes risk)
-- Reuses existing `fl::stub_main::setup()` and `fl::stub_main::next_loop()`
-
----
-
-#### Step 1.4: Update generate_wrapper.py for DLL Mode
-**File**: `ci/util/generate_wrapper.py`
-
-**Current content** (from read):
+**Current signature** (lines 30-40, approximate):
 ```python
-def main():
-    if len(sys.argv) != 4:
-        print(
-            "Usage: generate_wrapper.py <output_file> <example_name> <ino_file>",
-            file=sys.stderr,
+def run_meson_build_examples(
+    source_dir: Path,
+    build_dir: Path,
+    example_names: list[str] | None = None,
+    clean: bool = False,
+    verbose: bool = False,
+    no_parallel: bool = False,
+    no_pch: bool = False,
+    full: bool = False,
+) -> MesonTestResult:
+```
+
+**New signature** (add two parameters):
+```python
+def run_meson_build_examples(
+    source_dir: Path,
+    build_dir: Path,
+    example_names: list[str] | None = None,
+    clean: bool = False,
+    verbose: bool = False,
+    debug: bool = False,              # NEW: Enable debug mode
+    build_mode: str | None = None,    # NEW: Override build mode
+    no_parallel: bool = False,
+    no_pch: bool = False,
+    full: bool = False,
+) -> MesonTestResult:
+```
+
+**Add docstring updates**:
+```python
+"""
+Compile and optionally execute host-based examples using Meson.
+
+Args:
+    source_dir: Root directory of the FastLED project
+    build_dir: Base build directory (will be made mode-specific)
+    example_names: List of example names to build (None = all)
+    clean: Force clean rebuild
+    verbose: Enable verbose output
+    debug: Enable debug mode (full symbols + sanitizers)
+    build_mode: Override build mode ('quick', 'debug', 'release')
+    no_parallel: Disable parallel compilation
+    no_pch: Disable precompiled headers (ignored, PCH always enabled)
+    full: Execute examples after compilation
+
+Returns:
+    MesonTestResult object with success status and output
+"""
+```
+
+#### Task 1.2: Implement Build Mode Logic
+
+**Location**: Beginning of `run_meson_build_examples()` function body
+
+**Add this code** (after parameter validation, before any build operations):
+
+```python
+    # Determine build mode (build_mode parameter takes precedence over debug flag)
+    if build_mode is None:
+        build_mode = "debug" if debug else "quick"
+
+    # Validate build mode
+    valid_modes = ["quick", "debug", "release"]
+    if build_mode not in valid_modes:
+        raise ValueError(
+            f"Invalid build mode: {build_mode}. "
+            f"Valid modes: {', '.join(valid_modes)}"
         )
-        sys.exit(1)
 
-    output_file = sys.argv[1]
-    example_name = sys.argv[2]
-    ino_file = sys.argv[3]
+    # Construct mode-specific build directory
+    # This enables caching per mode when source unchanged but flags differ
+    # Example: .build/meson -> .build/meson-debug
+    original_build_dir = build_dir
+    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
 
-    content = f"""// Auto-generated wrapper for example: {example_name}
-// This file includes the Arduino sketch and provides main()
-
-#include "{ino_file}"
-#include "platforms/stub_main.hpp"
-"""
-
-    with open(output_file, "w") as f:
-        f.write(content)
-
-    print(f"Generated wrapper: {output_file}")
+    _ts_print(f"[EXAMPLES] Using mode-specific build directory: {build_dir}")
+    _ts_print(f"[EXAMPLES] Build mode: {build_mode}")
 ```
 
-**Changes needed**:
-Replace the content generation to use conditional compilation:
+**Rationale**: This matches the pattern in `meson_runner.py:1624-1631` exactly.
 
+#### Task 1.3: Pass Debug Flag to setup_meson_build()
+
+**Location**: Where `setup_meson_build()` is called in `meson_example_runner.py`
+
+**Current call** (approximate):
 ```python
-    content = f"""// Auto-generated wrapper for example: {example_name}
-// This file includes the Arduino sketch and provides main() or DLL export
+    setup_meson_build(
+        source_dir=source_dir,
+        build_dir=build_dir,
+        reconfigure=clean,
+    )
+```
 
-#include "{ino_file}"
-
-#ifdef EXAMPLE_DLL_MODE
-// DLL mode: Use export function from example_dll_main.hpp
-#include "platforms/example_dll_main.hpp"
-#else
-// Standalone mode: Use standard stub_main.hpp with main()
-#include "platforms/stub_main.hpp"
-#endif
-"""
+**Updated call** (add debug parameter):
+```python
+    setup_meson_build(
+        source_dir=source_dir,
+        build_dir=build_dir,
+        debug=(build_mode == "debug"),  # Convert mode string to boolean
+        reconfigure=clean,
+    )
 ```
 
 **Verification**:
-- Wrapper supports both modes via `-DEXAMPLE_DLL_MODE` flag
-- No mode flag = standalone executable (existing behavior)
-- With mode flag = DLL export (new behavior)
+- `setup_meson_build()` in `meson_runner.py` already accepts `debug` parameter
+- It handles marker files (`.debug_config`), reconfiguration, and cleanup automatically
+- No changes needed to `setup_meson_build()` itself
 
 ---
 
-### Phase 2: Update Build System (Iteration 4)
+### Phase 2: test.py Integration (Iteration 4)
 
-#### Step 2.1: Add example_runner.exe to examples/meson.build
+#### Task 2.1: Verify Command-Line Flags
 
-**Location**: After line 122 (after stub_main_src definition), add runner build:
+**File**: `test.py`
 
-```meson
-# Build crash handler library for example_runner.exe
-# Reuse the crash handler from tests (same implementation)
-crash_handler_deps_example = []
-if libunwind_dep.found()
-  crash_handler_deps_example += [libunwind_dep]
-endif
+**Check for these flags** (likely already exist):
+1. `--examples` - Run examples instead of tests
+2. `--debug` - Enable debug mode
+3. `--build-mode` - Override build mode
 
-crash_handler_example = static_library('crash_handler_example',
-  project_root / 'tests' / 'shared' / 'crash_handler_main.cpp',
-  include_directories: [src_dir, stub_dir],
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
-  dependencies: crash_handler_deps_example,
-  install: false
-)
-
-# Build example_runner.exe (static, generic DLL loader)
-# This executable loads an example DLL and calls its run_example() function
-# It will be copied to each example directory as example-<name>.exe
-#
-# OPTIMIZATION: System libraries (pthread, dbghelp, psapi) are linked here (once)
-# instead of in each example-X.dll (96 times), significantly reducing build time.
-# The example_runner.exe provides these symbols to the loaded DLL at runtime.
-# Crash handler is also setup in example_runner.exe before loading any DLL.
-example_runner_link_args = ['-static', '-static-libgcc', '-static-libstdc++']
-example_runner_deps = []
-if build_machine.system() == 'windows'
-  # Windows: Add system libraries that example DLLs depend on
-  example_runner_link_args += [
-    '-lpthread',    # POSIX threads (winpthreads) - required by FastLED
-    '-ldbghelp',    # Debug helper library (for stack traces in crash handler)
-    '-lpsapi',      # Process status API (for memory info in crash handler)
-  ]
-else
-  # Unix: Add pthread and libunwind (if available)
-  example_runner_link_args += ['-pthread']
-  if libunwind_dep.found()
-    example_runner_deps += [libunwind_dep]
-  endif
-endif
-
-example_runner_exe = executable('example_runner',
-  'shared' / 'example_runner.cpp',
-  cpp_args: [
-    '-std=c++11',
-    '-O2',
-    '-g',
-    # Suppress warnings from Windows SDK headers
-    '-Wno-pragma-pack',
-  ],
-  link_args: example_runner_link_args,
-  link_with: [crash_handler_example],  # Link crash handler library
-  dependencies: example_runner_deps,
-  install: false
+**If --build-mode doesn't exist**, add it:
+```python
+parser.add_argument(
+    "--build-mode",
+    type=str,
+    choices=["quick", "debug", "release"],
+    default=None,
+    help="Override build mode (default: quick, or debug if --debug flag set)"
 )
 ```
 
-**Verification**:
-- Runner builds successfully
-- Links against crash handler library
-- System libraries included in runner (not DLLs)
+#### Task 2.2: Pass Flags to run_meson_build_examples()
 
----
+**Location**: In `test.py`, find where `run_meson_build_examples()` is called
 
-#### Step 2.2: Transform example executable() to shared_library()
-
-**Location**: examples/meson.build, line 198-207 (the exe = executable(...) block)
-
-**Current code**:
-```meson
-    exe = executable(
-        'example-' + example_name,
-        all_sources,  # Wrapper + additional .cpp files
-        include_directories: all_includes,
-        link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args,
-        link_args: example_link_args,
-        build_by_default: false,  # Only build when explicitly requested
-        install: false
+**Add two arguments** to the function call:
+```python
+    result = run_meson_build_examples(
+        source_dir=source_dir,
+        build_dir=build_dir,
+        example_names=example_names,  # or args.examples, depending on implementation
+        clean=args.clean if hasattr(args, 'clean') else False,
+        verbose=args.verbose if hasattr(args, 'verbose') else False,
+        debug=args.debug,              # NEW: Pass debug flag
+        build_mode=args.build_mode if hasattr(args, 'build_mode') else None,  # NEW
+        no_parallel=args.no_parallel if hasattr(args, 'no_parallel') else False,
+        no_pch=args.no_pch if hasattr(args, 'no_pch') else False,
+        full=args.full if hasattr(args, 'full') else False,
     )
 ```
 
-**New code** (replace entire block):
-```meson
-    # Build example as a shared library (DLL)
-    # NOTE: System dependencies moved to example_runner.exe
-    example_dll = shared_library(
-        'example-' + example_name,
-        all_sources,  # Wrapper + additional .cpp files
-        include_directories: all_includes,
-        link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args + ['-DEXAMPLE_DLL_MODE'],
-        link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
-        name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
-        build_by_default: false,  # Only build when explicitly requested
-        install: false
-    )
+**Testing**:
+```bash
+# Quick mode (default)
+uv run test.py --examples
 
-    # Copy example_runner.exe to example directory as example-<name>.exe
-    # This allows running `example-Blink.exe` which auto-loads `example-Blink.dll`
-    example_runner_copy = custom_target(
-        'example-' + example_name + '_runner',
-        input: example_runner_exe,
-        output: 'example-' + example_name + '.exe',
-        command: ['cp', '@INPUT@', '@OUTPUT@'],
-        depends: [example_dll],  # Ensure DLL is built first
-        build_by_default: false
-    )
+# Debug mode
+uv run test.py --examples --debug
 
-    # Register as test target: runner loads the DLL and executes it
-    # Add to 'examples' suite for easy filtering
-    test('example-' + example_name, example_runner_exe,
-        args: [example_dll.full_path()],
-        suite: 'examples',
-        timeout: 60
-    )
+# Release mode
+uv run test.py --examples --build-mode release
 
-    # Track both DLL and runner for alias target
-    example_executables += [example_dll, example_runner_copy]
+# Single example in debug mode
+uv run test.py --examples Blink --debug
 ```
-
-**Key changes**:
-1. `executable()` → `shared_library()` with `name_prefix: ''`
-2. Added `-DEXAMPLE_DLL_MODE` to cpp_args
-3. Changed `link_args` from `example_link_args` to `dll_link_args`
-4. Added `custom_target` to copy runner
-5. Updated test registration to use runner + DLL path
-6. Track both DLL and runner copy in example_executables
-
-**Verification**:
-- Examples build as DLLs
-- Runner copies created with correct names
-- Test registration works with runner + DLL
 
 ---
 
-#### Step 2.3: Verify dll_link_args exists in root meson.build
+### Phase 3: Initial Testing (Iteration 5)
 
-**Check**: Root `meson.build` should already have `dll_link_args` from test transformation (commit b1314eaf8)
+#### Task 3.1: Test Single Example - Quick Mode
 
-**Location**: Root meson.build (already exists from test transformation)
-
-**Expected content**:
-```meson
-# DLL-specific link arguments: Minimize linking by moving libraries to runner.exe
-if is_windows
-  dll_link_args = [
-    '-mconsole',                # Console application subsystem
-    '-Wl,--stack,16777216',     # 16MB stack (for large arrays)
-    '-Wl,--no-undefined',       # Catch undefined symbols at link time
-  ]
-else
-  dll_link_args = [
-    '-rdynamic',                # Export symbols for backtrace_symbols()
-    '-Wl,--no-undefined',       # Catch undefined symbols at link time
-  ]
-endif
-```
-
-**Action**: Verify this exists. If not, it's an error (should be from commit b1314eaf8).
-
-**Verification**:
-- `dll_link_args` variable exists in root meson.build
-- Examples can reference it via parent scope
-
----
-
-### Phase 3: Incremental Testing (Iteration 5)
-
-#### Step 3.1: Test single example (Blink)
+**Purpose**: Establish baseline before testing debug mode
 
 **Commands**:
 ```bash
-# Clean build
-rm -rf builddir
-meson setup builddir
+# Clean slate
+rm -rf .build/meson-*
 
-# Build just Blink
-ninja -C builddir example-Blink.dll
-ninja -C builddir example-Blink.exe
-
-# Verify files exist
-ls -lh builddir/examples/example-Blink.dll
-ls -lh builddir/examples/example-Blink.exe
-
-# Run via runner (explicit DLL path)
-builddir/example_runner.exe builddir/examples/example-Blink.dll
-
-# Run via convenience copy (auto-loads DLL)
-builddir/examples/example-Blink.exe
+# Compile Blink in quick mode (default)
+uv run test.py --examples Blink
 ```
 
-**Expected output**:
-- Blink.dll builds successfully (~200KB, small)
-- example-Blink.exe is a copy of example_runner.exe
-- Both invocation methods work identically
-- Example executes 5 loop iterations (FASTLED_STUB_MAIN_FAST_EXIT)
-- Returns exit code 0
+**Expected results**:
+- Build directory: `.build/meson-quick/examples/`
+- Executable: `.build/meson-quick/examples/example-Blink.exe`
+- Marker file: `.build/meson-quick/.debug_config` (contains "False")
+- Exit code: 0 (success)
 
-**Troubleshooting**:
-- If "Failed to load DLL": Check DLL actually built, check paths
-- If "Failed to find run_example()": Check EXAMPLE_DLL_MODE flag, check example_dll_main.hpp included
-- If linker errors: Check dll_link_args applied, check system libs NOT in DLL link
+#### Task 3.2: Test Single Example - Debug Mode
 
----
-
-#### Step 3.2: Test example with additional sources
-
-**Example to test**: `xypath` (has subdirectory sources)
-
-**Why**: Tests that additional .cpp files are handled correctly in DLL mode
+**Purpose**: Verify debug mode compilation works
 
 **Commands**:
 ```bash
-ninja -C builddir example-xypath.dll
-ninja -C builddir example-xypath.exe
-builddir/examples/example-xypath.exe
+# Switch to debug mode (should trigger reconfiguration)
+uv run test.py --examples Blink --debug
+```
+
+**Expected results**:
+- Build directory: `.build/meson-debug/examples/`
+- Executable: `.build/meson-debug/examples/example-Blink.exe`
+- Marker file: `.build/meson-debug/.debug_config` (contains "True")
+- Compilation includes `-O0 -g3 -fsanitize=address,undefined`
+- Binary size larger than quick mode (debug symbols)
+- Exit code: 0 (success)
+
+**Verification**:
+```bash
+# Check that both directories exist
+ls -ld .build/meson-quick/examples/
+ls -ld .build/meson-debug/examples/
+
+# Compare binary sizes
+ls -lh .build/meson-quick/examples/example-Blink.exe
+ls -lh .build/meson-debug/examples/example-Blink.exe
+```
+
+#### Task 3.3: Test Mode Switching
+
+**Purpose**: Verify mode changes trigger cleanup and reconfiguration
+
+**Commands**:
+```bash
+# Start in quick mode
+uv run test.py --examples Blink
+
+# Switch to debug mode
+uv run test.py --examples Blink --debug
+
+# Switch back to quick mode
+uv run test.py --examples Blink
+
+# Switch to release mode
+uv run test.py --examples Blink --build-mode release
 ```
 
 **Expected behavior**:
-- Builds successfully with subdirectory sources
-- Runs without errors
+- Each mode switch prints: `"⚠️  Debug mode changed: X → Y"`
+- Each mode switch prints: `"🔄 Forcing reconfigure"`
+- Each mode switch prints: `"🗑️  Debug mode changed - cleaning all object files"`
+- No linking errors occur
+- All builds succeed
 
----
+#### Task 3.4: Test Multiple Examples in Debug Mode
 
-#### Step 3.3: Test all examples
-
-**Command**:
-```bash
-uv run test.py --examples
-```
-
-**Expected output**:
-- All ~96 examples compile as DLLs
-- All runner copies created
-- All tests pass (via meson test)
-- Total build time faster than before (~10-15% improvement)
-
-**Success criteria**:
-- Zero compilation failures
-- Zero runtime failures
-- Measurable build time improvement
-
-**If failures occur**:
-- Check specific example for platform-specific code
-- Verify EXAMPLE_DLL_MODE handling
-- Check include paths and source discovery
-
----
-
-### Phase 4: Validation and Cleanup (Iteration 6)
-
-#### Step 4.1: Verify binary sizes
-
-**Check**:
-```bash
-# Total size of all example DLLs
-du -sh builddir/examples/*.dll
-
-# Size of runner
-du -sh builddir/example_runner.exe
-
-# Compare to old architecture (if backup exists)
-```
-
-**Expected**:
-- Individual DLLs smaller (no system libs)
-- Runner larger (has system libs + crash handler)
-- Total size reduced
-
----
-
-#### Step 4.2: Verify link args optimization
-
-**Check**: Example DLLs should NOT link pthread, dbghelp, psapi directly
-
-**Command**:
-```bash
-# On Windows with objdump
-objdump -p builddir/examples/example-Blink.dll | grep -i "DLL Name"
-```
-
-**Expected imports**:
-- Should see: `msvcrt.dll`, `KERNEL32.dll`, `libgcc_s_seh-1.dll`, `libstdc++-6.dll`
-- Should NOT see: `libpthread` explicit imports (provided by runner at runtime)
-
----
-
-#### Step 4.3: Run full regression test suite
+**Purpose**: Verify debug mode works for multiple examples
 
 **Commands**:
 ```bash
-# Build everything
-ninja -C builddir
-
-# Run all tests (examples + unit tests)
-uv run test.py --cpp
-uv run test.py --examples
-
-# Run linter
-bash lint
+# Compile several examples in debug mode
+uv run test.py --examples Blink DemoReel100 Pride2015 --debug
 ```
 
-**Success criteria**:
-- All tests pass
-- No new linter errors
-- No regressions in functionality
+**Expected results**:
+- All three examples compile successfully
+- All use `.build/meson-debug/examples/` directory
+- All execute without sanitizer errors (if --full flag added)
 
 ---
 
-#### Step 4.4: Update documentation
+### Phase 4: Full Suite Validation (Iteration 6)
 
-**File**: `examples/meson.build` (comment block at top)
+#### Task 4.1: Test All Examples - Quick Mode
 
-**Update** the "HOST-BASED COMPILATION" section to mention DLL architecture:
+**Purpose**: Baseline performance and verify no regressions
 
-```meson
-# HOST-BASED EXAMPLE COMPILATION (Fast, using STUB platform + DLL architecture)
-# ============================================================================
-# Compiles all Arduino examples for the host platform using STUB backend.
-# Examples are built as DLLs loaded by example_runner.exe for optimal build performance.
-# System libraries (pthread, dbghelp, psapi, libunwind) are linked once in the runner,
-# not separately in each of the 96 example DLLs.
+**Command**:
+```bash
+time uv run test.py --examples
 ```
 
-**File**: `INVESTIGATION.md`
+**Expected results**:
+- All 96 examples compile successfully
+- Compilation time ~0.24s (with PCH)
+- Zero failures
 
-**Add section** at the end:
+#### Task 4.2: Test All Examples - Debug Mode
+
+**Purpose**: Verify debug mode works for entire suite
+
+**Command**:
+```bash
+time uv run test.py --examples --debug
+```
+
+**Expected results**:
+- All 96 examples compile successfully
+- Compilation time slower than quick mode (sanitizers add overhead)
+- Zero failures
+- No linking errors
+
+#### Task 4.3: Test All Examples - Release Mode
+
+**Purpose**: Verify release mode works for entire suite
+
+**Command**:
+```bash
+time uv run test.py --examples --build-mode release
+```
+
+**Expected results**:
+- All 96 examples compile successfully
+- Uses `-O3 -DNDEBUG` flags
+- Zero failures
+
+#### Task 4.4: Verify Sanitizer Execution
+
+**Purpose**: Confirm sanitizers work at runtime
+
+**Commands**:
+```bash
+# Execute examples with sanitizers
+uv run test.py --examples Blink DemoReel100 --debug --full
+```
+
+**Expected results**:
+- Examples execute without sanitizer errors
+- No memory leaks reported
+- No undefined behavior detected
+- Clean exit (code 0)
+
+---
+
+### Phase 5: Documentation (Iteration 7)
+
+#### Task 5.1: Update examples/AGENTS.md
+
+**File**: `examples/AGENTS.md`
+
+**Add new section** after the existing compilation commands:
 
 ```markdown
-## Implementation Complete
+## Debug Mode for Examples
 
-The example DLL transformation was successfully implemented in iterations 3-6.
-See commit history for details. Examples now use the same DLL architecture as tests,
-resulting in 10-15% build time improvement and reduced binary size.
+Examples support three build modes, mirroring the unit test system:
+
+### Quick Mode (Default)
+- **Flags**: `-O0 -g1` (minimal debug info)
+- **Use case**: Fast iteration and testing
+- **Command**: `uv run test.py --examples`
+- **Build directory**: `.build/meson-quick/examples/`
+
+### Debug Mode
+- **Flags**: `-O0 -g3` + AddressSanitizer + UndefinedBehaviorSanitizer
+- **Use case**: Debugging crashes, memory issues, undefined behavior
+- **Command**: `uv run test.py --examples --debug`
+- **Build directory**: `.build/meson-debug/examples/`
+- **Example**: `uv run test.py --examples Blink --debug --full`
+
+### Release Mode
+- **Flags**: `-O3 -DNDEBUG` (optimized)
+- **Use case**: Performance testing
+- **Command**: `uv run test.py --examples --build-mode release`
+- **Build directory**: `.build/meson-release/examples/`
+
+### Mode-Specific Build Directories
+
+Examples use separate build directories per mode to enable caching and prevent flag conflicts:
+
+- `.build/meson-quick/examples/` - Quick mode
+- `.build/meson-debug/examples/` - Debug mode
+- `.build/meson-release/examples/` - Release mode
+
+When switching modes, the system automatically:
+1. Detects the mode change via marker files
+2. Forces Meson reconfiguration
+3. Cleans all object files and archives
+4. Rebuilds with new flags
+
+This prevents linking errors from mixing objects compiled with different flags.
+
+### Debugging Workflow
+
+1. **Identify problematic example**:
+   ```bash
+   uv run test.py --examples ExampleName
+   ```
+
+2. **Compile with debug symbols and sanitizers**:
+   ```bash
+   uv run test.py --examples ExampleName --debug --full
+   ```
+
+3. **Analyze sanitizer output** for memory errors or undefined behavior
+
+4. **Use GDB for deeper investigation** (if needed):
+   ```bash
+   gdb .build/meson-debug/examples/example-ExampleName.exe
+   ```
+
+### Performance Notes
+
+- **Quick mode**: Fastest compilation, suitable for rapid iteration
+- **Debug mode**: Slower compilation (sanitizers add overhead), larger binaries
+- **Release mode**: Optimized for performance testing, no debug info
+- **Mode switching**: One-time cleanup cost, then normal build speed
+- **PCH**: Works in all modes (precompiled headers dramatically speed up compilation)
+```
+
+#### Task 5.2: Update CLAUDE.md
+
+**File**: `CLAUDE.md`
+
+**Update section**: "Example Compilation (Host-Based)"
+
+**Add build mode commands** to the existing list:
+
+```markdown
+### Example Compilation (Host-Based)
+FastLED supports fast host-based compilation of `.ino` examples using Meson build system:
+
+- `uv run test.py --examples` - Compile and run all examples (quick mode, default)
+- `uv run test.py --examples --debug` - Compile with debug symbols and sanitizers
+- `uv run test.py --examples --build-mode release` - Compile optimized release builds
+- `uv run test.py --examples Blink DemoReel100` - Compile specific examples
+- `uv run test.py --examples Blink --debug --full` - Debug mode with execution
+- `uv run test.py --examples --no-parallel` - Sequential compilation (easier debugging)
+- `uv run test.py --examples --verbose` - Show detailed compilation output
+- `uv run test.py --examples --clean` - Clean build cache and recompile
+
+**Build Modes**:
+- **quick** (default): Fast compilation with minimal debug info (`-O0 -g1`)
+- **debug**: Full symbols and sanitizers (`-O0 -g3` + ASan + UBSan)
+- **release**: Optimized production build (`-O3 -DNDEBUG`)
+
+**Mode-Specific Directories**:
+- `.build/meson-quick/examples/` - Quick mode builds
+- `.build/meson-debug/examples/` - Debug mode builds
+- `.build/meson-release/examples/` - Release mode builds
 ```
 
 ---
 
-### Phase 5: Performance Benchmarking (Iteration 7)
+### Phase 6: Edge Cases and Polish (Iteration 8)
 
-#### Step 5.1: Measure build time improvement
+#### Task 6.1: Test Edge Case - Clean Flag with Mode
 
-**Benchmark**:
+**Commands**:
 ```bash
-# Clean build (before)
-rm -rf builddir
-time meson setup builddir && time ninja -C builddir examples-host
+# Build in quick mode
+uv run test.py --examples Blink
 
-# Record time
+# Force clean rebuild in debug mode
+uv run test.py --examples Blink --debug --clean
 ```
 
-**Record**:
-- Setup time: X seconds
-- Build time: Y seconds
-- Total: X + Y seconds
+**Expected**: Complete rebuild in debug mode, even if quick mode cached
 
-**Compare** to INVESTIGATION.md baseline (if available)
+#### Task 6.2: Test Edge Case - Invalid Build Mode
+
+**Command**:
+```bash
+uv run test.py --examples --build-mode invalid
+```
+
+**Expected**: Clear error message:
+```
+Error: Invalid build mode: invalid. Valid modes: quick, debug, release
+```
+
+#### Task 6.3: Test Edge Case - Conflicting Flags
+
+**Command**:
+```bash
+uv run test.py --examples --debug --build-mode quick
+```
+
+**Expected behavior** (implementation decision):
+- **Option A**: `build_mode` parameter takes precedence (use quick mode)
+- **Option B**: Raise error about conflicting flags
+
+**Recommendation**: Option A (precedence) for flexibility
+
+#### Task 6.4: Improve Error Messages
+
+**Add helpful error messages** for common failure scenarios:
+
+1. **Mode detection failure**:
+   ```python
+   if build_mode is None and not debug:
+       # This shouldn't happen, but handle gracefully
+       build_mode = "quick"
+       print("Warning: Could not determine build mode, defaulting to 'quick'")
+   ```
+
+2. **Build directory creation failure**:
+   ```python
+   try:
+       build_dir.mkdir(parents=True, exist_ok=True)
+   except OSError as e:
+       print(f"Error: Failed to create build directory: {build_dir}")
+       print(f"Reason: {e}")
+       return MesonTestResult(success=False, output=str(e))
+   ```
+
+3. **Marker file issues**:
+   ```python
+   try:
+       debug_marker.write_text(str(debug))
+   except (OSError, IOError) as e:
+       print(f"Warning: Could not write debug marker file: {e}")
+       print("Build will continue, but mode detection may be affected")
+   ```
 
 ---
 
-#### Step 5.2: Measure binary size reduction
+## Testing Matrix
 
-**Calculate**:
+### Smoke Tests (Fast - Run First)
 ```bash
-# Total size of example DLLs
-TOTAL_DLL=$(du -sb builddir/examples/*.dll | awk '{sum+=$1} END {print sum}')
+# Single example, each mode
+uv run test.py --examples Blink                    # quick
+uv run test.py --examples Blink --debug            # debug
+uv run test.py --examples Blink --build-mode release  # release
 
-# Size of runner
-RUNNER=$(du -sb builddir/example_runner.exe | awk '{print $1}')
-
-# Total
-echo "Total size: $(($TOTAL_DLL + $RUNNER)) bytes"
+# Mode switching (same example)
+uv run test.py --examples Blink                    # quick
+uv run test.py --examples Blink --debug            # switch to debug
+uv run test.py --examples Blink                    # switch back to quick
 ```
 
-**Compare** to old architecture total
+### Integration Tests (Medium - Run After Smoke Tests Pass)
+```bash
+# Multiple examples, each mode
+uv run test.py --examples Blink DemoReel100 Pride2015
+uv run test.py --examples Blink DemoReel100 Pride2015 --debug
+uv run test.py --examples Blink DemoReel100 Pride2015 --build-mode release
+
+# Execution with sanitizers
+uv run test.py --examples Blink --debug --full
+```
+
+### Full Suite Tests (Slow - Run Before Final Validation)
+```bash
+# All examples, each mode
+time uv run test.py --examples                     # ~0.24s expected
+time uv run test.py --examples --debug             # slower, but should succeed
+time uv run test.py --examples --build-mode release
+```
+
+### Regression Tests (Critical - Must Pass)
+```bash
+# Ensure no breakage to existing functionality
+uv run test.py --cpp                               # Unit tests still work
+uv run test.py --examples                          # Examples still work (default)
+bash lint                                          # No new linter errors
+```
 
 ---
 
-## Rollback Strategy
+## Implementation Checklist
 
-If critical issues arise during implementation:
+### Phase 1: Core Infrastructure (Iteration 3)
+- [ ] Add `debug` parameter to `run_meson_build_examples()`
+- [ ] Add `build_mode` parameter to `run_meson_build_examples()`
+- [ ] Implement build mode determination logic
+- [ ] Implement mode-specific build directory construction
+- [ ] Pass `debug` flag to `setup_meson_build()`
+- [ ] Add docstring updates
+- [ ] Verify code compiles without syntax errors
 
-### Rollback Point 1 (After Phase 1)
-**If**: Core infrastructure doesn't compile
+### Phase 2: test.py Integration (Iteration 4)
+- [ ] Verify `--debug` flag exists in test.py
+- [ ] Add `--build-mode` flag if missing
+- [ ] Pass `debug` to `run_meson_build_examples()`
+- [ ] Pass `build_mode` to `run_meson_build_examples()`
+- [ ] Test CLI flags work correctly
 
-**Action**:
-```bash
-rm examples/shared/example_runner.cpp
-rm src/platforms/example_dll_main.hpp
-git checkout ci/util/generate_wrapper.py
-```
+### Phase 3: Initial Testing (Iteration 5)
+- [ ] Test single example in quick mode
+- [ ] Test single example in debug mode
+- [ ] Verify mode-specific directories created
+- [ ] Verify marker files created
+- [ ] Test mode switching triggers reconfiguration
+- [ ] Test multiple examples in debug mode
 
-### Rollback Point 2 (After Phase 2)
-**If**: Build system changes break examples
+### Phase 4: Full Suite Validation (Iteration 6)
+- [ ] Test all examples in quick mode
+- [ ] Test all examples in debug mode
+- [ ] Test all examples in release mode
+- [ ] Verify sanitizer execution works
+- [ ] Measure compilation times
+- [ ] Verify no regressions
 
-**Action**:
-```bash
-git checkout examples/meson.build
-# Remove runner build from meson.build manually
-```
+### Phase 5: Documentation (Iteration 7)
+- [ ] Update `examples/AGENTS.md`
+- [ ] Update `CLAUDE.md`
+- [ ] Add usage examples
+- [ ] Document debugging workflow
 
-### Complete Rollback
-**If**: DLL architecture causes unfixable issues
-
-**Action**:
-```bash
-git checkout examples/meson.build
-git checkout ci/util/generate_wrapper.py
-rm -rf examples/shared/
-rm src/platforms/example_dll_main.hpp
-```
+### Phase 6: Edge Cases (Iteration 8)
+- [ ] Test clean flag with mode
+- [ ] Test invalid build mode
+- [ ] Test conflicting flags
+- [ ] Add error messages
+- [ ] Final regression testing
 
 ---
 
 ## Success Criteria
 
-### Must Have (Blocking)
-- [ ] All 96 examples compile as DLLs without errors
-- [ ] All examples run successfully via runner
-- [ ] Zero functionality regressions
-- [ ] No new linter errors
+**The implementation is complete when ALL of these are verified:**
 
-### Should Have (Non-blocking)
-- [ ] 10-15% build time improvement measured
-- [ ] Binary size reduction measured
-- [ ] Documentation updated
+### Functionality
+- [ ] `uv run test.py --examples` works (quick mode, default)
+- [ ] `uv run test.py --examples --debug` works (debug mode)
+- [ ] `uv run test.py --examples --build-mode release` works (release mode)
+- [ ] Mode-specific build directories created correctly
+- [ ] Mode switching triggers automatic cleanup and reconfiguration
+- [ ] All 96 examples compile successfully in each mode
+- [ ] Debug mode includes `-g3` symbols and sanitizers
+- [ ] Examples execute without sanitizer errors
 
-### Nice to Have
-- [ ] Consistent build time across iterations (demonstrating stability)
-- [ ] Zero warnings during compilation
+### Quality
+- [ ] No regressions in existing functionality
+- [ ] Unit tests still pass (`uv run test.py --cpp`)
+- [ ] Linter passes (`bash lint`)
+- [ ] Error messages are clear and helpful
+- [ ] Edge cases handled gracefully
+
+### Documentation
+- [ ] `examples/AGENTS.md` updated with debug mode section
+- [ ] `CLAUDE.md` updated with build mode commands
+- [ ] Usage examples provided
+- [ ] Debugging workflow documented
 
 ---
 
-## Key Files Reference
-
-### Files to Create
-1. `examples/shared/example_runner.cpp` (based on tests/shared/runner.cpp)
-2. `src/platforms/example_dll_main.hpp` (new DLL export header)
+## Key Files
 
 ### Files to Modify
-1. `ci/util/generate_wrapper.py` (add EXAMPLE_DLL_MODE support)
-2. `examples/meson.build` (transform executable → shared_library, add runner build)
+1. **ci/util/meson_example_runner.py** (PRIMARY)
+   - Add `debug` and `build_mode` parameters
+   - Implement mode-specific directory logic
+   - Pass debug flag to `setup_meson_build()`
 
-### Files to Reference (Do NOT modify)
-1. `tests/shared/runner.cpp` (template for example_runner.cpp)
-2. `tests/shared/crash_handler_main.cpp` (reuse for examples)
-3. `tests/meson.build` (reference implementation)
-4. `src/platforms/stub_main.hpp` (reuse fl::stub_main:: functions)
-5. `meson.build` (root - dll_link_args already defined)
+2. **test.py** (SECONDARY)
+   - Verify/add `--build-mode` flag
+   - Pass flags to `run_meson_build_examples()`
 
-### Files to Read for Context
-1. `INVESTIGATION.md` (background on DLL transformation)
-2. `CLAUDE.md` (project coding standards)
-3. `.loop/MOTIVATION.md` (performance expectations)
+3. **examples/AGENTS.md** (DOCUMENTATION)
+   - Add debug mode documentation
+   - Add usage examples
 
----
+4. **CLAUDE.md** (DOCUMENTATION)
+   - Update quick reference
 
-## Execution Notes for Agents
+### Files to Reference (Do NOT Modify)
+1. **ci/util/meson_runner.py**
+   - Reference implementation (lines 1584-1972)
+   - `setup_meson_build()` implementation (lines 327-1049)
 
-### Iteration 3 (Infrastructure)
-**Focus**: Create runner, export header, update wrapper script
-**Verify**: Files compile independently
-**Time**: ~15-20 minutes
+2. **INVESTIGATION.md**
+   - Technical details from iteration 1
+   - Design patterns to follow
 
-### Iteration 4 (Build System)
-**Focus**: Update meson.build for DLL architecture
-**Verify**: Builds complete without errors
-**Time**: ~20-30 minutes
+3. **meson.build**
+   - Build mode flag definitions (lines 124-148)
 
-### Iteration 5 (Testing)
-**Focus**: Incremental testing (single example → all examples)
-**Verify**: Functionality matches original
-**Time**: ~30-40 minutes
-
-### Iteration 6 (Validation)
-**Focus**: Regression testing, documentation
-**Verify**: No regressions, docs updated
-**Time**: ~20-30 minutes
-
-### Iteration 7 (Benchmarking)
-**Focus**: Measure improvements, document results
-**Verify**: Performance gains documented
-**Time**: ~10-15 minutes
-
-**Total estimated time**: 95-135 minutes across 5 iterations
+4. **meson.options**
+   - Build mode option definition
 
 ---
 
-## Critical Reminders
+## Critical Patterns to Follow
 
-1. **NEVER ask questions** - this is an agent loop. Document questions for next iteration.
-2. **Wait for background processes** - Don't end iteration with running builds.
-3. **Maximize parallelism** - Run independent operations in parallel.
-4. **Test incrementally** - Don't change everything at once.
-5. **Document everything** - Update ITERATION_X.md with progress.
-6. **Check DONE.md** - If all work complete, write DONE.md to halt loop.
-7. **Trust INVESTIGATION.md** - It's accurate research from iteration 1.
+### From INVESTIGATION.md:
+
+1. **Mode-Specific Build Directories**
+   ```python
+   build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
+   ```
+   - Prevents flag conflicts
+   - Enables per-mode caching
+
+2. **Debug Flag Conversion**
+   ```python
+   setup_meson_build(..., debug=(build_mode == "debug"))
+   ```
+   - Convert mode string to boolean
+   - `setup_meson_build()` expects boolean, not string
+
+3. **Mode Validation**
+   ```python
+   if build_mode not in ["quick", "debug", "release"]:
+       raise ValueError(...)
+   ```
+   - Fail fast on invalid modes
+   - Clear error messages
+
+4. **Marker File Handling**
+   - `setup_meson_build()` handles this automatically
+   - No additional code needed in `meson_example_runner.py`
+
+---
+
+## Common Pitfalls to Avoid
+
+### ❌ Don't Do This:
+1. **Reuse same build directory for all modes** → Causes linking errors
+2. **Forget to pass debug flag to setup_meson_build()** → No sanitizers applied
+3. **Hardcode build directory paths** → Breaks mode-specific directories
+4. **Skip mode validation** → Cryptic errors from Meson
+
+### ✅ Do This Instead:
+1. Use mode-specific directories: `build_dir / f"{name}-{mode}"`
+2. Always pass debug flag: `debug=(build_mode == "debug")`
+3. Use Path concatenation: `build_dir.parent / f"..."`
+4. Validate early: Check mode before any build operations
+
+---
+
+## Performance Expectations
+
+### Build Times (from INVESTIGATION.md)
+- **Quick mode**: ~0.24s for 96 examples (with PCH)
+- **Debug mode**: Slower (sanitizers add overhead), but should complete in reasonable time
+- **Release mode**: Similar to quick mode (optimization happens at compile, not link)
+
+### Binary Sizes
+- **Quick mode**: Minimal debug info → smaller binaries
+- **Debug mode**: Full symbols → significantly larger binaries
+- **Release mode**: Optimized, no debug info → smallest binaries
+
+### Mode Switching
+- **First switch**: One-time cleanup cost (deletes .o, .a, .exe files)
+- **Subsequent builds**: Normal build speed (cached if source unchanged)
 
 ---
 
 ## Definition of Done
 
-Write `DONE.md` at project root when ALL of these are true:
+Write `DONE.md` at project root when **ALL** of these are true:
 
-1. ✅ Infrastructure files created and compile
-2. ✅ Build system fully transformed
-3. ✅ All examples build as DLLs successfully
-4. ✅ All examples run via runner without errors
-5. ✅ Full regression test passes (cpp + examples + lint)
-6. ✅ Build time improvement measured and documented
-7. ✅ Documentation updated
+1. ✅ Core infrastructure implemented and compiles
+2. ✅ test.py integration complete
+3. ✅ All smoke tests pass
+4. ✅ All integration tests pass
+5. ✅ Full suite tests pass (96 examples, all modes)
+6. ✅ Regression tests pass (cpp, examples, lint)
+7. ✅ Documentation updated (AGENTS.md, CLAUDE.md)
+8. ✅ Edge cases handled gracefully
+9. ✅ No known issues or blockers
 
-Until ALL criteria met, continue iterations with incremental progress.
+**Until ALL criteria met**, continue iterations with incremental progress.
+
+---
+
+## Notes for Future Iterations
+
+### Iteration 3 (Core Infrastructure)
+- Focus: Modify `meson_example_runner.py`
+- Verify: Code compiles without syntax errors
+- Test: Import the module (`uv run python -c "from ci.util.meson_example_runner import run_meson_build_examples"`)
+
+### Iteration 4 (test.py Integration)
+- Focus: Update `test.py` to pass flags
+- Verify: `--debug` and `--build-mode` flags recognized
+- Test: `uv run test.py --examples --help` shows flags
+
+### Iteration 5 (Initial Testing)
+- Focus: Single example testing in each mode
+- Verify: Mode-specific directories created
+- Test: Blink in quick, debug, release modes
+
+### Iteration 6 (Full Suite Validation)
+- Focus: All 96 examples in each mode
+- Verify: Zero failures
+- Test: Full suite in quick, debug, release
+
+### Iteration 7 (Documentation)
+- Focus: Update AGENTS.md and CLAUDE.md
+- Verify: Documentation clear and accurate
+- Test: User can follow docs to use debug mode
+
+### Iteration 8 (Edge Cases and Final Validation)
+- Focus: Edge cases, error handling, regression testing
+- Verify: All edge cases handled, all tests pass
+- Test: Complete testing matrix
 
 ---
 
 **END OF TASK SPECIFICATION**
+
+Ready for iteration 3 to begin implementation.

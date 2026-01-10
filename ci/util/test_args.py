@@ -127,7 +127,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Enable debug mode for C++ unit tests (e.g., full debug symbols)",
+        help="Enable debug mode for C++ unit tests and examples (full debug symbols + sanitizers)",
+    )
+    parser.add_argument(
+        "--build-mode",
+        type=str,
+        choices=["quick", "debug", "release"],
+        default=None,
+        help="Override build mode for unit tests and examples (default: quick, or debug if --debug flag set)",
     )
     parser.add_argument(
         "--run",
@@ -180,6 +187,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         full=parsed_args.full,
         no_parallel=parsed_args.no_parallel,
         debug=parsed_args.debug,
+        build_mode=parsed_args.build_mode,
         run=parsed_args.run,
         qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
