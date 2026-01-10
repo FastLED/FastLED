@@ -23,6 +23,8 @@ import time
 import tomllib
 from pathlib import Path
 
+from ci.wasm_tools import get_emcc
+
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -34,55 +36,6 @@ BUILD_FLAGS_TOML = (
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
 LTO_CACHE_DIR = BUILD_DIR / "lto_cache"
 ENTRY_POINT_CPP = PROJECT_ROOT / "src" / "platforms" / "wasm" / "entry_point.cpp"
-
-
-def find_emscripten() -> Path:
-    """Find emscripten em++ compiler in clang-tool-chain."""
-    # Check for clang-tool-chain installation
-    home = Path.home()
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "win"
-        / "x86_64"
-        / "emscripten"
-        / "em++.bat"
-    )
-
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try Unix-style path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "linux"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try macOS path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "darwin"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    raise FileNotFoundError(
-        "Could not find emscripten compiler in clang-tool-chain installation. "
-        "Make sure clang-tool-chain is installed with emscripten support."
-    )
 
 
 def load_build_flags(
@@ -254,7 +207,7 @@ def needs_compilation(source_file: Path, output_object: Path) -> bool:
 def compile_object(
     source_file: Path,
     output_object: Path,
-    emcc: Path,
+    emcc: str,
     flags: dict[str, list[str]],
     verbose: bool = False,
     force: bool = False,
@@ -265,7 +218,7 @@ def compile_object(
     Args:
         source_file: Source .cpp file to compile
         output_object: Output .o file path
-        emcc: Path to em++ compiler
+        emcc: Compiler command (e.g., 'clang-tool-chain-emcc')
         flags: Build flags dictionary
         verbose: Enable verbose output
         force: Force recompilation even if up-to-date
@@ -292,7 +245,7 @@ def compile_object(
     # Build compilation command
     cmd = (
         [
-            str(emcc),
+            emcc,
             "-c",
             str(source_file),
             "-o",
@@ -346,8 +299,8 @@ def compile_wasm(
         start_time = time.time()
         print(f"Building FastLED sketch to WASM (mode: {build_mode})...")
 
-        # Find emscripten compiler
-        emcc = find_emscripten()
+        # Get tool command
+        emcc = get_emcc()
         if verbose:
             print(f"Using emscripten: {emcc}")
 
@@ -438,7 +391,7 @@ def compile_wasm(
         # Link command: sketch.o + entry_point.o + libfastled.a -> output
         link_cmd = (
             [
-                str(emcc),
+                emcc,
                 str(sketch_object),
                 str(entry_point_object),
                 str(library_archive),

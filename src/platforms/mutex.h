@@ -31,7 +31,8 @@
     #include "platforms/arm/rp/mutex_rp.h"
 #elif defined(FL_IS_STM32) && __has_include("FreeRTOS.h")
     #include "platforms/arm/stm32/mutex_stm32.h"
-#elif defined(FL_IS_STUB)
+#elif defined(FL_IS_STUB) || defined(FL_IS_WASM)
+    // WASM uses stub mutex profile (std::mutex with pthread support)
     #include "platforms/stub/mutex_stub.h"
 #elif defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
     #include "platforms/arm/d21/mutex_samd.h"

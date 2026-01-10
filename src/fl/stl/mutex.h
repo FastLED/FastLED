@@ -12,7 +12,7 @@
 /// - unique_lock implementation (std::unique_lock or custom)
 /// - Lock constructor tag types (defer_lock, try_to_lock, adopt_lock)
 
-#include "platforms/mutex.h"
+#include "platforms/mutex.h"  // IWYU pragma: keep
 
 namespace fl {
 

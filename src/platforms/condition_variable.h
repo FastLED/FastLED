@@ -22,7 +22,8 @@
 // Platform dispatch
 #ifdef FL_IS_ESP32
     #include "platforms/esp/32/condition_variable_esp32.h"
-#elif defined(FL_IS_STUB)
+#elif defined(FL_IS_STUB) || defined(FL_IS_WASM)
+    // WASM uses stub condition_variable profile (std::condition_variable with pthread support)
     #include "platforms/stub/condition_variable_stub.h"
 #else
     // Default fallback: Use stub implementation for all platforms

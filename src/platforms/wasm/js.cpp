@@ -25,6 +25,7 @@
 #include "fl/str.h"
 #include "js.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+#include "fl/stl/time.h"
 
 // extern setup and loop which will be supplied by the sketch.
 extern void setup();
@@ -51,15 +52,15 @@ void delay(int ms) {
     if (ms <= 0) {
         return;
     }
-    
-    uint32_t end = millis() + ms;
-    
+
+    uint32_t end = fl::millis() + ms;
+
     // Break delay into 1ms chunks and pump all async tasks
-    while (millis() < end) {
+    while (fl::millis() < end) {
         // Update all async tasks (fetch, timers, etc.) during delay
         fl::async_run();
 
-        if (millis() >= end) {
+        if (fl::millis() >= end) {
             break;
         }
 

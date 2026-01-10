@@ -44,6 +44,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+from ci.wasm_tools import get_emar, get_emcc, get_wasm_ld
+
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -65,104 +67,6 @@ LIBRARY_OUTPUT = BUILD_DIR / "libfastled.a"
 LIBRARY_METADATA = BUILD_DIR / "library_metadata.json"
 UNITY_METADATA = UNITY_DIR / "unity_metadata.json"
 PCH_OUTPUT = BUILD_DIR / "wasm_pch.h.pch"
-
-
-def find_emscripten() -> Path:
-    """Find emscripten em++ compiler in clang-tool-chain."""
-    home = Path.home()
-
-    # Try Windows path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "win"
-        / "x86_64"
-        / "emscripten"
-        / "em++.bat"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try Linux path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "linux"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try macOS path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "darwin"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    raise FileNotFoundError(
-        "Could not find emscripten compiler in clang-tool-chain installation. "
-        "Make sure clang-tool-chain is installed with emscripten support."
-    )
-
-
-def find_emar() -> Path:
-    """Find emscripten emar archiver in clang-tool-chain."""
-    home = Path.home()
-
-    # Try Windows path
-    emar_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "win"
-        / "x86_64"
-        / "emscripten"
-        / "emar.bat"
-    )
-    if emar_path.exists():
-        return emar_path
-
-    # Try Linux path
-    emar_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "linux"
-        / "x86_64"
-        / "emscripten"
-        / "emar"
-    )
-    if emar_path.exists():
-        return emar_path
-
-    # Try macOS path
-    emar_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "darwin"
-        / "x86_64"
-        / "emscripten"
-        / "emar"
-    )
-    if emar_path.exists():
-        return emar_path
-
-    raise FileNotFoundError(
-        "Could not find emscripten archiver (emar) in clang-tool-chain installation. "
-        "Make sure clang-tool-chain is installed with emscripten support."
-    )
 
 
 def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
@@ -336,7 +240,7 @@ def needs_rebuild(
 
 
 def compile_object(
-    emcc: Path,
+    emcc: str,
     source_path: Path,
     object_path: Path,
     depfile_path: Path,
@@ -348,7 +252,7 @@ def compile_object(
     Compile a single source file to an object file.
 
     Args:
-        emcc: Path to em++ compiler
+        emcc: Compiler command (e.g., 'clang-tool-chain-emcc')
         source_path: Source .cpp file
         object_path: Output .o file
         depfile_path: Output .d file
@@ -387,7 +291,7 @@ def compile_object(
                 "run",
                 "python",
                 str(COMPILE_PCH_WRAPPER),
-                str(emcc),
+                emcc,
                 "-c",  # Compile only, don't link
                 str(source_path),
                 "-o",
@@ -504,7 +408,7 @@ def ensure_unity_files_generated(unity_chunks: int, verbose: bool = False) -> in
 
 
 def create_thin_archive(
-    emar: Path,
+    emar: str,
     object_files: list[Path],
     output_path: Path,
     verbose: bool = False,
@@ -516,7 +420,7 @@ def create_thin_archive(
     resulting in faster archive creation and smaller archive size.
 
     Args:
-        emar: Path to emar archiver
+        emar: Archiver command (e.g., 'clang-tool-chain-emar')
         object_files: List of .o files to include
         output_path: Output .a archive path
         verbose: Enable verbose output
@@ -546,7 +450,7 @@ def create_thin_archive(
     #   s = write an index (required for linking)
     #   T = create thin archive (references instead of copies)
     cmd = [
-        str(emar),
+        emar,
         "rcsT",
         str(output_path),
         f"@{response_file}",
@@ -682,12 +586,15 @@ def build_library(
             if unity_result != 0:
                 return unity_result
 
-        # Step 3: Find compiler and archiver
-        emcc = find_emscripten()
-        emar = find_emar()
+        # Step 3: Get tool commands
+        emcc = get_emcc()
+        emar = get_emar()
+        wasm_ld = get_wasm_ld()
+
         if verbose:
             print(f"Using emscripten: {emcc}")
             print(f"Using archiver: {emar}")
+            print(f"Using linker: {wasm_ld}")
 
         # Step 4: Load build flags
         flags = load_build_flags(build_mode)
@@ -878,21 +785,6 @@ def build_library(
             with open(response_file, "w") as f:
                 for obj_path in all_objects:
                     f.write(f'"{obj_path}"\n')
-
-            # Find wasm-ld (it's in the same directory as em++)
-            emcc_dir = emcc.parent
-            wasm_ld = (
-                emcc_dir / "wasm-ld.exe"
-                if emcc_dir.name == "emscripten"
-                else emcc_dir / "wasm-ld"
-            )
-            if not wasm_ld.exists():
-                # Try in bin subdirectory
-                wasm_ld = (
-                    emcc_dir.parent
-                    / "bin"
-                    / ("wasm-ld.exe" if sys.platform == "win32" else "wasm-ld")
-                )
 
             # Partial link command using wasm-ld directly
             partial_link_cmd = [

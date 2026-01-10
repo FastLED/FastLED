@@ -5,7 +5,7 @@
 // Include platform-specific thread implementation
 // This will define FASTLED_MULTITHREADED based on platform capabilities
 // Platforms can override FASTLED_MULTITHREADED detection in platforms/thread.h
-#include "platforms/thread.h"
+#include "platforms/thread.h"  // IWYU pragma: keep
 
 #ifndef FASTLED_MULTITHREADED
 // Default detection: enable multithreading for testing/stub builds with pthread support

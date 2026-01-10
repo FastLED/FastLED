@@ -38,6 +38,8 @@ import sys
 import tomllib
 from pathlib import Path
 
+from ci.wasm_tools import get_emcc
+
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -53,60 +55,11 @@ PCH_DEPFILE = BUILD_DIR / "wasm_pch.h.d"
 PCH_METADATA = BUILD_DIR / "wasm_pch_metadata.json"
 
 
-def find_emscripten() -> Path:
-    """Find emscripten em++ compiler in clang-tool-chain."""
-    home = Path.home()
-
-    # Try Windows path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "win"
-        / "x86_64"
-        / "emscripten"
-        / "em++.bat"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try Linux path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "linux"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    # Try macOS path
-    emcc_path = (
-        home
-        / ".clang-tool-chain"
-        / "emscripten"
-        / "darwin"
-        / "x86_64"
-        / "emscripten"
-        / "em++"
-    )
-    if emcc_path.exists():
-        return emcc_path
-
-    raise FileNotFoundError(
-        "Could not find emscripten compiler in clang-tool-chain installation. "
-        "Make sure clang-tool-chain is installed with emscripten support."
-    )
-
-
-def get_compiler_version(emcc: Path) -> str:
+def get_compiler_version(emcc: str) -> str:
     """Get emscripten compiler version string."""
     try:
         result = subprocess.run(
-            [str(emcc), "--version"],
+            [emcc, "--version"],
             capture_output=True,
             text=True,
             check=True,
@@ -196,7 +149,7 @@ def save_metadata(metadata: dict[str, str]) -> None:
 
 
 def needs_rebuild(
-    emcc: Path,
+    emcc: str,
     flags: dict[str, list[str]],
     force: bool = False,
 ) -> tuple[bool, str]:
@@ -236,7 +189,7 @@ def needs_rebuild(
 
 
 def compile_pch(
-    emcc: Path,
+    emcc: str,
     flags: dict[str, list[str]],
     verbose: bool = False,
 ) -> int:
@@ -244,7 +197,7 @@ def compile_pch(
     Compile the PCH file.
 
     Args:
-        emcc: Path to em++ compiler
+        emcc: Compiler command (e.g., 'clang-tool-chain-emcc')
         flags: Compilation flags from TOML
         verbose: Enable verbose output
 
@@ -278,7 +231,7 @@ def compile_pch(
             "run",
             "python",
             str(PROJECT_ROOT / "ci" / "compile_pch.py"),
-            str(emcc),
+            emcc,
             "-x",
             "c++-header",  # Treat input as C++ header
             str(PCH_HEADER),  # Input: wasm_pch.h
@@ -387,8 +340,8 @@ def main() -> int:
             print(f"Error: PCH header not found: {PCH_HEADER}", file=sys.stderr)
             return 1
 
-        # Find emscripten compiler
-        emcc = find_emscripten()
+        # Get tool command
+        emcc = get_emcc()
         if args.verbose:
             print(f"Using emscripten: {emcc}")
 

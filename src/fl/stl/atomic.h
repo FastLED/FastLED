@@ -9,7 +9,7 @@
 // Note: ESP8266 excluded - lacks native atomic support, would require linking libatomic
 #if FASTLED_MULTITHREADED || defined(ESP32)
 #define FASTLED_USE_REAL_ATOMICS 1
-#include "platforms/atomic.h"
+#include "platforms/atomic.h"  // IWYU pragma: keep
 #else
 #define FASTLED_USE_REAL_ATOMICS 0
 #endif

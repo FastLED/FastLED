@@ -2,8 +2,7 @@
 
 // Include platform-specific semaphore implementation
 // This will define FASTLED_MULTITHREADED based on platform capabilities
-#include "fl/stl/cstddef.h"
-#include "semaphore_stub_stl.h"
+#include "platforms/semaphore.h"  // IWYU pragma: keep
 
 namespace fl {
 

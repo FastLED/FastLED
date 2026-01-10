@@ -30,7 +30,8 @@
 //------------------------------------------------------------------------------
 
 // Platform dispatch for threading
-#ifdef FL_IS_STUB
+#if defined(FL_IS_STUB) || defined(FL_IS_WASM)
+    // WASM uses stub threading profile (pthread-based multithreading)
     #include "platforms/stub/thread_stub.h"
 #else
     // Default fallback: Use stub no-op implementation for platforms without threading

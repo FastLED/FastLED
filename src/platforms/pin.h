@@ -42,6 +42,9 @@
 #elif defined(FL_IS_STUB)
     // Stub platform for testing (no-op pins)
     #include "platforms/shared/pin_noop.hpp"
+#elif defined(FL_IS_WASM)
+    // WASM platform uses no-op pin implementation
+    #include "platforms/shared/pin_noop.hpp"
 #elif defined(ARDUINO)
     // Arduino-compatible platform without specific pin implementation
     #error "Platform-specific pin implementation not defined for this Arduino variant. Please add support in src/platforms/pin.h or update the platform detection logic."

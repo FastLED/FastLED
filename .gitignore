@@ -87,3 +87,4 @@ ci/docker/avr8js/*.js
 ci/docker/.build_timestamps.json
 examples/**/*.ino.cpp
 ./*.log
+.loop

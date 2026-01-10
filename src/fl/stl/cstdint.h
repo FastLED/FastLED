@@ -15,7 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Include platform-specific type definitions (no namespace for C)
-#include "platforms/int.h"
+#include "platforms/int.h"  // IWYU pragma: keep
 
 // Define standard integer type names for C code
 // 8-bit types use raw primitives to match system headers exactly
