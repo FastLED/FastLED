@@ -133,7 +133,7 @@ endif
 
 crash_handler_example = static_library('crash_handler_example',
   project_root / 'tests' / 'shared' / 'crash_handler_main.cpp',
-  include_directories: [src_dir, stub_dir],
+  include_directories: [src_dir, stub_dir, tests_dir],
   cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
   dependencies: crash_handler_deps_example,
   install: false
@@ -230,8 +230,8 @@ foreach example_name : example_paths.keys()
         build_by_default: false
     )
 
-    # Add FastLED includes (src and stub platform) to the example includes
-    all_includes = [src_dir, stub_dir] + include_objs
+    # Add FastLED includes (src, stub platform, and tests for shared infrastructure) to the example includes
+    all_includes = [src_dir, stub_dir, tests_dir] + include_objs
 
     # Get additional source files for this example (e.g., src/*.cpp)
     additional_sources = []

@@ -26,7 +26,7 @@ def main():
 
 #ifdef EXAMPLE_DLL_MODE
 // DLL mode: Use export function from example_dll_main.hpp
-#include "platforms/example_dll_main.hpp"
+#include "shared/example_dll_main.hpp"
 #else
 // Standalone mode: Use standard stub_main.hpp with main()
 #include "platforms/stub_main.hpp"

@@ -7,7 +7,7 @@
 
 // ok no namespace fl
 
-#include "stub_main.hpp"
+#include "../src/platforms/stub_main.hpp"
 
 // Export function for DLL mode - called by example_runner.exe
 extern "C" {

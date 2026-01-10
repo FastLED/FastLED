@@ -1,5 +1,7 @@
 # TASK: Transform Examples to DLL Architecture
 
+> **Note**: This file is historical documentation. As of 2026-01-10, `src/platforms/example_dll_main.hpp` has been moved to `tests/shared/example_dll_main.hpp`.
+
 ## Executive Summary
 
 **Objective**: Apply the same DLL transformation used for tests (commit b1314eaf8) to example executables, converting ~96 standalone executables into DLLs loaded by a shared runner.
