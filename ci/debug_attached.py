@@ -594,6 +594,9 @@ def run_monitor(
                         print(
                             f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
                         )
+                    except KeyboardInterrupt:
+                        notify_main_thread()
+                        raise
                     except Exception as e:
                         print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
                 print(f"   ⏳ Waiting for {rpc_responses_needed} response(s)...\n")

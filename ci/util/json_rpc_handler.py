@@ -10,6 +10,8 @@ import re
 from pathlib import Path
 from typing import Any, cast
 
+from ci.util.global_interrupt_handler import notify_main_thread
+
 
 class JsonRpcHandler:
     """Handler for JSON-RPC communication with FL::Remote devices.
@@ -120,7 +122,8 @@ def parse_json_rpc_commands(json_rpc_arg: str | None) -> list[dict[str, Any]]:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
         except KeyboardInterrupt:
-            raise  # Always re-raise KeyboardInterrupt
+            notify_main_thread()  # Propagate interrupt to main thread
+            raise
         except Exception as e:
             raise ValueError(f"Failed to read JSON-RPC file {file_path}: {e}")
 
