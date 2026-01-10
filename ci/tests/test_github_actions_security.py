@@ -1,4 +1,4 @@
-# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
@@ -87,19 +87,24 @@ class TestGitHubActionsSecurityTest(unittest.TestCase):
 
                 # Parse steps
                 steps: list[WorkflowStep] = []
-                raw_steps: list[Any] = job_data.get("steps", [])  # pyright: ignore[reportUnknownVariableType]
-                for step_data in raw_steps:  # pyright: ignore[reportUnknownVariableType]
-                    if isinstance(step_data, dict):
-                        step_dict: dict[str, Any] = step_data  # pyright: ignore[reportUnknownVariableType]
-                        step = WorkflowStep(
-                            name=step_dict.get("name"),
-                            uses=step_dict.get("uses"),
-                            with_config=step_dict.get("with"),
-                            run=step_dict.get("run"),
-                        )
-                        steps.append(step)
+                raw_steps_value = job_data.get("steps", [])
+                if isinstance(raw_steps_value, list):
+                    raw_steps: list[Any] = raw_steps_value
+                    for step_item in raw_steps:
+                        step_data: Any = step_item
+                        if isinstance(step_data, dict):
+                            step_dict_raw: Any = step_data
+                            step_dict: dict[str, Any] = step_dict_raw
+                            step = WorkflowStep(
+                                name=step_dict.get("name"),
+                                uses=step_dict.get("uses"),
+                                with_config=step_dict.get("with"),
+                                run=step_dict.get("run"),
+                            )
+                            steps.append(step)
 
-                job_dict: dict[str, Any] = job_data  # pyright: ignore[reportUnknownVariableType]
+                job_dict_raw: Any = job_data
+                job_dict: dict[str, Any] = job_dict_raw
                 job = WorkflowJob(
                     runs_on=job_dict.get("runs-on"),
                     steps=steps,

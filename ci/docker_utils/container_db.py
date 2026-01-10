@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Docker container lifecycle database management.
 
 This module provides a robust container lifecycle management system that:

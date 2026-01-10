@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Meson build system integration for FastLED unit tests."""
+# pyright: reportMissingImports=false, reportUnknownVariableType=false
 
 import hashlib
 import json
@@ -624,18 +625,18 @@ def setup_meson_build(
             if tests_py_path not in [Path(p) for p in sys.path]:
                 sys.path.insert(0, str(tests_py_path))
 
-            from discover_tests import (  # type: ignore[import-not-found]
-                discover_test_files,  # type: ignore[misc]
+            from discover_tests import (
+                discover_test_files,  # type: ignore[import-not-found]
             )
             from test_config import (  # type: ignore[import-not-found]
-                EXCLUDED_TEST_FILES,  # type: ignore[misc]
-                TEST_SUBDIRS,  # type: ignore[misc]
+                EXCLUDED_TEST_FILES,
+                TEST_SUBDIRS,
             )
 
             # Get current test files
             tests_dir = source_dir / "tests"
-            current_test_files: list[str] = sorted(  # type: ignore[misc]
-                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)  # type: ignore[misc]
+            current_test_files: list[str] = sorted(
+                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)  # type: ignore[no-untyped-call]
             )
 
             # Check cached test file list

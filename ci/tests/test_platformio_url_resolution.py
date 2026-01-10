@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -49,7 +48,6 @@ def _setup_utf8_output():
 
 from ci.compiler.platformio_cache import PlatformIOCache
 from ci.compiler.platformio_ini import PlatformIOIni
-
 
 # Removed verbose emoji debug system - tests are now succinct
 

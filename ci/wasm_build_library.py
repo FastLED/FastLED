@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 WASM Static Library Build Script (libfastled.a)
@@ -48,7 +47,6 @@ from pathlib import Path
 from typing import Any
 
 from ci.wasm_tools import get_emar, get_emcc, get_wasm_ld
-
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent

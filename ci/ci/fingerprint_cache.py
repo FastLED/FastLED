@@ -207,9 +207,9 @@ class FingerprintCache:
         return {
             "total_entries": len(self.cache),
             "cache_file_exists": self.cache_file.exists(),
-            "cache_file_size_bytes": self.cache_file.stat().st_size
-            if self.cache_file.exists()
-            else 0,
+            "cache_file_size_bytes": (
+                self.cache_file.stat().st_size if self.cache_file.exists() else 0
+            ),
         }
 
     def get_cached_files(self) -> list[Path]:

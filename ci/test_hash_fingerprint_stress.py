@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Comprehensive stress test suite for HashFingerprintCache.
@@ -17,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
-
 
 # Type alias for Queue results
 QueueResult = tuple[str, Any]

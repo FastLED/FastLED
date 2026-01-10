@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportOperatorIssue=false, reportArgumentType=false
 """
@@ -150,9 +149,9 @@ def analyze_symbols(
     print("Analyzing symbols with enhanced coverage...")
 
     symbols: list[SymbolInfo] = []
-    symbols_dict: dict[
-        str, SymbolInfo
-    ] = {}  # To deduplicate by address+type (or demangled name for zero-address symbols)
+    symbols_dict: dict[str, SymbolInfo] = (
+        {}
+    )  # To deduplicate by address+type (or demangled name for zero-address symbols)
 
     # Method 1: Use readelf to get ALL symbols (including those without size)
     if readelf_path:

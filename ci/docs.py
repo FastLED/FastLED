@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """
 Work in progress to generate doxygen via a script instead of a GitHub action.
 """
@@ -14,7 +13,6 @@ from pathlib import Path
 from typing import Optional
 
 from download import download  # type: ignore
-
 
 # Configs
 DOXYGEN_VERSION = (

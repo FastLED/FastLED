@@ -9,6 +9,7 @@ Efficient file change detection using:
 Key optimization: If content matches despite mtime change (e.g., touch, git checkout),
 updates the cached mtime to avoid redundant hashing on subsequent checks.
 """
+# pyright: reportUnknownVariableType=false
 
 import hashlib
 import json
@@ -91,8 +92,9 @@ class TwoLayerFingerprintCache:
                 data: Any = json.load(f)
                 # Ensure data is a dict (backward compatibility)
                 if isinstance(data, dict) and "files" in data:
-                    files_raw: Any = data["files"]  # pyright: ignore[reportUnknownVariableType]
-                    if isinstance(files_raw, dict):
+                    files_value: Any = data["files"]
+                    if isinstance(files_value, dict):
+                        files_raw: dict[str, Any] = files_value
                         return cast(dict[str, dict[str, float | str]], files_raw)
                 if isinstance(data, dict):
                     return cast(dict[str, dict[str, float | str]], data)

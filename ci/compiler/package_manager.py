@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 if TYPE_CHECKING:
     from ci.boards import Board
     from ci.compiler.path_manager import FastLEDPaths

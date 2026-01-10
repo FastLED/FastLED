@@ -46,6 +46,8 @@ dependencies = [
     "daemoniker>=0.2.3",
     "colorama>=0.4.6",
     "flake8>=7.0.0",
+    "isort>=5.13.0",
+    "black>=24.0.0",
 ]
 
 [build-system]
@@ -67,7 +69,7 @@ KBI = "lint_plugins.flake8.keyboard_interrupt_checker:KeyboardInterruptChecker"
 "lint_plugins" = "lint_plugins"
 
 [tool.ruff]
-exclude = ["ci/tmp", "ci/wasm", "scripts", "native"]
+exclude = ["ci/tmp", "ci/wasm", "scripts", "native", "**/.fbuild", "**/.pio"]
 
 [tool.ruff.lint]
 # Enable import sorting (replaces isort)
@@ -91,6 +93,11 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.isort]
+# Configure isort to use black-compatible formatting
+profile = "black"
+skip_glob = ["ci/tmp/*", "ci/wasm/*", "scripts/*", "native/*", "**/.fbuild/*", "**/.pio/*"]
 
 [tool.pyright]
 include = ["ci", "ci/compiler"]

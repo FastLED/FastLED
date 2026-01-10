@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Toolchain abstraction for multi-platform builds.
 
 This module provides abstract interfaces and concrete implementations for

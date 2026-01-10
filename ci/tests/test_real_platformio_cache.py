@@ -12,7 +12,6 @@ import pytest
 from ci.compiler.platformio_cache import PlatformIOCache
 from ci.compiler.platformio_ini import PlatformIOIni
 
-
 # Test constants
 ESP32_PLATFORM_URL = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-2/platform-espressif32.zip"
 

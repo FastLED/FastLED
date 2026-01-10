@@ -28,7 +28,6 @@ from typing import Any, Generator, Optional
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 try:
     from subprocess import DEVNULL  # py3k
 except ImportError:

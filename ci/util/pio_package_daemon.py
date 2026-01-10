@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 PlatformIO Package Installation Daemon
@@ -42,7 +41,6 @@ from daemoniker import Daemonizer
 
 from ci.util.build_process_tracker import BuildProcessTracker
 from ci.util.pio_package_messages import DaemonState, DaemonStatus, PackageRequest
-
 
 # Daemon configuration
 DAEMON_NAME = "fastled_pio_package_daemon"

@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Output management utilities for FastLED compilation.
 
 This module handles validation and copying of build artifacts to output locations.

@@ -43,9 +43,9 @@ def test_platformio_merge_bin_target_exists() -> None:
     with open(merged_bin, "rb") as f:
         f.seek(0x1000)  # Bootloader is at offset 0x1000
         magic_byte = f.read(1)[0]
-        assert magic_byte == 0xE9, (
-            f"Invalid magic byte at 0x1000: {hex(magic_byte)}, expected 0xE9"
-        )
+        assert (
+            magic_byte == 0xE9
+        ), f"Invalid magic byte at 0x1000: {hex(magic_byte)}, expected 0xE9"
 
     print(f"SUCCESS: merged.bin generated at {merged_bin}")
     print(f"   Size: {size:,} bytes")

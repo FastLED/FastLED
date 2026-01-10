@@ -10,7 +10,6 @@ import subprocess
 import sys
 from typing import Optional
 
-
 # Cache for docker executable path
 _docker_executable_cache: Optional[str] = None
 

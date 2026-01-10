@@ -9,7 +9,6 @@ from pathlib import Path
 
 from ci.compiler.platformio_ini import PlatformIOIni
 
-
 # Test data constants
 BASIC_INI_CONTENT = """[platformio]
 src_dir = src

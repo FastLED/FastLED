@@ -19,7 +19,6 @@ from ci.util.check_files import (
 )
 from ci.util.paths import PROJECT_ROOT
 
-
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 

@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """Serial port detection and management utilities.
 
@@ -18,6 +17,7 @@ import datetime
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import psutil
 import serial.tools.list_ports
@@ -39,7 +39,7 @@ class ComportResult:
     ok: bool
     selected_port: str | None
     error_message: str | None = None
-    all_ports: list[ListPortInfo] = field(default_factory=list)  # pyright: ignore[reportUnknownVariableType]
+    all_ports: list[ListPortInfo] = field(default_factory=lambda: [])
 
 
 def auto_detect_upload_port() -> ComportResult:
@@ -227,7 +227,7 @@ def kill_port_users(port: str) -> None:
     # Find processes using the port
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])  # pyright: ignore[reportUnknownMemberType]
+            proc_info: dict[str, Any] = proc.as_dict(attrs=["pid", "name", "cmdline"])  # type: ignore[assignment]
             proc_pid: int = proc_info["pid"]
             proc_name: str = proc_info["name"]
             cmdline: list[str] | None = proc_info["cmdline"]

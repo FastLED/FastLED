@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Docker image build utilities for FastLED PlatformIO compilation.
 
 This module provides functions for building Docker images with pre-cached
@@ -220,9 +219,11 @@ def generate_config_hash(board_name: str, framework: Optional[str] = None) -> st
         "platform": board.platform or "",
         "framework": board.framework or "",
         "board_name": board.board_name,
-        "platform_packages": sorted(board.platform_packages.split(","))
-        if board.platform_packages
-        else [],
+        "platform_packages": (
+            sorted(board.platform_packages.split(","))
+            if board.platform_packages
+            else []
+        ),
         # Include PlatformIO version for full reproducibility
         "platformio_version": get_platformio_version(),
     }

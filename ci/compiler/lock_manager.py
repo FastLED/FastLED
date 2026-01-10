@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """
 Lock management for FastLED PlatformIO builds.
 

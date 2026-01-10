@@ -4,7 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 MINIMUM_REPORT_SEVERTIY = "medium"
 MINIMUM_FAIL_SEVERTIY = "high"
 

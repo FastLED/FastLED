@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 File Locking API Wrapper with Stale Lock Detection
@@ -27,7 +26,6 @@ from types import TracebackType
 from typing import Any
 
 import fasteners
-
 
 logger = logging.getLogger(__name__)
 

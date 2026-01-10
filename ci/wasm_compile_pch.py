@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 WASM Precompiled Header (PCH) Compilation Script
@@ -42,7 +41,6 @@ import tomllib
 from pathlib import Path
 
 from ci.wasm_tools import get_emcc
-
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent

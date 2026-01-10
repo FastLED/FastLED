@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 

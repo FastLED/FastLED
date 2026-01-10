@@ -3,7 +3,6 @@
 import time
 from typing import Any
 
-
 # Global timestamp for consistent timing across all output
 _GLOBAL_START_TIME: float | None = None
 

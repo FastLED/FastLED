@@ -101,7 +101,6 @@ from ci.util.pio_runner import create_pio_process
 from ci.util.port_utils import auto_detect_upload_port, kill_port_users
 from ci.util.sketch_resolver import parse_timeout, resolve_sketch_path
 
-
 # Initialize colorama for cross-platform colored output
 init(autoreset=True)
 
@@ -550,12 +549,12 @@ def run_monitor(
     formatter.begin()  # Start the timestamp timer
 
     output_lines: list[str] = []
-    failing_lines: list[
-        tuple[str, str]
-    ] = []  # Track all lines containing fail keywords
-    expect_lines: list[
-        tuple[str, str]
-    ] = []  # Track all lines containing expect keywords
+    failing_lines: list[tuple[str, str]] = (
+        []
+    )  # Track all lines containing fail keywords
+    expect_lines: list[tuple[str, str]] = (
+        []
+    )  # Track all lines containing expect keywords
     found_expect_keywords: set[str] = (
         set()
     )  # Track which expect keywords have been found

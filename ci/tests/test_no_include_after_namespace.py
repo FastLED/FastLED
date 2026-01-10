@@ -5,7 +5,6 @@ import unittest
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 
-
 SRC_ROOT = PROJECT_ROOT / "src"
 EXAMPLES_ROOT = PROJECT_ROOT / "examples"
 TESTS_ROOT = PROJECT_ROOT / "tests"

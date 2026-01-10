@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 
-
 SRC_ROOT = PROJECT_ROOT / "src"
 
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4

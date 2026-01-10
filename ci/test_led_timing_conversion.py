@@ -16,7 +16,6 @@ from tools.led_timing_conversions import (
     phase3_to_datasheet,
 )
 
-
 # ============================================================================
 # Chipset Database - Values from src/fl/chipsets/led_timing.h
 # ============================================================================

@@ -10,7 +10,6 @@ from playwright.async_api import async_playwright  # type: ignore
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent.parent.parent  # scrapers is 3 levels down from project root
 SCREENSHOTS_DIR = HERE / "screenshots"

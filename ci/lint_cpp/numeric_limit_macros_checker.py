@@ -10,7 +10,6 @@ import re
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
-
 # Common integer limit macros from stdint.h and limits.h
 # Pattern captures the macro name for better error messages
 NUMERIC_LIMIT_MACROS = [

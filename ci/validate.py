@@ -51,7 +51,6 @@ from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import auto_detect_upload_port, kill_port_users
 from ci.util.sketch_resolver import parse_timeout
 
-
 # Initialize colorama
 init(autoreset=True)
 

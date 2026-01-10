@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Simple test runner for FastLED unit tests.
@@ -22,7 +21,6 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.util.test_exceptions import TestExecutionFailedException, TestFailureInfo
-
 
 _ABORT_EVENT = threading.Event()
 
@@ -511,9 +509,11 @@ def main() -> None:
                         test_name=test.name,
                         command=test.name,
                         return_code=actual_return_code,
-                        output=test.output
-                        if i < 3
-                        else "Output suppressed (failure limit reached)",
+                        output=(
+                            test.output
+                            if i < 3
+                            else "Output suppressed (failure limit reached)"
+                        ),
                         error_type="test_execution_failure",
                     )
                 )

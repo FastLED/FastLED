@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Toolchain Pre-downloader for PlatformIO
@@ -29,7 +28,6 @@ from ci.util.github_url_converter import (
     format_manual_install_warning,
 )
 from ci.util.resumable_downloader import ResumableDownloader
-
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -178,9 +176,9 @@ def download_toolchain(
                 package_type=package.type or "toolchain",
                 original_url=download_url,
                 converted_url=converted_url,
-                size_bytes=toolchain_path.stat().st_size
-                if toolchain_path.exists()
-                else 0,
+                size_bytes=(
+                    toolchain_path.stat().st_size if toolchain_path.exists() else 0
+                ),
             )
 
             result.success = True

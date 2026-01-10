@@ -8,7 +8,6 @@ using the Rich library for consistent formatting across Windows, macOS, and Linu
 
 from typing import TYPE_CHECKING, Optional
 
-
 if TYPE_CHECKING:
     from rich.console import Console
     from rich.text import Text

@@ -5,7 +5,6 @@
 from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
-
 EXAMPLES_ROOT = PROJECT_ROOT / "examples"
 
 

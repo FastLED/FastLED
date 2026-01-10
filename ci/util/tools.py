@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 # pyright: reportUnknownMemberType=false
 """
 Tools for working with build info and tool paths.

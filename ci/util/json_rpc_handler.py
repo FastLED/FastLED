@@ -122,8 +122,8 @@ def parse_json_rpc_commands(json_rpc_arg: str | None) -> list[dict[str, Any]]:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
         except KeyboardInterrupt:
-            notify_main_thread()  # Propagate interrupt to main thread
-            raise
+            notify_main_thread()
+            raise  # Always re-raise KeyboardInterrupt
         except Exception as e:
             raise ValueError(f"Failed to read JSON-RPC file {file_path}: {e}")
 

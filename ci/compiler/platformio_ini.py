@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 PlatformIO INI file parser and writer.
@@ -26,7 +25,6 @@ from typing import (
     cast,
 )
 from urllib.error import HTTPError
-
 
 if TYPE_CHECKING:
     from ci.compiler.platformio_cache import PlatformIOCache
@@ -2044,14 +2042,19 @@ class PlatformIOIni:
                     repository_url=resolution.repository_url,
                     version=resolution.version,
                     frameworks=resolution.frameworks,
-                    resolved_at=resolution.resolved_at.isoformat()
-                    if resolution.resolved_at
-                    else None,
+                    resolved_at=(
+                        resolution.resolved_at.isoformat()
+                        if resolution.resolved_at
+                        else None
+                    ),
                     expires_at=(
-                        resolution.resolved_at + timedelta(hours=resolution.ttl_hours)
-                    ).isoformat()
-                    if resolution.resolved_at
-                    else None,
+                        (
+                            resolution.resolved_at
+                            + timedelta(hours=resolution.ttl_hours)
+                        ).isoformat()
+                        if resolution.resolved_at
+                        else None
+                    ),
                 )
                 result.platforms[name] = cache_entry
 
@@ -2061,14 +2064,19 @@ class PlatformIOIni:
                     url=resolution.url,
                     homepage=resolution.homepage,
                     platforms=resolution.platforms,
-                    resolved_at=resolution.resolved_at.isoformat()
-                    if resolution.resolved_at
-                    else None,
+                    resolved_at=(
+                        resolution.resolved_at.isoformat()
+                        if resolution.resolved_at
+                        else None
+                    ),
                     expires_at=(
-                        resolution.resolved_at + timedelta(hours=resolution.ttl_hours)
-                    ).isoformat()
-                    if resolution.resolved_at
-                    else None,
+                        (
+                            resolution.resolved_at
+                            + timedelta(hours=resolution.ttl_hours)
+                        ).isoformat()
+                        if resolution.resolved_at
+                        else None
+                    ),
                 )
                 result.frameworks[name] = cache_entry
 
@@ -2181,9 +2189,9 @@ class PlatformIOIni:
             return
 
         # Step 4: Deduplicate artifacts by URL to avoid redundant processing
-        unique_artifacts: dict[
-            str, tuple[bool, str]
-        ] = {}  # url -> (is_framework, env_section)
+        unique_artifacts: dict[str, tuple[bool, str]] = (
+            {}
+        )  # url -> (is_framework, env_section)
         for artifact_url, is_framework, env_section in zip_artifacts:
             if artifact_url not in unique_artifacts:
                 unique_artifacts[artifact_url] = (is_framework, env_section)

@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Cache-Specific Locking API
@@ -20,7 +19,6 @@ from ci.util.file_lock_rw import (
     is_lock_stale,
 )
 from ci.util.url_utils import sanitize_url_for_path
-
 
 logger = logging.getLogger(__name__)
 

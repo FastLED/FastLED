@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Build Process Tracking and Cleanup Module
@@ -43,7 +42,7 @@ class ProcessTreeInfo:
 
     client_pid: int
     root_pid: int
-    child_pids: list[int] = field(default_factory=list)  # pyright: ignore[reportUnknownVariableType]
+    child_pids: list[int] = field(default_factory=lambda: [])
     request_id: str = ""
     project_dir: str = ""
     started_at: float = field(default_factory=time.time)
@@ -230,7 +229,7 @@ class BuildProcessTracker:
         Returns:
             List of client PIDs that were cleaned up
         """
-        orphaned_clients = []
+        orphaned_clients: list[int] = []
 
         with self.lock:
             for client_pid, info in list(self._registry.items()):
@@ -245,7 +244,7 @@ class BuildProcessTracker:
                 )
 
                 killed_count = self._kill_process_tree(info)
-                orphaned_clients.append(client_pid)  # pyright: ignore[reportUnknownMemberType]
+                orphaned_clients.append(client_pid)
 
                 logging.info(
                     f"Cleaned up {killed_count} processes for dead client {client_pid}"
@@ -257,7 +256,7 @@ class BuildProcessTracker:
         if orphaned_clients:
             self._save_registry()
 
-        return orphaned_clients  # pyright: ignore[reportUnknownVariableType]
+        return orphaned_clients
 
     def _kill_process_tree(self, info: ProcessTreeInfo) -> int:
         """Kill an entire process tree (root + all children).

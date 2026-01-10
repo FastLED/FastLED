@@ -11,7 +11,6 @@ import sys
 
 from discover_sources import discover_sources
 
-
 # Source directories organized by library
 SOURCE_LIBRARIES: dict[str, list[tuple[str, bool]]] = {
     # Core FastLED library - base functionality (src/*.cpp, src/lib8tion)

@@ -18,7 +18,6 @@ from typing import Any, Optional, cast
 
 from ci.util.file_lock_rw import FileLock, write_lock
 
-
 logger = logging.getLogger(__name__)
 
 

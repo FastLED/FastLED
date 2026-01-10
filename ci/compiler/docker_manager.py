@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Docker management for FastLED compilation.
 
 This module provides clean abstraction layers for Docker operations including

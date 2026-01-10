@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """ESP32 artifact management for QEMU and flashing.
 
 This module provides clean separation of concerns for ESP32-specific artifact

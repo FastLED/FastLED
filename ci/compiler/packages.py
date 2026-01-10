@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """
 Enhanced Arduino Package Index Implementation with Pydantic
 

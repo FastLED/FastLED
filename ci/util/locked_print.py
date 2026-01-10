@@ -1,6 +1,5 @@
 from threading import Lock
 
-
 PRINT_LOCK = Lock()
 
 

@@ -5,7 +5,6 @@ from pathlib import Path
 from ci.util.elf import dump_symbol_sizes
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 

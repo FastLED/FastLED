@@ -15,7 +15,6 @@ from ci.boards import Board  # type: ignore
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.locked_print import locked_print
 
-
 ERROR_HAPPENED = False
 
 

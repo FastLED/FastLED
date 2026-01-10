@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 """Sketch filtering system for selective compilation based on platform/memory constraints.
 
 This module provides parsing and evaluation of @filter blocks in .ino files.

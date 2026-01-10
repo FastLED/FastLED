@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 """
@@ -19,7 +18,6 @@ from typing import Optional
 
 from ci.boards import Board, create_board  # type: ignore
 from ci.util.locked_print import locked_print
-
 
 HERE = Path(__file__).parent.resolve()
 

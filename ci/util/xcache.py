@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 xcache.py - Enhanced sccache wrapper with response file support
@@ -35,7 +34,6 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-
 
 # os.environ["XCACHE_DEBUG"] = "1"
 
@@ -97,7 +95,7 @@ def create_compiler_wrapper_script(config: XCacheConfig) -> Path:
     try:
         if is_windows:
             # Create Windows batch file
-            wrapper_content = f'''@echo off
+            wrapper_content = f"""@echo off
 REM Temporary xcache compiler wrapper script
 REM Acts as alias for: sccache <actual_compiler>
 
@@ -107,10 +105,10 @@ if /i "{config.debug}"=="true" (
 
 REM Execute sccache with the actual compiler and all arguments (including response files)
 "{config.sccache_path}" "{config.compiler_path}" %*
-'''
+"""
         else:
             # Create Unix shell script
-            wrapper_content = f'''#!/bin/bash
+            wrapper_content = f"""#!/bin/bash
 # Temporary xcache compiler wrapper script
 # Acts as alias for: sccache <actual_compiler>
 
@@ -120,7 +118,7 @@ fi
 
 # Execute sccache with the actual compiler and all arguments (including response files)
 exec "{config.sccache_path}" "{config.compiler_path}" "$@"
-'''
+"""
 
         # Write wrapper script
         with os.fdopen(script_fd, "w", encoding="utf-8") as f:

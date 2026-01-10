@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Playwright test for FastLED WASM Record Button functionality.
@@ -20,13 +19,12 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from playwright.async_api import ConsoleMessage, Page, async_playwright
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
 
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
@@ -34,8 +32,15 @@ PROJECT_ROOT = HERE.parent
 console = Console()
 
 
+class ViewportSize(TypedDict):
+    """Type definition for viewport size matching playwright's ViewportSize."""
+
+    width: int
+    height: int
+
+
 # Viewport configurations
-VIEWPORTS = {
+VIEWPORTS: dict[str, ViewportSize] = {
     "mobile": {"width": 375, "height": 667},
     "tablet": {"width": 768, "height": 1024},
     "desktop": {"width": 1920, "height": 1080},
@@ -230,53 +235,75 @@ def print_state_table(worker_state: dict[str, Any], button_state: dict[str, Any]
     table.add_row(
         "WorkerManager",
         "exists",
-        str(worker_state.get("workerManagerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("workerManagerExists", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "WorkerManager",
         "isWorkerActive",
-        str(worker_state.get("isWorkerActive", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("isWorkerActive", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "Controller",
         "exists",
-        str(worker_state.get("controllerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("controllerExists", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "Controller",
         "workerMode",
-        str(worker_state.get("controllerWorkerMode", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("controllerWorkerMode", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "AsyncController",
         "exists",
-        str(worker_state.get("asyncControllerExists", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("asyncControllerExists", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
     table.add_row(
         "AsyncController",
         "workerMode",
-        str(worker_state.get("asyncControllerWorkerMode", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        str(
+            worker_state.get("asyncControllerWorkerMode", "unknown")
+        ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     )
 
     # Button state
-    table.add_row("RecordButton", "exists", str(button_state.get("exists", "unknown")))  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+    table.add_row(
+        "RecordButton", "exists", str(button_state.get("exists", "unknown"))
+    )  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
     if button_state.get("exists"):
         table.add_row(
             "RecordButton",
             "visible",
-            str(button_state.get("visible", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+            str(
+                button_state.get("visible", "unknown")
+            ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
         table.add_row(
             "RecordButton",
             "enabled",
-            str(button_state.get("enabled", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+            str(
+                button_state.get("enabled", "unknown")
+            ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
         table.add_row(
             "RecordButton",
             "clickable",
-            str(button_state.get("clickable", "unknown")),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+            str(
+                button_state.get("clickable", "unknown")
+            ),  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
-        table.add_row("RecordButton", "text", str(button_state.get("text", "")))  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        table.add_row(
+            "RecordButton", "text", str(button_state.get("text", ""))
+        )  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
 
     console.print()
     console.print(table)
@@ -416,7 +443,7 @@ async def main() -> int:
         # Launch browser
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=args.headless)
-            page = await browser.new_page(viewport=viewport_config)  # pyright: ignore[reportArgumentType]
+            page = await browser.new_page(viewport=viewport_config)
 
             # Setup console log capture
             log_capture = ConsoleLogCapture()

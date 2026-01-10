@@ -11,7 +11,6 @@ from rich.panel import Panel
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
 

@@ -304,9 +304,11 @@ class NativeCompilationCache:
             "file_cache_entries": file_stats["total_entries"],
             "build_cache_entries": build_entries,
             "cache_dir": str(self.cache_dir),
-            "build_cache_size_bytes": self.build_cache_file.stat().st_size
-            if self.build_cache_file.exists()
-            else 0,
+            "build_cache_size_bytes": (
+                self.build_cache_file.stat().st_size
+                if self.build_cache_file.exists()
+                else 0
+            ),
         }
 
 

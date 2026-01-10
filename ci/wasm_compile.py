@@ -12,7 +12,6 @@ from ci.boards import NATIVE
 from ci.compiler.board_example_utils import should_skip_example_for_board
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 console = Console()
 
 
@@ -193,7 +192,7 @@ def main() -> int:
     # This lists data files (.json, .csv, .txt, .bin, etc.) that the sketch can load
     example_dir = Path("examples") / example_name
     data_extensions = {".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav"}
-    data_files = []
+    data_files: list[dict[str, str | int]] = []
 
     # Scan example directory for data files (exclude .ino and fastled_js output dir)
     for file_path in example_dir.rglob("*"):
@@ -204,7 +203,7 @@ def main() -> int:
         ):
             # Get relative path from example directory
             rel_path = file_path.relative_to(example_dir)
-            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})  # pyright: ignore[reportUnknownMemberType]
+            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})
 
     # Write files.json to output directory
     files_json_path = output_dir / "files.json"

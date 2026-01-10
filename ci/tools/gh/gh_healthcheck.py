@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 GitHub Actions Health Check
@@ -305,9 +304,9 @@ class HealthChecker:
                 "category": category,
                 "count": len(errors),
                 "description": pattern_info.description if pattern_info else category,
-                "suggestion": pattern_info.suggestion
-                if pattern_info
-                else "Review error details",
+                "suggestion": (
+                    pattern_info.suggestion if pattern_info else "Review error details"
+                ),
                 "details": list(details),
             }
             root_causes.append(root_cause)

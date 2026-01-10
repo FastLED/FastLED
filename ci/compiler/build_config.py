@@ -15,7 +15,6 @@ from ci.compiler.compiler import CacheType
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 if TYPE_CHECKING:
     from ci.boards import Board
     from ci.compiler.path_manager import FastLEDPaths
@@ -157,9 +156,9 @@ def apply_board_specific_config(
         packages_dir=str(paths.packages_dir),
         project_root=str(project_root),
         build_cache_dir=str(paths.build_cache_dir),
-        extra_scripts=["post:cache_setup.scons"]
-        if cache_type != CacheType.NO_CACHE
-        else None,
+        extra_scripts=(
+            ["post:cache_setup.scons"] if cache_type != CacheType.NO_CACHE else None
+        ),
     )
 
     # Apply PlatformIO cache optimization to speed up builds

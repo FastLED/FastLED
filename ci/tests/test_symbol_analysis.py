@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 # OPTIMIZED: Disabled by default to avoid expensive imports during test discovery
 _ENABLED = True
 
@@ -20,7 +19,6 @@ from ci.util.symbol_analysis import (
     find_board_build_info,
     generate_report,
 )
-
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"

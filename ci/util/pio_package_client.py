@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 PlatformIO Package Installation Client
@@ -28,7 +27,6 @@ from ci.util.banner_print import (
     print_tree_status,
 )
 from ci.util.pio_package_messages import DaemonState, DaemonStatus, PackageRequest
-
 
 # Import package validator
 try:

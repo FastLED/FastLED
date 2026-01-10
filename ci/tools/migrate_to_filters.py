@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """Auto-generate @filter/@end-filter blocks from C++ platform guards in sketches.
 
@@ -40,7 +39,10 @@ def extract_guard_filters(content: str) -> Optional[str]:
         return "require:\n   - memory: high"
 
     # Pattern 2: Platform-specific guards
-    filters: dict[str, list[str]] = {"require": [], "exclude": []}  # type: Dict[str, List[str]]
+    filters: dict[str, list[str]] = {
+        "require": [],
+        "exclude": [],
+    }  # type: Dict[str, List[str]]
 
     # Check for ESP32-S3 specific
     if re.search(

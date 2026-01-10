@@ -15,7 +15,6 @@ from typing import Any, Optional
 from ci.util.file_lock_rw import write_lock
 from ci.util.url_utils import sanitize_url_for_path
 
-
 logger = logging.getLogger(__name__)
 
 

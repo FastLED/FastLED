@@ -5,7 +5,6 @@ import pytest
 
 from ci.util.map_dump import map_dump
 
-
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 

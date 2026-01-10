@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Lock handler utility for detecting and breaking file locks on Windows.
@@ -14,7 +13,6 @@ import subprocess
 import time
 from pathlib import Path
 from typing import Any
-
 
 try:
     import psutil

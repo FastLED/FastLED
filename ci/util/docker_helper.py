@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """Docker helper utilities for FastLED compilation optimization.
 
@@ -17,7 +16,9 @@ from typing import Optional
 from ci.docker_utils.build_platforms import (
     get_docker_image_name as get_platform_image_name,
 )
-from ci.docker_utils.build_platforms import get_platform_for_board
+from ci.docker_utils.build_platforms import (
+    get_platform_for_board,
+)
 
 # Import Docker command utilities from separate module to avoid circular imports
 from ci.util.docker_command import (

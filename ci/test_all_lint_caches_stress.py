@@ -1,6 +1,5 @@
 from ci.util.global_interrupt_handler import notify_main_thread
 
-
 #!/usr/bin/env python3
 """
 Comprehensive stress test for all lint caches and test caching systems.
@@ -22,7 +21,6 @@ from pathlib import Path
 from typing import Any
 
 from ci.util.dependency_loader import DependencyManifest
-
 
 # Type alias for Queue results
 QueueResult = tuple[str, Any]
