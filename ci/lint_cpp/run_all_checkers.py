@@ -110,6 +110,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         StaticInHeaderChecker(),
         LoggingInIramChecker(),
         PlatformIncludesChecker(),
+        # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
     ]
 
     # Src-only checkers

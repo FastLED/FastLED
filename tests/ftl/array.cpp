@@ -428,13 +428,13 @@ TEST_CASE("fl::array - to_array() helper function from span") {
     }
 
     SUBCASE("from vector via span") {
-        fl::vector<int> vec;
-        vec.push_back(1);
-        vec.push_back(2);
-        vec.push_back(3);
-        vec.push_back(4);
+        fl::vector<int> heap_vec;
+        heap_vec.push_back(1);
+        heap_vec.push_back(2);
+        heap_vec.push_back(3);
+        heap_vec.push_back(4);
 
-        fl::span<const int> s(vec);
+        fl::span<const int> s(heap_vec);
         fl::array<int, 4> arr = fl::to_array<4>(s);
 
         CHECK_EQ(arr.size(), 4);

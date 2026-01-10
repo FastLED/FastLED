@@ -47,8 +47,8 @@
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
 #include <iostream>  // For debug output
-#include "__algorithm/min.h"
-#include "__ostream/basic_ostream.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/ostream.h"
 
 
 // This file contains the main function for doctest

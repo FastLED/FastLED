@@ -7,9 +7,6 @@
 #include <string>
 #include <iostream>
 #include <stddef.h>
-#include "__algorithm/min.h"
-#include "__fwd/string.h"
-#include "__ostream/basic_ostream.h"
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"

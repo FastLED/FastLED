@@ -64,4 +64,64 @@
   # Platform-specific but common headers
   { include: ['<sys/types.h>', 'public', '<sys/types.h>', 'public'] },
   { include: ['<unistd.h>', 'public', '<unistd.h>', 'public'] },
+
+  # Block all libc++ private headers (pattern: __*/*.h or __*)
+  # These are internal implementation details and should never be included directly
+  # Map to FastLED equivalents (fl/stl/*) instead of standard library headers
+
+  # __algorithm/* -> "fl/stl/algorithm.h"
+  { include: ['"__algorithm/min.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+  { include: ['"__algorithm/max.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+  { include: ['"__algorithm/reverse.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+  { include: ['"__algorithm/shuffle.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+  { include: ['"__algorithm/sort.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+  { include: ['"__algorithm/remove.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+
+  # __atomic/* -> "fl/stl/atomic.h"
+  { include: ['"__atomic/atomic.h"', 'private', '"fl/stl/atomic.h"', 'public'] },
+  { include: ['"__atomic/support/c11.h"', 'private', '"fl/stl/atomic.h"', 'public'] },
+
+  # __chrono/* -> "fl/stl/thread.h" (chrono types used with thread sleep functions)
+  { include: ['"__chrono/duration.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+  { include: ['"__chrono/steady_clock.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+  { include: ['"__chrono/time_point.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+
+  # __functional/* -> "fl/stl/functional.h"
+  { include: ['"__functional/operations.h"', 'private', '"fl/stl/functional.h"', 'public'] },
+
+  # __fwd/* -> appropriate FastLED headers
+  { include: ['"__fwd/string.h"', 'private', '"fl/stl/string.h"', 'public'] },
+
+  # __iterator/* -> "fl/stl/iterator.h"
+  { include: ['"__iterator/reverse_iterator.h"', 'private', '"fl/stl/iterator.h"', 'public'] },
+
+  # __numeric/* -> "fl/stl/algorithm.h" (FastLED has accumulate in algorithm.h)
+  { include: ['"__numeric/accumulate.h"', 'private', '"fl/stl/algorithm.h"', 'public'] },
+
+  # __ostream/* -> "fl/stl/ostream.h"
+  { include: ['"__ostream/basic_ostream.h"', 'private', '"fl/stl/ostream.h"', 'public'] },
+
+  # __random/* -> "fl/stl/random.h"
+  { include: ['"__random/mersenne_twister_engine.h"', 'private', '"fl/stl/random.h"', 'public'] },
+  { include: ['"__random/random_device.h"', 'private', '"fl/stl/random.h"', 'public'] },
+
+  # __thread/* -> "fl/stl/thread.h"
+  { include: ['"__thread/id.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+  { include: ['"__thread/this_thread.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+  { include: ['"__thread/thread.h"', 'private', '"fl/stl/thread.h"', 'public'] },
+
+  # __type_traits/* -> "fl/stl/type_traits.h"
+  { include: ['"__type_traits/invoke.h"', 'private', '"fl/stl/type_traits.h"', 'public'] },
+
+  # __utility/* -> "fl/stl/utility.h"
+  { include: ['"__utility/move.h"', 'private', '"fl/stl/utility.h"', 'public'] },
+  { include: ['"__utility/pair.h"', 'private', '"fl/stl/utility.h"', 'public'] },
+
+  # __vector/* -> "fl/stl/vector.h"
+  { include: ['"__vector/comparison.h"', 'private', '"fl/stl/vector.h"', 'public'] },
+  { include: ['"__vector/vector.h"', 'private', '"fl/stl/vector.h"', 'public'] },
+
+  # Top-level private headers
+  { include: ['"__hash_table"', 'private', '"fl/stl/unordered_map.h"', 'public'] },
+  { include: ['"__tree"', 'private', '"fl/stl/map.h"', 'public'] },
 ]

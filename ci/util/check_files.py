@@ -14,6 +14,7 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 EXCLUDED_FILES = [
     "stub_main.cpp",
+    "doctest_main.cpp",  # Binding to system headers, needs exemption
 ]
 
 

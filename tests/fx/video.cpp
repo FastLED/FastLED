@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "fl/stl/new.h"
-#include "__vector/vector.h"
+#include "fl/stl/vector.h"
 #include "doctest.h"
 #include "fl/file_system.h"
 #include "fl/rgb8.h"

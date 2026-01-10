@@ -8,10 +8,8 @@
 
 #define FASTLED_INTERNAL
 #include "fl/isr.h"
-#include "__atomic/atomic.h"
-#include "__atomic/support/c11.h"
-#include "__chrono/duration.h"
-#include "__thread/this_thread.h"
+#include "fl/stl/atomic.h"
+#include "fl/stl/thread.h"
 #include "doctest.h"
 #include "isr_stub.hpp"
 

@@ -5,9 +5,9 @@
 #include "fl/compiler_control.h"
 #include <iostream>
 #include <cstdio> // For std::sprintf and std::snprintf
-#include "__algorithm/min.h"
+#include "fl/stl/algorithm.h"
 #include "fl/stl/new.h"
-#include "__ostream/basic_ostream.h"
+#include "fl/stl/ostream.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/move.h"
 #include "fl/unused.h"

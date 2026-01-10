@@ -3,8 +3,14 @@
 
 FastLED uses custom fl/ alternatives instead of standard library headers
 to ensure consistent behavior across all platforms and reduce code size.
+
+This checker also detects private libc++ headers (pattern: #include "__*").
+libc++ private headers (starting with double underscore like __algorithm/min.h)
+are internal implementation details and should never be included directly.
+They are unstable across libc++ versions and will break portability.
 """
 
+import re
 from dataclasses import dataclass
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
@@ -123,6 +129,34 @@ HEADER_RECOMMENDATIONS = {
     "string.h": "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
     "type_traits": "fl/stl/type_traits.h",
     "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
+}
+
+# ============================================================================
+# PRIVATE LIBC++ HEADER MAPPINGS
+# ============================================================================
+# Mapping from private libc++ headers to FastLED equivalents
+# These headers (starting with __) are internal implementation details of libc++
+# and should never be included directly. They are unstable across libc++ versions.
+#
+# This checker is designed to catch IWYU (Include What You Use) mistakes that
+# insert private headers and to prevent them from being committed to the codebase.
+
+PRIVATE_LIBCPP_HEADER_MAPPINGS = {
+    "__algorithm": '"fl/stl/algorithm.h"',
+    "__atomic": '"fl/stl/atomic.h"',
+    "__chrono": '"fl/stl/thread.h"',
+    "__functional": '"fl/stl/functional.h"',
+    "__fwd/string": '"fl/stl/string.h"',
+    "__iterator": '"fl/stl/iterator.h"',
+    "__numeric": '"fl/stl/algorithm.h"',
+    "__ostream": '"fl/stl/ostream.h"',
+    "__random": '"fl/stl/random.h"',
+    "__thread": '"fl/stl/thread.h"',
+    "__type_traits": '"fl/stl/type_traits.h"',
+    "__utility": '"fl/stl/utility.h"',
+    "__vector": '"fl/stl/vector.h"',
+    "__hash_table": '"fl/stl/unordered_map.h"',
+    "__tree": '"fl/stl/map.h"',
 }
 
 
@@ -430,6 +464,28 @@ class BannedHeadersChecker(FileContentChecker):
             header, "Use fl/ alternatives instead of standard library headers"
         )
 
+    @staticmethod
+    def _get_private_libcpp_header_recommendation(private_header: str) -> str:
+        """Map a private libc++ header to its FastLED equivalent.
+
+        Args:
+            private_header: The private header name (e.g., "__algorithm/min.h")
+
+        Returns:
+            The recommended FastLED header to use instead
+        """
+        # Check for exact matches first (e.g., "__hash_table", "__tree")
+        if private_header in PRIVATE_LIBCPP_HEADER_MAPPINGS:
+            return PRIVATE_LIBCPP_HEADER_MAPPINGS[private_header]
+
+        # Check for prefix matches (e.g., "__algorithm/*" -> "__algorithm")
+        for prefix, recommendation in PRIVATE_LIBCPP_HEADER_MAPPINGS.items():
+            if private_header.startswith(prefix):
+                return recommendation
+
+        # Unknown private header - recommend checking IWYU mapping file
+        return '"appropriate FastLED header" (check ci/iwyu/stdlib.imp)'
+
     def _should_allow_bypass(self, file_path: str) -> bool:
         """Check if file type allows 'ok include' bypass.
 
@@ -440,19 +496,48 @@ class BannedHeadersChecker(FileContentChecker):
         return file_path.endswith(".cpp") or file_path.endswith(".cc")
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
-        """Check file content for banned headers."""
+        """Check file content for banned headers and private libc++ headers."""
         violations: list[tuple[int, str]] = []
-
-        if len(self.banned_headers_list) == 0:
-            return []
 
         # Determine file type and if bypass is allowed
         can_bypass = self._should_allow_bypass(file_content.path)
         file_ext = file_content.path.split(".")[-1]
 
-        # Check each line for banned headers
+        # Pattern to detect private libc++ headers
+        # Matches: #include "__anything" or #include <__anything>
+        # But NOT triple underscores or more (e.g., ___pixeltypes.h)
+        # Examples:
+        #   #include "__algorithm/min.h"  ✓ Match
+        #   #include "__atomic/atomic.h"  ✓ Match
+        #   #include <__algorithm/min.h>  ✓ Match
+        #   #include "___pixeltypes.h"    ✗ No match (triple underscore)
+        private_header_pattern = re.compile(r'#include\s+["<](__[^_][^">]*)[">]')
+
+        # Check each line for banned headers and private libc++ headers
         for line_number, line in enumerate(file_content.lines, 1):
-            if line.strip().startswith("//"):
+            # Skip comment lines
+            stripped = line.strip()
+            if stripped.startswith("//"):
+                continue
+
+            # Check for private libc++ headers (these are always banned)
+            match = private_header_pattern.search(line)
+            if match:
+                header_name = match.group(1)
+                public_header = self._get_private_libcpp_header_recommendation(
+                    header_name
+                )
+                violations.append(
+                    (
+                        line_number,
+                        f'Found private libc++ header "{header_name}" - Use {public_header} instead. '
+                        f"Private libc++ headers (starting with __) are internal implementation details and should never be included directly. "
+                        f"They are unstable across libc++ versions and break portability.",
+                    )
+                )
+
+            # Check for regular banned headers (only if list is not empty)
+            if len(self.banned_headers_list) == 0:
                 continue
 
             for header in self.banned_headers_list:

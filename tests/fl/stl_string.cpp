@@ -7,11 +7,11 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "__fwd/string.h"
+#include "fl/stl/string.h"
 #include "fl/stl/new.h"
-#include "__thread/thread.h"
-#include "__type_traits/invoke.h"
-#include "__vector/vector.h"
+#include "fl/stl/thread.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/vector.h"
 #include "doctest.h"
 #include "fl/compiler_control.h"
 #include "fl/int.h"

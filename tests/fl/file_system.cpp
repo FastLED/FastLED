@@ -17,15 +17,16 @@
 // This allows testing SD card functionality without requiring actual SD hardware
 // and keeps all file operations centralized in the stub platform implementation.
 
+#include "test.h"
 
 #include "fl/file_system.h"
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #include <stdint.h>
-#include "__algorithm/remove.h"
-#include "__fwd/string.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/string.h"
 #include "fl/stl/new.h"
-#include "__vector/vector.h"
+#include "fl/stl/vector.h"
 #include "doctest.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"

@@ -2,8 +2,8 @@
 
 #include "fl/geometry.h"
 #include <string>
-#include "__algorithm/min.h"
-#include "__ostream/basic_ostream.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/ostream.h"
 #include "doctest.h"
 #include "fl/exit.h"
 #include "fl/stl/math.h"

@@ -8,11 +8,8 @@
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
 #include <stdint.h>
-#include "__chrono/duration.h"
-#include "__chrono/steady_clock.h"
-#include "__chrono/time_point.h"
+#include "fl/stl/thread.h"
 #include "fl/stl/new.h"
-#include "__thread/this_thread.h"
 #include "doctest.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 #include "ratio"
