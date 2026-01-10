@@ -10,6 +10,7 @@
 #if defined(ESP8266)
     #include "platforms/esp/new.h"  // IWYU pragma: export
 #elif defined(ESP32)
+    #include "platforms/esp/new.h"  // IWYU pragma: export
 #elif defined(__AVR__)
     #include "platforms/avr/new.h"  // IWYU pragma: export
 #elif defined(FASTLED_ARM)
