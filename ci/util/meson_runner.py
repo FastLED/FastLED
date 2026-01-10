@@ -13,8 +13,6 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-
-from ci.util.global_interrupt_handler import notify_main_thread
 from pathlib import Path
 from typing import Optional
 
@@ -22,6 +20,7 @@ from running_process import RunningProcess
 
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.color_output import print_blue, print_green, print_red, print_yellow
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
