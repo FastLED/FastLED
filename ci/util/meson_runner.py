@@ -101,11 +101,37 @@ def _print_banner(title: str, emoji: str = "", width: int = 62) -> None:
     _ts_print(f"{bottom_border}")
 
 
+def _resolve_meson_executable() -> str:
+    """
+    Resolve meson executable path, preferring venv installation.
+
+    This ensures consistent meson version usage regardless of invocation method
+    (direct Python vs uv run). The venv meson version is controlled by pyproject.toml.
+
+    Returns:
+        Path to meson executable (venv version preferred, falls back to PATH)
+    """
+    # Try to find venv meson first
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent.parent
+
+    # Platform-specific meson executable name
+    is_windows = sys.platform.startswith("win") or os.name == "nt"
+    meson_exe_name = "meson.exe" if is_windows else "meson"
+    venv_meson = project_root / ".venv" / "Scripts" / meson_exe_name
+
+    if venv_meson.exists():
+        return str(venv_meson)
+
+    # Fallback to PATH resolution (will use system meson)
+    return "meson"
+
+
 def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
     try:
         result = subprocess.run(
-            ["meson", "--version"],
+            [_resolve_meson_executable(), "--version"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -138,7 +164,7 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     try:
         # Query Meson for all targets
         result = subprocess.run(
-            ["meson", "introspect", str(build_dir), "--targets"],
+            [_resolve_meson_executable(), "introspect", str(build_dir), "--targets"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -730,7 +756,7 @@ def setup_meson_build(
         )
         _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
         cmd = [
-            "meson",
+            _resolve_meson_executable(),
             "setup",
             "--reconfigure",
             "--native-file",
@@ -742,7 +768,13 @@ def setup_meson_build(
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
-        cmd = ["meson", "setup", "--native-file", str(native_file_path), str(build_dir)]
+        cmd = [
+            _resolve_meson_executable(),
+            "setup",
+            "--native-file",
+            str(native_file_path),
+            str(build_dir),
+        ]
         if debug:
             cmd.extend(["-Dbuild_mode=debug"])
 
@@ -1062,7 +1094,7 @@ def compile_meson(
     Returns:
         True if compilation successful, False otherwise
     """
-    cmd = ["meson", "compile", "-C", str(build_dir)]
+    cmd = [_resolve_meson_executable(), "compile", "-C", str(build_dir)]
 
     if target:
         cmd.append(target)
@@ -1380,7 +1412,13 @@ def run_meson_test(
     Returns:
         MesonTestResult with success status, duration, and test counts
     """
-    cmd = ["meson", "test", "-C", str(build_dir), "--print-errorlogs"]
+    cmd = [
+        _resolve_meson_executable(),
+        "test",
+        "-C",
+        str(build_dir),
+        "--print-errorlogs",
+    ]
 
     if verbose:
         cmd.append("-v")
@@ -1991,7 +2029,7 @@ def stream_compile_and_run_tests(
     Returns:
         Tuple of (overall_success, num_passed, num_failed)
     """
-    cmd = ["meson", "compile", "-C", str(build_dir)]
+    cmd = [_resolve_meson_executable(), "compile", "-C", str(build_dir)]
 
     if target:
         cmd.append(target)
