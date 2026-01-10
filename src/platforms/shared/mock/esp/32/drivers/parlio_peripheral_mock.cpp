@@ -90,17 +90,7 @@ fl::vector<fl::vector<uint8_t>> untransposeParlioBitstreamInternal(
         // Determine which pin this bit belongs to (cycles through pins)
         size_t hardware_pin_idx = bit_idx % num_pins;
 
-        // Apply lane swap to match wave8_transpose_2 behavior:
-        // wave8_transpose_2 puts lane[0]→odd positions, lane[1]→even positions
-        // Bits cycle through pins: pin0 gets bit_idx=0,2,4,... pin1 gets bit_idx=1,3,5,...
-        // So pin0 (hardware_pin_idx=0) gets EVEN positions → lane[1] data
-        //    pin1 (hardware_pin_idx=1) gets ODD positions → lane[0] data
-        // But we want:
-        //    pin0 (gpio_pins[0]) to get lane[0] data
-        //    pin1 (gpio_pins[1]) to get lane[1] data
-        // Solution: When hardware_pin_idx receives even bits (lane[1]), it should store to lane[0]
-        //           When hardware_pin_idx receives odd bits (lane[0]), it should store to lane[1]
-        // Direct mapping (NO swap for now - debugging)
+        // Direct mapping: hardware pin index maps directly to lane index
         size_t lane_idx = hardware_pin_idx;
 
         // Determine position in the lane's waveform
@@ -395,18 +385,6 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
     for (size_t i = 0; i < per_pin_waveforms.size() && i < static_cast<size_t>(mConfig.data_width); i++) {
         int gpio_pin = mConfig.gpio_pins[i];
         mPerPinData[gpio_pin] = fl::move(per_pin_waveforms[i]);
-        // Debug output
-        if (mConfig.data_width == 2 && per_pin_waveforms[i].size() >= 8) {
-            FL_DBG("GPIO pin " << gpio_pin << " (index " << i << ") data: "
-                   << fl::hex << (int)per_pin_waveforms[i][0] << " "
-                   << (int)per_pin_waveforms[i][1] << " "
-                   << (int)per_pin_waveforms[i][2] << " "
-                   << (int)per_pin_waveforms[i][3] << " "
-                   << (int)per_pin_waveforms[i][4] << " "
-                   << (int)per_pin_waveforms[i][5] << " "
-                   << (int)per_pin_waveforms[i][6] << " "
-                   << (int)per_pin_waveforms[i][7]);
-        }
     }
 
     // Update state with mutex protection
