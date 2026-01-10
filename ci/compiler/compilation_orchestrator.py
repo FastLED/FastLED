@@ -9,7 +9,7 @@ import time
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from typeguard import typechecked
 
@@ -62,7 +62,7 @@ def compile_board_examples(
     print(f"EXAMPLES: {', '.join(examples)}")
     print(f"GLOBAL CACHE: {resolved_cache_dir}")
     if merged_bin:
-        print(f"MERGED-BIN MODE: Enabled")
+        print("MERGED-BIN MODE: Enabled")
         if merged_bin_output:
             print(f"MERGED-BIN OUTPUT: {merged_bin_output}")
 
@@ -230,6 +230,9 @@ def compile_board_examples(
                 print("=" * 60)
                 print(stats)
                 print("=" * 60)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Warning: Could not retrieve compiler statistics: {e}")
 

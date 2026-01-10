@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 """
@@ -8,7 +11,6 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 
 def run_symbol_analysis(board_name: str):
@@ -30,6 +32,9 @@ def run_symbol_analysis(board_name: str):
             print(f"❌ Symbol analysis failed for {board_name}")
             print(f"Error: {result.stderr}")
             return False
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"❌ Error running symbol analysis for {board_name}: {e}")
         return False
@@ -65,6 +70,9 @@ def load_and_summarize_results(board_name: str):
         for sym_type, stats in list(summary["type_breakdown"].items())[:5]:
             print(f"   {sym_type}: {stats['count']} symbols, {stats['size']} bytes")
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"❌ Error loading results for {board_name}: {e}")
 

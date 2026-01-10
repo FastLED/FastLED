@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Serial port detection and management utilities.
 
@@ -58,6 +61,9 @@ def auto_detect_upload_port() -> ComportResult:
     try:
         # Scan all available COM ports
         all_ports = list(serial.tools.list_ports.comports())
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         # Failed to scan ports - return error result
         return ComportResult(
@@ -143,6 +149,9 @@ def log_port_cleanup(message: str, log_dir: Path | None = None) -> None:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {message}\n")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         # Silently ignore logging errors - don't fail the operation
         pass
@@ -277,7 +286,7 @@ def kill_port_users(port: str) -> None:
 
         print(f"   Waiting 2 seconds for OS to release {port}...")
         time.sleep(2)
-        print(f"✅ Port cleanup completed")
+        print("✅ Port cleanup completed")
         log_port_cleanup(f"Port cleanup completed for {port}")
     else:
         print(f"✅ No orphaned processes found using {port}")

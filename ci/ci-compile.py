@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 FastLED Example Compiler
@@ -23,18 +26,15 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
-from ci.boards import ALL, Board, create_board
+from ci.boards import Board, create_board
 from ci.compiler.argument_parser import CompilationConfig
 from ci.compiler.board_example_utils import (
-    get_all_examples,
-    get_board_artifact_extension,
     get_default_boards,
     resolve_example_path,
 )
 from ci.compiler.compilation_orchestrator import (
-    BoardCompilationResult,
     compile_board_examples,
     format_elapsed_time,
 )
@@ -44,10 +44,7 @@ from ci.compiler.docker_manager import (
     DockerContainerManager,
 )
 from ci.compiler.formatting_utils import green_text, red_text, yellow_text
-from ci.compiler.output_utils import (
-    copy_build_artifact,
-    validate_output_path,
-)
+from ci.compiler.output_utils import copy_build_artifact, validate_output_path
 from ci.util.docker_command import get_docker_command
 from ci.util.docker_helper import should_use_docker_for_board
 from ci.util.global_interrupt_handler import (
@@ -240,6 +237,9 @@ def main() -> int:
             try:
                 board = create_board(board_name, no_project_options=False)
                 boards.append(board)
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 print(f"ERROR: Failed to get board '{board_name}': {e}")
                 return 1
@@ -281,7 +281,7 @@ def main() -> int:
         if is_github_actions():
             print(
                 yellow_text(
-                    f"ℹ️  GitHub Actions detected - using --local (native compilation)"
+                    "ℹ️  GitHub Actions detected - using --local (native compilation)"
                 )
             )
             print("   This avoids pulling Docker images on CI runners")
@@ -313,7 +313,7 @@ def main() -> int:
             if use_docker:
                 print(
                     green_text(
-                        f"🐳 Docker detected and will be used for faster compilation"
+                        "🐳 Docker detected and will be used for faster compilation"
                     )
                 )
                 print("   Use --local to force native compilation instead")
@@ -544,6 +544,8 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\nInterrupted by user")
         signal_interrupt()
         wait_for_cleanup()

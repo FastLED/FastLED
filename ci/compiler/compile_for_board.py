@@ -9,7 +9,7 @@ import subprocess
 import time
 from pathlib import Path
 from threading import Lock
-from typing import List, Optional
+from typing import Optional
 
 from ci.boards import Board  # type: ignore
 from ci.util.build_lock import libfastled_build_lock

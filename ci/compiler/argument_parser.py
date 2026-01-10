@@ -1,14 +1,14 @@
 """Argument parsing and configuration for FastLED compilation."""
 
 import argparse
-import os
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from ci.boards import Board, create_board
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 class WorkflowType(Enum):
@@ -329,6 +329,10 @@ class CompilationArgumentParser:
             try:
                 board = create_board(name, no_project_options=False)
                 boards.append(board)
+                notify_main_thread()
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 raise ValueError(f"Failed to create board '{name}': {e}")
 
@@ -347,7 +351,6 @@ class CompilationArgumentParser:
             should be bypassed (when specific sketches are requested or --no-filter is used)
         """
         # Track if 'all' was used for auto-discovery
-        used_all_keyword = False
 
         if args.positional_examples:
             examples = [self._normalize_example(ex) for ex in args.positional_examples]
@@ -360,7 +363,6 @@ class CompilationArgumentParser:
         # Check for special 'all' keyword
         if "all" in examples:
             # Remove 'all' keyword and discover all examples
-            used_all_keyword = True
             examples = self._discover_all_examples()
 
         # Apply exclusions

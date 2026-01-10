@@ -9,6 +9,8 @@ from pathlib import Path
 
 from dirsync import sync  # type: ignore
 
+from ci.util.global_interrupt_handler import notify_main_thread
+
 
 def generate_main_cpp(ino_files: list[str]) -> str:
     """Generate stub main.cpp content that includes .ino files from sketch directory.
@@ -21,7 +23,7 @@ def generate_main_cpp(ino_files: list[str]) -> str:
     """
     includes: list[str] = []
     for ino_file in sorted(ino_files):
-        includes.append(f"#include <Arduino.h>")
+        includes.append("#include <Arduino.h>")
         includes.append(f'#include "sketch/{ino_file}"')
 
     include_lines = "\n".join(includes)
@@ -211,6 +213,9 @@ def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
                     time.sleep(retry_delay)
                 else:
                     raise
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         warnings.warn(f"Failed to sync boards directory: {e}")
         return False
@@ -240,13 +245,11 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
                 max_rmtree_retries = 5 if sys.platform == "win32" else 1
                 rmtree_delay_ms = 100 if sys.platform == "win32" else 0
 
-                rmtree_failed = False
                 for rmtree_attempt in range(max_rmtree_retries):
                     try:
                         shutil.rmtree(lib_dir)
                         break  # Success
                     except OSError as e:
-                        rmtree_failed = True
                         if (
                             sys.platform == "win32"
                             and rmtree_attempt < max_rmtree_retries - 1
@@ -311,6 +314,10 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
             print(f"Synced FastLED library to {lib_dir}")
             if library_json_src.exists():
                 print(f"Copied library.json to {lib_dir}")
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as sync_error:
         warnings.warn(f"Failed to sync FastLED library: {sync_error}")
         return False

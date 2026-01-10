@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -15,7 +18,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -37,6 +40,9 @@ def _setup_utf8_output():
 
             # Set console code page to UTF-8 if possible
             os.system("chcp 65001 > nul 2>&1")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except:
             pass  # Ignore if we can't set up UTF-8 output
 
@@ -344,7 +350,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
 
         if debug:
-            sections = pio_ini.get_env_sections()
+            pio_ini.get_env_sections()
             # debug_print(f"   • Environment sections: {len(sections)} ({', '.join(sections)})")
             # debug_print(f"✓ Test environment ready")
             pass
@@ -498,7 +504,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
             # debug_print(f"   🎯 Should match input: {test_url}")
 
             # Verify exact passthrough
-            self.assertEqual(result, test_url, f"URL should pass through unchanged")
+            self.assertEqual(result, test_url, "URL should pass through unchanged")
             # debug_print(f"   ✅ URL passthrough successful")
 
         # debug_print(f"🎉 All real URL passthrough tests successful - no mocks needed!")
@@ -572,7 +578,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # TEST - Verify cache contents
         # debug_print(f"\n🔍 Verifying cache contents")
         cache = pio_ini.get_resolved_urls_cache()
-        self.assertIn(target_platform, cache.platforms, f"Platform should be in cache")
+        self.assertIn(target_platform, cache.platforms, "Platform should be in cache")
 
         cached_url = cache.platforms[target_platform].repository_url
         self.assertEqual(
@@ -1246,7 +1252,6 @@ framework = arduino
 
         first_package = platform_packages[0]
         package_name = first_package.name
-        package_requirements = first_package.requirements
 
         # debug_print(f"  • First package name: {package_name}")
         # debug_print(f"  • First package requirements: {package_requirements}")
@@ -1574,7 +1579,10 @@ def main():
     for test_name in focused_tests:
         try:
             suite.addTest(TestPlatformIOUrlResolution(test_name))
-        except Exception as e:
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
+        except Exception:
             # debug_print(f"⚠️ Could not load test '{test_name}': {e}")
             pass
 
@@ -1590,8 +1598,8 @@ def main():
         # debug_print("🎉 Design implementation working perfectly!")
         pass
     else:
-        failures = len(result.failures)
-        errors = len(result.errors)
+        len(result.failures)
+        len(result.errors)
         # debug_print(f"❌ FAILURE: {failures} failures, {errors} errors out of {result.testsRun} tests")
         pass
 

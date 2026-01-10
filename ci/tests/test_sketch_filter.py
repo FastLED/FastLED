@@ -9,7 +9,7 @@ Tests the enhanced @filter syntax supporting:
 
 import tempfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pytest
 

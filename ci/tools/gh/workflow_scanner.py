@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 GitHub Actions Workflow Scanner
@@ -22,13 +25,11 @@ Features:
 import argparse
 import json
 import queue
-import re
 import subprocess
 import sys
 import threading
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 
 @dataclass
@@ -96,6 +97,9 @@ class WorkflowScanner:
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"  # Default fallback
@@ -131,6 +135,9 @@ class WorkflowScanner:
             )
             runs = json.loads(result.stdout)
             return runs
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
             return []
@@ -167,6 +174,9 @@ class WorkflowScanner:
                 job_infos.append(job_info)
 
             return job_infos
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting jobs for run {run_id}: {e}", file=sys.stderr)
             return []
@@ -259,6 +269,9 @@ class WorkflowScanner:
 
         except subprocess.TimeoutExpired:
             print(f"Timeout fetching logs for {job.job_name}", file=sys.stderr)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(
                 f"Error fetching logs for {job.job_name}: {e}",
@@ -484,6 +497,7 @@ Examples:
             try:
                 scanner.scan()
             except KeyboardInterrupt:
+                notify_main_thread()
                 print("\n\nInterrupted by user")
                 sys.exit(1)
 
@@ -499,6 +513,8 @@ Examples:
         try:
             scanner.scan()
         except KeyboardInterrupt:
+            notify_main_thread()
+            raise
             print("\n\nInterrupted by user")
             sys.exit(1)
         except Exception as e:

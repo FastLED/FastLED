@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Sketch filtering system for selective compilation based on platform/memory constraints.
 
 This module provides parsing and evaluation of @filter blocks in .ino files.
@@ -47,7 +50,7 @@ import fnmatch
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from ci.boards import Board
 
@@ -129,7 +132,7 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
     for match in re.finditer(condition_pattern, filter_line):
         key = match.group(1)
         word_operator = match.group(2)  # is, is not, matches (or None)
-        symbol_operator = match.group(3)  # =, : (or None)
+        match.group(3)  # =, : (or None)
         value = match.group(4)
 
         value = value.strip()
@@ -184,6 +187,9 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
     """
     try:
         content = ino_path.read_text(encoding="utf-8")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return None
 

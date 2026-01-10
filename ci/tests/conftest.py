@@ -1,7 +1,5 @@
 """Pytest configuration for FastLED test suite."""
 
-from typing import List
-
 import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser

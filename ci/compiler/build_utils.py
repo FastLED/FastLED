@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from ci.util.global_interrupt_handler import notify_main_thread
+
 
 def get_utf8_env() -> dict[str, str]:
     """Get environment with UTF-8 encoding to prevent Windows CP1252 encoding errors.
@@ -142,6 +144,9 @@ def load_json_metadata(path: Path) -> dict[str, str]:
     try:
         with open(path) as f:
             return json.load(f)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not load metadata from {path}: {e}")
         return {}
@@ -196,6 +201,10 @@ def parse_depfile(depfile_path: Path) -> list[Path]:
         # Convert to Path objects
         return [Path(d) for d in deps]
 
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not parse dependency file {depfile_path}: {e}")
         return []

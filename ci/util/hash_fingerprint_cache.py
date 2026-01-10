@@ -11,7 +11,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import fasteners
 
@@ -93,7 +93,7 @@ class HashFingerprintCache:
         try:
             with open(pending_file, "w") as f:
                 json.dump(pending_data, f, indent=2)
-        except OSError as e:
+        except OSError:
             # If we can't store pending data, that's okay - we'll fall back to force update
             pass
 
@@ -146,7 +146,7 @@ class HashFingerprintCache:
 
             with open(self.timestamp_file, "w") as f:
                 json.dump(timestamp_data, f, indent=2)
-        except OSError as e:
+        except OSError:
             # Non-fatal error - log but don't fail
             pass
 
@@ -410,7 +410,7 @@ if __name__ == "__main__":
         # Get cache info
         cache_info = cache.get_cache_info()
         if cache_info:
-            print(f"Cache info:")
+            print("Cache info:")
             print(f"  Hash: {cache_info['hash'][:16]}...")
             print(f"  File count: {cache_info['file_count']}")
             print(f"  Cache file: {cache_info['cache_file']}")

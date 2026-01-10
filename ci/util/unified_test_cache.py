@@ -7,10 +7,9 @@ custom fingerprint implementations with the single safe approach.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
-from ci.util.test_types import FingerprintResult, fingerprint_code_base
 
 
 class UnifiedTestCache:

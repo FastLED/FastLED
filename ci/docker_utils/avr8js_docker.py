@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 AVR8JS Docker Runner for FastLED
@@ -6,12 +9,11 @@ Runs Arduino firmware in avr8js simulator via Docker container.
 Compatible with Windows (MSYS2/Git Bash) and Unix systems.
 """
 
-import os
 import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 
 class DockerAVR8jsRunner:
@@ -101,8 +103,8 @@ class DockerAVR8jsRunner:
         if not hex_path.exists():
             raise FileNotFoundError(f"HEX file not found: {hex_path}")
 
-        print(f"Preparing Docker execution environment:")
-        print(f"  Firmware format conversion: ELF → HEX (required by avr8js)")
+        print("Preparing Docker execution environment:")
+        print("  Firmware format conversion: ELF → HEX (required by avr8js)")
         print(f"    ELF file: {elf_path}")
         print(f"    HEX file: {hex_path}")
         print()
@@ -114,10 +116,10 @@ class DockerAVR8jsRunner:
         # Convert to Docker-compatible path for volume mounting
         docker_firmware_dir = self._convert_to_docker_volume_path(firmware_dir)
 
-        print(f"  Docker volume mounting:")
+        print("  Docker volume mounting:")
         print(f"    Host directory: {firmware_dir}")
         print(f"    Docker path: {docker_firmware_dir}")
-        print(f"    Container mount: /firmware (read-only)")
+        print("    Container mount: /firmware (read-only)")
         print()
 
         docker_cmd: list[str] = [
@@ -131,7 +133,7 @@ class DockerAVR8jsRunner:
             str(timeout),
         ]
 
-        print(f"  Docker execution:")
+        print("  Docker execution:")
         print(f"    Image: {self.docker_image}")
         print(f"    Target MCU: {mcu} @ {frequency}Hz")
         print(f"    Firmware (in container): /firmware/{firmware_name}")
@@ -139,7 +141,7 @@ class DockerAVR8jsRunner:
         print()
         print(f"  Docker command: {' '.join(docker_cmd)}")
         print()
-        print(f"Starting avr8js emulator...")
+        print("Starting avr8js emulator...")
         print(f"{'-' * 70}")
 
         try:
@@ -159,7 +161,7 @@ class DockerAVR8jsRunner:
                 output += "\n" + result.stderr
 
             print(f"{'-' * 70}")
-            print(f"Emulator output:")
+            print("Emulator output:")
             print(f"{'-' * 70}")
 
             # Print output to console
@@ -178,13 +180,14 @@ class DockerAVR8jsRunner:
 
             # Print result summary
             if result.returncode == 0:
-                print(f"✅ Emulation completed successfully (exit code: 0)")
+                print("✅ Emulation completed successfully (exit code: 0)")
             else:
                 print(f"❌ Emulation failed (exit code: {result.returncode})")
 
             return result.returncode
 
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except subprocess.TimeoutExpired:
             print(f"\n❌ Docker timeout after {timeout}s")
@@ -206,6 +209,7 @@ class DockerAVR8jsRunner:
 
             return True
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             print(f"❌ Error checking Docker image: {e}")
@@ -237,6 +241,7 @@ class DockerAVR8jsRunner:
             result = subprocess.run(build_cmd)
             return result.returncode == 0
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             print(f"❌ Error building Docker image: {e}")
@@ -279,6 +284,8 @@ def main() -> None:
         sys.exit(returncode)
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n⚠️  Interrupted by user")
         sys.exit(130)
     except Exception as e:

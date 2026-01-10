@@ -9,6 +9,8 @@ from playwright.async_api import ConsoleMessage, async_playwright  # type: ignor
 from rich.console import Console
 from rich.panel import Panel
 
+from ci.util.global_interrupt_handler import notify_main_thread
+
 
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
@@ -42,6 +44,9 @@ def install_playwright_browsers():
         # Simulate the `playwright install` command
         os.system(f"{sys.executable} -m playwright install chromium")
         console.print("[dim]Playwright browsers ready.[/dim]")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         console.print(
             f"[bold red]Failed to install Playwright browsers:[/bold red] {e}"
@@ -142,6 +147,10 @@ async def main() -> None:
                     )
                     raise Exception("FastLED.js failed to initialize")
 
+                notify_main_thread()
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 console.print(f"[bold red]✗ An error occurred:[/bold red] {e}")
                 raise Exception(f"An error occurred: {e}") from e

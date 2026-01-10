@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 WASM Precompiled Header (PCH) Compilation Script
@@ -67,6 +70,9 @@ def get_compiler_version(emcc: str) -> str:
         )
         # Return first line which contains version info
         return result.stdout.split("\n")[0].strip()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not get compiler version: {e}")
         return "unknown"
@@ -136,6 +142,9 @@ def load_metadata() -> dict[str, str]:
     try:
         with open(PCH_METADATA) as f:
             return json.load(f)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not load PCH metadata: {e}")
         return {}
@@ -366,6 +375,7 @@ def main() -> int:
         return compile_pch(emcc, flags, args.verbose)
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         print(f"✗ PCH compilation failed with exception: {e}", file=sys.stderr)

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 PlatformIO INI file parser and writer.
@@ -11,25 +14,15 @@ import configparser
 import io
 import json
 import logging
-import os
 import re
 import subprocess
-import tempfile
-import time
-import urllib.request
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Dict,
-    List,
     Optional,
-    Tuple,
-    Union,
     cast,
 )
 from urllib.error import HTTPError
@@ -910,6 +903,9 @@ def _resolve_package_url_from_registry(
             logger.warning(
                 f"HTTP error querying registry for {owner}/{package_name}: {e}"
             )
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Error resolving package {owner}/{package_name}: {e}")
 
@@ -1024,6 +1020,9 @@ class PlatformIOIni:
                 self.config.write(f)
             temp_file.replace(file_path)
             logger.debug(f"Successfully wrote platformio.ini: {file_path}")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             if temp_file.exists():
                 temp_file.unlink()
@@ -1602,6 +1601,9 @@ class PlatformIOIni:
             logger.debug(f"Command output: {e.stdout}, Error: {e.stderr}")
         except FileNotFoundError:
             logger.error("PlatformIO CLI not found. Is it installed and in PATH?")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             cmd_str = " ".join(["pio"] + args)
             logger.error(f"Unexpected error running PlatformIO command: {e}")
@@ -1618,6 +1620,9 @@ class PlatformIOIni:
         if raw_data and isinstance(raw_data, dict):
             try:
                 return PlatformShowResponse.from_dict(raw_data)  # type: ignore
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 logger.error(
                     f"Failed to parse platform show response for {platform_name}: {e}"
@@ -1647,10 +1652,16 @@ class PlatformIOIni:
                     try:
                         framework = FrameworkInfo.from_dict(fw_data)
                         frameworks_list.append(framework)
+                    except KeyboardInterrupt:
+                        notify_main_thread()
+                        raise
                     except Exception as e:
                         logger.warning(f"Failed to parse framework data: {e}")
                         continue
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.error(f"Failed to parse frameworks list response: {e}")
             return []

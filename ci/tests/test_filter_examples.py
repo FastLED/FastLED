@@ -5,7 +5,7 @@ This script validates all the new @filter syntax styles with actual sketch files
 
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 

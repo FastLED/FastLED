@@ -1,7 +1,6 @@
 import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from typing import List
 
 from ci.util.paths import PROJECT_ROOT
 

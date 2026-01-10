@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 """
@@ -12,7 +15,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 from ci.boards import Board, create_board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -403,6 +406,9 @@ def compile_with_pio_ci(
             error_msg = f"Timeout building {example_path.name} for {board_name}"
             locked_print(f"ERROR: {error_msg}")
             errors.append(error_msg)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             error_msg = f"Exception building {example_path.name} for {board_name}: {e}"
             locked_print(f"ERROR: {error_msg}")
@@ -446,6 +452,9 @@ def run_symbol_analysis(boards: list[Board]) -> None:
                 if result.stdout:
                     print(result.stdout)
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             locked_print(
                 f"ERROR: Exception during symbol analysis for board {board.board_name}: {e}"
@@ -474,6 +483,9 @@ def main() -> int:
         try:
             board = create_board(board_name, no_project_options=False)
             boards.append(board)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             locked_print(f"ERROR: Failed to get board '{board_name}': {e}")
             return 1
@@ -576,5 +588,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         locked_print("\nInterrupted by user")
         sys.exit(1)

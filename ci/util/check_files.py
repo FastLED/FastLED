@@ -3,8 +3,8 @@ import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import cast
 
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -171,6 +171,9 @@ class MultiCheckerFileProcessor:
                         issues = checker.check_file_content(file_content)
                         results[checker_name].extend(issues)
 
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     # Add error to all interested checkers
                     error_msg = f"Error reading file {file_path}: {str(e)}"
@@ -247,6 +250,10 @@ class GenericFileSearcher:
                 content = f.read()
             file_content = FileContent(path=file_path, content=content, lines=[])
             return callback.check_file_content(file_content)
+            notify_main_thread()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             return [f"Error processing file {file_path}: {str(e)}"]
 

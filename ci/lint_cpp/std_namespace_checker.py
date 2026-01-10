@@ -2,11 +2,7 @@
 # pyright: reportUnknownMemberType=false
 """Checker for std:: namespace usage - should use fl:: instead."""
 
-from ci.util.check_files import (
-    EXCLUDED_FILES,
-    FileContent,
-    FileContentChecker,
-)
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
 
 class StdNamespaceChecker(FileContentChecker):

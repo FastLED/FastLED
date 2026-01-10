@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 """Linter to check for 'namespace fl {' declarations in src/ root files.
@@ -9,15 +12,12 @@ but allows them in subdirectories like src/chipsets/, src/protocols/, etc.
 import os
 import re
 import unittest
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import List
 
 from ci.util.check_files import (
     FileContent,
     FileContentChecker,
     MultiCheckerFileProcessor,
-    collect_files_to_check,
 )
 from ci.util.paths import PROJECT_ROOT
 
@@ -47,6 +47,9 @@ class NamespaceFlDeclarationChecker(FileContentChecker):
         try:
             if path_obj.parent.resolve() != SRC_ROOT.resolve():
                 return False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             return False
 

@@ -3,7 +3,7 @@
 
 import subprocess
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -68,7 +68,7 @@ class FastLEDTestException(Exception):
             details.append(f"   Command: {cmd_str}")
             details.append(f"   Error Type: {failure.error_type}")
             details.append(f"   Exit Code: {failure.return_code}")
-            details.append(f"   Output:")
+            details.append("   Output:")
             # Indent the output
             for line in failure.output.split("\n"):
                 details.append(f"     {line}")

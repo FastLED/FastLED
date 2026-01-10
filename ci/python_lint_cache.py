@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Python Linting Cache Integration
@@ -10,7 +13,6 @@ Uses the unified safe fingerprint cache system.
 
 import sys
 from pathlib import Path
-from typing import List
 
 from ci.util.color_output import print_cache_hit, print_cache_miss
 
@@ -77,7 +79,7 @@ def check_python_files_changed() -> bool:
     needs_update = cache.check_needs_update(file_paths)
 
     if needs_update:
-        print_cache_miss(f"Python files changed - running pyright")
+        print_cache_miss("Python files changed - running pyright")
         print(f"   Monitoring {len(file_paths)} files")
         if len(file_paths) <= 5:
             for f in file_paths:
@@ -118,6 +120,9 @@ def invalidate_python_cache() -> None:
         print_cache_miss(
             "Python lint cache invalidated - will re-run pyright next time"
         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print_cache_miss(f"Failed to invalidate Python cache: {e}")
 

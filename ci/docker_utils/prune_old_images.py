@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Prune old FastLED PlatformIO Docker images.
@@ -20,12 +23,11 @@ Usage:
 """
 
 import argparse
-import json
 import re
 import subprocess
 import sys
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Set, cast
+from typing import Any, cast
 
 from ci.util.docker_command import get_docker_command
 
@@ -216,6 +218,9 @@ def parse_docker_timestamp(timestamp: str) -> datetime:
         if len(parts) >= 2:
             date_str = f"{parts[0]} {parts[1]}"
             return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         pass
 

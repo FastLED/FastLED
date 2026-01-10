@@ -1,6 +1,5 @@
 """Unit tests for ESP32 flash image merging functionality."""
 
-import shutil
 import tempfile
 from pathlib import Path
 

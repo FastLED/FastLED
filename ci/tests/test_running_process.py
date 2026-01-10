@@ -8,7 +8,6 @@ This test executes a trivial Python command via `uv run python -c` and verifies:
 import time
 import unittest
 from pathlib import Path
-from typing import List, Union
 
 import pytest
 from running_process import RunningProcess

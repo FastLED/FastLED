@@ -11,7 +11,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 from ci.util.check_files import (
     FileContent,
@@ -47,7 +46,7 @@ class UsingNamespaceChecker(FileContentChecker):
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for 'using namespace' declarations."""
         violations: list[tuple[int, str]] = []
-        lines_with_newlines = file_content.content.splitlines(keepends=True)
+        file_content.content.splitlines(keepends=True)
 
         for line_num, line in enumerate(file_content.lines, 1):
             # Remove comments to avoid false positives

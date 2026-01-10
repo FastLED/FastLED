@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """LED Chipset Timing Conversion Utilities.
 
@@ -426,10 +429,10 @@ def handle_interactive() -> None:
 
                 # Check for asymmetric cycles
                 if ds_measured.cycle_0 != ds_measured.cycle_1:
-                    print(f"⚠ NOTE: Asymmetric cycle times in initial values:")
+                    print("⚠ NOTE: Asymmetric cycle times in initial values:")
                     print(f"  Cycle 0: {ds_measured.cycle_0}ns (T0H + T0L)")
                     print(f"  Cycle 1: {ds_measured.cycle_1}ns (T1H + T1L)")
-                    print(f"  Asymmetry will be corrected (symmetric cycles required)")
+                    print("  Asymmetry will be corrected (symmetric cycles required)")
                     print()
 
                 # Optimize timing
@@ -492,7 +495,7 @@ def handle_interactive() -> None:
                 # Check for asymmetric cycles and warn user
                 if ds.cycle_0 != ds.cycle_1:
                     print()
-                    print(f"⚠ WARNING: Asymmetric cycle times detected!")
+                    print("⚠ WARNING: Asymmetric cycle times detected!")
                     print(f"  Cycle 0: {ds.cycle_0}ns (T0H + T0L)")
                     print(f"  Cycle 1: {ds.cycle_1}ns (T1H + T1L)")
                     print()
@@ -552,6 +555,7 @@ def handle_interactive() -> None:
             print(f"Cycle '1': {ds.cycle_1}ns")
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except ValueError:
         print("\nERROR: Invalid input. Please enter integer values.")
@@ -724,6 +728,7 @@ def main() -> int:
         return 0
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

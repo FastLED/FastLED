@@ -5,7 +5,6 @@ file names, and default configurations.
 """
 
 from dataclasses import dataclass
-from typing import List, Set
 
 
 @dataclass(frozen=True)

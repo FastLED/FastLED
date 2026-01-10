@@ -13,6 +13,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.compiler.build_utils import get_utf8_env
 from ci.compiler.compiler import CacheType
 from ci.util.create_build_dir import insert_tool_aliases
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 if TYPE_CHECKING:
@@ -120,8 +121,11 @@ def generate_build_info_json_from_existing_build(
             return False
 
     except TimeoutError:
-        print(f"Warning: Timeout generating build_info.json (no output for 900s)")
+        print("Warning: Timeout generating build_info.json (no output for 900s)")
         return False
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Exception generating build_info.json: {e}")
         return False
@@ -178,6 +182,9 @@ def apply_board_specific_config(
             f"Applied PlatformIO cache optimization using cache directory: {paths.global_platformio_cache_dir}"
         )
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         # Graceful fallback to original URLs on cache failures
         print(
@@ -277,7 +284,7 @@ def get_sccache_build_flags(board_name: str) -> dict[str, str]:
     sccache_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"SCCACHE cache directory: {sccache_dir}")
-    print(f"SCCACHE cache size limit: 2G")
+    print("SCCACHE cache size limit: 2G")
 
     # Get xcache wrapper path
     project_root = _get_project_root()
@@ -324,7 +331,7 @@ def get_ccache_build_flags(board_name: str) -> dict[str, str]:
     ccache_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"CCACHE cache directory: {ccache_dir}")
-    print(f"CCACHE cache size limit: 2G")
+    print("CCACHE cache size limit: 2G")
 
     # Return environment variables that PlatformIO will use
     env_vars = {
@@ -384,7 +391,7 @@ def setup_sccache_environment(board_name: str) -> bool:
         print(f"Set CXX environment variable: {os.environ['CXX']}")
 
     print(f"SCCACHE cache directory: {sccache_dir}")
-    print(f"SCCACHE cache size limit: 2G")
+    print("SCCACHE cache size limit: 2G")
 
     # Show sccache statistics if available
     try:
@@ -403,6 +410,9 @@ def setup_sccache_environment(board_name: str) -> bool:
                     print(f"   {line}")
         else:
             print("SCCACHE stats not available (cache empty or first run)")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Could not retrieve SCCACHE stats: {e}")
 
@@ -454,7 +464,7 @@ def setup_ccache_environment(board_name: str) -> bool:
         print(f"Set CXX environment variable: {os.environ['CXX']}")
 
     print(f"CCACHE cache directory: {ccache_dir}")
-    print(f"CCACHE cache size limit: 2G")
+    print("CCACHE cache size limit: 2G")
 
     # Show ccache statistics if available
     try:
@@ -473,6 +483,10 @@ def setup_ccache_environment(board_name: str) -> bool:
                     print(f"   {line}")
         else:
             print("CCACHE stats not available (cache empty or first run)")
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Could not retrieve CCACHE stats: {e}")
 

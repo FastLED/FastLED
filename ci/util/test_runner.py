@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 WARNING: sys.stdout.flush() causes blocking issues on Windows with QEMU/subprocess processes!
@@ -15,12 +18,10 @@ import threading
 import time
 import traceback
 from dataclasses import dataclass
-from pathlib import Path
 from queue import Queue
-from typing import Any, Callable, Dict, List, Optional, Pattern, Protocol, cast
+from typing import Callable, Optional, Protocol, cast
 
 from running_process import RunningProcess
-from running_process.process_output_reader import EndOfStream
 from typeguard import typechecked
 
 from ci.util.color_output import print_cache_hit
@@ -684,6 +685,9 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
                     if example_parts:
                         return f"{script_name} {' '.join(example_parts)}"
                     return script_name
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             # Fall back to generic extraction on any unexpected parsing issue
             pass
@@ -768,18 +772,21 @@ def _handle_process_completion(
         if returncode != 0:
             test_name = _extract_test_name(cmd)
             ts_print(f"\nCommand failed: {cmd} with return code {returncode}")
-            ts_print(f"\033[91m###### ERROR ######\033[0m")
+            ts_print("\033[91m###### ERROR ######\033[0m")
             ts_print(f"Test failed: {test_name}")
 
             # Capture the actual output from the failed process
             try:
                 actual_output = proc.stdout
                 if actual_output.strip():
-                    ts_print(f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
+                    ts_print("\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
                     ts_print(actual_output)
-                    ts_print(f"=== END OF OUTPUT ===")
+                    ts_print("=== END OF OUTPUT ===")
                 else:
                     actual_output = "No output captured from failed process"
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 actual_output = f"Error capturing output: {e}"
 
@@ -816,20 +823,26 @@ def _handle_process_completion(
         if os.name != "nt":  # Only flush on non-Windows systems
             sys.stdout.flush()
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         test_name = _extract_test_name(cmd)
         ts_print(f"\nError waiting for process: {cmd}")
         ts_print(f"Error: {e}")
-        ts_print(f"\033[91m###### ERROR ######\033[0m")
+        ts_print("\033[91m###### ERROR ######\033[0m")
         ts_print(f"Test error: {test_name}")
 
         # Try to capture any available output
         try:
             actual_output = proc.stdout
             if actual_output.strip():
-                ts_print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
+                ts_print("\n=== PROCESS OUTPUT BEFORE ERROR ===")
                 ts_print(actual_output)
-                ts_print(f"=== END OF OUTPUT ===")
+                ts_print("=== END OF OUTPUT ===")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as output_error:
             ts_print(f"Could not capture process output: {output_error}")
 
@@ -839,6 +852,9 @@ def _handle_process_completion(
             # Try to capture output from this process too
             try:
                 process_output = p.stdout if hasattr(p, "stdout") else str(e)
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 process_output = str(e)
 
@@ -1003,7 +1019,7 @@ def _run_processes_parallel(
         return []
 
     # Create a shared output handler for formatting
-    output_handler = ProcessOutputHandler(verbose=verbose)
+    ProcessOutputHandler(verbose=verbose)
 
     # Configure Windows console for UTF-8 output if needed
     if os.name == "nt":  # Windows
@@ -1233,7 +1249,7 @@ def _run_processes_parallel(
 
         # Check for processes that failed with non-zero exit codes
         if exit_failed_processes:
-            ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+            ts_print("\n\033[91m###### ERROR ######\033[0m")
             ts_print(
                 f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
             )
@@ -1257,7 +1273,7 @@ def _run_processes_parallel(
 
         # Check for failed processes - CRITICAL FIX
         if failed_processes:
-            ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+            ts_print("\n\033[91m###### ERROR ######\033[0m")
             ts_print(f"Tests failed due to {len(failed_processes)} killed process(es):")
             for cmd in failed_processes:
                 ts_print(f"  - {cmd}")
@@ -1348,6 +1364,9 @@ def run_test_processes(
                 )
             except ImportError:
                 pass  # Fall back to normal execution if display not available
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 pass  # Fall back to normal execution on any display error
 
@@ -1398,7 +1417,7 @@ def runner(
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
     """
-    ts_print(f"[TEST_RUNNER] Starting runner function")
+    ts_print("[TEST_RUNNER] Starting runner function")
     ts_print(f"[TEST_RUNNER] Args: {args}")
     ts_print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
     ts_print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
@@ -1437,7 +1456,7 @@ def runner(
             # Print summary with timing
             if result.success:
                 ts_print(f"\n{'=' * 70}")
-                ts_print(f"✓ C++ Unit Tests PASSED")
+                ts_print("✓ C++ Unit Tests PASSED")
                 ts_print(
                     f"  Tests run: {result.num_tests_passed}/{result.num_tests_run}"
                 )
@@ -1560,7 +1579,6 @@ def runner(
         will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
 
         # Print summary of what we're about to run
-        execution_mode = "in parallel" if will_run_parallel else "sequentially"
 
         # Run processes (parallel unless NO_PARALLEL is set)
         timings = run_test_processes(
@@ -1581,7 +1599,7 @@ def runner(
             ts_print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print summary and exit with proper code
-        ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+        ts_print("\n\033[91m###### ERROR ######\033[0m")
         ts_print(f"Tests failed with {len(e.failures)} failure(s)")
 
         # Exit with appropriate code

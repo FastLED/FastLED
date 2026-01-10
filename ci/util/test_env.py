@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 import os
-import platform
 import sys
 import threading
 import time
 import traceback
-from pathlib import Path
 from typing import Protocol, cast
 
 import psutil
 
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.test_types import TestArgs
 
 
@@ -63,6 +62,9 @@ def get_process_tree_info(pid: int) -> str:
                 info.append(f"    Memory: {child.memory_info()}")
 
         return "\n".join(info)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except:
         return f"Could not get process info for PID {pid}"
 

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Basic tests for container database operations.
 
@@ -15,7 +18,6 @@ from pathlib import Path
 
 from ci.docker_utils.container_db import (
     ContainerDatabase,
-    cleanup_orphaned_containers,
     process_exists,
 )
 
@@ -26,7 +28,7 @@ def test_database_initialization():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test.db"
-        db = ContainerDatabase(db_path)
+        ContainerDatabase(db_path)
 
         # Verify database file exists
         assert db_path.exists(), "Database file was not created"
@@ -149,6 +151,9 @@ def main():
         print()
         print(f"❌ Test failed: {e}")
         return 1
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print()
         print(f"❌ Unexpected error: {e}")

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Docker image build utilities for FastLED PlatformIO compilation.
 
 This module provides functions for building Docker images with pre-cached
@@ -104,6 +107,9 @@ def extract_architecture(board_name: str) -> str:
         platform_name = platform_name.replace(".git", "").replace(".zip", "")
         return platform_name
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         # Fallback if board creation fails - use board name
         return board_name
@@ -166,6 +172,9 @@ def generate_docker_tag(board_name: str) -> str:
         # Future: Can extract GCC version or other toolchain info
         return "latest"
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         # Fallback if board creation fails
         return "latest"
@@ -196,6 +205,9 @@ def generate_config_hash(board_name: str, framework: Optional[str] = None) -> st
     """
     try:
         board = create_board(board_name, no_project_options=True)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         raise ValueError(f"Failed to create board '{board_name}': {e}") from e
 

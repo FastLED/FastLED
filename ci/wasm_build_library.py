@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 WASM Static Library Build Script (libfastled.a)
@@ -175,6 +178,9 @@ def parse_depfile(depfile_path: Path) -> list[Path]:
         # Convert to Path objects
         return [Path(d) for d in deps]
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not parse dependency file {depfile_path}: {e}")
         return []
@@ -333,6 +339,7 @@ def compile_object(
         return True, source_path.name, ""
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         return False, source_path.name, f"Exception during compilation: {e}"
@@ -482,6 +489,9 @@ def load_metadata() -> dict[str, Any]:
     try:
         with open(LIBRARY_METADATA) as f:
             return json.load(f)  # type: ignore[no-any-return]
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not load library metadata: {e}")
         return {}
@@ -808,7 +818,7 @@ def build_library(
 
             print(f"✓ Partial object created: {partial_object}")
         else:
-            print(f"✓ Partial object is up-to-date")
+            print("✓ Partial object is up-to-date")
 
         # Step 12: Create thin archive from partial object (single file, much faster)
         archive_result = create_thin_archive(
@@ -837,6 +847,7 @@ def build_library(
         return 0
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         print(f"✗ Library build failed with exception: {e}", file=sys.stderr)
@@ -900,6 +911,8 @@ def main() -> int:
         )
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n✗ Build interrupted by user")
         raise
     except Exception as e:

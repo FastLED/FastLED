@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 PlatformIO Package Installation Daemon
@@ -139,6 +142,7 @@ def read_status_file_safe() -> DaemonStatus:
 
         return default_status
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.error(f"Unexpected error reading status file: {e}")
@@ -162,6 +166,7 @@ def write_status_file_atomic(status: dict[str, Any]) -> None:
         temp_file.replace(STATUS_FILE)
 
     except KeyboardInterrupt:
+        notify_main_thread()
         temp_file.unlink(missing_ok=True)
         raise
     except Exception as e:
@@ -217,6 +222,7 @@ def read_request_file() -> PackageRequest | None:
         logging.error(f"Failed to parse request file: {e}")
         return None
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.error(f"Unexpected error reading request file: {e}")
@@ -228,6 +234,7 @@ def clear_request_file() -> None:
     try:
         REQUEST_FILE.unlink(missing_ok=True)
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.error(f"Failed to clear request file: {e}")
@@ -255,6 +262,7 @@ def check_disk_space(path: Path, required_mb: int = 1000) -> tuple[bool, str]:
 
         return True, ""
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         return False, f"Failed to check disk space: {e}"
@@ -415,14 +423,14 @@ def run_package_install_with_retry(
         cmd_str = " ".join(cmd)
         shell = True
         env = get_clean_windows_env()
-        logging.info(f"Windows detected: using cmd.exe shell with clean environment")
+        logging.info("Windows detected: using cmd.exe shell with clean environment")
         logging.debug(f"Command string: {cmd_str}")
     else:
         # Non-Windows: use direct execution (no shell)
         cmd_str = cmd
         shell = False
         env = None  # Inherit environment
-        logging.info(f"Non-Windows platform: using direct execution")
+        logging.info("Non-Windows platform: using direct execution")
 
     for attempt in range(max_retries):
         if attempt > 0:
@@ -552,6 +560,7 @@ def get_default_environment(project_dir: str) -> str | None:
 
         return None
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.warning(f"Failed to read default_envs from platformio.ini: {e}")
@@ -655,6 +664,9 @@ def process_package_request(request: PackageRequest) -> bool:
                         return False
 
                     logging.info("Post-install validation passed")
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     logging.warning(f"Post-install validation error (non-fatal): {e}")
                     # Don't fail installation on validation error, just log
@@ -678,6 +690,7 @@ def process_package_request(request: PackageRequest) -> bool:
             return False
 
     except KeyboardInterrupt:
+        notify_main_thread()
         logging.warning("Package installation interrupted by user")
         update_status(
             DaemonState.FAILED,
@@ -711,6 +724,9 @@ def should_shutdown() -> bool:
         logging.info("Shutdown signal detected")
         try:
             shutdown_file.unlink()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             pass
         return True
@@ -750,6 +766,7 @@ def cleanup_and_exit() -> None:
     try:
         PID_FILE.unlink(missing_ok=True)
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.error(f"Failed to remove PID file: {e}")
@@ -801,6 +818,9 @@ def run_daemon_loop() -> None:
                             f"Cleaned up orphaned processes for {len(orphaned_clients)} dead clients: {orphaned_clients}"
                         )
                     last_orphan_check = time.time()
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     logging.error(f"Error during orphan cleanup: {e}", exc_info=True)
 
@@ -849,6 +869,7 @@ def run_daemon_loop() -> None:
             time.sleep(0.5)
 
         except KeyboardInterrupt:
+            notify_main_thread()
             logging.warning("Daemon interrupted by user")
             cleanup_and_exit()
         except Exception as e:
@@ -861,7 +882,6 @@ def main() -> int:
     """Main entry point for daemon."""
     # Parse command-line arguments
     foreground = "--foreground" in sys.argv
-    verbose = "--verbose" in sys.argv
 
     # Setup logging
     setup_logging(foreground=foreground)
@@ -895,6 +915,7 @@ def main() -> int:
                 logging.info(f"Removing stale PID file for PID {existing_pid}")
                 PID_FILE.unlink()
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             logging.warning(f"Error checking existing PID: {e}")
@@ -931,6 +952,7 @@ def main() -> int:
 
             run_daemon_loop()
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         logging.error(f"Failed to daemonize: {e}", exc_info=True)
@@ -954,5 +976,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\nDaemon interrupted by user")
         sys.exit(130)

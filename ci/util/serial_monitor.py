@@ -181,7 +181,7 @@ class FailHandler(LineHandler):
                     self.mMatchedLine = line
                     print(f"\n🚨 FAIL PATTERN DETECTED: /{pattern_str}/")
                     print(f"   Matched line: {line}")
-                    print(f"   Terminating monitor immediately...\n")
+                    print("   Terminating monitor immediately...\n")
                     return False  # Stop monitoring immediately
         return True
 
@@ -478,6 +478,9 @@ class PioDeviceMonitorHandler:
                 except TimeoutError:
                     # No output within read timeout - continue waiting
                     continue
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     # Check for specific serial port errors indicating device is stuck
                     error_str = str(e)

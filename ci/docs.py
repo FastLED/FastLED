@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """
 Work in progress to generate doxygen via a script instead of a GitHub action.
 """
@@ -8,7 +11,7 @@ import shutil
 import subprocess
 import warnings
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from download import download  # type: ignore
 
@@ -165,6 +168,9 @@ def main() -> None:
     try:
         dot_version = run("dot -V", check=False)
         print(f"Graphviz detected: {dot_version}")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         warnings.warn(
             "Graphviz (dot) not found in PATH. Diagrams may not be generated."

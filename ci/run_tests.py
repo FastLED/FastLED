@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Simple test runner for FastLED unit tests.
@@ -14,14 +17,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from running_process import RunningProcess
 
-from ci.util.test_exceptions import (
-    TestExecutionFailedException,
-    TestFailureInfo,
-)
+from ci.util.test_exceptions import TestExecutionFailedException, TestFailureInfo
 
 
 _ABORT_EVENT = threading.Event()
@@ -171,6 +171,9 @@ def _dump_post_mortem_stack_trace(
         return "GDB analysis timed out after 60 seconds"
     except FileNotFoundError:
         return "GDB not found - install GDB to enable stack trace analysis"
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return f"Failed to run post-mortem stack trace analysis: {e}"
 
@@ -435,6 +438,7 @@ def main() -> None:
                             break
 
                 except KeyboardInterrupt:
+                    notify_main_thread()
                     _ABORT_EVENT.set()
                     print("\nTest execution interrupted by user")
                     try:
@@ -527,6 +531,8 @@ def main() -> None:
             )
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\nTest execution interrupted by user")
         sys.exit(1)
     except TestExecutionFailedException as e:

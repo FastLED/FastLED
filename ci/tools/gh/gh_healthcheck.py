@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 GitHub Actions Health Check
@@ -25,7 +28,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 
 @dataclass
@@ -115,6 +118,9 @@ class HealthChecker:
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"
@@ -139,6 +145,9 @@ class HealthChecker:
             )
             runs = json.loads(result.stdout)
             return runs[0] if runs else None
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
             return None
@@ -161,6 +170,9 @@ class HealthChecker:
                 timeout=30,
             )
             return json.loads(result.stdout)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting run info: {e}", file=sys.stderr)
             return None
@@ -196,6 +208,9 @@ class HealthChecker:
         except subprocess.TimeoutExpired:
             print(f"⚠️  Timeout fetching logs for job {job_id}", file=sys.stderr)
             return []
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"⚠️  Error fetching job logs: {e}", file=sys.stderr)
             return []
@@ -313,7 +328,7 @@ class HealthChecker:
         print("=" * 80)
 
         # Run summary
-        print(f"\n📋 Run Information:")
+        print("\n📋 Run Information:")
         print(f"  Run ID: {self.run_id}")
         print(f"  Title: {run_info.get('displayTitle', 'Unknown')}")
         print(f"  Branch: {run_info.get('headBranch', 'Unknown')}")
@@ -327,7 +342,7 @@ class HealthChecker:
         failed_jobs = len(job_failures)
         passed_jobs = total_jobs - failed_jobs
 
-        print(f"\n📊 Job Summary:")
+        print("\n📊 Job Summary:")
         print(f"  Total Jobs: {total_jobs}")
         print(f"  ✅ Passed: {passed_jobs}")
         print(f"  ❌ Failed: {failed_jobs}")
@@ -369,7 +384,7 @@ class HealthChecker:
             print(f"     💡 Suggestion: {cause['suggestion']}")
 
             if cause["details"] and self.detail_level in ["medium", "high"]:
-                print(f"     Affected:")
+                print("     Affected:")
                 for detail in list(cause["details"])[:5]:  # Show max 5
                     print(f"       - {detail}")
 
@@ -406,9 +421,9 @@ class HealthChecker:
             print("     Platform may be deprecated - consider upgrading or removing")
 
         if failed_jobs == 1:
-            print(f"  3. Only one job failed - issue may be platform-specific")
+            print("  3. Only one job failed - issue may be platform-specific")
         elif failed_jobs == total_jobs:
-            print(f"  4. All jobs failed - likely a fundamental build system issue")
+            print("  4. All jobs failed - likely a fundamental build system issue")
 
         print("\n" + "=" * 80)
 
@@ -524,6 +539,8 @@ Examples:
         exit_code = checker.run_healthcheck()
         sys.exit(exit_code)
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\nInterrupted by user")
         sys.exit(1)
     except Exception as e:

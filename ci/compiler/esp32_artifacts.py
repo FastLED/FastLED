@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """ESP32 artifact management for QEMU and flashing.
 
 This module provides clean separation of concerns for ESP32-specific artifact
@@ -8,7 +11,7 @@ import shutil
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ci.compiler.esp32_constants import (
     BOOT_APP0_SIZE,
@@ -284,12 +287,15 @@ class ESP32ArtifactCopier:
             flash_path = output_dir / FILE_NAMES.FLASH
             if builder.create_merged_image(flash_path, self.flash_config.size_mb):
                 copied.append(FILE_NAMES.FLASH)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"⚠️  Warning: Could not create flash.bin: {e}")
 
     def _print_summary(self, output_dir: Path, copied: list[str]) -> None:
         """Print summary of copied files."""
-        print(f"\n📋 ESP32 QEMU artifacts summary:")
+        print("\n📋 ESP32 QEMU artifacts summary:")
         print(f"   Output directory: {output_dir}")
         print(f"   Files copied: {len(copied)}")
         for filename in sorted(copied):
@@ -325,7 +331,7 @@ class ESP32ArtifactManager:
             print(
                 f"⚠️  Warning: Flash mode {flash_config.mode.value} may not be QEMU compatible"
             )
-            print(f"   QEMU works best with DIO mode")
+            print("   QEMU works best with DIO mode")
 
         # Determine output directory
         output_dir = self._resolve_output_dir(output_path)

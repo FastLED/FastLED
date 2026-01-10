@@ -8,13 +8,12 @@ to enable fast incremental builds.
 """
 
 import hashlib
-import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 from ci.ci.fingerprint_cache import FingerprintCache
-from ci.util.test_types import FingerprintResult, fingerprint_code_base
+from ci.util.test_types import fingerprint_code_base
 
 
 @dataclass
@@ -353,7 +352,7 @@ if __name__ == "__main__":
 
     # Show cache stats
     stats = cache.get_cache_stats()
-    print(f"\nCache Statistics:")
+    print("\nCache Statistics:")
     print(f"  File cache entries: {stats['file_cache_entries']}")
     print(f"  Build cache entries: {stats['build_cache_entries']}")
     print(f"  Cache directory: {stats['cache_dir']}")

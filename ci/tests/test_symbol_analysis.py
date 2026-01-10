@@ -20,7 +20,6 @@ from ci.util.symbol_analysis import (
     find_board_build_info,
     generate_report,
 )
-from ci.util.tools import Tools, load_tools
 
 
 HERE = Path(__file__).resolve().parent.absolute()

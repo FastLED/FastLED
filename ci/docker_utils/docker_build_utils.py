@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 FastLED Docker Build Utilities
@@ -9,7 +12,7 @@ This module handles platformio.ini generation and platform-related operations.
 import logging
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 # Setup logging
@@ -57,6 +60,9 @@ def generate_platformio_ini(
         logger.info(f"Successfully generated platformio.ini at {ini_path}")
         return True, f"Generated platformio.ini for board: {board_name}"
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         error_msg = f"Failed to generate platformio.ini for {board_name}: {e}"
         logger.error(error_msg)
@@ -85,6 +91,9 @@ def get_platform_from_ini(ini_path: str = "platformio.ini") -> Optional[str]:
                         return value.split("\n")[0].strip()
     except FileNotFoundError:
         logger.warning(f"platformio.ini not found at {ini_path}")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.error(f"Error reading platformio.ini: {e}")
 
@@ -113,6 +122,9 @@ def get_platform_packages_from_ini(ini_path: str = "platformio.ini") -> Optional
                         return value.split("\n")[0].strip()
     except FileNotFoundError:
         logger.warning(f"platformio.ini not found at {ini_path}")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.error(f"Error reading platformio.ini: {e}")
 
@@ -143,6 +155,9 @@ def run_command(cmd: list[str], description: str = "") -> bool:
 
         return True
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.error(f"Error running command: {e}")
         return False
@@ -173,8 +188,11 @@ def install_platform(platform: str, skip_dependencies: bool = True) -> tuple[boo
             return True, f"Platform {platform} installed successfully"
         else:
             # Non-fatal - platform might already be installed
-            return True, f"Platform installation completed (may already exist)"
+            return True, "Platform installation completed (may already exist)"
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         error_msg = f"Failed to install platform {platform}: {e}"
         logger.error(error_msg)
@@ -221,6 +239,9 @@ def install_platform_packages(
 
         return True, "Platform packages installed successfully"
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         error_msg = f"Failed to install platform packages: {e}"
         logger.error(error_msg)
@@ -265,6 +286,9 @@ def compile_board_example(
         else:
             return False, f"Failed to compile {board} with {example}"
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         error_msg = f"Error during compilation: {e}"
         logger.error(error_msg)

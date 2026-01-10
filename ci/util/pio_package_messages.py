@@ -13,7 +13,7 @@ Supports:
 import time
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from typeguard import typechecked
 

@@ -8,7 +8,6 @@ scripts that were embedded in meson.build.
 
 import sys
 from pathlib import Path
-from typing import List
 
 
 def discover_sources(

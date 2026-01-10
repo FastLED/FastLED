@@ -500,7 +500,7 @@ class BannedHeadersChecker(FileContentChecker):
         violations: list[tuple[int, str]] = []
 
         # Determine file type and if bypass is allowed
-        can_bypass = self._should_allow_bypass(file_content.path)
+        self._should_allow_bypass(file_content.path)
         file_ext = file_content.path.split(".")[-1]
 
         # Pattern to detect private libc++ headers

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 # pyright: reportUnknownMemberType=false
 """
 Concurrent run utilities.
@@ -9,7 +12,7 @@ import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ci.boards import Board  # type: ignore
 from ci.compiler.compile_for_board import compile_examples, errors_happened
@@ -148,6 +151,9 @@ def concurrent_run(
                     locked_print(
                         f"SUCCESS: Finished initializing build_dir for board {board.board_name} ({completed_boards}/{len(projects)})"
                     )
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 locked_print(
                     f"EXCEPTION: Build directory initialization failed for board {board.board_name}: {e}"
@@ -231,6 +237,9 @@ def concurrent_run(
                     if result.stdout:
                         print(result.stdout)
 
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 error_msg = f"Exception during symbol analysis for board {board.board_name}: {e}"
                 symbol_analysis_errors.append(error_msg)

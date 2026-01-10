@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 
 def parse_args() -> argparse.Namespace:

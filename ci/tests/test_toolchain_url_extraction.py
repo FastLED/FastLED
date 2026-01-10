@@ -9,15 +9,10 @@ platform download requirements (toolchains represent ~90% of download size).
 
 import unittest
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import pytest
 
-from ci.compiler.platformio_ini import (
-    PackageInfo,
-    PlatformIOIni,
-    PlatformUrlResolution,
-)
+from ci.compiler.platformio_ini import PackageInfo, PlatformIOIni
 
 
 class TestToolchainUrlExtraction(unittest.TestCase):
@@ -91,7 +86,6 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         is_direct_url = toolchain_url.startswith("http://") or toolchain_url.startswith(
             "https://"
         )
-        is_version_requirement = not is_direct_url
 
         if is_direct_url:
             # Verify it's a downloadable artifact (zip, tar, etc.)
@@ -102,15 +96,15 @@ class TestToolchainUrlExtraction(unittest.TestCase):
                 ),
                 f"Toolchain URL doesn't point to a downloadable archive: {toolchain_url}",
             )
-            print(f"\n✓ ESP32C3 RISC-V Toolchain (Direct URL):")
+            print("\n✓ ESP32C3 RISC-V Toolchain (Direct URL):")
             print(f"  Name: {riscv_toolchain.name}")
             print(f"  URL: {toolchain_url}")
         else:
             # Version requirement - PlatformIO will resolve this via package registry
-            print(f"\n✓ ESP32C3 RISC-V Toolchain (Version Requirement):")
+            print("\n✓ ESP32C3 RISC-V Toolchain (Version Requirement):")
             print(f"  Name: {riscv_toolchain.name}")
             print(f"  Requirement: {toolchain_url}")
-            print(f"  Note: PlatformIO resolves this via package registry")
+            print("  Note: PlatformIO resolves this via package registry")
 
         print(f"  Version: {riscv_toolchain.version or 'N/A'}")
         print(f"  Optional: {riscv_toolchain.optional}")
@@ -181,7 +175,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
             "https://"
         )
 
-        print(f"\n✓ ESP32S3 Xtensa Toolchain:")
+        print("\n✓ ESP32S3 Xtensa Toolchain:")
         print(f"  Name: {xtensa_toolchain.name}")
         if is_direct_url:
             print(f"  URL: {toolchain_url}")
@@ -255,7 +249,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         c3_url = c3_riscv[0].requirements or c3_riscv[0].url
         s3_url = s3_xtensa[0].requirements or s3_xtensa[0].url
 
-        print(f"\n✓ Toolchain Comparison:")
+        print("\n✓ Toolchain Comparison:")
         print(f"  ESP32C3 (RISC-V): {c3_name}")
         print(f"    URL/Version: {c3_url}")
         print(f"  ESP32S3 (Xtensa): {s3_name}")
@@ -294,7 +288,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
             packages_by_type[pkg_type].append(pkg)
 
         # Print summary
-        print(f"\n✓ ESP32C3 Package Summary:")
+        print("\n✓ ESP32C3 Package Summary:")
         for pkg_type, packages in sorted(packages_by_type.items()):
             print(f"  {pkg_type}: {len(packages)} package(s)")
             for pkg in packages:

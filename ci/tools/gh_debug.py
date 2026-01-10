@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 GitHub Actions Debug Tool
@@ -20,13 +23,12 @@ Features:
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 
 class GitHubDebugger:
@@ -98,6 +100,9 @@ class GitHubDebugger:
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"  # Default fallback
@@ -120,6 +125,9 @@ class GitHubDebugger:
                 timeout=10,
             )
             return json.loads(result.stdout)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting run info: {e}", file=sys.stderr)
             return {}
@@ -148,6 +156,9 @@ class GitHubDebugger:
                 if job.get("conclusion") in ["failure", "cancelled"]
             ]
             return failed_jobs
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error getting failed jobs: {e}", file=sys.stderr)
             return []
@@ -195,6 +206,9 @@ class GitHubDebugger:
         except subprocess.TimeoutExpired:
             print("Error: Log download timed out", file=sys.stderr)
             return None
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Error downloading logs: {e}", file=sys.stderr)
             return None
@@ -295,6 +309,9 @@ class GitHubDebugger:
             if error_buffer:
                 self._save_error_block(current_job, error_buffer, is_critical=False)
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"\nError analyzing logs: {e}", file=sys.stderr)
 
@@ -440,6 +457,8 @@ Examples:
     try:
         debugger.debug()
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\nInterrupted by user")
         sys.exit(1)
     except Exception as e:

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Native WASM compilation using clang-tool-chain's emscripten.
@@ -250,7 +253,7 @@ def compile_object(
             str(source_file),
             "-o",
             str(output_object),
-            f"-include-pch",
+            "-include-pch",
             str(pch_file),
         ]
         + includes
@@ -335,7 +338,7 @@ def compile_wasm(
                 print("✗ Sketch compilation failed")
                 return 1
         else:
-            print(f"✓ Sketch is up-to-date")
+            print("✓ Sketch is up-to-date")
         phase3_time = time.time() - phase3_start
         if verbose:
             print(f"Sketch compilation: {phase3_time:.2f}s")
@@ -350,7 +353,7 @@ def compile_wasm(
                 print("✗ Entry point compilation failed")
                 return 1
         else:
-            print(f"✓ Entry point is up-to-date")
+            print("✓ Entry point is up-to-date")
         phase3_time += time.time() - phase3_start
 
         # Phase 4: Link everything together
@@ -372,7 +375,7 @@ def compile_wasm(
             print(f"  - {output_file}")
             if wasm_output.exists():
                 print(f"  - {wasm_output}")
-            print(f"\nBuild times:")
+            print("\nBuild times:")
             print(f"  Library:  {phase2_time:.2f}s")
             print(f"  Sketch:   {phase3_time:.2f}s")
             print(f"  Linking:  {phase4_time:.2f}s (skipped)")
@@ -418,7 +421,7 @@ def compile_wasm(
             wasm_file = output_file.with_suffix(".wasm")
             if wasm_file.exists():
                 print(f"  - {wasm_file}")
-            print(f"\nBuild times:")
+            print("\nBuild times:")
             print(f"  Library:  {phase2_time:.2f}s")
             print(f"  Sketch:   {phase3_time:.2f}s")
             print(f"  Linking:  {phase4_time:.2f}s")
@@ -429,6 +432,7 @@ def compile_wasm(
             return result.returncode
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         print(f"✗ Build failed with exception: {e}", file=sys.stderr)
@@ -491,6 +495,8 @@ def main() -> int:
             args.unity_chunks,
         )
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n✗ Build interrupted by user")
         return 130
 

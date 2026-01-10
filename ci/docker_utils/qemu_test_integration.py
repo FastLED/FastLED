@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Integration module for Docker-based QEMU ESP32 testing.
@@ -6,13 +9,10 @@ This module provides a bridge between the existing test infrastructure
 and the Docker-based QEMU runner.
 """
 
-import os
-import platform
-import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 from ci.docker_utils.qemu_esp32_docker import DockerQEMURunner
 from ci.util.docker_command import get_docker_command
@@ -111,6 +111,9 @@ class QEMUTestIntegration:
             runner = DockerQEMURunner()
             runner.pull_image()
             return True
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Failed to pull Docker image: {e}", file=sys.stderr)
             return False
@@ -138,14 +141,6 @@ def integrate_with_test_framework():
         return True
 
     # Find the QEMU test section and add Docker support
-    integration_code = """
-# Docker QEMU integration
-try:
-    from ci.docker_utils.qemu_test_integration import QEMUTestIntegration
-    DOCKER_QEMU_AVAILABLE = True
-except ImportError:
-    DOCKER_QEMU_AVAILABLE = False
-"""
 
     print("Successfully prepared Docker QEMU integration code")
     return True

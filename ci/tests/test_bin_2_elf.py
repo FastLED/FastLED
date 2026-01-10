@@ -5,6 +5,7 @@ from pathlib import Path
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 from ci.util.tools import Tools, load_tools
 
@@ -66,6 +67,10 @@ class TestBinToElf(unittest.TestCase):
             )
             stdout = dump_symbol_sizes(tools.nm_path, tools.cpp_filt_path, output_elf)
             print(stdout)
+            notify_main_thread()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             warnings.warn(f"Error while converting binary to ELF: {e}")
 

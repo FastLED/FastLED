@@ -266,7 +266,7 @@ class TestIsArtifactLocked(unittest.TestCase):
         url = "https://example.com/toolchain.tar.gz"
 
         # Acquire and release lock to create artifact dir
-        with acquire_artifact_lock(self.cache_dir, url) as lock:
+        with acquire_artifact_lock(self.cache_dir, url):
             pass
 
         # Manually create stale lock

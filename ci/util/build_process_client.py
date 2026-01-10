@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Build Process Registration Client
@@ -59,6 +62,7 @@ def register_build_process(
                 ) as f:
                     registry = json.load(f)
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception:
                 pass  # Start with empty registry if corrupted
@@ -86,6 +90,7 @@ def register_build_process(
         )
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         # Non-fatal: log but don't fail the build
@@ -122,6 +127,7 @@ def unregister_build_process() -> None:
             logging.debug(f"Unregistered build process for client={client_pid}")
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         # Non-fatal: log but don't fail

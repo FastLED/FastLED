@@ -7,10 +7,11 @@ import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List
+from typing import Any
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.map_dump import map_dump
 from ci.util.symbol_analysis import SymbolInfo, analyze_symbols
 
@@ -286,6 +287,9 @@ def main() -> int:
         # Display per-function sizes prominently
         display_function_sizes(symbols, board, top_n=50)
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"\nWarning: Per-function analysis failed: {e}")
         print("Continuing with archive-level analysis...\n")
@@ -309,6 +313,10 @@ def main() -> int:
             print("LEGACY ANALYSIS (bin-to-elf conversion)")
             print("=" * 80)
             print(out)
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(
             f"Error while converting binary to ELF, binary analysis will not work on this build: {e}"

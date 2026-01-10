@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Utility to find and kill processes holding file locks.
@@ -60,6 +63,9 @@ def kill_process_holding_file(file_path: Path) -> bool:
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
             # Process may have exited or we don't have permission
             continue
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             # Ignore other errors and continue
             continue
@@ -83,6 +89,9 @@ def kill_process_holding_file(file_path: Path) -> bool:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
                 # Process may have exited or we don't have permission
                 continue
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 # Ignore other errors and continue
                 continue

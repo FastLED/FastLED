@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Build Process Tracking and Cleanup Module
@@ -99,6 +102,7 @@ class BuildProcessTracker:
 
             logging.info(f"Loaded {len(self._registry)} process trees from registry")
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             logging.warning(f"Failed to load process registry: {e}")
@@ -121,6 +125,7 @@ class BuildProcessTracker:
             temp_file.replace(self.registry_file)
 
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             logging.error(f"Failed to save process registry: {e}")
@@ -206,6 +211,7 @@ class BuildProcessTracker:
             info.last_updated = time.time()
             logging.debug(f"Root process {info.root_pid} no longer exists")
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             logging.warning(f"Failed to update child PIDs for client={client_pid}: {e}")
@@ -273,6 +279,7 @@ class BuildProcessTracker:
             children = root_proc.children(recursive=True)
             all_pids = [child.pid for child in children] + [info.root_pid]
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception:
             pass  # Use cached PID list
@@ -286,6 +293,7 @@ class BuildProcessTracker:
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception as e:
                 logging.warning(f"Failed to get process {pid}: {e}")
@@ -299,6 +307,7 @@ class BuildProcessTracker:
             except psutil.NoSuchProcess:
                 pass  # Already dead
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception as e:
                 logging.warning(f"Failed to terminate process {proc.pid}: {e}")
@@ -312,6 +321,7 @@ class BuildProcessTracker:
                 proc.kill()
                 logging.warning(f"Force killed stubborn process {proc.pid}")
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception as e:
                 logging.warning(f"Failed to force kill process {proc.pid}: {e}")

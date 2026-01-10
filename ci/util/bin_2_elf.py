@@ -145,25 +145,25 @@ def _generate_platform_linker_script(map_file: Path, platform: str) -> Path:
             dram0_0_seg : org = 0x3FFB0000, len = 0x50000
             flash_seg   : org = 0x400D0020, len = 0x330000
         }
-        
+
         SECTIONS
         {
             .iram0.text : {
                 *(.iram0.literal .iram0.text)
             } > iram0_0_seg
-            
+
             .flash.text : {
                 *(.literal .text .literal.* .text.*)
             } > flash_seg
-            
+
             .flash.rodata : {
                 *(.rodata .rodata.*)
             } > flash_seg
-            
+
             .dram0.data : {
                 *(.data .data.*)
             } > dram0_0_seg
-            
+
             .dram0.bss : {
                 *(.bss .bss.*)
             } > dram0_0_seg
@@ -178,19 +178,19 @@ def _generate_platform_linker_script(map_file: Path, platform: str) -> Path:
             data (rw!x) : ORIGIN = 0x800100, LENGTH = 0x800
             eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 0x400
         }
-        
+
         SECTIONS
         {
             .text : {
                 *(.text)
                 *(.text.*)
             } > text
-            
+
             .data : {
                 *(.data)
                 *(.data.*)
             } > data
-            
+
             .bss : {
                 *(.bss)
                 *(.bss.*)

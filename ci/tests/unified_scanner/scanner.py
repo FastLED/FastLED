@@ -3,7 +3,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from queue import Queue
-from typing import List, Set
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 from .base_checker import BaseChecker
 from .result import CheckResult
@@ -80,6 +81,10 @@ class UnifiedFileScanner:
                     for violation in violations:
                         self.result_queue.put(violation)
 
+            notify_main_thread()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             # Report file read errors
             self.result_queue.put(

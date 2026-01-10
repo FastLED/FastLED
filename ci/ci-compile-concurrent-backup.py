@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 """
@@ -16,16 +19,11 @@ This backup is kept for reference and potential future needs.
 """
 
 import argparse
-import concurrent.futures
-import io
-import multiprocessing
 import os
-import subprocess
 import sys
 import time
 import warnings
 from pathlib import Path
-from typing import List, Set
 
 from ci.boards import Board, create_board  # type: ignore
 from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
@@ -406,4 +404,6 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         sys.exit(1)

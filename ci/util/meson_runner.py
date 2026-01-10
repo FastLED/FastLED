@@ -13,6 +13,8 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+
+from ci.util.global_interrupt_handler import notify_main_thread
 from pathlib import Path
 from typing import Optional
 
@@ -226,6 +228,9 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
 
         return (hasher.hexdigest(), source_files)
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hash: {e}")
         return ("", [])

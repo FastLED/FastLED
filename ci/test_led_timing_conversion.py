@@ -7,7 +7,6 @@ Tests the conversion between datasheet format (T0H, T0L, T1H, T1L) and
 """
 
 import unittest
-from typing import Dict, List, Tuple
 
 # Import the timing conversion module
 from tools.led_timing_conversions import (

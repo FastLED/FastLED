@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Auto-generate @filter/@end-filter blocks from C++ platform guards in sketches.
 
@@ -13,7 +16,7 @@ Supported guard patterns:
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from ci.compiler.sketch_filter import parse_filter_from_sketch
 
@@ -40,7 +43,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
     filters: dict[str, list[str]] = {"require": [], "exclude": []}  # type: Dict[str, List[str]]
 
     # Check for ESP32-S3 specific
-    if match := re.search(
+    if re.search(
         r"#if\s+defined\(CONFIG_IDF_TARGET_ESP32S3\)|#define.*IS_ESP32_S3.*ESP32S3",
         content,
         re.MULTILINE,
@@ -48,7 +51,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
         filters["require"].append("target: ESP32S3")
 
     # Check for ESP32-P4 specific
-    if match := re.search(
+    if re.search(
         r"#if\s+defined\(CONFIG_IDF_TARGET_ESP32P4\)",
         content,
         re.MULTILINE,
@@ -105,6 +108,9 @@ def migrate_sketch(ino_path: Path, dry_run: bool = False) -> tuple[bool, str]:
     """
     try:
         content = ino_path.read_text(encoding="utf-8")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, f"Failed to read: {e}"
 
@@ -199,7 +205,7 @@ def main() -> int:
 
     print()
     print("=" * 70)
-    print(f"Migration summary:")
+    print("Migration summary:")
     print(f"  Migrated: {migrated}")
     print(f"  Skipped: {skipped}")
     if errors:

@@ -1,8 +1,8 @@
 import os
 import re
 import unittest
-from typing import Dict, List, Tuple
 
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -118,6 +118,9 @@ def scan_cpp_files(directory: str = ".") -> dict[str, list[tuple[int, str]]]:
                     line_info = find_includes_after_namespace(file_path)
                     if line_info:
                         violations[file_path] = line_info
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Error processing {file_path}: {e}")
 

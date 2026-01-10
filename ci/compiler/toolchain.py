@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Toolchain abstraction for multi-platform builds.
 
 This module provides abstract interfaces and concrete implementations for
@@ -223,6 +226,7 @@ class EmscriptenToolchain(Toolchain):
             # Return first line which contains version info
             return result.stdout.split("\n")[0].strip()
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             print(f"Warning: Could not get compiler version: {e}")

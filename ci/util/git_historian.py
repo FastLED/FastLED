@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """
 Git Historian - Fast code search combining working tree and git history
 
@@ -12,7 +15,6 @@ import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 # --- tiny helpers ------------------------------------------------------------
@@ -34,6 +36,9 @@ def _run(cmd: str, timeout: float = 3.0) -> str:
         return out.stdout
     except subprocess.TimeoutExpired:
         return ""
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return ""
 
@@ -49,6 +54,9 @@ def _have(cmd: str) -> bool:
             check=False,
         )
         return result.returncode == 0
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return False
 
@@ -250,9 +258,15 @@ def query(keywords: list[str], paths: list[Path]) -> list[str]:
             for fut in as_completed([fut_tree, fut_hist], timeout=5.0):
                 try:
                     results.extend(fut.result())
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception:
                     # keep going even if one branch fails
                     pass
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             # Timeout or other error - just use whatever results we have
             pass

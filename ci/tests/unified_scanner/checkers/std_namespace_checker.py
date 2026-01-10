@@ -1,7 +1,6 @@
 # pyright: reportUnknownMemberType=false
 import re
 from pathlib import Path
-from typing import List
 
 from ..base_checker import BaseChecker
 from ..result import CheckResult

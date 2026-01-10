@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Build lock utility for coordinating concurrent operations.
@@ -78,10 +81,16 @@ class BuildLock:
                     self.lock_file.unlink()
                     print(f"Removed stale lock file: {self.lock_file}")
                     return True
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Warning: Could not remove stale lock file: {e}")
                     return False
             return False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Warning: Could not check for stale lock: {e}")
             return False
@@ -133,6 +142,8 @@ class BuildLock:
                     self._is_acquired = True
                     return True
             except KeyboardInterrupt:
+                notify_main_thread()
+                raise
                 raise  # MANDATORY: Always re-raise KeyboardInterrupt
             except Exception:
                 # Handle timeout or other exceptions as failed acquisition (continue loop)
@@ -161,6 +172,9 @@ class BuildLock:
             try:
                 self._lock.release()
                 self._is_acquired = False
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 pass
             finally:

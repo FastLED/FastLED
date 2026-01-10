@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Docker Image Priority Tracker
@@ -23,9 +26,8 @@ Usage:
 
 import argparse
 import json
-import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -124,6 +126,9 @@ def get_dockerhub_image_age(platform: str) -> float | None:
 
             return age
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(
             f"Warning: Failed to query Docker Hub for {platform}: {e}",
@@ -338,5 +343,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\nOperation cancelled by user", file=sys.stderr)
         sys.exit(130)

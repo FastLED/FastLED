@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 FastLED Web Scraper Utility
@@ -47,6 +50,9 @@ def run_scraper(
 
         return result.returncode
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Error running scraper: {e}", file=sys.stderr)
         return 1

@@ -19,10 +19,8 @@ Source of Truth (C++ sketch_macros.h):
 """
 
 import sys
-from pathlib import Path
-from typing import List, Set
 
-from ci.boards import ALL, Board
+from ci.boards import ALL
 
 
 # Mapping of board characteristics to expected memory class
@@ -169,7 +167,7 @@ def audit_memory_classification():
     if missing_in_reality:
         print(f"  ⚠️  Expected boards NOT found in ALL: {missing_in_reality}")
     else:
-        print(f"  ✓ All expected boards found in ALL")
+        print("  ✓ All expected boards found in ALL")
 
     print()
     return len(errors)
@@ -198,7 +196,7 @@ def verify_sketch_macros_compliance():
     print("Python boards.py low_memory_boards list:")
     from ci.boards import create_board
 
-    test_board = create_board("uno", no_project_options=True)
+    create_board("uno", no_project_options=True)
     # Access the low_memory_boards list via memory_class computation
     # (it's defined inside the property, so we check indirectly)
 

@@ -1,8 +1,6 @@
 # pyright: reportUnknownMemberType=false
 import os
 import unittest
-from pathlib import Path
-from typing import List
 
 import pytest
 from unified_scanner import BaseChecker, CheckResult, UnifiedFileScanner

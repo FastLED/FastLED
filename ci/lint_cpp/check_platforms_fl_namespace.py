@@ -11,15 +11,11 @@ This prevents namespace pollution from platform-specific implementations.
 
 import os
 import unittest
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from typing import List, Tuple
 
 from ci.util.check_files import (
     FileContent,
     FileContentChecker,
     MultiCheckerFileProcessor,
-    collect_files_to_check,
 )
 from ci.util.paths import PROJECT_ROOT
 

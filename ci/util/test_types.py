@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import hashlib
-import json
+import threading
 import time
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from typeguard import typechecked
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 class TestResultType(Enum):
@@ -319,11 +321,21 @@ def fingerprint_code_base(
                         # Read in chunks to handle large files
                         for chunk in iter(lambda: f.read(4096), b""):
                             hasher.update(chunk)
+                except KeyboardInterrupt:
+                    # Only notify main thread if we're in a worker thread
+                    if threading.current_thread() != threading.main_thread():
+                        notify_main_thread()
+                    raise
                 except Exception as e:
                     # If we can't read the file, include the error in the hash
                     hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
 
         return FingerprintResult(hash=hasher.hexdigest())
+    except KeyboardInterrupt:
+        # Only notify main thread if we're in a worker thread
+        if threading.current_thread() != threading.main_thread():
+            notify_main_thread()
+        raise
     except Exception as e:
         return FingerprintResult(hash="", status=f"error: {str(e)}")
 

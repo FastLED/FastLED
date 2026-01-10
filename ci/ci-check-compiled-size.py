@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, List, Match, Optional
+from typing import Optional
 
 
 HERE = Path(__file__).resolve().parent

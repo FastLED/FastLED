@@ -1,8 +1,10 @@
 import threading
-from typing import List, Optional
+from typing import Optional
 
 # Import at runtime since this module is part of util package and used broadly
 from running_process import RunningProcess
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 class RunningProcessManager:
@@ -43,6 +45,10 @@ class RunningProcessManager:
             try:
                 if p.proc is not None:
                     pid = p.proc.pid
+                notify_main_thread()
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 pid = None
 

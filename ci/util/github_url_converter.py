@@ -5,8 +5,7 @@ Converts GitHub repository URLs to downloadable zip URLs when possible.
 Handles various GitHub URL patterns and provides warnings for unconvertible URLs.
 """
 
-import re
-from typing import Optional, Tuple
+from typing import Optional
 from urllib.parse import urlparse
 
 

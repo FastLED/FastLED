@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Generic Symbol Analysis Runner for GitHub Actions
@@ -83,6 +86,9 @@ def main():
         if args.skip_on_failure:
             return 0
         return 1
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Symbol analysis failed: {e}")
         if args.skip_on_failure:

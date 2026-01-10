@@ -2,9 +2,6 @@
 # pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import os
 import unittest
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from typing import List
 
 from ci.util.check_files import (
     FileContent,

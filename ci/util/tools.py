@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 # pyright: reportUnknownMemberType=false
 """
 Tools for working with build info and tool paths.
@@ -8,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from ci.util.paths import BUILD
 
@@ -207,5 +210,7 @@ if __name__ == "__main__":
     try:
         cli()
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("Exiting...")
         sys.exit(1)

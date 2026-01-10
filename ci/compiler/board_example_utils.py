@@ -6,7 +6,6 @@ in the FastLED compilation system.
 
 import os
 from pathlib import Path
-from typing import List, Tuple
 
 from ci.boards import ALL, Board
 from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch

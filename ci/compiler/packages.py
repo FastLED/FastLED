@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """
 Enhanced Arduino Package Index Implementation with Pydantic
 
@@ -13,17 +16,13 @@ Key Features:
 - Checksum validation and error handling
 """
 
-import asyncio
 import hashlib
 import json
-import shutil
 import sys
 import tarfile
 import zipfile
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
-from urllib.parse import urlparse
+from typing import Any, Optional
 from urllib.request import urlopen
 
 import httpx
@@ -35,7 +34,6 @@ from pydantic import (
     HttpUrl,
     ValidationError,
     field_validator,
-    model_validator,
 )
 
 
@@ -462,6 +460,9 @@ class PackageIndexParser:
 
             return self.parse_package_index(json_str)
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
 
@@ -476,6 +477,9 @@ class PackageIndexParser:
 
             return self.parse_package_index(json_str)
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
 
@@ -567,6 +571,9 @@ def extract_archive(archive_path: Path, extract_to: Path) -> bool:
 
         return True
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Error extracting archive {archive_path}: {e}")
         return False
@@ -624,7 +631,7 @@ def display_package_info(package: Package) -> None:
 
 def display_validation_summary(package_index: PackageIndex) -> None:
     """Display validation summary for the package index"""
-    print(f"\n✅ VALIDATION SUMMARY")
+    print("\n✅ VALIDATION SUMMARY")
     print(f"   📦 Total packages: {len(package_index.packages)}")
 
     total_platforms = sum(len(pkg.platforms) for pkg in package_index.packages)
@@ -671,6 +678,9 @@ def demo_esp32_parsing() -> Optional[PackageIndex]:
     except PackageParsingError as e:
         print(f"❌ Package parsing error: {e}")
         sys.exit(1)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         sys.exit(1)
@@ -741,7 +751,7 @@ def main() -> None:
 
         # Interactive options
         try:
-            print(f"\n📋 AVAILABLE OPTIONS:")
+            print("\n📋 AVAILABLE OPTIONS:")
             print("1. Show detailed tools information")
             print("2. Search for specific architecture")
             print("3. Exit")
@@ -782,9 +792,13 @@ def main() -> None:
                 print("👋 Goodbye!")
 
         except KeyboardInterrupt:
+            notify_main_thread()
+            raise
             print("\n👋 Interrupted by user")
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n👋 Interrupted by user")
         sys.exit(1)
 

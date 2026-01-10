@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 File Locking API Wrapper with Stale Lock Detection
@@ -17,12 +20,11 @@ import json
 import logging
 import os
 import platform
-import signal
 import time
 from datetime import datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Any, ContextManager
+from typing import Any
 
 import fasteners
 
@@ -61,6 +63,9 @@ def is_process_alive(pid: int) -> bool:
             return False
     except (OSError, ProcessLookupError):
         return False
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.warning(f"Error checking if PID {pid} is alive: {e}")
         return False  # Assume dead if we can't check

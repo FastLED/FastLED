@@ -1,10 +1,12 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Output management utilities for FastLED compilation.
 
 This module handles validation and copying of build artifacts to output locations.
 """
 
 from pathlib import Path
-from typing import Tuple
 
 from ci.boards import Board
 from ci.compiler.board_example_utils import get_board_artifact_extension
@@ -77,13 +79,13 @@ def validate_esp32_flash_mode_for_qemu(build_dir: Path, board: Board) -> bool:
 
             # Look for flash mode settings in build_flags
             if "FLASH_MODE=qio" in content.upper():
-                print(f"⚠️  WARNING: QIO flash mode detected in platformio.ini")
-                print(f"   QEMU requires DIO flash mode for compatibility")
-                print(f"   Consider using DIO mode for QEMU builds")
+                print("⚠️  WARNING: QIO flash mode detected in platformio.ini")
+                print("   QEMU requires DIO flash mode for compatibility")
+                print("   Consider using DIO mode for QEMU builds")
                 return True  # Warning but not blocking
 
             if "FLASH_MODE=dio" in content.upper():
-                print(f"✅ DIO flash mode detected - compatible with QEMU")
+                print("✅ DIO flash mode detected - compatible with QEMU")
                 return True
 
         # Check if build artifacts exist to examine flash settings
@@ -94,16 +96,19 @@ def validate_esp32_flash_mode_for_qemu(build_dir: Path, board: Board) -> bool:
             if flash_args_file.exists():
                 flash_args = flash_args_file.read_text()
                 if "--flash_mode qio" in flash_args:
-                    print(f"⚠️  WARNING: QIO flash mode detected in build artifacts")
-                    print(f"   QEMU may not boot properly with QIO mode")
+                    print("⚠️  WARNING: QIO flash mode detected in build artifacts")
+                    print("   QEMU may not boot properly with QIO mode")
                 elif "--flash_mode dio" in flash_args:
                     print(
-                        f"✅ DIO flash mode detected in build artifacts - QEMU compatible"
+                        "✅ DIO flash mode detected in build artifacts - QEMU compatible"
                     )
 
         print(f"ℹ️  Flash mode validation complete for {board.board_name}")
         return True
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"WARNING: Could not validate ESP32 flash mode: {e}")
         return True  # Don't fail build for validation issues
@@ -123,7 +128,7 @@ def copy_esp32_qemu_artifacts(
     Returns:
         True if successful, False otherwise
     """
-    print(f"🔧 ESP32 QEMU mode detected - collecting all required artifacts")
+    print("🔧 ESP32 QEMU mode detected - collecting all required artifacts")
 
     # Validate flash mode for QEMU compatibility
     validate_esp32_flash_mode_for_qemu(build_dir, board)
@@ -184,6 +189,9 @@ def copy_build_artifact(
         shutil.copy2(source_artifact, output_path)
         print(f"✅ Build artifact saved to: {output_path}")
         return True
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"ERROR: Failed to copy build artifact: {e}")
         return False

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Comprehensive stress test suite for HashFingerprintCache.
@@ -8,14 +11,10 @@ and edge cases to ensure robustness before using for linting.
 
 import json
 import multiprocessing
-import os
-import shutil
 import tempfile
-import threading
 import time
-from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
@@ -87,6 +86,9 @@ def test_basic_functionality(results: StressTestResults) -> None:
         try:
             cache.mark_success()
             results.pass_test("mark_success() completes without error")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("mark_success()", str(e))
 
@@ -139,6 +141,9 @@ def test_file_modification_during_processing(results: StressTestResults) -> None
         try:
             cache.mark_success()
             results.pass_test("mark_success() works despite file modifications")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("mark_success() with modified files", str(e))
 
@@ -160,6 +165,9 @@ def _concurrent_check_worker(
         cache = HashFingerprintCache(cache_dir, "concurrent_test")
         needs_update = cache.check_needs_update(files)
         result_queue.put(("success", needs_update))
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         result_queue.put(("error", str(e)))
 
@@ -258,6 +266,9 @@ def test_cross_process_pending_fingerprint(results: StressTestResults) -> None:
         try:
             cache2.mark_success()
             results.pass_test("mark_success() reads cross-process pending fingerprint")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("Cross-process mark_success()", str(e))
 
@@ -389,7 +400,7 @@ def test_large_file_set_performance(results: StressTestResults) -> None:
 
         # Time the check_needs_update
         start = time.time()
-        needs_update = cache.check_needs_update(files)
+        cache.check_needs_update(files)
         check_time = time.time() - start
 
         if check_time < 1.0:  # Should complete in under 1 second
@@ -398,7 +409,7 @@ def test_large_file_set_performance(results: StressTestResults) -> None:
             )
         else:
             results.fail_test(
-                f"check_needs_update with 500 files < 1s",
+                "check_needs_update with 500 files < 1s",
                 f"Took {check_time:.3f}s",
             )
 
@@ -413,7 +424,7 @@ def test_large_file_set_performance(results: StressTestResults) -> None:
             )
         else:
             results.fail_test(
-                f"mark_success with 500 files < 0.5s", f"Took {mark_time:.3f}s"
+                "mark_success with 500 files < 0.5s", f"Took {mark_time:.3f}s"
             )
 
 
@@ -443,6 +454,9 @@ def test_race_condition_rapid_operations(results: StressTestResults) -> None:
                     print(f"    Completed {i} iterations...")
 
             results.pass_test("50 rapid check/mark/invalidate cycles completed")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("Rapid sequential operations", str(e))
 
@@ -465,6 +479,9 @@ def test_timestamp_file_optional(results: StressTestResults) -> None:
             cache1.check_needs_update(files)
             cache1.mark_success()
             results.pass_test("Cache works without timestamp_file parameter")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("Cache without timestamp_file", str(e))
 
@@ -480,6 +497,9 @@ def test_timestamp_file_optional(results: StressTestResults) -> None:
                 results.pass_test("Timestamp file created when parameter provided")
             else:
                 results.fail_test("Timestamp file creation", "File not created")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             results.fail_test("Cache with timestamp_file", str(e))
 
@@ -508,6 +528,8 @@ def main() -> int:
         return 0 if success else 1
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\n⚠️  Test suite interrupted by user")
         return 2
     except Exception as e:

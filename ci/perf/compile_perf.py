@@ -41,12 +41,11 @@ Options:
 
 import json
 import os
-import shutil
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 
 class CompilePerfAnalyzer:
@@ -337,7 +336,7 @@ class CompilePerfAnalyzer:
         lines.append("=" * 80)
         lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append(f"Compiler: {os.environ.get('COMPILER', 'clang++')}")
-        lines.append(f"File: ci/perf/test_compile.cpp")
+        lines.append("File: ci/perf/test_compile.cpp")
         lines.append("")
 
         # Summary
@@ -585,7 +584,7 @@ def compile_with_trace(
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
         if result.returncode != 0:
-            print(f"Compilation failed:", file=sys.stderr)
+            print("Compilation failed:", file=sys.stderr)
             print(result.stderr, file=sys.stderr)
             sys.exit(1)
 

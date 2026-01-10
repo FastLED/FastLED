@@ -9,7 +9,7 @@ This is the single source of truth for platform→boards relationships used
 during Docker image builds.
 """
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 # Platform families and their included boards

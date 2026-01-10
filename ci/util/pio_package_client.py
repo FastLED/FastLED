@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 PlatformIO Package Installation Client
@@ -17,7 +20,6 @@ from typing import Any
 import psutil
 
 from ci.util.banner_print import (
-    BannerPrinter,
     format_elapsed_time,
     print_error_banner,
     print_phase_banner,
@@ -25,11 +27,7 @@ from ci.util.banner_print import (
     print_success_banner,
     print_tree_status,
 )
-from ci.util.pio_package_messages import (
-    DaemonState,
-    DaemonStatus,
-    PackageRequest,
-)
+from ci.util.pio_package_messages import DaemonState, DaemonStatus, PackageRequest
 
 
 # Import package validator
@@ -73,12 +71,14 @@ def is_daemon_running() -> bool:
             PID_FILE.unlink()
             return False
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception:
         # Corrupted PID file - remove it
         try:
             PID_FILE.unlink(missing_ok=True)
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception:
             pass
@@ -130,6 +130,7 @@ def read_status_file() -> DaemonStatus:
             updated_at=time.time(),
         )
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception:
         return DaemonStatus(
@@ -209,6 +210,7 @@ def packages_already_installed(project_dir: Path, environment: str | None) -> bo
         return result.returncode == 0
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception:
         # If check fails, assume packages need installation
@@ -499,6 +501,7 @@ def ensure_packages_installed(
             time.sleep(1)
 
         except KeyboardInterrupt:
+            notify_main_thread()
             print("\n\n⚠️  Interrupted by user")
             print("Note: Daemon will continue installation in background")
             print("      Check progress: bash daemon logs-tail")
@@ -547,6 +550,9 @@ def get_daemon_status() -> dict[str, Any]:
         try:
             with open(PID_FILE, "r") as f:
                 status["pid"] = int(f.read().strip())
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             status["pid"] = None
 
@@ -629,5 +635,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\nInterrupted by user")
         sys.exit(130)

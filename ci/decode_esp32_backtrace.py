@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 ESP32 Stack Trace Decoder
@@ -23,7 +26,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Optional, cast
 
 
 def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
@@ -67,6 +70,9 @@ def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
         print("Warning: No addr2line path found in build_info.json", file=sys.stderr)
         return None
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(
             f"Warning: Failed to load addr2line from build_info.json: {e}",

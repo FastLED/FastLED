@@ -6,7 +6,7 @@ This module provides platform-neutral colored output for the CI system,
 using the Rich library for consistent formatting across Windows, macOS, and Linux.
 """
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 
 if TYPE_CHECKING:

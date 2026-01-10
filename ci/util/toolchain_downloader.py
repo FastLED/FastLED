@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Toolchain Pre-downloader for PlatformIO
@@ -12,7 +15,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 from ci.compiler.platformio_ini import PackageInfo, PlatformIOIni
 from ci.util.cache_lock import acquire_artifact_lock, force_unlock_cache
@@ -59,6 +62,9 @@ def extract_toolchains_from_platformio_ini(
     """
     try:
         pio_ini = PlatformIOIni.parseFile(platformio_ini_path)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.error(f"Failed to parse {platformio_ini_path}: {e}")
         return []
@@ -81,6 +87,9 @@ def extract_toolchains_from_platformio_ini(
                     f"Found {len(resolution.packages)} packages for platform {platform_value}"
                 )
                 all_packages.extend(resolution.packages)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(
                 f"Failed to resolve platform {platform_value} in {section_name}: {e}"
@@ -109,6 +118,9 @@ def download_toolchain(
     # Get download URL from package
     try:
         download_url = package.get_download_url()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         result.error_message = f"Failed to resolve download URL: {e}"
         return result
@@ -179,6 +191,7 @@ def download_toolchain(
         result.error_message = f"Lock timeout: {e}"
         logger.error(f"❌ Failed to acquire lock for {package.name}: {e}")
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         result.error_message = str(e)
@@ -250,6 +263,7 @@ def predownload_toolchains(
                     print(format_manual_install_warning(package.name, result.url))
 
             except KeyboardInterrupt:
+                notify_main_thread()
                 logger.warning("Download interrupted by user")
                 raise
             except Exception as e:
@@ -345,6 +359,8 @@ def main() -> int:
         return 1 if failed_count > 0 else 0
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         logger.warning("\nInterrupted by user")
         return 130
     except Exception as e:

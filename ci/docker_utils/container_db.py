@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Docker container lifecycle database management.
 
 This module provides a robust container lifecycle management system that:
@@ -358,6 +361,9 @@ def process_exists(pid: int) -> bool:
     except PermissionError:
         # Process exists but we don't have permission to signal it
         return True
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return False
 
@@ -635,7 +641,7 @@ def cleanup_orphaned_containers(db: Optional[ContainerDatabase] = None) -> int:
                 print(
                     f"⚠️  Warning: Failed to remove container {container.container_id}: {error_msg}"
                 )
-                print(f"   Database record will still be cleaned up")
+                print("   Database record will still be cleaned up")
 
             # Remove from DB (even if container removal failed)
             db.delete_by_id(container.container_id)
@@ -688,7 +694,7 @@ def garbage_collect_platform_containers(
             print(
                 f"⚠️  Warning: Failed to remove container {container.container_id}: {error_msg}"
             )
-            print(f"   Database record will still be cleaned up")
+            print("   Database record will still be cleaned up")
 
         # Remove from DB (even if container removal failed)
         db.delete_by_id(container.container_id)

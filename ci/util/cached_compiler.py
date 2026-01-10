@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Python-based cached compiler system for sccache integration.
@@ -17,7 +20,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 def find_toolchain_compiler(
@@ -121,13 +124,13 @@ def main() -> int:
         if not Path(REAL_COMPILER_PATH).exists():
             print(f"ERROR: Real compiler not found: {{REAL_COMPILER_PATH}}", file=sys.stderr)
             return 1
-        
+
         # Verify cache executable exists
         cache_path = CACHE_EXECUTABLE
         if not Path(cache_path).exists() and not shutil.which(cache_path.split()[0]):
             print(f"ERROR: Cache executable not found: {{cache_path}}", file=sys.stderr)
             return 1
-        
+
         # Build command: cache_tool real_compiler args...
         if " " in cache_path:
             # Handle "python xcache.py" style commands
@@ -136,9 +139,9 @@ def main() -> int:
         else:
             # Handle simple "sccache" style commands
             command = [cache_path, REAL_COMPILER_PATH] + sys.argv[1:]
-        
+
         debug_print(f"Executing: {{' '.join(command)}}")
-        
+
         # Execute the cache tool with real compiler and arguments
         result = subprocess.run(command, cwd=os.getcwd())
         return result.returncode
@@ -277,7 +280,9 @@ def get_platform_packages_paths() -> list[str]:
                         if package_dir.is_dir():
                             paths.append(str(package_dir))
     except KeyboardInterrupt:
-        print(f"Keyboard interrupt in get_platform_packages_paths")
+        notify_main_thread()
+        raise
+        print("Keyboard interrupt in get_platform_packages_paths")
         import sys
 
         sys.exit(1)

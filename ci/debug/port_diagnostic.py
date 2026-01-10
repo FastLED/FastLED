@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Diagnostic script to identify processes holding a serial port open.
 
@@ -14,7 +17,6 @@ Usage:
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Any, cast
 
 import psutil
@@ -192,7 +194,7 @@ def diagnose_port(port_name: str) -> None:
                 if matches:
                     print(f"    ✅ Would be killed by: {', '.join(patterns)}")
                 else:
-                    print(f"    ❌ NOT matched by any kill pattern")
+                    print("    ❌ NOT matched by any kill pattern")
                 print()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
@@ -227,7 +229,7 @@ def diagnose_port(port_name: str) -> None:
                 # Show process tree
                 tree = get_process_tree(proc)
                 if len(tree) > 1:
-                    print(f"    Process tree:")
+                    print("    Process tree:")
                     for i, ancestor in enumerate(reversed(tree)):
                         try:
                             indent = "      " + "  " * i
@@ -284,7 +286,7 @@ def diagnose_port(port_name: str) -> None:
                 if matches:
                     print(f"    ✅ Would be killed by: {', '.join(patterns)}")
                 else:
-                    print(f"    ❌ NOT matched by any kill pattern")
+                    print("    ❌ NOT matched by any kill pattern")
                 print()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
@@ -336,6 +338,9 @@ def main() -> int:
     try:
         diagnose_port(args.port)
         return 0
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"❌ Error during diagnosis: {e}", file=sys.stderr)
         import traceback

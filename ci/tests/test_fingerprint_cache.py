@@ -17,7 +17,7 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 from unittest import TestCase
 
 # Import the fingerprint cache module
@@ -195,7 +195,7 @@ class TestFingerprintCache(TestCase):
 
         # Actually modify content
         new_content = "modified content"
-        new_modtime = self.modify_file_content(test_file, new_content)
+        self.modify_file_content(test_file, new_content)
 
         # Should detect change
         result = cache.has_changed(test_file, original_modtime)

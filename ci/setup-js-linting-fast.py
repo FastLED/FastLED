@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env -S uv run --script
 
 
@@ -142,11 +145,11 @@ def download_and_extract_node():
 def setup_eslint():
     """Install ESLint and create configuration"""
     if platform.system() == "Windows":
-        node_exe = NODE_DIR / "node.exe"
-        npm_exe = NODE_DIR / "npm.cmd"
+        NODE_DIR / "node.exe"
+        NODE_DIR / "npm.cmd"
     else:
-        node_exe = NODE_DIR / "bin" / "node"
-        npm_exe = NODE_DIR / "bin" / "npm"
+        NODE_DIR / "bin" / "node"
+        NODE_DIR / "bin" / "npm"
 
     print("Installing ESLint...")
 
@@ -169,7 +172,7 @@ def setup_eslint():
     # Install ESLint
     try:
         # Get absolute paths for node and npm
-        node_exe_abs = (
+        (
             (TOOLS_DIR / "node" / "node.exe").resolve()
             if platform.system() == "Windows"
             else (TOOLS_DIR / "node" / "bin" / "node").resolve()
@@ -191,7 +194,7 @@ def setup_eslint():
 
         # On Windows, use shell=True to properly execute .cmd files
         if platform.system() == "Windows":
-            result = subprocess.run(
+            subprocess.run(
                 [str(npm_exe_abs), "install"],
                 cwd=TOOLS_DIR,
                 check=True,
@@ -201,7 +204,7 @@ def setup_eslint():
                 env=env,
             )
         else:
-            result = subprocess.run(
+            subprocess.run(
                 [str(npm_exe_abs), "install"],
                 cwd=TOOLS_DIR,
                 check=True,
@@ -234,13 +237,13 @@ def setup_eslint():
 def create_fast_lint_script():
     """Create fast linting script"""
     if platform.system() == "Windows":
-        node_exe = NODE_DIR / "node.exe"
-        eslint_exe = TOOLS_DIR / "node_modules" / ".bin" / "eslint.cmd"
+        NODE_DIR / "node.exe"
+        TOOLS_DIR / "node_modules" / ".bin" / "eslint.cmd"
     else:
-        node_exe = NODE_DIR / "bin" / "node"
-        eslint_exe = TOOLS_DIR / "node_modules" / ".bin" / "eslint"
+        NODE_DIR / "bin" / "node"
+        TOOLS_DIR / "node_modules" / ".bin" / "eslint"
 
-    script_content = f"""#!/bin/bash
+    f"""#!/bin/bash
 # FastLED JavaScript Linting Script (Node.js + ESLint - FAST!)
 
 # Colors for output
@@ -296,7 +299,7 @@ def main():
     print("Setting up fast JavaScript linting (Node.js + ESLint)...")
 
     try:
-        node_exe = download_and_extract_node()
+        download_and_extract_node()
         setup_eslint()
         create_fast_lint_script()
 
@@ -305,6 +308,9 @@ def main():
         print("  bash ci/lint-js-fast                 # Fast linting with ESLint")
         print("  For more info: ci/js/README.md")
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Setup failed: {e}")
         sys.exit(1)

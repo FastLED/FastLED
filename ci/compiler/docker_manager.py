@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """Docker management for FastLED compilation.
 
 This module provides clean abstraction layers for Docker operations including
@@ -11,11 +14,10 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ci.docker_utils.container_db import (
     ContainerDatabase,
-    cleanup_container,
     prepare_container,
 )
 from ci.util.docker_command import get_docker_command
@@ -156,6 +158,9 @@ class DockerConfig:
                 arch = extract_architecture(board_name)
                 image_name = f"niteris/fastled-compiler-{arch}-{board_name}:latest"
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             # Fallback if lookups fail
             print(
@@ -390,7 +395,7 @@ class DockerContainerManager:
                         )
                         if start_result.returncode != 0:
                             print(
-                                f"⚠️  Failed to start existing container, will create new one"
+                                "⚠️  Failed to start existing container, will create new one"
                             )
                         else:
                             self._container_id = actual_container_id
@@ -832,7 +837,7 @@ class DockerCompilationOrchestrator:
                 print()
             else:
                 # Try to pull from registry with streaming output
-                print(f"Attempting to pull from registry...")
+                print("Attempting to pull from registry...")
                 print()
 
                 sys.stdout.flush()
@@ -850,22 +855,22 @@ class DockerCompilationOrchestrator:
 
             # Pull failed or was skipped - check if we should build
             if not build_if_missing:
-                print(f"❌ Could not pull Docker image from registry.")
+                print("❌ Could not pull Docker image from registry.")
                 print(f"   Image: {self.config.image_name}")
-                print(f"")
-                print(f"Ensure the image exists on Docker Hub:")
-                print(f"  https://hub.docker.com/r/niteris")
-                print(f"")
-                print(f"Or build locally with:")
+                print("")
+                print("Ensure the image exists on Docker Hub:")
+                print("  https://hub.docker.com/r/niteris")
+                print("")
+                print("Or build locally with:")
                 print(
                     f"  bash compile --docker --build {self.config.board_name} <example>"
                 )
-                print(f"")
+                print("")
                 return False
 
             # Build the image locally
             print(f"Building Docker image: {self.config.image_name}")
-            print(f"This may take 15-30 minutes depending on the platform...")
+            print("This may take 15-30 minutes depending on the platform...")
 
             # Parse image name to extract base name (without tag)
             image_parts = self.config.image_name.split(":")
@@ -888,6 +893,9 @@ class DockerCompilationOrchestrator:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             # Docker command not found or timed out - likely Docker is not running
             return self._handle_docker_not_found()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"❌ Unexpected error checking Docker image: {e}")
             return False
@@ -985,7 +993,7 @@ class DockerCompilationOrchestrator:
         host_path.mkdir(parents=True, exist_ok=True)
 
         print()
-        print(f"Copying build artifacts from container to host...")
+        print("Copying build artifacts from container to host...")
 
         copy_cmd = [
             get_docker_command(),
@@ -1000,7 +1008,7 @@ class DockerCompilationOrchestrator:
             print(f"✅ Build artifacts copied to {host_path}")
             return True
         else:
-            print(f"⚠️  Warning: Could not copy artifacts from container")
+            print("⚠️  Warning: Could not copy artifacts from container")
             if result.stderr:
                 print(f"   Error: {result.stderr}")
             return False

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 PlatformIO artifact cache implementation for speeding up CI builds.
@@ -17,7 +20,6 @@ import json
 import logging
 import os
 import shutil
-import subprocess
 import tempfile
 import threading
 import time
@@ -27,8 +29,7 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Optional, cast
 
 import fasteners
 import httpx
@@ -36,8 +37,6 @@ from running_process import RunningProcess
 
 from ci.compiler.platformio_ini import PlatformIOIni
 from ci.util.download_breadcrumb import (
-    create_download_breadcrumb,
-    get_breadcrumb_path,
     is_download_complete,
     read_breadcrumb,
     write_breadcrumb,
@@ -117,6 +116,9 @@ def _get_remote_file_size(url: str) -> Optional[int]:
                 content_length = response.headers.get("Content-Length")
                 if content_length:
                     return int(content_length)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.debug(f"Failed to get file size for {url}: {e}")
     return None
@@ -336,6 +338,9 @@ def cleanup_stale_platformio_locks(max_age_minutes: float = 30) -> int:
                 except (OSError, PermissionError) as e:
                     logger.debug(f"Could not remove lock {lock_file}: {e}")
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Error during lock cleanup in {cache_dir}: {e}")
 
@@ -479,6 +484,9 @@ class PlatformIOCache:
                 print(f"Successfully cached: {cached_path}")
                 return str(cached_path)
 
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 logger.error(f"Download failed: {e}")
                 if temp_path.exists():
@@ -606,6 +614,9 @@ def unzip_and_install(
         except zipfile.BadZipFile:
             logger.error(f"Invalid zip file: {cached_zip_path_obj}")
             return False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.error(f"Extraction failed: {e}")
             return False
@@ -698,6 +709,9 @@ def install_with_platformio(
             )
             return False
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         if "No such file or directory" in str(e) or "not found" in str(e).lower():
             logger.error("PlatformIO CLI not found. Is it installed and in PATH?")
@@ -833,6 +847,9 @@ def handle_zip_artifact(
         # Return the file URL for the extracted directory
         return get_proper_file_url(extracted_dir)
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         import traceback
 
@@ -855,6 +872,9 @@ def _process_artifact(
             env_section=env_section,
             resolved_path=resolved_path,
         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         logger.error(f"Failed to process {artifact_url}: {e}", exc_info=e)
         return ArtifactProcessingResult(
@@ -937,12 +957,17 @@ def _download_and_process_urls(
                         # Re-raise all exceptions - no downloads should fail silently
                         if result.exception:
                             raise result.exception
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     logger.error(
                         f"Future failed with unexpected error: {e}", exc_info=e
                     )
                     raise  # Re-raise unexpected exceptions
         except KeyboardInterrupt:
+            notify_main_thread()
+            raise
             logger.warning("Processing interrupted, cancelling remaining downloads...")
             _global_cancel_event.set()
             # The context manager will handle cleanup of the executor
@@ -1007,6 +1032,9 @@ def _apply_board_specific_config(
         try:
             pio_ini.dump(platformio_ini_path)
             print(f"Updated platformio.ini with {len(replacements)} resolved artifacts")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.error(f"Failed to update platformio.ini: {e}")
             raise

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 SCCACHE Configuration for FastLED Builds
@@ -55,6 +58,9 @@ def clear_sccache_stats() -> None:
         )
     except subprocess.TimeoutExpired:
         pass  # Don't fail build if stats clearing times out
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         pass  # Don't fail build if stats clearing fails
 
@@ -141,6 +147,9 @@ def show_sccache_stats() -> None:
                 ts_print(result.stdout)
     except subprocess.TimeoutExpired:
         ts_print("Warning: sccache --show-stats timed out")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
 
@@ -189,16 +198,16 @@ def configure_sccache(env: PlatformIOEnv) -> None:
         os.environ["SCCACHE_LOG"] = "info"
 
     # Get current compiler paths
-    original_cc = env.get("CC")
-    original_cxx = env.get("CXX")
+    env.get("CC")
+    env.get("CXX")
 
     # Note: For PlatformIO, we don't need to manually wrap CC/CXX here
     # Instead, we'll use build_flags to wrap the compiler commands
     # This is handled in the Board configuration via extra_scripts
 
-    ts_print(f"SCCACHE configuration completed")
+    ts_print("SCCACHE configuration completed")
     ts_print(f"Cache directory: {sccache_dir}")
-    ts_print(f"Cache size limit: 2G")
+    ts_print("Cache size limit: 2G")
 
     # Show SCCACHE stats if available
     try:
@@ -208,6 +217,9 @@ def configure_sccache(env: PlatformIOEnv) -> None:
         if result.returncode == 0:
             ts_print("SCCACHE Statistics:")
             ts_print(result.stdout)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         pass  # Don't fail build if stats aren't available
 
@@ -227,31 +239,31 @@ from ci.util.timestamp_print import ts_print
 
 def setup_sccache_wrapper():
     """Setup sccache wrapper for compiler commands."""
-    
+
     # Check if sccache is available
     sccache_path = shutil.which("sccache")
     if not sccache_path:
         ts_print("SCCACHE not found, compilation will proceed without caching")
         return
-    
+
     ts_print(f"Setting up SCCACHE wrapper: {sccache_path}")
-    
+
     # Get current build environment
     project_dir = env.get("PROJECT_DIR", os.getcwd())
     board_name = env.get("PIOENV", "default")
-    
+
     # Setup sccache directory
     sccache_dir = os.path.join(project_dir, ".sccache", board_name)
     Path(sccache_dir).mkdir(parents=True, exist_ok=True)
-    
+
     # Configure sccache environment
     os.environ["SCCACHE_DIR"] = sccache_dir
     os.environ["SCCACHE_CACHE_SIZE"] = "2G"
-    
+
     # Wrap compiler commands
     current_cc = env.get("CC", "gcc")
     current_cxx = env.get("CXX", "g++")
-    
+
     # Only wrap if not already wrapped
     if "sccache" not in current_cc:
         env.Replace(

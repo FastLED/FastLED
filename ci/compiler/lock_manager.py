@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """
 Lock management for FastLED PlatformIO builds.
 
@@ -65,10 +68,16 @@ class GlobalPackageLock:
                     self.lock_file.unlink()
                     print(f"Removed stale lock file: {self.lock_file}")
                     return True
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Warning: Could not remove stale lock file: {e}")
                     return False
             return False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Warning: Could not check for stale lock: {e}")
             return False
@@ -96,7 +105,7 @@ class GlobalPackageLock:
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
                     # Stale lock was removed, try to acquire immediately
-                    print(f"Stale lock removed, retrying acquisition...")
+                    print("Stale lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
             # Try to acquire with very short timeout (non-blocking)
@@ -109,6 +118,7 @@ class GlobalPackageLock:
                     )
                     return
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise  # MANDATORY: Always re-raise KeyboardInterrupt
             except Exception:
                 # Handle timeout or other exceptions as failed acquisition (continue loop)
@@ -143,6 +153,9 @@ class GlobalPackageLock:
             self._file_lock.release()
             self._is_acquired = False
             print(f"Released global package lock for platform {self.platform_name}")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             warnings.warn(
                 f"Failed to release global package lock for {self.platform_name}: {e}"
@@ -170,6 +183,9 @@ class GlobalPackageLock:
         """Ensure lock is released when object is garbage collected."""
         try:
             self.release()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             pass  # Ignore errors during cleanup
 
@@ -212,10 +228,16 @@ class PlatformLock:
                     self.lock_file_path.unlink()
                     print(f"Removed stale lock file: {self.lock_file_path}")
                     return True
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Warning: Could not remove stale lock file: {e}")
                     return False
             return False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Warning: Could not check for stale lock: {e}")
             return False
@@ -232,7 +254,7 @@ class PlatformLock:
         while True:
             # Check for keyboard interrupt
             if is_interrupted():
-                print(f"\nKeyboardInterrupt: Aborting platform lock acquisition")
+                print("\nKeyboardInterrupt: Aborting platform lock acquisition")
                 raise KeyboardInterrupt()
 
             elapsed = time.time() - start_time
@@ -241,7 +263,7 @@ class PlatformLock:
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
                     # Stale lock was removed, try to acquire immediately
-                    print(f"Stale platform lock removed, retrying acquisition...")
+                    print("Stale platform lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
             # Try to acquire with very short timeout (non-blocking)
@@ -252,6 +274,8 @@ class PlatformLock:
                     print(f"Acquired platform lock: {self.lock_file_path}")
                     return
             except KeyboardInterrupt:
+                notify_main_thread()
+                raise
                 raise  # MANDATORY: Always re-raise KeyboardInterrupt
             except Exception:
                 # Handle timeout or other exceptions as failed acquisition (continue loop)
@@ -284,6 +308,9 @@ class PlatformLock:
                 self.lock.release()
                 self.is_locked = False
                 print(f"Released platform lock: {self.lock_file_path}")
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 print(f"Warning: Failed to release platform lock: {e}")
 
@@ -307,5 +334,8 @@ class PlatformLock:
             try:
                 self.lock.release()
                 self.is_locked = False
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception:
                 pass  # Ignore errors during cleanup

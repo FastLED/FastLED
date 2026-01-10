@@ -4,13 +4,13 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 from rich.console import Console
 from rich.panel import Panel
 
 from ci.boards import NATIVE
 from ci.compiler.board_example_utils import should_skip_example_for_board
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 console = Console()
@@ -77,6 +77,10 @@ def main() -> int:
         console.print(
             f"[bold yellow]⚠️  WARNING:[/bold yellow] Error checking filters for '{example_name}': {e}"
         )
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         # Unexpected error during filter check - log and continue
         console.print(
@@ -166,7 +170,7 @@ def main() -> int:
         if modules_dst.exists():
             shutil.rmtree(modules_dst)
         shutil.copytree(modules_src, modules_dst)
-        console.print(f"[dim]Copied modules directory to output[/dim]")
+        console.print("[dim]Copied modules directory to output[/dim]")
     else:
         console.print(
             f"[yellow]Warning: modules directory not found: {modules_src}[/yellow]"
@@ -179,7 +183,7 @@ def main() -> int:
         if vendor_dst.exists():
             shutil.rmtree(vendor_dst)
         shutil.copytree(vendor_src, vendor_dst)
-        console.print(f"[dim]Copied vendor directory to output[/dim]")
+        console.print("[dim]Copied vendor directory to output[/dim]")
     else:
         console.print(
             f"[yellow]Warning: vendor directory not found: {vendor_src}[/yellow]"
@@ -212,14 +216,14 @@ def main() -> int:
             f"[dim]Generated files.json with {len(data_files)} data file(s)[/dim]"  # pyright: ignore[reportUnknownArgumentType]
         )
     else:
-        console.print(f"[dim]Generated empty files.json (no data files found)[/dim]")
+        console.print("[dim]Generated empty files.json (no data files found)[/dim]")
 
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 
     # Run tests if --run flag is provided
     if args.run:
         console.print()
-        console.print(f"[bold cyan]Step 2/2:[/bold cyan] Running Playwright tests...")
+        console.print("[bold cyan]Step 2/2:[/bold cyan] Running Playwright tests...")
         console.print()
 
         test_cmd = [sys.executable, "-m", "ci.wasm_test", example_name]

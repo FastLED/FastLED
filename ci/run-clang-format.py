@@ -24,7 +24,9 @@ import subprocess
 import sys
 import traceback
 from functools import partial
-from typing import Any, Dict, Generator, List, Optional, Tuple, Union
+from typing import Any, Generator, Optional
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 try:
@@ -127,6 +129,9 @@ def run_clang_format_diff_wrapper(args: Any, file: str) -> tuple[list[str], list
         ret = run_clang_format_diff(args, file)
         return ret
     except DiffError:
+        raise
+    except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         raise UnexpectedError("{}: {}: {}".format(file, e.__class__.__name__, e), e)

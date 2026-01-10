@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 PlatformIO Builder for FastLED
@@ -50,7 +53,6 @@ from ci.compiler.source_manager import (
     copy_example_source,
     copy_fastled_library,
 )
-from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
@@ -71,9 +73,7 @@ def _init_platformio_build(
     # Check for and fix corrupted packages before building
     # Find platform path based on board's platform URL (works for any platform)
     platform_path = find_platform_path_from_board(board, paths)
-    fixed_packages = detect_and_fix_corrupted_packages_dynamic(
-        paths, board.board_name, platform_path
-    )
+    detect_and_fix_corrupted_packages_dynamic(paths, board.board_name, platform_path)
 
     # Lock is already held by build() - no need to acquire again
 
@@ -137,7 +137,10 @@ def _init_platformio_build(
 
         # Generate linker map in the board directory (file name is sufficient; PIO writes here)
         board_with_sketch_include.build_flags.append("-Wl,-Map,firmware.map")
-    except Exception as _e:
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
+    except Exception:
         # Non-fatal: continue without optimization artifacts if path resolution fails
         pass
 
@@ -174,18 +177,18 @@ def _init_platformio_build(
     # Copy FastLED library
     ok_copy_fastled = copy_fastled_library(project_root, build_dir)
     if not ok_copy_fastled:
-        warnings.warn(f"Failed to copy FastLED library")
+        warnings.warn("Failed to copy FastLED library")
         return InitResult(
-            success=False, output=f"Failed to copy FastLED library", build_dir=build_dir
+            success=False, output="Failed to copy FastLED library", build_dir=build_dir
         )
 
     # Copy boards directory
     ok_copy_boards = copy_boards_directory(project_root, build_dir)
     if not ok_copy_boards:
-        warnings.warn(f"Failed to copy boards directory")
+        warnings.warn("Failed to copy boards directory")
         return InitResult(
             success=False,
-            output=f"Failed to copy boards directory",
+            output="Failed to copy boards directory",
             build_dir=build_dir,
         )
 
@@ -199,7 +202,7 @@ def _init_platformio_build(
     frameworks = {f.strip() for f in (board.framework or "").split(",")}
     if {"arduino", "espidf"}.issubset(frameworks):
         sdkconfig_path = build_dir / "sdkconfig.defaults"
-        print(f"Creating sdkconfig.defaults file")
+        print("Creating sdkconfig.defaults file")
         try:
             sdkconfig_path.write_text(
                 "CONFIG_FREERTOS_HZ=1000\r\nCONFIG_AUTOSTART_ARDUINO=y"
@@ -207,6 +210,9 @@ def _init_platformio_build(
             with open(sdkconfig_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     print(line, end="")
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             warnings.warn(f"Failed to write sdkconfig: {e}")
 
@@ -233,7 +239,7 @@ def _init_platformio_build(
     print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
 
     # Start timer for this example
-    start_time = time.time()
+    time.time()
 
     # Create formatter for path substitution and timestamping
     formatter = create_sketch_path_formatter(example)
@@ -482,7 +488,7 @@ class PioCompiler(Compiler):
 
             # If build failed with PackageException and we have retries left, attempt recovery
             if not success and has_package_exception and attempt < max_attempts - 1:
-                print(f"\nPackageException detected in build output")
+                print("\nPackageException detected in build output")
                 if package_info:
                     print(f"Package info: {package_info}")
 
@@ -556,6 +562,9 @@ class PioCompiler(Compiler):
             else:
                 return f"Failed to get {cache_name.upper()} statistics: {result.stderr}"
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
 
@@ -816,6 +825,8 @@ class PioCompiler(Compiler):
                             break
                         print(line)  # No timestamp for monitor output
                 except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                     print("\n📡 Monitor stopped by user")
                     monitor_process.terminate()
                 except OSError as e:
@@ -896,6 +907,9 @@ class PioCompiler(Compiler):
             if result.returncode == 0:
                 return result.stdout.strip().split()
             return []
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             return []
 
@@ -905,6 +919,9 @@ class PioCompiler(Compiler):
             import os
 
             return os.geteuid() == 0
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             return False
 
@@ -976,6 +993,9 @@ class PioCompiler(Compiler):
 
             return True
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"ERROR: Failed to install udev rules: {e}")
             return False
@@ -1061,7 +1081,7 @@ class PioCompiler(Compiler):
         if not boot_app0_bin.exists():
             # Create default 8KB boot_app0.bin (all 0xFF)
             boot_app0_bin.write_bytes(b"\xff" * 8192)
-            print(f"Created default boot_app0.bin")
+            print("Created default boot_app0.bin")
 
         # Determine chip type and offsets based on board
         # ESP32 (original) uses 0x1000 for bootloader
@@ -1218,6 +1238,9 @@ def run_pio_build(
                             print("=" * 60)
                             print(stats)
                             print("=" * 60)
+                    except KeyboardInterrupt:
+                        notify_main_thread()
+                        raise
                     except Exception as e:
                         print(f"Warning: Could not retrieve compiler statistics: {e}")
 

@@ -11,7 +11,6 @@ Refactored to use the new hash-based fingerprint cache system.
 import _thread
 import sys
 from pathlib import Path
-from typing import List
 
 from ci.util.color_output import print_cache_hit, print_cache_miss
 
@@ -90,7 +89,7 @@ def check_js_files_changed() -> bool:
         # Count JS and TS files for informational purposes
         js_files = [f for f in all_file_paths if f.suffix == ".js"]
         ts_files = [f for f in all_file_paths if f.suffix == ".ts"]
-        print_cache_miss(f"Changes detected in JavaScript/TypeScript directories")
+        print_cache_miss("Changes detected in JavaScript/TypeScript directories")
         print(
             f"   Found {len(js_files)} JavaScript files, {len(ts_files)} TypeScript files, {len(all_file_paths)} total files"
         )

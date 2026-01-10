@@ -8,7 +8,7 @@ by CI/linting/testing operations.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class DependencyManifest:

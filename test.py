@@ -9,12 +9,8 @@ import time
 import traceback
 import warnings
 from pathlib import Path
-from typing import Optional
-
-import psutil
 
 from ci.util.global_interrupt_handler import (
-    is_interrupted,
     notify_main_thread,
     signal_interrupt,
     wait_for_cleanup,
@@ -23,13 +19,10 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.running_process_manager import RunningProcessManagerSingleton
 from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_args import parse_args
-from ci.util.test_commands import run_command
 from ci.util.test_env import (
     dump_thread_stacks,
-    get_process_tree_info,
     setup_environment,
     setup_force_exit,
-    setup_watchdog,
 )
 from ci.util.test_runner import runner as test_runner
 from ci.util.test_types import (
@@ -84,6 +77,9 @@ def make_watch_dog_thread(
         # Dump outstanding running processes (if any)
         try:
             RunningProcessManagerSingleton.dump_active()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             ts_print(f"Failed to dump active processes: {e}")
 
@@ -152,17 +148,17 @@ def run_qemu_tests(args: TestArgs) -> None:
         ts_print()
 
         # Try pulling from Docker Hub registry first
-        ts_print(f"Attempting to pull prebuilt image from Docker Hub...")
+        ts_print("Attempting to pull prebuilt image from Docker Hub...")
         pull_success = docker_runner.pull_and_tag_board_image(platform)
 
         if pull_success:
-            ts_print(f"✅ Successfully pulled and configured Docker image")
+            ts_print("✅ Successfully pulled and configured Docker image")
             ts_print()
             image_exists = True
         else:
             # Pull failed - show build options
             ts_print()
-            ts_print(f"❌ Could not pull image from Docker Hub")
+            ts_print("❌ Could not pull image from Docker Hub")
             ts_print()
 
             # Check if we should auto-build
@@ -177,7 +173,7 @@ def run_qemu_tests(args: TestArgs) -> None:
             elif args.interactive:
                 # Interactive prompt mode
                 response = (
-                    input(f"Docker image missing. Build now? [y/N]: ").strip().lower()
+                    input("Docker image missing. Build now? [y/N]: ").strip().lower()
                 )
                 if response in ["y", "yes"]:
                     ts_print()
@@ -212,12 +208,12 @@ def run_qemu_tests(args: TestArgs) -> None:
                     ts_print(f"❌ Failed to build Docker image for {platform}")
                     ts_print()
                     ts_print("Options:")
-                    ts_print(f"  1. Try again with verbose logging:")
+                    ts_print("  1. Try again with verbose logging:")
                     ts_print(
                         f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
                     )
                     ts_print()
-                    ts_print(f"  2. Build image separately:")
+                    ts_print("  2. Build image separately:")
                     ts_print(f"     bash compile --docker --build {platform} Blink")
                     ts_print()
                     sys.exit(1)
@@ -404,6 +400,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             ts_print(f"✅ Successfully pulled {avr8js_image}")
             ts_print()
         except KeyboardInterrupt:
+            notify_main_thread()
             raise
         except Exception as e:
             ts_print(f"❌ Failed to pull avr8js image: {e}")
@@ -436,12 +433,12 @@ def run_avr8js_tests(args: TestArgs) -> None:
         try:
             # Step 1: Show what we're compiling
             example_ino_path = Path("examples") / example / f"{example}.ino"
-            ts_print(f"\n[STEP 1/3] Compiling Arduino Sketch")
+            ts_print("\n[STEP 1/3] Compiling Arduino Sketch")
             ts_print(f"  Source file: {example_ino_path}")
             ts_print(
                 f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
             )
-            ts_print(f"  Compiler: PlatformIO via ci/ci-compile.py")
+            ts_print("  Compiler: PlatformIO via ci/ci-compile.py")
             ts_print()
 
             # Build the example for the specified board
@@ -476,7 +473,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             ts_print(f"\n✅ Build successful for {example}")
 
             # Step 2: Locate compiled firmware
-            ts_print(f"\n[STEP 2/3] Locating Compiled Firmware")
+            ts_print("\n[STEP 2/3] Locating Compiled Firmware")
             build_dir = Path(".build")
             elf_files = list(build_dir.rglob("*.elf"))
             if not elf_files:
@@ -488,7 +485,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             hex_path = elf_path.with_suffix(".hex")
             ts_print(f"  ELF file: {elf_path}")
             ts_print(f"  HEX file: {hex_path}")
-            ts_print(f"  (avr8js requires HEX format for execution)")
+            ts_print("  (avr8js requires HEX format for execution)")
 
             if not hex_path.exists():
                 ts_print(f"  ❌ HEX file not found: {hex_path}")
@@ -496,10 +493,10 @@ def run_avr8js_tests(args: TestArgs) -> None:
                 continue
 
             # Step 3: Run in avr8js Docker
-            ts_print(f"\n[STEP 3/3] Running in AVR8JS Docker Emulator")
+            ts_print("\n[STEP 3/3] Running in AVR8JS Docker Emulator")
             ts_print(f"  Docker image: {docker_runner.docker_image}")
             ts_print(f"  Firmware: {hex_path}")
-            ts_print(f"  Timeout: 15 seconds")
+            ts_print("  Timeout: 15 seconds")
             ts_print()
 
             # Set up output file
@@ -591,7 +588,7 @@ def main() -> None:
             )
 
         # Set up watchdog timer
-        watchdog = make_watch_dog_thread(seconds=timeout)
+        _ = make_watch_dog_thread(seconds=timeout)
 
         # Handle --no-interactive flag
         if args.no_interactive:
@@ -845,7 +842,6 @@ def main() -> None:
             # Check if we need to use sequential execution to avoid resource conflicts
             if not args.unit and not args.examples and not args.py and args.full:
                 # Full test mode - use RunningProcessGroup for dependency-based execution
-                from running_process import RunningProcess
 
                 from ci.util.running_process_group import (
                     ExecutionMode,
@@ -912,7 +908,7 @@ def main() -> None:
 
                     # Print timing summary
                     if timings:
-                        ts_print(f"\nExecution Summary:")
+                        ts_print("\nExecution Summary:")
                         for timing in timings:
                             ts_print(f"  {timing.name}: {timing.duration:.2f}s")
                 except KeyboardInterrupt:
@@ -974,7 +970,7 @@ def main() -> None:
             save_fingerprints_with_status(status)
 
         # Set up force exit daemon and exit
-        daemon_thread = setup_force_exit()
+        _ = setup_force_exit()
         _CANCEL_WATCHDOG.set()
 
         # Print total execution time
@@ -984,6 +980,9 @@ def main() -> None:
         sys.exit(0)
 
     except KeyboardInterrupt:
+        # Only notify main thread if we're in a worker thread
+        if threading.current_thread() != threading.main_thread():
+            notify_main_thread()
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)
@@ -993,6 +992,9 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        # Only notify main thread if we're in a worker thread
+        if threading.current_thread() != threading.main_thread():
+            notify_main_thread()
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)

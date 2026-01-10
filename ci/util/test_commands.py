@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
 import sys
-from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from running_process import RunningProcess
 

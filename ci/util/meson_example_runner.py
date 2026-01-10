@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Meson build system integration for FastLED example compilation and execution."""
 
@@ -6,7 +9,6 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from running_process import RunningProcess
 
@@ -53,7 +55,7 @@ def compile_examples(
     if examples is None:
         # Build all examples via the alias target
         cmd.append("examples-host")
-        _ts_print(f"[MESON] Compiling all examples...")
+        _ts_print("[MESON] Compiling all examples...")
     else:
         # Build specific example targets
         for example_name in examples:
@@ -86,10 +88,11 @@ def compile_examples(
 
             return False
 
-        _ts_print(f"[MESON] Example compilation successful")
+        _ts_print("[MESON] Example compilation successful")
         return True
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         _ts_print(
@@ -129,7 +132,7 @@ def run_examples(
     if examples is None:
         # Run all tests in the 'examples' suite
         cmd.extend(["--suite", "examples"])
-        _ts_print(f"[MESON] Running all examples...")
+        _ts_print("[MESON] Running all examples...")
     else:
         # Run specific examples by name pattern
         # Meson test names are "example-<name>"
@@ -234,6 +237,7 @@ def run_examples(
         )
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception as e:
         duration = time.time() - start_time

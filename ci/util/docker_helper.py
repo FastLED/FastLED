@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Docker helper utilities for FastLED compilation optimization.
 
@@ -9,7 +12,7 @@ import os
 import subprocess
 import sys
 import time
-from typing import Optional, Tuple
+from typing import Optional
 
 from ci.docker_utils.build_platforms import (
     get_docker_image_name as get_platform_image_name,
@@ -19,7 +22,6 @@ from ci.docker_utils.build_platforms import get_platform_for_board
 # Import Docker command utilities from separate module to avoid circular imports
 from ci.util.docker_command import (
     find_docker_executable,
-    get_docker_command,
     is_docker_available,
 )
 
@@ -130,6 +132,9 @@ def _check_wsl2_docker_backend() -> tuple[bool, str]:
         return False, "WSL2 not installed (wsl command not found)"
     except subprocess.TimeoutExpired:
         return False, "WSL2 command timed out"
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, f"Failed to check WSL2 status: {e}"
 
@@ -180,6 +185,9 @@ def _kill_docker_desktop_windows() -> bool:
         time.sleep(3)
         return True
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return False
 
@@ -240,6 +248,9 @@ def _restart_docker_desktop_windows() -> tuple[bool, str]:
             "Docker Desktop started but WSL2 backend failed to initialize within 2 minutes",
         )
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, f"Failed to restart Docker Desktop: {e}"
 
@@ -303,6 +314,9 @@ def _start_docker_windows() -> tuple[bool, str]:
                 )
                 return _restart_docker_desktop_windows()
 
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 return False, f"Failed to start Docker Desktop: {e}"
 
@@ -310,6 +324,9 @@ def _start_docker_windows() -> tuple[bool, str]:
             False,
             "Docker Desktop not found. Please install it from https://www.docker.com/products/docker-desktop",
         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, f"Failed to start Docker: {e}"
 
@@ -339,6 +356,9 @@ def _start_docker_macos() -> tuple[bool, str]:
             False,
             "Docker Desktop started but failed to become available after 30 seconds",
         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return (
             False,
@@ -397,6 +417,9 @@ def _start_docker_linux() -> tuple[bool, str]:
             False,
             "Could not find systemctl or service command. Please ensure Docker is installed.",
         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         return False, "Failed to start Docker: Unknown error"
 
@@ -452,6 +475,9 @@ def is_docker_image_available(board_name: str) -> bool:
             timeout=5,
         )
         return result.returncode == 0
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except (subprocess.TimeoutExpired, ValueError, Exception):
         return False
 
@@ -488,7 +514,7 @@ def should_use_docker_for_board(
             reason = f"Docker image '{image_name}' not found"
             if verbose:
                 print(f"ℹ  {reason} - using native compilation")
-                print(f"   To build the image, run:")
+                print("   To build the image, run:")
                 print(f"   bash compile --docker --build {board_name} Blink")
         except ValueError as e:
             reason = str(e)

@@ -12,7 +12,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from ci.util.check_files import (
     FileContent,
@@ -461,7 +461,7 @@ def main() -> None:
         total_violations = sum(len(v) for v in violations.values())
         file_count = len(violations)
 
-        print(f"❌ Found #include directives after using namespace declarations")
+        print("❌ Found #include directives after using namespace declarations")
         print()
         print(f"📁 Project Files ({file_count} files, {total_violations} violations):")
         print()
@@ -497,7 +497,7 @@ def main() -> None:
                 if namespace_key:
                     print(f"  {namespace_key}")
                 else:
-                    print(f"  (no namespace found)")
+                    print("  (no namespace found)")
 
                 for include_line, include_snippet in includes:
                     print(f"  {include_line}: {include_snippet}")

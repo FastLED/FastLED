@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Build PlatformIO Docker images with pre-cached dependencies.
@@ -19,21 +22,19 @@ Usage:
 """
 
 import argparse
-import hashlib
-import json
 import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 # Import board configuration
 from ci.boards import create_board
 from ci.docker_utils.build_image import generate_config_hash
+from ci.util.docker_command import get_docker_command
 from ci.util.docker_helper import (
     attempt_start_docker,
-    get_docker_command,
     is_docker_available,
 )
 
@@ -129,6 +130,9 @@ def generate_platformio_ini(platform_name: str, framework: Optional[str] = None)
     """
     try:
         board = create_board(platform_name)
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         raise ValueError(f"Failed to create board '{platform_name}': {e}") from e
 
@@ -311,6 +315,7 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
             print(f"Error building base image: {e}", file=sys.stderr)
             raise
         except KeyboardInterrupt:
+            notify_main_thread()
             print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
             raise
 
@@ -397,6 +402,7 @@ def build_docker_image(
         print(f"Error building Docker image: {e}", file=sys.stderr)
         raise
     except KeyboardInterrupt:
+        notify_main_thread()
         print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
         raise
 
@@ -406,6 +412,7 @@ def main() -> int:
     try:
         return _main_impl()
     except KeyboardInterrupt:
+        notify_main_thread()
         print("\n\nOperation cancelled by user (Ctrl+C)", file=sys.stderr)
         return 130  # Standard exit code for SIGINT
 
@@ -474,6 +481,9 @@ def _main_impl() -> int:
         # Mode B uses custom ini, so hash would be unstable
         try:
             config_hash = generate_config_hash(platform_name, args.framework)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"Warning: Could not generate config hash: {e}", file=sys.stderr)
             config_hash = "custom"
@@ -507,6 +517,9 @@ def _main_impl() -> int:
                 tag = args.tag if args.tag else generate_docker_tag(platform_name)
                 image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             # Final fallback if all lookups fail
             print(f"Warning: Could not generate semantic name: {e}", file=sys.stderr)
@@ -603,11 +616,11 @@ def _main_impl() -> int:
     print(f"Image name: {image_name}")
     print()
     print("Usage example:")
-    print(f"  docker run --rm \\")
-    print(f"    -v $(pwd)/src:/fastled/src:ro \\")
-    print(f"    -v $(pwd)/examples:/fastled/examples:ro \\")
+    print("  docker run --rm \\")
+    print("    -v $(pwd)/src:/fastled/src:ro \\")
+    print("    -v $(pwd)/examples:/fastled/examples:ro \\")
     print(f"    {image_name} \\")
-    print(f"    'pio run'")
+    print("    'pio run'")
     print("=" * 70)
 
     return 0
@@ -617,6 +630,8 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         # Double interrupt or interrupt during shutdown
         print("\n\nForced exit", file=sys.stderr)
         sys.exit(130)

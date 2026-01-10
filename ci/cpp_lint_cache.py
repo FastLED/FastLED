@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 C++ Linting Cache Integration
@@ -10,7 +13,6 @@ Uses the unified safe fingerprint cache system.
 
 import sys
 from pathlib import Path
-from typing import List
 
 from ci.util.color_output import print_cache_hit, print_cache_miss
 from ci.util.dependency_loader import DependencyManifest
@@ -99,7 +101,7 @@ def check_cpp_files_changed() -> bool:
     needs_update = cache.check_needs_update(file_paths)
 
     if needs_update:
-        print_cache_miss(f"C++ files changed - running linting")
+        print_cache_miss("C++ files changed - running linting")
         print(f"   Monitoring {len(file_paths)} files")
         if len(file_paths) <= 5:
             for f in file_paths:
@@ -138,6 +140,9 @@ def invalidate_cpp_cache() -> None:
     try:
         cache.invalidate()
         print_cache_miss("C++ lint cache invalidated - will re-run linting next time")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print_cache_miss(f"Failed to invalidate C++ cache: {e}")
 

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Docker-based QEMU ESP32 Runner
@@ -8,15 +11,13 @@ and consistency across different environments.
 
 import argparse
 import os
-import platform
-import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from running_process import RunningProcess
 
@@ -178,6 +179,9 @@ class DockerQEMURunner:
             )
             returncode = proc.wait(timeout=5)
             return returncode == 0
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except (Exception, FileNotFoundError):
             return False
 
@@ -202,6 +206,9 @@ class DockerQEMURunner:
                     stdout_lines.append(line)
             result_stdout = "\n".join(stdout_lines)
             return bool(result_stdout.strip())
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             return False
 
@@ -219,6 +226,9 @@ class DockerQEMURunner:
         try:
             config_hash = generate_config_hash(platform)
             return f"fastled-platformio-{platform}-{config_hash}"
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             # Fallback if hash generation fails
             return f"fastled-platformio-{platform}"
@@ -270,7 +280,7 @@ class DockerQEMURunner:
 
         print(f"🔍 Attempting to pull from Docker Hub: {registry_image}")
         print(f"   Will be tagged locally as: {local_image}")
-        print(f"   This may take a few minutes on first run...")
+        print("   This may take a few minutes on first run...")
         print()
 
         try:
@@ -286,7 +296,7 @@ class DockerQEMURunner:
             returncode = proc.wait()
 
             if returncode != 0:
-                print(f"❌ Failed to pull image from Docker Hub")
+                print("❌ Failed to pull image from Docker Hub")
                 return False
 
             print()
@@ -299,13 +309,16 @@ class DockerQEMURunner:
             tag_returncode = tag_proc.wait()
 
             if tag_returncode != 0:
-                print(f"❌ Failed to tag pulled image")
+                print("❌ Failed to tag pulled image")
                 return False
 
-            print(f"✅ Image ready for use")
+            print("✅ Image ready for use")
             print()
             return True
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"❌ Error pulling from registry: {e}")
             return False
@@ -459,6 +472,9 @@ class DockerQEMURunner:
                     raise ValueError(f"Invalid firmware path: {firmware_path}")
 
             return temp_dir
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             # Clean up on error
             shutil.rmtree(temp_dir, ignore_errors=True)
@@ -664,6 +680,9 @@ class DockerQEMURunner:
                     output_file=output_file,
                 )
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"ERROR: {e}", file=sys.stderr)
             return 1

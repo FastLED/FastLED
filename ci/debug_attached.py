@@ -90,7 +90,6 @@ from typing import Any
 
 import serial
 from colorama import Fore, Style, init
-from running_process import RunningProcess
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
@@ -99,15 +98,7 @@ from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.json_rpc_handler import JsonRpcHandler
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.pio_runner import create_pio_process
-from ci.util.port_utils import ComportResult, auto_detect_upload_port, kill_port_users
-from ci.util.serial_monitor import (
-    ExpectHandler,
-    FailHandler,
-    InputTriggerHandler,
-    OutputCollector,
-    PioDeviceMonitorHandler,
-    SerialMonitor,
-)
+from ci.util.port_utils import auto_detect_upload_port, kill_port_users
 from ci.util.sketch_resolver import parse_timeout, resolve_sketch_path
 
 
@@ -378,11 +369,9 @@ def run_monitor(
             print(
                 f"⚠️  Warning: Invalid --input-on-trigger format: '{input_on_trigger}'"
             )
-            print(f"   Expected format: 'PATTERN:TEXT' or 'PATTERN:TEXT:TIMEOUT'")
-            print(
-                f"   Example: 'VALIDATION_READY:START' or 'VALIDATION_READY:START:10'"
-            )
-            print(f"   Ignoring input-on-trigger")
+            print("   Expected format: 'PATTERN:TEXT' or 'PATTERN:TEXT:TIMEOUT'")
+            print("   Example: 'VALIDATION_READY:START' or 'VALIDATION_READY:START:10'")
+            print("   Ignoring input-on-trigger")
         else:
             parts = input_on_trigger.split(":", 2)
             trigger_pattern_str = parts[0]
@@ -396,8 +385,8 @@ def run_monitor(
                     print(
                         f"⚠️  Warning: Invalid timeout value '{parts[2]}' in input-on-trigger"
                     )
-                    print(f"   Expected numeric value (e.g., '10' or '10.5')")
-                    print(f"   Ignoring trigger timeout")
+                    print("   Expected numeric value (e.g., '10' or '10.5')")
+                    print("   Ignoring trigger timeout")
                     trigger_timeout_seconds = None
 
             try:
@@ -417,7 +406,7 @@ def run_monitor(
                 print(
                     f"⚠️  Warning: Invalid regex pattern in input-on-trigger '{trigger_pattern_str}': {e}"
                 )
-                print(f"   Using literal string match instead")
+                print("   Using literal string match instead")
                 trigger_pattern = re.compile(re.escape(trigger_pattern_str))
 
     # Compile regex patterns for fail and expect keywords
@@ -427,7 +416,7 @@ def run_monitor(
             fail_patterns.append((pattern_str, re.compile(pattern_str)))
         except re.error as e:
             print(f"⚠️  Warning: Invalid regex pattern '{pattern_str}': {e}")
-            print(f"   Using literal string match instead")
+            print("   Using literal string match instead")
             # Fallback to escaped literal pattern
             fail_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
 
@@ -437,7 +426,7 @@ def run_monitor(
             expect_patterns.append((pattern_str, re.compile(pattern_str)))
         except re.error as e:
             print(f"⚠️  Warning: Invalid regex pattern '{pattern_str}': {e}")
-            print(f"   Using literal string match instead")
+            print("   Using literal string match instead")
             # Fallback to escaped literal pattern
             expect_patterns.append((pattern_str, re.compile(re.escape(pattern_str))))
 
@@ -448,7 +437,7 @@ def run_monitor(
             stop_pattern = re.compile(stop_keyword)
         except re.error as e:
             print(f"⚠️  Warning: Invalid regex pattern in --stop '{stop_keyword}': {e}")
-            print(f"   Using literal string match instead")
+            print("   Using literal string match instead")
             stop_pattern = re.compile(re.escape(stop_keyword))
     print("=" * 60)
     print("MONITORING CONFIGURATION")
@@ -496,7 +485,7 @@ def run_monitor(
         print("🔧 JSON-RPC commands: None")
 
     if trigger_pattern:
-        print(f"📤 Input-on-trigger: ENABLED")
+        print("📤 Input-on-trigger: ENABLED")
         print(f"   Trigger pattern: /{trigger_pattern.pattern}/")
         print(f"   Text to send: '{trigger_text}'")
         if json_rpc_commands:
@@ -580,7 +569,6 @@ def run_monitor(
     trigger_deadline = None  # Deadline for trigger timeout
     trigger_timeout_triggered = False  # Track if trigger timeout occurred
     stop_keyword_found = False  # Track if stop keyword was found
-    stop_matched_line = None
     line_buffer = ""  # Buffer for incomplete lines
 
     # Set trigger deadline if trigger timeout is configured
@@ -617,9 +605,9 @@ def run_monitor(
                 banner_width = 62
                 border = "═" * (banner_width - 2)
                 print(f"\n{Fore.RED}╔{border}╗")
-                print(f"║ DEVICE APPEARS STUCK!!!                                    ║")
-                print(f"║ DID NOT RESPOND TO A COMMAND TO START!!!                   ║")
-                print(f"║ PLEASE ASK THE USER TO POWER CYCLE THE DEVICE!!!           ║")
+                print("║ DEVICE APPEARS STUCK!!!                                    ║")
+                print("║ DID NOT RESPOND TO A COMMAND TO START!!!                   ║")
+                print("║ PLEASE ASK THE USER TO POWER CYCLE THE DEVICE!!!           ║")
                 print(f"╚{border}╝{Style.RESET_ALL}\n")
                 break
 
@@ -638,6 +626,9 @@ def run_monitor(
                     data = ser.read(ser.in_waiting)
                     try:
                         text = data.decode("utf-8", errors="replace")
+                    except KeyboardInterrupt:
+                        notify_main_thread()
+                        raise
                     except Exception:
                         text = data.decode("latin-1", errors="replace")
 
@@ -709,6 +700,9 @@ def run_monitor(
                                         ser.write(f"{trigger_text}\n".encode("utf-8"))
                                         ser.flush()
                                         print(f"   ✓ Sent '{trigger_text}' to serial\n")
+                                    except KeyboardInterrupt:
+                                        notify_main_thread()
+                                        raise
                                     except Exception as e:
                                         print(
                                             f"   ⚠️  Warning: Failed to send trigger text to serial: {e}\n"
@@ -718,7 +712,6 @@ def run_monitor(
                             if stop_pattern and not stop_keyword_found:
                                 if stop_pattern.search(formatted_line):
                                     stop_keyword_found = True
-                                    stop_matched_line = formatted_line
                                     print(
                                         f"\n🛑 STOP PATTERN DETECTED: /{stop_pattern.pattern}/"
                                     )
@@ -730,19 +723,19 @@ def run_monitor(
                                         )
                                         if missing:
                                             print(
-                                                f"   ⚠️  Stop pattern found, but not all expect patterns matched yet"
+                                                "   ⚠️  Stop pattern found, but not all expect patterns matched yet"
                                             )
                                             print(
                                                 f"   Missing {len(missing)} pattern(s), continuing to monitor..."
                                             )
                                         else:
                                             print(
-                                                f"   ✅ All expect patterns found - early successful exit\n"
+                                                "   ✅ All expect patterns found - early successful exit\n"
                                             )
                                             break
                                     else:
                                         print(
-                                            f"   ✅ Stop pattern found - early successful exit\n"
+                                            "   ✅ Stop pattern found - early successful exit\n"
                                         )
                                         break
 
@@ -765,7 +758,7 @@ def run_monitor(
                                             )
                                             print(f"   Matched line: {formatted_line}")
                                             print(
-                                                f"   Terminating monitor immediately...\n"
+                                                "   Terminating monitor immediately...\n"
                                             )
                                             break
 
@@ -903,13 +896,13 @@ def run_monitor(
             f"❌ Monitor failed - stop pattern /{stop_pattern.pattern}/ was specified but not found"
         )
         print(
-            f"   The test did not complete successfully or the stop word was not emitted"
+            "   The test did not complete successfully or the stop word was not emitted"
         )
     elif expect_patterns:
         # Check if all expect patterns were found
         missing_patterns = set(p for p, _ in expect_patterns) - found_expect_keywords
         if missing_patterns:
-            print(f"❌ Monitor failed - not all expect patterns found")
+            print("❌ Monitor failed - not all expect patterns found")
             print(
                 f"   Expected {len(expect_patterns)} patterns, found {len(found_expect_keywords)}"
             )
@@ -917,7 +910,7 @@ def run_monitor(
             if len(missing_patterns) == 1:
                 print(f"   Missing pattern: /{list(missing_patterns)[0]}/")
             else:
-                print(f"   Missing patterns:")
+                print("   Missing patterns:")
                 for pattern in sorted(missing_patterns):
                     print(f"     - /{pattern}/")
             # Display found patterns if any
@@ -925,7 +918,7 @@ def run_monitor(
                 if len(found_expect_keywords) == 1:
                     print(f"   Found pattern: /{list(found_expect_keywords)[0]}/")
                 else:
-                    print(f"   Found patterns:")
+                    print("   Found patterns:")
                     for pattern in sorted(found_expect_keywords):
                         print(f"     - /{pattern}/")
         else:
@@ -935,7 +928,7 @@ def run_monitor(
             if len(expect_patterns) == 1:
                 print(f"   Pattern: /{expect_patterns[0][0]}/")
             else:
-                print(f"   Patterns:")
+                print("   Patterns:")
                 for pattern_str, _ in sorted(expect_patterns):
                     print(f"     - /{pattern_str}/")
     elif timeout_reached:
@@ -1328,6 +1321,8 @@ def main() -> int:
             lock.release()
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\n⚠️  Interrupted by user")
         return 130
 

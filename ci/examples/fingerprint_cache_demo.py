@@ -10,7 +10,6 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from typing import List
 
 from ci.ci.fingerprint_cache import FingerprintCache, has_changed
 

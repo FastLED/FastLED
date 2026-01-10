@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """Validate @filter/@end-filter blocks in sketch files.
 
@@ -10,7 +13,6 @@ This script:
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from ci.compiler.sketch_filter import parse_filter_from_sketch
 
@@ -55,6 +57,9 @@ def validate_sketch(ino_path: Path, examples_dir: Path) -> tuple[bool, list[str]
 
     try:
         content = ino_path.read_text(encoding="utf-8")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, [f"{relative_path}: Failed to read file: {e}"]
 
@@ -92,6 +97,9 @@ def validate_sketch(ino_path: Path, examples_dir: Path) -> tuple[bool, list[str]
                             f"{relative_path}: Filter has same key '{req_key}' in both require and exclude "
                             f"(require={req_str}, exclude={exc_str}). This might be unintended."
                         )
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, [f"{relative_path}: Error validating filter: {e}"]
 
@@ -144,7 +152,7 @@ def main() -> int:
 
     # Summary
     print("=" * 70)
-    print(f"Validation complete:")
+    print("Validation complete:")
     print(f"  Valid sketches: {valid_count}/{len(sketches)}")
     if warnings:
         print(f"  Warnings: {len(warnings)}")

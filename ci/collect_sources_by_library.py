@@ -8,7 +8,6 @@ Example: LIBRARY:fl:src/fl/algorithm.cpp
 """
 
 import sys
-from pathlib import Path
 
 from discover_sources import discover_sources
 

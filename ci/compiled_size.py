@@ -3,7 +3,9 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 def _create_board_info(path: Path) -> dict[str, Any]:
@@ -133,6 +135,9 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
             data = int(m.group(2))
             headers = int(m.group(3))
             return code + data + headers
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception:
         pass
     return None
@@ -176,6 +181,10 @@ def main(board: str, example: Optional[str] = None):
         print(f"Error: {e}")
     except json.JSONDecodeError:
         print(f"Error: Unable to parse build_info.json for {board}")
+        notify_main_thread()
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 

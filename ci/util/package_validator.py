@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Package Validator for PlatformIO Packages
@@ -46,6 +49,9 @@ def validate_package(package_dir: Path) -> tuple[bool, str]:
         return False, f"Missing package.json in {package_dir.name}"
     except json.JSONDecodeError as e:
         return False, f"Corrupted package.json in {package_dir.name}: {e}"
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         return False, f"Cannot read package.json in {package_dir.name}: {e}"
 
@@ -140,6 +146,7 @@ def get_required_packages(project_dir: Path, environment: str) -> list[str]:
         return packages
 
     except KeyboardInterrupt:
+        notify_main_thread()
         raise
     except Exception:
         # If parsing fails, return empty list (fast-path check will trigger)
@@ -231,5 +238,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\nInterrupted by user")
         sys.exit(130)

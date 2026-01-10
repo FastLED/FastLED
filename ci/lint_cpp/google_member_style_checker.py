@@ -23,11 +23,7 @@ The linter will suggest the correct m-prefix camelCase conversion for each viola
 
 import re
 
-from ci.util.check_files import (
-    EXCLUDED_FILES,
-    FileContent,
-    FileContentChecker,
-)
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
 
 def convert_google_to_m_prefix(var_name: str) -> str:
@@ -90,7 +86,6 @@ class GoogleMemberStyleChecker(FileContentChecker):
         """Check file for Google-style member variables."""
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
-        in_string = False
 
         # Pattern to detect member variable declarations with trailing underscore
         # Matches: type_name var_name_; or type_name var_name_ = ...;

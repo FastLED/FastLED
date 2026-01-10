@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 """
 Comprehensive tests for enhanced Arduino package index implementation with Pydantic
 
@@ -5,8 +8,7 @@ Tests all Pydantic models, validation rules, parsing functionality, and error ha
 """
 
 import json
-from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -15,15 +17,10 @@ from pydantic import ValidationError
 from ci.compiler.packages import (
     Board,
     Help,
-    Package,
-    PackageIndex,
     PackageIndexParser,
-    PackageManagerConfig,
     PackageParsingError,
     Platform,
     SystemDownload,
-    Tool,
-    ToolDependency,
     format_size,
 )
 
@@ -205,11 +202,14 @@ class TestRealDataParsing:
             assert len(esp32_package.platforms) > 0
             assert len(esp32_package.tools) > 0
 
-            print(f"✅ Successfully parsed ESP32 package index:")
+            print("✅ Successfully parsed ESP32 package index:")
             print(f"   📦 Packages: {len(package_index.packages)}")
             print(f"   🛠️  Platforms: {len(esp32_package.platforms)}")
             print(f"   🔧 Tools: {len(esp32_package.tools)}")
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             # Skip if network not available
             pytest.skip(f"Network test skipped: {e}")

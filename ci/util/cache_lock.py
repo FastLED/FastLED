@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Cache-Specific Locking API
@@ -145,6 +148,9 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
         try:
             if break_stale_lock(lock_file):
                 cleaned_count += 1
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Error checking lock {lock_file}: {e}")
 
@@ -209,6 +215,9 @@ def list_active_locks(cache_dir: Path) -> list[LockInfo]:
                 )
             )
 
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Error reading lock {lock_file}: {e}")
 

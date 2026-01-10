@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Lock handler utility for detecting and breaking file locks on Windows.
@@ -6,12 +9,11 @@ Uses psutil to find processes holding locks on files/directories and forcefully
 terminates them to enable cleanup of corrupted package directories.
 """
 
-import os
 import platform
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any
 
 
 try:
@@ -68,6 +70,9 @@ def find_processes_locking_path(
         try:
             name = proc.info["name"].lower() if proc.info.get("name") else ""
             return 0 if name in priority_names else 1
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception:
             return 2
 
@@ -131,7 +136,10 @@ def find_processes_locking_path(
         ):
             # Skip processes we can't access
             continue
-        except Exception as e:
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
+        except Exception:
             # Skip any other errors (e.g., invalid paths)
             continue
 
@@ -186,6 +194,9 @@ def kill_processes(pids: set[int], force: bool = True) -> bool:
                 f"  ✗ Access denied killing process {pid} (may require admin privileges)"
             )
             all_killed = False
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"  ✗ Failed to kill process {pid}: {e}")
             all_killed = False
@@ -259,10 +270,13 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
                                 )
 
                             if result.returncode == 0:
-                                print(f"  ✓ Windows command succeeded")
+                                print("  ✓ Windows command succeeded")
                                 return True
                             else:
                                 print(f"  ✗ Windows command failed: {result.stderr}")
+                        except KeyboardInterrupt:
+                            notify_main_thread()
+                            raise
                         except Exception as cmd_error:
                             print(f"  ✗ Windows command error: {cmd_error}")
 

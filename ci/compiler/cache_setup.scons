@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-
 # Import env and try to import projenv (SCons-specific imports)
 # These are dynamically available in PlatformIO/SCons environment
 try:
@@ -43,10 +42,7 @@ get_platform_packages_paths: Optional[Any] = None
 cached_compiler_available: bool = False
 
 try:
-    from ci.util.cached_compiler import (
-        create_cached_toolchain,
-        get_platform_packages_paths,
-    )
+    from ci.util.cached_compiler import create_cached_toolchain, get_platform_packages_paths
 
     cached_compiler_available = True
 except ImportError as e:
@@ -260,8 +256,8 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                     # Fast path: use existing cached compilers
                     # On Windows, ensure we have .cmd shims to avoid 'python script.py @file'
                     # causing Python to treat @file as the script name.
-                    import sys as _sys
                     import os as _os
+                    import sys as _sys
 
                     is_win = (
                         _os.name == "nt"

@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportOperatorIssue=false, reportArgumentType=false
 """
@@ -14,7 +17,7 @@ import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Optional
 
 # Import board mapping system
 from ci.boards import create_board
@@ -131,6 +134,9 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
         demangled = result.stdout.strip()
         # If demangling failed, c++filt returns the original name
         return demangled if demangled != mangled_name else mangled_name
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Error demangling symbol: {mangled_name}")
         print(f"Error: {e}")
@@ -174,7 +180,7 @@ def analyze_symbols(
                         addr = parts[1]
                         size = int(parts[2]) if parts[2].isdigit() else 0
                         symbol_type = parts[3]
-                        bind = parts[4]
+                        parts[4]
                         # Skip vis and ndx (parts[5], parts[6]) - not needed
                         name = " ".join(parts[7:]) if len(parts) > 7 else ""
 
@@ -505,6 +511,9 @@ def analyze_map_file(map_file: Path) -> dict[str, list[str]]:
                             symbol = line[symbol_start:symbol_end]
                             dependencies[current_archive].append(symbol)
                     current_archive = None
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Error reading map file: {e}")
         return {}

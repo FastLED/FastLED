@@ -10,7 +10,7 @@ from concurrent.futures import Future
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Optional
 
 
 class CacheType(Enum):

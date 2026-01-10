@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Wrapper script for PCH compilation that fixes dependency file generation.
@@ -128,6 +131,9 @@ def main() -> int:
     if result.returncode == 0 and pch_output and depfile:
         try:
             fix_depfile(depfile, pch_output)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             print(f"ERROR fixing PCH depfile: {e}", file=sys.stderr)
             import traceback

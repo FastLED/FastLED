@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Lock Administration CLI
@@ -24,7 +27,6 @@ from ci.util.cache_lock import (
 from ci.util.file_lock_rw import (
     _read_lock_metadata,
     break_stale_lock,
-    is_lock_stale,
     is_process_alive,
 )
 
@@ -129,10 +131,10 @@ def check_lock(lock_file: Path) -> int:
         if pid:
             if is_process_alive(pid):
                 print(f"Process status: 🟢 ALIVE (PID {pid} is running)")
-                print(f"Lock status: ACTIVE")
+                print("Lock status: ACTIVE")
             else:
                 print(f"Process status: 🔴 DEAD (PID {pid} not found)")
-                print(f"Lock status: STALE")
+                print("Lock status: STALE")
     else:
         print("⚠️  No metadata found for this lock")
         print("Lock may be from an old version or corrupted")
@@ -230,6 +232,8 @@ Examples:
             return check_lock(args.check)
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n❌ Interrupted by user")
         return 130
     except Exception as e:

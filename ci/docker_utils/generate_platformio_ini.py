@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Generate platformio.ini from board configuration.
@@ -7,7 +10,6 @@ Usage:
 """
 
 import sys
-from pathlib import Path
 
 
 def main():
@@ -37,6 +39,9 @@ def main():
             f.write(ini_content)
 
         print("Successfully generated platformio.ini")
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Error generating platformio.ini: {e}", file=sys.stderr)
         sys.exit(1)

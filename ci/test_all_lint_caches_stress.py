@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 """
 Comprehensive stress test for all lint caches and test caching systems.
@@ -14,14 +17,11 @@ import json
 import multiprocessing
 import subprocess
 import sys
-import tempfile
 import time
-from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from ci.util.dependency_loader import DependencyManifest
-from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 # Type alias for Queue results
@@ -71,6 +71,9 @@ class CacheLintStressTest:
             needs_update = result.returncode == 0
             output = result.stdout + result.stderr
             return needs_update, output
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             return False, str(e)
 
@@ -97,6 +100,9 @@ class CacheLintStressTest:
             )
             output = result.stdout + result.stderr
             return result.returncode == 0, output
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             return False, str(e)
 
@@ -291,7 +297,7 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
 
         for op in required_ops:
             try:
-                config = test.manifest.get_operation(op)
+                test.manifest.get_operation(op)
                 globs: list[Any] = test.manifest.get_globs(op)
                 if globs:
                     found_ops.append(op)
@@ -306,6 +312,9 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
         if len(found_ops) == len(required_ops):
             test.pass_test("All required operations present in manifest")
 
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         test.fail_test("Manifest validation", str(e))
 
@@ -359,6 +368,9 @@ def _concurrent_cache_check(
             timeout=10,
         )
         result_queue.put(("success", result.returncode))
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         result_queue.put(("error", str(e)))
 
@@ -416,6 +428,8 @@ def main() -> int:
         return 0 if success else 1
 
     except KeyboardInterrupt:
+        notify_main_thread()
+        raise
         print("\n\n⚠️  Test suite interrupted by user")
         return 2
     except Exception as e:

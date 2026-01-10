@@ -6,6 +6,8 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
+from ci.util.global_interrupt_handler import notify_main_thread
+
 
 if TYPE_CHECKING:
     from ci.boards import Board
@@ -79,6 +81,9 @@ def get_platform_required_packages(platform_path: Path) -> list[str]:
         packages = data.get("packages", {})
         # Return all package names from the platform
         return list(packages.keys())
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not parse platform.json: {e}")
         return []
@@ -117,6 +122,9 @@ def get_installed_packages_from_pio() -> dict[str, str]:
                 packages[package_name] = version
 
         return packages
+    except KeyboardInterrupt:
+        notify_main_thread()
+        raise
     except Exception as e:
         print(f"Warning: Could not get installed packages: {e}")
         return {}
@@ -184,6 +192,9 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
                     cleaned = True
                 else:
                     print(f"    ✗ Failed to remove {package_name}")
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 print(f"    ✗ Error removing {package_name}: {e}")
 
@@ -276,29 +287,33 @@ def detect_and_fix_corrupted_packages_dynamic(
         )
         if is_corrupted:
             if piopm_exists and not manifest_exists:
-                print(f"  -> CORRUPTED: Has .piopm but missing package.json")
+                print("  -> CORRUPTED: Has .piopm but missing package.json")
             elif not piopm_exists and not manifest_exists:
                 print(
-                    f"  -> CORRUPTED: Incomplete installation (missing both .piopm and package.json)"
+                    "  -> CORRUPTED: Incomplete installation (missing both .piopm and package.json)"
                 )
-            print(f"  -> FIXING: Removing corrupted package...")
+            print("  -> FIXING: Removing corrupted package...")
             try:
                 # Use lock-aware deletion that kills holding processes
                 success = force_remove_path(package_path, max_retries=3)
                 if success:
                     print(f"  -> SUCCESS: Removed {package_name}")
-                    print(f"  -> PlatformIO will re-download package automatically")
+                    print("  -> PlatformIO will re-download package automatically")
                     results[package_name] = True  # Was corrupted, now fixed
                 else:
                     print(
                         f"  -> ERROR: Failed to remove {package_name} after all retries"
                     )
                     results[package_name] = False  # Still corrupted
+                notify_main_thread()
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 print(f"  -> ERROR: Failed to remove {package_name}: {e}")
                 results[package_name] = False  # Still corrupted
         else:
-            print(f"  -> OK: Not corrupted")
+            print("  -> OK: Not corrupted")
             results[package_name] = False  # Not corrupted
 
     print("=== Dynamic Detection & Fix Complete ===")

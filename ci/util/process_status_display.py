@@ -6,7 +6,9 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
+
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 if TYPE_CHECKING:
@@ -99,6 +101,9 @@ class ProcessStatusDisplay(ABC):
                 spinner_index = (spinner_index + 1) % 4
                 time.sleep(1.0)  # Check every second but only print every 5 seconds
 
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
             except Exception as e:
                 logger.warning(f"Display update error: {e}")
                 time.sleep(1.0)
@@ -186,12 +191,7 @@ class RichStatusDisplay(ProcessStatusDisplay):
         try:
             from rich.console import Console
             from rich.live import Live
-            from rich.progress import (
-                Progress,
-                SpinnerColumn,
-                TextColumn,
-                TimeElapsedColumn,
-            )
+            from rich.progress import Progress
             from rich.table import Table
 
             self.Progress = Progress
@@ -229,6 +229,9 @@ class RichStatusDisplay(ProcessStatusDisplay):
 
         try:
             return self._format_rich_display(group_status, spinner_index)
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Rich formatting failed, using ASCII fallback: {e}")
             return self._format_ascii_fallback(group_status, spinner_index)
@@ -340,11 +343,11 @@ class RichStatusDisplay(ProcessStatusDisplay):
 
 def get_display_format() -> DisplayConfig:
     """Auto-detect best display format for current environment."""
+    import sys
+
     try:
         # Test Rich availability
-        import sys
-
-        import rich
+        import rich  # noqa: F401
 
         if sys.stdout.encoding and sys.stdout.encoding.lower() in ["utf-8", "utf8"]:
             return DisplayConfig(format_type="rich")
@@ -367,6 +370,10 @@ def create_status_display(
     if display_type == "rich":
         try:
             return RichStatusDisplay(group)
+            notify_main_thread()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             logger.warning(f"Rich display creation failed, falling back to ASCII: {e}")
             return ASCIIStatusDisplay(group)

@@ -1,12 +1,12 @@
 # pyright: reportUnknownMemberType=false
-import os
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 import yaml
 
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -113,6 +113,10 @@ class TestGitHubActionsSecurityTest(unittest.TestCase):
                 jobs=jobs_dict,
                 permissions=content.get("permissions"),
             )
+            notify_main_thread()
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
         except Exception as e:
             self.fail(f"Failed to parse workflow {workflow_path}: {e}")
 
@@ -266,7 +270,7 @@ class TestGitHubActionsSecurityTest(unittest.TestCase):
 
         if excessive_permission_workflows:
             self.fail(
-                f"Found workflows with excessive permissions:\n"
+                "Found workflows with excessive permissions:\n"
                 + "\n".join(f"  - {w}" for w in excessive_permission_workflows)
                 + "\n\nUse minimal required permissions instead."
             )

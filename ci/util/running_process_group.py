@@ -1,3 +1,6 @@
+from ci.util.global_interrupt_handler import notify_main_thread
+
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
 """RunningProcessGroup - Unified process execution management for FastLED CI.
@@ -10,13 +13,11 @@ to fully-buffered mode when stdout is not a TTY, which can cause multi-second de
 import os
 import subprocess
 import sys
-import threading
 import time
-import traceback
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import Optional
 
 from running_process import RunningProcess
 
@@ -191,7 +192,7 @@ class RunningProcessGroup:
             return []
 
         # Create a shared output handler for formatting
-        output_handler = ProcessOutputHandler(verbose=self.config.verbose)
+        ProcessOutputHandler(verbose=self.config.verbose)
 
         # Configure Windows console for UTF-8 output if needed
         if os.name == "nt":  # Windows
@@ -226,7 +227,7 @@ class RunningProcessGroup:
             global_timeout = max(runner_timeouts) + 60  # Add 1 minute buffer
 
         # Track last activity time for each process to detect stuck processes
-        last_activity_time = {proc: time.time() for proc in active_processes}
+        {proc: time.time() for proc in active_processes}
         stuck_process_timeout = self.config.stuck_timeout_seconds
 
         # Track failed processes for proper error reporting
@@ -332,7 +333,7 @@ class RunningProcessGroup:
 
         # Check for processes that failed with non-zero exit codes
         if exit_failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m", flush=True)
+            print("\n\033[91m###### ERROR ######\033[0m", flush=True)
             print(
                 f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:",
                 flush=True,
@@ -357,7 +358,7 @@ class RunningProcessGroup:
 
         # Check for failed processes (killed due to timeout/stuck)
         if failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m", flush=True)
+            print("\n\033[91m###### ERROR ######\033[0m", flush=True)
             print(
                 f"Tests failed due to {len(failed_processes)} killed process(es):",
                 flush=True,
@@ -620,6 +621,9 @@ class RunningProcessGroup:
                             f"Process failed with exit code {exit_code}", [failure]
                         )
 
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Process failed: {process.get_command_str()} - {e}")
                     raise
@@ -697,6 +701,9 @@ class RunningProcessGroup:
                             f"Process failed with exit code {exit_code}", [failure]
                         )
 
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
                 except Exception as e:
                     print(f"Process failed: {process.get_command_str()} - {e}")
                     raise
