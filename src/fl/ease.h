@@ -9,7 +9,6 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 */
 
 #include "fl/int.h"
-#include "platforms/shared/int_windows.h"
 
 namespace fl {
 

@@ -19,12 +19,12 @@
 #include "fl/int.h"
 #include "fl/stl/map.h"
 #include "fl/scoped_array.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "fl/slice.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/utility.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 namespace fl {
 

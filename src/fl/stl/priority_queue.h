@@ -4,7 +4,7 @@
 #include "fl/stl/vector.h"                 // for vector
 #include "fl/stl/move.h"                   // for remove_reference
 #include "fl/stl/utility.h"                // for greater, less
-#include "platforms/shared/int_windows.h"  // for size
+#include "fl/int.h"                        // for size
 
 namespace fl {
 

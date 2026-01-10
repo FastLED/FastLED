@@ -10,7 +10,7 @@
 #include "fl/delay.h"  // for delayMicroseconds
 #include "fl/stl/assert.h"  // for FL_ASSERT
 #include "hsv2rgb.h"  // for CRGB
-#include "platforms/shared/int_windows.h"  // for u32, u16
+#include "fl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep
 #include "fl/channels/config.h"  // for ChannelConfig
 

@@ -77,10 +77,21 @@ Options:
   --no-expect         Clear default --expect patterns (use custom only)
   --no-fail-on        Clear default --fail-on pattern (use custom only)
 
+Driver Selection (JSON-RPC):
+  --parlio            Test only PARLIO driver
+  --rmt               Test only RMT driver
+  --spi               Test only SPI driver
+  --uart              Test only UART driver
+
+  Multiple drivers can be specified: --parlio --rmt
+  If no driver flags are specified, all drivers are tested (default)
+
   Any other options are passed directly to 'bash debug Validation'
 
 Examples:
-  bash validate                       # Run with all default patterns
+  bash validate                       # Run with all default patterns (all drivers)
+  bash validate --parlio              # Test only PARLIO driver
+  bash validate --rmt --spi           # Test only RMT and SPI drivers
   bash validate --timeout 60          # Longer timeout for debugging
   bash validate --skip-lint           # Skip linting for faster iteration
   bash validate --no-expect --expect "CUSTOM PATTERN"  # Custom patterns only
@@ -102,6 +113,7 @@ EOF
 USE_DEFAULT_EXPECT=true
 USE_DEFAULT_FAIL_ON=true
 EXTRA_ARGS=()
+DRIVERS=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -117,12 +129,44 @@ while [[ $# -gt 0 ]]; do
             USE_DEFAULT_FAIL_ON=false
             shift
             ;;
+        --parlio)
+            DRIVERS+=("PARLIO")
+            shift
+            ;;
+        --rmt)
+            DRIVERS+=("RMT")
+            shift
+            ;;
+        --spi)
+            DRIVERS+=("SPI")
+            shift
+            ;;
+        --uart)
+            DRIVERS+=("UART")
+            shift
+            ;;
         *)
             EXTRA_ARGS+=("$1")
             shift
             ;;
     esac
 done
+
+# Build JSON-RPC command if drivers specified
+JSON_RPC_CMD=""
+if [[ ${#DRIVERS[@]} -gt 0 ]]; then
+    # Build JSON array of driver names
+    DRIVER_LIST=""
+    for driver in "${DRIVERS[@]}"; do
+        if [[ -n "$DRIVER_LIST" ]]; then
+            DRIVER_LIST+=","
+        fi
+        DRIVER_LIST+="\"$driver\""
+    done
+
+    # Create JSON-RPC command: {"function":"setDrivers","args":["PARLIO","RMT"]}
+    JSON_RPC_CMD="{\"function\":\"setDrivers\",\"args\":[$DRIVER_LIST]}"
+fi
 
 # Build final command (bypass bash debug wrapper to avoid --check-usage)
 CMD=(uv run ci/debug_attached.py Validation)
@@ -155,6 +199,11 @@ for pattern in "${EXIT_ON_ERROR_PATTERNS[@]}"; do
     CMD+=(--exit-on-error "$pattern")
 done
 
+# Add JSON-RPC command if drivers specified
+if [[ -n "$JSON_RPC_CMD" ]]; then
+    CMD+=(--json-rpc "$JSON_RPC_CMD")
+fi
+
 # Append any extra arguments
 CMD+=("${EXTRA_ARGS[@]}")
 
@@ -164,6 +213,14 @@ echo "  Expect: ${#DEFAULT_EXPECT[@]} patterns (use --help to see list)"
 echo "  Stop: $STOP_PATTERN (early exit when tests complete)"
 echo "  Fail-on: $DEFAULT_FAIL_ON"
 echo "  Exit-on-error: ${#EXIT_ON_ERROR_PATTERNS[@]} patterns (immediate failure)"
+
+# Show driver filtering if active
+if [[ ${#DRIVERS[@]} -gt 0 ]]; then
+    echo "  Driver filter: ${DRIVERS[*]} (via JSON-RPC setDrivers)"
+else
+    echo "  Driver filter: ALL (default - no filter)"
+fi
+
 echo ""
 echo "Command: ${CMD[*]}"
 echo ""

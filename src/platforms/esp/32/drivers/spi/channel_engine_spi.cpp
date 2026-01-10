@@ -14,6 +14,7 @@
 #include "fl/math_macros.h"
 #include "fl/warn.h"
 #include "fl/stl/time.h"
+#include "fl/channels/detail/wave8.hpp" // Inline wave8 functions
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h" // wave8 encoding (Stage 6)

@@ -79,24 +79,75 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 The `bash validate` command is the **preferred entry point** for AI agents doing live device testing. It provides a complete validation framework with pre-configured expect/fail patterns designed for hardware testing.
 
-**Usage:**
-- `bash validate` - Run full hardware validation suite (recommended for AI agents)
-- `bash validate --skip-lint` - Skip linting for faster iteration
-- `bash validate --timeout 120` - Custom timeout (default: 120s)
-- `bash validate --help` - See all options
+**⚠️ MANDATORY: Driver Selection Required**
+
+You **must** specify at least one LED driver to test using one of these flags:
+- `--parlio` - Test parallel I/O driver
+- `--rmt` - Test RMT (Remote Control) driver
+- `--spi` - Test SPI driver
+- `--uart` - Test UART driver
+- `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart`)
+
+**Usage Examples:**
+```bash
+# Test specific driver (MANDATORY - must specify at least one)
+bash validate --parlio
+bash validate --rmt
+bash validate --spi
+bash validate --uart
+
+# Test multiple drivers
+bash validate --parlio --rmt
+bash validate --spi --uart
+
+# Test all drivers
+bash validate --all
+
+# Combined with other options
+bash validate --parlio --skip-lint
+bash validate --rmt --timeout 120
+bash validate --all --skip-lint --timeout 180
+```
+
+**Common Options:**
+- `--skip-lint` - Skip linting for faster iteration
+- `--timeout <seconds>` - Custom timeout (default: 120s)
+- `--help` - See all options
+
+**Error Handling:**
+If you run `bash validate` without specifying a driver, you'll get a helpful error message:
+```
+ERROR: No LED driver specified. You must specify at least one driver to test.
+
+Available driver options:
+  --parlio    Test parallel I/O driver
+  --rmt       Test RMT (Remote Control) driver
+  --spi       Test SPI driver
+  --uart      Test UART driver
+  --all       Test all drivers
+
+Example commands:
+  bash validate --parlio
+  bash validate --rmt --spi
+  bash validate --all
+```
 
 **What it does:**
-1. **Lint** → Catches ISR errors and code quality issues
+1. **Lint** → Catches ISR errors and code quality issues (skippable with --skip-lint)
 2. **Compile** → Builds for attached device
 3. **Upload** → Flashes firmware to device
 4. **Monitor** → Validates output with smart pattern matching
 5. **Report** → Exit 0 (success) or 1 (failure) with detailed feedback
+
+**Runtime Driver Selection:**
+Driver selection happens at runtime via JSON-RPC (no recompilation needed). You can instantly switch between drivers or test multiple drivers without rebuilding firmware.
 
 **Why use `bash validate` instead of `bash debug`:**
 - ✅ Pre-configured patterns catch hardware failures automatically
 - ✅ Designed for automated testing and AI feedback loops
 - ✅ Prevents false positives from ISR hangs and device crashes
 - ✅ Comprehensive test matrix (48 test cases across drivers/lanes/sizes)
+- ✅ Runtime driver selection (no recompilation needed)
 
 **When to use `bash debug` (advanced):**
 For custom sketches requiring manual pattern configuration. See examples below.

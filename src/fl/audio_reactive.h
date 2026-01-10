@@ -9,7 +9,7 @@
 #include "fl/sketch_macros.h"
 #include "fl/rgb8.h"  // for CRGB
 #include "fl/colorutils.h"
-#include "platforms/shared/int_windows.h"  // for u32, size, i16, u16
+#include "fl/int.h"  // for u32, size, i16, u16
 
 namespace fl {
 

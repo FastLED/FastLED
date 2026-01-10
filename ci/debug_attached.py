@@ -86,6 +86,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import serial
 from colorama import Fore, Style, init
@@ -95,6 +96,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.json_rpc_handler import JsonRpcHandler
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.pio_runner import create_pio_process
 from ci.util.port_utils import ComportResult, auto_detect_upload_port, kill_port_users
@@ -323,7 +325,8 @@ def run_monitor(
     input_on_trigger: str | None = None,
     device_error_keywords: list[str] | None = None,
     stop_keyword: str | None = None,
-) -> tuple[bool, list[str]]:
+    json_rpc_commands: list[dict[str, Any]] | None = None,
+) -> tuple[bool, list[str], JsonRpcHandler]:
     """Attach to serial monitor and capture output.
 
     Keyword Behavior:
@@ -346,9 +349,10 @@ def run_monitor(
         device_error_keywords: List of error keywords in serial exceptions that indicate device stuck
                                (default: ["ClearCommError", "PermissionError"])
         stop_keyword: Regex pattern that triggers early successful exit if all expect patterns found
+        json_rpc_commands: List of JSON-RPC commands to send to device at startup (before trigger)
 
     Returns:
-        Tuple of (success, output_lines)
+        Tuple of (success, output_lines, json_rpc_handler)
     """
     if fail_keywords is None:
         fail_keywords = []
@@ -356,6 +360,14 @@ def run_monitor(
         expect_keywords = []
     if device_error_keywords is None:
         device_error_keywords = ["ClearCommError", "PermissionError"]
+    if json_rpc_commands is None:
+        json_rpc_commands = []
+
+    # Initialize JSON-RPC handler
+    rpc_handler = JsonRpcHandler()
+    rpc_commands_sent = False  # Track if RPC commands have been sent
+    rpc_responses_needed = len(json_rpc_commands)  # Number of RPC responses to wait for
+    rpc_responses_received = 0
 
     # Parse input-on-trigger argument
     trigger_pattern = None
@@ -474,10 +486,21 @@ def run_monitor(
         print("🛑 Stop pattern: None")
 
     print("\n--- Interactive Features ---")
+    if json_rpc_commands:
+        print(f"🔧 JSON-RPC commands: {len(json_rpc_commands)} command(s)")
+        for i, cmd in enumerate(json_rpc_commands, 1):
+            args_str = cmd.get("args", [])
+            print(f"   {i}. {cmd['function']}({args_str})")
+        print(f"   📡 Commands will be sent immediately after device boots")
+    else:
+        print("🔧 JSON-RPC commands: None")
+
     if trigger_pattern:
         print(f"📤 Input-on-trigger: ENABLED")
         print(f"   Trigger pattern: /{trigger_pattern.pattern}/")
         print(f"   Text to send: '{trigger_text}'")
+        if json_rpc_commands:
+            print(f"   ⚠️  Note: RPC commands will be sent BEFORE trigger")
     else:
         print("📤 Input-on-trigger: DISABLED")
 
@@ -501,7 +524,7 @@ def run_monitor(
         ports = list(list_ports.comports())
         if not ports:
             print("❌ No serial ports found")
-            return False, []
+            return False, [], JsonRpcHandler()
         monitor_port = ports[0].device
         print(f"📡 Auto-detected serial port: {monitor_port}")
 
@@ -515,7 +538,7 @@ def run_monitor(
         print(f"\n✓ Serial port opened: {monitor_port} (115200 baud)")
     except serial.SerialException as e:
         print(f"❌ Failed to open serial port {monitor_port}: {e}")
-        return False, []
+        return False, [], JsonRpcHandler()
 
     # Print final configuration summary before starting monitoring
     print("\n" + "=" * 60)
@@ -566,6 +589,27 @@ def run_monitor(
 
     try:
         while True:
+            # Send JSON-RPC commands immediately if not yet sent
+            # This happens before waiting for trigger pattern
+            if not rpc_commands_sent and json_rpc_commands:
+                rpc_commands_sent = True
+                print(
+                    f"\n🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s) to device..."
+                )
+                for i, cmd in enumerate(json_rpc_commands, 1):
+                    from ci.util.json_rpc_handler import format_json_rpc_command
+
+                    cmd_str = format_json_rpc_command(cmd)
+                    try:
+                        ser.write(f"{cmd_str}\n".encode("utf-8"))
+                        ser.flush()
+                        print(
+                            f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
+                        )
+                    except Exception as e:
+                        print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
+                print(f"   ⏳ Waiting for {rpc_responses_needed} response(s)...\n")
+
             # Check trigger timeout (higher priority than general timeout)
             if trigger_deadline and not trigger_sent and time.time() > trigger_deadline:
                 trigger_timeout_triggered = True
@@ -613,6 +657,21 @@ def run_monitor(
                                 formatted_line
                             )  # Store timestamped line
                             print(formatted_line)  # Display with timestamp
+
+                            # Process JSON-RPC responses (REMOTE: prefix)
+                            rpc_response = rpc_handler.process_line(formatted_line)
+                            if rpc_response:
+                                rpc_responses_received += 1
+                                func_name = rpc_response.get("function", "unknown")
+                                result = rpc_response.get("result")
+                                print(f"   📡 RPC Response: {func_name}() → {result}")
+                                if (
+                                    rpc_responses_received >= rpc_responses_needed
+                                    and rpc_responses_needed > 0
+                                ):
+                                    print(
+                                        f"   ✅ All {rpc_responses_needed} RPC response(s) received\n"
+                                    )
 
                             # Check for expect patterns (track but don't terminate)
                             if expect_patterns:
@@ -888,7 +947,7 @@ def run_monitor(
     else:
         print("❌ Monitor failed")
 
-    return success, output_lines
+    return success, output_lines, rpc_handler
 
 
 def parse_args() -> argparse.Namespace:
@@ -1025,6 +1084,12 @@ Examples:
         action="store_true",
         help="Enable sketch usage checks (e.g., block 'bash debug Validation' without wrapper)",
     )
+    parser.add_argument(
+        "--json-rpc",
+        type=str,
+        metavar="COMMANDS",
+        help='JSON-RPC commands to send to device at startup. Accepts JSON string: \'{"function":"ping"}\' or \'[{"function":"setDrivers","args":["PARLIO"]}]\', or file path: @commands.json',
+    )
 
     return parser.parse_args()
 
@@ -1107,6 +1172,15 @@ def main() -> int:
         timeout_seconds = parse_timeout(args.timeout)
     except ValueError as e:
         print(f"❌ Error: {e}")
+        return 1
+
+    # Parse JSON-RPC commands if provided
+    from ci.util.json_rpc_handler import parse_json_rpc_commands
+
+    try:
+        json_rpc_commands = parse_json_rpc_commands(args.json_rpc)
+    except ValueError as e:
+        print(f"❌ Error parsing JSON-RPC commands: {e}")
         return 1
 
     # Auto-detect upload port if not specified
@@ -1227,7 +1301,7 @@ def main() -> int:
                 return 1
 
             # Phase 4: Monitor serial output
-            success, output = run_monitor(
+            success, output, rpc_handler = run_monitor(
                 build_dir,
                 args.environment,
                 upload_port,  # Use same port for monitoring
@@ -1239,6 +1313,7 @@ def main() -> int:
                 args.input_on_trigger,
                 args.device_error_keywords,
                 args.stop_keyword,
+                json_rpc_commands,
             )
 
             if not success:

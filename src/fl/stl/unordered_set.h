@@ -5,7 +5,7 @@
 #include "fl/hash.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 namespace fl {
 

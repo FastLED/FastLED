@@ -6,7 +6,7 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/stdint.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"

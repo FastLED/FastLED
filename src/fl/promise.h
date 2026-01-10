@@ -41,7 +41,7 @@
 ///     });
 /// @endcode
 
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "fl/stl/function.h"
 #include "fl/stl/string.h"
 #include "fl/stl/shared_ptr.h"

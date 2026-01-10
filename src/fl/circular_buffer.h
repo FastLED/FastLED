@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/scoped_array.h"
-#include "platforms/shared/int_windows.h"  // for size
+#include "fl/int.h"  // for size
 
 namespace fl {
 
