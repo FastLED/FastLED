@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "fl/int.h"
+
 /*
 Experimental bilinearn downscaling algorithm. Not tested yet and completely
 "vibe-coded" by ai.
@@ -8,11 +10,10 @@ Experimental bilinearn downscaling algorithm. Not tested yet and completely
 If you use this and find an issue then please report it.
 */
 
-#include "fl/int.h"
-#include "crgb.h"
 
 namespace fl {
 
+struct CRGB;
 class XYMap;
 
 void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,

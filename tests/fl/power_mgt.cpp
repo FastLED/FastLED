@@ -4,8 +4,8 @@
 #include "FastLED.h"
 #include "power_mgt.h"
 #include <stdint.h>
-#include "crgb.h"
 #include "doctest.h"
+#include "hsv2rgb.h"
 
 TEST_CASE("PowerModelRGB - constructor") {
     PowerModelRGB model(40, 40, 40, 2);

@@ -6,7 +6,7 @@
 #include "platforms/shared/spi_hw_16.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/log.h"
 #include "fl/promise.h"
@@ -15,12 +15,12 @@
 #include "fl/spi/config.h"
 #include "fl/spi/device.h"
 #include "fl/spi/transaction.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/move.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/strstream.h"
+#include "fl/stl/vector.h"
 
 using namespace fl::spi;
 using fl::SPIError;

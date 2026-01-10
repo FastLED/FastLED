@@ -93,4 +93,9 @@
   { include: ['<stddef.h>', 'public', '"fl/stl/cstddef.h"', 'public'] },
   { include: ['<cstdint>', 'public', '"fl/stl/stdint.h"', 'public'] },
   { include: ['<cstddef>', 'public', '"fl/stl/cstddef.h"', 'public'] },
+
+  # Map system placement new header to FastLED wrapper
+  # This redirects libc++'s __new/placement_new_delete.h to our platform abstraction
+  { include: ['"__new/placement_new_delete.h"', 'private', '"fl/stl/new.h"', 'public'] },
+  { include: ['<new>', 'public', '"fl/stl/new.h"', 'public'] },
 ]

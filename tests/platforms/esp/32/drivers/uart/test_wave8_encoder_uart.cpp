@@ -7,11 +7,10 @@
 #include "doctest.h"
 
 #include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
-#include "fl/stl/vector.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
-#include "fl/stl/allocator.h"
+#include "fl/stl/new.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 

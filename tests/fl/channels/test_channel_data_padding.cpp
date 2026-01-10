@@ -10,7 +10,7 @@
 #include "fl/stl/vector.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/slice.h"

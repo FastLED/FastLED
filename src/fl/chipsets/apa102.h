@@ -7,7 +7,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/math_macros.h"
-#include "platforms/shared/spi_pixel_writer.h"
+#include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 #include "platforms/spi_output_template.h"
 #include "fl/chipsets/encoders/apa102.h"
 

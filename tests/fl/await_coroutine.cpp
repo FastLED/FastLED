@@ -3,25 +3,24 @@
 #include "fl/promise.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/mutex.h"
-#include "fl/stl/vector.h"
 #include "fl/math_macros.h"
 #include <stdint.h>
 #include <stdio.h>
 #include "__chrono/duration.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__thread/this_thread.h"
 #include "__thread/thread.h"
 #include "__type_traits/invoke.h"
 #include "__utility/move.h"
 #include "doctest.h"
 #include "fl/promise_result.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "mutex_stub_stl.h"
 #include "thread_stub_stl.h"
+#include "fl/stl/vector.h"
 
 #ifdef FASTLED_STUB_IMPL
 #endif

@@ -24,13 +24,10 @@
 ///   }
 /// @endcode
 
-#include "fl/stl/stdint.h"
-#include "fl/force_inline.h"
-#include "fl/compiler_control.h"
+#include "platforms/shared/simd_x86.hpp"  // ok platform headers
 
 // Platform dispatch header - delegates to platform-specific SIMD implementations
 // using the coarse-to-fine pattern. No #ifdef needed here!
-#include "platforms/simd.h"
 
 namespace fl {
 namespace simd {

@@ -4,7 +4,7 @@
 
 #include "fl/xypath.h"
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
@@ -264,7 +264,7 @@ TEST_CASE("Test RosePath") {
 }
 
 TEST_CASE("Check complex types") {
-    fl::HeapVector<fl::XYPathPtr> paths;
+    fl::vector<fl::XYPathPtr> paths;
     fl::XYPathPtr circle = fl::XYPath::NewCirclePath();
     paths.push_back(circle);
     

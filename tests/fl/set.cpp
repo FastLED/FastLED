@@ -3,14 +3,14 @@
 
 #include "fl/stl/set.h"
 #include "fl/stl/bit_cast.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/log.h"
 #include "fl/stl/move.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/type_traits.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 

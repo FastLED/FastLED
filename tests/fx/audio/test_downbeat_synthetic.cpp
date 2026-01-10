@@ -4,16 +4,16 @@
 #include "fl/fx/audio/detectors/beat.h"
 #include "fl/fx/audio/detectors/downbeat.h"
 #include "Arduino.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/audio.h"
 #include "fl/math_macros.h"
 #include "fl/slice.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/int.h"
 #include "fl/stl/vector.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/stl/strstream.h"
 
 using namespace fl;
 

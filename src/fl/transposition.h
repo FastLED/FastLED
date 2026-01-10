@@ -27,6 +27,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/cstring.h"
 
 namespace fl {
 

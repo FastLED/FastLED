@@ -13,7 +13,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/allocator.h"

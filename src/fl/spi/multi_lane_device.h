@@ -14,7 +14,7 @@
 #include "fl/numeric_limits.h"
 #include "fl/spi/transaction.h"
 #include "fl/spi/write_result.h"
-#include "platforms/shared/spi_types.h"
+#include "platforms/shared/spi_types.h"  // ok platform headers
 
 namespace fl {
 namespace spi {

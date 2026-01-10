@@ -6,7 +6,7 @@
 #include "eorder.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "crgb.h"
 #include "doctest.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"

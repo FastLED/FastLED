@@ -1,9 +1,9 @@
 #include "fl/stl/time.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 

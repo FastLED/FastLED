@@ -3,9 +3,7 @@
 
 #include "fl/rx_device.h"
 #include "fl/stl/cstring.h"
-#include <stddef.h>
-#include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/slice.h"
 #include "fl/stl/move.h"

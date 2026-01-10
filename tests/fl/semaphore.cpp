@@ -7,15 +7,14 @@
 #include "__chrono/duration.h"
 #include "__chrono/steady_clock.h"
 #include "__chrono/time_point.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__thread/this_thread.h"
 #include "__thread/thread.h"
 #include "__type_traits/invoke.h"
 #include "__utility/move.h"
-#include "fl/stl/allocator.h"
-#include "fl/stl/vector.h"
 #include "ratio"
 #include "thread_stub_stl.h"
+#include "fl/stl/vector.h"
 
 
 #if FASTLED_MULTITHREADED

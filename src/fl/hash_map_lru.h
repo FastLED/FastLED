@@ -8,7 +8,9 @@ recently used items when it reaches capacity.
 
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/type_traits.h"
-#include "fl/numeric_limits.h"
+#include "fl/hash.h"
+#include "fl/stl/limits.h"
+#include "fl/int.h"
 
 namespace fl {
 

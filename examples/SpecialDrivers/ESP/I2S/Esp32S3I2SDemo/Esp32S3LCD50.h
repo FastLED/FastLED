@@ -22,7 +22,7 @@
 #ifdef ESP32
 
 #include <FastLED.h>
-#include "platforms/esp/32/clockless_lcd_i80_esp32.h"
+#include "platforms/esp/32/clockless_lcd_i80_esp32.h"  // ok platform headers
 
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256

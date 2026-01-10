@@ -46,6 +46,9 @@
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
   // Clang doesn't have subobject-linkage warning, use no-op
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
+  // C++14/17 extension warnings (for compatibility when using SIMD intrinsic headers)
+  #define FL_DISABLE_WARNING_C14_EXTENSIONS FL_DISABLE_WARNING(c++14-extensions)
+  #define FL_DISABLE_WARNING_C17_EXTENSIONS FL_DISABLE_WARNING(c++17-extensions)
 #elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
@@ -83,6 +86,9 @@
   #endif
   // GCC has subobject-linkage warning
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
+  // GCC doesn't have C++14/17 extension warnings, use no-op
+  #define FL_DISABLE_WARNING_C14_EXTENSIONS
+  #define FL_DISABLE_WARNING_C17_EXTENSIONS
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN
@@ -100,9 +106,17 @@
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
   // Other compilers don't have subobject-linkage warning, use no-op
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
+  // Other compilers don't have C++14/17 extension warnings, use no-op
+  #define FL_DISABLE_WARNING_C14_EXTENSIONS
+  #define FL_DISABLE_WARNING_C17_EXTENSIONS
 #endif
 
 // END WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.
+
+// Convenient diagnostic control aliases
+#define FL_DIAGNOSTIC_PUSH FL_DISABLE_WARNING_PUSH
+#define FL_DIAGNOSTIC_POP FL_DISABLE_WARNING_POP
+#define FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS FL_DISABLE_WARNING_C14_EXTENSIONS
 
 // Fast math optimization controls with additional aggressive flags
 #if defined(__clang__)

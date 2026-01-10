@@ -3,14 +3,12 @@
 
 
 #include "fl/line_simplification.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/slice.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
-#include "fl/stl/vector.h"
 
 
 TEST_CASE("Test Line Simplification") {

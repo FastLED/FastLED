@@ -13,12 +13,13 @@
 /// 6. Transaction history capture
 /// 7. Error handling and state validation
 
+#include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 #include <stdint.h>
 #include "doctest.h"
 #include "fl/slice.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
 #include "platforms/esp/32/drivers/spi/ispi_peripheral.h"
-#include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 
 using namespace fl;
 using namespace fl::detail;

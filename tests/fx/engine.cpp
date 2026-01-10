@@ -9,7 +9,7 @@
 #include "fl/stl/vector.h"
 #include "FastLED.h"
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "crgb.h"
 #include "doctest.h"
 #include "fl/fx/detail/transition.h"

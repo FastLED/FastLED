@@ -2,12 +2,12 @@
 
 #include "fl/stl/iterator.h"
 #include "fl/stl/vector.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/vector.h"
 
-TEST_CASE("back_inserter with HeapVector") {
-    fl::HeapVector<int> vec;
+TEST_CASE("back_inserter with vector") {
+    fl::vector<int> vec;
 
     SUBCASE("Basic insertion") {
         auto inserter = fl::back_inserter(vec);
@@ -114,7 +114,7 @@ TEST_CASE("back_inserter with move semantics") {
         }
     };
 
-    fl::HeapVector<MoveOnly> vec;
+    fl::vector<MoveOnly> vec;
 
     SUBCASE("Move insertion") {
         auto inserter = fl::back_inserter(vec);
@@ -127,12 +127,12 @@ TEST_CASE("back_inserter with move semantics") {
 
 // Test integration with algorithms
 TEST_CASE("back_inserter with algorithm integration") {
-    fl::HeapVector<int> source;
+    fl::vector<int> source;
     source.push_back(1);
     source.push_back(2);
     source.push_back(3);
 
-    fl::HeapVector<int> dest;
+    fl::vector<int> dest;
 
     SUBCASE("Manual copy using back_inserter") {
         auto inserter = fl::back_inserter(dest);

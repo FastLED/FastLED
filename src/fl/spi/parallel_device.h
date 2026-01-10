@@ -12,7 +12,7 @@
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
 #include "fl/numeric_limits.h"
-#include "platforms/shared/spi_types.h"
+#include "platforms/shared/spi_types.h"  // ok platform headers
 
 // Forward declarations for backends
 namespace fl {

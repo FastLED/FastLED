@@ -3,7 +3,7 @@
 #include "FastLED.h"
 #include "doctest.h"
 #include "fl/xymap.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 
 namespace {

@@ -6,7 +6,6 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"
-#include "fl/int.h"
 
 // Forward declaration to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
 #ifndef FTL_CSTDIO_H_INCLUDED

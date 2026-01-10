@@ -113,7 +113,7 @@ class CatmullRomParams : public XYPathParams {
     fl::size size() const { return points.size(); }
 
     // Vector of control points
-    HeapVector<vec2f> points;
+    fl::vector<vec2f> points;
 };
 
 /////////////////////////////////////////////////

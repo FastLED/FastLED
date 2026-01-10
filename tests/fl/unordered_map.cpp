@@ -5,7 +5,7 @@
 
 #include "fl/stl/unordered_map.h"
 #include <cstddef>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__tree"
 #include "__vector/vector.h"
 #include "doctest.h"
@@ -17,7 +17,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "initializer_list"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 

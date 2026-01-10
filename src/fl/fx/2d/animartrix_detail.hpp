@@ -58,7 +58,6 @@ License CC BY-NC 3.0
 
 #include "crgb.h"
 #include "fl/force_inline.h"
-#include "fl/stl/math.h"
 #include "fl/compiler_control.h"
 
 #ifndef FL_ANIMARTRIX_USES_FAST_MATH
@@ -183,9 +182,9 @@ class ANIMartRIX {
     modulators move; // all oscillator based movers and shifters at one place
     rgb pixel;
 
-    fl::HeapVector<fl::HeapVector<float>>
+    fl::vector<fl::vector<float>>
         polar_theta; // look-up table for polar angles
-    fl::HeapVector<fl::HeapVector<float>>
+    fl::vector<fl::vector<float>>
         distance; // look-up table for polar distances
 
     unsigned long a, b, c; // for time measurements
@@ -399,8 +398,8 @@ class ANIMartRIX {
     // the polar coordinates
 
     void render_polar_lookup_table(float cx, float cy) {
-        polar_theta.resize(num_x, fl::HeapVector<float>(num_y, 0.0f));
-        distance.resize(num_x, fl::HeapVector<float>(num_y, 0.0f));
+        polar_theta.resize(num_x, fl::vector<float>(num_y, 0.0f));
+        distance.resize(num_x, fl::vector<float>(num_y, 0.0f));
 
         for (int xx = 0; xx < num_x; xx++) {
             for (int yy = 0; yy < num_y; yy++) {

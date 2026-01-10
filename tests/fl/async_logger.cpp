@@ -4,7 +4,7 @@
 #include "fl/detail/async_logger.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 

@@ -1,15 +1,14 @@
 #pragma once
 
 #include "fl/fft.h"
-#include "fl/stl/vector.h"
 #include "fl/int.h"
 #include "fl/audio.h"
 #include "fl/stl/array.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/sketch_macros.h"
-#include "fl/rgb8.h"  // for CRGB
 #include "fl/colorutils.h"
-#include "fl/int.h"  // for u32, size, i16, u16
+#include "fl/rgb8.h"  // for CRGB
+#include "fl/stl/vector.h"
 
 namespace fl {
 

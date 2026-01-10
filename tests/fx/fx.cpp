@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "doctest.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 
 using namespace fl;

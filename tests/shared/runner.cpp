@@ -2,6 +2,7 @@
 // This executable is copied to each test directory as <test_name>.exe
 // It automatically loads <test_name>.dll and calls run_tests()
 
+#include <windef.h>
 #include <libloaderapi.h>
 #include <string>
 #include <iostream>
@@ -10,9 +11,7 @@
 #include "__fwd/string.h"
 #include "__ostream/basic_ostream.h"
 #include "errhandlingapi.h"
-#include "ios"
 #include "minwindef.h"
-#include "windef.h"
 #include "winbase.h"
 
 typedef int (*RunTestsFunc)();

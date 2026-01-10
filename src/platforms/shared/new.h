@@ -9,11 +9,11 @@
     #include "platforms/shared/inplacenew.h"
 #elif __has_include(<new>)
     // Modern platforms with standard library support
-    #include <new>  // ok include
+    #include <new>  // ok include // IWYU pragma: export
 #elif __has_include(<new.h>)
     // Alternative standard header location
-    #include <new.h>  // ok include
+    #include <new.h>  // ok include // IWYU pragma: export
 #else
     // Fallback to manual definition
-    #include "platforms/shared/inplacenew.h"
+    #include "platforms/shared/inplacenew.h"  // IWYU pragma: export
 #endif

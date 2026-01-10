@@ -1,11 +1,11 @@
 #include "fl/stl/array.h"
 #include "fl/slice.h"  // For fl::span
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
-#include "fl/stl/vector.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 
@@ -428,11 +428,19 @@ TEST_CASE("fl::array - to_array() helper function from span") {
     }
 
     SUBCASE("from vector via span") {
+<<<<<<< HEAD
         fl::vector<int> vec;
         vec.push_back(1);
         vec.push_back(2);
         vec.push_back(3);
         vec.push_back(4);
+=======
+        fl::vector<int> heap_vec;
+        heap_vec.push_back(1);
+        heap_vec.push_back(2);
+        heap_vec.push_back(3);
+        heap_vec.push_back(4);
+>>>>>>> 9534968fe2 (feat(async): add async logging queue implementation)
 
         fl::span<const int> s(vec);
         fl::array<int, 4> arr = fl::to_array<4>(s);

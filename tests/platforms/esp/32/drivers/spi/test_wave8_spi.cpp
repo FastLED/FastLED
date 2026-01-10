@@ -10,15 +10,15 @@
 /// that function requires ESP32-specific headers that aren't available in the
 /// stub platform. That conversion will be tested in integration tests on real hardware.
 
-#include <stddef.h>  // for size_t
-#include <stdint.h>  // for uint8_t
-#include "doctest.h"  // for ResultBuilder, CHECK, etc.
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/slice.h"  // for span
 
 // Include the full wave8_encoder_spi.h header
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
+#include <stddef.h>  // for size_t
+#include <stdint.h>  // for uint8_t
+#include "doctest.h"  // for ResultBuilder, CHECK, etc.
+#include "fl/slice.h"  // for span
 
 using namespace fl;
 

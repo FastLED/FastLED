@@ -2,7 +2,7 @@
 
 // Include centralized AVR platform detection
 #if defined(__AVR__)
-#include "platforms/avr/is_avr.h"
+#include "platforms/avr/is_avr.h"  // ok platform headers
 #endif
 
 #if defined(__arm__)

@@ -750,7 +750,7 @@ FastLED 3.9.5
   * `fl::string`: a copy on write String with inlined memory, which overflows to the heap after 64 characters. Lightning fast to copy around and keep your characters on the stack and prevent heap allocation. Check it out in `fl/str.h`. If 64 characters is too large for your needs then you can change it with a build-level define.
   * `fl/vector.h`:
     * `fl::FixedVector`: Inlined vector which won't ever overflow.
-    * `fl::HeapVector`: Do you need overflow in your vector or a drop in replacement for `std::vector`? Use this.
+    * `fl::vector`: Do you need overflow in your vector or a drop in replacement for `std::vector`? Use this.
     * `fl::SortedHeapVector`: If you want to have your items sorted, use this. Inserts are O(n) always right now, however with deferred sorting, it could be much faster. Use `fl::SortedHeapVector::setMaxSize(int)` to keep it from growing.
   * `fl/map.h`
     * `fl::SortedHeapMap`: Almost a drop in replacement for `std::map`. It differs from the `fl::SortedHeapVector` because this version works on key/value pairs. Like `std::map` this takes a comparator which only applies to the keys.

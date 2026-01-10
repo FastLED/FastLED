@@ -13,8 +13,9 @@
 #include "fl/stl/string.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/function.h"
-#include "fl/stl/vector.h"
 #include "fl/stl/priority_queue.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/strstream.h"
 
 // Compile-time prefix for Remote JSON output
 // Define as empty string to disable: -DFASTLED_REMOTE_PREFIX=\"\"

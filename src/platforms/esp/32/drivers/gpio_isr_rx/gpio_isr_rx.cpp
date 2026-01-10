@@ -923,7 +923,7 @@ private:
     // Non-ISR members
     gpio_num_t mPin;                              ///< GPIO pin for RX
     size_t mBufferSize;                          ///< Buffer size for edge timestamps
-    fl::HeapVector<EdgeTimestamp> mEdgeBuffer;   ///< Buffer (ISR writes cycles, getEdges() converts to ns)
+    fl::vector<EdgeTimestamp> mEdgeBuffer;   ///< Buffer (ISR writes cycles, getEdges() converts to ns)
     bool mIsrInstalled;                          ///< True if ISR handler is installed
     bool mNeedsConversion;                       ///< True if buffer has cycles (not yet converted to ns)
     uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)

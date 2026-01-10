@@ -1,6 +1,6 @@
 #include "fl/stl/priority_queue.h"
 #include <stddef.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/utility.h"
@@ -239,7 +239,7 @@ TEST_CASE("fl::PriorityQueue stress test") {
 
 TEST_CASE("fl::push_heap and pop_heap functions") {
     SUBCASE("push_heap basic") {
-        HeapVector<int> v;
+        vector<int> v;
         v.push_back(5);
         push_heap(v.begin(), v.end());
         CHECK_EQ(v.front(), 5);
@@ -254,7 +254,7 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
     }
 
     SUBCASE("pop_heap basic") {
-        HeapVector<int> v;
+        vector<int> v;
         v.push_back(5);
         v.push_back(3);
         v.push_back(7);
@@ -281,7 +281,7 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
     }
 
     SUBCASE("push_heap with custom comparator") {
-        HeapVector<int> v;
+        vector<int> v;
         auto comp = [](int a, int b) { return a > b; };  // Min heap
 
         v.push_back(5);
@@ -299,7 +299,7 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
 
 TEST_CASE("fl::sift_down function") {
     SUBCASE("basic sift_down") {
-        HeapVector<int> v = {1, 7, 5, 3, 2};
+        vector<int> v = {1, 7, 5, 3, 2};
 
         // Sift down the first element
         sift_down(v.begin(), v.end(), v.begin(),

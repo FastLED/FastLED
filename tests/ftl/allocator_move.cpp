@@ -5,7 +5,7 @@
 #include "fl/stl/map.h"
 #include "fl/stl/set.h"
 #include "fl/stl/allocator.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
@@ -16,7 +16,7 @@
 #include "fl/stl/utility.h"
 #include "fl/unused.h"
 #include "new"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 namespace {
 
@@ -160,14 +160,14 @@ public:
 
 } // anonymous namespace
 
-TEST_CASE("HeapVector - Allocator move constructor") {
+TEST_CASE("vector - Allocator move constructor") {
     TrackingAllocator<int>::Stats stats;
 
     SUBCASE("Move constructor moves allocator") {
         stats.reset();
 
         // Create vector with default allocator, then populate
-        fl::HeapVector<int, TrackingAllocator<int>> vec2;
+        fl::vector<int, TrackingAllocator<int>> vec2;
         vec2.push_back(1);
         vec2.push_back(2);
         vec2.push_back(3);
@@ -176,7 +176,7 @@ TEST_CASE("HeapVector - Allocator move constructor") {
         stats.reset();
 
         // Move construct - should move the allocator
-        fl::HeapVector<int, TrackingAllocator<int>> vec3(fl::move(vec2));
+        fl::vector<int, TrackingAllocator<int>> vec3(fl::move(vec2));
 
         // Verify move constructor was called
         // Note: The allocator may be moved or copied depending on implementation
@@ -195,17 +195,17 @@ TEST_CASE("HeapVector - Allocator move constructor") {
     }
 }
 
-TEST_CASE("HeapVector - Allocator move assignment") {
+TEST_CASE("vector - Allocator move assignment") {
     TrackingAllocator<int>::Stats stats;
 
     SUBCASE("Move assignment moves allocator") {
         stats.reset();
 
-        fl::HeapVector<int, TrackingAllocator<int>> vec1;
+        fl::vector<int, TrackingAllocator<int>> vec1;
         vec1.push_back(10);
         vec1.push_back(20);
 
-        fl::HeapVector<int, TrackingAllocator<int>> vec2;
+        fl::vector<int, TrackingAllocator<int>> vec2;
         vec2.push_back(1);
         vec2.push_back(2);
         vec2.push_back(3);
@@ -456,13 +456,13 @@ TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
 
 TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
     SUBCASE("Stateless allocator (fl::allocator) moves are lightweight") {
-        fl::HeapVector<int> vec1;
+        fl::vector<int> vec1;
         vec1.push_back(1);
         vec1.push_back(2);
         vec1.push_back(3);
 
         // Move construct with stateless allocator
-        fl::HeapVector<int> vec2(fl::move(vec1));
+        fl::vector<int> vec2(fl::move(vec1));
 
         // Should still work correctly even though allocator is stateless
         CHECK(vec2.size() == 3);
@@ -473,10 +473,10 @@ TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
     }
 
     SUBCASE("Stateless allocator move assignment") {
-        fl::HeapVector<int> vec1;
+        fl::vector<int> vec1;
         vec1.push_back(100);
 
-        fl::HeapVector<int> vec2;
+        fl::vector<int> vec2;
         vec2.push_back(1);
         vec2.push_back(2);
 

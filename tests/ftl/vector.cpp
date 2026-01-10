@@ -4,7 +4,7 @@
 #include "fl/stl/vector.h"
 #include "fl/slice.h"  // For fl::span
 #include <stddef.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/insert_result.h"
 #include "fl/stl/allocator.h"
@@ -280,8 +280,8 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         CHECK(vec[4] == 5);
     }
 
-    SUBCASE("from HeapVector via span") {
-        fl::HeapVector<int> heap_vec;
+    SUBCASE("from vector via span") {
+        fl::vector<int> heap_vec;
         heap_vec.push_back(100);
         heap_vec.push_back(200);
         heap_vec.push_back(300);
@@ -466,9 +466,9 @@ TEST_CASE("SortedVector") {
     }
 }
 
-TEST_CASE("HeapVector") {
+TEST_CASE("vector") {
     SUBCASE("resize") {
-        fl::HeapVector<int> vec;
+        fl::vector<int> vec;
         vec.resize(5);
         CHECK(vec.size() == 5);
         CHECK(vec.capacity() >= 5);
@@ -484,8 +484,8 @@ TEST_CASE("HeapVector") {
         // Create a span from the array (implicit conversion)
         fl::span<const int> s(source_data, 5);
 
-        // Test implicit conversion from span to HeapVector
-        fl::HeapVector<int> vec = s;  // This should work with the implicit constructor
+        // Test implicit conversion from span to vector
+        fl::vector<int> vec = s;  // This should work with the implicit constructor
 
         CHECK(vec.size() == 5);
         CHECK(vec[0] == 10);
@@ -508,20 +508,20 @@ TEST_CASE("HeapVector") {
         fixed_vec.push_back(3);
 
         fl::span<const int> fixed_span(fixed_vec);
-        fl::HeapVector<int> from_fixed = fixed_span;
+        fl::vector<int> from_fixed = fixed_span;
 
         CHECK(from_fixed.size() == 3);
         CHECK(from_fixed[0] == 1);
         CHECK(from_fixed[1] == 2);
         CHECK(from_fixed[2] == 3);
 
-        // Test with another HeapVector
-        fl::HeapVector<int> heap_vec;
+        // Test with another vector
+        fl::vector<int> heap_vec;
         heap_vec.push_back(100);
         heap_vec.push_back(200);
 
         fl::span<const int> heap_span(heap_vec);
-        fl::HeapVector<int> from_heap = heap_span;
+        fl::vector<int> from_heap = heap_span;
 
         CHECK(from_heap.size() == 2);
         CHECK(from_heap[0] == 100);
@@ -553,8 +553,8 @@ TEST_CASE("Initializer list constructors") {
         CHECK(vec[2] == 3);
     }
     
-    SUBCASE("HeapVector initializer list") {
-        fl::HeapVector<int> vec{10, 20, 30, 40};
+    SUBCASE("vector initializer list") {
+        fl::vector<int> vec{10, 20, 30, 40};
         
         CHECK(vec.size() == 4);
         CHECK(vec[0] == 10);
@@ -585,7 +585,7 @@ TEST_CASE("Initializer list constructors") {
     }
     
     SUBCASE("fl::vector initializer list") {
-        fl::vector<int> vec{100, 200, 300};  // This uses HeapVector
+        fl::vector<int> vec{100, 200, 300};  // This uses vector
         
         CHECK(vec.size() == 3);
         CHECK(vec[0] == 100);
@@ -595,7 +595,7 @@ TEST_CASE("Initializer list constructors") {
     
     SUBCASE("Empty initializer list") {
         fl::FixedVector<int, 5> fixed_vec{};
-        fl::HeapVector<int> heap_vec{};
+        fl::vector<int> heap_vec{};
         fl::InlinedVector<int, 3> inlined_vec{};
 
         CHECK(fixed_vec.size() == 0);

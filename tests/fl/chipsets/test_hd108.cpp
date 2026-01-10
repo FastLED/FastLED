@@ -18,7 +18,7 @@
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "fl/ease.h"
 #include <stddef.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "dither_mode.h"
 #include "doctest.h"
 #include "eorder.h"
@@ -27,11 +27,8 @@
 #include "fl/eorder.h"
 #include "fl/int.h"
 #include "fl/slice.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/utility.h"
-#include "fl/stl/vector.h"
 #include "pixel_controller.h"
-#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

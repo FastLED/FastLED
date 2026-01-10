@@ -105,7 +105,9 @@ def main():
     # The compiler itself is not passed to IWYU - IWYU uses its own Clang frontend
 
     args = sys.argv[1:]
-    compiler_executable = None
+    compiler_executable: str | None = None
+    compiler_args: list[str] = []
+    iwyu_specific_args: list[str] = []
 
     # Split at '--' separator if present
     if "--" in args:
@@ -121,15 +123,15 @@ def main():
                 # Save compiler path for querying include paths
                 compiler_executable = compiler_and_args[0]
                 # Skip the compiler path itself (IWYU doesn't need it)
-                compiler_args: list[str] = compiler_and_args[1:]
+                compiler_args = compiler_and_args[1:]
             else:
-                compiler_args: list[str] = []
+                compiler_args = []
         else:
-            compiler_args: list[str] = []
+            compiler_args = []
     else:
         # No separator - all args go to IWYU
-        iwyu_specific_args: list[str] = []
-        compiler_args: list[str] = args
+        iwyu_specific_args = []
+        compiler_args = args
 
     # Extract include paths from the actual compiler
     # This ensures IWYU can find stdlib headers like <initializer_list>
@@ -183,18 +185,25 @@ def main():
     # Exit code 0 = no suggestions, non-zero = suggestions or errors
     iwyu_result = subprocess.run(iwyu_cmd)
 
-    # After IWYU analysis, run the actual compiler to produce the .obj file
-    # The compiler executable and args were saved earlier
+    # CRITICAL: Also run the actual compiler to produce .obj files
+    # The build system expects .obj files to exist for linking, but IWYU only analyzes code.
+    # We must invoke the actual compiler after IWYU analysis to create object files.
+    # Note: We ALWAYS run the compiler, even if IWYU had suggestions (non-zero exit).
+    # IWYU suggestions are informational, but the build must complete.
+    compile_returncode = 0
     if compiler_executable and compiler_args:
-        # Run the actual compiler with original arguments
-        compiler_cmd = [compiler_executable] + compiler_args
-        compiler_result = subprocess.run(compiler_cmd)
+        # Run the actual compilation
+        # Use the original compiler with original arguments (including PCH if present)
+        compile_cmd = [compiler_executable] + compiler_args
+        compile_result = subprocess.run(compile_cmd)
+        compile_returncode = compile_result.returncode
 
-        # If compiler fails, exit with compiler's error code (more important)
-        if compiler_result.returncode != 0:
-            sys.exit(compiler_result.returncode)
+    # Return compilation error if compilation failed (most critical)
+    # Otherwise return IWYU result (suggestions are useful but non-blocking)
+    if compile_returncode != 0:
+        sys.exit(compile_returncode)
 
-    # Exit with IWYU's return code (for CI checking)
+
     sys.exit(iwyu_result.returncode)
 
 

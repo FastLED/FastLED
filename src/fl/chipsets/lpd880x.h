@@ -5,7 +5,7 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
-#include "platforms/shared/spi_pixel_writer.h"
+#include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 #include "platforms/spi_output_template.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

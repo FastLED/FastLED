@@ -29,7 +29,7 @@ namespace fl {
 struct PinGroup {
     fl::u8 base_pin;      ///< Starting GPIO pin
     fl::u8 num_pins;      ///< Number of consecutive pins (2, 4, or 8)
-    fl::HeapVector<fl::u8> pins;  ///< List of all pins in this group (sorted)
+    fl::vector<fl::u8> pins;  ///< List of all pins in this group (sorted)
 
     PIO pio;          ///< PIO instance (pio0 or pio1)
     fl::i32 sm;           ///< State machine index (-1 if not allocated)
@@ -104,7 +104,7 @@ class RP2040ParallelGroup {
     bool mDrawn = false;
 
     // Pin groups detected from consecutive pins
-    fl::HeapVector<fl::unique_ptr<PinGroup>> mPinGroups;
+    fl::vector<fl::unique_ptr<PinGroup>> mPinGroups;
 
     // Map from pin number to group index
     fl::SortedHeapMap<fl::u8, fl::u32> mPinToGroupIndex;
@@ -146,7 +146,7 @@ class RP2040ParallelGroup {
         }
 
         // Extract pins and sort them (simple insertion sort for small N)
-        fl::HeapVector<fl::u8> sorted_pins;
+        fl::vector<fl::u8> sorted_pins;
         for (auto it = mRectDrawBuffer.mDrawList.begin();
              it != mRectDrawBuffer.mDrawList.end(); ++it) {
             sorted_pins.push_back(it->mPin);

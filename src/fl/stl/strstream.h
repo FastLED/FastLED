@@ -12,7 +12,7 @@ namespace fl {
 class Tile2x2_u8;
 class Tile2x2_u8_wrap;  // Forward declaration to support operator<< overload
 template <typename T> struct vec2;  // Forward declaration from fl/geometry.h
-template <typename T, typename Alloc> class HeapVector;  // Forward declaration from fl/vector.h
+template <typename T, typename Alloc> class vector;  // Forward declaration from fl/vector.h
 struct FFTBins;  // Forward declaration from fl/fft.h
 template <fl::u32 N> class BitsetFixed;
 class bitset_dynamic;
@@ -60,9 +60,9 @@ class StrStream {
         return *this;
     }
 
-    // HeapVector<T, Alloc> support - format as [item1, item2, ...]
+    // vector<T, Alloc> support - format as [item1, item2, ...]
     template<typename T, typename Alloc>
-    StrStream &operator<<(const HeapVector<T, Alloc> &vec) {
+    StrStream &operator<<(const fl::vector<T, Alloc> &vec) {
         mStr.append("[");
         for (fl::size i = 0; i < vec.size(); ++i) {
             if (i > 0) {
@@ -287,9 +287,9 @@ class FakeStrStream {
     template<typename T>
     FakeStrStream &operator<<(const vec2<T> &) { return *this; }
 
-    // HeapVector support
+    // vector support
     template<typename T, typename Alloc>
-    FakeStrStream &operator<<(const HeapVector<T, Alloc> &) { return *this; }
+    FakeStrStream &operator<<(const fl::vector<T, Alloc> &) { return *this; }
 
     // Bitset support
     template<fl::u32 N>

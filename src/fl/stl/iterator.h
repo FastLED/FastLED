@@ -7,11 +7,11 @@ namespace fl {
 /// Back insert iterator - an output iterator that inserts elements at the end of a container
 ///
 /// This is similar to std::back_insert_iterator and provides a convenient way to insert elements
-/// into containers that support push_back() (like fl::HeapVector, fl::FixedVector, fl::InlinedVector).
+/// into containers that support push_back() (like fl::vector, fl::FixedVector, fl::InlinedVector).
 ///
 /// Usage example:
 /// @code
-///     fl::HeapVector<int> vec;
+///     fl::vector<int> vec;
 ///     auto inserter = fl::back_inserter(vec);
 ///     *inserter++ = 10;
 ///     *inserter++ = 20;
@@ -21,8 +21,8 @@ namespace fl {
 ///
 /// Or use in algorithm-style iteration:
 /// @code
-///     fl::HeapVector<int> source = {1, 2, 3, 4, 5};
-///     fl::HeapVector<int> dest;
+///     fl::vector<int> source = {1, 2, 3, 4, 5};
+///     fl::vector<int> dest;
 ///     auto inserter = fl::back_inserter(dest);
 ///     for (auto it = source.begin(); it != source.end(); ++it) {
 ///         *inserter++ = *it;
@@ -87,7 +87,7 @@ public:
 ///
 /// Example:
 /// @code
-///     fl::HeapVector<int> vec;
+///     fl::vector<int> vec;
 ///     auto it = fl::back_inserter(vec);
 ///     *it = 42;  // vec now contains [42]
 /// @endcode

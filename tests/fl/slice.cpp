@@ -2,7 +2,7 @@
 #include "fl/stl/array.h"
 #include "doctest.h"
 #include "fl/geometry.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 
 using namespace fl;
 

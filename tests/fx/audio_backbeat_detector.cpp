@@ -4,7 +4,7 @@
 #include "fl/fx/audio/detectors/downbeat.h"
 #include "fl/audio/audio_context.h"
 #include "fl/stl/math.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/audio.h"
 #include "fl/int.h"
@@ -16,7 +16,6 @@
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
-#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

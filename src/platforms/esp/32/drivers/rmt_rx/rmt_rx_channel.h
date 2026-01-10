@@ -48,7 +48,7 @@ namespace fl {
  *     auto rx_timing = fl::make4PhaseTiming(ws2812b_tx, 150);
  *
  *     // Decode to bytes
- *     fl::HeapVector<uint8_t> bytes;
+ *     fl::vector<uint8_t> bytes;
  *     auto result = rx->decode(rx_timing, fl::back_inserter(bytes));
  *     if (result.ok()) {
  *         FL_DBG("Decoded " << result.value() << " bytes");
@@ -159,7 +159,7 @@ public:
      *     fl::ChipsetTiming ws2812b{fl::TIMING_WS2812_800KHZ::T1, fl::TIMING_WS2812_800KHZ::T2,
      *                               fl::TIMING_WS2812_800KHZ::T3, fl::TIMING_WS2812_800KHZ::RESET, "WS2812B"};
      *     auto rx_timing = fl::make4PhaseTiming(ws2812b, 150);
-     *     fl::HeapVector<uint8_t> bytes;
+     *     fl::vector<uint8_t> bytes;
      *     rx->decode(rx_timing, fl::back_inserter(bytes));
      * }
      * @endcode

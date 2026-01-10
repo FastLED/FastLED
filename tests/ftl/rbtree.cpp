@@ -7,7 +7,7 @@
 #include "__algorithm/shuffle.h"
 #include "__fwd/string.h"
 #include "__iterator/reverse_iterator.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__random/mersenne_twister_engine.h"
 #include "__random/random_device.h"
 #include "__utility/move.h"

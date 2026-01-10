@@ -1,17 +1,16 @@
 #pragma once
 
 
-#include "fl/stl/stdint.h"
 #include "fl/clamp.h"
 #include "fl/geometry.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/type_traits.h"
+#include "fl/int.h"
 
 namespace fl {
 
 template <typename T, fl::size INLINED_SIZE> class FixedVector;
 
-template <typename T, typename Allocator> class HeapVector;
+template <typename T, typename Allocator> class vector;
 
 template <typename T, fl::size INLINED_SIZE> class InlinedVector;
 
@@ -95,7 +94,7 @@ template <typename T> class span<T, dynamic_extent> {
     // ======= CONTAINER CONSTRUCTORS =======
     // Simple constructors that work for all cases
     template<typename Alloc>
-    span(const HeapVector<T, Alloc> &vector)
+    span(const fl::vector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>
@@ -108,7 +107,7 @@ template <typename T> class span<T, dynamic_extent> {
 
     // Additional constructors for const conversion (U -> const U)
     template<typename U, typename Alloc>
-    span(const HeapVector<U, Alloc> &vector)
+    span(const fl::vector<U, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template<typename U, fl::size INLINED_SIZE>
@@ -122,7 +121,7 @@ template <typename T> class span<T, dynamic_extent> {
     // ======= NON-CONST CONTAINER CONVERSIONS =======
     // Non-const versions for mutable spans
     template<typename Alloc>
-    span(HeapVector<T, Alloc> &vector)
+    span(fl::vector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>

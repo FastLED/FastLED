@@ -959,7 +959,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Use a small discard buffer (64 symbols = 256 bytes)
         constexpr size_t DISCARD_BUFFER_SIZE = 64;
-        fl::HeapVector<RmtSymbol> discard_buffer;
+        fl::vector<RmtSymbol> discard_buffer;
         discard_buffer.reserve(DISCARD_BUFFER_SIZE);
         for (size_t i = 0; i < DISCARD_BUFFER_SIZE; i++) {
             discard_buffer.push_back(0);
@@ -1348,9 +1348,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter; ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
                       ///< (inverted)
-    fl::HeapVector<RmtSymbol>
+    fl::vector<RmtSymbol>
         mInternalBuffer; ///< DMA buffer for hardware RX (small, ≤4096 symbols)
-    fl::HeapVector<RmtSymbol>
+    fl::vector<RmtSymbol>
         mAccumulationBuffer; ///< Accumulation buffer for full data stream
                              ///< (user-requested size)
     volatile size_t

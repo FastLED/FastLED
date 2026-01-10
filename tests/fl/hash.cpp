@@ -4,7 +4,6 @@
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/int.h"
-#include "platforms/shared/int_windows.h"
 
 using namespace fl;
 

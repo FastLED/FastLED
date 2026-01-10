@@ -1,11 +1,14 @@
 
 #pragma once
 
-#include "fl/stl/span.h"
+#include "fl/geometry.h"
+#include "fl/slice.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/allocator.h"
+#include "fl/int.h"
 
 namespace fl {
+
+template <typename T> class allocator_psram;
 
 
 template <typename T> class Grid {

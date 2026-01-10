@@ -48,7 +48,7 @@ template <typename T> struct rect;
 template <typename T> struct vec2;
 template <typename T> struct vec3;
 template <typename T, fl::size Extent> class span;
-template <typename T, typename Allocator> class HeapVector;
+template <typename T, typename Allocator> class vector;
 template <typename T, fl::size N> class InlinedVector;
 template <typename T, fl::size N> class FixedVector;
 template <fl::size N> class StrN;
@@ -2183,7 +2183,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> string &append(const fl::HeapVector<T> &vec) {
+    template <typename T> string &append(const fl::vector<T> &vec) {
         fl::span<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;

@@ -3,7 +3,7 @@
 
 #include "fl/sensors/potentiometer.h"
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"

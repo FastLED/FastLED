@@ -5,10 +5,10 @@
 #include "fl/fx/video/pixel_stream.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "hsv2rgb.h"  // for CRGB
 #include "doctest.h"
 #include "fl/fx/video.h"
 #include "fl/stl/shared_ptr.h"
+#include "hsv2rgb.h"
 
 TEST_CASE("ByteStreamMemory basic operations") {
 

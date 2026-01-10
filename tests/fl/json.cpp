@@ -8,7 +8,7 @@
 #include "fl/stl/map.h"
 #include <stdint.h>
 #include <stdio.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/log.h"
@@ -21,7 +21,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
-#include "fl/stl/vector.h"
+#include "fl/stl/strstream.h"
 
 
 

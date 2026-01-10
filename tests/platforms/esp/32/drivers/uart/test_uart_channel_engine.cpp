@@ -12,10 +12,9 @@
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "fl/channels/engine.h"
 #include "fl/delay.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"

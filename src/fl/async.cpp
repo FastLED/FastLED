@@ -7,6 +7,7 @@
 #include "fl/stl/time.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
+#include "fl/thread_local.h"
 
 // Platform-specific includes
 #ifdef __EMSCRIPTEN__
@@ -146,7 +147,7 @@ void Scheduler::update() {
         task& t = mTasks[i];
 
         if (!t.is_valid() || t._is_canceled()) {
-            // erase() returns bool in HeapVector, not iterator
+            // erase() returns bool in fl::vector, not iterator
             mTasks.erase(mTasks.begin() + i);
             // Don't increment i since we just removed an element
         } else {
@@ -169,7 +170,7 @@ void Scheduler::update() {
                 if (is_recurring) {
                     ++i; // Keep recurring tasks
                 } else {
-                    // erase() returns bool in HeapVector, not iterator
+                    // erase() returns bool in fl::vector, not iterator
                     mTasks.erase(mTasks.begin() + i);
                     // Don't increment i since we just removed an element
                 }
@@ -196,7 +197,7 @@ void Scheduler::update_tasks_of_type(TaskType task_type) {
         task& t = mTasks[i];
 
         if (!t.is_valid() || t._is_canceled()) {
-            // erase() returns bool in HeapVector, not iterator
+            // erase() returns bool in fl::vector, not iterator
             mTasks.erase(mTasks.begin() + i);
             // Don't increment i since we just removed an element
         } else if (t._type() == task_type) {

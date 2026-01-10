@@ -74,7 +74,7 @@ class LedRopeTCL : public LedRopeInterface {
   bool mLazyInitialized;
   FrameBuffer mFrameBuffer;
   bool mControllerAdded = false;
-  fl::HeapVector<CRGB> mLedBuffer;
+  fl::vector<CRGB> mLedBuffer;
   fl::ScreenMap mScreenMap;
 };
 

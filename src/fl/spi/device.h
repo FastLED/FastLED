@@ -14,7 +14,7 @@
 #include "fl/numeric_limits.h"
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
-#include "platforms/shared/spi_types.h"  // DMABuffer, SPIError, TransmitMode
+#include "platforms/shared/spi_types.h"  // ok platform headers - DMABuffer, SPIError, TransmitMode
 
 namespace fl {
 namespace spi {

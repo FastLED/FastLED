@@ -18,7 +18,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/chipset_timing_config.h"
@@ -28,7 +28,6 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/stl/vector.h"
 #include "led_sysdefs_stub_generic.h"
 #include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 

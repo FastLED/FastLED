@@ -8,13 +8,12 @@
 
 #include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
-#include "fl/stl/vector.h"
 #include <stddef.h>
 #include <stdint.h>
 #include "fl/log.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/strstream.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 

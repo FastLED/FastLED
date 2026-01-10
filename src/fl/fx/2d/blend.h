@@ -17,7 +17,7 @@ namespace fl {
 class Frame;
 class XYMap;
 template<typename T, typename Allocator>
-class HeapVector;
+class vector;
 
 struct Blend2dParams {
     uint8_t blur_amount = 0;
@@ -55,7 +55,7 @@ class Blend2d : public Fx2d {
         Entry(Fx2dPtr fx, uint8_t blur_amount, uint8_t blur_passes)
             : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };
-    HeapVector<Entry> mLayers;
+    vector<Entry> mLayers;
     fl::shared_ptr<Frame> mFrame;
     fl::shared_ptr<Frame> mFrameTransform;
     uint8_t mGlobalBlurAmount = 0;

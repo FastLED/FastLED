@@ -21,10 +21,9 @@
 
 #include "fl/chipsets/encoders/ws2801.h"
 #include "fl/stl/array.h"
-#include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
 #include <stddef.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"

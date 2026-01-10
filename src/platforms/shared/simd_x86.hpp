@@ -16,7 +16,12 @@
 
 // SSE2 intrinsics (baseline for all x64, available on most x86)
 #if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+  // Clang's SIMD intrinsic headers use C++14 constexpr features
+  // Suppress C++14 extension warnings when including these system headers
+  FL_DIAGNOSTIC_PUSH
+  FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS
   #include <emmintrin.h>  // SSE2
+  FL_DIAGNOSTIC_POP
   #define FASTLED_X86_HAS_SSE2 1
 #else
   #define FASTLED_X86_HAS_SSE2 0

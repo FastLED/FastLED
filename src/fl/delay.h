@@ -9,13 +9,13 @@
 
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
-#include "fl/compiler_control.h"
+#include "platforms/delaycycles_generic.h"
+#include "fl/int.h"
 
 // ============================================================================
 // Platform-specific includes (must be outside detail namespace)
 // ============================================================================
 
-#include "platforms/delay.h"
 
 namespace fl {
 

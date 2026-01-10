@@ -9,18 +9,17 @@
 #include "fl/tile2x2.h" // Ensure this header is included for Tile2x2_u8
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
-#include "crgb.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/log.h"
 #include "fl/rgb8.h"
 #include "fl/slice.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/strstream.h"
-#include "fl/stl/vector.h"
 #include "fl/unused.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
+#include "fl/stl/vector.h"
+#include "hsv2rgb.h"
 
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 288

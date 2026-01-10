@@ -40,7 +40,6 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/string.h"
-#include "platforms/shared/int_windows.h"
 
 TEST_CASE("StrStream basic operations") {
     SUBCASE("Construction and assignment") {

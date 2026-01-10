@@ -4,7 +4,7 @@
 #define __INC_LIB8TION_RANDOM_H
 
 #if defined(__AVR__)
-#include "platforms/avr/is_avr.h"
+#include "platforms/avr/is_avr.h"  // ok platform headers
 #endif
 
 #include "fl/stl/stdint.h"

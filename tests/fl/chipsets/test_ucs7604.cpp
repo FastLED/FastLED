@@ -7,12 +7,10 @@
 /// - Padding: 0-2 zero bytes to ensure total size divisible by 3
 
 #include "fl/chipsets/ucs7604.h"
-#include "crgb.h"
-#include "fl/stl/vector.h"
 #include "fl/ease.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "cled_controller.h"
 #include "cpixel_ledcontroller.h"
 #include "dither_mode.h"
@@ -25,9 +23,10 @@
 #include "fl/rgb8.h"
 #include "fl/rgbw.h"
 #include "fl/slice.h"
-#include "fl/stl/allocator.h"
 #include "pixel_controller.h"
 #include "rgbw.h"
+#include "fl/stl/vector.h"
+#include "hsv2rgb.h"
 
 using namespace fl;
 

@@ -336,7 +336,7 @@ public:
 
     // OPTIMIZED: reallocate() - in-place resize using fl::realloc()
     // Returns the new pointer if successful, nullptr if not supported/failed
-    // The caller (HeapVector) handles fallback to allocate-copy-deallocate
+    // The caller (fl::vector) handles fallback to allocate-copy-deallocate
     pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
         if (new_count == 0) {
             if (ptr) {

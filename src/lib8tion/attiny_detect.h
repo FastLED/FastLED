@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platforms/avr/is_avr.h"
+#include "platforms/avr/is_avr.h"  // ok platform headers
 
 /// @file attiny_detect.h
 /// Automatic detection of ATtiny platforms

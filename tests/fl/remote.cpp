@@ -4,14 +4,12 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/cstdio.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/fx/wled/segment.h"
 #include "fl/json.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
-#include "fl/stl/vector.h"
 
 // Test 4.1 - Basic Function Registration
 TEST_CASE("Remote: Basic function registration") {

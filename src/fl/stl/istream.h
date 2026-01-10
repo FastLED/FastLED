@@ -5,7 +5,6 @@
 #include "fl/stl/type_traits.h"
 #include "fl/sketch_macros.h"
 #include "fl/int.h"
-#include "fl/int.h"
 
 // Forward declarations to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
 #ifndef FTL_CSTDIO_H_INCLUDED

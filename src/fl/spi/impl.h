@@ -5,9 +5,9 @@
 /// @note This header is for internal use only (pImpl pattern)
 
 #include "fl/spi.h"
-#include "platforms/shared/spi_bus_manager.h"
-#include "platforms/shared/spi_types.h"
-#include "platforms/shared/spi_hw_base.h"
+#include "platforms/shared/spi_bus_manager.h"  // ok platform headers
+#include "platforms/shared/spi_types.h"  // ok platform headers
+#include "platforms/shared/spi_hw_base.h"  // ok platform headers
 #include "fl/log.h"
 #include "fl/numeric_limits.h"
 

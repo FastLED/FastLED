@@ -1,12 +1,16 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
 
 #include "fl/stl/vector.h"
-#include "fl/stl/map.h"
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/pair.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/move.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/utility.h"
+#include "fl/int.h"
 
 
 namespace fl {
@@ -169,7 +173,7 @@ template <typename Key, size N> class VectorSetFixed {
 
 template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet {
   public:
-    typedef fl::HeapVector<Key, Allocator> VectorType;
+    typedef fl::vector<Key, Allocator> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
 

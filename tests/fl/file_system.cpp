@@ -24,12 +24,12 @@
 #include <stdint.h>
 #include "__algorithm/remove.h"
 #include "__fwd/string.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__vector/vector.h"
 #include "doctest.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
-#include "platforms/shared/int_windows.h"
+#include "fl/int.h"
 #include "string"
 #endif
 

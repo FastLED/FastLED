@@ -17,16 +17,16 @@
 #include "doctest.h"
 #include "fl/chipsets/encoders/hd108.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
-#include "fl/stl/vector.h"
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
 #include <stddef.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "fl/ease.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "platforms/shared/int_windows.h"
+#include "fl/stl/vector.h"
 
 namespace test_hd108 {
 

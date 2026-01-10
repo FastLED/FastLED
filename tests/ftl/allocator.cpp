@@ -1,11 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
-#include "fl/stl/vector.h"
+#include "fl/int.h"
 #include "platforms/shared/int_windows.h"
 
 using namespace fl;

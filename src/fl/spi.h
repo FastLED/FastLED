@@ -18,7 +18,7 @@
 #include "fl/spi/lane.h"
 #include "fl/spi/write_result.h"  // Defines WriteResult with wait() method
 #include "fl/spi/multi_lane_device.h"
-#include "platforms/shared/spi_types.h"
+#include "platforms/shared/spi_types.h"  // ok platform headers
 
 namespace fl {
 

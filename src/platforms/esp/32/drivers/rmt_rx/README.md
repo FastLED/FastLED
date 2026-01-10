@@ -44,7 +44,7 @@ if (rx->wait(50) == fl::esp32::RmtRxWaitResult::SUCCESS) {
     FL_DBG("Received " << symbols.size() << " symbols");
 
     // Decode to bytes
-    fl::HeapVector<uint8_t> bytes;
+    fl::vector<uint8_t> bytes;
     auto result = rx->decode(fl::esp32::CHIPSET_TIMING_WS2812B_RX,
                              fl::back_inserter(bytes));
     if (result.ok()) {
@@ -82,7 +82,7 @@ while (!rx->finished()) {
 }
 
 // Decode and validate
-fl::HeapVector<uint8_t> bytes;
+fl::vector<uint8_t> bytes;
 auto result = rx->decode(fl::esp32::CHIPSET_TIMING_WS2812B_RX,
                          fl::back_inserter(bytes));
 // Compare bytes against expected values...

@@ -3,11 +3,11 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/shared/spi_hw_16.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "doctest.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 
 TEST_CASE("FL_INIT verification - SPI stub instances are registered") {
     // Test that FL_INIT successfully registered all SPI stub instances

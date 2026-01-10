@@ -5,8 +5,8 @@
 #include "fl/hsv16.h"
 #include "lib8tion/intmap.h"
 #include <stdint.h>
-#include "crgb.h"
 #include "doctest.h"
+#include "hsv2rgb.h"
 
 
 TEST_CASE("RGB to HSV16 to RGB") {

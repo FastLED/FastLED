@@ -3,10 +3,10 @@
 
 
 #include "fl/downscale.h"
-#include "crgb.h"
 #include "doctest.h"
 #include "fl/rgb8.h"
 #include "fl/xymap.h"
+#include "hsv2rgb.h"
 
 
 TEST_CASE("downscale 2x2 to 1x1") {

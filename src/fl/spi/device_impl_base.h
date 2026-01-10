@@ -6,7 +6,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
-#include "platforms/shared/spi_hw_base.h"
+#include "platforms/shared/spi_hw_base.h"  // ok platform headers
 
 namespace fl {
 namespace spi {

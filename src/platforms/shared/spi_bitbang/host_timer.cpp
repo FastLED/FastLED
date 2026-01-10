@@ -42,8 +42,8 @@ struct ISRContext {
 };
 
 /* Global ISR registry (for multi-instance support) */
-static fl::HeapVector<ISRContext*>& get_isr_contexts() {
-    static fl::HeapVector<ISRContext*> contexts;
+static fl::vector<ISRContext*>& get_isr_contexts() {
+    static fl::vector<ISRContext*> contexts;
     return contexts;
 }
 

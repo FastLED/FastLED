@@ -3,14 +3,13 @@
 
 
 #include "FastLED.h"
-#include "chsv.h"
 #include "colorutils.h"
-#include "crgb.h"
 #include "doctest.h"
 #include "eorder.h"
 #include "fl/colorutils_misc.h"
 #include "fl/eorder.h"
 #include "fl/fill.h"
+#include "hsv2rgb.h"
 
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000

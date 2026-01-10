@@ -8,7 +8,7 @@
 #include <string>
 #include <stdint.h>
 #include "__fwd/string.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__thread/thread.h"
 #include "__type_traits/invoke.h"
 #include "__vector/vector.h"
@@ -20,7 +20,6 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
-#include "platforms/shared/int_windows.h"
 #include "stdio.h"
 #include "string.h"
 

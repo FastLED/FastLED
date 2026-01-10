@@ -9,7 +9,6 @@ Each of the four pixels in the tile is a fl::u8 value in the range
 */
 
 #include "fl/tile2x2.h"
-#include "fl/int.h"
 #include "fl/geometry.h"
 
 namespace fl {

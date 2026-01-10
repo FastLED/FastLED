@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdio> // For std::sprintf and std::snprintf
 #include "__algorithm/min.h"
-#include "__new/placement_new_delete.h"
+#include "fl/stl/new.h"
 #include "__ostream/basic_ostream.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/move.h"
