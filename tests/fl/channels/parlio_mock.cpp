@@ -691,6 +691,13 @@ TEST_CASE("parlio_mock_untransposition_complex_pattern") {
     // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
     // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
     uint8_t expected_pin1[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+
+    // Check values with CAPTURE
+    CAPTURE((int)pin1_data[0]);
+    CAPTURE((int)pin1_data[1]);
+    CAPTURE((int)expected_pin1[0]);
+    CAPTURE((int)expected_pin1[1]);
+
     for (size_t i = 0; i < pin1_data.size(); i++) {
         REQUIRE(pin1_data[i] == expected_pin1[i]);
     }
