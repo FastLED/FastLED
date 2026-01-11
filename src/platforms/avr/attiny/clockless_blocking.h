@@ -144,7 +144,7 @@ template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER uint8_t & loopvar)
 #endif
 
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-static uint8_t gTimeErrorAccum256ths;
+extern uint8_t gTimeErrorAccum256ths;
 #endif
 
 #define FASTLED_HAS_CLOCKLESS 1
