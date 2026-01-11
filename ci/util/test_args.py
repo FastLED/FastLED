@@ -161,6 +161,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Build Docker images if missing (use with --qemu)",
     )
+    parser.add_argument("--no-unity", help="Not in use any more, maybe revived later")
 
     parsed_args = parser.parse_args(args)
 
