@@ -5,6 +5,7 @@
 // Maps SD card operations to real hard drive paths for testing
 
 #include "fl/file_system.h"
+#include "fl/log.h"
 #include "fl/stl/memory.h"
 #include <algorithm>  // For std::replace in path conversion
 #include <fstream>    // For file I/O operations
@@ -170,13 +171,13 @@ public:
 #else
         if (access(full_path.c_str(), F_OK) != 0) {
 #endif
-            FASTLED_WARN("Test file not found: " << full_path.c_str());
+            FL_WARN("Test file not found: " << full_path.c_str());
             return FileHandlePtr();
         }
 
         auto handle = fl::make_shared<StubFileHandle>(full_path);
         if (!handle->valid()) {
-            FASTLED_WARN("Failed to open test file: " << full_path.c_str());
+            FL_WARN("Failed to open test file: " << full_path.c_str());
             return FileHandlePtr();
         }
 
