@@ -37,7 +37,8 @@
 #elif defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
     #include "platforms/arm/d21/mutex_samd.h"
 #elif defined(FL_IS_TEENSY)
-    #include "platforms/arm/teensy/mutex_teensy.h"
+    // TODO: Implement Teensy mutexes
+    #include "platforms/stub/mutex_stub_noop.h"
 #else
     // Default fallback: Use stub implementation for all platforms
     // TODO: Add platform-specific implementations here as needed

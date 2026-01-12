@@ -63,7 +63,7 @@
 
 // Teensy - FreeRTOS, TeensyThreads, or interrupt-based mutex (auto-detected)
 #if defined(FL_IS_TEENSY)
-    #include "platforms/arm/teensy/mutex_teensy.h"
+    #include "platforms/stub/thread_stub_noop.h"
 #endif
 
 // Note: ESP32 and RP2040/RP2350 already have their own mutex implementations

@@ -214,7 +214,7 @@ Examples:
         print("The 'FastLED.h' header is for end-user sketches only.")
         return 1
     else:
-        print("No violations found ✓")
+        print("No violations found (ok)")
         return 0
 
 

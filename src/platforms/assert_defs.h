@@ -1,14 +1,35 @@
 // ok no namespace fl
 #pragma once
 
-#include "fl/stl/strstream.h"
-#include "fl/warn.h"
+// TODO: Please fix this header, it's a little messy.
+//
+// Note: Do NOT include "fl/warn.h" here as it causes circular dependency:
+// assert_defs.h -> warn.h -> log.h -> sketch_macros.h -> ostream.h -> string.h -> shared_ptr.h -> atomic.h -> thread.h -> mutex_teensy.h -> assert.h -> assert_defs.h
+//
+// Instead, we use a minimal warning mechanism for assertions that doesn't require string formatting
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js_assert.h"
 #elif defined(ESP32)
 #include "platforms/esp/esp_assert.h"
-#else
+#endif
+
+// Forward declare minimal print function for assertions
+// Implementation is in fl/stl/cstdio.cpp
+#ifndef FL_PRINTLN_DECLARED
+#define FL_PRINTLN_DECLARED
+namespace fl {
+    void println(const char* str);
+}
+#endif
+
+// Minimal FASTLED_WARN_IF macro that only accepts string literals (no formatting)
+// This breaks the circular dependency by not requiring StrStream/string.h
+#ifndef FASTLED_WARN_IF
+#define FASTLED_WARN_IF(COND, MSG) do { if (COND) fl::println(MSG); } while(0)
+#endif
+
+#if !defined(__EMSCRIPTEN__) && !defined(ESP32)
 
 #ifndef FASTLED_USES_SYSTEM_ASSERT
 #if defined(FASTLED_TESTING)
