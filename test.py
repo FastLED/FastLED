@@ -10,8 +10,10 @@ import traceback
 import warnings
 from pathlib import Path
 
+from ci.runners.avr8js_runner import run_avr8js_tests
+from ci.runners.qemu_runner import run_qemu_tests
+from ci.util.fingerprint import FingerprintManager
 from ci.util.global_interrupt_handler import (
-    notify_main_thread,
     signal_interrupt,
     wait_for_cleanup,
 )
@@ -26,12 +28,6 @@ from ci.util.test_env import (
 )
 from ci.util.test_runner import runner as test_runner
 from ci.util.test_types import (
-    FingerprintResult,
-    TestArgs,
-    calculate_cpp_test_fingerprint,
-    calculate_examples_fingerprint,
-    calculate_fingerprint,
-    calculate_python_test_fingerprint,
     process_test_flags,
 )
 from ci.util.timestamp_print import ts_print
@@ -40,18 +36,16 @@ _CANCEL_WATCHDOG = threading.Event()
 
 _TIMEOUT_EVERYTHING = 600
 
+
 # Platform to emulator backend mapping for --run command
-_RUN_PLATFORM_BACKENDS = {
-    # ESP32 platforms use QEMU
-    "esp32dev": "qemu",
-    "esp32c3": "qemu",
-    "esp32s3": "qemu",
-    # AVR boards use avr8js
-    "uno": "avr8js",
-    "attiny85": "avr8js",
-    "attiny88": "avr8js",
-    "nano_every": "avr8js",
-}
+def _load_backends():
+    backend_path = Path(__file__).parent / "ci" / "runners" / "backends.json"
+    with open(backend_path) as f:
+        return json.load(f)
+
+
+_RUN_PLATFORM_BACKENDS = _load_backends()
+
 
 if os.environ.get("_GITHUB"):
     _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub Linux builds
@@ -90,474 +84,6 @@ def make_watch_dog_thread(
     thr = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")
     thr.start()
     return thr
-
-
-def run_qemu_tests(args: TestArgs) -> None:
-    """Run examples in QEMU emulation using Docker."""
-    from pathlib import Path
-
-    from running_process import RunningProcess
-
-    from ci.docker.qemu_esp32_docker import DockerQEMURunner
-
-    if not args.qemu or len(args.qemu) < 1:
-        ts_print("Error: --qemu requires a platform (e.g., esp32s3)")
-        sys.exit(1)
-
-    platform = args.qemu[0].lower()
-    supported_platforms = ["esp32dev", "esp32c3", "esp32s3"]
-    if platform not in supported_platforms:
-        ts_print(
-            f"Error: Unsupported QEMU platform: {platform}. Supported platforms: {', '.join(supported_platforms)}"
-        )
-        sys.exit(1)
-
-    ts_print(f"Running {platform.upper()} QEMU tests using Docker...")
-
-    # Determine which examples to test (skip the platform argument)
-    examples_to_test = args.qemu[1:] if len(args.qemu) > 1 else ["BlinkParallel"]
-    if not examples_to_test:  # Empty list means test all available examples
-        examples_to_test = ["BlinkParallel", "RMT5WorkerPool"]
-
-    ts_print(f"Testing examples: {examples_to_test}")
-
-    # Quick test mode - just validate the setup
-    if os.getenv("FASTLED_QEMU_QUICK_TEST") == "true":
-        ts_print("Quick test mode - validating Docker QEMU setup only")
-        ts_print("QEMU ESP32 Docker option is working correctly!")
-        return
-
-    # Initialize Docker QEMU runner
-    docker_runner = DockerQEMURunner()
-
-    # Check if Docker is available
-    if not docker_runner.check_docker_available():
-        ts_print("❌ ERROR: Docker is not available or not running")
-        ts_print()
-        ts_print("Please install Docker Desktop and ensure it's running:")
-        ts_print("  https://www.docker.com/products/docker-desktop")
-        ts_print()
-        sys.exit(1)
-
-    # Check if board Docker image exists (needed for compilation)
-    board_image = docker_runner.get_board_image_name(platform)
-    image_exists = docker_runner.check_image_exists(board_image)
-
-    if not image_exists:
-        ts_print(f"❌ Docker image for {platform} not found locally")
-        ts_print()
-
-        # Try pulling from Docker Hub registry first
-        ts_print("Attempting to pull prebuilt image from Docker Hub...")
-        pull_success = docker_runner.pull_and_tag_board_image(platform)
-
-        if pull_success:
-            ts_print("✅ Successfully pulled and configured Docker image")
-            ts_print()
-            image_exists = True
-        else:
-            # Pull failed - show build options
-            ts_print()
-            ts_print("❌ Could not pull image from Docker Hub")
-            ts_print()
-
-            # Check if we should auto-build
-            if args.build:
-                # Auto-build mode (explicit flag)
-                ts_print("Auto-build enabled (--build flag)")
-                ts_print()
-                build_result = docker_runner.build_board_image(platform, progress=True)
-                if build_result != 0:
-                    ts_print(f"❌ Failed to build Docker image for {platform}")
-                    sys.exit(1)
-            elif args.interactive:
-                # Interactive prompt mode
-                response = (
-                    input("Docker image missing. Build now? [y/N]: ").strip().lower()
-                )
-                if response in ["y", "yes"]:
-                    ts_print()
-                    build_result = docker_runner.build_board_image(
-                        platform, progress=True
-                    )
-                    if build_result != 0:
-                        ts_print(f"❌ Failed to build Docker image for {platform}")
-                        sys.exit(1)
-                else:
-                    ts_print("Build cancelled. Please build the image manually.")
-                    sys.exit(1)
-            else:
-                # Default mode - automatically build with warning and delay
-                ts_print("⚠️  Docker image not available. Will build automatically.")
-                ts_print("   This will take approximately 30 minutes.")
-                ts_print("   Press Ctrl+C within 5 seconds to cancel...")
-                ts_print()
-
-                import time
-
-                for i in range(5, 0, -1):
-                    ts_print(f"   Starting build in {i}...", end="\r")
-                    time.sleep(1)
-                ts_print()  # New line after countdown
-                ts_print()
-
-                ts_print("🔨 Building Docker image automatically...")
-                ts_print()
-                build_result = docker_runner.build_board_image(platform, progress=True)
-                if build_result != 0:
-                    ts_print(f"❌ Failed to build Docker image for {platform}")
-                    ts_print()
-                    ts_print("Options:")
-                    ts_print("  1. Try again with verbose logging:")
-                    ts_print(
-                        f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
-                    )
-                    ts_print()
-                    ts_print("  2. Build image separately:")
-                    ts_print(f"     bash compile --docker --build {platform} Blink")
-                    ts_print()
-                    sys.exit(1)
-
-    success_count = 0
-    failure_count = 0
-
-    # Test each example
-    for example in examples_to_test:
-        ts_print(f"\n--- Testing {example} ---")
-
-        try:
-            # Build the example for the specified platform with merged binary for QEMU
-            ts_print(f"Building {example} for {platform} with merged binary...")
-            # Use Docker compilation on Windows to avoid toolchain issues
-            # IMPORTANT: Use --local on GitHub Actions to avoid pulling Docker images
-            build_cmd = [
-                "uv",
-                "run",
-                "ci/ci-compile.py",
-                platform,
-                "--examples",
-                example,
-                "--merged-bin",
-                "-o",
-                "qemu-build/merged.bin",
-                "--defines",
-                "FASTLED_ESP32_IS_QEMU",
-            ]
-            # Force --local on GitHub Actions to avoid pulling Docker images
-            from ci.util.github_env import is_github_actions
-
-            if is_github_actions():
-                build_cmd.append("--local")
-            elif sys.platform == "win32":
-                build_cmd.append("--docker")
-            build_proc = RunningProcess(
-                build_cmd,
-                timeout=600,
-                auto_run=True,
-                output_formatter=TimestampFormatter(),
-            )
-
-            # Stream build output
-            with build_proc.line_iter(timeout=None) as it:
-                for line in it:
-                    ts_print(line)
-
-            build_returncode = build_proc.wait()
-            if build_returncode != 0:
-                ts_print(
-                    f"Build failed for {example} with exit code: {build_returncode}"
-                )
-                failure_count += 1
-                continue
-
-            ts_print(f"Build successful for {example}")
-
-            # Check if merged binary exists
-            merged_bin_path = Path("qemu-build/merged.bin")
-            if not merged_bin_path.exists():
-                ts_print(f"Merged binary not found: {merged_bin_path}")
-                failure_count += 1
-                continue
-
-            ts_print(f"Merged binary found: {merged_bin_path}")
-
-            # Run in QEMU using Docker
-            ts_print(f"Running {example} in Docker QEMU...")
-
-            # Set up interrupt regex pattern
-            interrupt_regex = "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
-
-            # Set up output file for GitHub Actions
-            output_file = "qemu_output.log"
-
-            # Determine machine type based on platform
-            if platform == "esp32c3":
-                machine_type = "esp32c3"
-            elif platform == "esp32s3":
-                machine_type = "esp32s3"
-            else:
-                machine_type = "esp32"
-
-            # Run QEMU in Docker with merged binary
-            qemu_returncode = docker_runner.run(
-                firmware_path=merged_bin_path,
-                timeout=30,
-                flash_size=4,
-                interrupt_regex=interrupt_regex,
-                interactive=False,
-                output_file=output_file,
-                machine=machine_type,
-            )
-
-            if qemu_returncode == 0:
-                ts_print(f"SUCCESS: {example} ran successfully in Docker QEMU")
-                success_count += 1
-            else:
-                ts_print(
-                    f"FAILED: {example} failed in Docker QEMU with exit code: {qemu_returncode}"
-                )
-                failure_count += 1
-
-        except KeyboardInterrupt:
-            _thread.interrupt_main()
-            raise
-        except Exception as e:
-            ts_print(f"ERROR: {example} failed with exception: {e}")
-            failure_count += 1
-
-    # Summary
-    ts_print(f"\n=== QEMU {platform.upper()} Test Summary ===")
-    ts_print(f"Examples tested: {len(examples_to_test)}")
-    ts_print(f"Successful: {success_count}")
-    ts_print(f"Failed: {failure_count}")
-
-    # Show sccache statistics
-    show_sccache_stats()
-
-    if failure_count > 0:
-        ts_print("Some tests failed. See output above for details.")
-        sys.exit(1)
-    else:
-        ts_print("All QEMU tests passed!")
-
-
-def run_avr8js_tests(args: TestArgs) -> None:
-    """Run AVR examples in avr8js emulation using Docker."""
-    from pathlib import Path
-
-    from running_process import RunningProcess
-
-    from ci.docker.avr8js_docker import DockerAVR8jsRunner
-
-    if not args.run or len(args.run) < 1:
-        ts_print("Error: --run requires a board (e.g., uno)")
-        sys.exit(1)
-
-    board = args.run[0].lower()
-    supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]
-    if board not in supported_boards:
-        ts_print(
-            f"Error: Unsupported avr8js board: {board}. Supported boards: {', '.join(supported_boards)}"
-        )
-        sys.exit(1)
-
-    ts_print(f"Running {board.upper()} avr8js tests using Docker...")
-
-    # Determine which examples to test (skip the board argument)
-    examples_to_test = args.run[1:] if len(args.run) > 1 else ["Test"]
-    if not examples_to_test:  # Empty list means test Test example
-        examples_to_test = ["Test"]
-
-    ts_print(f"Testing examples: {examples_to_test}")
-
-    # Quick test mode - just validate the setup
-    if os.getenv("FASTLED_AVR8JS_QUICK_TEST") == "true":
-        ts_print("Quick test mode - validating Docker avr8js setup only")
-        ts_print("avr8js AVR Docker option is working correctly!")
-        return
-
-    # Initialize Docker avr8js runner
-    docker_runner = DockerAVR8jsRunner()
-
-    # Check if Docker is available
-    if not docker_runner.check_docker_available():
-        ts_print("❌ ERROR: Docker is not available or not running")
-        ts_print()
-        ts_print("Please install Docker Desktop and ensure it's running:")
-        ts_print("  https://www.docker.com/products/docker-desktop")
-        ts_print()
-        sys.exit(1)
-
-    # Check if avr8js Docker image exists
-    avr8js_image = docker_runner.docker_image
-    image_exists = docker_runner.check_image_exists(avr8js_image)
-
-    if not image_exists:
-        ts_print(f"❌ Docker avr8js image not found locally: {avr8js_image}")
-        ts_print()
-        ts_print("Attempting to pull avr8js image from Docker Hub...")
-        try:
-            docker_runner.pull_image()
-            ts_print(f"✅ Successfully pulled {avr8js_image}")
-            ts_print()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
-            raise
-        except Exception as e:
-            ts_print(f"❌ Failed to pull avr8js image: {e}")
-            ts_print()
-            ts_print("Please build the image manually:")
-            ts_print(
-                f"  docker build -f ci/docker/Dockerfile.avr8js -t {avr8js_image} ."
-            )
-            ts_print()
-            sys.exit(1)
-
-    # Get MCU type and frequency based on board
-    mcu_config = {
-        "uno": {"mcu": "atmega328p", "frequency": 16000000},
-        "attiny85": {"mcu": "attiny85", "frequency": 8000000},
-        "attiny88": {"mcu": "attiny88", "frequency": 8000000},
-        "nano_every": {"mcu": "atmega4809", "frequency": 16000000},
-    }
-    config = mcu_config.get(board, {"mcu": "atmega328p", "frequency": 16000000})
-
-    success_count = 0
-    failure_count = 0
-
-    # Test each example
-    for example in examples_to_test:
-        ts_print(f"\n{'=' * 70}")
-        ts_print(f"Testing: {example}")
-        ts_print(f"{'=' * 70}")
-
-        try:
-            # Step 1: Show what we're compiling
-            example_ino_path = Path("examples") / example / f"{example}.ino"
-            ts_print("\n[STEP 1/3] Compiling Arduino Sketch")
-            ts_print(f"  Source file: {example_ino_path}")
-            ts_print(
-                f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
-            )
-            ts_print("  Compiler: PlatformIO via ci/ci-compile.py")
-            ts_print()
-
-            # Build the example for the specified board
-            build_cmd = [
-                "uv",
-                "run",
-                "ci/ci-compile.py",
-                board,
-                "--examples",
-                example,
-            ]
-            build_proc = RunningProcess(
-                build_cmd,
-                timeout=300,
-                auto_run=True,
-                output_formatter=TimestampFormatter(),
-            )
-
-            # Stream build output
-            with build_proc.line_iter(timeout=None) as it:
-                for line in it:
-                    ts_print(line)
-
-            build_returncode = build_proc.wait()
-            if build_returncode != 0:
-                ts_print(
-                    f"\n❌ Build failed for {example} with exit code: {build_returncode}"
-                )
-                failure_count += 1
-                continue
-
-            ts_print(f"\n✅ Build successful for {example}")
-
-            # Step 2: Locate compiled firmware
-            ts_print("\n[STEP 2/3] Locating Compiled Firmware")
-            build_dir = Path(".build")
-            elf_files = list(build_dir.rglob("*.elf"))
-            if not elf_files:
-                ts_print(f"  ❌ ELF file not found in {build_dir}")
-                failure_count += 1
-                continue
-
-            elf_path = elf_files[0]
-            hex_path = elf_path.with_suffix(".hex")
-            ts_print(f"  ELF file: {elf_path}")
-            ts_print(f"  HEX file: {hex_path}")
-            ts_print("  (avr8js requires HEX format for execution)")
-
-            if not hex_path.exists():
-                ts_print(f"  ❌ HEX file not found: {hex_path}")
-                failure_count += 1
-                continue
-
-            # Step 3: Run in avr8js Docker
-            ts_print("\n[STEP 3/3] Running in AVR8JS Docker Emulator")
-            ts_print(f"  Docker image: {docker_runner.docker_image}")
-            ts_print(f"  Firmware: {hex_path}")
-            ts_print("  Timeout: 15 seconds")
-            ts_print()
-
-            # Set up output file
-            output_file = "avr8js_output.txt"
-
-            # Run avr8js in Docker
-            avr8js_returncode = docker_runner.run(
-                elf_path=elf_path,
-                mcu=config["mcu"],
-                frequency=config["frequency"],
-                timeout=15,
-                output_file=output_file,
-            )
-
-            # Validate output for Test example
-            if example == "Test" and Path(output_file).exists():
-                output_content = Path(output_file).read_text(
-                    encoding="utf-8", errors="replace"
-                )
-
-                # Check for test completion
-                if (
-                    "Test Summary:" in output_content
-                    and "All tests PASSED!" in output_content
-                ):
-                    ts_print(f"SUCCESS: {example} tests passed in Docker avr8js")
-                    success_count += 1
-                else:
-                    ts_print(f"FAILED: {example} tests did not pass in Docker avr8js")
-                    failure_count += 1
-            elif avr8js_returncode == 0:
-                ts_print(f"SUCCESS: {example} ran successfully in Docker avr8js")
-                success_count += 1
-            else:
-                ts_print(
-                    f"FAILED: {example} failed in Docker avr8js with exit code: {avr8js_returncode}"
-                )
-                failure_count += 1
-
-        except KeyboardInterrupt:
-            _thread.interrupt_main()
-            raise
-        except Exception as e:
-            ts_print(f"ERROR: {example} failed with exception: {e}")
-            failure_count += 1
-
-    # Summary
-    ts_print(f"\n=== avr8js {board.upper()} Test Summary ===")
-    ts_print(f"Examples tested: {len(examples_to_test)}")
-    ts_print(f"Successful: {success_count}")
-    ts_print(f"Failed: {failure_count}")
-
-    # Show sccache statistics
-    show_sccache_stats()
-
-    if failure_count > 0:
-        ts_print("Some tests failed. See output above for details.")
-        sys.exit(1)
-    else:
-        ts_print("All avr8js tests passed!")
 
 
 def main() -> None:
@@ -623,147 +149,13 @@ def main() -> None:
 
         # Set up fingerprint caching
         cache_dir = Path(".cache")
-        cache_dir.mkdir(exist_ok=True)
-        fingerprint_file = cache_dir / "fingerprint.json"
+        fingerprint_manager = FingerprintManager(cache_dir)
 
-        def write_fingerprint(fingerprint: FingerprintResult) -> None:
-            fingerprint_dict = {
-                "hash": fingerprint.hash,
-                "elapsed_seconds": fingerprint.elapsed_seconds,
-                "status": fingerprint.status,
-            }
-            with open(fingerprint_file, "w") as f:
-                json.dump(fingerprint_dict, f, indent=2)
-
-        def read_fingerprint() -> FingerprintResult | None:
-            if fingerprint_file.exists():
-                with open(fingerprint_file, "r") as f:
-                    try:
-                        data = json.load(f)
-                        return FingerprintResult(
-                            hash=data.get("hash", ""),
-                            elapsed_seconds=data.get("elapsed_seconds"),
-                            status=data.get("status"),
-                        )
-                    except json.JSONDecodeError:
-                        ts_print("Invalid fingerprint file. Recalculating...")
-            return None
-
-        # Calculate fingerprint (but don't save until tests pass)
-        prev_fingerprint = read_fingerprint()
-        fingerprint_data = calculate_fingerprint()
-        src_code_change = (
-            True
-            if prev_fingerprint is None
-            else not prev_fingerprint.should_skip(fingerprint_data)
-        )
-
-        # Set up C++ test-specific fingerprint caching
-        cpp_test_fingerprint_file = cache_dir / "cpp_test_fingerprint.json"
-
-        def write_cpp_test_fingerprint(fingerprint: FingerprintResult) -> None:
-            fingerprint_dict = {
-                "hash": fingerprint.hash,
-                "elapsed_seconds": fingerprint.elapsed_seconds,
-                "status": fingerprint.status,
-            }
-            with open(cpp_test_fingerprint_file, "w") as f:
-                json.dump(fingerprint_dict, f, indent=2)
-
-        def read_cpp_test_fingerprint() -> FingerprintResult | None:
-            if cpp_test_fingerprint_file.exists():
-                with open(cpp_test_fingerprint_file, "r") as f:
-                    try:
-                        data = json.load(f)
-                        return FingerprintResult(
-                            hash=data.get("hash", ""),
-                            elapsed_seconds=data.get("elapsed_seconds"),
-                            status=data.get("status"),
-                        )
-                    except json.JSONDecodeError:
-                        ts_print("Invalid C++ test fingerprint file. Recalculating...")
-            return None
-
-        # Calculate C++ test fingerprint (but don't save until tests pass)
-        prev_cpp_test_fingerprint = read_cpp_test_fingerprint()
-        cpp_test_fingerprint_data = calculate_cpp_test_fingerprint(args)
-        cpp_test_change = (
-            True
-            if prev_cpp_test_fingerprint is None
-            else not prev_cpp_test_fingerprint.should_skip(cpp_test_fingerprint_data)
-        )
-
-        # Set up examples test fingerprint caching
-        examples_fingerprint_file = cache_dir / "examples_fingerprint.json"
-
-        def write_examples_fingerprint(fingerprint: FingerprintResult) -> None:
-            fingerprint_dict = {
-                "hash": fingerprint.hash,
-                "elapsed_seconds": fingerprint.elapsed_seconds,
-                "status": fingerprint.status,
-            }
-            with open(examples_fingerprint_file, "w") as f:
-                json.dump(fingerprint_dict, f, indent=2)
-
-        def read_examples_fingerprint() -> FingerprintResult | None:
-            if examples_fingerprint_file.exists():
-                with open(examples_fingerprint_file, "r") as f:
-                    try:
-                        data = json.load(f)
-                        return FingerprintResult(
-                            hash=data["hash"],
-                            elapsed_seconds=data["elapsed_seconds"],
-                            status=data["status"],
-                        )
-                    except (json.JSONDecodeError, KeyError):
-                        return None
-            return None
-
-        # Calculate examples fingerprint (but don't save until tests pass)
-        prev_examples_fingerprint = read_examples_fingerprint()
-        examples_fingerprint_data = calculate_examples_fingerprint()
-        examples_change = (
-            True
-            if prev_examples_fingerprint is None
-            else not prev_examples_fingerprint.should_skip(examples_fingerprint_data)
-        )
-
-        # Set up Python test fingerprint caching
-        python_test_fingerprint_file = cache_dir / "python_test_fingerprint.json"
-
-        def write_python_test_fingerprint(fingerprint: FingerprintResult) -> None:
-            fingerprint_dict = {
-                "hash": fingerprint.hash,
-                "elapsed_seconds": fingerprint.elapsed_seconds,
-                "status": fingerprint.status,
-            }
-            with open(python_test_fingerprint_file, "w") as f:
-                json.dump(fingerprint_dict, f, indent=2)
-
-        def read_python_test_fingerprint() -> FingerprintResult | None:
-            if python_test_fingerprint_file.exists():
-                with open(python_test_fingerprint_file, "r") as f:
-                    try:
-                        data = json.load(f)
-                        return FingerprintResult(
-                            hash=data["hash"],
-                            elapsed_seconds=data["elapsed_seconds"],
-                            status=data["status"],
-                        )
-                    except (json.JSONDecodeError, KeyError):
-                        return None
-            return None
-
-        # Calculate Python test fingerprint (but don't save until tests pass)
-        prev_python_test_fingerprint = read_python_test_fingerprint()
-        python_test_fingerprint_data = calculate_python_test_fingerprint()
-        python_test_change = (
-            True
-            if prev_python_test_fingerprint is None
-            else not prev_python_test_fingerprint.should_skip(
-                python_test_fingerprint_data
-            )
-        )
+        # Calculate fingerprints
+        src_code_change = fingerprint_manager.check_all()
+        cpp_test_change = fingerprint_manager.check_cpp(args)
+        examples_change = fingerprint_manager.check_examples()
+        python_test_change = fingerprint_manager.check_python()
 
         # Handle --run flag (unified emulation interface)
         if args.run is not None:
@@ -774,7 +166,11 @@ def main() -> None:
             platform = args.run[0].lower()
 
             # Look up backend from mapping table
-            backend = _RUN_PLATFORM_BACKENDS.get(platform)
+            backend = None
+            for b, platforms in _RUN_PLATFORM_BACKENDS.items():
+                if platform in platforms:
+                    backend = b
+                    break
 
             if backend is None:
                 # Platform not found - show error with supported platforms
@@ -783,17 +179,8 @@ def main() -> None:
                 ts_print("Supported platforms:")
 
                 # Group platforms by backend
-                qemu_platforms = [
-                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "qemu"
-                ]
-                avr8js_boards = [
-                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "avr8js"
-                ]
-
-                if qemu_platforms:
-                    ts_print(f"  ESP32 (QEMU): {', '.join(sorted(qemu_platforms))}")
-                if avr8js_boards:
-                    ts_print(f"  AVR (avr8js): {', '.join(sorted(avr8js_boards))}")
+                for b, platforms in _RUN_PLATFORM_BACKENDS.items():
+                    ts_print(f"  {b.upper()}: {', '.join(sorted(platforms))}")
 
                 sys.exit(1)
 
@@ -821,19 +208,6 @@ def main() -> None:
             ts_print("Note: --qemu is deprecated, use --run instead")
             run_qemu_tests(args)
             return
-
-        # Helper function to save all fingerprints with a given status
-        def save_fingerprints_with_status(status: str) -> None:
-            """Save all fingerprints with the specified status (success/failure)"""
-            fingerprint_data.status = status
-            cpp_test_fingerprint_data.status = status
-            examples_fingerprint_data.status = status
-            python_test_fingerprint_data.status = status
-
-            write_fingerprint(fingerprint_data)
-            write_cpp_test_fingerprint(cpp_test_fingerprint_data)
-            write_examples_fingerprint(examples_fingerprint_data)
-            write_python_test_fingerprint(python_test_fingerprint_data)
 
         # Track test success/failure for fingerprint status
         tests_passed = False
@@ -968,7 +342,7 @@ def main() -> None:
         finally:
             # Always save fingerprints with appropriate status
             status = "success" if tests_passed else "failure"
-            save_fingerprints_with_status(status)
+            fingerprint_manager.save_all(status)
 
         # Set up force exit daemon and exit
         _ = setup_force_exit()
@@ -983,6 +357,10 @@ def main() -> None:
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
+            from ci.util.global_interrupt_handler import (
+                handle_keyboard_interrupt_properly,
+            )
+
             handle_keyboard_interrupt_properly()
         signal_interrupt()
         wait_for_cleanup()
@@ -995,6 +373,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
+            from ci.util.global_interrupt_handler import (
+                handle_keyboard_interrupt_properly,
+            )
+
             handle_keyboard_interrupt_properly()
         signal_interrupt()
         wait_for_cleanup()
