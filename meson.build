@@ -4,8 +4,7 @@ project('fastled', 'cpp',
   default_options: [
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
-    'werror=false',
-    'buildtype=debug'
+    'werror=false'
   ]
 )
 
@@ -226,6 +225,8 @@ endif
 if is_windows
   # Windows: Minimal DLL linking (crash handler moved to runner.exe)
   dll_link_args = [
+    '-static-libgcc',           # Statically link libgcc
+    '-static-libstdc++',        # Statically link libstdc++
     '-mconsole',                # Console application subsystem
     '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
     '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)

@@ -437,14 +437,8 @@ def create_unit_test_process(
     if enable_stack_trace:
         test_cmd.append("--stack-trace")
 
-    both_cmds: list[str] = []
-    both_cmds.extend(compile_cmd)
-    both_cmds.extend(["&&"])
-    both_cmds.extend(test_cmd)
-    cmd_str = subprocess.list2cmdline(both_cmds)
-
     return RunningProcess(
-        cmd_str,
+        test_cmd,
         timeout=_TIMEOUT,  # 2 minutes timeout
         auto_run=True,
         output_formatter=TimestampFormatter(),
@@ -485,9 +479,7 @@ def create_examples_test_process(
         1800 if args.no_parallel else 600
     )  # 30 minutes for sequential, 10 minutes for parallel
 
-    cmd_str = subprocess.list2cmdline(cmd)
-
-    return RunningProcess(cmd_str, auto_run=False, timeout=timeout)
+    return RunningProcess(cmd, auto_run=False, timeout=timeout)
 
 
 def create_python_test_process(

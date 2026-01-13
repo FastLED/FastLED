@@ -32,9 +32,21 @@ class MesonTestResult:
 
     success: bool
     duration: float  # Total duration in seconds
-    num_tests_run: int = 0  # Number of tests executed
-    num_tests_passed: int = 0  # Number of tests that passed
-    num_tests_failed: int = 0  # Number of tests that failed
+    num_tests_run: int  # Number of tests executed
+    num_tests_passed: int  # Number of tests that passed
+    num_tests_failed: int  # Number of tests that failed
+
+    @staticmethod
+    def construct_build_error(duration: float) -> "MesonTestResult":
+        """Construct MesonTestResult with error status and duration"""
+        out = MesonTestResult(
+            success=False,
+            duration=duration,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
+        return out
 
 
 def _get_color_timestamp() -> str:
@@ -1657,7 +1669,13 @@ def run_meson_build_and_test(
             f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', or 'release'",
             file=sys.stderr,
         )
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Construct mode-specific build directory
     # This enables caching libfastled.a per mode when source unchanged but flags differ
@@ -1672,7 +1690,13 @@ def run_meson_build_and_test(
     if not check_meson_installed():
         _ts_print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
         _ts_print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Clean if requested
     if clean and build_dir.exists():
@@ -1691,7 +1715,13 @@ def run_meson_build_and_test(
         debug=use_debug,
         check=check,
     ):
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Perform periodic maintenance on Ninja dependency database (once per day)
     # This helps prevent .ninja_deps corruption and keeps builds fast
@@ -1906,11 +1936,21 @@ def run_meson_build_and_test(
 
                 if not compilation_success:
                     return MesonTestResult(
-                        success=False, duration=time.time() - start_time
+                        success=False,
+                        duration=time.time() - start_time,
+                        num_tests_run=0,
+                        num_tests_passed=0,
+                        num_tests_failed=0,
                     )
     except TimeoutError as e:
         _ts_print(f"[MESON] {e}", file=sys.stderr)
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # In IWYU check mode, we only compile (to run static analysis)
     # Skip test execution and return success after successful compilation
@@ -1942,7 +1982,13 @@ def run_meson_build_and_test(
                 f"[MESON] Error: test executable not found: {test_exe_path}",
                 file=sys.stderr,
             )
-            return MesonTestResult(success=False, duration=time.time() - start_time)
+            return MesonTestResult(
+                success=False,
+                duration=time.time() - start_time,
+                num_tests_run=0,
+                num_tests_passed=0,
+                num_tests_failed=0,
+            )
 
         _print_banner("RUNNING TESTS", "▶️")
         _ts_print(f"▶️  Running test: {meson_test_name}")
@@ -2114,7 +2160,7 @@ def stream_compile_and_run_tests(
                         ):
                             # Exclude infrastructure executables that aren't actual tests
                             test_name = test_path.stem  # Get filename without extension
-                            if test_name in ("runner", "test_runner"):
+                            if test_name in ("runner", "test_runner", "example_runner"):
                                 continue  # Skip these infrastructure executables
 
                             # Skip DLL/shared library files

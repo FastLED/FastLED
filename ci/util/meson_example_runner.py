@@ -195,64 +195,13 @@ def run_examples(
             timeout=1800,  # 30 minute total timeout
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=_prepare_environment(build_mode),  # Add compiler DLL directory to PATH
+            env=_prepare_environment(
+                build_mode
+            ),  # Pass current environment with wrapper paths
             output_formatter=TimestampFormatter(),
         )
 
-        # Parse output in real-time to show test progress
-        # Pattern matches: "1/96 example-Blink       OK              0.12s"
-        # Note: Meson uses variable whitespace between fields
-        test_pattern = re.compile(
-            r"^(\d+)/(\d+)\s+(example-\S+)\s+(OK|FAIL|SKIP|TIMEOUT)\s+([\d.]+)s",
-            re.MULTILINE,
-        )
-
         returncode = proc.wait(echo=verbose)
-
-        # Parse the complete output to extract test results (works for both verbose and non-verbose)
-        output = proc.stdout
-
-        for line in output.splitlines():
-            # Strip timestamp prefix from TimestampFormatter (e.g., "0.63 " at start)
-            # Timestamps are in format: "0.63 " or "10.32 " (seconds with decimal)
-            line_without_timestamp = re.sub(r"^\d+\.\d+\s+", "", line)
-
-            # Try to parse test result line (works for both verbose and non-verbose)
-            match = test_pattern.match(line_without_timestamp)
-            if match:
-                current = int(match.group(1))
-                total = int(match.group(2))
-                test_name = match.group(3)
-                status = match.group(4)
-                duration_str = match.group(5)
-
-                num_run = current
-                if status == "OK":
-                    num_passed += 1
-                    if not verbose:
-                        # Show brief progress for passed tests in non-verbose mode
-                        _ts_print(
-                            f"  [{current}/{total}] ✓ {test_name} ({duration_str}s)"
-                        )
-                elif status == "FAIL":
-                    num_failed += 1
-                    if not verbose:
-                        _ts_print(
-                            f"  [{current}/{total}] ✗ {test_name} FAILED ({duration_str}s)"
-                        )
-                elif status == "TIMEOUT":
-                    num_failed += 1
-                    if not verbose:
-                        _ts_print(
-                            f"  [{current}/{total}] ⏱ {test_name} TIMEOUT ({duration_str}s)"
-                        )
-
-        # If test failed and we didn't see individual test results, show error context
-        if returncode != 0 and num_run == 0 and output:
-            _ts_print("[MESON] Example execution output:", file=sys.stderr)
-            _ts_print(output, file=sys.stderr)
-
-        duration = time.time() - start_time
 
         if returncode != 0:
             _ts_print(
@@ -261,18 +210,16 @@ def run_examples(
             )
             return MesonTestResult(
                 success=False,
-                duration=duration,
+                duration=time.time() - start_time,
                 num_tests_run=num_run,
                 num_tests_passed=num_passed,
                 num_tests_failed=num_failed,
             )
 
-        _ts_print(
-            f"[MESON] All examples passed ({num_passed}/{num_run} examples in {duration:.2f}s)"
-        )
+        _ts_print(f"[MESON] All examples passed (return code {returncode})")
         return MesonTestResult(
             success=True,
-            duration=duration,
+            duration=time.time() - start_time,
             num_tests_run=num_run,
             num_tests_passed=num_passed,
             num_tests_failed=num_failed,
@@ -339,7 +286,13 @@ def run_meson_examples(
             f"Valid modes: {', '.join(valid_modes)}",
             file=sys.stderr,
         )
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Construct mode-specific build directory
     # This enables caching per mode when source unchanged but flags differ
@@ -354,7 +307,13 @@ def run_meson_examples(
     if not check_meson_installed():
         _ts_print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
         _ts_print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Clean if requested
     if clean and build_dir.exists():
@@ -367,7 +326,13 @@ def run_meson_examples(
     if not setup_meson_build(
         source_dir, build_dir, debug=(build_mode == "debug"), reconfigure=False
     ):
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        return MesonTestResult(
+            success=False,
+            duration=time.time() - start_time,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Perform periodic maintenance on Ninja dependency database
     perform_ninja_maintenance(build_dir)
@@ -382,10 +347,16 @@ def run_meson_examples(
                 parallel=parallel,
                 build_mode=build_mode,
             ):
-                return MesonTestResult(success=False, duration=time.time() - start_time)
+                duration = time.time() - start_time
+                out: MesonTestResult = MesonTestResult.construct_build_error(
+                    time.time() - start_time
+                )
+                return out
     except TimeoutError as e:
         _ts_print(f"[MESON] {e}", file=sys.stderr)
-        return MesonTestResult(success=False, duration=time.time() - start_time)
+        duration = time.time() - start_time
+        out: MesonTestResult = MesonTestResult.construct_build_error(duration)
+        return out
 
     # If full mode, run the examples
     if full:
@@ -401,7 +372,13 @@ def run_meson_examples(
         # Just compilation, return success
         duration = time.time() - start_time
         _ts_print(f"[MESON] Example compilation complete in {duration:.2f}s")
-        return MesonTestResult(success=True, duration=duration)
+        return MesonTestResult(
+            success=True,
+            duration=duration,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
 
 if __name__ == "__main__":
