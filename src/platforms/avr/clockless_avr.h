@@ -9,10 +9,11 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 #include "platforms/shared/clockless_blocking.h"
+#include "platforms/is_platform.h"
 
 namespace fl {
 
-#if defined(FASTLED_AVR)
+#if defined(FL_IS_AVR)
 
 // Scaling macro choice
 #ifndef FASTLED_AVR_SCALE
@@ -196,9 +197,11 @@ template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER uint8_t & loopvar)
 #	define NO_CLOCK_CORRECTION 1
 #endif
 
-#if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-inline uint8_t gTimeErrorAccum256ths = 0;
-#endif
+
+inline uint8_t& avr_time_accumulator() {
+	static uint8_t gTimeErrorAccum256ths = 0;
+	return gTimeErrorAccum256ths;
+}
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
@@ -265,9 +268,11 @@ protected:
             uint16_t x256ths = microsTaken >> 2;
             x256ths += scale16by8(x256ths,7);
 
-            x256ths += gTimeErrorAccum256ths;
+			uint8_t& accum = avr_time_accumulator();
+
+            x256ths += accum;
             MS_COUNTER += (x256ths >> 8);
-            gTimeErrorAccum256ths = x256ths & 0xFF;
+            accum = x256ths & 0xFF;
         }
 
 #if 0

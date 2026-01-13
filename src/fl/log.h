@@ -93,7 +93,7 @@ const char *fastled_file_offset(const char *file);
 #else
 // No-op macros for memory-constrained platforms
 #define FL_WARN(X) do { } while(0)
-#define FL_WARN_IF(COND, MSG) do { } while(0)
+#define FL_WARN_IF(COND, MSG) if(false) { void(fl::FakeStrStream() << MSG); }
 #define FL_WARN_ONCE(X) do { } while(0)
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
