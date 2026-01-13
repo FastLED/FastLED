@@ -8,26 +8,14 @@
 //
 // Instead, we use a minimal warning mechanism for assertions that doesn't require string formatting
 
+#include "fl/log.h"
+
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js_assert.h"
 #elif defined(ESP32)
 #include "platforms/esp/esp_assert.h"
 #endif
 
-// Forward declare minimal print function for assertions
-// Implementation is in fl/stl/cstdio.cpp
-#ifndef FL_PRINTLN_DECLARED
-#define FL_PRINTLN_DECLARED
-namespace fl {
-    void println(const char* str);
-}
-#endif
-
-// Minimal FASTLED_WARN_IF macro that only accepts string literals (no formatting)
-// This breaks the circular dependency by not requiring StrStream/string.h
-#ifndef FASTLED_WARN_IF
-#define FASTLED_WARN_IF(COND, MSG) do { if (COND) fl::println(MSG); } while(0)
-#endif
 
 #if !defined(__EMSCRIPTEN__) && !defined(ESP32)
 
@@ -48,6 +36,6 @@ namespace fl {
         FASTLED_WARN_IF(!(x), MSG);                                            \
     }
 #else
-#define FASTLED_ASSERT(x, MSG) FASTLED_WARN_IF(!(x), MSG)
+#define FASTLED_ASSERT(x, MSG) FL_WARN_IF(!(x), MSG)
 #endif
 #endif

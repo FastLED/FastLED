@@ -13,7 +13,12 @@ static void arm_compile_tests() {
 #error "FASTLED_USE_PROGMEM should be either 0 or 1 for ARM platforms"
 #endif
 
-#if defined(ARDUINO_TEENSYLC) || defined(ARDUINO_TEENSY30) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)
+#if defined(FL_IS_TEENSY) && !defined(FL_IS_TEENSY_LC)
+    // Teensy 3.x and 4.x have limited memory
+    #if SKETCH_HAS_LOTS_OF_MEMORY != 0
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy 3.x and 4.x"
+    #endif
+#elif defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)
     // Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1 have limited memory
     #if SKETCH_HAS_LOTS_OF_MEMORY != 0
     #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1"

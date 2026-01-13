@@ -30,10 +30,6 @@
 #endif  // __AVR__
 #endif  // MAX_CLED_CONTROLLERS
 
-#ifndef FASTLED_MANUAL_ENGINE_EVENTS
-#define FASTLED_MANUAL_ENGINE_EVENTS 0
-#endif
-
 #if defined(__SAM3X8E__)
 volatile fl::u32 fuckit;
 #endif
@@ -128,9 +124,7 @@ static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
 	FL_SCOPED_TRACE;
-#if !FASTLED_MANUAL_ENGINE_EVENTS
-	fl::EngineEvents::onBeginFrame();
-#endif
+	onBeginFrame();
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -174,13 +168,13 @@ FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
 	}
 	countFPS();
 	onEndFrame();
-#if !FASTLED_MANUAL_ENGINE_EVENTS
-	fl::EngineEvents::onEndShowLeds();
-#endif
+	onEndShowLeds();
 }
 
 void CFastLED::onEndFrame() {
+	#if FASTLED_HAS_ENGINE_EVENTS
 	fl::EngineEvents::onEndFrame();
+	#endif
 }
 
 int CFastLED::count() {
@@ -504,3 +498,17 @@ namespace __cxxabiv1
 	}
 }
 #endif
+
+
+void CFastLED::onBeginFrame() {
+	#if FASTLED_HAS_ENGINE_EVENTS
+	fl::EngineEvents::onBeginFrame();
+	#endif
+}
+
+
+void CFastLED::onEndShowLeds() {
+	#if FASTLED_HAS_ENGINE_EVENTS
+	fl::EngineEvents::onEndShowLeds();
+	#endif
+}

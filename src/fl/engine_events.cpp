@@ -4,6 +4,9 @@
 
 namespace fl {
 
+// Explicitly define constructor and destructor
+EngineEvents::EngineEvents() = default;
+EngineEvents::~EngineEvents() = default;
 
 
 EngineEvents::Listener::Listener() {}

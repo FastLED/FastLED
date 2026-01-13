@@ -4,6 +4,7 @@
 #include "fl/stl/bit_cast.h"    // for safe type-punning
 #include "fl/stl/new.h"          // for placement new operator (must be before namespace fl)
 #include "fl/align.h"        // for FL_ALIGN_AS_T macro (GCC 4.8.3 workaround)
+#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -213,7 +214,10 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
     // –– destroy via table
     void destroy_current() noexcept {
         using Fn = void (*)(void *);
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING(array-bounds)
         static constexpr Fn table[] = {&variant::template destroy_fn<Types>...};
+        FL_DISABLE_WARNING_POP
         if (_tag != Empty) {
             table[_tag - 1](&_storage);
         }

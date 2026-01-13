@@ -11,6 +11,7 @@
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
+
 namespace fl {
 
 class CLEDController;  // forward declaration
@@ -110,7 +111,8 @@ class EngineEvents {
     }
 
     // Needed by fl::vector<T>
-    EngineEvents() = default;
+    EngineEvents();
+    ~EngineEvents();
 
   private:
     // Safe to add a listeners during a callback.

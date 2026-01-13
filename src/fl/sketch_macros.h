@@ -4,14 +4,15 @@
 #include "fl/stl/time.h"
 #include "fl/delay.h"
 
+#include "platforms/is_platform.h"
+
 #if defined(__AVR__) \
   || defined(__AVR_ATtiny85__) \
   || defined(__AVR_ATtiny88__) \
   || defined(__AVR_ATmega32U4__) \
   || defined(ARDUINO_attinyxy6) \
   || defined(ARDUINO_attinyxy4) \
-  || defined(ARDUINO_TEENSYLC) \
-  || defined(ARDUINO_TEENSY30) \
+  || (defined(FL_IS_TEENSY) && !defined(FL_IS_TEENSY_LC)) \
   || defined(__MK20DX128__) \
   || defined(__MK20DX256__) \
   || defined(STM32F1) \

@@ -487,11 +487,11 @@ public:
 	
 	/// Manually trigger the begin frame event
 	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
-	void onBeginFrame() { fl::EngineEvents::onBeginFrame(); }
+	void onBeginFrame() ;
 	
 	/// Manually trigger the end show LEDs event
 	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
-	void onEndShowLeds() { fl::EngineEvents::onEndShowLeds(); }
+	void onEndShowLeds() ;
 	
 	/// @} Manual Engine Events
 
