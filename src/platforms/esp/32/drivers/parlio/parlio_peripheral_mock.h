@@ -64,7 +64,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
-#include "fl/stl/unordered_map.h"
+#include "fl/stl/map.h"
 
 namespace fl {
 namespace detail {
@@ -207,7 +207,7 @@ public:
     /// // result[1] = {0xFF, 0xFF, ...}  // Lane 0 waveform (all high)
     /// // result[2] = {0x00, 0x00, ...}  // Lane 1 waveform (all low)
     /// ```
-    static fl::unordered_map<int, fl::vector<uint8_t>> untransposeParlioBitstream(
+    static fl::fl_map<int, fl::vector<uint8_t>> untransposeParlioBitstream(
         fl::span<const uint8_t> transposed_data,
         fl::span<const int> pins,
         ParlioBitPackOrder packing = ParlioBitPackOrder::FL_PARLIO_MSB);

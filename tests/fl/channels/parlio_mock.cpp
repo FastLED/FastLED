@@ -27,7 +27,7 @@
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
-#include "fl/stl/unordered_map.h"
+#include "fl/stl/map.h"
 #include "led_sysdefs_stub_generic.h"
 #include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 
@@ -728,7 +728,7 @@ TEST_CASE("parlio_mock_untransposition_with_span_api") {
     fl::span<const int> pins_span(pins);
 
     // Call the new static function
-    fl::unordered_map<int, fl::vector<uint8_t>> result =
+    fl::fl_map<int, fl::vector<uint8_t>> result =
         fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(transposed_span, pins_span);
 
     // Verify we have data for both pins

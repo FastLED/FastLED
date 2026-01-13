@@ -10,7 +10,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
 #include "fl/stl/atomic.h"
-#include "fl/stl/unordered_map.h"
+#include "fl/stl/map.h"
 
 #include <thread>  // ok include
 #include <chrono>  // ok include
@@ -186,7 +186,7 @@ private:
 
     // Untransposed per-pin waveform data (stored separately from transmission records)
     // Maps actual GPIO pin numbers to their waveform data for the most recent transmission
-    fl::unordered_map<int, fl::vector<uint8_t>> mPerPinData;
+    fl::fl_map<int, fl::vector<uint8_t>> mPerPinData;
 
     // Pending transmission state (for waitAllDone simulation)
     size_t mPendingTransmissions;
@@ -755,12 +755,12 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
 // Public Untranspose Function
 //=============================================================================
 
-fl::unordered_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBitstream(
+fl::fl_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBitstream(
     fl::span<const uint8_t> transposed_data,
     fl::span<const int> pins,
     ParlioBitPackOrder packing) {
 
-    fl::unordered_map<int, fl::vector<uint8_t>> result;
+    fl::fl_map<int, fl::vector<uint8_t>> result;
 
     // Validate inputs
     if (transposed_data.empty() || pins.empty()) {
