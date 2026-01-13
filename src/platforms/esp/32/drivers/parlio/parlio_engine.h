@@ -78,11 +78,7 @@
 
 // Include peripheral interface
 #include "iparlio_peripheral.h"
-#ifdef FASTLED_STUB_IMPL
-#include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
-#else
-#include "parlio_peripheral_esp.h"
-#endif
+
 
 namespace fl {
 namespace detail {

@@ -236,10 +236,6 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "platforms/arm/rp/rp2040/delay.cpp", "RP2040 delay implementation"
         ),
-        HeaderException(
-            "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.cpp",
-            "ESP32 PARLIO mock for testing",
-        ),
         # platforms/ - Legacy headers that need Arduino.h (TODO: refactor these)
         HeaderException(
             "platforms/apollo3/fastpin_apollo3.h", "TODO: Refactor to remove dependency"

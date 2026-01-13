@@ -42,6 +42,13 @@
 #endif
 #endif
 
+
+#ifdef FASTLED_STUB_IMPL
+#include "parlio_peripheral_mock.h"
+#else
+#include "parlio_peripheral_esp.h"
+#endif
+
 // All ESP-IDF dependencies have been abstracted through IParlioPeripheral interface
 // - Timer operations: fl::isr::attachTimerHandler(), etc. (via fl/isr.h)
 // - Timestamp operations: getMicroseconds()

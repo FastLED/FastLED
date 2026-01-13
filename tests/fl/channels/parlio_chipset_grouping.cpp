@@ -9,7 +9,7 @@
 
 #ifdef FASTLED_STUB_IMPL  // Mock tests only run on stub platform
 
-#include "platforms/shared/mock/esp/32/drivers/parlio_peripheral_mock.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #include <stddef.h>
 #include <stdint.h>
