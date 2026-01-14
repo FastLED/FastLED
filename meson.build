@@ -286,38 +286,23 @@ endif
 # Unit tests add their specific flags when compiling test sources.
 
 # Compile platforms/shared files separately
-platforms_shared_objects = []
-foreach src : platforms_shared_files
-  # Create shorter target names by using relative paths from 'src/'
-  # Example: src/platforms/shared/spi/spi_engine.cpp → ps_platforms_shared_spi_spi_engine
-  # This avoids Windows MAX_PATH (260 char) issues with very long absolute paths
-  src_str = src.full_path()
-  # Strip the project directory prefix first (handles both forward and back slashes)
-  src_relative = src_str.replace(meson.current_source_dir(), '').replace('\\', '/').strip('/')
-  # Remove 'src/' prefix if present
-  if src_relative.startswith('src/')
-    src_relative = src_relative.substring(4)
-  endif
-  # Create short target name: ps_ prefix + path with underscores
-  target_name = 'ps_' + src_relative.replace('/', '_').replace('.cpp', '')
-
-  obj = static_library(
-    target_name,
-    src,
-    include_directories: [src_dir, stub_dir],
-    cpp_args: base_compile_args,
-    install: false
-  )
-  platforms_shared_objects += obj.extract_all_objects(recursive: false)
-endforeach
-
-fastled_lib = static_library('fastled',
-  fastled_sources,
-  objects: platforms_shared_objects,
+platforms_shared_lib = static_library('platforms_shared',
+  platforms_shared_files,
   include_directories: [src_dir, stub_dir],
   cpp_args: base_compile_args,
   install: false
 )
+
+fastled_lib = static_library('fastled',
+  fastled_sources,
+  link_with: platforms_shared_lib, # Link against the shared platforms library
+  include_directories: [src_dir, stub_dir],
+  cpp_args: base_compile_args,
+  install: false
+)
+
+
+
 
 # Build tests subdirectory
 subdir('tests')

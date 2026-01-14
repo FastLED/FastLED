@@ -16,6 +16,8 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
+#else
+#include <stdlib.h>  // For aligned_alloc on POSIX
 #endif
 
 #ifdef ARDUINO
@@ -388,8 +390,10 @@ uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
     // Windows: Use _aligned_malloc
     buffer = _aligned_malloc(aligned_size, 4);
 #else
-    // POSIX: Use aligned_alloc
-    buffer = aligned_alloc(4, aligned_size);
+    // POSIX: Use posix_memalign
+    if (posix_memalign(&buffer, 4, aligned_size) != 0) {
+        buffer = nullptr; // Ensure buffer is null on failure
+    }
 #endif
 
     if (buffer == nullptr) {
