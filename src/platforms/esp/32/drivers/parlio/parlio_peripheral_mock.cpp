@@ -16,6 +16,7 @@
 #include <chrono>  // ok include
 #include <mutex>   // ok include
 #include <condition_variable>  // ok include
+#include <stdlib.h> // ok include for aligned_alloc on POSIX
 
 #ifdef ARDUINO
 #include <Arduino.h>  // For micros() and delay() on Arduino platforms
