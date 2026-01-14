@@ -131,7 +131,7 @@ jobs:
         working-directory: trusted
         run: |
           set -o pipefail
-          ./compile --no-interactive --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log
+          ./compile --no-interactive --no-parallel --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log
         shell: bash
 
 
