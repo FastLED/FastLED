@@ -165,10 +165,10 @@ else
 endif
 
 example_runner_exe = executable('example_runner',
-  project_root / 'tests' / 'shared' / 'example_runner.cpp',
+  files(project_root / 'tests' / 'shared' / 'example_runner.cpp'),
   cpp_args: [
     '-std=c++11',
-    '-O2',
+    '-O0',
     '-g',
   ],
   link_args: example_runner_link_args,
@@ -244,9 +244,9 @@ foreach example_name : example_paths.keys()
     # DEBUG FLAGS: Special case for Downscale example - add debug symbols for investigation
     # TODO: Consider generalizing this mechanism for per-example compile flags if needed
     debug_cpp_args = []
-    if example_name == 'Downscale'
-        debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
-    endif
+    # if example_name == 'Downscale'
+    #     debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
+    # endif
 
     # Collect all source files: wrapper + any additional .cpp files from subdirectories
     all_sources = [wrapper_cpp] + additional_sources
