@@ -728,32 +728,62 @@ TEST_CASE("parlio_mock_untransposition_with_span_api") {
     fl::span<const int> pins_span(pins);
 
     // Call the new static function
-    fl::fl_map<int, fl::vector<uint8_t>> result =
+    fl::vector<fl::pair<int, fl::vector<uint8_t>>> result =
         fl::detail::ParlioPeripheralMock::untransposeParlioBitstream(transposed_span, pins_span);
 
     // Verify we have data for both pins
     REQUIRE(result.size() == 2);
-    REQUIRE(result.find(10) != result.end());
-    REQUIRE(result.find(20) != result.end());
+    // REQUIRE(result.find(10) != result.end());
+    // REQUIRE(result.find(20) != result.end());
+    REQUIRE(result[0].first == 10);
+    REQUIRE(result[1].first == 20);
 
     // Verify size
-    REQUIRE(result[10].size() == 8);
-    REQUIRE(result[20].size() == 8);
+    REQUIRE(result[0].second.size() == 8);
+    REQUIRE(result[1].second.size() == 8);
 
     // GPIO pin 10 should reconstruct waveform for Lane 0 (0xAA)
     // With the LUT (bit0=0x00, bit1=0xFF), 0xAA (10101010) expands to:
     // [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00]
-    uint8_t expected_pin10[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
-    for (size_t i = 0; i < result[10].size(); i++) {
-        REQUIRE(result[10][i] == expected_pin10[i]);
+    const uint8_t expected_pin10[8] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+    const uint8_t expected_pin20[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
+    // for (size_t i = 0; i < result[10].size(); i++) {
+    //     REQUIRE(result[10][i] == expected_pin10[i]);
+    // }
+
+    // for (auto& pair : result) {
+    //     REQUIRE(pair.first == 10);
+    //     for (size_t i = 0; i < pair.second.size(); i++) {
+    //         REQUIRE(pair.second[i] == expected_pin10[i]);
+    //     }
+    // }
+
+    auto& pair0 = result[0];
+    auto& pair1 = result[1];
+    REQUIRE(pair0.first == 10);
+    REQUIRE(pair1.first == 20);
+    for (size_t i = 0; i < pair0.second.size(); i++) {
+        REQUIRE(pair0.second[i] == expected_pin10[i]);
+    }
+    for (size_t i = 0; i < pair1.second.size(); i++) {
+        REQUIRE(pair1.second[i] == expected_pin20[i]);
     }
 
     // GPIO pin 20 should reconstruct waveform for Lane 1 (0x55)
     // With the LUT (bit0=0x00, bit1=0xFF), 0x55 (01010101) expands to:
     // [0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF]
-    uint8_t expected_pin20[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};
-    for (size_t i = 0; i < result[20].size(); i++) {
-        REQUIRE(result[20][i] == expected_pin20[i]);
+
+    // for (size_t i = 0; i < result[20].size(); i++) {
+    //     REQUIRE(result[20][i] == expected_pin20[i]);
+    // }
+
+    #define INTERNAL_ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]));
+
+    size_t expected_pin20_size = INTERNAL_ARRAY_SIZE(expected_pin20);
+    for (size_t i = 0; i < pair1.second.size(); i++) {
+        REQUIRE_LE(i, expected_pin20_size);
+        uint8_t val = expected_pin20[i];
+        REQUIRE(pair1.second[i] == val);
     }
 }
 

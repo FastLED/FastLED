@@ -1058,7 +1058,7 @@ _BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
 
 
 def create_board(board_name: str, no_project_options: bool = False) -> Board:
-    board: Board
+    board: Board | None = None
     if no_project_options:
         board = Board(board_name=board_name, add_board_to_all=False)
     elif board_name in _BOARD_MAP:
@@ -1077,4 +1077,5 @@ def create_board(board_name: str, no_project_options: bool = False) -> Board:
             # Assume platformio will know what to do with it
             board = Board(board_name=board_name, add_board_to_all=False)
 
+    assert board is not None
     return board.clone()

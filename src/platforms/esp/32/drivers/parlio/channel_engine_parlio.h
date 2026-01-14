@@ -454,6 +454,8 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @return "PARLIO"
     const char* getName() const override { return "PARLIO"; }
 
+    void setReversedPinOrder(bool reversed_pin_order);
+
   private:
     /// @brief Begin LED data transmission for all enqueued channels
     /// @param channelData Span of channel data to transmit
@@ -495,6 +497,7 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @brief Chipset grouping state for sequential transmission
     fl::vector<ChipsetGroup> mChipsetGroups;      ///< Groups of channels by timing
     size_t mCurrentGroupIndex;                     ///< Index of currently transmitting group
+    bool mReversedPinOrder;
 };
 
 //=============================================================================

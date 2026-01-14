@@ -28,6 +28,7 @@
 #include "fl/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/trace.h"
+#include "fl/assert.h"
 
     // The test may have 3000 LEDs, but we use streaming buffers for large strips
 #ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
@@ -44,7 +45,8 @@ ChannelEnginePARLIOImpl::ChannelEnginePARLIOImpl(size_t data_width)
     : mEngine(detail::ParlioEngine::getInstance()),
       mInitialized(false),
       mDataWidth(data_width),
-      mCurrentGroupIndex(0) {
+      mCurrentGroupIndex(0),
+      mReversedPinOrder(false) {
 
     // Validate data width
     if (data_width != 1 && data_width != 2 && data_width != 4 &&
@@ -85,9 +87,14 @@ void ChannelEnginePARLIOImpl::enqueue(ChannelDataPtr channelData) {
     }
 }
 
+void ChannelEnginePARLIOImpl::setReversedPinOrder(bool reversed_pin_order) {
+    mReversedPinOrder = reversed_pin_order;
+}
+
 void ChannelEnginePARLIOImpl::show() {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
+        FL_ASSERT(mTransmittingChannels.empty(), "ChannelEnginePARLIOImpl::show() - enqueue while mTransmittingChannels is not empty, indicating transmission is in progress");
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
         mEnqueuedChannels.clear();
@@ -151,6 +158,26 @@ void ChannelEnginePARLIOImpl::show() {
                      // Sort by transmission time ascending (faster groups first)
                      return transmissionTimeA < transmissionTimeB;
                  });
+
+        for (const auto& group : mChipsetGroups) {
+            // sort each member of the group by their pin orders.
+            fl::sort(group.mChannels, [mReversedPinOrder](const ChannelDataPtr& a, const ChannelDataPtr& b) {
+                if (mReversedPinOrder) {
+                    return b->getPin() < a->getPin();
+                }
+                return a->getPin() < b->getPin();
+            });
+            bool has_unique_pins = true;
+            for (size_t i = 1; i < group.mChannels.size(); i++) {
+                if (group.mChannels[i]->getPin() == group.mChannels[i - 1]->getPin()) {
+                    has_unique_pins = false;
+                    break;
+                }
+            }
+            if (!has_unique_pins) {
+                FL_LOG_PARLIO("PARLIO: Channels in group " << group.mTiming.name << " have non-unique pins");
+            }
+        }
 
         // Begin transmission of first chipset group
         // Note: show() always starts first group synchronously, then returns

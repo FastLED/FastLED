@@ -207,9 +207,9 @@ public:
     /// // result[1] = {0xFF, 0xFF, ...}  // Lane 0 waveform (all high)
     /// // result[2] = {0x00, 0x00, ...}  // Lane 1 waveform (all low)
     /// ```
-    static fl::fl_map<int, fl::vector<uint8_t>> untransposeParlioBitstream(
+    static fl::vector<fl::pair<int, fl::vector<uint8_t>>> untransposeParlioBitstream(
         fl::span<const uint8_t> transposed_data,
-        fl::span<const int> pins,
+        fl::span<const int> pins,  // Pin order that will be return in the result.
         ParlioBitPackOrder packing = ParlioBitPackOrder::FL_PARLIO_MSB);
 
     //-------------------------------------------------------------------------

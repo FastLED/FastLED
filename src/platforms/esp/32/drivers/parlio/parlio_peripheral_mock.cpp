@@ -755,12 +755,12 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
 // Public Untranspose Function
 //=============================================================================
 
-fl::fl_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBitstream(
+fl::vector<fl::pair<int, fl::vector<uint8_t>>> ParlioPeripheralMock::untransposeParlioBitstream(
     fl::span<const uint8_t> transposed_data,
     fl::span<const int> pins,
     ParlioBitPackOrder packing) {
 
-    fl::fl_map<int, fl::vector<uint8_t>> result;
+    fl::vector<fl::pair<int, fl::vector<uint8_t>>> result;
 
     // Validate inputs
     if (transposed_data.empty() || pins.empty()) {
@@ -781,7 +781,11 @@ fl::fl_map<int, fl::vector<uint8_t>> ParlioPeripheralMock::untransposeParlioBits
     // Map lane indices to GPIO pin numbers
     for (size_t i = 0; i < per_pin_waveforms.size() && i < pins.size(); i++) {
         int gpio_pin = pins[i];
-        result[gpio_pin] = fl::move(per_pin_waveforms[i]);
+        //result[gpio_pin] = fl::move(per_pin_waveforms[i]);
+        fl::pair<int, fl::vector<uint8_t>> pair;
+        pair.first = gpio_pin;
+        pair.second = fl::move(per_pin_waveforms[i]);
+        result.emplace_back(pair);
     }
 
     return result;
