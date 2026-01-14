@@ -161,7 +161,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Build Docker images if missing (use with --qemu)",
     )
-    parser.add_argument("--no-unity", help="Not in use any more, maybe revived later")
+    parser.add_argument(
+        "--no-unity",
+        action="store_true",
+        help="This option will be re-enabled in the near future. How we always assume no unity builds.",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -194,6 +198,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_fingerprint=parsed_args.no_fingerprint,
         force=parsed_args.force,
         build=parsed_args.build,
+        no_unity=parsed_args.no_unity,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided

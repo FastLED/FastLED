@@ -97,6 +97,10 @@ def main() -> None:
         # Parse and process arguments
         args = parse_args()
 
+        # Handle --no-unity flag
+        if args.no_unity:
+            ts_print("(--no-unity is assumed by default now)")
+
         # Default to parallel execution for better performance
         # Users can disable parallel compilation by setting NO_PARALLEL=1 or using --no-parallel
         if os.environ.get("NO_PARALLEL", "0") == "1":
