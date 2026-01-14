@@ -165,7 +165,7 @@ else
 endif
 
 example_runner_exe = executable('example_runner',
-  'shared' / 'example_runner.cpp',
+  project_root / 'tests' / 'shared' / 'example_runner.cpp',
   cpp_args: [
     '-std=c++11',
     '-O2',
