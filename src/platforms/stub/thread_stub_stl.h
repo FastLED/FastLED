@@ -11,7 +11,8 @@
 // Standard library includes must be OUTSIDE namespaces
 #include <thread>  // ok include
 
-#define FASTLED_MULTITHREADED 1
+// FASTLED_MULTITHREADED is defined by fl/stl/thread_config.h
+// This file provides the STL-based thread implementation for multithreaded platforms
 
 namespace fl {
 namespace platforms {

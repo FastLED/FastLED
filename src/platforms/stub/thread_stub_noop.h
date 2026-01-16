@@ -10,7 +10,8 @@
 
 #include "fl/stl/functional.h"
 
-#define FASTLED_MULTITHREADED 0
+// FASTLED_MULTITHREADED is defined by fl/stl/thread_config.h
+// This file provides the no-op thread implementation for single-threaded platforms
 
 namespace fl {
 namespace platforms {

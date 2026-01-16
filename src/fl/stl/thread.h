@@ -1,21 +1,10 @@
 #pragma once
 
-#include "fl/has_include.h"
+#include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED
 
 // Include platform-specific thread implementation
-// This will define FASTLED_MULTITHREADED based on platform capabilities
-// Platforms can override FASTLED_MULTITHREADED detection in platforms/thread.h
+// FASTLED_MULTITHREADED is already defined by thread_config.h
 #include "platforms/thread.h"  // IWYU pragma: keep
-
-#ifndef FASTLED_MULTITHREADED
-// Default detection: enable multithreading for testing/stub builds with pthread support
-// WASM uses this same profile (stub-compatible: pthread support for testing/simulation)
-#if defined(FASTLED_TESTING) && FL_HAS_INCLUDE(<pthread.h>)
-#define FASTLED_MULTITHREADED 1
-#else
-#define FASTLED_MULTITHREADED 0
-#endif
-#endif  // FASTLED_MULTITHREADED
 
 // Define FASTLED_USE_THREAD_LOCAL based on FASTLED_MULTITHREADED
 #ifndef FASTLED_USE_THREAD_LOCAL

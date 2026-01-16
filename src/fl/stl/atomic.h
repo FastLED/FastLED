@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/thread.h"
+#include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED (no circular deps)
 #include "fl/int.h"
 
 // Determine if we need real atomics:

@@ -70,7 +70,7 @@
 // Note: POSIX/Windows/Stub use std::mutex via fl/stl/mutex.h
 // Note: AVR uses interrupt disable (no threading support)
 
-// Verify FASTLED_MULTITHREADED is defined after platform detection
+// Verify FASTLED_MULTITHREADED is defined (should be set by fl/stl/thread_config.h)
 #ifndef FASTLED_MULTITHREADED
-#error "Expected FASTLED_MULTITHREADED to be defined by platform thread headers"
+#error "Expected FASTLED_MULTITHREADED to be defined by fl/stl/thread_config.h"
 #endif
