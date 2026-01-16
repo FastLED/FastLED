@@ -112,14 +112,6 @@ jobs:
           cache-dependency-glob: "**/pyproject.toml"
           version: "0.8.0" # 0.8.8 has problems with deployment on linux.
 
-      - name: Install LLVM toolchain (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install llvm
-          # Add LLVM to PATH for thin archive support
-          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-        shell: bash
-
       - name: Install
         working-directory: trusted
         run: ./install
