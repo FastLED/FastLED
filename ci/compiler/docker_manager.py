@@ -574,6 +574,17 @@ if command -v rsync &> /dev/null; then
         ) &
     fi
 
+    if [ -d "/host/lint_plugins" ]; then
+        echo "  → syncing lint_plugins/..."
+        (
+            START=$(date +%s.%N)
+            # --no-t prevents timestamp updates when content is unchanged (avoids spurious rebuilds)
+            rsync -a --no-t --checksum --delete $RSYNC_EXCLUDES /host/lint_plugins/ /fastled/lint_plugins/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/lint_plugins.time"
+        ) &
+    fi
+
     # Wait for all parallel syncs to complete
     wait
 
@@ -599,6 +610,9 @@ if command -v rsync &> /dev/null; then
     fi
     if [ -f "$TMPDIR/ci.time" ]; then
         printf "  ✓ ci/ synced in %.3fs\\n" $(cat "$TMPDIR/ci.time")
+    fi
+    if [ -f "$TMPDIR/lint_plugins.time" ]; then
+        printf "  ✓ lint_plugins/ synced in %.3fs\\n" $(cat "$TMPDIR/lint_plugins.time")
     fi
 
     printf "  ─────────────────────────────\\n"
