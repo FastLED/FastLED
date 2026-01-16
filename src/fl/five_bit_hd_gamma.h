@@ -24,7 +24,6 @@ enum FiveBitGammaCorrectionMode {
 // FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE in your build settings
 // then define the function anywhere in your project.
 // Example:
-//  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_bitshift(
 //      fl::u8 r8, fl::u8 g8, fl::u8 b8,
 //      fl::u8 r8_scale, fl::u8 g8_scale, fl::u8 b8_scale,
@@ -34,7 +33,6 @@ enum FiveBitGammaCorrectionMode {
 //      fl::u8* out_power_5bit) {
 //        cout << "hello world\n";
 //  }
-//  FASTLED_NAMESPACE_END
 
 // Force push
 
@@ -70,13 +68,11 @@ inline void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
 // To override this function you'll need to define
 // FASTLED_FIVE_BIT_HD_GAMMA_BITSHIFT_FUNCTION_OVERRIDE in your build settings
 // and then define your own version anywhere in your project. Example:
-//  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_function(
 //    fl::u8 r8, fl::u8 g8, fl::u8 b8,
 //    u16* r16, u16* g16, u16* b16) {
 //      cout << "hello world\n";
 //  }
-//  FASTLED_NAMESPACE_END
 #ifdef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
 // extern here.

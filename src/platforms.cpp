@@ -53,7 +53,3 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
     FL_EXTERN_C_END
 
 #endif // defined(NRF52_SERIES)
-
-
-// FASTLED_NAMESPACE_BEGIN
-// FASTLED_NAMESPACE_END
