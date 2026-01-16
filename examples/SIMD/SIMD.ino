@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+//
 // examples/SIMD/SIMD.ino
 //
 // FastLED SIMD Operations Test Suite
