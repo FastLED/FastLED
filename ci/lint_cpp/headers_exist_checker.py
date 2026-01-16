@@ -41,6 +41,7 @@ EXCLUDED_TEST_FILES = {
     "test_runner.cpp",  # Test runner executable that loads test DLLs
     "runner.cpp",  # Windows DLL loader for test execution
     "crash_handler_main.cpp",  # Shared infrastructure for crash handling in runner
+    "example_runner.cpp",  # Generic example runner that loads and executes example DLLs
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)

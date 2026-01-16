@@ -19,5 +19,5 @@ typedef int (*RunExampleFunc)(int argc, const char** argv);
 #ifdef _WIN32
 #include "example_runner_win.hpp"
 #else // _WIN32
-#incldue "example_runner_posix.hpp"
+#include "example_runner_posix.hpp"
 #endif // _WIN32
