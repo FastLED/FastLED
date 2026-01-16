@@ -149,9 +149,13 @@ using thread_id = ThreadFake::id;
 namespace this_thread {
     /// @brief Get current thread ID
     /// @return Thread ID (always returns the same ID in single-threaded mode)
+    ///
+    /// Note: No static local variable here - Teensy 3.0/3.1/3.2 has __cxa_guard_*
+    /// symbol conflicts when static locals are used in header files. Since this
+    /// is single-threaded mode and thread_id() always returns the same value
+    /// (mId=0), we just return a fresh default-constructed thread_id each time.
     inline thread_id get_id() noexcept {
-        static thread_id main_thread_id = thread_id();
-        return main_thread_id;
+        return thread_id();
     }
 
     /// @brief Yield (no-op in single-threaded mode)
