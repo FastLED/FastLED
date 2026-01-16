@@ -14,11 +14,13 @@ namespace fl {
 //-------------------------------------------------------------------------------
 
 // Helper trait for bitcast - check if a type can be bitcast (relax POD requirement)
+// Trivially copyable types are safe for bit_cast (matches C++20 std::bit_cast requirements)
 template <typename T>
 struct is_bitcast_compatible {
-    static constexpr bool value = fl::is_integral<T>::value || 
+    static constexpr bool value = fl::is_integral<T>::value ||
                                   fl::is_floating_point<T>::value ||
-                                  fl::is_pod<T>::value;
+                                  fl::is_pod<T>::value ||
+                                  fl::is_trivially_copyable<T>::value;
 };
 
 // Specializations for const types
