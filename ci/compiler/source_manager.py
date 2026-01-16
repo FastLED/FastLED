@@ -314,7 +314,6 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
             print(f"Synced FastLED library to {lib_dir}")
             if library_json_src.exists():
                 print(f"Copied library.json to {lib_dir}")
-        handle_keyboard_interrupt_properly()
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
