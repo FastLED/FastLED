@@ -162,6 +162,10 @@ inline bool requires_assembly_handler(uint8_t priority) {
 // Global Interrupt Control (noInterrupts/interrupts)
 // =============================================================================
 
+// Only define if not already provided by a platform-specific header
+// (e.g., isr_avr.hpp defines these for all AVR including ATtiny)
+#ifndef FL_ISR_GLOBAL_INTERRUPTS_DEFINED
+
 /// No-op for null/unsupported platform
 inline void interruptsDisable() {
     // No-op: platform doesn't have ISR support
@@ -171,5 +175,7 @@ inline void interruptsDisable() {
 inline void interruptsEnable() {
     // No-op: platform doesn't have ISR support
 }
+
+#endif // FL_ISR_GLOBAL_INTERRUPTS_DEFINED
 
 } // namespace fl
