@@ -178,28 +178,32 @@ example_compile_args = base_compile_args + example_specific_args
 # ============================================================================
 # Platform-specific link arguments
 # ============================================================================
-# Windows vs Unix/Linux/macOS have different linking requirements
+# Force LLD linker on all platforms for consistent behavior.
+# LLD supports the same flags across Windows, Linux, and macOS.
 
 # Detect platform
 is_windows = build_machine.system() == 'windows'
 
+# Common link arguments for all platforms (LLD is forced via -fuse-ld=lld)
+# This ensures consistent linker behavior across Windows, Linux, and macOS.
+common_link_args = [
+  '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
+  '-Wl,--no-undefined',       # Catch undefined symbols at link time
+]
+
 # Base link arguments (shared foundation for all link types)
 if is_windows
   # Windows-specific base flags
-  # Let clang-tool-chain handle library linking automatically (stdlib, runtime, unwind, etc.)
-  # Only specify application-specific requirements
-  base_link_args = [
+  base_link_args = common_link_args + [
     '-mconsole',                # Console application subsystem
     '-lpthread',                # POSIX threads (winpthreads) - required for thread_local.h
     '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
-    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 else
-  # Unix/Linux/macOS base flags
-  base_link_args = [
+  # Unix (Linux/macOS) base flags - same for both with LLD
+  base_link_args = common_link_args + [
     '-pthread',                 # Enable POSIX threads
     '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
-    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 endif
 
@@ -224,18 +228,16 @@ endif
 # Result: ~10-15% build time improvement
 if is_windows
   # Windows: Minimal DLL linking (crash handler moved to runner.exe)
-  dll_link_args = [
+  dll_link_args = common_link_args + [
     '-static-libgcc',           # Statically link libgcc
     '-static-libstdc++',        # Statically link libstdc++
     '-mconsole',                # Console application subsystem
     '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
-    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 else
-  # Unix: Minimal DLL linking (pthread and libunwind moved to runner.exe)
-  dll_link_args = [
+  # Unix (Linux/macOS): Minimal DLL linking with LLD
+  dll_link_args = common_link_args + [
     '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
-    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 endif
 

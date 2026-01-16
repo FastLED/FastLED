@@ -147,18 +147,39 @@ crash_handler_example = static_library('crash_handler_example',
 # instead of in each example-X.dll (96 times), significantly reducing build time.
 # The example_runner.exe provides these symbols to the loaded DLL at runtime.
 # Crash handler is also setup in example_runner.exe before loading any DLL.
-example_runner_link_args = ['-static', '-static-libgcc', '-static-libstdc++']
+# Example runner link arguments: Force LLD linker on all platforms for consistency.
+# Static linking flags work with clang-tool-chain's MinGW mode on Windows and GNU mode on Linux.
+# macOS doesn't support fully static binaries (system libs unavailable as static).
 example_runner_deps = []
 if build_machine.system() == 'windows'
-  # Windows: Add system libraries that example DLLs depend on
-  example_runner_link_args += [
-    '-lpthread',    # POSIX threads (winpthreads) - required by FastLED
-    '-ldbghelp',    # Debug helper library (for stack traces in crash handler)
-    '-lpsapi',      # Process status API (for memory info in crash handler)
+  # Windows: Static linking + system libraries (MinGW mode)
+  example_runner_link_args = [
+    '-fuse-ld=lld',             # Force LLD linker
+    '-static',                  # Static linking
+    '-static-libgcc',           # Statically link libgcc
+    '-static-libstdc++',        # Statically link libstdc++
+    '-lpthread',                # POSIX threads (winpthreads)
+    '-ldbghelp',                # Debug helper library (for stack traces)
+    '-lpsapi',                  # Process status API (for memory info)
   ]
+elif build_machine.system() == 'darwin'
+  # macOS: Dynamic linking (static not supported), but force LLD
+  example_runner_link_args = [
+    '-fuse-ld=lld',             # Force LLD linker
+    '-pthread',                 # POSIX threads
+  ]
+  if libunwind_dep.found()
+    example_runner_deps += [libunwind_dep]
+  endif
 else
-  # Unix: Add pthread and libunwind (if available)
-  example_runner_link_args += ['-pthread']
+  # Linux: Static linking + pthread
+  example_runner_link_args = [
+    '-fuse-ld=lld',             # Force LLD linker
+    '-static',                  # Static linking
+    '-static-libgcc',           # Statically link libgcc
+    '-static-libstdc++',        # Statically link libstdc++
+    '-pthread',                 # POSIX threads
+  ]
   if libunwind_dep.found()
     example_runner_deps += [libunwind_dep]
   endif
