@@ -28,7 +28,7 @@
 #include "fl/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/trace.h"
-#include "fl/assert.h"
+#include "fl/stl/assert.h"
 
     // The test may have 3000 LEDs, but we use streaming buffers for large strips
 #ifndef FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL
