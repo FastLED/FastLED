@@ -132,7 +132,7 @@ if libunwind_dep.found()
 endif
 
 crash_handler_example = static_library('crash_handler_example',
-  project_root / 'tests' / 'shared' / 'crash_handler_main.cpp',
+  files('../tests/shared/crash_handler_main.cpp'),
   include_directories: [src_dir, stub_dir, tests_dir],
   cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
   dependencies: crash_handler_deps_example,
@@ -165,7 +165,7 @@ else
 endif
 
 example_runner_exe = executable('example_runner',
-  project_root / 'tests' / 'shared' / 'example_runner.cpp',
+  files('../tests/shared/example_runner.cpp'),
   cpp_args: [
     '-std=c++11',
     '-O0',
