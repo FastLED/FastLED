@@ -13,6 +13,9 @@
   || defined(ARDUINO_attinyxy6) \
   || defined(ARDUINO_attinyxy4) \
   || defined(FL_IS_TEENSY_LC) \
+  || defined(FL_IS_TEENSY_30) \
+  || defined(FL_IS_TEENSY_31) \
+  || defined(FL_IS_TEENSY_32) \
   || defined(__MK20DX128__) \
   || defined(__MK20DX256__) \
   || defined(STM32F1) \
