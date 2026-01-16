@@ -1,6 +1,9 @@
 /// @file mutex_rp.cpp
 /// @brief RP2040/RP2350 Pico SDK mutex platform implementation
 
+// Include platform detection BEFORE the guard
+#include "is_rp.h"
+
 #ifdef FL_IS_RP2040
 
 #include "mutex_rp.h"
@@ -28,9 +31,10 @@ MutexRP::MutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF), mLocked(false) 
         return;
     }
 
-    // Get the actual spinlock instance
+    // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
-    mSpinlock = static_cast<void*>(spinlock);
+    // spin_lock_t* may be volatile, so we need reinterpret_cast
+    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
 }
 
 MutexRP::~MutexRP() {
@@ -86,8 +90,8 @@ bool MutexRP::try_lock() {
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
 
     // Try to acquire the spinlock without blocking
-    uint32_t save;
-    bool acquired = spin_try_lock(spinlock, &save);
+    // Use spin_try_lock_unsafe which returns true if lock acquired
+    bool acquired = spin_try_lock_unsafe(spinlock);
 
     if (acquired) {
         mLocked = true;
@@ -110,9 +114,10 @@ RecursiveMutexRP::RecursiveMutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF
         return;
     }
 
-    // Get the actual spinlock instance
+    // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
-    mSpinlock = static_cast<void*>(spinlock);
+    // spin_lock_t* may be volatile, so we need reinterpret_cast
+    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
 }
 
 RecursiveMutexRP::~RecursiveMutexRP() {
@@ -181,8 +186,8 @@ bool RecursiveMutexRP::try_lock() {
     }
 
     // Try to acquire the spinlock without blocking
-    uint32_t save;
-    bool acquired = spin_try_lock(spinlock, &save);
+    // Use spin_try_lock_unsafe which returns true if lock acquired
+    bool acquired = spin_try_lock_unsafe(spinlock);
 
     if (acquired) {
         mLockCount = 1;

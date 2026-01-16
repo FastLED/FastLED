@@ -1,6 +1,9 @@
 /// @file semaphore_rp.cpp
 /// @brief RP2040/RP2350 Pico SDK semaphore platform implementation
 
+// Include platform detection BEFORE the guard
+#include "is_rp.h"
+
 #ifdef FL_IS_RP2040
 
 #include "semaphore_rp.h"
@@ -36,9 +39,10 @@ CountingSemaphoreRP<LeastMaxValue>::CountingSemaphoreRP(ptrdiff_t desired)
         return;
     }
 
-    // Get the actual spinlock instance
+    // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
-    mSpinlock = static_cast<void*>(spinlock);
+    // spin_lock_t* may be volatile, so we need reinterpret_cast (fl::bit_cast cannot handle volatile)
+    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
 }
 
 template<ptrdiff_t LeastMaxValue>

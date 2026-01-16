@@ -4,15 +4,14 @@
 /// This file provides the implementation of platform initialization for RP2040/RP2350.
 /// It initializes the PIO parallel group system for LED output.
 
+// Include platform detection BEFORE the guard
+#include "platforms/arm/rp/is_rp.h"
+
 #include "fl/compiler_control.h"
 #ifdef FL_IS_RP
 
 #include "platforms/arm/rp/init_rp.h"
 #include "fl/dbg.h"
-
-// PIO parallel group is accessed via singleton pattern
-// Include the header to access getInstance()
-#include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
 
 namespace fl {
 namespace platforms {
@@ -30,12 +29,9 @@ void init() {
 
     FL_DBG("RP2040/RP2350: Platform initialization starting");
 
-    // Initialize PIO parallel group singleton
-    // This manages automatic grouping of consecutive pins for parallel PIO output
-    // and allocates PIO state machines and DMA channels
-    (void)RP2040ParallelGroup::getInstance();
-
-    // Note: ISR alarm lock and ADC are initialized on-demand (lazy init is fine for these)
+    // PIO parallel group singleton is initialized lazily on first use when
+    // FastLED.addLeds() is called. No explicit initialization needed here.
+    // ISR alarm lock and ADC are also initialized on-demand.
 
     initialized = true;
     FL_DBG("RP2040/RP2350: Platform initialization complete");
