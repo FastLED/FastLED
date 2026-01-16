@@ -52,6 +52,7 @@ class CompilationConfig:
     skip_filters: bool = (
         False  # True to skip @filter directives (override platform/memory constraints)
     )
+    no_parallel: bool = False  # Disable parallel compilation (currently a no-op)
 
     def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
@@ -267,6 +268,11 @@ class CompilationArgumentParser:
             help="Disables interactive mode (deprecated)",
         )
         parser.add_argument(
+            "--no-parallel",
+            action="store_true",
+            help="Disable parallel compilation (builds are already sequential, this is a no-op)",
+        )
+        parser.add_argument(
             "--global-cache",
             type=str,
             help="Override global PlatformIO cache directory path (for testing)",
@@ -310,6 +316,7 @@ class CompilationArgumentParser:
             wasm_run=args.run,
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,
             skip_filters=skip_filters,
+            no_parallel=args.no_parallel,
         )
 
     def _resolve_boards(self, board_spec: Optional[str]) -> list[Board]:

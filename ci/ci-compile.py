@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 FastLED Example Compiler
@@ -262,6 +263,7 @@ def main() -> int:
             wasm_run=config.wasm_run,
             global_cache_dir=config.global_cache_dir,
             skip_filters=config.skip_filters,
+            no_parallel=config.no_parallel,
         )
 
     # Auto-detect Docker availability if neither --docker nor --local is specified
@@ -304,6 +306,7 @@ def main() -> int:
                 wasm_run=config.wasm_run,
                 global_cache_dir=config.global_cache_dir,
                 skip_filters=config.skip_filters,
+                no_parallel=config.no_parallel,
             )
         else:
             # Normal Docker auto-detection for non-CI environments
@@ -336,6 +339,7 @@ def main() -> int:
                     wasm_run=config.wasm_run,
                     global_cache_dir=config.global_cache_dir,
                     skip_filters=config.skip_filters,
+                    no_parallel=config.no_parallel,
                 )
 
     # Handle Docker compilation mode
