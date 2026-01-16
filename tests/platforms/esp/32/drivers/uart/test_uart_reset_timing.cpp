@@ -124,12 +124,12 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         // This test verifies that the reset period after transmission
         // is proportional to the transmission time (or 50us minimum for WS2812).
         //
-        // We test this by checking that isBusy() stays true for the expected
-        // duration after waitTxDone() returns. We use busy-waiting instead of
-        // sleeping to avoid Windows scheduler quantum issues (~15.6ms).
+        // We test the mock's CALCULATED reset duration (not wall-clock measurements)
+        // to avoid flakiness from CPU scheduling during parallel test execution.
 
         // Small transmission (10 bytes)
-        // Expected: transmission ~31us, reset period 50us (minimum)
+        // At 3.2 Mbps with 10 bits/byte: 10 * 10 bits / 3.2 MHz = ~31.25us
+        // Expected reset: 50us (minimum for WS2812)
         uint8_t small_data[10];
         for (int i = 0; i < 10; i++) {
             small_data[i] = 0xAA;
@@ -139,17 +139,17 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         CHECK(mock.waitTxDone(1000));
         CHECK(mock.isBusy());  // Should be in reset period
 
-        // Busy-wait until reset completes (no sleeping to avoid scheduler issues)
-        auto reset_start = std::chrono::steady_clock::now();
+        // Get the calculated reset duration (not wall-clock measurement)
+        uint64_t small_reset_us = mock.getLastCalculatedResetDurationUs();
+
+        // Wait for reset to complete before next transmission
         while (mock.isBusy()) {
-            // Busy wait - no sleep
+            // Busy wait
         }
-        auto reset_duration_small = std::chrono::steady_clock::now() - reset_start;
-        auto reset_us_small = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_small).count();
-        (void)reset_us_small;  // Suppress unused variable warning
 
         // Large transmission (1000 bytes)
-        // Expected: transmission ~3125us, reset period 3125us
+        // At 3.2 Mbps with 10 bits/byte: 1000 * 10 bits / 3.2 MHz = ~3125us
+        // Expected reset: ~3125us (proportional to transmission time)
         uint8_t large_data[1000];
         for (int i = 0; i < 1000; i++) {
             large_data[i] = static_cast<uint8_t>(i & 0xFF);
@@ -159,40 +159,20 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         CHECK(mock.waitTxDone(1000));
         CHECK(mock.isBusy());  // Should be in reset period
 
-        // Busy-wait until reset completes
-        reset_start = std::chrono::steady_clock::now();
-        while (mock.isBusy()) {
-            // Busy wait - no sleep
-        }
-        auto reset_duration_large = std::chrono::steady_clock::now() - reset_start;
-        auto reset_us_large = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_large).count();
-        (void)reset_us_large;  // Suppress unused variable warning
+        // Get the calculated reset duration (not wall-clock measurement)
+        uint64_t large_reset_us = mock.getLastCalculatedResetDurationUs();
 
-        // Reset period for larger transmission should be longer (proportional to transmission time)
-        // Expected: ~50us for small (1 byte) vs ~322us for large (100 bytes) at 3.2 Mbps
-        //
-        // Note: This is a timing-based test that verifies the mock correctly simulates
-        // proportional reset periods. However, the actual wall-clock measurements can be
-        // affected by CPU scheduling during parallel test execution.
-        //
-        // The underlying behavior is correct - the mock properly calculates and enforces
-        // reset periods based on transmission size. But when measuring these durations with
-        // std::chrono under system load, timing noise can occur.
-        //
-        // Strategy: We primarily verify that BOTH measurements completed (reset periods
-        // expired), which confirms the timing mechanism works. We also check that the
-        // large duration is at least 50% of small duration to catch major regressions,
-        // but allow for timing noise that might invert the measurements under load.
-        auto small_us = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_small).count();
-        auto large_us = std::chrono::duration_cast<std::chrono::microseconds>(reset_duration_large).count();
+        // Verify reset duration calculations:
+        // 1. Small transmission should use minimum reset (50us) since tx time < 50us
+        REQUIRE(small_reset_us >= 50);  // Minimum WS2812 reset requirement
 
-        // Both measurements should have completed (non-zero durations)
-        REQUIRE(small_us > 0);
-        REQUIRE(large_us > 0);
+        // 2. Large transmission should have proportionally larger reset
+        REQUIRE(large_reset_us > small_reset_us);
 
-        // In ideal conditions, large >= small. Under load, allow significant tolerance.
-        // The key property is that both reset periods execute and complete.
-        REQUIRE(large_us >= small_us * 0.5);  // Allow 50% tolerance for timing noise
+        // 3. Large should be roughly proportional to transmission time
+        // 1000 bytes at 3.2 Mbps = ~3125us transmission time
+        // Reset duration should be at least 3000us (with buffer overhead)
+        REQUIRE(large_reset_us >= 3000);
     }
 
     SUBCASE("writeBytes() during reset period blocks until reset completes") {

@@ -12,7 +12,7 @@
   || defined(__AVR_ATmega32U4__) \
   || defined(ARDUINO_attinyxy6) \
   || defined(ARDUINO_attinyxy4) \
-  || (defined(FL_IS_TEENSY) && !defined(FL_IS_TEENSY_LC)) \
+  || defined(FL_IS_TEENSY_LC) \
   || defined(__MK20DX128__) \
   || defined(__MK20DX256__) \
   || defined(STM32F1) \

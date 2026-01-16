@@ -23,7 +23,8 @@ UartPeripheralMock::UartPeripheralMock()
       mTransmissionDelayUs(0),
       mManualDelaySet(false),
       mLastWriteTimestamp(0),
-      mResetExpireTime(0) {
+      mResetExpireTime(0),
+      mLastCalculatedResetDuration(0) {
 }
 
 UartPeripheralMock::~UartPeripheralMock() {
@@ -192,6 +193,7 @@ void UartPeripheralMock::reset() {
     mManualDelaySet = false;
     mLastWriteTimestamp = 0;
     mResetExpireTime = 0;
+    mLastCalculatedResetDuration = 0;
     mConfig = UartConfig();
 }
 
@@ -205,6 +207,10 @@ size_t UartPeripheralMock::getCapturedByteCount() const {
 
 void UartPeripheralMock::resetCapturedData() {
     mCapturedData.clear();
+}
+
+uint64_t UartPeripheralMock::getLastCalculatedResetDurationUs() const {
+    return mLastCalculatedResetDuration;
 }
 
 fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const {
@@ -305,6 +311,7 @@ bool UartPeripheralMock::isTransmissionComplete() const {
             const uint64_t reset_duration = (current_tx_delay > MIN_RESET_DURATION_US) ?
                                            current_tx_delay : MIN_RESET_DURATION_US;
             const_cast<UartPeripheralMock*>(this)->mResetExpireTime = now + reset_duration;
+            const_cast<UartPeripheralMock*>(this)->mLastCalculatedResetDuration = reset_duration;
         }
         return true;
     }

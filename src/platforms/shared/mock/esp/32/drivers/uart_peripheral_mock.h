@@ -163,6 +163,14 @@ public:
     /// Useful for multi-phase tests.
     void resetCapturedData();
 
+    /// @brief Get the calculated reset duration for the last transmission
+    /// @return Reset duration in microseconds (0 if no transmission occurred)
+    ///
+    /// Returns the reset duration that the mock calculated for the last
+    /// transmission. This is based on transmission time and WS2812 requirements.
+    /// Use this to verify reset timing logic without wall-clock measurements.
+    uint64_t getLastCalculatedResetDurationUs() const;
+
     //-------------------------------------------------------------------------
     // Waveform Extraction (for validation)
     //-------------------------------------------------------------------------
@@ -208,6 +216,7 @@ private:
     bool mManualDelaySet;                  ///< True if delay was manually set via setTransmissionDelay()
     uint64_t mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
     uint64_t mResetExpireTime;             ///< Timestamp when reset period expires
+    uint64_t mLastCalculatedResetDuration; ///< Calculated reset duration (for testing)
 
     //=========================================================================
     // Internal Helpers
