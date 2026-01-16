@@ -5,6 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/int.h"
 
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/functional.h"
 #include "fl/stl/initializer_list.h"
 #include "fl/insert_result.h"
@@ -56,17 +57,17 @@ struct alignas(alignof(T) > alignof(fl::uptr) ? alignof(T) : alignof(fl::uptr)) 
     T *memory() {
         MemoryType *begin = &mMemoryBlock[0];
         fl::uptr shift_up =
-            reinterpret_cast<fl::uptr>(begin) & (sizeof(MemoryType) - 1);
+            fl::ptr_to_int(begin) & (sizeof(MemoryType) - 1);
         MemoryType *raw = begin + shift_up;
-        return reinterpret_cast<T *>(raw);
+        return fl::bit_cast<T *>(raw);
     }
 
     const T *memory() const {
         const MemoryType *begin = &mMemoryBlock[0];
         const fl::uptr shift_up =
-            reinterpret_cast<fl::uptr>(begin) & (sizeof(MemoryType) - 1);
+            fl::ptr_to_int(begin) & (sizeof(MemoryType) - 1);
         const MemoryType *raw = begin + shift_up;
-        return reinterpret_cast<const T *>(raw);
+        return fl::bit_cast<const T *>(raw);
     }
 
 #ifdef FASTLED_TESTING

@@ -71,4 +71,16 @@ T* int_to_ptr(uptr value) noexcept {
     return bit_cast<T*>(value);
 }
 
+//-------------------------------------------------------------------------------
+// fl::reinterpret_cast - Wrapper that delegates to bit_cast for safety
+//-------------------------------------------------------------------------------
+// This provides a drop-in replacement for reinterpret_cast that uses bit_cast
+// internally. Use this when you need reinterpret_cast semantics but want the
+// safety guarantees of bit_cast against strict aliasing violations.
+
+template <typename To, typename From>
+To reinterpret_cast_(const From& from) noexcept { // ok reinterpret cast - defining the wrapper
+    return bit_cast<To>(from);
+}
+
 } // namespace fl

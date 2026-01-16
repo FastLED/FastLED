@@ -38,6 +38,7 @@ FL_EXTERN_C_BEGIN
 #include "freertos/task.h" // For taskYIELD()
 FL_EXTERN_C_END
 
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/type_traits.h"
 
 namespace fl {
@@ -76,7 +77,7 @@ inline uint32_t ticksToNs(uint32_t ticks, uint32_t ns_per_tick) {
 inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
                          uint32_t ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
-    const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
+    const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
     // Reset pulse characteristics:
     // - Long low duration (>50us)
@@ -125,7 +126,7 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     }
 
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
-    const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
+    const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
     // Convert durations to nanoseconds
     uint32_t duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
@@ -175,7 +176,7 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
                      uint32_t ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
-    const auto &rmt_sym = reinterpret_cast<const rmt_symbol_word_t &>(symbol);
+    const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
     // Convert tick durations to nanoseconds
     uint32_t high_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
@@ -270,7 +271,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
 
     // Cast RmtSymbol array to rmt_symbol_word_t for access to bitfields
     const auto *rmt_symbols =
-        reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
+        fl::bit_cast_ptr<const rmt_symbol_word_t>(symbols.data());
 
     // Log first 30 symbols for detailed analysis (using FL_WARN to ensure output)
     size_t log_symbol_limit = (symbols.size() < 30) ? symbols.size() : 30;
@@ -806,7 +807,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // duration1/level1) Cast RmtSymbol to rmt_symbol_word_t to access
         // bitfields
         const auto *rmt_symbols =
-            reinterpret_cast<const rmt_symbol_word_t *>(symbols.data());
+            fl::bit_cast_ptr<const rmt_symbol_word_t>(symbols.data());
 
         // First pass: Count total edges
         size_t total_edges = 0;
@@ -899,7 +900,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Convert EdgeTime pairs to RMT symbols
         auto *rmt_symbols =
-            reinterpret_cast<rmt_symbol_word_t *>(mAccumulationBuffer.data());
+            fl::bit_cast_ptr<rmt_symbol_word_t>(mAccumulationBuffer.data());
 
         for (size_t i = 0; i < symbol_count; i++) {
             const EdgeTime &edge0 = edges[i * 2];     // First edge (duration0)
@@ -1220,7 +1221,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert
         // above)
-        auto *rmt_buffer = reinterpret_cast<rmt_symbol_word_t *>(buffer);
+        auto *rmt_buffer = reinterpret_cast<rmt_symbol_word_t *>(buffer); // ok reinterpret cast - ESP-IDF hardware API
 
         // Start receiving
         esp_err_t err =
@@ -1305,7 +1306,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Copy word-by-word (32-bit aligned, efficient)
             for (size_t i = 0; i < symbols_to_copy; i++) {
-                dest[i] = reinterpret_cast<const RmtSymbol &>(src[i]);
+                dest[i] = reinterpret_cast<const RmtSymbol &>(src[i]); // ok reinterpret cast - ISR IRAM context
             }
 
             // Update accumulation offset

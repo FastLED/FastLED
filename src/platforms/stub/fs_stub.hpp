@@ -6,6 +6,7 @@
 
 #include "fl/file_system.h"
 #include "fl/log.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/memory.h"
 #include <algorithm>  // For std::replace in path conversion
 #include <fstream>    // For file I/O operations
@@ -60,7 +61,7 @@ public:
         fl::size bytesAvailable = mSize - mPos;
         fl::size bytesToActuallyRead = (bytesToRead < bytesAvailable) ? bytesToRead : bytesAvailable;
 
-        mFile.read(reinterpret_cast<char*>(dst), bytesToActuallyRead);
+        mFile.read(fl::bit_cast<char*>(dst), bytesToActuallyRead);
         fl::size bytesActuallyRead = mFile.gcount();
         mPos += bytesActuallyRead;
 

@@ -61,6 +61,7 @@
 
 #include "fl/compiler_control.h"
 #include "fl/int.h"
+#include "fl/stl/bit_cast.h"
 #include "crgb.h"
 #include "pixel_controller.h"
 #include "parallel_transpose.h"
@@ -159,7 +160,7 @@ public:
 
         // Allocate transposition buffer
         mBufferSize = mMaxLeds * 24;
-        mTransposeBuffer = reinterpret_cast<u8*>(malloc(mBufferSize));
+        mTransposeBuffer = fl::bit_cast<u8*>(malloc(mBufferSize));
         if (mTransposeBuffer == nullptr) {
             return;
         }
@@ -222,7 +223,7 @@ private:
     void prepareTransposedData() {
         // Allocate temporary buffer for padded RGB data
         u32 padded_size = mMaxLeds * 3 * NUM_LANES;
-        u8* padded_rgb = reinterpret_cast<u8*>(malloc(padded_size));
+        u8* padded_rgb = fl::bit_cast<u8*>(malloc(padded_size));
         if (padded_rgb == nullptr) {
             return;
         }
@@ -234,7 +235,7 @@ private:
         for (u8 strip = 0; strip < NUM_LANES; strip++) {
             if (mStrips[strip].enabled && mStrips[strip].leds) {
                 u8* dest = padded_rgb + (strip * mMaxLeds * 3);
-                const u8* src = reinterpret_cast<const u8*>(mStrips[strip].leds);
+                const u8* src = fl::bit_cast<const u8*>(mStrips[strip].leds);
                 u32 copy_bytes = mStrips[strip].num_leds * 3;
                 fl::memcpy(dest, src, copy_bytes);
             }
@@ -250,19 +251,19 @@ private:
         switch (NUM_LANES) {
             case 8:
                 transpose_8strips(
-                    reinterpret_cast<const u8* const*>(strip_ptrs),
+                    fl::bit_cast<const u8* const*>(strip_ptrs),
                     mTransposeBuffer, mMaxLeds, 3
                 );
                 break;
             case 4:
                 transpose_4strips(
-                    reinterpret_cast<const u8* const*>(strip_ptrs),
+                    fl::bit_cast<const u8* const*>(strip_ptrs),
                     mTransposeBuffer, mMaxLeds, 3
                 );
                 break;
             case 2:
                 transpose_2strips(
-                    reinterpret_cast<const u8* const*>(strip_ptrs),
+                    fl::bit_cast<const u8* const*>(strip_ptrs),
                     mTransposeBuffer, mMaxLeds, 3
                 );
                 break;

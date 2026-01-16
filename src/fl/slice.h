@@ -3,6 +3,7 @@
 
 #include "fl/clamp.h"
 #include "fl/geometry.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
 
@@ -543,12 +544,12 @@ span<const fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeo
 as_bytes(const span<T, Extent>& s) {
     if (Extent == dynamic_extent) {
         return span<const fl::u8, dynamic_extent>(
-            reinterpret_cast<const fl::u8*>(s.data()),
+            fl::bit_cast<const fl::u8*>(s.data()),
             s.size_bytes()
         );
     } else {
         return span<const fl::u8, Extent * sizeof(T)>(
-            reinterpret_cast<const fl::u8*>(s.data())
+            fl::bit_cast<const fl::u8*>(s.data())
         );
     }
 }
@@ -559,12 +560,12 @@ span<fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
 as_writable_bytes(span<T, Extent>& s) {
     if (Extent == dynamic_extent) {
         return span<fl::u8, dynamic_extent>(
-            reinterpret_cast<fl::u8*>(s.data()),
+            fl::bit_cast<fl::u8*>(s.data()),
             s.size_bytes()
         );
     } else {
         return span<fl::u8, Extent * sizeof(T)>(
-            reinterpret_cast<fl::u8*>(s.data())
+            fl::bit_cast<fl::u8*>(s.data())
         );
     }
 }

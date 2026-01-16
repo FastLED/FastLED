@@ -26,6 +26,7 @@
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/sstream.h"
@@ -322,17 +323,17 @@ struct Rmt5EncoderImpl {
                                          const void *primary_data,
                                          size_t data_size,
                                          rmt_encode_state_t *ret_state) {
-        Rmt5EncoderImpl *impl = reinterpret_cast<Rmt5EncoderImpl *>(encoder);
+        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
         return impl->encode(channel, primary_data, data_size, ret_state);
     }
 
     static esp_err_t FL_IRAM resetCallback(rmt_encoder_t *encoder) {
-        Rmt5EncoderImpl *impl = reinterpret_cast<Rmt5EncoderImpl *>(encoder);
+        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
         return impl->reset();
     }
 
     static esp_err_t delCallback(rmt_encoder_t *encoder) {
-        Rmt5EncoderImpl *impl = reinterpret_cast<Rmt5EncoderImpl *>(encoder);
+        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
         delete impl;
         return ESP_OK;
     }

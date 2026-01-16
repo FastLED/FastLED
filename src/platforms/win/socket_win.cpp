@@ -137,13 +137,13 @@ int socketpair(int domain, int type, int protocol, int sv[2]) {
 // Addressing
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
-    int result = ::bind(sock, reinterpret_cast<const ::sockaddr*>(addr), addrlen);
+    int result = ::bind(sock, reinterpret_cast<const ::sockaddr*>(addr), addrlen); // ok reinterpret cast
     return (result == SOCKET_ERROR) ? -1 : 0;
 }
 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
-    int result = ::connect(sock, reinterpret_cast<const ::sockaddr*>(addr), addrlen);
+    int result = ::connect(sock, reinterpret_cast<const ::sockaddr*>(addr), addrlen); // ok reinterpret cast
     return (result == SOCKET_ERROR) ? -1 : 0;
 }
 
@@ -156,7 +156,7 @@ int listen(int sockfd, int backlog) {
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     SOCKET server_sock = static_cast<SOCKET>(sockfd);
     int addr_len = addrlen ? static_cast<int>(*addrlen) : 0;
-    SOCKET client_sock = ::accept(server_sock, reinterpret_cast<::sockaddr*>(addr), &addr_len);
+    SOCKET client_sock = ::accept(server_sock, reinterpret_cast<::sockaddr*>(addr), &addr_len); // ok reinterpret cast
     if (addrlen) *addrlen = static_cast<socklen_t>(addr_len);
     return (client_sock == INVALID_SOCKET) ? -1 : static_cast<int>(client_sock);
 }
@@ -178,7 +178,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                const struct sockaddr *dest_addr, socklen_t addrlen) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int result = ::sendto(sock, static_cast<const char*>(buf), static_cast<int>(len), flags,
-                         reinterpret_cast<const ::sockaddr*>(dest_addr), addrlen);
+                         reinterpret_cast<const ::sockaddr*>(dest_addr), addrlen); // ok reinterpret cast
     return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
 }
 
@@ -187,7 +187,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int addr_len = addrlen ? static_cast<int>(*addrlen) : 0;
     int result = ::recvfrom(sock, static_cast<char*>(buf), static_cast<int>(len), flags,
-                           reinterpret_cast<::sockaddr*>(src_addr), &addr_len);
+                           reinterpret_cast<::sockaddr*>(src_addr), &addr_len); // ok reinterpret cast
     if (addrlen) *addrlen = static_cast<socklen_t>(addr_len);
     return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
 }
@@ -231,7 +231,7 @@ int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optl
 int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int len = addrlen ? static_cast<int>(*addrlen) : 0;
-    int result = ::getpeername(sock, reinterpret_cast<::sockaddr*>(addr), &len);
+    int result = ::getpeername(sock, reinterpret_cast<::sockaddr*>(addr), &len); // ok reinterpret cast
     if (addrlen) *addrlen = static_cast<socklen_t>(len);
     return (result == SOCKET_ERROR) ? -1 : 0;
 }
@@ -239,7 +239,7 @@ int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
 int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int len = addrlen ? static_cast<int>(*addrlen) : 0;
-    int result = ::getsockname(sock, reinterpret_cast<::sockaddr*>(addr), &len);
+    int result = ::getsockname(sock, reinterpret_cast<::sockaddr*>(addr), &len); // ok reinterpret cast
     if (addrlen) *addrlen = static_cast<socklen_t>(len);
     return (result == SOCKET_ERROR) ? -1 : 0;
 }

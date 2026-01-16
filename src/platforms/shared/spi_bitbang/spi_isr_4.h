@@ -2,6 +2,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/bit_cast.h"
 #include "spi_isr_engine.h"
 
 namespace fl {
@@ -258,7 +259,7 @@ public:
     };
 
     static const GPIOEvent* getValidationEventsTyped() {
-        return reinterpret_cast<const GPIOEvent*>(fl_spi_get_validation_events());
+        return fl::bit_cast<const GPIOEvent*>(fl_spi_get_validation_events());
     }
 #endif
 };

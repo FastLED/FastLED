@@ -975,11 +975,11 @@ public:
 
 private:
     T* get_inlined_ptr() {
-        return reinterpret_cast<T*>(m_inlined_storage.data);
+        return fl::bit_cast_ptr<T>(m_inlined_storage.data);
     }
-    
+
     const T* get_inlined_ptr() const {
-        return reinterpret_cast<const T*>(m_inlined_storage.data);
+        return fl::bit_cast_ptr<const T>(m_inlined_storage.data);
     }
     
     // SFINAE helper to detect if base allocator has cleanup() method

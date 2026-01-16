@@ -560,7 +560,7 @@ void ParlioPeripheralMockImpl::simulateTransmitComplete() {
         // Cast callback to correct signature
         // bool (*callback)(void* tx_unit, const void* edata, void* user_ctx)
         using CallbackType = bool (*)(void*, const void*, void*);
-        auto callback_fn = reinterpret_cast<CallbackType>(mCallback);
+        auto callback_fn = reinterpret_cast<CallbackType>(mCallback); // ok reinterpret cast
 
         // Call with null tx_unit handle (mock doesn't have real handle)
         callback_fn(nullptr, nullptr, mUserCtx);
@@ -725,7 +725,7 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
                 // Call ISR callback if registered
                 if (callback) {
                     using CallbackType = bool (*)(void*, const void*, void*);
-                    auto callback_fn = reinterpret_cast<CallbackType>(callback);
+                    auto callback_fn = reinterpret_cast<CallbackType>(callback); // ok reinterpret cast
                     callback_fn(nullptr, nullptr, user_ctx);
                 } else {
                     FL_WARN("Parlio Mock: No callback registered!");

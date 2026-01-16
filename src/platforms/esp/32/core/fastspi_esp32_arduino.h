@@ -145,7 +145,7 @@ public:
 	}
 
 	void writePixelsBulk(const CRGB* pixels, size_t n) {
-		uint8_t* data = reinterpret_cast<uint8_t*>(pixels);
+		uint8_t* data = reinterpret_cast<uint8_t*>(const_cast<CRGB*>(pixels)); // ok reinterpret cast - Arduino SPI API requires non-const, const_cast needed
 		size_t n_bytes = n * 3;
 		m_ledSPI.writePixels(data, n_bytes);
 	}

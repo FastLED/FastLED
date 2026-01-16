@@ -165,7 +165,7 @@ bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) {
 
     // Register post-transaction callback if set
     if (mCallback != nullptr) {
-        dev_config.post_cb = reinterpret_cast<transaction_cb_t>(mCallback);
+        dev_config.post_cb = reinterpret_cast<transaction_cb_t>(mCallback); // ok reinterpret cast
     }
 
     // Add device to bus (delegate to ESP-IDF)

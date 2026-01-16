@@ -3,6 +3,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/map.h"
 #include "fl/stl/atomic.h"
+#include "fl/stl/bit_cast.h"
 #include "crgb.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 
@@ -33,7 +34,7 @@ public:
     /// @brief Constructor - registers this tracker and gets a unique sequential ID
     /// Uses the tracker's own address to obtain a stable, unique identifier
     ActiveStripTracker() {
-        uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
+        uintptr_t tracker_addr = fl::ptr_to_int(this);
         int existing_id;
 
         if (getTrackerMap().get(tracker_addr, &existing_id)) {
@@ -48,7 +49,7 @@ public:
     /// Each copy gets its own unique ID in the registry
     ActiveStripTracker(const ActiveStripTracker& other) {
         (void)other; // Don't copy ID - get fresh one
-        uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
+        uintptr_t tracker_addr = fl::ptr_to_int(this);
         mId = getNextId().fetch_add(1);
         getTrackerMap().update(tracker_addr, mId);
     }
@@ -56,7 +57,7 @@ public:
     /// @brief Copy assignment - keeps same ID, updates address
     ActiveStripTracker& operator=(const ActiveStripTracker& other) {
         if (this != &other) {
-            uintptr_t addr = reinterpret_cast<uintptr_t>(this);
+            uintptr_t addr = fl::ptr_to_int(this);
             getTrackerMap().erase(addr);
             mId = other.mId;
             getTrackerMap().update(addr, mId);
@@ -67,8 +68,8 @@ public:
     /// @brief Move constructor - transfers ID to new address
     ActiveStripTracker(ActiveStripTracker&& other) noexcept {
         mId = other.mId;
-        uintptr_t old_addr = reinterpret_cast<uintptr_t>(&other);
-        uintptr_t new_addr = reinterpret_cast<uintptr_t>(this);
+        uintptr_t old_addr = fl::ptr_to_int(&other);
+        uintptr_t new_addr = fl::ptr_to_int(this);
         getTrackerMap().erase(old_addr);
         getTrackerMap().update(new_addr, mId);
     }
@@ -76,12 +77,12 @@ public:
     /// @brief Move assignment - transfers ID to new address
     ActiveStripTracker& operator=(ActiveStripTracker&& other) noexcept {
         if (this != &other) {
-            uintptr_t old_this = reinterpret_cast<uintptr_t>(this);
-            uintptr_t old_other = reinterpret_cast<uintptr_t>(&other);
+            uintptr_t old_this = fl::ptr_to_int(this);
+            uintptr_t old_other = fl::ptr_to_int(&other);
             getTrackerMap().erase(old_this);
             getTrackerMap().erase(old_other);
             mId = other.mId;
-            uintptr_t new_this = reinterpret_cast<uintptr_t>(this);
+            uintptr_t new_this = fl::ptr_to_int(this);
             getTrackerMap().update(new_this, mId);
         }
         return *this;
@@ -90,7 +91,7 @@ public:
     /// @brief Destructor - unregisters this tracker
     /// Removes the tracker's address from the map to clean up orphaned IDs
     ~ActiveStripTracker() {
-        uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
+        uintptr_t tracker_addr = fl::ptr_to_int(this);
         getTrackerMap().erase(tracker_addr);
     }
 
@@ -104,7 +105,7 @@ public:
     /// @param pixels Span of CRGB pixels
     void update(fl::span<const CRGB> pixels) {
         // Convert CRGB span to uint8_t span (safe because CRGB is packed RGB)
-        const uint8_t* data = reinterpret_cast<const uint8_t*>(pixels.data());
+        const uint8_t* data = fl::bit_cast<const uint8_t*>(pixels.data());
         size_t size = pixels.size() * 3; // 3 bytes per CRGB
         update(fl::span<const uint8_t>(data, size));
     }

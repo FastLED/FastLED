@@ -3,6 +3,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/bit_cast.h"
 #include "spi_isr_engine.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
@@ -226,7 +227,7 @@ public:
      * Returns pointer to array of GPIO events captured during ISR execution
      */
     static const GPIOEvent* getValidationEvents() {
-        return reinterpret_cast<const GPIOEvent*>(fl_spi_get_validation_events());
+        return fl::bit_cast<const GPIOEvent*>(fl_spi_get_validation_events());
     }
 
     /**

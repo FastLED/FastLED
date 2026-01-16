@@ -1,6 +1,7 @@
 
 #include "crgb.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/xymap.h"
@@ -148,7 +149,7 @@ void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
             break;
         }
         case PixelFormat::RGB565: {
-            fl::u16* pixel565 = reinterpret_cast<fl::u16*>(pixels);
+            fl::u16* pixel565 = fl::bit_cast<fl::u16*>(pixels);
             for (size_t i = 0; i < mPixelsCount; i++) {
                 fl::u8 r, g, b;
                 rgb565ToRgb888(pixel565[i], r, g, b);

@@ -283,7 +283,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
             if (scratchpad.size() != required_bytes) {
                 scratchpad.resize(required_bytes);
                 // Zero the buffer (phantom pixels will remain black)
-                CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data());
+                CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data()); // ok reinterpret cast
                 for (int i = 0; i < rgb_pixel_count; i++) {
                     buffer[i] = CRGB(0, 0, 0);
                 }
@@ -308,7 +308,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
 
             // -- Create a new PixelController pointing to the converted buffer
             //    treating it as RGB pixels (even though it's packed RGBW)
-            CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data());
+            CRGB* buffer = reinterpret_cast<CRGB*>(scratchpad.data()); // ok reinterpret cast
             ColorAdjustment no_adjustment = ColorAdjustment::noAdjustment();
             PixelController<RGB_ORDER> converted_pixels(
                 buffer, rgb_pixel_count, no_adjustment, DISABLE_DITHER);

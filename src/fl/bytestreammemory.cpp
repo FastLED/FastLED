@@ -1,6 +1,7 @@
 #include "fl/int.h"
 
 #include "fl/bytestreammemory.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
 
@@ -57,7 +58,7 @@ fl::size ByteStreamMemory::write(const fl::u8 *src, fl::size n) {
 }
 
 fl::size ByteStreamMemory::writeCRGB(const CRGB *src, fl::size n) {
-    fl::size bytes_written = write(reinterpret_cast<const fl::u8 *>(src), n * 3);
+    fl::size bytes_written = write(fl::bit_cast<const fl::u8 *>(src), n * 3);
     fl::size pixels_written = bytes_written / 3;
     return pixels_written;
 }

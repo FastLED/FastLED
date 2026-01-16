@@ -457,7 +457,7 @@ void SpiPeripheralMockImpl::simulateTransactionComplete() {
         // void (*callback)(spi_transaction_t* trans)
         // For mock purposes, we pass nullptr since we don't have real ESP-IDF transaction structure
         using CallbackType = void (*)(void*);
-        auto callback_fn = reinterpret_cast<CallbackType>(mCallback);
+        auto callback_fn = reinterpret_cast<CallbackType>(mCallback);  // ok reinterpret cast
 
         // Call with nullptr transaction pointer (mock doesn't have ESP-IDF transaction)
         callback_fn(nullptr);
@@ -556,7 +556,7 @@ void SpiPeripheralMockImpl::simulationThreadFunc() {
 
                 // Call post-transaction callback
                 using CallbackType = void (*)(void*);
-                auto callback_fn = reinterpret_cast<CallbackType>(mCallback);
+                auto callback_fn = reinterpret_cast<CallbackType>(mCallback);  // ok reinterpret cast
                 callback_fn(nullptr);
             }
         } else {

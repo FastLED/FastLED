@@ -320,7 +320,7 @@ bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_
 
     // Setup callback structure
     parlio_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(callback);
+    callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(callback); // ok reinterpret cast
 
     // Delegate to ESP-IDF
     FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_tx_unit_register_event_callbacks()");

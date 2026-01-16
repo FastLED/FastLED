@@ -261,7 +261,7 @@ public:
     };
 
     static const GPIOEvent* getValidationEventsTyped() {
-        return reinterpret_cast<const GPIOEvent*>(fl_spi_get_validation_events());
+        return reinterpret_cast<const GPIOEvent*>(fl_spi_get_validation_events()); // ok reinterpret cast
     }
 #endif
 };

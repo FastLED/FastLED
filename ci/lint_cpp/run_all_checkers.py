@@ -31,6 +31,7 @@ from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecke
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
+from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
@@ -117,6 +118,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         UsingNamespaceFlChecker(),
         StdNamespaceChecker(),
         NamespaceIncludesChecker(),
+        ReinterpretCastChecker(),
     ]
 
     # Platforms-specific checkers

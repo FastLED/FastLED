@@ -30,7 +30,7 @@ namespace platform {
 // ============================================================================
 
 // Base register address for GPIO
-#define ESP8266_REG(addr) (*reinterpret_cast<volatile uint32_t*>(0x60000000 + (addr)))
+#define ESP8266_REG(addr) (*reinterpret_cast<volatile uint32_t*>(0x60000000 + (addr)))  // ok reinterpret cast
 
 // GPIO (pins 0-15) registers
 #define GPO      ESP8266_REG(0x300)  // Output level

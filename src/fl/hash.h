@@ -31,7 +31,7 @@ static inline u32 MurmurHash3_x86_32(const void *key, fl::size len,
     const u32 c2 = 0x1b873593;
 
     // body
-    const u32 *blocks = reinterpret_cast<const u32 *>(data);
+    const u32 *blocks = reinterpret_cast<const u32 *>(data); // ok reinterpret cast
     for (int i = 0; i < nblocks; ++i) {
         u32 k1 = blocks[i];
         k1 *= c1;
@@ -143,7 +143,7 @@ template <typename T> struct FastHash<vec2<T>> {
 template <typename T> struct Hash<T *> {
     u32 operator()(T *key) const noexcept {
         if (sizeof(T *) == sizeof(u32)) {
-            u32 key_u = reinterpret_cast<fl::uptr>(key);
+            u32 key_u = static_cast<u32>(fl::ptr_to_int(key));
             return fast_hash32(key_u);
         } else {
             // Hash the pointer value (address), not the data it points to

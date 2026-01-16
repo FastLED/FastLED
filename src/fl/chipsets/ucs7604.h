@@ -11,6 +11,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/encoders/ucs7604.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/vector.h"
 #include "lib8tion/intmap.h"
 #include "fl/stl/type_traits.h"
@@ -175,7 +176,7 @@ protected:
 
         // Reinterpret byte buffer as CRGB pixels (encoder ensures divisible by 3)
         size_t num_pixels = mByteBuffer.size() / 3;
-        CRGB* fake_pixels = reinterpret_cast<CRGB*>(mByteBuffer.data());
+        CRGB* fake_pixels = fl::bit_cast<CRGB*>(mByteBuffer.data());
 
         // Construct PixelController and send to delegate controller
         PixelController<RGB> pixel_data(fake_pixels, num_pixels, ColorAdjustment::noAdjustment(), DISABLE_DITHER);

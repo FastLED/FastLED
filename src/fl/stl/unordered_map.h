@@ -10,6 +10,7 @@ and removals.
 */
 
 #include "fl/stl/assert.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/bitset.h"
 #include "fl/clamp.h"
 #include "fl/hash.h"
@@ -194,17 +195,17 @@ class FL_ALIGN unordered_map {
         }
 
         pointer operator->() {
-            // Use reinterpret_cast since pair<const Key, T> and pair<Key, T> are different types
+            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
             // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
             using mutable_value_type = pair<Key, T>;
-            auto& mutable_cached = *reinterpret_cast<mutable_value_type*>(&_cached_value);
+            auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
             mutable_cached.~mutable_value_type();
             new (&mutable_cached) mutable_value_type(operator*());
             return &_cached_value;
         }
         
         pointer operator->() const {
-            // Use reinterpret_cast since pair<const Key, T> and pair<Key, T> are different types
+            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
             // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
             using mutable_value_type = pair<Key, T>;
             auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
@@ -265,10 +266,10 @@ class FL_ALIGN unordered_map {
         }
 
         pointer operator->() const {
-            // Use reinterpret_cast since pair<const Key, T> and pair<Key, T> are different types
+            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
             // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
             using mutable_value_type = pair<Key, T>;
-            auto& mutable_cached = *reinterpret_cast<mutable_value_type*>(&_cached_value);
+            auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
             mutable_cached.~mutable_value_type();
             new (&mutable_cached) mutable_value_type(operator*());
             return &_cached_value;

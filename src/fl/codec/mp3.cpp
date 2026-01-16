@@ -1,4 +1,5 @@
 #include "fl/codec/mp3.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
 
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
@@ -71,7 +72,7 @@ int Mp3HelixDecoder::decodeFrame(const fl::u8** inbuf, fl::size* bytes_left) {
         static_cast<HMP3Decoder>(mDecoder),
         inbuf,
         bytes_left,
-        reinterpret_cast<short*>(mPcmBuffer),
+        fl::bit_cast<short*>(mPcmBuffer),
         0  // useSize = 0 (use default)
     );
 

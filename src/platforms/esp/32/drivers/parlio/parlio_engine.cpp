@@ -740,8 +740,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
 
             // MSB bit packing: Use natural lane order (no swap needed)
             uint8_t transposed[2 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut,
-                                reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed));
+            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             // DIAGNOSTIC: Log transposed output for LED[2] (16 bytes for 2-lane Wave8)
             // if (absolute_byte >= 6 && absolute_byte <= 8) {
@@ -762,8 +762,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             }
 
             uint8_t transposed[4 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_4(reinterpret_cast<const uint8_t(&)[4]>(lanes), mWave8Lut,
-                                reinterpret_cast<uint8_t(&)[4 * sizeof(Wave8Byte)]>(transposed));
+            fl::wave8Transpose_4(reinterpret_cast<const uint8_t(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<uint8_t(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
@@ -776,8 +776,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             }
 
             uint8_t transposed[8 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_8(reinterpret_cast<const uint8_t(&)[8]>(lanes), mWave8Lut,
-                                reinterpret_cast<uint8_t(&)[8 * sizeof(Wave8Byte)]>(transposed));
+            fl::wave8Transpose_8(reinterpret_cast<const uint8_t(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<uint8_t(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
@@ -790,8 +790,8 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             }
 
             uint8_t transposed[16 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_16(reinterpret_cast<const uint8_t(&)[16]>(lanes), mWave8Lut,
-                                 reinterpret_cast<uint8_t(&)[16 * sizeof(Wave8Byte)]>(transposed));
+            fl::wave8Transpose_16(reinterpret_cast<const uint8_t(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                 reinterpret_cast<uint8_t(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
@@ -1216,7 +1216,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     // Register ISR callback
     FL_LOG_PARLIO("PARLIO_INIT: Registering ISR callback");
     if (!mPeripheral->registerTxDoneCallback(
-            reinterpret_cast<void*>(txDoneCallback), this)) {
+            reinterpret_cast<void*>(txDoneCallback), this)) { // ok reinterpret cast - callback function pointer to void*
         FL_LOG_PARLIO("PARLIO_INIT: FAILED to register ISR callback");
         FL_LOG_PARLIO("PARLIO: Failed to register callbacks");
         mPeripheral = nullptr;

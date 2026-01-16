@@ -51,19 +51,19 @@ using simd_f32x4 = __m128;
 //==============================================================================
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const uint8_t* ptr) noexcept {
-    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr));
+    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr)); // ok reinterpret cast
 }
 
 FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(uint8_t* ptr, simd_u8x16 vec) noexcept {
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), vec);
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), vec); // ok reinterpret cast
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const uint32_t* ptr) noexcept {
-    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr));
+    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr)); // ok reinterpret cast
 }
 
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(uint32_t* ptr, simd_u32x4 vec) noexcept {
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), vec);
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), vec); // ok reinterpret cast
 }
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 load_f32_4(const float* ptr) noexcept {
     return _mm_loadu_ps(ptr);
@@ -93,13 +93,13 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, uint8_t scal
     // For simplicity in initial implementation, use scalar loop
     // TODO: Optimize with proper SSE2 unpack/multiply/pack sequence
     alignas(16) uint8_t data[16];
-    _mm_store_si128(reinterpret_cast<__m128i*>(data), vec);
+    _mm_store_si128(reinterpret_cast<__m128i*>(data), vec); // ok reinterpret cast
 
     for (int i = 0; i < 16; ++i) {
         data[i] = static_cast<uint8_t>((static_cast<uint16_t>(data[i]) * scale) >> 8);
     }
 
-    return _mm_load_si128(reinterpret_cast<const __m128i*>(data));
+    return _mm_load_si128(reinterpret_cast<const __m128i*>(data)); // ok reinterpret cast
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(uint32_t value) noexcept {

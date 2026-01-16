@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cstring.h"
+#include "fl/stl/bit_cast.h"
 // Include C string headers for standard C library functions
 #include <string.h>  // ok include
 #include <stdlib.h>  // ok include
@@ -132,11 +133,11 @@ const void* memchr(const void* s, int c, size_t n) noexcept {
 #if defined(ARDUINO) && defined(__AVR__)
 
 size_t strlen_P(detail::pgm_p s) noexcept {
-    return ::strlen_P(reinterpret_cast<const char*>(s));
+    return ::strlen_P(fl::bit_cast<const char*>(s));
 }
 
 int strcmp_P(const char* a, detail::pgm_p b) noexcept {
-    return ::strcmp_P(a, reinterpret_cast<const char*>(b));
+    return ::strcmp_P(a, fl::bit_cast<const char*>(b));
 }
 
 int memcmp_P(const void* a, detail::pgm_p b, size_t n) noexcept {

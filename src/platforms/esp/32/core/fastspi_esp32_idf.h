@@ -4,6 +4,7 @@
 
 #include "crgb.h"
 #include "fastspi_types.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"  // For fl::memset
 
 FL_EXTERN_C_BEGIN
@@ -151,7 +152,7 @@ public:
             return;
         }
 
-        const uint8_t* data = reinterpret_cast<const uint8_t*>(pixels);
+        const uint8_t* data = fl::bit_cast<const uint8_t*>(pixels);
         size_t n_bytes = n * 3;
 
         spi_transaction_t t = {};

@@ -13,6 +13,7 @@
 
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 
@@ -287,7 +288,7 @@ bool requiresAssemblyHandler(uint8_t priority);
 /// @param alignment Alignment requirement in bytes (must be power of 2)
 /// @return true if aligned, false otherwise
 FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) {
-    return (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1)) == 0;
+    return (fl::ptr_to_int(ptr) & (alignment - 1)) == 0;
 }
 
 /// @brief ISR-optimized 32-bit block copy for 4-byte aligned memory
@@ -350,8 +351,8 @@ void memcpy(void* FL_RESTRICT_PARAM dst,
     // - Both 2-byte aligned AND size multiple of 2: index 1 (memcpy16)
     // - Otherwise: index 0 (memcpybyte)
 
-    uintptr_t dst_addr = reinterpret_cast<uintptr_t>(dst);
-    uintptr_t src_addr = reinterpret_cast<uintptr_t>(src);
+    uintptr_t dst_addr = fl::ptr_to_int(dst);
+    uintptr_t src_addr = fl::ptr_to_int(src);
 
     // Branchless: Convert boolean to integer (0 or 1) using bitwise ops
     // Check if all are 2-byte aligned (LSB is 0)
@@ -406,7 +407,7 @@ void memset_zero_byte(uint8_t* dest, size_t count) {
 /// @note Handles remainder bytes using byte writes
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memset_zero_word(uint8_t* dest, size_t count) {
-    uint32_t* dest32 = reinterpret_cast<uint32_t*>(dest);
+    uint32_t* dest32 = fl::bit_cast<uint32_t*>(dest);
     size_t count32 = count / 4;
     size_t remainder = count % 4;
 
@@ -426,7 +427,7 @@ void memset_zero_word(uint8_t* dest, size_t count) {
 /// @note Automatically selects word or byte writes based on alignment
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memset_zero(uint8_t* dest, size_t count) {
-    uintptr_t address = reinterpret_cast<uintptr_t>(dest);
+    uintptr_t address = fl::ptr_to_int(dest);
 
     // If aligned AND large enough, use fast word writes
     if ((address % 4 == 0) && (count >= 4)) {
