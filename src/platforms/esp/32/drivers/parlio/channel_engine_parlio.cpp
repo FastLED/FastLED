@@ -159,10 +159,11 @@ void ChannelEnginePARLIOImpl::show() {
                      return transmissionTimeA < transmissionTimeB;
                  });
 
-        for (const auto& group : mChipsetGroups) {
+        for (auto& group : mChipsetGroups) {
             // sort each member of the group by their pin orders.
-            fl::sort(group.mChannels, [mReversedPinOrder](const ChannelDataPtr& a, const ChannelDataPtr& b) {
-                if (mReversedPinOrder) {
+            bool reversed = mReversedPinOrder;
+            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) {
+                if (reversed) {
                     return b->getPin() < a->getPin();
                 }
                 return a->getPin() < b->getPin();
