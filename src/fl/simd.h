@@ -24,10 +24,9 @@
 ///   }
 /// @endcode
 
-#include "platforms/shared/simd_x86.hpp"  // ok platform headers
-
 // Platform dispatch header - delegates to platform-specific SIMD implementations
-// using the coarse-to-fine pattern. No #ifdef needed here!
+// using the coarse-to-fine pattern. Uses scalar fallback for non-SIMD platforms.
+#include "platforms/simd.h"  // ok platform headers
 
 namespace fl {
 namespace simd {
