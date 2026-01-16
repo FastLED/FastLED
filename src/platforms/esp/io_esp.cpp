@@ -10,7 +10,7 @@
 //
 // ok no namespace fl
 
-#ifdef ESP32
+#if defined(ESP32) || defined(ESP8266)
 
 // Determine which backend to use at compile time and include it
 #if defined(ARDUINO) && !defined(FL_NO_ARDUINO)
@@ -22,4 +22,4 @@
     #include "io_esp_idf.hpp"
 #endif
 
-#endif  // ESP32
+#endif  // ESP32 || ESP8266
