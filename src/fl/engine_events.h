@@ -6,6 +6,7 @@
 #include "fl/xymap.h"
 #include "fl/stl/string.h"
 #include "fl/int.h"
+#include "fl/sketch_macros.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
