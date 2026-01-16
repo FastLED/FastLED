@@ -25,8 +25,6 @@
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
-#include "platforms/shared/int_windows.h"
-#include "fl/stl/vector.h"
 
 namespace test_hd108 {
 
