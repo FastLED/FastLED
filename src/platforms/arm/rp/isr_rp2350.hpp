@@ -270,9 +270,11 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Set IRQ priority if specified
+    // RP2350 has dual timers (TIMER0/TIMER1) with separate IRQs
+    // Use TIMER_ALARM_IRQ_NUM macro for portability with PICO_DEFAULT_TIMER
     if (config.priority != ISR_PRIORITY_DEFAULT) {
         uint8_t nvic_priority = map_priority_to_nvic(config.priority);
-        irq_set_priority(TIMER_IRQ_0 + alarm_num, nvic_priority);
+        irq_set_priority(TIMER_ALARM_IRQ_NUM(timer_hw, alarm_num), nvic_priority);
     }
 
     FL_DBG("Timer started at " << config.frequency_hz << " Hz on alarm "
