@@ -100,15 +100,17 @@ endif
 
 runner_exe = executable('runner',
   'shared/runner.cpp',
+  include_directories: [src_dir, stub_dir],  # For platforms/run_unit_test.h
   cpp_args: [
     '-std=c++11',
     '-O2',
     '-g',
+    '-DFASTLED_STUB_IMPL',  # Required for fl:: types
     # Suppress warnings from Windows SDK headers
     '-Wno-pragma-pack',
   ],
   link_args: runner_link_args,
-  link_with: [crash_handler_runner],  # Link crash handler library
+  link_with: [crash_handler_runner, fastled_lib],  # Link crash handler and fastled library
   dependencies: runner_deps,
   install: false
 )

@@ -294,5 +294,7 @@
     "platformio-ide.autoOpenPlatformIOIniFile": false,
     "platformio-ide.autoPreloadEnvTasks": false,
     "platformio-ide.autoCloseSerialMonitor": false,
-    "platformio-ide.disablePIOHomeStartup": true
+    "platformio-ide.disablePIOHomeStartup": true,
+    "C_Cpp.default.compileCommands": "builddir/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
 }

@@ -1,20 +1,16 @@
-// Generic example runner that loads and executes example DLLs
-// Usage: example_runner.exe <example_dll_path> [args...]
-// Or:    <example_name>.exe (auto-loads <example_name>.dll from same directory)
+// ok no namespace fl
+#pragma once
 
-// Generic example runner that loads and executes example DLLs
-// Usage: example_runner.exe <example_dll_path> [args...]
-// Or:    <example_name>.exe (auto-loads <example_name>.dll from same directory)
+/// @file run_example.hpp
+/// Windows implementation of example runner
+///
+/// This file provides the main() function for loading and executing FastLED
+/// example DLLs on Windows using the Win32 API (LoadLibraryA, GetProcAddress).
+///
+/// Usage: runner.exe <example_dll_path> [args...]
+/// Or:    <example_name>.exe (auto-loads <example_name>.dll from same directory)
 
-#include <string>    // ok include
-#include <iostream>  // ok include
-#include <vector>    // ok include
-#include <stddef.h>  // ok include
-
-// Crash handler setup (defined in crash_handler_main.cpp)
-extern "C" void runner_setup_crash_handler();
-
-typedef int (*RunExampleFunc)(int argc, const char** argv);
+#ifdef _WIN32
 
 #include <windef.h>
 #include <libloaderapi.h>
@@ -26,7 +22,7 @@ int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any DLLs
     // This ensures crash handling is active for the entire process lifetime
     runner_setup_crash_handler();
-    std::string dll_path;
+    fl::string dll_path;
 
     // Determine DLL path: explicit argument or inferred from exe name
     if (argc > 1 && argv[1][0] != '-') {
@@ -38,22 +34,22 @@ int main(int argc, char** argv) {
         DWORD result = GetModuleFileNameA(NULL, exe_path, MAX_PATH);
 
         if (result == 0 || result == MAX_PATH) {
-            std::cerr << "Error: Failed to get executable path" << std::endl;
+            fl::cout << "Error: Failed to get executable path" << fl::endl;
             return 1;
         }
 
         // Extract directory and filename
-        std::string full_path(exe_path);
+        fl::string full_path(exe_path);
         size_t last_slash = full_path.find_last_of("\\/");
-        std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
-        std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
+        fl::string exe_dir = (last_slash != fl::string::npos) ? full_path.substr(0, last_slash) : ".";
+        fl::string exe_file = (last_slash != fl::string::npos) ? full_path.substr(last_slash + 1) : full_path;
 
         // Remove .exe extension
         size_t dot_pos = exe_file.find_last_of('.');
-        std::string exe_name = (dot_pos != std::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
+        fl::string exe_name = (dot_pos != fl::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
 
         // Construct DLL path
-        std::string dll_name = exe_name + ".dll";
+        fl::string dll_name = exe_name + ".dll";
         dll_path = exe_dir + "\\" + dll_name;
     }
 
@@ -61,14 +57,14 @@ int main(int argc, char** argv) {
     HMODULE dll = LoadLibraryA(dll_path.c_str());
     if (!dll) {
         DWORD error = GetLastError();
-        std::cerr << "Error: Failed to load " << dll_path << " (error code: " << error << ")" << std::endl;
+        fl::cout << "Error: Failed to load " << dll_path << " (error code: " << error << ")" << fl::endl;
         return 1;
     }
 
     // Get run_example function
     RunExampleFunc run_example = (RunExampleFunc)GetProcAddress(dll, "run_example");
     if (!run_example) {
-        std::cerr << "Error: Failed to find run_example() in " << dll_path << std::endl;
+        fl::cout << "Error: Failed to find run_example() in " << dll_path << fl::endl;
         FreeLibrary(dll);
         return 1;
     }
@@ -76,7 +72,7 @@ int main(int argc, char** argv) {
     // Prepare arguments for run_example (skip DLL path if it was provided)
     int example_argc;
     const char** example_argv;
-    std::vector<const char*> adjusted_argv;
+    fl::vector<const char*> adjusted_argv;
 
     if (argc > 1 && argv[1][0] != '-') {
         // DLL path was provided: skip it in arguments passed to example
@@ -100,3 +96,5 @@ int main(int argc, char** argv) {
 
     return example_result;
 }
+
+#endif // _WIN32

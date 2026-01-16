@@ -166,13 +166,15 @@ endif
 
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
+  include_directories: [src_dir, stub_dir],  # For platforms/run_example.h
   cpp_args: [
     '-std=c++11',
     '-O0',
     '-g',
+    '-DFASTLED_STUB_IMPL',  # Required for fl:: types
   ],
   link_args: example_runner_link_args,
-  link_with: [crash_handler_example],  # Link crash handler library
+  link_with: [crash_handler_example, fastled_lib],  # Link crash handler and fastled library
   dependencies: example_runner_deps,
   install: false
 )
