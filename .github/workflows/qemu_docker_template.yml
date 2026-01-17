@@ -228,7 +228,7 @@ jobs:
           # Try to pull or build the Docker image
           uv run python -c "
           import sys
-          from ci.docker.qemu_esp32_docker import DockerQEMURunner
+          from ci.docker_utils.qemu_esp32_docker import DockerQEMURunner
 
           print('Initializing Docker QEMU runner...')
           runner = DockerQEMURunner()
@@ -278,7 +278,7 @@ jobs:
           uv run python -c "
           import sys
           from pathlib import Path
-          from ci.docker.qemu_esp32_docker import DockerQEMURunner
+          from ci.docker_utils.qemu_esp32_docker import DockerQEMURunner
 
           print('Initializing Docker QEMU runner...')
           runner = DockerQEMURunner()

@@ -59,7 +59,7 @@ jobs:
         id: config
         run: |
           boards=$(uv run python3 -c "
-          from ci.docker.build_platforms import get_boards_for_platform, get_docker_image_name
+          from ci.docker_utils.build_platforms import get_boards_for_platform, get_docker_image_name
           platform = '${{ matrix.platform }}'
           boards = get_boards_for_platform(platform)
           image = get_docker_image_name(platform)
@@ -162,7 +162,7 @@ jobs:
         id: config
         run: |
           image=$(uv run python3 -c "
-          from ci.docker.build_platforms import get_docker_image_name
+          from ci.docker_utils.build_platforms import get_docker_image_name
           print(get_docker_image_name('${{ matrix.platform }}'))
           ")
           echo "image=$image" >> $GITHUB_OUTPUT
