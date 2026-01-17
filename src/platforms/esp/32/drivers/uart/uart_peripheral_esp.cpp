@@ -18,6 +18,16 @@ FL_EXTERN_C_BEGIN
 #include "freertos/task.h"
 FL_EXTERN_C_END
 
+// ESP-IDF version compatibility for UART clock source
+// UART_SCLK_DEFAULT only exists in ESP-IDF 5.0+
+// For older versions, use UART_SCLK_APB (APB clock source)
+#include "platforms/esp/esp_version.h"
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#define FASTLED_UART_SCLK_SOURCE UART_SCLK_DEFAULT
+#else
+#define FASTLED_UART_SCLK_SOURCE UART_SCLK_APB
+#endif
+
 namespace fl {
 
 //=============================================================================
@@ -76,7 +86,7 @@ bool UartPeripheralEsp::initialize(const UartConfig& config) {
 
     uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 0;
-    uart_config.source_clk = UART_SCLK_DEFAULT;
+    uart_config.source_clk = FASTLED_UART_SCLK_SOURCE;
 
     // Configure UART parameters (maps directly to ESP-IDF structure)
     FL_DBG("UART_PERIPH: Calling uart_param_config()");

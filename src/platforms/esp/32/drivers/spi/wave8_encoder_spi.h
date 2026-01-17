@@ -25,10 +25,16 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 
+// ESP32-specific: check feature flag for clockless SPI support
+#if defined(ESP32)
+#include "platforms/esp/32/feature_flags/enabled.h"
+#endif
+
 namespace fl {
 
 // ESP32-specific conversion function (requires SpiTimingConfig from channel_engine_spi.h)
-#ifdef ESP32
+// Only available when FASTLED_ESP32_HAS_CLOCKLESS_SPI is defined (ESP-IDF 5.0+)
+#if defined(ESP32) && FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 // Forward declaration of SpiTimingConfig (defined in channel_engine_spi.h)
 struct SpiTimingConfig;
@@ -43,10 +49,10 @@ struct SpiTimingConfig;
 ///
 /// @param spiTiming SPI timing configuration with clock and bit patterns
 /// @return ChipsetTiming with T1, T2, T3 derived from SPI patterns
-/// @note This function is ESP32-specific and only available when ESP32 is defined
+/// @note This function is ESP32-specific and only available when FASTLED_ESP32_HAS_CLOCKLESS_SPI is defined
 ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming);
 
-#endif // ESP32
+#endif // defined(ESP32) && FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 /// @brief Encode single-lane LED data using wave8 expansion (no transposition)
 ///

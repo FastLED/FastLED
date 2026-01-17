@@ -12,8 +12,13 @@
 // Only convertSpiTimingToChipsetTiming() requires ESP32-specific headers.
 
 // ESP32-specific: Include SpiTimingConfig definition for conversion function
+// Requires FASTLED_ESP32_HAS_CLOCKLESS_SPI since SpiTimingConfig is defined in
+// channel_engine_spi.h which is guarded by that flag
 #ifdef ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "channel_engine_spi.h"  // For SpiTimingConfig definition
+#endif
 #endif
 
 namespace fl {
@@ -22,7 +27,7 @@ namespace fl {
 // ESP32-specific: SpiTimingConfig conversion (requires channel_engine_spi.h)
 // ============================================================================
 
-#ifdef ESP32
+#if defined(ESP32) && FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming) {
     // SPI timing structure:
@@ -84,7 +89,7 @@ ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming) 
     return chipsetTiming;
 }
 
-#endif // ESP32
+#endif // defined(ESP32) && FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 } // namespace fl
 
