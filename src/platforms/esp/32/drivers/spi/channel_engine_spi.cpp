@@ -357,10 +357,13 @@ uint8_t ChannelEngineSpi::determineLaneCapacity(
     // when hardware is saturated, so we want K to match actual parallel capacity,
     // not the theoretical maximum.
 
-#if defined(SPI2_HOST) && defined(SPI3_HOST)
+// Use FASTLED_ESP32_HAS_SPI3 (based on SOC_SPI_PERIPH_NUM) for accurate detection
+// ESP32-C3/C6/H2: 1 usable SPI host (SPI2)
+// ESP32/S2/S3/P4: 2 usable SPI hosts (SPI2, SPI3)
+#if FASTLED_ESP32_HAS_SPI3
     constexpr uint8_t PARALLEL_SPI_HOSTS = 2;  // ESP32/S2/S3/P4
 #elif defined(SPI2_HOST)
-    constexpr uint8_t PARALLEL_SPI_HOSTS = 1;  // ESP32-C3
+    constexpr uint8_t PARALLEL_SPI_HOSTS = 1;  // ESP32-C3/C6/H2
 #else
     constexpr uint8_t PARALLEL_SPI_HOSTS = 0;  // No SPI available
 #endif
@@ -753,11 +756,12 @@ uint32_t ChannelEngineSpi::encodeLedByte(uint8_t data, uint8_t *buf,
 spi_host_device_t ChannelEngineSpi::acquireSpiHost() {
     // SPI host priority: SPI2 → SPI3 → SPI1
     // Note: SPI1 is often used for flash, so it's last priority
+    // Use FASTLED_ESP32_HAS_SPI3 (based on SOC_SPI_PERIPH_NUM) for accurate detection
     static const spi_host_device_t hosts[] = {
 #ifdef SPI2_HOST
         SPI2_HOST,
 #endif
-#ifdef SPI3_HOST
+#if FASTLED_ESP32_HAS_SPI3
         SPI3_HOST,
 #endif
 #ifdef SPI1_HOST

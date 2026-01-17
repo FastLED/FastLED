@@ -49,8 +49,17 @@
 #ifndef SPI2_HOST
     #define SPI2_HOST ((spi_host_device_t)1)
 #endif
-#ifndef SPI3_HOST
-    #define SPI3_HOST ((spi_host_device_t)2)
+
+// SPI3_HOST is only available on chips with more than 2 SPI peripherals
+// ESP32-C3/C6/H2 only have 2 SPI peripherals (SPI0/1 flash, SPI2 general)
+// ESP32/S2/S3/P4 have 3+ SPI peripherals (SPI2 and SPI3 for general use)
+#if SOC_SPI_PERIPH_NUM > 2
+  #ifndef SPI3_HOST
+      #define SPI3_HOST ((spi_host_device_t)2)
+  #endif
+  #define FASTLED_ESP32_HAS_SPI3 1
+#else
+  #define FASTLED_ESP32_HAS_SPI3 0
 #endif
 
 #endif  // FL_IS_ESP32
