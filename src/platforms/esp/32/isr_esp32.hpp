@@ -6,7 +6,8 @@
 
   This header routes to the appropriate implementation based on ESP-IDF version:
   - ESP-IDF 5.0+: Uses gptimer API (isr_esp32_idf5.hpp)
-  - ESP-IDF 4.x:  Uses legacy timer API (isr_esp32_idf4.hpp)
+  - ESP-IDF 4.x:  Uses legacy timer API with timer_isr_callback_* (isr_esp32_idf4.hpp)
+  - ESP-IDF 3.x:  Uses legacy timer API with timer_isr_register (isr_esp32_idf3.hpp)
 
   License: MIT (FastLED)
 */
@@ -26,9 +27,12 @@
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     // ESP-IDF 5.0+: Use new gptimer API
     #include "platforms/esp/32/isr_esp32_idf5.hpp"
-#else
-    // ESP-IDF 4.x: Use legacy timer API
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+    // ESP-IDF 4.x: Use legacy timer API with callback functions
     #include "platforms/esp/32/isr_esp32_idf4.hpp"
+#else
+    // ESP-IDF 3.x: Use legacy timer API with timer_isr_register
+    #include "platforms/esp/32/isr_esp32_idf3.hpp"
 #endif
 
 #endif // ESP32
