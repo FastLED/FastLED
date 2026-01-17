@@ -5,9 +5,8 @@
 #include "fastpin_esp32.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
-#ifdef FASTLED_ALL_PINS_HARDWARE_SPI
+// ESP32 always uses hardware SPI via GPIO matrix - no conditional needed
 #include "fastspi_esp32.h"
-#endif
 
 
 // Include ALL available clockless drivers for ESP32

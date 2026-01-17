@@ -41,7 +41,7 @@
 
 #include "platforms/arm/teensy/is_teensy.h"
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#if (defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)) && !defined(FASTLED_FORCE_SOFTWARE_SPI)
 #include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
 #elif defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/mxrt1062/spi_device_proxy.h"
@@ -63,7 +63,7 @@
 #if defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/spi_output_template.h"
 
-#elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#elif (defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)) && !defined(FASTLED_FORCE_SOFTWARE_SPI)
 #include "platforms/esp/32/drivers/spi/spi_output_template.h"
 
 #elif defined(ESP8266)
@@ -120,20 +120,43 @@
 // ============================================================================
 // DATA RATE MACROS (platform-specific clock calculations)
 // ============================================================================
+//
+// These macros provide platform-specific clock rate calculations for SPI:
+// - Hardware SPI platforms (ESP32, Teensy4, etc.): Return frequency in Hz
+// - Software SPI platforms (AVR, etc.): Return clock divider (CPU cycles per bit)
+//
+// New macros with semantic clarity (recommended):
+//   FL_DATA_RATE_MHZ(X) - Returns either Hz (hardware) or divider (software) depending on platform
+//   FL_DATA_RATE_KHZ(X) - Same as above but for kHz input
+//   FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) - Explicit clock divider calculation
+//
+// Legacy macros (backwards compatibility):
+//   DATA_RATE_MHZ(X) - Alias for FL_DATA_RATE_MHZ
+//   DATA_RATE_KHZ(X) - Alias for FL_DATA_RATE_KHZ
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
-#define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
-#define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
-#elif defined(FASTLED_TEENSY4) || (defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI) || defined(FASTLED_STUB_IMPL))
-// just use clocks
-#define DATA_RATE_MHZ(X) (1000000 * (X))
-#define DATA_RATE_KHZ(X) (1000 * (X))
+// Teensy 3.x with overclocking: clock divider based on 48 MHz
+#define FL_DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
+#define FL_DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
+#define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
+
+#elif defined(FASTLED_TEENSY4) || defined(ESP32) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || defined(FASTLED_STUB_IMPL)
+// Hardware SPI platforms: return frequency in Hz
+// ESP32 always uses hardware SPI via GPIO matrix (no conditional needed)
+#define FL_DATA_RATE_MHZ(X) (1000000 * (X))
+#define FL_DATA_RATE_KHZ(X) (1000 * (X))
+#define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
+
 #else
-/// Convert data rate from megahertz (MHz) to clock cycles per bit
-#define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
-/// Convert data rate from kilohertz (KHz) to clock cycles per bit
-#define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
+// Software SPI platforms: return clock divider (CPU cycles per bit)
+#define FL_DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
+#define FL_DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
+#define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
 #endif
+
+// Backwards compatibility aliases
+#define DATA_RATE_MHZ FL_DATA_RATE_MHZ
+#define DATA_RATE_KHZ FL_DATA_RATE_KHZ
 
 // ============================================================================
 // GENERIC SOFTWARE SPI OUTPUT

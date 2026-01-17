@@ -9,6 +9,11 @@
 // - fastspi_esp32.h (this file) - Dispatch/trampoline header
 // - fastspi_esp32_arduino.h - Arduino framework SPI implementation
 // - fastspi_esp32_idf.h - Native ESP-IDF SPI implementation (driver/spi_master.h)
+//
+// DEPRECATION NOTICE:
+// FASTLED_ALL_PINS_HARDWARE_SPI is now deprecated on ESP32. Hardware SPI is enabled
+// by default via GPIO matrix routing. The define is accepted for backwards compatibility
+// but no longer required. Use FASTLED_FORCE_SOFTWARE_SPI to disable hardware SPI if needed.
 
 // ok no namespace fl
 

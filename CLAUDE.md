@@ -241,6 +241,10 @@ The package installation daemon is a singleton background process that ensures P
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
+- **🚫 NEVER use bare `pio` or `platformio` commands**: Direct PlatformIO commands are DANGEROUS and NOT ALLOWED
+  - ✅ Use: `bash compile`, `bash validate`, or `bash debug` instead
+  - ❌ Never use: `pio run`, `platformio run`, or any bare `pio`/`platformio` commands
+  - Rationale: Bare PlatformIO commands bypass critical safety checks and daemon-managed package installation
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **Compiler requirement (Windows)**: The project requires clang for Windows builds. When configuring meson:
   ```bash

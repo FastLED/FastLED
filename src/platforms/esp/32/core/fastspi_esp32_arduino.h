@@ -6,6 +6,13 @@
 #include "fastspi_types.h"
 #include <SPI.h>
 
+// NOTE: FASTLED_ALL_PINS_HARDWARE_SPI is deprecated on ESP32.
+// Hardware SPI is now enabled by default via GPIO matrix.
+// The define is accepted for backwards compatibility but no longer required.
+#ifdef FASTLED_ALL_PINS_HARDWARE_SPI
+// Silently accept for backwards compatibility
+#endif
+
 /*
  * ESP32 Hardware SPI Driver
  *
@@ -16,8 +23,7 @@
  * VSPI or HSPI bus (aka SPI2 & SPI3). No support is provided for SPI1, because it is
  * shared among devices and the cache for data (code) in the Flash as well as the PSRAM.
  *
- * To enable the hardware SPI driver, add the following line *before* including
- * FastLED.h:
+ * DEPRECATED: The following define is no longer required (hardware SPI is now the default):
  *
  * #define FASTLED_ALL_PINS_HARDWARE_SPI
  *
