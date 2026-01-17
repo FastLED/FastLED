@@ -172,6 +172,31 @@ public:
     uint64_t getLastCalculatedResetDurationUs() const;
 
     //-------------------------------------------------------------------------
+    // Virtual Time Control (for deterministic testing)
+    //-------------------------------------------------------------------------
+
+    /// @brief Enable or disable virtual time mode
+    /// @param enabled true to use virtual time, false to use real wall-clock time
+    ///
+    /// When virtual time is enabled, the mock uses an internal virtual clock
+    /// instead of real wall-clock time. Time only advances when you call
+    /// advanceTime(). This eliminates race conditions in parallel tests.
+    void setVirtualTimeMode(bool enabled);
+
+    /// @brief Advance virtual time by specified amount
+    /// @param microseconds Amount to advance virtual time
+    ///
+    /// Only has effect when virtual time mode is enabled.
+    /// Use this instead of std::this_thread::sleep_for() for deterministic testing.
+    void advanceTime(uint64_t microseconds);
+
+    /// @brief Get current virtual time
+    /// @return Current virtual time in microseconds
+    ///
+    /// Returns 0 if virtual time mode is disabled.
+    uint64_t getVirtualTime() const;
+
+    //-------------------------------------------------------------------------
     // Waveform Extraction (for validation)
     //-------------------------------------------------------------------------
 
@@ -217,6 +242,8 @@ private:
     uint64_t mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
     uint64_t mResetExpireTime;             ///< Timestamp when reset period expires
     uint64_t mLastCalculatedResetDuration; ///< Calculated reset duration (for testing)
+    bool mVirtualTimeEnabled;              ///< True if using virtual time instead of wall-clock
+    uint64_t mVirtualTime;                 ///< Current virtual time in microseconds
 
     //=========================================================================
     // Internal Helpers

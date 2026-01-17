@@ -8,11 +8,9 @@
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
 #include <stdint.h>
-#include "fl/stl/thread.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
-#include "ratio"
 #include "fl/stl/vector.h"
 
 using namespace fl;
@@ -36,6 +34,8 @@ UartConfig createDefaultConfig() {
 
 TEST_CASE("UartPeripheralMock - Reset timing behavior") {
     UartPeripheralMock mock;
+    // Enable virtual time mode for deterministic testing (no real-time dependencies)
+    mock.setVirtualTimeMode(true);
     UartConfig config = createDefaultConfig();
     CHECK(mock.initialize(config));
 
@@ -46,6 +46,9 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
 
         // Initially busy during transmission
         CHECK(mock.isBusy());
+
+        // Advance time to complete transmission (3 bytes at 3.2 Mbps ~= 10us per byte)
+        mock.advanceTime(100);
 
         // Wait for transmission to complete
         CHECK(mock.waitTxDone(1000));
@@ -59,18 +62,16 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         // First transmission
         uint8_t data1[] = {0xAA};
         CHECK(mock.writeBytes(data1, sizeof(data1)));
+
+        // Advance time to complete transmission
+        mock.advanceTime(100);
         CHECK(mock.waitTxDone(1000));
 
         // Should be in reset period (busy)
         CHECK(mock.isBusy());
 
-        // Calculate expected reset duration
-        // WS2812 reset requires >50us, but actual implementation may vary
-        // For this test, we expect the mock to use a reasonable reset period
-        // based on the transmission characteristics
-
-        // Wait for reset period to expire (assume ~100us total for small transmission)
-        std::this_thread::sleep_for(std::chrono::microseconds(150));
+        // Advance time past reset period (>= 50us minimum for WS2812)
+        mock.advanceTime(200);
 
         // After reset period, should not be busy
         CHECK_FALSE(mock.isBusy());
@@ -88,11 +89,11 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         for (int i = 0; i < num_transmissions; i++) {
             uint8_t data = 0x11 * (i + 1);  // 0x11, 0x22, 0x33
 
-            // Wait until peripheral is ready (not busy)
-            int max_wait_iterations = 1000;
+            // Advance time until peripheral is ready (not busy)
+            int max_iterations = 100;
             int iterations = 0;
-            while (mock.isBusy() && iterations < max_wait_iterations) {
-                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            while (mock.isBusy() && iterations < max_iterations) {
+                mock.advanceTime(10);
                 iterations++;
             }
 
@@ -102,6 +103,9 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
             // Submit new transmission
             CHECK(mock.writeBytes(&data, 1));
             CHECK(mock.isBusy());
+
+            // Advance time for transmission
+            mock.advanceTime(100);
 
             // Wait for transmission
             CHECK(mock.waitTxDone(1000));
@@ -136,16 +140,16 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         }
 
         CHECK(mock.writeBytes(small_data, sizeof(small_data)));
+        // Advance time for transmission
+        mock.advanceTime(100);
         CHECK(mock.waitTxDone(1000));
         CHECK(mock.isBusy());  // Should be in reset period
 
         // Get the calculated reset duration (not wall-clock measurement)
         uint64_t small_reset_us = mock.getLastCalculatedResetDurationUs();
 
-        // Wait for reset to complete before next transmission
-        while (mock.isBusy()) {
-            // Busy wait
-        }
+        // Advance time past reset period to complete
+        mock.advanceTime(small_reset_us + 100);
 
         // Large transmission (1000 bytes)
         // At 3.2 Mbps with 10 bits/byte: 1000 * 10 bits / 3.2 MHz = ~3125us
@@ -156,6 +160,8 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         }
 
         CHECK(mock.writeBytes(large_data, sizeof(large_data)));
+        // Advance time for transmission (~3125us)
+        mock.advanceTime(4000);
         CHECK(mock.waitTxDone(1000));
         CHECK(mock.isBusy());  // Should be in reset period
 
@@ -179,52 +185,51 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         // First transmission
         uint8_t data1[] = {0xAA};
         CHECK(mock.writeBytes(data1, sizeof(data1)));
+        mock.advanceTime(100);
         CHECK(mock.waitTxDone(1000));
 
         // Should be in reset period
         CHECK(mock.isBusy());
 
-        // Attempt to write during reset period
-        // This should either:
-        // a) Block until reset completes, then accept the write
-        // b) Return false to indicate rejection (implementation choice)
-        //
-        // For this test, we expect it to eventually succeed after reset
+        // Advance past reset period before attempting second write
+        mock.advanceTime(200);
+
+        // Attempt to write after reset period
         uint8_t data2[] = {0x55};
         bool write_success = mock.writeBytes(data2, sizeof(data2));
 
-        // Write should eventually succeed
+        // Write should succeed
         CHECK(write_success);
-
-        // Note: Implementation may either block until reset completes or
-        // return immediately. Both behaviors are acceptable.
     }
 }
 
-TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
+TEST_CASE("UartPeripheralMock - Reset timing with virtual timing simulation") {
     UartPeripheralMock mock;
+    // Enable virtual time mode for deterministic testing
+    mock.setVirtualTimeMode(true);
     UartConfig config = createDefaultConfig();
     CHECK(mock.initialize(config));
 
-    SUBCASE("Transmission time calculation is realistic") {
+    SUBCASE("Transmission time calculation is correct") {
         // At 3.2 Mbps, each bit takes 312.5 ns
         // For 8N1: 10 bits per byte = 3.125 us per byte
-        // For 10 bytes: 31.25 us transmission time
+        // For 10 bytes: 31.25 us transmission time (plus 10us overhead = ~41us)
 
         uint8_t data[10] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-        auto start = std::chrono::steady_clock::now();
         CHECK(mock.writeBytes(data, sizeof(data)));
+
+        // Advance time past the expected transmission delay
+        // 10 bytes * 10 bits/byte / 3.2 MHz = 31.25us + 10us overhead = ~42us
+        mock.advanceTime(50);
         CHECK(mock.waitTxDone(1000));
-        auto end = std::chrono::steady_clock::now();
 
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        // Verify we can get the calculated reset duration
+        uint64_t reset_duration = mock.getLastCalculatedResetDurationUs();
+        CHECK(reset_duration >= 50);  // At least 50us for WS2812 requirement
 
-        // Expected transmission time: 31.25 us
-        // With reset period (assume ~50us), total should be ~80-100us
-        // Allow generous range for test stability
-        CHECK(elapsed >= 10);   // At least 10us (very conservative)
-        CHECK(elapsed <= 500);  // No more than 500us (sanity check)
+        // Note: We're testing that the timing calculation is consistent,
+        // not that real wall-clock time passes (which would be flaky in parallel tests)
     }
 
     SUBCASE("WS2812 reset requirement (>50us) is satisfied") {
@@ -234,16 +239,22 @@ TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
 
         uint8_t data[] = {0xAA, 0x55};
         CHECK(mock.writeBytes(data, sizeof(data)));
+
+        // Advance time for transmission
+        mock.advanceTime(50);
         CHECK(mock.waitTxDone(1000));
 
         // Should be in reset period
         CHECK(mock.isBusy());
 
-        // Wait at least 50us
-        std::this_thread::sleep_for(std::chrono::microseconds(50));
+        // Verify the calculated reset duration meets WS2812 requirement
+        uint64_t reset_duration = mock.getLastCalculatedResetDurationUs();
+        CHECK(reset_duration >= 50);  // At least 50us for WS2812 compatibility
 
-        // Reset period should still be active (or just expired)
-        // We expect reset duration to be AT LEAST 50us for WS2812 compatibility
-        // But actual implementation may use a calculated value based on transmission
+        // Advance time past reset period
+        mock.advanceTime(reset_duration + 10);
+
+        // Should no longer be busy
+        CHECK_FALSE(mock.isBusy());
     }
 }

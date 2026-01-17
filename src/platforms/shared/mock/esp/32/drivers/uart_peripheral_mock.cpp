@@ -24,7 +24,9 @@ UartPeripheralMock::UartPeripheralMock()
       mManualDelaySet(false),
       mLastWriteTimestamp(0),
       mResetExpireTime(0),
-      mLastCalculatedResetDuration(0) {
+      mLastCalculatedResetDuration(0),
+      mVirtualTimeEnabled(false),
+      mVirtualTime(0) {
 }
 
 UartPeripheralMock::~UartPeripheralMock() {
@@ -194,6 +196,8 @@ void UartPeripheralMock::reset() {
     mLastWriteTimestamp = 0;
     mResetExpireTime = 0;
     mLastCalculatedResetDuration = 0;
+    mVirtualTimeEnabled = false;
+    mVirtualTime = 0;
     mConfig = UartConfig();
 }
 
@@ -211,6 +215,24 @@ void UartPeripheralMock::resetCapturedData() {
 
 uint64_t UartPeripheralMock::getLastCalculatedResetDurationUs() const {
     return mLastCalculatedResetDuration;
+}
+
+void UartPeripheralMock::setVirtualTimeMode(bool enabled) {
+    mVirtualTimeEnabled = enabled;
+    if (enabled && mVirtualTime == 0) {
+        // Initialize virtual time to a non-zero value to avoid edge cases
+        mVirtualTime = 1000;
+    }
+}
+
+void UartPeripheralMock::advanceTime(uint64_t microseconds) {
+    if (mVirtualTimeEnabled) {
+        mVirtualTime += microseconds;
+    }
+}
+
+uint64_t UartPeripheralMock::getVirtualTime() const {
+    return mVirtualTimeEnabled ? mVirtualTime : 0;
 }
 
 fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const {
@@ -279,6 +301,9 @@ bool UartPeripheralMock::verifyStartStopBits() const {
 //=============================================================================
 
 uint64_t UartPeripheralMock::getCurrentTimestamp() const {
+    if (mVirtualTimeEnabled) {
+        return mVirtualTime;
+    }
     return micros();
 }
 
