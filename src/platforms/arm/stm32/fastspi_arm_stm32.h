@@ -37,10 +37,10 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class STM32SPIOutput {
 private:
 #if FASTLED_STM32_USE_HAL
-    // Arduino Mbed framework: SPIClass inherits from abstract HardwareSPI
-    // We must use a pointer to avoid instantiation of abstract type
+    // Arduino Mbed framework: SPIClass is abstract, use concrete MbedSPI
+    // MbedSPI requires pin parameters (MISO, MOSI, SCK) in constructor
     #ifdef ARDUINO_ARCH_MBED
-        SPIClass* m_spi;
+        arduino::MbedSPI* m_spi;
     #else
         SPIClass m_spi;
     #endif
@@ -99,7 +99,9 @@ public:
             // For custom pins, we rely on the board's pin mapping
             #ifdef ARDUINO_ARCH_MBED
                 if (!m_spi) {
-                    m_spi = new SPIClass();
+                    // Arduino Mbed requires MbedSPI with pin parameters
+                    // SPIClass is abstract, so we use MbedSPI(MISO, MOSI, SCK)
+                    m_spi = new arduino::MbedSPI(SPI_MISO, SPI_MOSI, SPI_SCK);
                 }
                 m_spi->begin();
             #else
