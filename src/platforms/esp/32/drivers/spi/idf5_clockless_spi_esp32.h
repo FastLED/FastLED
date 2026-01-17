@@ -16,6 +16,7 @@
 #include "fl/channels/engine.h"
 #include "fl/channels/bus_manager.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/warn.h"
 
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>

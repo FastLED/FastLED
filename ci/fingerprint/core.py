@@ -23,6 +23,7 @@ from typing import Any, Optional, cast
 
 import fasteners
 
+
 # ==============================================================================
 # Legacy FingerprintCache (from ci/ci/fingerprint_cache.py)
 # ==============================================================================

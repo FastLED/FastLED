@@ -13,6 +13,7 @@ from ci.fingerprint.core import (
 )
 from ci.fingerprint.rules import CacheInvalidationRules
 
+
 __all__ = [
     "FingerprintCache",
     "HashFingerprintCache",

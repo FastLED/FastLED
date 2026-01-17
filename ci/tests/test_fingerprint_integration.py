@@ -49,22 +49,22 @@ def test_all_caches_basic_functionality() -> None:
         baseline = time.time() - 3600
 
         changed_files = [f for f in files if fp_cache.has_changed(f, baseline)]
-        assert (
-            len(changed_files) == 5
-        ), f"FingerprintCache: Expected 5 changed files, got {len(changed_files)}"
+        assert len(changed_files) == 5, (
+            f"FingerprintCache: Expected 5 changed files, got {len(changed_files)}"
+        )
 
         # Test TwoLayerFingerprintCache
         two_layer = TwoLayerFingerprintCache(cache_dir, "two_layer_test")
         needs_update = two_layer.check_needs_update(files)
-        assert (
-            needs_update
-        ), "TwoLayerFingerprintCache: Expected cache miss on first check"
+        assert needs_update, (
+            "TwoLayerFingerprintCache: Expected cache miss on first check"
+        )
 
         two_layer.mark_success()
         needs_update = two_layer.check_needs_update(files)
-        assert (
-            not needs_update
-        ), "TwoLayerFingerprintCache: Expected cache hit on second check"
+        assert not needs_update, (
+            "TwoLayerFingerprintCache: Expected cache hit on second check"
+        )
 
         # Test HashFingerprintCache
         hash_cache = HashFingerprintCache(cache_dir, "hash_test")
@@ -73,9 +73,9 @@ def test_all_caches_basic_functionality() -> None:
 
         hash_cache.mark_success()
         needs_update = hash_cache.check_needs_update(files)
-        assert (
-            not needs_update
-        ), "HashFingerprintCache: Expected cache hit on second check"
+        assert not needs_update, (
+            "HashFingerprintCache: Expected cache hit on second check"
+        )
 
 
 def test_touch_optimization_comparison() -> None:
@@ -100,9 +100,9 @@ def test_touch_optimization_comparison() -> None:
 
         # Should NOT need update (touch optimization)
         needs_update = two_layer.check_needs_update(files)
-        assert (
-            not needs_update
-        ), "TwoLayerFingerprintCache: Touch optimization should not trigger update"
+        assert not needs_update, (
+            "TwoLayerFingerprintCache: Touch optimization should not trigger update"
+        )
 
         # HashFingerprintCache
         hash_cache = HashFingerprintCache(cache_dir, "touch_hash")
@@ -142,12 +142,12 @@ def test_performance_comparison() -> None:
         two_layer.check_needs_update(files)
         two_layer_hit_time = time.time() - start
 
-        assert (
-            two_layer_time < 5.0
-        ), f"TwoLayerFingerprintCache first check too slow: {two_layer_time:.3f}s"
-        assert (
-            two_layer_hit_time < 0.5
-        ), f"TwoLayerFingerprintCache cache hit too slow: {two_layer_hit_time:.3f}s"
+        assert two_layer_time < 5.0, (
+            f"TwoLayerFingerprintCache first check too slow: {two_layer_time:.3f}s"
+        )
+        assert two_layer_hit_time < 0.5, (
+            f"TwoLayerFingerprintCache cache hit too slow: {two_layer_hit_time:.3f}s"
+        )
 
         # HashFingerprintCache performance
         hash_cache = HashFingerprintCache(cache_dir, "perf_hash")
@@ -161,12 +161,12 @@ def test_performance_comparison() -> None:
         hash_cache.check_needs_update(files)
         hash_hit_time = time.time() - start
 
-        assert (
-            hash_time < 0.5
-        ), f"HashFingerprintCache first check too slow: {hash_time:.3f}s"
-        assert (
-            hash_hit_time < 0.5
-        ), f"HashFingerprintCache cache hit too slow: {hash_hit_time:.3f}s"
+        assert hash_time < 0.5, (
+            f"HashFingerprintCache first check too slow: {hash_time:.3f}s"
+        )
+        assert hash_hit_time < 0.5, (
+            f"HashFingerprintCache cache hit too slow: {hash_hit_time:.3f}s"
+        )
 
 
 def test_accuracy_all_caches() -> None:
@@ -188,9 +188,9 @@ def test_accuracy_all_caches() -> None:
         files[1].write_text("Modified content\n")
 
         needs_update = two_layer.check_needs_update(files)
-        assert (
-            needs_update
-        ), "TwoLayerFingerprintCache: Should detect single file change"
+        assert needs_update, (
+            "TwoLayerFingerprintCache: Should detect single file change"
+        )
 
         # HashFingerprintCache accuracy
         hash_cache = HashFingerprintCache(cache_dir, "accuracy_hash")
@@ -255,9 +255,9 @@ def test_stress_large_files() -> None:
         elapsed = time.time() - start
 
         assert needs_update, "TwoLayerFingerprintCache: Should detect new large files"
-        assert (
-            elapsed < 2.0
-        ), f"TwoLayerFingerprintCache: Large files took {elapsed:.3f}s (expected < 2.0s)"
+        assert elapsed < 2.0, (
+            f"TwoLayerFingerprintCache: Large files took {elapsed:.3f}s (expected < 2.0s)"
+        )
 
         # HashFingerprintCache with large files
         hash_cache = HashFingerprintCache(cache_dir, "large_hash")
@@ -266,9 +266,9 @@ def test_stress_large_files() -> None:
         elapsed = time.time() - start
 
         assert needs_update, "HashFingerprintCache: Should detect new large files"
-        assert (
-            elapsed < 1.0
-        ), f"HashFingerprintCache: Large files took {elapsed:.3f}s (expected < 1.0s)"
+        assert elapsed < 1.0, (
+            f"HashFingerprintCache: Large files took {elapsed:.3f}s (expected < 1.0s)"
+        )
 
 
 def test_edge_case_symlinks() -> None:
@@ -350,9 +350,9 @@ def test_consistency_after_crash() -> None:
         # Create new instance - should still need update
         two_layer2 = TwoLayerFingerprintCache(cache_dir, "crash_two_layer")
         needs_update = two_layer2.check_needs_update(files)
-        assert (
-            needs_update
-        ), "TwoLayerFingerprintCache: Should still need update after crash"
+        assert needs_update, (
+            "TwoLayerFingerprintCache: Should still need update after crash"
+        )
 
         # HashFingerprintCache - check but don't mark success
         hash_cache = HashFingerprintCache(cache_dir, "crash_hash")
@@ -362,6 +362,6 @@ def test_consistency_after_crash() -> None:
         # Create new instance - should still need update
         hash_cache2 = HashFingerprintCache(cache_dir, "crash_hash")
         needs_update = hash_cache2.check_needs_update(files)
-        assert (
-            needs_update
-        ), "HashFingerprintCache: Should still need update after crash"
+        assert needs_update, (
+            "HashFingerprintCache: Should still need update after crash"
+        )

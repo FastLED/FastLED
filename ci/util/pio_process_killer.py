@@ -25,6 +25,7 @@ from ci.util.global_interrupt_handler import (  # noqa: F401
     handle_keyboard_interrupt_properly,
 )
 
+
 # Configure module logger
 logger = logging.getLogger(__name__)
 
