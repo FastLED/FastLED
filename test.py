@@ -161,7 +161,7 @@ def main() -> None:
         # Calculate fingerprints
         src_code_change = fingerprint_manager.check_all()
         cpp_test_change = fingerprint_manager.check_cpp(args)
-        examples_change = fingerprint_manager.check_examples()
+        examples_change = fingerprint_manager.check_examples(args)
         python_test_change = fingerprint_manager.check_python()
 
         # Handle --run flag (unified emulation interface)

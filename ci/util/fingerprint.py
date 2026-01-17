@@ -73,8 +73,8 @@ class FingerprintManager:
     def check_cpp(self, args: TestArgs) -> bool:
         return self.check("cpp_test", lambda: calculate_cpp_test_fingerprint(args))
 
-    def check_examples(self) -> bool:
-        return self.check("examples", calculate_examples_fingerprint)
+    def check_examples(self, args: TestArgs) -> bool:
+        return self.check("examples", lambda: calculate_examples_fingerprint(args))
 
     def check_python(self) -> bool:
         return self.check("python_test", calculate_python_test_fingerprint)

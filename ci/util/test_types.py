@@ -412,8 +412,12 @@ def calculate_cpp_test_fingerprint(
 
     # Include build configuration flags that affect compilation
     if args is not None:
-        # Include --debug flag as it affects build configuration
-        hasher.update(f"debug:{args.debug}".encode("utf-8"))
+        # Include build_mode in fingerprint (quick/debug/release affects compiler flags)
+        # This ensures separate fingerprints for different build configurations
+        build_mode = (
+            args.build_mode if args.build_mode else ("debug" if args.debug else "quick")
+        )
+        hasher.update(f"build_mode:{build_mode}".encode("utf-8"))
 
     elapsed_time = time.time() - start_time
 
@@ -422,9 +426,14 @@ def calculate_cpp_test_fingerprint(
     )
 
 
-def calculate_examples_fingerprint() -> FingerprintResult:
+def calculate_examples_fingerprint(
+    args: Optional[TestArgs] = None,
+) -> FingerprintResult:
     """
     Calculate fingerprint for example tests, including examples/ directory.
+
+    Args:
+        args: Test arguments (optional, used to include build configuration in fingerprint)
 
     Returns:
         The fingerprint result covering files that affect example compilation tests
@@ -479,6 +488,15 @@ def calculate_examples_fingerprint() -> FingerprintResult:
                         "utf-8"
                     )
                 )
+
+    # Include build configuration flags that affect compilation
+    if args is not None:
+        # Include build_mode in fingerprint (quick/debug/release affects compiler flags)
+        # This ensures separate fingerprints for different build configurations
+        build_mode = (
+            args.build_mode if args.build_mode else ("debug" if args.debug else "quick")
+        )
+        hasher.update(f"build_mode:{build_mode}".encode("utf-8"))
 
     elapsed_time = time.time() - start_time
 
