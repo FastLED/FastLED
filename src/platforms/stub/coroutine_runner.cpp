@@ -206,42 +206,43 @@ CoroutineRunner& CoroutineRunner::instance() {
     return gCoroutineRunnerInstance;
 }
 
-// ===== Global synchronization primitives =====
+// ===== Global execution lock for cooperative multitasking =====
+//
+// This lock ensures only one thread executes "user code" at a time.
+// It provides a single-threaded execution model on top of real threads.
 
-class GlobalMutex {
-public:
-    void lock() { mMutex.lock(); }
-    void unlock() { mMutex.unlock(); }
-    bool try_lock() { return mMutex.try_lock(); }
+// File-scope static mutex for DLL boundary sharing (same rationale as CoroutineRunner)
+static fl::mutex gGlobalExecutionMutex;
 
-private:
-    fl::mutex mMutex;
-};
+// Thread-local flag to track if current thread holds the global execution lock.
+// Each thread has its own copy, so coroutines and main thread track independently.
+// This prevents undefined behavior from unlocking a mutex we don't own.
+thread_local bool gHoldingExecutionLock = false;
 
-class GlobalConditionVariable {
-public:
-    void notify_one() { mCv.notify_one(); }
-    void notify_all() { mCv.notify_all(); }
-
-    template<typename Lock, typename Predicate>
-    void wait(Lock& lock, Predicate pred) {
-        mCv.wait(lock, pred);
-    }
-
-private:
-    fl::condition_variable mCv;
-};
-
-// File-scope static instances for DLL boundary sharing (same rationale as CoroutineRunner)
-static GlobalMutex gGlobalExecutionMutex;
-static GlobalConditionVariable gGlobalExecutionCv;
-
-GlobalMutex& global_execution_mutex() {
-    return gGlobalExecutionMutex;
+void global_execution_lock() {
+    gGlobalExecutionMutex.lock();
+    gHoldingExecutionLock = true;
 }
 
-GlobalConditionVariable& global_execution_cv() {
-    return gGlobalExecutionCv;
+void global_execution_unlock() {
+    gHoldingExecutionLock = false;
+    gGlobalExecutionMutex.unlock();
+}
+
+bool global_execution_try_lock() {
+    bool acquired = gGlobalExecutionMutex.try_lock();
+    if (acquired) {
+        gHoldingExecutionLock = true;
+    }
+    return acquired;
+}
+
+bool global_execution_is_held() {
+    return gHoldingExecutionLock;
+}
+
+void global_execution_set_held(bool held) {
+    gHoldingExecutionLock = held;
 }
 
 } // namespace detail

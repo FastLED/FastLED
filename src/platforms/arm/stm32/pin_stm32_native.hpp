@@ -9,23 +9,31 @@
 ///
 /// IMPORTANT: This file requires STM32 HAL to be available via STM32duino core headers.
 
+#include "fl/has_include.h"
+
 // STM32duino core headers - provides HAL includes and pin mapping functions
 // These headers provide: PinName, NC, digitalPinToPinName(), STM_PORT(), STM_GPIO_PIN(),
 // STM_PIN_CHANNEL(), STM_PIN_AFNUM(), pinmap_find_function(), pinmap_peripheral(),
 // PinMap_ADC, PinMap_TIM/PinMap_PWM, and all STM32 HAL types
-#if __has_include("stm32_def.h")
+//
+// IMPORTANT: The Maple framework (used by stm32f103cb maple_mini) does NOT have
+// stm32_def.h or HAL types. All STM32duino-specific headers are only included when
+// stm32_def.h is available, because on Maple the pins_arduino.h includes variant.h
+// which has undefined macros (BOARD_SPI*_PIN).
+#if FL_HAS_INCLUDE("stm32_def.h")
 #include "stm32_def.h"       // STM32 HAL types and definitions
-#endif
-#if __has_include("pins_arduino.h")
+// Only include STM32duino-specific headers when HAL is available
+#if FL_HAS_INCLUDE("pins_arduino.h")
 #include "pins_arduino.h"    // Arduino pin mapping - provides digitalPinToPinName macro
 #endif
-#if __has_include("PeripheralPins.h")
+#if FL_HAS_INCLUDE("PeripheralPins.h")
 #include "PeripheralPins.h"  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
 #endif
-#if __has_include("pinmap.h")
+#if FL_HAS_INCLUDE("pinmap.h")
 #include "pinmap.h"          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
 #define FL_STM32_HAS_PINMAP 1  // Marker that pinmap functions are available
 #endif
+#endif  // FL_HAS_INCLUDE("stm32_def.h")
 
 #include "fl/warn.h"
 #include "fl/dbg.h"

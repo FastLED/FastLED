@@ -21,26 +21,38 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/has_include.h"
 
 // STM32duino core headers - provides HAL includes and pin mapping functions
 // These headers provide: PinName, NC, digitalPinToPinName(), STM_PORT(), STM_GPIO_PIN(),
 // STM_PIN_CHANNEL(), STM_PIN_AFNUM(), pinmap_find_function(), pinmap_peripheral(),
 // PinMap_ADC, PinMap_TIM/PinMap_PWM, and all STM32 HAL types
-#if __has_include("stm32_def.h")
+//
+// IMPORTANT: The Maple framework (used by stm32f103cb maple_mini) does NOT have
+// stm32_def.h or HAL types. We set FL_STM32_HAS_HAL only when the HAL is available.
+// All other STM32duino-specific headers are only included when HAL is available,
+// because on Maple the pins_arduino.h includes variant.h which has undefined macros.
+#if FL_HAS_INCLUDE("stm32_def.h")
 #include "stm32_def.h"       // STM32 HAL types and definitions
-#endif
-#if __has_include("pins_arduino.h")
+#define FL_STM32_HAS_HAL     // Marker that STM32 HAL types are available
+// Only include STM32duino-specific headers when HAL is available
+#if FL_HAS_INCLUDE("pins_arduino.h")
 #include "pins_arduino.h"    // Arduino pin mapping - provides digitalPinToPinName macro
 #endif
-#if __has_include("PeripheralPins.h")
+#if FL_HAS_INCLUDE("PeripheralPins.h")
 #include "PeripheralPins.h"  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
 #endif
-#if __has_include("pinmap.h")
+#if FL_HAS_INCLUDE("pinmap.h")
 #include "pinmap.h"          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
 #endif
+#endif  // FL_HAS_INCLUDE("stm32_def.h")
 
 namespace fl {
 namespace stm32 {
+
+// All function declarations below require STM32 HAL types (GPIO_TypeDef, TIM_TypeDef, etc.)
+// which are only available when STM32duino core is present (not on Maple framework).
+#ifdef FL_STM32_HAS_HAL
 
 // ============================================================================
 // GPIO Helper Functions
@@ -176,6 +188,8 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream);
 void stopDMA(DMA_Stream_TypeDef* stream);
 
 #endif  // FASTLED_STM32_HAS_DMA_STREAMS
+
+#endif  // FL_STM32_HAS_HAL
 
 }  // namespace stm32
 }  // namespace fl

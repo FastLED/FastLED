@@ -138,6 +138,10 @@ fl::result<T> await(fl::promise<T> promise) {
         cv.notify_one();
     });
 
+    // Release global execution lock before waiting
+    // This allows other coroutines and main thread to run while we wait
+    fl::detail::global_execution_unlock();
+
     // Signal next coroutine in executor queue to run while we wait
     fl::detail::CoroutineRunner::instance().signal_next();
 
@@ -146,24 +150,13 @@ fl::result<T> await(fl::promise<T> promise) {
     // - In multithreaded mode: fl::unique_lock = std::unique_lock, fl::mutex = std::mutex
     fl::unique_lock<fl::mutex> local_lock(mtx);
     cv.wait(local_lock, [&]() { return completed.load(); });
+    local_lock.unlock();  // Release local lock
 
-    // Create a one-time context to wait for our turn to resume
-    // IMPORTANT: Keep shared_ptr ownership throughout this scope
-    fl::shared_ptr<fl::detail::CoroutineContext> resume_ctx = fl::detail::CoroutineContext::create();
-    fl::detail::CoroutineRunner::instance().enqueue(resume_ctx);
+    // Re-acquire global execution lock before returning to user code
+    // This ensures only one thread executes "user code" at a time
+    fl::detail::global_execution_lock();
 
-    // Wait for executor to signal us
-    local_lock.unlock();  // Release local lock before waiting
-    resume_ctx->wait();
-
-    // Mark context as completed so it gets cleaned from queue
-    resume_ctx->set_completed(true);
-
-    // Remove from queue to clean up weak_ptr reference
-    // The shared_ptr will automatically delete the context when this function returns
-    fl::detail::CoroutineRunner::instance().remove(resume_ctx);
-
-    // Promise completed (we now hold global lock again), return result
+    // Promise completed and we now hold global lock again, return result
     return promise.is_resolved()
         ? fl::result<T>(promise.value())
         : fl::result<T>(promise.error());

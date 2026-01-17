@@ -97,9 +97,15 @@ void async_yield() {
 #endif
 
 #ifdef FASTLED_STUB_IMPL
+    // Only release lock if we actually hold it (prevents undefined behavior)
+    // This handles the case where main thread calls async_yield() for the first
+    // time before it has acquired the lock.
+    if (fl::detail::global_execution_is_held()) {
+        fl::detail::global_execution_unlock();
+    }
+
     // Signal next coroutine in executor queue to run
     auto& runner = fl::detail::CoroutineRunner::instance();
-    // FL_DBG("async_yield: CoroutineRunner instance at " << fl::hex << reinterpret_cast<uintptr_t>(&runner));
     // FL_DBG("async_yield: Calling signal_next()");
     runner.signal_next();
     // FL_DBG("async_yield: signal_next() returned");
@@ -107,6 +113,10 @@ void async_yield() {
     // Yield CPU to allow coroutine threads to actually execute
     std::this_thread::yield();  // okay std namespace
     std::this_thread::sleep_for(std::chrono::milliseconds(1));  // okay std namespace
+
+    // Always re-acquire the global execution lock
+    // This ensures the caller holds the lock when we return
+    fl::detail::global_execution_lock();
 #endif
 
     // Standard async pumping (no global lock management here)

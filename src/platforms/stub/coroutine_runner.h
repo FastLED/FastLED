@@ -93,6 +93,39 @@ public:
     static CoroutineRunner& instance();
 };
 
+/// @brief Global execution lock for cooperative multitasking
+///
+/// This lock ensures only one thread (main or coroutine) executes "user code"
+/// at a time, providing a single-threaded execution model on top of real threads.
+///
+/// **Protocol:**
+/// - Main thread holds the lock during normal execution
+/// - async_yield() releases lock, signals next coroutine, re-acquires lock
+/// - Coroutines acquire lock after being signaled, release before await/completion
+///
+/// This enables safe cooperative multitasking without complex thread synchronization
+/// in user code.
+
+/// @brief Acquire the global execution lock
+/// @note Blocks until lock is available. Use from coroutine startup or after await.
+void global_execution_lock();
+
+/// @brief Release the global execution lock
+/// @note Must only be called by thread that currently holds the lock.
+void global_execution_unlock();
+
+/// @brief Try to acquire the global execution lock without blocking
+/// @return true if lock was acquired, false otherwise
+bool global_execution_try_lock();
+
+/// @brief Check if current thread holds the global execution lock
+/// @return true if current thread holds the lock
+bool global_execution_is_held();
+
+/// @brief Set the thread-local ownership flag (internal use)
+/// @param held true if current thread now holds the lock
+void global_execution_set_held(bool held);
+
 } // namespace detail
 } // namespace fl
 

@@ -9,6 +9,7 @@
 
 // Include platform detection header for FL_IS_STM32
 #include "platforms/arm/stm32/is_stm32.h"
+#include "fl/has_include.h"
 
 // Platform guard using standardized FL_IS_STM32 macro
 #if defined(FL_IS_STM32)
@@ -16,18 +17,23 @@
 #include "platforms/arm/stm32/stm32_capabilities.h"
 
 // STM32duino core headers - provides HAL includes and pin mapping functions
-#if __has_include("stm32_def.h")
+// IMPORTANT: The Maple framework (used by stm32f103cb maple_mini) does NOT have
+// stm32_def.h or HAL types. We set FL_STM32_HAS_HAL only when the HAL is available.
+// All other STM32duino-specific headers are only included when HAL is available,
+// because on Maple the pins_arduino.h includes variant.h which has undefined macros.
+#if FL_HAS_INCLUDE("stm32_def.h")
 #include "stm32_def.h"  // STM32duino core - provides HAL includes
-#endif
-#if __has_include("pins_arduino.h")
+#define FL_STM32_HAS_HAL  // Marker that STM32 HAL types are available
+#if FL_HAS_INCLUDE("pins_arduino.h")
 #include "pins_arduino.h"  // Arduino pin mapping - provides digitalPinToPinName macro
 #endif
-#if __has_include("PeripheralPins.h")
+#if FL_HAS_INCLUDE("PeripheralPins.h")
 #include "PeripheralPins.h"  // Pin mapping tables
 #endif
-#if __has_include("pinmap.h")
+#if FL_HAS_INCLUDE("pinmap.h")
 #include "pinmap.h"  // Pin mapping functions
 #endif
+#endif  // FL_HAS_INCLUDE("stm32_def.h")
 
 #include "platforms/arm/stm32/stm32_capabilities.h"
 #include "fl/warn.h"
@@ -36,6 +42,10 @@
 
 namespace fl {
 namespace stm32 {
+
+// All function definitions below require STM32 HAL types (GPIO_TypeDef, TIM_TypeDef, etc.)
+// which are only available when STM32duino core is present (not on Maple framework).
+#ifdef FL_STM32_HAS_HAL
 
 // ============================================================================
 // GPIO Helper Functions
@@ -967,6 +977,8 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
 }
 
 #endif  // FASTLED_STM32_HAS_DMA_STREAMS && FL_STM32_HAS_SPI_HW_*
+
+#endif  // FL_STM32_HAS_HAL
 
 }  // namespace stm32
 }  // namespace fl

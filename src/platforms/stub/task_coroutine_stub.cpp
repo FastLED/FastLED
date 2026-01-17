@@ -114,11 +114,18 @@ public:
                 return;
             }
 
+            // Acquire global execution lock before running user code
+            // This ensures only one thread executes "user code" at a time
+            fl::detail::global_execution_lock();
+
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " executing user function");
             // Execute the user's coroutine function
             // FL_DBG("TaskCoroutineStub: About to call user function");
             func();
             // FL_DBG("TaskCoroutineStub: User function returned");
+
+            // Release global execution lock after user code completes
+            fl::detail::global_execution_unlock();
 
             // FL_DBG("TaskCoroutineStub: Thread for context " << fl::hex << reinterpret_cast<uintptr_t>(ctx_shared.get()) << " completed, signaling next");
             // Mark as completed and signal next coroutine
