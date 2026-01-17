@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from ci.ci.fingerprint_cache import FingerprintCache
+from ci.fingerprint import FingerprintCache
 from ci.util.test_types import fingerprint_code_base
 
 

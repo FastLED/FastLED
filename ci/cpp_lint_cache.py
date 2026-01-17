@@ -14,9 +14,9 @@ Uses the unified safe fingerprint cache system.
 import sys
 from pathlib import Path
 
+from ci.fingerprint import TwoLayerFingerprintCache
 from ci.util.color_output import print_cache_hit, print_cache_miss
 from ci.util.dependency_loader import DependencyManifest
-from ci.util.two_layer_fingerprint_cache import TwoLayerFingerprintCache
 
 
 def get_cpp_files() -> list[Path]:

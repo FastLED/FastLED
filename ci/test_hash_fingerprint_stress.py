@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from ci.util.hash_fingerprint_cache import HashFingerprintCache
+from ci.fingerprint import HashFingerprintCache
 
 
 # Type alias for Queue results
@@ -158,7 +158,7 @@ def test_file_modification_during_processing(results: StressTestResults) -> None
 def _concurrent_check_worker(
     cache_dir: Path,
     files: list[Path],
-    result_queue: multiprocessing.Queue[tuple[str, Any]],
+    result_queue: "multiprocessing.Queue[tuple[str, Any]]",
 ) -> None:
     """Worker function run in separate process. Must be top-level for pickling."""
     try:
@@ -185,7 +185,7 @@ def test_concurrent_checks(results: StressTestResults) -> None:
         files = create_test_files(test_dir, 10)
 
         # Run 5 concurrent checks
-        result_queue: multiprocessing.Queue[tuple[str, Any]] = multiprocessing.Queue()
+        result_queue: "multiprocessing.Queue[tuple[str, Any]]" = multiprocessing.Queue()
         processes: list[multiprocessing.Process] = []
 
         for i in range(5):

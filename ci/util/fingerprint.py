@@ -14,14 +14,20 @@ from ci.util.timestamp_print import ts_print
 
 
 class FingerprintManager:
-    def __init__(self, cache_dir: Path):
+    def __init__(self, cache_dir: Path, build_mode: str = "quick"):
         self.cache_dir = cache_dir
+        self.build_mode = build_mode
+        self.fingerprint_dir = cache_dir / "fingerprint"
         self.cache_dir.mkdir(exist_ok=True)
+        self.fingerprint_dir.mkdir(exist_ok=True)
         self._fingerprints: dict[str, FingerprintResult] = {}
         self._prev_fingerprints: dict[str, Optional[FingerprintResult]] = {}
 
     def _get_fingerprint_file(self, name: str) -> Path:
-        return self.cache_dir / f"{name}_fingerprint.json"
+        # For cpp_test and examples, include build mode in filename to separate caches per build mode
+        if name in ("cpp_test", "examples"):
+            return self.fingerprint_dir / f"{name}_{self.build_mode}.json"
+        return self.fingerprint_dir / f"{name}.json"
 
     def read(self, name: str) -> Optional[FingerprintResult]:
         fingerprint_file = self._get_fingerprint_file(name)

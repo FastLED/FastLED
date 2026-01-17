@@ -21,12 +21,17 @@ from typing import Optional
 from unittest import TestCase
 
 # Import the fingerprint cache module
-from ci.ci.fingerprint_cache import (
+from ci.fingerprint.core import (
     CacheEntry,
     FingerprintCache,
     FingerprintCacheConfig,
-    has_changed,
 )
+
+
+def has_changed(src_path: Path, previous_modtime: float, cache_file: Path) -> bool:
+    """Convenience wrapper for backward compatibility."""
+    cache = FingerprintCache(cache_file)
+    return cache.has_changed(src_path, previous_modtime)
 
 
 class TestFingerprintCache(TestCase):

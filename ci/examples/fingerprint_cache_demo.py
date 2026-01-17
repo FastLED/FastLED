@@ -11,7 +11,13 @@ import tempfile
 import time
 from pathlib import Path
 
-from ci.ci.fingerprint_cache import FingerprintCache, has_changed
+from ci.fingerprint import FingerprintCache
+
+
+def has_changed(src_path: Path, previous_modtime: float, cache_file: Path) -> bool:
+    """Convenience wrapper for backward compatibility."""
+    cache = FingerprintCache(cache_file)
+    return cache.has_changed(src_path, previous_modtime)
 
 
 def demo_basic_usage() -> None:

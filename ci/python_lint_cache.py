@@ -14,10 +14,9 @@ Uses the unified safe fingerprint cache system.
 import sys
 from pathlib import Path
 
-from ci.util.color_output import print_cache_hit, print_cache_miss
-
 # Import the two-layer fingerprint cache (mtime + content hash)
-from ci.util.two_layer_fingerprint_cache import TwoLayerFingerprintCache
+from ci.fingerprint import TwoLayerFingerprintCache
+from ci.util.color_output import print_cache_hit, print_cache_miss
 
 
 def get_python_files() -> list[Path]:

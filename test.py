@@ -154,7 +154,9 @@ def main() -> None:
 
         # Set up fingerprint caching
         cache_dir = Path(".cache")
-        fingerprint_manager = FingerprintManager(cache_dir)
+        # Determine build mode (default to "quick")
+        build_mode = args.build_mode if args.build_mode else "quick"
+        fingerprint_manager = FingerprintManager(cache_dir, build_mode=build_mode)
 
         # Calculate fingerprints
         src_code_change = fingerprint_manager.check_all()
