@@ -1,5 +1,6 @@
 #include "spi_bus_manager.h"
 
+#include "fastled_config.h"  // For FASTLED_FORCE_SOFTWARE_SPI
 #include "fl/stl/vector.h"
 #include "fl/warn.h"
 #include "fl/stl/strstream.h"  // Required for FL_WARN_FMT
@@ -589,6 +590,15 @@ bool SPIBusManager::initializeBus(SPIBusInfo& bus) {
     if (bus.num_devices == 0) {
         return true;  // Not an error, just nothing to initialize
     }
+
+    // Check for forced software SPI mode
+#if defined(FASTLED_FORCE_SOFTWARE_SPI)
+    // User explicitly requested software SPI - skip hardware attempts
+    bus.bus_type = SPIBusType::SOFT_SPI;
+    bus.is_initialized = true;
+    FL_DBG("SPI: Forcing software SPI (FASTLED_FORCE_SOFTWARE_SPI defined)");
+    return true;
+#endif
 
     // Single device? Use standard single-line SPI
     if (bus.num_devices == 1) {

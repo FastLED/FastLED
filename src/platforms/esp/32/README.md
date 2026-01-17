@@ -87,7 +87,7 @@ Additional I2S defines and guidance:
 - **SPI tuning (clocked LEDs and WS2812-over-SPI path)**
   - **Hardware SPI is now enabled by default** on ESP32 via GPIO matrix routing. Any GPIO can be used for `DATA_PIN` and `CLOCK_PIN`.
   - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: **DEPRECATED**. Hardware SPI is now the unconditional default. This define is accepted for backwards compatibility but no longer required.
-  - **`FASTLED_FORCE_SOFTWARE_SPI`**: Force software bit-banging SPI instead of hardware SPI (use only if hardware SPI causes issues).
+  - **`FASTLED_FORCE_SOFTWARE_SPI`**: Force software bit-banging SPI instead of hardware SPI. The SPI bus manager will still handle device registration and conflict detection, but all data transmission uses software bit-banging. Use only if hardware SPI causes issues.
   - **`FASTLED_ESP32_SPI_BUS`**: Select SPI bus: `VSPI`, `HSPI`, or `FSPI`. Defaults per target: S2/S3 use `FSPI`, others default to `VSPI` (see `fastspi_esp32.h`).
   - **`FASTLED_ESP32_SPI_BULK_TRANSFER`**: When `1`, batches pixels into blocks to reduce transfer overhead and improve throughput at the cost of RAM. Default `0`.
   - **`FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE`**: Bulk block size (CRGBs) when bulk mode is enabled. Default `64`.

@@ -40,8 +40,9 @@
 // This must happen before FastLED.h includes chipsets.h
 
 #include "platforms/arm/teensy/is_teensy.h"
+#include "platforms/esp/is_esp.h"
 
-#if (defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)) && !defined(FASTLED_FORCE_SOFTWARE_SPI)
+#if defined(FL_IS_ESP32)
 #include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
 #elif defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/mxrt1062/spi_device_proxy.h"
@@ -63,7 +64,7 @@
 #if defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/spi_output_template.h"
 
-#elif (defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)) && !defined(FASTLED_FORCE_SOFTWARE_SPI)
+#elif defined(FL_IS_ESP32)
 #include "platforms/esp/32/drivers/spi/spi_output_template.h"
 
 #elif defined(ESP8266)
