@@ -1444,6 +1444,7 @@ def runner(
                 clean=args.clean,
                 verbose=args.verbose,
                 debug=args.debug,
+                build_mode=args.build_mode,
                 check=args.check,
             )
 
@@ -1486,6 +1487,7 @@ def runner(
                 clean=args.clean,
                 verbose=args.verbose,
                 debug=args.debug,
+                build_mode=args.build_mode,
                 check=args.check,
             )
 
