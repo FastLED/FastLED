@@ -13,11 +13,19 @@
 /// - PinMode::InputPulldown (3) = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
 
 #include "fl/compiler_control.h"
+#include "platforms/esp/esp_version.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
-#include "esp_adc/adc_oneshot.h"
 #include "esp_err.h"
+
+#if ESP_IDF_VERSION_5_OR_HIGHER
+#include "esp_adc/adc_oneshot.h"
+#else
+// Legacy ADC API for IDF v4.x
+#include "driver/adc.h"
+#endif
+
 FL_EXTERN_C_END
 
 namespace fl {
@@ -84,6 +92,8 @@ inline PinValue digitalRead(int pin) {
 // Analog Pin Functions
 // ============================================================================
 
+#if ESP_IDF_VERSION_5_OR_HIGHER
+
 namespace {
     // ADC handle for analog reads (lazy initialization)
     adc_oneshot_unit_handle_t adc1_handle = nullptr;
@@ -126,6 +136,37 @@ inline uint16_t analogRead(int pin) {
     adc_oneshot_read(adc1_handle, channel, &raw_value);
     return static_cast<uint16_t>(raw_value);
 }
+
+#else  // ESP-IDF v4.x legacy ADC API
+
+namespace {
+    bool adc1_initialized = false;
+
+    void initADC1() {
+        if (adc1_initialized) {
+            return;
+        }
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        adc1_initialized = true;
+    }
+}
+
+inline uint16_t analogRead(int pin) {
+    initADC1();
+
+    // Note: This is a stub implementation. Real implementation would need
+    // proper GPIO-to-ADC channel mapping based on ESP32 variant
+    adc1_channel_t channel = ADC1_CHANNEL_0;  // Placeholder
+    adc1_config_channel_atten(channel, ADC_ATTEN_DB_11);
+
+    int raw_value = adc1_get_raw(channel);
+    if (raw_value < 0) {
+        return 0;
+    }
+    return static_cast<uint16_t>(raw_value);
+}
+
+#endif  // ESP_IDF_VERSION_5_OR_HIGHER
 
 inline void analogWrite(int pin, uint16_t val) {
     // ESP-IDF does not provide a simple analogWrite API like Arduino
