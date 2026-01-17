@@ -254,7 +254,7 @@ jobs:
           echo ""
           uv run python -c "
           import sys
-          from ci.docker.avr8js_docker import DockerAVR8jsRunner
+          from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
 
           print('  Checking Docker image availability...')
           runner = DockerAVR8jsRunner()
@@ -298,7 +298,7 @@ jobs:
           uv run python -c "
           import sys
           from pathlib import Path
-          from ci.docker.avr8js_docker import DockerAVR8jsRunner
+          from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
 
           print('🔧 Initializing AVR8JS Docker runner...')
           runner = DockerAVR8jsRunner()
