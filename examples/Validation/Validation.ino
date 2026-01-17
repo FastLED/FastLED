@@ -187,11 +187,12 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-// RX buffer sized for largest possible strip (LONG_STRIP_SIZE = 3000 LEDs)
+// RX buffer sized for largest possible strip (LONG_STRIP_SIZE LEDs)
 // Each LED = 24 bits = 24 symbols, plus headroom for RESET pulses
-#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // 3000 LEDs × 32:1 expansion + headroom
+#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // LEDs × 32:1 expansion + headroom
 
-uint8_t rx_buffer[RX_BUFFER_SIZE];  // Shared RX buffer for all test cases
+// Use PSRAM-backed vector for dynamic allocation (avoids DRAM overflow on ESP32S2)
+fl::vector_psram<uint8_t> rx_buffer;  // Shared RX buffer - initialized in setup()
 
 // ⚠️ CRITICAL: RMT RX channel - MUST persist across ALL loop iterations
 // Created ONCE in setup(), reused for all driver tests
@@ -246,6 +247,9 @@ void setup() {
     // DISABLED FOR DEBUGGING: Investigating if watchdog causes crash at 7.69s
     // fl::watchdog_setup(5000);
     while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
+
+    // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
+    rx_buffer.resize(RX_BUFFER_SIZE);
 
 
 
@@ -463,7 +467,7 @@ void setup() {
         test_matrix_complete,
         frame_counter,
         rx_channel,
-        fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
+        rx_buffer
     );
 
     ss.clear();
@@ -541,7 +545,7 @@ void runSingleTestCase(
         tx_configs.push_back(fl::ChannelConfig(
             lane.pin,
             timing_config.timing,
-            fl::span<CRGB>(lane.leds.data(), lane.num_leds),
+            lane.leds,
             COLOR_ORDER
         ));
     }
@@ -550,7 +554,7 @@ void runSingleTestCase(
     fl::ValidationConfig validation_config(
         timing_config.timing,
         timing_config.name,
-        fl::span<fl::ChannelConfig>(tx_configs.data(), tx_configs.size()),
+        tx_configs,
         test_case.driver_name.c_str(),
         rx_channel,
         rx_buffer,
@@ -659,7 +663,7 @@ void loop() {
             test_results[i],
             timing_config,
             rx_channel,
-            fl::span<uint8_t>(rx_buffer, RX_BUFFER_SIZE)
+            rx_buffer
         );
 
         // Short delay between test cases

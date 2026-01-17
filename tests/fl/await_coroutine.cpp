@@ -514,7 +514,7 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     int timeout = 0;
     while (!both_completed.load() && timeout < 500) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
-        timeout += 10;
+        timeout += 1;  // Match the sleep duration
     }
 
     CHECK(both_completed.load());
