@@ -13,15 +13,20 @@ static void arm_compile_tests() {
 #error "FASTLED_USE_PROGMEM should be either 0 or 1 for ARM platforms"
 #endif
 
-#if defined(FL_IS_TEENSY) && !defined(FL_IS_TEENSY_LC)
-    // Teensy 3.x and 4.x have limited memory
+#if defined(FL_IS_TEENSY_30) || defined(FL_IS_TEENSY_31) || defined(FL_IS_TEENSY_32)
+    // Teensy 3.0/3.1/3.2 have limited memory (16KB-64KB RAM)
     #if SKETCH_HAS_LOTS_OF_MEMORY != 0
-    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy 3.x and 4.x"
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy 3.0/3.1/3.2"
     #endif
-#elif defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)
-    // Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1 have limited memory
+#elif defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36) || defined(FL_IS_TEENSY_4X)
+    // Teensy 3.5/3.6 have 256KB RAM, Teensy 4.x has 1MB RAM - plenty of memory
+    #if SKETCH_HAS_LOTS_OF_MEMORY != 1
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 1 for Teensy 3.5/3.6/4.x"
+    #endif
+#elif defined(FL_IS_TEENSY_LC) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)
+    // Teensy LC, Renesas UNO, and STM32F1 have limited memory
     #if SKETCH_HAS_LOTS_OF_MEMORY != 0
-    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1"
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC, Renesas UNO, and STM32F1"
     #endif
 #else
     // Most other ARM platforms have lots of memory
