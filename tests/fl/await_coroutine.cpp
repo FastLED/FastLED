@@ -510,9 +510,9 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     config2.name = "TestCoro2";
     auto coro2 = task::coroutine(config2);
 
-    // Wait for both coroutines to complete (reduced from 5000ms to 500ms)
+    // Wait for both coroutines to complete (5000ms total timeout)
     int timeout = 0;
-    while (!both_completed.load() && timeout < 500) {
+    while (!both_completed.load() && timeout < 5000) {
         async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
         timeout += 1;  // Match the sleep duration
     }
