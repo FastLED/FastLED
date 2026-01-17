@@ -327,8 +327,10 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
 
         // Wait should succeed within timeout
         CHECK(mock.waitTxDone(5000));
-        // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
-        std::this_thread::sleep_for(std::chrono::microseconds(60));
+        // Reset period is proportional to transmission time (max of 50us or tx_delay)
+        // With 1000us transmission delay, reset period is also 1000us
+        // Add 100us buffer for timing margin
+        std::this_thread::sleep_for(std::chrono::microseconds(1100));
         CHECK_FALSE(mock.isBusy());
     }
 

@@ -386,12 +386,17 @@ uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
     // Use aligned_alloc for 4-byte alignment (matches real hardware)
     void* buffer = nullptr;
 
+    // Alignment must be at least sizeof(void*) for posix_memalign
+    // Use 8-byte alignment which satisfies both 4-byte SPI requirement
+    // and POSIX alignment constraints on 64-bit systems
+    constexpr size_t kAlignment = sizeof(void*) >= 4 ? sizeof(void*) : 4;
+
 #if defined(_WIN32) || defined(_WIN64)
     // Windows: Use _aligned_malloc
-    buffer = _aligned_malloc(aligned_size, 4);
+    buffer = _aligned_malloc(aligned_size, kAlignment);
 #else
-    // POSIX: Use posix_memalign
-    if (posix_memalign(&buffer, 4, aligned_size) != 0) {
+    // POSIX: Use posix_memalign (alignment must be power of 2 and >= sizeof(void*))
+    if (posix_memalign(&buffer, kAlignment, aligned_size) != 0) {
         buffer = nullptr; // Ensure buffer is null on failure
     }
 #endif

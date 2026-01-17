@@ -16,6 +16,7 @@
 
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+#include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
 #include <stddef.h>
 #include <stdint.h>
 #include "fl/stl/new.h"
@@ -919,8 +920,6 @@ TEST_CASE("parlio_mock_packing_mode_persistence") {
 //=============================================================================
 // Test Suite: ParlioBufferCalculator - DMA Buffer Size Math
 //=============================================================================
-
-#include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
 
 TEST_CASE("ParlioBufferCalculator - outputBytesPerInputByte for all data widths") {
     // Test Wave8 expansion ratio for each data width
