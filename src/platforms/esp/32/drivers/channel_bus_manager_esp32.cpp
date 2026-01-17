@@ -2,13 +2,14 @@
 /// @brief ESP32-specific channel engine initialization
 ///
 /// This file provides lazy initialization of ESP32-specific channel engines
-/// (PARLIO, SPI, RMT) in priority order. Engines are registered on first
-/// access to ChannelBusManager::instance().
+/// (LCD_RGB, PARLIO, SPI, RMT, UART) in priority order. Engines are registered
+/// on first access to ChannelBusManager::instance().
 ///
 /// Priority Order:
-/// - PARLIO (100): Highest performance, best timing (ESP32-P4, C6, H2, C5)
-/// - SPI (50): Good performance, reliable (ESP32-S3, others)
-/// - RMT (10): Fallback, lower performance (all ESP32 variants)
+/// - PARLIO (4): Highest priority, best timing (ESP32-P4, C6, H2, C5)
+/// - LCD_RGB (3): High performance, parallel LED output via LCD peripheral (ESP32-P4 only)
+/// - SPI (2): Good performance, reliable (ESP32-S3, others)
+/// - RMT (1): Fallback, lower performance (all ESP32 variants)
 /// - UART (0): Efficient wave8 encoding, automatic start/stop bits
 ///             (all ESP32 variants, lowest priority because it's unused)
 
@@ -39,17 +40,21 @@
 #include "rmt/rmt_4/channel_engine_rmt4.h"
 #endif
 #endif  // FASTLED_ESP32_HAS_RMT
+#if FASTLED_ESP32_HAS_LCD_RGB
+#include "lcd_cam/channel_engine_lcd_rgb.h"
+#endif
 
 namespace fl {
 
 namespace detail {
 
 /// @brief Engine priority constants for ESP32
-/// @note Higher values = higher precedence (PARLIO 100 > SPI 50 > UART 30 > RMT 10)
-constexpr int PRIORITY_PARLIO = 3;  ///< Highest priority value (PARLIO engine - ESP32-P4/C6/H2/C5)
-constexpr int PRIORITY_SPI = 2;      ///< Medium priority value (SPI engine)
-constexpr int PRIORITY_RMT = 1;      ///< Lowest priority value (Fallback RMT engine - all ESP32 variants)
-constexpr int PRIORITY_UART = 0;     ///(Beta) < UART engine with wave8 encoding (all ESP32 variants with ESP-IDF 4.0+)
+/// @note Higher values = higher precedence (PARLIO 4 > LCD_RGB 3 > SPI 2 > RMT 1 > UART 0)
+constexpr int PRIORITY_PARLIO = 4;   ///< Highest priority (PARLIO engine - ESP32-P4/C6/H2/C5)
+constexpr int PRIORITY_LCD_RGB = 3;  ///< High priority (LCD RGB engine - ESP32-P4 only, parallel LED output via LCD peripheral)
+constexpr int PRIORITY_SPI = 2;      ///< Medium priority (SPI engine)
+constexpr int PRIORITY_RMT = 1;      ///< Low priority (Fallback RMT engine - all ESP32 variants)
+constexpr int PRIORITY_UART = 0;     ///< Lowest priority (Beta - UART engine with wave8 encoding)
 
 /// @brief Add PARLIO engine if supported by platform
 static void addParlioIfPossible(ChannelBusManager& manager) {
@@ -58,6 +63,21 @@ static void addParlioIfPossible(ChannelBusManager& manager) {
     // This tells the driver to use internal clock source instead of external GPIO 0
     manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>(), "PARLIO");
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
+
+/// @brief Add LCD RGB engine if supported by platform
+static void addLcdRgbIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_LCD_RGB
+    auto engine = createLcdRgbEngine();
+    if (engine) {
+        manager.addEngine(PRIORITY_LCD_RGB, engine, "LCD_RGB");
+        FL_DBG("ESP32: Added LCD_RGB engine (priority " << PRIORITY_LCD_RGB << ")");
+    } else {
+        FL_DBG("ESP32-P4: LCD_RGB engine creation failed");
+    }
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif
@@ -130,6 +150,7 @@ void initChannelEngines() {
 
     // Add engines in priority order (each function handles platform-specific ifdefs)
     detail::addParlioIfPossible(manager);
+    detail::addLcdRgbIfPossible(manager);
     detail::addSpiIfPossible(manager);
     detail::addUartIfPossible(manager);
     detail::addRmtIfPossible(manager);

@@ -18,6 +18,7 @@
 #include "fl/channels/data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/thread.h"
 
 using namespace fl;
 using namespace fl::detail;
@@ -140,9 +141,9 @@ TEST_CASE("ChannelEngineLcdRgb - single channel transmission") {
     engine.enqueue(channelData);
     engine.show();
 
-    // Wait for completion
+    // Wait for completion - yield to allow simulation thread to process
     while (engine.poll() != IChannelEngine::EngineState::READY) {
-        // Polling loop
+        fl::this_thread::yield();
     }
 
     // Verify mock received data
@@ -188,9 +189,9 @@ TEST_CASE("ChannelEngineLcdRgb - multi-channel transmission") {
     engine.enqueue(channel3);
     engine.show();
 
-    // Wait for completion
+    // Wait for completion - yield to allow simulation thread to process
     while (engine.poll() != IChannelEngine::EngineState::READY) {
-        // Polling loop
+        fl::this_thread::yield();
     }
 
     // Verify transmission occurred
@@ -221,10 +222,11 @@ TEST_CASE("ChannelEngineLcdRgb - state transitions") {
     // Start transmission
     engine.show();
 
-    // Wait and verify completion
+    // Wait and verify completion - yield to allow simulation thread to process
     int iterations = 0;
     const int maxIterations = 1000;
     while (engine.poll() != IChannelEngine::EngineState::READY && iterations < maxIterations) {
+        fl::this_thread::yield();
         iterations++;
     }
 
@@ -256,6 +258,7 @@ TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     int iterations = 0;
     const int maxIterations = 100;
     while (engine.poll() != IChannelEngine::EngineState::READY && iterations < maxIterations) {
+        fl::this_thread::yield();
         iterations++;
     }
 

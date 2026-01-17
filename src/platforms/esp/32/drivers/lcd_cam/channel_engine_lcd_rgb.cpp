@@ -297,7 +297,7 @@ void ChannelEngineLcdRgb::prepareScratchBuffer(fl::span<const ChannelDataPtr> ch
         fl::memcpy(mScratchBuffer.data() + offset, data.data(), data.size());
 
         // Set strip pointer for encoding
-        mStrips[lane] = reinterpret_cast<CRGB*>(mScratchBuffer.data() + offset);
+        mStrips[lane] = reinterpret_cast<CRGB*>(mScratchBuffer.data() + offset); // ok reinterpret cast - scratch buffer layout matches CRGB alignment
     }
 }
 

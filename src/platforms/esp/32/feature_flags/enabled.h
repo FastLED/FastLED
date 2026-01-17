@@ -83,4 +83,15 @@ FL_EXTERN_C_END
 #endif
 #endif
 
+// LCD RGB driver availability for LED output
+// LCD RGB peripheral is only available on ESP32-P4 (uses RGB LCD peripheral for parallel LED driving)
+// Requires ESP-IDF 5.0+ and esp_lcd_panel_rgb.h header
+#if !defined(FASTLED_ESP32_HAS_LCD_RGB)
+#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#define FASTLED_ESP32_HAS_LCD_RGB 1
+#else
+#define FASTLED_ESP32_HAS_LCD_RGB 0
+#endif
+#endif
+
 #endif  // ESP32 || ARDUINO_ARCH_ESP32
