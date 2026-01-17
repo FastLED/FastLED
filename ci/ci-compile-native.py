@@ -6,9 +6,9 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from ci.compiler.native_fingerprint import NativeCompilationCache
+from ci.util.pio_runner import run_pio_command
 
 
 def parse_args():
@@ -61,7 +61,7 @@ def main():
     os.chdir(str(script_dir))
 
     # Determine build identifier
-    example_path: Optional[Path] = None
+    example_path: Path | None = None
     if args.example:
         example_path = Path.cwd().parent / "examples" / args.example
         build_id = f"example_{args.example}"
@@ -104,9 +104,17 @@ def main():
     try:
         if args.verbose:
             print("Running PlatformIO native compilation...")
-        result = subprocess.run(["pio", "run"], check=True)
+        # Use run_pio_command for proper process tracking and atexit cleanup
+        result = run_pio_command(["pio", "run"], cwd=native_dir)
 
         compile_time = time.time() - start_time
+
+        if result.returncode != 0:
+            print(
+                f"✗ Native compilation failed after {compile_time:.2f}s (exit code {result.returncode})"
+            )
+            cache.invalidate_build(build_id)
+            return result.returncode
 
         if args.verbose:
             print(f"✓ Native compilation completed in {compile_time:.2f}s")

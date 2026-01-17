@@ -1,11 +1,11 @@
 import argparse
 import json
 import re
-import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.pio_runner import run_pio_command
 
 
 def _create_board_info(path: Path) -> dict[str, Any]:
@@ -17,7 +17,7 @@ def _create_board_info(path: Path) -> dict[str, Any]:
     return build_info[next(iter(build_info))]
 
 
-def _find_build_info(board: str, example: Optional[str] = None) -> Path:
+def _find_build_info(board: str, example: str | None = None) -> Path:
     """Find build_info.json for a board, with optional example-specific search.
 
     Args:
@@ -65,14 +65,13 @@ def _find_build_info(board: str, example: Optional[str] = None) -> Path:
         )
 
 
-def _run_pio_size(build_dir: Path) -> Optional[int]:
+def _run_pio_size(build_dir: Path) -> int | None:
     try:
         # Try to compute size without building first
-        result = subprocess.run(
+        # Uses run_pio_command for proper process tracking and atexit cleanup
+        result = run_pio_command(
             ["pio", "run", "-d", str(build_dir), "-t", "size"],
             capture_output=True,
-            text=True,
-            check=False,
         )
         output = (result.stdout or "") + "\n" + (result.stderr or "")
 
@@ -101,14 +100,13 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
             return code + data + headers
 
         # If size target did not yield, try a full build then retry size
-        subprocess.run(
-            ["pio", "run", "-d", str(build_dir)], capture_output=False, check=False
+        run_pio_command(
+            ["pio", "run", "-d", str(build_dir)],
+            capture_output=False,
         )
-        result = subprocess.run(
+        result = run_pio_command(
             ["pio", "run", "-d", str(build_dir), "-t", "size"],
             capture_output=True,
-            text=True,
-            check=False,
         )
         output = (result.stdout or "") + "\n" + (result.stderr or "")
 
@@ -143,7 +141,7 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
     return None
 
 
-def check_firmware_size(board: str, example: Optional[str] = None) -> int:
+def check_firmware_size(board: str, example: str | None = None) -> int:
     build_info_json = _find_build_info(board, example)
     board_info = _create_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
@@ -173,7 +171,7 @@ def check_firmware_size(board: str, example: Optional[str] = None) -> int:
     )
 
 
-def main(board: str, example: Optional[str] = None):
+def main(board: str, example: str | None = None):
     try:
         size = check_firmware_size(board, example)
         print(f"Firmware size for {board}: {size} bytes")
