@@ -368,6 +368,7 @@ def setup_meson_build(
     reconfigure: bool = False,
     debug: bool = False,
     check: bool = False,
+    build_mode: Optional[str] = None,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -378,10 +379,20 @@ def setup_meson_build(
         reconfigure: Force reconfiguration of existing build
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         check: Enable IWYU static analysis (default: False)
+        build_mode: Build mode ("quick", "debug", or "release"). If None, derived from debug flag.
 
     Returns:
         True if setup successful, False otherwise
     """
+    # Derive build_mode from debug flag if not explicitly provided
+    if build_mode is None:
+        build_mode = "debug" if debug else "quick"
+
+    # Ensure debug flag matches build_mode for consistency
+    if build_mode == "debug":
+        debug = True
+    elif build_mode in ("quick", "release"):
+        debug = False
     # Create build directory if it doesn't exist
     build_dir.mkdir(parents=True, exist_ok=True)
 
@@ -464,6 +475,7 @@ def setup_meson_build(
     source_files_marker = build_dir / ".source_files_hash"
     debug_marker = build_dir / ".debug_config"
     check_marker = build_dir / ".check_config"
+    build_mode_marker = build_dir / ".build_mode_config"
     force_reconfigure = False
 
     # Get current source file hash (used for change detection and saving after setup)
@@ -618,6 +630,81 @@ def setup_meson_build(
             # No marker file exists from previous configure
             # This can happen on first run after updating to this version
             _ts_print("[MESON] ℹ️  No check marker found, will create after setup")
+
+        # Check if build_mode setting has changed since last configure
+        # CRITICAL: This detects quick <-> release transitions which both have debug=False
+        # but have different optimization flags (-O0 vs -O3)
+        # When build_mode changes, we must clean objects to avoid mixing different compiler flags
+        build_mode_changed = False
+        last_build_mode: Optional[str] = None
+        if build_mode_marker.exists():
+            try:
+                last_build_mode = build_mode_marker.read_text().strip()
+                if last_build_mode != build_mode:
+                    _ts_print(
+                        f"[MESON] ⚠️  Build mode changed: {last_build_mode} → {build_mode}"
+                    )
+                    _ts_print(
+                        "[MESON] 🔄 Forcing reconfigure to update optimization/debug flags"
+                    )
+                    force_reconfigure = True
+                    build_mode_changed = True
+            except (OSError, IOError):
+                # If we can't read the marker, force reconfigure to be safe
+                _ts_print(
+                    "[MESON] ⚠️  Could not read build_mode marker, forcing reconfigure"
+                )
+                force_reconfigure = True
+        else:
+            # No marker file exists from previous configure
+            # This can happen on first run after updating to this version
+            _ts_print("[MESON] ℹ️  No build_mode marker found, will create after setup")
+
+        # CRITICAL: Delete all object files and archives when build_mode changes
+        # Object files compiled with different optimization flags cannot be safely mixed
+        # E.g., -O0 vs -O3 produces incompatible object code
+        # Note: last_build_mode is guaranteed to be set if build_mode_changed is True
+        if build_mode_changed:
+            import glob
+
+            _ts_print(
+                f"[MESON] 🗑️  Build mode changed ({last_build_mode} → {build_mode}) - cleaning all object files and archives"
+            )
+
+            # Delete all .obj and .o files (object files)
+            obj_files = glob.glob(str(build_dir / "**" / "*.obj"), recursive=True)
+            obj_files.extend(glob.glob(str(build_dir / "**" / "*.o"), recursive=True))
+            deleted_obj_count = 0
+            for obj_file in obj_files:
+                try:
+                    Path(obj_file).unlink()
+                    deleted_obj_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {obj_file}: {e}")
+
+            # Delete all .a files (static libraries)
+            archive_files = glob.glob(str(build_dir / "**" / "*.a"), recursive=True)
+            deleted_archive_count = 0
+            for archive_file in archive_files:
+                try:
+                    Path(archive_file).unlink()
+                    deleted_archive_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {archive_file}: {e}")
+
+            # Delete all .exe files (test executables)
+            exe_files = glob.glob(str(build_dir / "**" / "*.exe"), recursive=True)
+            deleted_exe_count = 0
+            for exe_file in exe_files:
+                try:
+                    Path(exe_file).unlink()
+                    deleted_exe_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {exe_file}: {e}")
+
+            _ts_print(
+                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, {deleted_exe_count} executables"
+            )
 
     # Check if any meson.build files are newer than build.ninja (requires reconfigure)
     build_ninja_path = build_dir / "build.ninja"
@@ -775,8 +862,8 @@ def setup_meson_build(
             str(native_file_path),
             str(build_dir),
         ]
-        if debug:
-            cmd.extend(["-Dbuild_mode=debug"])
+        # Always pass explicit build_mode to ensure meson uses correct optimization flags
+        cmd.extend([f"-Dbuild_mode={build_mode}"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
@@ -787,8 +874,8 @@ def setup_meson_build(
             str(native_file_path),
             str(build_dir),
         ]
-        if debug:
-            cmd.extend(["-Dbuild_mode=debug"])
+        # Always pass explicit build_mode to ensure meson uses correct optimization flags
+        cmd.extend([f"-Dbuild_mode={build_mode}"])
 
     # Print debug mode status
     if debug:
@@ -1016,6 +1103,16 @@ endian = 'little'
                 # If we can't read/delete, that's okay - build will handle it
                 _ts_print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
                 pass
+
+        # CRITICAL: Create build_mode marker if it doesn't exist (migration from older code)
+        # This ensures cache invalidation works correctly on first run after update
+        if not build_mode_marker.exists():
+            try:
+                build_mode_marker.write_text(build_mode, encoding="utf-8")
+                _ts_print(f"[MESON] ✅ Created build_mode marker: {build_mode}")
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not write build_mode marker: {e}")
+
         return True
 
     # Run meson setup using RunningProcess for proper streaming output
@@ -1073,6 +1170,15 @@ endian = 'little'
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write check marker: {e}")
+
+        # Write marker file to track build_mode setting for future runs
+        # CRITICAL: This enables detection of quick <-> release transitions
+        try:
+            build_mode_marker.write_text(build_mode, encoding="utf-8")
+            _ts_print(f"[MESON] ✅ Saved build_mode configuration: {build_mode}")
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            _ts_print(f"[MESON] Warning: Could not write build_mode marker: {e}")
 
         # Write marker file to track source/test file list for future runs
         if current_source_hash:
@@ -1712,6 +1818,7 @@ def run_meson_build_and_test(
 
     # Setup build
     # Pass debug=True when build_mode is "debug" to enable sanitizers and full symbols
+    # Also pass explicit build_mode to ensure proper cache invalidation on mode changes
     use_debug = build_mode == "debug"
     if not setup_meson_build(
         source_dir,
@@ -1719,6 +1826,7 @@ def run_meson_build_and_test(
         reconfigure=False,
         debug=use_debug,
         check=check,
+        build_mode=build_mode,
     ):
         return MesonTestResult(
             success=False,

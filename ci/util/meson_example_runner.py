@@ -280,9 +280,13 @@ def run_meson_examples(
 
         shutil.rmtree(build_dir)
 
-    # Setup build (convert mode string to boolean for debug parameter)
+    # Setup build with explicit build_mode to ensure proper cache invalidation
     if not setup_meson_build(
-        source_dir, build_dir, debug=(build_mode == "debug"), reconfigure=False
+        source_dir,
+        build_dir,
+        debug=(build_mode == "debug"),
+        reconfigure=False,
+        build_mode=build_mode,
     ):
         return MesonTestResult(
             success=False,
