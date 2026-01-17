@@ -325,8 +325,25 @@ static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
     7, // A7 (internal only on some variants)
 };
 
+#elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__) || \
+      defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny3216__) || defined(__AVR_ATtiny3217__)
+
+// megaAVR 0-series / tinyAVR 0/1/2-series (ATtiny1604, ATtiny1616, etc.)
+// These use PORTA.DIR/OUT/IN style registers instead of DDRB/PORTB/PINB
+
+// Minimal pin mapping for PORTB pins (common across tinyAVR 0/1/2-series)
+static const uint8_t PROGMEM digital_pin_to_port_PGM[] = { PB, PB, PB, PB, PB, PB };
+static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = { _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5) };
+
+// megaAVR uses PORTB.DIR, PORTB.OUT, PORTB.IN instead of DDRB, PORTB, PINB
+static const uint16_t PROGMEM port_to_mode_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &PORTB.DIR };
+static const uint16_t PROGMEM port_to_output_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &PORTB.OUT };
+static const uint16_t PROGMEM port_to_input_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &PORTB.IN };
+static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = { 0, 1, 2, 3 };
+
 #else
-// Fallback for other AVR variants (minimal implementation)
+// Fallback for other classic AVR variants (minimal implementation)
+// Uses traditional DDRx/PORTx/PINx registers
 static const uint8_t PROGMEM digital_pin_to_port_PGM[] = { PB, PB, PB, PB, PB, PB };
 static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = { _BV(0), _BV(1), _BV(2), _BV(3), _BV(4), _BV(5) };
 static const uint16_t PROGMEM port_to_mode_PGM[] = { NOT_A_PORT, NOT_A_PORT, (uint16_t) &DDRB };
