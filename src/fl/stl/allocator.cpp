@@ -9,6 +9,7 @@
 #ifdef ESP32
 #include "esp_heap_caps.h"
 #include "esp_system.h"
+#include "platforms/esp/esp_version.h"
 #endif
 
 namespace fl {
@@ -192,7 +193,13 @@ void* DMAAlloc(fl::size size) {
     // Round size up to 64-byte multiple for proper cache line alignment
     fl::size aligned_size = ((size + 63) / 64) * 64;
 
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // heap_caps_aligned_alloc is available in ESP-IDF v4.0+
     void* ptr = heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+#else
+    // ESP-IDF v3.x fallback: use regular allocation (no alignment guarantee)
+    void* ptr = heap_caps_malloc(aligned_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+#endif
     if (ptr) {
         fl::memset(ptr, 0, aligned_size);  // Zero-initialize full aligned buffer
     }
