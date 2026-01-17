@@ -54,6 +54,6 @@ FrameBuffer::FrameBuffer(int n_pixels)
 
 FrameBuffer::~FrameBuffer() {
   fl::free(mColorArray);
-  mColorArray = NULL;
+  mColorArray = nullptr;
   mNColorArray = 0;
 }
