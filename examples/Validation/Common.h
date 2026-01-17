@@ -64,6 +64,7 @@ struct TestCaseConfig {
     int base_strip_size;        ///< Base LED count (SHORT_STRIP_SIZE or LONG_STRIP_SIZE)
     fl::vector<LaneConfig> lanes;  ///< Per-lane configurations
 
+    // Constructor for uniform lane sizes (legacy)
     TestCaseConfig(const char* driver, int num_lanes, int base_size)
         : driver_name(driver), lane_count(num_lanes), base_strip_size(base_size) {
         // Generate lane configurations with SAME LED count for all lanes
@@ -78,6 +79,26 @@ struct TestCaseConfig {
             lanes.push_back(LaneConfig(lane_pin, lane_leds));
         }
     }
+
+    // Constructor for variable lane sizes (new)
+    TestCaseConfig(const char* driver, const fl::vector<int>& lane_sizes, int base_pin = 0)
+        : driver_name(driver), lane_count(static_cast<int>(lane_sizes.size())), base_strip_size(0) {
+        // Generate lane configurations with DIFFERENT LED counts
+        for (int i = 0; i < static_cast<int>(lane_sizes.size()); i++) {
+            int lane_leds = lane_sizes[i];
+            int lane_pin = base_pin + i;  // Will be overridden with actual TX pins later
+            lanes.push_back(LaneConfig(lane_pin, lane_leds));
+        }
+    }
+
+    /// @brief Get total LED count across all lanes
+    int getTotalLeds() const {
+        int total = 0;
+        for (const auto& lane : lanes) {
+            total += lane.num_leds;
+        }
+        return total;
+    }
 };
 
 /// @brief Test matrix configuration - controls which test combinations to run
@@ -88,18 +109,54 @@ struct TestMatrixConfig {
     bool test_small_strips;                  ///< Test short strips (10 LEDs)?
     bool test_large_strips;                  ///< Test long strips (300 LEDs)?
 
+    // NEW: Variable lane sizing support
+    fl::vector<int> lane_sizes;              ///< Per-lane LED counts (overrides uniform sizing when set)
+    int custom_led_count;                    ///< Custom LED count for uniform sizing (overrides base sizes)
+    fl::string test_pattern;                 ///< Test pattern name ("MSB_LSB_A", "SOLID_RGB", etc.)
+    int test_iterations;                     ///< Number of test iterations per configuration
+
     TestMatrixConfig()
         : min_lanes(1)
         , max_lanes(8)
         , test_small_strips(true)
-        , test_large_strips(true) {}
+        , test_large_strips(true)
+        , lane_sizes()                       // Empty = use uniform sizing
+        , custom_led_count(100)              // Default: 100 LEDs per lane
+        , test_pattern("MSB_LSB_A")
+        , test_iterations(1) {}
 
     /// @brief Get total number of test cases in the matrix
     int getTotalTestCases() const {
         int driver_count = enabled_drivers.size();
+
+        // If lane_sizes is set, test count is simpler (one config per driver)
+        if (!lane_sizes.empty()) {
+            return driver_count;  // One test per driver with specific lane config
+        }
+
+        // Legacy: lane range × strip sizes
         int lane_range = (max_lanes - min_lanes + 1);
         int strip_sizes = (test_small_strips ? 1 : 0) + (test_large_strips ? 1 : 0);
         return driver_count * lane_range * strip_sizes;
+    }
+
+    /// @brief Get lane count (from lane_sizes or min_lanes)
+    int getLaneCount() const {
+        return lane_sizes.empty() ? min_lanes : static_cast<int>(lane_sizes.size());
+    }
+
+    /// @brief Get total LED count across all lanes
+    int getTotalLeds() const {
+        if (lane_sizes.empty()) {
+            // Uniform sizing
+            return getLaneCount() * custom_led_count;
+        }
+        // Variable sizing
+        int total = 0;
+        for (int size : lane_sizes) {
+            total += size;
+        }
+        return total;
     }
 };
 

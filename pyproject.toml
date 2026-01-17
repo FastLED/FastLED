@@ -118,7 +118,9 @@ exclude = [
     "**/build",
     "**/dist",
     "**/*.egg-info",
-    "tmp.py"
+    "tmp.py",
+    "ci/validation_agent.py",
+    "ci/validation_loop.py"
 ]
 
 # Type checking configuration

@@ -590,25 +590,26 @@ void runSingleTestCase(
 // ============================================================================
 
 void loop() {
-    // IMPORTANT: Must be first line - handles halt state and prevents watchdog resets
-    if (halt.check()) return;
-
-    // Process scheduled RPC commands
+    // CRITICAL: Process RPC commands BEFORE halt check
+    // This allows reset/configure commands to work even when halted
     RemoteControlSingleton::instance().tick(millis());
+    RemoteControlSingleton::instance().processSerialInput();
+
+    // Check halt state AFTER processing RPC (allows reset to work)
+    if (halt.check()) return;
 
     // Check for START command or JSON RPC commands on serial input
     if (!start_command_received) {
-        // Process serial input via remote control
-        RemoteControlSingleton::instance().processSerialInput();
+        // Already processed serial input above
 
-        // DEBUGGING: Auto-send START command after 1 second to skip idle waiting
-        // This helps isolate whether crash is timing-related or test-execution-related
-        static bool auto_start_sent = false;
-        if (!auto_start_sent && millis() > 1000) {
-            FL_PRINT("[DEBUG] Auto-sending START command after 1 second");
-            start_command_received = true;
-            auto_start_sent = true;
-        }
+        // DEBUGGING: Auto-send START command DISABLED for RPC testing
+        // Enable this to auto-start tests without waiting for RPC command
+        // static bool auto_start_sent = false;
+        // if (!auto_start_sent && millis() > 1000) {
+        //     FL_PRINT("[DEBUG] Auto-sending START command after 1 second");
+        //     start_command_received = true;
+        //     auto_start_sent = true;
+        // }
 
         // If START not received yet, print waiting message every 5 seconds
         if (!start_command_received) {

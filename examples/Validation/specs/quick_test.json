@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "description": "Quick validation test with uniform lanes",
+  "drivers": ["PARLIO"],
+  "laneConfigs": [[100, 100]],
+  "patterns": ["MSB_LSB_A"],
+  "iterations": 1,
+  "options": {
+    "timeout": 60,
+    "stopOnFirstFailure": false,
+    "verbose": false
+  }
+}

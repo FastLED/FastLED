@@ -214,6 +214,93 @@ bash debug MySketch --expect "INIT OK" --expect "TEST PASS" --fail-on "PANIC" --
 
 For full documentation, see `uv run ci/debug_attached.py --help`
 
+### JSON-RPC Validation Protocol (Advanced)
+
+**🔧 EXTENSIBLE TESTING**: The validation system uses bidirectional JSON-RPC over serial for hardware-in-the-loop testing. This protocol enables AI agents to:
+- Test LED drivers without recompilation (runtime driver selection)
+- Add new test functionality by extending the JSON-RPC API
+- Configure variable lane sizes and test patterns programmatically
+
+**Python Agent (`ci/validation_agent.py`)**:
+```python
+from validation_agent import ValidationAgent, TestConfig
+
+# Connect to device
+with ValidationAgent("COM18") as agent:
+    # Health check
+    agent.ping()  # Returns: {timestamp, uptimeMs, frameCounter}
+
+    # Get available drivers
+    drivers = agent.get_drivers()  # Returns: ["PARLIO", "RMT", "SPI", "UART"]
+
+    # Configure test: 100 LEDs, 1 lane, PARLIO driver
+    config = TestConfig(
+        driver="PARLIO",
+        lane_sizes=[100],  # Per-lane LED counts
+        pattern="MSB_LSB_A",
+        iterations=1
+    )
+    agent.configure(config)
+
+    # Run test and get results
+    result = agent.run_test()
+    print(f"Passed: {result.passed_tests}/{result.total_tests}")
+
+    # Reset between tests
+    agent.reset()
+```
+
+**JSON-RPC Commands** (sent over serial with `REMOTE:` response prefix):
+
+| Command | Args | Description |
+|---------|------|-------------|
+| `ping` | - | Health check, returns timestamp and uptime |
+| `drivers` | - | List available LED drivers with enabled status |
+| `getState` | - | Query current device state and configuration |
+| `configure` | `{driver, laneSizes, pattern, iterations}` | Set up test parameters |
+| `setLaneSizes` | `[sizes...]` | Set per-lane LED counts directly |
+| `setLedCount` | `count` | Set uniform LED count for all lanes |
+| `setPattern` | `name` | Set test pattern (MSB_LSB_A, SOLID_RGB, etc.) |
+| `runTest` | - | Execute configured test, returns streaming results |
+| `reset` | - | Reset device state |
+
+**Raw JSON-RPC Example** (for custom integrations):
+```json
+// Send:
+{"function":"configure","args":[{"driver":"PARLIO","laneSizes":[100],"pattern":"MSB_LSB_A","iterations":1}]}
+
+// Receive:
+REMOTE: {"success":true,"config":{"driver":"PARLIO","laneSizes":[100],"totalLeds":100}}
+
+// Send:
+{"function":"runTest","args":[]}
+
+// Receive (streaming JSONL):
+REMOTE: {"success":true,"streamMode":true}
+RESULT: {"type":"test_start","driver":"PARLIO","totalLeds":100}
+RESULT: {"type":"test_complete","passed":true,"totalTests":4,"passedTests":4,"durationMs":2830}
+```
+
+**Variable Lane Configurations**:
+```python
+# Uniform: all lanes same size
+config = TestConfig.uniform("RMT", led_count=100, lane_count=4, pattern="MSB_LSB_A")
+
+# Asymmetric: different sizes per lane
+config = TestConfig(driver="PARLIO", lane_sizes=[300, 200, 100, 50], pattern="SOLID_RGB")
+```
+
+**Extending the Protocol**:
+The JSON-RPC architecture allows agents to easily add new test functionality:
+1. Add new RPC handler in `examples/Validation/ValidationRemote.cpp`
+2. Add corresponding Python method in `ci/validation_agent.py`
+3. No firmware recompilation needed for client-side extensions
+
+**Files**:
+- `ci/validation_agent.py` - Python ValidationAgent class
+- `ci/validation_loop.py` - Test orchestration with CLI
+- `examples/Validation/ValidationRemote.cpp` - Firmware RPC handlers
+
 ### Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
 

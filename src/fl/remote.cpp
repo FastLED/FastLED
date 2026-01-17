@@ -26,7 +26,6 @@ void Remote::printJson(const fl::Json& json) {
     fl::string jsonStr = json.to_string();
 
     // Ensure single-line (replace any newlines/carriage returns with spaces)
-    // Note: fl::Json::to_string() should already produce compact output, but this is defensive
     for (size_t i = 0; i < jsonStr.size(); ++i) {
         if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
             jsonStr[i] = ' ';
@@ -41,6 +40,39 @@ void Remote::printJson(const fl::Json& json) {
     } else {
         fl::println(jsonStr.c_str());
     }
+}
+
+// Static Helper: Print JSONL stream message with type prefix
+
+void Remote::printStream(const char* messageType, const fl::Json& data) {
+    // Build pure JSONL message: RESULT: {"type":"...", ...data}
+    // Example: RESULT: {"type":"config_start","driver":"PARLIO","leds":100}
+
+    // Create a new JSON object with type field
+    fl::Json output = fl::Json::object();
+    output.set("type", messageType);
+
+    // Copy all fields from data into output
+    if (data.is_object()) {
+        auto keys = data.keys();
+        for (fl::size i = 0; i < keys.size(); i++) {
+            output.set(keys[i].c_str(), data[keys[i]]);
+        }
+    }
+
+    // Serialize to compact JSON
+    fl::string jsonStr = output.to_string();
+
+    // Ensure single-line
+    for (size_t i = 0; i < jsonStr.size(); ++i) {
+        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
+            jsonStr[i] = ' ';
+        }
+    }
+
+    // Output: RESULT: <json-with-type>
+    fl::print("RESULT: ");
+    fl::println(jsonStr.c_str());
 }
 
 // Function Registration

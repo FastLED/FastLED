@@ -269,6 +269,28 @@ public:
      */
     static void printJson(const fl::Json& json);
 
+    /**
+     * @brief Print JSONL stream message with type field embedded
+     * @param messageType Type of message (e.g., "config_start", "test_result")
+     * @param data JSON object containing message data
+     *
+     * Outputs pure JSONL format: RESULT: {"type":"...", ...data}
+     * This is the recommended format for streaming progress updates.
+     *
+     * Example:
+     *   fl::Json data = fl::Json::object();
+     *   data.set("driver", "PARLIO");
+     *   data.set("leds", 100);
+     *   fl::Remote::printStream("config_start", data);
+     *   // Output: RESULT: {"type":"config_start","driver":"PARLIO","leds":100}
+     *
+     * To filter on host side:
+     *   grep "^RESULT: " /dev/ttyUSB0 | sed 's/^RESULT: //' | jq 'select(.type == "config_start")'
+     *   # Or with Python:
+     *   # line.startswith("RESULT: ") and json.loads(line[8:])
+     */
+    static void printStream(const char* messageType, const fl::Json& data);
+
 protected:
     struct ScheduledCall {
         uint32_t mExecuteAt;        // millis() timestamp when to execute

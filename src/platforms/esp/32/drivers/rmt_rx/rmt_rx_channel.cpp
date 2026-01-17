@@ -273,16 +273,18 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     const auto *rmt_symbols =
         fl::bit_cast_ptr<const rmt_symbol_word_t>(symbols.data());
 
-    // Log first 30 symbols for detailed analysis (using FL_WARN to ensure output)
+    // Log first 30 symbols for detailed analysis (disabled by default)
+#if FASTLED_RX_LOG_ENABLED
     size_t log_symbol_limit = (symbols.size() < 30) ? symbols.size() : 30;
     for (size_t idx = 0; idx < log_symbol_limit; idx++) {
         uint32_t high_ns = ticksToNs(rmt_symbols[idx].duration0, ns_per_tick);
         uint32_t low_ns = ticksToNs(rmt_symbols[idx].duration1, ns_per_tick);
-        FL_WARN("Symbol[" << idx << "]: duration0=" << rmt_symbols[idx].duration0
+        FL_LOG_RX("Symbol[" << idx << "]: duration0=" << rmt_symbols[idx].duration0
                << " (" << high_ns << "ns) level0=" << static_cast<int>(rmt_symbols[idx].level0)
                << ", duration1=" << rmt_symbols[idx].duration1
                << " (" << low_ns << "ns) level1=" << static_cast<int>(rmt_symbols[idx].level1));
     }
+#endif
 
     // Note: Edge detection is now handled by filterSpuriousSymbols() before
     // decode() is called. The symbols array passed here already starts at the
@@ -404,14 +406,16 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
         bit_index++;
 
-        // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - using FL_WARN to ensure output
+        // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - disabled by default
+#if FASTLED_RX_LOG_ENABLED
         if (bytes_decoded < 3) {
             uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
             uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
-            FL_WARN("Bit[byte=" << bytes_decoded << ", bit=" << (bit_index-1) << "]: value=" << bit
+            FL_LOG_RX("Bit[byte=" << bytes_decoded << ", bit=" << (bit_index-1) << "]: value=" << bit
                    << " (symbol " << i << ": high=" << high_ns << "ns, low=" << low_ns << "ns) current_byte=0x"
                    << fl::hex << static_cast<int>(current_byte) << fl::dec);
         }
+#endif
 
         // Byte complete?
         if (bit_index == 8) {
@@ -420,10 +424,12 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
                 bytes_out[bytes_decoded] = current_byte;
                 bytes_decoded++;
 
-                // Log completed byte for first 3 bytes - using FL_WARN to ensure output
+                // Log completed byte for first 3 bytes - disabled by default
+#if FASTLED_RX_LOG_ENABLED
                 if (bytes_decoded <= 3) {
-                    FL_WARN("Byte[" << (bytes_decoded-1) << "] completed: 0x" << fl::hex << static_cast<int>(current_byte) << fl::dec);
+                    FL_LOG_RX("Byte[" << (bytes_decoded-1) << "] completed: 0x" << fl::hex << static_cast<int>(current_byte) << fl::dec);
                 }
+#endif
             } else {
                 // Buffer full, stop decoding
                 FL_WARN("decodeRmtSymbols: output buffer overflow at byte "
@@ -438,7 +444,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
 
     // Flush partial byte if we reached end of symbols without reset
     if (bit_index != 0 && !buffer_overflow) {
-        FL_WARN("decodeRmtSymbols: partial byte at end (bit_index="
+        FL_LOG_RX("decodeRmtSymbols: partial byte at end (bit_index="
                 << bit_index << "), flushing");
         // Shift remaining bits to MSB position
         current_byte <<= (8 - bit_index);
@@ -765,7 +771,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Receive completed naturally (spurious symbols already filtered in
         // ISR)
         FL_LOG_RX("wait(): receive done, count=" << mSymbolsReceived);
-        FL_WARN("RMT RX callback count: " << mCallbackCount
+        FL_LOG_RX("RMT RX callback count: " << mCallbackCount
                                           << " (en_partial_rx test)");
         return RxWaitResult::SUCCESS;
     }

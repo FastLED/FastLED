@@ -307,7 +307,22 @@ fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_a
 fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx) {
     fl::vector<fl::TestCaseConfig> test_cases;
 
-    // Iterate through all combinations: drivers × lane counts × strip sizes
+    // NEW: If lane_sizes is explicitly set, use variable lane sizing
+    if (!matrix_config.lane_sizes.empty()) {
+        // Generate one test case per driver with the specified lane sizes
+        for (fl::size driver_idx = 0; driver_idx < matrix_config.enabled_drivers.size(); driver_idx++) {
+            const char* driver_name = matrix_config.enabled_drivers[driver_idx].c_str();
+
+            // Create test case with variable lane sizes
+            fl::TestCaseConfig test_case(driver_name, matrix_config.lane_sizes, pin_tx);
+
+            test_cases.push_back(test_case);
+        }
+
+        return test_cases;
+    }
+
+    // LEGACY: Uniform sizing - iterate through all combinations: drivers × lane counts × strip sizes
     for (fl::size driver_idx = 0; driver_idx < matrix_config.enabled_drivers.size(); driver_idx++) {
         const char* driver_name = matrix_config.enabled_drivers[driver_idx].c_str();
 

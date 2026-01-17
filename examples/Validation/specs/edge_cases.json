@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "description": "Edge cases for buffer handling and asymmetric configurations",
+  "drivers": ["PARLIO", "RMT"],
+  "laneConfigs": [
+    [1],
+    [1, 1],
+    [1, 300],
+    [300, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1]
+  ],
+  "patterns": ["MSB_LSB_A"],
+  "iterations": 5,
+  "options": {
+    "timeout": 120,
+    "stopOnFirstFailure": false,
+    "verbose": true
+  }
+}
