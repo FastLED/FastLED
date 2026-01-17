@@ -26,6 +26,7 @@ from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
+from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
@@ -124,6 +125,12 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     # Platforms-specific checkers
     checkers_by_scope["platforms"] = [
         PlatformsFlNamespaceChecker(),
+    ]
+
+    # Include paths checker (for fl/ and platforms/ directories)
+    # Ensures include paths use "fl/", "platforms/", etc. prefixes
+    checkers_by_scope["fl_platforms_include_paths"] = [
+        IncludePathsChecker(),
     ]
 
     # Src root-only checkers
@@ -248,6 +255,16 @@ def run_checkers(
         ]
         if fl_header_files:
             processor.process_files_with_checkers(fl_header_files, fl_headers_checkers)
+
+    # Run include paths checker on fl/ and platforms/
+    fl_platforms_files = fl_files + platforms_files
+    fl_platforms_include_paths_checkers = checkers_by_scope.get(
+        "fl_platforms_include_paths", []
+    )
+    if fl_platforms_files and fl_platforms_include_paths_checkers:
+        processor.process_files_with_checkers(
+            fl_platforms_files, fl_platforms_include_paths_checkers
+        )
 
     # Run lib8tion/ directory checkers
     lib8tion_files = files_by_dir.get("lib8tion", [])

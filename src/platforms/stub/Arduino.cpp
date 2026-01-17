@@ -6,7 +6,7 @@
 // Stdlib headers included first
 #include <random>
 
-#include "./Arduino.h"  // ok include
+#include "platforms/stub/Arduino.h"  // ok include
 
 #include "fl/stl/map.h"
 #include "fl/stl/stdio.h"

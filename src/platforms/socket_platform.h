@@ -22,13 +22,13 @@
     #include "win/socket_win.h"
 #elif defined(__EMSCRIPTEN__)
     // WASM platforms (Emscripten, standalone WASM)
-    #include "wasm/socket_wasm.h"
+    #include "platforms/wasm/socket_wasm.h"
 #elif defined(FASTLED_STUB_IMPL)
     // Stub implementation for testing
     // Note: stub socket.hpp doesn't exist yet - uses inline stubs
 #else
     // POSIX platforms (Linux, macOS, etc.)
-    #include "posix/socket_posix.h"
+    #include "platforms/posix/socket_posix.h"
 #endif
 
 #endif // FASTLED_HAS_NETWORKING 

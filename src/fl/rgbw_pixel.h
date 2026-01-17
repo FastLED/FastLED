@@ -7,7 +7,7 @@
 /// 4-channel RGBW pixel data. Kept separate from rgbw.h to avoid circular
 /// dependencies.
 
-#include "ftl/stdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

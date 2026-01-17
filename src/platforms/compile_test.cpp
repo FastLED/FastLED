@@ -28,15 +28,15 @@ FL_DISABLE_WARNING(unused-parameter)
 
 // Include platform-specific compile test headers
 #if defined(__AVR__)
-#include "avr/compile_test.hpp"
+#include "platforms/avr/compile_test.hpp"
 #elif defined(ESP32) || defined(ESP8266)
-#include "esp/compile_test.hpp"
+#include "platforms/esp/compile_test.hpp"
 #elif defined(FASTLED_ARM)
-#include "arm/compile_test.hpp"
+#include "platforms/arm/compile_test.hpp"
 #elif defined(APOLLO3) || defined(ARDUINO_ARCH_APOLLO3)
-#include "apollo3/compile_test.hpp"
+#include "platforms/apollo3/compile_test.hpp"
 #elif defined(FASTLED_STUB_IMPL)
-#include "stub/compile_test.hpp"
+#include "platforms/stub/compile_test.hpp"
 #endif
 
 namespace fl {

@@ -26,21 +26,21 @@
 // defined earlier in the include hierarchy.
 // ============================================================================
 #if defined(__EMSCRIPTEN__)
-  #include "wasm/clockless.h"
+  #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
-  #include "stub/clockless_stub_generic.h"
+  #include "platforms/stub/clockless_stub_generic.h"
 #elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
-  #include "esp/clockless.h"
+  #include "platforms/esp/clockless.h"
 #elif defined(FASTLED_TEENSY4)
-  #include "arm/teensy/teensy4_common/clockless.h"
+  #include "platforms/arm/teensy/teensy4_common/clockless.h"
 #elif defined(__AVR__)
-  #include "avr/is_avr.h"
+  #include "platforms/avr/is_avr.h"
   #ifdef FL_IS_AVR_ATTINY
     // ATtiny platforms use optimized assembly implementation from FastLED 3.10.3
-    #include "avr/attiny/clockless_blocking.h"
+    #include "platforms/avr/attiny/clockless_blocking.h"
   #else
     // Other AVR platforms (Uno, Mega, etc.) use the standard clockless controller
-    #include "avr/clockless_avr.h"
+    #include "platforms/avr/clockless_avr.h"
   #endif
 #endif
 

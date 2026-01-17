@@ -9,7 +9,7 @@
 #if defined(FASTLED_DEBUG)
     #if defined(ESP32)
         // ESP32 platforms have debug setup implementation
-        #include "esp/32/debug_setup.hpp"
+        #include "platforms/esp/32/debug_setup.hpp"
     #else
         // Warn about missing debug_setup implementation for this platform
         #warning "debug_setup.cpp is not implemented for this platform. FASTLED_DEBUG will have no effect."
