@@ -37,7 +37,13 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class STM32SPIOutput {
 private:
 #if FASTLED_STM32_USE_HAL
-    SPIClass m_spi;
+    // Arduino Mbed framework: SPIClass inherits from abstract HardwareSPI
+    // We must use a pointer to avoid instantiation of abstract type
+    #ifdef ARDUINO_ARCH_MBED
+        SPIClass* m_spi;
+    #else
+        SPIClass m_spi;
+    #endif
     bool m_initialized;
 #endif
     Selectable* m_pSelect;
@@ -50,6 +56,9 @@ public:
     STM32SPIOutput()
         : m_pSelect(nullptr)
 #if FASTLED_STM32_USE_HAL
+        #ifdef ARDUINO_ARCH_MBED
+            , m_spi(nullptr)
+        #endif
         , m_initialized(false)
 #endif
     {
@@ -58,10 +67,23 @@ public:
     STM32SPIOutput(Selectable* pSelect)
         : m_pSelect(pSelect)
 #if FASTLED_STM32_USE_HAL
+        #ifdef ARDUINO_ARCH_MBED
+            , m_spi(nullptr)
+        #endif
         , m_initialized(false)
 #endif
     {
     }
+
+#if FASTLED_STM32_USE_HAL && defined(ARDUINO_ARCH_MBED)
+    // Destructor for Arduino Mbed - clean up allocated SPIClass
+    ~STM32SPIOutput() {
+        if (m_spi) {
+            delete m_spi;
+            m_spi = nullptr;
+        }
+    }
+#endif
 
     // Set the object representing the selectable
     void setSelect(Selectable* pSelect) {
@@ -75,7 +97,14 @@ public:
             // Initialize SPI with specified pins
             // Note: STM32duino's SPI.begin() uses the default SPI pins
             // For custom pins, we rely on the board's pin mapping
-            m_spi.begin();
+            #ifdef ARDUINO_ARCH_MBED
+                if (!m_spi) {
+                    m_spi = new SPIClass();
+                }
+                m_spi->begin();
+            #else
+                m_spi.begin();
+            #endif
             m_initialized = true;
         }
 #else
@@ -125,7 +154,13 @@ public:
     // Write a single byte via SPI
     void writeByte(uint8_t b) {
 #if FASTLED_STM32_USE_HAL
-        m_spi.transfer(b);
+        #ifdef ARDUINO_ARCH_MBED
+            if (m_spi) {
+                m_spi->transfer(b);
+            }
+        #else
+            m_spi.transfer(b);
+        #endif
 #else
         // Software SPI fallback - bitbang implementation
         for (uint8_t bit = 0; bit < 8; bit++) {
@@ -149,7 +184,13 @@ public:
         uint32_t spi_speed = SPI_SPEED;
         if (spi_speed > 36000000) spi_speed = 36000000; // Cap at 36 MHz
 
-        m_spi.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
+        #ifdef ARDUINO_ARCH_MBED
+            if (m_spi) {
+                m_spi->beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
+            }
+        #else
+            m_spi.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
+        #endif
 #endif
         if (m_pSelect != nullptr) {
             m_pSelect->select();
@@ -162,7 +203,13 @@ public:
             m_pSelect->release();
         }
 #if FASTLED_STM32_USE_HAL
-        m_spi.endTransaction();
+        #ifdef ARDUINO_ARCH_MBED
+            if (m_spi) {
+                m_spi->endTransaction();
+            }
+        #else
+            m_spi.endTransaction();
+        #endif
 #endif
     }
 
@@ -181,7 +228,13 @@ public:
     void writeBytesValueRaw(uint8_t value, int len) {
         while (len--) {
 #if FASTLED_STM32_USE_HAL
-            m_spi.transfer(value);
+            #ifdef ARDUINO_ARCH_MBED
+                if (m_spi) {
+                    m_spi->transfer(value);
+                }
+            #else
+                m_spi.transfer(value);
+            #endif
 #else
             writeByte(value);
 #endif
