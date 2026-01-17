@@ -19,13 +19,22 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 // ESP-IDF version compatibility for UART clock source
-// UART_SCLK_DEFAULT only exists in ESP-IDF 5.0+
-// For older versions, use UART_SCLK_APB (APB clock source)
+// - IDF 5.0+: Use UART_SCLK_DEFAULT
+// - IDF 4.x: Use UART_SCLK_APB (APB clock source)
+// - IDF 3.x: source_clk field doesn't exist in uart_config_t
 #include "platforms/esp/esp_version.h"
+
+// Only define FASTLED_UART_SCLK_SOURCE and set source_clk for IDF 4.0+
+// IDF 3.x doesn't have the source_clk field in uart_config_t at all
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#define FASTLED_UART_HAS_SOURCE_CLK 1
 #define FASTLED_UART_SCLK_SOURCE UART_SCLK_DEFAULT
-#else
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+#define FASTLED_UART_HAS_SOURCE_CLK 1
 #define FASTLED_UART_SCLK_SOURCE UART_SCLK_APB
+#else
+// IDF 3.x - no source_clk field exists
+#define FASTLED_UART_HAS_SOURCE_CLK 0
 #endif
 
 namespace fl {
@@ -86,7 +95,9 @@ bool UartPeripheralEsp::initialize(const UartConfig& config) {
 
     uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 0;
+#if FASTLED_UART_HAS_SOURCE_CLK
     uart_config.source_clk = FASTLED_UART_SCLK_SOURCE;
+#endif
 
     // Configure UART parameters (maps directly to ESP-IDF structure)
     FL_DBG("UART_PERIPH: Calling uart_param_config()");
@@ -198,7 +209,13 @@ bool UartPeripheralEsp::writeBytes(const uint8_t* data, size_t length) {
     // - Async mode (tx_buffer_size > 0): Copies to ring buffer, returns immediately
     // - Blocking mode (tx_buffer_size = 0): Blocks until all data in FIFO
     // Returns: Number of bytes written, or -1 on error
+    // Note: IDF 3.x expects const char*, IDF 4.0+ expects const void*/uint8_t*
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
     int written = uart_write_bytes(uart_num, data, length);
+#else
+    // IDF 3.x uart_write_bytes expects const char* - this cast is required for API compatibility
+    int written = uart_write_bytes(uart_num, reinterpret_cast<const char*>(data), length); // ok reinterpret cast
+#endif
 
     if (written < 0) {
         // Error occurred
