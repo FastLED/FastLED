@@ -27,6 +27,17 @@ This project uses directory-specific agent guidelines. See:
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
 
+### Test Disambiguation
+When multiple tests match a query, use these methods:
+
+**Path-based queries:**
+- `uv run test.py tests/fl/async` - Run unit test by path
+- `uv run test.py examples/Blink` - Run example by path
+
+**Flag-based filtering:**
+- `uv run test.py async --cpp` - Filter to unit tests only
+- `uv run test.py Async --examples` - Filter to examples only
+
 ### Example Compilation (Host-Based)
 FastLED supports fast host-based compilation of `.ino` examples using Meson build system:
 

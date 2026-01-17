@@ -218,7 +218,19 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
 
             _print_banner("TEST DISCOVERY", "🔍")
             ts_print(f"🔍 Smart selector: searching for '{test_args.test}'...")
-            match = get_best_match_or_prompt(test_args.test)
+
+            # Determine filter type based on flags
+            filter_type = None
+            if test_args.cpp and not test_args.examples:
+                # --cpp flag without --examples means unit tests only
+                filter_type = "unit_test"
+                ts_print("🔍 Filtering to unit tests only (--cpp flag)")
+            elif test_args.examples is not None and not test_args.unit:
+                # --examples flag without --unit means examples only
+                filter_type = "example"
+                ts_print("🔍 Filtering to examples only (--examples flag)")
+
+            match = get_best_match_or_prompt(test_args.test, filter_type=filter_type)
 
             if match is None:
                 # No match or ambiguous - error message already printed by smart selector
@@ -235,11 +247,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                     ts_print(f"Auto-enabled --cpp mode for example: {match.name}")
             else:  # unit_test
                 ts_print(f"✅ Auto-selected unit test: {match.name} ({match.path})")
-                # Keep the original test name for unit test execution
-                # (test_args.test is used by the unit test runner)
+                # Update test name to the matched name (in case user used path-based query)
+                test_args.test = match.name
                 if not test_args.cpp and not test_args.py:
                     test_args.cpp = True
-                    ts_print(f"Auto-enabled --cpp mode for unit test: {test_args.test}")
+                    ts_print(f"Auto-enabled --cpp mode for unit test: {match.name}")
                 # Also enable --unit when a specific C++ test is provided without any other flags
                 if (
                     not test_args.unit
@@ -249,7 +261,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 ):
                     test_args.unit = True
                     ts_print(
-                        f"Auto-enabled --unit mode for specific test: {test_args.test}"
+                        f"Auto-enabled --unit mode for specific test: {match.name}"
                     )
 
     # Auto-enable --verbose when running unit tests (disabled)

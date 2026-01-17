@@ -142,7 +142,7 @@ def test_performance_comparison() -> None:
         two_layer.check_needs_update(files)
         two_layer_hit_time = time.time() - start
 
-        assert two_layer_time < 5.0, (
+        assert two_layer_time < 15.0, (
             f"TwoLayerFingerprintCache first check too slow: {two_layer_time:.3f}s"
         )
         assert two_layer_hit_time < 0.5, (

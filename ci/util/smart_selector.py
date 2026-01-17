@@ -11,7 +11,6 @@ user input with fuzzy matching capabilities. It can:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -82,6 +81,41 @@ def _fuzzy_score(query: str, target: str) -> float:
         return 0.6 * coverage
 
     return 0.0
+
+
+def _score_match(query: str, match: TestMatch) -> float:
+    """Calculate match score for a TestMatch, considering both name and path.
+
+    Path-based queries get exact match bonus if they match the path structure.
+
+    Args:
+        query: Search query string
+        match: TestMatch to score
+
+    Returns:
+        Match score from 0.0 to 1.0
+    """
+    # Normalize path separators in query for cross-platform support
+    normalized_query = query.replace("\\", "/")
+
+    # Try matching against the path if query contains path separators
+    if "/" in normalized_query or "\\" in query:
+        # Path-based query - try exact path match first
+        if match.path == normalized_query:
+            return 1.0  # Exact path match
+
+        # Try matching path without extension
+        path_no_ext = match.path.replace(".cpp", "").replace(".ino", "")
+        if path_no_ext == normalized_query:
+            return 1.0  # Exact path match (without extension)
+
+        # Try fuzzy match on path
+        path_score = _fuzzy_score(normalized_query, match.path)
+        if path_score > 0.0:
+            return path_score
+
+    # Fall back to name-based matching
+    return _fuzzy_score(query, match.name)
 
 
 def _find_unit_tests(project_dir: Path) -> list[TestMatch]:
@@ -155,7 +189,7 @@ def _find_examples(project_dir: Path) -> list[TestMatch]:
 
 
 def smart_select(
-    query: str, project_dir: Path | None = None
+    query: str, project_dir: Path | None = None, filter_type: str | None = None
 ) -> TestMatch | list[TestMatch]:
     """Smart selector for unit tests and examples with fuzzy matching.
 
@@ -164,8 +198,9 @@ def smart_select(
     - A list of TestMatch objects if disambiguation is needed
 
     Args:
-        query: Search query (e.g., "Animartrix", "string", "async")
+        query: Search query (e.g., "Animartrix", "string", "async", "tests/fl/async")
         project_dir: Project root directory (defaults to current directory)
+        filter_type: Optional type filter ("unit_test" or "example")
 
     Returns:
         Single TestMatch for auto-selection, or list of TestMatch for disambiguation
@@ -177,13 +212,15 @@ def smart_select(
     unit_tests = _find_unit_tests(project_dir)
     examples = _find_examples(project_dir)
 
-    # Combine all matches
+    # Combine all matches (optionally filter by type)
     all_matches = unit_tests + examples
+    if filter_type:
+        all_matches = [m for m in all_matches if m.type == filter_type]
 
-    # Calculate scores for all matches
+    # Calculate scores for all matches using both name and path
     scored_matches: list[TestMatch] = []
     for match in all_matches:
-        score = _fuzzy_score(query, match.name)
+        score = _score_match(query, match)
         if score > 0.0:  # Only include matches with non-zero scores
             match.score = score
             scored_matches.append(match)
@@ -254,7 +291,7 @@ def format_match_for_display(match: TestMatch) -> str:
 
 
 def get_best_match_or_prompt(
-    query: str, project_dir: Path | None = None
+    query: str, project_dir: Path | None = None, filter_type: str | None = None
 ) -> TestMatch | None:
     """Get the best match for a query, or return None if disambiguation is needed.
 
@@ -264,6 +301,7 @@ def get_best_match_or_prompt(
     Args:
         query: Search query
         project_dir: Project root directory (defaults to current directory)
+        filter_type: Optional type filter ("unit_test" or "example")
 
     Returns:
         TestMatch if auto-selected, None if disambiguation needed
@@ -271,7 +309,7 @@ def get_best_match_or_prompt(
     Side effects:
         Prints disambiguation options when multiple matches are found
     """
-    result = smart_select(query, project_dir)
+    result = smart_select(query, project_dir, filter_type)
 
     if isinstance(result, TestMatch):
         # Single match - auto-select
@@ -285,8 +323,18 @@ def get_best_match_or_prompt(
             print("Try:")
             print("  - Check spelling")
             print("  - Use a longer query string")
-            print("  - Run 'bash test --examples' to see all examples")
-            print("  - Run 'bash test --cpp' to see all unit tests")
+            if filter_type == "unit_test":
+                print("  - Use path-based query (e.g., 'tests/fl/async')")
+                print("  - Run 'uv run test.py --cpp' to see all unit tests")
+            elif filter_type == "example":
+                print("  - Use path-based query (e.g., 'examples/Blink')")
+                print("  - Run 'uv run test.py --examples' to see all examples")
+            else:
+                print(
+                    "  - Use path-based query (e.g., 'tests/fl/async' or 'examples/Blink')"
+                )
+                print("  - Run 'uv run test.py --examples' to see all examples")
+                print("  - Run 'uv run test.py --cpp' to see all unit tests")
             return None
 
         # Multiple matches - need disambiguation
@@ -297,7 +345,21 @@ def get_best_match_or_prompt(
                 f"  {i}. {format_match_for_display(match)} (score: {match.score:.2f})"
             )
         print()
-        print("Please be more specific or use the full name/path.")
+        print("To disambiguate, use one of these methods:")
+        print()
+        # Show specific disambiguation examples based on the matches
+        if result[0].type == "unit_test":
+            # Show path-based query for the top match
+            path_no_ext = result[0].path.replace(".cpp", "")
+            print(f"  1. Use full path: uv run test.py {path_no_ext}")
+            print(
+                f"  2. Use relative path: uv run test.py {result[0].path.split('/', 1)[1] if '/' in result[0].path else result[0].name}"
+            )
+        else:  # example
+            print(f"  1. Use full path: uv run test.py {result[0].path}")
+            print(
+                f"  2. Use example name with --examples: uv run test.py --examples {result[0].name}"
+            )
         return None
 
     return None
