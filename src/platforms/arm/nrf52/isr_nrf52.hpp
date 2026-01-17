@@ -432,9 +432,9 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         compare_value = 1;  // Minimum value
     }
 
-    // Set compare value
-    // Note: Function name varies by SDK version (nrf_timer_cc_write in SDK 15.0, nrf_timer_cc_set in newer)
-    nrf_timer_cc_t cc_channel = static_cast<nrf_timer_cc_t>(NRF_TIMER_CC_CHANNEL0 + channel);
+    // Set compare value using nrf_timer_cc_channel_t enum
+    // SDK provides NRF_TIMER_CC_CHANNEL0..5 as the proper channel type
+    nrf_timer_cc_channel_t cc_channel = static_cast<nrf_timer_cc_channel_t>(NRF_TIMER_CC_CHANNEL0 + channel);
     nrf_timer_cc_set(timer, cc_channel, compare_value);
 
     // Enable auto-reload unless one-shot mode requested
@@ -515,11 +515,12 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     }
 
     // Configure GPIOTE channel
-    nrf_gpiote_event_configure(gpiote_ch, pin, polarity);
-    nrf_gpiote_event_enable(gpiote_ch);
+    // SDK 15.x+ HAL functions require NRF_GPIOTE register pointer as first arg
+    nrf_gpiote_event_configure(NRF_GPIOTE, static_cast<uint32_t>(gpiote_ch), pin, polarity);
+    nrf_gpiote_event_enable(NRF_GPIOTE, static_cast<uint32_t>(gpiote_ch));
 
     // Enable GPIOTE interrupt
-    nrf_gpiote_int_enable(1U << gpiote_ch);
+    nrf_gpiote_int_enable(NRF_GPIOTE, 1U << gpiote_ch);
 
     // Set NVIC priority and enable IRQ
     uint8_t nvic_priority = map_priority_to_nvic(config.priority);
@@ -564,8 +565,8 @@ int detach_handler(isr_handle_t& handle) {
     } else {
         // Disable GPIOTE interrupt
         if (handle_data->gpiote_channel >= 0) {
-            nrf_gpiote_event_disable(handle_data->gpiote_channel);
-            nrf_gpiote_int_disable(1U << handle_data->gpiote_channel);
+            nrf_gpiote_event_disable(NRF_GPIOTE, static_cast<uint32_t>(handle_data->gpiote_channel));
+            nrf_gpiote_int_disable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
 
             free_gpiote_channel(handle_data->gpiote_channel);
         }
@@ -596,8 +597,8 @@ int enable_handler(const isr_handle_t& handle) {
             static_cast<uint32_t>(NRF_TIMER_INT_COMPARE0_MASK << handle_data->timer_channel));
         handle_data->is_enabled = true;
     } else {
-        nrf_gpiote_event_enable(handle_data->gpiote_channel);
-        nrf_gpiote_int_enable(1U << handle_data->gpiote_channel);
+        nrf_gpiote_event_enable(NRF_GPIOTE, static_cast<uint32_t>(handle_data->gpiote_channel));
+        nrf_gpiote_int_enable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
         handle_data->is_enabled = true;
     }
 
@@ -621,8 +622,8 @@ int disable_handler(const isr_handle_t& handle) {
             static_cast<uint32_t>(NRF_TIMER_INT_COMPARE0_MASK << handle_data->timer_channel));
         handle_data->is_enabled = false;
     } else {
-        nrf_gpiote_event_disable(handle_data->gpiote_channel);
-        nrf_gpiote_int_disable(1U << handle_data->gpiote_channel);
+        nrf_gpiote_event_disable(NRF_GPIOTE, static_cast<uint32_t>(handle_data->gpiote_channel));
+        nrf_gpiote_int_disable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
         handle_data->is_enabled = false;
     }
 
