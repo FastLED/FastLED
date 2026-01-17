@@ -2,7 +2,7 @@
 /// @brief ESP32-specific channel engine initialization
 ///
 /// This file provides lazy initialization of ESP32-specific channel engines
-/// (LCD_RGB, PARLIO, SPI, RMT, UART) in priority order. Engines are registered
+/// (LCD_RGB, PARLIO, SPI, RMT, UART, I2S) in priority order. Engines are registered
 /// on first access to ChannelBusManager::instance().
 ///
 /// Priority Order:
@@ -12,6 +12,7 @@
 /// - RMT (1): Fallback, lower performance (all ESP32 variants)
 /// - UART (0): Efficient wave8 encoding, automatic start/stop bits
 ///             (all ESP32 variants, lowest priority because it's unused)
+/// - I2S (-1): Experimental, LCD_CAM via I80 bus (ESP32-S3 only)
 
 #include "fl/compiler_control.h"
 #ifdef ESP32
@@ -43,6 +44,9 @@
 #if FASTLED_ESP32_HAS_LCD_RGB
 #include "lcd_cam/channel_engine_lcd_rgb.h"
 #endif
+#if FASTLED_ESP32_HAS_I2S_LCD_CAM
+#include "i2s/channel_engine_i2s.h"
+#endif
 
 namespace fl {
 
@@ -55,6 +59,7 @@ constexpr int PRIORITY_LCD_RGB = 3;  ///< High priority (LCD RGB engine - ESP32-
 constexpr int PRIORITY_SPI = 2;      ///< Medium priority (SPI engine)
 constexpr int PRIORITY_RMT = 1;      ///< Low priority (Fallback RMT engine - all ESP32 variants)
 constexpr int PRIORITY_UART = 0;     ///< Lowest priority (Beta - UART engine with wave8 encoding)
+constexpr int PRIORITY_I2S = -1;     ///< Experimental priority (I2S LCD_CAM engine - ESP32-S3 only)
 
 /// @brief Add PARLIO engine if supported by platform
 static void addParlioIfPossible(ChannelBusManager& manager) {
@@ -135,6 +140,23 @@ static void addRmtIfPossible(ChannelBusManager& manager) {
 #endif
 }
 
+/// @brief Add I2S LCD_CAM engine if supported by platform
+static void addI2sIfPossible(ChannelBusManager& manager) {
+#if FASTLED_ESP32_HAS_I2S_LCD_CAM
+    // I2S LCD_CAM engine uses LCD_CAM peripheral via I80 bus (ESP32-S3 only)
+    // Experimental driver - uses transpose encoding for parallel LED output
+    auto engine = createI2sEngine();
+    if (engine) {
+        manager.addEngine(PRIORITY_I2S, engine, "I2S");
+        FL_DBG("ESP32-S3: Added I2S LCD_CAM engine (priority " << PRIORITY_I2S << ")");
+    } else {
+        FL_DBG("ESP32-S3: I2S LCD_CAM engine creation failed");
+    }
+#else
+    (void)manager;  // Suppress unused parameter warning
+#endif
+}
+
 } // namespace detail
 
 namespace platform {
@@ -154,6 +176,7 @@ void initChannelEngines() {
     detail::addSpiIfPossible(manager);
     detail::addUartIfPossible(manager);
     detail::addRmtIfPossible(manager);
+    detail::addI2sIfPossible(manager);
 
     FL_DBG("ESP32: Channel engines initialized");
 }

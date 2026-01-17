@@ -82,6 +82,8 @@ Driver Selection (JSON-RPC):
   --rmt               Test only RMT driver
   --spi               Test only SPI driver
   --uart              Test only UART driver
+  --i2s               Test only I2S driver (ESP32-S3 LCD_CAM, experimental)
+  --all               Test all drivers (PARLIO, RMT, SPI, UART, I2S)
 
   Multiple drivers can be specified: --parlio --rmt
   If no driver flags are specified, all drivers are tested (default)
@@ -143,6 +145,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --uart)
             DRIVERS+=("UART")
+            shift
+            ;;
+        --i2s)
+            DRIVERS+=("I2S")
+            shift
+            ;;
+        --all)
+            DRIVERS+=("PARLIO" "RMT" "SPI" "UART" "I2S")
             shift
             ;;
         *)
