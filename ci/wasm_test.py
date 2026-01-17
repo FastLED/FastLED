@@ -1,6 +1,9 @@
 import argparse
 import asyncio
+import http.server
+import multiprocessing
 import os
+import socketserver
 import sys
 import time
 from pathlib import Path
@@ -53,13 +56,23 @@ def install_playwright_browsers():
         sys.exit(1)
 
 
-# Start an HTTP server on the dynamic port
-def start_http_server(port: int, directory: Path):
-    from fastled import Test  # type: ignore
+def _run_http_server(port: int, directory: str) -> None:
+    """Run HTTP server in a separate process."""
+    os.chdir(directory)
+    handler = http.server.SimpleHTTPRequestHandler
+    with socketserver.TCPServer(("", port), handler) as httpd:
+        httpd.serve_forever()
 
-    server_process = Test.spawn_http_server(
-        directory=directory, port=port, open_browser=False
+
+# Start an HTTP server on the dynamic port
+def start_http_server(port: int, directory: Path) -> multiprocessing.Process:
+    """Start HTTP server using Python's built-in http.server."""
+    server_process = multiprocessing.Process(
+        target=_run_http_server,
+        args=(port, str(directory)),
+        daemon=True,
     )
+    server_process.start()
     return server_process
 
 

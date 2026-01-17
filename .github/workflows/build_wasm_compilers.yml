@@ -79,12 +79,32 @@ jobs:
     - name: Set working directory to trusted
       run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
-    - name: Install UV
-      run: pip install uv
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-    - name: uv run ci/run_test_wasm_local_compile.py
+    - name: Install UV and clang-tool-chain
+      run: pip install uv clang-tool-chain --upgrade
+
+    - name: Verify clang-tool-chain installation
+      run: |
+        which clang-tool-chain-emcc || (echo "clang-tool-chain-emcc not found in PATH" && exit 1)
+        clang-tool-chain-emcc --version
+
+    - name: Compile WASM example using native toolchain
       working-directory: trusted
-      run: uv run ci/run_test_wasm_local_compile.py
+      run: uv run ci/wasm_compile.py examples/wasm
+
+    - name: Install Playwright
+      working-directory: trusted
+      run: |
+        uv pip install playwright
+        uv run python -m playwright install chromium
+
+    - name: Run Playwright tests
+      working-directory: trusted
+      run: uv run ci/wasm_test.py wasm
 
     - name: Generate timestamp and random hex
       id: generate_id
@@ -96,4 +116,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-        path: trusted/dist/*
+        path: trusted/examples/wasm/fastled_js/*

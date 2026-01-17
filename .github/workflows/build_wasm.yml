@@ -102,20 +102,22 @@ jobs:
           echo "Or check the demo: https://zackees.github.io/fastled-wasm/"
           echo "Happy coding! - Zach Vorhies"
 
-      - name: Install UV for python and npm packages
+      - name: Install UV and clang-tool-chain
         run: |
-          pip install uv fastled --upgrade
+          pip install uv clang-tool-chain --upgrade
           npm install -g live-server
 
-      - name: Verify live-server installation
+      - name: Verify tool installations
         run: |
           which live-server || (echo "live-server not found in PATH" && exit 1)
           live-server --version
+          which clang-tool-chain-emcc || (echo "clang-tool-chain-emcc not found in PATH" && exit 1)
+          clang-tool-chain-emcc --version
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         working-directory: trusted
         run: |
-          fastled --just-compile examples/wasm
+          uv run ci/wasm_compile.py examples/wasm
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
         shell: bash
 
@@ -148,7 +150,13 @@ jobs:
           path: trusted/examples/wasm/fastled_js/*.*
           if-no-files-found: ${{ matrix.os == 'ubuntu-latest' && 'error' || 'ignore' }}
 
-      - name: Verify FastLED_onFrame with Playwrite
+      - name: Install Playwright
+        working-directory: trusted
+        run: |
+          uv pip install playwright
+          uv run python -m playwright install chromium
+
+      - name: Verify FastLED_onFrame with Playwright
         working-directory: trusted
         run: |
           uv run ci/wasm_test.py
