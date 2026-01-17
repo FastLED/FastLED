@@ -179,6 +179,7 @@ struct BufferPopulationParams {
 /// - Ring buffer capacity limits
 /// - Last buffer special case (takes all remaining bytes)
 /// - Lane stride capping (prevents buffer overflow)
+/// - Minimum buffer size enforcement (prevents < 15 byte buffers)
 ///
 /// ISR-SAFE: No allocations, no logging, pure computation.
 ///
@@ -192,18 +193,63 @@ calculateBufferByteCount(const BufferPopulationParams& params) {
         return 0;
     }
 
+    // CRITICAL FIX (Iteration 3): Enforce minimum buffer size to prevent DMA timing glitches
+    // Empirical testing on ESP32-C6 shows that buffers < 15 INPUT bytes cause 100% corruption
+    // for single-lane configurations (data_width=1).
+    // Root cause: DMA controller needs sufficient time to transition between ring buffers.
+    // Threshold: 5 LEDs × 3 bytes/LED = 15 INPUT bytes minimum per buffer
+    //
+    // CRITICAL FIX (Iteration 5): Apply threshold AFTER data width expansion
+    // Multi-lane configurations expand data size by outputBytesPerInputByte() factor:
+    // - 1 lane (data_width=1):  8× expansion  → 15 input bytes = 120 encoded bytes
+    // - 2 lanes (data_width=2): 16× expansion → 15 input bytes = 240 encoded bytes
+    // - 4 lanes (data_width=4): 32× expansion → 15 input bytes = 480 encoded bytes
+    // - 8 lanes (data_width=8): 64× expansion → 15 input bytes = 960 encoded bytes
+    // The minimum buffer size must be checked on ENCODED output bytes, not input bytes.
+    //
+    // ITERATION 11 EXPERIMENT: Increase threshold from 15→20 input bytes
+    // Hypothesis: 240 encoded bytes (at minimum) still causes glitches
+    // Testing with 20 input bytes = 320 encoded bytes (33% safety margin)
+    constexpr size_t MIN_INPUT_BYTES_PER_BUFFER = 20;  // Increased from 15 to test glitch hypothesis
+
+    // Calculate buffer sizing parameters (used throughout function)
+    ParlioBufferCalculator calc{params.dataWidth};
+    size_t expansionFactor = calc.outputBytesPerInputByte();
+
+    // Calculate effective ring count to ensure minimum buffer size
+    // For small LED counts, reduce ring count to avoid creating tiny buffers
+    size_t effective_ring_count = ParlioRingBuffer3::RING_BUFFER_COUNT;
+    size_t min_encoded_bytes = MIN_INPUT_BYTES_PER_BUFFER * expansionFactor;
+
+    // If total bytes would create buffers < min_encoded_bytes, reduce ring count
+    // CRITICAL: Apply expansion factor to get ACTUAL encoded buffer size
+    while (effective_ring_count > 1) {
+        size_t test_input_bytes_per_buffer = (params.totalBytes + effective_ring_count - 1) / effective_ring_count;
+        size_t test_encoded_bytes_per_buffer = test_input_bytes_per_buffer * expansionFactor;
+        if (test_encoded_bytes_per_buffer >= min_encoded_bytes) {
+            break;  // Found acceptable ring count
+        }
+        effective_ring_count--;  // Try with fewer buffers
+    }
+
+    // ITERATION 11: 2-buffer bypass hypothesis FAILED
+    // Forcing 2→3 buffers creates UNDERSIZED buffers (10 input bytes = 160 encoded < 240 minimum)
+    // This caused 36.7μs glitch instead of 52.2μs glitch - DIFFERENT but still corrupt
+    // Root cause is NOT buffer count - reverting to investigate buffer size threshold
+    // (Removed 2-buffer bypass code)
+
     // Calculate target bytes per buffer (divide total into chunks)
-    size_t bytes_per_buffer = (params.totalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1)
-                              / ParlioRingBuffer3::RING_BUFFER_COUNT;
+    size_t bytes_per_buffer = (params.totalBytes + effective_ring_count - 1)
+                              / effective_ring_count;
 
     // LED boundary alignment constant: 3 bytes (RGB) × lane count
     size_t bytes_per_led_all_lanes = 3 * params.dataWidth;
 
     // Calculate maximum input bytes that fit in one buffer
-    ParlioBufferCalculator calc{params.dataWidth};
+    // (reuse calc object from above to avoid duplication)
     size_t reset_padding = calc.resetPaddingBytes(params.resetUs);
     size_t available_capacity = params.ringBufferCapacity - reset_padding;
-    size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
+    size_t max_input_bytes_per_buffer = available_capacity / expansionFactor;
 
     // Reduce max by one LED boundary to prevent exact-capacity overflow
     if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
@@ -223,8 +269,8 @@ calculateBufferByteCount(const BufferPopulationParams& params) {
         bytes_per_buffer = bytes_per_led_all_lanes;
     }
 
-    // Determine if this is the last buffer
-    bool is_last_buffer = (params.ringCount >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
+    // Determine if this is the last buffer (use effective ring count, not hardcoded constant)
+    bool is_last_buffer = (params.ringCount >= effective_ring_count - 1) ||
                           (bytes_remaining <= bytes_per_buffer);
 
     // Calculate byte count for this buffer
@@ -807,29 +853,10 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                 ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                 : 0;
 
-            // DIAGNOSTIC: Log LED[2] data (bytes 6-8: RGB channels)
-            size_t absolute_byte = startByte + byteOffset;
-            if (absolute_byte >= 6 && absolute_byte <= 8) {
-                // FL_WARN("PARLIO 2-lane byte[" << absolute_byte << "]: "
-                //        << "lane[0]=" << (int)lanes[0] << " "
-                //        << "lane[1]=" << (int)lanes[1] << " "
-                //        << "stride=" << mLaneStride << " "
-                //        << "offset[0]=" << (0 * mLaneStride + startByte + byteOffset) << " "
-                //        << "offset[1]=" << (1 * mLaneStride + startByte + byteOffset));
-            }
-
             // MSB bit packing: Use natural lane order (no swap needed)
             uint8_t transposed[2 * sizeof(Wave8Byte)];
             fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
                                 reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
-
-            // DIAGNOSTIC: Log transposed output for LED[2] (16 bytes for 2-lane Wave8)
-            // if (absolute_byte >= 6 && absolute_byte <= 8) {
-            //     FL_WARN("PARLIO 2-lane transposed[" << absolute_byte << "]: ");
-            //     for (size_t i = 0; i < 16; i++) {
-            //         FL_WARN("  [" << i << "]=" << (int)transposed[i]);
-            //     }
-            // }
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;

@@ -328,10 +328,13 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     // Prepare scratch buffer (per-lane layout)
     prepareScratchBuffer(channelData, maxChannelSize);
 
+    // Calculate total buffer size (all lanes)
+    size_t totalBufferSize = channelData.size() * maxChannelSize;
+
     // Delegate to HAL (blocking call)
     if (!mEngine.beginTransmission(
             mScratchBuffer.data(),
-            maxChannelSize,
+            totalBufferSize,        // ITERATION 9 FIX: Pass total buffer size, not per-lane size
             channelData.size(),
             maxChannelSize)) {
         FL_WARN("PARLIO: Transmission failed");
@@ -353,17 +356,11 @@ void ChannelEnginePARLIOImpl::prepareScratchBuffer(
 
         const auto& srcData = channelData[i]->getData();
 
-        // [ITERATION 4 DIAGNOSTIC] Check if srcData contains LED pixel data or zeros
-        // FL_ERROR("CHANNEL[" << i << "]: dataSize=" << dataSize << " maxChannelSize=" << maxChannelSize);
-        // if (srcData.size() >= 8) {
-        //     FL_ERROR("CHANNEL[" << i << "]: srcData[0-7]="
-        //         << (int)srcData[0] << " " << (int)srcData[1] << " "
-        //         << (int)srcData[2] << " " << (int)srcData[3] << " "
-        //         << (int)srcData[4] << " " << (int)srcData[5] << " "
-        //         << (int)srcData[6] << " " << (int)srcData[7]);
-        // } else {
-        //     FL_ERROR("CHANNEL[" << i << "]: srcData.size()=" << srcData.size() << " (too small to dump)");
-        // }
+        // Safety check: Skip empty channels (shouldn't happen in normal operation)
+        if (srcData.size() == 0 || dataSize == 0) {
+            FL_WARN("PARLIO: Channel " << i << " has empty data (size=" << srcData.size() << "), skipping transmission");
+            return;  // Abort transmission - channel not ready
+        }
 
         if (dataSize < maxChannelSize) {
             // Right-pad with zeros

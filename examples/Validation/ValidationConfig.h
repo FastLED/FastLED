@@ -5,26 +5,28 @@
 #pragma once
 
 // Enable debug logging for RX decoder analysis
-#define FASTLED_FORCE_DBG 1
+// #define FASTLED_FORCE_DBG 1  // DISABLED: Testing hypothesis that debug logging affects timing
 
 // ============================================================================
-// Phase 2a: PARLIO with 2 lanes and 10 LEDs (Small strips)
+// Iteration 10: Testing with 10 LEDs (2 lanes) - Debug logging hypothesis
 // ============================================================================
-// Multi-lane testing begins: Verify PARLIO can handle 2 parallel lanes correctly.
+// BREAKTHROUGH: 5 LEDs and 20 LEDs BOTH PASS 100%! Only 10 LEDs fails!
+// Hypothesis: Debug logging adds delays that affect 10 LED case timing
+// Testing 10 LEDs WITHOUT debug logging to confirm
 
 // Driver selection
-// #define JUST_PARLIO  // Testing PARLIO only
+#define JUST_PARLIO  // Testing PARLIO only
 // #define JUST_RMT
 // #define JUST_SPI
-#define JUST_UART  // Testing UART only
+// #define JUST_UART
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1  // UART testing: Start with 1 lane
-#define MAX_LANES 1  // UART testing: Start with 1 lane
+#define MIN_LANES 2  // Iteration 12: Multi-lane edge case testing
+#define MAX_LANES 2  // Iteration 12: Multi-lane edge case testing
 
-// Strip size selection - UART testing: Small strips (10 LEDs per lane)
-#define JUST_SMALL_STRIPS  // UART testing: Testing with small strips
-// #define JUST_LARGE_STRIPS  // Will test 3000 LEDs next
+// Strip size selection - PARLIO baseline: Small strips (10 LEDs per lane)
+#define JUST_SMALL_STRIPS  // Testing with 15 LEDs
+// #define JUST_LARGE_STRIPS  // Will test larger strips after baseline
 
 // Memory configuration
 // Define SKETCH_HAS_LOTS_OF_MEMORY=1 for platforms with >320KB RAM (ESP32, ESP32S3)
@@ -38,11 +40,8 @@
 #endif
 
 // Strip size constants (MUST be defined BEFORE Common.h)
-// UART: Reduced to 1 LED due to RMT RX buffer limitation (200 edges max)
-// 1 LED = 3 bytes = 12 UART frames = 120 edges (fits in 200 edge buffer with margin)
-// Math: 3 bytes × 4 frames/byte = 12 frames; 12 frames × 10 bits/frame × 2 edges/bit = 240 edges
-// Actual: ~120 edges measured (10 bits become ~10 edges after edge reduction)
-#define SHORT_STRIP_SIZE 1  // UART testing: 1 LED per lane (RMT RX buffer limit)
+// Iteration 12: Multi-lane regression - 20 LEDs (2 lanes, data_width=2, expansion 16x)
+#define SHORT_STRIP_SIZE 20  // Test 20 LEDs with 2 lanes (expect 3 buffers)
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
     #define LONG_STRIP_SIZE 3000  // Large strip for platforms with lots of RAM
