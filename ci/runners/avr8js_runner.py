@@ -77,7 +77,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             ts_print()
             ts_print("Please build the image manually:")
             ts_print(
-                f"  docker build -f ci/docker/Dockerfile.avr8js -t {avr8js_image} ."
+                f"  docker build -f ci/docker_utils/Dockerfile.avr8js -t {avr8js_image} ."
             )
             ts_print()
             sys.exit(1)

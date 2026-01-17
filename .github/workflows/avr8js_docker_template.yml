@@ -214,7 +214,7 @@ jobs:
           # NOTE: Only platforms with hardware USART are supported
           # ATtiny85 is NOT supported - lacks hardware UART and avr8js does not
           # emulate Analog Comparator required for TinySoftwareSerial
-          # See ci/docker/avr8js/README.md for details
+          # See ci/docker_utils/avr8js/README.md for details
           PLATFORM="${{ inputs.platform }}"
           case "$PLATFORM" in
             uno)
@@ -232,7 +232,7 @@ jobs:
             attiny85)
               echo "  ❌ ERROR: attiny85 is not supported by AVR8JS emulator"
               echo "  Reason: No hardware UART, requires Analog Comparator for software serial"
-              echo "  See ci/docker/avr8js/README.md for technical details"
+              echo "  See ci/docker_utils/avr8js/README.md for technical details"
               exit 1
               ;;
             *)

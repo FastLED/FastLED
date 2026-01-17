@@ -39,7 +39,7 @@ fi
 
 # Find JavaScript and TypeScript files (exclude node_modules and vendor)
 JS_FILES=$(find src/platforms/wasm -name "*.js" -type f -not -path "*/node_modules/*" -not -path "*/vendor/*" 2>/dev/null)
-TS_FILES=$(find ci/docker/avr8js -name "*.ts" -type f -not -path "*/node_modules/*" 2>/dev/null)
+TS_FILES=$(find ci/docker_utils/avr8js -name "*.ts" -type f -not -path "*/node_modules/*" 2>/dev/null)
 
 if [ -z "$JS_FILES" ] && [ -z "$TS_FILES" ]; then
     echo -e "${YELLOW}WARNING: No JavaScript or TypeScript files found${NC}"
@@ -71,7 +71,7 @@ fi
 
 # Add TypeScript files if they exist
 if [ -n "$TS_FILES" ]; then
-    LINT_TARGETS+=("../../ci/docker/avr8js/*.ts")
+    LINT_TARGETS+=("../../ci/docker_utils/avr8js/*.ts")
 fi
 
 if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c .eslintrc.js "${LINT_TARGETS[@]}"; then

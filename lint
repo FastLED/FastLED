@@ -270,7 +270,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Note: JavaScript linting uses ci/lint-js-fast which handles its own cache checking
-# Monitors: src/platforms/wasm/compiler/** + ci/docker/avr8js/**
+# Monitors: src/platforms/wasm/compiler/** + ci/docker_utils/avr8js/**
 
 # Export environment variable for lint-js-fast if --no-fingerprint is set
 if [ "$NO_FINGERPRINT" = true ]; then

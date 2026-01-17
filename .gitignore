@@ -81,10 +81,10 @@ qemu-build
 test_output.txt
 ci/**/node_modules
 # TypeScript compiled output (we run .ts directly with tsx)
-ci/docker/avr8js/*.js
+ci/docker_utils/avr8js/*.js
 
 # Docker build timestamp cache (persisted via GitHub Actions artifacts)
-ci/docker/.build_timestamps.json
+ci/docker_utils/.build_timestamps.json
 examples/**/*.ino.cpp
 ./*.log
 .loop

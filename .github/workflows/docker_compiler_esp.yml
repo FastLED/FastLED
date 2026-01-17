@@ -114,7 +114,7 @@ jobs:
         with:
           platforms: ${{ matrix.arch.platform }}
           context: .
-          file: ./ci/docker/Dockerfile.template
+          file: ./ci/docker_utils/Dockerfile.template
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ steps.config.outputs.image }},push-by-digest=true,name-canonical=true,push=true
           build-args: |

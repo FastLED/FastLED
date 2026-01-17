@@ -162,7 +162,7 @@ jobs:
             echo "Using smart prioritization with limit: $limit"
 
             # Get prioritized platforms as JSON
-            platforms_json=$(uv run python ci/docker/image_priority_tracker.py --check --limit $limit --json | \
+            platforms_json=$(uv run python ci/docker_utils/image_priority_tracker.py --check --limit $limit --json | \
               jq -c 'map(.platform)')
 
             echo "Prioritized platforms: $platforms_json"
@@ -267,7 +267,7 @@ jobs:
         with:
           platforms: ${{ matrix.arch.platform }}
           context: .
-          file: ./ci/docker/Dockerfile.template
+          file: ./ci/docker_utils/Dockerfile.template
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ steps.config.outputs.image }},push-by-digest=true,name-canonical=true,push=true
           build-args: |
@@ -398,21 +398,21 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-timestamps
-          path: ci/docker/
+          path: ci/docker_utils/
 
       - name: Record successful builds
         run: |
           echo "Recording build timestamps for completed platforms..."
           echo '${{ needs.detect-priority.outputs.platforms }}' | jq -r '.[]' | while read platform; do
             echo "Recording: $platform"
-            uv run python ci/docker/image_priority_tracker.py --record "$platform"
+            uv run python ci/docker_utils/image_priority_tracker.py --record "$platform"
           done
 
       - name: Upload timestamp cache
         uses: actions/upload-artifact@v4
         with:
           name: build-timestamps
-          path: ci/docker/.build_timestamps.json
+          path: ci/docker_utils/.build_timestamps.json
           retention-days: 365
 
   # ============================================================================
@@ -442,7 +442,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-timestamps
-          path: ci/docker/
+          path: ci/docker_utils/
 
       - name: Generate summary report
         run: |
@@ -460,4 +460,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### All Platforms Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          uv run python ci/docker/image_priority_tracker.py --list-all --no-dockerhub >> $GITHUB_STEP_SUMMARY
+          uv run python ci/docker_utils/image_priority_tracker.py --list-all --no-dockerhub >> $GITHUB_STEP_SUMMARY

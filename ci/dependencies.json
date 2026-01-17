@@ -29,10 +29,10 @@
       "description": "JavaScript/TypeScript linting for WASM compiler and AVR8JS emulator",
       "cache_key": "js_lint",
       "cache_file": ".cache/fingerprint/js_lint.json",
-      "pattern": "src/platforms/wasm/compiler/** + ci/docker/avr8js/**",
+      "pattern": "src/platforms/wasm/compiler/** + ci/docker_utils/avr8js/**",
       "globs": [
         "src/platforms/wasm/compiler/**/*",
-        "ci/docker/avr8js/**/*"
+        "ci/docker_utils/avr8js/**/*"
       ],
       "tools": [
         "eslint"
@@ -233,7 +233,7 @@
         "javascript_lint"
       ]
     },
-    "ci/docker/avr8js": {
+    "ci/docker_utils/avr8js": {
       "monitored_by": [
         "javascript_lint"
       ]

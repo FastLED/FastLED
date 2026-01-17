@@ -27,7 +27,7 @@ ARG PLATFORMS
 
 # Copy build scripts for dependency caching
 # Using script files makes Docker layer caching more deterministic
-COPY ci/docker/build.sh /tmp/build.sh
+COPY ci/docker_utils/build.sh /tmp/build.sh
 RUN chmod +x /tmp/build.sh
 
 # Copy Python modules needed by build.sh

@@ -3,7 +3,7 @@ name: Docker Compiler Platforms
 on:
   push:
     paths:
-      - 'ci/docker/**'
+      - 'ci/docker_utils/**'
       - '.github/workflows/docker_compiler_template.yml'
   workflow_dispatch:
     inputs:
