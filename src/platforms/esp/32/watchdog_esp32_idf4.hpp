@@ -99,13 +99,11 @@ void deinit_existing_watchdog() {
 
 // Initializes watchdog with specified timeout
 bool init_task_watchdog(uint32_t timeout_ms) {
-    esp_task_wdt_config_t config = {
-        .timeout_ms = timeout_ms,
-        .idle_core_mask = (1 << 0),  // Monitor idle task on core 0 (main loop)
-        .trigger_panic = true         // Trigger panic and reset on timeout
-    };
+    // ESP-IDF v4.x uses simple parameters: esp_task_wdt_init(timeout_seconds, panic)
+    // Convert milliseconds to seconds (ESP-IDF v4.x uses seconds, not milliseconds)
+    uint32_t timeout_s = (timeout_ms + 999) / 1000;  // Round up to nearest second
 
-    esp_err_t err = esp_task_wdt_init(&config);
+    esp_err_t err = esp_task_wdt_init(timeout_s, true);  // true = trigger panic on timeout
     if (err != ESP_OK) {
         FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
         return false;
