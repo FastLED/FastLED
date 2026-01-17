@@ -155,7 +155,13 @@ def main() -> None:
         # Set up fingerprint caching
         cache_dir = Path(".cache")
         # Determine build mode (default to "quick")
-        build_mode = args.build_mode if args.build_mode else "quick"
+        # IMPORTANT: If --debug is set, use "debug" mode even if --build-mode is not specified
+        # This ensures fingerprint caching correctly separates debug builds from quick builds
+        build_mode = (
+            args.build_mode
+            if args.build_mode
+            else ("debug" if args.debug else "quick")
+        )
         fingerprint_manager = FingerprintManager(cache_dir, build_mode=build_mode)
 
         # Calculate fingerprints

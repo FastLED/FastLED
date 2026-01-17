@@ -155,6 +155,39 @@ def check_meson_installed() -> bool:
         return False
 
 
+def get_compiler_version(compiler_path: str) -> str:
+    """
+    Get compiler version string for cache invalidation.
+
+    This function queries the compiler's version to detect when the compiler
+    has been upgraded, which requires invalidating cached PCH and object files.
+
+    Args:
+        compiler_path: Path to compiler executable (e.g., clang-tool-chain-cpp)
+
+    Returns:
+        Version string (e.g., "clang version 21.1.5") or "unknown" on error
+    """
+    try:
+        result = subprocess.run(
+            [compiler_path, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=True,
+            timeout=10,
+        )
+        # Return first line which contains version info
+        return result.stdout.split("\n")[0].strip()
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        _ts_print(f"[MESON] Warning: Could not get compiler version: {e}")
+        return "unknown"
+
+
 def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     """
     Get fuzzy match candidates for a test name using meson introspect.
@@ -476,7 +509,9 @@ def setup_meson_build(
     debug_marker = build_dir / ".debug_config"
     check_marker = build_dir / ".check_config"
     build_mode_marker = build_dir / ".build_mode_config"
+    compiler_version_marker = build_dir / ".compiler_version_config"
     force_reconfigure = False
+    compiler_version_changed = False  # Track for late check after compiler detection
 
     # Get current source file hash (used for change detection and saving after setup)
     current_source_hash, current_source_files = get_source_files_hash(source_dir)
@@ -501,11 +536,14 @@ def setup_meson_build(
                 )
                 force_reconfigure = True
         else:
-            # No marker file exists from previous configure - create one after setup
+            # No marker file exists from previous configure
             # This can happen on first run after updating to this version
+            # Force reconfigure because we don't know what thin archive setting
+            # the cached libfastled.a was built with
             _ts_print(
-                "[MESON] ℹ️  No thin archive marker found, will create after setup"
+                "[MESON] ℹ️  No thin archive marker found, forcing reconfigure"
             )
+            force_reconfigure = True
 
         # Check if source/test files have changed since last configure
         # This detects when files are added or removed, which requires reconfigure
@@ -561,7 +599,10 @@ def setup_meson_build(
         else:
             # No marker file exists from previous configure
             # This can happen on first run after updating to this version
-            _ts_print("[MESON] ℹ️  No debug marker found, will create after setup")
+            # Force reconfigure because we don't know what debug setting
+            # the cached objects/PCH were built with - sanitizers could mismatch
+            _ts_print("[MESON] ℹ️  No debug marker found, forcing reconfigure")
+            force_reconfigure = True
 
         # CRITICAL: Delete all object files and archives when debug mode changes
         # Object files compiled with sanitizers cannot be linked without sanitizer runtime
@@ -605,8 +646,31 @@ def setup_meson_build(
                 except (OSError, IOError) as e:
                     _ts_print(f"[MESON] Warning: Could not delete {exe_file}: {e}")
 
+            # Delete all .pch files (precompiled headers)
+            # CRITICAL: PCH compiled with/without sanitizers is incompatible
+            # Sanitizer instrumentation changes ABI and object layout
+            pch_files = glob.glob(str(build_dir / "**" / "*.pch"), recursive=True)
+            deleted_pch_count = 0
+            for pch_file in pch_files:
+                try:
+                    Path(pch_file).unlink()
+                    deleted_pch_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {pch_file}: {e}")
+
+            # Delete all .lib files (Windows static libraries)
+            lib_files = glob.glob(str(build_dir / "**" / "*.lib"), recursive=True)
+            deleted_lib_count = 0
+            for lib_file in lib_files:
+                try:
+                    Path(lib_file).unlink()
+                    deleted_lib_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {lib_file}: {e}")
+
             _ts_print(
-                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, {deleted_exe_count} executables"
+                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, "
+                f"{deleted_exe_count} executables, {deleted_pch_count} PCH files, {deleted_lib_count} .lib files"
             )
 
         # Check if IWYU check setting has changed since last configure
@@ -629,7 +693,10 @@ def setup_meson_build(
         else:
             # No marker file exists from previous configure
             # This can happen on first run after updating to this version
-            _ts_print("[MESON] ℹ️  No check marker found, will create after setup")
+            # Force reconfigure because we don't know what IWYU setting
+            # the cached compiler wrapper was configured with
+            _ts_print("[MESON] ℹ️  No check marker found, forcing reconfigure")
+            force_reconfigure = True
 
         # Check if build_mode setting has changed since last configure
         # CRITICAL: This detects quick <-> release transitions which both have debug=False
@@ -658,7 +725,10 @@ def setup_meson_build(
         else:
             # No marker file exists from previous configure
             # This can happen on first run after updating to this version
-            _ts_print("[MESON] ℹ️  No build_mode marker found, will create after setup")
+            # CRITICAL: Force reconfigure because we don't know what mode the cached
+            # objects/PCH were built with - they could be incompatible with current mode
+            _ts_print("[MESON] ℹ️  No build_mode marker found, forcing reconfigure")
+            force_reconfigure = True
 
         # CRITICAL: Delete all object files and archives when build_mode changes
         # Object files compiled with different optimization flags cannot be safely mixed
@@ -702,8 +772,31 @@ def setup_meson_build(
                 except (OSError, IOError) as e:
                     _ts_print(f"[MESON] Warning: Could not delete {exe_file}: {e}")
 
+            # Delete all .pch files (precompiled headers)
+            # CRITICAL: PCH compiled with different optimization flags is incompatible
+            # E.g., -O0 vs -O3 produces incompatible precompiled headers
+            pch_files = glob.glob(str(build_dir / "**" / "*.pch"), recursive=True)
+            deleted_pch_count = 0
+            for pch_file in pch_files:
+                try:
+                    Path(pch_file).unlink()
+                    deleted_pch_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {pch_file}: {e}")
+
+            # Delete all .lib files (Windows static libraries)
+            lib_files = glob.glob(str(build_dir / "**" / "*.lib"), recursive=True)
+            deleted_lib_count = 0
+            for lib_file in lib_files:
+                try:
+                    Path(lib_file).unlink()
+                    deleted_lib_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {lib_file}: {e}")
+
             _ts_print(
-                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, {deleted_exe_count} executables"
+                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, "
+                f"{deleted_exe_count} executables, {deleted_pch_count} PCH files, {deleted_lib_count} .lib files"
             )
 
     # Check if any meson.build files are newer than build.ninja (requires reconfigure)
@@ -765,15 +858,24 @@ def setup_meson_build(
             )
 
             # Check cached test file list
+            # NOTE: We use try-except instead of exists() check to avoid TOCTOU race condition
+            # This is more robust when multiple builds could run concurrently
             test_list_cache = build_dir / "test_list_cache.txt"
             cached_test_files: list[str] = []
-            if test_list_cache.exists():
+            try:
                 with open(test_list_cache, "r") as f:
                     cached_test_files = [
                         line.strip()
                         for line in f
                         if line.strip() and not line.startswith("#")
                     ]
+            except FileNotFoundError:
+                # File doesn't exist yet - treat as empty cache
+                cached_test_files = []
+            except (IOError, OSError) as e:
+                # Corrupted or inaccessible - treat as stale
+                _ts_print(f"[MESON] Warning: Could not read test cache: {e}")
+                cached_test_files = []
 
             # Compare lists
             if current_test_files != cached_test_files:
@@ -810,15 +912,29 @@ def setup_meson_build(
 
                 test_files_changed = True
 
-                # Update cache
-                with open(test_list_cache, "w") as f:
-                    f.write(
-                        "# Auto-generated test file list cache for Meson reconfiguration\n"
+                # Update cache atomically using temp file + rename pattern
+                # This prevents torn reads if another process is reading the cache
+                temp_cache = test_list_cache.with_suffix(".tmp")
+                try:
+                    with open(temp_cache, "w") as f:
+                        f.write(
+                            "# Auto-generated test file list cache for Meson reconfiguration\n"
+                        )
+                        f.write(f"# Total tests: {len(current_test_files)}\n")  # type: ignore[misc]
+                        f.write("# Generated by meson_runner.py\n\n")
+                        for test_file in current_test_files:  # type: ignore[misc]
+                            f.write(f"{test_file}\n")
+                    # Atomic rename - either completes fully or not at all
+                    temp_cache.replace(test_list_cache)
+                except (OSError, IOError) as e:
+                    _ts_print(
+                        f"[MESON] Warning: Could not update test cache atomically: {e}"
                     )
-                    f.write(f"# Total tests: {len(current_test_files)}\n")  # type: ignore[misc]
-                    f.write("# Generated by meson_runner.py\n\n")
-                    for test_file in current_test_files:  # type: ignore[misc]
-                        f.write(f"{test_file}\n")
+                    # Clean up temp file if it exists
+                    try:
+                        temp_cache.unlink()
+                    except (OSError, IOError):
+                        pass
 
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -987,6 +1103,125 @@ def setup_meson_build(
         _ts_print(f"[MESON]   C++ compiler: {clangxx_wrapper}")
     _ts_print(f"[MESON]   Archiver: {llvm_ar_wrapper}")
 
+    # ============================================================================
+    # COMPILER VERSION TRACKING
+    # ============================================================================
+    # Check if compiler version has changed since last configure.
+    # When the compiler is upgraded (e.g., clang-tool-chain is updated), all
+    # PCH files and object files become incompatible and must be rebuilt.
+    # This check happens after compiler detection but before skip_meson_setup decision.
+    # ============================================================================
+    current_compiler_version = get_compiler_version(clangxx_wrapper)
+    _ts_print(f"[MESON]   Compiler version: {current_compiler_version}")
+
+    if already_configured:
+        if compiler_version_marker.exists():
+            try:
+                last_compiler_version = compiler_version_marker.read_text().strip()
+                if last_compiler_version != current_compiler_version:
+                    _ts_print(
+                        f"[MESON] ⚠️  Compiler version changed: {last_compiler_version} → {current_compiler_version}"
+                    )
+                    _ts_print(
+                        "[MESON] 🔄 Forcing reconfigure and cleaning cached objects/PCH"
+                    )
+                    force_reconfigure = True
+                    compiler_version_changed = True
+                    # Re-evaluate skip_meson_setup since we're forcing reconfigure
+                    skip_meson_setup = False
+            except (OSError, IOError):
+                _ts_print(
+                    "[MESON] ⚠️  Could not read compiler version marker, forcing reconfigure"
+                )
+                force_reconfigure = True
+                skip_meson_setup = False
+        else:
+            # No marker file exists from previous configure
+            _ts_print("[MESON] ℹ️  No compiler version marker found, forcing reconfigure")
+            force_reconfigure = True
+            skip_meson_setup = False
+
+        # CRITICAL: Delete all object files, archives, and PCH when compiler version changes
+        # Objects compiled with a different compiler version can have incompatible ABI
+        if compiler_version_changed:
+            import glob
+
+            _ts_print(
+                f"[MESON] 🗑️  Compiler version changed - cleaning all object files, archives, and PCH"
+            )
+
+            # Delete all .obj and .o files (object files)
+            obj_files = glob.glob(str(build_dir / "**" / "*.obj"), recursive=True)
+            obj_files.extend(glob.glob(str(build_dir / "**" / "*.o"), recursive=True))
+            deleted_obj_count = 0
+            for obj_file in obj_files:
+                try:
+                    Path(obj_file).unlink()
+                    deleted_obj_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {obj_file}: {e}")
+
+            # Delete all .a files (static libraries)
+            archive_files = glob.glob(str(build_dir / "**" / "*.a"), recursive=True)
+            deleted_archive_count = 0
+            for archive_file in archive_files:
+                try:
+                    Path(archive_file).unlink()
+                    deleted_archive_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {archive_file}: {e}")
+
+            # Delete all .exe files (executables)
+            exe_files = glob.glob(str(build_dir / "**" / "*.exe"), recursive=True)
+            deleted_exe_count = 0
+            for exe_file in exe_files:
+                try:
+                    Path(exe_file).unlink()
+                    deleted_exe_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {exe_file}: {e}")
+
+            # Delete all .pch files (precompiled headers)
+            pch_files = glob.glob(str(build_dir / "**" / "*.pch"), recursive=True)
+            deleted_pch_count = 0
+            for pch_file in pch_files:
+                try:
+                    Path(pch_file).unlink()
+                    deleted_pch_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {pch_file}: {e}")
+
+            # Delete all .lib files (Windows static libraries)
+            lib_files = glob.glob(str(build_dir / "**" / "*.lib"), recursive=True)
+            deleted_lib_count = 0
+            for lib_file in lib_files:
+                try:
+                    Path(lib_file).unlink()
+                    deleted_lib_count += 1
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete {lib_file}: {e}")
+
+            _ts_print(
+                f"[MESON] 🗑️  Deleted {deleted_obj_count} object files, {deleted_archive_count} archives, "
+                f"{deleted_exe_count} executables, {deleted_pch_count} PCH files, {deleted_lib_count} .lib files"
+            )
+
+        # CRITICAL: If compiler version forced a reconfigure, we need to update cmd
+        # The original cmd assignment was based on pre-compiler-check values
+        if force_reconfigure and cmd is None:
+            _ts_print(
+                f"[MESON] Reconfiguring build directory (forced by compiler version change): {build_dir}"
+            )
+            cmd = [
+                _resolve_meson_executable(),
+                "setup",
+                "--reconfigure",
+                "--native-file",
+                str(native_file_path),
+                str(build_dir),
+            ]
+            cmd.extend([f"-Dbuild_mode={build_mode}"])
+
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
     # environment variables are lost. Native file ensures tools are configured.
@@ -1104,14 +1339,62 @@ endian = 'little'
                 _ts_print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
                 pass
 
-        # CRITICAL: Create build_mode marker if it doesn't exist (migration from older code)
+        # CRITICAL: Create all marker files if they don't exist (migration from older code)
         # This ensures cache invalidation works correctly on first run after update
+        # Without this, marker files would never be created in the skip path
         if not build_mode_marker.exists():
             try:
                 build_mode_marker.write_text(build_mode, encoding="utf-8")
                 _ts_print(f"[MESON] ✅ Created build_mode marker: {build_mode}")
             except (OSError, IOError) as e:
                 _ts_print(f"[MESON] Warning: Could not write build_mode marker: {e}")
+
+        if not thin_archive_marker.exists():
+            try:
+                thin_archive_marker.write_text(str(use_thin_archives), encoding="utf-8")
+                _ts_print(
+                    f"[MESON] ✅ Created thin archive marker: {use_thin_archives}"
+                )
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not write thin archive marker: {e}")
+
+        if not debug_marker.exists():
+            try:
+                debug_marker.write_text(str(debug), encoding="utf-8")
+                _ts_print(f"[MESON] ✅ Created debug marker: {debug}")
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
+
+        if not check_marker.exists():
+            try:
+                check_marker.write_text(str(check), encoding="utf-8")
+                _ts_print(f"[MESON] ✅ Created check marker: {check}")
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not write check marker: {e}")
+
+        if current_source_hash and not source_files_marker.exists():
+            try:
+                source_files_marker.write_text(current_source_hash, encoding="utf-8")
+                _ts_print(
+                    f"[MESON] ✅ Created source/test files marker ({len(current_source_files)} files)"
+                )
+            except (OSError, IOError) as e:
+                _ts_print(
+                    f"[MESON] Warning: Could not write source/test files marker: {e}"
+                )
+
+        if not compiler_version_marker.exists():
+            try:
+                compiler_version_marker.write_text(
+                    current_compiler_version, encoding="utf-8"
+                )
+                _ts_print(
+                    f"[MESON] ✅ Created compiler version marker: {current_compiler_version}"
+                )
+            except (OSError, IOError) as e:
+                _ts_print(
+                    f"[MESON] Warning: Could not write compiler version marker: {e}"
+                )
 
         return True
 
@@ -1192,6 +1475,21 @@ endian = 'little'
                 _ts_print(
                     f"[MESON] Warning: Could not write source/test files marker: {e}"
                 )
+
+        # Write marker file to track compiler version for future runs
+        # CRITICAL: This enables detection of compiler upgrades that invalidate PCH/objects
+        try:
+            compiler_version_marker.write_text(
+                current_compiler_version, encoding="utf-8"
+            )
+            _ts_print(
+                f"[MESON] ✅ Saved compiler version: {current_compiler_version}"
+            )
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            _ts_print(
+                f"[MESON] Warning: Could not write compiler version marker: {e}"
+            )
 
         return True
 
