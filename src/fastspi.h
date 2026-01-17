@@ -7,13 +7,13 @@
 /// This file provides:
 /// 1. Common SPI macros and utilities (DATA_RATE_MHZ, DATA_RATE_KHZ)
 /// 2. SoftwareSPIOutput template (generic bit-banging SPI)
-/// 3. Includes all platform-specific implementations
+/// 3. Includes all platform-specific implementations via dispatch headers
 ///
 /// IMPORTANT: The SPIOutput template is NOT defined in this file.
 /// Instead, it is defined by platform-specific spi_output_template.h files:
 /// - Each platform (esp32, teensy, nrf52, etc.) has its own platform directory
 /// - Each platform directory contains spi_output_template.h
-/// - When that file is included, it defines SPIOutput for that platform
+/// - The dispatch header (platforms/spi_output_template.h) selects the right one
 /// - This approach centralizes platform logic in platform-specific directories
 ///
 /// The include pattern is:
@@ -38,79 +38,12 @@
 // Include platform-specific SPI device proxy implementations BEFORE FastLED.h
 // These provide the hardware SPI abstractions for each platform
 // This must happen before FastLED.h includes chipsets.h
-
-#include "platforms/arm/teensy/is_teensy.h"
-#include "platforms/esp/is_esp.h"
-
-#if defined(FL_IS_ESP32)
-#include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
-#elif defined(FL_IS_TEENSY_4X)
-#include "platforms/arm/mxrt1062/spi_device_proxy.h"
-#elif defined(NRF51)
-#include "platforms/arm/nrf52/spi_device_proxy.h"
-#elif defined(NRF52_SERIES)
-#include "platforms/arm/nrf52/spi_device_proxy.h"
-#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-#include "platforms/arm/sam/spi_device_proxy.h"
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
-#include "platforms/arm/stm32/spi_device_proxy.h"
-#endif
+#include "platforms/spi_device_proxy.h"
 
 // Include platform-specific SPIOutput template implementations BEFORE FastLED.h
-// Each of these files defines the SPIOutput template for its platform
-// NOTE: These files must NOT have their own namespace wrappers - they define
-// templates/classes at the global scope for use by FastLED
+// The dispatch header selects the appropriate SPIOutput for the current platform
 // This must happen BEFORE FastLED.h includes chipsets.h
-#if defined(FASTLED_STUB_IMPL)
-#include "platforms/stub/spi_output_template.h"
-
-#elif defined(FL_IS_ESP32)
-#include "platforms/esp/32/drivers/spi/spi_output_template.h"
-
-#elif defined(ESP8266)
-#include "platforms/esp/8266/spi_output_template.h"
-
-#elif defined(NRF51)
-#include "platforms/arm/nrf51/spi_output_template.h"
-
-#elif defined(NRF52_SERIES)
-#include "platforms/arm/nrf52/spi_output_template.h"
-
-#elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#include "platforms/apollo3/spi_output_template.h"
-
-#elif defined(FL_IS_TEENSY_3X)
-#include "platforms/arm/teensy/teensy3_common/spi_output_template.h"
-
-#elif defined(FL_IS_TEENSY_4X)
-#include "platforms/arm/teensy/teensy4_common/spi_output_template.h"
-
-#elif defined(FL_IS_TEENSY_LC)
-#include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
-
-#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-      defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
-      defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-#include "platforms/arm/sam/spi_output_template.h"
-
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
-#include "platforms/arm/stm32/spi_output_template.h"
-
-#elif defined(AVR_HARDWARE_SPI) || defined(ARDUNIO_CORE_SPI)
-#include "platforms/avr/spi_output_template.h"
-
-#else
-// Fallback: Generic software SPI for unsupported platforms
-#include "platforms/shared/spi_bitbang/spi_output_template.h"
-
-#  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "WARNING: No hardware SPI support for this platform. Using generic software SPI (bit-banging)."
-#    else
-#      warning "WARNING: No hardware SPI support for this platform. Using generic software SPI (bit-banging)."
-#    endif
-#  endif
-#endif
+#include "platforms/spi_output_template.h"
 
 // NOW include the internal FastLED header, which defines core types without cycles
 // At this point, SPIOutput is already defined for the current platform
