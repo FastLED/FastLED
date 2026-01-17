@@ -1,22 +1,29 @@
 #pragma once
 
 /// @file platforms/arm/renesas/pin_renesas.hpp
-/// Renesas (Arduino UNO R4, etc.) native pin implementation using BSP API
+/// Renesas (Arduino UNO R4, etc.) native pin implementation using FSP IOPORT API
 ///
-/// Provides native pin control using Renesas Flexible Software Package (FSP) BSP API.
-/// This implementation uses R_IOPORT functions for direct hardware access without
-/// requiring the Arduino framework.
+/// Provides native pin control using Renesas Flexible Software Package (FSP) IOPORT
+/// HAL driver for direct hardware access. Requires Arduino framework for type
+/// definitions and pin mapping (g_pin_cfg[] from variant.cpp).
 ///
 /// Architecture:
 /// - Uses R_IOPORT_PinCfg() for pin mode configuration
 /// - Uses R_IOPORT_PinWrite() for atomic digital output
 /// - Uses R_IOPORT_PinRead() for digital input
-/// - Pin mapping via external g_pin_cfg[] table (provided by Arduino variant or BSP)
+/// - Pin mapping via g_pin_cfg[] array (PinMuxCfg_t from Arduino variant)
 
 #if defined(ARDUINO_ARCH_RENESAS) || defined(FL_IS_RENESAS)
 
 #include "fl/pin.h"
-#include "bsp_api.h"  // Renesas BSP API (includes R_IOPORT, bsp_io_port_pin_t, etc.)
+
+// Include Arduino.h to get all Renesas FSP headers and type definitions
+// This provides:
+// - bsp_api.h: Core BSP types (bsp_io_port_pin_t, bsp_io_level_t, etc.)
+// - r_ioport_api.h: IOPORT HAL interface (IOPORT_CFG_*, R_IOPORT_*, etc.)
+// - r_ioport.h: IOPORT driver implementation
+// - variant.h: PinMuxCfg_t type and g_pin_cfg[] array declaration
+#include <Arduino.h>
 
 namespace fl {
 namespace platform {
@@ -28,11 +35,10 @@ namespace platform {
 /// Get BSP pin identifier from Arduino pin number
 /// @param pin Arduino pin number
 /// @return BSP pin identifier (bsp_io_port_pin_t)
-/// @note Requires g_pin_cfg[] pin mapping table from Arduino variant or BSP
+/// @note Uses g_pin_cfg[] declared in Arduino.h (from variant.h)
 inline bsp_io_port_pin_t getBspPin(int pin) {
-    // Arduino variant provides g_pin_cfg[] which maps Arduino pin numbers
-    // to BSP pin identifiers (e.g., BSP_IO_PORT_01_PIN_05)
-    extern const ioport_pin_cfg_t g_pin_cfg[];
+    // g_pin_cfg[] is declared in Arduino.h as extern const PinMuxCfg_t g_pin_cfg[];
+    // PinMuxCfg_t contains: bsp_io_port_pin_t pin; const uint16_t* list;
     return g_pin_cfg[pin].pin;
 }
 
