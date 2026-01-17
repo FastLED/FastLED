@@ -4,8 +4,6 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 #!/usr/bin/env python3
 """Meson build system integration for FastLED example compilation and execution."""
 
-import os
-import re
 import sys
 import time
 from pathlib import Path
@@ -21,45 +19,6 @@ from ci.util.meson_runner import (
 )
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
-
-
-def _prepare_environment(build_mode: str) -> dict[str, str]:
-    """
-    Prepare environment for example execution.
-
-    In debug mode on Windows, adds compiler DLL directory to PATH
-    to ensure ASAN runtime dependencies (libc++.dll, libunwind.dll) are found.
-
-    Args:
-        build_mode: Build mode ("quick", "debug", or "release")
-
-    Returns:
-        Environment dictionary
-    """
-    env = os.environ.copy()
-
-    # Only modify PATH on Windows in debug mode
-    if sys.platform != "win32" or build_mode != "debug":
-        return env
-
-    # Import the DLL finder utility
-    from ci.util.find_compiler_dlls import find_compiler_dll_dir
-
-    # Find compiler DLL directory
-    dll_dir = find_compiler_dll_dir()
-    if dll_dir:
-        # Prepend to PATH (takes priority over system PATH)
-        current_path = env.get("PATH", "")
-        env["PATH"] = f"{dll_dir}{os.pathsep}{current_path}"
-        _ts_print(f"[DEBUG] Added compiler DLL directory to PATH: {dll_dir}")
-    else:
-        # Warn if not found (non-fatal - may still work if DLLs are in system PATH)
-        _ts_print(
-            "[WARN] Could not find compiler DLL directory - ASAN tests may fail",
-            file=sys.stderr,
-        )
-
-    return env
 
 
 def compile_examples(
@@ -110,7 +69,7 @@ def compile_examples(
             timeout=600,  # 10 minute timeout
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=_prepare_environment(build_mode),  # Add compiler DLL directory to PATH
+            # DLLs are auto-deployed by clang-tool-chain 1.0.31+ to output directory
             output_formatter=TimestampFormatter(),
         )
 
@@ -196,9 +155,7 @@ def run_examples(
             timeout=1800,  # 30 minute total timeout
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=_prepare_environment(
-                build_mode
-            ),  # Pass current environment with wrapper paths
+            # DLLs are auto-deployed by clang-tool-chain 1.0.31+ to output directory
             output_formatter=TimestampFormatter(),
         )
 
