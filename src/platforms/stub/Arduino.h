@@ -11,6 +11,7 @@
 
 // FastLED headers only - NO stdlib headers
 #include "fl/str.h"
+#include "fl/stddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdio.h"
@@ -170,6 +171,15 @@ struct SerialEmulation {
 #define OUTPUT 1
 #define INPUT_PULLUP 2
 
+// Bit manipulation macros
+#define bit(b) (1UL << (b))
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bitWrite(value, bit, bitvalue) ((bitvalue) ? bitSet(value, bit) : bitClear(value, bit))
+#define lowByte(w) ((uint8_t) ((w) & 0xff))
+#define highByte(w) ((uint8_t) ((w) >> 8))
+
 void digitalWrite(int, int);
 void analogWrite(int, int);
 void analogReference(int);
@@ -193,6 +203,8 @@ void pinMode(int, int);
 
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
+typedef bool boolean;
+typedef unsigned int word;
 
 // Arduino String class compatibility - use fl::string as String
 typedef fl::string String;
