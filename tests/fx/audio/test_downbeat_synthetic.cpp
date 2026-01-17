@@ -70,7 +70,9 @@ shared_ptr<AudioContext> createMockAudioContext(u32 timestamp, bool isDownbeat,
         // Generate audio with sudden energy (beat onset)
         // Downbeats have more bass energy for accent detection
         i16 baseAmplitude = isDownbeat ? 25000 : 15000;
-        i16 amplitude = static_cast<i16>(baseAmplitude * accentMultiplier);
+        // Clamp to i16 range to prevent UBSan overflow (max accentMultiplier is 2.0)
+        float amplitudeFloat = baseAmplitude * accentMultiplier;
+        i16 amplitude = static_cast<i16>(FL_MIN(amplitudeFloat, 32767.0f));
 
         // Use multiple frequencies to create richer spectral content
         for (int i = 0; i < 512; i++) {

@@ -916,4 +916,345 @@ TEST_CASE("parlio_mock_packing_mode_persistence") {
     }
 }
 
+//=============================================================================
+// Test Suite: ParlioBufferCalculator - DMA Buffer Size Math
+//=============================================================================
+
+#include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
+
+TEST_CASE("ParlioBufferCalculator - outputBytesPerInputByte for all data widths") {
+    // Test Wave8 expansion ratio for each data width
+    // Wave8 expands 1 input byte to 64 pulses, then packs based on data_width
+
+    SUBCASE("data_width = 1 (single lane)") {
+        ParlioBufferCalculator calc{1};
+        // 64 pulses / (8/1) ticks per byte = 64 / 8 = 8 bytes
+        CHECK(calc.outputBytesPerInputByte() == 8);
+    }
+
+    SUBCASE("data_width = 2 (two lanes)") {
+        ParlioBufferCalculator calc{2};
+        // 64 pulses / (8/2) ticks per byte = 64 / 4 = 16 bytes
+        CHECK(calc.outputBytesPerInputByte() == 16);
+    }
+
+    SUBCASE("data_width = 4 (four lanes)") {
+        ParlioBufferCalculator calc{4};
+        // 64 pulses / (8/4) ticks per byte = 64 / 2 = 32 bytes
+        CHECK(calc.outputBytesPerInputByte() == 32);
+    }
+
+    SUBCASE("data_width = 8 (eight lanes)") {
+        ParlioBufferCalculator calc{8};
+        // 64 pulses / (8/8) ticks per byte = 64 / 1 = 64 bytes
+        CHECK(calc.outputBytesPerInputByte() == 64);
+    }
+
+    SUBCASE("data_width = 16 (sixteen lanes)") {
+        ParlioBufferCalculator calc{16};
+        // 16-bit mode: 64 pulses × 2 bytes per pulse = 128 bytes
+        CHECK(calc.outputBytesPerInputByte() == 128);
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - boundaryPaddingBytes for all data widths") {
+    // Boundary padding: back padding only (8 bytes per lane, no front padding)
+    // Total = 8 * data_width bytes
+
+    SUBCASE("data_width = 1") {
+        ParlioBufferCalculator calc{1};
+        CHECK(calc.boundaryPaddingBytes() == 8);  // 8 * 1 = 8
+    }
+
+    SUBCASE("data_width = 2") {
+        ParlioBufferCalculator calc{2};
+        CHECK(calc.boundaryPaddingBytes() == 16);  // 8 * 2 = 16
+    }
+
+    SUBCASE("data_width = 4") {
+        ParlioBufferCalculator calc{4};
+        CHECK(calc.boundaryPaddingBytes() == 32);  // 8 * 4 = 32
+    }
+
+    SUBCASE("data_width = 8") {
+        ParlioBufferCalculator calc{8};
+        CHECK(calc.boundaryPaddingBytes() == 64);  // 8 * 8 = 64
+    }
+
+    SUBCASE("data_width = 16") {
+        ParlioBufferCalculator calc{16};
+        CHECK(calc.boundaryPaddingBytes() == 128);  // 8 * 16 = 128
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - transposeBlockSize matches outputBytesPerInputByte") {
+    // transposeBlockSize should match outputBytesPerInputByte for consistency
+
+    SUBCASE("data_width = 1") {
+        ParlioBufferCalculator calc{1};
+        CHECK(calc.transposeBlockSize() == 8);
+        CHECK(calc.transposeBlockSize() == calc.outputBytesPerInputByte());
+    }
+
+    SUBCASE("data_width = 2") {
+        ParlioBufferCalculator calc{2};
+        CHECK(calc.transposeBlockSize() == 16);
+        CHECK(calc.transposeBlockSize() == calc.outputBytesPerInputByte());
+    }
+
+    SUBCASE("data_width = 4") {
+        ParlioBufferCalculator calc{4};
+        CHECK(calc.transposeBlockSize() == 32);
+        CHECK(calc.transposeBlockSize() == calc.outputBytesPerInputByte());
+    }
+
+    SUBCASE("data_width = 8") {
+        ParlioBufferCalculator calc{8};
+        CHECK(calc.transposeBlockSize() == 64);
+        CHECK(calc.transposeBlockSize() == calc.outputBytesPerInputByte());
+    }
+
+    SUBCASE("data_width = 16") {
+        ParlioBufferCalculator calc{16};
+        CHECK(calc.transposeBlockSize() == 128);
+        CHECK(calc.transposeBlockSize() == calc.outputBytesPerInputByte());
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - resetPaddingBytes") {
+    ParlioBufferCalculator calc{1};  // data_width doesn't affect reset padding
+
+    SUBCASE("zero reset time") {
+        CHECK(calc.resetPaddingBytes(0) == 0);
+    }
+
+    SUBCASE("1us reset time") {
+        // ceil(1 / 8) = 1 Wave8Byte = 8 bytes
+        CHECK(calc.resetPaddingBytes(1) == 8);
+    }
+
+    SUBCASE("8us reset time (exactly 1 Wave8Byte)") {
+        // ceil(8 / 8) = 1 Wave8Byte = 8 bytes
+        CHECK(calc.resetPaddingBytes(8) == 8);
+    }
+
+    SUBCASE("9us reset time") {
+        // ceil(9 / 8) = 2 Wave8Bytes = 16 bytes
+        CHECK(calc.resetPaddingBytes(9) == 16);
+    }
+
+    SUBCASE("80us reset time (WS2812 typical)") {
+        // ceil(80 / 8) = 10 Wave8Bytes = 80 bytes
+        CHECK(calc.resetPaddingBytes(80) == 80);
+    }
+
+    SUBCASE("280us reset time (SK6812 typical)") {
+        // ceil(280 / 8) = 35 Wave8Bytes = 280 bytes
+        CHECK(calc.resetPaddingBytes(280) == 280);
+    }
+
+    SUBCASE("300us reset time") {
+        // ceil(300 / 8) = 38 Wave8Bytes = 304 bytes
+        CHECK(calc.resetPaddingBytes(300) == 304);
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - dmaBufferSize basic calculations") {
+    SUBCASE("single lane, single LED, no reset") {
+        ParlioBufferCalculator calc{1};
+        // 1 LED = 3 input bytes
+        // DMA = boundary_padding + (input_bytes * output_per_input) + reset_padding
+        // DMA = 8 + (3 * 8) + 0 = 8 + 24 + 0 = 32 bytes
+        CHECK(calc.dmaBufferSize(3, 0) == 32);
+    }
+
+    SUBCASE("single lane, single LED, 80us reset") {
+        ParlioBufferCalculator calc{1};
+        // DMA = 8 + (3 * 8) + 80 = 8 + 24 + 80 = 112 bytes
+        CHECK(calc.dmaBufferSize(3, 80) == 112);
+    }
+
+    SUBCASE("single lane, 10 LEDs, no reset") {
+        ParlioBufferCalculator calc{1};
+        // 10 LEDs = 30 input bytes
+        // DMA = 8 + (30 * 8) + 0 = 8 + 240 + 0 = 248 bytes
+        CHECK(calc.dmaBufferSize(30, 0) == 248);
+    }
+
+    SUBCASE("four lanes, 10 LEDs per lane, no reset") {
+        ParlioBufferCalculator calc{4};
+        // 10 LEDs × 4 lanes = 40 LEDs = 120 input bytes
+        // DMA = 32 + (120 * 32) + 0 = 32 + 3840 + 0 = 3872 bytes
+        CHECK(calc.dmaBufferSize(120, 0) == 3872);
+    }
+
+    SUBCASE("four lanes, 5 LEDs per lane (15 bytes), 280us reset") {
+        ParlioBufferCalculator calc{4};
+        // 5 LEDs × 4 lanes = 20 LEDs = 60 input bytes
+        // DMA = 32 + (60 * 32) + 280 = 32 + 1920 + 280 = 2232 bytes
+        CHECK(calc.dmaBufferSize(60, 280) == 2232);
+    }
+
+    SUBCASE("16 lanes, 1 LED per lane, no reset") {
+        ParlioBufferCalculator calc{16};
+        // 1 LED × 16 lanes = 16 LEDs = 48 input bytes
+        // DMA = 128 + (48 * 128) + 0 = 128 + 6144 + 0 = 6272 bytes
+        CHECK(calc.dmaBufferSize(48, 0) == 6272);
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - dmaBufferSize edge cases") {
+    SUBCASE("zero input bytes") {
+        ParlioBufferCalculator calc{1};
+        // DMA = 8 + (0 * 8) + 0 = 8 bytes (boundary padding only)
+        CHECK(calc.dmaBufferSize(0, 0) == 8);
+    }
+
+    SUBCASE("zero input bytes with reset") {
+        ParlioBufferCalculator calc{1};
+        // DMA = 8 + (0 * 8) + 80 = 88 bytes
+        CHECK(calc.dmaBufferSize(0, 80) == 88);
+    }
+
+    SUBCASE("large input (1000 LEDs, single lane)") {
+        ParlioBufferCalculator calc{1};
+        // 1000 LEDs = 3000 input bytes
+        // DMA = 8 + (3000 * 8) + 0 = 8 + 24000 + 0 = 24008 bytes
+        CHECK(calc.dmaBufferSize(3000, 0) == 24008);
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - calculateRingBufferCapacity") {
+    SUBCASE("100 LEDs, single lane, 3 ring buffers, 80us reset") {
+        ParlioBufferCalculator calc{1};
+        // LEDs per buffer = ceil(100 / 3) = 34 LEDs
+        // Input bytes per buffer = 34 * 3 * 1 = 102 bytes
+        // DMA capacity = dmaBufferSize(102, 80) + 128 safety margin
+        // = 8 + (102 * 8) + 80 + 128 = 8 + 816 + 80 + 128 = 1032 bytes
+        size_t capacity = calc.calculateRingBufferCapacity(100, 80, 3);
+        CHECK(capacity == 1032);
+    }
+
+    SUBCASE("10 LEDs, 4 lanes, 3 ring buffers, no reset") {
+        ParlioBufferCalculator calc{4};
+        // LEDs per buffer = ceil(10 / 3) = 4 LEDs
+        // Input bytes per buffer = 4 * 3 * 4 = 48 bytes
+        // DMA capacity = dmaBufferSize(48, 0) + 128 safety margin
+        // = 32 + (48 * 32) + 0 + 128 = 32 + 1536 + 0 + 128 = 1696 bytes
+        size_t capacity = calc.calculateRingBufferCapacity(10, 0, 3);
+        CHECK(capacity == 1696);
+    }
+
+    SUBCASE("single LED, single lane, 3 ring buffers") {
+        ParlioBufferCalculator calc{1};
+        // LEDs per buffer = ceil(1 / 3) = 1 LED
+        // Input bytes per buffer = 1 * 3 * 1 = 3 bytes
+        // DMA capacity = dmaBufferSize(3, 0) + 128
+        // = 8 + (3 * 8) + 0 + 128 = 8 + 24 + 0 + 128 = 160 bytes
+        size_t capacity = calc.calculateRingBufferCapacity(1, 0, 3);
+        CHECK(capacity == 160);
+    }
+
+    SUBCASE("3000 LEDs, single lane, 3 ring buffers, 280us reset") {
+        ParlioBufferCalculator calc{1};
+        // Example from header comment:
+        // LEDs per buffer = ceil(3000 / 3) = 1000 LEDs
+        // Input bytes per buffer = 1000 * 3 * 1 = 3000 bytes
+        // DMA capacity = dmaBufferSize(3000, 280) + 128
+        // = 8 + (3000 * 8) + 280 + 128 = 8 + 24000 + 280 + 128 = 24416 bytes
+        size_t capacity = calc.calculateRingBufferCapacity(3000, 280, 3);
+        CHECK(capacity == 24416);
+    }
+}
+
+TEST_CASE("ParlioBufferCalculator - consistency across data widths") {
+    // Verify that larger data widths produce proportionally larger buffers
+
+    size_t input_bytes = 30;  // 10 LEDs
+    uint32_t reset_us = 80;
+
+    ParlioBufferCalculator calc1{1};
+    ParlioBufferCalculator calc2{2};
+    ParlioBufferCalculator calc4{4};
+    ParlioBufferCalculator calc8{8};
+    ParlioBufferCalculator calc16{16};
+
+    size_t size1 = calc1.dmaBufferSize(input_bytes, reset_us);
+    size_t size2 = calc2.dmaBufferSize(input_bytes, reset_us);
+    size_t size4 = calc4.dmaBufferSize(input_bytes, reset_us);
+    size_t size8 = calc8.dmaBufferSize(input_bytes, reset_us);
+    size_t size16 = calc16.dmaBufferSize(input_bytes, reset_us);
+
+    // Verify sizes increase with data width (due to both expansion and padding)
+    CHECK(size1 < size2);
+    CHECK(size2 < size4);
+    CHECK(size4 < size8);
+    CHECK(size8 < size16);
+
+    // Verify ratio between consecutive widths is approximately 2x
+    // (not exact due to padding overhead)
+    CHECK(size2 > size1 * 1.5);
+    CHECK(size4 > size2 * 1.5);
+    CHECK(size8 > size4 * 1.5);
+    CHECK(size16 > size8 * 1.5);
+}
+
+TEST_CASE("ParlioBufferCalculator - buffer overflow scenario from BUG-006") {
+    // This test validates the math for the exact scenario that caused BUG-006
+    // 4 lanes, 5 LEDs per lane, should produce correct buffer sizes
+
+    ParlioBufferCalculator calc{4};
+
+    // 5 LEDs per lane × 4 lanes = 20 LEDs total
+    // Each LED = 3 bytes, so 60 input bytes total
+    // Lane stride = 5 LEDs × 3 bytes = 15 bytes per lane
+
+    size_t num_leds_per_lane = 5;
+    size_t num_lanes = 4;
+    size_t bytes_per_led = 3;
+    size_t lane_stride = num_leds_per_lane * bytes_per_led;  // 15
+    size_t total_bytes = lane_stride * num_lanes;            // 60
+
+    CHECK(lane_stride == 15);
+    CHECK(total_bytes == 60);
+
+    // The DMA buffer must be large enough for the expanded data
+    // Input: 60 bytes (all lanes)
+    // Output expansion: 60 * 32 (for 4-lane width) = 1920 bytes for pixel data
+    // Plus boundary padding: 32 bytes
+    // Total: 1952 bytes (no reset padding)
+    size_t dma_size = calc.dmaBufferSize(total_bytes, 0);
+    CHECK(dma_size == 1952);
+
+    // Verify the per-lane iteration limit is correct
+    // When iterating per-lane, we should only process lane_stride bytes per lane
+    // NOT total_bytes per lane (which caused the overflow)
+    CHECK(lane_stride == 15);  // This is the correct iteration limit per lane
+    CHECK(total_bytes == 60);  // This was incorrectly used as iteration limit
+}
+
+TEST_CASE("ParlioBufferCalculator - buffer overflow scenario from BUG-007") {
+    // This test validates the math for the 2-lane scenario from BUG-007
+    // 2 lanes, 5 LEDs per lane
+
+    ParlioBufferCalculator calc{2};
+
+    size_t num_leds_per_lane = 5;
+    size_t num_lanes = 2;
+    size_t bytes_per_led = 3;
+    size_t lane_stride = num_leds_per_lane * bytes_per_led;  // 15
+    size_t total_bytes = lane_stride * num_lanes;            // 30
+
+    CHECK(lane_stride == 15);
+    CHECK(total_bytes == 30);
+
+    // DMA buffer size for 2-lane width
+    // Input: 30 bytes
+    // Output expansion: 30 * 16 (for 2-lane width) = 480 bytes for pixel data
+    // Plus boundary padding: 16 bytes
+    // Total: 496 bytes
+    size_t dma_size = calc.dmaBufferSize(total_bytes, 0);
+    CHECK(dma_size == 496);
+}
+
 #endif // FASTLED_STUB_IMPL

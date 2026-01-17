@@ -153,6 +153,114 @@ static inline bool isParlioPinValid(int pin) {
 }
 
 //=============================================================================
+// Buffer Population Helper - Shared Logic for DMA Buffer Byte Count Calculation
+//=============================================================================
+
+/// @brief Parameters for DMA buffer population byte count calculation
+///
+/// This struct encapsulates the inputs needed to calculate how many bytes
+/// to process in a single DMA buffer population. Used by both workerIsrCallback()
+/// and populateNextDMABuffer() to avoid code duplication.
+struct BufferPopulationParams {
+    size_t totalBytes;              ///< Total bytes to transmit (bytes per lane)
+    size_t nextByteOffset;          ///< Current byte offset in transmission
+    size_t ringCount;               ///< Number of buffers currently in ring
+    size_t ringBufferCapacity;      ///< Capacity of each ring buffer
+    size_t dataWidth;               ///< Data width (number of lanes: 1, 2, 4, 8, 16)
+    size_t laneStride;              ///< Bytes per lane in scratch buffer
+    uint32_t resetUs;               ///< Reset time in microseconds
+};
+
+/// @brief Calculate the byte count for a DMA buffer population
+///
+/// This is a pure calculation function that determines how many input bytes
+/// to process for the next DMA buffer. It handles:
+/// - LED boundary alignment (3 bytes/LED × number of lanes)
+/// - Ring buffer capacity limits
+/// - Last buffer special case (takes all remaining bytes)
+/// - Lane stride capping (prevents buffer overflow)
+///
+/// ISR-SAFE: No allocations, no logging, pure computation.
+///
+/// @param params Input parameters for calculation
+/// @return Number of input bytes to process for this buffer
+FL_OPTIMIZE_FUNCTION static inline size_t FL_IRAM
+calculateBufferByteCount(const BufferPopulationParams& params) {
+    // Calculate remaining bytes
+    size_t bytes_remaining = params.totalBytes - params.nextByteOffset;
+    if (bytes_remaining == 0) {
+        return 0;
+    }
+
+    // Calculate target bytes per buffer (divide total into chunks)
+    size_t bytes_per_buffer = (params.totalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1)
+                              / ParlioRingBuffer3::RING_BUFFER_COUNT;
+
+    // LED boundary alignment constant: 3 bytes (RGB) × lane count
+    size_t bytes_per_led_all_lanes = 3 * params.dataWidth;
+
+    // Calculate maximum input bytes that fit in one buffer
+    ParlioBufferCalculator calc{params.dataWidth};
+    size_t reset_padding = calc.resetPaddingBytes(params.resetUs);
+    size_t available_capacity = params.ringBufferCapacity - reset_padding;
+    size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
+
+    // Reduce max by one LED boundary to prevent exact-capacity overflow
+    if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
+        max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
+    }
+
+    // Cap bytes_per_buffer at ring buffer capacity
+    if (bytes_per_buffer > max_input_bytes_per_buffer) {
+        bytes_per_buffer = max_input_bytes_per_buffer;
+    }
+
+    // LED boundary alignment: Round DOWN to nearest multiple of (3 bytes × lane count)
+    bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
+
+    // Edge case: Ensure at least one LED across all lanes per buffer if data exists
+    if (bytes_per_buffer < bytes_per_led_all_lanes && params.totalBytes >= bytes_per_led_all_lanes) {
+        bytes_per_buffer = bytes_per_led_all_lanes;
+    }
+
+    // Determine if this is the last buffer
+    bool is_last_buffer = (params.ringCount >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
+                          (bytes_remaining <= bytes_per_buffer);
+
+    // Calculate byte count for this buffer
+    size_t byte_count;
+    if (is_last_buffer) {
+        // Last buffer takes all remaining bytes, but cap at buffer capacity
+        byte_count = bytes_remaining;
+        if (byte_count > max_input_bytes_per_buffer) {
+            byte_count = max_input_bytes_per_buffer;
+        }
+    } else {
+        byte_count = bytes_per_buffer;
+    }
+
+    // Handle edge case: zero byte_count when data remains
+    // (can happen when bytes_per_buffer rounds down to 0 for partial LEDs)
+    if (byte_count == 0 && bytes_remaining > 0) {
+        byte_count = bytes_remaining;
+        if (byte_count > max_input_bytes_per_buffer) {
+            byte_count = max_input_bytes_per_buffer;
+        }
+    }
+
+    // CRITICAL: Cap byte_count at lane stride to prevent buffer overflow
+    // The populateDmaBuffer() function accesses mScratchBuffer using:
+    //   mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+    // where byteOffset ranges from 0 to byteCount-1.
+    // If byteCount > mLaneStride, then for lane > 0, the access will exceed buffer bounds.
+    if (byte_count > params.laneStride) {
+        byte_count = params.laneStride;
+    }
+
+    return byte_count;
+}
+
+//=============================================================================
 // ParlioEngine - Singleton Implementation
 //=============================================================================
 
@@ -540,48 +648,20 @@ ParlioEngine::workerIsrCallback(void *user_data) {
         return;  // Invalid buffer - should never happen
     }
 
-    // Calculate byte range for this buffer
-    size_t bytes_remaining = ctx->mTotalBytes - ctx->mNextByteOffset;
-    size_t bytes_per_buffer = (ctx->mTotalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) / ParlioRingBuffer3::RING_BUFFER_COUNT;
+    // Calculate byte count using shared helper function
+    // This centralizes the LED boundary alignment, capacity limits, and lane stride capping logic
+    BufferPopulationParams params;
+    params.totalBytes = ctx->mTotalBytes;
+    params.nextByteOffset = ctx->mNextByteOffset;
+    params.ringCount = ctx->mRingCount;
+    params.ringBufferCapacity = self->mRingBufferCapacity;
+    params.dataWidth = self->mDataWidth;
+    params.laneStride = self->mLaneStride;
+    params.resetUs = self->mResetUs;
 
-    // LED boundary alignment constant
-    size_t bytes_per_led_all_lanes = 3 * ctx->mNumLanes;
-
-    // CAP bytes_per_buffer at ring buffer capacity
-    ParlioBufferCalculator calc{self->mDataWidth};
-    size_t reset_padding = calc.resetPaddingBytes(self->mResetUs);
-    size_t available_capacity = self->mRingBufferCapacity - reset_padding;  // Reserve space for reset padding
-    size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
-
-    // Reduce max by one LED boundary to prevent exact-capacity overflow
-    if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
-        max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
-    }
-
-    if (bytes_per_buffer > max_input_bytes_per_buffer) {
-        bytes_per_buffer = max_input_bytes_per_buffer;
-    }
-
-    // LED boundary alignment: Round DOWN
-    bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
-
-    // Ensure at least one LED per buffer
-    if (bytes_per_buffer < bytes_per_led_all_lanes && ctx->mTotalBytes >= bytes_per_led_all_lanes) {
-        bytes_per_buffer = bytes_per_led_all_lanes;
-    }
-
-    // For LAST buffer, take ALL remaining bytes
-    size_t byte_count;
-    size_t buffers_already_populated = ctx->mRingCount;
-    bool is_last_buffer = (buffers_already_populated >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
-                          (bytes_remaining <= bytes_per_buffer);
-    if (is_last_buffer) {
-        byte_count = bytes_remaining;
-        if (byte_count > max_input_bytes_per_buffer) {
-            byte_count = max_input_bytes_per_buffer;
-        }
-    } else {
-        byte_count = bytes_per_buffer;
+    size_t byte_count = calculateBufferByteCount(params);
+    if (byte_count == 0) {
+        return;  // No data to process
     }
 
     // Zero output buffer (ISR-safe memset)
@@ -982,67 +1062,22 @@ ParlioEngine::populateNextDMABuffer() {
         return false;
     }
 
-    // Calculate byte range for this buffer (divide total bytes into chunks)
-    size_t bytes_remaining = mIsrContext->mTotalBytes - mIsrContext->mNextByteOffset;
-    size_t bytes_per_buffer = (mIsrContext->mTotalBytes + ParlioRingBuffer3::RING_BUFFER_COUNT - 1) / ParlioRingBuffer3::RING_BUFFER_COUNT;
+    // Calculate byte count using shared helper function
+    // This centralizes the LED boundary alignment, capacity limits, and lane stride capping logic
+    // See calculateBufferByteCount() for detailed documentation of the algorithm.
+    BufferPopulationParams params;
+    params.totalBytes = mIsrContext->mTotalBytes;
+    params.nextByteOffset = mIsrContext->mNextByteOffset;
+    params.ringCount = mIsrContext->mRingCount;
+    params.ringBufferCapacity = mRingBufferCapacity;
+    params.dataWidth = mDataWidth;
+    params.laneStride = mLaneStride;
+    params.resetUs = mResetUs;
 
-    // LED boundary alignment constant: 3 bytes (RGB) × lane count
-    // Used for both capacity calculation and alignment rounding
-    size_t bytes_per_led_all_lanes = 3 * mDataWidth;
-
-    // CAP bytes_per_buffer at ring buffer capacity to enable streaming for large strips
-    ParlioBufferCalculator calc{mDataWidth};
-    size_t reset_padding = calc.resetPaddingBytes(mResetUs);
-    size_t available_capacity = mRingBufferCapacity - reset_padding;  // Reserve space for reset padding
-    size_t max_input_bytes_per_buffer = available_capacity / calc.outputBytesPerInputByte();
-
-    // CRITICAL FIX: Reduce max by one LED boundary to prevent exact-capacity overflow
-    if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
-        max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
-    }
-
-    if (bytes_per_buffer > max_input_bytes_per_buffer) {
-        bytes_per_buffer = max_input_bytes_per_buffer;
-    }
-
-    // LED boundary alignment: Round DOWN to nearest multiple of (3 bytes × lane count)
-    bytes_per_buffer = (bytes_per_buffer / bytes_per_led_all_lanes) * bytes_per_led_all_lanes;
-
-    // Edge case: Ensure at least one LED across all lanes per buffer if data exists
-    if (bytes_per_buffer < bytes_per_led_all_lanes && mIsrContext->mTotalBytes >= bytes_per_led_all_lanes) {
-        bytes_per_buffer = bytes_per_led_all_lanes;
-    }
-
-    // FIX: For the LAST buffer, take ALL remaining bytes (don't round down and lose data)
-    size_t byte_count;
-    size_t buffers_already_populated = mIsrContext->mRingCount;
-    bool is_last_buffer = (buffers_already_populated >= ParlioRingBuffer3::RING_BUFFER_COUNT - 1) ||
-                          (bytes_remaining <= bytes_per_buffer);
-    if (is_last_buffer) {
-        byte_count = bytes_remaining;  // Last buffer takes all remaining bytes
-        // BUT cap at buffer capacity (streaming will handle rest)
-        if (byte_count > max_input_bytes_per_buffer) {
-            byte_count = max_input_bytes_per_buffer;
-        }
-    } else {
-        byte_count = bytes_per_buffer;  // Earlier buffers use aligned size
-    }
-
-    // CRITICAL FIX (Iteration 3): Prevent 0-byte buffers when data remains
-    // If bytes_per_buffer rounded down to 0 (e.g., totalBytes=1, LED boundary=3),
-    // we still need to transmit the remaining bytes. This happens when:
-    // 1. Small totalBytes < bytes_per_led_all_lanes (partial LED)
-    // 2. Rounding caused byte_count to become 0
-    // In these cases, take remaining bytes WITHOUT alignment restrictions.
-    if (byte_count == 0 && bytes_remaining > 0 && mIsrContext->mNextByteOffset < mIsrContext->mTotalBytes) {
-        byte_count = bytes_remaining;
-        // Cap at buffer capacity
-        if (byte_count > max_input_bytes_per_buffer) {
-            byte_count = max_input_bytes_per_buffer;
-        }
-    }
+    size_t byte_count = calculateBufferByteCount(params);
 
     // SAFETY CHECK: Never exceed total bytes (prevents overflow from rounding errors)
+    // This additional check is specific to populateNextDMABuffer (not in workerIsr)
     if (mIsrContext->mNextByteOffset + byte_count > mIsrContext->mTotalBytes) {
         byte_count = mIsrContext->mTotalBytes - mIsrContext->mNextByteOffset;
     }
@@ -1112,11 +1147,27 @@ bool ParlioEngine::initialize(size_t dataWidth,
         mPeripheral = getParlioPeripheral();
     }
 
-    // Check if already initialized AND peripheral is still initialized
-    // This handles the case where mock.reset() was called but engine still thinks it's initialized
-    if (mInitialized && mPeripheral && mPeripheral->isInitialized()) {
-        FL_LOG_PARLIO("PARLIO_INIT: Already initialized, returning true");
-        return true; // Already initialized
+    // Check if already initialized AND peripheral is still initialized AND configuration matches
+    // This handles the case where:
+    // 1. mock.reset() was called but engine still thinks it's initialized
+    // 2. Parameters changed (different dataWidth, pins, etc.) requiring reconfiguration
+    // CRITICAL: Must compare configuration to avoid buffer overflows when tests
+    // change lane count without calling mock.reset()
+    bool config_matches = (mDataWidth == dataWidth &&
+                          mPins.size() == pins.size() &&
+                          mTimingT1Ns == timing.t1_ns &&
+                          mTimingT2Ns == timing.t2_ns &&
+                          mTimingT3Ns == timing.t3_ns);
+    if (mInitialized && mPeripheral && mPeripheral->isInitialized() && config_matches) {
+        FL_LOG_PARLIO("PARLIO_INIT: Already initialized with matching config, returning true");
+        return true; // Already initialized with same configuration
+    }
+
+    // If configuration changed, we need to re-initialize
+    if (mInitialized && !config_matches) {
+        FL_DBG("PARLIO_INIT: Configuration changed, re-initializing");
+        mInitialized = false;
+        mTxUnitEnabled = false;
     }
 
     // If we reach here, either first initialization or peripheral was reset
@@ -1290,10 +1341,34 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
     // Store scratch buffer reference (NOT owned by this class)
     mScratchBuffer = scratchBuffer;
-    mLaneStride = laneStride;
+
+    // CRITICAL FIX: Validate and compute correct lane stride
+    // The lane stride represents bytes per lane in the scratch buffer.
+    // If caller incorrectly passes totalBytes as laneStride, compute the correct value.
+    // The scratch buffer layout is: [lane0_data][lane1_data]...[laneN_data]
+    // where each lane has (totalBytes / numLanes) bytes.
+    size_t computed_lane_stride = totalBytes / numLanes;
+
+    // Use the smaller of provided and computed stride to prevent buffer overflow
+    // If laneStride is correct (= computed), this is a no-op
+    // If laneStride is incorrect (= totalBytes), this fixes it
+    if (laneStride > computed_lane_stride) {
+        FL_DBG("PARLIO: Correcting laneStride from " << laneStride << " to " << computed_lane_stride);
+        mLaneStride = computed_lane_stride;
+    } else {
+        mLaneStride = laneStride;
+    }
 
     // Initialize IsrContext state for ring buffer streaming
-    mIsrContext->mTotalBytes = totalBytes;
+    // CRITICAL FIX (Iteration 3): mTotalBytes represents bytes-per-lane, not total bytes
+    // The buffer access pattern uses: mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+    // For this to work correctly, startByte+byteOffset must stay within laneStride.
+    // Example: 4 lanes, 15 bytes/lane, 60 total bytes
+    //   - mTotalBytes should be 15 (per lane), loop iterates byte positions 0-14
+    //   - Each iteration processes lane[i][bytePos] for all lanes simultaneously
+    //   - lane 0 accesses [0-14], lane 1 accesses [15-29], etc.
+    // CRITICAL: Use the corrected mLaneStride, NOT the original laneStride parameter
+    mIsrContext->mTotalBytes = mLaneStride;
     mIsrContext->mNumLanes = numLanes;
     mIsrContext->mCurrentByte = 0;
     mIsrContext->mStreamComplete = false;
