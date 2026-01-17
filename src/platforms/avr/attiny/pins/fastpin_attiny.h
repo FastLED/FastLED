@@ -213,15 +213,20 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #elif defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__)  || defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__)
 #pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
 
-#elif defined(__AVR_ATtinyxy4__)
+#elif defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny804__) || defined(__AVR_ATtiny404__)
 #define MAX_PIN 12
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
 _FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B);
 _FL_DEFPIN( 8, 1, A); _FL_DEFPIN( 9, 2, A); _FL_DEFPIN(10, 3, A); _FL_DEFPIN(11, 0, A);
 
+// SPI pins: MOSI=PA1(8), MISO=PA2(9), SCK=PA3(10), SS=PA4(0)
+#define SPI_DATA 8
+#define SPI_CLOCK 10
+#define SPI_SELECT 0
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATtinyxy6__)
+#elif defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny3216__)
 
 #define MAX_PIN 18
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
@@ -230,9 +235,14 @@ _FL_DEFPIN( 8, 1, B); _FL_DEFPIN( 9, 0, B); _FL_DEFPIN(10, 0, C); _FL_DEFPIN(11,
 _FL_DEFPIN(12, 2, C); _FL_DEFPIN(13, 3, C); _FL_DEFPIN(14, 1, A); _FL_DEFPIN(15, 2, A);
 _FL_DEFPIN(16, 3, A); _FL_DEFPIN(17, 0, A);
 
+// SPI pins: MOSI=PA1(14), MISO=PA2(15), SCK=PA3(16), SS=PA4(0)
+#define SPI_DATA 14
+#define SPI_CLOCK 16
+#define SPI_SELECT 0
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATtinyxy7__)
+#elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtiny1617__) || defined(__AVR_ATtiny817__) || defined(__AVR_ATtiny417__) || defined(__AVR_ATtiny3217__)
 
 #define MAX_PIN 22
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
@@ -242,6 +252,11 @@ _FL_DEFPIN(12, 0, C); _FL_DEFPIN(13, 1, C); _FL_DEFPIN(14, 2, C); _FL_DEFPIN(15,
 _FL_DEFPIN(16, 4, C); _FL_DEFPIN(17, 5, C); _FL_DEFPIN(18, 1, A); _FL_DEFPIN(19, 2, A);
 _FL_DEFPIN(20, 3, A); _FL_DEFPIN(21, 0, A);
 
+// SPI pins: MOSI=PA1(18), MISO=PA2(19), SCK=PA3(20), SS=PA4(0)
+#define SPI_DATA 18
+#define SPI_CLOCK 20
+#define SPI_SELECT 0
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 #endif

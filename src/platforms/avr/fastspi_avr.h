@@ -351,8 +351,16 @@ public:
 		FastPin<_CLOCK_PIN>::setOutput();
 		FastPin<_DATA_PIN>::setOutput();
 
+		// Configure PORTMUX for SPI (varies by chip family)
+		// megaAVR 0-series (ATmega4809) uses PORTMUX_TWISPIROUTEA
+		// tinyAVR 0/1-series (ATtiny1604 etc) uses PORTMUX.CTRLB
+#if defined(PORTMUX_TWISPIROUTEA)
 		// Arduino Nano Every documentation lists SPI pins in ALT2 portmux position
 		PORTMUX_TWISPIROUTEA = PORTMUX_SPI01_bm;
+#elif defined(PORTMUX_CTRLB)
+		// tinyAVR 0/1-series: use default SPI pin positions (no portmux change needed)
+		// PORTMUX.CTRLB bits are for SPI0 pin swap - we use default (0)
+#endif
 
 		// Set SPI master mode and clock scaler.
 		SPI0_CTRLA = SPI_MASTER_bm;
