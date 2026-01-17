@@ -17,6 +17,7 @@ import re
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
+
 # List of banned logging macros that cannot be used in FL_IRAM functions
 # Note: FL_LOG_* pattern excludes FL_LOG_*ASYNC* variants (those are allowed)
 BANNED_MACROS = [

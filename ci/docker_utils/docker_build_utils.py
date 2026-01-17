@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 FastLED Docker Build Utilities
@@ -12,6 +13,7 @@ import logging
 import subprocess
 from pathlib import Path
 from typing import Optional
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

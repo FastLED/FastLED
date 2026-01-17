@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
 """RunningProcessGroup - Unified process execution management for FastLED CI.
@@ -231,9 +232,9 @@ class RunningProcessGroup:
 
         # Track failed processes for proper error reporting
         failed_processes: list[str] = []  # Processes killed due to timeout/stuck
-        exit_failed_processes: list[tuple[RunningProcess, int]] = (
-            []
-        )  # Processes that failed with non-zero exit code
+        exit_failed_processes: list[
+            tuple[RunningProcess, int]
+        ] = []  # Processes that failed with non-zero exit code
 
         # Track completed processes for timing summary
         completed_timings: list[ProcessTiming] = []

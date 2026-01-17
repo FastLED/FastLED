@@ -7,6 +7,7 @@ from .namespace_checker import NamespaceIncludeChecker
 from .pragma_once_checker import PragmaOnceChecker
 from .std_namespace_checker import StdNamespaceChecker
 
+
 __all__ = [
     "BannedHeadersChecker",
     "BannedDefineChecker",

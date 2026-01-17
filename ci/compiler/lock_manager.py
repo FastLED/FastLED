@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """
 Lock management for FastLED PlatformIO builds.
 

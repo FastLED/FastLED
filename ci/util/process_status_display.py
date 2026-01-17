@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 if TYPE_CHECKING:
     from ci.util.running_process_group import GroupStatus, RunningProcessGroup
 

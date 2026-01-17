@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """Auto-generate @filter/@end-filter blocks from C++ platform guards in sketches.
 

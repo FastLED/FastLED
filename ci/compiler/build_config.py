@@ -15,6 +15,7 @@ from ci.compiler.compiler import CacheType
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 if TYPE_CHECKING:
     from ci.boards import Board
     from ci.compiler.path_manager import FastLEDPaths

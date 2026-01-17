@@ -218,9 +218,7 @@ def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) 
         "--src-filters=+<src/>",
         "--tool=include-what-you-use",
         "--flags",
-    ] + iwyu_cmd[
-        1:
-    ]  # Skip the include-what-you-use binary name
+    ] + iwyu_cmd[1:]  # Skip the include-what-you-use binary name
 
     try:
         result = subprocess.run(pio_cmd)

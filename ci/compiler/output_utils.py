@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """Output management utilities for FastLED compilation.
 
 This module handles validation and copying of build artifacts to output locations.

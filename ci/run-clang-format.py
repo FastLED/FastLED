@@ -28,6 +28,7 @@ from typing import Any, Generator, Optional
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 try:
     from subprocess import DEVNULL  # py3k
 except ImportError:

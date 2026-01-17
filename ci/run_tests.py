@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Simple test runner for FastLED unit tests.
@@ -21,6 +22,7 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.util.test_exceptions import TestExecutionFailedException, TestFailureInfo
+
 
 _ABORT_EVENT = threading.Event()
 

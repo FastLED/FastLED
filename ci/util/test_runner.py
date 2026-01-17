@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 WARNING: sys.stdout.flush() causes blocking issues on Windows with QEMU/subprocess processes!
@@ -40,6 +41,7 @@ from ci.util.test_types import (
     determine_test_categories,
 )
 from ci.util.timestamp_print import ts_print
+
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 240
@@ -1050,9 +1052,9 @@ def _run_processes_parallel(
 
     # Track failed processes for proper error reporting
     failed_processes: list[str] = []  # Processes killed due to timeout/stuck
-    exit_failed_processes: list[tuple[RunningProcess, int]] = (
-        []
-    )  # Processes that failed with non-zero exit code
+    exit_failed_processes: list[
+        tuple[RunningProcess, int]
+    ] = []  # Processes that failed with non-zero exit code
 
     # Track completed processes for timing summary
     completed_timings: list[ProcessTiming] = []

@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ci.util.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 # PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
 

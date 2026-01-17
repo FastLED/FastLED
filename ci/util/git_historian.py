@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """
 Git Historian - Fast code search combining working tree and git history
 
@@ -14,6 +15,7 @@ import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 
 # --- tiny helpers ------------------------------------------------------------
 

@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --iwyu            Run IWYU (Include-What-You-Use) analysis only"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
-            echo "Python linting includes: ruff + isort (--profile black) + black + flake8 + pyright."
+            echo "Python linting includes: ruff (lint + format) + flake8 + pyright."
             echo "C++ linting includes: clang-format and custom checkers."
             echo "IWYU (Include-What-You-Use) runs ONLY with --full or --iwyu flags."
             echo "JavaScript linting: FAST ONLY (skips if not available)."
@@ -104,18 +104,14 @@ if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
     echo "📝 PYTHON LINTING"
     echo "------------------"
     PYTHON_LINT_START=$(date +%s)
-    echo "Running ruff check (linting)"
+    echo "Running ruff check (linting + import sorting)"
     uv run ruff check --fix test.py
     uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-    echo "Running ruff format (formatting + import sorting)"
+    echo "Running ruff format (formatting)"
     uv run ruff format test.py
     uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
-    echo "Running isort (import sorting with black profile)"
-    uv run isort --profile black test.py
-    find ci -name "*.py" -not -path "ci/tmp/*" -not -path "ci/wasm/*" -not -path "*/.fbuild/*" -not -path "*/.pio/*" -exec uv run isort --profile black {} +
-    echo "Running black (code formatting)"
-    uv run black test.py
-    find ci -name "*.py" -not -path "ci/tmp/*" -not -path "ci/wasm/*" -not -path "*/.fbuild/*" -not -path "*/.pio/*" -exec uv run black {} +
+    # Note: ruff handles both import sorting (via lint.isort) and formatting (via ruff.format)
+    # We no longer run standalone isort/black as they can conflict with ruff's output
     echo "Running flake8 (KeyboardInterrupt handling checks)"
     uv run flake8 test.py ci --exclude ci/tmp,ci/wasm,**/.pio
     PYTHON_LINT_DURATION=$(get_elapsed_seconds $PYTHON_LINT_START)
@@ -388,7 +384,7 @@ echo "  - Use 'bash lint --js' for JavaScript linting only"
 echo "  - Use 'bash lint --cpp' for C++ linting only"
 echo "  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis"
 echo "  - Use 'bash lint --iwyu' to run IWYU analysis only"
-echo "  - Python linting includes: ruff + isort (--profile black) + black + flake8 + pyright"
+echo "  - Python linting includes: ruff (lint + format) + flake8 + pyright"
 echo "  - C++ linting includes: clang-format and custom checkers"
 echo "  - IWYU runs ONLY with --full or --iwyu flags"
 echo "  - JavaScript linting: FAST ONLY (no slow fallback)"

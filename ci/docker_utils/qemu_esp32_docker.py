@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Docker-based QEMU ESP32 Runner
@@ -21,6 +22,7 @@ from typing import Any, Optional
 from running_process import RunningProcess
 
 from ci.docker_utils.DockerManager import DockerManager
+
 
 # Docker image constants
 DEFAULT_DOCKER_IMAGE = "espressif/idf:latest"

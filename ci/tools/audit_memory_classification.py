@@ -22,6 +22,7 @@ import sys
 
 from ci.boards import ALL
 
+
 # Mapping of board characteristics to expected memory class
 EXPECTED_MEMORY_BY_PATTERN = {
     # AVR boards (all low-memory)

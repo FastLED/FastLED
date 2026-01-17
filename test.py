@@ -32,6 +32,7 @@ from ci.util.test_types import (
 )
 from ci.util.timestamp_print import ts_print
 
+
 _CANCEL_WATCHDOG = threading.Event()
 
 _TIMEOUT_EVERYTHING = 600

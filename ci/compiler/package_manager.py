@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 if TYPE_CHECKING:
     from ci.boards import Board
     from ci.compiler.path_manager import FastLEDPaths

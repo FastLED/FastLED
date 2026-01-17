@@ -17,6 +17,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 print(
     f"[zig_toolchain_override.py] Running on platform: {platform.system()}",
     file=sys.stderr,

@@ -11,9 +11,9 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 def _create_board_info(path: Path) -> dict[str, Any]:
     build_info = json.loads(path.read_text())
     assert build_info.keys(), f"No boards found in {build_info}"
-    assert (
-        len(build_info.keys()) == 1
-    ), f"Multiple boards found in {build_info}, so correct board should be specified"
+    assert len(build_info.keys()) == 1, (
+        f"Multiple boards found in {build_info}, so correct board should be specified"
+    )
     return build_info[next(iter(build_info))]
 
 

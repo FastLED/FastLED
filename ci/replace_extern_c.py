@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 # Regex patterns for matching extern "C" blocks
 PATTERN_OPEN = re.compile(
     r'#ifdef\s+__cplusplus\s*\n\s*extern\s+"C"\s*\{\s*\n\s*#endif', re.MULTILINE

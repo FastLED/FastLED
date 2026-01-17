@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """ESP32 artifact management for QEMU and flashing.
 
 This module provides clean separation of concerns for ESP32-specific artifact

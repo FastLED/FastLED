@@ -14,6 +14,7 @@ from rich.panel import Panel
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
 

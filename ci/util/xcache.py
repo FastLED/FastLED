@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 xcache.py - Enhanced sccache wrapper with response file support
@@ -34,6 +35,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
 
 # os.environ["XCACHE_DEBUG"] = "1"
 

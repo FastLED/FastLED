@@ -4,6 +4,7 @@ import re
 
 from ci.util.check_files import FileContent, FileContentChecker
 
+
 # Skip patterns for directories that contain third-party code or build artifacts
 SKIP_PATTERNS = [
     ".venv",

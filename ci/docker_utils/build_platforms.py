@@ -11,6 +11,7 @@ during Docker image builds.
 
 from typing import Optional
 
+
 # Platform families and their included boards
 # Key = platform family name (used in Docker image names)
 # Value = list of board names (from ci/boards.py) to pre-cache

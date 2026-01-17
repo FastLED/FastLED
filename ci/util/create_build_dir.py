@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 # pyright: reportUnknownMemberType=false
 """
 Create build directory for project.

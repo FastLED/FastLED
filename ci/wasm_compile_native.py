@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Native WASM compilation using clang-tool-chain's emscripten.
@@ -26,6 +27,7 @@ import tomllib
 from pathlib import Path
 
 from ci.wasm_tools import get_emcc
+
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent

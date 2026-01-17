@@ -45,6 +45,7 @@ import re
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
+
 # Pattern to match deep platform header includes (more than one layer deep)
 # Examples:
 #   - platforms/shared/int_windows.h (DEEP - has subdirectory)

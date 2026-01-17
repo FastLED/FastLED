@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """Docker management for FastLED compilation.
 
 This module provides clean abstraction layers for Docker operations including

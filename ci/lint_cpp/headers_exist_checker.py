@@ -28,6 +28,7 @@ from pathlib import Path
 from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
+
 TESTS_ROOT = PROJECT_ROOT / "tests"
 SRC_ROOT = PROJECT_ROOT / "src"
 

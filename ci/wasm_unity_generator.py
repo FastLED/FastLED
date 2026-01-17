@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 WASM Unity Build Generator
@@ -39,6 +40,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
+
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent

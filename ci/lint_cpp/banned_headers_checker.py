@@ -15,6 +15,7 @@ from dataclasses import dataclass
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 
+
 # ============================================================================
 # CONFIGURATION CONSTANTS
 # ============================================================================

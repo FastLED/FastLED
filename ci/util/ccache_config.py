@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
+
 # ruff: noqa: F821
 # pyright: reportUndefinedVariable=false
 Import("env")  # type: ignore # Import is provided by PlatformIO

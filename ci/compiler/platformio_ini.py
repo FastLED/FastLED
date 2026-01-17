@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 PlatformIO INI file parser and writer.
@@ -25,6 +26,7 @@ from typing import (
     cast,
 )
 from urllib.error import HTTPError
+
 
 if TYPE_CHECKING:
     from ci.compiler.platformio_cache import PlatformIOCache
@@ -2189,9 +2191,9 @@ class PlatformIOIni:
             return
 
         # Step 4: Deduplicate artifacts by URL to avoid redundant processing
-        unique_artifacts: dict[str, tuple[bool, str]] = (
-            {}
-        )  # url -> (is_framework, env_section)
+        unique_artifacts: dict[
+            str, tuple[bool, str]
+        ] = {}  # url -> (is_framework, env_section)
         for artifact_url, is_framework, env_section in zip_artifacts:
             if artifact_url not in unique_artifacts:
                 unique_artifacts[artifact_url] = (is_framework, env_section)

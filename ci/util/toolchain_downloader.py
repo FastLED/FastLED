@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Toolchain Pre-downloader for PlatformIO
@@ -28,6 +29,7 @@ from ci.util.github_url_converter import (
     format_manual_install_warning,
 )
 from ci.util.resumable_downloader import ResumableDownloader
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")

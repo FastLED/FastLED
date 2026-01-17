@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env -S uv run --script
 
 
@@ -22,6 +23,7 @@ from pathlib import Path
 
 # Import httpx for HTTP requests (dynamically managed by uv)
 import httpx
+
 
 # Force UTF-8 output for Windows consoles
 if sys.platform.startswith("win"):

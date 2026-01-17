@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """Sketch filtering system for selective compilation based on platform/memory constraints.
 
 This module provides parsing and evaluation of @filter blocks in .ino files.

@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 """
@@ -27,6 +28,7 @@ from pathlib import Path
 from ci.boards import Board, create_board  # type: ignore
 from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.util.locked_print import locked_print
+
 
 HERE = Path(__file__).parent.resolve()
 

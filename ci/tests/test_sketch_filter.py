@@ -576,9 +576,9 @@ some code
             )
 
             skip, _ = should_skip_sketch(test_board, filter_obj)
-            assert (
-                skip == should_skip_expected
-            ), f"Failed for {description}: board='{board_name}'"
+            assert skip == should_skip_expected, (
+                f"Failed for {description}: board='{board_name}'"
+            )
 
 
 class TestPintestFilter:
@@ -628,9 +628,9 @@ class TestPintestFilter:
 
         # After fix: atmega8a should be skipped due to memory constraints
         # The filter now excludes atmega8* boards because atmega8a only has 8KB flash
-        assert (
-            should_skip is True
-        ), f"atmega8a should be skipped for Pintest (reason: {reason})"
+        assert should_skip is True, (
+            f"atmega8a should be skipped for Pintest (reason: {reason})"
+        )
         assert "atmega8" in reason.lower() or "board" in reason.lower()
 
 

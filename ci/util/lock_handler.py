@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Lock handler utility for detecting and breaking file locks on Windows.
@@ -13,6 +14,7 @@ import subprocess
 import time
 from pathlib import Path
 from typing import Any
+
 
 try:
     import psutil

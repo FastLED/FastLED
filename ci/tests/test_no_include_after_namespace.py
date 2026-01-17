@@ -5,6 +5,7 @@ import unittest
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 EXAMPLES_ROOT = PROJECT_ROOT / "examples"
 TESTS_ROOT = PROJECT_ROOT / "tests"

@@ -12,6 +12,7 @@ from ci.boards import NATIVE
 from ci.compiler.board_example_utils import should_skip_example_for_board
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 console = Console()
 
 

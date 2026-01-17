@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 """Docker image build utilities for FastLED PlatformIO compilation.
 
 This module provides functions for building Docker images with pre-cached

@@ -1,5 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
+
 #!/usr/bin/env python3
 """
 Build Process Registration Client
@@ -23,6 +24,7 @@ import json
 import logging
 import os
 from pathlib import Path
+
 
 # Daemon configuration (must match daemon settings)
 DAEMON_DIR = Path.home() / ".fastled" / "daemon"
