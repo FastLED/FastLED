@@ -94,6 +94,9 @@ INPUT_ON_TRIGGER = "VALIDATION_READY:START:10"
 class Args:
     """Parsed command-line arguments for validation test runner."""
 
+    # Positional argument
+    environment_positional: str | None
+
     # Driver selection flags
     parlio: bool
     rmt: bool
@@ -123,7 +126,8 @@ class Args:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
-  %(prog)s --parlio                    # Test only PARLIO driver
+  %(prog)s --parlio                    # Auto-detect env, test only PARLIO driver
+  %(prog)s esp32s3 --parlio            # Test esp32s3, PARLIO driver
   %(prog)s --rmt --spi                 # Test RMT and SPI drivers
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
@@ -150,6 +154,13 @@ See Also:
   - examples/Validation/Validation.ino - Validation sketch documentation
   - CLAUDE.md Section "Live Device Testing (AI Agents)" - Usage guidelines
         """,
+        )
+
+        # Positional argument for environment
+        parser.add_argument(
+            "environment_positional",
+            nargs="?",
+            help="PlatformIO environment to build (e.g., esp32s3, esp32dev). If omitted, auto-detects from attached device.",
         )
 
         # Driver selection flags
@@ -252,6 +263,7 @@ See Also:
 
         # Convert argparse.Namespace to Args dataclass
         return Args(
+            environment_positional=parsed.environment_positional,
             parlio=parsed.parlio,
             rmt=parsed.rmt,
             spi=parsed.spi,
@@ -279,6 +291,12 @@ def run(args: Args | None = None) -> int:
     """Main entry point."""
     args = args or Args.parse_args()
     assert args is not None
+
+    # ============================================================
+    # Environment Resolution
+    # ============================================================
+    # Resolve environment: positional argument takes precedence over --env flag
+    final_environment = args.environment_positional or args.environment
 
     # ============================================================
     # Driver Selection Validation
@@ -314,6 +332,7 @@ def run(args: Args | None = None) -> int:
         print("  --all       Test all drivers")
         print("\nExample commands:")
         print("  uv run ci/validate.py --parlio")
+        print("  uv run ci/validate.py esp32s3 --parlio")
         print("  uv run ci/validate.py --rmt --spi")
         print("  uv run ci/validate.py --all")
         print()
@@ -426,8 +445,8 @@ def run(args: Args | None = None) -> int:
     print("=" * 60)
     print(f"Project: {build_dir}")
     print(f"Sketch: examples/Validation")
-    if args.environment:
-        print(f"Environment: {args.environment}")
+    if final_environment:
+        print(f"Environment: {final_environment}")
     print(f"Upload port: {upload_port}")
     print("=" * 60)
     print()
@@ -452,7 +471,7 @@ def run(args: Args | None = None) -> int:
 
         from ci.util.pio_package_client import ensure_packages_installed
 
-        if not ensure_packages_installed(build_dir, args.environment, timeout=1800):
+        if not ensure_packages_installed(build_dir, final_environment, timeout=1800):
             print("\n❌ Package installation failed or timed out")
             return 1
 
@@ -472,7 +491,7 @@ def run(args: Args | None = None) -> int:
         # ============================================================
         # PHASE 2: Compile (NO LOCK - parallelizable)
         # ============================================================
-        if not run_compile(build_dir, args.environment, args.verbose):
+        if not run_compile(build_dir, final_environment, args.verbose):
             return 1
 
         # ============================================================
@@ -493,13 +512,13 @@ def run(args: Args | None = None) -> int:
                 kill_port_users(upload_port)
 
             # Phase 3: Upload firmware
-            if not run_upload(build_dir, args.environment, upload_port, args.verbose):
+            if not run_upload(build_dir, final_environment, upload_port, args.verbose):
                 return 1
 
             # Phase 4: Monitor serial output with validation patterns
             success, output, rpc_handler = run_monitor(
                 build_dir,
-                args.environment,
+                final_environment,
                 upload_port,
                 args.verbose,
                 timeout_seconds,

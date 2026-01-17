@@ -138,21 +138,24 @@ You **must** specify at least one LED driver to test using one of these flags:
 **Usage Examples:**
 ```bash
 # Test specific driver (MANDATORY - must specify at least one)
-bash validate --parlio
+bash validate --parlio                    # Auto-detect environment
+bash validate esp32s3 --parlio            # Specify esp32s3 environment
 bash validate --rmt
 bash validate --spi
 bash validate --uart
 
 # Test multiple drivers
-bash validate --parlio --rmt
+bash validate --parlio --rmt              # Auto-detect environment
+bash validate esp32dev --parlio --rmt     # Specify esp32dev environment
 bash validate --spi --uart
 
 # Test all drivers
-bash validate --all
+bash validate --all                       # Auto-detect environment
+bash validate esp32s3 --all               # Specify esp32s3 environment
 
 # Combined with other options
 bash validate --parlio --skip-lint
-bash validate --rmt --timeout 120
+bash validate esp32s3 --rmt --timeout 120
 bash validate --all --skip-lint --timeout 180
 ```
 
@@ -175,6 +178,7 @@ Available driver options:
 
 Example commands:
   bash validate --parlio
+  bash validate esp32s3 --parlio
   bash validate --rmt --spi
   bash validate --all
 ```

@@ -6,7 +6,8 @@
 # to catch ISR failures, hardware issues, and test matrix errors.
 #
 # Usage:
-#   bash validate                   # Run with default patterns
+#   bash validate                   # Run with default patterns (auto-detect environment)
+#   bash validate esp32s3           # Run on esp32s3 environment
 #   bash validate --timeout 120     # Override timeout
 #   bash validate --skip-lint       # Skip linting phase
 #   bash validate --help            # Show help
@@ -42,7 +43,11 @@ show_help() {
 FastLED Validation Test Wrapper
 
 Usage:
-  bash validate [OPTIONS]
+  bash validate [ENVIRONMENT] [OPTIONS]
+
+Positional Arguments:
+  ENVIRONMENT         Optional PlatformIO environment (e.g., esp32s3, esp32dev)
+                      If omitted, auto-detects from attached device
 
 Description:
   Runs the Validation.ino sketch with comprehensive --expect and --fail-on patterns
@@ -91,8 +96,10 @@ Driver Selection (JSON-RPC):
   Any other options are passed directly to 'bash debug Validation'
 
 Examples:
-  bash validate                       # Run with all default patterns (all drivers)
-  bash validate --parlio              # Test only PARLIO driver
+  bash validate                       # Run with auto-detected environment (all drivers)
+  bash validate esp32s3               # Run on esp32s3 environment (all drivers)
+  bash validate esp32dev --parlio     # Run on esp32dev, test only PARLIO driver
+  bash validate --parlio              # Auto-detect environment, test only PARLIO driver
   bash validate --rmt --spi           # Test only RMT and SPI drivers
   bash validate --timeout 60          # Longer timeout for debugging
   bash validate --skip-lint           # Skip linting for faster iteration
@@ -116,6 +123,8 @@ USE_DEFAULT_EXPECT=true
 USE_DEFAULT_FAIL_ON=true
 EXTRA_ARGS=()
 DRIVERS=()
+ENVIRONMENT=""
+FIRST_POSITIONAL=true
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -155,8 +164,19 @@ while [[ $# -gt 0 ]]; do
             DRIVERS+=("PARLIO" "RMT" "SPI" "UART" "I2S")
             shift
             ;;
-        *)
+        -*)
+            # Options starting with dash are passed through
             EXTRA_ARGS+=("$1")
+            shift
+            ;;
+        *)
+            # First non-option argument is the environment
+            if [[ "$FIRST_POSITIONAL" == "true" ]]; then
+                ENVIRONMENT="$1"
+                FIRST_POSITIONAL=false
+            else
+                EXTRA_ARGS+=("$1")
+            fi
             shift
             ;;
     esac
@@ -180,6 +200,11 @@ fi
 
 # Build final command (bypass bash debug wrapper to avoid --check-usage)
 CMD=(uv run ci/debug_attached.py Validation)
+
+# Add environment if specified
+if [[ -n "$ENVIRONMENT" ]]; then
+    CMD+=(--env "$ENVIRONMENT")
+fi
 
 # Add input-on-trigger to auto-send START when VALIDATION_READY appears
 # Format: PATTERN:TEXT[:TIMEOUT] (timeout is optional)
