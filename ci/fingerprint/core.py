@@ -75,12 +75,12 @@ class FingerprintCache:
         """
         Load cache from JSON file, return empty dict if file doesn't exist.
 
+        Uses try-except instead of exists() check to avoid TOCTOU race condition.
+        This is the same pattern used in meson_runner.py for test_list_cache.
+
         Returns:
             Dictionary mapping file paths to cache entries
         """
-        if not self.cache_file.exists():
-            return {}
-
         try:
             with open(self.cache_file, "r") as f:
                 data = json.load(f)
@@ -93,8 +93,11 @@ class FingerprintCache:
                     md5_hash=entry_data["md5_hash"],
                 )
             return cache
-        except (json.JSONDecodeError, KeyError, TypeError):
-            # Cache corrupted - start fresh
+        except FileNotFoundError:
+            # Cache file doesn't exist yet - start fresh
+            return {}
+        except (json.JSONDecodeError, KeyError, TypeError, IOError, OSError):
+            # Cache corrupted or inaccessible - start fresh
             return {}
 
     def _save_cache(self) -> None:
