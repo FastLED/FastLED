@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "fbuild",  # Editable install from ~/dev/fbuild - see [tool.uv.sources]
     "platformio==6.1.18",
     "python-dateutil",
     "ruff",
@@ -120,7 +121,8 @@ exclude = [
     "**/*.egg-info",
     "tmp.py",
     "ci/validation_agent.py",
-    "ci/validation_loop.py"
+    "ci/validation_loop.py",
+    "ci/util/fbuild_runner.py"
 ]
 
 # Type checking configuration
@@ -217,3 +219,7 @@ pythonVersion = "3.11"
 pythonPlatform = "All"
 # Enforce return type annotations even for test methods
 reportReturnType = "error"
+
+[tool.uv.sources]
+# Editable local install of fbuild from ~/dev/fbuild
+fbuild = { path = "../fbuild", editable = true }

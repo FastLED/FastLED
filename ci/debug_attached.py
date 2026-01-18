@@ -1086,8 +1086,50 @@ Examples:
         metavar="COMMANDS",
         help='JSON-RPC commands to send to device at startup. Accepts JSON string: \'{"function":"ping"}\' or \'[{"function":"setDrivers","args":["PARLIO"]}]\', or file path: @commands.json',
     )
+    parser.add_argument(
+        "--use-fbuild",
+        action="store_true",
+        help="Use fbuild for compile and upload instead of PlatformIO (default for esp32s3/esp32c6)",
+    )
+    parser.add_argument(
+        "--no-fbuild",
+        action="store_true",
+        help="Force PlatformIO even for esp32s3/esp32c6 (disables fbuild default)",
+    )
 
     return parser.parse_args()
+
+
+def _should_use_fbuild(
+    environment: str | None, use_fbuild_flag: bool, no_fbuild_flag: bool
+) -> bool:
+    """Determine if fbuild should be used for compilation and upload.
+
+    fbuild is the default for esp32s3 and esp32c6 (RISC-V) environments.
+
+    Args:
+        environment: PlatformIO environment name (e.g., "esp32s3", "esp32c6")
+        use_fbuild_flag: True if --use-fbuild was explicitly specified
+        no_fbuild_flag: True if --no-fbuild was explicitly specified
+
+    Returns:
+        True if fbuild should be used, False otherwise
+    """
+    # Explicit --no-fbuild takes priority
+    if no_fbuild_flag:
+        return False
+
+    # Explicit --use-fbuild
+    if use_fbuild_flag:
+        return True
+
+    # Default: use fbuild for esp32s3 and esp32c6
+    if environment:
+        env_lower = environment.lower()
+        if "esp32s3" in env_lower or "esp32c6" in env_lower:
+            return True
+
+    return False
 
 
 def main() -> int:
@@ -1269,8 +1311,23 @@ def main() -> int:
         # No lock needed: each project has isolated build directory.
         # Multiple agents can compile different projects simultaneously.
 
-        if not run_compile(build_dir, args.environment, args.verbose):
-            return 1
+        # Determine if fbuild should be used (default for esp32s3/esp32c6)
+        use_fbuild = _should_use_fbuild(
+            args.environment, args.use_fbuild, args.no_fbuild
+        )
+        if use_fbuild:
+            print("📦 Using fbuild (default for esp32s3/esp32c6)")
+        else:
+            print("📦 Using PlatformIO")
+
+        if use_fbuild:
+            from ci.util.fbuild_runner import run_fbuild_compile
+
+            if not run_fbuild_compile(build_dir, args.environment, args.verbose):
+                return 1
+        else:
+            if not run_compile(build_dir, args.environment, args.verbose):
+                return 1
 
         # ============================================================
         # PHASES 3-4: Upload + Monitor (DEVICE LOCK)
@@ -1293,8 +1350,18 @@ def main() -> int:
                 kill_port_users(upload_port)
 
             # Phase 3: Upload firmware (with incremental rebuild if needed)
-            if not run_upload(build_dir, args.environment, upload_port, args.verbose):
-                return 1
+            if use_fbuild:
+                from ci.util.fbuild_runner import run_fbuild_upload
+
+                if not run_fbuild_upload(
+                    build_dir, args.environment, upload_port, args.verbose
+                ):
+                    return 1
+            else:
+                if not run_upload(
+                    build_dir, args.environment, upload_port, args.verbose
+                ):
+                    return 1
 
             # Phase 4: Monitor serial output
             success, output, rpc_handler = run_monitor(

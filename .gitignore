@@ -88,3 +88,4 @@ ci/docker_utils/.build_timestamps.json
 examples/**/*.ino.cpp
 ./*.log
 .loop
+.fbuild/* 

@@ -27,6 +27,30 @@ This project uses directory-specific agent guidelines. See:
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
 
+### fbuild (Default for ESP32-S3 and ESP32-C6)
+The project uses `fbuild` as the **default build system** for ESP32-S3 and ESP32-C6 (RISC-V) boards. fbuild provides:
+- **Daemon-based compilation** - Background process handles builds, survives agent interrupts
+- **Cached toolchains/frameworks** - Downloads and caches ESP32 toolchain, Arduino framework
+- **Direct esptool integration** - Fast uploads without PlatformIO overhead
+
+**Default behavior:**
+- **ESP32-S3 / ESP32-C6**: fbuild is used automatically (no flag needed)
+- **Other ESP32 variants**: PlatformIO is used by default
+
+**Usage via debug_attached.py:**
+```bash
+# ESP32-S3: fbuild is the default (no --use-fbuild needed)
+uv run ci/debug_attached.py esp32s3 --example Blink
+
+# Force PlatformIO on esp32s3/esp32c6
+uv run ci/debug_attached.py esp32s3 --example Blink --no-fbuild
+
+# Explicitly use fbuild on other ESP32 variants
+uv run ci/debug_attached.py esp32dev --use-fbuild --example Blink
+```
+
+**Build caching:** fbuild stores builds in `.fbuild/build/<env>/` and caches toolchains in `.fbuild/cache/`.
+
 ### Test Disambiguation
 When multiple tests match a query, use these methods:
 
