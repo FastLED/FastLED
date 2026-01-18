@@ -12,7 +12,15 @@ namespace fl {
 class Tile2x2_u8;
 class Tile2x2_u8_wrap;  // Forward declaration to support operator<< overload
 template <typename T> struct vec2;  // Forward declaration from fl/geometry.h
+template <typename T> struct rect;  // Forward declaration from fl/geometry.h
 template <typename T, typename Alloc> class vector;  // Forward declaration from fl/vector.h
+template <typename T> class Optional;  // Forward declaration from fl/stl/optional.h
+template <typename Key, typename Hash, typename KeyEqual> class unordered_set;  // Forward declaration from fl/stl/unordered_set.h
+template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT> class unordered_map;  // Forward declaration from fl/stl/unordered_map.h
+template <typename Key, typename Value, fl::size N> class FixedMap;  // Forward declaration from fl/stl/map.h
+template <typename Key, typename Value, typename Less, typename Allocator> class SortedHeapMap;  // Forward declaration from fl/stl/map.h
+template <typename T, fl::size Extent> class span;  // Forward declaration from fl/slice.h (no default arg to avoid redefinition)
+template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
 struct FFTBins;  // Forward declaration from fl/fft.h
 template <fl::u32 N> class BitsetFixed;
 class bitset_dynamic;
@@ -60,6 +68,30 @@ class StrStream {
         return *this;
     }
 
+    // rect<T> support - format as rect((minx,miny), (maxx,maxy))
+    template<typename T>
+    StrStream &operator<<(const rect<T> &r) {
+        mStr.append("rect(");
+        (*this) << r.mMin;
+        mStr.append(", ");
+        (*this) << r.mMax;
+        mStr.append(")");
+        return *this;
+    }
+
+    // Optional<T> support - format as nullopt or optional(value)
+    template<typename T>
+    StrStream &operator<<(const Optional<T> &opt) {
+        if (!opt.has_value()) {
+            mStr.append("nullopt");
+        } else {
+            mStr.append("optional(");
+            (*this) << *opt;
+            mStr.append(")");
+        }
+        return *this;
+    }
+
     // vector<T, Alloc> support - format as [item1, item2, ...]
     template<typename T, typename Alloc>
     StrStream &operator<<(const fl::vector<T, Alloc> &vec) {
@@ -68,9 +100,105 @@ class StrStream {
             if (i > 0) {
                 mStr.append(", ");
             }
-            mStr.append(vec[i]);
+            (*this) << vec[i];
         }
         mStr.append("]");
+        return *this;
+    }
+
+    // unordered_set<Key, Hash, KeyEqual> support - format as {item1, item2, ...}
+    template<typename Key, typename Hash, typename KeyEqual>
+    StrStream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &set) {
+        mStr.append("{");
+        bool first = true;
+        for (auto it = set.begin(); it != set.end(); ++it) {
+            if (!first) {
+                mStr.append(", ");
+            }
+            first = false;
+            (*this) << *it;
+        }
+        mStr.append("}");
+        return *this;
+    }
+
+    // unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> support - format as {key1: value1, key2: value2, ...}
+    template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
+    StrStream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &map) {
+        mStr.append("{");
+        bool first = true;
+        for (auto it = map.begin(); it != map.end(); ++it) {
+            if (!first) {
+                mStr.append(", ");
+            }
+            first = false;
+            (*this) << it->first;
+            mStr.append(": ");
+            (*this) << it->second;
+        }
+        mStr.append("}");
+        return *this;
+    }
+
+    // FixedMap<Key, Value, N> support - format as {key1: value1, key2: value2, ...}
+    template<typename Key, typename Value, fl::size N>
+    StrStream &operator<<(const fl::FixedMap<Key, Value, N> &map) {
+        mStr.append("{");
+        bool first = true;
+        for (auto it = map.begin(); it != map.end(); ++it) {
+            if (!first) {
+                mStr.append(", ");
+            }
+            first = false;
+            (*this) << it->first;
+            mStr.append(": ");
+            (*this) << it->second;
+        }
+        mStr.append("}");
+        return *this;
+    }
+
+    // SortedHeapMap<Key, Value, Less, Allocator> support - format as {key1: value1, key2: value2, ...}
+    template<typename Key, typename Value, typename Less, typename Allocator>
+    StrStream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &map) {
+        mStr.append("{");
+        bool first = true;
+        for (auto it = map.begin(); it != map.end(); ++it) {
+            if (!first) {
+                mStr.append(", ");
+            }
+            first = false;
+            (*this) << it->first;
+            mStr.append(": ");
+            (*this) << it->second;
+        }
+        mStr.append("}");
+        return *this;
+    }
+
+    // span<T, Extent> support - format as span[item1, item2, ...]
+    // Uses same format as vector but with "span" prefix for clarity
+    template<typename T, fl::size Extent>
+    StrStream &operator<<(const fl::span<T, Extent> &s) {
+        mStr.append("span[");
+        for (fl::size i = 0; i < s.size(); ++i) {
+            if (i > 0) {
+                mStr.append(", ");
+            }
+            (*this) << s[i];
+        }
+        mStr.append("]");
+        return *this;
+    }
+
+    // pair<T1, T2> support - format as (first, second)
+    template<typename T1, typename T2>
+    StrStream &operator<<(const fl::pair<T1, T2> &p) {
+        mStr.append("(");
+        (*this) << p.first;
+        mStr.append(", ");
+        (*this) << p.second;
+        mStr.append(")");
         return *this;
     }
 
@@ -287,9 +415,41 @@ class FakeStrStream {
     template<typename T>
     FakeStrStream &operator<<(const vec2<T> &) { return *this; }
 
+    // rect support
+    template<typename T>
+    FakeStrStream &operator<<(const rect<T> &) { return *this; }
+
+    // Optional support
+    template<typename T>
+    FakeStrStream &operator<<(const Optional<T> &) { return *this; }
+
     // vector support
     template<typename T, typename Alloc>
     FakeStrStream &operator<<(const fl::vector<T, Alloc> &) { return *this; }
+
+    // unordered_set support
+    template<typename Key, typename Hash, typename KeyEqual>
+    FakeStrStream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &) { return *this; }
+
+    // unordered_map support
+    template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
+    FakeStrStream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) { return *this; }
+
+    // FixedMap support
+    template<typename Key, typename Value, fl::size N>
+    FakeStrStream &operator<<(const fl::FixedMap<Key, Value, N> &) { return *this; }
+
+    // SortedHeapMap support
+    template<typename Key, typename Value, typename Less, typename Allocator>
+    FakeStrStream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &) { return *this; }
+
+    // span support
+    template<typename T, fl::size Extent>
+    FakeStrStream &operator<<(const fl::span<T, Extent> &) { return *this; }
+
+    // pair support
+    template<typename T1, typename T2>
+    FakeStrStream &operator<<(const fl::pair<T1, T2> &) { return *this; }
 
     // Bitset support
     template<fl::u32 N>

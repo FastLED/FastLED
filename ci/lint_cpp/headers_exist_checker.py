@@ -43,6 +43,7 @@ EXCLUDED_TEST_FILES = {
     "runner.cpp",  # Windows DLL loader for test execution
     "crash_handler_main.cpp",  # Shared infrastructure for crash handling in runner
     "example_runner.cpp",  # Generic example runner that loads and executes example DLLs
+    "fltest_self_test.cpp",  # Self-test for fl::test framework (tests fltest.h)
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)
