@@ -19,12 +19,12 @@
 // #define JUST_RMT
 // #define JUST_SPI
 // #define JUST_UART
-// #define JUST_I2S     // Test I2S LCD_CAM driver (ESP32-S3 only)
+#define JUST_I2S     // Test I2S LCD_CAM driver (ESP32-S3 only)
 // Note: No JUST_* define = test all available drivers
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 1  // Start with single lane testing
-#define MAX_LANES 1  // Start with single lane testing
+#define MIN_LANES 2  // Testing 2 lanes for I2S
+#define MAX_LANES 2  // Testing 2 lanes for I2S
 
 // Strip size selection - PARLIO baseline: Small strips (10 LEDs per lane)
 #define JUST_SMALL_STRIPS  // Testing with 15 LEDs

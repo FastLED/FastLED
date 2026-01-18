@@ -58,6 +58,7 @@
 
 #include "fl/channels/data.h"
 #include "fl/channels/engine.h"
+#include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
@@ -218,6 +219,11 @@ private:
     /// @brief Transfer state
     volatile bool mBusy;
     uint32_t mFrameCounter;
+
+    /// @brief Wave8 expansion LUT for current timing configuration
+    Wave8BitExpansionLut mWave8Lut;
+    bool mWave8LutValid;
+    ChipsetTimingConfig mCurrentTiming;
 };
 
 /// @brief Factory function to create I2S engine with real hardware peripheral
