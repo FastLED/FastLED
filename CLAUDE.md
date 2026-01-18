@@ -133,7 +133,8 @@ You **must** specify at least one LED driver to test using one of these flags:
 - `--rmt` - Test RMT (Remote Control) driver
 - `--spi` - Test SPI driver
 - `--uart` - Test UART driver
-- `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart`)
+- `--i2s` - Test I2S LCD_CAM driver (ESP32-S3 only)
+- `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart --i2s`)
 
 **Usage Examples:**
 ```bash
@@ -143,6 +144,7 @@ bash validate esp32s3 --parlio            # Specify esp32s3 environment
 bash validate --rmt
 bash validate --spi
 bash validate --uart
+bash validate --i2s                       # ESP32-S3 only
 
 # Test multiple drivers
 bash validate --parlio --rmt              # Auto-detect environment
@@ -174,6 +176,7 @@ Available driver options:
   --rmt       Test RMT (Remote Control) driver
   --spi       Test SPI driver
   --uart      Test UART driver
+  --i2s       Test I2S LCD_CAM driver (ESP32-S3 only)
   --all       Test all drivers
 
 Example commands:

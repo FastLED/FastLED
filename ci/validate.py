@@ -64,10 +64,10 @@ init(autoreset=True)
 # ============================================================
 
 # Default expect patterns - simplified to essential checks only
+# Note: PARLIO is NOT available on ESP32-S3 (it has I2S LCD_CAM instead)
 DEFAULT_EXPECT_PATTERNS = [
     "TX Pin: 1",  # Hardware setup verification (PIN_TX = 1 in firmware)
     "RX Pin: 2",  # Hardware setup verification (PIN_RX = 2 in firmware)
-    "DRIVER_ENABLED: PARLIO",  # Parlio driver availability (key driver)
     "VALIDATION_READY: true",  # Test ready indicator
 ]
 
@@ -453,6 +453,7 @@ class Args:
     rmt: bool
     spi: bool
     uart: bool
+    i2s: bool
     all: bool
 
     # Standard options
@@ -542,9 +543,14 @@ See Also:
             help="Test only UART driver",
         )
         driver_group.add_argument(
+            "--i2s",
+            action="store_true",
+            help="Test only I2S LCD_CAM driver (ESP32-S3 only)",
+        )
+        driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart)",
+            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s)",
         )
 
         # Standard options
@@ -651,6 +657,7 @@ See Also:
             rmt=parsed.rmt,
             spi=parsed.spi,
             uart=parsed.uart,
+            i2s=parsed.i2s,
             all=parsed.all,
             environment=parsed.environment,
             verbose=parsed.verbose,
@@ -692,7 +699,7 @@ def run(args: Args | None = None) -> int:
 
     # Check if any driver flags were specified
     if args.all:
-        drivers = ["PARLIO", "RMT", "SPI", "UART"]
+        drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S"]
     else:
         if args.parlio:
             drivers.append("PARLIO")
@@ -702,6 +709,8 @@ def run(args: Args | None = None) -> int:
             drivers.append("SPI")
         if args.uart:
             drivers.append("UART")
+        if args.i2s:
+            drivers.append("I2S")
 
     # MANDATORY: At least one driver must be specified
     if not drivers:
@@ -716,6 +725,7 @@ def run(args: Args | None = None) -> int:
         print("  --rmt       Test RMT (Remote Control) driver")
         print("  --spi       Test SPI driver")
         print("  --uart      Test UART driver")
+        print("  --i2s       Test I2S LCD_CAM driver (ESP32-S3 only)")
         print("  --all       Test all drivers")
         print("\nExample commands:")
         print("  uv run ci/validate.py --parlio")
@@ -825,8 +835,8 @@ def run(args: Args | None = None) -> int:
         # Port detection succeeded
         upload_port = result.selected_port
 
-    # Ensure upload_port is set at this point (narrows type from str | None to str)
-    assert upload_port is not None, "upload_port should be set at this point"
+    # Ensure upload_port is set at this point (for type checker)
+    assert upload_port is not None, "upload_port should be set by auto-detection"
 
     # ============================================================
     # Print Configuration Summary

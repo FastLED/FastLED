@@ -3,6 +3,7 @@
 #include "ValidationConfig.h"  // Must be included BEFORE ValidationHelpers.h to set config macros
 #include "ValidationHelpers.h"
 #include "fl/stl/sstream.h"
+#include "fl/pin.h"  // Platform-independent pin API
 
 bool testRxChannel(
     fl::shared_ptr<fl::RxDevice> rx_channel,
@@ -12,9 +13,9 @@ bool testRxChannel(
     size_t buffer_size) {
     FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN " << pin_tx);
 
-    // Configure PIN_TX as output (temporarily take ownership from FastLED)
-    pinMode(pin_tx, OUTPUT);
-    digitalWrite(pin_tx, LOW);  // Start LOW
+    // Configure PIN_TX as output using fl::pin functions (temporarily take ownership from FastLED)
+    fl::pinMode(pin_tx, fl::PinMode::Output);
+    fl::digitalWrite(pin_tx, fl::PinValue::Low);  // Start LOW
 
     // Generate fast toggles (RMT max signal_range is ~819 μs, so use 100 μs pulses)
     const int num_toggles = 10;
@@ -31,16 +32,16 @@ bool testRxChannel(
 
     if (!rx_channel->begin(rx_config)) {
         FL_ERROR("[RX TEST]: Failed to begin RX channel");
-        pinMode(pin_tx, INPUT);  // Release pin
+        fl::pinMode(pin_tx, fl::PinMode::Input);  // Release pin
         return false;
     }
     delayMicroseconds(50);  // Let RX stabilize
 
     // Generate toggle pattern: HIGH -> LOW -> HIGH -> LOW ...
     for (int i = 0; i < num_toggles; i++) {
-        digitalWrite(pin_tx, HIGH);
+        fl::digitalWrite(pin_tx, fl::PinValue::High);
         delayMicroseconds(toggle_delay_us);
-        digitalWrite(pin_tx, LOW);
+        fl::digitalWrite(pin_tx, fl::PinValue::Low);
         delayMicroseconds(toggle_delay_us);
     }
 
@@ -48,8 +49,8 @@ bool testRxChannel(
     uint32_t timeout_ms = 100;  // 10 toggles * 200μs = 2ms, use 100ms for safety
     fl::RxWaitResult wait_result = rx_channel->wait(timeout_ms);
 
-    // Release PIN_TX for FastLED use
-    pinMode(pin_tx, INPUT);
+    // Release PIN_TX for FastLED use using fl::pin functions
+    fl::pinMode(pin_tx, fl::PinMode::Input);
 
     // Check if we successfully captured data
     if (wait_result != fl::RxWaitResult::SUCCESS) {
@@ -82,9 +83,10 @@ void validateExpectedEngines() {
     expected_engines.push_back("RMT");
     FL_WARN("\n[VALIDATION] Platform: ESP32-C6");
 #elif defined(FL_IS_ESP_32S3)
-    // ESP32-S3 should have: SPI, PARLIO, RMT
+    // ESP32-S3 should have: SPI, RMT, I2S (I2S uses LCD_CAM peripheral)
     expected_engines.push_back("SPI");
     expected_engines.push_back("RMT");
+    expected_engines.push_back("I2S");
     FL_WARN("\n[VALIDATION] Platform: ESP32-S3");
 #elif defined(FL_IS_ESP_32C3)
     // ESP32-C3 should have: SPI, RMT (no PARLIO)
@@ -273,6 +275,8 @@ fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_a
             if (fl::strcmp(driver_name, "SPI") == 0) include = true;
         #elif defined(JUST_UART)
             if (fl::strcmp(driver_name, "UART") == 0) include = true;
+        #elif defined(JUST_I2S)
+            if (fl::strcmp(driver_name, "I2S") == 0) include = true;
         #else
             // No filter - include all drivers
             include = true;

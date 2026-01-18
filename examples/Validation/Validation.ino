@@ -119,13 +119,14 @@
 //
 // This sketch now supports comprehensive matrix testing with the following dimensions:
 //
-// 1. DRIVER SELECTION (4 options):
+// 1. DRIVER SELECTION (5 options):
 //    - Uncomment to test ONLY a specific driver:
 //    // #define JUST_PARLIO  // Test only PARLIO driver
 //    // #define JUST_RMT     // Test only RMT driver
 //    // #define JUST_SPI     // Test only SPI driver
 //    // #define JUST_UART    // Test only UART driver
-//    - Default: Test all available drivers (RMT, SPI, PARLIO, UART)
+//    // #define JUST_I2S     // Test only I2S LCD_CAM driver (ESP32-S3 only)
+//    - Default: Test all available drivers (RMT, SPI, PARLIO, UART, I2S)
 //
 // 2. LANE RANGE (1-8 lanes):
 //    - Uncomment to override lane range:

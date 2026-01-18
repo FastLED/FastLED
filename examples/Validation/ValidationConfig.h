@@ -15,14 +15,16 @@
 // Testing 10 LEDs WITHOUT debug logging to confirm
 
 // Driver selection
-#define JUST_PARLIO  // Testing PARLIO only
+// #define JUST_PARLIO  // Testing PARLIO only
 // #define JUST_RMT
 // #define JUST_SPI
 // #define JUST_UART
+// #define JUST_I2S     // Test I2S LCD_CAM driver (ESP32-S3 only)
+// Note: No JUST_* define = test all available drivers
 
 // Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 2  // Iteration 12: Multi-lane edge case testing
-#define MAX_LANES 2  // Iteration 12: Multi-lane edge case testing
+#define MIN_LANES 1  // Start with single lane testing
+#define MAX_LANES 1  // Start with single lane testing
 
 // Strip size selection - PARLIO baseline: Small strips (10 LEDs per lane)
 #define JUST_SMALL_STRIPS  // Testing with 15 LEDs
@@ -40,8 +42,8 @@
 #endif
 
 // Strip size constants (MUST be defined BEFORE Common.h)
-// Iteration 12: Multi-lane regression - 20 LEDs (2 lanes, data_width=2, expansion 16x)
-#define SHORT_STRIP_SIZE 20  // Test 20 LEDs with 2 lanes (expect 3 buffers)
+// I2S testing: 100 LEDs as user-specified baseline
+#define SHORT_STRIP_SIZE 100  // Test with 100 LEDs (user-specified)
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
     #define LONG_STRIP_SIZE 3000  // Large strip for platforms with lots of RAM

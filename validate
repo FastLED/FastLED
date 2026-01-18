@@ -32,7 +32,8 @@ Driver Selection (MANDATORY - must specify at least one):
   --rmt               Test RMT (Remote Control) driver
   --spi               Test SPI driver
   --uart              Test UART driver
-  --all               Test all drivers (equivalent to --parlio --rmt --spi --uart)
+  --i2s               Test I2S LCD_CAM driver (ESP32-S3 only)
+  --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s)
 
 Options:
   -h, --help          Show this help message
