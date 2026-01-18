@@ -122,7 +122,8 @@ exclude = [
     "tmp.py",
     "ci/validation_agent.py",
     "ci/validation_loop.py",
-    "ci/util/fbuild_runner.py"
+    "ci/util/fbuild_runner.py",
+    "ci/util/fbuild_adapter.py"
 ]
 
 # Type checking configuration

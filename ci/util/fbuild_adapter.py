@@ -2,7 +2,7 @@
 fbuild Adapter Module for FastLED CI.
 
 This module provides a clean interface to the fbuild build system,
-wrapping the fbuild daemon client API for use in FastLED's validation
+wrapping the fbuild Daemon API for use in FastLED's validation
 and debugging workflows.
 
 The fbuild daemon provides faster builds by:
@@ -12,12 +12,19 @@ The fbuild daemon provides faster builds by:
 
 Key functions:
     - fbuild_build_and_upload: Build and upload firmware to device
+    - fbuild_build_only: Build firmware without uploading
     - is_fbuild_available: Check if fbuild is available
+    - get_fbuild_version: Get fbuild version string
+
+For daemon management, use fbuild.Daemon directly:
+    import fbuild
+
+    fbuild.Daemon.ensure_running()
+    fbuild.Daemon.stop()
+    fbuild.Daemon.status()
 """
 
-import sys
 from pathlib import Path
-from typing import Any
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
@@ -29,10 +36,9 @@ def is_fbuild_available() -> bool:
         True if fbuild can be imported, False otherwise.
     """
     try:
-        import fbuild  # noqa: F401
-        from fbuild.daemon import client as daemon_client  # noqa: F401
+        import fbuild  # type: ignore[import-not-found]
 
-        return True
+        return fbuild.is_available()
     except ImportError:
         return False
 
@@ -44,9 +50,9 @@ def get_fbuild_version() -> str | None:
         Version string if available, None otherwise.
     """
     try:
-        from fbuild import __version__
+        import fbuild  # type: ignore[import-not-found]
 
-        return __version__
+        return fbuild.__version__  # type: ignore[no-any-return]
     except ImportError:
         return None
 
@@ -64,11 +70,6 @@ def fbuild_build_and_upload(
     to an embedded device. It does NOT start monitoring - the caller
     should use the existing run_monitor function for that.
 
-    Uses request_deploy() from fbuild.daemon.client which handles:
-    - Build compilation
-    - Firmware upload to device
-    - Progress monitoring through status file
-
     Args:
         project_dir: Path to project directory containing platformio.ini
         environment: Build environment name (e.g., 'esp32c6')
@@ -80,28 +81,17 @@ def fbuild_build_and_upload(
         Tuple of (success: bool, message: str)
     """
     try:
-        from fbuild.daemon import client as daemon_client
+        import fbuild  # type: ignore[import-not-found]
     except ImportError as e:
         return False, f"fbuild not available: {e}"
 
     try:
         # Ensure daemon is running
-        if not daemon_client.ensure_daemon_running():
+        if not fbuild.Daemon.ensure_running():
             return False, "Failed to start fbuild daemon"
 
         # Request deploy (build + upload, no monitor)
-        # The request_deploy function takes these parameters:
-        # - project_dir: Path to project directory
-        # - environment: Build environment
-        # - port: Serial port (optional, auto-detect if None)
-        # - clean_build: Whether to perform clean build
-        # - monitor_after: Whether to start monitor after deploy
-        # - monitor_timeout: Timeout for monitor (if monitor_after=True)
-        # - monitor_halt_on_error: Pattern to halt on error
-        # - monitor_halt_on_success: Pattern to halt on success
-        # - monitor_expect: Expected pattern to check
-        # - timeout: Maximum wait time in seconds
-        success = daemon_client.request_deploy(
+        success = fbuild.Daemon.deploy(
             project_dir=project_dir,
             environment=environment,
             port=port,
@@ -131,11 +121,6 @@ def fbuild_build_only(
 ) -> tuple[bool, str]:
     """Build firmware using fbuild without uploading.
 
-    Uses request_build() from fbuild.daemon.client which handles:
-    - Source compilation
-    - Library dependency management
-    - Object file caching
-
     Args:
         project_dir: Path to project directory containing platformio.ini
         environment: Build environment name (e.g., 'esp32c6')
@@ -147,23 +132,17 @@ def fbuild_build_only(
         Tuple of (success: bool, message: str)
     """
     try:
-        from fbuild.daemon import client as daemon_client
+        import fbuild  # type: ignore[import-not-found]
     except ImportError as e:
         return False, f"fbuild not available: {e}"
 
     try:
         # Ensure daemon is running
-        if not daemon_client.ensure_daemon_running():
+        if not fbuild.Daemon.ensure_running():
             return False, "Failed to start fbuild daemon"
 
         # Request build only
-        # The request_build function takes these parameters:
-        # - project_dir: Project directory
-        # - environment: Build environment
-        # - clean_build: Whether to perform clean build
-        # - verbose: Enable verbose build output
-        # - timeout: Maximum wait time in seconds
-        success = daemon_client.request_build(
+        success = fbuild.Daemon.build(
             project_dir=project_dir,
             environment=environment,
             clean_build=clean_build,
@@ -181,83 +160,3 @@ def fbuild_build_only(
         raise
     except Exception as e:
         return False, f"fbuild error: {e}"
-
-
-def stop_fbuild_daemon() -> bool:
-    """Stop the fbuild daemon.
-
-    Returns:
-        True if daemon was stopped, False otherwise.
-    """
-    try:
-        from fbuild.daemon import client as daemon_client
-
-        return daemon_client.stop_daemon()
-    except ImportError:
-        return False
-    except KeyboardInterrupt:
-        notify_main_thread()
-        raise
-    except Exception:
-        return False
-
-
-def get_fbuild_daemon_status() -> dict[str, Any]:
-    """Get current fbuild daemon status.
-
-    Returns:
-        Dictionary with daemon status information.
-    """
-    try:
-        from fbuild.daemon import client as daemon_client
-
-        return daemon_client.get_daemon_status()
-    except ImportError:
-        return {"error": "fbuild not available", "running": False}
-    except KeyboardInterrupt:
-        notify_main_thread()
-        raise
-    except Exception as e:
-        return {"error": str(e), "running": False}
-
-
-def ensure_daemon_running() -> bool:
-    """Ensure the fbuild daemon is running.
-
-    Returns:
-        True if daemon is running or was started successfully, False otherwise.
-    """
-    try:
-        from fbuild.daemon import client as daemon_client
-
-        return daemon_client.ensure_daemon_running()
-    except ImportError:
-        return False
-    except KeyboardInterrupt:
-        notify_main_thread()
-        raise
-    except Exception:
-        return False
-
-
-def main() -> int:
-    """Test the fbuild adapter."""
-    print("Testing fbuild adapter...")
-    print()
-
-    # Check availability
-    available = is_fbuild_available()
-    print(f"fbuild available: {available}")
-
-    if available:
-        version = get_fbuild_version()
-        print(f"fbuild version: {version}")
-
-        status = get_fbuild_daemon_status()
-        print(f"Daemon status: {status}")
-
-    return 0 if available else 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())

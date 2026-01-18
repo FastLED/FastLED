@@ -10,12 +10,15 @@ and cleaning up orphaned processes that may be holding serial port locks.
 Key features:
     - Auto-detection of USB serial ports (filters out Bluetooth, ACPI, etc.)
     - Preference for common ESP32/Arduino USB-to-serial chips
+    - ESP32 chip type detection using esptool
+    - Chip-to-environment mapping for auto-detection
     - Safe process cleanup (never kills current process or parents)
     - Detailed logging of port cleanup operations
 """
 
 import datetime
 import os
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -24,6 +27,18 @@ import psutil
 import serial.tools.list_ports
 from psutil import Process
 from serial.tools.list_ports_common import ListPortInfo
+
+
+# Mapping from detected ESP chip type to PlatformIO environment
+CHIP_TO_ENVIRONMENT: dict[str, str] = {
+    "ESP32-S3": "esp32s3",
+    "ESP32-C6": "esp32c6",
+    "ESP32-C3": "esp32c3",
+    "ESP32-C2": "esp32c2",
+    "ESP32-H2": "esp32h2",
+    "ESP32": "esp32dev",  # Generic ESP32 (original)
+    "ESP8266": "esp8266",  # ESP8266
+}
 
 
 @dataclass
@@ -292,3 +307,131 @@ def kill_port_users(port: str) -> None:
     else:
         print(f"✅ No orphaned processes found using {port}")
         log_port_cleanup(f"Port cleanup for {port}: No orphaned processes found")
+
+
+@dataclass
+class ChipDetectionResult:
+    """Result of ESP chip detection.
+
+    Attributes:
+        ok: True if chip was detected, False otherwise
+        chip_type: Detected chip type (e.g., "ESP32-S3", "ESP32-C6")
+        environment: Suggested PlatformIO environment (e.g., "esp32s3", "esp32c6")
+        error_message: Optional error description if detection failed
+    """
+
+    ok: bool
+    chip_type: str | None
+    environment: str | None
+    error_message: str | None = None
+
+
+def detect_attached_chip(port: str, timeout: float = 10.0) -> ChipDetectionResult:
+    """Detect ESP chip type using esptool.
+
+    Uses esptool with auto chip detection to identify the connected ESP device.
+    This allows automatic selection of the correct PlatformIO environment.
+
+    Args:
+        port: Serial port name (e.g., "COM13", "/dev/ttyUSB0")
+        timeout: Maximum time to wait for esptool in seconds
+
+    Returns:
+        ChipDetectionResult with chip type, suggested environment, or error details
+    """
+    try:
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "python",
+                "-m",
+                "esptool",
+                "-c",
+                "auto",
+                "-p",
+                port,
+                "chip-id",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+
+        # Parse output for "Detecting chip type... ESP32-S3" line
+        chip_type = None
+        for line in result.stdout.split("\n"):
+            if "Detecting chip type..." in line:
+                # Extract chip type after "..."
+                chip_type = line.split("...")[-1].strip()
+                break
+
+        if not chip_type:
+            # Also check for "Chip is ESP32-S3" pattern in case output format varies
+            for line in result.stdout.split("\n"):
+                if line.strip().startswith("Chip is "):
+                    chip_type = line.strip().replace("Chip is ", "").strip()
+                    break
+
+        if not chip_type:
+            return ChipDetectionResult(
+                ok=False,
+                chip_type=None,
+                environment=None,
+                error_message="Could not parse chip type from esptool output",
+            )
+
+        # Map chip type to environment
+        environment = chip_to_environment(chip_type)
+
+        return ChipDetectionResult(
+            ok=True,
+            chip_type=chip_type,
+            environment=environment,
+            error_message=None,
+        )
+
+    except subprocess.TimeoutExpired:
+        return ChipDetectionResult(
+            ok=False,
+            chip_type=None,
+            environment=None,
+            error_message=f"esptool timed out after {timeout}s - device may not be in bootloader mode",
+        )
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        return ChipDetectionResult(
+            ok=False,
+            chip_type=None,
+            environment=None,
+            error_message=f"Failed to detect chip: {e}",
+        )
+
+
+def chip_to_environment(chip_type: str) -> str | None:
+    """Map an ESP chip type to a PlatformIO environment name.
+
+    Handles chip variants like "ESP32-S3 (QFN56)" by matching the base chip type.
+
+    Args:
+        chip_type: Chip type string from esptool (e.g., "ESP32-S3", "ESP32-C6 (QFN40)")
+
+    Returns:
+        PlatformIO environment name (e.g., "esp32s3") or None if no mapping found
+    """
+    # Normalize chip type for comparison
+    chip_upper = chip_type.upper()
+
+    # Try exact match first
+    for known_chip, env in CHIP_TO_ENVIRONMENT.items():
+        if chip_upper == known_chip.upper():
+            return env
+
+    # Try prefix match for variants like "ESP32-S3 (QFN56)"
+    for known_chip, env in CHIP_TO_ENVIRONMENT.items():
+        if chip_upper.startswith(known_chip.upper()):
+            return env
+
+    return None

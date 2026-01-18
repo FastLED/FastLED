@@ -37,6 +37,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, cast
 
 import serial
 from colorama import Fore, Style, init
@@ -51,7 +52,23 @@ from ci.debug_attached import (
 from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.json_rpc_handler import parse_json_rpc_commands
-from ci.util.port_utils import auto_detect_upload_port, kill_port_users
+from ci.util.port_utils import (
+    auto_detect_upload_port,
+    detect_attached_chip,
+    kill_port_users,
+)
+
+
+# Try to import fbuild ledger for cached chip detection
+try:
+    from fbuild.ledger import (  # pyright: ignore[reportMissingImports]
+        detect_and_cache as fbuild_detect_and_cache,  # type: ignore[import-not-found]
+    )
+
+    FBUILD_LEDGER_AVAILABLE = True
+except ImportError:
+    FBUILD_LEDGER_AVAILABLE = False
+    fbuild_detect_and_cache = None  # type: ignore[assignment,misc]
 from ci.util.sketch_resolver import parse_timeout
 
 
@@ -892,6 +909,102 @@ def run(args: Args | None = None) -> int:
 
     # Ensure upload_port is set at this point (for type checker)
     assert upload_port is not None, "upload_port should be set by auto-detection"
+
+    # ============================================================
+    # Auto-Detect Environment from Attached Chip (if not specified)
+    # ============================================================
+    detected_chip_type: str | None = None
+    detected_environment: str | None = None
+    was_cached = False
+
+    if not final_environment:
+        print("🔍 Detecting attached chip type...")
+
+        # Try fbuild ledger first (faster when cached)
+        if FBUILD_LEDGER_AVAILABLE and fbuild_detect_and_cache is not None:
+            try:
+                # Use cast(Any, ...) to silence pyright errors from unresolved fbuild module
+                ledger_result = cast(Any, fbuild_detect_and_cache)(upload_port)
+                detected_chip_type: str | None = (
+                    str(ledger_result.chip_type) if ledger_result.chip_type else None
+                )
+                detected_environment: str | None = (
+                    str(ledger_result.environment)
+                    if ledger_result.environment
+                    else None
+                )
+                was_cached: bool = bool(ledger_result.was_cached)
+                final_environment: str | None = detected_environment
+                cache_indicator = " (cached)" if was_cached else ""
+                print(
+                    f"✅ Detected {detected_chip_type} → using environment '{final_environment}'{cache_indicator}"
+                )
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
+            except Exception as e:
+                # fbuild ledger failed, fall back to esptool
+                print(f"⚠️  fbuild ledger failed ({e}), trying esptool...")
+                chip_result = detect_attached_chip(upload_port)
+                if chip_result.ok and chip_result.environment:
+                    detected_chip_type = chip_result.chip_type
+                    detected_environment = chip_result.environment
+                    final_environment = detected_environment
+                    print(
+                        f"✅ Detected {chip_result.chip_type} → using environment '{final_environment}'"
+                    )
+                else:
+                    detected_chip_type = None
+                    detected_environment = None
+        else:
+            # fbuild ledger not available, use esptool directly
+            chip_result = detect_attached_chip(upload_port)
+            if chip_result.ok and chip_result.environment:
+                detected_chip_type = chip_result.chip_type
+                detected_environment = chip_result.environment
+                final_environment = detected_environment
+                print(
+                    f"✅ Detected {chip_result.chip_type} → using environment '{final_environment}'"
+                )
+
+        # Fall back to platformio.ini default_envs if detection failed
+        if not final_environment:
+            from ci.util.pio_package_daemon import get_default_environment
+
+            default_env = get_default_environment(str(build_dir))
+            if default_env:
+                final_environment = default_env
+                error_msg = "Chip detection failed"
+                print(
+                    f"⚠️  {error_msg}, "
+                    f"using platformio.ini default: '{final_environment}'"
+                )
+            else:
+                print("⚠️  Chip detection failed and no default_envs in platformio.ini")
+        print()
+
+    # ============================================================
+    # Platform Mismatch Warning (detected chip vs platformio.ini default_envs)
+    # ============================================================
+    from ci.util.pio_package_daemon import get_default_environment
+
+    default_env = get_default_environment(str(build_dir))
+    if detected_environment and default_env and detected_environment != default_env:
+        print(Fore.YELLOW + "=" * 60)
+        print(Fore.YELLOW + "⚠️  PLATFORM MISMATCH WARNING")
+        print(Fore.YELLOW + "=" * 60)
+        print(
+            f"{Fore.YELLOW}Detected chip: {detected_chip_type} ({detected_environment})"
+        )
+        print(f"{Fore.YELLOW}platformio.ini default_envs: {default_env}")
+        print(
+            f"{Fore.YELLOW}Using detected environment '{detected_environment}' for this session."
+        )
+        print(
+            f"{Fore.YELLOW}To make this permanent, update platformio.ini: default_envs = {detected_environment}"
+        )
+        print(Fore.YELLOW + "=" * 60 + Style.RESET_ALL)
+        print()
 
     # ============================================================
     # Print Configuration Summary
