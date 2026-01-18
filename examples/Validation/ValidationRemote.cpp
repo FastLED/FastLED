@@ -95,7 +95,7 @@ void ValidationRemoteControl::registerFunctions(
         FL_PRINT("[REGEN] Regenerating test cases from modified configuration");
 
         // Rebuild test cases from current test_matrix
-        *mpTestCases = generateTestCases(*mpTestMatrix, 0);  // PIN_TX will be updated per lane
+        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx);  // Use configured TX pin
 
         // Clear and rebuild test results to match new test cases
         mpTestResults->clear();
