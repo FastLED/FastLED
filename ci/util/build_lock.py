@@ -53,46 +53,50 @@ class BuildLock:
         self._lock: Optional[fasteners.InterProcessLock] = None
         self._is_acquired = False
 
+    _stale_lock_warned: bool = False
+
     def _check_stale_lock(self) -> bool:
         """Check if lock file is stale (no process holding it) and remove if stale.
+
+        Uses a fast approach: skip expensive process scanning and instead rely on
+        file age heuristics. Locks older than 10 minutes with no activity are
+        considered stale.
 
         Returns:
             True if lock was stale and removed, False otherwise
         """
-        from ci.util.lock_handler import (
-            find_processes_locking_path,
-            is_psutil_available,
-        )
-
         if not self.lock_file.exists():
             return False
 
-        if not is_psutil_available():
-            return False  # Can't check, assume not stale
-
         try:
-            # Check if any process has the lock file open
-            locking_pids = find_processes_locking_path(self.lock_file)
+            # Check lock file age - if older than 10 minutes, consider it stale
+            lock_mtime = self.lock_file.stat().st_mtime
+            lock_age = time.time() - lock_mtime
+            max_lock_age = 600  # 10 minutes
 
-            if not locking_pids:
-                # No process holds the lock, it's stale
-                print(f"Detected stale lock at {self.lock_file}. Removing...")
+            if lock_age > max_lock_age:
+                if not BuildLock._stale_lock_warned:
+                    BuildLock._stale_lock_warned = True
+                    print(
+                        f"Detected stale lock at {self.lock_file} (age: {lock_age:.0f}s). Attempting removal..."
+                    )
                 try:
                     self.lock_file.unlink()
                     print(f"Removed stale lock file: {self.lock_file}")
+                    BuildLock._stale_lock_warned = False  # Reset for next time
                     return True
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise
-                except Exception as e:
-                    print(f"Warning: Could not remove stale lock file: {e}")
+                except Exception:
+                    # Silently fail - the lock is held by another process
+                    # which will release it when done
                     return False
             return False
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
             raise
-        except Exception as e:
-            print(f"Warning: Could not check for stale lock: {e}")
+        except Exception:
             return False
 
     def acquire(self, timeout: float = 300.0) -> bool:
