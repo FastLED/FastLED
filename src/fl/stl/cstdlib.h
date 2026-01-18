@@ -22,4 +22,7 @@ int atoi(const char* str);
 // Convert string to long
 long atol(const char* str);
 
+// Convert string to double
+double strtod(const char* str, char** endptr);
+
 } // namespace fl

@@ -187,4 +187,89 @@ long atol(const char* str) {
     return strtol(str, nullptr, 10);
 }
 
+double strtod(const char* str, char** endptr) {
+    if (!str) {
+        if (endptr) {
+            *endptr = const_cast<char*>(str);
+        }
+        return 0.0;
+    }
+
+    const char* p = str;
+    double result = 0.0;
+    bool negative = false;
+
+    // Skip leading whitespace
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\f' || *p == '\v') {
+        p++;
+    }
+
+    // Handle sign
+    if (*p == '-') {
+        negative = true;
+        p++;
+    } else if (*p == '+') {
+        p++;
+    }
+
+    const char* start = p;
+
+    // Parse integer part
+    while (*p >= '0' && *p <= '9') {
+        result = result * 10.0 + (*p - '0');
+        p++;
+    }
+
+    // Parse fractional part
+    if (*p == '.') {
+        p++;
+        double fraction = 0.1;
+        while (*p >= '0' && *p <= '9') {
+            result += (*p - '0') * fraction;
+            fraction *= 0.1;
+            p++;
+        }
+    }
+
+    // Parse exponent
+    if (*p == 'e' || *p == 'E') {
+        p++;
+        bool expNegative = false;
+        if (*p == '-') {
+            expNegative = true;
+            p++;
+        } else if (*p == '+') {
+            p++;
+        }
+
+        int exp = 0;
+        while (*p >= '0' && *p <= '9') {
+            exp = exp * 10 + (*p - '0');
+            p++;
+        }
+
+        double multiplier = 1.0;
+        for (int i = 0; i < exp; i++) {
+            multiplier *= 10.0;
+        }
+
+        if (expNegative) {
+            result /= multiplier;
+        } else {
+            result *= multiplier;
+        }
+    }
+
+    // Set endptr
+    if (endptr) {
+        if (p == start) {
+            *endptr = const_cast<char*>(str);
+        } else {
+            *endptr = const_cast<char*>(p);
+        }
+    }
+
+    return negative ? -result : result;
+}
+
 } // namespace fl

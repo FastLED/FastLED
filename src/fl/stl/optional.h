@@ -104,6 +104,17 @@ template <typename T> class Optional {
     T& value() { return *ptr(); }
     const T& value() const { return *ptr(); }
 
+    // value_or() method for std::optional compatibility
+    // Returns the contained value if present, otherwise returns the provided default
+    T value_or(const T& default_value) const {
+        return has_value() ? *ptr() : default_value;
+    }
+
+    // value_or() overload for rvalue default values
+    T value_or(T&& default_value) const {
+        return has_value() ? *ptr() : fl::move(default_value);
+    }
+
     template <typename TT, typename UU>
     bool operator==(const variant<TT, UU> &other) const {
         if (!other.template holdsTypeOf<T>()) {

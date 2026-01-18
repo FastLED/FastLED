@@ -822,8 +822,12 @@ struct JsonValue {
         //FASTLED_WARN("is_double called, tag=" << data.tag());
         return data.is<float>(); 
     }
-    bool is_float() const noexcept { 
-        return data.is<float>(); 
+    bool is_float() const noexcept {
+        return data.is<float>();
+    }
+    // is_number() returns true if the value is any numeric type (int or float)
+    bool is_number() const noexcept {
+        return is_int() || is_float();
     }
     bool is_string() const noexcept { 
         //FASTLED_WARN("is_string called, tag=" << data.tag());
@@ -1734,6 +1738,8 @@ public:
     bool is_int() const { return m_value && (m_value->is_int() || m_value->is_bool()); }
     bool is_float() const { return m_value && m_value->is_float(); }
     bool is_double() const { return m_value && m_value->is_double(); }
+    // is_number() returns true if the value is any numeric type (int or float)
+    bool is_number() const { return m_value && m_value->is_number(); }
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
     bool is_generic_array() const { return m_value && m_value->is_generic_array(); }
