@@ -143,6 +143,9 @@ def run_gpio_pretest(
                         print("  [boot] ... (draining boot output)")
                 else:
                     break  # Empty line, buffer drained
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
             except Exception:
                 break
             if boot_lines >= 100:
@@ -168,6 +171,9 @@ def run_gpio_pretest(
             while time.time() - attempt_start < attempt_timeout:
                 try:
                     line = ser.readline().decode("utf-8", errors="replace").strip()
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                    raise
                 except Exception:
                     continue
 
@@ -244,6 +250,9 @@ def run_gpio_pretest(
         ser.close()
         return False
 
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
     except serial.SerialException as e:
         print()
         print(f"{Fore.RED}❌ GPIO PRE-TEST ERROR{Style.RESET_ALL}")
@@ -311,6 +320,9 @@ def run_pin_discovery(
                         print("  [boot] ... (draining boot output)")
                 else:
                     break
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
             except Exception:
                 break
             if boot_lines >= 100:
@@ -338,6 +350,9 @@ def run_pin_discovery(
             while time.time() - attempt_start < attempt_timeout:
                 try:
                     line = ser.readline().decode("utf-8", errors="replace").strip()
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                    raise
                 except Exception:
                     continue
 
@@ -402,6 +417,9 @@ def run_pin_discovery(
         ser.close()
         return (False, None, None)
 
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
     except serial.SerialException as e:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
@@ -806,6 +824,9 @@ def run(args: Args | None = None) -> int:
 
         # Port detection succeeded
         upload_port = result.selected_port
+
+    # Ensure upload_port is set at this point (narrows type from str | None to str)
+    assert upload_port is not None, "upload_port should be set at this point"
 
     # ============================================================
     # Print Configuration Summary
