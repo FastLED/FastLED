@@ -178,11 +178,41 @@
 
 const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 
-#define PIN_RX 0  // GPIO 3 to avoid conflict with 2-lane TX (GPIO 0, 1)
-#define PIN_TX 1  // This pin is what we always test.
-// For multi-lane testing use GPIO 2,3..., but keep in mind they won't
-// be directly tested.
+// ============================================================================
+// Platform-Specific Pin Defaults
+// ============================================================================
+// These defaults are chosen based on hardware constraints of each platform.
+// They can be overridden at runtime via JSON-RPC (setPins, setTxPin, setRxPin).
 
+#if defined(FL_IS_ESP_32S3)
+    // ESP32-S3: GPIO 0 has boot-mode issues on XIAO and some other boards
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 2;
+#elif defined(FL_IS_ESP_32S2)
+    // ESP32-S2: Standard configuration
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 0;
+#elif defined(FL_IS_ESP_32C6)
+    // ESP32-C6: RISC-V - standard configuration
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 0;
+#elif defined(FL_IS_ESP_32C3)
+    // ESP32-C3: RISC-V - standard configuration
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 0;
+#else
+    // ESP32 (classic) and other variants: Standard configuration
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 0;
+#endif
+
+// Runtime pin variables - can be modified via JSON-RPC
+int g_pin_tx = DEFAULT_PIN_TX;
+int g_pin_rx = DEFAULT_PIN_RX;
+
+// Legacy macros for backward compatibility in existing code
+#define PIN_TX g_pin_tx
+#define PIN_RX g_pin_rx
 
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
@@ -198,6 +228,12 @@ fl::vector_psram<uint8_t> rx_buffer;  // Shared RX buffer - initialized in setup
 // Created ONCE in setup(), reused for all driver tests
 // DO NOT reset, destroy, or recreate this channel in loop()
 fl::shared_ptr<fl::RxDevice> rx_channel;
+
+// Factory function for creating RxDevice instances
+// This allows ValidationRemoteControl to recreate the RX channel when the pin changes
+fl::shared_ptr<fl::RxDevice> createRxDevice(int pin) {
+    return fl::RxDevice::create<RX_TYPE>(pin);
+}
 
 // ============================================================================
 // Global Error Tracking and Halt Control
@@ -334,7 +370,12 @@ void setup() {
         test_matrix_complete,
         frame_counter,
         rx_channel,
-        rx_buffer
+        rx_buffer,
+        g_pin_tx,
+        g_pin_rx,
+        DEFAULT_PIN_TX,
+        DEFAULT_PIN_RX,
+        createRxDevice  // Factory function for RxDevice creation
     );
 
     FL_PRINT("[REMOTE RPC] ✓ RPC system initialized (testGpioConnection available)");

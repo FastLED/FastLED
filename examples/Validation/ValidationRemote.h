@@ -22,6 +22,11 @@ namespace fl {
     struct NamedTimingConfig;
 }
 
+/// @brief Factory function type for creating RxDevice instances
+/// @param pin The GPIO pin to create the RxDevice on
+/// @return A shared_ptr to the created RxDevice, or nullptr on failure
+using RxDeviceFactory = fl::shared_ptr<fl::RxDevice>(*)(int pin);
+
 /// @brief Remote RPC control system for test validation
 /// Encapsulates all RPC function registration and processing logic
 class ValidationRemoteControl {
@@ -40,8 +45,13 @@ public:
     /// @param start_command_received Reference to start command flag
     /// @param test_matrix_complete Reference to completion flag
     /// @param frame_counter Reference to frame counter
-    /// @param rx_channel Reference to RX channel
+    /// @param rx_channel Reference to RX channel (may be recreated on pin change)
     /// @param rx_buffer RX buffer span
+    /// @param pin_tx Reference to TX pin variable (runtime configurable)
+    /// @param pin_rx Reference to RX pin variable (runtime configurable)
+    /// @param default_pin_tx Default TX pin for this platform
+    /// @param default_pin_rx Default RX pin for this platform
+    /// @param rx_factory Factory function for creating RxDevice instances
     void registerFunctions(
         fl::vector<fl::DriverInfo>& drivers_available,
         fl::TestMatrixConfig& test_matrix,
@@ -51,7 +61,12 @@ public:
         bool& test_matrix_complete,
         uint32_t& frame_counter,
         fl::shared_ptr<fl::RxDevice>& rx_channel,
-        fl::span<uint8_t> rx_buffer
+        fl::span<uint8_t> rx_buffer,
+        int& pin_tx,
+        int& pin_rx,
+        int default_pin_tx,
+        int default_pin_rx,
+        RxDeviceFactory rx_factory
     );
 
     /// @brief Process scheduled RPC commands (call from loop())
@@ -76,6 +91,15 @@ private:
     bool* mpStartCommandReceived;
     bool* mpTestMatrixComplete;
     uint32_t* mpFrameCounter;
-    fl::shared_ptr<fl::RxDevice> mpRxChannel;
+    fl::shared_ptr<fl::RxDevice>* mpRxChannel;  // Pointer to shared_ptr (for RX recreation)
     fl::span<uint8_t> mRxBuffer;
+
+    // Pin configuration (runtime modifiable via RPC)
+    int* mpPinTx;
+    int* mpPinRx;
+    int mDefaultPinTx;
+    int mDefaultPinRx;
+
+    // RxDevice factory for creating/recreating RX channels
+    RxDeviceFactory mRxFactory;
 };

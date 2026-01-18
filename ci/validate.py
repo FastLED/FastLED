@@ -66,7 +66,7 @@ init(autoreset=True)
 # Default expect patterns - simplified to essential checks only
 DEFAULT_EXPECT_PATTERNS = [
     "TX Pin: 1",  # Hardware setup verification (PIN_TX = 1 in firmware)
-    "RX Pin: 0",  # Hardware setup verification (PIN_RX = 0 in firmware)
+    "RX Pin: 2",  # Hardware setup verification (PIN_RX = 2 in firmware)
     "DRIVER_ENABLED: PARLIO",  # Parlio driver availability (key driver)
     "VALIDATION_READY: true",  # Test ready indicator
 ]
@@ -89,7 +89,7 @@ INPUT_ON_TRIGGER = "VALIDATION_READY:START:10"
 
 # GPIO pin definitions (must match Validation.ino)
 PIN_TX = 1  # TX pin used by FastLED drivers
-PIN_RX = 0  # RX pin used by RMT receiver
+PIN_RX = 2  # RX pin used by RMT receiver
 
 
 # ============================================================
@@ -279,6 +279,10 @@ class Args:
     expect_keywords: list[str] | None
     fail_keywords: list[str] | None
 
+    # Pin configuration
+    tx_pin: int | None
+    rx_pin: int | None
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -420,6 +424,22 @@ See Also:
             help="Add custom regex pattern that triggers immediate termination + exit 1 (can be specified multiple times)",
         )
 
+        # Pin configuration
+        pin_group = parser.add_argument_group(
+            "Pin Configuration",
+            "Override default TX/RX pins (platform-specific defaults otherwise).",
+        )
+        pin_group.add_argument(
+            "--tx-pin",
+            type=int,
+            help="Override TX pin number (FastLED driver output)",
+        )
+        pin_group.add_argument(
+            "--rx-pin",
+            type=int,
+            help="Override RX pin number (RMT receiver input)",
+        )
+
         parsed = parser.parse_args()
 
         # Convert argparse.Namespace to Args dataclass
@@ -440,6 +460,8 @@ See Also:
             no_fail_on=parsed.no_fail_on,
             expect_keywords=parsed.expect_keywords,
             fail_keywords=parsed.fail_keywords,
+            tx_pin=parsed.tx_pin,
+            rx_pin=parsed.rx_pin,
         )
 
 
@@ -676,9 +698,23 @@ def run(args: Args | None = None) -> int:
             if not run_upload(build_dir, final_environment, upload_port, args.verbose):
                 return 1
 
+            # Determine effective TX/RX pins (CLI args override defaults)
+            effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
+            effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+
+            # If custom pins specified, add setPins RPC command before the setDrivers command
+            if args.tx_pin is not None or args.rx_pin is not None:
+                # Insert setPins command at the beginning of the RPC command list
+                set_pins_cmd = {
+                    "function": "setPins",
+                    "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}]
+                }
+                json_rpc_commands.insert(0, set_pins_cmd)
+                print(f"\n📌 Custom pin configuration: TX={effective_tx_pin}, RX={effective_rx_pin}")
+
             # Phase 3.5: GPIO Connectivity Pre-Test
             # This verifies the TX-RX jumper wire is connected before running tests
-            if not run_gpio_pretest(upload_port):
+            if not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
                 print()
                 print(f"{Fore.RED}=" * 60)
                 print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
@@ -687,13 +723,13 @@ def run(args: Args | None = None) -> int:
                 print("The validation cannot proceed without a physical connection")
                 print("between the TX and RX pins.")
                 print()
-                print(f"Please connect a jumper wire from GPIO {PIN_TX} to GPIO {PIN_RX}")
+                print(f"Please connect a jumper wire from GPIO {effective_tx_pin} to GPIO {effective_rx_pin}")
                 print("and run the validation again.")
                 print()
                 return 1
 
             # Phase 4: Monitor serial output with validation patterns
-            success, output, rpc_handler = run_monitor(
+            success, _output, _rpc_handler = run_monitor(
                 build_dir,
                 final_environment,
                 upload_port,

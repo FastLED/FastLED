@@ -34,8 +34,13 @@ ValidationRemoteControl::ValidationRemoteControl()
     , mpStartCommandReceived(nullptr)
     , mpTestMatrixComplete(nullptr)
     , mpFrameCounter(nullptr)
-    , mpRxChannel()
-    , mRxBuffer(nullptr, 0) {
+    , mpRxChannel(nullptr)
+    , mRxBuffer(nullptr, 0)
+    , mpPinTx(nullptr)
+    , mpPinRx(nullptr)
+    , mDefaultPinTx(1)
+    , mDefaultPinRx(0)
+    , mRxFactory(nullptr) {
 }
 
 ValidationRemoteControl::~ValidationRemoteControl() = default;
@@ -49,7 +54,12 @@ void ValidationRemoteControl::registerFunctions(
     bool& test_matrix_complete,
     uint32_t& frame_counter,
     fl::shared_ptr<fl::RxDevice>& rx_channel,
-    fl::span<uint8_t> rx_buffer) {
+    fl::span<uint8_t> rx_buffer,
+    int& pin_tx,
+    int& pin_rx,
+    int default_pin_tx,
+    int default_pin_rx,
+    RxDeviceFactory rx_factory) {
 
     // Store references to external state
     mpDriversAvailable = &drivers_available;
@@ -59,8 +69,13 @@ void ValidationRemoteControl::registerFunctions(
     mpStartCommandReceived = &start_command_received;
     mpTestMatrixComplete = &test_matrix_complete;
     mpFrameCounter = &frame_counter;
-    mpRxChannel = rx_channel;
+    mpRxChannel = &rx_channel;  // Pointer to shared_ptr for RX recreation
     mRxBuffer = rx_buffer;
+    mpPinTx = &pin_tx;
+    mpPinRx = &pin_rx;
+    mDefaultPinTx = default_pin_tx;
+    mDefaultPinRx = default_pin_rx;
+    mRxFactory = rx_factory;
 
     // Helper to serialize test results
     auto serializeTestResult = [](const fl::TestCaseResult& result) -> fl::Json {
@@ -408,7 +423,7 @@ void ValidationRemoteControl::registerFunctions(
             (*mpTestCases)[idx],
             (*mpTestResults)[idx],
             timing_config,
-            mpRxChannel,
+            *mpRxChannel,
             mRxBuffer
         );
 
@@ -503,7 +518,7 @@ void ValidationRemoteControl::registerFunctions(
                     (*mpTestCases)[i],
                     (*mpTestResults)[i],
                     timing_config,
-                    mpRxChannel,
+                    *mpRxChannel,
                     mRxBuffer
                 );
 
@@ -568,7 +583,7 @@ void ValidationRemoteControl::registerFunctions(
                 (*mpTestCases)[i],
                 (*mpTestResults)[i],
                 timing_config,
-                mpRxChannel,
+                *mpRxChannel,
                 mRxBuffer
             );
 
@@ -1027,7 +1042,7 @@ void ValidationRemoteControl::registerFunctions(
                     (*mpTestCases)[i],
                     (*mpTestResults)[i],
                     timing_config,
-                    mpRxChannel,
+                    *mpRxChannel,
                     mRxBuffer
                 );
 
@@ -1252,6 +1267,221 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
+    // ========================================================================
+    // Pin Configuration RPC Functions (Dynamic TX/RX Pin Support)
+    // ========================================================================
+
+    // Register "getPins" function - query current and default pin configuration
+    mRemote->registerFunctionWithReturn("getPins", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+        response.set("success", true);
+        response.set("txPin", static_cast<int64_t>(*mpPinTx));
+        response.set("rxPin", static_cast<int64_t>(*mpPinRx));
+
+        fl::Json defaults = fl::Json::object();
+        defaults.set("txPin", static_cast<int64_t>(mDefaultPinTx));
+        defaults.set("rxPin", static_cast<int64_t>(mDefaultPinRx));
+        response.set("defaults", defaults);
+
+        #if defined(FL_IS_ESP_32S3)
+            response.set("platform", "ESP32-S3");
+        #elif defined(FL_IS_ESP_32S2)
+            response.set("platform", "ESP32-S2");
+        #elif defined(FL_IS_ESP_32C6)
+            response.set("platform", "ESP32-C6");
+        #elif defined(FL_IS_ESP_32C3)
+            response.set("platform", "ESP32-C3");
+        #else
+            response.set("platform", "ESP32");
+        #endif
+
+        return response;
+    });
+
+    // Register "setTxPin" function - set TX pin (regenerates test cases)
+    mRemote->registerFunctionWithReturn("setTxPin", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [pin: int]");
+            return response;
+        }
+
+        int new_pin = static_cast<int>(args[0].as_int().value());
+
+        // Validate pin range (ESP32 GPIO range)
+        if (new_pin < 0 || new_pin > 48) {
+            response.set("error", "InvalidPin");
+            response.set("message", "Pin must be 0-48");
+            return response;
+        }
+
+        int old_pin = *mpPinTx;
+        *mpPinTx = new_pin;
+
+        // Regenerate test cases with new TX pin
+        regenerateTestCasesLocal();
+
+        FL_PRINT("[RPC] setTxPin(" << new_pin << ") - TX pin changed from " << old_pin << " to " << new_pin);
+
+        response.set("success", true);
+        response.set("txPin", static_cast<int64_t>(new_pin));
+        response.set("previousTxPin", static_cast<int64_t>(old_pin));
+        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
+        return response;
+    });
+
+    // Register "setRxPin" function - set RX pin (recreates RX channel)
+    mRemote->registerFunctionWithReturn("setRxPin", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [pin: int]");
+            return response;
+        }
+
+        int new_pin = static_cast<int>(args[0].as_int().value());
+
+        // Validate pin range (ESP32 GPIO range)
+        if (new_pin < 0 || new_pin > 48) {
+            response.set("error", "InvalidPin");
+            response.set("message", "Pin must be 0-48");
+            return response;
+        }
+
+        int old_pin = *mpPinRx;
+        bool pin_changed = (new_pin != old_pin);
+        bool rx_recreated = false;
+
+        if (pin_changed) {
+            *mpPinRx = new_pin;
+
+            // Recreate RX channel with new pin
+            FL_PRINT("[RPC] setRxPin(" << new_pin << ") - Recreating RX channel...");
+
+            // Destroy old RX channel
+            mpRxChannel->reset();
+
+            // Create new RX channel on new pin using factory
+            *mpRxChannel = mRxFactory(new_pin);
+
+            if (*mpRxChannel) {
+                FL_PRINT("[RPC] setRxPin - RX channel recreated on GPIO " << new_pin);
+                rx_recreated = true;
+            } else {
+                FL_ERROR("[RPC] setRxPin - Failed to create RX channel on GPIO " << new_pin);
+                response.set("error", "RxChannelCreationFailed");
+                response.set("message", "Failed to create RX channel on new pin");
+                // Restore old pin value
+                *mpPinRx = old_pin;
+                return response;
+            }
+        }
+
+        response.set("success", true);
+        response.set("rxPin", static_cast<int64_t>(new_pin));
+        response.set("previousRxPin", static_cast<int64_t>(old_pin));
+        response.set("rxChannelRecreated", rx_recreated);
+        return response;
+    });
+
+    // Register "setPins" function - set both TX and RX pins atomically
+    mRemote->registerFunctionWithReturn("setPins", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Accept either {txPin, rxPin} object or [txPin, rxPin] array
+        int new_tx_pin = -1;
+        int new_rx_pin = -1;
+
+        if (args.is_array() && args.size() == 1 && args[0].is_object()) {
+            // Object form: [{txPin: int, rxPin: int}]
+            fl::Json config = args[0];
+            if (config.contains("txPin") && config["txPin"].is_int()) {
+                new_tx_pin = static_cast<int>(config["txPin"].as_int().value());
+            }
+            if (config.contains("rxPin") && config["rxPin"].is_int()) {
+                new_rx_pin = static_cast<int>(config["rxPin"].as_int().value());
+            }
+        } else if (args.is_array() && args.size() == 2) {
+            // Array form: [txPin, rxPin]
+            if (args[0].is_int()) {
+                new_tx_pin = static_cast<int>(args[0].as_int().value());
+            }
+            if (args[1].is_int()) {
+                new_rx_pin = static_cast<int>(args[1].as_int().value());
+            }
+        } else {
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [{txPin, rxPin}] or [txPin, rxPin]");
+            return response;
+        }
+
+        // Validate pin ranges
+        if (new_tx_pin < 0 || new_tx_pin > 48) {
+            response.set("error", "InvalidTxPin");
+            response.set("message", "TX pin must be 0-48");
+            return response;
+        }
+        if (new_rx_pin < 0 || new_rx_pin > 48) {
+            response.set("error", "InvalidRxPin");
+            response.set("message", "RX pin must be 0-48");
+            return response;
+        }
+
+        int old_tx_pin = *mpPinTx;
+        int old_rx_pin = *mpPinRx;
+        bool rx_pin_changed = (new_rx_pin != old_rx_pin);
+        bool rx_recreated = false;
+
+        // Update TX pin
+        *mpPinTx = new_tx_pin;
+
+        // Update RX pin and recreate channel if changed
+        if (rx_pin_changed) {
+            *mpPinRx = new_rx_pin;
+
+            FL_PRINT("[RPC] setPins - Recreating RX channel on GPIO " << new_rx_pin << "...");
+
+            // Destroy old RX channel
+            mpRxChannel->reset();
+
+            // Create new RX channel using factory
+            *mpRxChannel = mRxFactory(new_rx_pin);
+
+            if (*mpRxChannel) {
+                FL_PRINT("[RPC] setPins - RX channel recreated successfully");
+                rx_recreated = true;
+            } else {
+                FL_ERROR("[RPC] setPins - Failed to create RX channel on GPIO " << new_rx_pin);
+                // Rollback both pins
+                *mpPinTx = old_tx_pin;
+                *mpPinRx = old_rx_pin;
+                response.set("error", "RxChannelCreationFailed");
+                response.set("message", "Failed to create RX channel - pins restored to previous values");
+                return response;
+            }
+        } else {
+            *mpPinRx = new_rx_pin;
+        }
+
+        // Regenerate test cases with new TX pin
+        regenerateTestCasesLocal();
+
+        FL_PRINT("[RPC] setPins - TX: " << old_tx_pin << " → " << new_tx_pin
+                << ", RX: " << old_rx_pin << " → " << new_rx_pin);
+
+        response.set("success", true);
+        response.set("txPin", static_cast<int64_t>(new_tx_pin));
+        response.set("rxPin", static_cast<int64_t>(new_rx_pin));
+        response.set("previousTxPin", static_cast<int64_t>(old_tx_pin));
+        response.set("previousRxPin", static_cast<int64_t>(old_rx_pin));
+        response.set("rxChannelRecreated", rx_recreated);
+        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
+        return response;
+    });
+
     // Register "help" function - list all RPC functions with descriptions
     mRemote->registerFunctionWithReturn("help", [this](const fl::Json& args) -> fl::Json {
         fl::Json functions = fl::Json::array();
@@ -1380,6 +1610,39 @@ void ValidationRemoteControl::registerFunctions(
         ping_fn.set("description", "Health check with timestamp");
         functions.push_back(ping_fn);
 
+        // Phase 5: Pin Configuration
+        fl::Json getPins_fn = fl::Json::object();
+        getPins_fn.set("name", "getPins");
+        getPins_fn.set("phase", "Phase 5: Pin Configuration");
+        getPins_fn.set("args", "[]");
+        getPins_fn.set("returns", "{txPin, rxPin, defaults: {txPin, rxPin}, platform}");
+        getPins_fn.set("description", "Query current and default pin configuration");
+        functions.push_back(getPins_fn);
+
+        fl::Json setTxPin_fn = fl::Json::object();
+        setTxPin_fn.set("name", "setTxPin");
+        setTxPin_fn.set("phase", "Phase 5: Pin Configuration");
+        setTxPin_fn.set("args", "[pin]");
+        setTxPin_fn.set("returns", "{success, txPin, previousTxPin, testCases}");
+        setTxPin_fn.set("description", "Set TX pin (regenerates test cases)");
+        functions.push_back(setTxPin_fn);
+
+        fl::Json setRxPin_fn = fl::Json::object();
+        setRxPin_fn.set("name", "setRxPin");
+        setRxPin_fn.set("phase", "Phase 5: Pin Configuration");
+        setRxPin_fn.set("args", "[pin]");
+        setRxPin_fn.set("returns", "{success, rxPin, previousRxPin, rxChannelRecreated}");
+        setRxPin_fn.set("description", "Set RX pin (recreates RX channel)");
+        functions.push_back(setRxPin_fn);
+
+        fl::Json setPins_fn = fl::Json::object();
+        setPins_fn.set("name", "setPins");
+        setPins_fn.set("phase", "Phase 5: Pin Configuration");
+        setPins_fn.set("args", "[{txPin, rxPin}] or [txPin, rxPin]");
+        setPins_fn.set("returns", "{success, txPin, rxPin, rxChannelRecreated, testCases}");
+        setPins_fn.set("description", "Set both TX and RX pins atomically");
+        functions.push_back(setPins_fn);
+
         fl::Json help_fn = fl::Json::object();
         help_fn.set("name", "help");
         help_fn.set("phase", "Phase 4: Utility");
@@ -1390,7 +1653,7 @@ void ValidationRemoteControl::registerFunctions(
 
         fl::Json response = fl::Json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(16));
+        response.set("totalFunctions", static_cast<int64_t>(20));
         response.set("functions", functions);
         return response;
     });
