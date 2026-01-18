@@ -212,16 +212,20 @@ def detect_and_fix_corrupted_packages_dynamic(
     """Dynamically detect and fix corrupted packages based on platform requirements."""
     from ci.util.lock_handler import force_remove_path, is_psutil_available
 
-    print("=== Dynamic Package Corruption Detection & Fix ===")
-    print(f"Board: {board_name}")
-    print(f"Packages dir: {paths.packages_dir}")
+    # Only print header when verbose or corruption is detected
+    verbose = False  # Could be made configurable later
 
-    if is_psutil_available():
-        print("  Lock detection: psutil available ✓")
-    else:
-        print(
-            "  Lock detection: psutil NOT available (install with: uv pip install psutil)"
-        )
+    if verbose:
+        print("=== Dynamic Package Corruption Detection & Fix ===")
+        print(f"Board: {board_name}")
+        print(f"Packages dir: {paths.packages_dir}")
+
+        if is_psutil_available():
+            print("  Lock detection: psutil available ✓")
+        else:
+            print(
+                "  Lock detection: psutil NOT available (install with: uv pip install psutil)"
+            )
 
     results: dict[str, Any] = {}
 
@@ -229,15 +233,17 @@ def detect_and_fix_corrupted_packages_dynamic(
     platform_packages = []
     if platform_path and platform_path.exists():
         platform_packages = get_platform_required_packages(platform_path)
-        print(f"Platform packages found: {len(platform_packages)}")
-        if platform_packages:
-            print(
-                f"  Required packages: {', '.join(platform_packages[:5])}{'...' if len(platform_packages) > 5 else ''}"
-            )
+        if verbose:
+            print(f"Platform packages found: {len(platform_packages)}")
+            if platform_packages:
+                print(
+                    f"  Required packages: {', '.join(platform_packages[:5])}{'...' if len(platform_packages) > 5 else ''}"
+                )
 
     # Get installed packages from PIO CLI
     installed_packages = get_installed_packages_from_pio()
-    print(f"Installed packages found: {len(installed_packages)}")
+    if verbose:
+        print(f"Installed packages found: {len(installed_packages)}")
 
     # If we have platform info, focus on those packages, otherwise scan all installed
     packages_to_check = []
@@ -246,9 +252,10 @@ def detect_and_fix_corrupted_packages_dynamic(
         packages_to_check = [
             pkg for pkg in platform_packages if pkg in installed_packages
         ]
-        print(
-            f"Checking {len(packages_to_check)} packages that are both required and installed"
-        )
+        if verbose:
+            print(
+                f"Checking {len(packages_to_check)} packages that are both required and installed"
+            )
     else:
         # Fallback: check all installed packages that look like frameworks
         packages_to_check = [
@@ -256,27 +263,33 @@ def detect_and_fix_corrupted_packages_dynamic(
             for pkg in installed_packages.keys()
             if "framework" in pkg.lower() or "toolchain" in pkg.lower()
         ]
-        print(
-            f"Fallback: Checking {len(packages_to_check)} framework/toolchain packages"
-        )
+        if verbose:
+            print(
+                f"Fallback: Checking {len(packages_to_check)} framework/toolchain packages"
+            )
 
     if not packages_to_check:
-        print("No packages to check - using fallback hardcoded list")
+        if verbose:
+            print("No packages to check - using fallback hardcoded list")
         packages_to_check = ["framework-arduinoespressif32-libs", "tool-esptoolpy"]
 
-    # Check each package for corruption
+    # Check each package for corruption (silent for OK packages, only print on issues)
+    corrupted_count = 0
     for package_name in packages_to_check:
-        print(f"Checking package: {package_name}")
+        if verbose:
+            print(f"Checking package: {package_name}")
         package_path = paths.packages_dir / package_name
-        print(f"  Package path: {package_path}")
+        if verbose:
+            print(f"  Package path: {package_path}")
 
         exists = package_path.exists()
         piopm_exists = (package_path / ".piopm").exists() if exists else False
         manifest_exists = (package_path / "package.json").exists() if exists else False
 
-        print(f"  Package exists: {exists}")
-        print(f"  .piopm exists: {piopm_exists}")
-        print(f"  package.json exists: {manifest_exists}")
+        if verbose:
+            print(f"  Package exists: {exists}")
+            print(f"  .piopm exists: {piopm_exists}")
+            print(f"  package.json exists: {manifest_exists}")
 
         # Two types of corruption:
         # 1. Has .piopm but missing package.json (installed but corrupted)
@@ -286,37 +299,38 @@ def detect_and_fix_corrupted_packages_dynamic(
             or (not piopm_exists and not manifest_exists)  # Type 2
         )
         if is_corrupted:
+            corrupted_count += 1
+            # Only show header on first corruption
+            if corrupted_count == 1:
+                print("=== Fixing corrupted packages ===")
+            print(f"  {package_name}: ", end="")
             if piopm_exists and not manifest_exists:
-                print("  -> CORRUPTED: Has .piopm but missing package.json")
+                print("CORRUPTED (missing package.json)")
             elif not piopm_exists and not manifest_exists:
-                print(
-                    "  -> CORRUPTED: Incomplete installation (missing both .piopm and package.json)"
-                )
-            print("  -> FIXING: Removing corrupted package...")
+                print("CORRUPTED (incomplete installation)")
             try:
                 # Use lock-aware deletion that kills holding processes
                 success = force_remove_path(package_path, max_retries=3)
                 if success:
-                    print(f"  -> SUCCESS: Removed {package_name}")
-                    print("  -> PlatformIO will re-download package automatically")
+                    print(f"    -> Removed, will re-download")
                     results[package_name] = True  # Was corrupted, now fixed
                 else:
-                    print(
-                        f"  -> ERROR: Failed to remove {package_name} after all retries"
-                    )
+                    print(f"    -> ERROR: Failed to remove after retries")
                     results[package_name] = False  # Still corrupted
                 handle_keyboard_interrupt_properly()
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
-                print(f"  -> ERROR: Failed to remove {package_name}: {e}")
+                print(f"    -> ERROR: {e}")
                 results[package_name] = False  # Still corrupted
         else:
-            print("  -> OK: Not corrupted")
+            if verbose:
+                print("  -> OK: Not corrupted")
             results[package_name] = False  # Not corrupted
 
-    print("=== Dynamic Detection & Fix Complete ===")
+    if verbose:
+        print("=== Dynamic Detection & Fix Complete ===")
     return results
 
 

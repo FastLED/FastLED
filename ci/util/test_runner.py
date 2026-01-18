@@ -662,6 +662,26 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
     # Simplify common command patterns to friendly names
     if "cpp_test_run" in command and "ci.run_tests" in command:
         return "unit_tests"
+    elif "meson_example_runner.py" in command:
+        # Extract specific example names from command (after the .py script)
+        tokens = command.split()
+        example_names: list[str] = []
+        found_script = False
+        for tok in tokens:
+            # Find the script first
+            if "meson_example_runner" in tok:
+                found_script = True
+                continue
+            if not found_script:
+                continue
+            # Skip flags
+            if tok.startswith("-"):
+                continue
+            # This is likely an example name (after the script)
+            example_names.append(tok)
+        if example_names:
+            return ", ".join(example_names)
+        return "examples"
     elif "test_example_compilation.py" in command:
         # Show script name plus example targets, e.g. "test_example_compilation.py Luminova"
         try:
@@ -700,13 +720,38 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
 
 
 def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
-    """Format a summary table of process execution times"""
+    """Format a summary of process execution times.
+
+    For single tests: Returns compact inline format (e.g., "Blink: 3.27s")
+    For multiple tests: Returns a table format
+    """
     if not process_timings:
         return ""
 
     # Sort by skipped status first (non-skipped first), then by duration (longest first)
     sorted_timings = sorted(process_timings, key=lambda x: (x.skipped, -x.duration))
 
+    # For single test, use compact inline format
+    if len(sorted_timings) == 1:
+        timing = sorted_timings[0]
+        if timing.skipped:
+            return f"{timing.name}: skipped"
+        else:
+            return f"✅ {timing.name}: {timing.duration:.2f}s"
+
+    # For 2-3 tests, use compact comma-separated format
+    if len(sorted_timings) <= 3:
+        parts: list[str] = []
+        for timing in sorted_timings:
+            if timing.skipped:
+                parts.append(f"{timing.name}: skipped")
+            else:
+                parts.append(f"{timing.name} ({timing.duration:.2f}s)")
+        # Show success indicator if all passed
+        prefix = "✅ " if not any(t.skipped for t in sorted_timings) else ""
+        return f"{prefix}{', '.join(parts)}"
+
+    # 4+ tests: use table format
     # Calculate column widths dynamically
     max_name_width = max(len(timing.name) for timing in sorted_timings)
     max_name_width = max(max_name_width, len("Test"))  # Use shorter header
@@ -725,17 +770,12 @@ def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
         row = f"{timing.name:<{max_name_width}} | {duration_str}"
         rows.append(row)
 
-    # Combine all parts
-    table_lines = (
-        [
-            "\nTests:",
-            separator,
-            header,
-            separator,
-        ]
-        + rows
-        + [separator]
-    )
+    # Combine all parts (header before separator, no bottom border)
+    table_lines = [
+        "Results:",
+        header,
+        separator,
+    ] + rows
 
     return "\n".join(table_lines)
 
@@ -804,7 +844,7 @@ def _handle_process_completion(
         active_processes.remove(proc)
         if proc in last_activity_time:
             del last_activity_time[proc]  # Clean up tracking
-        ts_print(f"Process completed: {cmd}")
+        # Process completion is shown in the timing summary table, no separate message needed
 
         # Collect timing data for summary
         if proc.duration is not None:
@@ -1228,7 +1268,7 @@ def _run_processes_parallel(
                         duration=duration,
                     )
                     completed_timings.append(timing)
-                    ts_print(f"Process completed: {proc.get_command_str()}")
+                    # Process completion is shown in the timing summary table, no separate message needed
                     any_activity = True
                     continue
 
@@ -1413,12 +1453,32 @@ def runner(
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
     """
-    ts_print("[TEST_RUNNER] Starting runner function")
-    ts_print(f"[TEST_RUNNER] Args: {args}")
-    ts_print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
-    ts_print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
-    ts_print(f"[TEST_RUNNER] Example files changed: {examples_change}")
-    ts_print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
+    # Debug logging - only shown in verbose mode to reduce UI clutter
+    if args.verbose:
+        # Show only active/non-default flags instead of full TestArgs dump
+        active_flags: list[str] = []
+        if args.test:
+            active_flags.append(f"test={args.test}")
+        if args.examples:
+            # Format list as comma-separated values instead of Python list syntax
+            active_flags.append(f"examples={','.join(args.examples)}")
+        if args.debug:
+            active_flags.append("debug")
+        if args.clean:
+            active_flags.append("clean")
+        if args.full:
+            active_flags.append("full")
+        if args.no_parallel:
+            active_flags.append("no-parallel")
+        if args.build_mode:
+            active_flags.append(f"build_mode={args.build_mode}")
+        if args.no_fingerprint:
+            active_flags.append("no-fingerprint")
+        if args.no_pch:
+            active_flags.append("no-pch")
+
+        if active_flags:
+            ts_print(f"Active flags: {', '.join(active_flags)}")
 
     # Clear sccache stats at start to show only metrics from this build
     from ci.util.sccache_config import clear_sccache_stats
@@ -1451,15 +1511,9 @@ def runner(
             )
 
             # Print summary with timing
-            if result.success:
-                ts_print(f"\n{'=' * 70}")
-                ts_print("✓ C++ Unit Tests PASSED")
-                ts_print(
-                    f"  Tests run: {result.num_tests_passed}/{result.num_tests_run}"
-                )
-                ts_print(f"  Duration: {result.duration:.2f}s")
-                ts_print(f"{'=' * 70}\n")
-            else:
+            # Note: The meson_runner already prints "✅ All tests passed (n/n in X.XXs)"
+            # so we don't need a second boxed summary here
+            if not result.success:
                 sys.exit(1)
         else:
             # Fingerprint cache hit - skip unit tests
@@ -1594,7 +1648,9 @@ def runner(
             # Show sccache statistics before test summary
             show_sccache_stats()
             summary = _format_timing_summary(all_timings)
-            ts_print(summary)
+            # Use print() instead of ts_print() to avoid orphan timestamps
+            # before multi-line content (the summary starts with \n)
+            print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print summary and exit with proper code
         ts_print("\n\033[91m###### ERROR ######\033[0m")

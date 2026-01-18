@@ -60,18 +60,18 @@ def compile_board_examples(
     print(f"\n{'=' * 60}")
     print(f"COMPILING BOARD: {board.board_name}")
     print(f"EXAMPLES: {', '.join(examples)}")
-    print(f"GLOBAL CACHE: {resolved_cache_dir}")
     if merged_bin:
         print("MERGED-BIN MODE: Enabled")
         if merged_bin_output:
             print(f"MERGED-BIN OUTPUT: {merged_bin_output}")
 
-    # Show other cache directories
+    # Show cache directories in verbose mode only
     paths = FastLEDPaths(board.board_name)
-
-    print(f"BUILD CACHE: {paths.build_cache_dir}")
-    print(f"CORE DIR: {paths.core_dir}")
-    print(f"PACKAGES DIR: {paths.packages_dir}")
+    if verbose:
+        print(f"GLOBAL CACHE: {resolved_cache_dir}")
+        print(f"BUILD CACHE: {paths.build_cache_dir}")
+        print(f"CORE DIR: {paths.core_dir}")
+        print(f"PACKAGES DIR: {paths.packages_dir}")
 
     # Apply filters based on @filter directives (unless skip_filters is True)
     if skip_filters:

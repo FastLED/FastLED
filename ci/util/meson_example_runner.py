@@ -17,7 +17,7 @@ from ci.util.meson_runner import (
     perform_ninja_maintenance,
     setup_meson_build,
 )
-from ci.util.output_formatter import TimestampFormatter
+from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -52,15 +52,14 @@ def compile_examples(
         cmd.extend(["-j", "1"])
 
     # Determine targets to build
+    # Note: process_group already shows "Compiling: <examples>" status
     if examples is None:
         # Build all examples via the alias target
         cmd.append("examples-host")
-        _ts_print("[MESON] Compiling all examples...")
     else:
         # Build specific example targets
         for example_name in examples:
             cmd.append(f"example-{example_name}")
-        _ts_print(f"[MESON] Compiling {len(examples)} examples: {', '.join(examples)}")
 
     try:
         # Use RunningProcess for streaming output
@@ -73,31 +72,32 @@ def compile_examples(
             output_formatter=TimestampFormatter(),
         )
 
-        returncode = proc.wait(echo=verbose)
+        # Use filtering callback in verbose mode to suppress noise patterns
+        echo_callback = create_filtering_echo_callback() if verbose else False
+        returncode = proc.wait(echo=echo_callback)
 
         if returncode != 0:
             _ts_print(
-                f"[MESON] Example compilation failed with return code {returncode}",
+                f"Compilation failed (return code {returncode})",
                 file=sys.stderr,
             )
 
             # Show output if not already shown
             if not verbose and proc.stdout:
-                _ts_print("[MESON] Compilation output:", file=sys.stderr)
+                _ts_print("Compilation output:", file=sys.stderr)
                 _ts_print(proc.stdout, file=sys.stderr)
 
             return False
 
-        _ts_print("[MESON] Example compilation successful")
+        # Note: Don't print "Compilation successful" - it's redundant
+        # The transition to "Running:" phase implies compilation succeeded
         return True
 
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
-        _ts_print(
-            f"[MESON] Example compilation failed with exception: {e}", file=sys.stderr
-        )
+        _ts_print(f"Compilation failed: {e}", file=sys.stderr)
         return False
 
 
@@ -134,14 +134,17 @@ def run_examples(
     if examples is None:
         # Run all tests in the 'examples' suite
         cmd.extend(["--suite", "examples"])
-        _ts_print("[MESON] Running all examples...")
+        if not verbose:
+            _ts_print("Running all examples...")
     else:
         # Run specific examples by name pattern
         # Meson test names are "example-<name>"
         for example_name in examples:
             # Add each example as a separate test argument
             cmd.append(f"example-{example_name}")
-        _ts_print(f"[MESON] Running {len(examples)} examples: {', '.join(examples)}")
+        # In verbose mode, meson output shows running tests - skip redundant message
+        if not verbose:
+            _ts_print(f"Running: {', '.join(examples)}")
 
     start_time = time.time()
     num_passed = 0
@@ -159,11 +162,13 @@ def run_examples(
             output_formatter=TimestampFormatter(),
         )
 
-        returncode = proc.wait(echo=verbose)
+        # Use filtering callback in verbose mode to suppress noise patterns
+        echo_callback = create_filtering_echo_callback() if verbose else False
+        returncode = proc.wait(echo=echo_callback)
 
         if returncode != 0:
             _ts_print(
-                f"[MESON] Examples failed with return code {returncode}",
+                f"Examples failed (return code {returncode})",
                 file=sys.stderr,
             )
             return MesonTestResult(
@@ -174,7 +179,7 @@ def run_examples(
                 num_tests_failed=num_failed,
             )
 
-        _ts_print(f"[MESON] All examples passed (return code {returncode})")
+        # Note: Don't print "All examples passed" - the results table shows pass/fail status
         return MesonTestResult(
             success=True,
             duration=time.time() - start_time,
@@ -188,9 +193,7 @@ def run_examples(
         raise
     except Exception as e:
         duration = time.time() - start_time
-        _ts_print(
-            f"[MESON] Example execution failed with exception: {e}", file=sys.stderr
-        )
+        _ts_print(f"Execution failed: {e}", file=sys.stderr)
         return MesonTestResult(
             success=False,
             duration=duration,
@@ -258,8 +261,8 @@ def run_meson_examples(
     original_build_dir = build_dir
     build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
 
-    _ts_print(f"[EXAMPLES] Using mode-specific build directory: {build_dir}")
-    _ts_print(f"[EXAMPLES] Build mode: {build_mode}")
+    # Build directory removed from output - build mode already shown in Config line
+    # and full path rarely useful to users (just noise)
 
     # Check if Meson is installed
     if not check_meson_installed():
@@ -287,6 +290,7 @@ def run_meson_examples(
         debug=(build_mode == "debug"),
         reconfigure=False,
         build_mode=build_mode,
+        verbose=verbose,
     ):
         return MesonTestResult(
             success=False,
@@ -333,7 +337,7 @@ def run_meson_examples(
     else:
         # Just compilation, return success
         duration = time.time() - start_time
-        _ts_print(f"[MESON] Example compilation complete in {duration:.2f}s")
+        _ts_print(f"Compilation complete ({duration:.2f}s)")
         return MesonTestResult(
             success=True,
             duration=duration,

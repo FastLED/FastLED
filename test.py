@@ -139,10 +139,8 @@ def main() -> None:
 
         # Handle stack trace control
         enable_stack_trace = not args.no_stack_trace
-        if enable_stack_trace:
-            ts_print("Stack trace dumping enabled for test timeouts")
-        else:
-            ts_print("Stack trace dumping disabled for test timeouts")
+        # Stack trace messages are only useful when debugging timeouts
+        # Don't clutter normal output with this implementation detail
 
         # Validate conflicting arguments
         if args.no_interactive and args.interactive:
@@ -329,10 +327,8 @@ def main() -> None:
                     src_code_change or args.no_fingerprint or args.force
                 )
 
-                if args.no_fingerprint or args.force:
-                    ts_print(
-                        "Fingerprint caching disabled (--no-fingerprint or --force)"
-                    )
+                # Only show cache status when it's enabled (the notable case)
+                # When disabled (--no-fingerprint), this is the default so no message needed
 
                 test_runner(
                     args,
@@ -361,7 +357,7 @@ def main() -> None:
 
         # Print total execution time
         elapsed_time = time.time() - start_time
-        ts_print(f"\nTotal execution time: {elapsed_time:.2f} seconds")
+        print(f"Total: {elapsed_time:.2f}s")
 
         sys.exit(0)
 

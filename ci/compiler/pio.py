@@ -224,19 +224,20 @@ def _init_platformio_build(
     if verbose:
         run_cmd.append("--verbose")
 
-    # Print platformio.ini content for the initialization build
-    platformio_ini_path = build_dir / "platformio.ini"
-    if platformio_ini_path.exists():
-        print()  # Add newline before configuration section
-        print("=" * 60)
-        print("PLATFORMIO.INI CONFIGURATION:")
-        print("=" * 60)
-        ini_content = platformio_ini_path.read_text()
-        print(ini_content)
-        print("=" * 60)
-        print()  # Add newline after configuration section
+    # Print platformio.ini content for the initialization build (verbose only)
+    if verbose:
+        platformio_ini_path = build_dir / "platformio.ini"
+        if platformio_ini_path.exists():
+            print()  # Add newline before configuration section
+            print("=" * 60)
+            print("PLATFORMIO.INI CONFIGURATION:")
+            print("=" * 60)
+            ini_content = platformio_ini_path.read_text()
+            print(ini_content)
+            print("=" * 60)
+            print()  # Add newline after configuration section
 
-    print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
+        print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
 
     # Start timer for this example
     time.time()

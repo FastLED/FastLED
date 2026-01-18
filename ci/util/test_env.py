@@ -18,9 +18,9 @@ class ReconfigurableIO(Protocol):
 
 def setup_environment(args: TestArgs) -> None:
     """Set up the test environment based on arguments"""
-    # Handle --quick flag
-    if args.quick:
-        print("Quick mode enabled.")
+    # Handle --quick flag (message already printed by test_types.py with timestamp)
+    # if args.quick:
+    #     print("Quick mode enabled.")
 
     # Handle build flags
     if args.show_compile:

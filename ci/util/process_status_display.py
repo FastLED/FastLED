@@ -65,8 +65,12 @@ class ProcessStatusDisplay(ABC):
     def _display_loop(self) -> None:
         """Main display loop running in background thread."""
         spinner_index = 0
-        last_status_time = 0
-        status_interval = 2  # Show status every 2 seconds
+        # Initialize to current time so first status only shows after 5s of activity
+        # This prevents duplicate "Running:" messages from appearing immediately
+        last_status_time = time.time()
+        status_interval = (
+            5  # Show status every 5 seconds (reduced noise for short tasks)
+        )
 
         while not self._stop_event.is_set():
             try:
@@ -84,18 +88,21 @@ class ProcessStatusDisplay(ABC):
                     completed_count = group_status.completed_processes
 
                     if running_count > 0:
-                        # Show a brief status update
-                        spinner_char = ["|", "/", "-", "\\\\"][spinner_index % 4]
-                        # Get names of running processes
+                        # Show a clean status update (no spinner noise)
                         running_names = [
                             p.name for p in group_status.processes if p.is_alive
                         ]
                         running_list = (
                             ", ".join(running_names) if running_names else "none"
                         )
-                        print(
-                            f"{spinner_char} Progress: {completed_count}/{group_status.total_processes} completed, {running_count} running: {running_list}"
-                        )
+                        total = group_status.total_processes
+                        # For single item, omit counter; for multiple, use 1-indexed current position
+                        if total == 1:
+                            print(f"  Running: {running_list}")
+                        else:
+                            # Show 1-indexed "current/total" (e.g., [1/3] when first is running)
+                            current = completed_count + 1
+                            print(f"  [{current}/{total}] Running: {running_list}")
                         last_status_time = current_time
 
                 spinner_index = (spinner_index + 1) % 4

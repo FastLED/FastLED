@@ -175,7 +175,10 @@ class RunningProcessGroup:
         if not self.processes:
             return []
 
-        print(f"Running process group: {self.name}", flush=True)
+        # Simplified message - avoid technical jargon like "process group"
+        # Just show the group name if it's user-friendly, otherwise skip
+        if self.name and self.name != "TestProcesses":
+            print(f"Running {self.name}...", flush=True)
 
         if self.config.execution_mode == ExecutionMode.PARALLEL:
             return self._run_parallel()
@@ -211,9 +214,39 @@ class RunningProcessGroup:
             cmd_str = proc.get_command_str()
             if proc.proc is None:  # Only start if not already running
                 proc.start()
-                print(f"Started: {cmd_str}", flush=True)
+                # Create user-friendly display message
+                display_msg = cmd_str
+                if "meson_example_runner" in cmd_str:
+                    # Extract example names from command (after the .py script)
+                    parts = cmd_str.split()
+                    examples: list[str] = []
+                    found_script = False
+                    for p in parts:
+                        if "meson_example_runner" in p:
+                            found_script = True
+                            continue
+                        if not found_script:
+                            continue
+                        # Skip flags
+                        if p.startswith("-"):
+                            continue
+                        examples.append(p)
+                    if examples:
+                        display_msg = f"Compiling: {', '.join(examples)}"
+                    else:
+                        display_msg = "Compiling examples"
+                elif "ci/util/" in cmd_str:
+                    display_msg = cmd_str.split("ci/util/")[-1]
+                elif "ci\\" in cmd_str or "ci/" in cmd_str:
+                    # Extract just the script name
+                    parts = cmd_str.replace("\\", "/").split("/")
+                    for i, part in enumerate(parts):
+                        if part in ("ci", "util") and i + 1 < len(parts):
+                            display_msg = "/".join(parts[i:])
+                            break
+                print(f"{display_msg}", flush=True)
             else:
-                print(f"Process already running: {cmd_str}", flush=True)
+                print(f"  Already running: {cmd_str}", flush=True)
 
         # Monitor all processes for output and completion
         active_processes = self.processes.copy()

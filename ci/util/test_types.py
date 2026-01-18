@@ -207,21 +207,20 @@ def process_test_flags(args: TestArgs) -> TestArgs:
             # Full was not explicitly set, so disable it
             pass  # args.full is already False
 
-        # Log what's running
-        enabled_tests: list[str] = []
-        if args.unit:
-            enabled_tests.append("unit tests")
-        if args.examples is not None:
-            enabled_tests.append("examples")
-        if args.py:
-            enabled_tests.append("Python tests")
-        if args.full:
-            if args.examples is not None:
-                enabled_tests.append("full example integration tests")
-            else:
-                enabled_tests.append("full integration tests")
-
-        print(f"Specific test flags provided: Running only {', '.join(enabled_tests)}")
+        # Log what's running (disabled - redundant with auto-enabled messages)
+        # enabled_tests: list[str] = []
+        # if args.unit:
+        #     enabled_tests.append("unit tests")
+        # if args.examples is not None:
+        #     enabled_tests.append("examples")
+        # if args.py:
+        #     enabled_tests.append("Python tests")
+        # if args.full:
+        #     if args.examples is not None:
+        #         enabled_tests.append("full example integration tests")
+        #     else:
+        #         enabled_tests.append("full integration tests")
+        # print(f"Specific test flags provided: Running only {', '.join(enabled_tests)}")
         return args
 
     # If no specific flags, run everything (backward compatibility)
@@ -229,7 +228,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.unit = True
         args.examples = []  # Empty list means run all examples
         args.py = True
-        print("No test flags specified: Running all tests (unit, examples, Python)")
+        # print("No test flags specified: Running all tests (unit, examples, Python)")
 
         # Auto-enable verbose mode for unit tests (disabled)
         # if args.unit and not args.verbose:

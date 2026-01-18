@@ -213,22 +213,22 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 )
         else:
             # Use smart selector to find matching unit test or example
-            # Print banner for test discovery phase
+            # Print banner for test discovery phase (verbose mode only)
             from ci.util.meson_runner import _print_banner
 
-            _print_banner("TEST DISCOVERY", "🔍")
-            ts_print(f"🔍 Smart selector: searching for '{test_args.test}'...")
+            _print_banner("Discovery", "🔍", verbose=test_args.verbose)
 
-            # Determine filter type based on flags
+            # Determine filter type based on flags (silently, no separate message)
             filter_type = None
+            filter_desc = ""
             if test_args.cpp and not test_args.examples:
                 # --cpp flag without --examples means unit tests only
                 filter_type = "unit_test"
-                ts_print("🔍 Filtering to unit tests only (--cpp flag)")
+                filter_desc = " (--cpp filter)"
             elif test_args.examples is not None and not test_args.unit:
                 # --examples flag without --unit means examples only
                 filter_type = "example"
-                ts_print("🔍 Filtering to examples only (--examples flag)")
+                filter_desc = " (--examples filter)"
 
             match = get_best_match_or_prompt(test_args.test, filter_type=filter_type)
 
@@ -238,20 +238,18 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
 
             # Found a match - configure based on match type
             if match.type == "example":
-                ts_print(f"✅ Auto-selected example: {match.name} ({match.path})")
                 # Enable example mode
                 if not test_args.examples:
                     test_args.examples = [match.name]
                 if not test_args.cpp:
                     test_args.cpp = True
-                    ts_print(f"Auto-enabled --cpp mode for example: {match.name}")
+                # Print consolidated selection message with type and filter info
+                ts_print(f"Found: {match.name} ({match.path}) [example]{filter_desc}")
             else:  # unit_test
-                ts_print(f"✅ Auto-selected unit test: {match.name} ({match.path})")
                 # Update test name to the matched name (in case user used path-based query)
                 test_args.test = match.name
                 if not test_args.cpp and not test_args.py:
                     test_args.cpp = True
-                    ts_print(f"Auto-enabled --cpp mode for unit test: {match.name}")
                 # Also enable --unit when a specific C++ test is provided without any other flags
                 if (
                     not test_args.unit
@@ -260,59 +258,61 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                     and not test_args.full
                 ):
                     test_args.unit = True
-                    ts_print(
-                        f"Auto-enabled --unit mode for specific test: {match.name}"
-                    )
+                # Print consolidated selection message with type and filter info
+                ts_print(f"Found: {match.name} ({match.path}) [unit]{filter_desc}")
 
     # Auto-enable --verbose when running unit tests (disabled)
     # if test_args.unit and not test_args.verbose:
     #     test_args.verbose = True
     #     ts_print("Auto-enabled --verbose mode for unit tests")
 
+    # Collect config items for consolidated summary
+    config_parts: list[str] = []
+
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:
         if not test_args.cpp:
             test_args.cpp = True
-            ts_print("Auto-enabled --cpp mode for static analysis (--check)")
         if not test_args.clang and not test_args.gcc:
             test_args.clang = True
-            ts_print("Auto-enabled --clang compiler for static analysis (--check)")
+        config_parts.append("check")
 
     # Auto-enable --cpp and --quick when --examples is provided
     if test_args.examples is not None:
         if not test_args.cpp:
             test_args.cpp = True
-            ts_print("Auto-enabled --cpp mode for example compilation (--examples)")
         if not test_args.quick:
             test_args.quick = True
-            ts_print(
-                "Auto-enabled --quick mode for faster example compilation (--examples)"
-            )
+        # Show just the build mode - "examples" is redundant since user knows what they're running
+        if test_args.quick:
+            config_parts.append("quick")
+        else:
+            config_parts.append("examples")
 
     # Handle --full flag behavior
     if test_args.full:
         if test_args.examples is not None:
             # --examples --full: Run examples with full compilation+linking+execution
-            ts_print("Full examples mode: compilation + linking + program execution")
+            config_parts.append("full")
         else:
             # --full alone: Run integration tests
             if not test_args.cpp:
                 test_args.cpp = True
-                ts_print("Auto-enabled --cpp mode for full integration tests (--full)")
-            ts_print(
-                "Full integration tests: compilation + linking + program execution"
-            )
+            config_parts.append("full integration")
 
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not test_args.gcc and not test_args.clang:
         test_args.clang = True
-        ts_print(
-            "Windows detected: defaulting to Clang compiler (use --gcc to override)"
-        )
-    elif test_args.gcc:
-        ts_print("Using GCC compiler")
+
+    # Determine compiler for config summary
+    if test_args.gcc:
+        config_parts.append("gcc")
     elif test_args.clang:
-        ts_print("Using Clang compiler")
+        config_parts.append("clang")
+
+    # Print consolidated config summary if there are config items
+    if config_parts:
+        ts_print(f"Config: {', '.join(config_parts)}")
 
     # Validate conflicting arguments
     if test_args.no_interactive and test_args.interactive:

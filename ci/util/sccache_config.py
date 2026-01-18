@@ -131,20 +131,27 @@ def show_sccache_stats() -> None:
                     tokens = line_stripped.split()
                     key_metrics["avg_compile"] = f"{tokens[-2]} {tokens[-1]}"
 
-            # Display compact summary
-            ts_print("\nSCCACHE (this build):")
-            if key_metrics:
-                ts_print(
-                    f"  Requests: {key_metrics.get('requests', 'N/A')} | "
-                    f"Hits: {key_metrics.get('hits', 'N/A')} | "
-                    f"Misses: {key_metrics.get('misses', 'N/A')} | "
-                    f"Hit Rate: {key_metrics.get('hit_rate', 'N/A')}"
-                )
-                if "avg_compile" in key_metrics:
-                    ts_print(f"  Avg: {key_metrics['avg_compile']}")
-            else:
-                # Fallback: show raw output if parsing fails
-                ts_print(result.stdout)
+            # Display compact summary only if there's meaningful data
+            # Skip displaying SCCACHE stats if no compilation occurred (all N/A values)
+            has_hits = key_metrics.get("hits") not in (None, "N/A", "0")
+            has_misses = key_metrics.get("misses") not in (None, "N/A", "0")
+
+            # Only show SCCACHE stats if there was actual compilation activity
+            # Require actual hits/misses, not just requests count
+            if has_hits or has_misses:
+                ts_print("\nSCCACHE (this build):")
+                if key_metrics:
+                    ts_print(
+                        f"  Requests: {key_metrics.get('requests', 'N/A')} | "
+                        f"Hits: {key_metrics.get('hits', 'N/A')} | "
+                        f"Misses: {key_metrics.get('misses', 'N/A')} | "
+                        f"Hit Rate: {key_metrics.get('hit_rate', 'N/A')}"
+                    )
+                    if "avg_compile" in key_metrics:
+                        ts_print(f"  Avg: {key_metrics['avg_compile']}")
+                else:
+                    # Fallback: show raw output if parsing fails
+                    ts_print(result.stdout)
     except subprocess.TimeoutExpired:
         ts_print("Warning: sccache --show-stats timed out")
     except KeyboardInterrupt:

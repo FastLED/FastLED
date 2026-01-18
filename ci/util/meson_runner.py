@@ -22,7 +22,7 @@ from running_process import RunningProcess
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.color_output import print_blue, print_green, print_red, print_yellow
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-from ci.util.output_formatter import TimestampFormatter
+from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -49,68 +49,53 @@ class MesonTestResult:
         return out
 
 
-def _get_color_timestamp() -> str:
-    """Get formatted timestamp for colored output using global timestamp."""
-    # Import here to avoid circular dependency
-    from ci.util.timestamp_print import _GLOBAL_START_TIME
-
-    if _GLOBAL_START_TIME is None:
-        # This shouldn't happen as ts_print is called early, but handle it gracefully
-        return "0.00"
-    elapsed = time.time() - _GLOBAL_START_TIME
-    return f"{elapsed:.2f}"
-
-
-# Colored output helpers with timestamps
+# Colored output helpers (timestamps removed for cleaner output)
 def _print_success(msg: str) -> None:
-    """Print success message in green with timestamp."""
-    ts = _get_color_timestamp()
-    print_green(f"{ts} {msg}")
+    """Print success message in green."""
+    print_green(msg)
 
 
 def _print_error(msg: str) -> None:
-    """Print error message in red with timestamp."""
-    ts = _get_color_timestamp()
-    print_red(f"{ts} {msg}")
+    """Print error message in red."""
+    print_red(msg)
 
 
 def _print_warning(msg: str) -> None:
-    """Print warning message in yellow with timestamp."""
-    ts = _get_color_timestamp()
-    print_yellow(f"{ts} {msg}")
+    """Print warning message in yellow."""
+    print_yellow(msg)
 
 
 def _print_info(msg: str) -> None:
-    """Print info message in blue with timestamp."""
-    ts = _get_color_timestamp()
-    print_blue(f"{ts} {msg}")
+    """Print info message in blue."""
+    print_blue(msg)
 
 
-def _print_banner(title: str, emoji: str = "", width: int = 62) -> None:
-    """Print a section banner for visual separation using box-drawing characters.
+def _print_banner(
+    title: str, emoji: str = "", width: int = 50, verbose: bool | None = None
+) -> None:
+    """Print a lightweight section separator.
 
     Args:
         title: The banner title text
         emoji: Optional emoji to prefix the title (e.g., "🔧", "📦")
-        width: Total banner width (default 62 for 70-char terminal with timestamps)
+        width: Total banner width (default 50)
+        verbose: If False, suppress banner. If None, always print (backward compat)
     """
-    # Box-drawing characters for consistent visual style
-    top_border = f"╔{'═' * width}╗"
-    bottom_border = f"╚{'═' * width}╝"
+    # Skip banner in non-verbose mode when verbose is explicitly False
+    if verbose is False:
+        return
 
     # Format title with emoji if provided
-    display_title = f"{emoji}  {title}" if emoji else title
+    display_title = f"{emoji} {title}" if emoji else title
 
-    # Center title in banner with proper padding
-    padding = width - len(display_title)
-    left_pad = padding // 2
-    right_pad = padding - left_pad
-    title_line = f"║{' ' * left_pad}{display_title}{' ' * right_pad}║"
+    # Simple single-line separator
+    padding = width - len(display_title) - 2  # -2 for leading "── "
+    if padding < 0:
+        padding = 0
+    separator = f"── {display_title} " + "─" * padding
 
-    # Print banner
-    _ts_print(f"\n{top_border}")
-    _ts_print(title_line)
-    _ts_print(f"{bottom_border}")
+    # Print simple separator (no blank line before for compactness)
+    print(separator)
 
 
 def _resolve_meson_executable() -> str:
@@ -527,6 +512,7 @@ def setup_meson_build(
     debug: bool = False,
     check: bool = False,
     build_mode: Optional[str] = None,
+    verbose: bool = False,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -538,6 +524,7 @@ def setup_meson_build(
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         check: Enable IWYU static analysis (default: False)
         build_mode: Build mode ("quick", "debug", or "release"). If None, derived from debug flag.
+        verbose: Show detailed output including toolchain info (default: False)
 
     Returns:
         True if setup successful, False otherwise
@@ -960,8 +947,8 @@ def setup_meson_build(
 
     cmd: Optional[list[str]] = None
     if skip_meson_setup:
-        # Build already configured, check wrappers below
-        _ts_print(f"[MESON] Build directory already configured: {build_dir}")
+        # Build already configured, check wrappers below (message consolidated below)
+        pass
     elif already_configured and (reconfigure or force_reconfigure):
         # Reconfigure existing build (explicitly requested or forced by thin archive change)
         reason = (
@@ -993,35 +980,19 @@ def setup_meson_build(
         # Always pass explicit build_mode to ensure meson uses correct optimization flags
         cmd.extend([f"-Dbuild_mode={build_mode}"])
 
-    # Print debug mode status
-    if debug:
-        _ts_print("[MESON] ✅ Debug mode ENABLED (-g3 + sanitizers + libunwind)")
-    else:
-        _ts_print("[MESON] Debug mode disabled (using -g1 for stack traces)")
-
-    # Print IWYU check mode status
-    if check:
-        _ts_print("[MESON] ✅ IWYU static analysis ENABLED (--check flag)")
-    else:
-        _ts_print("[MESON] IWYU static analysis disabled (use --check to enable)")
-
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
     # Thin archives configuration (faster builds, smaller disk usage when supported)
     thin_flag = " --thin" if use_thin_archives else ""
 
-    if use_thin_archives:
+    # Build config summary is shown in toolchain line and mode lines elsewhere
+    # No need for separate config message here
+
+    # Only show thin archives warning when explicitly disabled (rare case)
+    if not use_thin_archives and os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES"):
         _ts_print(
-            "[MESON] ✅ Thin archives ENABLED (using clang-tool-chain LLVM tools)"
+            "[MESON] ⚠️  Thin archives DISABLED (FASTLED_DISABLE_THIN_ARCHIVES set)"
         )
-        _ts_print("[MESON]     Benefits: Faster builds, ~99% smaller archive files")
-    else:
-        # Show warning when thin archives are manually disabled
-        _ts_print("=" * 80)
-        _ts_print("⚠️  WARNING: Thin archives DISABLED")
-        _ts_print("    Reason: FASTLED_DISABLE_THIN_ARCHIVES environment variable set")
-        _ts_print("    Impact: +200ms archive creation, +45MB disk usage per build")
-        _ts_print("=" * 80)
 
     # Check for obsolete zig wrapper artifacts before proceeding
     # These wrappers were used in the old zig-based compiler system and must be removed
@@ -1094,25 +1065,17 @@ def setup_meson_build(
             _ts_print("[MESON]   - clang-tool-chain-ar")
         raise RuntimeError("clang-tool-chain wrapper commands not available")
 
-    _ts_print("[MESON] ✓ Using clang-tool-chain wrapper commands")
-    if use_sccache:
-        _ts_print(f"[MESON]   C compiler: {clang_wrapper} (with sccache)")
-        _ts_print(f"[MESON]   C++ compiler: {clangxx_wrapper} (with sccache)")
-    else:
-        _ts_print(f"[MESON]   C compiler: {clang_wrapper}")
-        _ts_print(f"[MESON]   C++ compiler: {clangxx_wrapper}")
-    _ts_print(f"[MESON]   Archiver: {llvm_ar_wrapper}")
-
-    # ============================================================================
-    # COMPILER VERSION TRACKING
-    # ============================================================================
-    # Check if compiler version has changed since last configure.
-    # When the compiler is upgraded (e.g., clang-tool-chain is updated), all
-    # PCH files and object files become incompatible and must be rebuilt.
-    # This check happens after compiler detection but before skip_meson_setup decision.
-    # ============================================================================
+    # Get compiler version for consolidated output
     current_compiler_version = get_compiler_version(clangxx_wrapper)
-    _ts_print(f"[MESON]   Compiler version: {current_compiler_version}")
+
+    # Consolidated single-line toolchain summary (verbose mode only)
+    # Before: 7 lines of compiler details
+    # After: "Toolchain: clang 21.1.5 + sccache"
+    if verbose:
+        if use_sccache:
+            print(f"Toolchain: {current_compiler_version} + sccache")
+        else:
+            print(f"Toolchain: {current_compiler_version}")
 
     if already_configured:
         if compiler_version_marker.exists():
@@ -1242,10 +1205,7 @@ endian = 'little'
     env["CXX"] = clangxx_wrapper
     env["AR"] = llvm_ar_wrapper
 
-    if use_sccache:
-        _ts_print("[MESON] ✅ sccache integration active (via clang-tool-chain)")
-    else:
-        _ts_print("[MESON] Note: sccache not found - using direct compilation")
+    # sccache status already shown in toolchain summary above
 
     # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:
@@ -1438,7 +1398,11 @@ endian = 'little'
 
 
 def compile_meson(
-    build_dir: Path, target: Optional[str] = None, check: bool = False
+    build_dir: Path,
+    target: Optional[str] = None,
+    check: bool = False,
+    quiet: bool = False,
+    verbose: bool = False,
 ) -> bool:
     """
     Compile using Meson.
@@ -1447,6 +1411,8 @@ def compile_meson(
         build_dir: Meson build directory
         target: Specific target to build (None = all)
         check: Enable IWYU static analysis during compilation (default: False)
+        quiet: Suppress banner and progress output (used during target fallback retries)
+        verbose: Enable verbose output with section banners
 
     Returns:
         True if compilation successful, False otherwise
@@ -1455,11 +1421,12 @@ def compile_meson(
 
     if target:
         cmd.append(target)
-        _print_banner("COMPILING TARGET", "📦")
-        _ts_print(f"[MESON] Compiling target: {target}")
+        if not quiet:
+            _print_banner("Compile", "📦", verbose=verbose)
+            print(f"Compiling: {target}")
     else:
-        _print_banner("COMPILING ALL TARGETS", "📦")
-        _ts_print(f"[MESON] Compiling all targets...")
+        _print_banner("Compile", "📦", verbose=verbose)
+        print("Compiling all targets...")
 
     # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
     # This avoids meson setup probe issues while still running IWYU during compilation
@@ -1567,8 +1534,27 @@ def compile_meson(
         )
 
         # Stream output line by line to rewrite Ninja paths
+        # In quiet mode, suppress all output (used during target fallback retries)
         with proc.line_iter(timeout=None) as it:
             for line in it:
+                # Filter out noisy Meson/Ninja INFO lines that clutter output
+                # Note: TimestampFormatter may add timestamp prefix, so check contains not startswith
+                stripped = line.strip()
+                if " INFO:" in stripped or stripped.startswith("INFO:"):
+                    continue  # Skip Meson INFO lines
+                if "Entering directory" in stripped:
+                    continue  # Skip Ninja directory change messages
+                if "calculating backend command" in stripped.lower():
+                    continue  # Skip Meson backend calculation message
+                if "ERROR: Can't invoke target" in stripped:
+                    continue  # Skip target-not-found errors (handled by fallback)
+                if "ninja: no work to do" in stripped.lower():
+                    continue  # Skip no-work ninja message (already up to date)
+
+                # In quiet mode, only collect output for error checking, don't print
+                if quiet:
+                    continue
+
                 # Rewrite Ninja paths to show full build-relative paths for clarity
                 # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
                 # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
@@ -1642,29 +1628,32 @@ def compile_meson(
                 )
 
         if returncode != 0:
-            _ts_print(
-                f"[MESON] Compilation failed with return code {returncode}",
-                file=sys.stderr,
-            )
+            # In quiet mode, don't print failure messages (fallback retries handle this)
+            if not quiet:
+                _ts_print(
+                    f"[MESON] Compilation failed with return code {returncode}",
+                    file=sys.stderr,
+                )
 
-            # Check for stale build cache error (missing files)
-            if "missing and no known rule to make it" in output.lower():
-                _ts_print(
-                    "[MESON] ⚠️  ERROR: Build cache references missing source files",
-                    file=sys.stderr,
-                )
-                _ts_print(
-                    "[MESON] 💡 TIP: Source files may have been deleted. Run with --clean to rebuild.",
-                    file=sys.stderr,
-                )
-                _ts_print(
-                    "[MESON] 💡 NOTE: Future builds should auto-detect this and reconfigure.",
-                    file=sys.stderr,
-                )
+                # Check for stale build cache error (missing files)
+                if "missing and no known rule to make it" in output.lower():
+                    _ts_print(
+                        "[MESON] ⚠️  ERROR: Build cache references missing source files",
+                        file=sys.stderr,
+                    )
+                    _ts_print(
+                        "[MESON] 💡 TIP: Source files may have been deleted. Run with --clean to rebuild.",
+                        file=sys.stderr,
+                    )
+                    _ts_print(
+                        "[MESON] 💡 NOTE: Future builds should auto-detect this and reconfigure.",
+                        file=sys.stderr,
+                    )
 
             return False
 
-        _ts_print(f"[MESON] Compilation successful")
+        # Don't print "Compilation successful" - the transition to Running phase implies success
+        # This was previously conditional on quiet mode, but it's always redundant
         return True
 
     except KeyboardInterrupt:
@@ -1782,11 +1771,11 @@ def run_meson_test(
 
     if test_name:
         cmd.append(test_name)
-        _print_banner("RUNNING TESTS", "▶️")
-        _ts_print(f"[MESON] Running test: {test_name}")
+        _print_banner("Test", "▶️", verbose=verbose)
+        print(f"Running: {test_name}")
     else:
-        _print_banner("RUNNING TESTS", "▶️")
-        _ts_print(f"[MESON] Running all tests...")
+        _print_banner("Test", "▶️", verbose=verbose)
+        print("Running all tests...")
 
     start_time = time.time()
     num_passed = 0
@@ -1813,7 +1802,9 @@ def run_meson_test(
         )
 
         if verbose:
-            returncode = proc.wait(echo=True)
+            # Use filtering callback in verbose mode to suppress noise patterns
+            echo_callback = create_filtering_echo_callback()
+            returncode = proc.wait(echo=echo_callback)
         else:
             # Stream output line by line to show test progress
             with proc.line_iter(timeout=None) as it:
@@ -1875,7 +1866,7 @@ def run_meson_test(
             )
 
         _print_success(
-            f"[MESON] ✅ All tests passed ({num_passed}/{num_run} tests in {duration:.2f}s)"
+            f"✅ All tests passed ({num_passed}/{num_run} in {duration:.2f}s)"
         )
         return MesonTestResult(
             success=True,
@@ -2028,8 +2019,8 @@ def run_meson_build_and_test(
     original_build_dir = build_dir
     build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
 
-    _ts_print(f"[MESON] Using mode-specific build directory: {build_dir}")
-    _ts_print(f"[MESON] Build mode: {build_mode}")
+    # Build dir and mode info is consolidated in setup_meson_build output
+    # No need for separate verbose messages here
 
     # Check if Meson is installed
     if not check_meson_installed():
@@ -2061,6 +2052,7 @@ def run_meson_build_and_test(
         debug=use_debug,
         check=check,
         build_mode=build_mode,
+        verbose=verbose,
     ):
         return MesonTestResult(
             success=False,
@@ -2130,9 +2122,10 @@ def run_meson_build_and_test(
                 # STREAMING EXECUTION PATH
                 # Compile and run tests in parallel - as soon as a test finishes linking,
                 # it's immediately executed while other tests continue compiling
-                _ts_print(
-                    "[MESON] Using streaming execution (compile + test in parallel)"
-                )
+                if verbose:
+                    _ts_print(
+                        "[MESON] Using streaming execution (compile + test in parallel)"
+                    )
 
                 # Create test callback for streaming execution
                 def test_callback(test_path: Path) -> bool:
@@ -2148,7 +2141,11 @@ def run_meson_build_and_test(
                             output_formatter=TimestampFormatter(),
                         )
 
-                        returncode = proc.wait(echo=verbose)
+                        # Use filtering callback in verbose mode to suppress noise patterns
+                        echo_callback = (
+                            create_filtering_echo_callback() if verbose else False
+                        )
+                        returncode = proc.wait(echo=echo_callback)
                         return returncode == 0
 
                     except KeyboardInterrupt:
@@ -2164,16 +2161,19 @@ def run_meson_build_and_test(
                         build_dir=build_dir,
                         test_callback=test_callback,
                         target=None,  # Build all default test targets (unit tests)
+                        verbose=verbose,
                     )
                 )
 
                 # Run streaming compilation and testing for EXAMPLES
-                _ts_print("[MESON] Starting examples compilation and execution...")
+                if verbose:
+                    _ts_print("[MESON] Starting examples compilation and execution...")
                 overall_success_examples, num_passed_examples, num_failed_examples = (
                     stream_compile_and_run_tests(
                         build_dir=build_dir,
                         test_callback=test_callback,
                         target="examples-host",  # Build examples explicitly
+                        verbose=verbose,
                     )
                 )
 
@@ -2185,28 +2185,15 @@ def run_meson_build_and_test(
                 duration = time.time() - start_time
                 num_tests_run = num_passed + num_failed
 
-                # Print combined summary
-                _ts_print(
-                    f"[MESON] Combined streaming results: {num_tests_run} total tests"
-                )
-                _ts_print(
-                    f"  Unit tests: {num_passed_tests}/{num_passed_tests + num_failed_tests} passed"
-                )
-                _ts_print(
-                    f"  Examples: {num_passed_examples}/{num_passed_examples + num_failed_examples} passed"
-                )
-                _ts_print(f"  Total: {num_passed} passed, {num_failed} failed")
-
                 # FALLBACK: If no tests were run during streaming (e.g., everything already compiled),
                 # fall back to running all tests via Meson test runner
+                # Show simplified message instead of detailed "0/0" breakdown
                 if num_tests_run == 0 and overall_success:
-                    _print_info(
-                        "[MESON] No tests executed during streaming (no compilation needed)"
-                    )
-                    _print_info(
-                        "[MESON] Falling back to Meson test runner for already-compiled tests..."
-                    )
-                    _print_banner("RUNNING TESTS", "▶️")
+                    if verbose:
+                        _print_info(
+                            "[MESON] Build up-to-date, running existing tests..."
+                        )
+                    # Note: run_meson_test already prints the RUNNING TESTS banner
                     result = run_meson_test(build_dir, test_name=None, verbose=verbose)
                     return result
 
@@ -2223,7 +2210,7 @@ def run_meson_build_and_test(
                     )
 
                 _print_success(
-                    f"[MESON] ✅ All tests passed ({num_passed}/{num_tests_run} tests in {duration:.2f}s)"
+                    f"✅ All tests passed ({num_passed}/{num_tests_run} in {duration:.2f}s)"
                 )
                 return MesonTestResult(
                     success=True,
@@ -2240,46 +2227,50 @@ def run_meson_build_and_test(
                 if meson_test_name:
                     compile_target = meson_test_name
 
-                compilation_success = compile_meson(build_dir, target=compile_target)
+                # Try target resolution with fallback - suppress all output during discovery
+                # to avoid confusing users with internal target name guessing
+                targets_to_try = [compile_target]
+                if fallback_test_name and fallback_test_name != compile_target:
+                    targets_to_try.append(fallback_test_name)
 
-                # If compilation failed and we have a fallback name, try the fallback
-                if not compilation_success and fallback_test_name:
-                    _ts_print(
-                        f"[MESON] Target '{compile_target}' not found, trying fallback: '{fallback_test_name}'"
+                # Build the full list of candidates up front so we can try quietly
+                if test_name:
+                    # Get fuzzy candidates early
+                    fuzzy_candidates = (
+                        get_fuzzy_test_candidates(build_dir, test_name)
+                        if not fuzzy_candidates
+                        else fuzzy_candidates
                     )
-                    compile_target = fallback_test_name
-                    meson_test_name = fallback_test_name
+                    # Add fuzzy candidates not already in the list
+                    for c in fuzzy_candidates:
+                        if c not in targets_to_try:
+                            targets_to_try.append(c)
+
+                # When there are multiple candidates, run all in quiet mode
+                # Only show banner once with final resolved target
+                has_fallbacks = len(targets_to_try) > 1
+                compilation_success = False
+                successful_target: Optional[str] = None
+
+                for candidate in targets_to_try:
+                    # Use quiet mode when there are fallbacks (suppress failure noise)
                     compilation_success = compile_meson(
-                        build_dir, target=compile_target
+                        build_dir,
+                        target=candidate,
+                        quiet=has_fallbacks,
+                        verbose=verbose,
                     )
+                    if compilation_success:
+                        successful_target = candidate
+                        compile_target = candidate
+                        meson_test_name = candidate
+                        break
 
-                # If still failed, try fuzzy matching candidates
-                # If fuzzy_candidates is empty (e.g., after fresh build), use meson introspect
-                if not compilation_success and test_name:
-                    if not fuzzy_candidates:
-                        # Query meson for fuzzy match candidates
-                        fuzzy_candidates = get_fuzzy_test_candidates(
-                            build_dir, test_name
-                        )
-                        # Remove primary and fallback names from candidates
-                        fuzzy_candidates = [
-                            c
-                            for c in fuzzy_candidates
-                            if c not in [meson_test_name, fallback_test_name]
-                        ]
-
-                    if fuzzy_candidates:
-                        for candidate in fuzzy_candidates:
-                            _ts_print(
-                                f"[MESON] Target '{compile_target}' not found, trying fuzzy match: '{candidate}'"
-                            )
-                            compile_target = candidate
-                            meson_test_name = candidate
-                            compilation_success = compile_meson(
-                                build_dir, target=compile_target
-                            )
-                            if compilation_success:
-                                break  # Found a match, stop trying
+                # Show the final result after target resolution
+                if compilation_success and has_fallbacks:
+                    _print_banner("Compile", "📦", verbose=verbose)
+                    print(f"Compiling: {successful_target}")
+                    # Note: Don't print "Compilation successful" - redundant before Running phase
 
                 if not compilation_success:
                     return MesonTestResult(
@@ -2337,8 +2328,8 @@ def run_meson_build_and_test(
                 num_tests_failed=0,
             )
 
-        _print_banner("RUNNING TESTS", "▶️")
-        _ts_print(f"▶️  Running test: {meson_test_name}")
+        _print_banner("Test", "▶️", verbose=verbose)
+        print(f"Running: {meson_test_name}")
 
         # Run the test executable directly
         try:
@@ -2352,7 +2343,9 @@ def run_meson_build_and_test(
                 output_formatter=TimestampFormatter(),
             )
 
-            returncode = proc.wait(echo=verbose)
+            # Use filtering callback in verbose mode to suppress noise patterns
+            echo_callback = create_filtering_echo_callback() if verbose else False
+            returncode = proc.wait(echo=echo_callback)
             duration = time.time() - start_time
 
             if returncode != 0:
@@ -2370,9 +2363,7 @@ def run_meson_build_and_test(
                     num_tests_failed=1,
                 )
 
-            _print_success(
-                f"[MESON] ✅ All tests passed (1/1 tests in {duration:.2f}s)"
-            )
+            _print_success(f"✅ All tests passed (1/1 in {duration:.2f}s)")
             return MesonTestResult(
                 success=True,
                 duration=duration,
@@ -2406,6 +2397,7 @@ def stream_compile_and_run_tests(
     build_dir: Path,
     test_callback: Callable[[Path], bool],
     target: Optional[str] = None,
+    verbose: bool = False,
 ) -> tuple[bool, int, int]:
     """
     Stream test compilation and execution in parallel.
@@ -2418,6 +2410,7 @@ def stream_compile_and_run_tests(
         test_callback: Function called with each completed test path.
                       Returns True if test passed, False if failed.
         target: Specific target to build (None = all)
+        verbose: Show detailed progress messages (default: False)
 
     Returns:
         Tuple of (overall_success, num_passed, num_failed)
@@ -2426,11 +2419,13 @@ def stream_compile_and_run_tests(
 
     if target:
         cmd.append(target)
-        _ts_print(f"[MESON] Streaming compilation of target: {target}")
+        if verbose:
+            _ts_print(f"[MESON] Streaming compilation of target: {target}")
     else:
         # Build default targets (unit tests) - no target specified builds defaults
         # Note: examples have build_by_default: false, so we need to build them separately
-        _ts_print(f"[MESON] Streaming compilation of all test targets...")
+        if verbose:
+            _ts_print(f"[MESON] Streaming compilation of all test targets...")
 
     # Pattern to detect test executable linking
     # Example: "[142/143] Linking target tests/test_foo.exe"
@@ -2468,11 +2463,19 @@ def stream_compile_and_run_tests(
             # Stream output line by line
             with proc.line_iter(timeout=None) as it:
                 for line in it:
+                    # Filter out noisy Meson/Ninja INFO lines that clutter output
+                    # These provide no useful information for normal operation
+                    stripped = line.strip()
+                    if stripped.startswith("INFO:"):
+                        continue  # Skip Meson INFO lines
+                    if "Entering directory" in stripped:
+                        continue  # Skip Ninja directory change messages
+
                     # Rewrite Ninja paths to show full build-relative paths for clarity
                     # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
                     # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
                     display_line = line
-                    link_match = link_pattern.match(line.strip())
+                    link_match = link_pattern.match(stripped)
                     if link_match:
                         rel_path = link_match.group(1)
                         # Convert build-relative path to project-relative path
@@ -2486,8 +2489,9 @@ def stream_compile_and_run_tests(
                             # If path is outside project, show absolute path
                             display_line = line.replace(rel_path, str(full_path))
 
-                    # Echo output for visibility
-                    _ts_print(f"[BUILD] {display_line}")
+                    # Echo output for visibility (skip empty lines) - only in verbose mode
+                    if stripped and verbose:
+                        _ts_print(f"[BUILD] {display_line}")
 
                     # Check for link completion
                     match = (
@@ -2514,7 +2518,8 @@ def stream_compile_and_run_tests(
                             if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
                                 continue  # Skip DLL/shared library files
 
-                            _ts_print(f"[MESON] Test ready: {test_path.name}")
+                            if verbose:
+                                _ts_print(f"[MESON] Test ready: {test_path.name}")
                             test_queue.put(test_path)
 
             # Check compilation result
@@ -2526,7 +2531,8 @@ def stream_compile_and_run_tests(
                 )
                 compilation_failed = True
             else:
-                _ts_print(f"[MESON] Compilation completed successfully")
+                if verbose:
+                    _ts_print(f"[MESON] Compilation completed successfully")
 
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -2560,20 +2566,24 @@ def stream_compile_and_run_tests(
 
                 # Run the test
                 tests_run += 1
-                _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
+                if verbose:
+                    _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
 
                 try:
                     success = test_callback(test_path)
                     if success:
                         num_passed += 1
-                        _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
+                        if verbose:
+                            _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
                     else:
                         num_failed += 1
+                        # Always show failures even in non-verbose mode
                         _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise
                 except Exception as e:
+                    # Always show errors even in non-verbose mode
                     _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
                     num_failed += 1
 
@@ -2598,20 +2608,23 @@ def stream_compile_and_run_tests(
     # Determine overall success
     overall_success = not compilation_failed and num_failed == 0
 
-    _ts_print(f"[MESON] Streaming test execution complete:")
-    _ts_print(f"  Tests run: {tests_run}")
-    if num_passed > 0:
-        _print_success(f"  Passed: {num_passed}")
-    else:
-        _ts_print(f"  Passed: {num_passed}")
-    if num_failed > 0:
-        _print_error(f"  Failed: {num_failed}")
-    else:
-        _ts_print(f"  Failed: {num_failed}")
-    if compilation_failed:
-        _print_error(f"  Compilation: ✗ FAILED")
-    else:
-        _print_success(f"  Compilation: ✓ OK")
+    # Only show streaming test summary if there were actual tests run
+    # Skip verbose "0/0" output when build was up-to-date
+    if tests_run > 0 or compilation_failed:
+        _ts_print(f"[MESON] Streaming test execution complete:")
+        _ts_print(f"  Tests run: {tests_run}")
+        if num_passed > 0:
+            _print_success(f"  Passed: {num_passed}")
+        else:
+            _ts_print(f"  Passed: {num_passed}")
+        if num_failed > 0:
+            _print_error(f"  Failed: {num_failed}")
+        else:
+            _ts_print(f"  Failed: {num_failed}")
+        if compilation_failed:
+            _print_error(f"  Compilation: ✗ FAILED")
+        else:
+            _print_success(f"  Compilation: ✓ OK")
 
     return overall_success, num_passed, num_failed
 
