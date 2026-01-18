@@ -40,7 +40,7 @@ namespace detail {
 /// @param edata Event data
 /// @param user_ctx User context (I2sLcdCamPeripheralEsp*)
 /// @return true if a higher priority task was woken
-static bool IRAM_ATTR i2s_lcd_cam_flush_ready(
+bool IRAM_ATTR i2s_lcd_cam_flush_ready(
     esp_lcd_panel_io_handle_t panel_io,
     esp_lcd_panel_io_event_data_t* edata,
     void* user_ctx) {
@@ -242,10 +242,10 @@ bool I2sLcdCamPeripheralEsp::transmit(const uint16_t* buffer, size_t size_bytes)
 
     mBusy = true;
 
-    // Use tx_color to transmit data via LCD_CAM DMA
+    // Use esp_lcd_panel_io_tx_color to transmit data via LCD_CAM DMA
     // Command 0x2C is the standard "write memory" command for displays
     // The LCD_CAM peripheral will DMA the buffer to the data pins
-    esp_err_t err = mPanelIo->tx_color(mPanelIo, 0x2C, buffer, size_bytes);
+    esp_err_t err = esp_lcd_panel_io_tx_color(mPanelIo, 0x2C, buffer, size_bytes);
 
     if (err != ESP_OK) {
         mBusy = false;

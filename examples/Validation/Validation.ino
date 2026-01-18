@@ -312,6 +312,34 @@ void setup() {
     FL_PRINT(ss.str());
 
     // ========================================================================
+    // Remote RPC Function Registration (EARLY - before GPIO baseline test)
+    // ========================================================================
+    // IMPORTANT: Register RPC functions BEFORE the GPIO baseline test so that
+    // even if setup() fails early, the testGpioConnection command can be used
+    // to diagnose hardware connection issues.
+
+    ss.clear();
+    ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
+    FL_PRINT(ss.str());
+
+    // Initialize RemoteControl singleton and register all RPC functions
+    // Note: Global variables (drivers_available, test_matrix, etc.) are empty at this point
+    // but are passed by reference, so RPC functions will access current values when called.
+    RemoteControlSingleton::instance().registerFunctions(
+        drivers_available,
+        test_matrix,
+        test_cases,
+        test_results,
+        start_command_received,
+        test_matrix_complete,
+        frame_counter,
+        rx_channel,
+        rx_buffer
+    );
+
+    FL_PRINT("[REMOTE RPC] ✓ RPC system initialized (testGpioConnection available)");
+
+    // ========================================================================
     // GPIO Baseline Test - Verify GPIO→GPIO path works before testing PARLIO
     // ========================================================================
     ss.clear();
@@ -449,50 +477,8 @@ void setup() {
         ));
     }
 
-    // ========================================================================
-    // Remote RPC Function Registration
-    // ========================================================================
-
-    ss.clear();
-    ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
-    FL_PRINT(ss.str());
-
-    // Initialize RemoteControl singleton and register all RPC functions
-    RemoteControlSingleton::instance().registerFunctions(
-        drivers_available,
-        test_matrix,
-        test_cases,
-        test_results,
-        start_command_received,
-        test_matrix_complete,
-        frame_counter,
-        rx_channel,
-        rx_buffer
-    );
-
-    ss.clear();
-    ss << "[REMOTE RPC] ✓ Registered 16 RPC functions:\n";
-    ss << "  Phase 1 - Basic Control:\n";
-    ss << "    - start()         : Trigger test matrix execution\n";
-    ss << "    - status()        : Query current test state\n";
-    ss << "    - drivers()       : List available drivers\n";
-    ss << "  Phase 2 - Configuration:\n";
-    ss << "    - getConfig()     : Query current test matrix configuration\n";
-    ss << "    - setDrivers()    : Configure enabled drivers\n";
-    ss << "    - setLaneRange()  : Configure lane range\n";
-    ss << "    - setStripSizes() : Configure strip sizes\n";
-    ss << "  Phase 3 - Selective Execution:\n";
-    ss << "    - runTestCase()   : Run single test case by index\n";
-    ss << "    - runDriver()     : Run all tests for specific driver\n";
-    ss << "    - runAll()        : Run full test matrix with JSON results\n";
-    ss << "    - getResults()    : Return all test results\n";
-    ss << "    - getResult()     : Return specific test case result\n";
-    ss << "  Phase 4 - Utility:\n";
-    ss << "    - reset()         : Reset test state without device reboot\n";
-    ss << "    - halt()          : Trigger sketch halt\n";
-    ss << "    - ping()          : Health check with timestamp\n";
-    ss << "    - help()          : List all RPC functions with descriptions";
-    FL_PRINT(ss.str());
+    // Note: RPC functions already registered early in setup() (before GPIO baseline test)
+    // This allows testGpioConnection to work even if setup() fails early.
 
     ss.clear();
     ss << "\n[SETUP COMPLETE]\n";

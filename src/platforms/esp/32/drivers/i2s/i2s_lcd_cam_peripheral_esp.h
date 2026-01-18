@@ -13,6 +13,9 @@
 #include "esp_lcd_panel_io.h"
 
 namespace fl {
+// Forward declaration for friend
+template<typename T, int N>
+class Singleton;
 namespace detail {
 
 /// @brief ESP32-S3 I2S LCD_CAM peripheral implementation
@@ -54,6 +57,16 @@ public:
     void delay(uint32_t ms) override;
 
 private:
+    // Allow Singleton to call private constructor
+    template<typename T, int N>
+    friend class ::fl::Singleton;
+
+    // Allow ISR callback to access members
+    friend bool i2s_lcd_cam_flush_ready(
+        esp_lcd_panel_io_handle_t panel_io,
+        esp_lcd_panel_io_event_data_t* edata,
+        void* user_ctx);
+
     I2sLcdCamPeripheralEsp();
 
     // Non-copyable

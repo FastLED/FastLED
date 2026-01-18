@@ -32,10 +32,13 @@ Architecture:
 """
 
 import argparse
+import json
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
+import serial
 from colorama import Fore, Style, init
 
 # Import phase functions from debug_attached
@@ -62,8 +65,8 @@ init(autoreset=True)
 
 # Default expect patterns - simplified to essential checks only
 DEFAULT_EXPECT_PATTERNS = [
-    "TX Pin: 0",  # Hardware setup verification
-    "RX Pin: 1",  # Hardware setup verification
+    "TX Pin: 1",  # Hardware setup verification (PIN_TX = 1 in firmware)
+    "RX Pin: 0",  # Hardware setup verification (PIN_RX = 0 in firmware)
     "DRIVER_ENABLED: PARLIO",  # Parlio driver availability (key driver)
     "VALIDATION_READY: true",  # Test ready indicator
 ]
@@ -83,6 +86,164 @@ EXIT_ON_ERROR_PATTERNS = [
 # Input-on-trigger configuration
 # Wait for VALIDATION_READY pattern, then send START command with 10s timeout
 INPUT_ON_TRIGGER = "VALIDATION_READY:START:10"
+
+# GPIO pin definitions (must match Validation.ino)
+PIN_TX = 1  # TX pin used by FastLED drivers
+PIN_RX = 0  # RX pin used by RMT receiver
+
+
+# ============================================================
+# GPIO Connectivity Pre-Test
+# ============================================================
+
+
+def run_gpio_pretest(
+    port: str, tx_pin: int = PIN_TX, rx_pin: int = PIN_RX, timeout: float = 15.0
+) -> bool:
+    """Test GPIO connectivity between TX and RX pins before running validation.
+
+    This pre-test uses a simple pullup/drive-low pattern to verify that
+    the TX and RX pins are physically connected via a jumper wire.
+
+    Args:
+        port: Serial port path
+        tx_pin: TX pin number (default: PIN_TX)
+        rx_pin: RX pin number (default: PIN_RX)
+        timeout: Timeout in seconds for response
+
+    Returns:
+        True if pins are connected, False otherwise
+    """
+    print()
+    print("=" * 60)
+    print("GPIO CONNECTIVITY PRE-TEST")
+    print("=" * 60)
+    print(f"Testing connection: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})")
+    print()
+
+    try:
+        # Open serial connection with short timeout for reads
+        ser = serial.Serial(port, 115200, timeout=0.5)
+
+        # Wait for device to boot and settle (needs time after reset)
+        print("  Waiting for device to boot...")
+        time.sleep(3.0)
+
+        # Drain any pending output from boot sequence
+        boot_lines = 0
+        while ser.in_waiting > 0 or boot_lines < 50:
+            try:
+                line = ser.readline().decode("utf-8", errors="replace").strip()
+                if line:
+                    boot_lines += 1
+                    # Only print first few lines and last few
+                    if boot_lines <= 3:
+                        print(f"  [boot] {line[:80]}")
+                    elif boot_lines == 4:
+                        print("  [boot] ... (draining boot output)")
+                else:
+                    break  # Empty line, buffer drained
+            except Exception:
+                break
+            if boot_lines >= 100:
+                break
+
+        # Now send the JSON-RPC command (may need to send multiple times)
+        cmd = {"function": "testGpioConnection", "args": [tx_pin, rx_pin]}
+        cmd_str = json.dumps(cmd, separators=(",", ":"))
+
+        print()
+        print(f"  Sending GPIO test command...")
+
+        # Try sending the command a few times (device might miss first one)
+        for attempt in range(3):
+            ser.reset_input_buffer()
+            ser.write((cmd_str + "\n").encode())
+            ser.flush()
+
+            # Wait for REMOTE: prefixed response
+            attempt_start = time.time()
+            attempt_timeout = timeout / 3  # Split timeout across attempts
+
+            while time.time() - attempt_start < attempt_timeout:
+                try:
+                    line = ser.readline().decode("utf-8", errors="replace").strip()
+                except Exception:
+                    continue
+
+                if not line:
+                    continue
+
+                # Look for REMOTE: prefix indicating JSON-RPC response
+                if line.startswith("REMOTE: "):
+                    json_str = line[len("REMOTE: ") :]
+                    try:
+                        response = json.loads(json_str)
+
+                        # Check if this is our testGpioConnection response
+                        if "connected" in response:
+                            if response.get("connected", False):
+                                print()
+                                print(
+                                    f"{Fore.GREEN}✅ GPIO PRE-TEST PASSED{Style.RESET_ALL}"
+                                )
+                                print(
+                                    f"   TX (GPIO {tx_pin}) and RX (GPIO {rx_pin}) are connected"
+                                )
+                                print()
+                                ser.close()
+                                return True
+                            else:
+                                print()
+                                print(
+                                    f"{Fore.RED}❌ GPIO PRE-TEST FAILED{Style.RESET_ALL}"
+                                )
+                                print()
+                                print(f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}")
+                                print()
+                                print("   The TX and RX pins are NOT electrically connected.")
+                                print()
+                                print(f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}")
+                                print(f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)")
+                                print()
+                                print("   Debug info:")
+                                print(f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}")
+                                print(f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}")
+                                print()
+                                ser.close()
+                                return False
+                    except json.JSONDecodeError:
+                        pass
+
+            # If attempt failed, try again
+            if attempt < 2:
+                print(f"  Retrying... (attempt {attempt + 2}/3)")
+
+        # Timeout waiting for response after all attempts
+        print()
+        print(f"{Fore.RED}❌ GPIO PRE-TEST TIMEOUT{Style.RESET_ALL}")
+        print(f"   No response from device within {timeout} seconds")
+        print()
+        print("   Possible causes:")
+        print("   1. Firmware is outdated (recompile with latest code)")
+        print("   2. Device is stuck in setup (check serial output above)")
+        print("   3. Serial communication issue")
+        print()
+        ser.close()
+        return False
+
+    except serial.SerialException as e:
+        print()
+        print(f"{Fore.RED}❌ GPIO PRE-TEST ERROR{Style.RESET_ALL}")
+        print(f"   Serial connection error: {e}")
+        print()
+        return False
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}❌ GPIO PRE-TEST ERROR{Style.RESET_ALL}")
+        print(f"   Unexpected error: {e}")
+        print()
+        return False
 
 
 # ============================================================
@@ -513,6 +674,22 @@ def run(args: Args | None = None) -> int:
 
             # Phase 3: Upload firmware
             if not run_upload(build_dir, final_environment, upload_port, args.verbose):
+                return 1
+
+            # Phase 3.5: GPIO Connectivity Pre-Test
+            # This verifies the TX-RX jumper wire is connected before running tests
+            if not run_gpio_pretest(upload_port):
+                print()
+                print(f"{Fore.RED}=" * 60)
+                print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
+                print(f"{Fore.RED}=" * 60)
+                print()
+                print("The validation cannot proceed without a physical connection")
+                print("between the TX and RX pins.")
+                print()
+                print(f"Please connect a jumper wire from GPIO {PIN_TX} to GPIO {PIN_RX}")
+                print("and run the validation again.")
+                print()
                 return 1
 
             # Phase 4: Monitor serial output with validation patterns

@@ -1183,6 +1183,75 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
+    // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
+    // This is a pre-test to diagnose hardware connection issues before running validation
+    mRemote->registerFunctionWithReturn("testGpioConnection", [](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Validate args: expects [txPin, rxPin]
+        if (!args.is_array() || args.size() != 2) {
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [txPin, rxPin]");
+            return response;
+        }
+
+        if (!args[0].is_int() || !args[1].is_int()) {
+            response.set("error", "InvalidPinType");
+            response.set("message", "Pin numbers must be integers");
+            return response;
+        }
+
+        int tx_pin = static_cast<int>(args[0].as_int().value());
+        int rx_pin = static_cast<int>(args[1].as_int().value());
+
+        FL_PRINT("[GPIO TEST] Testing connection: TX=" << tx_pin << " → RX=" << rx_pin);
+
+        // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
+        pinMode(tx_pin, OUTPUT);
+        pinMode(rx_pin, INPUT_PULLUP);
+        digitalWrite(tx_pin, LOW);
+        delay(5);  // Allow signal to settle
+        int rx_when_tx_low = digitalRead(rx_pin);
+
+        // Test 2: TX drives HIGH → RX should read HIGH if connected
+        digitalWrite(tx_pin, HIGH);
+        delay(5);  // Allow signal to settle
+        int rx_when_tx_high = digitalRead(rx_pin);
+
+        // Restore pins to safe state
+        pinMode(tx_pin, INPUT);
+        pinMode(rx_pin, INPUT);
+
+        // Analyze results
+        bool connected = (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
+
+        response.set("txPin", static_cast<int64_t>(tx_pin));
+        response.set("rxPin", static_cast<int64_t>(rx_pin));
+        response.set("rxWhenTxLow", rx_when_tx_low == LOW ? "LOW" : "HIGH");
+        response.set("rxWhenTxHigh", rx_when_tx_high == HIGH ? "HIGH" : "LOW");
+        response.set("connected", connected);
+
+        if (connected) {
+            response.set("success", true);
+            response.set("message", "GPIO pins are connected");
+            FL_PRINT("[GPIO TEST] ✓ Pins connected: TX=" << tx_pin << " → RX=" << rx_pin);
+        } else {
+            response.set("success", false);
+            if (rx_when_tx_low == HIGH && rx_when_tx_high == HIGH) {
+                response.set("message", "RX pin stuck HIGH - no connection detected (check jumper wire)");
+                FL_ERROR("[GPIO TEST] ✗ RX stuck HIGH - pins NOT connected");
+            } else if (rx_when_tx_low == LOW && rx_when_tx_high == LOW) {
+                response.set("message", "RX pin stuck LOW - possible short to ground");
+                FL_ERROR("[GPIO TEST] ✗ RX stuck LOW - check for short");
+            } else {
+                response.set("message", "Unexpected GPIO behavior - check wiring");
+                FL_ERROR("[GPIO TEST] ✗ Unexpected behavior");
+            }
+        }
+
+        return response;
+    });
+
     // Register "help" function - list all RPC functions with descriptions
     mRemote->registerFunctionWithReturn("help", [this](const fl::Json& args) -> fl::Json {
         fl::Json functions = fl::Json::array();
