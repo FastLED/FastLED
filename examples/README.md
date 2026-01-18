@@ -78,11 +78,8 @@ The repository includes `ci/native/` and `ci/kitchensink/` PlatformIO configs yo
 
 ### ESP32 Special Drivers (parallel output)
 
-- See `examples/SpecialDrivers/ESP/` for all ESP32 special drivers:
-  - `I2S/` - I2S-based parallel output for ESP32 and ESP32-S3
-  - `LCD_I80/` - LCD I80 peripheral for ESP32-S2/S3
-  - `LCD_RGB/` - LCD RGB peripheral for ESP32-P4
-  - `Parlio/` - Parallel IO driver for ESP32-P4
+- See `examples/SpecialDrivers/ESP/` for ESP32 special driver examples:
+  - `DriverTest/` - Tests all available LED drivers for your ESP32 variant (RMT, SPI, I2S, PARLIO, UART, LCD_RGB)
 - These demonstrate high-throughput hardware-accelerated output; choose a board definition matching your dev board and wiring
 - On some environments, parallel output requires specific pin sets and PSRAM settings; consult the sketch notes
 
@@ -155,7 +152,7 @@ This list highlights commonly used examples. It is not exhaustive—browse the f
 
 ### ESP/Teensy/SmartMatrix specifics
 
-- See `SpecialDrivers/ESP/` for ESP32 parallel drivers (LCD, I2S, Parlio)
+- See `SpecialDrivers/ESP/DriverTest/` for ESP32 driver testing (tests RMT, SPI, I2S, PARLIO, UART, LCD_RGB based on your variant)
 - See `SpecialDrivers/Teensy/` for Teensy parallel drivers (OctoWS2811, ObjectFLED)
 - `SmartMatrix/` — run on SmartMatrix hardware
 
