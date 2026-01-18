@@ -199,16 +199,28 @@ def run_gpio_pretest(
                                     f"{Fore.RED}❌ GPIO PRE-TEST FAILED{Style.RESET_ALL}"
                                 )
                                 print()
-                                print(f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}")
+                                print(
+                                    f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}"
+                                )
                                 print()
-                                print("   The TX and RX pins are NOT electrically connected.")
+                                print(
+                                    "   The TX and RX pins are NOT electrically connected."
+                                )
                                 print()
-                                print(f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}")
-                                print(f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)")
+                                print(
+                                    f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}"
+                                )
+                                print(
+                                    f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)"
+                                )
                                 print()
                                 print("   Debug info:")
-                                print(f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}")
-                                print(f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}")
+                                print(
+                                    f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}"
+                                )
+                                print(
+                                    f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}"
+                                )
                                 print()
                                 ser.close()
                                 return False
@@ -247,6 +259,166 @@ def run_gpio_pretest(
 
 
 # ============================================================
+# Pin Discovery (Auto-Detect Connected Pins)
+# ============================================================
+
+
+def run_pin_discovery(
+    port: str, start_pin: int = 0, end_pin: int = 21, timeout: float = 15.0
+) -> tuple[bool, int | None, int | None]:
+    """Auto-discover connected pin pairs by probing adjacent GPIO pins.
+
+    This function calls the findConnectedPins RPC to search for a jumper wire
+    connection between adjacent pin pairs.
+
+    Args:
+        port: Serial port path
+        start_pin: Start of pin range to search (default: 0)
+        end_pin: End of pin range to search (default: 21)
+        timeout: Timeout in seconds for response
+
+    Returns:
+        Tuple of (success, tx_pin, rx_pin) where:
+        - success: True if pins were found and auto-applied
+        - tx_pin: Discovered TX pin number (or None if not found)
+        - rx_pin: Discovered RX pin number (or None if not found)
+    """
+    print()
+    print("=" * 60)
+    print("PIN DISCOVERY (Auto-Detect Connected Pins)")
+    print("=" * 60)
+    print(f"Searching for jumper wire connection in GPIO range {start_pin}-{end_pin}")
+    print()
+
+    try:
+        # Open serial connection with short timeout for reads
+        ser = serial.Serial(port, 115200, timeout=0.5)
+
+        # Wait for device to boot and settle
+        print("  Waiting for device to boot...")
+        time.sleep(3.0)
+
+        # Drain any pending output from boot sequence
+        boot_lines = 0
+        while ser.in_waiting > 0 or boot_lines < 50:
+            try:
+                line = ser.readline().decode("utf-8", errors="replace").strip()
+                if line:
+                    boot_lines += 1
+                    if boot_lines <= 3:
+                        print(f"  [boot] {line[:80]}")
+                    elif boot_lines == 4:
+                        print("  [boot] ... (draining boot output)")
+                else:
+                    break
+            except Exception:
+                break
+            if boot_lines >= 100:
+                break
+
+        # Send findConnectedPins RPC command
+        cmd = {
+            "function": "findConnectedPins",
+            "args": [{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
+        }
+        cmd_str = json.dumps(cmd, separators=(",", ":"))
+
+        print()
+        print("  Probing adjacent pin pairs for jumper wire connection...")
+
+        # Try sending the command a few times
+        for attempt in range(3):
+            ser.reset_input_buffer()
+            ser.write((cmd_str + "\n").encode())
+            ser.flush()
+
+            attempt_start = time.time()
+            attempt_timeout = timeout / 3
+
+            while time.time() - attempt_start < attempt_timeout:
+                try:
+                    line = ser.readline().decode("utf-8", errors="replace").strip()
+                except Exception:
+                    continue
+
+                if not line:
+                    continue
+
+                # Look for REMOTE: prefix indicating JSON-RPC response
+                if line.startswith("REMOTE: "):
+                    json_str = line[len("REMOTE: ") :]
+                    try:
+                        response = json.loads(json_str)
+
+                        # Check if this is our findConnectedPins response
+                        if "found" in response:
+                            if response.get("found", False):
+                                tx_pin = response.get("txPin")
+                                rx_pin = response.get("rxPin")
+                                auto_applied = response.get("autoApplied", False)
+
+                                print()
+                                print(
+                                    f"{Fore.GREEN}✅ PIN DISCOVERY SUCCESSFUL{Style.RESET_ALL}"
+                                )
+                                print(
+                                    f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})"
+                                )
+                                if auto_applied:
+                                    print(
+                                        f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}"
+                                    )
+                                print()
+                                ser.close()
+                                return (True, tx_pin, rx_pin)
+                            else:
+                                print()
+                                print(
+                                    f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
+                                )
+                                print()
+                                print(
+                                    f"   {response.get('message', 'No connected pin pairs detected')}"
+                                )
+                                print()
+                                print(
+                                    f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}"
+                                )
+                                print()
+                                ser.close()
+                                return (False, None, None)
+                    except json.JSONDecodeError:
+                        pass
+
+            # If attempt failed, try again
+            if attempt < 2:
+                print(f"  Retrying... (attempt {attempt + 2}/3)")
+
+        # Timeout waiting for response
+        print()
+        print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY TIMEOUT{Style.RESET_ALL}")
+        print(f"   No response within {timeout} seconds, falling back to default pins")
+        print()
+        ser.close()
+        return (False, None, None)
+
+    except serial.SerialException as e:
+        print()
+        print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
+        print(f"   Serial error: {e}")
+        print(f"   Falling back to default pins")
+        print()
+        return (False, None, None)
+    except Exception as e:
+        print()
+        print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
+        print(f"   Unexpected error: {e}")
+        print(f"   Falling back to default pins")
+        print()
+        return (False, None, None)
+
+
+# ============================================================
 # Argument Parsing
 # ============================================================
 
@@ -282,6 +454,7 @@ class Args:
     # Pin configuration
     tx_pin: int | None
     rx_pin: int | None
+    auto_discover_pins: bool
 
     @staticmethod
     def parse_args() -> "Args":
@@ -439,6 +612,17 @@ See Also:
             type=int,
             help="Override RX pin number (RMT receiver input)",
         )
+        pin_group.add_argument(
+            "--auto-discover-pins",
+            action="store_true",
+            default=True,
+            help="Auto-discover connected pin pairs (default: True)",
+        )
+        pin_group.add_argument(
+            "--no-auto-discover-pins",
+            action="store_true",
+            help="Disable auto-discovery of connected pins",
+        )
 
         parsed = parser.parse_args()
 
@@ -462,6 +646,8 @@ See Also:
             fail_keywords=parsed.fail_keywords,
             tx_pin=parsed.tx_pin,
             rx_pin=parsed.rx_pin,
+            auto_discover_pins=parsed.auto_discover_pins
+            and not parsed.no_auto_discover_pins,
         )
 
 
@@ -698,23 +884,63 @@ def run(args: Args | None = None) -> int:
             if not run_upload(build_dir, final_environment, upload_port, args.verbose):
                 return 1
 
-            # Determine effective TX/RX pins (CLI args override defaults)
-            effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
-            effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+            # ============================================================
+            # Phase 3.5: Pin Discovery (runs FIRST if enabled)
+            # ============================================================
+            effective_tx_pin: int | None = None
+            effective_rx_pin: int | None = None
+            pins_discovered = False
 
-            # If custom pins specified, add setPins RPC command before the setDrivers command
+            # CLI args take priority - skip discovery if user specified pins
             if args.tx_pin is not None or args.rx_pin is not None:
-                # Insert setPins command at the beginning of the RPC command list
+                effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
+                effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+                print(
+                    f"\n📌 Using CLI-specified pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                )
+                # Add setPins RPC command
                 set_pins_cmd = {
                     "function": "setPins",
-                    "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}]
+                    "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}],
                 }
                 json_rpc_commands.insert(0, set_pins_cmd)
-                print(f"\n📌 Custom pin configuration: TX={effective_tx_pin}, RX={effective_rx_pin}")
 
-            # Phase 3.5: GPIO Connectivity Pre-Test
-            # This verifies the TX-RX jumper wire is connected before running tests
-            if not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
+            # Auto-discover pins if enabled and no CLI override
+            elif args.auto_discover_pins:
+                print("\n🔍 Auto-discovery enabled - searching for connected pins...")
+                success, discovered_tx, discovered_rx = run_pin_discovery(upload_port)
+
+                if success and discovered_tx is not None and discovered_rx is not None:
+                    effective_tx_pin = discovered_tx
+                    effective_rx_pin = discovered_rx
+                    pins_discovered = True
+                    print(
+                        f"📌 Using discovered pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                    )
+                    # Note: findConnectedPins with autoApply=True already applies pins in firmware
+                    # No need to send setPins RPC command
+                else:
+                    # Fall back to defaults
+                    effective_tx_pin = PIN_TX
+                    effective_rx_pin = PIN_RX
+                    print(
+                        f"📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                    )
+            else:
+                # Auto-discovery disabled, use defaults
+                effective_tx_pin = PIN_TX
+                effective_rx_pin = PIN_RX
+                print(
+                    f"\n📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                )
+
+            # ============================================================
+            # Phase 3.6: GPIO Connectivity Pre-Test
+            # ============================================================
+            # Skip GPIO pre-test if pins were just discovered (already verified)
+            if pins_discovered:
+                print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
+            elif not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
                 print()
                 print(f"{Fore.RED}=" * 60)
                 print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
@@ -723,7 +949,9 @@ def run(args: Args | None = None) -> int:
                 print("The validation cannot proceed without a physical connection")
                 print("between the TX and RX pins.")
                 print()
-                print(f"Please connect a jumper wire from GPIO {effective_tx_pin} to GPIO {effective_rx_pin}")
+                print(
+                    f"Please connect a jumper wire from GPIO {effective_tx_pin} to GPIO {effective_rx_pin}"
+                )
                 print("and run the validation again.")
                 print()
                 return 1

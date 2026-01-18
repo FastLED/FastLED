@@ -1482,6 +1482,165 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
+    // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
+    // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
+    mRemote->registerFunctionWithReturn("findConnectedPins", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
+        int start_pin = 0;
+        int end_pin = 21;  // Default range: GPIO 0-21 covers most common pins
+        bool auto_apply = true;  // If true, automatically apply found pins
+
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            fl::Json config = args[0];
+            if (config.contains("startPin") && config["startPin"].is_int()) {
+                start_pin = static_cast<int>(config["startPin"].as_int().value());
+            }
+            if (config.contains("endPin") && config["endPin"].is_int()) {
+                end_pin = static_cast<int>(config["endPin"].as_int().value());
+            }
+            if (config.contains("autoApply") && config["autoApply"].is_bool()) {
+                auto_apply = config["autoApply"].as_bool().value();
+            }
+        }
+
+        // Validate range
+        if (start_pin < 0 || start_pin > 48 || end_pin < 0 || end_pin > 48 || start_pin >= end_pin) {
+            response.set("error", "InvalidRange");
+            response.set("message", "Pin range must be 0-48 with startPin < endPin");
+            return response;
+        }
+
+        FL_PRINT("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
+
+        // Helper lambda to test if two pins are connected
+        auto testPinPair = [](int tx, int rx) -> bool {
+            // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
+            pinMode(tx, OUTPUT);
+            pinMode(rx, INPUT_PULLUP);
+            digitalWrite(tx, LOW);
+            delay(2);  // Allow signal to settle
+            int rx_when_tx_low = digitalRead(rx);
+
+            // Test 2: TX drives HIGH → RX should read HIGH if connected
+            digitalWrite(tx, HIGH);
+            delay(2);  // Allow signal to settle
+            int rx_when_tx_high = digitalRead(rx);
+
+            // Restore pins to safe state
+            pinMode(tx, INPUT);
+            pinMode(rx, INPUT);
+
+            return (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
+        };
+
+        // Search for connected adjacent pin pairs (n, n+1)
+        int found_tx = -1;
+        int found_rx = -1;
+        fl::Json tested_pairs = fl::Json::array();
+
+        for (int pin = start_pin; pin < end_pin; pin++) {
+            int tx_candidate = pin;
+            int rx_candidate = pin + 1;
+
+            // Skip certain pins known to cause issues
+            #if defined(FL_IS_ESP_32S3)
+            // Skip GPIO 0 as RX (boot mode issues), skip strapping pins
+            if (rx_candidate == 0 || tx_candidate == 0) continue;
+            if (tx_candidate >= 26 && tx_candidate <= 32) continue;  // Flash pins
+            if (rx_candidate >= 26 && rx_candidate <= 32) continue;
+            #endif
+
+            fl::Json pair = fl::Json::object();
+            pair.set("tx", static_cast<int64_t>(tx_candidate));
+            pair.set("rx", static_cast<int64_t>(rx_candidate));
+
+            // Test TX→RX direction
+            bool connected_forward = testPinPair(tx_candidate, rx_candidate);
+            if (connected_forward) {
+                pair.set("connected", true);
+                pair.set("direction", "forward");
+                tested_pairs.push_back(pair);
+                found_tx = tx_candidate;
+                found_rx = rx_candidate;
+                FL_PRINT("[PIN PROBE] ✓ Found connected pair: TX=" << found_tx << " → RX=" << found_rx);
+                break;
+            }
+
+            // Test RX→TX direction (reversed)
+            bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
+            if (connected_reverse) {
+                pair.set("connected", true);
+                pair.set("direction", "reverse");
+                tested_pairs.push_back(pair);
+                found_tx = rx_candidate;  // Swap since reversed
+                found_rx = tx_candidate;
+                FL_PRINT("[PIN PROBE] ✓ Found connected pair (reversed): TX=" << found_tx << " → RX=" << found_rx);
+                break;
+            }
+
+            pair.set("connected", false);
+            tested_pairs.push_back(pair);
+        }
+
+        response.set("testedPairs", tested_pairs);
+        fl::Json search_range = fl::Json::array();
+        search_range.push_back(static_cast<int64_t>(start_pin));
+        search_range.push_back(static_cast<int64_t>(end_pin));
+        response.set("searchRange", search_range);
+
+        if (found_tx >= 0 && found_rx >= 0) {
+            response.set("success", true);
+            response.set("found", true);
+            response.set("txPin", static_cast<int64_t>(found_tx));
+            response.set("rxPin", static_cast<int64_t>(found_rx));
+
+            // Auto-apply the found pins if requested
+            if (auto_apply) {
+                int old_tx = *mpPinTx;
+                int old_rx = *mpPinRx;
+                bool rx_changed = (found_rx != old_rx);
+
+                *mpPinTx = found_tx;
+                *mpPinRx = found_rx;
+
+                // Recreate RX channel if pin changed
+                if (rx_changed && mRxFactory) {
+                    mpRxChannel->reset();
+                    *mpRxChannel = mRxFactory(found_rx);
+                    if (!*mpRxChannel) {
+                        FL_ERROR("[PIN PROBE] Failed to recreate RX channel on GPIO " << found_rx);
+                        // Restore old values
+                        *mpPinTx = old_tx;
+                        *mpPinRx = old_rx;
+                        response.set("error", "RxChannelCreationFailed");
+                        response.set("autoApplied", false);
+                        return response;
+                    }
+                }
+
+                // Regenerate test cases
+                regenerateTestCasesLocal();
+
+                FL_PRINT("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
+                response.set("autoApplied", true);
+                response.set("previousTxPin", static_cast<int64_t>(old_tx));
+                response.set("previousRxPin", static_cast<int64_t>(old_rx));
+                response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
+            } else {
+                response.set("autoApplied", false);
+                response.set("message", "Use setPins to apply the found pins");
+            }
+        } else {
+            response.set("success", true);  // Function succeeded, just no pins found
+            response.set("found", false);
+            response.set("message", "No connected pin pairs found. Please connect a jumper wire between adjacent GPIO pins.");
+        }
+
+        return response;
+    });
+
     // Register "help" function - list all RPC functions with descriptions
     mRemote->registerFunctionWithReturn("help", [this](const fl::Json& args) -> fl::Json {
         fl::Json functions = fl::Json::array();
@@ -1643,6 +1802,14 @@ void ValidationRemoteControl::registerFunctions(
         setPins_fn.set("description", "Set both TX and RX pins atomically");
         functions.push_back(setPins_fn);
 
+        fl::Json findConnectedPins_fn = fl::Json::object();
+        findConnectedPins_fn.set("name", "findConnectedPins");
+        findConnectedPins_fn.set("phase", "Phase 5: Pin Configuration");
+        findConnectedPins_fn.set("args", "[{startPin, endPin, autoApply}] (all optional)");
+        findConnectedPins_fn.set("returns", "{success, found, txPin, rxPin, autoApplied, testedPairs}");
+        findConnectedPins_fn.set("description", "Probe adjacent pin pairs to find jumper wire connection");
+        functions.push_back(findConnectedPins_fn);
+
         fl::Json help_fn = fl::Json::object();
         help_fn.set("name", "help");
         help_fn.set("phase", "Phase 4: Utility");
@@ -1653,7 +1820,7 @@ void ValidationRemoteControl::registerFunctions(
 
         fl::Json response = fl::Json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(20));
+        response.set("totalFunctions", static_cast<int64_t>(21));
         response.set("functions", functions);
         return response;
     });
