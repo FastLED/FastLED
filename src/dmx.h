@@ -65,7 +65,7 @@ public:
 	/// Initialize the LED controller
 	virtual void init() { DMXSerial.init(DMXController); }
 
-	/// @copydoc CPixelLEDController::showPixels()
+	/// @copydoc CPixelLEDController::showPixels().
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		int iChannel = 1;
 		while(pixels.has(1)) {
