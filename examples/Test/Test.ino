@@ -13,7 +13,7 @@
 
 void setup() {
     Serial.begin(115200);  // Fast baud for avr8js
-    Serial.println("Test setup starting");
+    Serial.println("SETUP COMPLETE");
 
 
     delay(100);
