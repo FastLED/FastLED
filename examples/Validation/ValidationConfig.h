@@ -4,7 +4,19 @@
 
 #pragma once
 
-// Enable debug logging for RX decoder analysis
+// ==============================================================================
+// Output Verbosity Control
+// ==============================================================================
+// Disable FL_DBG output to reduce serial spam during validation runs.
+// The debug output from FastLED internals (channel.cpp, bus_manager.cpp, etc.)
+// can obscure the structured test results and JSON-RPC responses.
+//
+// Set VALIDATION_VERBOSE=1 before including this file to re-enable debug output.
+#ifndef VALIDATION_VERBOSE
+    #define FASTLED_DISABLE_DBG 1  // Disable FL_DBG output for cleaner validation output
+#endif
+
+// Enable debug logging for RX decoder analysis (only effective if VALIDATION_VERBOSE=1)
 // #define FASTLED_FORCE_DBG 1  // DISABLED: Testing hypothesis that debug logging affects timing
 
 // ============================================================================

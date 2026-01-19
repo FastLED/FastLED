@@ -2,6 +2,25 @@
 
 #include "fl/stl/stdint.h"
 
+// =============================================================================
+// Global Log Level Storage and API
+// =============================================================================
+
+namespace fl {
+
+// Default log level is DEBUG (all logging enabled)
+static uint8_t gLogLevel = LOG_LEVEL_DEBUG;
+
+uint8_t getLogLevel() {
+    return gLogLevel;
+}
+
+void setLogLevel(uint8_t level) {
+    gLogLevel = level;
+}
+
+} // namespace fl
+
 // Platform-specific I/O implementations
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/io_wasm.h"
@@ -48,6 +67,8 @@ static read_handler_t& get_read_handler() {
 
 void print(const char* str) {
     if (!str) return;
+    // Check global log level - if NONE, suppress all output
+    if (gLogLevel == LOG_LEVEL_NONE) return;
 
 #ifdef FASTLED_TESTING
     // Check for injected handler first
@@ -82,6 +103,8 @@ void print(const char* str) {
 
 void println(const char* str) {
     if (!str) return;
+    // Check global log level - if NONE, suppress all output
+    if (gLogLevel == LOG_LEVEL_NONE) return;
 
 #ifdef FASTLED_TESTING
     // Check for injected handler first

@@ -640,9 +640,137 @@ TEST_CASE("fl::sprintf vs fl::snprintf comparison") {
 }
 
 
+TEST_CASE("fl::LogLevel control") {
+    // Test log level control and ScopedLogDisable RAII class
+
+    SUBCASE("default log level is DEBUG") {
+        // Ensure we start with DEBUG level
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_DEBUG);
+    }
+
+    SUBCASE("setLogLevel and getLogLevel") {
+        // Save original level
+        uint8_t originalLevel = fl::getLogLevel();
+
+        fl::setLogLevel(fl::LOG_LEVEL_NONE);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+
+        fl::setLogLevel(fl::LOG_LEVEL_ERROR);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_ERROR);
+
+        fl::setLogLevel(fl::LOG_LEVEL_WARN);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_WARN);
+
+        fl::setLogLevel(fl::LOG_LEVEL_INFO);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_INFO);
+
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_DEBUG);
+
+        // Restore original level
+        fl::setLogLevel(originalLevel);
+    }
+
+    SUBCASE("ScopedLogDisable disables logging") {
+        // Setup capture for testing platform output
+        fl::inject_println_handler(test_helper::capture_print);
+        test_helper::clear_capture();
+
+        // Ensure we start with DEBUG level (logging enabled)
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_DEBUG);
+
+        // Output should be captured when logging is enabled
+        fl::println("before scope");
+        fl::string result1 = test_helper::get_capture();
+        REQUIRE(result1.find("before scope") != fl::string::npos);
+
+        test_helper::clear_capture();
+
+        {
+            fl::ScopedLogDisable guard;
+            REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+
+            // Output should be suppressed
+            fl::println("inside scope - should be suppressed");
+            fl::string result2 = test_helper::get_capture();
+            REQUIRE_EQ(result2.size(), 0);
+        }
+
+        // After scope ends, logging should be restored
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_DEBUG);
+
+        fl::println("after scope");
+        fl::string result3 = test_helper::get_capture();
+        REQUIRE(result3.find("after scope") != fl::string::npos);
+
+        // Cleanup
+        fl::clear_io_handlers();
+    }
+
+    SUBCASE("ScopedLogDisable restores previous level") {
+        // Test that ScopedLogDisable restores the previous level, not just DEBUG
+        fl::setLogLevel(fl::LOG_LEVEL_WARN);
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_WARN);
+
+        {
+            fl::ScopedLogDisable guard;
+            REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+        }
+
+        // Should restore to WARN, not DEBUG
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_WARN);
+
+        // Restore to DEBUG for other tests
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+    }
+
+    SUBCASE("nested ScopedLogDisable") {
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+
+        {
+            fl::ScopedLogDisable outer;
+            REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+
+            {
+                fl::ScopedLogDisable inner;
+                REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+            }
+
+            // Inner restored to outer's saved state (NONE)
+            REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_NONE);
+        }
+
+        // Outer restored to original DEBUG level
+        REQUIRE_EQ(fl::getLogLevel(), fl::LOG_LEVEL_DEBUG);
+    }
+
+    SUBCASE("LOG_LEVEL_NONE suppresses print") {
+        fl::inject_print_handler(test_helper::capture_print);
+        test_helper::clear_capture();
+
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+        fl::print("test1");
+        fl::string result1 = test_helper::get_capture();
+        REQUIRE(result1.find("test1") != fl::string::npos);
+
+        test_helper::clear_capture();
+
+        fl::setLogLevel(fl::LOG_LEVEL_NONE);
+        fl::print("test2");
+        fl::string result2 = test_helper::get_capture();
+        REQUIRE_EQ(result2.size(), 0);
+
+        // Restore
+        fl::setLogLevel(fl::LOG_LEVEL_DEBUG);
+        fl::clear_io_handlers();
+    }
+}
+
 TEST_CASE("fl::snprintf vs std::snprintf return value comparison") {
     // Test that fl::snprintf returns the same values as std::snprintf
-    
+
     SUBCASE("simple string formatting") {
         char buffer1[100];
         char buffer2[100];
