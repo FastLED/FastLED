@@ -766,9 +766,33 @@ def run_monitor(
                                 # Break outer loop if fail found
                                 if fail_keyword_found:
                                     break
+
+                            # Break inner loop if stop keyword found and should exit
+                            if stop_keyword_found:
+                                if not expect_patterns or (
+                                    set(p for p, _ in expect_patterns)
+                                    <= found_expect_keywords
+                                ):
+                                    break
+
+                        # Break outer loop if stop keyword found and all expects matched
+                        if stop_keyword_found:
+                            if not expect_patterns or (
+                                set(p for p, _ in expect_patterns)
+                                <= found_expect_keywords
+                            ):
+                                break
                 else:
                     # No data available, small sleep to prevent busy loop
                     time.sleep(0.01)
+
+                # Break outer loop if stop keyword found and all expects matched
+                # This check MUST be after the if/else for ser.in_waiting
+                if stop_keyword_found:
+                    if not expect_patterns or (
+                        set(p for p, _ in expect_patterns) <= found_expect_keywords
+                    ):
+                        break
 
             except serial.SerialException as e:
                 # Check for specific serial port errors indicating device is stuck
