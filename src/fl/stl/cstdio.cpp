@@ -2,25 +2,6 @@
 
 #include "fl/stl/stdint.h"
 
-// =============================================================================
-// Global Log Level Storage and API
-// =============================================================================
-
-namespace fl {
-
-// Default log level is DEBUG (all logging enabled)
-static uint8_t gLogLevel = LOG_LEVEL_DEBUG;
-
-uint8_t getLogLevel() {
-    return gLogLevel;
-}
-
-void setLogLevel(uint8_t level) {
-    gLogLevel = level;
-}
-
-} // namespace fl
-
 // Platform-specific I/O implementations
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/io_wasm.h"
@@ -39,6 +20,25 @@ void setLogLevel(uint8_t level) {
 #else
 #include "platforms/io_arduino.h"
 #endif
+
+// =============================================================================
+// Global Log Level Storage and API
+// =============================================================================
+
+namespace fl {
+
+// Default log level is DEBUG (all logging enabled)
+static uint8_t gLogLevel = LOG_LEVEL_DEBUG;
+
+uint8_t getLogLevel() {
+    return gLogLevel;
+}
+
+void setLogLevel(uint8_t level) {
+    gLogLevel = level;
+}
+
+} // namespace fl
 
 namespace fl {
 

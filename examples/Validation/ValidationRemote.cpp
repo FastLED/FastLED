@@ -1,6 +1,11 @@
 // examples/Validation/ValidationRemote.cpp
 //
 // Remote RPC control system implementation for Validation sketch.
+//
+// ARCHITECTURE:
+// - RPC responses use printJsonRaw()/printStreamRaw() which bypass fl::println
+// - Test execution wrapped in fl::ScopedLogDisable to suppress debug noise
+// - This provides clean, parseable JSON output without FL_DBG/FL_PRINT spam
 
 #include "ValidationRemote.h"
 #include "ValidationConfig.h"
@@ -9,8 +14,58 @@
 #include "ValidationHelpers.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/optional.h"
 #include "fl/json.h"
 #include <Arduino.h>
+
+// ============================================================================
+// Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
+// ============================================================================
+
+void printJsonRaw(const fl::Json& json, const char* prefix) {
+    fl::string jsonStr = json.to_string();
+
+    // Ensure single-line (replace any newlines/carriage returns with spaces)
+    for (size_t i = 0; i < jsonStr.size(); ++i) {
+        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
+            jsonStr[i] = ' ';
+        }
+    }
+
+    // Output directly to Serial, bypassing fl::println
+    if (prefix && prefix[0] != '\0') {
+        Serial.print(prefix);
+    }
+    Serial.println(jsonStr.c_str());
+}
+
+void printStreamRaw(const char* messageType, const fl::Json& data) {
+    // Build pure JSONL message: RESULT: {"type":"...", ...data}
+    fl::Json output = fl::Json::object();
+    output.set("type", messageType);
+
+    // Copy all fields from data into output
+    if (data.is_object()) {
+        auto keys = data.keys();
+        for (fl::size i = 0; i < keys.size(); i++) {
+            output.set(keys[i].c_str(), data[keys[i]]);
+        }
+    }
+
+    // Serialize to compact JSON
+    fl::string jsonStr = output.to_string();
+
+    // Ensure single-line
+    for (size_t i = 0; i < jsonStr.size(); ++i) {
+        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
+            jsonStr[i] = ' ';
+        }
+    }
+
+    // Output directly to Serial: RESULT: <json-with-type>
+    Serial.print("RESULT: ");
+    Serial.println(jsonStr.c_str());
+}
 
 // Forward declarations
 fl::vector<fl::TestCaseConfig> generateTestCases(
@@ -112,7 +167,8 @@ void ValidationRemoteControl::registerFunctions(
     };
 
     // Register "start" function - triggers test matrix execution
-    mRemote->registerFunction("start", [this](const fl::Json& args) {
+    // UPGRADED: Using typed method() API for simple void function
+    mRemote->method("start", [this]() {
         FL_PRINT("[RPC] start() - Triggering test matrix execution");
         *mpStartCommandReceived = true;
     });
@@ -398,8 +454,7 @@ void ValidationRemoteControl::registerFunctions(
 
         fl::size idx = static_cast<fl::size>(index);
 
-        // Run the test case
-        FL_PRINT("[RPC] runTestCase(" << index << ") - Running test case");
+        // Run the test case (no debug print - case_start event provides info)
 
         // Get timing configuration (WS2812B-V5)
         fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
@@ -415,23 +470,26 @@ void ValidationRemoteControl::registerFunctions(
             data.set("caseIndex", index);
             data.set("driver", (*mpTestCases)[idx].driver_name.c_str());
             data.set("laneCount", static_cast<int64_t>((*mpTestCases)[idx].lane_count));
-            fl::Remote::printStream("case_start", data);
+            printStreamRaw("case_start", data);
         }
 
-        // Run the test case
-        runSingleTestCase(
-            (*mpTestCases)[idx],
-            (*mpTestResults)[idx],
-            timing_config,
-            *mpRxChannel,
-            mRxBuffer
-        );
+        // Run the test case with debug output suppressed
+        {
+            fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
+            runSingleTestCase(
+                (*mpTestCases)[idx],
+                (*mpTestResults)[idx],
+                timing_config,
+                *mpRxChannel,
+                mRxBuffer
+            );
+        }  // logGuard destroyed, logging restored
 
         // Emit case_result event
         {
             fl::Json result = serializeTestResult((*mpTestResults)[idx]);
             result.set("caseIndex", index);
-            fl::Remote::printStream("case_result", result);
+            printStreamRaw("case_result", result);
         }
 
         // Return simple success response
@@ -466,9 +524,7 @@ void ValidationRemoteControl::registerFunctions(
         }
         fl::string driver_name = driver_name_opt.value();
 
-        FL_PRINT("[RPC] runDriver('" << driver_name.c_str() << "') - Running all tests for driver");
-
-        // Count matching test cases
+        // Count matching test cases (no debug print - rundriver_start event provides info)
         int tests_to_run = 0;
         for (fl::size i = 0; i < mpTestCases->size(); i++) {
             if ((*mpTestCases)[i].driver_name == driver_name) {
@@ -489,7 +545,7 @@ void ValidationRemoteControl::registerFunctions(
             fl::Json data = fl::Json::object();
             data.set("driver", driver_name.c_str());
             data.set("totalCases", static_cast<int64_t>(tests_to_run));
-            fl::Remote::printStream("rundriver_start", data);
+            printStreamRaw("rundriver_start", data);
         }
 
         // Get timing configuration (WS2812B-V5)
@@ -510,23 +566,26 @@ void ValidationRemoteControl::registerFunctions(
                     data.set("caseIndex", static_cast<int64_t>(i));
                     data.set("driver", driver_name.c_str());
                     data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                    fl::Remote::printStream("case_start", data);
+                    printStreamRaw("case_start", data);
                 }
 
-                // Run the test case
-                runSingleTestCase(
-                    (*mpTestCases)[i],
-                    (*mpTestResults)[i],
-                    timing_config,
-                    *mpRxChannel,
-                    mRxBuffer
-                );
+                // Run the test case with debug output suppressed
+                {
+                    fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
+                    runSingleTestCase(
+                        (*mpTestCases)[i],
+                        (*mpTestResults)[i],
+                        timing_config,
+                        *mpRxChannel,
+                        mRxBuffer
+                    );
+                }  // logGuard destroyed, logging restored
 
                 // Emit case_result event
                 {
                     fl::Json result = serializeTestResult((*mpTestResults)[i]);
                     result.set("caseIndex", static_cast<int64_t>(i));
-                    fl::Remote::printStream("case_result", result);
+                    printStreamRaw("case_result", result);
                 }
 
                 tests_run++;
@@ -538,7 +597,7 @@ void ValidationRemoteControl::registerFunctions(
             fl::Json data = fl::Json::object();
             data.set("driver", driver_name.c_str());
             data.set("testsRun", static_cast<int64_t>(tests_run));
-            fl::Remote::printStream("rundriver_complete", data);
+            printStreamRaw("rundriver_complete", data);
         }
 
         // Return simple success response
@@ -549,13 +608,11 @@ void ValidationRemoteControl::registerFunctions(
 
     // Register "runAll" function - run full test matrix with JSONL streaming
     mRemote->registerFunctionWithReturn("runAll", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        FL_PRINT("[RPC] runAll() - Running full test matrix");
-
-        // Emit runall_start event
+        // Emit runall_start event (no debug print - event provides info)
         {
             fl::Json data = fl::Json::object();
             data.set("totalCases", static_cast<int64_t>(mpTestCases->size()));
-            fl::Remote::printStream("runall_start", data);
+            printStreamRaw("runall_start", data);
         }
 
         // Get timing configuration (WS2812B-V5)
@@ -576,22 +633,26 @@ void ValidationRemoteControl::registerFunctions(
                 data.set("caseIndex", static_cast<int64_t>(i));
                 data.set("driver", (*mpTestCases)[i].driver_name.c_str());
                 data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                fl::Remote::printStream("case_start", data);
+                printStreamRaw("case_start", data);
             }
 
-            runSingleTestCase(
-                (*mpTestCases)[i],
-                (*mpTestResults)[i],
-                timing_config,
-                *mpRxChannel,
-                mRxBuffer
-            );
+            // Run the test case with debug output suppressed
+            {
+                fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
+                runSingleTestCase(
+                    (*mpTestCases)[i],
+                    (*mpTestResults)[i],
+                    timing_config,
+                    *mpRxChannel,
+                    mRxBuffer
+                );
+            }  // logGuard destroyed, logging restored
 
             // Emit case_result event with detailed result
             {
                 fl::Json result = serializeTestResult((*mpTestResults)[i]);
                 result.set("caseIndex", static_cast<int64_t>(i));
-                fl::Remote::printStream("case_result", result);
+                printStreamRaw("case_result", result);
             }
         }
 
@@ -610,7 +671,7 @@ void ValidationRemoteControl::registerFunctions(
             data.set("totalCases", static_cast<int64_t>(total_cases));
             data.set("passedCases", static_cast<int64_t>(passed_cases));
             data.set("skippedCases", static_cast<int64_t>(skipped_cases));
-            fl::Remote::printStream("runall_complete", data);
+            printStreamRaw("runall_complete", data);
         }
 
         // Return simple success response
@@ -626,21 +687,21 @@ void ValidationRemoteControl::registerFunctions(
         {
             fl::Json data = fl::Json::object();
             data.set("totalResults", static_cast<int64_t>(mpTestResults->size()));
-            fl::Remote::printStream("results_start", data);
+            printStreamRaw("results_start", data);
         }
 
         // Stream each result
         for (fl::size i = 0; i < mpTestResults->size(); i++) {
             fl::Json result = serializeTestResult((*mpTestResults)[i]);
             result.set("resultIndex", static_cast<int64_t>(i));
-            fl::Remote::printStream("result_item", result);
+            printStreamRaw("result_item", result);
         }
 
         // Emit results_complete event
         {
             fl::Json data = fl::Json::object();
             data.set("totalResults", static_cast<int64_t>(mpTestResults->size()));
-            fl::Remote::printStream("results_complete", data);
+            printStreamRaw("results_complete", data);
         }
 
         // Return simple success response
@@ -689,7 +750,7 @@ void ValidationRemoteControl::registerFunctions(
         // Stream the result
         fl::Json result = serializeTestResult((*mpTestResults)[static_cast<fl::size>(index)]);
         result.set("resultIndex", index);
-        fl::Remote::printStream("result_item", result);
+        printStreamRaw("result_item", result);
 
         // Return simple success response
         response.set("success", true);
@@ -987,7 +1048,7 @@ void ValidationRemoteControl::registerFunctions(
         confirmed.set("testCases", static_cast<int64_t>(mpTestCases->size()));
 
         // Emit config_complete event (JSONL streaming)
-        fl::Remote::printStream("config_complete", confirmed);
+        printStreamRaw("config_complete", confirmed);
 
         // Return simple success response
         response.set("success", true);
@@ -1005,7 +1066,7 @@ void ValidationRemoteControl::registerFunctions(
             data.set("timestamp", static_cast<int64_t>(start_ms));
             data.set("testCases", static_cast<int64_t>(mpTestCases->size()));
             data.set("iterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-            fl::Remote::printStream("test_start", data);
+            printStreamRaw("test_start", data);
         }
 
         // Get timing configuration (WS2812B-V5)
@@ -1025,7 +1086,7 @@ void ValidationRemoteControl::registerFunctions(
                 fl::Json data = fl::Json::object();
                 data.set("iteration", static_cast<int64_t>(iter + 1));
                 data.set("totalIterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-                fl::Remote::printStream("iteration_start", data);
+                printStreamRaw("iteration_start", data);
             }
 
             for (fl::size i = 0; i < mpTestCases->size(); i++) {
@@ -1035,7 +1096,7 @@ void ValidationRemoteControl::registerFunctions(
                     data.set("caseIndex", static_cast<int64_t>(i));
                     data.set("driver", (*mpTestCases)[i].driver_name.c_str());
                     data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                    fl::Remote::printStream("test_case_start", data);
+                    printStreamRaw("test_case_start", data);
                 }
 
                 runSingleTestCase(
@@ -1053,7 +1114,7 @@ void ValidationRemoteControl::registerFunctions(
                     data.set("passed", (*mpTestResults)[i].allPassed());
                     data.set("totalTests", static_cast<int64_t>((*mpTestResults)[i].total_tests));
                     data.set("passedTests", static_cast<int64_t>((*mpTestResults)[i].passed_tests));
-                    fl::Remote::printStream("test_case_result", data);
+                    printStreamRaw("test_case_result", data);
                 }
             }
 
@@ -1061,7 +1122,7 @@ void ValidationRemoteControl::registerFunctions(
             {
                 fl::Json data = fl::Json::object();
                 data.set("iteration", static_cast<int64_t>(iter + 1));
-                fl::Remote::printStream("iteration_complete", data);
+                printStreamRaw("iteration_complete", data);
             }
         }
 
@@ -1082,7 +1143,7 @@ void ValidationRemoteControl::registerFunctions(
             data.set("passedTests", static_cast<int64_t>(passed_tests));
             data.set("passed", passed_tests == total_tests);
             data.set("durationMs", static_cast<int64_t>(end_ms - start_ms));
-            fl::Remote::printStream("test_complete", data);
+            printStreamRaw("test_complete", data);
         }
 
         // Return minimal response (full details streamed above)
@@ -1861,7 +1922,7 @@ bool ValidationRemoteControl::processSerialInput() {
                 // If function returned a value, print it
                 if (result.has_value()) {
                     FL_PRINT("[RPC] About to printJson...");
-                    fl::Remote::printJson(result);
+                    printJsonRaw(result);
                     FL_PRINT("[RPC] printJson() completed");
                 } else {
                     FL_WARN("[RPC] Function executed but result.has_value() is false");
@@ -1891,7 +1952,7 @@ bool ValidationRemoteControl::processSerialInput() {
                         errorObj.set("message", "Unknown error");
                         break;
                 }
-                fl::Remote::printJson(errorObj);
+                printJsonRaw(errorObj);
             }
         }
     }

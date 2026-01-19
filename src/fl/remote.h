@@ -16,6 +16,7 @@
 #include "fl/stl/priority_queue.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
+#include "fl/rpc.h"
 
 // Compile-time prefix for Remote JSON output
 // Define as empty string to disable: -DFASTLED_REMOTE_PREFIX=\"\"
@@ -31,6 +32,10 @@ namespace fl {
  * Supports both immediate and scheduled execution of registered functions.
  * Functions can optionally return JSON values for queries.
  *
+ * UPGRADED: Now uses fl::Rpc internally for typed method registration.
+ * You can register methods with auto-deduced typed signatures OR use the
+ * legacy untyped JSON callback API.
+ *
  * Each RPC call contains:
  * - timestamp: When to execute (0 = immediate, >0 = scheduled at millis())
  * - function: Name of the registered function to call
@@ -40,13 +45,19 @@ namespace fl {
  * {"timestamp":0,"function":"setLed","args":[0,255,0,0]}
  * {"timestamp":5000,"function":"setBrightness","args":[128]}
  * {"function":"millis","args":[]}  // Returns: 12345
+ *
+ * TYPED METHOD REGISTRATION (NEW - Recommended):
+ *   remote.method("add", [](int a, int b) { return a + b; });
+ *   remote.method("setLed", [](int index, int r, int g, int b) { ... });
+ *
+ * LEGACY UNTYPED REGISTRATION (still supported for backward compatibility):
+ *   remote.registerFunction("test", [](const fl::Json& args) { ... });
+ *   remote.registerFunctionWithReturn("millis", [](const fl::Json& args) -> fl::Json { ... });
  */
 class Remote {
 public:
-    // Callback signature (no return value): void callback(const fl::Json& args)
+    // Legacy callback signatures (for backward compatibility)
     using RpcCallback = fl::function<void(const fl::Json&)>;
-
-    // Callback signature (with return value): fl::Json callback(const fl::Json& args)
     using RpcCallbackWithReturn = fl::function<fl::Json(const fl::Json&)>;
 
     // Error codes returned by processRpc()
@@ -55,7 +66,8 @@ public:
         InvalidJson,        // JSON parsing failed
         MissingFunction,    // "function" field missing
         UnknownFunction,    // Function not registered
-        InvalidTimestamp    // Timestamp field has wrong type
+        InvalidTimestamp,   // Timestamp field has wrong type
+        InvalidParams       // Parameter conversion failed (typed RPC only)
     };
 
     /**
@@ -90,10 +102,112 @@ public:
 
     Remote() = default;
 
+    // =========================================================================
+    // TYPED Method Registration (NEW - Recommended)
+    // =========================================================================
+
+    /**
+     * @brief Register a method with auto-deduced typed signature (RECOMMENDED)
+     * @param name Function name (case-sensitive, supports dot notation for namespacing)
+     * @param fn Callable (lambda, function pointer, or functor)
+     * @return RpcHandle for direct invocation, or empty handle if registration failed
+     *
+     * Example:
+     *   auto add = remote.method("add", [](int a, int b) { return a + b; });
+     *   int result = add(2, 3);  // Direct call returns 5
+     *
+     *   // Void functions work too:
+     *   remote.method("setLed", [&leds](int index, int r, int g, int b) {
+     *       leds[index] = CRGB(r, g, b);
+     *   });
+     *
+     *   // Namespaced methods with dot notation:
+     *   remote.method("led.setBrightness", [](int b) { setBrightness(b); });
+     *   remote.method("system.status", []() -> fl::string { return "ok"; });
+     */
+    template<typename Callable>
+    auto method(const char* name, Callable&& fn)
+        -> RpcHandle<typename callable_traits<typename decay<Callable>::type>::signature> {
+        return mRpc.method(name, fl::forward<Callable>(fn));
+    }
+
+    /**
+     * @brief Fluent builder for method registration with metadata
+     * @param name Function name
+     * @param fn Callable
+     * @return MethodBuilder for chaining .params(), .description(), .tags(), .done()
+     *
+     * Example:
+     *   auto setBri = remote.method_with("led.setBrightness", [](int b) { setBrightness(b); })
+     *       .params({"brightness"})
+     *       .description("Set LED brightness (0-255)")
+     *       .tags({"led", "control"})
+     *       .done();
+     */
+    template<typename Callable>
+    auto method_with(const char* name, Callable&& fn)
+        -> detail::MethodBuilder<typename callable_traits<typename decay<Callable>::type>::signature> {
+        return mRpc.method_with(name, fl::forward<Callable>(fn));
+    }
+
+    /**
+     * @brief Bind a typed callable for a registered method
+     * @param name Function name
+     * @return Typed function if found and signature matches, empty function otherwise
+     *
+     * Example:
+     *   auto addFn = remote.bind<int(int, int)>("add");
+     *   if (addFn) {
+     *       int result = addFn(5, 7);  // Returns 12
+     *   }
+     */
+    template<class Sig>
+    RpcFn<Sig> bind(const char* name) const {
+        return mRpc.bind<Sig>(name);
+    }
+
+    /**
+     * @brief Try to bind a typed callable (returns optional)
+     * @param name Function name
+     * @return Optional containing function if found and signature matches
+     */
+    template<class Sig>
+    fl::optional<RpcFn<Sig>> try_bind(const char* name) const {
+        return mRpc.try_bind<Sig>(name);
+    }
+
+    /**
+     * @brief Direct typed invocation without binding
+     * @param name Function name
+     * @param args Arguments to pass
+     * @return Return value (undefined behavior if method not found or signature mismatch)
+     */
+    template<typename R, typename... Args>
+    R call(const char* name, Args&&... args) {
+        return mRpc.call<R>(name, fl::forward<Args>(args)...);
+    }
+
+    /**
+     * @brief Safe direct invocation with optional return
+     * @param name Function name
+     * @param args Arguments to pass
+     * @return Optional containing result, or nullopt if method not found
+     */
+    template<typename R, typename... Args>
+    fl::optional<R> try_call(const char* name, Args&&... args) {
+        return mRpc.try_call<R>(name, fl::forward<Args>(args)...);
+    }
+
+    // =========================================================================
+    // Legacy Untyped Registration (for backward compatibility)
+    // =========================================================================
+
     /**
      * @brief Register a function that can be called remotely (no return value)
      * @param name Function name (case-sensitive)
      * @param callback Function to invoke when RPC is received
+     *
+     * @deprecated Use method() with typed lambdas instead for better type safety
      *
      * Example:
      *   remote.registerFunction("setLed", [](const fl::Json& args) {
@@ -110,6 +224,8 @@ public:
      * @brief Register a function that returns a JSON value
      * @param name Function name (case-sensitive)
      * @param callback Function to invoke when RPC is received
+     *
+     * @deprecated Use method() with typed lambdas instead for better type safety
      *
      * Example (query system time):
      *   remote.registerFunctionWithReturn("millis", [](const fl::Json& args) -> fl::Json {
@@ -129,11 +245,15 @@ public:
     bool unregisterFunction(const fl::string& name);
 
     /**
-     * @brief Check if a function is registered
+     * @brief Check if a function is registered (typed or legacy)
      * @param name Function name to check
      * @return true if function is registered, false otherwise
      */
     bool hasFunction(const fl::string& name) const;
+
+    // =========================================================================
+    // RPC Processing
+    // =========================================================================
 
     /**
      * @brief Process incoming JSON RPC call
@@ -152,6 +272,7 @@ public:
      * - MissingFunction: FL_ERROR logged, returns Error::MissingFunction
      * - UnknownFunction: FL_WARN logged, returns Error::UnknownFunction
      * - InvalidTimestamp: FL_WARN logged, uses 0 (immediate), returns Error::InvalidTimestamp
+     * - InvalidParams: For typed methods, returns Error::InvalidParams if args don't match signature
      */
     Error processRpc(const fl::string& jsonStr);
 
@@ -240,7 +361,7 @@ public:
     void clearScheduled();
 
     /**
-     * @brief Clear all registered functions
+     * @brief Clear all registered functions (typed and legacy)
      *
      * Does not affect pending scheduled calls.
      */
@@ -250,6 +371,58 @@ public:
      * @brief Clear everything (scheduled calls + registered functions)
      */
     void clear();
+
+    // =========================================================================
+    // Schema and Discovery (NEW - from fl::Rpc)
+    // =========================================================================
+
+    /**
+     * @brief Enable built-in rpc.discover method
+     * @param title API title for OpenRPC schema
+     * @param version API version for OpenRPC schema
+     *
+     * When enabled, clients can call {"method":"rpc.discover"} to get
+     * the full OpenRPC schema for all registered typed methods.
+     */
+    void enableDiscover(const char* title = "RPC API", const char* version = "1.0.0") {
+        mRpc.enableDiscover(title, version);
+    }
+
+    /**
+     * @brief Returns array of method schemas (typed methods only)
+     * @return JSON array of OpenRPC method schemas
+     */
+    Json methods() const {
+        return mRpc.methods();
+    }
+
+    /**
+     * @brief Returns full OpenRPC document (typed methods only)
+     * @param title API title
+     * @param version API version
+     * @return OpenRPC schema document
+     */
+    Json schema(const char* title = "RPC API", const char* version = "1.0.0") const {
+        return mRpc.schema(title, version);
+    }
+
+    /**
+     * @brief Returns number of registered methods (typed + legacy)
+     */
+    fl::size count() const {
+        return mRpc.count() + mLegacyCallbacks.size();
+    }
+
+    /**
+     * @brief Returns list of unique tags used across all typed methods
+     */
+    fl::vector<fl::string> tags() const {
+        return mRpc.tags();
+    }
+
+    // =========================================================================
+    // Static Output Helpers
+    // =========================================================================
 
     /**
      * @brief Print JSON to output with FASTLED_REMOTE_PREFIX (single-line format)
@@ -305,15 +478,15 @@ protected:
         }
     };
 
-    // Internal callback wrapper that handles both void and returning functions
-    struct CallbackWrapper {
+    // Legacy callback wrapper that handles both void and returning functions
+    struct LegacyCallbackWrapper {
         RpcCallback voidCallback;
         RpcCallbackWithReturn returningCallback;
         bool hasReturn;
 
-        CallbackWrapper() : hasReturn(false) {}
-        CallbackWrapper(RpcCallback cb) : voidCallback(cb), hasReturn(false) {}
-        CallbackWrapper(RpcCallbackWithReturn cb) : returningCallback(cb), hasReturn(true) {}
+        LegacyCallbackWrapper() : hasReturn(false) {}
+        LegacyCallbackWrapper(RpcCallback cb) : voidCallback(cb), hasReturn(false) {}
+        LegacyCallbackWrapper(RpcCallbackWithReturn cb) : returningCallback(cb), hasReturn(true) {}
 
         fl::Json execute(const fl::Json& args) {
             if (hasReturn) {
@@ -326,10 +499,16 @@ protected:
     };
 
     fl::Json executeFunction(const fl::string& funcName, const fl::Json& args);
+    fl::tuple<Error, fl::Json> executeFunctionTyped(const fl::string& funcName, const fl::Json& args);
     void scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args);
     void recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled);
 
-    fl::unordered_map<fl::string, CallbackWrapper> mCallbacks;
+    // Typed RPC registry (NEW)
+    fl::Rpc mRpc;
+
+    // Legacy untyped callbacks (for backward compatibility)
+    fl::unordered_map<fl::string, LegacyCallbackWrapper> mLegacyCallbacks;
+
     fl::priority_queue_stable<ScheduledCall> mScheduled;  // Uses default fl::greater for min-heap: earlier times = higher priority (FIFO for equal times)
     fl::vector<RpcResult> mResults;  // Results from executed functions (cleared on tick())
 };

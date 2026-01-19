@@ -4,6 +4,7 @@
 
 #include "fl/stl/time.h"
 #include "fl/stl/cstdio.h"
+#include "fl/detail/rpc/type_conversion_result.h"
 
 namespace fl {
 
@@ -75,30 +76,37 @@ void Remote::printStream(const char* messageType, const fl::Json& data) {
     fl::println(jsonStr.c_str());
 }
 
-// Function Registration
+// Legacy Function Registration
 
 void Remote::registerFunction(const fl::string& name, RpcCallback callback) {
-    mCallbacks[name] = CallbackWrapper(callback);
-    FL_DBG("Registered RPC function: " << name);
+    mLegacyCallbacks[name] = LegacyCallbackWrapper(callback);
+    FL_DBG("Registered legacy RPC function: " << name);
 }
 
 void Remote::registerFunctionWithReturn(const fl::string& name, RpcCallbackWithReturn callback) {
-    mCallbacks[name] = CallbackWrapper(callback);
-    FL_DBG("Registered RPC function with return: " << name);
+    mLegacyCallbacks[name] = LegacyCallbackWrapper(callback);
+    FL_DBG("Registered legacy RPC function with return: " << name);
 }
 
 bool Remote::unregisterFunction(const fl::string& name) {
-    auto it = mCallbacks.find(name);
-    if (it != mCallbacks.end()) {
-        mCallbacks.erase(it);
-        FL_DBG("Unregistered RPC function: " << name);
+    // Check legacy callbacks first
+    auto it = mLegacyCallbacks.find(name);
+    if (it != mLegacyCallbacks.end()) {
+        mLegacyCallbacks.erase(it);
+        FL_DBG("Unregistered legacy RPC function: " << name);
         return true;
     }
+    // Note: fl::Rpc doesn't support unregistration, so typed methods cannot be removed
     return false;
 }
 
 bool Remote::hasFunction(const fl::string& name) const {
-    return mCallbacks.find(name) != mCallbacks.end();
+    // Check typed RPC first
+    if (mRpc.has(name.c_str())) {
+        return true;
+    }
+    // Then check legacy callbacks
+    return mLegacyCallbacks.find(name) != mLegacyCallbacks.end();
 }
 
 // RPC Processing
@@ -157,7 +165,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
         args = fl::Json::array();
     }
 
-    // Check if function exists
+    // Check if function exists (typed or legacy)
     if (!hasFunction(funcName)) {
         FL_WARN("RPC: Unknown function '" << funcName << "'");
         return Error::UnknownFunction;
@@ -167,9 +175,22 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
 
     // Execute or schedule
     if (timestamp == 0) {
-        // Immediate execution - capture return value
+        // Immediate execution
         uint32_t executedAt = receivedAt;  // Immediate execution happens at receive time
-        outResult = executeFunction(funcName, args);
+
+        // Try typed RPC first
+        if (mRpc.has(funcName.c_str())) {
+            auto resultTuple = executeFunctionTyped(funcName, args);
+            Error err = fl::get<0>(resultTuple);
+            outResult = fl::get<1>(resultTuple);
+            if (err != Error::None) {
+                return err;
+            }
+        } else {
+            // Fall back to legacy callback
+            outResult = executeFunction(funcName, args);
+        }
+
         recordResult(funcName, outResult, 0, receivedAt, executedAt, false);
     } else {
         // Scheduled execution - result will be available after execution via getResults()
@@ -180,16 +201,41 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
     return errorCode;
 }
 
-// Function Execution
+// Function Execution (Legacy)
 
 fl::Json Remote::executeFunction(const fl::string& funcName, const fl::Json& args) {
-    auto it = mCallbacks.find(funcName);
-    if (it != mCallbacks.end()) {
-        FL_DBG("Executing RPC: " << funcName);
+    auto it = mLegacyCallbacks.find(funcName);
+    if (it != mLegacyCallbacks.end()) {
+        FL_DBG("Executing legacy RPC: " << funcName);
         return it->second.execute(args);  // Call the callback wrapper
     }
     // Note: We already checked hasFunction() in processRpc(), so this should always succeed
     return fl::Json(nullptr);
+}
+
+// Function Execution (Typed via fl::Rpc)
+
+fl::tuple<Remote::Error, fl::Json> Remote::executeFunctionTyped(const fl::string& funcName, const fl::Json& args) {
+    FL_DBG("Executing typed RPC: " << funcName);
+
+    // Build JSON-RPC request for fl::Rpc::handle()
+    fl::Json request = fl::Json::object();
+    request.set("method", funcName);
+    request.set("params", args);
+    request.set("id", 1);  // We need an ID to get the response
+
+    // Process through fl::Rpc
+    fl::Json response = mRpc.handle(request);
+
+    // Check for errors
+    if (response.contains("error")) {
+        FL_WARN("RPC: Typed method error: " << response["error"]["message"].as_string().value_or("unknown"));
+        return fl::make_tuple(Error::InvalidParams, fl::Json(nullptr));
+    }
+
+    // Extract result
+    fl::Json result = response["result"];
+    return fl::make_tuple(Error::None, result);
 }
 
 void Remote::scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args) {
@@ -215,7 +261,17 @@ size_t Remote::tick(uint32_t currentTimeMs) {
         const ScheduledCall& call = mScheduled.top();
 
         uint32_t executedAt = currentTimeMs;  // Use the tick time, not wall clock time
-        fl::Json result = executeFunction(call.mFunctionName, call.mArgs);
+        fl::Json result;
+
+        // Try typed RPC first
+        if (mRpc.has(call.mFunctionName.c_str())) {
+            auto resultTuple = executeFunctionTyped(call.mFunctionName, call.mArgs);
+            // Ignore error for scheduled calls - just record the result
+            result = fl::get<1>(resultTuple);
+        } else {
+            // Fall back to legacy callback
+            result = executeFunction(call.mFunctionName, call.mArgs);
+        }
 
         // Record result with timing metadata
         recordResult(call.mFunctionName, result, call.mExecuteAt, call.mReceivedAt, executedAt, true);
@@ -248,8 +304,11 @@ void Remote::clearScheduled() {
 }
 
 void Remote::clearFunctions() {
-    mCallbacks.clear();
-    FL_DBG("Cleared all registered RPC functions");
+    mLegacyCallbacks.clear();
+    // Note: fl::Rpc doesn't support clearing, so we'd need to recreate it
+    // For now, just clear the legacy callbacks
+    // mRpc = fl::Rpc();  // Would need to verify this works
+    FL_DBG("Cleared all registered RPC functions (legacy only - typed methods remain)");
 }
 
 void Remote::clear() {

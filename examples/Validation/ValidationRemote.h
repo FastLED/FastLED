@@ -2,6 +2,12 @@
 //
 // Remote RPC control system for Validation sketch.
 // Provides JSON-RPC interface for dynamic test control via serial commands.
+//
+// ARCHITECTURE:
+// - All test output is communicated EXCLUSIVELY via JSON-RPC
+// - fl::ScopedLogDisable suppresses FL_DBG/FL_PRINT during test execution
+// - RPC responses use printJsonRaw() which bypasses fl::println (direct Serial output)
+// - This allows clean, parseable JSON output without debug noise
 
 #pragma once
 
@@ -11,6 +17,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/cstdio.h"  // For fl::ScopedLogDisable
 
 // Forward declarations
 namespace fl {
@@ -26,6 +33,17 @@ namespace fl {
 /// @param pin The GPIO pin to create the RxDevice on
 /// @return A shared_ptr to the created RxDevice, or nullptr on failure
 using RxDeviceFactory = fl::shared_ptr<fl::RxDevice>(*)(int pin);
+
+/// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable
+/// This ensures RPC responses are always visible regardless of log level
+/// @param json JSON object to output
+/// @param prefix Optional prefix (default: "REMOTE: ")
+void printJsonRaw(const fl::Json& json, const char* prefix = "REMOTE: ");
+
+/// @brief Print JSONL stream message directly to Serial, bypassing fl::println
+/// @param messageType Type of message (e.g., "test_result", "config_complete")
+/// @param data JSON object containing message data
+void printStreamRaw(const char* messageType, const fl::Json& data);
 
 /// @brief Remote RPC control system for test validation
 /// Encapsulates all RPC function registration and processing logic

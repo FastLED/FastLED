@@ -1469,4 +1469,236 @@ TEST_CASE("Remote: WLED individual LED control large range") {
     }
 }
 
+// =============================================================================
+// NEW: Typed RPC API Tests (fl::Remote with fl::Rpc integration)
+// =============================================================================
+
+// Test: Typed method registration with auto-deduced signature
+TEST_CASE("Remote: Typed method registration") {
+    fl::Remote remote;
+
+    // Register typed method
+    auto addFn = remote.method("add", [](int a, int b) -> int {
+        return a + b;
+    });
+
+    // Direct invocation should work
+    REQUIRE(addFn);
+    int result = addFn(2, 3);
+    REQUIRE_EQ(result, 5);
+
+    // Method should be discoverable
+    REQUIRE(remote.hasFunction("add"));
+}
+
+// Test: Typed method via JSON RPC
+TEST_CASE("Remote: Typed method JSON-RPC invocation") {
+    fl::Remote remote;
+
+    remote.method("multiply", [](int a, int b) -> int {
+        return a * b;
+    });
+
+    fl::Json result;
+    auto err = remote.processRpc(R"({"function":"multiply","args":[6,7]})", result);
+
+    REQUIRE_EQ(err, fl::Remote::Error::None);
+    REQUIRE(result.has_value());
+    int value = result.as_int().value_or(0);
+    REQUIRE_EQ(value, 42);
+}
+
+// Test: Typed void method
+TEST_CASE("Remote: Typed void method") {
+    fl::Remote remote;
+
+    int counter = 0;
+    remote.method("increment", [&counter]() {
+        counter++;
+    });
+
+    // Direct invocation
+    auto incrementFn = remote.bind<void()>("increment");
+    REQUIRE(incrementFn);
+    incrementFn();
+    REQUIRE_EQ(counter, 1);
+
+    // JSON-RPC invocation
+    fl::Json result;
+    auto err = remote.processRpc(R"({"function":"increment","args":[]})", result);
+    REQUIRE_EQ(err, fl::Remote::Error::None);
+    REQUIRE_EQ(counter, 2);
+}
+
+// Test: Typed method with string arguments
+TEST_CASE("Remote: Typed method with string arguments") {
+    fl::Remote remote;
+
+    remote.method("greet", [](fl::string name) -> fl::string {
+        return "Hello, " + name + "!";
+    });
+
+    fl::Json result;
+    auto err = remote.processRpc(R"({"function":"greet","args":["World"]})", result);
+
+    REQUIRE_EQ(err, fl::Remote::Error::None);
+    fl::string greeting = result.as_string().value_or("");
+    REQUIRE_EQ(greeting, "Hello, World!");
+}
+
+// Test: Mixed typed and legacy methods
+TEST_CASE("Remote: Mixed typed and legacy methods") {
+    fl::Remote remote;
+
+    // Register typed method
+    remote.method("typed_add", [](int a, int b) -> int {
+        return a + b;
+    });
+
+    // Register legacy method
+    int legacyResult = 0;
+    remote.registerFunction("legacy_add", [&legacyResult](const fl::Json& args) {
+        int a = args[0] | 0;
+        int b = args[1] | 0;
+        legacyResult = a + b;
+    });
+
+    // Both should be found
+    REQUIRE(remote.hasFunction("typed_add"));
+    REQUIRE(remote.hasFunction("legacy_add"));
+
+    // Both should execute correctly
+    fl::Json result1;
+    auto err1 = remote.processRpc(R"({"function":"typed_add","args":[10,20]})", result1);
+    REQUIRE_EQ(err1, fl::Remote::Error::None);
+    REQUIRE_EQ(result1.as_int().value_or(0), 30);
+
+    fl::Json result2;
+    auto err2 = remote.processRpc(R"({"function":"legacy_add","args":[5,7]})", result2);
+    REQUIRE_EQ(err2, fl::Remote::Error::None);
+    REQUIRE_EQ(legacyResult, 12);
+}
+
+// Test: Typed method with invalid params
+TEST_CASE("Remote: Typed method invalid params returns error") {
+    fl::Remote remote;
+
+    remote.method("square", [](int x) -> int {
+        return x * x;
+    });
+
+    // Wrong number of arguments
+    fl::Json result;
+    auto err = remote.processRpc(R"({"function":"square","args":[1,2,3]})", result);
+    REQUIRE_EQ(err, fl::Remote::Error::InvalidParams);
+}
+
+// Test: bind returns empty function for wrong signature
+TEST_CASE("Remote: bind returns empty for wrong signature") {
+    fl::Remote remote;
+
+    remote.method("add", [](int a, int b) -> int {
+        return a + b;
+    });
+
+    // Try to bind with wrong signature
+    auto wrongFn = remote.try_bind<double(double, double)>("add");
+    REQUIRE_FALSE(wrongFn.has_value());
+
+    // Correct signature should work
+    auto correctFn = remote.try_bind<int(int, int)>("add");
+    REQUIRE(correctFn.has_value());
+    REQUIRE_EQ(correctFn.value()(3, 4), 7);
+}
+
+// Test: method_with fluent builder API
+TEST_CASE("Remote: method_with fluent builder API") {
+    fl::Remote remote;
+
+    auto setBri = remote.method_with("led.setBrightness", [](int brightness) {
+        (void)brightness;  // Do nothing, just test API
+    })
+        .params({"brightness"})
+        .description("Set LED brightness (0-255)")
+        .tags({"led", "control"})
+        .done();
+
+    REQUIRE(setBri);
+    REQUIRE(remote.hasFunction("led.setBrightness"));
+
+    // Verify schema contains metadata
+    fl::Json methods = remote.methods();
+    REQUIRE_EQ(methods.size(), 1);
+
+    fl::Json method = methods[0];
+    fl::string name = method["name"].as_string().value_or("");
+    REQUIRE_EQ(name, "led.setBrightness");
+
+    // Check param name
+    fl::string paramName = method["params"][0]["name"].as_string().value_or("");
+    REQUIRE_EQ(paramName, "brightness");
+
+    // Check description
+    fl::string desc = method["description"].as_string().value_or("");
+    REQUIRE_EQ(desc, "Set LED brightness (0-255)");
+
+    // Check tags
+    REQUIRE_EQ(method["tags"].size(), 2);
+}
+
+// Test: count includes both typed and legacy methods
+TEST_CASE("Remote: count includes typed and legacy methods") {
+    fl::Remote remote;
+
+    // Add typed method
+    remote.method("typed1", []() {});
+
+    // Add legacy method
+    remote.registerFunction("legacy1", [](const fl::Json&) {});
+
+    // Count should be 2
+    REQUIRE_EQ(remote.count(), 2);
+}
+
+// Test: schema generation
+TEST_CASE("Remote: schema generation") {
+    fl::Remote remote;
+
+    remote.method("add", [](int a, int b) -> int { return a + b; });
+    remote.method("ping", []() {});
+
+    fl::Json schema = remote.schema("Test API", "1.0.0");
+
+    REQUIRE(schema.contains("openrpc"));
+    REQUIRE(schema.contains("info"));
+    REQUIRE(schema.contains("methods"));
+
+    fl::string title = schema["info"]["title"].as_string().value_or("");
+    REQUIRE_EQ(title, "Test API");
+
+    fl::string version = schema["info"]["version"].as_string().value_or("");
+    REQUIRE_EQ(version, "1.0.0");
+
+    REQUIRE_EQ(schema["methods"].size(), 2);
+}
+
+// Test: scheduled typed method execution
+TEST_CASE("Remote: Scheduled typed method execution") {
+    fl::Remote remote;
+
+    int value = 0;
+    remote.method("setValue", [&value](int v) {
+        value = v;
+    });
+
+    // Schedule for future execution
+    auto err = remote.processRpc(R"({"timestamp":1000,"function":"setValue","args":[42]})");
+    REQUIRE_EQ(err, fl::Remote::Error::None);
+    REQUIRE_EQ(value, 0);  // Not executed yet
+
+    // Execute scheduled method
+    remote.tick(1000);
+    REQUIRE_EQ(value, 42);  // Now executed
+}
+
 #endif // FASTLED_ENABLE_JSON

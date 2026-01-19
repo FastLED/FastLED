@@ -94,7 +94,7 @@ if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
     TSC_EXIT_CODE=$?
     # Filter out Node.js events error and vendor directory errors (third-party code)
     # This awk script filters out vendor errors and their continuation lines (which start with spaces)
-    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} !skip {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} skip==0 {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
 
     if [ -n "$FILTERED_OUTPUT" ]; then
         echo "$FILTERED_OUTPUT"
@@ -112,7 +112,7 @@ elif [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc" ]; then
     TSC_EXIT_CODE=$?
     # Filter out Node.js events error and vendor directory errors (third-party code)
     # This awk script filters out vendor errors and their continuation lines (which start with spaces)
-    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} !skip {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} skip==0 {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
 
     if [ -n "$FILTERED_OUTPUT" ]; then
         echo "$FILTERED_OUTPUT"
