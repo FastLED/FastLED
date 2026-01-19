@@ -347,9 +347,21 @@ def main() -> None:
                 tests_passed = False
             raise
         finally:
-            # Always save fingerprints with appropriate status
-            status = "success" if tests_passed else "failure"
-            fingerprint_manager.save_all(status)
+            # Only save fingerprints when running ALL tests, not specific tests
+            # This prevents running a specific test from marking the full fingerprint as valid
+            # Note: args.examples == [] means "all examples" (e.g., --cpp mode), which is OK
+            # args.examples with specific items (e.g., ['Blink']) means specific examples only
+            running_specific_examples = (
+                args.examples is not None and len(args.examples) > 0
+            )
+            running_all_tests = (
+                args.test is None
+                and not running_specific_examples
+                and not args.no_fingerprint
+            )
+            if running_all_tests:
+                status = "success" if tests_passed else "failure"
+                fingerprint_manager.save_all(status)
 
         # Set up force exit daemon and exit
         _ = setup_force_exit()
