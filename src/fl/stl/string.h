@@ -26,6 +26,7 @@
 #include "fl/force_inline.h"
 #include "fl/deprecated.h"
 #include "fl/compiler_control.h"
+#include "fl/string_view.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -100,17 +101,90 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
   protected:
     fl::size mLength = 0;
 
-    // Storage variants: either inline buffer or heap pointer
+    // Storage variants: inline buffer, heap pointer, or non-owning references
     struct InlinedBuffer {
         char data[SIZE] = {0};
     };
-    fl::variant<InlinedBuffer, NotNullStringHolderPtr> mStorage;
+
+    // ConstLiteral: Non-owning pointer to constant null-terminated string data.
+    // Used for string literals that have static storage duration.
+    // The string data must outlive the StrN object.
+    struct ConstLiteral {
+        const char* data;
+        constexpr ConstLiteral() : data(nullptr) {}
+        constexpr explicit ConstLiteral(const char* str) : data(str) {}
+    };
+
+    // ConstView: Non-owning pointer + length to constant string data.
+    // Used for string_view-like references that don't need null termination.
+    // The string data must outlive the StrN object.
+    struct ConstView {
+        const char* data;
+        fl::size length;
+        constexpr ConstView() : data(nullptr), length(0) {}
+        constexpr ConstView(const char* str, fl::size len) : data(str), length(len) {}
+    };
+
+    fl::variant<InlinedBuffer, NotNullStringHolderPtr, ConstLiteral, ConstView> mStorage;
 
   public:
     // Static constants (like std::string)
     static constexpr fl::size npos = static_cast<fl::size>(-1);
 
-    // Constructors
+    // ======= STATIC FACTORY METHODS FOR NON-OWNING STRINGS =======
+    // These create strings that reference constant data without copying.
+    // The source data must outlive the string object.
+    // When the string is modified, data is automatically copied (copy-on-write).
+
+    // Create a string that references a constant null-terminated string literal.
+    // Usage: auto s = StrN<>::from_literal("hello");
+    // The literal must have static storage duration (string literal).
+    // No memory is allocated until the string is modified.
+    static StrN from_literal(const char* literal) {
+        StrN result;
+        if (literal) {
+            result.mLength = fl::strlen(literal);
+            result.mStorage = ConstLiteral(literal);
+        }
+        return result;
+    }
+
+    // Create a string that references a constant string view.
+    // Usage: auto s = StrN<>::from_view(ptr, len);
+    // The source data must outlive the string object.
+    // No memory is allocated until the string is modified.
+    static StrN from_view(const char* data, fl::size len) {
+        StrN result;
+        if (data && len > 0) {
+            result.mLength = len;
+            result.mStorage = ConstView(data, len);
+        }
+        return result;
+    }
+
+    // Create a string that references a string_view without copying.
+    // The string_view's data must outlive the string object.
+    static StrN from_view(const string_view& sv) {
+        return from_view(sv.data(), sv.size());
+    }
+
+    // ======= STORAGE TYPE QUERY METHODS =======
+    // Check if the string is using constant literal storage (no copy made).
+    bool is_literal() const { return mStorage.template is<ConstLiteral>(); }
+
+    // Check if the string is using constant view storage (no copy made).
+    bool is_view() const { return mStorage.template is<ConstView>(); }
+
+    // Check if the string owns its data (inline buffer or heap allocated).
+    bool is_owning() const {
+        return mStorage.template is<InlinedBuffer>() ||
+               mStorage.template is<NotNullStringHolderPtr>();
+    }
+
+    // Check if the string is referencing external data (literal or view).
+    bool is_referencing() const { return is_literal() || is_view(); }
+
+    // ======= CONSTRUCTORS =======
     StrN() : mLength(0), mStorage(InlinedBuffer{}) {}
 
     // cppcheck-suppress-begin [operatorEqVarError]
@@ -134,6 +208,22 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Leave other in a valid empty state
         other.mLength = 0;
         other.mStorage = InlinedBuffer{};
+    }
+
+    // Constructor from string_view
+    // Copies the string_view data into the string
+    StrN(const string_view& sv) : mLength(0), mStorage(InlinedBuffer{}) {
+        if (sv.empty()) {
+            return;
+        }
+        fl::size len = sv.size();
+        mLength = len;
+        if (len + 1 <= SIZE) {
+            fl::memcpy(inlineData(), sv.data(), len);
+            inlineData()[len] = '\0';
+        } else {
+            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(sv.data(), len));
+        }
     }
 
     // Iterator range constructor (std::string compatibility)
@@ -371,7 +461,16 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         mLength = len;
     }
 
-    fl::size capacity() const { return hasHeapData() ? heapData()->capacity() : SIZE; }
+    fl::size capacity() const {
+        if (hasHeapData()) {
+            return heapData()->capacity();
+        } else if (isNonOwning()) {
+            // Non-owning storage has no capacity for modification
+            // Return 0 to indicate no capacity available
+            return 0;
+        }
+        return SIZE;
+    }
 
     fl::size write(const fl::u8 *data, fl::size n) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(data));
@@ -380,6 +479,36 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     fl::size write(const char *str, fl::size n) {
         fl::size newLen = mLength + n;
+
+        // Handle non-owning storage (ConstLiteral or ConstView)
+        // Must materialize into owned storage before modification
+        if (isNonOwning()) {
+            const char* existingData = constData();
+            fl::size existingLen = mLength;
+            if (newLen + 1 <= SIZE) {
+                // Result fits in inline buffer
+                InlinedBuffer buf;
+                if (existingLen > 0 && existingData) {
+                    fl::memcpy(buf.data, existingData, existingLen);
+                }
+                fl::memcpy(buf.data + existingLen, str, n);
+                buf.data[newLen] = '\0';
+                mStorage = buf;
+                mLength = newLen;
+            } else {
+                // Need heap allocation
+                NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+                if (existingLen > 0 && existingData) {
+                    fl::memcpy(newData->data(), existingData, existingLen);
+                }
+                fl::memcpy(newData->data() + existingLen, str, n);
+                newData->data()[newLen] = '\0';
+                mStorage = newData;
+                mLength = newLen;
+            }
+            return mLength;
+        }
+
         if (hasHeapData() && heapData().get().use_count() <= 1) {
             NotNullStringHolderPtr& heap = heapData();
             if (!heap->hasCapacity(newLen)) {
@@ -499,11 +628,28 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     // Accessors
     fl::size size() const { return mLength; }
     fl::size length() const { return size(); }
+    // c_str() returns a null-terminated string.
+    // For ConstView, the data may not be null-terminated at position mLength,
+    // so we must materialize to ensure null-termination.
+    // For ConstLiteral, the data is guaranteed to be null-terminated.
     const char *c_str() const {
-        return hasHeapData() ? heapData()->data() : inlineData();
+        if (mStorage.template is<ConstView>()) {
+            // ConstView data may not be null-terminated - need to check
+            const ConstView& view = mStorage.template get<ConstView>();
+            if (view.data && view.length > 0 && view.data[view.length] != '\0') {
+                // Need to materialize - const_cast is safe here because
+                // we're converting to owned storage
+                const_cast<StrN*>(this)->materialize();
+            }
+        }
+        return constData();
     }
 
     char *c_str_mutable() {
+        // Must materialize non-owning storage before providing mutable access
+        if (isNonOwning()) {
+            materialize();
+        }
         return hasHeapData() ? heapData()->data() : inlineData();
     }
 
@@ -649,10 +795,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     void clear(bool freeMemory = false) {
         mLength = 0;
-        // Ensure null termination for c_str()
-        c_str_mutable()[0] = '\0';
-        if (freeMemory && hasHeapData()) {
+        // For non-owning storage, always transition to owned empty buffer
+        if (isNonOwning() || (freeMemory && hasHeapData())) {
             mStorage = InlinedBuffer{};
+        } else {
+            // Ensure null termination for c_str()
+            c_str_mutable()[0] = '\0';
         }
     }
 
@@ -2024,6 +2172,74 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return mStorage.template is<NotNullStringHolderPtr>();
     }
 
+    bool hasConstLiteral() const {
+        return mStorage.template is<ConstLiteral>();
+    }
+
+    bool hasConstView() const {
+        return mStorage.template is<ConstView>();
+    }
+
+    // Check if storage is non-owning (literal or view)
+    bool isNonOwning() const {
+        return hasConstLiteral() || hasConstView();
+    }
+
+    // Get const data pointer for any storage type
+    const char* constData() const {
+        if (mStorage.template is<InlinedBuffer>()) {
+            return mStorage.template get<InlinedBuffer>().data;
+        } else if (mStorage.template is<NotNullStringHolderPtr>()) {
+            return mStorage.template get<NotNullStringHolderPtr>()->data();
+        } else if (mStorage.template is<ConstLiteral>()) {
+            return mStorage.template get<ConstLiteral>().data;
+        } else if (mStorage.template is<ConstView>()) {
+            return mStorage.template get<ConstView>().data;
+        }
+        return "";
+    }
+
+    // Materialize non-owning storage into owned storage before modification.
+    // This implements copy-on-write semantics for literals and views.
+    // After calling this, the string will be using either InlinedBuffer or heap storage.
+    void materialize() {
+        if (mStorage.template is<ConstLiteral>()) {
+            const char* data = mStorage.template get<ConstLiteral>().data;
+            if (!data) {
+                mLength = 0;
+                mStorage = InlinedBuffer{};
+                return;
+            }
+            fl::size len = mLength;
+            if (len + 1 <= SIZE) {
+                InlinedBuffer buf;
+                fl::memcpy(buf.data, data, len);
+                buf.data[len] = '\0';
+                mStorage = buf;
+            } else {
+                mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(data, len));
+            }
+        } else if (mStorage.template is<ConstView>()) {
+            const ConstView& view = mStorage.template get<ConstView>();
+            if (!view.data) {
+                mLength = 0;
+                mStorage = InlinedBuffer{};
+                return;
+            }
+            fl::size len = view.length;
+            mLength = len;
+            if (len + 1 <= SIZE) {
+                InlinedBuffer buf;
+                fl::memcpy(buf.data, view.data, len);
+                buf.data[len] = '\0';
+                mStorage = buf;
+            } else {
+                mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(view.data, len));
+            }
+        }
+        // InlinedBuffer and NotNullStringHolderPtr are already owned - no action needed
+    }
+
     NotNullStringHolderPtr& heapData() {
         if (!mStorage.template is<NotNullStringHolderPtr>()) {
             // Create a new heap-allocated StringHolder with empty content
@@ -2045,8 +2261,36 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     // Standard string npos constant for compatibility
     static constexpr fl::size npos = static_cast<fl::size>(-1);
 
+    // ======= STATIC FACTORY METHODS FOR NON-OWNING STRINGS =======
+    // Create a string that references a constant null-terminated string literal.
+    // No memory is allocated until the string is modified.
+    static string from_literal(const char* literal) {
+        string result;
+        if (literal) {
+            result.mLength = fl::strlen(literal);
+            result.mStorage = ConstLiteral(literal);
+        }
+        return result;
+    }
+
+    // Create a string that references a constant string view.
+    // No memory is allocated until the string is modified.
+    static string from_view(const char* data, fl::size len) {
+        string result;
+        if (data && len > 0) {
+            result.mLength = len;
+            result.mStorage = ConstView(data, len);
+        }
+        return result;
+    }
+
+    // Create a string that references a string_view without copying.
+    static string from_view(const string_view& sv) {
+        return from_view(sv.data(), sv.size());
+    }
+
     static int strcmp(const string& a, const string& b);
-    
+
     string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
     string(const char *str, fl::size len) : StrN<FASTLED_STR_INLINED_SIZE>() {
@@ -2058,6 +2302,8 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     template <fl::size M>
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    // Constructor from string_view
+    string(const string_view& sv) : StrN<FASTLED_STR_INLINED_SIZE>(sv) {}
     string &operator=(const string &other) {
         copy(other);
         return *this;
@@ -2065,6 +2311,21 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     
     string &operator=(const char *str) {
         copy(str, fl::strlen(str));
+        return *this;
+    }
+
+    // Bring base class assign methods into scope so they're not hidden
+    using StrN<FASTLED_STR_INLINED_SIZE>::assign;
+
+    // Assignment from string_view
+    // Note: This takes string_view by value to avoid ambiguity with StrN assignment.
+    // Passing string_view by value is efficient since it's just a pointer+size.
+    string &assign(string_view sv) {
+        if (sv.empty()) {
+            clear();
+        } else {
+            copy(sv.data(), sv.size());
+        }
         return *this;
     }
 

@@ -31,7 +31,8 @@ class string_view {
     using const_reverse_iterator = const char*;
 
     // Special value to indicate "not found" or "until end"
-    static const fl::size npos = static_cast<fl::size>(-1);
+    // Using constexpr for C++11 implicit inline semantics - no ODR definition needed
+    static constexpr fl::size npos = static_cast<fl::size>(-1);
 
     // ======= CONSTRUCTORS =======
     // Default constructor - empty view
@@ -432,9 +433,6 @@ class string_view {
     const char* mData;
     fl::size mSize;
 };
-
-// Out-of-class definition for npos (required for C++11 ODR)
-const fl::size string_view::npos;
 
 // ======= COMPARISON OPERATORS =======
 inline bool operator==(string_view lhs, string_view rhs) {
