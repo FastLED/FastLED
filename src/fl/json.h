@@ -2112,9 +2112,13 @@ public:
     }
 
     // has_value method for compatibility
-    bool has_value() const { 
-        return m_value && !m_value->is_null(); 
+    bool has_value() const {
+        return m_value && !m_value->is_null();
     }
+
+    // Get access to the internal JsonValue for direct variant visiting
+    // Returns nullptr if no value is set
+    const JsonValue* internal_value() const { return m_value.get(); }
 
     // Method to set the internal value (for JsonValue::to_string())
     void set_value(const fl::shared_ptr<JsonValue>& value) {

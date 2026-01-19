@@ -1023,4 +1023,76 @@ namespace int_cast_detail {
     template<typename T> struct cast_target<T, 8, true> { using type = fl::i64; };
 }
 
+//-------------------------------------------------------------------------------
+// callable_traits - Extract signature from callable types (lambdas, functors, function pointers)
+// Used for auto-deducing RPC method signatures from lambdas
+// NOTE: args_tuple is NOT provided here due to header dependency issues (fl::tuple
+// is defined in a header that includes this one). Use function_traits in typed_rpc.h
+// if you need args_tuple.
+//-------------------------------------------------------------------------------
+
+// Forward declaration
+template <typename T, typename = void>
+struct callable_traits;
+
+// Member function pointer (non-const) - handles mutable lambdas and functors
+template <typename C, typename R, typename... Args>
+struct callable_traits<R(C::*)(Args...)> {
+    using signature = R(Args...);
+    using return_type = R;
+    static constexpr fl::size arity = sizeof...(Args);
+};
+
+// Member function pointer (const) - handles regular lambdas and const functors
+template <typename C, typename R, typename... Args>
+struct callable_traits<R(C::*)(Args...) const> {
+    using signature = R(Args...);
+    using return_type = R;
+    static constexpr fl::size arity = sizeof...(Args);
+};
+
+// Free function pointer
+template <typename R, typename... Args>
+struct callable_traits<R(*)(Args...)> {
+    using signature = R(Args...);
+    using return_type = R;
+    static constexpr fl::size arity = sizeof...(Args);
+};
+
+// Free function (not pointer)
+template <typename R, typename... Args>
+struct callable_traits<R(Args...)> {
+    using signature = R(Args...);
+    using return_type = R;
+    static constexpr fl::size arity = sizeof...(Args);
+};
+
+// Lambda/functor with operator() - delegates to member function pointer version
+// Uses SFINAE to detect callable types with operator()
+template <typename T>
+struct callable_traits<T, typename enable_if<
+    is_member_function_pointer<decltype(&T::operator())>::value
+>::type> : callable_traits<decltype(&T::operator())> {};
+
+// =============================================================================
+// Index sequence implementation for tuple unpacking (moved from typed_rpc.h)
+// =============================================================================
+
+template <fl::size... Is>
+struct index_sequence {
+    using type = index_sequence;
+    static constexpr fl::size size() { return sizeof...(Is); }
+};
+
+template <fl::size N, fl::size... Is>
+struct make_index_sequence_impl : make_index_sequence_impl<N - 1, N - 1, Is...> {};
+
+template <fl::size... Is>
+struct make_index_sequence_impl<0, Is...> {
+    using type = index_sequence<Is...>;
+};
+
+template <fl::size N>
+using make_index_sequence = typename make_index_sequence_impl<N>::type;
+
 } // namespace fl
