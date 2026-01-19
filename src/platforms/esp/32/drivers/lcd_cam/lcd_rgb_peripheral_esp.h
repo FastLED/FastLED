@@ -13,6 +13,10 @@
 #include "esp_lcd_panel_ops.h"
 
 namespace fl {
+
+// Forward declaration for friend access
+template <typename T, int N> class Singleton;
+
 namespace detail {
 
 /// @brief ESP32-P4 LCD RGB peripheral implementation
@@ -54,6 +58,8 @@ public:
     void delay(uint32_t ms) override;
 
 private:
+    friend class fl::Singleton<LcdRgbPeripheralEsp>;
+
     LcdRgbPeripheralEsp();
 
     // Non-copyable
