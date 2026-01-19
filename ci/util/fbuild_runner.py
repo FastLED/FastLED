@@ -2,7 +2,7 @@
 """fbuild wrapper for FastLED build operations.
 
 This module provides a wrapper around fbuild commands for use by the FastLED
-CI system. It integrates with the fbuild daemon for build and deploy operations.
+CI system. It integrates with the fbuild DaemonConnection for build and deploy operations.
 
 Usage:
     from ci.util.fbuild_runner import (
@@ -21,7 +21,13 @@ Usage:
 from pathlib import Path
 from typing import Any
 
-from fbuild.daemon import client as fbuild_client
+from fbuild import connect_daemon
+from fbuild.daemon import (
+    ensure_daemon_running,
+    get_daemon_status,
+    stop_daemon,
+)
+from fbuild.daemon.client import is_daemon_running
 
 
 def ensure_fbuild_daemon() -> bool:
@@ -30,7 +36,7 @@ def ensure_fbuild_daemon() -> bool:
     Returns:
         True if daemon is running or was started successfully, False otherwise
     """
-    return fbuild_client.ensure_daemon_running()
+    return ensure_daemon_running()
 
 
 def run_fbuild_compile(
@@ -64,13 +70,13 @@ def run_fbuild_compile(
 
             env_name = EnvironmentDetector.detect_environment(build_dir, None)
 
-        success = fbuild_client.request_build(
-            project_dir=build_dir,
-            environment=env_name,
-            clean_build=clean,
-            verbose=verbose,
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(build_dir, env_name) as conn:
+            success = conn.build(
+                clean=clean,
+                verbose=verbose,
+                timeout=timeout,
+            )
 
         if success:
             print("\n✅ Compilation succeeded (fbuild)\n")
@@ -124,14 +130,14 @@ def run_fbuild_upload(
 
             env_name = EnvironmentDetector.detect_environment(build_dir, None)
 
-        success = fbuild_client.request_deploy(
-            project_dir=build_dir,
-            environment=env_name,
-            port=upload_port,
-            clean_build=False,  # No rebuild - already compiled
-            monitor_after=False,  # Don't monitor - FastLED has its own monitoring
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(build_dir, env_name) as conn:
+            success = conn.deploy(
+                port=upload_port,
+                clean=False,  # No rebuild - already compiled
+                monitor_after=False,  # Don't monitor - FastLED has its own monitoring
+                timeout=timeout,
+            )
 
         if success:
             print("\n✅ Upload succeeded (fbuild)\n")
@@ -198,18 +204,18 @@ def run_fbuild_deploy(
 
             env_name = EnvironmentDetector.detect_environment(build_dir, None)
 
-        success = fbuild_client.request_deploy(
-            project_dir=build_dir,
-            environment=env_name,
-            port=upload_port,
-            clean_build=clean,
-            monitor_after=monitor_after,
-            monitor_timeout=monitor_timeout,
-            monitor_halt_on_error=monitor_halt_on_error,
-            monitor_halt_on_success=monitor_halt_on_success,
-            monitor_expect=monitor_expect,
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(build_dir, env_name) as conn:
+            success = conn.deploy(
+                port=upload_port,
+                clean=clean,
+                monitor_after=monitor_after,
+                monitor_timeout=monitor_timeout,
+                monitor_halt_on_error=monitor_halt_on_error,
+                monitor_halt_on_success=monitor_halt_on_success,
+                monitor_expect=monitor_expect,
+                timeout=timeout,
+            )
 
         if success:
             print("\n✅ Deploy succeeded (fbuild)\n")
@@ -266,16 +272,16 @@ def run_fbuild_monitor(
 
             env_name = EnvironmentDetector.detect_environment(build_dir, None)
 
-        success = fbuild_client.request_monitor(
-            project_dir=build_dir,
-            environment=env_name,
-            port=port,
-            baud_rate=baud_rate,
-            halt_on_error=halt_on_error,
-            halt_on_success=halt_on_success,
-            expect=expect,
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(build_dir, env_name) as conn:
+            success = conn.monitor(
+                port=port,
+                baud_rate=baud_rate,
+                halt_on_error=halt_on_error,
+                halt_on_success=halt_on_success,
+                expect=expect,
+                timeout=timeout,
+            )
 
         return success
 
@@ -296,7 +302,7 @@ def stop_fbuild_daemon() -> bool:
     Returns:
         True if daemon was stopped, False otherwise
     """
-    return fbuild_client.stop_daemon()
+    return stop_daemon()
 
 
 def get_fbuild_daemon_status() -> dict[str, Any]:
@@ -305,7 +311,7 @@ def get_fbuild_daemon_status() -> dict[str, Any]:
     Returns:
         Dictionary with daemon status information
     """
-    return fbuild_client.get_daemon_status()
+    return get_daemon_status()
 
 
 def is_fbuild_daemon_running() -> bool:
@@ -314,4 +320,4 @@ def is_fbuild_daemon_running() -> bool:
     Returns:
         True if daemon is running, False otherwise
     """
-    return fbuild_client.is_daemon_running()
+    return is_daemon_running()

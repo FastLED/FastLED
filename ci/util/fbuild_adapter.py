@@ -2,7 +2,7 @@
 fbuild Adapter Module for FastLED CI.
 
 This module provides a clean interface to the fbuild build system,
-wrapping the fbuild Daemon API for use in FastLED's validation
+wrapping the fbuild DaemonConnection API for use in FastLED's validation
 and debugging workflows.
 
 The fbuild daemon provides faster builds by:
@@ -16,12 +16,13 @@ Key functions:
     - is_fbuild_available: Check if fbuild is available
     - get_fbuild_version: Get fbuild version string
 
-For daemon management, use fbuild.Daemon directly:
-    import fbuild
+For daemon management, use the new DaemonConnection API (v1.2.12+):
+    from fbuild import connect_daemon
 
-    fbuild.Daemon.ensure_running()
-    fbuild.Daemon.stop()
-    fbuild.Daemon.status()
+    with connect_daemon(project_dir, environment) as conn:
+        conn.install_dependencies()
+        conn.build()
+        conn.deploy(port=port)
 """
 
 from pathlib import Path
@@ -66,7 +67,7 @@ def fbuild_build_and_upload(
 ) -> tuple[bool, str]:
     """Build and upload firmware using fbuild.
 
-    This function uses the fbuild daemon to compile and upload firmware
+    This function uses the fbuild DaemonConnection to compile and upload firmware
     to an embedded device. It does NOT start monitoring - the caller
     should use the existing run_monitor function for that.
 
@@ -81,24 +82,27 @@ def fbuild_build_and_upload(
         Tuple of (success: bool, message: str)
     """
     try:
-        import fbuild  # type: ignore[import-not-found]
+        from fbuild import connect_daemon  # type: ignore[import-not-found]
+        from fbuild.daemon import (
+            ensure_daemon_running,  # type: ignore[import-not-found]
+        )
     except ImportError as e:
         return False, f"fbuild not available: {e}"
 
     try:
         # Ensure daemon is running
-        if not fbuild.Daemon.ensure_running():
+        if not ensure_daemon_running():
             return False, "Failed to start fbuild daemon"
 
-        # Request deploy (build + upload, no monitor)
-        success = fbuild.Daemon.deploy(
-            project_dir=project_dir,
-            environment=environment,
-            port=port,
-            clean_build=clean_build,
-            monitor_after=False,  # We'll handle monitoring separately via run_monitor
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(project_dir, environment) as conn:
+            # Request deploy (build + upload, no monitor)
+            success = conn.deploy(
+                port=port,
+                clean=clean_build,
+                monitor_after=False,  # We'll handle monitoring separately via run_monitor
+                timeout=timeout,
+            )
 
         if success:
             return True, "Build and upload completed successfully"
@@ -132,23 +136,26 @@ def fbuild_build_only(
         Tuple of (success: bool, message: str)
     """
     try:
-        import fbuild  # type: ignore[import-not-found]
+        from fbuild import connect_daemon  # type: ignore[import-not-found]
+        from fbuild.daemon import (
+            ensure_daemon_running,  # type: ignore[import-not-found]
+        )
     except ImportError as e:
         return False, f"fbuild not available: {e}"
 
     try:
         # Ensure daemon is running
-        if not fbuild.Daemon.ensure_running():
+        if not ensure_daemon_running():
             return False, "Failed to start fbuild daemon"
 
-        # Request build only
-        success = fbuild.Daemon.build(
-            project_dir=project_dir,
-            environment=environment,
-            clean_build=clean_build,
-            verbose=verbose,
-            timeout=timeout,
-        )
+        # Use the new DaemonConnection context manager API
+        with connect_daemon(project_dir, environment) as conn:
+            # Request build only
+            success = conn.build(
+                clean=clean_build,
+                verbose=verbose,
+                timeout=timeout,
+            )
 
         if success:
             return True, "Build completed successfully"

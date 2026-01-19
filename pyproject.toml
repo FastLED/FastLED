@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fbuild>=1.2.10",  # ESP32 build daemon - installed from PyPI
+    "fbuild>=1.2.12",  # ESP32 build daemon - installed from PyPI
     "platformio==6.1.18",
     "python-dateutil",
     "ruff",

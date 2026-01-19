@@ -50,7 +50,10 @@ from ci.debug_attached import (
     run_upload,
 )
 from ci.util.build_lock import BuildLock
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import (
+    handle_keyboard_interrupt_properly,
+    is_interrupted,
+)
 from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import (
     auto_detect_upload_port,
@@ -149,6 +152,9 @@ def run_gpio_pretest(
         # Drain any pending output from boot sequence
         boot_lines = 0
         while ser.in_waiting > 0 or boot_lines < 50:
+            # Check for interrupt before blocking read (Windows workaround)
+            if is_interrupted():
+                raise KeyboardInterrupt()
             try:
                 line = ser.readline().decode("utf-8", errors="replace").strip()
                 if line:
@@ -186,6 +192,9 @@ def run_gpio_pretest(
             attempt_timeout = timeout / 3  # Split timeout across attempts
 
             while time.time() - attempt_start < attempt_timeout:
+                # Check for interrupt before blocking read (Windows workaround)
+                if is_interrupted():
+                    raise KeyboardInterrupt()
                 try:
                     line = ser.readline().decode("utf-8", errors="replace").strip()
                 except KeyboardInterrupt:
@@ -327,6 +336,9 @@ def run_pin_discovery(
         # Drain any pending output from boot sequence
         boot_lines = 0
         while ser.in_waiting > 0 or boot_lines < 50:
+            # Check for interrupt before blocking read (Windows workaround)
+            if is_interrupted():
+                raise KeyboardInterrupt()
             try:
                 line = ser.readline().decode("utf-8", errors="replace").strip()
                 if line:
@@ -365,6 +377,9 @@ def run_pin_discovery(
             attempt_timeout = timeout / 3
 
             while time.time() - attempt_start < attempt_timeout:
+                # Check for interrupt before blocking read (Windows workaround)
+                if is_interrupted():
+                    raise KeyboardInterrupt()
                 try:
                     line = ser.readline().decode("utf-8", errors="replace").strip()
                 except KeyboardInterrupt:
