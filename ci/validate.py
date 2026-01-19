@@ -92,7 +92,8 @@ DEFAULT_EXPECT_PATTERNS = [
 ]
 
 # Stop pattern - early exit when test suite completes successfully
-STOP_PATTERN = "VALIDATION_SUITE_COMPLETE"
+# Firmware emits: RESULT: {"reason":"test_matrix_complete","type":"halt","success":true}
+STOP_PATTERN = "test_matrix_complete"
 
 # Default fail-on pattern
 DEFAULT_FAIL_ON_PATTERN = "ERROR"
@@ -781,6 +782,12 @@ def run(args: Args | None = None) -> int:
     # ============================================================
     # Resolve environment: positional argument takes precedence over --env flag
     final_environment = args.environment_positional or args.environment
+
+    # If --i2s is specified but no environment, force esp32s3
+    # I2S LCD_CAM driver is only available on ESP32-S3
+    if args.i2s and not final_environment:
+        final_environment = "esp32s3"
+        print("ℹ️  --i2s flag requires ESP32-S3, auto-selecting 'esp32s3' environment")
 
     # ============================================================
     # Driver Selection Validation
