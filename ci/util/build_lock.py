@@ -3,11 +3,12 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 #!/usr/bin/env python3
 """
-Build lock utility for coordinating concurrent operations.
+Build lock utility for coordinating concurrent build operations.
 
-This module provides file-based locking to prevent concurrent operations
-from conflicting. Supports both project-local locks (for builds) and
-system-wide global locks (for shared resources like attached devices).
+This module provides file-based locking to prevent concurrent build operations
+from conflicting. Used for project-local locks (e.g., libfastled_build).
+
+Note: Device locking is now handled by fbuild (daemon-based).
 
 Uses the 'fasteners' library for cross-platform file locking.
 """
@@ -39,7 +40,7 @@ class BuildLock:
             use_global: If True, use ~/.fastled/locks (system-wide). If False, use .build/locks (project-local)
         """
         if use_global:
-            # Global lock (system-wide resource like attached device)
+            # Global lock (system-wide)
             home_dir = Path.home()
             lock_dir = home_dir / ".fastled" / "locks"
         else:

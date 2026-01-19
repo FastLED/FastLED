@@ -11,8 +11,6 @@ Lock management for FastLED PlatformIO builds.
    from ci.util.pio_package_client import ensure_packages_installed
 
    See ci/debug_attached.py for usage example.
-
-   PlatformLock is still used for device operations.
 """
 
 import time

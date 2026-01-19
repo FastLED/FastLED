@@ -49,9 +49,9 @@ from ci.debug_attached import (
     run_monitor,
     run_upload,
 )
-from ci.util.build_lock import BuildLock
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
+    install_signal_handler,
     is_interrupted,
 )
 from ci.util.json_rpc_handler import parse_json_rpc_commands
@@ -770,6 +770,9 @@ def _should_use_fbuild(
 
 def run(args: Args | None = None) -> int:
     """Main entry point."""
+    # Install signal handler for proper Ctrl+C handling on Windows
+    install_signal_handler()
+
     args = args or Args.parse_args()
     assert args is not None
 
@@ -1093,135 +1096,156 @@ def run(args: Args | None = None) -> int:
                 return 1
 
         # ============================================================
-        # PHASES 3-4: Upload + Monitor (DEVICE LOCK)
+        # PHASES 3-4: Upload + Monitor
         # ============================================================
-        lock = BuildLock(lock_name="device_debug", use_global=True)
-        if not lock.acquire(timeout=600.0):  # 10 minute timeout
-            print(
-                "\n❌ Another agent is currently using the device for debug operations."
-            )
-            print("   Please retry later once the debug operation has completed.")
-            print(f"   Lock file: {lock.lock_file}")
-            return 1
+        # Note: Device locking is handled by fbuild (daemon-based)
 
-        try:
-            # Clean up orphaned processes holding the serial port
-            if upload_port:
+        # Clean up orphaned processes holding the serial port
+        if upload_port:
+            kill_port_users(upload_port)
+
+        # Phase 3: Upload firmware
+        if use_fbuild:
+            from ci.util.fbuild_runner import run_fbuild_upload
+
+            if not run_fbuild_upload(
+                build_dir, final_environment, upload_port, args.verbose
+            ):
+                return 1
+        else:
+            if not run_upload(build_dir, final_environment, upload_port, args.verbose):
+                return 1
+
+        # Wait for serial port to become available after upload
+        # Device reboots after firmware upload, so we need to wait for USB re-enumeration
+        if upload_port:
+            print(
+                "\n⏳ Waiting for device to reboot and serial port to become available..."
+            )
+            port_ready = False
+            max_wait_time = 15.0  # seconds
+            wait_interval = 0.5  # seconds
+            start_time = time.time()
+
+            while time.time() - start_time < max_wait_time:
+                # Kill any orphaned processes that might be holding the port
                 kill_port_users(upload_port)
 
-            # Phase 3: Upload firmware
-            if use_fbuild:
-                from ci.util.fbuild_runner import run_fbuild_upload
+                try:
+                    # Try to open the serial port briefly
+                    test_ser = serial.Serial(upload_port, 115200, timeout=0.1)
+                    test_ser.close()
+                    port_ready = True
+                    elapsed = time.time() - start_time
+                    print(f"✅ Serial port available after {elapsed:.1f}s")
+                    break
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                    raise
+                except Exception:
+                    # Port not ready yet, wait and retry
+                    time.sleep(wait_interval)
 
-                if not run_fbuild_upload(
-                    build_dir, final_environment, upload_port, args.verbose
-                ):
-                    return 1
-            else:
-                if not run_upload(
-                    build_dir, final_environment, upload_port, args.verbose
-                ):
-                    return 1
-
-            # ============================================================
-            # Phase 3.5: Pin Discovery (runs FIRST if enabled)
-            # ============================================================
-            effective_tx_pin: int | None = None
-            effective_rx_pin: int | None = None
-            pins_discovered = False
-
-            # CLI args take priority - skip discovery if user specified pins
-            if args.tx_pin is not None or args.rx_pin is not None:
-                effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
-                effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+            if not port_ready:
                 print(
-                    f"\n📌 Using CLI-specified pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                    f"{Fore.YELLOW}⚠️  Port not available after {max_wait_time}s, proceeding anyway...{Style.RESET_ALL}"
                 )
-                # Add setPins RPC command
-                set_pins_cmd = {
-                    "function": "setPins",
-                    "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}],
-                }
-                json_rpc_commands.insert(0, set_pins_cmd)
 
-            # Auto-discover pins if enabled and no CLI override
-            elif args.auto_discover_pins:
-                print("\n🔍 Auto-discovery enabled - searching for connected pins...")
-                success, discovered_tx, discovered_rx = run_pin_discovery(upload_port)
+        # ============================================================
+        # Phase 3.5: Pin Discovery (runs FIRST if enabled)
+        # ============================================================
+        effective_tx_pin: int | None = None
+        effective_rx_pin: int | None = None
+        pins_discovered = False
 
-                if success and discovered_tx is not None and discovered_rx is not None:
-                    effective_tx_pin = discovered_tx
-                    effective_rx_pin = discovered_rx
-                    pins_discovered = True
-                    print(
-                        f"📌 Using discovered pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
-                    )
-                    # Note: findConnectedPins with autoApply=True already applies pins in firmware
-                    # No need to send setPins RPC command
-                else:
-                    # Fall back to defaults
-                    effective_tx_pin = PIN_TX
-                    effective_rx_pin = PIN_RX
-                    print(
-                        f"📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
-                    )
+        # CLI args take priority - skip discovery if user specified pins
+        if args.tx_pin is not None or args.rx_pin is not None:
+            effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
+            effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+            print(
+                f"\n📌 Using CLI-specified pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+            )
+            # Add setPins RPC command
+            set_pins_cmd = {
+                "function": "setPins",
+                "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}],
+            }
+            json_rpc_commands.insert(0, set_pins_cmd)
+
+        # Auto-discover pins if enabled and no CLI override
+        elif args.auto_discover_pins:
+            print("\n🔍 Auto-discovery enabled - searching for connected pins...")
+            success, discovered_tx, discovered_rx = run_pin_discovery(upload_port)
+
+            if success and discovered_tx is not None and discovered_rx is not None:
+                effective_tx_pin = discovered_tx
+                effective_rx_pin = discovered_rx
+                pins_discovered = True
+                print(
+                    f"📌 Using discovered pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                )
+                # Note: findConnectedPins with autoApply=True already applies pins in firmware
+                # No need to send setPins RPC command
             else:
-                # Auto-discovery disabled, use defaults
+                # Fall back to defaults
                 effective_tx_pin = PIN_TX
                 effective_rx_pin = PIN_RX
                 print(
-                    f"\n📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
+                    f"📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
                 )
-
-            # ============================================================
-            # Phase 3.6: GPIO Connectivity Pre-Test
-            # ============================================================
-            # Skip GPIO pre-test if pins were just discovered (already verified)
-            if pins_discovered:
-                print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
-            elif not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
-                print()
-                print(f"{Fore.RED}=" * 60)
-                print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
-                print(f"{Fore.RED}=" * 60)
-                print()
-                print("The validation cannot proceed without a physical connection")
-                print("between the TX and RX pins.")
-                print()
-                print(
-                    f"Please connect a jumper wire from GPIO {effective_tx_pin} to GPIO {effective_rx_pin}"
-                )
-                print("and run the validation again.")
-                print()
-                return 1
-
-            # Phase 4: Monitor serial output with validation patterns
-            success, _output, _rpc_handler = run_monitor(
-                build_dir,
-                final_environment,
-                upload_port,
-                args.verbose,
-                timeout_seconds,
-                fail_keywords,
-                expect_keywords,
-                stream=False,
-                input_on_trigger=INPUT_ON_TRIGGER,
-                device_error_keywords=None,  # Use defaults
-                stop_keyword=STOP_PATTERN,
-                json_rpc_commands=json_rpc_commands,
+        else:
+            # Auto-discovery disabled, use defaults
+            effective_tx_pin = PIN_TX
+            effective_rx_pin = PIN_RX
+            print(
+                f"\n📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
             )
 
-            if not success:
-                return 1
+        # ============================================================
+        # Phase 3.6: GPIO Connectivity Pre-Test
+        # ============================================================
+        # Skip GPIO pre-test if pins were just discovered (already verified)
+        if pins_discovered:
+            print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
+        elif not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
+            print()
+            print(f"{Fore.RED}=" * 60)
+            print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
+            print(f"{Fore.RED}=" * 60)
+            print()
+            print("The validation cannot proceed without a physical connection")
+            print("between the TX and RX pins.")
+            print()
+            print(
+                f"Please connect a jumper wire from GPIO {effective_tx_pin} to GPIO {effective_rx_pin}"
+            )
+            print("and run the validation again.")
+            print()
+            return 1
 
-            phases_completed = "three" if args.skip_lint else "four"
-            print(f"\n✅ All {phases_completed} phases completed successfully")
-            print("✅ Validation test suite PASSED")
-            return 0
+        # Phase 4: Monitor serial output with validation patterns
+        success, _output, _rpc_handler = run_monitor(
+            build_dir,
+            final_environment,
+            upload_port,
+            args.verbose,
+            timeout_seconds,
+            fail_keywords,
+            expect_keywords,
+            stream=False,
+            input_on_trigger=INPUT_ON_TRIGGER,
+            device_error_keywords=None,  # Use defaults
+            stop_keyword=STOP_PATTERN,
+            json_rpc_commands=json_rpc_commands,
+        )
 
-        finally:
-            # Always release the device lock
-            lock.release()
+        if not success:
+            return 1
+
+        phases_completed = "three" if args.skip_lint else "four"
+        print(f"\n✅ All {phases_completed} phases completed successfully")
+        print("✅ Validation test suite PASSED")
+        return 0
 
     except KeyboardInterrupt:
         print("\n\n⚠️  Interrupted by user")

@@ -41,16 +41,8 @@ Phase 4: Monitor
     - Provides output summary (first/last 100 lines)
 
 Concurrency Control:
-    - Uses a file-based lock (~/.fastled/locks/device_debug.lock) for upload and monitor phases
-    - Prevents multiple agents from interfering with device operations
-    - Lock scope: System-wide (device is a global resource, not project-specific)
-    - Lock timeout: 600 seconds (10 minutes)
-    - Prevents port conflicts between multiple agents
-
-Locking Architecture:
-    - Phase 0: Daemon provides implicit global lock (singleton + sequential processing)
-    - Phase 1: NO LOCK (compilation is project-local, fully parallelizable)
-    - Phase 2-3: Device lock (~/.fastled/locks/device_debug.lock, system-wide)
+    - Device locking is handled by fbuild (daemon-based)
+    - No legacy file-based locking required
 
 Usage:
     ⚠️ AI agents should use 'bash validate' for device testing (see CLAUDE.md)
@@ -93,8 +85,10 @@ from colorama import Fore, Style, init
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
-from ci.util.build_lock import BuildLock
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import (
+    handle_keyboard_interrupt_properly,
+    is_interrupted,
+)
 from ci.util.json_rpc_handler import JsonRpcHandler
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.pio_runner import create_pio_process
@@ -577,6 +571,10 @@ def run_monitor(
 
     try:
         while True:
+            # Check for interrupt flag (Windows Ctrl+C workaround)
+            if is_interrupted():
+                raise KeyboardInterrupt()
+
             # Send JSON-RPC commands immediately if not yet sent
             # This happens before waiting for trigger pattern
             if not rpc_commands_sent and json_rpc_commands:
@@ -1330,65 +1328,48 @@ def main() -> int:
                 return 1
 
         # ============================================================
-        # PHASES 3-4: Upload + Monitor (DEVICE LOCK)
+        # PHASES 3-4: Upload + Monitor
         # ============================================================
-        # Acquire device lock for upload and monitor phases.
-        # Lock ensures only one agent accesses the device at a time.
-        lock = BuildLock(lock_name="device_debug", use_global=True)
-        if not lock.acquire(timeout=600.0):  # 10 minute timeout
-            print(
-                "\n❌ Another agent is currently using the device for debug operations."
-            )
-            print("   Please retry later once the debug operation has completed.")
-            print(f"   Lock file: {lock.lock_file}")
-            return 1
+        # Note: Device locking is handled by fbuild (daemon-based)
 
-        try:
-            # Clean up orphaned processes holding the serial port
-            # This MUST happen inside the lock to prevent race conditions
-            if upload_port:
-                kill_port_users(upload_port)
+        # Clean up orphaned processes holding the serial port
+        if upload_port:
+            kill_port_users(upload_port)
 
-            # Phase 3: Upload firmware (with incremental rebuild if needed)
-            if use_fbuild:
-                from ci.util.fbuild_runner import run_fbuild_upload
+        # Phase 3: Upload firmware (with incremental rebuild if needed)
+        if use_fbuild:
+            from ci.util.fbuild_runner import run_fbuild_upload
 
-                if not run_fbuild_upload(
-                    build_dir, args.environment, upload_port, args.verbose
-                ):
-                    return 1
-            else:
-                if not run_upload(
-                    build_dir, args.environment, upload_port, args.verbose
-                ):
-                    return 1
-
-            # Phase 4: Monitor serial output
-            success, output, rpc_handler = run_monitor(
-                build_dir,
-                args.environment,
-                upload_port,  # Use same port for monitoring
-                args.verbose,
-                timeout_seconds,
-                fail_keywords,
-                args.expect_keywords or [],
-                args.stream,
-                args.input_on_trigger,
-                args.device_error_keywords,
-                args.stop_keyword,
-                json_rpc_commands,
-            )
-
-            if not success:
+            if not run_fbuild_upload(
+                build_dir, args.environment, upload_port, args.verbose
+            ):
+                return 1
+        else:
+            if not run_upload(build_dir, args.environment, upload_port, args.verbose):
                 return 1
 
-            phases_completed = "three" if args.skip_lint else "four"
-            print(f"\n✅ All {phases_completed} phases completed successfully")
-            return 0
+        # Phase 4: Monitor serial output
+        success, output, rpc_handler = run_monitor(
+            build_dir,
+            args.environment,
+            upload_port,  # Use same port for monitoring
+            args.verbose,
+            timeout_seconds,
+            fail_keywords,
+            args.expect_keywords or [],
+            args.stream,
+            args.input_on_trigger,
+            args.device_error_keywords,
+            args.stop_keyword,
+            json_rpc_commands,
+        )
 
-        finally:
-            # Always release the device lock
-            lock.release()
+        if not success:
+            return 1
+
+        phases_completed = "three" if args.skip_lint else "four"
+        print(f"\n✅ All {phases_completed} phases completed successfully")
+        return 0
 
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
