@@ -890,4 +890,366 @@ TEST_CASE("RpcFactory - JSON transport works regardless of registration typedef"
     CHECK_EQ(resp2["result"].as_string().value_or(""), "foobar");
 }
 
+// =============================================================================
+// TEST SUITE: Schema Generation - OpenRPC Format
+// =============================================================================
+
+TEST_CASE("RpcFactory - schema generation basic") {
+    RpcFactory rpc;
+
+    SUBCASE("empty registry returns valid schema") {
+        Json schema = rpc.schema();
+        CHECK(schema.is_object());
+        CHECK(schema.contains("openrpc"));
+        CHECK(schema.contains("info"));
+        CHECK(schema.contains("methods"));
+        CHECK_EQ(schema["openrpc"].as_string().value_or(""), "1.3.2");
+        CHECK(schema["methods"].is_array());
+        CHECK_EQ(schema["methods"].size(), 0);
+    }
+
+    SUBCASE("single method schema") {
+        rpc.method("add", [](int a, int b) -> int { return a + b; });
+
+        Json schema = rpc.schema();
+        CHECK_EQ(schema["methods"].size(), 1);
+
+        Json method = schema["methods"][0];
+        CHECK_EQ(method["name"].as_string().value_or(""), "add");
+        CHECK(method["params"].is_array());
+        CHECK_EQ(method["params"].size(), 2);
+        CHECK(method.contains("result"));
+    }
+
+    SUBCASE("void return method has no result") {
+        bool called = false;
+        rpc.method("ping", [&called]() { called = true; });
+
+        Json methods = rpc.methods();
+        CHECK_EQ(methods.size(), 1);
+
+        Json method = methods[0];
+        CHECK_EQ(method["name"].as_string().value_or(""), "ping");
+        CHECK(method["params"].is_array());
+        CHECK_EQ(method["params"].size(), 0);
+        CHECK_FALSE(method.contains("result"));
+    }
+}
+
+TEST_CASE("RpcFactory - parameter schema types") {
+    RpcFactory rpc;
+
+    SUBCASE("integer parameters") {
+        rpc.method("int_fn", [](int x) -> int { return x; });
+
+        Json methods = rpc.methods();
+        Json param = methods[0]["params"][0];
+        CHECK_EQ(param["schema"]["type"].as_string().value_or(""), "integer");
+    }
+
+    SUBCASE("float parameters") {
+        rpc.method("float_fn", [](float x) -> float { return x; });
+
+        Json methods = rpc.methods();
+        Json param = methods[0]["params"][0];
+        CHECK_EQ(param["schema"]["type"].as_string().value_or(""), "number");
+    }
+
+    SUBCASE("bool parameters") {
+        rpc.method("bool_fn", [](bool x) -> bool { return x; });
+
+        Json methods = rpc.methods();
+        Json param = methods[0]["params"][0];
+        CHECK_EQ(param["schema"]["type"].as_string().value_or(""), "boolean");
+    }
+
+    SUBCASE("string parameters") {
+        rpc.method("string_fn", [](fl::string x) -> fl::string { return x; });
+
+        Json methods = rpc.methods();
+        Json param = methods[0]["params"][0];
+        CHECK_EQ(param["schema"]["type"].as_string().value_or(""), "string");
+    }
+
+    SUBCASE("mixed parameters") {
+        rpc.method("mixed", [](int a, float b, fl::string c) -> bool { return a > 0; });
+
+        Json methods = rpc.methods();
+        Json params = methods[0]["params"];
+        CHECK_EQ(params.size(), 3);
+        CHECK_EQ(params[0]["schema"]["type"].as_string().value_or(""), "integer");
+        CHECK_EQ(params[1]["schema"]["type"].as_string().value_or(""), "number");
+        CHECK_EQ(params[2]["schema"]["type"].as_string().value_or(""), "string");
+    }
+}
+
+TEST_CASE("RpcFactory - result schema types") {
+    RpcFactory rpc;
+
+    SUBCASE("integer result") {
+        rpc.method("int_result", []() -> int { return 42; });
+
+        Json methods = rpc.methods();
+        Json result = methods[0]["result"];
+        CHECK_EQ(result["type"].as_string().value_or(""), "integer");
+    }
+
+    SUBCASE("float result") {
+        rpc.method("float_result", []() -> float { return 3.14f; });
+
+        Json methods = rpc.methods();
+        Json result = methods[0]["result"];
+        CHECK_EQ(result["type"].as_string().value_or(""), "number");
+    }
+
+    SUBCASE("bool result") {
+        rpc.method("bool_result", []() -> bool { return true; });
+
+        Json methods = rpc.methods();
+        Json result = methods[0]["result"];
+        CHECK_EQ(result["type"].as_string().value_or(""), "boolean");
+    }
+
+    SUBCASE("string result") {
+        rpc.method("string_result", []() -> fl::string { return "hello"; });
+
+        Json methods = rpc.methods();
+        Json result = methods[0]["result"];
+        CHECK_EQ(result["type"].as_string().value_or(""), "string");
+    }
+}
+
+TEST_CASE("RpcFactory - multiple methods schema") {
+    RpcFactory rpc;
+
+    rpc.method("add", [](int a, int b) -> int { return a + b; });
+    rpc.method("greet", [](fl::string name) -> fl::string { return "Hello " + name; });
+    rpc.method("ping", []() {});
+
+    Json schema = rpc.schema("Test API", "2.0.0");
+
+    CHECK_EQ(schema["info"]["title"].as_string().value_or(""), "Test API");
+    CHECK_EQ(schema["info"]["version"].as_string().value_or(""), "2.0.0");
+    CHECK_EQ(schema["methods"].size(), 3);
+    CHECK_EQ(rpc.count(), 3);
+}
+
+TEST_CASE("Rpc alias works") {
+    // Test that Rpc is an alias for RpcFactory
+    fl::Rpc rpc;
+
+    auto add = rpc.method("add", [](int a, int b) -> int { return a + b; });
+    CHECK_EQ(add(2, 3), 5);
+
+    Json schema = rpc.schema();
+    CHECK(schema.is_object());
+    CHECK_EQ(rpc.count(), 1);
+}
+
+// =============================================================================
+// TEST SUITE: Named Parameters
+// =============================================================================
+
+TEST_CASE("RpcFactory - named parameters in schema") {
+    RpcFactory rpc;
+
+    SUBCASE("named params via method_with builder") {
+        auto add = rpc.method_with("add", [](int a, int b) -> int { return a + b; })
+            .params({"left", "right"})
+            .done();
+
+        CHECK_EQ(add(2, 3), 5);
+
+        Json methods = rpc.methods();
+        CHECK_EQ(methods.size(), 1);
+
+        Json params = methods[0]["params"];
+        CHECK_EQ(params.size(), 2);
+        CHECK_EQ(params[0]["name"].as_string().value_or(""), "left");
+        CHECK_EQ(params[1]["name"].as_string().value_or(""), "right");
+    }
+
+    SUBCASE("partial named params uses defaults for rest") {
+        rpc.method_with("func", [](int a, int b, int c) -> int { return a + b + c; })
+            .params({"first"})  // Only first param named
+            .done();
+
+        Json methods = rpc.methods();
+        Json params = methods[0]["params"];
+        CHECK_EQ(params[0]["name"].as_string().value_or(""), "first");
+        CHECK_EQ(params[1]["name"].as_string().value_or(""), "arg1");
+        CHECK_EQ(params[2]["name"].as_string().value_or(""), "arg2");
+    }
+}
+
+// =============================================================================
+// TEST SUITE: Method Descriptions
+// =============================================================================
+
+TEST_CASE("RpcFactory - method descriptions in schema") {
+    RpcFactory rpc;
+
+    rpc.method_with("calculate", [](int x) -> int { return x * 2; })
+        .description("Doubles the input value")
+        .done();
+
+    Json methods = rpc.methods();
+    CHECK_EQ(methods.size(), 1);
+    CHECK(methods[0].contains("description"));
+    CHECK_EQ(methods[0]["description"].as_string().value_or(""), "Doubles the input value");
+}
+
+// =============================================================================
+// TEST SUITE: Tags (OpenRPC Grouping)
+// =============================================================================
+
+TEST_CASE("RpcFactory - tags for method grouping") {
+    RpcFactory rpc;
+
+    SUBCASE("single tag") {
+        rpc.method_with("led.setBrightness", [](int b) { (void)b; })
+            .tags({"led"})
+            .done();
+
+        Json methods = rpc.methods();
+        CHECK(methods[0].contains("tags"));
+        CHECK(methods[0]["tags"].is_array());
+        CHECK_EQ(methods[0]["tags"].size(), 1);
+        CHECK_EQ(methods[0]["tags"][0]["name"].as_string().value_or(""), "led");
+    }
+
+    SUBCASE("multiple tags") {
+        rpc.method_with("led.setColor", [](int r, int g, int b) { (void)r; (void)g; (void)b; })
+            .tags({"led", "color"})
+            .done();
+
+        Json methods = rpc.methods();
+        CHECK_EQ(methods[0]["tags"].size(), 2);
+        CHECK_EQ(methods[0]["tags"][0]["name"].as_string().value_or(""), "led");
+        CHECK_EQ(methods[0]["tags"][1]["name"].as_string().value_or(""), "color");
+    }
+
+    SUBCASE("tags() returns unique tag names") {
+        rpc.method_with("led.on", []() {})
+            .tags({"led", "control"})
+            .done();
+        rpc.method_with("led.off", []() {})
+            .tags({"led", "control"})
+            .done();
+        rpc.method_with("system.status", []() -> fl::string { return "ok"; })
+            .tags({"system"})
+            .done();
+
+        auto tagList = rpc.tags();
+        CHECK_EQ(tagList.size(), 3);  // led, control, system - unique
+    }
+}
+
+// =============================================================================
+// TEST SUITE: Namespaced Methods (Dot Notation)
+// =============================================================================
+
+TEST_CASE("RpcFactory - namespaced methods with dot notation") {
+    RpcFactory rpc;
+
+    rpc.method("led.setBrightness", [](int b) { (void)b; });
+    rpc.method("led.getStatus", []() -> fl::string { return "on"; });
+    rpc.method("system.reboot", []() {});
+
+    CHECK(rpc.has("led.setBrightness"));
+    CHECK(rpc.has("led.getStatus"));
+    CHECK(rpc.has("system.reboot"));
+
+    // JSON-RPC transport works with namespaced methods
+    Json request = Json::parse(R"({"method": "led.getStatus", "params": [], "id": 1})");
+    Json response = rpc.handle(request);
+    CHECK_EQ(response["result"].as_string().value_or(""), "on");
+}
+
+// =============================================================================
+// TEST SUITE: rpc.discover Built-in
+// =============================================================================
+
+TEST_CASE("RpcFactory - rpc.discover built-in") {
+    RpcFactory rpc;
+
+    SUBCASE("discover disabled by default") {
+        rpc.method("add", [](int a, int b) -> int { return a + b; });
+
+        Json request = Json::parse(R"({"method": "rpc.discover", "params": [], "id": 1})");
+        Json response = rpc.handle(request);
+
+        // Should return error - method not found
+        CHECK(response.contains("error"));
+    }
+
+    SUBCASE("discover enabled returns schema") {
+        rpc.enableDiscover("My API", "2.0.0");
+        rpc.method("add", [](int a, int b) -> int { return a + b; });
+
+        Json request = Json::parse(R"({"method": "rpc.discover", "params": [], "id": 1})");
+        Json response = rpc.handle(request);
+
+        CHECK(response.contains("result"));
+        Json schema = response["result"];
+
+        CHECK_EQ(schema["openrpc"].as_string().value_or(""), "1.3.2");
+        CHECK_EQ(schema["info"]["title"].as_string().value_or(""), "My API");
+        CHECK_EQ(schema["info"]["version"].as_string().value_or(""), "2.0.0");
+        CHECK(schema["methods"].is_array());
+        CHECK_EQ(schema["methods"].size(), 1);
+    }
+}
+
+// =============================================================================
+// TEST SUITE: Full Fluent API Example
+// =============================================================================
+
+TEST_CASE("RpcFactory - full fluent API example") {
+    RpcFactory rpc;
+    rpc.enableDiscover("LED Controller API", "1.0.0");
+
+    // Register methods with full metadata
+    auto setBrightness = rpc.method_with("led.setBrightness", [](int brightness) {
+            (void)brightness;
+        })
+        .params({"brightness"})
+        .description("Set LED brightness (0-255)")
+        .tags({"led", "control"})
+        .done();
+
+    auto getStatus = rpc.method_with("led.getStatus", []() -> fl::string {
+            return "active";
+        })
+        .description("Get current LED status")
+        .tags({"led", "status"})
+        .done();
+
+    // Simple method without extra metadata still works
+    rpc.method("system.ping", []() {});
+
+    // Verify everything works
+    CHECK(setBrightness);
+    CHECK(getStatus);
+    CHECK_EQ(getStatus(), "active");
+
+    // Verify schema has all metadata
+    Json schema = rpc.schema();
+    CHECK_EQ(schema["methods"].size(), 3);
+
+    // Find led.setBrightness in methods
+    bool found = false;
+    for (fl::size i = 0; i < schema["methods"].size(); ++i) {
+        if (schema["methods"][i]["name"].as_string().value_or("") == "led.setBrightness") {
+            Json method = schema["methods"][i];
+            CHECK_EQ(method["params"][0]["name"].as_string().value_or(""), "brightness");
+            CHECK_EQ(method["description"].as_string().value_or(""), "Set LED brightness (0-255)");
+            CHECK_EQ(method["tags"].size(), 2);
+            found = true;
+            break;
+        }
+    }
+    CHECK(found);
+}
+
 #endif // FASTLED_ENABLE_JSON

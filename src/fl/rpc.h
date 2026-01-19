@@ -12,7 +12,7 @@
 // single header to get access to the high-level API:
 //
 // HIGH-LEVEL API (use these):
-//   - RpcFactory      : Main RPC registry - register methods, bind, call
+//   - Rpc             : Main RPC registry (alias: RpcFactory for compatibility)
 //   - RpcFn<Sig>      : Type alias for fl::function<Sig>
 //   - RpcHandle<Sig>  : Callable handle returned from method() registration
 //
@@ -20,11 +20,16 @@
 //
 //   #include "fl/rpc.h"
 //
-//   fl::RpcFactory rpc;
+//   fl::Rpc rpc;
 //
 //   // Register with auto-deduced signature (RECOMMENDED)
 //   auto add = rpc.method("add", [](int a, int b) { return a + b; });
 //   int result = add(2, 3);  // Direct call via handle
+//
+//   // GROUP METHODS using tag prefixes (dot notation for namespacing):
+//   rpc.method("led.setBrightness", [](int b) { /* ... */ });
+//   rpc.method("led.setColor", [](int r, int g, int b) { /* ... */ });
+//   rpc.method("system.status", []() -> fl::string { return "ok"; });
 //
 //   // Or bind later by name
 //   auto bound = rpc.bind<int(int, int)>("add");
@@ -37,6 +42,14 @@
 //   fl::Json request = fl::Json::parse(R"({"method":"add","params":[6,7],"id":1})");
 //   fl::Json response = rpc.handle(request);
 //
+//   // Schema generation (OpenRPC format)
+//   fl::Json schema = rpc.schema();      // Full OpenRPC document
+//   fl::Json methods = rpc.methods();    // Just method list
+//
+//   // Built-in discovery (auto-registered)
+//   fl::Json discoverReq = fl::Json::parse(R"({"method":"rpc.discover","params":[],"id":1})");
+//   fl::Json discoverResp = rpc.handle(discoverReq);  // Returns schema
+//
 // =============================================================================
 
 // Detail headers containing implementation (hidden from users)
@@ -47,6 +60,7 @@
 #include "fl/detail/rpc/function_traits.h"
 #include "fl/detail/rpc/json_arg_converter.h"
 #include "fl/detail/rpc/typed_rpc_binding.h"
+#include "fl/detail/rpc/type_schema.h"
 
 // Required STL headers for the public API
 #include "fl/stl/stdint.h"
@@ -56,6 +70,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/initializer_list.h"
 
 namespace fl {
 
@@ -132,6 +147,40 @@ public:
     virtual fl::tuple<TypeConversionResult, Json> invoke(const Json& args) = 0;
 };
 
+// Erased schema generator interface
+class ErasedSchemaGenerator {
+public:
+    virtual ~ErasedSchemaGenerator() = default;
+    virtual Json params() const = 0;
+    virtual Json result() const = 0;
+    virtual bool hasResult() const = 0;
+    virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
+};
+
+// Typed schema generator
+template<typename Sig>
+class TypedSchemaGenerator : public ErasedSchemaGenerator {
+public:
+    Json params() const override {
+        return MethodSchema<Sig>::paramsWithNames(mParamNames);
+    }
+
+    Json result() const override {
+        return MethodSchema<Sig>::result();
+    }
+
+    bool hasResult() const override {
+        return MethodSchema<Sig>::hasResult();
+    }
+
+    void setParamNames(const fl::vector<fl::string>& names) override {
+        mParamNames = names;
+    }
+
+private:
+    fl::vector<fl::string> mParamNames;
+};
+
 // Typed invoker implementation
 template<typename Sig>
 class TypedInvoker;
@@ -173,7 +222,7 @@ private:
 
 class RpcFactory {
 public:
-    RpcFactory() = default;
+    RpcFactory() : mDiscoverEnabled(false) {}
     ~RpcFactory() = default;
 
     // Non-copyable but movable
@@ -189,6 +238,8 @@ public:
     // =========================================================================
     // IDEAL API: Auto-deducing registration from lambda/callable
     // Returns RpcHandle for immediate use without re-binding
+    //
+    // Supports dot notation for namespacing: "led.setBrightness", "system.status"
     // =========================================================================
 
     template<typename Callable>
@@ -196,7 +247,7 @@ public:
         -> RpcHandle<typename callable_traits<typename decay<Callable>::type>::signature> {
         using Sig = typename callable_traits<typename decay<Callable>::type>::signature;
         RpcFn<Sig> wrapped(fl::forward<Callable>(fn));
-        bool ok = method_impl<Sig>(name, wrapped);
+        bool ok = method_impl<Sig>(name, wrapped, fl::vector<fl::string>(), "", fl::vector<fl::string>());
         if (ok) {
             return RpcHandle<Sig>(wrapped);
         }
@@ -209,13 +260,85 @@ public:
 
     template<class Sig>
     bool method(const char* name, RpcFn<Sig> fn) {
-        return method_impl<Sig>(name, fn);
+        return method_impl<Sig>(name, fn, fl::vector<fl::string>(), "", fl::vector<fl::string>());
+    }
+
+    // =========================================================================
+    // MethodBuilder - Fluent API for setting method metadata
+    // =========================================================================
+    template<typename Sig>
+    class MethodBuilder {
+    public:
+        MethodBuilder(RpcFactory* factory, const char* name, RpcFn<Sig> fn)
+            : mFactory(factory), mName(name), mFn(fn) {}
+
+        // Set parameter names (in order)
+        MethodBuilder& params(fl::initializer_list<const char*> names) {
+            for (const char* n : names) {
+                mParamNames.push_back(fl::string(n));
+            }
+            return *this;
+        }
+
+        // Set method description
+        MethodBuilder& description(const char* desc) {
+            mDescription = desc;
+            return *this;
+        }
+
+        // Set tags for grouping (OpenRPC tags)
+        MethodBuilder& tags(fl::initializer_list<const char*> tagList) {
+            for (const char* t : tagList) {
+                mTags.push_back(fl::string(t));
+            }
+            return *this;
+        }
+
+        // Finalize and register the method
+        RpcHandle<Sig> done() {
+            bool ok = mFactory->method_impl<Sig>(mName.c_str(), mFn, mParamNames, mDescription, mTags);
+            if (ok) {
+                return RpcHandle<Sig>(mFn);
+            }
+            return RpcHandle<Sig>();
+        }
+
+    private:
+        RpcFactory* mFactory;
+        fl::string mName;
+        RpcFn<Sig> mFn;
+        fl::vector<fl::string> mParamNames;
+        fl::string mDescription;
+        fl::vector<fl::string> mTags;
+    };
+
+    // =========================================================================
+    // method_with() - Fluent builder for method registration with metadata
+    // =========================================================================
+    template<typename Callable>
+    auto method_with(const char* name, Callable&& fn)
+        -> MethodBuilder<typename callable_traits<typename decay<Callable>::type>::signature> {
+        using Sig = typename callable_traits<typename decay<Callable>::type>::signature;
+        return MethodBuilder<Sig>(this, name, RpcFn<Sig>(fl::forward<Callable>(fn)));
+    }
+
+    // =========================================================================
+    // enableDiscover() - Register built-in rpc.discover method
+    // =========================================================================
+    void enableDiscover(const char* title = "RPC API", const char* version = "1.0.0") {
+        if (mDiscoverEnabled) return;
+        mDiscoverEnabled = true;
+        mSchemaTitle = title;
+        mSchemaVersion = version;
     }
 
 private:
     // Internal implementation shared by both method() overloads
     template<class Sig>
-    bool method_impl(const char* name, RpcFn<Sig> fn) {
+    bool method_impl(const char* name, RpcFn<Sig> fn,
+                     const fl::vector<fl::string>& paramNames,
+                     const fl::string& description,
+                     const fl::vector<fl::string>& tags) {
         fl::string key(name);
 
         // Check for duplicate registration with different signature
@@ -233,6 +356,14 @@ private:
         entry.mTypeTag = detail::TypeTag<Sig>::id();
         entry.mInvoker = fl::make_shared<detail::TypedInvoker<Sig>>(fn);
         entry.mTypedCallable = fl::make_shared<TypedCallableHolder<Sig>>(fn);
+        entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<Sig>>();
+        entry.mDescription = description;
+        entry.mTags = tags;
+
+        // Set parameter names in schema generator
+        if (!paramNames.empty()) {
+            entry.mSchemaGenerator->setParamNames(paramNames);
+        }
 
         mRegistry[key] = fl::move(entry);
         return true;
@@ -334,6 +465,17 @@ public:
         }
         fl::string methodName = methodOpt.value();
 
+        // Handle built-in rpc.discover if enabled
+        if (mDiscoverEnabled && methodName == "rpc.discover") {
+            Json response = Json::object();
+            response.set("jsonrpc", "2.0");
+            response.set("result", schema(mSchemaTitle.c_str(), mSchemaVersion.c_str()));
+            if (request.contains("id")) {
+                response.set("id", request["id"]);
+            }
+            return response;
+        }
+
         // Look up the method
         auto it = mRegistry.find(methodName);
         if (it == mRegistry.end()) {
@@ -402,6 +544,85 @@ public:
         return handle(request);
     }
 
+    // =========================================================================
+    // Schema generation - OpenRPC format
+    // =========================================================================
+
+    // methods() returns array of method schemas
+    Json methods() const {
+        Json arr = Json::array();
+        for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
+            Json methodObj = Json::object();
+            methodObj.set("name", it->first.c_str());
+
+            // Add description if present
+            if (!it->second.mDescription.empty()) {
+                methodObj.set("description", it->second.mDescription.c_str());
+            }
+
+            // Add tags if present (OpenRPC tags for grouping)
+            if (!it->second.mTags.empty()) {
+                Json tagsArr = Json::array();
+                for (fl::size i = 0; i < it->second.mTags.size(); ++i) {
+                    Json tagObj = Json::object();
+                    tagObj.set("name", it->second.mTags[i].c_str());
+                    tagsArr.push_back(tagObj);
+                }
+                methodObj.set("tags", tagsArr);
+            }
+
+            methodObj.set("params", it->second.mSchemaGenerator->params());
+            if (it->second.mSchemaGenerator->hasResult()) {
+                methodObj.set("result", it->second.mSchemaGenerator->result());
+            }
+            arr.push_back(methodObj);
+        }
+        return arr;
+    }
+
+    // schema() returns full OpenRPC document
+    // See: https://spec.open-rpc.org/
+    Json schema(const char* title = "RPC API", const char* version = "1.0.0") const {
+        Json doc = Json::object();
+        doc.set("openrpc", "1.3.2");
+
+        // Info object
+        Json info = Json::object();
+        info.set("title", title);
+        info.set("version", version);
+        doc.set("info", info);
+
+        // Methods array
+        doc.set("methods", methods());
+
+        return doc;
+    }
+
+    // count() returns number of registered methods
+    fl::size count() const {
+        return mRegistry.size();
+    }
+
+    // tags() returns list of unique tags used across all methods
+    fl::vector<fl::string> tags() const {
+        fl::vector<fl::string> result;
+        for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
+            for (fl::size i = 0; i < it->second.mTags.size(); ++i) {
+                bool found = false;
+                for (fl::size j = 0; j < result.size(); ++j) {
+                    if (result[j] == it->second.mTags[i]) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    result.push_back(it->second.mTags[i]);
+                }
+            }
+        }
+        return result;
+    }
+
 private:
     // Type-erased holder for typed callables
     struct CallableHolderBase {
@@ -419,6 +640,9 @@ private:
         const void* mTypeTag = nullptr;
         fl::shared_ptr<detail::ErasedInvoker> mInvoker;
         fl::shared_ptr<CallableHolderBase> mTypedCallable;
+        fl::shared_ptr<detail::ErasedSchemaGenerator> mSchemaGenerator;
+        fl::string mDescription;
+        fl::vector<fl::string> mTags;
     };
 
     // Helper to create JSON-RPC error response
@@ -439,7 +663,13 @@ private:
     }
 
     fl::unordered_map<fl::string, Entry> mRegistry;
+    bool mDiscoverEnabled;
+    fl::string mSchemaTitle;
+    fl::string mSchemaVersion;
 };
+
+// Rpc is the primary name; RpcFactory is kept for backwards compatibility
+using Rpc = RpcFactory;
 
 } // namespace fl
 
