@@ -28,6 +28,9 @@
     #define HAS_USB_SERIAL_JTAG 0
 #endif
 
+// ROM delay function - works in any context including panic handlers
+#include "esp_rom_sys.h"
+
 namespace fl {
 namespace detail {
 
@@ -56,7 +59,9 @@ void disconnect_usb_hardware() {
     SET_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLDOWN);
 
     // Wait for Windows to detect disconnect
-    fl::delayMicroseconds(USB_DISCONNECT_DELAY_US);
+    // Use ROM-based delay that works in panic/shutdown context
+    // (fl::delayMicroseconds uses Arduino delay which may not work in panic handlers)
+    esp_rom_delay_us(USB_DISCONNECT_DELAY_US);
 #endif
 }
 
