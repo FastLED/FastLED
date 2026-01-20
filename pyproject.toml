@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fbuild>=1.2.17",  # ESP32 build daemon - installed from PyPI
+    "fbuild>=1.3.0",  # ESP32 build daemon - local editable install for development
     "platformio==6.1.18",
     "python-dateutil",
     "ruff",
@@ -222,4 +222,5 @@ pythonPlatform = "All"
 reportReturnType = "error"
 
 [tool.uv.sources]
-# fbuild is installed from PyPI (global pip package)
+# fbuild - local editable install for development
+fbuild = { path = "../fbuild", editable = true }
