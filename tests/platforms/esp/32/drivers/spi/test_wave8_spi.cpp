@@ -15,8 +15,8 @@
 
 // Include the full wave8_encoder_spi.h header
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
-#include <stddef.h>  // for size_t
-#include <stdint.h>  // for uint8_t
+#include "fl/stl/cstddef.h"  // for size_t
+#include "fl/stl/stdint.h"  // for uint8_t
 #include "doctest.h"  // for ResultBuilder, CHECK, etc.
 #include "fl/slice.h"  // for span
 

@@ -17,7 +17,7 @@
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "fl/ease.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "dither_mode.h"
 #include "doctest.h"

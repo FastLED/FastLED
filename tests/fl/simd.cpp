@@ -1,8 +1,8 @@
 // Test for fl::simd atomic operations
 
 #include "fl/simd.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 
 using namespace fl;

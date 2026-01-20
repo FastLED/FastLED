@@ -1,7 +1,7 @@
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
-#include "stdint.h"
+#include "stdint.h" // ok include - testing FL types against standard
 
 // Test C++ standard integer types and macros defined in fl/stl/stdint.h
 // This header provides C++ integer type definitions without <stdint.h>

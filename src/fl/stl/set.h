@@ -10,6 +10,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
+#include "fl/stl/initializer_list.h"
 #include "fl/int.h"
 
 
@@ -326,6 +327,22 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     set(set&& other) = default;
     set& operator=(const set& other) = default;
     set& operator=(set&& other) = default;
+
+    // Initializer list constructor
+    set(fl::initializer_list<Key> init) {
+        for (const auto& elem : init) {
+            insert(elem);
+        }
+    }
+
+    // Initializer list assignment
+    set& operator=(fl::initializer_list<Key> init) {
+        clear();
+        for (const auto& elem : init) {
+            insert(elem);
+        }
+        return *this;
+    }
     
     // Iterators
     const_iterator begin() const { return mTree.begin(); }

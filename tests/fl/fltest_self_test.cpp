@@ -297,22 +297,22 @@ FL_TEST_CASE("FL_CHECK_ARRAY_EQ array comparison") {
 FL_TEST_CASE("FL_CHECK_THROWS_AS typed exception") {
     // Test catching specific exception type
     auto throwsRuntimeError = []() {
-        throw std::runtime_error("test error");
+        throw std::runtime_error("test error");  // okay std namespace - testing exception handling
     };
     auto throwsInt = []() {
         throw 42;
     };
 
-    FL_CHECK_THROWS_AS(throwsRuntimeError(), std::runtime_error);
+    FL_CHECK_THROWS_AS(throwsRuntimeError(), std::runtime_error);  // okay std namespace - testing exception handling
     FL_CHECK_THROWS_AS(throwsInt(), int);
 
     // Test catching base class
-    FL_CHECK_THROWS_AS(throwsRuntimeError(), std::exception);
+    FL_CHECK_THROWS_AS(throwsRuntimeError(), std::exception);  // okay std namespace - testing exception handling
 }
 
 FL_TEST_CASE("FL_CHECK_THROWS_WITH exception message") {
     auto throwsWithMessage = []() {
-        throw std::runtime_error("contains specific text here");
+        throw std::runtime_error("contains specific text here");  // okay std namespace - testing exception handling
     };
 
     FL_CHECK_THROWS_WITH(throwsWithMessage(), "specific text");

@@ -230,7 +230,7 @@ TEST_CASE("fl::initializer_list free functions") {
         CHECK_EQ(sum, 50);
     }
 #else
-    SUBCASE("non-AVR platforms use std::initializer_list") {
+    SUBCASE("non-AVR platforms use std::initializer_list") {  // okay std namespace - documenting implementation
         fl::initializer_list<int> list = {1, 2, 3};
 
         // We can use member functions directly

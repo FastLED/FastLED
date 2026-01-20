@@ -3,8 +3,8 @@
 
 #include "fl/rectangular_draw_buffer.h"
 #include "rgbw.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"

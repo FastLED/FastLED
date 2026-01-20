@@ -1,7 +1,7 @@
 #include "fl/audio_reactive.h"
 #include "fl/stl/math.h"
 #include "fl/circular_buffer.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/audio.h"

@@ -8,8 +8,8 @@
 
 #include "fl/chipsets/ucs7604.h"
 #include "fl/ease.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "cled_controller.h"
 #include "cpixel_ledcontroller.h"

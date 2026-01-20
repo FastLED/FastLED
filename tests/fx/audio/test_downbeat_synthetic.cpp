@@ -3,7 +3,6 @@
 #include "fl/audio/audio_context.h"
 #include "fl/fx/audio/detectors/beat.h"
 #include "fl/fx/audio/detectors/downbeat.h"
-#include "Arduino.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/audio.h"

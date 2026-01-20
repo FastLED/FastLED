@@ -2,7 +2,7 @@
 /// @brief Tests for AsyncLogger lazy instantiation and auto-registration
 
 #include "fl/detail/async_logger.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 

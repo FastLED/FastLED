@@ -4,9 +4,9 @@
 
 #include "crgb.h"
 #include "fl/stl/vector.h"
-#include <cstring>
+#include "fl/stl/cstring.h"
 #include <string>
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/stl/new.h"
 #include "fl/stl/thread.h"
@@ -20,8 +20,6 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
-#include "stdio.h"
-#include "string.h"
 
 using namespace fl;
 
@@ -133,7 +131,7 @@ TEST_CASE("Str with long strings") {
 
 TEST_CASE("Str overflowing inline data") {
     SUBCASE("Construction with long string") {
-        std::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer
+        std::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer  // okay std namespace - testing fl::string compatibility
         fl::Str s(long_string.c_str());
         CHECK(s.size() == long_string.length());
         CHECK(fl::strcmp(s.c_str(), long_string.c_str()) == 0);
@@ -141,7 +139,7 @@ TEST_CASE("Str overflowing inline data") {
 
     SUBCASE("Appending to overflow") {
         fl::Str s("Short string");
-        std::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow
+        std::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow  // okay std namespace - testing fl::string compatibility
         s.append(append_string.c_str());
         CHECK(s.size() == fl::strlen("Short string") + append_string.length());
         CHECK(s[0] == 'S');
@@ -149,7 +147,7 @@ TEST_CASE("Str overflowing inline data") {
     }
 
     SUBCASE("Copy on write with long string") {
-        std::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');
+        std::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');  // okay std namespace - testing fl::string compatibility
         fl::Str s1(long_string.c_str());
         fl::Str s2 = s1;
         CHECK(s1.size() == s2.size());
@@ -2026,7 +2024,7 @@ TEST_CASE("String find_last_not_of operations") {
         }
     }
 
-    // at() tests - bounds-checked element access (std::string compatibility)
+    // at() tests - bounds-checked element access (std::string compatibility)  // okay std namespace - testing fl::string compatibility
     SUBCASE("at() basic access") {
         fl::string s = "Hello";
         CHECK(s.at(0) == 'H');
@@ -2055,7 +2053,7 @@ TEST_CASE("String find_last_not_of operations") {
     SUBCASE("at() out of bounds") {
         fl::string s = "test";
         // Out of bounds access returns dummy '\0'
-        // (unlike std::string which would throw exception)
+        // (unlike std::string which would throw exception)  // okay std namespace - testing fl::string compatibility
         CHECK(s.at(4) == '\0');  // pos == length
         CHECK(s.at(5) == '\0');  // pos > length
         CHECK(s.at(100) == '\0');  // far out of bounds
@@ -2284,7 +2282,7 @@ TEST_CASE("String find_last_not_of operations") {
     }
 }
 
-// Test reverse iterators (std::string compatibility)
+// Test reverse iterators (std::string compatibility)  // okay std namespace - testing fl::string compatibility
 TEST_CASE("StrN reverse iterators") {
     SUBCASE("rbegin/rend on non-empty string") {
         fl::string s = "Hello";
@@ -3299,7 +3297,7 @@ TEST_CASE("fl::string - Modifiers") {
         CHECK(s.empty());
         CHECK(s.size() == 0);
         // Note: fl::string's clear() only sets length to 0, it doesn't null-terminate
-        // the internal buffer immediately. This is different from std::string behavior.
+        // the internal buffer immediately. This is different from std::string behavior.  // okay std namespace - testing fl::string compatibility
         // The string is logically empty even though the raw buffer may contain old data.
         CHECK(s.size() == 0);  // This is the correct way to check if cleared
     }
@@ -3601,7 +3599,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
 
     SUBCASE("Long strings (heap storage)") {
         // Create a string longer than FASTLED_STR_INLINED_SIZE
-        std::string long_str(FASTLED_STR_INLINED_SIZE + 10, 'a');
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 10, 'a');  // okay std namespace - testing fl::string compatibility
         fl::string s(long_str.c_str());
         
         CHECK(s.size() == long_str.length());
@@ -3612,7 +3610,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
         fl::string s("Short");
         
         // Append enough to exceed inline capacity
-        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');
+        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');  // okay std namespace - testing fl::string compatibility
         s.append(long_append.c_str());
         
         CHECK(s.size() == 5 + long_append.length());
@@ -3621,7 +3619,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
     }
 
     SUBCASE("Copy-on-write with heap storage") {
-        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'b');
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'b');  // okay std namespace - testing fl::string compatibility
         fl::string s1(long_str.c_str());
         fl::string s2 = s1;
         
@@ -3657,7 +3655,7 @@ TEST_CASE("fl::string - Edge Cases and Special Characters") {
 
     SUBCASE("Very long strings") {
         // Test with very long strings
-        std::string very_long(1000, 'z');
+        std::string very_long(1000, 'z');  // okay std namespace - testing fl::string compatibility
         fl::string s(very_long.c_str());
         CHECK(s.size() == 1000);
         CHECK(s[0] == 'z');
@@ -3720,8 +3718,8 @@ TEST_CASE("fl::string - Memory Management") {
     }
 }
 
-TEST_CASE("fl::string - Compatibility with std::string patterns") {
-    SUBCASE("Common std::string usage patterns") {
+TEST_CASE("fl::string - Compatibility with std::string patterns") {  // okay std namespace - testing fl::string compatibility
+    SUBCASE("Common std::string usage patterns") {  // okay std namespace - testing fl::string compatibility
         // Pattern 1: Build string incrementally
         fl::string result;
         result += "Hello";
@@ -3746,7 +3744,7 @@ TEST_CASE("fl::string - Compatibility with std::string patterns") {
     }
 
     SUBCASE("String container behavior") {
-        // Test that fl::string can be used like std::string in containers
+        // Test that fl::string can be used like std::string in containers  // okay std namespace - testing fl::string compatibility
         fl::vector<string> strings;
         strings.push_back(fl::string("First"));
         strings.push_back(fl::string("Second"));
@@ -3937,7 +3935,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         // This constructor has the same bug: mCapacity = mLength instead of mLength + 1
 
         // Create a long string that will trigger heap allocation
-        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'a');
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'a');  // okay std namespace - testing fl::string compatibility
         fl::string s(long_str.c_str());
 
         CHECK(s.size() == long_str.length());
@@ -3985,7 +3983,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         // This is where off-by-one errors are most likely to manifest
 
         fl::size boundary = FASTLED_STR_INLINED_SIZE - 1;
-        std::string boundary_str(boundary, 'b');
+        std::string boundary_str(boundary, 'b');  // okay std namespace - testing fl::string compatibility
 
         fl::string s1(boundary_str.c_str());
         CHECK(s1.size() == boundary);
@@ -4019,7 +4017,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         CHECK(::strlen(s1.c_str()) == 11);
 
         // Force heap allocation
-        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');
+        std::string long_append(FASTLED_STR_INLINED_SIZE, 'x');  // okay std namespace - testing fl::string compatibility
         s1.append(long_append.c_str());
         CHECK(s1.c_str()[s1.size()] == '\0');
         CHECK(::strlen(s1.c_str()) == s1.size());
@@ -4028,7 +4026,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
     SUBCASE("Capacity after copy operations") {
         // Test that capacity is correctly maintained during copy-on-write operations
 
-        std::string long_str(FASTLED_STR_INLINED_SIZE + 50, 'c');
+        std::string long_str(FASTLED_STR_INLINED_SIZE + 50, 'c');  // okay std namespace - testing fl::string compatibility
         fl::string s1(long_str.c_str());
         fl::string s2 = s1;  // Copy (copy-on-write)
 
@@ -4131,20 +4129,20 @@ TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
         CHECK(::strlen(s1.c_str()) == 1);
 
         // Length SIZE-1 (should fit inline with null terminator)
-        std::string str_size_minus_1(FASTLED_STR_INLINED_SIZE - 1, 'm');
+        std::string str_size_minus_1(FASTLED_STR_INLINED_SIZE - 1, 'm');  // okay std namespace - testing fl::string compatibility
         fl::string s_sm1(str_size_minus_1.c_str());
         CHECK(s_sm1.size() == FASTLED_STR_INLINED_SIZE - 1);
         CHECK(s_sm1.c_str()[FASTLED_STR_INLINED_SIZE - 1] == '\0');
 
         // Length SIZE (exactly at boundary, needs heap)
-        std::string str_size(FASTLED_STR_INLINED_SIZE, 's');
+        std::string str_size(FASTLED_STR_INLINED_SIZE, 's');  // okay std namespace - testing fl::string compatibility
         fl::string s_s(str_size.c_str());
         CHECK(s_s.size() == FASTLED_STR_INLINED_SIZE);
         CHECK(s_s.c_str()[FASTLED_STR_INLINED_SIZE] == '\0');
         CHECK(::strlen(s_s.c_str()) == FASTLED_STR_INLINED_SIZE);
 
         // Length SIZE+1
-        std::string str_size_plus_1(FASTLED_STR_INLINED_SIZE + 1, 'p');
+        std::string str_size_plus_1(FASTLED_STR_INLINED_SIZE + 1, 'p');  // okay std namespace - testing fl::string compatibility
         fl::string s_sp1(str_size_plus_1.c_str());
         CHECK(s_sp1.size() == FASTLED_STR_INLINED_SIZE + 1);
         CHECK(s_sp1.c_str()[FASTLED_STR_INLINED_SIZE + 1] == '\0');
@@ -4214,7 +4212,7 @@ TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
         s = "short";
         CHECK(::strlen(s.c_str()) == 5);
 
-        std::string long_data(FASTLED_STR_INLINED_SIZE * 2, 'L');
+        std::string long_data(FASTLED_STR_INLINED_SIZE * 2, 'L');  // okay std namespace - testing fl::string compatibility
         s = long_data.c_str();
         CHECK(::strlen(s.c_str()) == long_data.length());
 
@@ -4224,7 +4222,7 @@ TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
     }
 
     SUBCASE("Copy and modify patterns") {
-        std::string base(FASTLED_STR_INLINED_SIZE + 10, 'B');
+        std::string base(FASTLED_STR_INLINED_SIZE + 10, 'B');  // okay std namespace - testing fl::string compatibility
         fl::string s1(base.c_str());
 
         // Create multiple copies
@@ -4409,8 +4407,8 @@ TEST_CASE("fl::string - Thread safety of numeric operations") {
         const int kNumThreads = 4;
         const int kIterations = 100;
 
-        std::vector<std::thread> threads;
-        std::vector<fl::string> results(kNumThreads);
+        std::vector<std::thread> threads;  // okay std namespace - testing threading
+        std::vector<fl::string> results(kNumThreads);  // okay std namespace - testing threading
 
         for (int t = 0; t < kNumThreads; ++t) {
             threads.emplace_back([t, &results]() {
@@ -4441,8 +4439,8 @@ TEST_CASE("fl::string - Thread safety of numeric operations") {
     SUBCASE("Concurrent mixed format appends") {
         const int kNumThreads = 4;
 
-        std::vector<std::thread> threads;
-        std::vector<fl::string> results(kNumThreads);
+        std::vector<std::thread> threads;  // okay std namespace - testing threading
+        std::vector<fl::string> results(kNumThreads);  // okay std namespace - testing threading
 
         for (int t = 0; t < kNumThreads; ++t) {
             threads.emplace_back([t, &results]() {
@@ -4567,7 +4565,7 @@ TEST_CASE("fl::string - Memory efficiency improvements") {
 
     SUBCASE("Repeated small string builds") {
         // This pattern creates many temporary StrN<64> buffers (reduced from 1000 to 500 for performance)
-        std::vector<fl::string> results;
+        std::vector<fl::string> results;  // okay std namespace - testing threading
 
         for (int i = 0; i < 500; ++i) {
             fl::string s;

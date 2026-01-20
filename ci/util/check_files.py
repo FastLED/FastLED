@@ -16,7 +16,23 @@ EXCLUDED_FILES = [
     "stub_main.cpp",
     "doctest_main.cpp",  # Binding to system headers, needs exemption
     "fltest.h",  # Test framework needs <exception> when exceptions enabled
+    "doctest.h",  # Third-party test framework - external dependency
+    # Test infrastructure for crash handling - uses platform-specific features
+    "crash_handler_execinfo.h",
+    "crash_handler_libunwind.h",
+    "crash_handler_noop.h",
+    "crash_handler_win.h",
 ]
+
+
+def is_excluded_file(file_path: str) -> bool:
+    """Check if a file should be excluded from linting.
+
+    Normalizes path separators to handle both Windows and Unix paths.
+    """
+    # Normalize to forward slashes for consistent matching
+    normalized_path = file_path.replace("\\", "/")
+    return any(normalized_path.endswith(excluded) for excluded in EXCLUDED_FILES)
 
 
 @dataclass

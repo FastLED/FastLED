@@ -1,5 +1,5 @@
 #include "fl/stl/istream.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/log.h"

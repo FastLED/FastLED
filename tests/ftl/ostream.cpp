@@ -1,5 +1,5 @@
 #include "fl/stl/ostream.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 
 // Since we can't override the fl::print function easily in this test setup,

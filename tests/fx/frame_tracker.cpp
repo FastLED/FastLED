@@ -4,7 +4,7 @@
 
 
 #include "fl/fx/video/frame_tracker.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 using namespace fl;
 TEST_CASE("FrameTracker basic frame advancement") {

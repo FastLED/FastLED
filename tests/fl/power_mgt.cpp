@@ -3,7 +3,7 @@
 
 #include "FastLED.h"
 #include "power_mgt.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "hsv2rgb.h"
 

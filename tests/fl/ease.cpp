@@ -2,11 +2,11 @@
 #include "fl/stl/pair.h"
 #include "lib8tion/intmap.h"
 #include "test.h"
-#include <cmath>
-#include <cstdlib>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
-#include "stdlib.h"
+#include <cstdlib>  // ok include - for abs()
+#include <cmath>  // ok include - for math functions
 using namespace fl;
 // Common array of easing types with names used across multiple test cases
 static const fl::pair<fl::EaseType, const char*> ALL_EASING_TYPES[10] = {
@@ -144,7 +144,7 @@ TEST_CASE("easeInOutQuad16") {
 
             // Should be within 1 due to precision differences
             int16_t diff =
-                std::abs((int16_t)result8 - (int16_t)scaled_result16);
+                abs((int16_t)result8 - (int16_t)scaled_result16);
             CHECK_LE(diff, kTolerance);
         }
     }
@@ -195,7 +195,7 @@ TEST_CASE("easeInOutCubic16") {
             // Should be within 2 due to precision differences in cubic
             // calculation
             int16_t diff =
-                std::abs((int16_t)result8 - (int16_t)scaled_result16);
+                abs((int16_t)result8 - (int16_t)scaled_result16);
             CHECK_LE(diff, 2);
         }
     }
@@ -402,7 +402,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
                 uint16_t result16 = fl::ease16(type, input16);
                 uint8_t scaled_result16 = map16_to_8(result16);
                 
-                int16_t diff = std::abs((int16_t)result8 - (int16_t)scaled_result16);
+                int16_t diff = abs((int16_t)result8 - (int16_t)scaled_result16);
                 
                 // Track the worst case for reporting
                 if (diff > max_diff) {
@@ -460,7 +460,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
             uint16_t result16_mid = fl::ease16(type, 32768);
             uint8_t scaled_result16_mid = map16_to_8(result16_mid);
             
-            int16_t diff = std::abs((int16_t)result8_mid - (int16_t)scaled_result16_mid);
+            int16_t diff = abs((int16_t)result8_mid - (int16_t)scaled_result16_mid);
             
             INFO("Testing EaseType " << name << " midpoint consistency"
                  << " (8-bit: " << (int)result8_mid

@@ -2,7 +2,7 @@
 // g++ --std=c++11 test_transition_ramp.cpp
 
 #include "fl/time_alpha.h"
-#include <cstdint>
+#include "fl/stl/cstdint.h"
 #include "doctest.h"
 
 

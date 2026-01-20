@@ -4,7 +4,7 @@
 
 #include "fl/tile2x2.h"
 #include "fl/xypath.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 #include "fl/raster_sparse.h"

@@ -2,7 +2,7 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/tile2x2.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/geometry.h"
 

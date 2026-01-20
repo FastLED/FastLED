@@ -1,6 +1,6 @@
 // g++ --std=c++11 test.cpp
 
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "platforms/intmap.h"
 using namespace fl;

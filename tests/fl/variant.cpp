@@ -240,7 +240,7 @@ TEST_CASE("Variant tests") {
 
 #if 0
     // 6) Move‐construct leaves source empty
-    fl::variant<int, fl::string> v3(std::move(v2));
+    fl::variant<int, fl::string> v3(fl::move(v2));
     REQUIRE(v3.is<fl::string>());
     REQUIRE_EQ(v3.getU(), fl::string("hello"));
     REQUIRE(v2.isEmpty());

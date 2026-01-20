@@ -3,11 +3,11 @@
 #include "doctest.h"
 
 #include "fl/stl/stdint.h"
-#include <iostream>
-#include <cstring>  // Bring in C string functions first
-#include <set>
-#include <string>
-#include <vector>
+#include "fl/stl/iostream.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/set.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 
 #include "crgb.h"
 #include "fl/stl/unordered_set.h"

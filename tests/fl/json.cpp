@@ -6,8 +6,8 @@
 #include "fl/json.h"
 #include "fl/screenmap.h"
 #include "fl/stl/map.h"
-#include <stdint.h>
-#include <stdio.h>
+#include "fl/stl/stdint.h"
+#include "fl/str.h" // ok include
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"

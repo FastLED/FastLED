@@ -3,7 +3,7 @@
 
 
 #include "fl/fx/frame.h"
-#include <cstdlib>
+#include "fl/stl/cstdlib.h"
 #include "fl/stl/allocator.h"
 #include "crgb.h"
 #include "doctest.h"
@@ -16,12 +16,12 @@ namespace {
 
     void* custom_malloc(size_t size) {
         allocation_count++;
-        return std::malloc(size);
+        return ::malloc(size);
     }
 
     void custom_free(void* ptr) {
         allocation_count--;
-        std::free(ptr);
+        ::free(ptr);
     }
 }
 

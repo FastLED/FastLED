@@ -7,8 +7,8 @@
 #include "fl/grid.h"
 #include "fl/screenmap.h"
 #include "fl/tile2x2.h" // Ensure this header is included for Tile2x2_u8
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/geometry.h"

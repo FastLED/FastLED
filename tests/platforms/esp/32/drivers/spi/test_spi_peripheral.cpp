@@ -14,7 +14,7 @@
 /// 7. Error handling and state validation
 
 #include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/slice.h"
 #include "fl/stl/allocator.h"

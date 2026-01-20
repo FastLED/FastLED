@@ -2,8 +2,8 @@
 /// @brief Unit tests for UartPeripheralMock
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
@@ -314,7 +314,7 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         CHECK(mock.isBusy());  // Should be busy (transmission not instant)
         CHECK(mock.waitTxDone(1000));  // Wait should succeed within timeout
         // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
-        std::this_thread::sleep_for(std::chrono::microseconds(60));
+        std::this_thread::sleep_for(std::chrono::microseconds(60));  // okay std namespace - threading
         CHECK_FALSE(mock.isBusy());
     }
 
@@ -330,7 +330,7 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         // Reset period is proportional to transmission time (max of 50us or tx_delay)
         // With 1000us transmission delay, reset period is also 1000us
         // Add 100us buffer for timing margin
-        std::this_thread::sleep_for(std::chrono::microseconds(1100));
+        std::this_thread::sleep_for(std::chrono::microseconds(1100));  // okay std namespace - threading
         CHECK_FALSE(mock.isBusy());
     }
 

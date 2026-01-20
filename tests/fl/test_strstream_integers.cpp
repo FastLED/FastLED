@@ -1,5 +1,5 @@
 #include "fl/stl/strstream.h"
-#include <cstdint>
+#include "fl/stl/cstdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/int.h"

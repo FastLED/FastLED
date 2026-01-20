@@ -1,10 +1,10 @@
 // test.cpp
 // g++ --std=c++11 test.cpp -o test && ./test
 
-#include <set>
+#include "fl/stl/set.h"
 
 #include "fl/stl/unordered_map.h"
-#include <cstddef>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "fl/stl/map.h"
 #include "fl/stl/vector.h"
@@ -134,9 +134,9 @@ TEST_CASE("Stress collisions & rehash with small initial capacity") {
     for (int i = 0; i < N; ++i) {
         m.insert(i, i * 3);
         // test that size is increasing
-        REQUIRE_EQ(m.size(), static_cast<std::size_t>(i + 1));
+        REQUIRE_EQ(m.size(), static_cast<fl::size>(i + 1));
     }
-    REQUIRE_EQ(m.size(), static_cast<std::size_t>(N));
+    REQUIRE_EQ(m.size(), static_cast<fl::size>(N));
     for (int i = 0; i < N; ++i) {
         auto *v = m.find_value(i);
         REQUIRE(v);
@@ -151,7 +151,7 @@ TEST_CASE("Iterator round-trip and const-iteration") {
     }
 
     // non-const iteration
-    std::size_t count = 0;
+    fl::size count = 0;
     for (auto kv : m) {
         REQUIRE_EQ(kv.second, kv.first + 100);
         ++count;
@@ -191,7 +191,7 @@ TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
     size_t new_capacity = m.capacity();
     // should still be 8
     REQUIRE_EQ(new_capacity, 8u);
-    std::set<int> found_values;
+    fl::set<int> found_values;
 
     for (auto it = m.begin(); it != m.end(); ++it) {
         auto kv = *it;
@@ -201,7 +201,10 @@ TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
         found_values.insert(kv.second);
     }
 
-    std::vector<int> found_values_vec(found_values.begin(), found_values.end());
+    fl::vector<int> found_values_vec;
+    for (auto it = found_values.begin(); it != found_values.end(); ++it) {
+        found_values_vec.push_back(*it);
+    }
     REQUIRE_EQ(MAX_CAPACITY, found_values_vec.size());
     for (int i = 0; i < MAX_CAPACITY; ++i) {
         auto value = found_values_vec[i];

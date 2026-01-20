@@ -8,8 +8,8 @@
 
 #include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"

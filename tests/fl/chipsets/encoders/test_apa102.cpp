@@ -5,7 +5,7 @@
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"

@@ -8,7 +8,7 @@
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
 #include "fl/stl/math.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/log.h"

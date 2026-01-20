@@ -11,7 +11,7 @@
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/int.h"

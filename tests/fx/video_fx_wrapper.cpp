@@ -6,7 +6,7 @@
 #include "fl/fx/video.h"
 #include "fl/stl/vector.h"
 #include "FastLED.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "crgb.h"
 #include "doctest.h"

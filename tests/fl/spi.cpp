@@ -4,8 +4,8 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/shared/spi_hw_16.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/log.h"

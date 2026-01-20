@@ -1,6 +1,6 @@
 #include "fl/traverse_grid.h"
 
-#include <set>
+#include "fl/stl/set.h"
 #include "fl/stl/new.h"
 #include "fl/stl/utility.h"
 #include "doctest.h"
@@ -8,7 +8,7 @@
 
 
 struct CollectingVisitor {
-    std::set<std::pair<int, int>> visited;
+    fl::set<fl::pair<int, int>> visited;
 
     void visit(int x, int y) {
         visited.insert({x, y});
@@ -50,7 +50,7 @@ TEST_CASE("Traverse grid") {
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
 
-        std::set<std::pair<int, int>> expected = {
+        fl::set<fl::pair<int, int>> expected = {
             {1,1}, {1,2}, {2,2}, {2,3}, {3,3}, {3,4}, {4,4}
         };
 
@@ -67,7 +67,7 @@ TEST_CASE("Traverse grid") {
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
 
-        std::set<std::pair<int, int>> expected = {
+        fl::set<fl::pair<int, int>> expected = {
             {4,1}, {4,2}, {3,2}, {3,3}, {2,3}, {2,4}, {1,4}
         };
 

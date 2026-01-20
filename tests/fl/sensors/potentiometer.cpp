@@ -2,7 +2,7 @@
 /// @brief Unit tests for Potentiometer class
 
 #include "fl/sensors/potentiometer.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/function.h"

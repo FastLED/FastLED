@@ -13,7 +13,7 @@
 #include "fl/chipsets/encoders/lpd8806.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/stl/array.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/int.h"

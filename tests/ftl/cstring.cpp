@@ -13,7 +13,7 @@
 // and are not tested in this host-based test suite.
 
 #include "fl/stl/cstring.h"
-#include <stddef.h>
+#include "fl/stl/cstddef.h"
 #include "doctest.h"
 
 // Note: We do NOT use "using namespace fl;" because string functions

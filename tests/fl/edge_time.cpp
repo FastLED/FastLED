@@ -2,7 +2,7 @@
 /// @brief Unit tests for EdgeTime packed structure
 
 #include "fl/rx_device.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 
 using namespace fl;

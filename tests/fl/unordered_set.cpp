@@ -1,6 +1,6 @@
 #include "fl/stl/unordered_set.h"
 
-#include <set>
+#include "fl/stl/set.h"
 #include <unordered_set>
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/new.h"
@@ -154,7 +154,7 @@ TEST_CASE("Iterator functionality") {
     REQUIRE_EQ(s.size(), expected_size);
     
     // Iterate and collect all keys
-    std::set<int> found_keys;
+    fl::set<int> found_keys;
     fl::size count = 0;
     
     for (auto it = s.begin(); it != s.end(); ++it) {
@@ -178,7 +178,7 @@ TEST_CASE("Const iterator functionality") {
     }
     
     fl::size count = 0;
-    std::set<int> found_keys;
+    fl::set<int> found_keys;
     
     // Use const_iterator directly from non-const object
     for (auto it = s.cbegin(); it != s.cend(); ++it) {
@@ -196,7 +196,7 @@ TEST_CASE("Range-based for loop") {
         s.insert(i);
     }
     
-    std::set<int> found_keys;
+    fl::set<int> found_keys;
     fl::size count = 0;
     
     // Range-based for loop
@@ -301,9 +301,9 @@ TEST_CASE("Custom hash and equality") {
 }
 #endif
 
-TEST_CASE("Equivalence with std::unordered_set for basic operations") {
+TEST_CASE("Equivalence with std::unordered_set for basic operations") {  // okay std namespace - testing compatibility
     fl::unordered_set<int> custom_set;
-    std::unordered_set<int> std_set;
+    std::unordered_set<int> std_set;  // okay std namespace - testing compatibility
     
     // Test insertion
     for (int i = 1; i <= 10; ++i) {
@@ -390,7 +390,7 @@ TEST_CASE("Large scale operations with deletion patterns") {
     REQUIRE_EQ(s.size(), 10u);
     
     // Check that the correct elements are still present
-    std::set<int> found_keys;
+    fl::set<int> found_keys;
     for (auto kv : s) {
         found_keys.insert(kv);
     }

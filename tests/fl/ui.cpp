@@ -15,10 +15,10 @@
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/stl/sstream.h"
-#include <cstring>
+#include "fl/stl/cstring.h"
 #include "fl/json.h"
 #include "fl/unused.h"
-#include <stdio.h>
+#include "fl/str.h" // ok include
 #include "doctest.h"
 #include "test.h"
 #include "fl/log.h"

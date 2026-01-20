@@ -1,5 +1,5 @@
 #include "fl/alloca.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/int.h"
 

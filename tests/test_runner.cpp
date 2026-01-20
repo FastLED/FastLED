@@ -2,8 +2,8 @@
 // This executable is lightweight and doesn't link against libfastled.a
 // CRITICAL: NO STL USAGE - prevents CRT boundary issues across DLLs
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "fl/str.h" // ok include
+#include <stdlib.h> // ok include - test runner needs printf/fprintf for DLL boundary safety
 
 #ifdef _WIN32
 #include <windows.h>

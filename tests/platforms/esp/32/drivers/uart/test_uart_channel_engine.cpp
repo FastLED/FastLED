@@ -10,8 +10,8 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "platforms/esp/32/drivers/uart/channel_engine_uart.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "fl/channels/engine.h"
 #include "fl/delay.h"

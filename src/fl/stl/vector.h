@@ -830,6 +830,32 @@ public:
         return true;
     }
 
+    // Range insert: insert elements from [first, last) before pos
+    template <typename InputIt>
+    iterator insert(iterator pos, InputIt first, InputIt last) {
+        fl::size target_idx = pos - begin();
+        fl::size count = 0;
+        // First, push all elements to the back
+        for (InputIt it = first; it != last; ++it) {
+            push_back(*it);
+            ++count;
+        }
+        if (count == 0) {
+            return begin() + target_idx;
+        }
+        // Now rotate them into place
+        // The new elements are at positions [size - count, size)
+        // We want them at [target_idx, target_idx + count)
+        fl::size src_start = mSize - count;
+        // Rotate by swapping
+        for (fl::size i = 0; i < count; ++i) {
+            for (fl::size j = src_start + i; j > target_idx + i; --j) {
+                swap(begin() + j - 1, begin() + j);
+            }
+        }
+        return begin() + target_idx;
+    }
+
     // 2) the iterator‐range overload, only enabled when InputIt is *not*
     // integral
     // template <typename InputIt>

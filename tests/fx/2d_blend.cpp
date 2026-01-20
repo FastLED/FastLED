@@ -8,7 +8,7 @@
 
 #include "fl/scoped_array.h"
 #include "fl/stl/ostream.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "crgb.h"
 #include "doctest.h"
 #include "fl/fx/fx2d.h"

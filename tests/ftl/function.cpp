@@ -83,7 +83,7 @@ TEST_CASE("Copy and move semantics") {
     REQUIRE(copy(8, 3) == 5);
 
     // Move
-    fl::function<int(int,int)> moved = std::move(orig);
+    fl::function<int(int,int)> moved = fl::move(orig);
     REQUIRE(moved);
     REQUIRE(moved(7, 2) == 5);
     REQUIRE(!orig);

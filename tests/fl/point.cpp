@@ -1,24 +1,22 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/geometry.h"
-#include <string>
+#include "fl/stl/string.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
 #include "doctest.h"
 #include "fl/exit.h"
 #include "fl/stl/math.h"
-#include "iostream"
+#include "fl/log.h"
 
-
-
-
+// Use doctest's REQUIRE with custom message
 #define REQUIRE_APPROX(a, b, tolerance) \
     do { \
         if (fl::fabs((a - b)) > (tolerance)) { \
-            std::cerr << "REQUIRE_APPROX failed: " << #a << " = " << (a) \
+            FL_WARN("REQUIRE_APPROX failed: " << #a << " = " << (a) \
                       << ", " << #b << " = " << (b) \
-                      << ", tolerance = " << (tolerance) << std::endl; \
-            fl::exit(1); \
+                      << ", tolerance = " << (tolerance)); \
+            REQUIRE(fl::fabs((a) - (b)) <= (tolerance)); \
         } \
     } while (0)
 

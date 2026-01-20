@@ -11,8 +11,8 @@
 
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/chipsets/chipset_timing_config.h"

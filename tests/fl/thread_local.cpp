@@ -2,7 +2,7 @@
 #include "fl/stl/string.h"
 
 #if FASTLED_USE_THREAD_LOCAL
-#include <pthread.h>
+#include "fl/stl/thread.h"
 #include <unistd.h>  // for usleep
 #include "doctest.h"
 #include "fl/stl/thread.h"

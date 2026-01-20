@@ -4,8 +4,8 @@
 /// Tests the WS2812-over-SPI bit encoding implementation used by ChannelEngineSpi.
 /// Each LED bit is encoded as 3 SPI bits (3:1 expansion ratio).
 
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/stl/cstring.h"
 

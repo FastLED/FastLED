@@ -4,7 +4,7 @@
 
 #include "lib8tion/intmap.h"
 #include "fl/lut.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 
 

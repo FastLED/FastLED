@@ -457,7 +457,7 @@ TEST_CASE("fl::move multiple times") {
 }
 
 TEST_CASE("fl::move comparison with std semantics") {
-    SUBCASE("fl::move behaves like std::move") {
+    SUBCASE("fl::move behaves like std::move") {  // okay std namespace - documenting behavior
         // Verify that fl::move produces same result as std::move would
         int x = 42;
         auto&& fl_moved = fl::move(x);

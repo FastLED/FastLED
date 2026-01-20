@@ -46,7 +46,7 @@
 
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
-#include <iostream>  // For debug output
+#include "fl/stl/iostream.h"  // For debug output
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
 

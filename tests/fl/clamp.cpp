@@ -1,5 +1,5 @@
 #include "fl/clamp.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 
 using namespace fl;

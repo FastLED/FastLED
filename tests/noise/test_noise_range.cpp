@@ -1,5 +1,5 @@
 #include "noise.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"

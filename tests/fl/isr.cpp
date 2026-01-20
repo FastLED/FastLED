@@ -26,7 +26,7 @@ static fl::atomic<uint32_t> g_isr_user_data_value{0};
 // This is more efficient and reliable than sleep polling under heavy load
 // Returns true if condition met, false if timeout
 template<typename Predicate>
-static bool wait_for_condition(Predicate pred, std::chrono::milliseconds timeout) {
+static bool wait_for_condition(Predicate pred, std::chrono::milliseconds timeout) { // okay std namespace
     if (pred()) {
         return true;  // Already satisfied
     }
@@ -35,17 +35,17 @@ static bool wait_for_condition(Predicate pred, std::chrono::milliseconds timeout
     auto& manager = fl::isr::TimerThreadManager::instance();
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
-    auto deadline = std::chrono::steady_clock::now() + timeout;
+    auto deadline = std::chrono::steady_clock::now() + timeout; // okay std namespace
 
     while (!pred()) {
-        auto now = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now(); // okay std namespace
         if (now >= deadline) {
             return false;  // Timeout
         }
 
         // Wait on condition variable with remaining timeout
         // This will be notified whenever an ISR executes
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now);
+        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now); // okay std namespace
         manager.get_test_sync_cv().wait_for(lock, remaining);
     }
 
@@ -101,7 +101,7 @@ TEST_CASE("test_isr_timer_basic") {
     // Wait for at least 2 calls (with 200ms timeout = 20 expected calls at 100 Hz)
     // This ensures the timer is working, even under heavy system load
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() >= 2; },
-                                        std::chrono::milliseconds(200));
+                                        std::chrono::milliseconds(200)); // okay std namespace
     REQUIRE(got_calls);
 
     int call_count = g_isr_call_count.load();
@@ -122,12 +122,12 @@ TEST_CASE("test_isr_timer_basic") {
     auto& manager = fl::isr::TimerThreadManager::instance();
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
     bool spurious_call = false;
 
-    while (std::chrono::steady_clock::now() < deadline) {
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-            deadline - std::chrono::steady_clock::now());
+    while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
+        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>( // okay std namespace
+            deadline - std::chrono::steady_clock::now()); // okay std namespace
         if (remaining.count() <= 0) break;
 
         manager.get_test_sync_cv().wait_for(lock, remaining);
@@ -167,7 +167,7 @@ TEST_CASE("test_isr_timer_user_data") {
     // Wait for user data to be set (timeout 200ms = 10 expected calls at 50 Hz)
     bool got_user_data = wait_for_condition(
         [test_value](){ return g_isr_user_data_value.load() == test_value; },
-        std::chrono::milliseconds(200));
+        std::chrono::milliseconds(200)); // okay std namespace
 
     // Verify user data was passed correctly
     REQUIRE(got_user_data);
@@ -195,7 +195,7 @@ TEST_CASE("test_isr_timer_enable_disable") {
 
     // Wait for at least one call (with 200ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
-                                        std::chrono::milliseconds(200));
+                                        std::chrono::milliseconds(200)); // okay std namespace
     REQUIRE(got_calls);
     int count_before_disable = g_isr_call_count.load();
     REQUIRE(count_before_disable > 0);
@@ -211,18 +211,18 @@ TEST_CASE("test_isr_timer_enable_disable") {
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
     int count_after_disable = count_before_disable;
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
 
-    while (std::chrono::steady_clock::now() < deadline) {
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-            deadline - std::chrono::steady_clock::now());
+    while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
+        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>( // okay std namespace
+            deadline - std::chrono::steady_clock::now()); // okay std namespace
         if (remaining.count() <= 0) break;
 
         int current_count = g_isr_call_count.load();
         if (current_count != count_after_disable) {
             count_after_disable = current_count;
             // Count changed, wait a bit more to ensure it stabilizes
-            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30);
+            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30); // okay std namespace
         }
 
         manager.get_test_sync_cv().wait_for(lock, remaining);
@@ -240,7 +240,7 @@ TEST_CASE("test_isr_timer_enable_disable") {
     // Wait for at least one new call after re-enabling (with 200ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_after_disable](){ return g_isr_call_count.load() > count_after_disable; },
-        std::chrono::milliseconds(200));
+        std::chrono::milliseconds(200)); // okay std namespace
     REQUIRE(got_new_calls);
     int count_after_enable = g_isr_call_count.load();
     REQUIRE(count_after_enable > count_after_disable);
@@ -318,7 +318,7 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
 
     // Wait for at least one call to verify timer is firing (with 200ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
-                                        std::chrono::milliseconds(200));
+                                        std::chrono::milliseconds(200)); // okay std namespace
     REQUIRE(got_calls);
     int count_enabled = g_isr_call_count.load();
     REQUIRE(count_enabled > 0);
@@ -333,18 +333,18 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
     int count_disabled = count_enabled;
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
 
-    while (std::chrono::steady_clock::now() < deadline) {
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-            deadline - std::chrono::steady_clock::now());
+    while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
+        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>( // okay std namespace
+            deadline - std::chrono::steady_clock::now()); // okay std namespace
         if (remaining.count() <= 0) break;
 
         int current_count = g_isr_call_count.load();
         if (current_count != count_disabled) {
             count_disabled = current_count;
             // Count changed, wait a bit more to ensure it stabilizes
-            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30);
+            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30); // okay std namespace
         }
 
         manager.get_test_sync_cv().wait_for(lock, remaining);
@@ -361,7 +361,7 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     // Wait for at least one new call after re-enabling (with 200ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_disabled](){ return g_isr_call_count.load() > count_disabled; },
-        std::chrono::milliseconds(200));
+        std::chrono::milliseconds(200)); // okay std namespace
     REQUIRE(got_new_calls);
     int count_reenabled = g_isr_call_count.load();
     REQUIRE(count_reenabled > count_disabled);

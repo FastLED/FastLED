@@ -3,7 +3,7 @@
 
 #include "fl/stl/function.h"
 #include "fl/unused.h"
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "doctest.h"
 #include "fl/stl/allocator.h"

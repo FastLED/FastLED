@@ -187,9 +187,13 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         UsingNamespaceChecker(),
     ]
 
-    # Tests-only checkers
+    # Tests-only checkers - FL compatibility now enforced
     checkers_by_scope["tests"] = [
         HeadersExistChecker(),
+        BannedHeadersChecker(
+            banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
+        ),
+        StdNamespaceChecker(),
     ]
 
     return checkers_by_scope

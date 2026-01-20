@@ -13,7 +13,7 @@ They are unstable across libc++ versions and will break portability.
 import re
 from dataclasses import dataclass
 
-from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
+from ci.util.check_files import FileContent, FileContentChecker, is_excluded_file
 
 
 # ============================================================================
@@ -410,8 +410,8 @@ class BannedHeadersChecker(FileContentChecker):
         if not file_path.endswith((".cpp", ".h", ".hpp", ".ino")):
             return False
 
-        # Check if file is in excluded list
-        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
+        # Check if file is in excluded list (handles both Windows and Unix paths)
+        if is_excluded_file(file_path):
             return False
 
         return True

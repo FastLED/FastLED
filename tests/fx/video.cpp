@@ -7,8 +7,8 @@
 #include "fl/bytestreammemory.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/fx/video.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "fl/stl/vector.h"
 #include "doctest.h"
@@ -56,7 +56,7 @@ class FakeFileHandle : public fl::FileHandle {
         return true;
     }
     void close() override {}
-    std::vector<uint8_t> data;
+    fl::vector<uint8_t> data;
     size_t mPos = 0;
 };
 

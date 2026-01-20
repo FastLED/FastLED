@@ -4,8 +4,8 @@
 #include "fl/stl/thread.h"
 #include "fl/stl/mutex.h"
 #include "fl/math_macros.h"
-#include <stdint.h>
-#include <stdio.h>
+#include "fl/stl/stdint.h"
+#include "fl/str.h" // ok include
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
 #include "fl/stl/type_traits.h"
@@ -64,7 +64,7 @@ promise<T> delayed_resolve(const T& value, uint32_t delay_ms) {
         // Sleep in small increments to allow early exit on shutdown
         for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 10) {
             uint32_t sleep_time = FL_MIN(10u, delay_ms - elapsed);
-            fl::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+            fl::this_thread::sleep_for(std::chrono::milliseconds(sleep_time)); // okay std namespace
         }
 
         // Only complete if not shutting down
@@ -90,7 +90,7 @@ promise<T> delayed_reject(const Error& error, uint32_t delay_ms) {
         // Sleep in small increments to allow early exit on shutdown
         for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 10) {
             uint32_t sleep_time = FL_MIN(10u, delay_ms - elapsed);
-            fl::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+            fl::this_thread::sleep_for(std::chrono::milliseconds(sleep_time)); // okay std namespace
         }
 
         // Only complete if not shutting down
@@ -168,7 +168,7 @@ TEST_CASE("await in coroutine - error handling") {
     // Wait for completion
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
 
@@ -204,7 +204,7 @@ TEST_CASE("await in coroutine - already completed promise") {
     // Should complete quickly (within 100ms)
     int timeout = 0;
     while (!test_completed.load() && timeout < 100) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
 
@@ -252,7 +252,7 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         if (timeout % 200 == 0) {
             printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
     printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
@@ -289,7 +289,7 @@ TEST_CASE("await in coroutine - invalid promise") {
     // Should complete quickly
     int timeout = 0;
     while (!test_completed.load() && timeout < 100) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
 
@@ -326,7 +326,7 @@ TEST_CASE("await in coroutine - sequential awaits") {
     // Wait for completion (should take ~6ms + overhead, reduced from 2000ms)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
 
@@ -364,7 +364,7 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // Wait for coroutine to complete
     int timeout = 0;
     while (!await_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 10;
     }
     CHECK(await_completed.load());
@@ -513,7 +513,7 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     // Wait for both coroutines to complete (5000ms total timeout)
     int timeout = 0;
     while (!both_completed.load() && timeout < 5000) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield and give time
+        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
         timeout += 1;  // Match the sleep duration
     }
 

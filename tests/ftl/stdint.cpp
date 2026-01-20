@@ -1,7 +1,7 @@
-#include <stddef.h>
-#include <stdint.h>
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
 #include "doctest.h"
-#include "stdint.h"
+#include "stdint.h" // ok include - testing FL types against standard
 
 // Test that fl/stl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy

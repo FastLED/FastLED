@@ -4,7 +4,7 @@
 /// Tests the WS2812-over-PARLIO bit encoding implementation used by ChannelEnginePARLIO.
 /// Each LED byte is encoded as 32 bits (4 ticks per bit, 8 bits per byte).
 
-#include <stdint.h>
+#include "fl/stl/stdint.h"
 #include "doctest.h"
 #include "fl/int.h"
 
