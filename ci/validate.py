@@ -32,7 +32,6 @@ Architecture:
 """
 
 import argparse
-import json
 import sys
 import time
 from dataclasses import dataclass
@@ -41,6 +40,8 @@ from typing import Any, cast
 
 import serial
 from colorama import Fore, Style, init
+
+from ci.rpc_client import RpcClient, RpcTimeoutError
 
 # Import phase functions from debug_attached
 from ci.debug_attached import (
@@ -52,7 +53,6 @@ from ci.debug_attached import (
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
     install_signal_handler,
-    is_interrupted,
 )
 from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import (
@@ -143,128 +143,46 @@ def run_gpio_pretest(
     print()
 
     try:
-        # Open serial connection with short timeout for reads
-        ser = serial.Serial(port, 115200, timeout=0.5)
-
-        # Wait for device to boot and settle (needs time after reset)
         print("  Waiting for device to boot...")
-        time.sleep(3.0)
+        with RpcClient(port, timeout=timeout) as client:
+            print()
+            print("  Sending GPIO test command...")
 
-        # Drain any pending output from boot sequence
-        boot_lines = 0
-        while ser.in_waiting > 0 or boot_lines < 50:
-            # Check for interrupt before blocking read (Windows workaround)
-            if is_interrupted():
-                raise KeyboardInterrupt()
-            try:
-                line = ser.readline().decode("utf-8", errors="replace").strip()
-                if line:
-                    boot_lines += 1
-                    # Only print first few lines and last few
-                    if boot_lines <= 3:
-                        print(f"  [boot] {line[:80]}")
-                    elif boot_lines == 4:
-                        print("  [boot] ... (draining boot output)")
-                else:
-                    break  # Empty line, buffer drained
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
-                raise
-            except Exception:
-                break
-            if boot_lines >= 100:
-                break
+            response = client.send_and_match(
+                "testGpioConnection",
+                args=[tx_pin, rx_pin],
+                match_key="connected",
+                retries=3,
+            )
 
-        # Now send the JSON-RPC command (may need to send multiple times)
-        cmd = {"function": "testGpioConnection", "args": [tx_pin, rx_pin]}
-        cmd_str = json.dumps(cmd, separators=(",", ":"))
+            if response.get("connected", False):
+                print()
+                print(f"{Fore.GREEN}✅ GPIO PRE-TEST PASSED{Style.RESET_ALL}")
+                print(f"   TX (GPIO {tx_pin}) and RX (GPIO {rx_pin}) are connected")
+                print()
+                return True
+            else:
+                print()
+                print(f"{Fore.RED}❌ GPIO PRE-TEST FAILED{Style.RESET_ALL}")
+                print()
+                print(
+                    f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}"
+                )
+                print()
+                print("   The TX and RX pins are NOT electrically connected.")
+                print()
+                print(f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}")
+                print(
+                    f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)"
+                )
+                print()
+                print("   Debug info:")
+                print(f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}")
+                print(f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}")
+                print()
+                return False
 
-        print()
-        print(f"  Sending GPIO test command...")
-
-        # Try sending the command a few times (device might miss first one)
-        for attempt in range(3):
-            ser.reset_input_buffer()
-            ser.write((cmd_str + "\n").encode())
-            ser.flush()
-
-            # Wait for REMOTE: prefixed response
-            attempt_start = time.time()
-            attempt_timeout = timeout / 3  # Split timeout across attempts
-
-            while time.time() - attempt_start < attempt_timeout:
-                # Check for interrupt before blocking read (Windows workaround)
-                if is_interrupted():
-                    raise KeyboardInterrupt()
-                try:
-                    line = ser.readline().decode("utf-8", errors="replace").strip()
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception:
-                    continue
-
-                if not line:
-                    continue
-
-                # Look for REMOTE: prefix indicating JSON-RPC response
-                if line.startswith("REMOTE: "):
-                    json_str = line[len("REMOTE: ") :]
-                    try:
-                        response = json.loads(json_str)
-
-                        # Check if this is our testGpioConnection response
-                        if "connected" in response:
-                            if response.get("connected", False):
-                                print()
-                                print(
-                                    f"{Fore.GREEN}✅ GPIO PRE-TEST PASSED{Style.RESET_ALL}"
-                                )
-                                print(
-                                    f"   TX (GPIO {tx_pin}) and RX (GPIO {rx_pin}) are connected"
-                                )
-                                print()
-                                ser.close()
-                                return True
-                            else:
-                                print()
-                                print(
-                                    f"{Fore.RED}❌ GPIO PRE-TEST FAILED{Style.RESET_ALL}"
-                                )
-                                print()
-                                print(
-                                    f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}"
-                                )
-                                print()
-                                print(
-                                    "   The TX and RX pins are NOT electrically connected."
-                                )
-                                print()
-                                print(
-                                    f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}"
-                                )
-                                print(
-                                    f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)"
-                                )
-                                print()
-                                print("   Debug info:")
-                                print(
-                                    f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}"
-                                )
-                                print(
-                                    f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}"
-                                )
-                                print()
-                                ser.close()
-                                return False
-                    except json.JSONDecodeError:
-                        pass
-
-            # If attempt failed, try again
-            if attempt < 2:
-                print(f"  Retrying... (attempt {attempt + 2}/3)")
-
-        # Timeout waiting for response after all attempts
+    except RpcTimeoutError:
         print()
         print(f"{Fore.RED}❌ GPIO PRE-TEST TIMEOUT{Style.RESET_ALL}")
         print(f"   No response from device within {timeout} seconds")
@@ -274,9 +192,7 @@ def run_gpio_pretest(
         print("   2. Device is stuck in setup (check serial output above)")
         print("   3. Serial communication issue")
         print()
-        ser.close()
         return False
-
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
@@ -327,129 +243,50 @@ def run_pin_discovery(
     print()
 
     try:
-        # Open serial connection with short timeout for reads
-        ser = serial.Serial(port, 115200, timeout=0.5)
-
-        # Wait for device to boot and settle
         print("  Waiting for device to boot...")
-        time.sleep(3.0)
+        with RpcClient(port, timeout=timeout) as client:
+            print()
+            print("  Probing adjacent pin pairs for jumper wire connection...")
 
-        # Drain any pending output from boot sequence
-        boot_lines = 0
-        while ser.in_waiting > 0 or boot_lines < 50:
-            # Check for interrupt before blocking read (Windows workaround)
-            if is_interrupted():
-                raise KeyboardInterrupt()
-            try:
-                line = ser.readline().decode("utf-8", errors="replace").strip()
-                if line:
-                    boot_lines += 1
-                    if boot_lines <= 3:
-                        print(f"  [boot] {line[:80]}")
-                    elif boot_lines == 4:
-                        print("  [boot] ... (draining boot output)")
-                else:
-                    break
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
-                raise
-            except Exception:
-                break
-            if boot_lines >= 100:
-                break
+            response = client.send_and_match(
+                "findConnectedPins",
+                args=[{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
+                match_key="found",
+                retries=3,
+            )
 
-        # Send findConnectedPins RPC command
-        cmd = {
-            "function": "findConnectedPins",
-            "args": [{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
-        }
-        cmd_str = json.dumps(cmd, separators=(",", ":"))
+            if response.get("found", False):
+                tx_pin = response.get("txPin")
+                rx_pin = response.get("rxPin")
+                auto_applied = response.get("autoApplied", False)
 
-        print()
-        print("  Probing adjacent pin pairs for jumper wire connection...")
+                print()
+                print(f"{Fore.GREEN}✅ PIN DISCOVERY SUCCESSFUL{Style.RESET_ALL}")
+                print(
+                    f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})"
+                )
+                if auto_applied:
+                    print(f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}")
+                print()
+                return (True, tx_pin, rx_pin)
+            else:
+                print()
+                print(
+                    f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
+                )
+                print()
+                print(f"   {response.get('message', 'No connected pin pairs detected')}")
+                print()
+                print(f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}")
+                print()
+                return (False, None, None)
 
-        # Try sending the command a few times
-        for attempt in range(3):
-            ser.reset_input_buffer()
-            ser.write((cmd_str + "\n").encode())
-            ser.flush()
-
-            attempt_start = time.time()
-            attempt_timeout = timeout / 3
-
-            while time.time() - attempt_start < attempt_timeout:
-                # Check for interrupt before blocking read (Windows workaround)
-                if is_interrupted():
-                    raise KeyboardInterrupt()
-                try:
-                    line = ser.readline().decode("utf-8", errors="replace").strip()
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception:
-                    continue
-
-                if not line:
-                    continue
-
-                # Look for REMOTE: prefix indicating JSON-RPC response
-                if line.startswith("REMOTE: "):
-                    json_str = line[len("REMOTE: ") :]
-                    try:
-                        response = json.loads(json_str)
-
-                        # Check if this is our findConnectedPins response
-                        if "found" in response:
-                            if response.get("found", False):
-                                tx_pin = response.get("txPin")
-                                rx_pin = response.get("rxPin")
-                                auto_applied = response.get("autoApplied", False)
-
-                                print()
-                                print(
-                                    f"{Fore.GREEN}✅ PIN DISCOVERY SUCCESSFUL{Style.RESET_ALL}"
-                                )
-                                print(
-                                    f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})"
-                                )
-                                if auto_applied:
-                                    print(
-                                        f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}"
-                                    )
-                                print()
-                                ser.close()
-                                return (True, tx_pin, rx_pin)
-                            else:
-                                print()
-                                print(
-                                    f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
-                                )
-                                print()
-                                print(
-                                    f"   {response.get('message', 'No connected pin pairs detected')}"
-                                )
-                                print()
-                                print(
-                                    f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}"
-                                )
-                                print()
-                                ser.close()
-                                return (False, None, None)
-                    except json.JSONDecodeError:
-                        pass
-
-            # If attempt failed, try again
-            if attempt < 2:
-                print(f"  Retrying... (attempt {attempt + 2}/3)")
-
-        # Timeout waiting for response
+    except RpcTimeoutError:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY TIMEOUT{Style.RESET_ALL}")
         print(f"   No response within {timeout} seconds, falling back to default pins")
         print()
-        ser.close()
         return (False, None, None)
-
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
@@ -488,6 +325,7 @@ class Args:
     uart: bool
     i2s: bool
     all: bool
+    simd: bool
 
     # Standard options
     environment: str | None
@@ -588,6 +426,11 @@ See Also:
             "--all",
             action="store_true",
             help="Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s)",
+        )
+        driver_group.add_argument(
+            "--simd",
+            action="store_true",
+            help="Test SIMD operations only (no LED drivers)",
         )
 
         # Standard options
@@ -708,6 +551,7 @@ See Also:
             uart=parsed.uart,
             i2s=parsed.i2s,
             all=parsed.all,
+            simd=parsed.simd,
             environment=parsed.environment,
             verbose=parsed.verbose,
             skip_lint=parsed.skip_lint,
@@ -794,6 +638,9 @@ def run(args: Args | None = None) -> int:
     # ============================================================
     drivers: list[str] = []
 
+    # SIMD test mode - special case, no drivers needed
+    simd_test_mode = args.simd
+
     # Check if any driver flags were specified
     if args.all:
         drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S"]
@@ -809,8 +656,8 @@ def run(args: Args | None = None) -> int:
         if args.i2s:
             drivers.append("I2S")
 
-    # MANDATORY: At least one driver must be specified
-    if not drivers:
+    # MANDATORY: At least one driver OR --simd must be specified
+    if not drivers and not simd_test_mode:
         print(Fore.RED + "=" * 60)
         print(Fore.RED + "ERROR: No LED driver specified.")
         print(Fore.RED + "=" * 60)
@@ -1152,8 +999,11 @@ def run(args: Args | None = None) -> int:
         effective_rx_pin: int | None = None
         pins_discovered = False
 
+        # Skip pin discovery and GPIO pre-test for SIMD mode (no hardware needed)
+        if simd_test_mode:
+            print("\n📌 SIMD mode: skipping pin discovery and GPIO pre-test")
         # CLI args take priority - skip discovery if user specified pins
-        if args.tx_pin is not None or args.rx_pin is not None:
+        elif args.tx_pin is not None or args.rx_pin is not None:
             effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
             effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
             print(
@@ -1198,10 +1048,12 @@ def run(args: Args | None = None) -> int:
         # ============================================================
         # Phase 3.6: GPIO Connectivity Pre-Test
         # ============================================================
-        # Skip GPIO pre-test if pins were just discovered (already verified)
-        if pins_discovered:
+        # Skip GPIO pre-test if pins were just discovered (already verified) or SIMD mode
+        if simd_test_mode:
+            pass  # Already printed skip message above
+        elif pins_discovered:
             print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
-        elif not run_gpio_pretest(upload_port, effective_tx_pin, effective_rx_pin):
+        elif not run_gpio_pretest(upload_port, effective_tx_pin or PIN_TX, effective_rx_pin or PIN_RX):
             print()
             print(f"{Fore.RED}=" * 60)
             print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
@@ -1218,6 +1070,44 @@ def run(args: Args | None = None) -> int:
             return 1
 
         # Phase 4: Monitor serial output with validation patterns
+        # SIMD test mode - simple RPC call instead of full driver test
+        if simd_test_mode:
+            print()
+            print("=" * 60)
+            print("SIMD TEST MODE")
+            print("=" * 60)
+            print("Running SIMD add_sat_u8_16 test...")
+            print()
+
+            try:
+                with RpcClient(upload_port, timeout=10.0) as client:
+                    response = client.send_and_match(
+                        "testSimd", match_key="passed", retries=3
+                    )
+
+                    if response.get("passed", False):
+                        print(f"{Fore.GREEN}✅ SIMD TEST PASSED{Style.RESET_ALL}")
+                        print(f"   {response.get('message', '')}")
+                        return 0
+                    else:
+                        print(f"{Fore.RED}❌ SIMD TEST FAILED{Style.RESET_ALL}")
+                        print(f"   {response.get('message', '')}")
+                        if "actual" in response:
+                            print(f"   Actual:   {response['actual']}")
+                            print(f"   Expected: {response['expected']}")
+                        return 1
+
+            except RpcTimeoutError:
+                print(f"{Fore.RED}❌ SIMD TEST TIMEOUT{Style.RESET_ALL}")
+                print("   No response from device within 10 seconds")
+                return 1
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
+            except Exception as e:
+                print(f"{Fore.RED}❌ SIMD TEST ERROR: {e}{Style.RESET_ALL}")
+                return 1
+
         success, _output, _rpc_handler = run_monitor(
             build_dir,
             final_environment,

@@ -34,6 +34,7 @@ Driver Selection (MANDATORY - must specify at least one):
   --uart              Test UART driver
   --i2s               Test I2S LCD_CAM driver (ESP32-S3 only)
   --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s)
+  --simd              Test SIMD operations only (no LED drivers needed)
 
 Options:
   -h, --help          Show this help message

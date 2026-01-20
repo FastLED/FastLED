@@ -16,6 +16,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
 #include "fl/json.h"
+#include "fl/simd.h"
 #include <Arduino.h>
 
 // ============================================================================
@@ -2017,10 +2018,68 @@ void ValidationRemoteControl::registerFunctions(
         help_fn.set("description", "List all RPC functions with descriptions");
         functions.push_back(help_fn);
 
+        fl::Json testSimd_fn = fl::Json::object();
+        testSimd_fn.set("name", "testSimd");
+        testSimd_fn.set("phase", "Phase 4: Utility");
+        testSimd_fn.set("args", "[]");
+        testSimd_fn.set("returns", "{success, passed, message}");
+        testSimd_fn.set("description", "Test SIMD operations (add_sat_u8_16)");
+        functions.push_back(testSimd_fn);
+
         fl::Json response = fl::Json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(21));
+        response.set("totalFunctions", static_cast<int64_t>(22));
         response.set("functions", functions);
+        return response;
+    });
+
+    // Register "testSimd" function - test SIMD operations
+    mRemote->registerFunctionWithReturn("testSimd", [](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Test data: 16 bytes each
+        alignas(16) uint8_t a[16] = {200, 200, 200, 200, 200, 200, 200, 200,
+                                      100, 100, 100, 100, 100, 100, 100, 100};
+        alignas(16) uint8_t b[16] = {100, 100, 100, 100, 100, 100, 100, 100,
+                                      200, 200, 200, 200, 200, 200, 200, 200};
+        alignas(16) uint8_t result[16] = {0};
+
+        // Expected: saturating add clamps at 255
+        // First 8: 200+100=255 (clamped), Last 8: 100+200=255 (clamped)
+        uint8_t expected[16] = {255, 255, 255, 255, 255, 255, 255, 255,
+                                255, 255, 255, 255, 255, 255, 255, 255};
+
+        // Perform SIMD saturating add
+        fl::simd::simd_u8x16 va = fl::simd::load_u8_16(a);
+        fl::simd::simd_u8x16 vb = fl::simd::load_u8_16(b);
+        fl::simd::simd_u8x16 vr = fl::simd::add_sat_u8_16(va, vb);
+        fl::simd::store_u8_16(result, vr);
+
+        // Verify result
+        bool passed = true;
+        for (int i = 0; i < 16; i++) {
+            if (result[i] != expected[i]) {
+                passed = false;
+                break;
+            }
+        }
+
+        response.set("success", true);
+        response.set("passed", passed);
+        if (passed) {
+            response.set("message", "SIMD add_sat_u8_16 test passed");
+        } else {
+            response.set("message", "SIMD add_sat_u8_16 test FAILED");
+            // Include actual vs expected for debugging
+            fl::Json actual = fl::Json::array();
+            fl::Json exp = fl::Json::array();
+            for (int i = 0; i < 16; i++) {
+                actual.push_back(static_cast<int64_t>(result[i]));
+                exp.push_back(static_cast<int64_t>(expected[i]));
+            }
+            response.set("actual", actual);
+            response.set("expected", exp);
+        }
         return response;
     });
 }
