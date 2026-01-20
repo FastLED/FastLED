@@ -27,7 +27,7 @@ For daemon management, use the new DaemonConnection API (v1.2.12+):
 
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 def is_fbuild_available() -> bool:
@@ -110,7 +110,7 @@ def fbuild_build_and_upload(
             return False, "Build or upload failed"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"fbuild error: {e}"
@@ -163,7 +163,7 @@ def fbuild_build_only(
             return False, "Build failed"
 
     except KeyboardInterrupt:
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         return False, f"fbuild error: {e}"

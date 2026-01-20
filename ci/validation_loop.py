@@ -22,7 +22,7 @@ from typing import Any, Callable
 
 from validation_agent import TestConfig, ValidationAgent
 
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 # Predefined lane size configurations for testing
@@ -215,7 +215,7 @@ def run_validation_loop(
 
                     except KeyboardInterrupt:
                         print("\n\nKeyboardInterrupt: Stopping validation loop")
-                        notify_main_thread()
+                        handle_keyboard_interrupt_properly()
                         raise
                     except Exception as e:
                         print(f"  Error: {e}")
@@ -253,7 +253,7 @@ def run_validation_loop(
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Cancelling validation loop")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         raise
     finally:
         agent.close()
@@ -337,5 +337,5 @@ Lane Size Presets:
         sys.exit(0 if results["summary"]["failed"] == 0 else 1)
     except KeyboardInterrupt:
         print("\nValidation cancelled by user")
-        notify_main_thread()
+        handle_keyboard_interrupt_properly()
         sys.exit(130)  # Standard exit code for SIGINT

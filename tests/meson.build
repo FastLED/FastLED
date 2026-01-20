@@ -26,6 +26,7 @@ test_pch = custom_target('test_pch',
     '-o', '@OUTPUT@',              # test_pch.h.pch
     '-MD', '-MF', '@DEPFILE@',     # Generate dependency file (will be fixed by wrapper)
     unit_test_compile_args,        # Same flags as all tests
+    '-fPIC',                       # Required: tests build as shared_library which needs PIC
     '-I' + meson.project_source_root() / 'src',
     '-I' + meson.project_source_root() / 'tests',
     '-I' + meson.project_source_root() / 'src/platforms/stub',
