@@ -1,8 +1,8 @@
 #include "hsv2rgb.h"
 #include <stddef.h>
-#include <numeric>
 #include "fl/stl/algorithm.h"
 #include "fl/stl/new.h"
+#include "fl/stl/pair.h"
 #include "fl/stl/utility.h"
 #include "fl/stl/vector.h"
 #include "chsv.h"
@@ -17,8 +17,8 @@ struct AccuracyStats {
     float median;
     float max;
     float min;
-    std::vector<float> deviations;
-    
+    vector<float> deviations;
+
     void calculate() {
         if (deviations.empty()) {
             average = median = max = min = 0.0f;
@@ -26,10 +26,13 @@ struct AccuracyStats {
         }
 
         // Sort for median calculation
-        std::sort(deviations.begin(), deviations.end());
+        sort(deviations.begin(), deviations.end());
 
         // Calculate average
-        float sum = std::accumulate(deviations.begin(), deviations.end(), 0.0f);
+        float sum = 0.0f;
+        for (size_t i = 0; i < deviations.size(); ++i) {
+            sum += deviations[i];
+        }
         average = sum / deviations.size();
 
         // Calculate median
@@ -136,26 +139,26 @@ TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     FL_WARN("");
     
     // Find the best performing function for each metric
-    std::vector<std::pair<float, const char*>> avg_results = {
+    vector<pair<float, const char*>> avg_results = {
         {rainbow_stats.average, "rainbow"},
         {spectrum_stats.average, "spectrum"},
         {fullspectrum_stats.average, "fullspectrum"}
     };
-    std::sort(avg_results.begin(), avg_results.end());
-    
-    std::vector<std::pair<float, const char*>> median_results = {
+    sort(avg_results.begin(), avg_results.end());
+
+    vector<pair<float, const char*>> median_results = {
         {rainbow_stats.median, "rainbow"},
         {spectrum_stats.median, "spectrum"},
         {fullspectrum_stats.median, "fullspectrum"}
     };
-    std::sort(median_results.begin(), median_results.end());
-    
-    std::vector<std::pair<float, const char*>> max_results = {
+    sort(median_results.begin(), median_results.end());
+
+    vector<pair<float, const char*>> max_results = {
         {rainbow_stats.max, "rainbow"},
         {spectrum_stats.max, "spectrum"},
         {fullspectrum_stats.max, "fullspectrum"}
     };
-    std::sort(max_results.begin(), max_results.end());
+    sort(max_results.begin(), max_results.end());
     
     FL_WARN("=== Best Performance Rankings ===");
     FL_WARN("Lowest Average Deviation: " << avg_results[0].second << " (" << avg_results[0].first << ")");
@@ -192,7 +195,7 @@ TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
         const char* name;
     };
     
-    std::vector<TestColor> test_colors = {
+    vector<TestColor> test_colors = {
         {{255, 0, 0}, "Pure Red"},
         {{0, 255, 0}, "Pure Green"},
         {{0, 0, 255}, "Pure Blue"},

@@ -15,8 +15,8 @@
 
 using namespace fl;
 // Test counters
-static std::atomic<int> g_isr_call_count{0};
-static std::atomic<uint32_t> g_isr_user_data_value{0};
+static fl::atomic<int> g_isr_call_count{0};
+static fl::atomic<uint32_t> g_isr_user_data_value{0};
 
 // =============================================================================
 // Helper Functions for Timing-Dependent Tests
@@ -57,7 +57,7 @@ static bool wait_for_condition(Predicate pred, std::chrono::milliseconds timeout
 // =============================================================================
 
 static void test_isr_handler(void* user_data) {
-    g_isr_call_count++;
+    ++g_isr_call_count;
     if (user_data) {
         uint32_t* value = static_cast<uint32_t*>(user_data);
         g_isr_user_data_value = *value;
