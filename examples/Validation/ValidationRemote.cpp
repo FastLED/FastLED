@@ -67,6 +67,34 @@ void printStreamRaw(const char* messageType, const fl::Json& data) {
     Serial.println(jsonStr.c_str());
 }
 
+// ============================================================================
+// Standard JSON-RPC Response Format (Phase 4 Refactoring)
+// ============================================================================
+// Return codes:
+//   0 = SUCCESS
+//   1 = TEST_FAILED
+//   2 = HARDWARE_ERROR (GPIO not connected)
+//   3 = INVALID_ARGS
+
+enum class ReturnCode : int {
+    SUCCESS = 0,
+    TEST_FAILED = 1,
+    HARDWARE_ERROR = 2,
+    INVALID_ARGS = 3
+};
+
+fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
+                      const fl::Json& data = fl::Json()) {
+    fl::Json r = fl::Json::object();
+    r.set("success", success);
+    r.set("returnCode", static_cast<int64_t>(static_cast<int>(returnCode)));
+    r.set("message", message);
+    if (!data.is_null() && data.has_value()) {
+        r.set("data", data);
+    }
+    return r;
+}
+
 // Forward declarations
 fl::vector<fl::TestCaseConfig> generateTestCases(
     const fl::TestMatrixConfig& matrix,
@@ -1151,6 +1179,116 @@ void ValidationRemoteControl::registerFunctions(
         response.set("success", true);
         response.set("streamMode", true);
         return response;
+    });
+
+    // ========================================================================
+    // Phase 5: Fast Single-Test RPC Command (runQuickTest)
+    // ========================================================================
+    // Optimized for Python orchestration - minimal overhead, no streaming
+    // Args: {driver: str, ledCount: int, laneCount: int, pattern: int (optional)}
+    // Returns: {success, returnCode, message, data: {passed, mismatches, durationMs}}
+    mRemote->registerFunctionWithReturn("runQuickTest", [this](const fl::Json& args) -> fl::Json {
+        // Validate args
+        if (!args.is_array() || args.size() != 1 || !args[0].is_object()) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS,
+                               "Expected [{driver, ledCount, laneCount, pattern?}]");
+        }
+
+        fl::Json config = args[0];
+
+        // Extract required parameters
+        if (!config.contains("driver") || !config["driver"].is_string()) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'driver' (string)");
+        }
+        if (!config.contains("ledCount") || !config["ledCount"].is_int()) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'ledCount' (int)");
+        }
+        if (!config.contains("laneCount") || !config["laneCount"].is_int()) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'laneCount' (int)");
+        }
+
+        fl::string driver = config["driver"].as_string().value();
+        int led_count = static_cast<int>(config["ledCount"].as_int().value());
+        int lane_count = static_cast<int>(config["laneCount"].as_int().value());
+        int pattern_id = config.contains("pattern") && config["pattern"].is_int()
+                         ? static_cast<int>(config["pattern"].as_int().value())
+                         : 0;  // Default to pattern A
+
+        // Validate ranges
+        if (led_count <= 0 || led_count > 3000) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "ledCount must be 1-3000");
+        }
+        if (lane_count <= 0 || lane_count > 8) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "laneCount must be 1-8");
+        }
+        if (pattern_id < 0 || pattern_id > 3) {
+            return makeResponse(false, ReturnCode::INVALID_ARGS, "pattern must be 0-3");
+        }
+
+        // Configure test matrix for this single test
+        mpTestMatrix->enabled_drivers.clear();
+        mpTestMatrix->enabled_drivers.push_back(driver);
+        mpTestMatrix->lane_sizes.clear();
+        for (int i = 0; i < lane_count; i++) {
+            mpTestMatrix->lane_sizes.push_back(led_count);
+        }
+        mpTestMatrix->test_iterations = 1;
+
+        // Regenerate test cases (should produce exactly 1 test case)
+        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx);
+
+        if (mpTestCases->empty()) {
+            return makeResponse(false, ReturnCode::HARDWARE_ERROR,
+                               "Failed to generate test case - driver may not be available");
+        }
+
+        // Initialize result
+        mpTestResults->clear();
+        mpTestResults->push_back(fl::TestCaseResult(
+            (*mpTestCases)[0].driver_name.c_str(),
+            (*mpTestCases)[0].lane_count,
+            (*mpTestCases)[0].base_strip_size
+        ));
+
+        // Get timing configuration
+        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
+
+        uint32_t start_ms = millis();
+
+        // Run the single test case (silenced - no streaming)
+        {
+            fl::ScopedLogDisable logGuard;
+            runSingleTestCase(
+                (*mpTestCases)[0],
+                (*mpTestResults)[0],
+                timing_config,
+                *mpRxChannel,
+                mRxBuffer
+            );
+        }
+
+        uint32_t end_ms = millis();
+
+        // Build result data
+        fl::Json data = fl::Json::object();
+        bool passed = (*mpTestResults)[0].allPassed();
+        int mismatches = (*mpTestResults)[0].total_tests - (*mpTestResults)[0].passed_tests;
+
+        data.set("passed", passed);
+        data.set("totalTests", static_cast<int64_t>((*mpTestResults)[0].total_tests));
+        data.set("passedTests", static_cast<int64_t>((*mpTestResults)[0].passed_tests));
+        data.set("mismatches", static_cast<int64_t>(mismatches));
+        data.set("durationMs", static_cast<int64_t>(end_ms - start_ms));
+        data.set("driver", driver.c_str());
+        data.set("ledCount", static_cast<int64_t>(led_count));
+        data.set("laneCount", static_cast<int64_t>(lane_count));
+        data.set("pattern", static_cast<int64_t>(pattern_id));
+
+        if (passed) {
+            return makeResponse(true, ReturnCode::SUCCESS, "Test passed", data);
+        } else {
+            return makeResponse(false, ReturnCode::TEST_FAILED, "Test failed - mismatches detected", data);
+        }
     });
 
     // Register "getState" function - query without running

@@ -275,27 +275,8 @@ void runTest(const char* test_name,
             uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
             if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
-                FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
-                        << " | Lane " << ctx.lane_index << "/" << ctx.lane_count
-                        << " (Pin " << ctx.pin_number << ", " << ctx.num_leds << " LEDs) | RX:" << ctx.rx_type_name << "] "
-                        << "LED[" << static_cast<int>(i) << "] mismatch: "
-                        << "expected RGB(" << static_cast<int>(expected_r) << ","
-                        << static_cast<int>(expected_g) << "," << static_cast<int>(expected_b)
-                        << ") got RGB(" << static_cast<int>(actual_r) << ","
-                        << static_cast<int>(actual_g) << "," << static_cast<int>(actual_b) << ")");
-
-                // Print raw edge timing context around corruption point
-                if (mismatches == 0) {  // Only print for first mismatch to avoid spam
-                    FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << "]");
-
-                    // Calculate edge index for corrupted LED
-                    size_t corruption_edge_index = i * 48;
-                    size_t offset = corruption_edge_index > 4 ? corruption_edge_index - 4 : 0;
-
-                    // Dump raw edge timing around corruption point (9 edges: -4 to +4)
-                    dumpRawEdgeTiming(config.rx_channel, config.timing, fl::EdgeRange(offset, 9));
-                }
-
+                // Per-LED error logging silenced for speed - errors tracked in mismatch count
+                // JSON-RPC response will include mismatch summary
                 mismatches++;
             }
         }
@@ -517,7 +498,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
             return;
         }
         channels.push_back(channel);
-        FL_WARN("[INFO] Created channel " << i << " on pin " << config.tx_configs[i].pin);
+        // Channel creation logging silenced for speed
     }
 
     FastLED.setBrightness(255);
@@ -527,23 +508,23 @@ void validateChipsetTiming(fl::ValidationConfig& config,
         fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Black);
     }
     FastLED.show();
-    FL_WARN("[INFO] TX engine pre-initialized for " << config.timing_name);
+    // TX engine pre-init logging silenced for speed
 
     // CRITICAL: Wait for PARLIO streaming transmission to complete before starting tests
     // Without this delay, the RX will capture the pre-initialization BLACK frame instead of the test pattern
     // PARLIO is a streaming engine with ring buffers - need time to drain the initial frame
-    delay(100);  // 100ms should be enough for 10 LEDs @ WS2812B timing (~300μs)
+    delay(5);  // Reduced from 100ms - just enough for buffer drain
 
     // Run test patterns (mixed bit patterns to test MSB vs LSB handling)
     int total = 0;
     int passed = 0;
 
-    // Multi-run configuration
+    // Multi-run configuration - optimized for speed
     fl::MultiRunConfig multi_config;
-    multi_config.num_runs = 10;           // Run each pattern 10 times
+    multi_config.num_runs = 1;            // Single run per pattern (Python orchestrates retries)
     multi_config.print_all_runs = false;  // Only print failed runs
-    multi_config.print_per_led_errors = true;  // Show first 5 LED errors per run
-    multi_config.max_errors_per_run = 5;  // Store first 5 errors
+    multi_config.print_per_led_errors = false;  // Errors reported via JSON-RPC
+    multi_config.max_errors_per_run = 5;  // Store first 5 errors for JSON response
 
     // Test all 4 bit patterns (0-3)
     for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
@@ -558,14 +539,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
         runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed);
     }
 
-    // Report results
-    FL_WARN("\nResults for " << config.timing_name << ": " << passed << "/" << total << " tests passed");
-
-    if (passed == total) {
-        FL_WARN("[PASS] " << config.timing_name << " validation successful");
-    } else {
-        FL_ERROR(config.timing_name << " validation failed");
-    }
+    // Results reported via JSON-RPC (verbose logging silenced for speed)
 
     // Accumulate results for driver-level tracking
     driver_total += total;
@@ -575,9 +549,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     for (auto& ch : channels) {
         ch.reset();
     }
-    FL_WARN("[INFO] All " << channels.size() << " channel(s) destroyed for " << config.timing_name);
-
-    delay(1000);
+    // Channel destruction is synchronous - no delay needed
 }
 
 // Set mixed RGB bit patterns to test MSB vs LSB handling

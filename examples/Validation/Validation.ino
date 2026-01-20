@@ -614,160 +614,40 @@ void runSingleTestCase(
 }
 
 // ============================================================================
-// Main Loop
+// Main Loop - Pure Command Runner (Phase 6 Refactoring)
 // ============================================================================
+// The main loop is simplified to be a pure JSON-RPC command runner.
+// All test orchestration is handled by Python via RPC commands like:
+//   - testGpioConnection: Pre-flight hardware check
+//   - runQuickTest: Fast single-test execution
+//   - runAll: Full test matrix execution
+//   - configure: Setup test parameters
+//
+// This architecture enables:
+//   - Fast test iteration (<100ms per test case)
+//   - Python-controlled test sequencing
+//   - Easy retry logic and error recovery
 
 void loop() {
-    // CRITICAL: Process RPC commands BEFORE halt check
-    // This allows reset/configure commands to work even when halted
+    // Process RPC commands - this is the primary entry point for all test control
     RemoteControlSingleton::instance().tick(millis());
     RemoteControlSingleton::instance().processSerialInput();
 
-    // Check halt state AFTER processing RPC (allows reset to work)
+    // Check halt state after processing RPC (allows reset to work)
     if (halt.check()) return;
 
-    // Check for START command or JSON RPC commands on serial input
-    if (!start_command_received) {
-        // If START not received yet, print waiting message every 5 seconds
-        uint32_t now = millis();
-        if (now - last_wait_message_ms >= 5000) {
-            // Output RPC-style ready message
-            fl::Json ready = fl::Json::object();
-            ready.set("ready", true);
-            ready.set("waitingForStart", true);
-            ready.set("uptimeMs", static_cast<int64_t>(now));
-            ready.set("testCases", static_cast<int64_t>(test_cases.size()));
-            printStreamRaw("status", ready);
-            last_wait_message_ms = now;
-        }
-        delay(100);  // Small delay to prevent tight loop
-        return;
+    // Emit periodic ready status (every 5 seconds) for Python connection detection
+    static uint32_t last_status_ms = 0;
+    uint32_t now = millis();
+    if (now - last_status_ms >= 5000) {
+        fl::Json status = fl::Json::object();
+        status.set("ready", true);
+        status.set("uptimeMs", static_cast<int64_t>(now));
+        status.set("testCases", static_cast<int64_t>(test_cases.size()));
+        printStreamRaw("status", status);
+        last_status_ms = now;
     }
 
-    // If test matrix already completed, halt with success message
-    if (test_matrix_complete) {
-        halt.finish("Test matrix complete");
-        return;
-    }
-
-    // Increment frame counter
-    frame_counter++;
-
-    // Emit start event via JSON-RPC
-    {
-        fl::Json data = fl::Json::object();
-        data.set("frame", static_cast<int64_t>(frame_counter));
-        data.set("totalCases", static_cast<int64_t>(test_cases.size()));
-        printStreamRaw("runall_start", data);
-    }
-
-    // Timing configuration to test (WS2812B-V5)
-    fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-
-    // Reset all test results for this iteration
-    for (fl::size i = 0; i < test_results.size(); i++) {
-        test_results[i].total_tests = 0;
-        test_results[i].passed_tests = 0;
-        test_results[i].skipped = false;
-    }
-
-    // Iterate through all test cases with JSON-RPC streaming output
-    for (fl::size i = 0; i < test_cases.size(); i++) {
-        // Emit case_start event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("caseIndex", static_cast<int64_t>(i));
-            data.set("driver", test_cases[i].driver_name.c_str());
-            data.set("laneCount", static_cast<int64_t>(test_cases[i].lane_count));
-            data.set("stripSize", static_cast<int64_t>(test_cases[i].base_strip_size));
-            printStreamRaw("case_start", data);
-        }
-
-        // Run this test case with debug output suppressed
-        {
-            fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
-            runSingleTestCase(
-                test_cases[i],
-                test_results[i],
-                timing_config,
-                rx_channel,
-                rx_buffer
-            );
-        }  // logGuard destroyed, logging restored
-
-        // Emit case_result event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("caseIndex", static_cast<int64_t>(i));
-            data.set("driver", test_results[i].driver_name.c_str());
-            data.set("laneCount", static_cast<int64_t>(test_results[i].lane_count));
-            data.set("stripSize", static_cast<int64_t>(test_results[i].base_strip_size));
-            data.set("totalTests", static_cast<int64_t>(test_results[i].total_tests));
-            data.set("passedTests", static_cast<int64_t>(test_results[i].passed_tests));
-            data.set("skipped", test_results[i].skipped);
-            data.set("passed", test_results[i].allPassed());
-            printStreamRaw("case_result", data);
-        }
-
-        // Short delay between test cases
-        delay(500);
-    }
-
-    // Flush async PARLIO logs accumulated during test execution
-    FL_LOG_PARLIO_ASYNC_FLUSH();
-
-    // Calculate summary statistics
-    int passed_count = 0;
-    int skipped_count = 0;
-    int failed_count = 0;
-    for (fl::size i = 0; i < test_results.size(); i++) {
-        if (test_results[i].skipped) {
-            skipped_count++;
-        } else if (test_results[i].allPassed()) {
-            passed_count++;
-        } else {
-            failed_count++;
-        }
-    }
-
-    // Emit completion event via JSON-RPC
-    {
-        fl::Json data = fl::Json::object();
-        data.set("frame", static_cast<int64_t>(frame_counter));
-        data.set("totalCases", static_cast<int64_t>(test_cases.size()));
-        data.set("passedCases", static_cast<int64_t>(passed_count));
-        data.set("failedCases", static_cast<int64_t>(failed_count));
-        data.set("skippedCases", static_cast<int64_t>(skipped_count));
-        data.set("allPassed", failed_count == 0);
-        printStreamRaw("runall_complete", data);
-    }
-
-    // Handle test outcome
-    if (failed_count > 0) {
-        // Emit error event
-        fl::Json error = fl::Json::object();
-        error.set("message", "Test matrix failed - see case_result events for details");
-        error.set("failedCount", static_cast<int64_t>(failed_count));
-        printStreamRaw("error", error);
-        halt.error("[TEST MATRIX] See JSON-RPC case_result events for details");
-    } else {
-        // Emit success event
-        fl::Json success = fl::Json::object();
-        success.set("message", "All test cases PASSED");
-        printStreamRaw("success", success);
-    }
-
-    // Emit halt event before stopping
-    {
-        fl::Json data = fl::Json::object();
-        data.set("reason", "test_matrix_complete");
-        data.set("success", failed_count == 0);
-        printStreamRaw("halt", data);
-    }
-
-    // Flush any remaining async PARLIO logs before halting
-    FL_LOG_PARLIO_ASYNC_FLUSH();
-
-    // Mark test matrix as complete - will halt on next loop() iteration
-    test_matrix_complete = true;
+    // Minimal delay to prevent tight loop and reduce power consumption
+    delay(1);
 }

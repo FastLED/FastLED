@@ -267,9 +267,9 @@ def ensure_packages_installed(
                 print_tree_status(
                     "🔍 Checking packages...",
                     [
-                        ("├─", "Validating integrity...", None),
-                        ("├─", f"❌ Corrupted: {errors[0]}", "error"),
-                        ("└─", "📦 Reinstallation required", None),
+                        ("", "Validating integrity...", None),
+                        ("", f"❌ Corrupted: {errors[0]}", "error"),
+                        ("", "📦 Reinstallation required", None),
                     ],
                 )
                 # Fall through to daemon installation
@@ -277,8 +277,8 @@ def ensure_packages_installed(
                 print_tree_status(
                     "🔍 Checking packages...",
                     [
-                        ("├─", "Validating integrity...", None),
-                        ("└─", "✅ Packages valid", "success"),
+                        ("", "Validating integrity...", None),
+                        ("", "✅ Packages valid", "success"),
                     ],
                 )
                 return True
@@ -286,7 +286,7 @@ def ensure_packages_installed(
             print_tree_status(
                 "🔍 Checking packages...",
                 [
-                    ("└─", "✅ Packages already installed", "success"),
+                    ("", "✅ Packages already installed", "success"),
                 ],
             )
             return True
@@ -294,8 +294,8 @@ def ensure_packages_installed(
         print_tree_status(
             "🔍 Checking packages...",
             [
-                ("├─", "Validating integrity...", None),
-                ("└─", "📦 Installation required", None),
+                ("", "Validating integrity...", None),
+                ("", "📦 Installation required", None),
             ],
         )
 
@@ -310,8 +310,8 @@ def ensure_packages_installed(
         print_tree_status(
             "🔗 Connecting to daemon...",
             [
-                ("├─", "Status: NOT RUNNING", None),
-                ("└─", "Starting daemon...", None),
+                ("", "Status: NOT RUNNING", None),
+                ("", "Starting daemon...", None),
             ],
         )
 
@@ -348,13 +348,13 @@ def ensure_packages_installed(
         print_tree_status(
             "🔗 Connecting to daemon...",
             [
-                ("├─", f"Status: RUNNING (PID {daemon_pid or 'unknown'})", None),
+                ("", f"Status: RUNNING (PID {daemon_pid or 'unknown'})", None),
                 (
-                    "├─",
+                    "",
                     f"Health: {health_status} (updated {daemon_status_age:.1f}s ago)",
                     health_color,
                 ),
-                ("└─", "✅ Connected", "success"),
+                ("", "✅ Connected", "success"),
             ],
         )
 
@@ -375,13 +375,13 @@ def ensure_packages_installed(
         print_tree_status(
             "📤 Submitting request...",
             [
-                ("├─", "⏳ Queue position: waiting", None),
+                ("", "⏳ Queue position: waiting", None),
                 (
-                    "├─",
+                    "",
                     f"Active: PID {status.caller_pid} ({status.caller_cwd})",
                     None,
                 ),
-                ("└─", "Waiting for slot...", None),
+                ("", "Waiting for slot...", None),
             ],
         )
 
@@ -421,8 +421,8 @@ def ensure_packages_installed(
     print_tree_status(
         "📤 Submitting request...",
         [
-            ("├─", f"Request ID: {request.request_id}", None),
-            ("└─", "✅ Submitted", "success"),
+            ("", f"Request ID: {request.request_id}", None),
+            ("", "✅ Submitted", "success"),
         ],
     )
     write_request_file(request)

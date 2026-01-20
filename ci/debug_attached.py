@@ -72,6 +72,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -298,6 +299,57 @@ def run_upload(
     return success
 
 
+def format_test_summary(result_events: list[dict[str, Any]]) -> str:
+    """Format RESULT JSON events into compact test summary.
+
+    Extracts meaningful test results from the RESULT JSON lines emitted by
+    the Validation firmware and formats them into a concise summary.
+
+    Args:
+        result_events: List of parsed RESULT JSON events
+
+    Returns:
+        Formatted summary string, or empty string if no results
+    """
+    if not result_events:
+        return ""
+
+    # Find case_result events (one per test case)
+    case_results = [e for e in result_events if e.get("type") == "case_result"]
+
+    if not case_results:
+        return ""
+
+    # Extract info from first case (they should all be same driver)
+    first = case_results[0]
+    driver = first.get("driver", "Unknown")
+    lanes = first.get("laneCount", 1)
+    strip_size = first.get("stripSize", 0)
+
+    total_tests = sum(c.get("totalTests", 0) for c in case_results)
+    passed_tests = sum(c.get("passedTests", 0) for c in case_results)
+    all_passed = all(c.get("passed", False) for c in case_results)
+
+    # Build compact summary
+    lane_str = "lane" if lanes == 1 else "lanes"
+    lines = [
+        f"{driver} Driver Test Results",
+        f"  Config    {lanes} {lane_str} × {strip_size} LEDs",
+        f"  Patterns  {total_tests} bit patterns tested",
+    ]
+
+    if all_passed:
+        lines.append(f"  Tests     {passed_tests}/{total_tests} PASSED")
+    else:
+        failed = total_tests - passed_tests
+        mismatch_str = "mismatch" if failed == 1 else "mismatches"
+        lines.append(
+            f"  Tests     {passed_tests}/{total_tests} FAILED ({failed} {mismatch_str})"
+        )
+
+    return "\n".join(lines)
+
+
 def run_monitor(
     build_dir: Path,
     environment: str | None = None,
@@ -433,71 +485,39 @@ def run_monitor(
             print(f"⚠️  Warning: Invalid regex pattern in --stop '{stop_keyword}': {e}")
             print("   Using literal string match instead")
             stop_pattern = re.compile(re.escape(stop_keyword))
-    print("=" * 60)
-    print("MONITORING CONFIGURATION")
-    print("=" * 60)
-    print(f"📡 Serial Port: {monitor_port if monitor_port else 'AUTO-DETECT'}")
-    print(
-        f"⏱️  Mode: {'STREAMING (runs until Ctrl+C)' if stream else f'TIMEOUT ({timeout}s)'}"
-    )
-    print(f"🔍 Verbose: {verbose}")
-
-    print("\n--- Pattern Matching ---")
-    if fail_patterns:
+    # Only show detailed config in verbose mode; otherwise show compact summary
+    if verbose:
+        print("─" * 60)
+        print("MONITORING CONFIGURATION")
+        print("─" * 60)
+        print(f"  Port: {monitor_port if monitor_port else 'AUTO-DETECT'}")
         print(
-            f"❌ Fail patterns ({len(fail_patterns)}) - terminate immediately on match:"
+            f"  Mode: {'STREAMING (runs until Ctrl+C)' if stream else f'TIMEOUT ({timeout}s)'}"
         )
-        for i, (pattern_str, _) in enumerate(fail_patterns, 1):
-            print(f"   {i}. /{pattern_str}/")
-    else:
-        print("❌ Fail patterns: None")
 
-    if expect_patterns:
-        print(
-            f"✅ Expect patterns ({len(expect_patterns)}) - ALL must match by timeout:"
-        )
-        for i, (pattern_str, _) in enumerate(expect_patterns, 1):
-            print(f"   {i}. /{pattern_str}/")
-    else:
-        print("✅ Expect patterns: None")
-
-    if stop_pattern:
-        print(
-            f"🛑 Stop pattern: /{stop_pattern.pattern}/ - early exit on match (success if all expects found)"
-        )
-    else:
-        print("🛑 Stop pattern: None")
-
-    print("\n--- Interactive Features ---")
-    if json_rpc_commands:
-        print(f"🔧 JSON-RPC commands: {len(json_rpc_commands)} command(s)")
-        for i, cmd in enumerate(json_rpc_commands, 1):
-            args_str = cmd.get("args", [])
-            print(f"   {i}. {cmd['function']}({args_str})")
-        print(f"   📡 Commands will be sent immediately after device boots")
-    else:
-        print("🔧 JSON-RPC commands: None")
-
-    if trigger_pattern:
-        print("📤 Input-on-trigger: ENABLED")
-        print(f"   Trigger pattern: /{trigger_pattern.pattern}/")
-        print(f"   Text to send: '{trigger_text}'")
+        if fail_patterns:
+            print(f"  Fail patterns: {len(fail_patterns)}")
+        if expect_patterns:
+            print(f"  Expect patterns: {len(expect_patterns)}")
+        if stop_pattern:
+            print(f"  Stop pattern: /{stop_pattern.pattern}/")
         if json_rpc_commands:
-            print(f"   ⚠️  Note: RPC commands will be sent BEFORE trigger")
+            print(f"  JSON-RPC commands: {len(json_rpc_commands)}")
+        if trigger_pattern:
+            print(f"  Trigger: send '{trigger_text}' on /{trigger_pattern.pattern}/")
+        print("─" * 60)
     else:
-        print("📤 Input-on-trigger: DISABLED")
-
-    print("\n--- Error Detection ---")
-    if device_error_keywords:
-        print(
-            f"🚨 Device error keywords ({len(device_error_keywords)}) - detect stuck device:"
-        )
-        for i, keyword in enumerate(device_error_keywords, 1):
-            print(f"   {i}. '{keyword}'")
-    else:
-        print("🚨 Device error keywords: None (no device stuck detection)")
-
-    print("=" * 60)
+        # Compact one-line summary for non-verbose mode
+        parts = [f"Port: {monitor_port}"]
+        if not stream:
+            parts.append(f"Timeout: {timeout}s")
+        if expect_patterns:
+            parts.append(f"Expect: {len(expect_patterns)}")
+        if fail_patterns:
+            parts.append(f"Fail: {len(fail_patterns)}")
+        if trigger_pattern:
+            parts.append(f"Trigger: /{trigger_pattern.pattern}/")
+        print(f"  {' | '.join(parts)}")
 
     # Open serial port directly for full read/write control
     if not monitor_port:
@@ -523,27 +543,16 @@ def run_monitor(
         print(f"❌ Failed to open serial port {monitor_port}: {e}")
         return False, [], JsonRpcHandler()
 
-    # Print final configuration summary before starting monitoring
-    print("\n" + "=" * 60)
-    print("STARTING SERIAL MONITOR")
-    print("=" * 60)
-    print(f"Port: {monitor_port}")
-    print(f"Timeout: {timeout}s" if not stream else "Mode: STREAMING")
-    if fail_patterns:
-        print(f"Fail-on: {len(fail_patterns)} pattern(s)")
-    if expect_patterns:
-        print(f"Expect: {len(expect_patterns)} pattern(s)")
-    if trigger_pattern:
-        print(f"Trigger: '{trigger_text}' on /{trigger_pattern.pattern}/")
-        print(f"  ⏳ Waiting for trigger pattern: /{trigger_pattern.pattern}/")
-    if device_error_keywords:
-        print(f"Device errors: {len(device_error_keywords)} keyword(s)")
-    print("=" * 60 + "\n")
+    # Print compact monitor start message
+    print("\n" + "─" * 25 + " SERIAL MONITOR " + "─" * 19)
 
     formatter = TimestampFormatter()
     formatter.begin()  # Start the timestamp timer
 
     output_lines: list[str] = []
+    result_events: list[
+        dict[str, Any]
+    ] = []  # Track RESULT JSON events for test summary
     failing_lines: list[
         tuple[str, str]
     ] = []  # Track all lines containing fail keywords
@@ -650,6 +659,15 @@ def run_monitor(
                             )  # Store timestamped line
                             print(formatted_line)  # Display with timestamp
 
+                            # Parse RESULT JSON lines for test summary
+                            if "RESULT: " in formatted_line:
+                                try:
+                                    json_str = formatted_line.split("RESULT: ", 1)[1]
+                                    event = json.loads(json_str)
+                                    result_events.append(event)
+                                except (json.JSONDecodeError, IndexError):
+                                    pass  # Not valid JSON, skip
+
                             # Process JSON-RPC responses (REMOTE: prefix)
                             rpc_response = rpc_handler.process_line(formatted_line)
                             if rpc_response:
@@ -677,46 +695,34 @@ def run_monitor(
                                         # Mark this pattern as found
                                         if pattern_str not in found_expect_keywords:
                                             found_expect_keywords.add(pattern_str)
+                                            # Compact pattern progress indicator
+                                            found = len(found_expect_keywords)
+                                            total = len(expect_patterns)
                                             print(
-                                                f"\n✅ EXPECT PATTERN DETECTED: /{pattern_str}/"
-                                            )
-                                            print(f"   Matched line: {formatted_line}")
-                                            print(
-                                                f"   (Continuing to monitor - need all {len(expect_patterns)} patterns)\n"
+                                                f"  ✓ [{found}/{total}] /{pattern_str}/"
                                             )
 
                             # Check for input-on-trigger pattern
                             if trigger_pattern and not trigger_sent:
                                 if trigger_pattern.search(formatted_line):
                                     trigger_sent = True
-                                    print(
-                                        f"\n📤 TRIGGER DETECTED: Pattern /{trigger_pattern.pattern}/ matched"
-                                    )
-                                    print(f"   Matched line: {formatted_line}")
-                                    print(
-                                        f"   Sending '{trigger_text}' to serial port...\n"
-                                    )
                                     # Send text to serial with newline
                                     try:
                                         ser.write(f"{trigger_text}\n".encode("utf-8"))
                                         ser.flush()
-                                        print(f"   ✓ Sent '{trigger_text}' to serial\n")
+                                        print(
+                                            f"  → Trigger matched, sent '{trigger_text}'"
+                                        )
                                     except KeyboardInterrupt:
                                         handle_keyboard_interrupt_properly()
                                         raise
                                     except Exception as e:
-                                        print(
-                                            f"   ⚠️  Warning: Failed to send trigger text to serial: {e}\n"
-                                        )
+                                        print(f"  ⚠ Failed to send trigger: {e}")
 
                             # Check for stop pattern - EARLY EXIT (success if all expects found)
                             if stop_pattern and not stop_keyword_found:
                                 if stop_pattern.search(formatted_line):
                                     stop_keyword_found = True
-                                    print(
-                                        f"\n🛑 STOP PATTERN DETECTED: /{stop_pattern.pattern}/"
-                                    )
-                                    print(f"   Matched line: {formatted_line}")
                                     if expect_patterns:
                                         missing = (
                                             set(p for p, _ in expect_patterns)
@@ -724,20 +730,15 @@ def run_monitor(
                                         )
                                         if missing:
                                             print(
-                                                "   ⚠️  Stop pattern found, but not all expect patterns matched yet"
-                                            )
-                                            print(
-                                                f"   Missing {len(missing)} pattern(s), continuing to monitor..."
+                                                f"  ⚠ Stop pattern found, missing {len(missing)} expect pattern(s)"
                                             )
                                         else:
                                             print(
-                                                "   ✅ All expect patterns found - early successful exit\n"
+                                                f"\n  ✓ Complete - all {len(expect_patterns)} patterns matched"
                                             )
                                             break
                                     else:
-                                        print(
-                                            "   ✅ Stop pattern found - early successful exit\n"
-                                        )
+                                        print(f"\n  ✓ Stop pattern matched")
                                         break
 
                             # Check for fail patterns - TERMINATE IMMEDIATELY
@@ -871,41 +872,43 @@ def run_monitor(
         # No specific failure conditions - success
         success = True
 
-    # Display first 50 and last 100 lines summary
-    print("\n" + "=" * 60)
-    print("OUTPUT SUMMARY")
-    print("=" * 60)
+    # Show output summary only on failure or in verbose mode
+    # On success, the user already saw the output and patterns during monitoring
+    show_summary = not success or verbose
 
-    if len(output_lines) > 0:
-        first_50 = output_lines[:50]
-        last_100 = output_lines[-100:]
+    if show_summary:
+        print("\n" + "─" * 60)
+        print("OUTPUT SUMMARY")
+        print("─" * 60)
 
-        print(f"\n--- FIRST {len(first_50)} LINES ---")
-        for line in first_50:
-            print(line)
+        if len(output_lines) > 0:
+            # On failure, show more context to help debug
+            if not success:
+                last_lines = output_lines[-30:]
+                print(f"\n--- LAST {len(last_lines)} LINES ---")
+                for line in last_lines:
+                    print(line)
 
-        if len(output_lines) > 50:
-            print(f"\n--- LAST {len(last_100)} LINES ---")
-            for line in last_100:
-                print(line)
+                # Display all failing lines if any were detected
+                if failing_lines:
+                    print(f"\n--- FAILING LINES ({len(failing_lines)} total) ---")
+                    for keyword, line in failing_lines:
+                        print(f"[{keyword}] {line}")
 
-        # Display all expect lines if any were detected
-        if expect_lines:
-            print(f"\n--- EXPECT LINES ({len(expect_lines)} total) ---")
-            for keyword, line in expect_lines:
-                print(f"[{keyword}] {line}")
+            print(f"\nTotal output lines: {len(output_lines)}")
+        else:
+            print("\nNo output captured")
 
-        # Display all failing lines if any were detected
-        if failing_lines:
-            print(f"\n--- FAILING LINES ({len(failing_lines)} total) ---")
-            for keyword, line in failing_lines:
-                print(f"[{keyword}] {line}")
-
-        print(f"\nTotal output lines: {len(output_lines)}")
+        print("─" * 60)
     else:
-        print("\nNo output captured")
+        # Success - show test summary if available, otherwise minimal summary
+        test_summary = format_test_summary(result_events)
+        if test_summary:
+            print("\n" + test_summary)
+        else:
+            print(f"\n(Captured {len(output_lines)} output lines)")
 
-    print("\n" + "=" * 60)
+    print()
 
     if device_stuck:
         print("❌ Monitor failed - device appears stuck and no longer responding")
@@ -947,15 +950,10 @@ def run_monitor(
                     for pattern in sorted(found_expect_keywords):
                         print(f"     - /{pattern}/")
         else:
+            # Test summary (if available) was already shown above
             print(
                 f"✅ Monitor succeeded - all {len(expect_patterns)} expect patterns found"
             )
-            if len(expect_patterns) == 1:
-                print(f"   Pattern: /{expect_patterns[0][0]}/")
-            else:
-                print("   Patterns:")
-                for pattern_str, _ in sorted(expect_patterns):
-                    print(f"     - /{pattern_str}/")
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
     elif stream and success:

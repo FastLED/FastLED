@@ -1032,36 +1032,23 @@ def run(args: Args | None = None) -> int:
         print()
 
     # ============================================================
-    # Print Configuration Summary
+    # Print Compact Configuration Header
     # ============================================================
+    print("─" * 60)
     print("FastLED Validation Test Runner")
-    print("=" * 60)
-    print(f"Project: {build_dir}")
-    print(f"Sketch: examples/Validation")
-    if final_environment:
-        print(f"Environment: {final_environment}")
-    print(f"Upload port: {upload_port}")
-    print("=" * 60)
-    print()
-
-    print("Validation Configuration:")
-    print(f"  Drivers: {', '.join(drivers)} (via JSON-RPC setDrivers)")
-    print(f"  Expect patterns: {len(expect_keywords)}")
-    print(f"  Fail patterns: {len(fail_keywords)}")
-    print(f"  Stop pattern: {STOP_PATTERN}")
-    print(f"  Input trigger: {INPUT_ON_TRIGGER}")
-    print(f"  Timeout: {timeout_seconds}s")
-    print("=" * 60)
+    print("─" * 60)
+    env_str = final_environment or "auto-detect"
+    print(f"  Target      {env_str} @ {upload_port}")
+    print(f"  Drivers     {', '.join(drivers)}")
+    print(f"  Timeout     {timeout_seconds}s")
+    print(
+        f"  Patterns    {len(expect_keywords)} expect, {len(fail_keywords)} fail, stop on '{STOP_PATTERN}'"
+    )
+    print("─" * 60)
     print()
 
     try:
-        # ============================================================
-        # PHASE 0: Package Installation (GLOBAL LOCK via daemon)
-        # ============================================================
-        print("=" * 60)
-        print("PHASE 0: ENSURING PACKAGES INSTALLED")
-        print("=" * 60)
-
+        # Phase 0: Package Installation (handled by pio_package_client with its own banner)
         from ci.util.pio_package_client import ensure_packages_installed
 
         if not ensure_packages_installed(build_dir, final_environment, timeout=1800):
@@ -1249,9 +1236,8 @@ def run(args: Args | None = None) -> int:
         if not success:
             return 1
 
-        phases_completed = "three" if args.skip_lint else "four"
-        print(f"\n✅ All {phases_completed} phases completed successfully")
-        print("✅ Validation test suite PASSED")
+        # Test summary is already shown by run_monitor()
+        print(f"\n{Fore.GREEN}PASSED{Style.RESET_ALL} All validation tests completed")
         return 0
 
     except KeyboardInterrupt:
