@@ -53,6 +53,7 @@ from ci.debug_attached import (
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
     install_signal_handler,
+    is_interrupted,
 )
 from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import (
@@ -965,10 +966,13 @@ def run(args: Args | None = None) -> int:
             )
             port_ready = False
             max_wait_time = 15.0  # seconds
-            wait_interval = 0.5  # seconds
             start_time = time.time()
 
             while time.time() - start_time < max_wait_time:
+                # Check for interrupt at top of loop (Windows Ctrl+C compatibility)
+                if is_interrupted():
+                    raise KeyboardInterrupt()
+
                 # Kill any orphaned processes that might be holding the port
                 kill_port_users(upload_port)
 
@@ -984,8 +988,11 @@ def run(args: Args | None = None) -> int:
                     handle_keyboard_interrupt_properly()
                     raise
                 except Exception:
-                    # Port not ready yet, wait and retry
-                    time.sleep(wait_interval)
+                    # Port not ready - use interruptible sleep for Windows Ctrl+C
+                    for _ in range(5):  # 5 * 0.1s = 0.5s total
+                        if is_interrupted():
+                            raise KeyboardInterrupt()
+                        time.sleep(0.1)
 
             if not port_ready:
                 print(
@@ -1079,25 +1086,34 @@ def run(args: Args | None = None) -> int:
             print("Running SIMD add_sat_u8_16 test...")
             print()
 
+            client: RpcClient | None = None
             try:
-                with RpcClient(upload_port, timeout=10.0) as client:
-                    response = client.send_and_match(
-                        "testSimd", match_key="passed", retries=3
-                    )
+                # Use short boot_wait - device already rebooted and we waited for port
+                print("   ⏳ Connecting to device...", end="", flush=True)
+                client = RpcClient(upload_port, timeout=10.0)
+                client.connect(boot_wait=1.0)  # Reduced from 3.0s since we already waited
+                print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
 
-                    if response.get("passed", False):
-                        print(f"{Fore.GREEN}✅ SIMD TEST PASSED{Style.RESET_ALL}")
-                        print(f"   {response.get('message', '')}")
-                        return 0
-                    else:
-                        print(f"{Fore.RED}❌ SIMD TEST FAILED{Style.RESET_ALL}")
-                        print(f"   {response.get('message', '')}")
-                        if "actual" in response:
-                            print(f"   Actual:   {response['actual']}")
-                            print(f"   Expected: {response['expected']}")
-                        return 1
+                print("   📡 Sending test command...", end="", flush=True)
+                response = client.send_and_match(
+                    "testSimd", match_key="passed", retries=3
+                )
+                print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
+
+                if response.get("passed", False):
+                    print(f"{Fore.GREEN}✅ SIMD TEST PASSED{Style.RESET_ALL}")
+                    print(f"   {response.get('message', '')}")
+                    return 0
+                else:
+                    print(f"{Fore.RED}❌ SIMD TEST FAILED{Style.RESET_ALL}")
+                    print(f"   {response.get('message', '')}")
+                    if "actual" in response:
+                        print(f"   Actual:   {response['actual']}")
+                        print(f"   Expected: {response['expected']}")
+                    return 1
 
             except RpcTimeoutError:
+                print()  # Newline after partial status line
                 print(f"{Fore.RED}❌ SIMD TEST TIMEOUT{Style.RESET_ALL}")
                 print("   No response from device within 10 seconds")
                 return 1
@@ -1105,8 +1121,12 @@ def run(args: Args | None = None) -> int:
                 handle_keyboard_interrupt_properly()
                 raise
             except Exception as e:
+                print()  # Newline after partial status line
                 print(f"{Fore.RED}❌ SIMD TEST ERROR: {e}{Style.RESET_ALL}")
                 return 1
+            finally:
+                if client is not None:
+                    client.close()
 
         success, _output, _rpc_handler = run_monitor(
             build_dir,

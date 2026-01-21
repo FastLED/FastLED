@@ -178,7 +178,6 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     if (mChipset.is<ClocklessChipset>()) {
         // Clockless chipsets: use WS2812 encoding (timing-sensitive byte stream)
         pixelIterator.writeWS2812(&data);
-        FL_DBG("Channel " << mId << " (clockless): Encoded " << data.size() << " bytes for WS2812");
     } else if (mChipset.is<SpiChipsetConfig>()) {
         // SPI chipsets: dispatch based on chipset type (zero allocation)
         const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
@@ -191,59 +190,48 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case SpiChipset::DOTSTAR:
             case SpiChipset::HD107:
                 pixelIterator.writeAPA102(&data, false);
-                FL_DBG("Channel " << mId << " (APA102): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::APA102HD:
             case SpiChipset::DOTSTARHD:
             case SpiChipset::HD107HD:
                 pixelIterator.writeAPA102(&data, true);
-                FL_DBG("Channel " << mId << " (APA102HD): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::SK9822:
                 pixelIterator.writeSK9822(&data, false);
-                FL_DBG("Channel " << mId << " (SK9822): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::SK9822HD:
                 pixelIterator.writeSK9822(&data, true);
-                FL_DBG("Channel " << mId << " (SK9822HD): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::WS2801:
                 pixelIterator.writeWS2801(&data);
-                FL_DBG("Channel " << mId << " (WS2801): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::WS2803:
                 pixelIterator.writeWS2803(&data);
-                FL_DBG("Channel " << mId << " (WS2803): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::P9813:
                 pixelIterator.writeP9813(&data);
-                FL_DBG("Channel " << mId << " (P9813): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::LPD8806:
                 pixelIterator.writeLPD8806(&data);
-                FL_DBG("Channel " << mId << " (LPD8806): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::LPD6803:
                 pixelIterator.writeLPD6803(&data);
-                FL_DBG("Channel " << mId << " (LPD6803): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::SM16716:
                 pixelIterator.writeSM16716(&data);
-                FL_DBG("Channel " << mId << " (SM16716): Encoded " << data.size() << " bytes");
                 break;
 
             case SpiChipset::HD108:
                 pixelIterator.writeHD108(&data);
-                FL_DBG("Channel " << mId << " (HD108): Encoded " << data.size() << " bytes");
                 break;
         }
         // No default case - compiler will error if any enum value is missing

@@ -270,10 +270,15 @@ IChannelEngine* ChannelBusManager::selectEngine() {
             mActiveEngine = entry.engine.get();
             mActiveEnginePriority = entry.priority;
 
-            if (!entry.name.empty()) {
-                FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
-            } else {
-                FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
+            // Only log when engine selection actually changes (avoid per-frame spam)
+            static fl::string lastSelectedEngine;
+            if (entry.name != lastSelectedEngine) {
+                lastSelectedEngine = entry.name;
+                if (!entry.name.empty()) {
+                    FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
+                } else {
+                    FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
+                }
             }
             return mActiveEngine;
         }

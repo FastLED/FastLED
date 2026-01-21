@@ -119,7 +119,12 @@ class RpcClient:
         )
 
         if boot_wait > 0:
-            time.sleep(boot_wait)
+            # Use interruptible sleep loop for Windows Ctrl+C compatibility.
+            # On Windows, time.sleep() blocks signal delivery, so poll.
+            start = time.time()
+            while time.time() - start < boot_wait:
+                self._check_interrupt()
+                time.sleep(0.05)  # Check interrupt every 50ms
 
         if drain_boot:
             self.drain_boot_output()
@@ -146,15 +151,23 @@ class RpcClient:
         assert self._serial is not None
 
         lines_drained = 0
+        empty_checks = 0
+        max_empty_checks = 3  # Exit after 3 consecutive empty checks
+
         while lines_drained < max_lines:
             self._check_interrupt()
             try:
-                if self._serial.in_waiting == 0 and lines_drained > 0:
+                if self._serial.in_waiting == 0:
+                    if lines_drained > 0:
+                        empty_checks += 1
+                        if empty_checks >= max_empty_checks:
+                            break
                     # Give a small window for more data
-                    time.sleep(0.1)
-                    if self._serial.in_waiting == 0:
-                        break
+                    time.sleep(0.05)
+                    self._check_interrupt()
+                    continue
 
+                empty_checks = 0  # Reset on data received
                 line = self._serial.readline().decode("utf-8", errors="replace").strip()
                 if not line:
                     break
@@ -165,6 +178,8 @@ class RpcClient:
                         print(f"  [boot] {line[:80]}")
                     elif lines_drained == 4:
                         print("  [boot] ... (draining boot output)")
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 break
 
@@ -260,6 +275,7 @@ class RpcClient:
         attempt_timeout = effective_timeout / max(retries, 1)
 
         for _attempt in range(retries):
+            self._check_interrupt()  # Check before each attempt
             self._serial.reset_input_buffer()
             self._serial.write((cmd_str + "\n").encode())
             self._serial.flush()
@@ -268,12 +284,26 @@ class RpcClient:
             while time.time() - start < attempt_timeout:
                 self._check_interrupt()
 
+                # Use non-blocking approach: check for data first, then read
+                # This allows interrupt checking on Windows where blocking I/O
+                # may not respond to Ctrl+C signals properly
                 try:
+                    if self._serial.in_waiting == 0:
+                        # No data available, sleep briefly and check interrupt again
+                        time.sleep(0.05)
+                        self._check_interrupt()
+                        continue
+
                     line = (
                         self._serial.readline().decode("utf-8", errors="replace").strip()
                     )
+                except KeyboardInterrupt:
+                    raise
                 except Exception:
                     continue
+
+                # Check interrupt after read completes
+                self._check_interrupt()
 
                 if not line:
                     continue
@@ -314,12 +344,22 @@ class RpcClient:
         while time.time() - start < timeout:
             self._check_interrupt()
 
+            # Use non-blocking approach for Windows Ctrl+C compatibility
             try:
+                if self._serial.in_waiting == 0:
+                    time.sleep(0.05)
+                    self._check_interrupt()
+                    continue
+
                 line = (
                     self._serial.readline().decode("utf-8", errors="replace").strip()
                 )
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 continue
+
+            self._check_interrupt()
 
             if not line:
                 continue
