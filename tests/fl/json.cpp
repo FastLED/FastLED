@@ -71,8 +71,8 @@ TEST_CASE("Simple JSON test") {
     
     // Test serialization
     fl::string jsonStr = obj.to_string();
-    printf("DEBUG: Generated JSON string: '%s'\n", jsonStr.c_str());
-    printf("DEBUG: JSON string length: %zu\n", jsonStr.length());
+    fl::printf("DEBUG: Generated JSON string: '%s'\n", jsonStr.c_str());
+    fl::printf("DEBUG: JSON string length: %zu\n", jsonStr.length());
     CHECK_FALSE(jsonStr.empty());
 
     // Test parsing
@@ -82,9 +82,9 @@ TEST_CASE("Simple JSON test") {
     
     // Print parsed object keys for debugging
     auto keys = parsed.keys();
-    printf("Parsed object has %zu keys:\n", keys.size());
+    fl::printf("Parsed object has %zu keys:\n", keys.size());
     for (const auto& key : keys) {
-        printf("  %s\n", key.c_str());
+        fl::printf("  %s\n", key.c_str());
     }
     
     // Test accessing values

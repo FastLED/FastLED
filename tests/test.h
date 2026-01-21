@@ -8,6 +8,7 @@
 #include "fl/stl/set.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/stdio.h"
 
 #include "crgb.h"
 #include "fl/stl/unordered_set.h"
@@ -27,8 +28,8 @@
         float _diff = fl::fabsf(_a - _b);                                      \
         bool _result = _diff <= (epsilon);                                     \
         if (!_result) {                                                        \
-            printf("CHECK_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a,     \
-                   (float)_b, _diff, (float)(epsilon));                        \
+            fl::printf("CHECK_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a, \
+                       (float)_b, _diff, (float)(epsilon));                    \
         }                                                                      \
         CHECK(_result);                                                        \
     } while (0)
@@ -40,8 +41,8 @@
         float _diff = fl::fabsf(_a - _b);                                      \
         bool _result = _diff <= (epsilon);                                     \
         if (!_result) {                                                        \
-            printf("REQUIRE_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a,   \
-                   (float)_b, _diff, (float)(epsilon));                        \
+            fl::printf("REQUIRE_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a, \
+                       (float)_b, _diff, (float)(epsilon));                      \
         }                                                                      \
         REQUIRE(_result);                                                      \
     } while (0)
