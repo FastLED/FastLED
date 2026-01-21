@@ -134,7 +134,8 @@ def run_fbuild_upload(
         with connect_daemon(build_dir, env_name) as conn:
             success = conn.deploy(
                 port=upload_port,
-                clean=False,  # No rebuild - already compiled
+                clean=False,
+                skip_build=True,  # Upload-only mode - firmware already compiled
                 monitor_after=False,  # Don't monitor - FastLED has its own monitoring
                 timeout=timeout,
             )
