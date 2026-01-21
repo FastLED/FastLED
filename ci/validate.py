@@ -41,8 +41,6 @@ from typing import Any, cast
 import serial
 from colorama import Fore, Style, init
 
-from ci.rpc_client import RpcClient, RpcTimeoutError
-
 # Import phase functions from debug_attached
 from ci.debug_attached import (
     run_compile,
@@ -50,6 +48,7 @@ from ci.debug_attached import (
     run_monitor,
     run_upload,
 )
+from ci.rpc_client import RpcClient, RpcTimeoutError
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
     install_signal_handler,
@@ -267,7 +266,9 @@ def run_pin_discovery(
                     f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})"
                 )
                 if auto_applied:
-                    print(f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}")
+                    print(
+                        f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}"
+                    )
                 print()
                 return (True, tx_pin, rx_pin)
             else:
@@ -276,7 +277,9 @@ def run_pin_discovery(
                     f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
                 )
                 print()
-                print(f"   {response.get('message', 'No connected pin pairs detected')}")
+                print(
+                    f"   {response.get('message', 'No connected pin pairs detected')}"
+                )
                 print()
                 print(f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}")
                 print()
@@ -1060,7 +1063,9 @@ def run(args: Args | None = None) -> int:
             pass  # Already printed skip message above
         elif pins_discovered:
             print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
-        elif not run_gpio_pretest(upload_port, effective_tx_pin or PIN_TX, effective_rx_pin or PIN_RX):
+        elif not run_gpio_pretest(
+            upload_port, effective_tx_pin or PIN_TX, effective_rx_pin or PIN_RX
+        ):
             print()
             print(f"{Fore.RED}=" * 60)
             print(f"{Fore.RED}VALIDATION ABORTED - GPIO PRE-TEST FAILED")
@@ -1091,7 +1096,9 @@ def run(args: Args | None = None) -> int:
                 # Use short boot_wait - device already rebooted and we waited for port
                 print("   ⏳ Connecting to device...", end="", flush=True)
                 client = RpcClient(upload_port, timeout=10.0)
-                client.connect(boot_wait=1.0)  # Reduced from 3.0s since we already waited
+                client.connect(
+                    boot_wait=1.0
+                )  # Reduced from 3.0s since we already waited
                 print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
 
                 print("   📡 Sending test command...", end="", flush=True)

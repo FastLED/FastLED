@@ -30,7 +30,7 @@ from typing import Any
 
 import serial
 
-from ci.util.global_interrupt_handler import is_interrupted
+from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 
 
 @dataclass
@@ -179,6 +179,7 @@ class RpcClient:
                     elif lines_drained == 4:
                         print("  [boot] ... (draining boot output)")
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception:
                 break
@@ -295,9 +296,12 @@ class RpcClient:
                         continue
 
                     line = (
-                        self._serial.readline().decode("utf-8", errors="replace").strip()
+                        self._serial.readline()
+                        .decode("utf-8", errors="replace")
+                        .strip()
                     )
                 except KeyboardInterrupt:
+                    notify_main_thread()
                     raise
                 except Exception:
                     continue
@@ -351,10 +355,9 @@ class RpcClient:
                     self._check_interrupt()
                     continue
 
-                line = (
-                    self._serial.readline().decode("utf-8", errors="replace").strip()
-                )
+                line = self._serial.readline().decode("utf-8", errors="replace").strip()
             except KeyboardInterrupt:
+                notify_main_thread()
                 raise
             except Exception:
                 continue
@@ -390,7 +393,6 @@ class RpcClient:
 
     def __exit__(
         self, _exc_type: type | None, _exc_val: Exception | None, _exc_tb: object
-    ) -> bool:
+    ) -> None:
         """Context manager exit - closes connection."""
         self.close()
-        return False

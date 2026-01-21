@@ -221,6 +221,3 @@ pythonPlatform = "All"
 # Enforce return type annotations even for test methods
 reportReturnType = "error"
 
-[tool.uv.sources]
-# fbuild - local editable install for development
-fbuild = { path = "../fbuild", editable = true }
