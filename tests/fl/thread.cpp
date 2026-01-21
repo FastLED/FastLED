@@ -37,7 +37,9 @@ TEST_CASE("fl::thread - this_thread::get_id") {
     t.join();
 
     // Thread ID should be different from main thread
-    REQUIRE(thread_id != main_id);
+    // Compare to boolean to avoid doctest stringification issues with thread::id
+    bool ids_different = (thread_id != main_id);
+    REQUIRE(ids_different);
 }
 
 TEST_CASE("fl::thread - thread with arguments") {
