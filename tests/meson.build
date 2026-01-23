@@ -105,12 +105,10 @@ elif build_machine.system() == 'darwin'
     '-pthread',                 # POSIX threads
   ]
 else
-  # Linux: Static linking + pthread
+  # Linux: Dynamic linking (static linking breaks backtrace() in crash handler)
+  # backtrace() and backtrace_symbols() require dynamic symbol information
   runner_link_args = [
     '-fuse-ld=lld',             # Force LLD linker
-    '-static',                  # Static linking
-    '-static-libgcc',           # Statically link libgcc
-    '-static-libstdc++',        # Statically link libstdc++
     '-pthread',                 # POSIX threads
   ]
   if libunwind_dep.found()
