@@ -206,8 +206,9 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
         uint32_t x, y, t;
 
         // Load the array and pack it into x and y (little-endian)
-        y = *(uint32_t*)(lane_bytes);      // lanes 0-3
-        x = *(uint32_t*)(lane_bytes + 4);  // lanes 4-7
+        // Use ISR-safe memcpy32 for aligned 32-bit loads
+        isr::memcpy32(&y, fl::bit_cast_ptr<const uint32_t>(lane_bytes), 1);      // lanes 0-3
+        isr::memcpy32(&x, fl::bit_cast_ptr<const uint32_t>(lane_bytes + 4), 1);  // lanes 4-7
 
         // Pre-transform x
         t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
@@ -223,8 +224,9 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
         x = t;
 
         // Store result directly to output (little-endian)
-        *((uint32_t*)(output + symbol_idx * 8)) = y;
-        *((uint32_t*)(output + symbol_idx * 8 + 4)) = x;
+        // Use ISR-safe memcpy32 for aligned 32-bit stores
+        isr::memcpy32(fl::bit_cast_ptr<uint32_t>(output + symbol_idx * 8), &y, 1);
+        isr::memcpy32(fl::bit_cast_ptr<uint32_t>(output + symbol_idx * 8 + 4), &x, 1);
     }
 }
 

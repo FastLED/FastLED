@@ -21,8 +21,8 @@
 #pragma GCC diagnostic push
 #if defined(__GNUC__) && (__GNUC__ >= 6)
   #pragma GCC diagnostic ignored "-Wstack-usage="
-#else
-  #pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#elif defined(__clang__)
+  #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #endif
 
 

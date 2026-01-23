@@ -1,6 +1,7 @@
 
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
+#include "fl/compiler_control.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -11,7 +12,7 @@
 
 // typetrait test
 namespace {
-void __compile_test() {
+FL_MAYBE_UNUSED void __compile_test() {
     static_assert(fl::is_integral<int>::value, "int should be integral");
     static_assert(fl::is_integral<float>::value == false,
                   "float should not be integral");
