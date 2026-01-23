@@ -229,14 +229,19 @@
 
 // Loop unrolling hint
 // Usage: FL_UNROLL(8) for (int i = 0; i < n; i++) { ... }
-// Note: Some compilers (e.g., AVR-GCC) may not support this pragma and will
-// emit warnings. The macro expands to nothing on unsupported compilers.
+// Note: Some compilers (e.g., AVR-GCC, older GCC versions) may not support
+// this pragma and will emit warnings. The macro expands to nothing on unsupported compilers.
 #if defined(__AVR__)
   // AVR-GCC does not support #pragma GCC unroll
   #define FL_UNROLL(N)
 #elif defined(__GNUC__) && !defined(__clang__)
-  // GCC supports #pragma GCC unroll N
-  #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(GCC unroll N))
+  // GCC supports #pragma GCC unroll N since GCC 8.0
+  #if (__GNUC__*100 + __GNUC_MINOR__) >= 800
+    #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(GCC unroll N))
+  #else
+    // Older GCC versions don't support #pragma GCC unroll - use no-op
+    #define FL_UNROLL(N)
+  #endif
 #elif defined(__clang__)
   // Clang supports #pragma unroll N (or #pragma clang loop unroll_count(N))
   #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(unroll N))

@@ -54,7 +54,7 @@ struct JsonToType<bool, void> {
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
-            return fl::make_tuple(false, result);
+            return fl::make_tuple(bool(false), result);
         }
 
         JsonToBoolVisitor visitor;

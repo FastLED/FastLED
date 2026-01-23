@@ -13,8 +13,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "doctest.h"
-#include <vector>  // okay std namespace - needed for std::vector in threading tests
-#include <thread>  // okay std namespace - needed for std::thread in threading tests
+#include <vector>  // ok include - needed for std::vector in threading tests
+#include <thread>  // ok include - needed for std::thread in threading tests
 #include "fl/compiler_control.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
