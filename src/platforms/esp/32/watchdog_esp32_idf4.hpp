@@ -29,7 +29,13 @@
 #endif
 
 // ROM delay function - works in any context including panic handlers
-#include "esp_rom_sys.h"
+// esp_rom_sys.h is only available in ESP-IDF v4.0+
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    #include "esp_rom_sys.h"
+#else
+    // ESP-IDF v3.x: ROM functions are in rom/ets_sys.h
+    #include "rom/ets_sys.h"
+#endif
 
 namespace fl {
 namespace detail {

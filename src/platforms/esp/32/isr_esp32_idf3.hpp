@@ -84,19 +84,19 @@ constexpr uint8_t ESP32_IDF3_PLATFORM_ID = 1;
  * Returns true if a timer was successfully allocated
  */
 static bool allocate_timer(timer_group_t* out_group, timer_idx_t* out_idx) {
-    taskENTER_CRITICAL(&timer_alloc_mutex);
+    portENTER_CRITICAL(&timer_alloc_mutex);
     for (int g = 0; g < 2; g++) {
         for (int t = 0; t < 2; t++) {
             if (!timer_allocated[g][t]) {
                 timer_allocated[g][t] = true;
                 *out_group = static_cast<timer_group_t>(g);
                 *out_idx = static_cast<timer_idx_t>(t);
-                taskEXIT_CRITICAL(&timer_alloc_mutex);
+                portEXIT_CRITICAL(&timer_alloc_mutex);
                 return true;
             }
         }
     }
-    taskEXIT_CRITICAL(&timer_alloc_mutex);
+    portEXIT_CRITICAL(&timer_alloc_mutex);
     return false;
 }
 
@@ -104,9 +104,9 @@ static bool allocate_timer(timer_group_t* out_group, timer_idx_t* out_idx) {
  * Free a previously allocated timer
  */
 static void free_timer(timer_group_t group, timer_idx_t idx) {
-    taskENTER_CRITICAL(&timer_alloc_mutex);
+    portENTER_CRITICAL(&timer_alloc_mutex);
     timer_allocated[group][idx] = false;
-    taskEXIT_CRITICAL(&timer_alloc_mutex);
+    portEXIT_CRITICAL(&timer_alloc_mutex);
 }
 
 // =============================================================================
@@ -361,19 +361,19 @@ inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_
     // Use critical section for multi-core safety
     static bool gpio_isr_service_installed = false;
     if (!gpio_isr_service_installed) {
-        taskENTER_CRITICAL(&gpio_isr_service_mutex_idf3);
+        portENTER_CRITICAL(&gpio_isr_service_mutex_idf3);
         // Double-check after acquiring lock (classic double-checked locking pattern)
         if (!gpio_isr_service_installed) {
             ret = gpio_install_isr_service(0);
             if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                taskEXIT_CRITICAL(&gpio_isr_service_mutex_idf3);
+                portEXIT_CRITICAL(&gpio_isr_service_mutex_idf3);
                 ESP_LOGW(ESP32_IDF3_ISR_TAG, "attachExternalHandler: gpio_install_isr_service failed: %s", esp_err_to_name(ret));
                 delete handle_data;
                 return -10;  // ISR service installation failed
             }
             gpio_isr_service_installed = true;
         }
-        taskEXIT_CRITICAL(&gpio_isr_service_mutex_idf3);
+        portEXIT_CRITICAL(&gpio_isr_service_mutex_idf3);
     }
 
     // Add ISR handler for specific GPIO pin

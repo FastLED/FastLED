@@ -84,8 +84,12 @@
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
   #endif
-  // GCC has subobject-linkage warning
-  #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
+  // GCC has subobject-linkage warning (requires GCC >= 5.0)
+  #if (__GNUC__*100 + __GNUC_MINOR__) >= 500
+    #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
+  #else
+    #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
+  #endif
   // GCC doesn't have C++14/17 extension warnings, use no-op
   #define FL_DISABLE_WARNING_C14_EXTENSIONS
   #define FL_DISABLE_WARNING_C17_EXTENSIONS
