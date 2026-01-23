@@ -96,7 +96,36 @@ RmtMemoryManager::MemoryLedger::MemoryLedger()
 
 RmtMemoryManager::RmtMemoryManager()
     : mLedger()
-    , mDMAAllocation{0, false, false} {
+    , mDMAAllocation{0, false, false}
+    , mIdleBlocks(FASTLED_RMT_MEM_BLOCKS)
+    , mNetworkBlocks(FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE) {
+}
+
+// Test-only constructor
+RmtMemoryManager::RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_global)
+    : mLedger()
+    , mDMAAllocation{0, false, false}
+    , mIdleBlocks(2)
+    , mNetworkBlocks(3) {
+
+    mLedger.is_global_pool = is_global;
+
+    if (is_global) {
+        // Global pool mode (ESP32, ESP32-S2)
+        mLedger.total_words = total_tx;  // total_tx holds global pool size
+        mLedger.allocated_words = 0;
+        mLedger.total_tx_words = 0;
+        mLedger.total_rx_words = 0;
+        FL_DBG("RMT Memory Manager (TEST): " << total_tx << " words GLOBAL POOL");
+    } else {
+        // Dedicated pool mode (ESP32-S3, C3, C6, H2)
+        mLedger.total_tx_words = total_tx;
+        mLedger.total_rx_words = total_rx;
+        mLedger.allocated_tx_words = 0;
+        mLedger.allocated_rx_words = 0;
+        mLedger.total_words = 0;
+        FL_DBG("RMT Memory Manager (TEST): TX=" << total_tx << " words, RX=" << total_rx << " words (DEDICATED pools)");
+    }
 }
 
 RmtMemoryManager& RmtMemoryManager::instance() {
@@ -104,28 +133,110 @@ RmtMemoryManager& RmtMemoryManager::instance() {
     return instance;
 }
 
+size_t RmtMemoryManager::getPlatformTxWords() {
+    size_t tx_limit = 0, rx_limit = 0;
+    initPlatformLimits(tx_limit, rx_limit);
+    return tx_limit;
+}
+
+size_t RmtMemoryManager::getPlatformRxWords() {
+    size_t tx_limit = 0, rx_limit = 0;
+    initPlatformLimits(tx_limit, rx_limit);
+    return rx_limit;
+}
+
+bool RmtMemoryManager::isPlatformGlobalPool() {
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
+    return true;  // Global pool platforms
+#else
+    return false;  // Dedicated pool platforms
+#endif
+}
+
 size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) {
-    // Calculate if platform has enough TX memory for triple-buffering (3× blocks)
-    // Triple-buffering one channel requires: 3 × SOC_RMT_MEM_WORDS_PER_CHANNEL words
-    // Total TX memory available: SOC_RMT_TX_CANDIDATES_PER_GROUP × SOC_RMT_MEM_WORDS_PER_CHANNEL
-    //
-    // Example calculations:
-    // - C3/C6/H2/C5: 2 × 48 = 96 words < 3 × 48 = 144 words → Cannot triple buffer
-    // - ESP32-S3: 4 × 48 = 192 words >= 3 × 48 = 144 words → Can triple buffer
-    // - ESP32: 8 × 64 = 512 words >= 3 × 64 = 192 words → Can triple buffer
-    // - ESP32-S2: 4 × 64 = 256 words >= 3 × 64 = 192 words → Can triple buffer
+    // Read memory block strategy from singleton instance
+    auto& mgr = instance();
+    size_t idleBlocks = mgr.mIdleBlocks;
+    size_t networkBlocks = mgr.mNetworkBlocks;
+
+    // Calculate platform maximum blocks based on available TX channels
+    size_t max_blocks = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+
+    // Select strategy based on network activity
+    size_t requested_blocks = networkActive ? networkBlocks : idleBlocks;
+
+    // Platform constraint enforcement
 #if SOC_RMT_TX_CANDIDATES_PER_GROUP < 3
-    // Insufficient TX memory for triple-buffering (platforms with < 3 TX channels)
-    (void)networkActive;  // Suppress unused parameter warning
-    return FASTLED_RMT_MEM_BLOCKS;  // Always 2 (cannot support 3×)
+    // Insufficient TX memory for triple-buffering (C3/C6/H2/C5: 2 TX channels)
+    // Force cap to 2 blocks regardless of strategy
+    if (requested_blocks > 2) {
+        FL_WARN("Platform limited to 2× buffering (SOC_RMT_TX_CANDIDATES_PER_GROUP="
+                << SOC_RMT_TX_CANDIDATES_PER_GROUP << "), capping from "
+                << requested_blocks << " to 2 blocks");
+        requested_blocks = 2;
+    }
 #else
     // Sufficient TX memory for network-aware allocation
-    if (networkActive) {
-        return FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE;  // Default: 3 (triple-buffer for network)
-    } else {
-        return FASTLED_RMT_MEM_BLOCKS;  // Default: 2 (double-buffer for idle)
+    // Validate requested blocks do not exceed platform maximum
+    if (requested_blocks > max_blocks) {
+        FL_WARN("Requested " << requested_blocks << " blocks exceeds platform max "
+                << max_blocks << " (SOC_RMT_TX_CANDIDATES_PER_GROUP), capping to "
+                << max_blocks);
+        requested_blocks = max_blocks;
     }
 #endif
+
+    // Ensure minimum 1 block
+    if (requested_blocks == 0) {
+        FL_WARN("Zero blocks requested, clamping to minimum 1 block");
+        requested_blocks = 1;
+    }
+
+    FL_DBG("calculateMemoryBlocks(networkActive=" << networkActive
+           << "): using " << requested_blocks << " blocks (idle=" << idleBlocks
+           << ", network=" << networkBlocks << ", max=" << max_blocks << ")");
+
+    return requested_blocks;
+}
+
+void RmtMemoryManager::setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) {
+    // Calculate platform maximum blocks based on available TX memory
+    // max_blocks = total_TX_words / words_per_channel
+    size_t max_blocks = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+
+    // Zero-block validation: clamp to minimum 1 block
+    if (idleBlocks == 0) {
+        FL_WARN("RMT setMemoryBlockStrategy: idleBlocks=0 invalid, clamping to 1");
+        idleBlocks = 1;
+    }
+    if (networkBlocks == 0) {
+        FL_WARN("RMT setMemoryBlockStrategy: networkBlocks=0 invalid, clamping to 1");
+        networkBlocks = 1;
+    }
+
+    // Platform limit validation: cap to max_blocks
+    if (idleBlocks > max_blocks) {
+        FL_WARN("RMT setMemoryBlockStrategy: idleBlocks=" << idleBlocks
+                << " exceeds platform limit=" << max_blocks << ", capping");
+        idleBlocks = max_blocks;
+    }
+    if (networkBlocks > max_blocks) {
+        FL_WARN("RMT setMemoryBlockStrategy: networkBlocks=" << networkBlocks
+                << " exceeds platform limit=" << max_blocks << ", capping");
+        networkBlocks = max_blocks;
+    }
+
+    // Update strategy configuration
+    mIdleBlocks = idleBlocks;
+    mNetworkBlocks = networkBlocks;
+
+    FL_DBG("RMT Memory Strategy updated: idle=" << idleBlocks << "×, network=" << networkBlocks << "×");
+}
+
+void RmtMemoryManager::getMemoryBlockStrategy(size_t& idleBlocks, size_t& networkBlocks) const {
+    // Read strategy configuration
+    idleBlocks = mIdleBlocks;
+    networkBlocks = mNetworkBlocks;
 }
 
 Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, bool use_dma, bool networkActive) {
@@ -149,8 +260,34 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
 
     // Try to allocate from appropriate pool
     if (!tryAllocateWords(words_needed, true)) {
-        FL_WARN("RMT TX allocation failed: need " << words_needed
-                << " words, only " << getAvailableWords(true) << " available");
+        // Calculate detailed memory breakdown for diagnostic message
+        size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_tx_words;
+        size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_tx_words;
+        size_t reserved = mLedger.reserved_tx_words;
+        size_t available = getAvailableWords(true);
+
+        FL_WARN("RMT TX allocation failed for channel " << static_cast<int>(channel_id));
+        FL_WARN("  Requested: " << words_needed << " words (" << mem_blocks << "× buffer"
+                << (networkActive ? ", Network mode" : "") << ")");
+        FL_WARN("  Available: " << available << " words");
+        FL_WARN("  Memory breakdown: Total=" << total << ", Allocated=" << allocated
+                << ", Reserved=" << reserved << " (external RMT usage)");
+
+        // Provide actionable suggestions based on the failure scenario
+        if (reserved > 0) {
+            FL_WARN("  Suggestion: " << reserved << " words reserved by external RMT usage (e.g., USB CDC)");
+            FL_WARN("              Consider using DMA channels (use_dma=true) to bypass on-chip memory");
+        }
+        if (allocated > 0) {
+            FL_WARN("  Suggestion: " << allocated << " words already allocated to other channels");
+            FL_WARN("              Consider reducing LED count or using fewer channels");
+        }
+        if (mem_blocks > 2 && networkActive) {
+            FL_WARN("  Suggestion: Network mode uses 3× buffering (" << (mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL)
+                    << " words per channel)");
+            FL_WARN("              Consider disabling network or using DMA channels");
+        }
+
         return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
     }
 
@@ -183,8 +320,28 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
 
     // Try to allocate from appropriate pool
     if (!tryAllocateWords(words_needed, false)) {
-        FL_WARN("RMT RX allocation failed: need " << words_needed
-                << " words, only " << getAvailableWords(false) << " available");
+        // Calculate detailed memory breakdown for diagnostic message
+        size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_rx_words;
+        size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_rx_words;
+        size_t reserved = mLedger.reserved_rx_words;
+        size_t available = getAvailableWords(false);
+
+        FL_WARN("RMT RX allocation failed for channel " << static_cast<int>(channel_id));
+        FL_WARN("  Requested: " << words_needed << " words (" << symbols << " symbols)");
+        FL_WARN("  Available: " << available << " words");
+        FL_WARN("  Memory breakdown: Total=" << total << ", Allocated=" << allocated
+                << ", Reserved=" << reserved << " (external RMT usage)");
+
+        // Provide actionable suggestions
+        if (reserved > 0) {
+            FL_WARN("  Suggestion: " << reserved << " words reserved by external RMT usage");
+            FL_WARN("              Consider using DMA channels (use_dma=true) to bypass on-chip memory");
+        }
+        if (allocated > 0) {
+            FL_WARN("  Suggestion: " << allocated << " words already allocated to other channels");
+            FL_WARN("              Consider reducing symbol count or using fewer channels");
+        }
+
         return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
     }
 
@@ -261,6 +418,64 @@ void RmtMemoryManager::reset() {
     mDMAAllocation.allocated = false;
     mDMAAllocation.channel_id = 0;
     mDMAAllocation.is_tx = false;
+}
+
+// ============================================================================
+// State Inspection Methods
+// ============================================================================
+
+size_t RmtMemoryManager::getTotalTxWords() const {
+    if (mLedger.is_global_pool) {
+        return mLedger.total_words;  // Global pool total
+    } else {
+        return mLedger.total_tx_words;  // Dedicated TX pool
+    }
+}
+
+size_t RmtMemoryManager::getTotalRxWords() const {
+    if (mLedger.is_global_pool) {
+        return 0;  // Global pool doesn't have separate RX total
+    } else {
+        return mLedger.total_rx_words;  // Dedicated RX pool
+    }
+}
+
+size_t RmtMemoryManager::getAllocatedTxWords() const {
+    if (mLedger.is_global_pool) {
+        // For global pool, calculate TX words from allocations
+        size_t tx_words = 0;
+        for (const auto& alloc : mLedger.allocations) {
+            if (alloc.is_tx) {
+                tx_words += alloc.words;
+            }
+        }
+        return tx_words;
+    } else {
+        return mLedger.allocated_tx_words;
+    }
+}
+
+size_t RmtMemoryManager::getAllocatedRxWords() const {
+    if (mLedger.is_global_pool) {
+        // For global pool, calculate RX words from allocations
+        size_t rx_words = 0;
+        for (const auto& alloc : mLedger.allocations) {
+            if (!alloc.is_tx) {
+                rx_words += alloc.words;
+            }
+        }
+        return rx_words;
+    } else {
+        return mLedger.allocated_rx_words;
+    }
+}
+
+size_t RmtMemoryManager::getAllocationCount() const {
+    return mLedger.allocations.size();
+}
+
+bool RmtMemoryManager::isGlobalPool() const {
+    return mLedger.is_global_pool;
 }
 
 // ============================================================================

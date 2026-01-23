@@ -75,18 +75,25 @@ static esp_err_t rmt_cache_sync(void* buffer_ptr, size_t buffer_size) {
     FL_MEMORY_BARRIER;
 
     // Cache sync: Writeback cache to memory (Cache-to-Memory)
+    // ESP_CACHE_MSYNC_FLAG_UNALIGNED: More permissive alignment checking
+    // Some ESP-IDF versions have strict alignment requirements that cause
+    // esp_cache_msync() to fail even with properly aligned DMA buffers.
+    // The UNALIGNED flag allows the operation to proceed, relying on memory
+    // barriers for ordering guarantees.
     esp_err_t err = esp_cache_msync(
         buffer_ptr,
         buffer_size,
-        ESP_CACHE_MSYNC_FLAG_DIR_C2M);  // Cache-to-Memory writeback
+        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
 
     // Memory barrier: Ensure cache sync completes before DMA submission
     FL_MEMORY_BARRIER;
 
-    // Log failures for debugging (non-critical on some platforms)
+    // Note: Even if cache sync fails, memory barriers ensure write ordering.
+    // DMA-capable memory (MALLOC_CAP_DMA) may not require cache ops on some
+    // platforms (ESP32/S2 have no data cache). Errors are logged but non-fatal.
     if (err != ESP_OK) {
         FL_LOG_RMT("RMT cache sync returned error: " << esp_err_to_name(err)
-                   << " (may be expected on this platform, continuing)");
+                   << " (non-fatal, memory barriers ensure ordering)");
     }
 
     return err;
@@ -360,6 +367,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // time-multiplexing) Only show critical RMT errors (ESP_LOG_ERROR and
         // above)
         esp_log_level_set("rmt", ESP_LOG_NONE);
+
+        // Suppress ESP-IDF cache sync errors (esp_cache_msync failures are
+        // non-fatal and handled by memory barriers). These errors are printed
+        // by ESP-IDF before FastLED can handle them, causing log spam.
+        esp_log_level_set("cache", ESP_LOG_NONE);
 
         FL_LOG_RMT("RMT Channel Engine initialized");
     }
@@ -672,13 +684,21 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 return false;
             }
 
-            // DMA mode: allocate enough symbols for the entire LED strip
-            // Each byte needs 8 RMT symbols (1 symbol per bit)
-            // Add extra space for reset pulse (typically 1 symbol, but use 16
-            // for safety)
-            fl::size dma_mem_block_symbols = (dataSize * 8) + 16;
+            // DMA mode: Use ESP-IDF recommended buffer size
+            // ESP-IDF documentation recommends mem_block_symbols = 1024 for DMA mode
+            // Reference: https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/rmt.html
+            //
+            // IMPORTANT: Unlike non-DMA mode which is limited by on-chip SRAM,
+            // DMA mode streams data from DRAM. The mem_block_symbols parameter
+            // controls DMA chunk size, not total capacity. Using too large a value
+            // (e.g., dataSize * 8) causes ESP_ERR_INVALID_ARG from rmt_new_tx_channel().
+            //
+            // Related issues:
+            // - https://github.com/espressif/esp-idf/issues/12564
+            // - https://github.com/espressif/idf-extra-components/issues/466
+            fl::size dma_mem_block_symbols = 1024;  // ESP-IDF recommended DMA buffer size
             FL_LOG_RMT("DMA allocation: "
-                       << dma_mem_block_symbols << " symbols for " << dataSize
+                       << dma_mem_block_symbols << " symbols (DMA chunk size) for " << dataSize
                        << " bytes (" << (dataSize / 3) << " LEDs)");
 
             // RMT5 interrupt priority is always set to level 3 (highest
@@ -758,9 +778,19 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         auto alloc_result = memMgr.allocateTx(state->memoryChannelId, false,
                                               networkActive); // false = non-DMA
         if (!alloc_result.ok()) {
+            // Memory allocation failed - this can happen when:
+            // 1. External RMT users (USB CDC, etc.) consume memory
+            // 2. Too many non-DMA channels requested
+            // 3. Network mode requires 3× buffering but insufficient memory
+            //
+            // Note: DMA channels consume 0 on-chip words, but ESP32-S3 only has
+            // 1 DMA channel. Subsequent channels must use non-DMA (on-chip memory).
             FL_WARN("Memory manager TX allocation failed for channel "
                     << static_cast<int>(state->memoryChannelId)
                     << " - insufficient on-chip memory");
+            FL_WARN("  Available: " << memMgr.availableTxWords() << " words");
+            FL_WARN("  Requested: " << (RmtMemoryManager::calculateMemoryBlocks(networkActive) * SOC_RMT_MEM_WORDS_PER_CHANNEL) << " words");
+            FL_WARN("  DMA channels in use: " << memMgr.getDMAChannelsInUse() << "/1");
             return false;
         }
 

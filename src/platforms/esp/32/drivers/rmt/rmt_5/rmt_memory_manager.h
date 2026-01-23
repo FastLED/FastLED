@@ -25,10 +25,6 @@
 #include "fl/stl/vector.h"
 #include "fl/result.h"
 
-FL_EXTERN_C_BEGIN
-#include "soc/soc_caps.h"
-FL_EXTERN_C_END
-
 namespace fl {
 
 /// @brief Error codes for RMT memory allocation
@@ -99,6 +95,45 @@ public:
     /// @return Reference to the global RMT memory manager
     static RmtMemoryManager& instance();
 
+    // ========================================================================
+    // Testing Support - Allows mocking platform limits for unit tests
+    // ========================================================================
+
+    /// @brief Test-only constructor - allows mocking platform limits
+    /// @param total_tx Total TX memory words (for dedicated pools or global pool)
+    /// @param total_rx Total RX memory words (0 for global pool platforms)
+    /// @param is_global true for global pool (ESP32/S2), false for dedicated pools (S3/C3/C6/H2)
+    ///
+    /// This constructor is intended for unit testing ONLY. It allows tests to:
+    /// - Mock different platform configurations (ESP32-S3, C3, etc.)
+    /// - Test memory exhaustion scenarios with controlled limits
+    /// - Verify accounting logic without hardware dependencies
+    ///
+    /// Example:
+    /// @code
+    /// // Mock ESP32-S3: 192 TX words, 192 RX words (dedicated pools)
+    /// RmtMemoryManager mgr_s3(192, 192, false);
+    ///
+    /// // Mock ESP32-C3: 96 TX words, 96 RX words (dedicated pools)
+    /// RmtMemoryManager mgr_c3(96, 96, false);
+    ///
+    /// // Mock ESP32: 512 words global pool
+    /// RmtMemoryManager mgr_esp32(512, 0, true);
+    /// @endcode
+    RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_global);
+
+    /// @brief Get platform-specific TX memory limit
+    /// @return Number of TX words available on this platform
+    static size_t getPlatformTxWords();
+
+    /// @brief Get platform-specific RX memory limit
+    /// @return Number of RX words available on this platform (0 for global pool)
+    static size_t getPlatformRxWords();
+
+    /// @brief Check if platform uses global memory pool
+    /// @return true for ESP32/S2 (global pool), false for S3/C3/C6/H2 (dedicated pools)
+    static bool isPlatformGlobalPool();
+
     /// @brief Allocate memory for TX channel with adaptive buffering policy
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
     /// @param use_dma Whether this channel uses DMA (bypasses on-chip memory)
@@ -162,6 +197,34 @@ public:
     /// @return Number of words allocated, or 0 if not found
     size_t getAllocatedWords(uint8_t channel_id, bool is_tx) const;
 
+    // ========================================================================
+    // State Inspection Methods - For Testing and Debugging
+    // ========================================================================
+
+    /// @brief Get total TX memory words configured
+    /// @return Total TX words (for dedicated pools or global pool)
+    size_t getTotalTxWords() const;
+
+    /// @brief Get total RX memory words configured
+    /// @return Total RX words (0 for global pool platforms)
+    size_t getTotalRxWords() const;
+
+    /// @brief Get currently allocated TX memory words
+    /// @return Allocated TX words
+    size_t getAllocatedTxWords() const;
+
+    /// @brief Get currently allocated RX memory words
+    /// @return Allocated RX words
+    size_t getAllocatedRxWords() const;
+
+    /// @brief Get number of active allocations
+    /// @return Count of allocated channels (TX + RX)
+    size_t getAllocationCount() const;
+
+    /// @brief Check if using global pool architecture
+    /// @return true for global pool (ESP32/S2), false for dedicated pools (S3/C3/C6/H2)
+    bool isGlobalPool() const;
+
     /// @brief Reset all allocations (for testing or error recovery)
     void reset();
 
@@ -197,6 +260,44 @@ public:
     /// C3/C6/H2/C5 platforms have only 96 words (2 channels × 48 words) of TX memory.
     /// Triple-buffering would require 144 words (3 × 48), which exceeds capacity.
     static size_t calculateMemoryBlocks(bool networkActive);
+
+    /// @brief Configure custom memory block strategy
+    /// @param idleBlocks Number of memory blocks when network is inactive (idle state)
+    /// @param networkBlocks Number of memory blocks when network is active
+    ///
+    /// Allows runtime override of the default memory block strategy defined by
+    /// FASTLED_RMT_MEM_BLOCKS and FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE.
+    ///
+    /// **Platform Constraints:**
+    /// Values exceeding platform limits are automatically capped:
+    /// - ESP32-C3/C6/H2: Max 2 blocks (96 TX words / 48 = 2)
+    /// - ESP32-S3: Max 4 blocks (192 TX words / 48 = 4)
+    /// - ESP32: Max 8 blocks (512 TX words / 64 = 8)
+    ///
+    /// Zero values are clamped to minimum of 1 block.
+    ///
+    /// Example:
+    /// @code
+    /// auto& mgr = fl::RmtMemoryManager::instance();
+    /// mgr.setMemoryBlockStrategy(1, 2);  // 1× idle, 2× network-active
+    /// @endcode
+    void setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks);
+
+    /// @brief Query current memory block strategy
+    /// @param idleBlocks Output: Number of blocks for network-idle state
+    /// @param networkBlocks Output: Number of blocks for network-active state
+    ///
+    /// Returns the current memory block strategy, including any runtime
+    /// customization via setMemoryBlockStrategy().
+    ///
+    /// Example:
+    /// @code
+    /// auto& mgr = fl::RmtMemoryManager::instance();
+    /// size_t idle, network;
+    /// mgr.getMemoryBlockStrategy(idle, network);
+    /// FL_DBG("Strategy: " << idle << "× idle, " << network << "× network");
+    /// @endcode
+    void getMemoryBlockStrategy(size_t& idleBlocks, size_t& networkBlocks) const;
 
     // ========================================================================
     // DMA Channel Management (ESP32-S3 only - 1 DMA channel shared TX/RX)
@@ -285,6 +386,10 @@ private:
 
     MemoryLedger mLedger;
     DMAAllocation mDMAAllocation;  ///< Single DMA channel tracking
+
+    // Memory block strategy configuration (Phase 1A: New API)
+    size_t mIdleBlocks;        ///< Number of memory blocks when network is inactive
+    size_t mNetworkBlocks;     ///< Number of memory blocks when network is active
 
     /// @brief Find allocation record for a channel
     /// @param channel_id RMT channel ID

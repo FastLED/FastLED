@@ -1,7 +1,7 @@
 # RMT5 Low-Level Driver Implementation
 
 **Status**: Phase 1-4 Complete (95%), Network-Aware Features Active
-**Last Updated**: 2025-12-08
+**Last Updated**: 2026-01-23 (Added Custom Memory Block Strategy API documentation)
 **Priority**: High
 
 ---
@@ -9,15 +9,18 @@
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [Problem Statement](#problem-statement)
-3. [Network-Aware Channel Management](#network-aware-channel-management)
-4. [Architecture Overview](#architecture-overview)
-5. [Implementation Strategy](#implementation-strategy)
-6. [Worker Pool Architecture](#worker-pool-architecture)
-7. [Integration Status](#integration-status)
-8. [Alternative Strategies](#alternative-strategies)
-9. [Testing & Validation](#testing--validation)
-10. [References](#references)
+2. [Memory Management Overview](#memory-management-overview)
+3. [Advanced: Custom Memory Block Strategy](#advanced-custom-memory-block-strategy)
+4. [Problem Statement](#problem-statement)
+5. [Network-Aware Channel Management](#network-aware-channel-management)
+6. [Architecture Overview](#architecture-overview)
+7. [Implementation Strategy](#implementation-strategy)
+8. [Worker Pool Architecture](#worker-pool-architecture)
+9. [Integration Status](#integration-status)
+10. [Alternative Strategies](#alternative-strategies)
+11. [Testing & Validation](#testing--validation)
+12. [Troubleshooting](#troubleshooting)
+13. [References](#references)
 
 ---
 
@@ -57,6 +60,478 @@ build_flags = -DFASTLED_RMT5_V2=0
 | ESP32-C6 | RISC-V | 2 | ✅ Complete |
 | ESP32-H2 | RISC-V | 2 | ✅ Complete |
 | ESP32 | Xtensa LX6 | 8 | ✅ Reference |
+
+### Memory Management Overview
+
+**Critical Information**: Each ESP32 platform has limited on-chip RMT memory. Understanding these limits is essential for multi-strip configurations.
+
+**Platform Memory Limits**:
+
+| Platform | TX Memory | RX Memory | Pool Type | Notes |
+|----------|-----------|-----------|-----------|-------|
+| ESP32 | 512 words | 512 words | Global (shared) | Most flexible |
+| ESP32-S2 | 256 words | 256 words | Global (shared) | Medium capacity |
+| ESP32-S3 | 192 words | 192 words | Dedicated (separate) | **Most constrained** |
+| ESP32-C3 | 96 words | 96 words | Dedicated (separate) | Very limited |
+| ESP32-C6 | 96 words | 96 words | Dedicated (separate) | Very limited |
+| ESP32-H2 | 96 words | 96 words | Dedicated (separate) | Very limited |
+
+**Per-Channel Memory Consumption**:
+
+| Configuration | Memory Usage | Example (ESP32-S3) |
+|---------------|--------------|-------------------|
+| DMA channel | 0 words (uses DRAM) | 3 DMA channels = 0 words ✅ |
+| Non-DMA (normal) | 96 words (2× buffer) | 2 non-DMA = 192 words ✅ |
+| Non-DMA (network) | 144 words (3× buffer) | 2 non-DMA = 288 words ❌ (exceeds 192) |
+
+**Key Insights**:
+
+1. **DMA is your friend**: DMA channels bypass on-chip memory entirely, using DRAM instead
+   - ESP32-S3: 1 DMA channel available (shared TX/RX)
+   - ESP32-C3/C6/H2: 1 DMA channel available (shared TX/RX)
+   - ESP32: Multiple DMA channels available
+   - **IMPORTANT**: ESP-IDF requires `mem_block_symbols = 1024` for DMA mode (not dynamically calculated)
+   - FastLED automatically uses this ESP-IDF recommended value for all DMA channels
+   - Reference: [GitHub Issue #2156](https://github.com/FastLED/FastLED/issues/2156)
+
+2. **External RMT usage matters**: USB CDC, IR receivers, or other libraries may reserve memory
+   - Example: USB CDC on ESP32-S3 reserves ~48 words
+   - Reduces available memory: 192 - 48 = 144 words remaining
+
+3. **Buffer multipliers**:
+   - Normal mode: 2× buffering (96 words per channel)
+   - Network mode: 3× buffering (144 words per channel)
+   - Network mode prevents memory exhaustion on constrained platforms
+
+4. **Memory accounting is strict**: The driver prevents over-allocation to avoid hardware crashes
+   - Error messages now include detailed diagnostics
+   - Suggests alternatives (DMA, fewer channels, smaller strips)
+
+**Common Configuration Patterns**:
+
+```cpp
+// Pattern 1: Mix DMA + non-DMA (ESP32-S3)
+FastLED.addLeds<WS2812B, 5>(leds1, 512).setDMA(true);   // 0 words (DMA)
+FastLED.addLeds<WS2812B, 6>(leds2, 512);                // 96 words (non-DMA)
+FastLED.addLeds<WS2812B, 7>(leds3, 512);                // 96 words (non-DMA)
+// Total: 192 words = ✅ FITS (exact capacity)
+
+// Pattern 2: All DMA (if single channel) - ESP32-S3
+FastLED.addLeds<WS2812B, 5>(leds1, 512).setDMA(true);   // 0 words (DMA)
+FastLED.addLeds<WS2812B, 6>(leds2, 512);                // 96 words (fallback non-DMA)
+FastLED.addLeds<WS2812B, 7>(leds3, 512);                // 96 words (non-DMA)
+// Note: Only first channel gets DMA (1 DMA slot), others fallback
+
+// Pattern 3: External memory reservation (USB CDC active)
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+RmtMemoryManager::getInstance().reserveExternalMemory(48, 0);  // USB CDC
+FastLED.addLeds<WS2812B, 5>(leds1, 512).setDMA(true);   // 0 words (DMA)
+FastLED.addLeds<WS2812B, 6>(leds2, 512);                // 96 words (non-DMA)
+// Available: 192 - 48 = 144 words
+// Total: 96 words = ✅ FITS (48 words remaining)
+```
+
+**See [Troubleshooting](#troubleshooting) section for detailed solutions to memory allocation failures.**
+
+---
+
+## Advanced: Custom Memory Block Strategy
+
+**Status**: ✅ Complete (Phase 1A-1B) - Production Ready
+
+Starting with FastLED 3.8.0, you can customize the memory block strategy used by the RMT driver. This provides fine-grained control over buffering behavior for advanced use cases.
+
+### When to Use Custom Strategy
+
+The default memory block strategy (2× buffering idle, 3× buffering network-active) works well for most applications. Consider using the custom strategy API when:
+
+1. **Extreme network interference**: Increase buffering beyond 3× for heavily congested networks
+2. **Memory-constrained platforms**: Reduce buffering to 1× on ESP32-C3/C6/H2 for more channels
+3. **Real-time applications**: Fine-tune buffering for minimal latency vs. flicker trade-offs
+4. **Debugging**: Test different buffering configurations to diagnose issues
+
+**⚠️ Warning**: Incorrect configuration can cause memory allocation failures or increased flicker. Always validate changes thoroughly.
+
+### API Reference
+
+#### Set Custom Memory Block Strategy
+
+```cpp
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+// Set custom idle and network-mode buffering
+void setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks);
+```
+
+**Parameters**:
+- `idleBlocks`: Memory blocks (buffer size multiplier) when network is OFF
+- `networkBlocks`: Memory blocks (buffer size multiplier) when network is ON (WiFi/Ethernet/Bluetooth)
+
+**Behavior**:
+- **Platform limits enforced**: Values capped to `SOC_RMT_TX_CANDIDATES_PER_GROUP` (max blocks per platform)
+- **Zero-block protection**: Values clamped to minimum 1 (at least 1× buffering required)
+- **Thread-safe**: Uses FreeRTOS spinlock for safe concurrent access
+- **Immediate effect**: Changes apply to next channel allocation (existing channels unaffected until reconfiguration)
+
+**Platform Limits**:
+
+| Platform | Max Blocks | Notes |
+|----------|-----------|-------|
+| ESP32 | 8 | Full support for high buffering |
+| ESP32-S2 | 4 | Medium capacity |
+| ESP32-S3 | 4 | Limited to 4× per channel |
+| ESP32-C3 | 2 | Very limited (2× max due to 96 TX words) |
+| ESP32-C6 | 2 | Very limited (2× max due to 96 TX words) |
+| ESP32-H2 | 2 | Very limited (2× max due to 96 TX words) |
+
+**Memory Consumption Formula**:
+```
+Per-channel memory = blocks × base_block_size
+
+Base block sizes:
+- ESP32: 64 words per block
+- ESP32-S2: 64 words per block
+- ESP32-S3: 48 words per block
+- ESP32-C3/C6/H2: 48 words per block
+
+Example (ESP32-S3):
+- 2× buffering = 2 × 48 = 96 words
+- 3× buffering = 3 × 48 = 144 words
+- 4× buffering = 4 × 48 = 192 words (entire TX memory!)
+```
+
+#### Query Current Memory Block Strategy
+
+```cpp
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+// Get current idle and network-mode buffering configuration
+void getMemoryBlockStrategy(size_t& idleBlocks, size_t& networkBlocks) const;
+```
+
+**Parameters**:
+- `idleBlocks`: Output parameter for idle blocks (passed by reference)
+- `networkBlocks`: Output parameter for network blocks (passed by reference)
+
+**Behavior**:
+- **Thread-safe read**: Uses FreeRTOS spinlock for safe concurrent access
+- **Returns current values**: Reflects any previous `setMemoryBlockStrategy()` calls or defaults
+
+### Usage Examples
+
+#### Example 1: Increase Buffering for Extreme Network Interference
+
+```cpp
+#include <FastLED.h>
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+void setup() {
+    // Increase network-mode buffering to 4× for maximum flicker protection
+    // (Only effective on ESP32/S2/S3 - C3/C6/H2 cap at 2×)
+    RmtMemoryManager::getInstance().setMemoryBlockStrategy(
+        2,  // Idle: 2× buffering (default)
+        4   // Network: 4× buffering (increased from 3× default)
+    );
+
+    // Add LED strips as usual
+    FastLED.addLeds<WS2812B, 5>(leds, NUM_LEDS);
+}
+
+void loop() {
+    // Network-aware features will use 4× buffering when WiFi/Ethernet/Bluetooth active
+    FastLED.show();
+}
+```
+
+**Note**: On ESP32-S3, 4× buffering consumes 192 words (entire TX memory for 1 channel). Plan accordingly.
+
+#### Example 2: Reduce Buffering on Memory-Constrained Platforms
+
+```cpp
+#include <FastLED.h>
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+void setup() {
+    // Reduce buffering to 1× for both idle and network modes
+    // Allows more channels but increases flicker risk
+    RmtMemoryManager::getInstance().setMemoryBlockStrategy(
+        1,  // Idle: 1× buffering (reduced from 2× default)
+        1   // Network: 1× buffering (reduced from 3× default)
+    );
+
+    // ESP32-C3 example: 96 TX words / 48 words per block = 2 blocks max
+    // With 1× buffering: 96 / 48 = 2 channels possible (vs 1 channel with 2×)
+    FastLED.addLeds<WS2812B, 5>(leds1, NUM_LEDS);  // 48 words
+    FastLED.addLeds<WS2812B, 6>(leds2, NUM_LEDS);  // 48 words
+    // Total: 96 words = fits exactly
+}
+```
+
+**⚠️ Caution**: 1× buffering significantly increases flicker risk, especially with network active.
+
+#### Example 3: Query Current Strategy
+
+```cpp
+#include <FastLED.h>
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+void setup() {
+    Serial.begin(115200);
+
+    // Query default strategy
+    size_t idleBlocks, networkBlocks;
+    RmtMemoryManager::getInstance().getMemoryBlockStrategy(idleBlocks, networkBlocks);
+
+    Serial.printf("Current strategy: Idle=%d×, Network=%d×\n", idleBlocks, networkBlocks);
+    // Output: "Current strategy: Idle=2×, Network=3×" (defaults)
+
+    // Modify strategy
+    RmtMemoryManager::getInstance().setMemoryBlockStrategy(2, 4);
+
+    // Verify change
+    RmtMemoryManager::getInstance().getMemoryBlockStrategy(idleBlocks, networkBlocks);
+    Serial.printf("Updated strategy: Idle=%d×, Network=%d×\n", idleBlocks, networkBlocks);
+    // Output: "Updated strategy: Idle=2×, Network=4×"
+}
+```
+
+#### Example 4: Platform-Aware Configuration
+
+```cpp
+#include <FastLED.h>
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+void setup() {
+    // Platform-aware buffering strategy
+    #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+        // ESP32-C3/C6/H2: Limited to 2× max, use 2×/2× for consistency
+        RmtMemoryManager::getInstance().setMemoryBlockStrategy(2, 2);
+    #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+        // ESP32-S3: Use aggressive 3×/4× for maximum flicker protection
+        RmtMemoryManager::getInstance().setMemoryBlockStrategy(3, 4);
+    #else
+        // ESP32/S2: Use default 2×/3× (no change needed)
+    #endif
+
+    FastLED.addLeds<WS2812B, 5>(leds, NUM_LEDS);
+}
+```
+
+### Migration from Legacy Defines
+
+**Before (Legacy - Deprecated)**:
+
+```cpp
+// platformio.ini or build flags
+#define FASTLED_RMT_MEM_BLOCKS 3               // Idle buffering
+#define FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE 4  // Network buffering
+
+#include <FastLED.h>
+```
+
+**⚠️ Deprecation Warning**: Overriding these defines triggers compiler warnings:
+```
+#pragma message "FASTLED_RMT_MEM_BLOCKS is deprecated. Use RmtMemoryManager::setMemoryBlockStrategy() instead."
+```
+
+**After (New API - Recommended)**:
+
+```cpp
+#include <FastLED.h>
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+void setup() {
+    // Set strategy via runtime API (no build flags needed)
+    RmtMemoryManager::getInstance().setMemoryBlockStrategy(
+        3,  // Idle: 3× buffering
+        4   // Network: 4× buffering
+    );
+
+    FastLED.addLeds<WS2812B, 5>(leds, NUM_LEDS);
+}
+```
+
+**Benefits of New API**:
+- ✅ **Runtime configuration**: Change strategy without recompilation
+- ✅ **Platform-aware**: Conditionally adjust based on detected platform
+- ✅ **Type-safe**: Compile-time validation via C++ API
+- ✅ **Thread-safe**: FreeRTOS spinlock protection
+- ✅ **Queryable**: Read current configuration programmatically
+
+**Migration Timeline**:
+- **Current**: Legacy defines still work (with deprecation warnings)
+- **FastLED 3.9.0**: Legacy defines fully deprecated
+- **FastLED 4.0.0**: Legacy defines removed (breaking change)
+
+### Troubleshooting
+
+#### Issue: "RMT TX allocation failed" after increasing buffering
+
+**Cause**: Increased buffering exceeds platform memory limits.
+
+**Solution**:
+1. Check platform limits (see table above)
+2. Reduce number of channels or LED count
+3. Use DMA channels (bypass on-chip memory)
+4. Lower buffering values
+
+**Example (ESP32-S3)**:
+```cpp
+// WRONG: 4× buffering on 2 channels exceeds 192 TX words
+RmtMemoryManager::getInstance().setMemoryBlockStrategy(4, 4);
+FastLED.addLeds<WS2812B, 5>(leds1, NUM_LEDS);  // 192 words
+FastLED.addLeds<WS2812B, 6>(leds2, NUM_LEDS);  // 192 words (FAILS!)
+
+// CORRECT: Mix DMA + non-DMA or reduce buffering
+FastLED.addLeds<WS2812B, 5>(leds1, NUM_LEDS).setDMA(true);  // 0 words (DMA)
+FastLED.addLeds<WS2812B, 6>(leds2, NUM_LEDS);                // 192 words (OK)
+```
+
+#### Issue: Increased flicker after reducing buffering
+
+**Cause**: Lower buffering reduces tolerance to interrupt latency.
+
+**Solution**:
+1. Increase buffering values (closer to defaults)
+2. Enable Network-aware channel reduction (`FASTLED_RMT_NETWORK_REDUCE_CHANNELS=1`)
+3. Reduce network activity during LED updates
+4. Use platforms with more memory (ESP32 vs C3)
+
+#### Issue: Strategy changes don't take effect
+
+**Cause**: `setMemoryBlockStrategy()` only affects **new** channel allocations.
+
+**Solution**:
+1. Call `setMemoryBlockStrategy()` **before** `FastLED.addLeds()`
+2. Existing channels retain old strategy until destroyed/recreated
+3. Network-aware reconfiguration will apply new strategy automatically
+
+**Correct Order**:
+```cpp
+void setup() {
+    // 1. Set strategy FIRST
+    RmtMemoryManager::getInstance().setMemoryBlockStrategy(2, 4);
+
+    // 2. Add LED strips SECOND (uses new strategy)
+    FastLED.addLeds<WS2812B, 5>(leds, NUM_LEDS);
+}
+```
+
+#### Issue: Values clamped unexpectedly
+
+**Cause**: Platform limits or zero-block protection enforced automatically.
+
+**Debug**: Enable FL_DBG logging to see clamping messages:
+```cpp
+#define FASTLED_DEBUG 1
+#include <FastLED.h>
+
+// Will log:
+// [RMT] setMemoryBlockStrategy: idleBlocks clamped from 8 to 2 (platform limit)
+// [RMT] setMemoryBlockStrategy: networkBlocks clamped from 0 to 1 (minimum)
+```
+
+### Implementation Details
+
+**Files**:
+- `rmt_memory_manager.h` (lines 268-314): API method declarations
+- `rmt_memory_manager.cpp` (lines 182-225): API method implementations
+- `rmt_memory_manager.h` (lines 356-359): Member variables (`mIdleBlocks`, `mNetworkBlocks`, `mStrategySpinlock`)
+- `rmt_memory_manager.cpp` (lines 100-102, 109-111): Constructor initialization
+- `rmt_memory_manager.cpp` (lines 158-205): `calculateMemoryBlocks()` integration
+
+**Thread Safety**:
+```cpp
+// FreeRTOS spinlock protects concurrent access
+portMUX_TYPE mStrategySpinlock = portMUX_INITIALIZER_UNLOCKED;
+
+void setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) {
+    portENTER_CRITICAL(&mStrategySpinlock);
+    mIdleBlocks = clamp(idleBlocks, 1, SOC_RMT_TX_CANDIDATES_PER_GROUP);
+    mNetworkBlocks = clamp(networkBlocks, 1, SOC_RMT_TX_CANDIDATES_PER_GROUP);
+    portEXIT_CRITICAL(&mStrategySpinlock);
+}
+```
+
+**Platform Limit Enforcement**:
+```cpp
+// Automatically caps to platform maximum
+#include "soc/soc_caps.h"
+const size_t max_blocks = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+
+// ESP32: max_blocks = 8
+// ESP32-S2: max_blocks = 4
+// ESP32-S3: max_blocks = 4
+// ESP32-C3/C6/H2: max_blocks = 2
+```
+
+---
+
+### DMA Channel Requirements (ESP-IDF Constraints)
+
+**Critical Information**: DMA channels have specific requirements imposed by ESP-IDF that differ from non-DMA channels.
+
+#### 1. Fixed Buffer Size Requirement
+
+**ESP-IDF mandates `mem_block_symbols = 1024` for DMA mode**:
+- Non-DMA channels: `mem_block_symbols` calculated dynamically based on LED count (e.g., `(dataSize * 8) + 16`)
+- DMA channels: **MUST use fixed value of 1024** (ESP-IDF validation requirement)
+- Attempting to use calculated values (e.g., 12,304 for 512 LEDs) causes `ESP_ERR_INVALID_ARG` from `rmt_new_tx_channel()`
+
+**Why 1024?**
+- ESP-IDF documentation recommends this value for optimal DMA performance
+- Represents DMA chunk size (not total capacity like non-DMA mode)
+- DMA streams data from DRAM in 1024-symbol chunks
+- Reference: [ESP-IDF RMT Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/rmt.html)
+
+**FastLED Implementation**:
+```cpp
+// channel_engine_rmt.cpp:699
+fl::size dma_mem_block_symbols = 1024;  // ESP-IDF recommended DMA buffer size
+```
+
+This fixed value is automatically applied to all DMA channels - no user configuration needed.
+
+#### 2. Cache Coherency Requirements
+
+**DMA channels require cache synchronization on platforms with data cache** (ESP32-S3/C3/C6/H2):
+
+**Problem**: CPU writes to LED buffer may be cached and not visible to DMA hardware, causing color corruption.
+
+**Solution**: FastLED automatically calls `esp_cache_msync()` before every DMA transmission:
+```cpp
+// Flush CPU cache to SRAM before DMA reads
+esp_cache_msync(buffer_ptr, buffer_size,
+    ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+```
+
+**Known Issue**: Some ESP-IDF versions report `ESP_ERR_INVALID_ARG` from `esp_cache_msync()` even with properly aligned DMA buffers:
+- **Root Cause**: Strict alignment checks in ESP-IDF cache subsystem
+- **Workaround**: FastLED uses `ESP_CACHE_MSYNC_FLAG_UNALIGNED` flag to bypass overly strict alignment validation
+- **Safety**: Memory barriers (`FL_MEMORY_BARRIER`) ensure write ordering even if cache sync fails
+- **Impact**: Errors are logged but non-fatal (LEDs work correctly due to memory barriers)
+
+**Platform-Specific Behavior**:
+| Platform | Data Cache? | Cache Sync Required? | Notes |
+|----------|-------------|---------------------|-------|
+| ESP32 | No | No | No data cache, sync is no-op |
+| ESP32-S2 | No | No | No data cache, sync is no-op |
+| ESP32-S3 | Yes | Yes | Requires explicit sync |
+| ESP32-C3 | Yes | Yes | Requires explicit sync |
+| ESP32-C6 | Yes | Yes | Requires explicit sync |
+| ESP32-H2 | Yes | Yes | Requires explicit sync |
+
+**Troubleshooting Cache Errors**:
+If you see log messages like `"RMT cache sync returned error: ESP_ERR_INVALID_ARG"`:
+- **This is expected and non-fatal** - memory barriers ensure correctness
+- FastLED automatically suppresses these logs via `esp_log_level_set("cache", ESP_LOG_NONE)`
+- If LEDs display correctly, no action needed
+- If you see color corruption, report as a bug with IDF version and platform details
+
+**Related Issues**:
+- [GitHub Issue #2156](https://github.com/FastLED/FastLED/issues/2156) - DMA buffer size and cache sync
+- [ESP-IDF Issue #12564](https://github.com/espressif/esp-idf/issues/12564) - RMT DMA validation
+- [ESP-IDF Issue #466](https://github.com/espressif/idf-extra-components/issues/466) - Cache alignment
 
 ---
 
@@ -424,6 +899,77 @@ build_flags =
 2. Network-aware features disabled (`FASTLED_RMT_NETWORK_REDUCE_CHANNELS=0`)
 3. Platform already at minimum channels (ESP32-C3/C6/H2)
 4. Enable debug logging to verify network state detection
+
+**Issue**: "RMT TX allocation failed" - Insufficient memory for LED strips
+
+**Root Cause**: ESP32-S3 has only 192 total words of on-chip RMT memory. Non-DMA channels require 2× buffering (96 words each). External RMT usage (e.g., USB CDC) can reserve additional memory.
+
+**Example Scenario (GitHub issue #2156)**:
+- Total memory: 192 words (ESP32-S3)
+- Reserved by USB CDC: 48 words (external RMT usage)
+- Available: 192 - 48 = 144 words
+- Requested: Channel 0 (DMA, 0 words) + Channel 1 (non-DMA, 96 words) + Channel 2 (non-DMA, 96 words) = 192 words
+- Result: ❌ Third channel fails (needs 96, only 48 available)
+
+**Solutions**:
+
+1. **Use DMA channels** (Recommended):
+   ```cpp
+   // DMA bypasses on-chip memory (uses DRAM instead)
+   FastLED.addLeds<WS2812B, PIN1>(leds1, NUM_LEDS).setDMA(true);  // 0 words
+   FastLED.addLeds<WS2812B, PIN2>(leds2, NUM_LEDS);               // 96 words
+   FastLED.addLeds<WS2812B, PIN3>(leds3, NUM_LEDS);               // 96 words
+   // Total: 192 words (fits in 192 total)
+   ```
+   **Note**: ESP32-S3 has only 1 DMA channel. Additional DMA attempts will fall back to non-DMA.
+
+2. **Reserve external memory** (if you control USB CDC or other RMT usage):
+   ```cpp
+   #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
+   // If USB CDC uses 48 words, tell the memory manager
+   RmtMemoryManager::getInstance().reserveExternalMemory(48, 0);
+   ```
+   This ensures accurate memory accounting when external code uses RMT.
+
+3. **Reduce LED count or channels**:
+   - Fewer LEDs → potentially 1× buffering instead of 2×
+   - Fewer channels → less total memory consumption
+
+4. **Disable network features during initialization**:
+   Network mode uses 3× buffering (144 words per channel):
+   ```ini
+   # platformio.ini
+   [env:esp32s3]
+   build_flags = -DFASTLED_RMT_MEM_BLOCKS_NETWORK_MODE=2
+   ```
+
+5. **Use platforms with more memory**:
+   - ESP32: 512 words (global pool)
+   - ESP32-S2: 256 words (global pool)
+   - ESP32-S3: 192 TX + 192 RX words (dedicated pools)
+   - ESP32-C3/C6/H2: 96 TX + 96 RX words (dedicated pools)
+
+**Memory Allocation Formula**:
+```
+Non-DMA channels: 2× buffer = 2 × 48 words = 96 words each
+DMA channels: 0 words (uses DRAM buffer)
+Network mode: 3× buffer = 3 × 48 words = 144 words each
+
+Available = Total - Reserved - Allocated
+```
+
+**Diagnostic Output**: The improved error messages now show:
+```
+RMT TX allocation failed for channel 2
+  Requested: 96 words (2× buffer)
+  Available: 48 words
+  Memory breakdown: Total=192, Allocated=96, Reserved=48 (external RMT usage)
+  Suggestion: 48 words reserved by external RMT usage (e.g., USB CDC)
+              Consider using DMA channels (use_dma=true) to bypass on-chip memory
+  Suggestion: 96 words already allocated to other channels
+              Consider reducing LED count or using fewer channels
+```
 
 ### Implementation Files
 
