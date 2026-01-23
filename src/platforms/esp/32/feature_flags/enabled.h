@@ -96,10 +96,10 @@ FL_EXTERN_C_END
 
 // I2S LCD_CAM driver availability for LED output (Yves driver channel API port)
 // I2S LCD_CAM peripheral is available on ESP32-S3 (uses LCD_CAM via I80 bus for parallel LED driving)
-// Requires ESP-IDF 5.0+ and esp_lcd_panel_io.h header
 // Note: This is EXPERIMENTAL and lower priority than other drivers
+// The LCD_CAM peripheral is ESP32-S3 specific - it does NOT exist on other ESP32 variants
 #if !defined(FASTLED_ESP32_HAS_I2S_LCD_CAM)
-#if defined(CONFIG_IDF_TARGET_ESP32S3) && __has_include("esp_lcd_panel_io.h")
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 #define FASTLED_ESP32_HAS_I2S_LCD_CAM 1
 #else
 #define FASTLED_ESP32_HAS_I2S_LCD_CAM 0
