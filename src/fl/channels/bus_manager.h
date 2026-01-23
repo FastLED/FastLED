@@ -107,6 +107,12 @@ public:
     /// @note Used by Channel affinity system to bind channels to specific engines
     IChannelEngine* getEngineByName(const char* name) const;
 
+    /// @brief Check if manager can handle channel data (always true - proxy pattern)
+    /// @param data Channel data to check (unused)
+    /// @return Always true - manager accepts all channel types and delegates to registered engines
+    /// @note Bus manager is a proxy that delegates to compatible engines based on canHandle()
+    bool canHandle(const ChannelDataPtr& data) const override;
+
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     /// @note Selects engine on first call, then batches channel data
@@ -149,9 +155,11 @@ private:
     };
 
     /// @brief Select engine for current operation
+    /// @param data Channel data to check compatibility (optional, for predicate filtering)
     /// @return Pointer to selected engine, or nullptr if none available
-    /// @note Selects highest priority engine from registry (highest priority value)
-    IChannelEngine* selectEngine();
+    /// @note Selects highest priority engine from registry that can handle the channel data
+    /// @note If data is nullptr, selects based on priority only (no predicate filtering)
+    IChannelEngine* selectEngine(const ChannelDataPtr& data = nullptr);
 
     /// @brief Get next lower priority engine for fallback
     /// @return Pointer to next engine, or nullptr if none available
@@ -182,6 +190,10 @@ private:
     /// @brief Exclusive driver name (empty if no exclusive mode)
     /// @note When non-empty, new engines are auto-disabled if name doesn't match
     fl::string mExclusiveDriver;
+
+    /// @brief Last selected engine name (for logging deduplication)
+    /// @note Used to avoid spamming logs when the same engine is selected repeatedly
+    fl::string mLastSelectedEngine;
 
     // Non-copyable, non-movable
     ChannelBusManager(const ChannelBusManager&) = delete;

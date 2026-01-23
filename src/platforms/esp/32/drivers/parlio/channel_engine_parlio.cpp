@@ -72,6 +72,14 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     mCurrentGroupIndex = 0;
 }
 
+bool ChannelEnginePARLIOImpl::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
+}
+
 // NOTE: Old ISR callback functions (txDoneCallback, transposeAndQueueNextChunk, generateRingBuffer)
 // have been removed. These belonged to the old architecture where the channel engine implemented
 // its own ISR handling. The new architecture delegates all hardware operations to ParlioEngine HAL.
@@ -382,6 +390,14 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
     // fl::unique_ptr automatically deletes mEngine when it goes out of scope
     // (RAII)
     mCurrentDataWidth = 0;
+}
+
+bool ChannelEnginePARLIO::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
 }
 
 void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {

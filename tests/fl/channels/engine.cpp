@@ -37,6 +37,11 @@ public:
     int lastChannelCount = 0;
     int enqueueCount = 0;
 
+    bool canHandle(const ChannelDataPtr& data) const override {
+        (void)data;
+        return true;  // Test engine accepts all channel types
+    }
+
     void enqueue(ChannelDataPtr channelData) override {
         if (channelData) {
             enqueueCount++;

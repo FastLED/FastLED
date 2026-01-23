@@ -51,6 +51,13 @@ public:
     virtual ~ChannelEngineRMT() = default;
 
     /**
+     * @brief Check if engine can handle channel data
+     * @param data Channel data to check
+     * @return true if clockless channel (rejects SPI), false otherwise
+     */
+    virtual bool canHandle(const ChannelDataPtr& data) const override = 0;
+
+    /**
      * @brief Enqueue channel data for transmission
      * @param channelData Channel data to transmit
      */

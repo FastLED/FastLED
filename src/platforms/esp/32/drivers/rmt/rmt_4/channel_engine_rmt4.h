@@ -163,6 +163,11 @@ public:
 
     virtual ~ChannelEngineRMT4() = default;
 
+    /// @brief Check if engine can handle channel data (clockless only)
+    /// @param data Channel data to check
+    /// @return true if clockless channel (rejects SPI), false otherwise
+    virtual bool canHandle(const ChannelDataPtr& data) const = 0;
+
     /// @brief Get the engine name for affinity binding
     /// @return "RMT"
     const char* getName() const override { return "RMT"; }

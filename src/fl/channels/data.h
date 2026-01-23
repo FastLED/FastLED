@@ -36,10 +36,19 @@ using PaddingGenerator = fl::function<void(fl::span<const uint8_t> src, fl::span
 /// prepare next frame.
 class ChannelData {
 public:
-    /// @brief Create channel transmission data
+    /// @brief Create channel transmission data (modern variant-based API)
+    /// @param chipset Chipset configuration (clockless or SPI)
+    /// @param encodedData Encoded byte stream ready for transmission (defaults to empty)
+    static ChannelDataPtr create(
+        const ChipsetVariant& chipset,
+        fl::vector_psram<uint8_t>&& encodedData = fl::vector_psram<uint8_t>()
+    );
+
+    /// @brief Create channel transmission data (backwards compatibility)
     /// @param pin GPIO pin number for this channel
     /// @param timing Chipset timing configuration (T0H, T1H, T0L, reset)
     /// @param encodedData Encoded byte stream ready for transmission (defaults to empty)
+    /// @deprecated Use variant-based create() instead
     static ChannelDataPtr create(
         int pin,
         const ChipsetTimingConfig& timing,
@@ -49,7 +58,17 @@ public:
     /// @brief Get the GPIO pin number
     int getPin() const { return mPin; }
 
-    /// @brief Get the timing configuration
+    /// @brief Get the chipset configuration variant
+    const ChipsetVariant& getChipset() const { return mChipset; }
+
+    /// @brief Check if this is a clockless chipset
+    bool isClockless() const { return mChipset.is<ClocklessChipset>(); }
+
+    /// @brief Check if this is an SPI chipset
+    bool isSpi() const { return mChipset.is<SpiChipsetConfig>(); }
+
+    /// @brief Get the timing configuration (clockless chipsets only)
+    /// @deprecated Use getChipset() instead
     const ChipsetTimingConfig& getTiming() const { return mTiming; }
 
     /// @brief Get the encoded transmission data
@@ -104,7 +123,14 @@ private:
     template<typename T, typename... Args>
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
 
-    /// @brief Private constructor (use create() factory method)
+    /// @brief Private constructor - variant-based (modern API)
+    ChannelData(
+        const ChipsetVariant& chipset,
+        fl::vector_psram<uint8_t>&& encodedData
+    );
+
+    /// @brief Private constructor - legacy API (backwards compatibility)
+    /// @deprecated Use variant-based constructor
     ChannelData(
         int pin,
         const ChipsetTimingConfig& timing,
@@ -115,8 +141,9 @@ private:
     ChannelData(const ChannelData&) = delete;
     ChannelData& operator=(const ChannelData&) = delete;
 
-    const int mPin;                         ///< GPIO pin number
-    const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset)
+    ChipsetVariant mChipset;                ///< Chipset configuration (clockless or SPI)
+    const int mPin;                         ///< GPIO pin number (extracted from chipset for convenience)
+    const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset) - backwards compatibility, clockless only
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<uint8_t> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)

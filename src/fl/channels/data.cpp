@@ -8,6 +8,33 @@
 
 namespace fl {
 
+namespace {
+// Helper to extract data pin from chipset variant
+int getDataPinFromChipset(const ChipsetVariant& chipset) {
+    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
+        return clockless->pin;
+    } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
+        return spi->dataPin;
+    }
+    return -1;
+}
+
+// Helper to extract timing from chipset variant (clockless only)
+ChipsetTimingConfig getTimingFromChipset(const ChipsetVariant& chipset) {
+    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
+        return clockless->timing;
+    }
+    return ChipsetTimingConfig(0, 0, 0, 0);  // Invalid/empty timing for SPI
+}
+} // anonymous namespace
+
+ChannelDataPtr ChannelData::create(
+    const ChipsetVariant& chipset,
+    fl::vector_psram<uint8_t>&& encodedData
+) {
+    return fl::make_shared<ChannelData>(chipset, fl::move(encodedData));
+}
+
 ChannelDataPtr ChannelData::create(
     int pin,
     const ChipsetTimingConfig& timing,
@@ -17,11 +44,22 @@ ChannelDataPtr ChannelData::create(
 }
 
 ChannelData::ChannelData(
+    const ChipsetVariant& chipset,
+    fl::vector_psram<uint8_t>&& encodedData
+)
+    : mChipset(chipset)
+    , mPin(getDataPinFromChipset(chipset))
+    , mTiming(getTimingFromChipset(chipset))
+    , mEncodedData(fl::move(encodedData))
+{}
+
+ChannelData::ChannelData(
     int pin,
     const ChipsetTimingConfig& timing,
     fl::vector_psram<uint8_t>&& encodedData
 )
-    : mPin(pin)
+    : mChipset(ClocklessChipset(pin, timing))
+    , mPin(pin)
     , mTiming(timing)
     , mEncodedData(fl::move(encodedData))
 {}

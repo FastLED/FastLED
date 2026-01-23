@@ -78,6 +78,13 @@ public:
     /// @note Used by Channel affinity system to bind channels to specific engines
     virtual const char* getName() const { return nullptr; }
 
+    /// @brief Check if this engine can handle the given channel data
+    /// @param data Channel data to check (chipset configuration, pin, timing)
+    /// @return true if this engine can render the channel data, false otherwise
+    /// @note Engines must implement this to filter by chipset type (e.g., SPI-only, clockless-only)
+    /// @note Used by ChannelBusManager to route channels to compatible engines
+    virtual bool canHandle(const ChannelDataPtr& data) const = 0;
+
     /// @brief Virtual destructor
     virtual ~IChannelEngine() = default;
 

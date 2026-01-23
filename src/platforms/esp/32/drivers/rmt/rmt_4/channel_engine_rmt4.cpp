@@ -98,6 +98,18 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// IChannelEngine Interface
+// ═══════════════════════════════════════════════════════════════════════════
+
+bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Timing Symbol Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 

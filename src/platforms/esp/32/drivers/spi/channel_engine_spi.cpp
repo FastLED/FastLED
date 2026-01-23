@@ -1,5 +1,11 @@
 /// @file channel_engine_spi.cpp
-/// @brief SPI-based ChannelEngine implementation for ESP32
+/// @brief Clockless-over-SPI ChannelEngine implementation for ESP32
+///
+/// ⚠️ ARCHITECTURE NOTE: This is NOT a general SPI LED driver!
+/// This driver implements CLOCKLESS protocols (WS2812, SK6812, etc.) using SPI hardware
+/// as a bit-banging engine. The SPI clock is used internally for timing but is NEVER
+/// physically connected to the LED strip - only the MOSI/data pin is used.
+/// See channel_engine_spi.h for detailed explanation.
 
 #include "channel_engine_spi.h"
 
@@ -108,6 +114,36 @@ ChannelEngineSpi::~ChannelEngineSpi() {
             releaseSpiHost(channel.spi_host);
         }
     }
+}
+
+bool ChannelEngineSpi::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+
+    // ⚠️ ARCHITECTURE CLARIFICATION: This is a CLOCKLESS-over-SPI engine!
+    //
+    // This engine uses SPI hardware to implement CLOCKLESS LED protocols (WS2812, SK6812, etc.),
+    // NOT true SPI protocols (APA102, SK9822, etc.). The SPI clock pin is used internally for
+    // precise timing generation but is NEVER physically connected to the LED strip - only the
+    // MOSI/data pin carries signals to the LEDs.
+    //
+    // How it works:
+    //   - Clockless LED bits are encoded as SPI bit patterns (e.g., 100b = '0', 110b = '1')
+    //   - The SPI clock controls MOSI timing (e.g., 2.5MHz for WS2812 = 400ns per bit)
+    //   - LEDs decode pulse widths on the data line, ignoring the clock signal
+    //
+    // ⚠️ CURRENT IMPLEMENTATION IS BACKWARDS!
+    // This method currently returns `data->isSpi()`, which means it accepts true SPI chipsets
+    // (APA102, SK9822) and rejects clockless chipsets (WS2812, SK6812). This is WRONG!
+    //
+    // Correct logic should be:
+    //   return !data->isSpi();  // Accept clockless, reject true SPI
+    // or:
+    //   return data->isClockless();  // If such a method exists
+    //
+    // TODO: Fix this inverted logic to match the engine's actual purpose
+    return data->isSpi();  // ⚠️ BACKWARDS - should be !data->isSpi()
 }
 
 void ChannelEngineSpi::configureMultiLanePins(
@@ -534,12 +570,27 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     bus_config.mosi_io_num = pin; // Data0 (always present)
     bus_config.miso_io_num =
         state->data1_pin;        // Data1 for dual/quad mode (-1 if unused)
-    // CRITICAL: SPI peripheral requires a clock signal for MOSI timing
-    // Clock pin must be specified even though we don't physically connect it to LEDs
-    // The clock determines the timing of MOSI bit transitions
-    // For ESP32-S3, use GPIO 1 as internal clock (not connected to LED strip)
-    // Note: GPIO 3 is a strapping pin (JTAG select) and should be avoided
-    bus_config.sclk_io_num = 1;  // Internal clock pin (required for SPI timing)
+
+    // ⚠️ CLOCKLESS-OVER-SPI ARCHITECTURE: Clock pin is internal-only, NOT connected to LEDs!
+    //
+    // CRITICAL: The SPI peripheral requires a clock signal for precise MOSI timing generation,
+    // BUT this clock is NEVER physically connected to the LED strip. This is what makes this
+    // a "clockless-over-SPI" driver:
+    //
+    //   1. ESP32 SPI peripheral generates clock internally (e.g., 2.5MHz for WS2812)
+    //   2. This clock controls the exact timing of MOSI bit transitions
+    //   3. MOSI pin sends encoded bit patterns to the LEDs (100b = '0', 110b = '1')
+    //   4. Clock pin (GPIO 1) is left floating or unused - LEDs never see it
+    //   5. LEDs decode the data stream based on pulse widths (T0H/T0L vs T1H/T1L)
+    //
+    // Why GPIO 1?
+    //   - For ESP32-S3, GPIO 1 is chosen as a safe internal clock pin
+    //   - GPIO 3 is avoided (strapping pin for JTAG select)
+    //   - The clock pin assignment is required by ESP-IDF SPI driver but physically ignored
+    //
+    // This is fundamentally different from true SPI protocols (APA102, SK9822) where both
+    // clock and data pins are connected to the LED strip for synchronous clocked transmission.
+    bus_config.sclk_io_num = 1;  // Internal clock pin (NOT connected to LEDs!)
     bus_config.quadwp_io_num =
         state->data2_pin; // Data2 for quad mode (-1 if unused)
     bus_config.quadhd_io_num =

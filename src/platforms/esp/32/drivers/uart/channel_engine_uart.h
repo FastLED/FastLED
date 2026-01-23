@@ -144,6 +144,11 @@ public:
     /// @brief Destructor - waits for transmission completion
     ~ChannelEngineUART() override;
 
+    /// @brief Check if engine can handle channel data (clockless only)
+    /// @param data Channel data to check
+    /// @return true if clockless channel (rejects SPI), false otherwise
+    bool canHandle(const ChannelDataPtr& data) const override;
+
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     ///

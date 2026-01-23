@@ -439,6 +439,11 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     explicit ChannelEnginePARLIOImpl(size_t data_width);
     ~ChannelEnginePARLIOImpl() override;
 
+    /// @brief Check if engine can handle channel data (clockless only)
+    /// @param data Channel data to check
+    /// @return true if clockless channel (rejects SPI), false otherwise
+    bool canHandle(const ChannelDataPtr& data) const override;
+
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     void enqueue(ChannelDataPtr channelData) override;
@@ -558,6 +563,11 @@ class ChannelEnginePARLIO : public IChannelEngine {
     /// @brief Constructor - lazy initialization (no engine created)
     ChannelEnginePARLIO();
     ~ChannelEnginePARLIO() override;
+
+    /// @brief Check if engine can handle channel data (clockless only)
+    /// @param data Channel data to check
+    /// @return true if clockless channel (rejects SPI), false otherwise
+    bool canHandle(const ChannelDataPtr& data) const override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit

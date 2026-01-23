@@ -93,6 +93,15 @@ ChannelEngineI2S::~ChannelEngineI2S() {
 // IChannelEngine Interface
 //=============================================================================
 
+bool ChannelEngineI2S::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
+}
+
+
 void ChannelEngineI2S::enqueue(ChannelDataPtr channelData) {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }

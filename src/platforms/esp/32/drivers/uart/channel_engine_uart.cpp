@@ -56,6 +56,14 @@ ChannelEngineUART::~ChannelEngineUART() {
     mCurrentGroupIndex = 0;
 }
 
+bool ChannelEngineUART::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
+}
+
 //=============================================================================
 // Public Interface - IChannelEngine Implementation
 //=============================================================================

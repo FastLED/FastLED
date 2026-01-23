@@ -159,14 +159,20 @@ IChannelEngine* ChannelBusManager::getEngineByName(const char* name) const {
     return nullptr;  // Not found or not enabled
 }
 
+bool ChannelBusManager::canHandle(const ChannelDataPtr& data) const {
+    (void)data;
+    return true;  // Bus manager accepts all - delegates to registered engines
+}
+
 // IChannelEngine interface implementation
 void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
     // Select engine on first call if not already selected
+    // Pass channelData to selectEngine() for predicate filtering
     if (!mActiveEngine) {
-        mActiveEngine = selectEngine();
+        mActiveEngine = selectEngine(channelData);
         if (!mActiveEngine) {
-            FL_WARN("ChannelBusManager::enqueue() - No engines available");
-            mLastError = "No engines available for channel data";
+            FL_WARN("ChannelBusManager::enqueue() - No compatible engines available for channel data");
+            mLastError = "No compatible engines available for channel data";
             return;
         }
     }
@@ -257,35 +263,46 @@ void ChannelBusManager::onEndFrame() {
     mActiveEnginePriority = -1;
 }
 
-IChannelEngine* ChannelBusManager::selectEngine() {
+IChannelEngine* ChannelBusManager::selectEngine(const ChannelDataPtr& data) {
     if (mEngines.empty()) {
         FL_WARN("ChannelBusManager::selectEngine() - No engines registered");
         return nullptr;
     }
 
     // Engines are already sorted by priority descending
-    // Select first enabled engine (highest priority)
+    // Select first enabled engine that can handle the channel data (highest priority)
     for (auto& entry : mEngines) {
-        if (entry.enabled) {
-            mActiveEngine = entry.engine.get();
-            mActiveEnginePriority = entry.priority;
-
-            // Only log when engine selection actually changes (avoid per-frame spam)
-            static fl::string lastSelectedEngine;
-            if (entry.name != lastSelectedEngine) {
-                lastSelectedEngine = entry.name;
-                if (!entry.name.empty()) {
-                    FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
-                } else {
-                    FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
-                }
-            }
-            return mActiveEngine;
+        if (!entry.enabled) {
+            continue;
         }
+
+        // Check if engine can handle this channel data (predicate filtering)
+        // Skip predicate check if data is nullptr (backwards compatibility)
+        if (data && !entry.engine->canHandle(data)) {
+            if (!entry.name.empty()) {
+                FL_DBG("ChannelBusManager: Engine '" << entry.name.c_str() << "' cannot handle channel data (chipset mismatch)");
+            }
+            continue;
+        }
+
+        // Found compatible engine
+        mActiveEngine = entry.engine.get();
+        mActiveEnginePriority = entry.priority;
+
+        // Only log when engine selection actually changes (avoid per-frame spam)
+        if (entry.name != mLastSelectedEngine) {
+            mLastSelectedEngine = entry.name;
+            if (!entry.name.empty()) {
+                FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
+            } else {
+                FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
+            }
+        }
+        return mActiveEngine;
     }
 
-    // No enabled engines found
-    FL_WARN("ChannelBusManager::selectEngine() - No enabled engines available");
+    // No compatible engines found
+    FL_WARN("ChannelBusManager::selectEngine() - No compatible enabled engines available");
     return nullptr;
 }
 

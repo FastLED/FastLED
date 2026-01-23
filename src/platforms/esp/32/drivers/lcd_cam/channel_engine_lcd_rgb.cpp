@@ -70,6 +70,15 @@ ChannelEngineLcdRgb::~ChannelEngineLcdRgb() {
 // IChannelEngine Interface
 //=============================================================================
 
+bool ChannelEngineLcdRgb::canHandle(const ChannelDataPtr& data) const {
+    if (!data) {
+        return false;
+    }
+    // Clockless engines only handle non-SPI chipsets
+    return !data->isSpi();
+}
+
+
 void ChannelEngineLcdRgb::enqueue(ChannelDataPtr channelData) {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }

@@ -117,8 +117,8 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     setDither(options.mDitherMode);
     setRgbw(options.mRgbw);
 
-    // Create ChannelData during construction
-    mChannelData = ChannelData::create(mPin, mTiming);
+    // Create ChannelData during construction with chipset variant
+    mChannelData = ChannelData::create(mChipset);
 }
 
 // Backwards-compatible constructor (deprecated)
@@ -252,6 +252,11 @@ namespace {
 class StubChannelEngine : public IChannelEngine {
 public:
     virtual ~StubChannelEngine() = default;
+
+    virtual bool canHandle(const ChannelDataPtr& data) const override {
+        (void)data;
+        return true;  // Test engine accepts all channel types
+    }
 
     virtual void enqueue(ChannelDataPtr /*channelData*/) override {
         // No-op: stub engine does nothing

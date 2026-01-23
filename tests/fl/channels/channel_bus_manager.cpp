@@ -38,6 +38,11 @@ public:
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
     void setShouldFail(bool shouldFail) { mShouldFail = shouldFail; }
 
+    bool canHandle(const ChannelDataPtr& data) const override {
+        (void)data;
+        return true;  // Test engine accepts all channel types
+    }
+
     void enqueue(ChannelDataPtr channelData) override {
         if (channelData) {
             mEnqueuedChannels.push_back(channelData);

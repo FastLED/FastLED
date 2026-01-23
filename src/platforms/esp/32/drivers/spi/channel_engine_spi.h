@@ -1,7 +1,27 @@
 /// @file channel_engine_spi.h
-/// @brief SPI-based implementation of ChannelEngine for ESP32
+/// @brief Clockless-over-SPI implementation of ChannelEngine for ESP32
 ///
-/// Provides WS2812-over-SPI LED transmission using ESP-IDF SPI master driver.
+/// ⚠️ ARCHITECTURE NOTE: This is NOT a general SPI LED driver (e.g., APA102, SK9822)!
+///
+/// This driver implements CLOCKLESS protocols (WS2812, SK6812, etc.) using SPI hardware
+/// as a bit-banging engine. The SPI clock pin is specified for internal timing generation
+/// but is NEVER physically connected to the LED strip - only the MOSI/data pin is used.
+///
+/// How it works:
+/// 1. The SPI peripheral generates a clock signal internally (e.g., 2.5MHz for WS2812)
+/// 2. This clock controls the precise timing of MOSI bit transitions
+/// 3. Each LED bit (0 or 1) expands to 3 SPI bits with specific high/low patterns:
+///    - LED bit '0' → SPI pattern 100 (binary) = short high, long low
+///    - LED bit '1' → SPI pattern 110 (binary) = long high, short low
+/// 4. The LEDs decode these patterns based on pulse width (T0H/T0L vs T1H/T1L)
+/// 5. The clock signal itself is ignored by the LEDs (never leaves the ESP32)
+///
+/// Why use SPI for clockless protocols?
+/// - Precise timing: SPI hardware generates exact bit patterns without CPU intervention
+/// - DMA support: Large LED buffers transmit without blocking the CPU
+/// - Multi-lane: Dual/quad SPI modes enable parallel transmission to multiple strips
+/// - ISR-safe: Encoding and transmission happen in background (timer ISR + DMA)
+///
 /// Replaces third-party Espressif LED strip implementation with direct ESP-IDF integration.
 
 #pragma once
@@ -31,16 +51,22 @@
 
 namespace fl {
 
-/// @brief SPI timing configuration for LED protocols
+/// @brief SPI timing configuration for CLOCKLESS LED protocols
 ///
-/// Unlike RMT (which uses nanosecond-precise T1/T2/T3 timing), SPI-based
-/// protocols use clock-synchronized bit patterns to encode LED data.
+/// ⚠️ This struct configures CLOCKLESS protocols (WS2812, SK6812, etc.) using SPI hardware!
+///
+/// Unlike RMT (which uses nanosecond-precise T1/T2/T3 timing), this approach uses SPI
+/// clock-synchronized bit patterns to encode clockless LED data. The SPI clock runs
+/// internally (never connected to LEDs) and controls precise MOSI bit timing.
+///
+/// APA102/SK9822 protocols listed below are NOT currently implemented - this driver
+/// is exclusively for clockless-over-SPI encoding.
 struct SpiTimingConfig {
     enum Protocol {
-        WS2812_OVER_SPI,  ///< WS2812 encoded as SPI bits (2.5MHz, 3:1 expansion)
-        APA102,           ///< Clocked protocol (future - not implemented in MVP)
-        SK9822,           ///< Clocked protocol (future - not implemented in MVP)
-        CUSTOM            ///< User-defined custom protocol
+        WS2812_OVER_SPI,  ///< WS2812 CLOCKLESS encoded as SPI bits (2.5MHz, 3:1 expansion)
+        APA102,           ///< ⚠️ NOT IMPLEMENTED - would require true clocked SPI driver
+        SK9822,           ///< ⚠️ NOT IMPLEMENTED - would require true clocked SPI driver
+        CUSTOM            ///< User-defined custom CLOCKLESS protocol
     };
 
     Protocol protocol;           ///< LED protocol type
@@ -169,15 +195,25 @@ struct MultiLanePinConfig {
     }
 };
 
-/// @brief SPI-based IChannelEngine implementation
+/// @brief Clockless-over-SPI IChannelEngine implementation
 ///
-/// Consolidates SPI LED strip functionality:
+/// ⚠️ This is a CLOCKLESS LED driver using SPI hardware, NOT a true SPI chipset driver!
+///
+/// Consolidates clockless LED strip functionality using SPI peripheral as bit-banger:
+/// - Implements clockless protocols (WS2812, SK6812, etc.) via SPI bit patterns
 /// - Direct ESP-IDF SPI master driver integration
-/// - WS2812-over-SPI bit encoding (2.5MHz, 3:1 expansion)
-/// - Multi-lane SPI support (dual/quad modes for higher throughput)
+/// - WS2812-over-SPI bit encoding (2.5MHz SPI clock, 3:1 bit expansion)
+/// - Multi-lane SPI support (dual/quad modes for parallel strip transmission)
 /// - Channel persistence between frames (avoid recreation overhead)
 /// - On-demand SPI bus allocation with reference counting
 /// - DMA support with PSRAM→DRAM buffer copying
+///
+/// How clockless-over-SPI works:
+/// - SPI clock generates precise timing internally (e.g., 2.5MHz = 400ns/bit)
+/// - Clock pin is specified but NEVER physically connected to LEDs
+/// - Only MOSI/data pin carries signals to the LED strip
+/// - Each LED bit expands to multiple SPI bits with specific patterns
+/// - LEDs decode based on pulse widths, ignoring the clock signal
 ///
 /// Managed by ChannelBusManager which handles frame lifecycle events.
 class ChannelEngineSpi : public IChannelEngine {
@@ -206,6 +242,18 @@ public:
     /// @brief Get the engine name for affinity binding
     /// @return "SPI"
     const char* getName() const override { return "SPI"; }
+
+    /// @brief Check if this engine can handle the given channel data
+    /// @param data Channel data to check
+    /// @return true for CLOCKLESS chipsets (WS2812, SK6812, etc.), false for true SPI chipsets
+    ///
+    /// ⚠️ CURRENT IMPLEMENTATION IS BACKWARDS!
+    /// This engine is a CLOCKLESS-over-SPI driver, so it should return:
+    ///   - true for clockless protocols (WS2812, SK6812, etc.)
+    ///   - false for true SPI protocols (APA102, SK9822, etc.)
+    /// But the current implementation uses `data->isSpi()` which inverts this logic.
+    /// TODO: Fix to use `!data->isSpi()` or equivalent clockless check
+    bool canHandle(const ChannelDataPtr& data) const override;
 
 private:
     /// @brief Begin LED data transmission with internal batching (internal helper)

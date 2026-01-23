@@ -416,6 +416,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
     // IChannelEngine interface implementation
+    bool canHandle(const ChannelDataPtr& data) const override {
+        if (!data) {
+            return false;
+        }
+        // Clockless engines only handle non-SPI chipsets
+        return !data->isSpi();
+    }
+
     void enqueue(ChannelDataPtr channelData) override {
         mEnqueuedChannels.push_back(channelData);
     }
