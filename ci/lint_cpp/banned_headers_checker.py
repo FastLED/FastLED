@@ -204,6 +204,12 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
             "led_sysdefs.h", "Core system definitions need platform headers"
         ),
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException(
+            "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"
+        ),
+        HeaderException(
+            "fl/delay.cpp.hpp", "Platform-specific delay implementation (header-only)"
+        ),
         # platforms/ - .cpp files that need Arduino.h for platform functionality
         HeaderException("platforms/avr/io_avr.cpp", "AVR platform I/O implementation"),
         HeaderException("platforms/stub/Arduino.cpp", "Stub Arduino implementation"),
@@ -312,6 +318,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         ),
     ],
     "thread": [
+        HeaderException("fl/async.cpp.hpp", "Stub-specific thread yielding"),
         HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
         HeaderException("platforms/stub/time_stub.cpp", "Test time simulation"),
         HeaderException(
@@ -332,10 +339,16 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     "stdint.h": [
         HeaderException("fl/stl/cstdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException(
+            "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"
+        ),
     ],
     # Time and timing
     "chrono": [
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
+        HeaderException(
+            "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"
+        ),
         HeaderException("platforms/stub/isr_stub.hpp", "Test ISR timing simulation"),
         HeaderException("platforms/stub/time_stub.cpp", "Test time simulation"),
         HeaderException(
@@ -351,7 +364,14 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     "string.h": [
         HeaderException(
             "fl/stl/str.cpp", "C string implementation (memcpy, strlen, etc.)"
-        )
+        ),
+        HeaderException(
+            "fl/stl/cstring.cpp.hpp", "C string wrapper (header-only implementation)"
+        ),
+        HeaderException(
+            "fl/stl/detail/string_holder.cpp.hpp",
+            "String holder implementation requiring strlen",
+        ),
     ],
     "stdlib.h": [
         HeaderException(
@@ -362,6 +382,9 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     "math.h": [
         HeaderException(
             "fl/stl/math.cpp", "Platform math functions (sin, cos, sqrt, etc.)"
+        ),
+        HeaderException(
+            "fl/stl/math.cpp.hpp", "Platform math wrapper (header-only implementation)"
         ),
         HeaderException("fl/audio_reactive.cpp", "Audio FFT and signal processing"),
         HeaderException(

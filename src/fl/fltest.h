@@ -864,12 +864,15 @@ bool isTestSkipped();
     } while (0)
 
 // FL_WARN - warning assertion (logs but doesn't affect pass/fail)
+// Note: Only define if not already defined by fl/log.h (which provides streaming support)
+#ifndef FL_WARN
 #define FL_WARN(expr)                                                           \
     do {                                                                         \
         if (!(expr)) {                                                           \
             fl::test::outputMessage("Warning: " #expr " is false", __FILE__, __LINE__); \
         }                                                                        \
     } while (0)
+#endif
 
 // FL_WARN_FALSE - warning assertion for false conditions
 #define FL_WARN_FALSE(expr)                                                     \

@@ -201,6 +201,26 @@ if [ "$JS_ONLY" = false ]; then
         echo "-------------------------------"
         echo "Running unified C++ checker (all content-based linters in one pass)"
         if uv run python ci/lint_cpp/run_all_checkers.py; then
+            # Unity build enforcement (src/fl/ only _build.cpp allowed)
+            echo ""
+            echo "Running unity build checker (src/fl/ must use .cpp.hpp files)"
+            if ! uv run python ci/lint_cpp/test_no_cpp_in_fl.py; then
+                # Invalidate cache on failure so it reruns next time
+                uv run python ci/cpp_lint_cache.py failure
+                echo "❌ Unity build check failed"
+                exit 1
+            fi
+
+            # Unity build completeness (all .cpp.hpp in _build.hpp)
+            echo ""
+            echo "Running unity build completeness checker (all .cpp.hpp must be in _build.hpp)"
+            if ! uv run python ci/lint_cpp/test_unity_build.py; then
+                # Invalidate cache on failure so it reruns next time
+                uv run python ci/cpp_lint_cache.py failure
+                echo "❌ Unity build completeness check failed"
+                exit 1
+            fi
+
             # Check for relative includes (paths with "..")
             # Only enforce strict no-relative-includes rule for src/, not examples/
             echo ""
