@@ -135,11 +135,39 @@ runner_exe = executable('runner',
 
 # Discover and organize tests using external Python script
 # Output format: TEST:<name>:<file_path>:<category>
-test_metadata_output = run_command(
-  'python', meson.current_source_dir() / 'organize_tests.py',
-  meson.current_source_dir(),
-  check: true
-).stdout().strip()
+# Uses hash-based caching to avoid re-running organize_tests.py when test files unchanged
+cache_script = meson.current_source_dir() / 'test_metadata_cache.py'
+tests_source_dir = meson.current_source_dir()
+tests_build_dir = meson.current_build_dir()
+
+# Check if cache is valid
+cache_check = run_command(
+  'python', cache_script, '--check', tests_source_dir, tests_build_dir,
+  check: false
+)
+
+if cache_check.returncode() == 0
+  # Cache hit - use cached metadata
+  test_metadata_output = cache_check.stdout().strip()
+  message('Using cached test metadata (no changes detected)')
+else
+  # Cache miss - run full discovery
+  message('Running test discovery (cache invalid or missing)')
+
+  discovery_result = run_command(
+    'python', meson.current_source_dir() / 'organize_tests.py',
+    tests_source_dir,
+    check: true
+  )
+  test_metadata_output = discovery_result.stdout().strip()
+
+  # Update cache
+  run_command(
+    'python', cache_script, '--update',
+    tests_source_dir, tests_build_dir, test_metadata_output,
+    check: true
+  )
+endif
 
 # Parse test metadata
 test_names = []
