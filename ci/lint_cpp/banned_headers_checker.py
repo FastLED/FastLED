@@ -399,12 +399,17 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     "cmath": [
         HeaderException("platforms/wasm/timer.cpp", "WASM timer implementation"),
     ],
-    # File operations
-    "fstream": [
-        HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
-        HeaderException("fl/stl/fstream.h", "fl::fstream wrapper for std::fstream"),
+    # Error handling
+    "cerrno": [
+        HeaderException(
+            "fl/stl/cerrno.h", "fl::errno and error constants implementation"
+        ),
+        HeaderException("fl/stl/fstream.h", "FILE* error handling via errno"),
     ],
+    # File operations
+    "fstream": [],  # No exceptions - use fl::ifstream/ofstream from fl/stl/fstream.h instead
     "cstdio": [
+        HeaderException("fl/stl/fstream.h", "FILE* wrapper implementation"),
         HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
         HeaderException("platforms/wasm/io_wasm.h", "WASM platform I/O implementation"),
         HeaderException(

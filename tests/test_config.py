@@ -17,7 +17,7 @@ from typing import List, Set
 EXCLUDED_TEST_FILES: Set[str] = {"test_runner.cpp", "doctest_main.cpp"}
 
 # Subdirectories containing tests that should be discovered
-TEST_SUBDIRS: List[str] = ["fl", "fl/channels", "fl/detail", "fl/rmt5", "fl/sensors", "fx", "ftl", "lib8tion", "platforms"]
+TEST_SUBDIRS: List[str] = ["fl", "fl/channels", "fl/detail", "fl/rmt5", "fl/sensors", "fl/stl", "fx", "ftl", "lib8tion", "platforms"]
 
 # ============================================================================
 # Test Categorization Configuration
