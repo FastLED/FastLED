@@ -461,11 +461,11 @@ inline bool operator>=(string_view lhs, string_view rhs) {
 
 // ======= OUTPUT HELPER =======
 // Inline hash function for string_view
-inline fl::size hash_string_view(string_view sv) {
-    // FNV-1a hash algorithm
-    fl::size hash = 2166136261u;
+inline uint32_t hash_string_view(string_view sv) {
+    // FNV-1a 32-bit hash algorithm
+    uint32_t hash = 2166136261u;
     for (fl::size i = 0; i < sv.size(); ++i) {
-        hash ^= static_cast<fl::size>(sv[i]);
+        hash ^= static_cast<uint32_t>(sv[i]);
         hash *= 16777619u;
     }
     return hash;
