@@ -409,7 +409,9 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     # File operations
     "fstream": [],  # No exceptions - use fl::ifstream/ofstream from fl/stl/fstream.h instead
     "cstdio": [
-        HeaderException("fl/stl/fstream.h", "FILE* wrapper implementation"),
+        HeaderException(
+            "fl/stl/detail/file_io.h", "Platform-agnostic FILE* abstraction (fl::FILE)"
+        ),
         HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
         HeaderException("platforms/wasm/io_wasm.h", "WASM platform I/O implementation"),
         HeaderException(
