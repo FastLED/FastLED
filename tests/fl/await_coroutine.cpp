@@ -371,7 +371,8 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // Wait for coroutine to complete
     int timeout = 0;
     while (!await_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+        async_yield();
+        delay(10);
         timeout += 10;
     }
     CHECK(await_completed.load());
@@ -465,6 +466,7 @@ TEST_CASE("global coordination - no concurrent execution") {
     int timeout = 0;
     while (!test_completed.load() && timeout < 5000) {
         async_yield();  // Keep yielding to let coroutine finish
+        delay(10);
         timeout += 10;
     }
 
@@ -520,8 +522,9 @@ TEST_CASE("global coordination - await releases lock for other threads") {
     // Wait for both coroutines to complete (5000ms total timeout)
     int timeout = 0;
     while (!both_completed.load() && timeout < 5000) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
-        timeout += 1;  // Match the sleep duration
+        async_yield();
+        delay(10);
+        timeout += 10;
     }
 
     CHECK(both_completed.load());
