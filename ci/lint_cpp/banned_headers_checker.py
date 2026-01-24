@@ -434,6 +434,10 @@ class BannedHeadersChecker(FileContentChecker):
         if not file_path.endswith((".cpp", ".h", ".hpp", ".ino")):
             return False
 
+        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
+        if file_path.endswith(".cpp.hpp"):
+            return False
+
         # Check if file is in excluded list (handles both Windows and Unix paths)
         if is_excluded_file(file_path):
             return False

@@ -41,6 +41,10 @@ class UsingNamespaceFlChecker(FileContentChecker):
         if "FastLED.h" in file_path:
             return False
 
+        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
+        if file_path.endswith(".cpp.hpp"):
+            return False
+
         # Only check header files
         return any(file_path.endswith(ext) for ext in [".h", ".hpp"])
 

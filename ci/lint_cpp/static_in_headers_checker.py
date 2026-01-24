@@ -52,6 +52,10 @@ class StaticInHeaderChecker(FileContentChecker):
         if not file_path.endswith((".h", ".hpp")):
             return False
 
+        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
+        if file_path.endswith(".cpp.hpp"):
+            return False
+
         # Check if file is in excluded list
         if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
             return False
