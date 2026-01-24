@@ -144,6 +144,9 @@ long lround_impl_double(double value) {
 }
 
 // Round to nearest floating-point value implementations using standard library
+// Arduino.h defines round as a macro, so we need to temporarily hide it
+#pragma push_macro("round")
+#undef round
 float round_impl_float(float value) {
     return ::roundf(value);
 }
@@ -151,6 +154,7 @@ float round_impl_float(float value) {
 double round_impl_double(double value) {
     return ::round(value);
 }
+#pragma pop_macro("round")
 
 // Floating-point modulo implementations using standard library
 float fmod_impl_float(float x, float y) {

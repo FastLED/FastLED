@@ -277,14 +277,16 @@ bool SPIDualNRF52::waitComplete(uint32_t timeout_ms) {
     uint32_t iterations = 0;
 
     // Wait for both SPIM peripherals to complete
+    // Use (max)() to prevent macro expansion by Arduino.h's max macro
     while ((!nrf_spim_event_check(mSPIM0, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM1, NRF_SPIM_EVENT_END)) &&
-           (timeout_ms == fl::numeric_limits<uint32_t>::max() || iterations < timeout_iterations)) {
+           (timeout_ms == (fl::numeric_limits<uint32_t>::max)() || iterations < timeout_iterations)) {
         iterations++;
     }
 
     // Check if we timed out
-    bool timed_out = (timeout_ms != fl::numeric_limits<uint32_t>::max()) && (iterations >= timeout_iterations);
+    // Use (max)() to prevent macro expansion by Arduino.h's max macro
+    bool timed_out = (timeout_ms != (fl::numeric_limits<uint32_t>::max)()) && (iterations >= timeout_iterations);
     if (timed_out) {
         FL_WARN("SPIDualNRF52: Transaction timeout");
         // Clear state even on timeout

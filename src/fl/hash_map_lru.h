@@ -137,7 +137,8 @@ class HashMapLru {
 
         // Find the entry with the oldest timestamp
         Key oldest_key;
-        u32 oldest_time = fl::numeric_limits<u32>::max();
+        // Use (max)() to prevent macro expansion by Arduino.h's max macro
+        u32 oldest_time = (fl::numeric_limits<u32>::max)();
         bool found = false;
 
         for (auto it = mMap.begin(); it != mMap.end(); ++it) {

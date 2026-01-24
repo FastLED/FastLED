@@ -118,7 +118,8 @@ public:
         , mType(type)
         , mIntervalMs(interval_ms)
         , mTraceLabel(trace ? make_unique<string>(make_trace_label(*trace)) : nullptr)
-        , mLastRunTime(numeric_limits<uint32_t>::max()) {}
+        // Use (max)() to prevent macro expansion by Arduino.h's max macro
+        , mLastRunTime((numeric_limits<uint32_t>::max)()) {}
 
     void set_then(function<void()> on_then) override {
         mThenCallback = fl::move(on_then);
@@ -149,7 +150,8 @@ public:
             return false;  // Frame tasks not ready during regular updates
         }
         if (mIntervalMs <= 0) return true;
-        if (mLastRunTime == fl::numeric_limits<uint32_t>::max()) return true;
+        // Use (max)() to prevent macro expansion by Arduino.h's max macro
+        if (mLastRunTime == (fl::numeric_limits<uint32_t>::max)()) return true;
         return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
     }
 

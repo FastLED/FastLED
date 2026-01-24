@@ -26,7 +26,11 @@ namespace fl {
     }
 
     // Provide abs function
+    // Arduino.h defines abs as a macro, so we need to temporarily hide it
+    #pragma push_macro("abs")
+    #undef abs
     int abs(int x) {
         return ::abs(x);
     }
+    #pragma pop_macro("abs")
 } // namespace fl

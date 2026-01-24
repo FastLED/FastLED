@@ -35,7 +35,8 @@ i32 worley_noise_2d_q15(i32 x, i32 y) {
     i32 cell_x = x >> 15;
     i32 cell_y = y >> 15;
 
-    i32 min_dist = fl::numeric_limits<i32>::max();
+    // Use (max)() to prevent macro expansion by Arduino.h's max macro
+    i32 min_dist = (fl::numeric_limits<i32>::max)();
 
     // Check surrounding 9 cells
     for (int dy = -1; dy <= 1; ++dy) {

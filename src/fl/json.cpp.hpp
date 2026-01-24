@@ -139,10 +139,11 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     void checkNumericValue(double val) {
                         // Check integer ranges in one pass
                         bool isInteger = val == floor(val);
-                        if (!isInteger || val < 0 || val > fl::numeric_limits<u8>::max()) {
+                        // Use (max)()/(min)() to prevent macro expansion by Arduino.h's min/max macros
+                        if (!isInteger || val < 0 || val > (fl::numeric_limits<u8>::max)()) {
                             isUint8 = false;
                         }
-                        if (!isInteger || val < fl::numeric_limits<i16>::min() || val > fl::numeric_limits<i16>::max()) {
+                        if (!isInteger || val < (fl::numeric_limits<i16>::min)() || val > (fl::numeric_limits<i16>::max)()) {
                             isInt16 = false;
                         }
                         if (!canBeRepresentedAsFloat(val)) {
@@ -152,10 +153,11 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     
                     void checkIntegerValue(int64_t val) {
                         // Check all ranges in one pass
-                        if (val < 0 || val > fl::numeric_limits<u8>::max()) {
+                        // Use (max)()/(min)() to prevent macro expansion by Arduino.h's min/max macros
+                        if (val < 0 || val > (fl::numeric_limits<u8>::max)()) {
                             isUint8 = false;
                         }
-                        if (val < fl::numeric_limits<i16>::min() || val > fl::numeric_limits<i16>::max()) {
+                        if (val < (fl::numeric_limits<i16>::min)() || val > (fl::numeric_limits<i16>::max)()) {
                             isInt16 = false;
                         }
                         if (val < -16777216 || val > 16777216) {

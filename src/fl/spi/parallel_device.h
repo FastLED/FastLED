@@ -113,7 +113,8 @@ public:
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max());
+    // Use (max)() to prevent macro expansion by Arduino.h's max macro
+    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
 
     /// @brief Check if transmission is in progress
     /// @returns true if busy, false if idle

@@ -142,7 +142,8 @@ int32_t PixelStream::framesDisplayed() const {
 
 int32_t PixelStream::bytesRemaining() const {
     if (mUsingByteStream) {
-        return fl::numeric_limits<int32_t>::max();
+        // Use (max)() to prevent macro expansion by Arduino.h's max macro
+        return (fl::numeric_limits<int32_t>::max)();
     } else {
         return mFileHandle->bytesLeft();
     }
