@@ -12,6 +12,7 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include "fl/stl/stdint.h"
+#include "is_avr.h"
 
 namespace fl {
 namespace platform {
@@ -269,47 +270,76 @@ static const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
     _BV(5),
 };
 
-// For ATmega4809, we use the .DIR, .OUT, .IN members of PORT structures
-// The Arduino core provides compatibility macros that map DDRB -> PORTB.DIR, etc.
+// Register access patterns by platform:
+//   - megaAVR + Arduino: flat register macros (PORTB_DIR, PORTB_OUT, PORTB_IN)
+//   - megaAVR non-Arduino: PORT structure members (PORTB.DIR, PORTB.OUT, PORTB.IN)
+//   - Classic AVR: legacy registers (DDRB, PORTB, PINB)
 static const uint16_t PROGMEM port_to_mode_PGM[] = {
     NOT_A_PORT,
     NOT_A_PORT,
-#if defined(DDRB)
-    (uint16_t) &DDRB,  // Arduino core provides compatibility macro
+#if defined(FL_IS_AVR_MEGAAVR)
+    #if defined(ARDUINO)
+        // Arduino megaAVR: use flat register macros (PORTB_DIR, etc.)
+        (uint16_t) &PORTB_DIR,
+        (uint16_t) &PORTC_DIR,
+        (uint16_t) &PORTD_DIR,
+    #else
+        // Non-Arduino megaAVR: use PORT structure members
+        (uint16_t) &PORTB.DIR,
+        (uint16_t) &PORTC.DIR,
+        (uint16_t) &PORTD.DIR,
+    #endif
+#else
+    // Classic AVR: use DDR registers
+    (uint16_t) &DDRB,
     (uint16_t) &DDRC,
     (uint16_t) &DDRD,
-#else
-    (uint16_t) &PORTB.DIR,  // Native megaAVR register access
-    (uint16_t) &PORTC.DIR,
-    (uint16_t) &PORTD.DIR,
 #endif
 };
 
 static const uint16_t PROGMEM port_to_output_PGM[] = {
     NOT_A_PORT,
     NOT_A_PORT,
-#if defined(PORTB)
-    (uint16_t) &PORTB,  // Arduino core provides compatibility macro
+#if defined(FL_IS_AVR_MEGAAVR)
+    #if defined(ARDUINO)
+        // Arduino megaAVR: use flat register macros (PORTB_OUT, etc.)
+        (uint16_t) &PORTB_OUT,
+        (uint16_t) &PORTC_OUT,
+        (uint16_t) &PORTD_OUT,
+    #else
+        // Non-Arduino megaAVR: use PORT structure members
+        (uint16_t) &PORTB.OUT,
+        (uint16_t) &PORTC.OUT,
+        (uint16_t) &PORTD.OUT,
+    #endif
+#else
+    // Classic AVR: use PORT registers
+    (uint16_t) &PORTB,
     (uint16_t) &PORTC,
     (uint16_t) &PORTD,
-#else
-    (uint16_t) &PORTB.OUT,  // Native megaAVR register access
-    (uint16_t) &PORTC.OUT,
-    (uint16_t) &PORTD.OUT,
 #endif
 };
 
 static const uint16_t PROGMEM port_to_input_PGM[] = {
     NOT_A_PORT,
     NOT_A_PORT,
-#if defined(PINB)
-    (uint16_t) &PINB,  // Arduino core provides compatibility macro
+#if defined(FL_IS_AVR_MEGAAVR)
+    #if defined(ARDUINO)
+        // Arduino megaAVR: use flat register macros (PORTB_IN, etc.)
+        (uint16_t) &PORTB_IN,
+        (uint16_t) &PORTC_IN,
+        (uint16_t) &PORTD_IN,
+    #else
+        // Non-Arduino megaAVR: use PORT structure members
+        (uint16_t) &PORTB.IN,
+        (uint16_t) &PORTC.IN,
+        (uint16_t) &PORTD.IN,
+    #endif
+#else
+    // Classic AVR: use PIN registers
+    (uint16_t) &PINB,
     (uint16_t) &PINC,
     (uint16_t) &PIND,
-#else
-    (uint16_t) &PORTB.IN,  // Native megaAVR register access
-    (uint16_t) &PORTC.IN,
-    (uint16_t) &PORTD.IN,
 #endif
 };
 
