@@ -59,8 +59,10 @@ enum class LogCategory : fl::u8 {
     SPI_MAIN = 5,
     AUDIO_ISR = 6,
     AUDIO_MAIN = 7,
+    INTERRUPT_ISR = 8,
+    INTERRUPT_MAIN = 9,
     // Add new categories here (max 16 total)
-    MAX_CATEGORIES = 8
+    MAX_CATEGORIES = 10
 };
 
 namespace detail {
@@ -122,5 +124,7 @@ inline AsyncLogger& get_spi_async_logger_isr() { return get_async_logger_by_inde
 inline AsyncLogger& get_spi_async_logger_main() { return get_async_logger_by_index<5>(); }
 inline AsyncLogger& get_audio_async_logger_isr() { return get_async_logger_by_index<6>(); }
 inline AsyncLogger& get_audio_async_logger_main() { return get_async_logger_by_index<7>(); }
+inline AsyncLogger& get_interrupt_async_logger_isr() { return get_async_logger_by_index<8>(); }
+inline AsyncLogger& get_interrupt_async_logger_main() { return get_async_logger_by_index<9>(); }
 
 } // namespace fl

@@ -4,7 +4,7 @@
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
 
 // Conditional include for async logger functions (only when logging features are enabled)
-#if defined(FASTLED_LOG_SPI_ENABLED) || defined(FASTLED_LOG_RMT_ENABLED) || defined(FASTLED_LOG_PARLIO_ENABLED) || defined(FASTLED_LOG_AUDIO_ENABLED)
+#if defined(FASTLED_LOG_SPI_ENABLED) || defined(FASTLED_LOG_RMT_ENABLED) || defined(FASTLED_LOG_PARLIO_ENABLED) || defined(FASTLED_LOG_AUDIO_ENABLED) || defined(FASTLED_LOG_INTERRUPT_ENABLED)
     #include "fl/detail/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_*_ASYNC_* macros
 #endif
 
@@ -268,6 +268,14 @@ const char *fastled_file_offset(const char *file);
     #define FL_LOG_AUDIO(X) FL_DBG_NO_OP(X)
 #endif
 
+/// @brief Interrupt handling logging
+/// Logs interrupt installation, handler registration, and ISR events
+#ifdef FASTLED_LOG_INTERRUPT_ENABLED
+    #define FL_LOG_INTERRUPT(X) FL_WARN(X)
+#else
+    #define FL_LOG_INTERRUPT(X) FL_DBG_NO_OP(X)
+#endif
+
 /// @}
 
 // =============================================================================
@@ -394,6 +402,23 @@ const char *fastled_file_offset(const char *file);
     #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_AUDIO_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
     #define FL_LOG_AUDIO_ASYNC_FLUSH() do {} while(0)
+#endif
+
+// -----------------------------------------------------------------------------
+// INTERRUPT Async Logging
+// -----------------------------------------------------------------------------
+
+#ifdef FASTLED_LOG_INTERRUPT_ENABLED
+    #define FL_LOG_INTERRUPT_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_interrupt_async_logger_isr(), X)
+    #define FL_LOG_INTERRUPT_ASYNC_MAIN(X) FL_LOG_ASYNC(fl::get_interrupt_async_logger_main(), X)
+    #define FL_LOG_INTERRUPT_ASYNC_FLUSH() do { \
+        fl::get_interrupt_async_logger_isr().flush(); \
+        fl::get_interrupt_async_logger_main().flush(); \
+    } while(0)
+#else
+    #define FL_LOG_INTERRUPT_ASYNC_ISR(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_INTERRUPT_ASYNC_MAIN(X) FL_DBG_NO_OP(X)
+    #define FL_LOG_INTERRUPT_ASYNC_FLUSH() do {} while(0)
 #endif
 
 // -----------------------------------------------------------------------------
