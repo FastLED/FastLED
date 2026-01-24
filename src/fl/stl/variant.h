@@ -217,10 +217,10 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING(array-bounds)
         static constexpr Fn table[] = {&variant::template destroy_fn<Types>...};
-        FL_DISABLE_WARNING_POP
         if (_tag != Empty) {
             table[_tag - 1](&_storage);
         }
+        FL_DISABLE_WARNING_POP
     }
 
     template <typename T> static void destroy_fn(void *storage) {
@@ -233,8 +233,11 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
     // –– copy‐construct via table
     void copy_construct_from(const variant &other) {
         using Fn = void (*)(void *, const variant &);
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING(array-bounds)
         static constexpr Fn table[] = {&variant::template copy_fn<Types>...};
         table[other._tag - 1](&_storage, other);
+        FL_DISABLE_WARNING_POP
         _tag = other._tag;
     }
 
@@ -249,8 +252,11 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
     // –– move‐construct via table
     void move_construct_from(variant &other) noexcept {
         using Fn = void (*)(void *, variant &);
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING(array-bounds)
         static constexpr Fn table[] = {&variant::template move_fn<Types>...};
         table[other._tag - 1](&_storage, other);
+        FL_DISABLE_WARNING_POP
         _tag = other._tag;
         other.reset();
     }
