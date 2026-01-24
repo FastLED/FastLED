@@ -3,7 +3,9 @@
 
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/data.h"
+#include "fl/channels/config.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "fl/chipsets/spi.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
@@ -800,6 +802,266 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
     CHECK(rmtEngine->getTransmitCount() == 0);
     CHECK(spiEngine->getTransmitCount() == 0);
     CHECK(parlioEngine->getTransmitCount() == 1);
+}
+
+// ============================================================================
+// SPI Routing Integration Tests
+// ============================================================================
+// Tests for correct routing between SpiChannelEngineAdapter (true SPI chipsets)
+// and ChannelEngineSpi (clockless-over-SPI chipsets)
+
+/// @brief Mock engine that accepts only SPI chipsets (mimics SpiChannelEngineAdapter)
+class FakeSpiHardwareEngine : public IChannelEngine {
+public:
+    FakeSpiHardwareEngine(const char* name, int priority)
+        : mName(name) {
+        (void)priority;  // Unused, just for API compatibility
+    }
+
+    ~FakeSpiHardwareEngine() override {}
+
+    bool canHandle(const ChannelDataPtr& data) const override {
+        if (!data) {
+            return false;
+        }
+        // Accept ONLY true SPI chipsets (APA102, SK9822)
+        return data->isSpi();
+    }
+
+    void enqueue(ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueuedChannels.push_back(channelData);
+        }
+    }
+
+    void show() override {
+        if (!mEnqueuedChannels.empty()) {
+            mTransmitCount++;
+            mLastChannelCount = static_cast<int>(mEnqueuedChannels.size());
+            mEnqueuedChannels.clear();
+        }
+    }
+
+    EngineState poll() override {
+        return EngineState::READY;
+    }
+
+    const char* getName() const override { return mName; }
+    int getTransmitCount() const { return mTransmitCount; }
+    int getLastChannelCount() const { return mLastChannelCount; }
+    void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
+
+private:
+    const char* mName;
+    int mTransmitCount = 0;
+    int mLastChannelCount = 0;
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;
+};
+
+/// @brief Mock engine that accepts only clockless chipsets (mimics ChannelEngineSpi)
+class FakeClocklessEngine : public IChannelEngine {
+public:
+    FakeClocklessEngine(const char* name, int priority)
+        : mName(name) {
+        (void)priority;  // Unused, just for API compatibility
+    }
+
+    ~FakeClocklessEngine() override {}
+
+    bool canHandle(const ChannelDataPtr& data) const override {
+        if (!data) {
+            return false;
+        }
+        // Accept ONLY clockless chipsets (WS2812, SK6812)
+        // Reject true SPI chipsets (APA102, SK9822)
+        return !data->isSpi();
+    }
+
+    void enqueue(ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueuedChannels.push_back(channelData);
+        }
+    }
+
+    void show() override {
+        if (!mEnqueuedChannels.empty()) {
+            mTransmitCount++;
+            mLastChannelCount = static_cast<int>(mEnqueuedChannels.size());
+            mEnqueuedChannels.clear();
+        }
+    }
+
+    EngineState poll() override {
+        return EngineState::READY;
+    }
+
+    const char* getName() const override { return mName; }
+    int getTransmitCount() const { return mTransmitCount; }
+    int getLastChannelCount() const { return mLastChannelCount; }
+    void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
+
+private:
+    const char* mName;
+    int mTransmitCount = 0;
+    int mLastChannelCount = 0;
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;
+};
+
+/// @brief Create SPI channel data (APA102, SK9822, etc.)
+ChannelDataPtr createSpiChannelData(int dataPin = 5, int clockPin = 18) {
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{dataPin, clockPin, encoder};
+    fl::vector_psram<uint8_t> data = {0x00, 0xFF, 0xAA, 0x55};
+    return ChannelData::create(spiConfig, fl::move(data));
+}
+
+/// @brief Create clockless channel data (WS2812, SK6812, etc.)
+ChannelDataPtr createClocklessChannelData(int pin = 5) {
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    fl::vector_psram<uint8_t> data = {0xFF, 0x00, 0xAA};
+    return ChannelData::create(pin, timing, fl::move(data));
+}
+
+TEST_CASE("ChannelBusManager - APA102 routes to HW SPI adapter (priority 9)") {
+    ChannelBusManager manager;
+
+    // Register HW SPI adapter (priority 9) and clockless engine (priority 2)
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    // Create APA102 channel data
+    auto data = createSpiChannelData(5, 18);
+
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify APA102 routed to HW SPI adapter
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 1);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 0);
+}
+
+TEST_CASE("ChannelBusManager - WS2812 routes to clockless engine (priority 2)") {
+    ChannelBusManager manager;
+
+    // Register HW SPI adapter (priority 9) and clockless engine (priority 2)
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    // Create WS2812 channel data
+    auto data = createClocklessChannelData(5);
+
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify WS2812 routed to clockless engine
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 0);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 1);
+}
+
+TEST_CASE("ChannelBusManager - Mixed APA102 and WS2812 in separate frames") {
+    ChannelBusManager manager;
+
+    // Register HW SPI adapter (priority 9) and clockless engine (priority 2)
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    // Frame 1: APA102
+    auto apa102 = createSpiChannelData(5, 18);
+    manager.enqueue(apa102);
+    manager.show();
+
+    // Verify APA102 routed to HW SPI
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 1);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 0);
+
+    // Reset for frame 2
+    hwSpiEngine->reset();
+    clocklessEngine->reset();
+    manager.onEndFrame();
+
+    // Frame 2: WS2812
+    auto ws2812 = createClocklessChannelData(6);
+    manager.enqueue(ws2812);
+    manager.show();
+
+    // Verify WS2812 routed to clockless engine
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 0);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 1);
+}
+
+TEST_CASE("ChannelBusManager - Priority ordering ensures HW SPI first") {
+    ChannelBusManager manager;
+
+    // Register in WRONG order (clockless before HW SPI)
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+
+    // Create APA102 channel data
+    auto data = createSpiChannelData(5, 18);
+
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify APA102 still routes to HW SPI despite registration order
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 1);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 0);
+}
+
+TEST_CASE("ChannelBusManager - SK9822 routes to HW SPI adapter") {
+    ChannelBusManager manager;
+
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    // Create SK9822 channel data
+    SpiEncoder encoder = SpiEncoder::sk9822();
+    SpiChipsetConfig spiConfig{5, 18, encoder};
+    fl::vector_psram<uint8_t> channelData = {0x00, 0xFF};
+    auto data = ChannelData::create(spiConfig, fl::move(channelData));
+
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify SK9822 routed to HW SPI adapter
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 1);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 0);
+}
+
+TEST_CASE("ChannelBusManager - SK6812 routes to clockless engine") {
+    ChannelBusManager manager;
+
+    auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
+    auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
+
+    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+
+    // Create SK6812 channel data
+    auto timing = makeTimingConfig<TIMING_SK6812>();
+    fl::vector_psram<uint8_t> channelData = {0xFF, 0x00, 0xAA};
+    auto data = ChannelData::create(5, timing, fl::move(channelData));
+
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify SK6812 routed to clockless engine
+    CHECK_EQ(hwSpiEngine->getTransmitCount(), 0);
+    CHECK_EQ(clocklessEngine->getTransmitCount(), 1);
 }
 
 } // namespace channel_bus_manager_test

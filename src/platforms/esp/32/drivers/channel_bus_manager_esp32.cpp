@@ -21,6 +21,17 @@
 #include "fl/dbg.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/stl/shared_ptr.h"
+#include "platforms/shared/spi_hw_1.h"
+#include "fl/channels/adapters/spi_channel_adapter.h"
+
+// Include SpiHw16 only on platforms that support it (ESP32, ESP32-S2)
+// ESP32-S3 and newer use LCD_CAM peripheral instead of I2S parallel mode
+#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+#include "platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.h"
+#define FASTLED_HAS_SPI_HW_16 1
+#else
+#define FASTLED_HAS_SPI_HW_16 0
+#endif
 
 // Include concrete engine implementations
 #if FASTLED_ESP32_HAS_PARLIO
@@ -60,6 +71,77 @@ constexpr int PRIORITY_SPI = 2;      ///< Medium priority (SPI engine)
 constexpr int PRIORITY_RMT = 1;      ///< Low priority (Fallback RMT engine - all ESP32 variants)
 constexpr int PRIORITY_UART = 0;     ///< Lowest priority (Beta - UART engine with wave8 encoding)
 constexpr int PRIORITY_I2S = -1;     ///< Experimental priority (I2S LCD_CAM engine - ESP32-S3 only)
+
+/// @brief Add HW SPI engines if supported by platform (UNIFIED VERSION)
+static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
+    FL_DBG("ESP32: Registering unified HW SPI channel engine");
+
+    fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
+    fl::vector<int> priorities;
+    fl::vector<const char*> names;
+
+    // ========================================================================
+    // Collect SpiHw16 controllers (highest priority: 9)
+    // ========================================================================
+#if FASTLED_HAS_SPI_HW_16
+    const auto& hw16Controllers = SpiHw16::getAll();
+    FL_DBG("ESP32: Found " << hw16Controllers.size() << " SpiHw16 controllers");
+
+    for (const auto& ctrl : hw16Controllers) {
+        if (ctrl) {
+            controllers.push_back(ctrl);
+            priorities.push_back(9);
+            names.push_back("SPI_HEXADECA");
+        }
+    }
+#endif
+
+    // ========================================================================
+    // Collect SpiHw1 controllers (lower priority: 5)
+    // ========================================================================
+    const auto& hw1Controllers = SpiHw1::getAll();
+    FL_DBG("ESP32: Found " << hw1Controllers.size() << " SpiHw1 controllers");
+
+    for (const auto& ctrl : hw1Controllers) {
+        if (ctrl) {
+            controllers.push_back(ctrl);
+            priorities.push_back(5);
+            names.push_back(ctrl->getName());  // "SPI2" or "SPI3"
+        }
+    }
+
+    // ========================================================================
+    // Create unified adapter with all controllers
+    // ========================================================================
+    if (!controllers.empty()) {
+        auto adapter = SpiChannelEngineAdapter::create(
+            controllers,
+            priorities,
+            names,
+            "SPI_UNIFIED"
+        );
+
+        if (adapter) {
+            // Register with highest priority found
+            int maxPriority = priorities[0];
+            for (size_t i = 1; i < priorities.size(); i++) {
+                if (priorities[i] > maxPriority) {
+                    maxPriority = priorities[i];
+                }
+            }
+
+            manager.addEngine(maxPriority, adapter, "SPI_UNIFIED");
+
+            FL_DBG("ESP32: Registered unified SPI engine with "
+                   << controllers.size() << " controllers (priority "
+                   << maxPriority << ")");
+        } else {
+            FL_WARN("ESP32: Failed to create unified SPI adapter");
+        }
+    } else {
+        FL_DBG("ESP32: No SPI hardware controllers available");
+    }
+}
 
 /// @brief Add PARLIO engine if supported by platform
 static void addParlioIfPossible(ChannelBusManager& manager) {
@@ -171,12 +253,15 @@ void initChannelEngines() {
     auto& manager = channelBusManager();
 
     // Add engines in priority order (each function handles platform-specific ifdefs)
-    detail::addParlioIfPossible(manager);
-    detail::addLcdRgbIfPossible(manager);
-    detail::addSpiIfPossible(manager);
-    detail::addUartIfPossible(manager);
-    detail::addRmtIfPossible(manager);
-    detail::addI2sIfPossible(manager);
+    // CRITICAL: HW SPI engines (priority 5-9) MUST be registered FIRST
+    // This ensures true SPI chipsets (APA102, SK9822) route to hardware SPI, not clockless-over-SPI
+    detail::addSpiHardwareIfPossible(manager);  // Priority 5-9 (unified, true SPI)
+    detail::addParlioIfPossible(manager);       // Priority 4 (clockless)
+    detail::addLcdRgbIfPossible(manager);       // Priority 3 (clockless)
+    detail::addSpiIfPossible(manager);          // Priority 2 (clockless-over-SPI)
+    detail::addUartIfPossible(manager);         // Priority 0 (clockless)
+    detail::addRmtIfPossible(manager);          // Priority 1 (clockless)
+    detail::addI2sIfPossible(manager);          // Priority -1 (clockless)
 
     FL_DBG("ESP32: Channel engines initialized");
 }

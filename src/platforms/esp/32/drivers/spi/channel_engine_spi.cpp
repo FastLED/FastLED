@@ -133,17 +133,14 @@ bool ChannelEngineSpi::canHandle(const ChannelDataPtr& data) const {
     //   - The SPI clock controls MOSI timing (e.g., 2.5MHz for WS2812 = 400ns per bit)
     //   - LEDs decode pulse widths on the data line, ignoring the clock signal
     //
-    // ⚠️ CURRENT IMPLEMENTATION IS BACKWARDS!
-    // This method currently returns `data->isSpi()`, which means it accepts true SPI chipsets
-    // (APA102, SK9822) and rejects clockless chipsets (WS2812, SK6812). This is WRONG!
+    // ✅ CORRECTED LOGIC:
+    // Accept CLOCKLESS chipsets (WS2812, SK6812), reject TRUE SPI chipsets (APA102, SK9822)
+    // True SPI chipsets should route to SpiChannelEngineAdapter (priority 5-9), not this engine
     //
-    // Correct logic should be:
-    //   return !data->isSpi();  // Accept clockless, reject true SPI
-    // or:
-    //   return data->isClockless();  // If such a method exists
-    //
-    // TODO: Fix this inverted logic to match the engine's actual purpose
-    return data->isSpi();  // ⚠️ BACKWARDS - should be !data->isSpi()
+    // Correct routing:
+    //   APA102 → SpiChannelEngineAdapter (true SPI hardware)
+    //   WS2812 → ChannelEngineSpi (this engine, clockless-over-SPI)
+    return !data->isSpi();  // ✅ FIXED: Accept clockless, reject true SPI
 }
 
 void ChannelEngineSpi::configureMultiLanePins(
