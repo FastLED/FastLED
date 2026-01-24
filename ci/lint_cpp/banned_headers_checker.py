@@ -379,6 +379,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     # File operations
     "fstream": [
         HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),
+        HeaderException("fl/stl/fstream.h", "fl::fstream wrapper for std::fstream"),
     ],
     "cstdio": [
         HeaderException("platforms/stub/fs_stub.hpp", "Test filesystem implementation"),

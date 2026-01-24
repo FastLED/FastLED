@@ -241,6 +241,26 @@ Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) {
 }
 
 template <typename Iterator, typename T>
+void replace(Iterator first, Iterator last, const T& old_value, const T& new_value) {
+    while (first != last) {
+        if (*first == old_value) {
+            *first = new_value;
+        }
+        ++first;
+    }
+}
+
+template <typename Iterator, typename UnaryPredicate, typename T>
+void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new_value) {
+    while (first != last) {
+        if (pred(*first)) {
+            *first = new_value;
+        }
+        ++first;
+    }
+}
+
+template <typename Iterator, typename T>
 Iterator remove(Iterator first, Iterator last, const T& value) {
     Iterator result = first;
     while (first != last) {

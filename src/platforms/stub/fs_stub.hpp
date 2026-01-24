@@ -8,8 +8,9 @@
 #include "fl/log.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/memory.h"
-#include <algorithm>  // For std::replace in path conversion
-#include <fstream>    // For file I/O operations
+#include "fl/stl/fstream.h"  // For file I/O operations
+#include "fl/stl/string.h"   // For fl::string
+#include "fl/stl/algorithm.h"  // For fl::replace in path conversion
 #include <cstdio>     // For file operations
 #ifdef _WIN32
   #include <direct.h>
@@ -23,17 +24,17 @@ namespace fl {
 
 class StubFileHandle : public FileHandle {
 private:
-    std::ifstream mFile;  // okay std namespace
-    std::string mPath;  // okay std namespace
-    std::size_t mSize;  // okay std namespace
-    std::size_t mPos;  // okay std namespace
+    fl::ifstream mFile;
+    fl::string mPath;
+    fl::size_t mSize;
+    fl::size_t mPos;
 
 public:
-    StubFileHandle(const std::string& path) : mPath(path), mPos(0) {  // okay std namespace
-        mFile.open(path, std::ios::binary | std::ios::ate);  // okay std namespace
+    StubFileHandle(const fl::string& path) : mPath(path), mPos(0) {
+        mFile.open(path.c_str(), fl::ios::binary | fl::ios::ate);
         if (mFile.is_open()) {
             mSize = mFile.tellg();
-            mFile.seekg(0, std::ios::beg);  // okay std namespace
+            mFile.seekg(0, fl::ios::beg);
         } else {
             mSize = 0;
         }
@@ -80,7 +81,7 @@ public:
         if (!mFile.is_open() || pos > mSize) {
             return false;
         }
-        mFile.seekg(pos, std::ios::beg);  // okay std namespace
+        mFile.seekg(pos, fl::ios::beg);
         mPos = pos;
         return true;
     }
@@ -98,13 +99,13 @@ public:
 
 class StubFileSystem : public FsImpl {
 private:
-    std::string mRootPath;  // okay std namespace
+    fl::string mRootPath;
 
 public:
     StubFileSystem() = default;
     ~StubFileSystem() override = default;
 
-    void setRootPath(const std::string& path) {  // okay std namespace
+    void setRootPath(const fl::string& path) {
         mRootPath = path;
         // Ensure the path ends with a directory separator
         if (!mRootPath.empty() && mRootPath.back() != '/' && mRootPath.back() != '\\') {
@@ -114,7 +115,7 @@ public:
 
     // Static test utility functions for file/directory management
     // These are only available on the stub/test platform
-    static bool createDirectory(const std::string& path) {  // okay std namespace
+    static bool createDirectory(const fl::string& path) {
 #ifdef _WIN32
         return _mkdir(path.c_str()) == 0 || errno == EEXIST;
 #else
@@ -122,7 +123,7 @@ public:
 #endif
     }
 
-    static bool removeDirectory(const std::string& path) {  // okay std namespace
+    static bool removeDirectory(const fl::string& path) {
 #ifdef _WIN32
         return _rmdir(path.c_str()) == 0;
 #else
@@ -130,16 +131,17 @@ public:
 #endif
     }
 
-    static bool removeFile(const std::string& path) {  // okay std namespace
+    static bool removeFile(const fl::string& path) {
         return ::remove(path.c_str()) == 0;
     }
 
-    static bool createTextFile(const std::string& path, const std::string& content) {  // okay std namespace
-        std::ofstream ofs(path);  // okay std namespace
+    static bool createTextFile(const fl::string& path, const fl::string& content) {
+        fl::ofstream ofs(path.c_str(), fl::ios::binary);  // use binary mode to avoid text transformations
         if (!ofs.is_open()) {
             return false;
         }
-        ofs << content;
+        ofs.write(content.data(), content.size());  // Use write() instead of << for exact byte control
+        ofs.close();  // Explicitly close to flush buffers before reading
         return ofs.good();
     }
 
@@ -158,12 +160,12 @@ public:
     }
 
     FileHandlePtr openRead(const char* path) override {
-        std::string full_path = mRootPath;  // okay std namespace
+        fl::string full_path = mRootPath;
         full_path.append(path);
 
         // Convert forward slashes to platform-appropriate separators
 #ifdef _WIN32
-        std::replace(full_path.begin(), full_path.end(), '/', '\\');  // okay std namespace
+        fl::replace(full_path.begin(), full_path.end(), '/', '\\');
 #endif
 
         // Check if file exists

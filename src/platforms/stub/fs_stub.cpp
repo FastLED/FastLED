@@ -5,7 +5,7 @@
 namespace fl {
 
 // Global variable to store test root path for stub platform
-std::string g_stub_fs_root_path;  // okay std namespace
+fl::string g_stub_fs_root_path;
 
 // Function to set test root path for stub platform
 void setTestFileSystemRoot(const char* root_path) {
