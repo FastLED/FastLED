@@ -413,7 +413,7 @@ namespace platform {
 ///
 /// This function is called lazily by SpiHw2::getAll() on first access.
 /// It replaces the old FL_INIT-based static initialization.
-void initSpiHw2Instances() {
+inline void initSpiHw2Instances() {
     FL_LOG_SPI("SpiHw2MXRT1062::Registrar - Teensy 4.x hardware SPI registration active");
 
     // Teensy 4.x has 3 LPSPI peripherals available

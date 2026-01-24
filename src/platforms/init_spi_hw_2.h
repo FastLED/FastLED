@@ -10,6 +10,8 @@
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
     #include "platforms/stub/init_spi_hw_2.h"
+#elif defined(__arm__) || defined(__aarch64__)
+    #include "platforms/arm/init_spi_hw_2.h"
 #else
     #include "platforms/shared/init_spi_hw_2.h"
 #endif

@@ -14,7 +14,7 @@
     // Teensy 4.x (MXRT1062) has 3 LPSPI peripherals supporting 4-lane mode
     namespace fl {
     namespace platform {
-    void initSpiHw4Instances();
+    inline void initSpiHw4Instances();
     }
     }
 
@@ -23,7 +23,7 @@
     #if defined(FASTLED_STM32_HAS_SPI_HW_4)
         namespace fl {
         namespace platform {
-        void initSpiHw4Instances();
+        inline void initSpiHw4Instances();
         }
         }
     #elif !defined(FASTLED_STM32_HAS_SPI_HW_4)
@@ -34,7 +34,7 @@
     // RP2040/RP2350 platforms with PIO-based quad SPI
     namespace fl {
     namespace platform {
-    void initSpiHw4Instances();
+    inline void initSpiHw4Instances();
     }
     }
 
@@ -42,7 +42,7 @@
     // nRF52 platforms with Timer/PPI-based quad SPI
     namespace fl {
     namespace platform {
-    void initSpiHw4Instances();
+    inline void initSpiHw4Instances();
     }
     }
 
@@ -52,7 +52,7 @@
     // SAMD51 platforms with native QSPI peripheral
     namespace fl {
     namespace platform {
-    void initSpiHw4Instances();
+    inline void initSpiHw4Instances();
     }
     }
 

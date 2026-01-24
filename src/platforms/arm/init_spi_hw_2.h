@@ -14,7 +14,7 @@
     // Teensy 4.x (MXRT1062) has 3 LPSPI peripherals
     namespace fl {
     namespace platform {
-    void initSpiHw2Instances();
+    inline void initSpiHw2Instances();
     }
     }
 
@@ -23,7 +23,7 @@
     #if defined(FASTLED_STM32_HAS_SPI_HW_2)
         namespace fl {
         namespace platform {
-        void initSpiHw2Instances();
+        inline void initSpiHw2Instances();
         }
         }
     #elif !defined(FASTLED_STM32_HAS_SPI_HW_2)
@@ -34,7 +34,7 @@
     // RP2040/RP2350 platforms with PIO-based dual SPI
     namespace fl {
     namespace platform {
-    void initSpiHw2Instances();
+    inline void initSpiHw2Instances();
     }
     }
 
@@ -42,7 +42,7 @@
     // nRF52 platforms with Timer/PPI-based dual SPI
     namespace fl {
     namespace platform {
-    void initSpiHw2Instances();
+    inline void initSpiHw2Instances();
     }
     }
 

@@ -5,14 +5,20 @@
 
 #include "semaphore_teensy.h"
 #include "fl/warn.h"
+#include <chrono>  // ok include - for std::chrono
 
-// ARM Cortex CMSIS intrinsics for interrupt control
-// __disable_irq() / __enable_irq() are available on all Teensy platforms
-// (Cortex-M0+, M4, M4F, M7)
-extern "C" {
-    void __disable_irq(void);
-    void __enable_irq(void);
-}
+// Include platform-specific CMSIS headers for interrupt control
+#if defined(FL_IS_TEENSY_4X)
+    FL_EXTERN_C_BEGIN
+    #include <imxrt.h>  // Provides __disable_irq()/__enable_irq() macros
+    FL_EXTERN_C_END
+#elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
+    FL_EXTERN_C_BEGIN
+    #include <kinetis.h>  // Provides __disable_irq()/__enable_irq() macros
+    FL_EXTERN_C_END
+#else
+    #error "Unknown Teensy platform - cannot determine interrupt control header"
+#endif
 
 namespace fl {
 namespace platforms {
