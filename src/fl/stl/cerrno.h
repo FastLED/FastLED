@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cerrno>  // For errno and error constants
+#include <errno.h>  // okay banned header (STL wrapper requires standard header)
+// Use C header <errno.h> instead of C++ <cerrno> for AVR platform compatibility
 
 // Bring errno functionality into fl:: namespace
 // Note: errno is a macro that expands to a thread-local lvalue.

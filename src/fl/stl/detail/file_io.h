@@ -92,6 +92,16 @@ int fseek(FILE* file, long offset, int origin);
 /// @return 0 on success, non-zero on error
 int fflush(FILE* file);
 
+// On some platforms (e.g., AVR), feof, ferror, and clearerr are macros
+// Save them, undefine temporarily to declare our functions, then restore
+// push_macro/pop_macro is safe even if the macro doesn't exist
+#pragma push_macro("feof")
+#pragma push_macro("ferror")
+#pragma push_macro("clearerr")
+#undef feof
+#undef ferror
+#undef clearerr
+
 /// Check for end-of-file
 /// @param file File handle
 /// @return Non-zero if EOF, 0 otherwise
@@ -105,6 +115,11 @@ int ferror(FILE* file);
 /// Clear file error indicators
 /// @param file File handle
 void clearerr(FILE* file);
+
+// Restore the original macro definitions (if they existed)
+#pragma pop_macro("clearerr")
+#pragma pop_macro("ferror")
+#pragma pop_macro("feof")
 
 // Note: fl::get_errno() and fl::strerror() are already defined in fl/stl/cerrno.h and fl/stl/cstring.h
 // We don't redeclare them here to avoid conflicts
