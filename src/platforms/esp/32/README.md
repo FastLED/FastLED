@@ -120,6 +120,88 @@ Additional I2S defines and guidance:
 
 Unless otherwise noted, all defines should be placed before including `FastLED.h` in your sketch.
 
+## SPI Hardware Manager
+
+The ESP32 platform uses a unified hardware manager pattern for initializing SPI controllers. This provides a clean, maintainable architecture with feature flags and priority-based registration.
+
+### Manager File
+
+`src/platforms/esp/32/drivers/spi_hw_manager_esp32.cpp.hpp`
+
+This file contains the `initSpiHardware()` function that initializes all available SPI hardware on ESP32 platforms.
+
+### Architecture
+
+The manager follows a helper function pattern with feature flags:
+
+```cpp
+namespace fl {
+namespace detail {
+
+constexpr int PRIORITY_HW_16 = 9;  // Highest (16-lane I2S)
+constexpr int PRIORITY_HW_8 = 8;   // 8-lane (ESP32-P4)
+constexpr int PRIORITY_HW_4 = 7;   // 4-lane (Quad SPI)
+constexpr int PRIORITY_HW_2 = 6;   // 2-lane (Dual SPI)
+constexpr int PRIORITY_HW_1 = 5;   // Lowest (Single SPI)
+
+static void addSpiHw16IfPossible() {
+#if FASTLED_ESP32_HAS_I2S
+    // Include and register I2S SPI implementation
+    #include "platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.cpp.hpp"
+    static auto i2s0 = fl::make_shared<SpiHwI2SESP32>(0);
+    SpiHw16::registerInstance(i2s0, PRIORITY_HW_16);
+    FL_DBG("ESP32: Added I2S SpiHw16 controller");
+#endif
+}
+
+}  // namespace detail
+
+namespace platform {
+
+void initSpiHardware() {
+    FL_DBG("ESP32: Initializing SPI hardware");
+
+    // Register in priority order (highest to lowest)
+    detail::addSpiHw16IfPossible();  // Priority 9
+    detail::addSpiHw8IfPossible();   // Priority 8
+    detail::addSpiHw4IfPossible();   // Priority 7
+    detail::addSpiHw2IfPossible();   // Priority 6
+    detail::addSpiHw1IfPossible();   // Priority 5
+
+    FL_DBG("ESP32: SPI hardware initialized");
+}
+
+}  // namespace platform
+}  // namespace fl
+```
+
+### Feature Flags
+
+The manager uses these feature flags to conditionally compile hardware support:
+
+- `FASTLED_ESP32_HAS_I2S` - Enables 16-lane I2S-based SPI (ESP32 classic, S2, S3)
+- `FASTLED_ESP32_HAS_OCTAL_SPI` - Enables 8-lane Octal SPI (ESP32-P4 only, IDF 5.0+)
+- SPI peripheral (1/2/4-lane) is available on all ESP32 variants
+
+### Lazy Initialization
+
+Hardware is only initialized on first access to `SpiHwN::getAll()`, following the Meyer's Singleton pattern:
+- No static constructors run at startup
+- Avoids initialization order issues
+- Zero overhead if SPI hardware is not used
+- Thread-safe via static local variables
+
+### Platform Support
+
+| ESP32 Variant | SpiHw1 | SpiHw2 | SpiHw4 | SpiHw8 | SpiHw16 |
+|---------------|--------|--------|--------|--------|---------|
+| ESP32 classic | ✅ | ✅ | ✅ | ❌ | ✅ (I2S) |
+| ESP32-S2 | ✅ | ✅ | ✅ | ❌ | ✅ (I2S) |
+| ESP32-S3 | ✅ | ✅ | ✅ | ❌ | ✅ (I2S) |
+| ESP32-C3 | ✅ | ✅ | ✅ | ❌ | ❌ |
+| ESP32-C6 | ✅ | ✅ | ✅ | ❌ | ❌ |
+| ESP32-P4 | ✅ | ✅ | ✅ | ✅ (IDF 5.0+) | ❌ |
+
 ## Hardware Multi-Lane SPI Support
 
 FastLED provides hardware-accelerated multi-lane SPI for parallel LED strip control via DMA.

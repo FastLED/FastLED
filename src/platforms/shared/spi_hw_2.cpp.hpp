@@ -6,7 +6,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/compiler_control.h"
-#include "platforms/init_spi_hw_2.h"
+#include "platforms/init_spi_hw.h"
 
 namespace fl {
 
@@ -51,7 +51,7 @@ const fl::vector<fl::shared_ptr<SpiHw2>>& SpiHw2::getAll() {
     static bool sInitialized = false;
     if (!sInitialized) {
         sInitialized = true;
-        platform::initSpiHw2Instances();
+        platform::initSpiHardware();  // Unified initialization (replaces initSpiHw2Instances)
     }
     return getRegistrySpiHw2();
 }

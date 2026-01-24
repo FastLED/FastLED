@@ -593,31 +593,14 @@ void SPIOctalSTM32::cleanup() {
 }
 
 // ============================================================================
-// Static Registration - New Polymorphic Pattern
+// Static Registration - Moved to spi_hw_manager_stm32.cpp.hpp
 // ============================================================================
-
-namespace platform {
-
-/// @brief Initialize STM32 SpiHw8 instances
-///
-/// This function is called lazily by SpiHw8::getAll() on first access.
-/// It replaces the old FL_INIT-based static initialization.
-void initSpiHw8Instances() {
-    // Create 2 logical octal-SPI buses
-    // Note: In practice, STM32 DMA resources may limit this to 1 bus
-    // (8 DMA channels per bus × 2 buses = 16 channels = all available on most STM32)
-    static auto controller0 = fl::make_shared<SPIOctalSTM32>(0, "OSPI0");
-    static auto controller1 = fl::make_shared<SPIOctalSTM32>(1, "OSPI1");
-
-    SpiHw8::registerInstance(controller0);
-    SpiHw8::registerInstance(controller1);
-
-    // Note: If your application doesn't need 2 octal buses, consider:
-    // - 1 octal (8 channels) + 1 quad (4 channels) + 1 dual (2 channels) = 14 channels
-    // - Or any other combination that fits within your DMA budget
-}
-
-}  // namespace platform
+//
+// Instance registration has been moved to the unified SPI hardware manager:
+// - src/platforms/arm/stm32/spi_hw_manager_stm32.cpp.hpp
+//
+// The old initSpiHw8Instances() function is replaced by initSpiHardware()
+// which registers all SpiHw* types (2, 4, 8) in priority order.
 
 }  // namespace fl
 

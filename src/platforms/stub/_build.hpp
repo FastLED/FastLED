@@ -12,5 +12,6 @@
 #include "platforms/stub/spi_2_stub.cpp.hpp"
 #include "platforms/stub/spi_4_stub.cpp.hpp"
 #include "platforms/stub/spi_8_stub.cpp.hpp"
+#include "platforms/stub/spi_hw_manager_stub.cpp.hpp"
 #include "platforms/stub/task_coroutine_stub.cpp.hpp"
 #include "platforms/stub/time_stub.cpp.hpp"

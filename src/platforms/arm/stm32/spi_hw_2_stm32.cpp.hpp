@@ -737,35 +737,14 @@ void SPIDualSTM32::cleanup() {
 }
 
 // ============================================================================
-// Static Registration - New Polymorphic Pattern
+// Static Registration - Moved to spi_hw_manager_stm32.cpp.hpp
 // ============================================================================
-
-namespace platform {
-
-/// @brief Initialize STM32 SpiHw2 instances
-///
-/// This function is called lazily by SpiHw2::getAll() on first access.
-/// It replaces the old FL_INIT-based static initialization.
-void initSpiHw2Instances() {
-    // Create logical SPI buses based on available Timer/DMA resources
-    // For initial implementation, we provide 2 potential buses
-    // Actual availability depends on:
-    // - Timer peripherals available (TIM2, TIM3, TIM4, etc.)
-    // - DMA channels available (2 per bus)
-    // - GPIO pins available
-
-    static auto controller0 = fl::make_shared<SPIDualSTM32>(0, "DSPI0");
-    static auto controller1 = fl::make_shared<SPIDualSTM32>(1, "DSPI1");
-
-    SpiHw2::registerInstance(controller0);
-    SpiHw2::registerInstance(controller1);
-
-    // Additional controllers can be added if hardware supports:
-    // static auto controller2 = fl::make_shared<SPIDualSTM32>(2, "DSPI2");
-    // SpiHw2::registerInstance(controller2);
-}
-
-}  // namespace platform
+//
+// Instance registration has been moved to the unified SPI hardware manager:
+// - src/platforms/arm/stm32/spi_hw_manager_stm32.cpp.hpp
+//
+// The old initSpiHw2Instances() function is replaced by initSpiHardware()
+// which registers all SpiHw* types (2, 4, 8) in priority order.
 
 }  // namespace fl
 

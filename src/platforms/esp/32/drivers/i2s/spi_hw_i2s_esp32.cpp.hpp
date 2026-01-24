@@ -386,20 +386,12 @@ fl::vector<int> SpiHwI2SESP32::extract_data_pins(const Config& config) {
 }
 
 // ============================================================================
-// Static Registration - New Polymorphic Pattern
+// Static Registration - REMOVED
 // ============================================================================
 
-/// Register ESP32 I2S SPI hardware instance during static initialization
-/// This replaces the old createInstances() factory pattern with the new
-/// centralized registration system using SpiHw16::registerInstance()
-namespace {
-    void init_spi_i2s_esp32() {
-        // Single static instance (I2S0 only available on ESP32)
-        static auto i2s0_controller = fl::make_shared<SpiHwI2SESP32>(0);
-        SpiHw16::registerInstance(i2s0_controller);
-    }
-}
-FL_INIT(init_spi_i2s_esp32_wrapper, init_spi_i2s_esp32);
+/// Registration moved to spi_hw_manager_esp32.cpp.hpp
+/// The manager now handles all ESP32 SPI hardware initialization in priority order.
+/// This prevents duplicate registration and ensures consistent initialization.
 
 } // namespace fl
 

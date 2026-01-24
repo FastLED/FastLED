@@ -24,32 +24,21 @@ extern fl::shared_ptr<SpiHw1>& getController2();
 extern fl::shared_ptr<SpiHw1>& getController3();
 #endif
 
-namespace {
-
 // ============================================================================
-// Centralized Registration via Single Static Constructor
+// Static Registration - REMOVED
 // ============================================================================
 
-/// Register all ESP32 SPI hardware instances at static initialization time
-FL_CONSTRUCTOR
-static void registerAllESP32SpiInstances() {
-    // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
-    // Access singleton instances from spi_hw_1_esp32.cpp
-    // Get references and copy to ensure proper shared_ptr type conversion
-    fl::shared_ptr<SpiHw1> ctrl2 = getController2();
-    SpiHw1::registerInstance(ctrl2);
-    #if SOC_SPI_PERIPH_NUM > 2
-    fl::shared_ptr<SpiHw1> ctrl3 = getController3();
-    SpiHw1::registerInstance(ctrl3);
-    #endif
-
-    // Note: ESP32 does not register SpiHw2/4/8/16 instances here.
-    // For parallel strips (2+ strips), ESP32 uses the I2S peripheral via SpiHw16,
-    // which is registered in the I2S driver initialization code.
-    // ESP32's SPI dual/quad/octal modes are designed for QSPI flash, not parallel LED strips.
-}
-
-}  // anonymous namespace
+/// Registration moved to spi_hw_manager_esp32.cpp.hpp
+/// The manager now handles all ESP32 SPI hardware initialization in priority order.
+/// This prevents duplicate registration and ensures consistent initialization.
+///
+/// Old FL_CONSTRUCTOR approach removed in favor of lazy initialization pattern
+/// that matches the channel_bus_manager_esp32.cpp.hpp architecture.
+///
+/// Note: ESP32 does not have SpiHw2/4/8 instances.
+/// For parallel strips (2+ strips), ESP32 uses the I2S peripheral via SpiHw16,
+/// which is now registered in spi_hw_manager_esp32.cpp.hpp.
+/// ESP32's SPI dual/quad/octal modes are designed for QSPI flash, not parallel LED strips.
 
 }  // namespace fl
 

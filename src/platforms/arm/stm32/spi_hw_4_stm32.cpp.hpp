@@ -630,37 +630,14 @@ void SPIQuadSTM32::cleanup() {
 }
 
 // ============================================================================
-// Static Registration - New Polymorphic Pattern
+// Static Registration - Moved to spi_hw_manager_stm32.cpp.hpp
 // ============================================================================
-
-namespace platform {
-
-/// @brief Initialize STM32 SpiHw4 instances
-///
-/// This function is called lazily by SpiHw4::getAll() on first access.
-/// It replaces the old FL_INIT-based static initialization.
-void initSpiHw4Instances() {
-    // Create logical SPI buses based on available Timer/DMA resources
-    // For initial implementation, we provide 2 potential buses
-    // Actual availability depends on:
-    // - Timer peripherals available (TIM2, TIM3, TIM4, etc.)
-    // - DMA channels available (4 per bus)
-    // - GPIO pins available
-
-    static auto controller0 = fl::make_shared<SPIQuadSTM32>(0, "QSPI0");
-    static auto controller1 = fl::make_shared<SPIQuadSTM32>(1, "QSPI1");
-
-    SpiHw4::registerInstance(controller0);
-    SpiHw4::registerInstance(controller1);
-
-    // Additional controllers can be added if hardware supports:
-    // Note: STM32F4 has 2 DMA controllers with 8 channels each = 16 total
-    // Each quad bus needs 4 channels, so theoretically 4 buses possible
-    // static auto controller2 = fl::make_shared<SPIQuadSTM32>(2, "QSPI2");
-    // SpiHw4::registerInstance(controller2);
-}
-
-}  // namespace platform
+//
+// Instance registration has been moved to the unified SPI hardware manager:
+// - src/platforms/arm/stm32/spi_hw_manager_stm32.cpp.hpp
+//
+// The old initSpiHw4Instances() function is replaced by initSpiHardware()
+// which registers all SpiHw* types (2, 4, 8) in priority order.
 
 }  // namespace fl
 
