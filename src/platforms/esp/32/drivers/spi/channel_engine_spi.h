@@ -45,7 +45,11 @@
 #include "fl/isr.h"
 #include "fl/channels/wave8.h"
 
-// Include ESP-IDF headers for SPI and GPIO types
+// EXCEPTION: Platform headers in .h file (technical debt)
+// Normally platform-specific headers (driver/*.h, soc/*.h) should only be in .cpp files
+// to improve IDE support and cross-platform compatibility. However, this driver's public
+// interface requires ESP-IDF types (spi_device_handle_t, spi_host_device_t, gpio_num_t).
+// TODO: Consider refactoring to use forward declarations + opaque handles in future.
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 

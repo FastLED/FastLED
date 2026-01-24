@@ -2,24 +2,22 @@
 /// @brief Implementation of wave8 encoding for ESP32 SPI
 
 #include "fl/compiler_control.h"
+
+// ESP32-specific: Include required headers BEFORE guards
+// In unity builds, headers with #pragma once are only processed once,
+// so we must include them in the right order
+#ifdef ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#include "channel_engine_spi.h"  // For SpiTimingConfig definition (must be before wave8_encoder_spi.h)
+#endif
+#endif
+
 #include "wave8_encoder_spi.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/stl/algorithm.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
-
-// The encoding functions (wave8Encode*) are platform-agnostic and work on all platforms.
-// Only convertSpiTimingToChipsetTiming() requires ESP32-specific headers.
-
-// ESP32-specific: Include SpiTimingConfig definition for conversion function
-// Requires FASTLED_ESP32_HAS_CLOCKLESS_SPI since SpiTimingConfig is defined in
-// channel_engine_spi.h which is guarded by that flag
-#ifdef ESP32
-#include "platforms/esp/32/feature_flags/enabled.h"
-#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#include "channel_engine_spi.h"  // For SpiTimingConfig definition
-#endif
-#endif
 
 namespace fl {
 

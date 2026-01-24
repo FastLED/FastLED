@@ -13,13 +13,22 @@
 #endif
 
 /*Definition des pixels*/
-#define APA102 0
-#define HD107 0
-#define HD108 2
-#define WS2811 4 
+// Enum class for type-safe pixel type selection (properly scoped)
+enum class PixelType {
+    APA102 = 0,
+    HD107 = 0,
+    HD108 = 2,
+    WS2811 = 4
+};
+
+// Preprocessor constants for compile-time selection (prefixed to avoid namespace pollution)
+#define I2S_PIXEL_TYPE_APA102 0
+#define I2S_PIXEL_TYPE_HD107 0
+#define I2S_PIXEL_TYPE_HD108 2
+#define I2S_PIXEL_TYPE_WS2811 4
 
 #ifndef PIXEL_TYPE
-#define PIXEL_TYPE APA102
+#define PIXEL_TYPE I2S_PIXEL_TYPE_APA102
 #endif
 
 
@@ -176,7 +185,7 @@ inline PixelStruct(uint8_t blocksize,uint8_t numberblock,uint8_t *blockorder,uin
 };
 
 
-#if PIXEL_TYPE == WS2811
+#if PIXEL_TYPE == I2S_PIXEL_TYPE_WS2811
 
 struct Pixel {
     union {
@@ -267,7 +276,7 @@ inline Pixel (const Pixel& rhs) __attribute__((always_inline))
 
 #endif
 
-#if PIXEL_TYPE == APA102
+#if PIXEL_TYPE == I2S_PIXEL_TYPE_APA102
 
 struct Pixel {
     union {
@@ -358,7 +367,7 @@ inline Pixel (const Pixel& rhs) __attribute__((always_inline))
 //static uint8_t f7[4]={0,3,2,1}; //britghness blue green red
 //static PixelStruct HD107=PixelStruct(1,4,f7,4,true); //4 blocks of 1*8bits
 #endif
-#if PIXEL_TYPE == HD108
+#if PIXEL_TYPE == I2S_PIXEL_TYPE_HD108
 
 struct Pixel {
     union {

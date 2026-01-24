@@ -7,14 +7,14 @@
 /// physically connected to the LED strip - only the MOSI/data pin is used.
 /// See channel_engine_spi.h for detailed explanation.
 
-#include "channel_engine_spi.h"
-
 #ifdef ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
+#include "channel_engine_spi.h"
+#include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h" // wave8 encoding (need after main header)
 #include "fl/dbg.h"
 #include "fl/delay.h"
 #include "fl/math_macros.h"
@@ -23,7 +23,6 @@
 #include "fl/channels/detail/wave8.hpp" // Inline wave8 functions
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
-#include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h" // wave8 encoding (Stage 6)
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"

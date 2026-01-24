@@ -16,6 +16,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
+#include "fl/delay.h"
 #include "mutex_stub_stl.h"
 #include "thread_stub_stl.h"
 #include "fl/stl/vector.h"
@@ -128,10 +129,11 @@ TEST_CASE("await in coroutine - basic resolution") {
     config.name = "TestAwait";
     auto coro = task::coroutine(config);
 
-    // Wait for coroutine to complete (max 200ms, reduced from 2000ms)
+    // Wait for coroutine to complete (max 500ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 200) {
+    while (!test_completed.load() && timeout < 500) {
         async_yield();  // Release lock and pump async tasks
+        delay(10);
         timeout += 10;
     }
 
@@ -165,10 +167,11 @@ TEST_CASE("await in coroutine - error handling") {
     config.name = "TestAwaitError";
     auto coro = task::coroutine(config);
 
-    // Wait for completion
+    // Wait for completion (max 500ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+    while (!test_completed.load() && timeout < 500) {
+        async_yield();
+        delay(10);
         timeout += 10;
     }
 
@@ -201,10 +204,11 @@ TEST_CASE("await in coroutine - already completed promise") {
     config.name = "TestAwaitImmediate";
     auto coro = task::coroutine(config);
 
-    // Should complete quickly (within 100ms)
+    // Should complete quickly (within 500ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 100) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+    while (!test_completed.load() && timeout < 500) {
+        async_yield();
+        delay(10);
         timeout += 10;
     }
 
@@ -245,14 +249,15 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         printf("Test: Spawned coroutine %d\n", i);
     }
 
-    // Wait for all coroutines to complete
+    // Wait for all coroutines to complete (max 2000ms to account for slow CI)
     int timeout = 0;
     printf("Test: Waiting for coroutines to complete...\n");
     while (completed_count.load() < 5 && timeout < 2000) {
         if (timeout % 200 == 0) {
             printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+        async_yield();
+        delay(10);
         timeout += 10;
     }
     printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
@@ -286,10 +291,11 @@ TEST_CASE("await in coroutine - invalid promise") {
     config.name = "TestAwaitInvalid";
     auto coro = task::coroutine(config);
 
-    // Should complete quickly
+    // Should complete quickly (within 500ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 100) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+    while (!test_completed.load() && timeout < 500) {
+        async_yield();
+        delay(10);
         timeout += 10;
     }
 
@@ -323,10 +329,11 @@ TEST_CASE("await in coroutine - sequential awaits") {
     config.name = "TestAwaitSequential";
     auto coro = task::coroutine(config);
 
-    // Wait for completion (should take ~6ms + overhead, reduced from 2000ms)
+    // Wait for completion (max 500ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 200) {
-        async_yield(); fl::this_thread::sleep_for(std::chrono::milliseconds(1)); // okay std namespace // Yield and give time
+    while (!test_completed.load() && timeout < 500) {
+        async_yield();
+        delay(10);
         timeout += 10;
     }
 

@@ -36,8 +36,8 @@ namespace fl {
 // Only available when FASTLED_ESP32_HAS_CLOCKLESS_SPI is defined (ESP-IDF 5.0+)
 #if defined(ESP32) && FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
-// Forward declaration of SpiTimingConfig (defined in channel_engine_spi.h)
-struct SpiTimingConfig;
+// Note: SpiTimingConfig is defined in channel_engine_spi.h
+// That header must be included before this one when using convertSpiTimingToChipsetTiming()
 
 /// @brief Convert SpiTimingConfig to ChipsetTiming for wave8 LUT generation
 ///

@@ -69,10 +69,16 @@ namespace fl {
 // Import types from detail namespace
 using detail::IRMT5Peripheral;
 using detail::Rmt5ChannelConfig;
+
+// On ESP32: These types are in fl:: namespace
+// On stub platforms: These types are in detail:: namespace
+#ifdef FASTLED_STUB_IMPL
 using detail::RmtMemoryManager;
 using detail::NetworkDetector;
 using detail::NetworkStateTracker;
 using detail::RMTBufferPool;
+#endif
+// On ESP32, these types are already in fl:: namespace so no using needed
 
 //=============================================================================
 // Platform Peripheral Selection
