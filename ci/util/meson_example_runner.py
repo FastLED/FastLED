@@ -14,6 +14,7 @@ from ci.util.build_lock import libfastled_build_lock
 from ci.util.meson_runner import (
     MesonTestResult,
     check_meson_installed,
+    get_meson_executable,
     perform_ninja_maintenance,
     setup_meson_build,
 )
@@ -42,7 +43,7 @@ def compile_examples(
         True if compilation successful, False otherwise
     """
     # Build command
-    cmd = ["meson", "compile", "-C", str(build_dir)]
+    cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
     if verbose:
         cmd.append("-v")
@@ -122,7 +123,7 @@ def run_examples(
         MesonTestResult with success status, duration, and test counts
     """
     # Build command
-    cmd = ["meson", "test", "-C", str(build_dir), "--print-errorlogs"]
+    cmd = [get_meson_executable(), "test", "-C", str(build_dir), "--print-errorlogs"]
 
     if verbose:
         cmd.append("-v")

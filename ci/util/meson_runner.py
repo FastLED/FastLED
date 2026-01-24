@@ -98,7 +98,7 @@ def _print_banner(
     print(separator)
 
 
-def _resolve_meson_executable() -> str:
+def get_meson_executable() -> str:
     """
     Resolve meson executable path, preferring venv installation.
 
@@ -128,7 +128,7 @@ def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
     try:
         result = subprocess.run(
-            [_resolve_meson_executable(), "--version"],
+            [get_meson_executable(), "--version"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -194,7 +194,7 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     try:
         # Query Meson for all targets
         result = subprocess.run(
-            [_resolve_meson_executable(), "introspect", str(build_dir), "--targets"],
+            [get_meson_executable(), "introspect", str(build_dir), "--targets"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -958,7 +958,7 @@ def setup_meson_build(
         )
         _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
         cmd = [
-            _resolve_meson_executable(),
+            get_meson_executable(),
             "setup",
             "--reconfigure",
             "--native-file",
@@ -971,7 +971,7 @@ def setup_meson_build(
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = [
-            _resolve_meson_executable(),
+            get_meson_executable(),
             "setup",
             "--native-file",
             str(native_file_path),
@@ -1118,7 +1118,7 @@ def setup_meson_build(
                 f"[MESON] Reconfiguring build directory (forced by compiler version change): {build_dir}"
             )
             cmd = [
-                _resolve_meson_executable(),
+                get_meson_executable(),
                 "setup",
                 "--reconfigure",
                 "--native-file",
@@ -1417,7 +1417,7 @@ def compile_meson(
     Returns:
         True if compilation successful, False otherwise
     """
-    cmd = [_resolve_meson_executable(), "compile", "-C", str(build_dir)]
+    cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
     if target:
         cmd.append(target)
@@ -1759,7 +1759,7 @@ def run_meson_test(
         MesonTestResult with success status, duration, and test counts
     """
     cmd = [
-        _resolve_meson_executable(),
+        get_meson_executable(),
         "test",
         "-C",
         str(build_dir),
@@ -2415,7 +2415,7 @@ def stream_compile_and_run_tests(
     Returns:
         Tuple of (overall_success, num_passed, num_failed)
     """
-    cmd = [_resolve_meson_executable(), "compile", "-C", str(build_dir)]
+    cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
     if target:
         cmd.append(target)

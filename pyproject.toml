@@ -19,7 +19,7 @@ dependencies = [
     "uv",
     "clang-tool-chain[sccache]==1.0.31",
     "ninja",
-    "meson",
+    "meson>=1.10.0",
     "cmake",
     "download",
     "playwright",
