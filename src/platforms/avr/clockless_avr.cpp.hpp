@@ -4,7 +4,9 @@
 
 #include "platforms/avr/is_avr.h"
 
-#ifdef FASTLED_AVR
+// ATtiny platforms use their own optimized implementation in attiny/clockless_blocking.h
+// This file should not be compiled for ATtiny to avoid template redefinition conflicts
+#if defined(FASTLED_AVR) && !defined(FL_IS_AVR_ATTINY)
 
 #include "clockless_avr.h"
 
@@ -14,4 +16,4 @@ namespace fl {
 
 }  // namespace fl
 
-#endif  // FASTLED_AVR
+#endif  // FASTLED_AVR && !FL_IS_AVR_ATTINY

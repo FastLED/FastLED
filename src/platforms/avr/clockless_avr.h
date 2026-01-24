@@ -13,7 +13,9 @@
 
 namespace fl {
 
-#if defined(FL_IS_AVR)
+// ATtiny platforms use their own optimized implementation in attiny/clockless_blocking.h
+// This file should not be compiled for ATtiny to avoid template redefinition conflicts
+#if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 
 // Scaling macro choice
 #ifndef FASTLED_AVR_SCALE
