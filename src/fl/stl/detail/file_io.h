@@ -93,33 +93,54 @@ int fseek(FILE* file, long offset, int origin);
 int fflush(FILE* file);
 
 // On some platforms (e.g., AVR), feof, ferror, and clearerr are macros
-// Save them, undefine temporarily to declare our functions, then restore
-// push_macro/pop_macro is safe even if the macro doesn't exist
+// Save them only if they exist, undefine temporarily to declare our functions
+// Only needed on platforms where they are actually macros (AVR)
+#ifdef __AVR__
+#ifdef feof
+#define FL_MACRO_NEEDS_RESTORE_feof
 #pragma push_macro("feof")
-#pragma push_macro("ferror")
-#pragma push_macro("clearerr")
 #undef feof
+#endif
+#ifdef ferror
+#define FL_MACRO_NEEDS_RESTORE_ferror
+#pragma push_macro("ferror")
 #undef ferror
+#endif
+#ifdef clearerr
+#define FL_MACRO_NEEDS_RESTORE_clearerr
+#pragma push_macro("clearerr")
 #undef clearerr
+#endif
+#endif // __AVR__
 
 /// Check for end-of-file
 /// @param file File handle
 /// @return Non-zero if EOF, 0 otherwise
+#ifdef __AVR__
+int (feof)(FILE* file);
+#else
 int feof(FILE* file);
+#endif
 
 /// Check for file error
 /// @param file File handle
 /// @return Non-zero if error, 0 otherwise
+#ifdef __AVR__
+int (ferror)(FILE* file);
+#else
 int ferror(FILE* file);
+#endif
 
 /// Clear file error indicators
 /// @param file File handle
+#ifdef __AVR__
+void (clearerr)(FILE* file);
+#else
 void clearerr(FILE* file);
+#endif
 
-// Restore the original macro definitions (if they existed)
-#pragma pop_macro("clearerr")
-#pragma pop_macro("ferror")
-#pragma pop_macro("feof")
+// Note: On AVR, we use parentheses around function names to prevent macro expansion
+// and we do NOT restore the macros (see comment at end of file for rationale)
 
 // Note: fl::get_errno() and fl::strerror() are already defined in fl/stl/cerrno.h and fl/stl/cstring.h
 // We don't redeclare them here to avoid conflicts
@@ -169,17 +190,35 @@ inline int fflush(FILE* file) {
     return ::fflush(static_cast<::FILE*>(file));
 }
 
+#ifdef __AVR__
+inline int (feof)(FILE* file) {
+    return ::feof(static_cast<::FILE*>(file));
+}
+#else
 inline int feof(FILE* file) {
     return ::feof(static_cast<::FILE*>(file));
 }
+#endif
 
+#ifdef __AVR__
+inline int (ferror)(FILE* file) {
+    return ::ferror(static_cast<::FILE*>(file));
+}
+#else
 inline int ferror(FILE* file) {
     return ::ferror(static_cast<::FILE*>(file));
 }
+#endif
 
+#ifdef __AVR__
+inline void (clearerr)(FILE* file) {
+    ::clearerr(static_cast<::FILE*>(file));
+}
+#else
 inline void clearerr(FILE* file) {
     ::clearerr(static_cast<::FILE*>(file));
 }
+#endif
 
 // Note: fl::get_errno() and fl::strerror() are defined in fl/stl/cerrno.h and fl/stl/cstring.h
 // No implementation needed here - those files provide them
@@ -229,16 +268,33 @@ inline int fflush(FILE* /*file*/) {
     return -1;
 }
 
+#ifdef __AVR__
+inline int (feof)(FILE* /*file*/) {
+    return 0;
+}
+#else
 inline int feof(FILE* /*file*/) {
     return 0;
 }
+#endif
 
+#ifdef __AVR__
+inline int (ferror)(FILE* /*file*/) {
+    return 1;
+}
+#else
 inline int ferror(FILE* /*file*/) {
     return 1;
 }
+#endif
 
+#ifdef __AVR__
+inline void (clearerr)(FILE* /*file*/) {
+}
+#else
 inline void clearerr(FILE* /*file*/) {
 }
+#endif
 
 // Note: fl::get_errno() and fl::strerror() are defined in fl/stl/cerrno.h and fl/stl/cstring.h
 // We use those implementations instead of defining our own here
@@ -246,3 +302,16 @@ inline void clearerr(FILE* /*file*/) {
 } // namespace fl
 
 #endif // FASTLED_TESTING
+
+// DO NOT restore the feof/ferror/clearerr macros on AVR
+// Rationale: Even with parentheses in function declarations, restoring these macros causes
+// them to expand at call sites like `fl::feof(file)`, which breaks compilation.
+// Macro expansion happens before namespace resolution, so `fl::feof(x)` becomes
+// `fl::((x)->flags & _FEOF)` on AVR, which is invalid syntax.
+//
+// Solution: We only undefine these macros on AVR (where they exist as macros), and we
+// use parentheses around function names `(feof)`, `(ferror)`, `(clearerr)` in declarations
+// and definitions to prevent macro expansion. We do NOT restore the macros.
+//
+// On non-AVR platforms where these are regular functions (not macros), we use normal
+// function syntax without parentheses.

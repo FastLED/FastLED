@@ -238,10 +238,13 @@ foreach test_name : test_names
   all_test_runners += test_runner
 
   # Register test: runner.exe loads the DLL and executes it
+  # Some tests have race conditions when run in parallel (use wall-clock time via micros())
+  is_serial = test_name in ['fl_file_system', 'test_uart_channel_engine']
   test(test_name, runner_exe,
     args: [test_dll.full_path()],
     workdir: meson.project_source_root(),
-    depends: [test_dll]
+    depends: [test_dll],
+    is_parallel: not is_serial
   )
 endforeach
 
