@@ -9,6 +9,7 @@
 // Subdirectory implementations (alphabetical order)
 #include "fl/audio/_build.hpp"
 #include "fl/channels/_build.hpp"
+#include "fl/channels/adapters/_build.hpp"
 #include "fl/chipsets/_build.hpp"
 #include "fl/codec/_build.hpp"
 #include "fl/detail/_build.hpp"

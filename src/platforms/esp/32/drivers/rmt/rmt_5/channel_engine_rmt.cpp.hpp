@@ -9,21 +9,26 @@
 /// When disabled (default), FL_LOG_RMT produces no code overhead (zero-cost
 /// abstraction).
 
-#ifdef ESP32
+// Allow compilation on both ESP32 hardware and stub platforms (for testing)
+#if defined(ESP32) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/compiler_control.h"
-#include "platforms/esp/32/feature_flags/enabled.h"
 
-#if FASTLED_RMT5
+#ifdef ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#endif
+
+// On ESP32: Check FASTLED_RMT5 flag
+// On stub platforms: Always allow compilation (no feature flag check)
+#if !defined(ESP32) || FASTLED_RMT5
 
 #include "channel_engine_rmt.h"
-#include "buffer_pool.h"
-#include "common.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
 #include "fl/error.h"
 #include "fl/log.h"
+#include "fl/pin.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/bit_cast.h"
@@ -33,321 +38,66 @@
 #include "fl/stl/time.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/trace.h"
-#include "network_detector.h"
-#include "network_state_tracker.h"
-#include "rmt_memory_manager.h"
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
-FL_EXTERN_C_BEGIN
-#include "driver/gpio.h"
-#include "driver/rmt_tx.h"
-#include "esp_cache.h" // For esp_cache_msync (DMA cache coherency)
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h" // For pdMS_TO_TICKS
-FL_EXTERN_C_END
+// Peripheral interface includes
+#include "irmt5_peripheral.h"
+
+// Platform-specific peripheral implementations
+// Note: These headers define the concrete peripheral classes (ESP32 or Mock)
+// and all necessary support types (RMT types, buffer pools, network detection).
+// The #ifdef is isolated to these includes only - no conditional code below.
+#ifndef FASTLED_STUB_IMPL
+    // ESP32 platform: Real hardware drivers
+    FL_EXTERN_C_BEGIN
+    #include "driver/rmt_tx.h"  // For rmt_channel_handle_t, rmt_tx_done_event_data_t (callback signature)
+    FL_EXTERN_C_END
+    #include "rmt5_peripheral_esp.h"
+    #include "common.h"  // ESP32 constants (FASTLED_RMT5_CLOCK_HZ, IRAM_ATTR, etc.)
+    #include "rmt_memory_manager.h"  // RmtMemoryManager
+    #include "buffer_pool.h"  // RMTBufferPool
+    #include "network_detector.h"  // NetworkDetector
+    #include "network_state_tracker.h"  // NetworkStateTracker
+#else
+    // Stub platform: Mock implementations for testing
+    #include "platforms/shared/mock/esp/32/drivers/rmt5_peripheral_mock.h"
+    #include "platforms/shared/mock/esp/32/drivers/rmt5_support_stubs.h"
+#endif
 
 namespace fl {
 
+// Import types from detail namespace
+using detail::IRMT5Peripheral;
+using detail::Rmt5ChannelConfig;
+using detail::RmtMemoryManager;
+using detail::NetworkDetector;
+using detail::NetworkStateTracker;
+using detail::RMTBufferPool;
+
 //=============================================================================
-// Cache Synchronization for DMA Buffers
+// Platform Peripheral Selection
 //=============================================================================
 
-/// @brief Cache sync for RMT DMA buffers (non-ISR context)
-/// @param buffer_ptr Pointer to buffer to sync
-/// @param buffer_size Size of buffer in bytes
-/// @return esp_err_t result from esp_cache_msync (ESP_OK or error code)
+/// @brief Get the default peripheral instance for the current platform
+/// @return Reference to platform-specific peripheral (ESP32 or Mock)
 ///
-/// CRITICAL: This function ensures CPU writes to the LED buffer are flushed
-/// to SRAM before RMT DMA reads the data. Without this, DMA may read stale
-/// cache data, causing LED color corruption.
-///
-/// Platform behavior:
-/// - ESP32-S3/C3/C6/H2: Have data cache, require explicit synchronization
-/// - ESP32/S2: No data cache, cache sync is a no-op
-/// - MALLOC_CAP_DMA buffers: May return ESP_ERR_INVALID_ARG on some platforms
-///   but memory barriers still ensure ordering
-static esp_err_t rmt_cache_sync(void* buffer_ptr, size_t buffer_size) {
-    if (!buffer_ptr || buffer_size == 0) {
-        return ESP_OK;
-    }
-
-    // Memory barrier: Ensure all preceding writes complete before cache sync
-    FL_MEMORY_BARRIER;
-
-    // Cache sync: Writeback cache to memory (Cache-to-Memory)
-    // ESP_CACHE_MSYNC_FLAG_UNALIGNED: More permissive alignment checking
-    // Some ESP-IDF versions have strict alignment requirements that cause
-    // esp_cache_msync() to fail even with properly aligned DMA buffers.
-    // The UNALIGNED flag allows the operation to proceed, relying on memory
-    // barriers for ordering guarantees.
-    esp_err_t err = esp_cache_msync(
-        buffer_ptr,
-        buffer_size,
-        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
-
-    // Memory barrier: Ensure cache sync completes before DMA submission
-    FL_MEMORY_BARRIER;
-
-    // Note: Even if cache sync fails, memory barriers ensure write ordering.
-    // DMA-capable memory (MALLOC_CAP_DMA) may not require cache ops on some
-    // platforms (ESP32/S2 have no data cache). Errors are logged but non-fatal.
-    if (err != ESP_OK) {
-        FL_LOG_RMT("RMT cache sync returned error: " << esp_err_to_name(err)
-                   << " (non-fatal, memory barriers ensure ordering)");
-    }
-
-    return err;
+/// This factory function hides the platform selection logic behind a single
+/// function call. The #ifdef is isolated here rather than scattered throughout
+/// the codebase.
+static IRMT5Peripheral& getDefaultPeripheral() {
+#ifdef FASTLED_STUB_IMPL
+    return detail::Rmt5PeripheralMock::instance();
+#else
+    return detail::Rmt5PeripheralESP::instance();
+#endif
 }
 
 //=============================================================================
-// Rmt5EncoderImpl - RMT5 encoder implementation (inlined from
-// rmt5_encoder.h/cpp)
+// ChannelEngineRMTImpl - Implementation class
 //=============================================================================
-
-/**
- * RMT5 Encoder Implementation - Plain struct for converting pixel bytes to RMT
- * symbols
- *
- * Architecture:
- * - Plain struct (no inheritance, no virtuals) for standard layout guarantee
- * - Uses ESP-IDF's official encoder pattern (rmt_encoder_t)
- * - Combines bytes_encoder (for pixel data) + copy_encoder (for reset pulse)
- * - State machine handles partial encoding when buffer fills
- * - Runs in ISR context - must be fast and ISR-safe
- * - rmt_encoder_t is first member to enable clean casting without offsetof
- *
- * Implementation based on ESP-IDF led_strip example:
- * https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt/led_strip
- */
-struct Rmt5EncoderImpl {
-    // CRITICAL: rmt_encoder_t MUST be first member for clean casting
-    // This allows: rmt_encoder_t* -> Rmt5EncoderImpl* via reinterpret_cast
-    rmt_encoder_t base;
-
-    // Sub-encoders
-    rmt_encoder_handle_t mBytesEncoder;
-    rmt_encoder_handle_t mCopyEncoder;
-
-    // Encoder state machine counter (0 = data, 1 = reset)
-    int mState;
-
-    // Reset pulse symbol (low signal for RESET microseconds)
-    rmt_symbol_word_t mResetCode;
-
-    // Timing configuration (stored for debugging)
-    uint32_t mBit0HighTicks;
-    uint32_t mBit0LowTicks;
-    uint32_t mBit1HighTicks;
-    uint32_t mBit1LowTicks;
-    uint32_t mResetTicks;
-
-    // Factory method to create encoder instance
-    static Rmt5EncoderImpl *create(const ChipsetTiming &timing,
-                                   uint32_t resolution_hz) {
-        Rmt5EncoderImpl *impl = new Rmt5EncoderImpl(timing, resolution_hz);
-        if (impl == nullptr) {
-            FL_WARN("Rmt5EncoderImpl::create: Failed to allocate encoder");
-            return nullptr;
-        }
-        if (impl->getHandle() == nullptr) {
-            FL_WARN("Rmt5EncoderImpl::create: Encoder initialization failed");
-            delete impl;
-            return nullptr;
-        }
-        return impl;
-    }
-
-    // Reinitialize encoder with new timing configuration
-    esp_err_t reinit(const ChipsetTiming &timing, uint32_t resolution_hz) {
-        if (mBytesEncoder) {
-            rmt_del_encoder(mBytesEncoder);
-            mBytesEncoder = nullptr;
-        }
-        if (mCopyEncoder) {
-            rmt_del_encoder(mCopyEncoder);
-            mCopyEncoder = nullptr;
-        }
-        return initialize(timing, resolution_hz);
-    }
-
-    // Get the underlying encoder handle for RMT transmission
-    rmt_encoder_handle_t getHandle() { return &base; }
-
-    // Destructor - cleans up sub-encoders
-    ~Rmt5EncoderImpl() { cleanup(); }
-
-    // Non-copyable
-    Rmt5EncoderImpl(const Rmt5EncoderImpl &) = delete;
-    Rmt5EncoderImpl &operator=(const Rmt5EncoderImpl &) = delete;
-
-  private:
-    // Private constructor - use create() factory method
-    Rmt5EncoderImpl(const ChipsetTiming &timing, uint32_t resolution_hz)
-        : mBytesEncoder(nullptr), mCopyEncoder(nullptr), mState(0),
-          mBit0HighTicks(0), mBit0LowTicks(0), mBit1HighTicks(0),
-          mBit1LowTicks(0), mResetTicks(0) {
-        base.encode = Rmt5EncoderImpl::encodeCallback;
-        base.reset = Rmt5EncoderImpl::resetCallback;
-        base.del = Rmt5EncoderImpl::delCallback;
-
-        mResetCode.duration0 = 0;
-        mResetCode.level0 = 0;
-        mResetCode.duration1 = 0;
-        mResetCode.level1 = 0;
-
-        esp_err_t ret = initialize(timing, resolution_hz);
-        if (ret != ESP_OK) {
-            FL_WARN("Rmt5EncoderImpl: Initialization failed: "
-                    << esp_err_to_name(ret));
-        }
-    }
-
-    // Private methods
-    size_t FL_IRAM encode(rmt_channel_handle_t channel,
-                          const void *primary_data, size_t data_size,
-                          rmt_encode_state_t *ret_state) {
-        rmt_encode_state_t session_state = RMT_ENCODING_RESET;
-        rmt_encode_state_t state = RMT_ENCODING_RESET;
-        size_t encoded_symbols = 0;
-
-        switch (mState) {
-        case 0:
-            encoded_symbols +=
-                mBytesEncoder->encode(mBytesEncoder, channel, primary_data,
-                                      data_size, &session_state);
-            if (session_state & RMT_ENCODING_COMPLETE) {
-                mState = 1;
-            }
-            if (session_state & RMT_ENCODING_MEM_FULL) {
-                state = static_cast<rmt_encode_state_t>(state |
-                                                        RMT_ENCODING_MEM_FULL);
-                goto out;
-            }
-            [[fallthrough]];
-
-        case 1:
-            encoded_symbols +=
-                mCopyEncoder->encode(mCopyEncoder, channel, &mResetCode,
-                                     sizeof(mResetCode), &session_state);
-            if (session_state & RMT_ENCODING_COMPLETE) {
-                mState = 0;
-                state = static_cast<rmt_encode_state_t>(state |
-                                                        RMT_ENCODING_COMPLETE);
-            }
-            if (session_state & RMT_ENCODING_MEM_FULL) {
-                state = static_cast<rmt_encode_state_t>(state |
-                                                        RMT_ENCODING_MEM_FULL);
-                goto out;
-            }
-            break;
-
-        default:
-            state = RMT_ENCODING_RESET;
-            break;
-        }
-
-    out:
-        *ret_state = state;
-        return encoded_symbols;
-    }
-
-    esp_err_t FL_IRAM reset() {
-        mState = 0;
-        if (mBytesEncoder) {
-            mBytesEncoder->reset(mBytesEncoder);
-        }
-        if (mCopyEncoder) {
-            mCopyEncoder->reset(mCopyEncoder);
-        }
-        return ESP_OK;
-    }
-
-    esp_err_t cleanup() {
-        if (mBytesEncoder) {
-            rmt_del_encoder(mBytesEncoder);
-            mBytesEncoder = nullptr;
-        }
-        if (mCopyEncoder) {
-            rmt_del_encoder(mCopyEncoder);
-            mCopyEncoder = nullptr;
-        }
-        return ESP_OK;
-    }
-
-    esp_err_t initialize(const ChipsetTiming &timing, uint32_t resolution_hz) {
-        const uint64_t ns_per_tick = 1000000000ULL / resolution_hz;
-        const uint64_t half_ns_per_tick = ns_per_tick / 2;
-
-        // WS2812 3-phase to 4-phase conversion:
-        // Bit 0: T0H = T1 (high), T0L = T2 + T3 (low)
-        // Bit 1: T1H = T1 + T2 (high), T1L = T3 (low)
-        mBit0HighTicks =
-            static_cast<uint32_t>((timing.T1 + half_ns_per_tick) / ns_per_tick);
-        mBit0LowTicks =
-            static_cast<uint32_t>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mBit1HighTicks =
-            static_cast<uint32_t>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
-        mBit1LowTicks =
-            static_cast<uint32_t>((timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mResetTicks = static_cast<uint32_t>(
-            (timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
-
-        rmt_bytes_encoder_config_t bytes_config = {};
-        bytes_config.bit0.level0 = 1;
-        bytes_config.bit0.duration0 = mBit0HighTicks;
-        bytes_config.bit0.level1 = 0;
-        bytes_config.bit0.duration1 = mBit0LowTicks;
-        bytes_config.bit1.level0 = 1;
-        bytes_config.bit1.duration0 = mBit1HighTicks;
-        bytes_config.bit1.level1 = 0;
-        bytes_config.bit1.duration1 = mBit1LowTicks;
-        bytes_config.flags.msb_first = 1;  // WS2812B requires MSB-first transmission
-
-        esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
-        if (ret != ESP_OK) {
-            return ret;
-        }
-
-        rmt_copy_encoder_config_t copy_config = {};
-        ret = rmt_new_copy_encoder(&copy_config, &mCopyEncoder);
-        if (ret != ESP_OK) {
-            rmt_del_encoder(mBytesEncoder);
-            mBytesEncoder = nullptr;
-            return ret;
-        }
-
-        mResetCode.duration0 = mResetTicks;
-        mResetCode.level0 = 0;
-        mResetCode.duration1 = 0;
-        mResetCode.level1 = 0;
-
-        return ESP_OK;
-    }
-
-    // Static callbacks for rmt_encoder_t interface
-    static size_t FL_IRAM encodeCallback(rmt_encoder_t *encoder,
-                                         rmt_channel_handle_t channel,
-                                         const void *primary_data,
-                                         size_t data_size,
-                                         rmt_encode_state_t *ret_state) {
-        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
-        return impl->encode(channel, primary_data, data_size, ret_state);
-    }
-
-    static esp_err_t FL_IRAM resetCallback(rmt_encoder_t *encoder) {
-        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
-        return impl->reset();
-    }
-
-    static esp_err_t delCallback(rmt_encoder_t *encoder) {
-        Rmt5EncoderImpl *impl = fl::bit_cast<Rmt5EncoderImpl *>(encoder);
-        delete impl;
-        return ESP_OK;
-    }
-};
-
-//=============================================================================
-// ChannelEngineRMTImpl - Implementation class with all ESP-IDF details
+//
+// NOTE: Rmt5EncoderImpl is now in rmt5_peripheral_esp.cpp (implementation detail).
+// Encoders are created via mPeripheral.createEncoder() which returns opaque void*.
 //=============================================================================
 
 /**
@@ -359,27 +109,32 @@ struct Rmt5EncoderImpl {
  */
 class ChannelEngineRMTImpl : public ChannelEngineRMT {
   public:
+    // Production constructor: Use default platform peripheral
     ChannelEngineRMTImpl()
-        : mDMAChannelsInUse(0), mAllocationFailed(false),
+        : ChannelEngineRMTImpl(getDefaultPeripheral()) {
+    }
+
+    // Testing constructor: Inject peripheral
+    explicit ChannelEngineRMTImpl(IRMT5Peripheral& peripheral)
+        : mPeripheral(peripheral),
+          mDMAChannelsInUse(0), mAllocationFailed(false),
           mMemoryReductionOffset(0),
           mConsecutiveAllocationFailures(0), mRecoveryWarningShown(false) {
-        // Suppress ESP-IDF RMT "no free channels" errors (expected during
-        // time-multiplexing) Only show critical RMT errors (ESP_LOG_ERROR and
-        // above)
-        esp_log_level_set("rmt", ESP_LOG_NONE);
-
-        // Suppress ESP-IDF cache sync errors (esp_cache_msync failures are
-        // non-fatal and handled by memory barriers). These errors are printed
-        // by ESP-IDF before FastLED can handle them, causing log spam.
-        esp_log_level_set("cache", ESP_LOG_NONE);
+        // Configure platform-specific logging (RMT and cache log levels)
+        mPeripheral.configureLogging();
 
         FL_LOG_RMT("RMT Channel Engine initialized");
     }
 
     ~ChannelEngineRMTImpl() override {
-        // Wait for all active transmissions to complete
-        while (poll() == EngineState::BUSY) {
+        // Wait for all active transmissions to complete (with timeout)
+        int timeout_iterations = 100000; // 10 seconds at 100us per iteration
+        while (poll() == EngineState::BUSY && timeout_iterations > 0) {
             fl::delayMicroseconds(100);
+            timeout_iterations--;
+        }
+        if (timeout_iterations == 0) {
+            FL_WARN("ChannelEngineRMT destructor timeout - forcing cleanup");
         }
 
         // Get memory manager reference
@@ -388,13 +143,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Destroy all channels
         for (auto &ch : mChannels) {
             if (ch.channel) {
-                rmt_tx_wait_all_done(ch.channel, pdMS_TO_TICKS(1000));
-                rmt_disable(ch.channel);
-                rmt_del_channel(ch.channel);
+                mPeripheral.waitAllDone(ch.channel, 1000);
+                mPeripheral.disableChannel(ch.channel);
+                mPeripheral.deleteChannel(ch.channel);
 
-                // ESP32: Restore GPIO pulldown when RMT channel is destroyed
+                // Restore GPIO pulldown when RMT channel is destroyed
                 // This ensures pin returns to stable LOW state
-                gpio_set_pull_mode(static_cast<gpio_num_t>(ch.pin), GPIO_PULLDOWN_ONLY);
+                fl::pinMode(ch.pin, fl::PinMode::InputPulldown);
 
                 // Free DMA if this channel was using it
                 if (ch.useDMA) {
@@ -408,7 +163,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             }
 
             // Delete per-channel encoder
-            ch.encoder.reset();
+            if (ch.encoder) {
+                mPeripheral.deleteEncoder(ch.encoder);
+                ch.encoder = nullptr;
+            }
         }
         mChannels.clear();
 
@@ -478,9 +236,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
                 // Disable channel to release HW resources
                 if (ch.channel) {
-                    esp_err_t err = rmt_disable(ch.channel);
-                    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                        FL_LOG_RMT("Failed to disable channel: " << err);
+                    bool disable_success = mPeripheral.disableChannel(ch.channel);
+                    if (!disable_success) {
+                        FL_LOG_RMT("Failed to disable channel");
                     }
                 }
 
@@ -531,9 +289,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
   private:
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
-        rmt_channel_handle_t channel;
-        fl::unique_ptr<Rmt5EncoderImpl> encoder; // Per-channel encoder (prevents race conditions)
-        gpio_num_t pin;
+        void* channel;  // Opaque channel handle (matches IRMT5Peripheral interface)
+        void* encoder;  // Encoder handle from peripheral interface (prevents race conditions)
+        int pin;        // GPIO pin number (platform-agnostic)
         ChipsetTiming timing;
         volatile bool transmissionComplete;
         bool inUse;
@@ -604,7 +362,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return Pointer to channel state, or nullptr if no HW available
-    ChannelState *acquireChannel(gpio_num_t pin, const ChipsetTiming &timing,
+    ChannelState *acquireChannel(int pin, const ChipsetTiming &timing,
                                  fl::size dataSize = 0);
 
     /// @brief Release a channel (marks as available for reuse)
@@ -613,7 +371,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Create new RMT channel with given configuration
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return true if channel created successfully
-    bool createChannel(ChannelState *state, gpio_num_t pin,
+    bool createChannel(ChannelState *state, int pin,
                        const ChipsetTiming &timing, fl::size dataSize = 0) {
         // ============================================================================
         // RMT5 MEMORY MANAGEMENT - Now using centralized RmtMemoryManager
@@ -721,25 +479,18 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // }
             // #endif
 
-            rmt_tx_channel_config_t dma_config = {};
-            dma_config.gpio_num = pin;
-            dma_config.clk_src = RMT_CLK_SRC_DEFAULT;
-            dma_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
-            dma_config.mem_block_symbols = dma_mem_block_symbols;
-            dma_config.trans_queue_depth = 1;
-            dma_config.flags.invert_out = 0;
-            dma_config.flags.with_dma = 1; // Enable DMA
-            dma_config.intr_priority = intr_priority;
+            Rmt5ChannelConfig dma_config(pin, FASTLED_RMT5_CLOCK_HZ,
+                                          dma_mem_block_symbols, 1, true, intr_priority);
 
-            esp_err_t dma_err =
-                rmt_new_tx_channel(&dma_config, &state->channel);
-            if (dma_err == ESP_OK) {
+            bool dma_success =
+                mPeripheral.createTxChannel(dma_config, (void**)&state->channel);
+            if (dma_success) {
                 // DMA SUCCESS - claim DMA slot in memory manager
                 if (!memMgr.allocateDMA(state->memoryChannelId,
                                         true)) { // true = TX channel
                     FL_WARN("DMA hardware creation succeeded but memory "
                             "manager allocation failed");
-                    rmt_del_channel(state->channel);
+                    mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     memMgr.free(state->memoryChannelId, true);
                     return false;
@@ -752,11 +503,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state->transmissionComplete = false;
 
                 // Create encoder for this DMA channel
-                state->encoder.reset(Rmt5EncoderImpl::create(timing, FASTLED_RMT5_CLOCK_HZ));
+                state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
                 if (!state->encoder) {
                     FL_WARN("Failed to create encoder for DMA channel");
-                    state->encoder.reset();
-                    rmt_del_channel(state->channel);
+                    mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
                     // Free DMA and memory allocation
@@ -774,10 +524,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // DMA FAILED - free memory and fall through to non-DMA
                 // Free memory allocation
                 memMgr.free(state->memoryChannelId, true);
-                FL_WARN("DMA channel creation failed: "
-                        << esp_err_to_name(dma_err)
-                        << " - unexpected failure on DMA-capable platform, "
-                           "falling back to non-DMA");
+                FL_WARN("DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA");
             }
         }
 
@@ -838,21 +585,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // }
         // #endif
 
-        rmt_tx_channel_config_t tx_config = {};
-        tx_config.gpio_num = pin;
-        tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
-        tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
-        tx_config.mem_block_symbols = mem_block_symbols;
-        tx_config.trans_queue_depth = 1;
-        tx_config.flags.invert_out = 0;
-        tx_config.flags.with_dma = 0; // Non-DMA
-        tx_config.intr_priority = intr_priority;
+        Rmt5ChannelConfig tx_config(pin, FASTLED_RMT5_CLOCK_HZ,
+                                     mem_block_symbols, 1, false, intr_priority);
 
-        esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
+        bool success = mPeripheral.createTxChannel(tx_config, (void**)&state->channel);
 
         // PROGRESSIVE RETRY MECHANISM FOR MEMORY ALLOCATION RECOVERY
         // =========================================================
-        // If ESP_ERR_NOT_FOUND: Actual RMT memory may be less than accounting expects
+        // If allocation fails: Actual RMT memory may be less than accounting expects
         // (external code using RMT peripherals, or hardware issues)
         //
         // Strategy: Progressively reduce mem_block_symbols and retry
@@ -860,9 +600,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // - Reduce by 1 symbol per retry until success or minimum reached
         // - Minimum: SOC_RMT_MEM_WORDS_PER_CHANNEL (1 block)
 
-        if (err == ESP_ERR_NOT_FOUND && mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-            FL_WARN("RMT channel allocation failed: " << esp_err_to_name(err)
-                    << " (initial request: " << mem_block_symbols << " symbols)");
+        if (!success && mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            FL_WARN("RMT channel allocation failed (initial request: "
+                    << mem_block_symbols << " symbols)");
             FL_WARN("Attempting progressive memory reduction recovery...");
 
             mConsecutiveAllocationFailures++;
@@ -882,13 +622,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
                 // Try allocating with reduced memory (bypass memory manager, direct allocation)
                 // We need to manually account for this since we're going below expected size
-                tx_config.mem_block_symbols = reduced_symbols;
+                Rmt5ChannelConfig retry_config(pin, FASTLED_RMT5_CLOCK_HZ,
+                                                 reduced_symbols, 1, false, intr_priority);
 
                 FL_LOG_RMT("Retry #" << retry_count << ": Attempting " << reduced_symbols
                            << " symbols (reduced by " << (original_symbols - reduced_symbols) << ")");
 
-                err = rmt_new_tx_channel(&tx_config, &state->channel);
-                if (err == ESP_OK) {
+                success = mPeripheral.createTxChannel(retry_config, (void**)&state->channel);
+                if (success) {
                     // SUCCESS - Record the memory reduction offset
                     mMemoryReductionOffset = original_symbols - reduced_symbols;
                     mConsecutiveAllocationFailures = 0; // Reset failure counter
@@ -938,7 +679,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     << "  Platform: " << CONFIG_IDF_TARGET << "\n"
                     << "  Requested: " << original_symbols << " symbols\n"
                     << "  Minimum attempted: " << min_symbols << " symbols\n"
-                    << "  Error: " << esp_err_to_name(err) << "\n"
                     << "\n"
                     << "Possible causes:\n"
                     << "  1. External code is using all RMT channels\n"
@@ -955,14 +695,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             }
 
             // Recovery succeeded - fall through to encoder creation
-            err = ESP_OK;
+            success = true;
         }
 
-        if (err != ESP_OK) {
-            // Non-recoverable error (not ESP_ERR_NOT_FOUND, or already at minimum)
+        if (!success) {
+            // Non-recoverable error (already at minimum or other failure)
             FL_LOG_RMT("Failed to create non-DMA RMT channel on pin "
-                       << static_cast<int>(pin) << ": "
-                       << esp_err_to_name(err));
+                       << static_cast<int>(pin));
             state->channel = nullptr;
             memMgr.free(state->memoryChannelId, true);
             return false;
@@ -977,11 +716,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         state->transmissionComplete = false;
 
         // Create encoder for this channel
-        state->encoder.reset(Rmt5EncoderImpl::create(timing, FASTLED_RMT5_CLOCK_HZ));
+        state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
         if (!state->encoder) {
             FL_WARN("Failed to create encoder for channel");
-            state->encoder.reset();
-            rmt_del_channel(state->channel);
+            mPeripheral.deleteChannel(state->channel);
             state->channel = nullptr;
             // Free memory allocation
             memMgr.free(state->memoryChannelId, true);
@@ -1001,7 +739,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Configure existing channel (handle pin/timing changes)
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
-    void configureChannel(ChannelState *state, gpio_num_t pin,
+    void configureChannel(ChannelState *state, int pin,
                           const ChipsetTiming &timing, fl::size dataSize = 0) {
         // Check if timing changed - if so, encoder must be recreated
         bool timingChanged =
@@ -1017,14 +755,17 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                            << ", recreating channel");
 
             // Wait for any pending transmission to complete
-            rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
+            mPeripheral.waitAllDone(state->channel, 100);
 
             // Delete encoder before deleting channel
-            state->encoder.reset();
+            if (state->encoder) {
+                mPeripheral.deleteEncoder(state->encoder);
+                state->encoder = nullptr;
+            }
 
             // Delete channel directly - no need to disable since we're deleting
             // (rmt_del_channel handles cleanup internally)
-            rmt_del_channel(state->channel);
+            mPeripheral.deleteChannel(state->channel);
             state->channel = nullptr;
 
             // Free DMA and memory allocation
@@ -1050,19 +791,21 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                     << " T3=" << timing.T3);
 
             // Wait for any pending transmission to complete
-            rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
+            mPeripheral.waitAllDone(state->channel, 100);
 
             // Delete old encoder
-            state->encoder.reset();
+            if (state->encoder) {
+                mPeripheral.deleteEncoder(state->encoder);
+                state->encoder = nullptr;
+            }
 
             // Create new encoder with updated timing
-            state->encoder.reset(Rmt5EncoderImpl::create(timing, FASTLED_RMT5_CLOCK_HZ));
+            state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
             if (!state->encoder) {
                 FL_WARN("Failed to recreate encoder with new timing");
-                state->encoder.reset();
                 // Channel is still valid but encoder is broken - mark channel
                 // as unusable
-                rmt_del_channel(state->channel);
+                mPeripheral.deleteChannel(state->channel);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1092,11 +835,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // here)
             if (!registerChannelCallback(state)) {
                 FL_WARN("Failed to register callback after reconfiguration");
-                state->encoder.reset();
+                if (state->encoder) {
+                    mPeripheral.deleteEncoder(state->encoder);
+                    state->encoder = nullptr;
+                }
                 if (state->useDMA) {
                     mDMAChannelsInUse--;
                 }
-                rmt_del_channel(state->channel);
+                mPeripheral.deleteChannel(state->channel);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1132,7 +878,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             fl::size dataSize = pending.data->getSize();
 
             // Acquire channel for this transmission
-            ChannelState* channel = acquireChannel(static_cast<gpio_num_t>(pending.pin), pending.timing, dataSize);
+            ChannelState* channel = acquireChannel(pending.pin, pending.timing, dataSize);
             if (!channel) {
                 ++i;  // No HW available, leave in queue
                 continue;
@@ -1171,9 +917,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Store pooled buffer in channel state for release on completion
             channel->pooledBuffer = pooledBuffer;
 
-            esp_err_t err = rmt_enable(channel->channel);
-            if (err != ESP_OK) {
-                FL_LOG_RMT("Failed to enable channel: " << esp_err_to_name(err));
+            bool enable_success = mPeripheral.enableChannel(channel->channel);
+            if (!enable_success) {
+                FL_LOG_RMT("Failed to enable channel");
                 // Release buffer back to pool before releasing channel
                 if (channel->useDMA) {
                     mBufferPool.releaseDMA();
@@ -1187,11 +933,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             }
 
             // Explicitly reset encoder before each transmission to ensure clean state
-            rmt_encoder_handle_t enc_handle = channel->encoder->getHandle();
-            err = enc_handle->reset(enc_handle);
-            if (err != ESP_OK) {
-                FL_LOG_RMT("Failed to reset encoder: " << esp_err_to_name(err));
-                rmt_disable(channel->channel);
+            if (!mPeripheral.resetEncoder(channel->encoder)) {
+                FL_LOG_RMT("Failed to reset encoder");
+                mPeripheral.disableChannel(channel->channel);
                 // Release buffer back to pool before releasing channel
                 if (channel->useDMA) {
                     mBufferPool.releaseDMA();
@@ -1208,22 +952,19 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // This ensures CPU writes to the LED buffer are flushed to SRAM
             // before RMT DMA reads the data. Without this, DMA may read stale
             // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
-            // NOTE: Only call esp_cache_msync() for DMA buffers.
+            // NOTE: Only call syncCache() for DMA buffers.
             // Non-DMA buffers use internal SRAM (no cache coherency issues).
             if (channel->useDMA) {
-                rmt_cache_sync(pooledBuffer.data(), pooledBuffer.size());
+                mPeripheral.syncCache(pooledBuffer.data(), pooledBuffer.size());
             }
 
-            rmt_transmit_config_t tx_config = {};
-            tx_config.loop_count = 0;
             // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
-            err = rmt_transmit(channel->channel, channel->encoder->getHandle(),
-                              pooledBuffer.data(),
-                              pooledBuffer.size(),
-                              &tx_config);
-            if (err != ESP_OK) {
-                FL_LOG_RMT("Failed to transmit: " << esp_err_to_name(err));
-                rmt_disable(channel->channel);
+            bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
+                                                    pooledBuffer.data(),
+                                                    pooledBuffer.size());
+            if (!tx_success) {
+                FL_LOG_RMT("Failed to transmit");
+                mPeripheral.disableChannel(channel->channel);
                 // Release buffer back to pool before releasing channel
                 if (channel->useDMA) {
                     mBufferPool.releaseDMA();
@@ -1350,12 +1091,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             FL_DBG("Reconfiguring idle channel " << i << " (pin: " << static_cast<int>(state.pin) << ")");
 
             // Delete encoder first
-            state.encoder.reset();
+            if (state.encoder) {
+                mPeripheral.deleteEncoder(state.encoder);
+                state.encoder = nullptr;
+            }
 
             // Delete channel
             if (state.channel) {
-                rmt_tx_wait_all_done(state.channel, pdMS_TO_TICKS(100));
-                rmt_del_channel(state.channel);
+                mPeripheral.waitAllDone(state.channel, 100);
+                mPeripheral.deleteChannel(state.channel);
                 state.channel = nullptr;
             }
 
@@ -1377,10 +1121,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     FL_WARN("Failed to re-register callback for reconfigured channel " << i);
                     // Channel creation succeeded but callback failed - destroy it
                     if (state.channel) {
-                        rmt_del_channel(state.channel);
+                        mPeripheral.deleteChannel(state.channel);
                         state.channel = nullptr;
                     }
-                    state.encoder.reset();
+                    if (state.encoder) {
+                        mPeripheral.deleteEncoder(state.encoder);
+                        state.encoder = nullptr;
+                    }
                     // Free memory allocation that createChannel() made
                     if (state.useDMA) {
                         memMgr.freeDMA(state.memoryChannelId, true);
@@ -1404,6 +1151,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     static bool IRAM_ATTR transmitDoneCallback(
         rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata,
         void *user_data);
+
+    /// @brief Peripheral interface (real or mock)
+    IRMT5Peripheral& mPeripheral;
 
     /// @brief All RMT channels (active and idle)
     fl::vector_inlined<ChannelState, 16> mChannels;
@@ -1455,7 +1205,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 //=============================================================================
 
 ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
-    gpio_num_t pin, const ChipsetTiming &timing, fl::size dataSize) {
+    int pin, const ChipsetTiming &timing, fl::size dataSize) {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
     // This applies to both DMA and non-DMA channels
     FL_LOG_RMT("acquireChannel: Finding channel with matching pin "
@@ -1508,7 +1258,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                 mDMAChannelsInUse--;
             }
             memMgr.free(stablePtr->memoryChannelId, true);
-            rmt_del_channel(stablePtr->channel);
+            mPeripheral.deleteChannel(stablePtr->channel);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
             return nullptr;
@@ -1534,9 +1284,8 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) {
     // bits have fully propagated out of the RMT peripheral. We must ensure
     // hardware is truly done before allowing buffer reuse to prevent race
     // conditions.
-    esp_err_t wait_result =
-        rmt_tx_wait_all_done(channel->channel, pdMS_TO_TICKS(100));
-    FL_ASSERT(wait_result == ESP_OK,
+    bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
+    FL_ASSERT(wait_success,
               "RMT transmission wait timeout - hardware may be stalled");
 
     // Release pooled buffer if one was acquired
@@ -1552,9 +1301,9 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) {
     channel->inUse = false;
     channel->transmissionComplete = false;
 
-    // ESP32: Restore GPIO pulldown when RMT releases pin
+    // Restore GPIO pulldown when RMT releases pin
     // This ensures pin returns to stable LOW state between transmissions
-    gpio_set_pull_mode(static_cast<gpio_num_t>(channel->pin), GPIO_PULLDOWN_ONLY);
+    fl::pinMode(channel->pin, fl::PinMode::InputPulldown);
 
     // NOTE: Keep channel and encoder alive for reuse
 }
@@ -1567,12 +1316,12 @@ bool ChannelEngineRMTImpl::registerChannelCallback(ChannelState *state) {
     // Register transmission completion callback
     // CRITICAL: state pointer must be stable (not on stack, not subject to
     // vector reallocation)
-    rmt_tx_event_callbacks_t cbs = {};
-    cbs.on_trans_done = transmitDoneCallback;
-    esp_err_t err =
-        rmt_tx_register_event_callbacks(state->channel, &cbs, state);
-    if (err != ESP_OK) {
-        FL_WARN("Failed to register callbacks: " << esp_err_to_name(err));
+    bool success = mPeripheral.registerTxCallback(
+        state->channel,
+        fl::bit_cast<void*>(&transmitDoneCallback),
+        state);
+    if (!success) {
+        FL_WARN("Failed to register callbacks");
         return false;
     }
 
@@ -1593,21 +1342,22 @@ void ChannelEngineRMTImpl::destroyChannel(ChannelState *state) {
     }
 
     // Wait for transmission to complete (should already be done if !inUse)
-    esp_err_t wait_result =
-        rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
-    if (wait_result != ESP_OK) {
-        FL_WARN("destroyChannel: rmt_tx_wait_all_done timeout for pin "
+    bool wait_success = mPeripheral.waitAllDone(state->channel, 100);
+    if (!wait_success) {
+        FL_WARN("destroyChannel: Wait all done timeout for pin "
                 << static_cast<int>(state->pin));
     }
 
     // Delete encoder
-    state->encoder.reset();
+    if (state->encoder) {
+        mPeripheral.deleteEncoder(state->encoder);
+        state->encoder = nullptr;
+    }
 
     // Delete channel
-    esp_err_t del_err = rmt_del_channel(state->channel);
-    if (del_err != ESP_OK) {
-        FL_WARN("destroyChannel: Failed to delete channel: "
-                << esp_err_to_name(del_err));
+    bool del_success = mPeripheral.deleteChannel(state->channel);
+    if (!del_success) {
+        FL_WARN("destroyChannel: Failed to delete channel");
     }
     state->channel = nullptr;
 
@@ -1728,6 +1478,6 @@ fl::shared_ptr<ChannelEngineRMT> ChannelEngineRMT::create() {
 
 } // namespace fl
 
-#endif // FASTLED_RMT5
+#endif // FASTLED_RMT5 or FASTLED_STUB_IMPL
 
-#endif // ESP32
+#endif // ESP32 or FASTLED_STUB_IMPL

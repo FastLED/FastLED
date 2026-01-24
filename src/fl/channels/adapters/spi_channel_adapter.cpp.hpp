@@ -6,7 +6,7 @@
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/channels/config.h"  // For SpiChipsetConfig
-#include "platforms/shared/spi_hw_1.h"  // For SpiHw1::Config
+#include "platforms/shared/spi_hw_1.h"  // For SpiHw1::Config // ok platform headers
 
 namespace fl {
 
