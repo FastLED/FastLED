@@ -262,6 +262,16 @@ For complete debugging documentation, see [DEBUGGING.md](DEBUGGING.md).
   * run `./lint`
   * Then submit your code via a git pull request.
 
+## Pull Request Guidelines
+
+**All PRs will be squash merged.** When your pull request is merged, all commits will be squashed into a single commit on the main branch. This keeps the project history clean and linear.
+
+What this means for you:
+- Feel free to make as many commits as needed during development
+- No need to manually squash or rebase your commits before submitting
+- The PR title and description should clearly summarize the changes (they become the squash commit message)
+- All commit history within the PR will be preserved in the PR description upon merge
+
 
 ## Going deeper
 
