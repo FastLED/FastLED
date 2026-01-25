@@ -60,12 +60,12 @@ extern volatile unsigned long timer0_millis;
 #  endif
 };
 
-// special defs for the tiny environments
-#if defined(FL_IS_AVR_ATTINY) || defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__)
+// special defs for limited resource AVR environments
+#ifdef FL_IS_AVR_LIMITED
 #define FASTLED_NEEDS_YIELD
 
-// Memory-saving defines for ATtiny platforms
-// These platforms have very limited flash memory (typically 4-16KB)
+// Memory-saving defines for limited resource AVR platforms
+// These platforms have very limited flash memory (typically 4-32KB)
 // Disable expensive features to ensure sketches fit within memory constraints
 #ifndef NO_CORRECTION
 #define NO_CORRECTION 1  // Disable color correction (~196 bytes)
@@ -75,10 +75,10 @@ extern volatile unsigned long timer0_millis;
 #endif
 #ifndef NO_CLOCK_CORRECTION
 #define NO_CLOCK_CORRECTION 1  // Disable clock correction (~50-100 bytes)
-                                // Safe for ATtiny: These platforms typically don't require
+                                // Safe for limited AVR: These platforms typically don't require
                                 // precise millis() timing during LED updates. Clock correction
                                 // compensates for time spent with interrupts disabled, but
-                                // ATtiny applications are usually simple (e.g., Blink) where
+                                // limited AVR applications are usually simple (e.g., Blink) where
                                 // slight timing drift is acceptable.
 #endif
 #ifndef FASTLED_INTERNAL

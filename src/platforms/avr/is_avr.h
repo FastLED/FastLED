@@ -96,3 +96,14 @@
     defined(__AVR_ATtiny88__)
 #define FL_IS_AVR_ATTINY_NO_UART
 #endif
+
+// ============================================================================
+// FL_IS_AVR_LIMITED - Limited resource AVR chips
+// Includes ATtiny family and low-end ATmega USB chips (ATmega32U2, ATmega16U2, ATmega8U2, AT90USB162)
+// These platforms require aggressive memory-saving optimizations (NO_CORRECTION, NO_DITHERING, etc.)
+// ============================================================================
+#if defined(FL_IS_AVR_ATTINY) || \
+    defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || \
+    defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__)
+#define FL_IS_AVR_LIMITED
+#endif
