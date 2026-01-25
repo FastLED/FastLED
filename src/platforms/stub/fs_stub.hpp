@@ -141,8 +141,9 @@ public:
             return false;
         }
         ofs.write(content.data(), content.size());  // Use write() instead of << for exact byte control
+        bool success = ofs.good();  // Check status before close
         ofs.close();  // Explicitly close to flush buffers before reading
-        return ofs.good();
+        return success;
     }
 
     bool begin() override {
