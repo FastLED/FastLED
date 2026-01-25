@@ -296,9 +296,11 @@ inline void format_impl(StrStream& stream, const char* format) {
             FormatSpec spec = parse_format_spec(format);
             if (spec.type == '%') {
                 stream << "%";
+                continue;
             } else {
                 // No argument for format specifier
                 stream << "<missing_arg>";
+                continue;
             }
         } else {
             // Create a single-character string since StrStream treats char as number
@@ -317,6 +319,7 @@ void format_impl(StrStream& stream, const char* format, const T& first, const Ar
             FormatSpec spec = parse_format_spec(format);
             if (spec.type == '%') {
                 stream << "%";
+                continue;
             } else {
                 // Format the first argument and continue with the rest
                 format_arg(stream, spec, first);
@@ -330,7 +333,7 @@ void format_impl(StrStream& stream, const char* format, const T& first, const Ar
             ++format;
         }
     }
-    
+
     // If we get here, there are unused arguments
     // This is not an error in printf, so we just ignore them
 }

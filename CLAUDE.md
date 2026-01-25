@@ -436,10 +436,19 @@ The package installation daemon is a singleton background process that ensures P
   - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
   - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead
   - Note: FL_DBG and FL_WARN use stream-style `<<` operator, NOT printf-style formatting
-- **No function-local statics in headers** (Teensy 3.0 compatibility):
-  - **DO NOT** use function-local static variables in header files (causes `__cxa_guard` linkage errors on Teensy 3.0/3.1/3.2)
-  - **Instead**: Move static initialization to corresponding `.cpp` file
-  - **Example**: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
+- **Function-local statics and Teensy 3.x `__cxa_guard` conflicts**:
+  - **Problem**: Function-local statics with non-trivial constructors generate implicit `__cxa_guard_*` function calls. If Teensy's `<new.h>` is included after the compiler sees the static, the signatures conflict.
+  - **Preferred Solution (`.cpp.hpp` files)**: Include `<new.h>` early on Teensy 3.x to declare the guard functions before use:
+    ```cpp
+    // Teensy 3.x compatibility: Include new.h before function-local statics
+    #if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+        #include <new.h>
+    #endif
+    ```
+    - ✅ Example: `src/fl/async.cpp.hpp` (includes `<new.h>` early to prevent conflicts)
+    - This ensures the compiler uses the correct `__guard*` signature
+  - **Alternative Solution (header files)**: Move static initialization to corresponding `.cpp` file
+    - Example: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
   - **Exception**: Statics inside template functions are allowed (each template instantiation gets its own static, avoiding conflicts)
   - **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
   - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)

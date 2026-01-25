@@ -77,6 +77,11 @@ struct MemoryGuard {
 
 #if defined(FASTLED_TESTING)
 void SetMallocFreeHook(MallocFreeHook* hook) {
+    // Pre-initialize reentrancy counter to avoid recursive malloc during first hook call.
+    // On macOS, ThreadLocal uses pthread_setspecific which calls operator new,
+    // triggering recursive Malloc() that would corrupt the reentrancy counter.
+    (void)tls_reintrancy_count();
+
     gMallocFreeHook = hook;
 }
 

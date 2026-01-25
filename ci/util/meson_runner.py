@@ -828,7 +828,7 @@ def setup_meson_build(
             # Import test discovery functions
             tests_py_path = source_dir / "tests"
             if tests_py_path not in [Path(p) for p in sys.path]:
-                sys.path.insert(0, str(tests_py_path))
+                sys.path.insert(0, str(tests_py_path))  # noqa: SPI001
 
             from discover_tests import (
                 discover_test_files,  # type: ignore[import-not-found]

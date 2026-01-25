@@ -2,6 +2,12 @@
 /// @brief Unity build header for fl/ directory
 /// Includes all implementation files in alphabetical order
 
+// Teensy 3.x compatibility: Include new.h before function-local statics
+// This ensures __cxa_guard_* functions are declared with correct signature
+#ifdef FL_IS_TEENSY_3X
+    #include <new.h>
+#endif
+
 #include "fl/async.cpp.hpp"
 #include "fl/audio.cpp.hpp"
 #include "fl/audio_input.cpp.hpp"

@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 # Import kill_file_lock utility
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent))  # noqa: SPI001
 from util.kill_file_lock import kill_process_holding_file
 
 

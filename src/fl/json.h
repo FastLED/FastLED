@@ -608,46 +608,70 @@ struct FloatConversionVisitor<double> {
 // Visitor for converting values to string
 struct StringConversionVisitor {
     fl::optional<fl::string> result;
-    
+
     template<typename U>
     void accept(const U& value) {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
-    
+
     void operator()(const fl::string& value) {
         result = value;
     }
-    
+
     void operator()(const int64_t& value) {
         // Convert integer to string
         result = fl::to_string(value);
     }
-    
+
     void operator()(const double& value) {
         // Convert double to string with higher precision for JSON representation
         result = fl::to_string(static_cast<float>(value), 6);
     }
-    
+
     void operator()(const float& value) {
         // Convert float to string with higher precision for JSON representation
         result = fl::to_string(value, 6);
     }
-    
+
     void operator()(const bool& value) {
         // Convert bool to string
         result = value ? "true" : "false";
     }
-    
+
     void operator()(const fl::nullptr_t&) {
         // Convert null to string
         result = "null";
     }
-    
+
     template<typename T>
     void operator()(const T&) {
         // Do nothing for other types (arrays, objects)
     }
+};
+
+// Visitor for getting size of arrays and objects
+struct SizeVisitor {
+    size_t result = 0;
+
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+
+    void operator()(const JsonArray& arr) { result = arr.size(); }
+    void operator()(const JsonObject& obj) { result = obj.size(); }
+    void operator()(const fl::vector<int16_t>& vec) { result = vec.size(); }
+    void operator()(const fl::vector<uint8_t>& vec) { result = vec.size(); }
+    void operator()(const fl::vector<float>& vec) { result = vec.size(); }
+
+    // Generic fallback for other types (primitives, null)
+    void operator()(const fl::nullptr_t&) { result = 0; }
+    void operator()(const bool&) { result = 0; }
+    void operator()(const int64_t&) { result = 0; }
+    void operator()(const float&) { result = 0; }
+    void operator()(const fl::string&) { result = 0; }
 };
 
 // The JSON node
@@ -1482,31 +1506,9 @@ struct JsonValue {
 
     // Size methods
     size_t size() const {
-        // Handle regular JsonArray first
-        if (data.is<JsonArray>()) {
-            auto ptr = data.ptr<JsonArray>();
-            return ptr ? ptr->size() : 0;
-        }
-        
-        // Handle specialized array types
-        if (data.is<fl::vector<int16_t>>()) {
-            auto ptr = data.ptr<fl::vector<int16_t>>();
-            return ptr ? ptr->size() : 0;
-        }
-        if (data.is<fl::vector<uint8_t>>()) {
-            auto ptr = data.ptr<fl::vector<uint8_t>>();
-            return ptr ? ptr->size() : 0;
-        }
-        if (data.is<fl::vector<float>>()) {
-            auto ptr = data.ptr<fl::vector<float>>();
-            return ptr ? ptr->size() : 0;
-        }
-        
-        if (is_object()) {
-            auto ptr = data.ptr<JsonObject>();
-            return ptr ? ptr->size() : 0;
-        }
-        return 0;
+        SizeVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
 
     // Serialization

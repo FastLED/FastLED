@@ -4,6 +4,7 @@
 
 #include "time_stub.h"
 #include "fl/stl/function.h"
+#include "fl/async.h"
 #include <chrono>
 #include <thread>
 
@@ -42,23 +43,25 @@ void delay(int ms) {
         return;
     }
 
-    // Default delay implementation
-#ifdef FASTLED_USE_PTHREAD_DELAY
     if (ms <= 0) {
-        return; // nothing to wait for
+        return;
     }
-    struct timespec req;
-    req.tv_sec = ms / 1000;
-    req.tv_nsec = (ms % 1000) * 1000000L;
-    // nanosleep may be interrupted by a signal; retry until the full time has elapsed
-    while (nanosleep(&req, &req) == -1 && errno == EINTR) {
-        // continue sleeping for the remaining time
+
+    // Pump async runner during delay (matches WASM behavior)
+    // This ensures coroutines and async tasks can execute during delay
+    uint32_t end = millis() + ms;
+
+    while (millis() < end) {
+        // Update all async tasks (coroutines, timers, fetch, etc.)
+        fl::async_run();
+
+        if (millis() >= end) {
+            break;
+        }
+
+        // Small sleep to avoid busy-wait (1ms granularity)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));  // okay std namespace
     }
-#else
-    if (ms > 0) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));  // okay std namespace
-    }
-#endif
 }
 
 void delayMicroseconds(int us) {
