@@ -2,6 +2,7 @@
 /// @brief Unity build header for platforms\arm\stm32/ directory
 /// Includes all implementation files in alphabetical order
 
+#include "platforms/arm/stm32/init_channel_engine_stm32.cpp.hpp"
 #include "platforms/arm/stm32/init_stm32.cpp.hpp"
 #include "platforms/arm/stm32/mutex_stm32.cpp.hpp"
 #include "platforms/arm/stm32/semaphore_stm32.cpp.hpp"
