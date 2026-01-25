@@ -10,7 +10,7 @@ namespace fl {
 template<uint8_t PIN> class FastPin;
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
+#warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
@@ -53,7 +53,7 @@ public:
 
 // Set MAX_PIN based on platform capability
 #if defined(PICO_RP2350)
-// RP2350B has up to 48 pins (0-47), RP2350A has 30 pins (0-29) 
+// RP2350B has up to 48 pins (0-47), RP2350A has 30 pins (0-29)
 // We support up to 47 for RP2350 variants
 #define MAX_PIN 47
 #else

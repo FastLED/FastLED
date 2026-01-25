@@ -7,7 +7,7 @@
 #include "fl/fastpin_base.h"
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
+#warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 

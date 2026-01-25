@@ -1286,6 +1286,4 @@ FastLED's Advanced SPI system provides **intelligent, automatic parallel LED con
 
 ### Documentation
 
-- **Quad-SPI Only:** `src/platforms/README_SPI_QUAD.md`
-- **Dual-SPI Only:** `src/platforms/README_SPI_DUAL.md`
 - **This Document:** `src/platforms/README_SPI_ADVANCED.md` (unified guide)
