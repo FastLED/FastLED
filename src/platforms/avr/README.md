@@ -45,7 +45,7 @@ The hierarchical structure reflects actual hardware differences:
 1. **Instruction Set Differences**:
    - **ATtiny (classic)**: No MUL instruction → software multiplication required
    - **ATmega (all)**: MUL instruction → optimized assembly multiplication
-   - Impact: Math/scale8 implementations route correctly via `LIB8_ATTINY` preprocessor define
+   - Impact: Math/scale8 implementations route correctly via `FL_IS_AVR_ATTINY` preprocessor define
 
 2. **Register Architecture**:
    - **Legacy AVR**: DDR/PORT/PIN registers for GPIO
@@ -73,8 +73,8 @@ All existing code continues to work unchanged. Dispatcher headers route to corre
 - **fastled_avr.h**: Aggregator header enabling PROGMEM and including `fastpin_avr.h`, `fastspi_avr.h`, `clockless_avr.h`.
 - **fastpin_avr.h**: Top-level dispatcher that routes to VPORT (ATmega4809/Nano Every) or legacy DDR/PORT/PIN pin mappings (all other AVRs).
 - **fastpin_avr_legacy.h**: Backward-compatibility shim that forwards to `atmega/common/fastpin_avr_legacy_dispatcher.h` (deprecated, will be removed in v4.0).
-- **math8.h**: Math dispatcher that routes to `attiny/math/math8_attiny.h` (software multiply) or `atmega/common/math8_avr.h` (hardware MUL) based on `LIB8_ATTINY`.
-- **scale8.h**: Cross-platform scale dispatcher. On AVR, routes to `attiny/math/scale8_attiny.h` or `atmega/common/scale8_avr.h` based on `LIB8_ATTINY`.
+- **math8.h**: Math dispatcher that routes to `attiny/math/math8_attiny.h` (software multiply) or `atmega/common/math8_avr.h` (hardware MUL) based on `FL_IS_AVR_ATTINY`.
+- **scale8.h**: Cross-platform scale dispatcher. On AVR, routes to `attiny/math/scale8_attiny.h` or `atmega/common/scale8_avr.h` based on `FL_IS_AVR_ATTINY`.
 - **trig8.h**: Cross-platform trig dispatcher. On AVR, routes to `atmega/common/trig8.h` (ATmega only, requires MUL instruction).
 - **atmega/common/avr_pin.h**: Core `_AVRPIN` template used by `FastPin<>` specializations for direct port IO (hi/lo/toggle, masks, ports).
 - **atmega/common/fastpin_avr_legacy_dispatcher.h**: Legacy pin dispatcher that routes to family-specific pin mappings (m328p, m32u4, m2560, attiny, or other).

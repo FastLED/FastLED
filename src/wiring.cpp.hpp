@@ -8,7 +8,7 @@
 
 #if 0
 
-#if defined(FASTLED_AVR) && !defined(TEENSYDUINO) && !defined(LIB8_ATTINY)
+#if defined(FASTLED_AVR) && !defined(TEENSYDUINO) && !defined(FL_IS_AVR_ATTINY)
 extern "C" {
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.

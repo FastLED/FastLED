@@ -62,7 +62,6 @@ extern volatile unsigned long timer0_millis;
 
 // special defs for the tiny environments
 #if defined(FL_IS_AVR_ATTINY) || defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__)
-#define LIB8_ATTINY 1
 #define FASTLED_NEEDS_YIELD
 
 // Memory-saving defines for ATtiny platforms

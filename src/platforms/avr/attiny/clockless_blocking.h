@@ -613,7 +613,7 @@ protected:
 
 };
 
-#endif  // defined(LIB8_ATTINY)
+#endif  // defined(FL_IS_AVR_ATTINY)
 
 }  // namespace fl
 
