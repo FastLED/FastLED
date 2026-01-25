@@ -155,7 +155,12 @@ template<cycle_t CYCLES> inline void delaycycles_min1() {
 // Millisecond and Microsecond delay wrappers
 // ============================================================================
 
-/// Delay for a given number of milliseconds
+/// Delay for a given number of milliseconds with optional async task pumping
+/// @param ms Milliseconds to delay
+/// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
+void delay(u32 ms, bool run_async = true);
+
+/// Delay for a given number of milliseconds (legacy - no async pumping)
 /// @param ms Milliseconds to delay
 void delayMillis(u32 ms);
 
@@ -169,10 +174,11 @@ inline void delayMicros(u32 us) {
   delayMicroseconds(us);
 }
 
-/// Shorter alias for delayMillis
+/// Shorter alias for delay with optional async task pumping
 /// @param ms Milliseconds to delay
-inline void delayMs(u32 ms) {
-  delayMillis(ms);
+/// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
+inline void delayMs(u32 ms, bool run_async = true) {
+  delay(ms, run_async);
 }
 
 /// Shorter alias for delayMicroseconds

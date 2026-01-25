@@ -8,33 +8,65 @@
 #include "fl/delay.h"
 #include "platforms/cycle_type.h"
 #include "fl/compiler_control.h"
+#include "fl/sketch_macros.h"
+#include "fl/stl/time.h"
 
 // ============================================================================
-// Platform-specific includes (centralized in platforms/delay.h)
+// Platform-specific includes
 // ============================================================================
 
 #include "platforms/delay.h"
 
-// ============================================================================
-// Platform-provided delay functions (from Arduino or platform layer)
-// ============================================================================
 #if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
 #include "Arduino.h"  // okay banned header (Arduino platform API required for delay functions)
 #endif
 
+#ifdef FASTLED_STUB_IMPL
+#include "fl/stl/thread.h"
+#include "fl/stl/chrono.h"
+#endif
+
+#if SKETCH_HAS_LOTS_OF_MEMORY
+#include "fl/async.h"
+#endif
+
 namespace fl {
+
+// ============================================================================
+// Internal platform-specific delay helpers
+// ============================================================================
+
+namespace {
+
+/// Raw sleep (no async pumping) - platform-agnostic
+inline void raw_sleep_ms(fl::u32 ms) {
+#ifdef FASTLED_STUB_IMPL
+  fl::this_thread::sleep_for(fl::chrono::milliseconds(ms));
+#elif defined(ARDUINO)
+  ::delay((unsigned long)ms);
+#endif
+}
+
+/// Single millisecond sleep (used in async pumping loop)
+inline void raw_sleep_1ms() {
+#ifdef FASTLED_STUB_IMPL
+  fl::this_thread::sleep_for(fl::chrono::milliseconds(1));
+#elif defined(ARDUINO)
+  ::delay(1);
+#endif
+}
+
+}  // anonymous namespace
 
 // ============================================================================
 // Runtime delayNanoseconds implementations
 // ============================================================================
 
 void delayNanoseconds(fl::u32 ns) {
-  // Call platform-specific implementation with auto-detected frequency
   delayNanoseconds_impl(ns);
 }
 
 void delayNanoseconds(fl::u32 ns, fl::u32 hz) {
-  // Call platform-specific implementation with explicit frequency
   delayNanoseconds_impl(ns, hz);
 }
 
@@ -161,10 +193,27 @@ template<> void delaycycles<50>() { delaycycles<40>(); delaycycles<10>(); }
 // Millisecond and Microsecond delay implementations
 // ============================================================================
 
-void delayMillis(u32 ms) {
-#ifdef ARDUINO
-  ::delay((unsigned long)ms);
+void delay(u32 ms, bool run_async) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+  if (run_async && ms > 0) {
+    // Pump async tasks during delay (1ms granularity)
+    u32 start = fl::millis();
+    while (fl::millis() - start < ms) {
+      async_yield();
+      raw_sleep_1ms();
+    }
+  } else {
+    raw_sleep_ms(ms);
+  }
+#else
+  (void)run_async;  // Suppress unused parameter warning
+  raw_sleep_ms(ms);
 #endif
+}
+
+void delayMillis(u32 ms) {
+  // Legacy function - no async pumping (backward compatibility)
+  delay(ms, false);
 }
 
 void delayMicroseconds(u32 us) {
@@ -176,4 +225,3 @@ void delayMicroseconds(u32 us) {
 
 
 }  // namespace fl
-

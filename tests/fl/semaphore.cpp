@@ -136,7 +136,7 @@ TEST_CASE("fl::counting_semaphore multiple threads") {
             }
 
             // Simulate work (reduced from 10ms to 5ms for performance)
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
 
             total_runs.fetch_add(1);
             concurrent_count.fetch_sub(1);
@@ -195,7 +195,7 @@ TEST_CASE("fl::binary_semaphore as thread synchronization") {
     });
 
     // Signal worker to start (reduced from 10ms to 5ms for performance)
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
     ready.release();
 
     // Wait for completion

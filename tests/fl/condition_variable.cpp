@@ -61,7 +61,7 @@ TEST_CASE("fl::condition_variable basic operations") {
         }
 
         // Give threads time to start waiting (reduced from 10ms to 5ms for performance)
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));  // okay std namespace
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
 
         // Wake all threads
         {
