@@ -149,7 +149,7 @@ def find_processes_with_open_files(
 
     port_lower = port_name.lower()
 
-    for proc in psutil.process_iter(["pid", "name"]):
+    for proc in psutil.process_iter(["pid", "name"]):  # type: ignore[reportUnknownMemberType]
         try:
             open_files = proc.open_files()
             matching_files = [
@@ -208,7 +208,7 @@ def diagnose_port(port_name: str) -> None:
     print("-" * 80)
 
     found_any = False
-    for proc in psutil.process_iter(["pid", "name", "cmdline", "ppid"]):
+    for proc in psutil.process_iter(["pid", "name", "cmdline", "ppid"]):  # type: ignore[reportUnknownMemberType]
         try:
             proc_info = cast(
                 dict[str, Any],
@@ -269,7 +269,7 @@ def diagnose_port(port_name: str) -> None:
     ]
 
     found_any = False
-    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):  # type: ignore[reportUnknownMemberType]
         try:
             proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])  # type: ignore[reportUnknownMemberType]
             proc_name_lower = proc_info["name"].lower()

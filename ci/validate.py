@@ -38,8 +38,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-import serial
 from colorama import Fore, Style, init
+from fbuild.api import SerialMonitor
 
 # Import phase functions from debug_attached
 from ci.debug_attached import (
@@ -196,7 +196,7 @@ def run_gpio_pretest(
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
-    except serial.SerialException as e:
+    except (RuntimeError, OSError) as e:
         print()
         print(f"{Fore.RED}❌ GPIO PRE-TEST ERROR{Style.RESET_ALL}")
         print(f"   Serial connection error: {e}")
@@ -294,7 +294,7 @@ def run_pin_discovery(
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
-    except serial.SerialException as e:
+    except (RuntimeError, OSError) as e:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
         print(f"   Serial error: {e}")
@@ -980,13 +980,12 @@ def run(args: Args | None = None) -> int:
                 kill_port_users(upload_port)
 
                 try:
-                    # Try to open the serial port briefly
-                    test_ser = serial.Serial(upload_port, 115200, timeout=0.1)
-                    test_ser.close()
-                    port_ready = True
-                    elapsed = time.time() - start_time
-                    print(f"✅ Serial port available after {elapsed:.1f}s")
-                    break
+                    # Try to open the serial port briefly using SerialMonitor
+                    with SerialMonitor(upload_port, baud_rate=115200) as _mon:
+                        port_ready = True
+                        elapsed = time.time() - start_time
+                        print(f"✅ Serial port available after {elapsed:.1f}s")
+                        break
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise

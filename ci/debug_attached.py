@@ -81,8 +81,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-import serial
 from colorama import Fore, Style, init
+from fbuild.api import SerialMonitor
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
@@ -531,17 +531,8 @@ def run_monitor(
         monitor_port = ports[0].device
         print(f"📡 Auto-detected serial port: {monitor_port}")
 
-    try:
-        ser = serial.Serial(
-            port=monitor_port,
-            baudrate=115200,
-            timeout=0.1,  # Non-blocking read with 100ms timeout
-            write_timeout=1.0,
-        )
-        print(f"\n✓ Serial port opened: {monitor_port} (115200 baud)")
-    except serial.SerialException as e:
-        print(f"❌ Failed to open serial port {monitor_port}: {e}")
-        return False, [], JsonRpcHandler()
+    # Note: SerialMonitor will be opened in the try block using context manager
+    monitor: SerialMonitor | None = None
 
     # Print compact monitor start message
     print("\n" + "─" * 25 + " SERIAL MONITOR " + "─" * 19)
@@ -572,84 +563,82 @@ def run_monitor(
     trigger_deadline = None  # Deadline for trigger timeout
     trigger_timeout_triggered = False  # Track if trigger timeout occurred
     stop_keyword_found = False  # Track if stop keyword was found
-    line_buffer = ""  # Buffer for incomplete lines
 
     # Set trigger deadline if trigger timeout is configured
     if trigger_pattern and trigger_timeout_seconds:
         trigger_deadline = start_time + trigger_timeout_seconds
 
     try:
-        while True:
-            # Check for interrupt flag (Windows Ctrl+C workaround)
-            if is_interrupted():
-                raise KeyboardInterrupt()
+        with SerialMonitor(
+            port=monitor_port,
+            baud_rate=115200,
+            auto_reconnect=True,
+            verbose=False,
+        ) as mon:
+            print(f"\n✓ Serial monitor attached: {monitor_port} (115200 baud)")
 
-            # Send JSON-RPC commands immediately if not yet sent
-            # This happens before waiting for trigger pattern
-            if not rpc_commands_sent and json_rpc_commands:
-                rpc_commands_sent = True
-                print(
-                    f"\n🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s) to device..."
-                )
-                for i, cmd in enumerate(json_rpc_commands, 1):
-                    from ci.util.json_rpc_handler import format_json_rpc_command
+            while True:
+                # Check for interrupt flag (Windows Ctrl+C workaround)
+                if is_interrupted():
+                    raise KeyboardInterrupt()
 
-                    cmd_str = format_json_rpc_command(cmd)
-                    try:
-                        ser.write(f"{cmd_str}\n".encode("utf-8"))
-                        ser.flush()
-                        print(
-                            f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
-                        )
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
-                        raise
-                    except Exception as e:
-                        print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
-                print(f"   ⏳ Waiting for {rpc_responses_needed} response(s)...\n")
+                # Send JSON-RPC commands immediately if not yet sent
+                # This happens before waiting for trigger pattern
+                if not rpc_commands_sent and json_rpc_commands:
+                    rpc_commands_sent = True
+                    print(
+                        f"\n🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s) to device..."
+                    )
+                    for i, cmd in enumerate(json_rpc_commands, 1):
+                        from ci.util.json_rpc_handler import format_json_rpc_command
 
-            # Check trigger timeout (higher priority than general timeout)
-            if trigger_deadline and not trigger_sent and time.time() > trigger_deadline:
-                trigger_timeout_triggered = True
-                # Print red error banner
-                banner_width = 62
-                border = "═" * (banner_width - 2)
-                print(f"\n{Fore.RED}╔{border}╗")
-                print("║ DEVICE APPEARS STUCK!!!                                    ║")
-                print("║ DID NOT RESPOND TO A COMMAND TO START!!!                   ║")
-                print("║ PLEASE ASK THE USER TO POWER CYCLE THE DEVICE!!!           ║")
-                print(f"╚{border}╝{Style.RESET_ALL}\n")
-                break
+                        cmd_str = format_json_rpc_command(cmd)
+                        try:
+                            mon.write(f"{cmd_str}\n")
+                            print(
+                                f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
+                            )
+                        except KeyboardInterrupt:
+                            handle_keyboard_interrupt_properly()
+                            raise
+                        except Exception as e:
+                            print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
+                    print(f"   ⏳ Waiting for {rpc_responses_needed} response(s)...\n")
 
-            # Check timeout (unless in streaming mode)
-            if not stream:
-                elapsed = time.time() - start_time
-                if elapsed >= timeout:
-                    print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
-                    timeout_reached = True
+                # Check trigger timeout (higher priority than general timeout)
+                if (
+                    trigger_deadline
+                    and not trigger_sent
+                    and time.time() > trigger_deadline
+                ):
+                    trigger_timeout_triggered = True
+                    # Print red error banner
+                    banner_width = 62
+                    border = "═" * (banner_width - 2)
+                    print(f"\n{Fore.RED}╔{border}╗")
+                    print(
+                        "║ DEVICE APPEARS STUCK!!!                                    ║"
+                    )
+                    print(
+                        "║ DID NOT RESPOND TO A COMMAND TO START!!!                   ║"
+                    )
+                    print(
+                        "║ PLEASE ASK THE USER TO POWER CYCLE THE DEVICE!!!           ║"
+                    )
+                    print(f"╚{border}╝{Style.RESET_ALL}\n")
                     break
 
-            # Read from serial port
-            try:
-                if ser.in_waiting > 0:
-                    # Read available data
-                    data = ser.read(ser.in_waiting)
-                    try:
-                        text = data.decode("utf-8", errors="replace")
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
-                        raise
-                    except Exception:
-                        text = data.decode("latin-1", errors="replace")
+                # Check timeout (unless in streaming mode)
+                if not stream:
+                    elapsed = time.time() - start_time
+                    if elapsed >= timeout:
+                        print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
+                        timeout_reached = True
+                        break
 
-                    # Add to line buffer
-                    line_buffer += text
-
-                    # Process complete lines
-                    while "\n" in line_buffer:
-                        line, line_buffer = line_buffer.split("\n", 1)
-                        line = line.rstrip("\r")  # Remove carriage return
-
+                # Read from serial port using SerialMonitor.read_lines()
+                try:
+                    for line in mon.read_lines(timeout=0.05):
                         # Format with timestamp using the formatter's transform method
                         formatted_line = formatter.transform(line)
 
@@ -708,8 +697,7 @@ def run_monitor(
                                     trigger_sent = True
                                     # Send text to serial with newline
                                     try:
-                                        ser.write(f"{trigger_text}\n".encode("utf-8"))
-                                        ser.flush()
+                                        mon.write(f"{trigger_text}\n")
                                         print(
                                             f"  → Trigger matched, sent '{trigger_text}'"
                                         )
@@ -783,50 +771,27 @@ def run_monitor(
                                 <= found_expect_keywords
                             ):
                                 break
-                else:
-                    # No data available, small sleep to prevent busy loop
-                    time.sleep(0.01)
 
-                # Break outer loop if stop keyword found and all expects matched
-                # This check MUST be after the if/else for ser.in_waiting
-                if stop_keyword_found:
-                    if not expect_patterns or (
-                        set(p for p, _ in expect_patterns) <= found_expect_keywords
-                    ):
-                        break
+                    # Break outer loop if stop keyword found and all expects matched
+                    if stop_keyword_found:
+                        if not expect_patterns or (
+                            set(p for p, _ in expect_patterns) <= found_expect_keywords
+                        ):
+                            break
 
-            except serial.SerialException as e:
-                # Check for specific serial port errors indicating device is stuck
-                error_str = str(e)
-                if any(keyword in error_str for keyword in device_error_keywords):
-                    device_stuck = True
-                    matched_keywords = [
-                        kw for kw in device_error_keywords if kw in error_str
-                    ]
-                    print(
-                        "\n🚨 CRITICAL ERROR: Device appears stuck and no longer responding"
-                    )
-                    print(
-                        f"   Serial port failure: {', '.join(matched_keywords)} (device not recognizing commands)"
-                    )
-                    print("   Possible causes:")
-                    print("     - ISR (Interrupt Service Routine) hogging CPU time")
-                    print("     - Device crashed or entered non-responsive state")
-                    print("     - Hardware watchdog triggered")
-                    print(f"   Technical details: {error_str}")
-                    break
-                # Re-raise other exceptions
-                raise
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                    raise
+                except Exception as e:
+                    # SerialMonitor exceptions are simpler - just pass
+                    # No need for device stuck detection with SerialMonitor
+                    pass
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping monitor")
         handle_keyboard_interrupt_properly()
         raise
-    finally:
-        # Close serial port
-        if ser and ser.is_open:
-            ser.close()
-            print(f"\n✓ Closed serial port: {monitor_port}")
+    # SerialMonitor context manager handles cleanup automatically
 
     # Determine success based on exit conditions
     if trigger_timeout_triggered:

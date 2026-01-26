@@ -28,7 +28,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-import serial
+from fbuild.api import SerialMonitor
 
 from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 
@@ -97,12 +97,12 @@ class RpcClient:
         self.baudrate = baudrate
         self.timeout = timeout
         self.read_timeout = read_timeout
-        self._serial: serial.Serial | None = None
+        self._monitor: SerialMonitor | None = None
 
     @property
     def is_connected(self) -> bool:
         """Check if serial connection is open."""
-        return self._serial is not None and self._serial.is_open
+        return self._monitor is not None
 
     def connect(self, boot_wait: float = 3.0, drain_boot: bool = True) -> None:
         """Open serial connection.
@@ -114,9 +114,13 @@ class RpcClient:
         if self.is_connected:
             return
 
-        self._serial = serial.Serial(
-            self.port, self.baudrate, timeout=self.read_timeout
+        self._monitor = SerialMonitor(
+            port=self.port,
+            baud_rate=self.baudrate,
+            auto_reconnect=True,
+            verbose=False,
         )
+        self._monitor.__enter__()  # Manual context manager entry
 
         if boot_wait > 0:
             # Use interruptible sleep loop for Windows Ctrl+C compatibility.
@@ -131,9 +135,9 @@ class RpcClient:
 
     def close(self) -> None:
         """Close serial connection."""
-        if self._serial is not None:
-            self._serial.close()
-            self._serial = None
+        if self._monitor is not None:
+            self._monitor.__exit__(None, None, None)
+            self._monitor = None
 
     def drain_boot_output(self, max_lines: int = 100, verbose: bool = False) -> int:
         """Drain pending boot output from serial buffer.
@@ -148,16 +152,32 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._serial is not None
+        assert self._monitor is not None
 
         lines_drained = 0
         empty_checks = 0
         max_empty_checks = 3  # Exit after 3 consecutive empty checks
+        drain_timeout = 0.05  # 50ms timeout per read
 
         while lines_drained < max_lines:
             self._check_interrupt()
             try:
-                if self._serial.in_waiting == 0:
+                # Use read_lines() with short timeout
+                line_found = False
+                for line in self._monitor.read_lines(timeout=drain_timeout):
+                    self._check_interrupt()
+                    empty_checks = 0  # Reset on data received
+                    lines_drained += 1
+                    line_found = True
+
+                    if verbose:
+                        if lines_drained <= 3:
+                            print(f"  [boot] {line[:80]}")
+                        elif lines_drained == 4:
+                            print("  [boot] ... (draining boot output)")
+                    break  # Process one line at a time
+
+                if not line_found:
                     if lines_drained > 0:
                         empty_checks += 1
                         if empty_checks >= max_empty_checks:
@@ -165,19 +185,7 @@ class RpcClient:
                     # Give a small window for more data
                     time.sleep(0.05)
                     self._check_interrupt()
-                    continue
 
-                empty_checks = 0  # Reset on data received
-                line = self._serial.readline().decode("utf-8", errors="replace").strip()
-                if not line:
-                    break
-
-                lines_drained += 1
-                if verbose:
-                    if lines_drained <= 3:
-                        print(f"  [boot] {line[:80]}")
-                    elif lines_drained == 4:
-                        print("  [boot] ... (draining boot output)")
             except KeyboardInterrupt:
                 notify_main_thread()
                 raise
@@ -211,7 +219,7 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._serial is not None
+        assert self._monitor is not None
 
         cmd = {"function": function, "args": args or []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
@@ -223,9 +231,7 @@ class RpcClient:
 
         for _attempt in range(retries):
             try:
-                self._serial.reset_input_buffer()
-                self._serial.write((cmd_str + "\n").encode())
-                self._serial.flush()
+                self._monitor.write(cmd_str + "\n")
 
                 response = self._wait_for_response(attempt_timeout)
                 return response
@@ -267,7 +273,7 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._serial is not None
+        assert self._monitor is not None
 
         cmd = {"function": function, "args": args or []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
@@ -277,53 +283,36 @@ class RpcClient:
 
         for _attempt in range(retries):
             self._check_interrupt()  # Check before each attempt
-            self._serial.reset_input_buffer()
-            self._serial.write((cmd_str + "\n").encode())
-            self._serial.flush()
+            self._monitor.write(cmd_str + "\n")
 
             start = time.time()
             while time.time() - start < attempt_timeout:
                 self._check_interrupt()
 
-                # Use non-blocking approach: check for data first, then read
-                # This allows interrupt checking on Windows where blocking I/O
-                # may not respond to Ctrl+C signals properly
+                # Use read_lines() with short timeout for interruptible reading
                 try:
-                    if self._serial.in_waiting == 0:
-                        # No data available, sleep briefly and check interrupt again
-                        time.sleep(0.05)
+                    for line in self._monitor.read_lines(timeout=0.05):
                         self._check_interrupt()
-                        continue
 
-                    line = (
-                        self._serial.readline()
-                        .decode("utf-8", errors="replace")
-                        .strip()
-                    )
+                        if line.startswith(self.RESPONSE_PREFIX):
+                            json_str = line[len(self.RESPONSE_PREFIX) :]
+                            try:
+                                data = json.loads(json_str)
+                                if match_key is None or match_key in data:
+                                    return RpcResponse(
+                                        success=data.get("success", True),
+                                        data=data,
+                                        raw_line=line,
+                                    )
+                            except json.JSONDecodeError:
+                                continue
+                        break  # Process one line at a time
                 except KeyboardInterrupt:
                     notify_main_thread()
                     raise
                 except Exception:
+                    time.sleep(0.05)
                     continue
-
-                # Check interrupt after read completes
-                self._check_interrupt()
-
-                if not line:
-                    continue
-
-                if line.startswith(self.RESPONSE_PREFIX):
-                    json_str = line[len(self.RESPONSE_PREFIX) :]
-                    try:
-                        data = json.loads(json_str)
-                        if match_key is None or match_key in data:
-                            return RpcResponse(
-                                success=data.get("success", True),
-                                data=data,
-                                raw_line=line,
-                            )
-                    except json.JSONDecodeError:
-                        continue
 
         raise RpcTimeoutError(
             f"No response with key '{match_key}' after {retries} attempts"
@@ -341,43 +330,36 @@ class RpcClient:
         Raises:
             RpcTimeoutError: If no response within timeout
         """
-        assert self._serial is not None
+        assert self._monitor is not None
 
         start = time.time()
 
         while time.time() - start < timeout:
             self._check_interrupt()
 
-            # Use non-blocking approach for Windows Ctrl+C compatibility
+            # Use read_lines() with short timeout for interruptible reading
             try:
-                if self._serial.in_waiting == 0:
-                    time.sleep(0.05)
+                for line in self._monitor.read_lines(timeout=0.05):
                     self._check_interrupt()
-                    continue
 
-                line = self._serial.readline().decode("utf-8", errors="replace").strip()
+                    if line.startswith(self.RESPONSE_PREFIX):
+                        json_str = line[len(self.RESPONSE_PREFIX) :]
+                        try:
+                            data = json.loads(json_str)
+                            return RpcResponse(
+                                success=data.get("success", True),
+                                data=data,
+                                raw_line=line,
+                            )
+                        except json.JSONDecodeError:
+                            continue
+                    break  # Process one line at a time
             except KeyboardInterrupt:
                 notify_main_thread()
                 raise
             except Exception:
+                time.sleep(0.05)
                 continue
-
-            self._check_interrupt()
-
-            if not line:
-                continue
-
-            if line.startswith(self.RESPONSE_PREFIX):
-                json_str = line[len(self.RESPONSE_PREFIX) :]
-                try:
-                    data = json.loads(json_str)
-                    return RpcResponse(
-                        success=data.get("success", True),
-                        data=data,
-                        raw_line=line,
-                    )
-                except json.JSONDecodeError:
-                    continue
 
         raise RpcTimeoutError(f"No response within {timeout}s")
 

@@ -212,8 +212,8 @@ def kill_port_users(port: str) -> None:
         pass
 
     # Define patterns for serial port users
-    # Only kill dedicated serial tools - NEVER kill Python processes
-    # (Python could be the agent backend: clud, claude, etc.)
+    # Kill dedicated serial tools AND orphaned Python serial processes
+    # (but protect agent backend: clud, claude, node.exe, etc.)
     safe_serial_exes = [
         "pio.exe",
         "pio",
@@ -231,6 +231,24 @@ def kill_port_users(port: str) -> None:
         "cu",  # Unix serial terminal
     ]
 
+    # Python scripts that are safe to kill if orphaned (known serial port users)
+    safe_python_scripts = [
+        "validate.py",
+        "debug_attached.py",
+        "validation_loop.py",
+        "monitor.py",
+    ]
+
+    # Agent processes to NEVER kill (even if orphaned)
+    protected_agent_patterns = [
+        "clud",
+        "claude",
+        "node.exe",
+        "node",
+        ".claude",
+        "anthropic",
+    ]
+
     cmdline_patterns = [
         "pio monitor",
         "pio device monitor",
@@ -241,7 +259,7 @@ def kill_port_users(port: str) -> None:
     ]
 
     # Find processes using the port
-    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):  # type: ignore[reportUnknownMemberType]
         try:
             proc_info: dict[str, Any] = proc.as_dict(attrs=["pid", "name", "cmdline"])  # type: ignore[assignment]
             proc_pid: int = proc_info["pid"]
@@ -253,12 +271,30 @@ def kill_port_users(port: str) -> None:
             if proc_pid in protected_pids:
                 continue
 
-            # NEVER kill Python processes (could be agent backend)
-            if "python" in proc_name_lower:
-                continue
+            # Check if this is a Python process
+            is_python = "python" in proc_name_lower
+
+            if is_python and cmdline:
+                # Python process - check if it's a protected agent process
+                cmdline_str = " ".join(cmdline).lower()
+
+                # NEVER kill agent processes (clud, claude, node.exe running claude code)
+                if any(pattern in cmdline_str for pattern in protected_agent_patterns):
+                    continue
+
+                # Check if it's a safe-to-kill Python script (validate.py, debug_attached.py, etc.)
+                is_safe_python_script = any(
+                    script in cmdline_str for script in safe_python_scripts
+                )
+
+                if is_safe_python_script:
+                    # Safe Python script - only kill if it mentions the port
+                    if port_lower in cmdline_str:
+                        processes_to_kill.append((proc, proc_name, cmdline))
+                # Otherwise skip this Python process (might be something else)
 
             # Check dedicated serial tools (safe to kill)
-            if any(exe in proc_name_lower for exe in safe_serial_exes):
+            elif any(exe in proc_name_lower for exe in safe_serial_exes):
                 if cmdline:
                     cmdline_str = " ".join(cmdline).lower()
                     # Check if command line contains port or serial patterns

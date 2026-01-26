@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-import serial
+from fbuild.api import SerialMonitor
 
 
 class TestPhase(Enum):
@@ -114,9 +114,14 @@ class ValidationAgent:
             baudrate: Serial baud rate (default: 115200)
             timeout: RPC response timeout in seconds (default: 30.0)
         """
-        self.serial = serial.Serial(port, baudrate, timeout=timeout)
+        self._monitor = SerialMonitor(
+            port=port,
+            baud_rate=baudrate,
+            auto_reconnect=True,
+            verbose=False,
+        )
+        self._monitor.__enter__()  # Manual context manager entry
         self.timeout = timeout
-        self._buffer = ""
 
     def send_rpc(self, function: str, args: list[Any] | None = None) -> dict[str, Any]:
         """Send JSON-RPC command and wait for response.
@@ -134,12 +139,8 @@ class ValidationAgent:
         cmd = {"function": function, "args": args or []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
-        # Clear any pending input
-        self.serial.reset_input_buffer()
-
-        # Send command
-        self.serial.write((cmd_str + "\n").encode())
-        self.serial.flush()
+        # Send command (no manual buffer clearing needed with SerialMonitor)
+        self._monitor.write(cmd_str + "\n")
 
         # Wait for REMOTE: prefixed response
         return self._wait_for_response()
@@ -156,16 +157,17 @@ class ValidationAgent:
         start = time.time()
 
         while time.time() - start < self.timeout:
-            line = self.serial.readline().decode(errors="replace").strip()
-
-            if line.startswith(self.REMOTE_PREFIX):
-                json_str = line[len(self.REMOTE_PREFIX) :]
-                try:
-                    return json.loads(json_str)
-                except json.JSONDecodeError as e:
-                    print(f"Warning: Failed to parse JSON: {e}")
-                    print(f"  Raw line: {line}")
-                    continue
+            # Use read_lines() iterator with short timeout
+            for line in self._monitor.read_lines(timeout=0.05):
+                if line.startswith(self.REMOTE_PREFIX):
+                    json_str = line[len(self.REMOTE_PREFIX) :]
+                    try:
+                        return json.loads(json_str)
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Failed to parse JSON: {e}")
+                        print(f"  Raw line: {line}")
+                        continue
+                break  # Process one line at a time
 
         raise TimeoutError(f"No response within {self.timeout}s")
 
@@ -240,15 +242,11 @@ class ValidationAgent:
             TimeoutError: If test does not complete within timeout
         """
         # Send RPC command
-        cmd = {"function": "runTest", "args": []}
+        cmd: dict[str, str | list[Any]] = {"function": "runTest", "args": []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
-        # Clear any pending input
-        self.serial.reset_input_buffer()
-
         # Send command
-        self.serial.write((cmd_str + "\n").encode())
-        self.serial.flush()
+        self._monitor.write(cmd_str + "\n")
 
         # Wait for REMOTE: response (RPC acknowledgement)
         response = self._wait_for_response()
@@ -264,9 +262,9 @@ class ValidationAgent:
             results = state.get("results", {})
 
             lane_results = []
-            for detail in results.get("details", []):
+            for detail in results.get("details", []):  # type: ignore[reportUnknownMemberType]
                 lane_idx = detail["lane"]
-                lane_results.append(
+                lane_results.append(  # type: ignore[reportUnknownMemberType]
                     LaneResult(
                         lane=lane_idx,
                         led_count=detail.get("ledCount", 0),
@@ -285,7 +283,7 @@ class ValidationAgent:
                 passed_tests=results["passedTests"],
                 failed_tests=results["failedTests"],
                 duration_ms=state.get("timing", {}).get("durationMs", 0),
-                lane_results=lane_results,
+                lane_results=lane_results,  # type: ignore[reportUnknownArgumentType]
             )
 
         # Streaming mode - parse RESULT: prefixed JSONL events
@@ -294,22 +292,26 @@ class ValidationAgent:
         test_complete_data = None
 
         while time.time() - start < self.timeout:
-            line = self.serial.readline().decode(errors="replace").strip()
+            # Use read_lines() iterator with short timeout
+            for line in self._monitor.read_lines(timeout=0.05):
+                if line.startswith(STREAM_PREFIX):
+                    json_str = line[len(STREAM_PREFIX) :]
+                    try:
+                        event = json.loads(json_str)
+                        event_type = event.get("type")
 
-            if line.startswith(STREAM_PREFIX):
-                json_str = line[len(STREAM_PREFIX) :]
-                try:
-                    event = json.loads(json_str)
-                    event_type = event.get("type")
+                        if event_type == "test_complete":
+                            test_complete_data = event
+                            break  # Test finished
 
-                    if event_type == "test_complete":
-                        test_complete_data = event
-                        break  # Test finished
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Failed to parse JSONL: {e}")
+                        print(f"  Line: {line}")
+                        continue
+                break  # Process one line at a time
 
-                except json.JSONDecodeError as e:
-                    print(f"Warning: Failed to parse JSONL: {e}")
-                    print(f"  Line: {line}")
-                    continue
+            if test_complete_data:
+                break
 
         if test_complete_data is None:
             raise TimeoutError(f"Test did not complete within {self.timeout}s")
@@ -363,7 +365,8 @@ class ValidationAgent:
 
     def close(self):
         """Close serial connection."""
-        self.serial.close()
+        if self._monitor:
+            self._monitor.__exit__(None, None, None)
 
     def __enter__(self):
         """Context manager entry."""

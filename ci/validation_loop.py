@@ -64,19 +64,19 @@ def generate_lane_configs(
     if presets:
         for preset_name in presets:
             if preset_name in LANE_SIZE_PRESETS:
-                configs.append(LANE_SIZE_PRESETS[preset_name](lane_count))
+                configs.append(LANE_SIZE_PRESETS[preset_name](lane_count))  # type: ignore[reportUnknownMemberType]
 
     # Add custom configurations
     if custom_configs:
         for custom in custom_configs:
             if len(custom) == lane_count:
-                configs.append(custom)
+                configs.append(custom)  # type: ignore[reportUnknownMemberType]
 
     # Default: uniform medium if nothing specified
     if not configs:
-        configs.append([100] * lane_count)
+        configs.append([100] * lane_count)  # type: ignore[reportUnknownMemberType]
 
-    return configs
+    return configs  # type: ignore[reportUnknownVariableType]
 
 
 def run_validation_loop(
@@ -149,7 +149,7 @@ def run_validation_loop(
                     config_response = agent.configure(config)
                     if not config_response.get("success"):
                         print(f"  Config failed: {config_response.get('error')}")
-                        all_results.append(
+                        all_results.append(  # type: ignore[reportUnknownMemberType]
                             {
                                 "config": {
                                     "driver": config.driver,
@@ -182,7 +182,7 @@ def run_validation_loop(
                                 print(f" - {lr.bit_errors} bit errors", end="")
                             print()
 
-                        all_results.append(
+                        all_results.append(  # type: ignore[reportUnknownMemberType]
                             {
                                 "config": {
                                     "driver": config.driver,
@@ -219,7 +219,7 @@ def run_validation_loop(
                         raise
                     except Exception as e:
                         print(f"  Error: {e}")
-                        all_results.append(
+                        all_results.append(  # type: ignore[reportUnknownMemberType]
                             {
                                 "config": {
                                     "driver": config.driver,

@@ -36,7 +36,8 @@ def ensure_fbuild_daemon() -> bool:
     Returns:
         True if daemon is running or was started successfully, False otherwise
     """
-    return ensure_daemon_running()
+    ensure_daemon_running()
+    return is_daemon_running()
 
 
 def run_fbuild_compile(
