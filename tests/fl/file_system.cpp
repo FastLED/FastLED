@@ -34,19 +34,54 @@
 #endif
 
 
+// RAII helper to ensure cleanup happens even on test failure
+class TestDirGuard {
+    fl::string mDir;
+    fl::vector<fl::string> mFiles;
+    fl::vector<fl::string> mSubdirs;
+public:
+    explicit TestDirGuard(const fl::string& dir) : mDir(dir) {
+        // Clean up any leftover state from previous failed runs
+        cleanup();
+        // Create fresh directory
+        fl::StubFileSystem::createDirectory(mDir.c_str());
+    }
+
+    ~TestDirGuard() {
+        cleanup();
+        fl::setTestFileSystemRoot(""); // Clear global state
+    }
+
+    void addFile(const fl::string& path) {
+        mFiles.push_back(path);
+    }
+
+    void addSubdir(const fl::string& path) {
+        mSubdirs.push_back(path);
+    }
+
+private:
+    void cleanup() {
+        // Force remove entire directory tree to handle any leftover state
+        // This ensures cleanup even if subdirectories/files exist from failed runs
+        fl::StubFileSystem::forceRemoveDirectory(mDir.c_str());
+    }
+};
+
 TEST_CASE("FileSystem test with real hard drive") {
     // Create a temporary test directory and file
     fl::string test_dir = "test_filesystem_temp";
     fl::string test_file = "test_data.txt";
     fl::string test_content = "Hello, FastLED filesystem test!";
 
-    // Create test directory using stub filesystem utilities
-    REQUIRE(fl::StubFileSystem::createDirectory(test_dir.c_str()));
+    // RAII guard ensures cleanup even on test failure
+    TestDirGuard guard(test_dir);
 
     // Create test file
     fl::string full_path = test_dir;
     full_path.append("/");
     full_path.append(test_file);
+    guard.addFile(full_path);
     REQUIRE(fl::StubFileSystem::createTextFile(full_path.c_str(), test_content.c_str()));
 
     // Set the test filesystem root
@@ -91,9 +126,7 @@ TEST_CASE("FileSystem test with real hard drive") {
     handle->close();
     fs.end();
 
-    // Remove test files using stub filesystem utilities
-    fl::StubFileSystem::removeFile(full_path.c_str());
-    fl::StubFileSystem::removeDirectory(test_dir.c_str());
+    // TestDirGuard destructor handles cleanup
 }
 
 TEST_CASE("FileSystem test with subdirectories") {
@@ -103,17 +136,21 @@ TEST_CASE("FileSystem test with subdirectories") {
     fl::string test_file = "video.rgb";
     fl::string test_content = "RGB video data here";
 
-    // Create directories using stub filesystem utilities
-    REQUIRE(fl::StubFileSystem::createDirectory(test_dir.c_str()));
+    // RAII guard ensures cleanup even on test failure
+    TestDirGuard guard(test_dir);
+
+    // Create subdirectory
     fl::string sub_dir_path = test_dir;
     sub_dir_path.append("/");
     sub_dir_path.append(sub_dir);
+    guard.addSubdir(sub_dir_path);
     REQUIRE(fl::StubFileSystem::createDirectory(sub_dir_path.c_str()));
 
     // Create test file in subdirectory
     fl::string full_path = sub_dir_path;
     full_path.append("/");
     full_path.append(test_file);
+    guard.addFile(full_path);
     REQUIRE(fl::StubFileSystem::createTextFile(full_path.c_str(), test_content.c_str()));
 
     // Set the test filesystem root
@@ -145,10 +182,7 @@ TEST_CASE("FileSystem test with subdirectories") {
     handle->close();
     fs.end();
 
-    // Remove test files and directories using stub filesystem utilities
-    fl::StubFileSystem::removeFile(full_path.c_str());
-    fl::StubFileSystem::removeDirectory(sub_dir_path.c_str());
-    fl::StubFileSystem::removeDirectory(test_dir.c_str());
+    // TestDirGuard destructor handles cleanup
 }
 
 TEST_CASE("FileSystem test with text file reading") {
@@ -161,11 +195,14 @@ TEST_CASE("FileSystem test with text file reading") {
     "brightness": 255
 })";
 
-    // Create test directory and file using stub filesystem utilities
-    REQUIRE(fl::StubFileSystem::createDirectory(test_dir.c_str()));
+    // RAII guard ensures cleanup even on test failure
+    TestDirGuard guard(test_dir);
+
+    // Create test file
     fl::string full_path = test_dir;
     full_path.append("/");
     full_path.append(test_file);
+    guard.addFile(full_path);
     REQUIRE(fl::StubFileSystem::createTextFile(full_path.c_str(), test_content.c_str()));
 
     // Set the test filesystem root
@@ -193,15 +230,28 @@ TEST_CASE("FileSystem test with text file reading") {
 
     // Clean up
     fs.end();
-    fl::StubFileSystem::removeFile(full_path.c_str());
-    fl::StubFileSystem::removeDirectory(test_dir.c_str());
+
+    // TestDirGuard destructor handles cleanup
 }
+
+// RAII helper for tests that use existing test data (no directory creation)
+class TestRootGuard {
+public:
+    explicit TestRootGuard(const char* root) {
+        fl::setTestFileSystemRoot(root);
+    }
+
+    ~TestRootGuard() {
+        fl::setTestFileSystemRoot(""); // Clear global state
+    }
+};
 
 TEST_CASE("FileSystem test with binary file loading") {
     // Test loading a binary JPEG file to verify byte-accurate reading
 
     // Set the test filesystem root to the tests directory
-    fl::setTestFileSystemRoot("tests");
+    // RAII guard ensures global state is cleared after test
+    TestRootGuard guard("tests");
 
     // Create filesystem and test reading binary file
     fl::FileSystem fs;
@@ -247,4 +297,6 @@ TEST_CASE("FileSystem test with binary file loading") {
     // Clean up
     handle->close();
     fs.end();
+
+    // TestRootGuard destructor clears global state
 }

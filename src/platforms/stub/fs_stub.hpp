@@ -11,13 +11,16 @@
 #include "fl/stl/fstream.h"  // For file I/O operations
 #include "fl/stl/string.h"   // For fl::string
 #include "fl/stl/algorithm.h"  // For fl::replace in path conversion
-#include <cstdio>     // For file operations
+#include <cstdio>     // For file operations (remove, etc.)
+#include <errno.h>    // For errno
 #ifdef _WIN32
   #include <direct.h>
   #include <io.h>
+  #include <sys/stat.h>  // For _stat
 #else
   #include <unistd.h>
   #include <sys/stat.h>
+  #include <dirent.h>   // For directory iteration
 #endif
 
 namespace fl {
@@ -132,11 +135,84 @@ public:
     }
 
     static bool removeFile(const fl::string& path) {
-        return ::remove(path.c_str()) == 0;
+        // Silently succeed if file doesn't exist (cleanup idempotency)
+        if (::remove(path.c_str()) == 0) {
+            return true;
+        }
+        return errno == ENOENT; // Success if file didn't exist
+    }
+
+    static void forceRemoveDirectory(const fl::string& path) {
+        // Synchronously and recursively remove directory and all contents
+        // This ensures cleanup completes before proceeding
+#ifdef _WIN32
+        // Windows implementation using _findfirst/_findnext (avoids windows.h conflicts)
+        fl::string search_path = path;
+        search_path.append("\\*");
+
+        struct _finddata_t find_data;
+        intptr_t find_handle = _findfirst(search_path.c_str(), &find_data);
+
+        if (find_handle != -1) {
+            do {
+                fl::string entry_name = find_data.name;
+                if (entry_name != "." && entry_name != "..") {
+                    fl::string full_path = path;
+                    full_path.append("\\");
+                    full_path.append(entry_name);
+
+                    if (find_data.attrib & _A_SUBDIR) {
+                        // Recursively remove subdirectory
+                        forceRemoveDirectory(full_path);
+                    } else {
+                        // Remove file
+                        ::remove(full_path.c_str());
+                    }
+                }
+            } while (_findnext(find_handle, &find_data) == 0);
+            _findclose(find_handle);
+        }
+
+        // Finally remove the directory itself
+        _rmdir(path.c_str());
+#else
+        // Unix implementation using opendir/readdir
+        DIR* dir = ::opendir(path.c_str());
+        if (dir) {
+            struct dirent* entry;
+            while ((entry = ::readdir(dir)) != nullptr) {
+                fl::string entry_name = entry->d_name;
+                if (entry_name != "." && entry_name != "..") {
+                    fl::string full_path = path;
+                    full_path.append("/");
+                    full_path.append(entry_name);
+
+                    struct stat st;
+                    if (::stat(full_path.c_str(), &st) == 0) {
+                        if (S_ISDIR(st.st_mode)) {
+                            // Recursively remove subdirectory
+                            forceRemoveDirectory(full_path);
+                        } else {
+                            // Remove file
+                            ::remove(full_path.c_str());
+                        }
+                    }
+                }
+            }
+            ::closedir(dir);
+        }
+
+        // Finally remove the directory itself
+        ::rmdir(path.c_str());
+#endif
     }
 
     static bool createTextFile(const fl::string& path, const fl::string& content) {
-        fl::ofstream ofs(path.c_str(), fl::ios::binary);  // use binary mode to avoid text transformations
+        // Force remove any existing file first to ensure clean state
+        removeFile(path.c_str());
+
+        // Create new file with explicit truncate mode
+        fl::ofstream ofs(path.c_str(), fl::ios::binary | fl::ios::trunc);
         if (!ofs.is_open()) {
             return false;
         }
