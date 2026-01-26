@@ -1,5 +1,4 @@
-#ifndef __INC_FASTSPI_ARM_STM32_H
-#define __INC_FASTSPI_ARM_STM32_H
+#pragma once
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
@@ -315,5 +314,3 @@ public:
 }  // namespace fl
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI
-
-#endif // #ifndef __INC_FASTSPI_ARM_STM32_H

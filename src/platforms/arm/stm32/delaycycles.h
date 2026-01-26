@@ -1,9 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-#ifndef __INC_FASTLED_PLATFORMS_STM32_DELAYCYCLES_H
-#define __INC_FASTLED_PLATFORMS_STM32_DELAYCYCLES_H
-
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
@@ -33,5 +30,3 @@ FASTLED_FORCE_INLINE void delay_cycles_dwt_arm(fl::u32 cycles) {
   fl::u32 start = dwt_cyccnt_arm();
   while ((fl::u32)(dwt_cyccnt_arm() - start) < cycles) { }
 }
-
-#endif  // __INC_FASTLED_PLATFORMS_STM32_DELAYCYCLES_H

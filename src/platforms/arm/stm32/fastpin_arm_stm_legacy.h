@@ -1,5 +1,4 @@
-#ifndef __FASTPIN_ARM_STM32_H
-#define __FASTPIN_ARM_STM32_H
+#pragma once
 
 #include "fl/force_inline.h"
 #include "armpin.h"
@@ -210,7 +209,7 @@ _FL_DEFPIN(36, 1, D);
 #define MAX_PIN 36
 
 // Generic STM32F1/F4 pin layout - covers most stm32duino boards including:
-// - STM32F103 variants (Blue Pill, etc.)  
+// - STM32F103 variants (Blue Pill, etc.)
 // - STM32F411CE (WeAct Black Pill V2.0)
 // - Other STM32F1/F4 boards with standard GPIO layout
 
@@ -261,7 +260,7 @@ _FL_DEFPIN(36, 1, D);
 
 // SPI2 MOSI
 #define SPI_DATA PB_15
-// SPI2 SCK  
+// SPI2 SCK
 #define SPI_CLOCK PB_13
 
 #define HAS_HARDWARE_PIN_SUPPORT
@@ -269,5 +268,3 @@ _FL_DEFPIN(36, 1, D);
 #endif // STM32F1 or STM32F4
 
 }  // namespace fl
-
-#endif // __INC_FASTPIN_ARM_STM32

@@ -1,5 +1,4 @@
-#ifndef __INC_CLOCKLESS_ARM_STM32_H
-#define __INC_CLOCKLESS_ARM_STM32_H
+#pragma once
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
@@ -165,5 +164,3 @@ protected:
 };
 
 }  // namespace fl
-
-#endif
