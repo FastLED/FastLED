@@ -1534,7 +1534,8 @@ def compile_meson(
         )
 
         # Stream output line by line to rewrite Ninja paths
-        # In quiet mode, suppress all output (used during target fallback retries)
+        # In quiet mode or non-verbose mode, suppress all output (errors shown via error filter)
+        # In verbose mode, show full compilation output for detailed debugging
         with proc.line_iter(timeout=None) as it:
             for line in it:
                 # Filter out noisy Meson/Ninja INFO lines that clutter output
@@ -1551,8 +1552,10 @@ def compile_meson(
                 if "ninja: no work to do" in stripped.lower():
                     continue  # Skip no-work ninja message (already up to date)
 
-                # In quiet mode, only collect output for error checking, don't print
-                if quiet:
+                # Suppress output unless verbose mode enabled
+                # In quiet or non-verbose mode: only collect output for error checking, don't print
+                # In verbose mode: show full compilation output for detailed debugging
+                if quiet or not verbose:
                     continue
 
                 # Rewrite Ninja paths to show full build-relative paths for clarity
@@ -1573,7 +1576,7 @@ def compile_meson(
                         # If path is outside project, show absolute path
                         display_line = line.replace(rel_path, str(full_path))
 
-                # Echo the (possibly rewritten) line
+                # Echo the (possibly rewritten) line (only in verbose mode)
                 _ts_print(display_line)
 
         returncode = proc.wait()
@@ -1635,6 +1638,14 @@ def compile_meson(
                     file=sys.stderr,
                 )
 
+                # Show error context from compilation output
+                error_filter: Callable[[str], None] = _create_error_context_filter(
+                    context_lines=20
+                )
+                output_lines = output.splitlines()
+                for line in output_lines:
+                    error_filter(line)
+
                 # Check for stale build cache error (missing files)
                 if "missing and no known rule to make it" in output.lower():
                     _ts_print(
@@ -1672,6 +1683,9 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
     is detected, it outputs the buffered context (lines before the error) plus
     the error line, and then continues outputting for context_lines after.
 
+    This version is smart about duplicate errors - it shows the first few instances
+    of each unique error, then summarizes the rest to prevent output truncation.
+
     Args:
         context_lines: Number of lines to show before and after error detection
 
@@ -1679,6 +1693,14 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
         Filter function that takes a line and returns None (consumes line)
     """
     from collections import deque
+
+    # Smart context sizing:
+    # - Reduced to 5 lines for Bash tool 30KB output limit
+    # - When many errors occur (e.g., 80+ examples failing), keeping output minimal
+    #   prevents the Bash tool from truncating with "... [N chars truncated] ..."
+    # - 5 lines is enough to show file location + error + immediate context
+    if context_lines > 5:
+        context_lines = 5  # Minimal context to fit under 30KB Bash tool limit
 
     # Circular buffer for context before errors
     pre_error_buffer: deque[str] = deque(maxlen=context_lines)
@@ -1688,6 +1710,16 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
 
     # Track if we've seen any errors
     error_detected = False
+
+    # Track seen error signatures to avoid showing identical errors repeatedly
+    seen_errors: set[str] = set()
+    error_count = 0
+    max_unique_errors_to_show = (
+        3  # Show first 3 unique errors to stay under 30KB Bash limit
+    )
+
+    # Track file context for better error reporting
+    current_file: str | None = None
 
     # Error patterns (case-insensitive)
     error_patterns = [
@@ -1704,42 +1736,104 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
 
     def filter_line(line: str) -> None:
         """Process a line and print it if it's part of error context."""
-        nonlocal post_error_lines, error_detected
+        nonlocal post_error_lines, error_detected, error_count, current_file
+
+        # Skip extremely long lines (>800 chars) - these are almost always compilation commands with no diagnostic value
+        # Typical error lines are 50-200 chars; compilation commands are 1000-2000+ chars
+        if len(line) > 800:
+            return
+
+        # Also skip lines that look like compilation commands (red ANSI code + quotes + flags)
+        if "[91m" in line and '"' in line and ("-I" in line or "-D" in line):
+            return
+
+        # Track current file being compiled for context
+        if "Compiling" in line or "Generating" in line:
+            # Extract filename from compilation lines
+            import re
+
+            file_match = re.search(r"([^\\/]+\.(cpp|h|ino))", line)
+            if file_match:
+                current_file = file_match.group(1)
 
         # Check if this line contains an error pattern
         line_lower = line.lower()
         is_error_line = any(pattern.lower() in line_lower for pattern in error_patterns)
 
         if is_error_line:
-            # Error detected! Output all buffered pre-context
-            if not error_detected:
-                # First error - show header and pre-context
-                _ts_print(
-                    "\n[MESON] ⚠️  Test failures detected - showing error context:"
-                )
-                _ts_print("-" * 80)
+            error_count += 1
+
+            # Extract error signature (first 100 chars of error for deduplication)
+            error_sig = line_lower[:100]
+
+            # Check if we've seen this exact error before
+            is_new_error = error_sig not in seen_errors
+            if is_new_error:
+                seen_errors.add(error_sig)
+
+            # Only show first N unique errors to prevent truncation
+            should_show = len(seen_errors) <= max_unique_errors_to_show
+
+            if should_show:
+                # Error detected! Output all buffered pre-context
+                if not error_detected:
+                    # First error - show header and pre-context
+                    _ts_print(
+                        "\n[MESON] ⚠️  Compilation errors detected - showing diagnostic output:"
+                    )
+                    _ts_print("-" * 80)
+                    error_detected = True
+
+                # Show which file this error is from if we have context
+                if current_file and is_new_error:
+                    _ts_print(f"\n[ERROR in {current_file}]")
+
+                # Output buffered pre-context
                 for buffered_line in pre_error_buffer:
                     _ts_print(buffered_line)
-                error_detected = True
 
-            # Output this error line with red color highlighting
-            _ts_print(f"\033[91m{line}\033[0m")
+                # Output this error line with red color highlighting
+                _ts_print(f"\033[91m{line}\033[0m")
 
-            # Start counting post-error lines
-            post_error_lines = context_lines
+                # Start counting post-error lines
+                post_error_lines = context_lines
 
-            # Don't buffer this line (already printed)
+            elif is_new_error and len(seen_errors) == max_unique_errors_to_show + 1:
+                # First suppressed error - show summary
+                _ts_print("\n" + "=" * 80)
+                _ts_print(
+                    f"[MESON] 📋 Showing first {max_unique_errors_to_show} unique errors - suppressing duplicates to prevent truncation"
+                )
+                _ts_print(
+                    f"[MESON] 💡 Run with --verbose flag to see all compilation errors"
+                )
+                _ts_print("=" * 80)
+
+            # Don't buffer this line (already handled)
             return
 
         if post_error_lines > 0:
             # We're in the post-error context window
-            _ts_print(line)
+            # Skip massive compilation command lines (they add 1000+ chars with no diagnostic value)
+            if not (
+                line.strip().startswith('"')
+                and ("-I" in line or "-D" in line)
+                and len(line) > 500
+            ):
+                _ts_print(line)
             post_error_lines -= 1
             return
 
         # No error detected yet - buffer this line for potential future context
         # Don't print anything - just accumulate in buffer
-        pre_error_buffer.append(line)
+        # Skip massive compilation command lines from the buffer (they're noise in error context)
+        # These lines typically start with a quoted path and contain many -I/-D flags
+        if not (
+            line.strip().startswith('"')
+            and ("-I" in line or "-D" in line)
+            and len(line) > 500
+        ):
+            pre_error_buffer.append(line)
 
     return filter_line
 
@@ -2529,6 +2623,15 @@ def stream_compile_and_run_tests(
                     f"[MESON] Compilation failed with return code {returncode}",
                     file=sys.stderr,
                 )
+
+                # Show error context from compilation output
+                error_filter: Callable[[str], None] = _create_error_context_filter(
+                    context_lines=20
+                )
+                output_lines = proc.stdout.splitlines()
+                for line in output_lines:
+                    error_filter(line)
+
                 compilation_failed = True
             else:
                 if verbose:
