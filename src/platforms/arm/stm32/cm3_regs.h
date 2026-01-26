@@ -1,6 +1,5 @@
 // ok no namespace fl
-#ifndef __CM3_REGS
-#define __CM3_REGS
+#pragma once
 
 #include "fl/stl/stdint.h"
 
@@ -60,5 +59,3 @@ typedef struct
 
 #define DWT_CTRL_CYCCNTENA_Pos              0                                          /*!< DWT CTRL: CYCCNTENA Position */
 #define DWT_CTRL_CYCCNTENA_Msk             (0x1UL << DWT_CTRL_CYCCNTENA_Pos)           /*!< DWT CTRL: CYCCNTENA Mask */
-
-#endif // __CM3_REGS

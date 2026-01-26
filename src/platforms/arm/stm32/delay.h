@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef __INC_FASTLED_PLATFORMS_STM32_DELAY_H
-#define __INC_FASTLED_PLATFORMS_STM32_DELAY_H
-
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
@@ -42,5 +39,3 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
 }
 
 }  // namespace fl
-
-#endif // __INC_FASTLED_PLATFORMS_STM32_DELAY_H

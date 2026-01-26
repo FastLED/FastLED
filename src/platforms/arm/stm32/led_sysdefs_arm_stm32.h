@@ -1,6 +1,5 @@
 // ok no namespace fl
-#ifndef __INC_LED_SYSDEFS_ARM_SAM_H
-#define __INC_LED_SYSDEFS_ARM_SAM_H
+#pragma once
 
 #include "platforms/arm/is_arm.h"
 
@@ -105,6 +104,4 @@ extern "C" void yield();
   // Generate unique section name using __COUNTER__ (e.g., .text_ram.0, .text_ram.1)
   #define _FL_IRAM_SECTION_NAME(counter) ".text_ram." _FL_IRAM_STRINGIFY(counter)
   #define FL_IRAM __attribute__((section(_FL_IRAM_SECTION_NAME(__COUNTER__))))
-#endif
-
 #endif

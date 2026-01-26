@@ -1,10 +1,7 @@
 // ok no namespace fl
-#ifndef __INC_FASTLED_ARM_SAM_H
-#define __INC_FASTLED_ARM_SAM_H
+#pragma once
 
-// Include the sam headers
+// Include the stm32 headers
 #include "fastpin_arm_stm32.h"
 #include "fastspi_arm_stm32.h"
 #include "clockless_arm_stm32.h"
-
-#endif
