@@ -9,4 +9,5 @@
 #include "platforms/arm/stm32/spi_hw_2_stm32.cpp.hpp"
 #include "platforms/arm/stm32/spi_hw_4_stm32.cpp.hpp"
 #include "platforms/arm/stm32/spi_hw_8_stm32.cpp.hpp"
+#include "platforms/arm/stm32/spi_hw_manager_stm32.cpp.hpp"
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.cpp.hpp"

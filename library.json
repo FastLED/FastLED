@@ -60,17 +60,13 @@
     },
     "build": {
         "srcFilter": [
-            "+<*.c>",
-            "+<*.cpp>",
+            "+<_build.cpp>",
+            "+<fl/_build.cpp>",
+            "+<platforms/_build.cpp>",
+            "+<third_party/_build.cpp>",
             "+<*.h>",
-            "+<platforms/**/*.cpp>",
-            "+<third_party/**/*.cpp>",
-            "+<third_party/**/*.c>",
             "+<third_party/libhelix_mp3/real/arm/*.S>",
-            "+<fx/**/*.cpp>",
-            "+<fl/**/*.cpp>",
-            "+<ftl/**/*.cpp>",
-            "+<sensors/**/*.cpp>"
+            "-<**/*.cpp>"
         ],
         "libArchive": true
     }

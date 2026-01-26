@@ -6,3 +6,4 @@
 #include "platforms/arm/teensy/teensy4_common/init_channel_engine_mxrt1062.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/spi_hw_2_mxrt1062.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/spi_hw_4_mxrt1062.cpp.hpp"
+#include "platforms/arm/teensy/teensy4_common/spi_hw_manager_mxrt1062.cpp.hpp"

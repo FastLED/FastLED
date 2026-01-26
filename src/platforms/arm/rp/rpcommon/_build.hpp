@@ -7,3 +7,4 @@
 #include "platforms/arm/rp/rpcommon/spi_hw_2_rp.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/spi_hw_4_rp.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/spi_hw_8_rp.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/spi_hw_manager_rp.cpp.hpp"
