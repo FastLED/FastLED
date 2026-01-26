@@ -1239,6 +1239,7 @@ using fl::UIDropdown;
 using fl::UIGroup;
 using fl::XYMap;
 using fl::round;  // Template version avoids conflicts with ::round
+using fl::delay;
 
 // Common fl:: type aliases for global namespace convenience
 template<typename T> using fl_vector = fl::vector<T>;

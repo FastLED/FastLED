@@ -24,6 +24,7 @@ def generate_main_cpp(ino_files: list[str]) -> str:
     includes: list[str] = []
     for ino_file in sorted(ino_files):
         includes.append("#include <Arduino.h>")
+        includes.append("#include <FastLED.h>")
         includes.append(f'#include "sketch/{ino_file}"')
 
     include_lines = "\n".join(includes)
@@ -36,7 +37,7 @@ __attribute__((weak)) int main() {{
     setup();
     while (true) {{
         loop();
-        delay(0);  // Yield to scheduler/watchdog (critical for ESP32 QEMU)
+        fl::delay(0);  // Yield to scheduler/watchdog (critical for ESP32 QEMU)
     }}
 }}
 """
