@@ -51,24 +51,15 @@ class XCacheConfig:
 
 
 def find_sccache() -> Optional[str]:
-    """Find sccache executable in PATH."""
-    sccache_path = shutil.which("sccache")
-    if sccache_path:
-        return sccache_path
+    """Find clang-tool-chain sccache wrapper executable in PATH.
 
-    # Check common locations only if not found in PATH
-    common_paths = [
-        "/usr/local/bin/sccache",
-        "/usr/bin/sccache",
-        "/opt/local/bin/sccache",
-        os.path.expanduser("~/.cargo/bin/sccache"),
-    ]
-
-    for path in common_paths:
-        if os.path.isfile(path) and os.access(path, os.X_OK):
-            return path
-
-    return None
+    IMPORTANT: Only uses clang-tool-chain-sccache wrapper.
+    The wrapper provides:
+    - Platform-specific ABI handling
+    - Automatic SCCACHE_IDLE_TIMEOUT=5 (prevents file locking)
+    - Graceful degradation to iso-env on failure
+    """
+    return shutil.which("clang-tool-chain-sccache")
 
 
 def detect_response_files(args: list[str]) -> list[str]:

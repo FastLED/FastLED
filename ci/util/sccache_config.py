@@ -31,13 +31,29 @@ class PlatformIOEnv(Protocol):
         ...
 
 
+def get_sccache_wrapper_path() -> str | None:
+    """Get the full path to clang-tool-chain sccache wrapper executable.
+
+    IMPORTANT: Only uses clang-tool-chain-sccache wrapper.
+    The wrapper provides:
+    - Platform-specific ABI handling
+    - Automatic SCCACHE_IDLE_TIMEOUT=5 (prevents file locking)
+    - Graceful degradation to iso-env on failure
+    """
+    return shutil.which("clang-tool-chain-sccache")
+
+
+def get_sccache_path() -> str | None:
+    """DEPRECATED: Use get_sccache_wrapper_path() instead.
+
+    Kept for API compatibility.
+    """
+    return get_sccache_wrapper_path()
+
+
 def is_sccache_available() -> bool:
-    """Check if sccache is available in the system."""
-    try:
-        subprocess.run(["sccache", "--version"], capture_output=True, check=True)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
+    """Check if clang-tool-chain sccache wrapper is available."""
+    return get_sccache_wrapper_path() is not None
 
 
 def clear_sccache_stats() -> None:
@@ -45,7 +61,7 @@ def clear_sccache_stats() -> None:
     if not is_sccache_available():
         return
 
-    sccache_path = get_sccache_path()
+    sccache_path = get_sccache_wrapper_path()
     if not sccache_path:
         return
 
@@ -65,33 +81,12 @@ def clear_sccache_stats() -> None:
         pass  # Don't fail build if stats clearing fails
 
 
-def get_sccache_path() -> str | None:
-    """Get the full path to sccache executable."""
-    # Use shutil.which for cross-platform executable finding
-    sccache_path = shutil.which("sccache")
-    if sccache_path:
-        return sccache_path
-
-    # Additional Windows-specific paths
-    if platform.system() == "Windows":
-        additional_paths = [
-            "C:\\ProgramData\\chocolatey\\bin\\sccache.exe",
-            os.path.expanduser("~\\scoop\\shims\\sccache.exe"),
-            os.path.expanduser("~\\.cargo\\bin\\sccache.exe"),
-        ]
-        for path in additional_paths:
-            if os.path.exists(path):
-                return path
-
-    return None
-
-
 def show_sccache_stats() -> None:
     """Display sccache statistics if sccache is available."""
     if not is_sccache_available():
         return
 
-    sccache_path = get_sccache_path()
+    sccache_path = get_sccache_wrapper_path()
     if not sccache_path:
         return
 
@@ -167,7 +162,7 @@ def configure_sccache(env: PlatformIOEnv) -> None:
         ts_print("SCCACHE is not available. Skipping SCCACHE configuration.")
         return
 
-    sccache_path = get_sccache_path()
+    sccache_path = get_sccache_wrapper_path()
     if not sccache_path:
         ts_print("Could not find SCCACHE executable. Skipping SCCACHE configuration.")
         return
@@ -245,12 +240,13 @@ from pathlib import Path
 from ci.util.timestamp_print import ts_print
 
 def setup_sccache_wrapper():
-    """Setup sccache wrapper for compiler commands."""
+    """Setup clang-tool-chain sccache wrapper for compiler commands."""
 
-    # Check if sccache is available
-    sccache_path = shutil.which("sccache")
+    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
+    sccache_path = shutil.which("clang-tool-chain-sccache")
+
     if not sccache_path:
-        ts_print("SCCACHE not found, compilation will proceed without caching")
+        ts_print("clang-tool-chain-sccache not found, compilation will proceed without caching")
         return
 
     ts_print(f"Setting up SCCACHE wrapper: {sccache_path}")

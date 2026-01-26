@@ -269,10 +269,13 @@ def get_sccache_build_flags(board_name: str) -> dict[str, str]:
     """Get build flags for SCCACHE configuration with xcache wrapper support."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Check if sccache is available
-    sccache_path = shutil.which("sccache")
+    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
+    sccache_path = shutil.which("clang-tool-chain-sccache")
+
     if not sccache_path:
-        print("SCCACHE not found in PATH, compilation will proceed without caching")
+        print(
+            "clang-tool-chain-sccache not found in PATH, compilation will proceed without caching"
+        )
         return {}
 
     print(f"Setting up SCCACHE build flags: {sccache_path}")
@@ -348,10 +351,13 @@ def setup_sccache_environment(board_name: str) -> bool:
     """Set up sccache environment variables for the current process."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Check if sccache is available
-    sccache_path = shutil.which("sccache")
+    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
+    sccache_path = shutil.which("clang-tool-chain-sccache")
+
     if not sccache_path:
-        print("SCCACHE not found in PATH, compilation will proceed without caching")
+        print(
+            "clang-tool-chain-sccache not found in PATH, compilation will proceed without caching"
+        )
         return False
 
     print(f"Setting up SCCACHE environment: {sccache_path}")
