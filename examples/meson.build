@@ -173,6 +173,12 @@ elif build_machine.system() == 'darwin'
   endif
 else
   # Linux: Static linking + pthread
+  # Note: libunwind is NOT included in static Linux builds because it's typically
+  # only available as a dynamic library (.so) on most distributions. Attempting to
+  # statically link libunwind results in: "ld.lld: error: attempted static link of
+  # dynamic object /usr/lib/x86_64-linux-gnu/libunwind.so"
+  # For development with enhanced stack traces, use dynamic builds or install
+  # libunwind static libraries (libunwind-dev package provides only .so files).
   example_runner_link_args = [
     '-fuse-ld=lld',             # Force LLD linker
     '-static',                  # Static linking
@@ -180,9 +186,8 @@ else
     '-static-libstdc++',        # Statically link libstdc++
     '-pthread',                 # POSIX threads
   ]
-  if libunwind_dep.found()
-    example_runner_deps += [libunwind_dep]
-  endif
+  # Skip libunwind on Linux static builds to avoid linking errors
+  # Crash handler will fall back to execinfo or no-op handler
 endif
 
 example_runner_exe = executable('example_runner',
