@@ -36,16 +36,14 @@ uint32_t micros() {
     return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();  // okay std namespace
 }
 
-void delay(int ms) {
+void delay(unsigned long ms) {
     // Use override function if set (for fast testing)
     if (g_delay_override) {
         g_delay_override(static_cast<uint32_t>(ms));
         return;
     }
 
-    if (ms <= 0) {
-        return;
-    }
+    // unsigned long can't be negative, no check needed
 
     // Pump async runner during delay (matches WASM behavior)
     // This ensures coroutines and async tasks can execute during delay
@@ -64,10 +62,8 @@ void delay(int ms) {
     }
 }
 
-void delayMicroseconds(int us) {
-    if (us > 0) {
-        std::this_thread::sleep_for(std::chrono::microseconds(us));  // okay std namespace
-    }
+void delayMicroseconds(unsigned long us) {
+    std::this_thread::sleep_for(std::chrono::microseconds(us));  // okay std namespace
 }
 
 void yield() {

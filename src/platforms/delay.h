@@ -9,7 +9,9 @@
 /// platform-specific delay and delay_cycles headers.
 
 #include "platforms/cycle_type.h"
+#include "platforms/cpu_frequency.h"
 #include "fl/force_inline.h"
+#include "platforms/is_platform.h"
 
 // ============================================================================
 // Platform-specific cycle delay includes (delaycycles)
@@ -37,6 +39,8 @@
 #include "platforms/arm/d21/delay.h"
 #elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 #include "platforms/arm/stm32/delay.h"
+#elif defined(FASTLED_STUB_IMPL)
+#include "platforms/stub/delay.h"
 #else
 #include "platforms/delay_generic.h"
 #endif

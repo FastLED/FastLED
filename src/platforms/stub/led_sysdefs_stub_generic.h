@@ -62,7 +62,7 @@ extern "C" {
     uint32_t millis(void);
     uint32_t micros(void);
 
-    void delay(int ms);
+    void delay(unsigned long ms);
     void yield(void);
 }
 #endif // FASTLED_NO_ARDUINO_STUBS

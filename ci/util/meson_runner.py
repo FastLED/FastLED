@@ -1935,8 +1935,8 @@ def run_meson_test(
 
             returncode = proc.wait()
 
-            # If test failed and we didn't see individual test results, show error context
-            if returncode != 0 and num_run == 0:
+            # If test failed, show error context
+            if returncode != 0:
                 # Create error-detecting filter
                 error_filter: Callable[[str], None] = _create_error_context_filter(
                     context_lines=20
