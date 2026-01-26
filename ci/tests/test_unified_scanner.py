@@ -3,15 +3,15 @@ import os
 import unittest
 
 import pytest
-from unified_scanner import BaseChecker, CheckResult, UnifiedFileScanner
-from unified_scanner.checkers import (
+
+from ci.tests.unified_scanner import BaseChecker, CheckResult, UnifiedFileScanner
+from ci.tests.unified_scanner.checkers import (
     BannedDefineChecker,
     BannedHeadersChecker,
     NamespaceIncludeChecker,
     PragmaOnceChecker,
     StdNamespaceChecker,
 )
-
 from ci.util.paths import PROJECT_ROOT
 
 
