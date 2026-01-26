@@ -60,15 +60,13 @@ void showPixels(PixelController<RGB_ORDER> &pixels) override {
     for (int i = 0; i < 8; i++) mSPI.writeByte(0x00);
 
     while (pixels.has(1)) {
-        // Load raw pixel data directly in OUTPUT order (respects RGB_ORDER template parameter)
-        // loadByte<0> returns first channel in output order, <1> second, <2> third
-        fl::u8 c0_8 = PixelController<RGB_ORDER>::template loadByte<0>(pixels);
-        fl::u8 c1_8 = PixelController<RGB_ORDER>::template loadByte<1>(pixels);
-        fl::u8 c2_8 = PixelController<RGB_ORDER>::template loadByte<2>(pixels);
+        // Load and scale pixel data in OUTPUT order (respects RGB_ORDER template parameter)
+        fl::u8 c0_8, c1_8, c2_8;
+        pixels.loadAndScaleRGB(&c0_8, &c1_8, &c2_8);
 
         // Apply gamma correction (2.8) to convert 8-bit to 16-bit for HD108
         // This provides smooth perceptual brightness transitions across the full 65K range
-        // Note: Brightness is already applied via loadAndScaleRGB before gamma correction
+        // Note: Brightness scaling is applied by loadAndScaleRGB() before gamma correction
         fl::u16 c0_16 = fl::gamma_2_8(c0_8);
         fl::u16 c1_16 = fl::gamma_2_8(c1_8);
         fl::u16 c2_16 = fl::gamma_2_8(c2_8);

@@ -88,7 +88,7 @@ fl::vector<u8> captureBytes(const CRGB* leds, int num_leds, u8 brightness) {
     ActiveStripTracker::resetForTesting();
 
     // Create ColorAdjustment with simplified setup
-    // Since HD108Controller now uses loadByte(), we just need to set up brightness
+    // Since HD108Controller uses loadAndScaleRGB(), we just need to set up brightness
     ColorAdjustment adjustment;
     adjustment.premixed = CRGB(255, 255, 255);  // No color correction - use raw pixel values
     #if FASTLED_HD_COLOR_MIXING
