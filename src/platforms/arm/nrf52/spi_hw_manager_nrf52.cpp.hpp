@@ -18,6 +18,8 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
+#include "platforms/arm/nrf52/spi_hw_2_nrf52.h"
+#include "platforms/arm/nrf52/spi_hw_4_nrf52.h"
 #include "fl/dbg.h"
 
 namespace fl {
@@ -29,9 +31,6 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 
 /// @brief Register nRF52 SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    // Include concrete SPIDualNRF52 implementation
-    #include "platforms/arm/nrf52/spi_hw_2_nrf52.cpp.hpp"
-
     FL_DBG("nRF52: Registering SpiHw2 instances");
 
     // nRF52 has multiple Timer/PPI combinations available
@@ -46,9 +45,6 @@ static void addSpiHw2IfPossible() {
 
 /// @brief Register nRF52 SpiHw4 instances
 static void addSpiHw4IfPossible() {
-    // Include concrete SPIQuadNRF52 implementation
-    #include "platforms/arm/nrf52/spi_hw_4_nrf52.cpp.hpp"
-
     FL_DBG("nRF52: Registering SpiHw4 instances");
 
     // nRF52 has multiple Timer/PPI combinations available
