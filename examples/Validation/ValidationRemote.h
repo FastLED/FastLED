@@ -92,7 +92,7 @@ public:
     void tick(uint32_t current_millis);
 
     /// @brief Process incoming serial data for RPC commands
-    /// @return true if START command received, false otherwise
+    /// @return false always (legacy return value, no longer used)
     bool processSerialInput();
 
     /// @brief Get underlying Remote instance

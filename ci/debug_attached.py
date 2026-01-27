@@ -416,7 +416,7 @@ def run_monitor(
                 f"⚠️  Warning: Invalid --input-on-trigger format: '{input_on_trigger}'"
             )
             print("   Expected format: 'PATTERN:TEXT' or 'PATTERN:TEXT:TIMEOUT'")
-            print("   Example: 'VALIDATION_READY:START' or 'VALIDATION_READY:START:10'")
+            print("   Example: 'READY:GO' or 'READY:GO:10'")
             print("   Ignoring input-on-trigger")
         else:
             parts = input_on_trigger.split(":", 2)
@@ -1047,7 +1047,7 @@ Examples:
         "--input-on-trigger",
         type=str,
         metavar="TRIGGER:TEXT",
-        help='Wait for trigger pattern, then send text. Format: "PATTERN:TEXT" (e.g., "VALIDATION_READY:START")',
+        help='Wait for trigger pattern, then send text. Format: "PATTERN:TEXT" (e.g., "READY:GO")',
     )
     parser.add_argument(
         "--device-error-keyword",

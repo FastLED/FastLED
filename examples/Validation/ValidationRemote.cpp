@@ -2100,14 +2100,8 @@ bool ValidationRemoteControl::processSerialInput() {
         String input = Serial.readStringUntil('\n');
         input.trim();
 
-        // Legacy "START" command
-        if (input == "START") {
-            *mpStartCommandReceived = true;
-            FL_PRINT("\n[START] Received START command - beginning test matrix");
-            return true;
-        }
         // JSON RPC command (starts with '{')
-        else if (input.length() > 0 && input[0] == '{') {
+        if (input.length() > 0 && input[0] == '{') {
             fl::Json result;
             fl::string jsonStr(input.c_str());
             auto err = mRemote->processRpc(jsonStr, result);

@@ -1,13 +1,29 @@
 #!/usr/bin/env python3
-"""FastLED Validation Test Runner - Hardware-in-the-loop validation with JSON-RPC support.
+"""FastLED Validation Test Runner - JSON-RPC Scripting Language.
 
-This script runs the Validation.ino sketch with comprehensive pattern matching and
-JSON-RPC driver selection. It extends debug_attached.py with validation-specific features:
+This script orchestrates hardware-in-the-loop testing using a JSON-RPC scripting
+model. All test coordination happens via RPC commands and responses:
 
-- Pre-configured expect/fail patterns for hardware testing
-- JSON-RPC driver selection (--parlio, --rmt, --spi, --uart)
-- Smart pattern matching for test matrix validation
-- Early exit on test completion (--stop pattern)
+JSON-RPC Workflow (Fail-Fast Model):
+    1. findConnectedPins()       - Auto-discover TX-RX jumper wire
+       → Returns: {found, txPin, rxPin} or {found: false}
+       → Fail-fast: Exit immediately if no connection found
+
+    2. testGpioConnection()      - Verify electrical connection
+       → Returns: {connected: true/false, rxWhenTxLow, rxWhenTxHigh}
+       → Fail-fast: Exit if connection test fails
+
+    3. setDrivers([...])         - Configure which drivers to test
+       → Returns: {success, drivers}
+
+    4. runTest()                 - Execute test matrix
+       → Streams: test_start, case_result, test_complete events
+       → Returns: {success, passedTests, totalTests}
+
+Legacy Text Patterns:
+    - Text output is for human diagnostics ONLY
+    - Machine coordination uses ONLY JSON-RPC commands/responses
+    - No grep/regex parsing for control flow decisions
 
 Usage:
     🎯 AI agents should use 'bash validate' wrapper (see CLAUDE.md)
@@ -85,10 +101,10 @@ init(autoreset=True)
 
 # Default expect patterns - simplified to essential checks only
 # Note: PARLIO is NOT available on ESP32-S3 (it has I2S LCD_CAM instead)
+# JSON-RPC orchestration: Text patterns only used for debugging/diagnostics
 DEFAULT_EXPECT_PATTERNS = [
     "TX Pin: 1",  # Hardware setup verification (PIN_TX = 1 in firmware)
     "RX Pin: 2",  # Hardware setup verification (PIN_RX = 2 in firmware)
-    "VALIDATION_READY: true",  # Test ready indicator
 ]
 
 # Stop pattern - early exit when test suite completes successfully

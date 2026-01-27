@@ -247,6 +247,32 @@ For full documentation, see `uv run ci/debug_attached.py --help`
 
 ### JSON-RPC Validation Protocol (Advanced)
 
+**🔧 JSON-RPC AS A SCRIPTING LANGUAGE**: The validation system uses JSON-RPC as a **scripting language** for hardware testing with fail-fast semantics:
+
+**Fail-Fast Model:**
+- All test orchestration happens via JSON-RPC commands and responses
+- Text output (FL_PRINT, FL_WARN) is for human diagnostics ONLY
+- Python code never greps serial output for control flow decisions
+- Tests exit immediately on pass/fail (no timeout waiting)
+
+**Example JSON-RPC Test Script:**
+```python
+from ci.rpc_client import RpcClient
+
+with RpcClient("/dev/ttyUSB0") as client:
+    # Pre-flight check
+    result = client.send("testGpioConnection", args=[1, 2])
+    if not result["connected"]:
+        exit(1)  # Fail-fast: hardware not connected
+
+    # Configure drivers
+    client.send("setDrivers", args=[["PARLIO", "RMT"]])
+
+    # Run test (returns immediately with results)
+    result = client.send("runTest")
+    exit(0 if result["success"] else 1)
+```
+
 **🔧 EXTENSIBLE TESTING**: The validation system uses bidirectional JSON-RPC over serial for hardware-in-the-loop testing. This protocol enables AI agents to:
 - Test LED drivers without recompilation (runtime driver selection)
 - Add new test functionality by extending the JSON-RPC API
@@ -297,6 +323,9 @@ with ValidationAgent("COM18") as agent:
 
 **Raw JSON-RPC Example** (for custom integrations):
 ```json
+// Device emits ready event after setup:
+RESULT: {"type":"ready","ready":true,"setupTimeMs":2340,"testCases":48,"drivers":3}
+
 // Send:
 {"function":"configure","args":[{"driver":"PARLIO","laneSizes":[100],"pattern":"MSB_LSB_A","iterations":1}]}
 

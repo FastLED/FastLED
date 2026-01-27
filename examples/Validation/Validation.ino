@@ -97,8 +97,24 @@
 // the "ERROR" message to be printed. Do not hide the symptom by changing
 // the error message keyword.
 // ============================================================================
-// If in the fastled you can run this sketch with:
-//   bash debug Validation --input-on-trigger "VALIDATION_READY:START" --expect "TX Pin: 0" --expect "RX Pin: 1" --expect "DRIVER_ENABLED: RMT" --expect "DRIVER_ENABLED: SPI" --expect "DRIVER_ENABLED: PARLIO" --expect "LANE_MIN: 1" --expect "LANE_MAX: 8" --expect "STRIP_SIZE_TESTED: 10" --expect "STRIP_SIZE_TESTED: 300" --expect "TEST_CASES_GENERATED: 48" --expect "VALIDATION_READY: true" --fail-on ERROR
+// JSON-RPC SCRIPTING LANGUAGE:
+// This sketch uses JSON-RPC for all test orchestration. Examples:
+//
+//   # Run validation with pure JSON-RPC (no text patterns needed)
+//   bash validate --all
+//
+//   # Custom JSON-RPC workflow
+//   uv run python -c "
+//   from ci.rpc_client import RpcClient
+//   with RpcClient('/dev/ttyUSB0') as c:
+//       c.send('configure', {'driver':'PARLIO', 'laneSizes':[100]})
+//       result = c.send('runTest')
+//       print(result)
+//   "
+//
+// Text output (FL_PRINT, FL_WARN) is for human diagnostics ONLY.
+// Machine coordination uses ONLY JSON-RPC commands and JSONL events.
+// ============================================================================
 
 
 // Enable async PARLIO logging to prevent ISR watchdog timeout
@@ -270,11 +286,8 @@ uint32_t frame_counter = 0;
 // Test completion flag - set to true after first test matrix run
 bool test_matrix_complete = false;
 
-// START command flag - set to true when "START" received on serial
+// Test start flag - set to true when start() JSON-RPC command is called
 bool start_command_received = false;
-
-// Last "waiting for START" message timestamp (milliseconds)
-uint32_t last_wait_message_ms = 0;
 
 
 void setup() {
@@ -522,11 +535,16 @@ void setup() {
     // Note: RPC functions already registered early in setup() (before GPIO baseline test)
     // This allows testGpioConnection to work even if setup() fails early.
 
-    ss.clear();
-    ss << "\n[SETUP COMPLETE]\n";
-    ss << "  VALIDATION_READY: true\n";
-    ss << "Starting test matrix validation loop...";
-    FL_PRINT(ss.str());
+    // Emit JSON-RPC ready event for Python orchestration
+    fl::Json readyData = fl::Json::object();
+    readyData.set("ready", true);
+    readyData.set("setupTimeMs", static_cast<int64_t>(millis()));
+    readyData.set("testCases", static_cast<int64_t>(test_cases.size()));
+    readyData.set("drivers", static_cast<int64_t>(test_matrix.enabled_drivers.size()));
+    printStreamRaw("ready", readyData);
+
+    // Human-readable diagnostics (not machine-parsed)
+    FL_PRINT("\n[SETUP COMPLETE] Validation ready - awaiting JSON-RPC commands");
     delay(2000);
 }
 
