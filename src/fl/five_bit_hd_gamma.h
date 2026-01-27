@@ -20,74 +20,21 @@ enum FiveBitGammaCorrectionMode {
 
 // Applies gamma correction for the RGBV(8, 8, 8, 5) color space, where
 // the last byte is the brightness byte at 5 bits.
-// To override this five_bit_hd_gamma_bitshift you'll need to define
-// FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE in your build settings
-// then define the function anywhere in your project.
-// Example:
-//  void five_bit_hd_gamma_bitshift(
-//      fl::u8 r8, fl::u8 g8, fl::u8 b8,
-//      fl::u8 r8_scale, fl::u8 g8_scale, fl::u8 b8_scale,
-//      fl::u8* out_r8,
-//      fl::u8* out_g8,
-//      fl::u8* out_b8,
-//      fl::u8* out_power_5bit) {
-//        cout << "hello world\n";
-//  }
-
-// Force push
-
-void internal_builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                                 fl::u8 global_brightness,
-                                                 CRGB *out_colors,
-                                                 fl::u8 *out_power_5bit);
 
 // Exposed for testing.
 void five_bit_bitshift(u16 r16, u16 g16, u16 b16, fl::u8 brightness, CRGB *out,
                        fl::u8 *out_power_5bit);
 
-#ifdef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
-// This function is located somewhere else in your project, so it's declared
-// extern here.
-extern void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                       fl::u8 global_brightness,
-                                       CRGB *out_colors,
-                                       fl::u8 *out_power_5bit);
-#else
-inline void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                       fl::u8 global_brightness,
-                                       CRGB *out_colors,
-                                       fl::u8 *out_power_5bit) {
-    internal_builtin_five_bit_hd_gamma_bitshift(
-        colors, colors_scale, global_brightness, out_colors, out_power_5bit);
-}
-#endif // FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
-
 // Simple gamma correction function that converts from
 // 8-bit color component and converts it to gamma corrected 16-bit
 // color component. Fast and no memory overhead!
-// To override this function you'll need to define
-// FASTLED_FIVE_BIT_HD_GAMMA_BITSHIFT_FUNCTION_OVERRIDE in your build settings
-// and then define your own version anywhere in your project. Example:
-//  void five_bit_hd_gamma_function(
-//    fl::u8 r8, fl::u8 g8, fl::u8 b8,
-//    u16* r16, u16* g16, u16* b16) {
-//      cout << "hello world\n";
-//  }
-#ifdef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
-// This function is located somewhere else in your project, so it's declared
-// extern here.
-extern void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
-                                       u16 *b16);
-#else
 inline void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
                                        u16 *b16) {
-
     gamma16(color, r16, g16, b16);
 }
-#endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
 FL_NO_INLINE_IF_AVR
-inline void internal_builtin_five_bit_hd_gamma_bitshift(
+inline void five_bit_hd_gamma_bitshift(
     CRGB colors, CRGB colors_scale, fl::u8 global_brightness, CRGB *out_colors,
     fl::u8 *out_power_5bit) {
 
