@@ -21,32 +21,31 @@ all the UI elements you see below.
 #include <Arduino.h>
 #include <FastLED.h>
 
-using namespace fl;
 
 #define NUM_LEDS 100
 #define IS_SERPINTINE true  // Type of matrix display, you probably have this.
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
-UITitle title("Wave Demo");
-UIDescription description("Shows the use of the Wave1D effect.");
+fl::UITitle title("Wave Demo");
+fl::UIDescription description("Shows the use of the Wave1D effect.");
 
-UIButton button("Trigger");
-WaveSimulation1D waveSim(NUM_LEDS, SuperSample::SUPER_SAMPLE_2X);
+fl::UIButton button("Trigger");
+fl::WaveSimulation1D waveSim(NUM_LEDS, fl::SuperSample::SUPER_SAMPLE_2X);
 
-UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
-UISlider extraFrames("Extra Frames", 1.0f, 0.0f, 8.0f, 1.0f);
-UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
-UICheckbox halfDuplex("Half Duplex", false);
-UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
+fl::UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
+fl::UISlider extraFrames("Extra Frames", 1.0f, 0.0f, 8.0f, 1.0f);
+fl::UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
+fl::UICheckbox halfDuplex("Half Duplex", false);
+fl::UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
 
 void setup() {
     Serial.begin(115200);
-    // No ScreenMap necessary for strips.
+    // No fl::ScreenMap necessary for strips.
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);
 }
 
-void triggerRipple(WaveSimulation1D &waveSim, int x) {
+void triggerRipple(fl::WaveSimulation1D &waveSim, int x) {
 
     for (int i = x - 1; i <= x + 1; i++) {
         if (i < 0 || i >= NUM_LEDS)
@@ -57,18 +56,18 @@ void triggerRipple(WaveSimulation1D &waveSim, int x) {
 
 // Wave simulation looks better when you render at a higher resolution then
 // downscale the result to the display resolution.
-SuperSample getSuperSample() {
+fl::SuperSample getSuperSample() {
     switch (int(superSample)) {
     case 0:
-        return SuperSample::SUPER_SAMPLE_NONE;
+        return fl::SuperSample::SUPER_SAMPLE_NONE;
     case 1:
-        return SuperSample::SUPER_SAMPLE_2X;
+        return fl::SuperSample::SUPER_SAMPLE_2X;
     case 2:
-        return SuperSample::SUPER_SAMPLE_4X;
+        return fl::SuperSample::SUPER_SAMPLE_4X;
     case 3:
-        return SuperSample::SUPER_SAMPLE_8X;
+        return fl::SuperSample::SUPER_SAMPLE_8X;
     default:
-        return SuperSample::SUPER_SAMPLE_NONE;
+        return fl::SuperSample::SUPER_SAMPLE_NONE;
     }
 }
 
@@ -96,7 +95,7 @@ void loop() {
     for (int x = 0; x < NUM_LEDS; x++) {
         // float value = waveSim.get(x);
         uint8_t value8 = waveSim.getu8(x);
-        leds[x] = CRGB(value8, value8, value8);
+        leds[x] = fl::CRGB(value8, value8, value8);
     }
     FastLED.show();
 }

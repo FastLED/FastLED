@@ -96,9 +96,25 @@ inline void delay(long ms) {
     delay(static_cast<u32>(ms), true);
 }
 
-#if !defined(__AVR__) && !defined(FL_IS_ARM) && !defined(__arm__) && !defined(_WIN32) && !defined(__EMSCRIPTEN__)
-/// Overload for unsigned long to match Arduino's delay(unsigned long) exactly
-/// Only enabled on platforms where unsigned long != u32 (e.g., ESP32 where u32 is unsigned int)
+// Platform detection: Does this platform need delay(unsigned long) overload?
+// Required when: unsigned long != uint32_t (e.g., x64 Linux/Mac where unsigned long is 64-bit)
+// Excluded when: unsigned long == uint32_t OR conflicts with Arduino's delay(uint32_t)
+//
+// Excluded platforms:
+// - AVR: unsigned long == uint32_t
+// - ARM: unsigned long == uint32_t
+// - Windows: unsigned long == uint32_t (Win32 LLP64 model)
+// - WASM: unsigned long == uint32_t
+// - ESP32: unsigned long == uint32_t AND conflicts with Arduino delay(uint32_t)
+#if defined(__AVR__) || defined(FL_IS_ARM) || defined(__arm__) || defined(_WIN32) || defined(__EMSCRIPTEN__) || defined(FL_IS_ESP32)
+    #define FL_DELAY_UNSIGNED_LONG_SAME_AS_U32 1
+#else
+    #define FL_DELAY_UNSIGNED_LONG_SAME_AS_U32 0
+#endif
+
+#if !FL_DELAY_UNSIGNED_LONG_SAME_AS_U32
+/// Overload for unsigned long (only on platforms where unsigned long != u32)
+/// Provides seamless compatibility with Arduino's delay(unsigned long) signature
 /// @param ms Milliseconds to delay
 inline void delay(unsigned long ms) {
     delay(static_cast<u32>(ms), true);
@@ -118,16 +134,6 @@ inline void delay(int ms, bool run_async) {
 inline void delay(long ms, bool run_async) {
     delay(static_cast<u32>(ms), run_async);
 }
-
-#if !defined(__AVR__) && !defined(FL_IS_ARM) && !defined(__arm__)
-/// Overload for unsigned long with async flag
-/// Only enabled on platforms where unsigned long != u32
-/// @param ms Milliseconds to delay
-/// @param run_async If true, pump async tasks during delay
-inline void delay(unsigned long ms, bool run_async) {
-    delay(static_cast<u32>(ms), run_async);
-}
-#endif
 
 /// Delay for a given number of milliseconds (legacy - no async pumping)
 /// @param ms Milliseconds to delay

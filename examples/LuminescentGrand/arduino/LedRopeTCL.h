@@ -15,7 +15,6 @@
 #include "crgb.h"
 #include "fl/screenmap.h"
 
-using namespace fl;
 
 // LedRopeTCL is a C++ wrapper around the Total Control Lighting LED rope
 // device driver (TCL.h). This wrapper includes automatic setup of the LED
@@ -74,7 +73,7 @@ class LedRopeTCL : public LedRopeInterface {
   bool mLazyInitialized;
   FrameBuffer mFrameBuffer;
   bool mControllerAdded = false;
-  fl::vector<CRGB> mLedBuffer;
+  fl::vector<fl::CRGB> mLedBuffer;
   fl::ScreenMap mScreenMap;
 };
 

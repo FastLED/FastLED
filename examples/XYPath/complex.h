@@ -29,7 +29,6 @@ all the UI elements you see below.
 #include "src/xypaths.h"
 
 #include "fl/stl/cstring.h"
-using namespace fl;
 
 #define HEIGHT 64
 #define WIDTH 64
@@ -37,22 +36,22 @@ using namespace fl;
 #define IS_SERPINTINE true
 #define TIME_ANIMATION 1000 // ms
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
-XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-// XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
+fl::XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
+// fl::XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
 
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 
-WaveEffect wave_fx; // init in setup().
-fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
+fl::WaveEffect wave_fx; // init in setup().
+fl::vector<fl::XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
 
-XYRaster raster(WIDTH, HEIGHT);
-TimeWarp time_warp;
+fl::XYRaster raster(WIDTH, HEIGHT);
+fl::TimeWarp time_warp;
 
-XYPathPtr getShape(int which) {
+fl::XYPathPtr getShape(int which) {
     int len = shapes.size();
     which = which % len;
     if (which < 0) {
@@ -62,19 +61,19 @@ XYPathPtr getShape(int which) {
 }
 
 //////////////////// UI Section /////////////////////////////
-UITitle title("XYPath Demo");
-UIDescription description("Use a path on the WaveFx");
-UIButton trigger("Trigger");
-UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
-UICheckbox useWaveFx("Use WaveFX", true);
-UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
+fl::UITitle title("XYPath Demo");
+fl::UIDescription description("Use a path on the WaveFx");
+fl::UIButton trigger("Trigger");
+fl::UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
+fl::UICheckbox useWaveFx("Use WaveFX", true);
+fl::UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 
-UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
-UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
-UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
-UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
+fl::UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
+fl::UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
+fl::UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
+fl::UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 
-TimeClampedTransition shapeProgress(TIME_ANIMATION);
+fl::TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
 void setupUiCallbacks() {
     speed.onChanged([](float value) { time_warp.setSpeed(speed.value()); });
@@ -113,7 +112,7 @@ float getAnimationTime(uint32_t now) {
     return pointf + transition.value();
 }
 
-void clearLeds() { fl::memfill(leds, 0, NUM_LEDS * sizeof(CRGB)); }
+void clearLeds() { fl::memfill(leds, 0, NUM_LEDS * sizeof(fl::CRGB)); }
 
 void loop() {
     // Your code here
@@ -148,7 +147,7 @@ void loop() {
     static uint32_t frame = 0;
     frame++;
     clearLeds();
-    const CRGB purple = CRGB(255, 0, 255);
+    const fl::CRGB purple = fl::CRGB(255, 0, 255);
     const int number_of_steps = numberOfSteps.value();
     raster.reset();
     // float factor = s_prev_alpha;  // 0->1.f
@@ -176,7 +175,7 @@ void loop() {
         if (!is_active) {
             alpha = 0;
         }
-        Tile2x2_u8 subpixel = shape->at_subpixel(a);
+        fl::Tile2x2_u8 subpixel = shape->at_subpixel(a);
         subpixel.scale(alpha);
         // subpixels.push_back(subpixel);
         raster.rasterize(subpixel);
@@ -186,7 +185,7 @@ void loop() {
 
 
     if (useWaveFx && is_active) {
-        DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);
+        fl::DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);
         raster.draw(xyMap, draw_wave_fx);
     } else {
         raster.draw(purple, xyMap, leds);
@@ -195,11 +194,11 @@ void loop() {
     int first = xyMap(1, 1);
     int last = xyMap(WIDTH - 2, HEIGHT - 2);
 
-    leds[first] = CRGB(255, 0, 0);
-    leds[last] = CRGB(0, 255, 0);
+    leds[first] = fl::CRGB(255, 0, 0);
+    leds[last] = fl::CRGB(0, 255, 0);
     if (useWaveFx) {
-        // fxBlend.draw(Fx::DrawContext(now, leds));
-        wave_fx.draw(Fx::DrawContext(now, leds));
+        // fxBlend.draw(fl::Fx::DrawContext(now, leds));
+        wave_fx.draw(fl::Fx::DrawContext(now, leds));
     }
 
     EVERY_N_SECONDS(1) {

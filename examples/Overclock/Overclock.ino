@@ -20,7 +20,6 @@
 #include "fl/fx/fx.h"
 
 
-using namespace fl;
 
 #define LED_PIN 3
 #define BRIGHTNESS 96
@@ -42,7 +41,7 @@ using namespace fl;
 // if this example code seems daunting.
 //
 //
-// The basic setup here is that for each frame, we generate a new array of
+// The basic setup here is that for each frame, we generate a new fl::array of
 // 'noise' data, and then map it onto the LED matrix through a color palette.
 //
 // Periodically, the color palette is changed, and new noise-generation
@@ -70,9 +69,9 @@ using namespace fl;
 // like water.
 #define SPEED 30
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(xyMap);
+fl::CRGB leds[NUM_LEDS];
+fl::XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
+fl::NoisePalette noisePalette(xyMap);
 
 
 void setup() {
@@ -86,6 +85,6 @@ void setup() {
 
 void loop() {
     EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
-    noisePalette.draw(Fx::DrawContext(fl::millis(), leds));
+    noisePalette.draw(fl::Fx::DrawContext(fl::millis(), leds));
     FastLED.show();
 }

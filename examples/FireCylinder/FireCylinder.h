@@ -38,7 +38,7 @@ with colors transitioning from black to red/yellow/white (or other palettes).
 #include "fl/xymap.h"    // Mapping between 1D LED array and 2D coordinates
 #include "fl/fx/time.h"     // Time manipulation utilities for animations
 
-using namespace fl;      // Use the FastLED namespace for convenience
+// Use the FastLED namespace for convenience
 
 // Cylinder dimensions - this defines the size of our virtual LED grid
 #define HEIGHT 100       // Number of rows in the cylinder (vertical dimension)
@@ -47,22 +47,22 @@ using namespace fl;      // Use the FastLED namespace for convenience
 #define BRIGHTNESS 255   // Maximum brightness level (0-255)
 
 // UI elements that appear in the FastLED web compiler interface:
-UITitle title("FireCylinder Demo");                    // Title displayed in the UI
-UIDescription description("This Fire demo wraps around the cylinder. It uses Perlin noise to create a fire effect.");
+fl::UITitle title("FireCylinder Demo");                    // Title displayed in the UI
+fl::UIDescription description("This Fire demo wraps around the cylinder. It uses Perlin noise to create a fire effect.");
 
-// TimeWarp helps control animation speed - it tracks time and allows speed adjustments
-TimeWarp timeScale(0, 1.0f);  // Initialize with 0 starting time and 1.0 speed multiplier
+// fl::TimeWarp helps control animation speed - it tracks time and allows speed adjustments
+fl::TimeWarp timeScale(0, 1.0f);  // Initialize with 0 starting time and 1.0 speed multiplier
 
 // UI Controls for adjusting the fire effect:
-UISlider scaleXY("Scale", 8, 1, 100, 1);              // Controls the overall size of the fire pattern
-UISlider speedY("SpeedY", 1.3, 1, 6, .1);             // Controls how fast the fire moves upward
-UISlider scaleX("ScaleX", .3, 0.1, 3, .01);           // Controls the horizontal scale (affects the wrap-around)
-UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);  // Controls how fast the fire pattern changes over time (higher = slower)
-UISlider brightness("Brightness", 255, 0, 255, 1);     // Controls overall brightness
+fl::UISlider scaleXY("Scale", 8, 1, 100, 1);              // Controls the overall size of the fire pattern
+fl::UISlider speedY("SpeedY", 1.3, 1, 6, .1);             // Controls how fast the fire moves upward
+fl::UISlider scaleX("ScaleX", .3, 0.1, 3, .01);           // Controls the horizontal scale (affects the wrap-around)
+fl::UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);  // Controls how fast the fire pattern changes over time (higher = slower)
+fl::UISlider brightness("Brightness", 255, 0, 255, 1);     // Controls overall brightness
 UINumberField palette("Palette", 0, 0, 2);             // Selects which color palette to use (0=fire, 1=green, 2=blue)
 
-// Array to hold all LED color values - one CRGB struct per LED
-CRGB leds[HEIGHT * WIDTH];
+// Array to hold all LED color values - one fl::CRGB struct per LED
+fl::CRGB leds[HEIGHT * WIDTH];
 
 // Color palettes define the gradient of colors used for the fire effect
 // Each entry has the format: position (0-255), R, G, B
@@ -91,8 +91,8 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     255, 255, 255, 255  // White (hottest part)
 };
 
-// Create a mapping between 1D array positions and 2D x,y coordinates
-XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
+// Create a mapping between 1D fl::array positions and 2D x,y coordinates
+fl::XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
 
 void setup() {
     Serial.begin(115200);  // Initialize serial communication for debugging
@@ -156,7 +156,7 @@ uint8_t getPaletteIndex(uint32_t millis32, int width, int max_width, int height,
     // qsub8 is a "saturating subtraction" - it won't go below 0
     return qsub8(noise_val, subtraction_factor);
 }
-CRGBPalette16 getPalette() {
+fl::CRGBPalette16 getPalette() {
     // This function returns the appropriate color palette based on the UI selection
     switch (palette) {
     case 0:
@@ -177,7 +177,7 @@ void loop() {
     FastLED.setBrightness(brightness);
     
     // Get the selected color palette
-    CRGBPalette16 myPal = getPalette();
+    fl::CRGBPalette16 myPal = getPalette();
     
     // Get the current time in milliseconds
     uint32_t now = fl::millis();
@@ -198,14 +198,14 @@ void loop() {
             
             // Get the actual RGB color from the palette
             // BRIGHTNESS ensures we use the full brightness range
-            CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
+            fl::CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
             
-            // Convert our 2D coordinates to the 1D array index
+            // Convert our 2D coordinates to the 1D fl::array index
             // We use (WIDTH-1)-width and (HEIGHT-1)-height to flip the coordinates
             // This makes the fire appear to rise from the bottom
             int index = xyMap((WIDTH - 1) - width, (HEIGHT - 1) - height);
             
-            // Set the LED color in our array
+            // Set the LED color in our fl::array
             leds[index] = c;
         }
     }

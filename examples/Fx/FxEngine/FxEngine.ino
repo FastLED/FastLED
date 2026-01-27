@@ -12,7 +12,7 @@
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include <FastLED.h>
-using namespace fl;
+
 
 #include "fl/fx/2d/noisepalette.h"
 #include "fl/fx/2d/animartrix.hpp"
@@ -36,15 +36,15 @@ using namespace fl;
 #endif
 
 
-UISlider SCALE("SCALE", 20, 20, 100);
-UISlider SPEED("SPEED", 30, 20, 100);
+fl::UISlider SCALE("SCALE", 20, 20, 100);
+fl::UISlider SPEED("SPEED", 30, 20, 100);
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
-NoisePalette noisePalette1(xyMap);
-NoisePalette noisePalette2(xyMap);
-FxEngine fxEngine(NUM_LEDS);
-UICheckbox switchFx("Switch Fx", true);
+fl::CRGB leds[NUM_LEDS];
+fl::XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
+fl::NoisePalette noisePalette1(xyMap);
+fl::NoisePalette noisePalette2(xyMap);
+fl::FxEngine fxEngine(NUM_LEDS);
+fl::UICheckbox switchFx("Switch Fx", true);
 
 void setup() {
     delay(1000); // sanity delay

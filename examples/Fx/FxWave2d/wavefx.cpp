@@ -31,52 +31,52 @@ which are blended together to create complex visual effects.
 
 #include "wavefx.h"  // Header file for this sketch
 
-using namespace fl;        // Use the FastLED namespace for convenience
+// Use the FastLED namespace for convenience
 
 
 
-// Array to hold all LED color values - one CRGB struct per LED
-CRGB leds[NUM_LEDS];
+// Array to hold all LED color values - one fl::CRGB struct per LED
+fl::CRGB leds[NUM_LEDS];
 
 // UI elements that appear in the FastLED web compiler interface:
-UITitle title("FxWave2D Demo");
-UIDescription description("Advanced layered and blended wave effects.");
+fl::UITitle title("FxWave2D Demo");
+fl::UIDescription description("Advanced layered and blended wave effects.");
 
-UICheckbox xCyclical("X Is Cyclical", false);  // If true, waves wrap around the x-axis (like a loop)
+fl::UICheckbox xCyclical("X Is Cyclical", false);  // If true, waves wrap around the x-axis (like a loop)
 // Main control UI elements:
-UIButton button("Trigger");                                  // Button to trigger a single ripple
-UIButton buttonFancy("Trigger Fancy");                       // Button to trigger a fancy cross-shaped effect
-UICheckbox autoTrigger("Auto Trigger", true);                // Enable/disable automatic ripple triggering
-UISlider triggerSpeed("Trigger Speed", .5f, 0.0f, 1.0f, 0.01f); // Controls how frequently auto-triggers happen (lower = faster)
-UICheckbox easeModeSqrt("Ease Mode Sqrt", false);            // Changes how wave heights are calculated (sqrt gives more natural waves)
-UICheckbox useChangeGrid("Use Change Grid", false);           // Enable performance optimization (reduces visual oscillation)
-UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);     // Controls overall blur amount for all layers
-UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);      // Controls how many times blur is applied (more = smoother but slower)
-UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f); // Controls anti-aliasing quality (higher = better quality but more CPU)
+fl::UIButton button("Trigger");                                  // Button to trigger a single ripple
+fl::UIButton buttonFancy("Trigger Fancy");                       // Button to trigger a fancy cross-shaped effect
+fl::UICheckbox autoTrigger("Auto Trigger", true);                // Enable/disable automatic ripple triggering
+fl::UISlider triggerSpeed("Trigger Speed", .5f, 0.0f, 1.0f, 0.01f); // Controls how frequently auto-triggers happen (lower = faster)
+fl::UICheckbox easeModeSqrt("Ease Mode Sqrt", false);            // Changes how wave heights are calculated (sqrt gives more natural waves)
+fl::UICheckbox useChangeGrid("Use Change fl::Grid", false);           // Enable performance optimization (reduces visual oscillation)
+fl::UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);     // Controls overall blur amount for all layers
+fl::UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);      // Controls how many times blur is applied (more = smoother but slower)
+fl::UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f); // Controls anti-aliasing quality (higher = better quality but more CPU)
 
 
 
 // Upper wave layer controls:
-UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);           // How fast the upper wave propagates
-UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f); // How quickly the upper wave loses energy
-UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);           // If true, waves only go positive (not negative)
-UISlider blurAmountUpper("Wave Upper: Blur Amount", 95, 0, 172, 1);    // Blur amount for upper wave layer
-UISlider blurPassesUpper("Wave Upper: Blur Passes", 1, 1, 10, 1);      // Blur passes for upper wave layer
+fl::UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);           // How fast the upper wave propagates
+fl::UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f); // How quickly the upper wave loses energy
+fl::UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);           // If true, waves only go positive (not negative)
+fl::UISlider blurAmountUpper("Wave Upper: Blur Amount", 95, 0, 172, 1);    // Blur amount for upper wave layer
+fl::UISlider blurPassesUpper("Wave Upper: Blur Passes", 1, 1, 10, 1);      // Blur passes for upper wave layer
 
 // Lower wave layer controls:
-UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);           // How fast the lower wave propagates
-UISlider dampeningLower("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f); // How quickly the lower wave loses energy
-UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);           // If true, waves only go positive (not negative)
-UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);     // Blur amount for lower wave layer
-UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);      // Blur passes for lower wave layer
+fl::UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);           // How fast the lower wave propagates
+fl::UISlider dampeningLower("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f); // How quickly the lower wave loses energy
+fl::UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);           // If true, waves only go positive (not negative)
+fl::UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);     // Blur amount for lower wave layer
+fl::UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);      // Blur passes for lower wave layer
 
 // Fancy effect controls (for the cross-shaped effect):
-UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);                   // Speed of the fancy effect animation
-UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);             // Intensity/height of the fancy effect waves
-UISlider fancyParticleSpan("Fancy Particle Span", 0.06f, 0.01f, 0.2f, 0.01f); // Width of the fancy effect lines
+fl::UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);                   // Speed of the fancy effect animation
+fl::UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);             // Intensity/height of the fancy effect waves
+fl::UISlider fancyParticleSpan("Fancy Particle Span", 0.06f, 0.01f, 0.2f, 0.01f); // Width of the fancy effect lines
 
-// Help text explaining the Use Change Grid feature
-UIHelp changeGridHelp("Use Change Grid preserves the set point over multiple iterations to ensure more stable results across simulation resolutions. However, turning it off may result in more dramatic effects and saves memory.");
+// Help text explaining the Use Change fl::Grid feature
+UIHelp changeGridHelp("Use Change fl::Grid preserves the set point over multiple iterations to ensure more stable results across simulation resolutions. However, turning it off may result in more dramatic effects and saves memory.");
 
 // Color palettes define the gradient of colors used for the wave effects
 // Each entry has the format: position (0-255), R, G, B
@@ -96,56 +96,56 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     255, 255, 255, 255  // White (maximum wave height)
 };
 
-// Create mappings between 1D array positions and 2D x,y coordinates
-XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);  // For the actual LED output (may be serpentine)
-XYMap xyRect(WIDTH, HEIGHT, false);         // For the wave simulation (always rectangular grid)
+// Create mappings between 1D fl::array positions and 2D x,y coordinates
+fl::XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);  // For the actual LED output (may be serpentine)
+fl::XYMap xyRect(WIDTH, HEIGHT, false);         // For the wave simulation (always rectangular grid)
 
 // Create default configuration for the lower wave layer
-WaveFx::Args CreateArgsLower() {
-    WaveFx::Args out;
-    out.factor = SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
+fl::WaveFx::Args CreateArgsLower() {
+    fl::WaveFx::Args out;
+    out.factor = fl::SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
     out.half_duplex = true;                     // Only positive waves (no negative values)
     out.auto_updates = true;                    // Automatically update the simulation each frame
     out.speed = 0.18f;                          // Wave propagation speed
     out.dampening = 9.0f;                       // How quickly waves lose energy
-    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricBlueFirePal);  // Color palette for this wave
+    out.crgbMap = fl::make_shared<fl::WaveCrgbGradientMap>(electricBlueFirePal);  // Color palette for this wave
     return out;
 }
 
 // Create default configuration for the upper wave layer
-WaveFx::Args CreateArgsUpper() {
-    WaveFx::Args out;
-    out.factor = SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
+fl::WaveFx::Args CreateArgsUpper() {
+    fl::WaveFx::Args out;
+    out.factor = fl::SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
     out.half_duplex = true;                     // Only positive waves (no negative values)
     out.auto_updates = true;                    // Automatically update the simulation each frame
     out.speed = 0.25f;                          // Wave propagation speed (faster than lower)
     out.dampening = 3.0f;                       // How quickly waves lose energy (less than lower)
-    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricGreenFirePal);  // Color palette for this wave
+    out.crgbMap = fl::make_shared<fl::WaveCrgbGradientMap>(electricGreenFirePal);  // Color palette for this wave
     return out;
 }
 
 // Create the two wave simulation layers with their default configurations
-WaveFx waveFxLower(xyRect, CreateArgsLower());  // Lower/background wave layer (blue)
-WaveFx waveFxUpper(xyRect, CreateArgsUpper());  // Upper/foreground wave layer (green/red)
+fl::WaveFx waveFxLower(xyRect, CreateArgsLower());  // Lower/background wave layer (blue)
+fl::WaveFx waveFxUpper(xyRect, CreateArgsUpper());  // Upper/foreground wave layer (green/red)
 
 // Create a blender that will combine the two wave layers
-Blend2d fxBlend(xyMap);
+fl::Blend2d fxBlend(xyMap);
 
 
 // Convert the UI slider value to the appropriate SuperSample enum value
 // SuperSample controls the quality of the wave simulation (higher = better quality but more CPU)
-SuperSample getSuperSample() {
+fl::SuperSample getSuperSample() {
     switch (int(superSample)) {
     case 0:
-        return SuperSample::SUPER_SAMPLE_NONE;  // No supersampling (fastest, lowest quality)
+        return fl::SuperSample::SUPER_SAMPLE_NONE;  // No supersampling (fastest, lowest quality)
     case 1:
-        return SuperSample::SUPER_SAMPLE_2X;    // 2x supersampling (2x2 grid = 4 samples per pixel)
+        return fl::SuperSample::SUPER_SAMPLE_2X;    // 2x supersampling (2x2 grid = 4 samples per pixel)
     case 2:
-        return SuperSample::SUPER_SAMPLE_4X;    // 4x supersampling (4x4 grid = 16 samples per pixel)
+        return fl::SuperSample::SUPER_SAMPLE_4X;    // 4x supersampling (4x4 grid = 16 samples per pixel)
     case 3:
-        return SuperSample::SUPER_SAMPLE_8X;    // 8x supersampling (8x8 grid = 64 samples per pixel, slowest)
+        return fl::SuperSample::SUPER_SAMPLE_8X;    // 8x supersampling (8x8 grid = 64 samples per pixel, slowest)
     default:
-        return SuperSample::SUPER_SAMPLE_NONE;  // Default fallback
+        return fl::SuperSample::SUPER_SAMPLE_NONE;  // Default fallback
     }
 }
 
@@ -179,7 +179,7 @@ void applyFancyEffect(uint32_t now, bool button_active) {
 
     // Create a static TimeRamp to manage the animation timing
     // TimeRamp handles the transition from start to end over time
-    static TimeRamp pointTransition = TimeRamp(0, total, 0);
+    static fl::TimeRamp pointTransition = fl::TimeRamp(0, total, 0);
 
     // If the button is active, start/restart the animation
     if (button_active) {
@@ -265,9 +265,9 @@ ui_state ui() {
     // Easing controls how wave heights are calculated:
     // - LINEAR: Simple linear mapping (sharper waves)
     // - SQRT: Square root mapping (more natural, rounded waves)
-    U8EasingFunction easeMode = easeModeSqrt
-                                    ? U8EasingFunction::WAVE_U8_MODE_SQRT
-                                    : U8EasingFunction::WAVE_U8_MODE_LINEAR;
+    fl::U8EasingFunction easeMode = easeModeSqrt
+                                    ? fl::U8EasingFunction::WAVE_U8_MODE_SQRT
+                                    : fl::U8EasingFunction::WAVE_U8_MODE_LINEAR;
     
     // Apply all settings from UI controls to the lower wave layer
     waveFxLower.setSpeed(speedLower);              // Wave propagation speed
@@ -362,7 +362,7 @@ void wavefx_setup() {
     // Initialize the LED strip:
     // - NEOPIXEL is the LED type
     // - 2 is the data pin number (for real hardware)
-    // - setScreenMap connects our 2D coordinate system to the 1D LED array
+    // - setScreenMap connects our 2D coordinate system to the 1D LED fl::array
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
     // Set up UI groupings
@@ -431,10 +431,10 @@ void wavefx_loop() {
     // Handle automatic triggering of ripples
     processAutoTrigger(now);
     
-    // Create a drawing context with the current time and LED array
-    Fx::DrawContext ctx(now, leds);
+    // Create a drawing context with the current time and LED fl::array
+    fl::Fx::DrawContext ctx(now, leds);
     
-    // Draw the blended result of both wave layers to the LED array
+    // Draw the blended result of both wave layers to the LED fl::array
     fxBlend.draw(ctx);
     
     // Send the color data to the actual LEDs

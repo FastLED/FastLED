@@ -25,7 +25,7 @@ which are blended together to create complex visual effects.
 #include <FastLED.h>      // Main FastLED library for controlling LEDs
 #include "wavefx.h"
 
-using namespace fl;        // Use the FastLED namespace for convenience
+// Use the FastLED namespace for convenience
 
 
 void setup() {

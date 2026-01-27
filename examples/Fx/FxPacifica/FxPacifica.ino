@@ -1,7 +1,7 @@
 // @filter: (memory is high)
 
 /// @file    FxPacifica.ino
-/// @brief   Pacifica ocean effect with ScreenMap
+/// @brief   Pacifica ocean effect with fl::ScreenMap
 /// @example FxPacifica.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
@@ -26,7 +26,6 @@
 #include "fl/fx/1d/pacifica.h"
 #include "fl/screenmap.h"
 
-using namespace fl;
 
 #define DATA_PIN            3
 #define NUM_LEDS            60
@@ -34,12 +33,12 @@ using namespace fl;
 #define LED_TYPE            WS2812B
 #define COLOR_ORDER         GRB
 
-CRGB leds[NUM_LEDS];
-Pacifica pacifica(NUM_LEDS);
+fl::CRGB leds[NUM_LEDS];
+fl::Pacifica pacifica(NUM_LEDS);
 
 void setup() {
   Serial.begin(115200);
-  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
+  fl::ScreenMap screenMap = fl::ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMap);
@@ -48,7 +47,7 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS(20) {
-    pacifica.draw(Fx::DrawContext(fl::millis(), leds));
+    pacifica.draw(fl::Fx::DrawContext(fl::millis(), leds));
     FastLED.show();
   }
 }

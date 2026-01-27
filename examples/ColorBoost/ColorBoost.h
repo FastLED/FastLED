@@ -16,12 +16,10 @@
 #include "FastLED.h"
 #include "fl/ease.h"
 
-using namespace fl;
+fl::UITitle title("ColorBoost");
+fl::UIDescription description("CRGB::colorBoost() is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
 
-UITitle title("ColorBoost");
-UIDescription description("CRGB::colorBoost() is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
-
-UISlider satSlider("Saturation", 60, 0, 255, 1);
+fl::UISlider satSlider("Saturation", 60, 0, 255, 1);
 
 // Create dropdown with descriptive ease function names
 fl::string easeOptions[] = {
@@ -36,11 +34,11 @@ fl::string easeOptions[] = {
     "Out Sine", 
     "In-Out Sine"
 };
-UIDropdown saturationFunction("Saturation Function", easeOptions);
-UIDropdown luminanceFunction("Luminance Function", easeOptions);
+fl::UIDropdown saturationFunction("Saturation Function", easeOptions);
+fl::UIDropdown luminanceFunction("Luminance Function", easeOptions);
 
 // Group related color boost UI elements using UIGroup template multi-argument constructor
-UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);
+fl::UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);
 
 #define DATA_PIN 2
 #define LED_TYPE WS2812
@@ -50,7 +48,7 @@ UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminan
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define BRIGHTNESS 150
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 // fl::ScreenMap screenmap(lut.data(), lut.size());
 // fl::ScreenMap screenmap(NUM_LEDS);
@@ -71,21 +69,21 @@ void setup() {
     luminanceFunction.setSelectedIndex(0);  // "None"
 }
 
-EaseType getEaseType(int value) {
+fl::EaseType getEaseType(int value) {
     switch (value) {
-        case 0: return EASE_NONE;
-        case 1: return EASE_IN_QUAD;
-        case 2: return EASE_OUT_QUAD;
-        case 3: return EASE_IN_OUT_QUAD;
-        case 4: return EASE_IN_CUBIC;
-        case 5: return EASE_OUT_CUBIC;
-        case 6: return EASE_IN_OUT_CUBIC;
-        case 7: return EASE_IN_SINE;
-        case 8: return EASE_OUT_SINE;
-        case 9: return EASE_IN_OUT_SINE;
+        case 0: return fl::EASE_NONE;
+        case 1: return fl::EASE_IN_QUAD;
+        case 2: return fl::EASE_OUT_QUAD;
+        case 3: return fl::EASE_IN_OUT_QUAD;
+        case 4: return fl::EASE_IN_CUBIC;
+        case 5: return fl::EASE_OUT_CUBIC;
+        case 6: return fl::EASE_IN_OUT_CUBIC;
+        case 7: return fl::EASE_IN_SINE;
+        case 8: return fl::EASE_OUT_SINE;
+        case 9: return fl::EASE_IN_OUT_SINE;
     }
     FL_ASSERT(false, "Invalid ease type");
-    return EASE_NONE;
+    return fl::EASE_NONE;
 }
 
 // Animated rainbow wave effect (Pride2015), with matrix divided into three segments to compare:
@@ -112,15 +110,15 @@ void rainbowWave() {
             uint8_t bri = 128 + (wave / 2); // Brightness wave from 128 to 255
 
             // Create the original color using HSV
-            CRGB original_color = CHSV(hue, satSlider.value(), bri);
+            fl::CRGB original_color = CHSV(hue, satSlider.value(), bri);
 
             if (y > HEIGHT / 3 * 2) {
                 // Upper third - original colors
                 leds[xyMap(x, y)] = original_color;
             } else if (y > HEIGHT / 3) {
                 // Middle third - colors transformed with colorBoost()
-                EaseType sat_ease = getEaseType(saturationFunction.as_int());
-                EaseType lum_ease = getEaseType(luminanceFunction.as_int());
+                fl::EaseType sat_ease = getEaseType(saturationFunction.as_int());
+                fl::EaseType lum_ease = getEaseType(luminanceFunction.as_int());
                 leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
             } else {
                 // Lower third - colors transformed using gamma correction
@@ -136,7 +134,7 @@ void rainbowWave() {
                 g = g * 255.f;
                 b = b * 255.f;
 
-                leds[xyMap(x, y)] = CRGB(r, g, b);
+                leds[xyMap(x, y)] = fl::CRGB(r, g, b);
             }
         }
     }

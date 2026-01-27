@@ -15,9 +15,8 @@ most portion being the bottom.
 #include "fl/warn.h"
 #include "noise.h"
 #include <FastLED.h>
-// #include "vec3.h"
+// #include "fl::vec3.h"
 
-using namespace fl;
 
 // Power management settings
 #define VOLTS 5
@@ -35,8 +34,8 @@ using namespace fl;
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
-UITitle festivalStickTitle("Festival Stick - Classic Version");
-UIDescription festivalStickDescription(
+fl::UITitle festivalStickTitle("Festival Stick - Classic Version");
+fl::UIDescription festivalStickDescription(
     "Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. Super simple but very awesome looking. "
     "This classic version uses 3D Perlin noise to create organic, flowing patterns around the cylindrical surface. "
     "Assumes dense 144 LEDs/meter (288 total LEDs).");
@@ -48,13 +47,13 @@ UIDescription festivalStickDescription(
 // UIHelp physicalBuildHelp("Building Your Festival Stick");
 
 
-UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
-UIButton button("Button");
+fl::UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
+fl::UIButton button("Button");
 
 // Adding a brightness slider
-UISlider brightness("Brightness", 16, 0, 255, 1); // Brightness from 0 to 255
+fl::UISlider brightness("Brightness", 16, 0, 255, 1); // Brightness from 0 to 255
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 
 // fl::vector<vec3f>
@@ -91,7 +90,7 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
         float z = radius * fl::sin(angle); // y coordinate
         float y = height;              // z coordinate
 
-        // Store the 3D coordinates in the vector
+        // Store the 3D coordinates in the fl::vector
         vec3f led_position(x, y, z);
         // screenMap.set(i, led_position);
         out.push_back(led_position);
@@ -101,7 +100,7 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
 
 
 fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
-    // Create a ScreenMap for the corkscrew
+    // Create a fl::ScreenMap for the corkscrew
     fl::vector<vec2f> points(args.num_leds);
 
     int num_leds = args.num_leds;
@@ -127,13 +126,13 @@ fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
         float x = r * fl::cos(angle); // x coordinate
         float y = r * fl::sin(angle); // y coordinate
 
-        // Store the 2D coordinates in the vector
+        // Store the 2D coordinates in the fl::vector
         points[i] = vec2f(x, y);
     }
 
-    FASTLED_WARN("Creating ScreenMap with:\n" << points);
+    FASTLED_WARN("Creating fl::ScreenMap with:\n" << points);
 
-    // Create a ScreenMap from the points
+    // Create a fl::ScreenMap from the points
     fl::ScreenMap screenMap(points.data(), num_leds, .5);
     return screenMap;
 }
@@ -162,7 +161,7 @@ void setup() {
     digitalWrite(PIN_GRND, LOW); // Set ground pin to low
     button.addRealButton(Button(PIN_BUTTON));
     screenMap = makeScreenMap(args);
-    //screenMap = ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
+    //screenMap = fl::ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
     auto controller = addController();
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
@@ -176,7 +175,7 @@ void setup() {
     FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_AMPS * 1000);
     // set brightness 8
     FastLED.setBrightness(brightness.as_int());
-    button.onChanged([](UIButton& but) {
+    button.onChanged([](fl::UIButton& but) {
         // This function is called when the button is pressed
         // If the button is pressed, show the generative pattern
         if (but.isPressed()) {
@@ -208,7 +207,7 @@ void showGenerative(uint32_t now) {
         // Create a hue that changes with position and time
         uint8_t sat = int32_t((x * 10 + y * 5 + now / 5)) % 256;
         // Set the color
-        leds[i] = CHSV(170, sat, fl::clamp(255- sat, 64, 255));
+        leds[i] = fl::CHSV(170, sat, fl::clamp(255- sat, 64, 255));
     }
 }
 

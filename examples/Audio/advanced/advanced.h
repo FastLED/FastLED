@@ -22,9 +22,6 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-conversion)
 FL_DISABLE_WARNING(sign-conversion)
 
-
-using namespace fl;
-
 // Display configuration
 // For WebAssembly, use a smaller display to avoid memory issues
 #ifdef __EMSCRIPTEN__
@@ -44,42 +41,42 @@ using namespace fl;
 #define FFT_SIZE 512
 
 // UI Elements
-UITitle title("Audio Reactive Visualizations");
-UIDescription description("Real-time audio visualizations with beat detection and multiple modes");
+fl::UITitle title("Audio Reactive Visualizations");
+fl::UIDescription description("Real-time audio visualizations with beat detection and multiple modes");
 
 // Master controls
-UICheckbox enableAudio("Enable Audio", true);
-UIDropdown visualMode("Visualization Mode", 
+fl::UICheckbox enableAudio("Enable Audio", true);
+fl::UIDropdown visualMode("Visualization Mode",
     {"Spectrum Bars", "Radial Spectrum", "Waveform", "VU Meter", "Matrix Rain", "Fire Effect", "Plasma Wave"});
 
 // Audio controls
-UISlider audioGain("Audio Gain", 1.0f, 0.1f, 5.0f, 0.1f);
-UISlider noiseFloor("Noise Floor", 0.1f, 0.0f, 1.0f, 0.01f);
-UICheckbox autoGain("Auto Gain", true);
+fl::UISlider audioGain("Audio Gain", 1.0f, 0.1f, 5.0f, 0.1f);
+fl::UISlider noiseFloor("Noise Floor", 0.1f, 0.0f, 1.0f, 0.01f);
+fl::UICheckbox autoGain("Auto Gain", true);
 
 // Visual controls
-UISlider brightness("Brightness", 128, 0, 255, 1);
-UISlider fadeSpeed("Fade Speed", 20, 0, 255, 1);
-UIDropdown colorPalette("Color Palette", 
+fl::UISlider brightness("Brightness", 128, 0, 255, 1);
+fl::UISlider fadeSpeed("Fade Speed", 20, 0, 255, 1);
+fl::UIDropdown colorPalette("Color Palette",
     {"Rainbow", "Heat", "Ocean", "Forest", "Party", "Lava", "Cloud"});
-UICheckbox mirrorMode("Mirror Mode", false);
+fl::UICheckbox mirrorMode("Mirror Mode", false);
 
 // Beat detection
-UICheckbox beatDetect("Beat Detection", true);
-UISlider beatSensitivity("Beat Sensitivity", 1.5f, 0.5f, 3.0f, 0.1f);
-UICheckbox beatFlash("Beat Flash", true);
+fl::UICheckbox beatDetect("Beat Detection", true);
+fl::UISlider beatSensitivity("Beat Sensitivity", 1.5f, 0.5f, 3.0f, 0.1f);
+fl::UICheckbox beatFlash("Beat Flash", true);
 
 // Pitch detection
-UICheckbox pitchDetectEnable("Pitch Detection", false);
-UICheckbox pitchVisualizer("Show Pitch Visualizer", false);
+fl::UICheckbox pitchDetectEnable("Pitch Detection", false);
+fl::UICheckbox pitchVisualizer("Show Pitch Visualizer", false);
 
 // Audio input
-UIAudio audio("Audio Input");
+fl::UIAudio audio("Audio Input");
 
 // Global variables
-CRGB leds[NUM_LEDS];
-XYMap xyMap(WIDTH, HEIGHT, false);
-SoundLevelMeter soundMeter(0.0, 0.0);
+fl::CRGB leds[NUM_LEDS];
+fl::XYMap xyMap(WIDTH, HEIGHT, false);
+fl::SoundLevelMeter soundMeter(0.0, 0.0);
 
 // Audio processing variables - keep these smaller for WebAssembly
 static const int NUM_BANDS = 16;  // Reduced from 32
@@ -102,23 +99,23 @@ uint8_t fireBuffer[WIDTH][HEIGHT] = {{0}};
 #endif
 
 // Pitch detection engine
-SoundToMIDI pitchConfig;
-SoundToMIDIEngine* pitchEngine = nullptr;
+fl::SoundToMIDI pitchConfig;
+fl::SoundToMIDIEngine* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 uint8_t currentVelocity = 0;
 bool noteIsOn = false;
 
 // Get current color palette
-CRGBPalette16 getCurrentPalette() {
+fl::CRGBPalette16 getCurrentPalette() {
     switch(colorPalette.as_int()) {
-        case 0: return CRGBPalette16(RainbowColors_p);
-        case 1: return CRGBPalette16(HeatColors_p);
-        case 2: return CRGBPalette16(OceanColors_p);
-        case 3: return CRGBPalette16(ForestColors_p);
-        case 4: return CRGBPalette16(PartyColors_p);
-        case 5: return CRGBPalette16(LavaColors_p);
-        case 6: return CRGBPalette16(CloudColors_p);
-        default: return CRGBPalette16(RainbowColors_p);
+        case 0: return fl::CRGBPalette16(fl::RainbowColors_p);
+        case 1: return fl::CRGBPalette16(fl::HeatColors_p);
+        case 2: return fl::CRGBPalette16(fl::OceanColors_p);
+        case 3: return fl::CRGBPalette16(fl::ForestColors_p);
+        case 4: return fl::CRGBPalette16(fl::PartyColors_p);
+        case 5: return fl::CRGBPalette16(fl::LavaColors_p);
+        case 6: return fl::CRGBPalette16(fl::CloudColors_p);
+        default: return fl::CRGBPalette16(fl::RainbowColors_p);
     }
 }
 
@@ -175,16 +172,16 @@ void updateAutoGain(float level) {
 // Clear display
 void clearDisplay() {
     if (fadeSpeed.as_int() == 0) {
-        fill_solid(leds, NUM_LEDS, CRGB::Black);
+        fill_solid(leds, NUM_LEDS, fl::CRGB::Black);
     } else {
         fadeToBlackBy(leds, NUM_LEDS, fadeSpeed.as_int());
     }
 }
 
 // Visualization: Spectrum Bars
-void drawSpectrumBars(FFTBins* fft, float /* peak */) {
+void drawSpectrumBars(fl::FFTBins* fft, float /* peak */) {
     clearDisplay();
-    CRGBPalette16 palette = getCurrentPalette();
+    fl::CRGBPalette16 palette = getCurrentPalette();
     
     int barWidth = WIDTH / NUM_BANDS;
     
@@ -211,7 +208,7 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
                 uint8_t colorIndex = fl::map_range<float, uint8_t>(
                     float(y) / HEIGHT, 0, 1, 0, 255
                 );
-                CRGB color = ColorFromPalette(palette, colorIndex + hue);
+                fl::CRGB color = ColorFromPalette(palette, colorIndex + hue);
                 
                 int ledIndex = xyMap(xStart + x, y);
                 if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
@@ -230,9 +227,9 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
 }
 
 // Visualization: Radial Spectrum
-void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
+void drawRadialSpectrum(fl::FFTBins* fft, float /* peak */) {
     clearDisplay();
-    CRGBPalette16 palette = getCurrentPalette();
+    fl::CRGBPalette16 palette = getCurrentPalette();
     
     int centerX = WIDTH / 2;
     int centerY = HEIGHT / 2;
@@ -264,9 +261,9 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
 }
 
 // Visualization: Logarithmic Waveform (prevents saturation)
-void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
+void drawWaveform(const fl::Slice<const int16_t>& pcm, float /* peak */) {
     clearDisplay();
-    CRGBPalette16 palette = getCurrentPalette();
+    fl::CRGBPalette16 palette = getCurrentPalette();
     
     int samplesPerPixel = pcm.size() / WIDTH;
     int centerY = HEIGHT / 2;
@@ -300,13 +297,13 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
         
         // Color mapping based on amplitude intensity
         uint8_t colorIndex = fl::map_range<int, uint8_t>(abs(amplitude), 0, HEIGHT/2, 40, 255);
-        CRGB color = ColorFromPalette(palette, colorIndex + hue);
-        
+        fl::CRGB color = ColorFromPalette(palette, colorIndex + hue);
+
         // Apply brightness scaling for low amplitudes
         if (abs(amplitude) < HEIGHT / 4) {
             color.fadeToBlackBy(128 - (abs(amplitude) * 512 / HEIGHT));
         }
-        
+
         // Draw vertical line from center
         if (amplitude == 0) {
             // Draw center point for zero amplitude
@@ -318,13 +315,13 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
             // Draw line from center to amplitude
             int startY = (amplitude > 0) ? centerY : centerY + amplitude;
             int endY = (amplitude > 0) ? centerY + amplitude : centerY;
-            
+
             for (int y = startY; y <= endY; y++) {
                 if (y >= 0 && y < HEIGHT) {
                     int ledIndex = xyMap(x, y);
                     if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
                         // Fade edges for smoother appearance
-                        CRGB pixelColor = color;
+                        fl::CRGB pixelColor = color;
                         if (y == startY || y == endY) {
                             pixelColor.fadeToBlackBy(100);
                         }
@@ -339,7 +336,7 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
 // Visualization: VU Meter
 void drawVUMeter(float rms, float peak) {
     clearDisplay();
-    CRGBPalette16 palette = getCurrentPalette();
+    fl::CRGBPalette16 palette = getCurrentPalette();
     
     // RMS level bar
     int rmsWidth = rms * WIDTH * audioGain.value() * autoGainValue;
@@ -362,17 +359,17 @@ void drawVUMeter(float rms, float peak) {
     for (int y = HEIGHT/4; y < 3*HEIGHT/4; y++) {
         int ledIndex = xyMap(peakX, y);
         if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
-            leds[ledIndex] = CRGB::White;
+            leds[ledIndex] = fl::CRGB::White;
         }
     }
-    
+
     // Beat indicator
     if (isBeat && beatFlash) {
         for (int x = 0; x < WIDTH; x++) {
             int ledIndex1 = xyMap(x, 0);
             int ledIndex2 = xyMap(x, HEIGHT - 1);
-            if (ledIndex1 >= 0 && ledIndex1 < NUM_LEDS) leds[ledIndex1] = CRGB::White;
-            if (ledIndex2 >= 0 && ledIndex2 < NUM_LEDS) leds[ledIndex2] = CRGB::White;
+            if (ledIndex1 >= 0 && ledIndex1 < NUM_LEDS) leds[ledIndex1] = fl::CRGB::White;
+            if (ledIndex2 >= 0 && ledIndex2 < NUM_LEDS) leds[ledIndex2] = fl::CRGB::White;
         }
     }
 }
@@ -431,8 +428,8 @@ void drawFireEffect(float peak) {
 void drawPlasmaWave(float peak) {
     static float time = 0; // okay static in header
     time += 0.05f + (peak * 0.2f);
-    
-    CRGBPalette16 palette = getCurrentPalette();
+
+    fl::CRGBPalette16 palette = getCurrentPalette();
     
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
@@ -477,7 +474,7 @@ void setup() {
 
     // Initialize pitch detection
     pitchConfig.sample_rate_hz = SAMPLE_RATE;
-    pitchEngine = new SoundToMIDIEngine(pitchConfig);
+    pitchEngine = new fl::SoundToMIDIEngine(pitchConfig);
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
         currentMIDINote = note;
         currentVelocity = velocity;
@@ -508,7 +505,7 @@ void loop() {
     }
     
     // Process only one audio sample per frame to avoid accumulation
-    AudioSample sample = audio.next();
+    fl::AudioSample sample = audio.next();
     if (sample.isValid()) {
         // Process pitch detection if enabled
         if (pitchDetectEnable && pitchEngine) {
@@ -547,7 +544,7 @@ void loop() {
         }
         
         // Get FFT data - create local FFTBins to avoid accumulation
-        FFTBins fftBins(NUM_BANDS);
+        fl::FFTBins fftBins(NUM_BANDS);
         sample.fft(&fftBins);
         
         // Update color animation
@@ -603,7 +600,7 @@ void loop() {
 
             // Draw pitch indicator - brightness based on velocity
             uint8_t brightness = fl::map_range<uint8_t, uint8_t>(currentVelocity, 0, 127, 50, 255);
-            CRGB pitchColor = CRGB(255, 0, 255);  // Magenta
+            fl::CRGB pitchColor = fl::CRGB(255, 0, 255);  // Magenta
             pitchColor.fadeToBlackBy(255 - brightness);
 
             // Draw a small cross at the pitch position

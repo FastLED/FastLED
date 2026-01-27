@@ -56,9 +56,6 @@ Performence notes @64x64:
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/ui.h"
 
-using namespace fl;
-
-
 #ifndef PIN_DATA
 #define PIN_DATA 3
 #endif  // PIN_DATA
@@ -75,7 +72,7 @@ using namespace fl;
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
-#define FIRST_ANIMATION POLAR_WAVES
+#define FIRST_ANIMATION fl::POLAR_WAVES
 
 // This is purely use for the web compiler to display the animartrix effects.
 // This small led was chosen because otherwise the bloom effect is too strong.
@@ -87,15 +84,15 @@ using namespace fl;
 #define POWER_MILLIAMPS 2000
 
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
+fl::CRGB leds[NUM_LEDS];
+fl::XYMap xyMap = fl::XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 
 
-UITitle title("Animartrix");
-UIDescription description("Demo of the Animatrix effects. @author of fx is StefanPetrick");
+fl::UITitle title("Animartrix");
+fl::UIDescription description("Demo of the Animatrix effects. @author of fx is StefanPetrick");
 
-UISlider brightness("Brightness", BRIGHTNESS, 0, 255);
-UIDropdown fxIndex("Animartrix - index", {
+fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255);
+fl::UIDropdown fxIndex("Animartrix - index", {
     "RGB_BLOBS5", "RGB_BLOBS4", "RGB_BLOBS3", "RGB_BLOBS2", "RGB_BLOBS",
     "POLAR_WAVES", "SLOW_FADE", "ZOOM2", "ZOOM", "HOT_BLOB",
     "SPIRALUS2", "SPIRALUS", "YVES", "SCALEDEMO1", "LAVA1",
@@ -108,13 +105,13 @@ UIDropdown fxIndex("Animartrix - index", {
     "MODULE_EXPERIMENT_SM4", "MODULE_EXPERIMENT_SM5", "MODULE_EXPERIMENT_SM6", "MODULE_EXPERIMENT_SM8", "MODULE_EXPERIMENT_SM9",
     "MODULE_EXPERIMENT_SM10", "FLUFFY_BLOBS"
 });
-UIDropdown colorOrder("Color Order", {"RGB", "RBG", "GRB", "GBR", "BRG", "BGR"});
-UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
+fl::UIDropdown colorOrder("Color Order", {"RGB", "RBG", "GRB", "GBR", "BRG", "BGR"});
+fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 
 
-Animartrix animartrix(xyMap, FIRST_ANIMATION);
-FxEngine fxEngine(NUM_LEDS);
+fl::Animartrix animartrix(xyMap, FIRST_ANIMATION);
+fl::FxEngine fxEngine(NUM_LEDS);
 
 const bool kPowerLimiterActive = false;
 
@@ -138,7 +135,7 @@ void setup() {
     setup_max_power();
     fxEngine.addFx(animartrix);
 
-    colorOrder.onChanged([](UIDropdown &dropdown) {
+    colorOrder.onChanged([](fl::UIDropdown &dropdown) {
         int value = dropdown.as_int();
         switch(value) {
             case 0: value = RGB; break;
@@ -148,7 +145,7 @@ void setup() {
             case 4: value = BRG; break;
             case 5: value = BGR; break;
         }
-        animartrix.setColorOrder(static_cast<EOrder>(value));
+        animartrix.setColorOrder(static_cast<fl::EOrder>(value));
     });
 }
 

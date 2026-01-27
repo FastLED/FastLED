@@ -14,30 +14,28 @@
 #include "fl/fx/1d/demoreel100.h"
 #include "fl/screenmap.h"
 
-using namespace fl;
-
 #define DATA_PIN    3
 //#define CLK_PIN   4
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 #define NUM_LEDS    64
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS          96
 #define FRAMES_PER_SECOND  120
 #define USES_RGBW 0
 
 #if USES_RGBW
-Rgbw rgbwMode = RgbwDefault();
+fl::Rgbw rgbwMode = fl::RgbwDefault();
 #else
-Rgbw rgbwMode = RgbwInvalid();  // No RGBW mode, just use RGB.
+fl::Rgbw rgbwMode = fl::RgbwInvalid();  // No RGBW mode, just use RGB.
 #endif
 
-DemoReel100Ptr demoReel = fl::make_shared<DemoReel100>(NUM_LEDS);
+fl::DemoReel100Ptr demoReel = fl::make_shared<fl::DemoReel100>(NUM_LEDS);
 
 void setup() {
-  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS);
+  fl::ScreenMap screenMap = fl::ScreenMap::DefaultStrip(NUM_LEDS);
 
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
@@ -52,7 +50,7 @@ void setup() {
 void loop()
 {
     // Run the DemoReel100 draw function
-    demoReel->draw(Fx::DrawContext(fl::millis(), leds));
+    demoReel->draw(fl::Fx::DrawContext(fl::millis(), leds));
 
     // send the 'leds' array out to the actual LED strip
     FastLED.show();

@@ -23,7 +23,6 @@
 #include "fl/file_system.h"
 
 
-using namespace fl;
 
 
 #define LED_PIN 2
@@ -43,19 +42,19 @@ using namespace fl;
 #define IS_SERPINTINE true
 
 
-UITitle title("SDCard Demo - Mapped Video");
-UIDescription description("Video data is streamed off of a SD card and displayed on a LED strip. The video data is mapped to the LED strip using a ScreenMap.");
+fl::UITitle title("SDCard Demo - Mapped fl::Video");
+fl::UIDescription description("fl::Video data is streamed off of a SD card and displayed on a LED strip. The video data is mapped to the LED strip using a fl::ScreenMap.");
 
 
-CRGB leds[NUM_LEDS];
-ScreenMap screenMap;
+fl::CRGB leds[NUM_LEDS];
+fl::ScreenMap screenMap;
 
-FileSystem filesystem;
-Video video;
-Video video2;
+fl::FileSystem filesystem;
+fl::Video video;
+fl::Video video2;
 
-UISlider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.01f);
-UINumberField whichVideo("Which Video", 0, 0, 1);
+fl::UISlider videoSpeed("fl::Video Speed", 1.0f, -1, 2.0f, 0.01f);
+UINumberField whichVideo("Which fl::Video", 0, 0, 1);
 
 
 bool gError = false;
@@ -83,7 +82,7 @@ void setup() {
     }
 
     // Read the screen map configuration
-    ScreenMap screenMap;
+    fl::ScreenMap screenMap;
     bool ok = filesystem.readScreenMap("data/screenmap.json", "strip1", &screenMap);
     if (!ok) {
       Serial.println("Failed to read screen map");
@@ -114,7 +113,7 @@ void loop() {
     }
 
     // Select the video to play based on the UI input
-    Video& vid = !bool(whichVideo.value()) ? video : video2;
+    fl::Video& vid = !bool(whichVideo.value()) ? video : video2;
     vid.setTimeScale(videoSpeed);
 
     // Get the current time and draw the video frame

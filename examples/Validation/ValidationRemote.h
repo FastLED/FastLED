@@ -5,7 +5,7 @@
 //
 // ARCHITECTURE:
 // - All test output is communicated EXCLUSIVELY via JSON-RPC
-// - fl::ScopedLogDisable suppresses FL_DBG/FL_PRINT during test execution
+// - ScopedLogDisable suppresses FL_DBG/FL_PRINT during test execution
 // - RPC responses use printJsonRaw() which bypasses fl::println (direct Serial output)
 // - This allows clean, parseable JSON output without debug noise
 
@@ -17,7 +17,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/stl/cstdio.h"  // For fl::ScopedLogDisable
+#include "fl/stl/cstdio.h"  // For ScopedLogDisable
 
 // Forward declarations
 namespace fl {

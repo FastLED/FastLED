@@ -13,11 +13,10 @@
 #define USE_OCTOWS2811
 #include <FastLED.h>
 
-using namespace fl;
 
 #define NUM_LEDS  1920
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 #define RED    0xFF0000
 #define GREEN  0x00FF00

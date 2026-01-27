@@ -14,8 +14,6 @@
 #include "fl/fx/2d/noisepalette.h"
 #include "fl/ui.h"
 
-using namespace fl;
-
 #define LED_PIN 3
 #define BRIGHTNESS 96
 #define LED_TYPE WS2811
@@ -62,17 +60,17 @@ using namespace fl;
 // The higher the value of scale, the more "zoomed out" the noise iwll be.  A
 // value of 1 will be so zoomed in, you'll mostly see solid colors.
 
-UISlider SCALE("SCALE", 20, 1, 100, 1);
+fl::UISlider SCALE("SCALE", 20, 1, 100, 1);
 
 // We're using the x/y dimensions to map to the x/y pixels on the matrix.  We'll
 // use the z-axis for "time".  speed determines how fast time moves forward. Try
 // 1 for a very slow moving effect, or 60 for something that ends up looking
 // like water.
-UISlider SPEED("SPEED", 30, 1, 60, 1);
+fl::UISlider SPEED("SPEED", 30, 1, 60, 1);
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(xyMap);
+fl::CRGB leds[NUM_LEDS];
+fl::XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
+fl::NoisePalette noisePalette(xyMap);
 
 void setup() {
     delay(1000); // sanity delay
@@ -88,6 +86,6 @@ void loop() {
     noisePalette.setScale(SCALE);
     EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
-    noisePalette.draw(Fx::DrawContext(fl::millis(), leds));
+    noisePalette.draw(fl::Fx::DrawContext(fl::millis(), leds));
     FastLED.show();
 }

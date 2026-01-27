@@ -16,7 +16,6 @@
 #include "./LedRopeTCL.h"
 #include "../shared/led_layout_array.h"
 
-using namespace fl;
 
 
 #define CHIPSET WS2812
@@ -25,16 +24,16 @@ using namespace fl;
 
 namespace {
 
-UIButton buttonAllWhite("All white");
+fl::UIButton buttonAllWhite("All white");
 
-ScreenMap init_screenmap() {
+fl::ScreenMap init_screenmap() {
   LedColumns cols = LedLayoutArray();
   const int length = cols.length;
   int sum = 0;
   for (int i = 0; i < length; ++i) {
     sum += cols.array[i];
   }
-  ScreenMap screen_map(sum, 0.8f);
+  fl::ScreenMap screen_map(sum, 0.8f);
   int curr_idx = 0;
   for (int i = 0; i < length; ++i) {
     int n = cols.array[i];
@@ -80,8 +79,8 @@ void LedRopeTCL::RawDrawPixel(byte r, byte g, byte b) {
     g = 0xff;
     b = 0xff;
   }
-  CRGB c(r, g, b);
-  mLedBuffer.push_back(CRGB(r, g, b));
+  fl::CRGB c(r, g, b);
+  mLedBuffer.push_back(fl::CRGB(r, g, b));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,7 +101,7 @@ void LedRopeTCL::RawCommitDraw() {
   FASTLED_WARN("\n\n############## COMMIT DRAW ################\n\n");
   if (!mControllerAdded) {
     mControllerAdded = true;
-    CRGB* leds = mLedBuffer.data();
+    fl::CRGB* leds = mLedBuffer.data();
     size_t n_leds = mLedBuffer.size();
     FastLED.addLeds<APA102, PIN_DATA, PIN_CLOCK>(leds, n_leds).setScreenMap(mScreenMap);
   }

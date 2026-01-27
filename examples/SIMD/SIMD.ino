@@ -62,7 +62,6 @@
 #include "test_helpers.h"
 #include "simd_tests.h"
 
-using namespace fl;
 using namespace simd_test;
 
 // ============================================================================

@@ -20,7 +20,6 @@
 #include "FastLED.h"
 #include "fl/warn.h"
 
-using namespace fl;
 
 // Hardware configuration
 #define PIN_STRIP1 3
@@ -29,9 +28,9 @@ using namespace fl;
 
 // All strips must have the same length in a single BulkClockless instance
 #define NUM_LEDS 100
-CRGB strip1[NUM_LEDS];
-CRGB strip2[NUM_LEDS];
-CRGB strip3[NUM_LEDS];
+fl::CRGB strip1[NUM_LEDS];
+fl::CRGB strip2[NUM_LEDS];
+fl::CRGB strip3[NUM_LEDS];
 
 void wait_for_serial(uint32_t timeout = 3000) {
     uint32_t start = millis();
@@ -58,9 +57,9 @@ void setup() {
     // Add LED strips using the new BulkClockless API
     // All strips in a single instance must have the same length
     auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
-        {PIN_STRIP1, strip1, NUM_LEDS, ScreenMap()},
-        {PIN_STRIP2, strip2, NUM_LEDS, ScreenMap()},
-        {PIN_STRIP3, strip3, NUM_LEDS, ScreenMap()}
+        {PIN_STRIP1, strip1, NUM_LEDS, fl::ScreenMap()},
+        {PIN_STRIP2, strip2, NUM_LEDS, fl::ScreenMap()},
+        {PIN_STRIP3, strip3, NUM_LEDS, fl::ScreenMap()}
     });
 
     // Optional: Set per-strip color correction
@@ -72,7 +71,7 @@ void setup() {
     print_startup_info();
 }
 
-void fill_all(CRGB color) {
+void fill_all(fl::CRGB color) {
     for (int i = 0; i < NUM_LEDS; i++) {
         strip1[i] = color;
         strip2[i] = color;
@@ -80,18 +79,18 @@ void fill_all(CRGB color) {
     }
 }
 
-void fill_strip(CRGB* strip, CRGB color) {
+void fill_strip(fl::CRGB* strip, fl::CRGB color) {
     for (int i = 0; i < NUM_LEDS; i++) {
         strip[i] = color;
     }
 }
 
-void blink_all(CRGB color, int times, int delay_ms = 250) {
+void blink_all(fl::CRGB color, int times, int delay_ms = 250) {
     for (int i = 0; i < times; ++i) {
         fill_all(color);
         FastLED.show();
         delay(delay_ms);
-        fill_all(CRGB::Black);
+        fill_all(fl::CRGB::Black);
         FastLED.show();
         delay(delay_ms);
     }
@@ -99,28 +98,28 @@ void blink_all(CRGB color, int times, int delay_ms = 250) {
 
 void chase_pattern() {
     // Chase different colors across the three strips
-    fill_strip(strip1, CRGB::Red);
-    fill_strip(strip2, CRGB::Black);
-    fill_strip(strip3, CRGB::Black);
+    fill_strip(strip1, fl::CRGB::Red);
+    fill_strip(strip2, fl::CRGB::Black);
+    fill_strip(strip3, fl::CRGB::Black);
     FastLED.show();
     delay(300);
 
-    fill_strip(strip1, CRGB::Black);
-    fill_strip(strip2, CRGB::Green);
-    fill_strip(strip3, CRGB::Black);
+    fill_strip(strip1, fl::CRGB::Black);
+    fill_strip(strip2, fl::CRGB::Green);
+    fill_strip(strip3, fl::CRGB::Black);
     FastLED.show();
     delay(300);
 
-    fill_strip(strip1, CRGB::Black);
-    fill_strip(strip2, CRGB::Black);
-    fill_strip(strip3, CRGB::Blue);
+    fill_strip(strip1, fl::CRGB::Black);
+    fill_strip(strip2, fl::CRGB::Black);
+    fill_strip(strip3, fl::CRGB::Blue);
     FastLED.show();
     delay(300);
 }
 
 void loop() {
     // Blink all strips simultaneously
-    blink_all(CRGB::White, 1, 200);
+    blink_all(fl::CRGB::White, 1, 200);
 
     // Chase pattern across strips
     chase_pattern();

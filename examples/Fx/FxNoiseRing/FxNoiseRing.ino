@@ -41,20 +41,18 @@
 #define PIR_RISING_TIME 1000  // how long to fade in the PIR sensor
 #define PIR_FALLING_TIME 1000  // how long to fade out the PIR sensor
 
-using namespace fl;
-
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 // These sliders and checkboxes are dynamic when using the FastLED web compiler.
 // When deployed to a real device these elements will always be the default value.
-UISlider brightness("Brightness", 1, 0, 1);
-UISlider scale("Scale", 4, .1, 4, .1);
-UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
-UISlider timescale("Time Scale", 1, .1, 10, .1);
+fl::UISlider brightness("Brightness", 1, 0, 1);
+fl::UISlider scale("Scale", 4, .1, 4, .1);
+fl::UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
+fl::UISlider timescale("Time Scale", 1, .1, 10, .1);
 // This PIR type is special because it will bind to a pin for a real device,
 // but also provides a UIButton when run in the simulator.
-Pir pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
-UICheckbox useDither("Use Binary Dither", true);
+fl::Pir pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
+fl::UICheckbox useDither("Use Binary Dither", true);
 
 float current_brightness = 0;
 
@@ -66,7 +64,7 @@ void setup() {
     // ScreenMap is purely something that is needed for the sketch to correctly
     // show on the web display. For deployements to real devices, this essentially
     // becomes a no-op.
-    ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
+    fl::ScreenMap xyMap = fl::ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
     controller = &FastLED.addLeds<WS2811, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
                 .setCorrection(TypicalLEDStrip)
                 .setDither(DISABLE_DITHER)
@@ -87,7 +85,7 @@ void draw(uint32_t now) {
         float angle = i * 2 * FL_M_PI / NUM_LEDS + angle_offset;
 
         // Use the new noiseRingHSV8 function to sample three z-slices for HSV components
-        CHSV hsv = noiseRingHSV8(angle, now, noise_radius);
+        CHSV hsv = fl::noiseRingHSV8(angle, now, noise_radius);
 
         // Apply same constraints as before: minimum saturation and adjusted value
         hsv.s = FL_MAX(128u, (unsigned)hsv.s);

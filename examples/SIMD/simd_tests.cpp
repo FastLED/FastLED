@@ -7,7 +7,6 @@
 #include <FastLED.h>
 #include "fl/simd.h"
 
-using namespace fl;
 using namespace fl::simd;
 
 namespace simd_test {

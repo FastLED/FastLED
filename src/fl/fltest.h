@@ -836,7 +836,10 @@ bool isTestSkipped();
     } while (0)
 
 // FL_INFO - alias for FL_MESSAGE (doctest compatibility)
+// Only define if not already defined (e.g., by fl/log.h)
+#ifndef FL_INFO
 #define FL_INFO(msg) FL_MESSAGE(msg)
+#endif
 
 // FL_CAPTURE - capture and print a variable's value
 #define FL_CAPTURE(x)                                                           \

@@ -36,6 +36,9 @@ from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
+from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
+    UsingNamespaceFlInExamplesChecker,
+)
 from ci.util.check_files import (
     CheckerResults,
     FileContentChecker,
@@ -142,6 +145,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     # Examples-only checkers
     checkers_by_scope["examples"] = [
         SerialPrintfChecker(),
+        UsingNamespaceFlInExamplesChecker(),
     ]
 
     # fl/ directory checkers with STRICT enforcement

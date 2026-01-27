@@ -1,5 +1,5 @@
 /// @file    FxWater.ino
-/// @brief   Water effect with XYMap
+/// @brief   Water effect with fl::XYMap
 /// @example FxWater.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
@@ -16,12 +16,11 @@
 #include "Arduino.h"
 #include "fl/xymap.h"
 
-using namespace fl;
 
 #define WIDTH 32
 #define HEIGHT 32
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 // the water needs 2 arrays each slightly bigger than the screen
 #define WATERWIDTH (WIDTH + 2)
@@ -37,13 +36,13 @@ void setup() {
 }
 
 // from: https://github.com/FastLED/FastLED/pull/202
-CRGB MyColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+fl::CRGB MyColorFromPaletteExtended(const fl::CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
   // Extract the four most significant bits of the index as a palette index.
   uint8_t index_4bit = (index >> 12);
   // Calculate the 8-bit offset from the palette index.
   uint8_t offset = (uint8_t)(index >> 4);
   // Get the palette entry from the 4-bit index
-  const CRGB* entry = &(pal[0]) + index_4bit;
+  const fl::CRGB* entry = &(pal[0]) + index_4bit;
   uint8_t red1   = entry->red;
   uint8_t green1 = entry->green;
   uint8_t blue1  = entry->blue;
@@ -80,11 +79,11 @@ CRGB MyColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_
     // nscale8x3_video(red1, green1, blue1, brightness);
     nscale8x3(red1, green1, blue1, brightness);
   }
-  return CRGB(red1, green1, blue1);
+  return fl::CRGB(red1, green1, blue1);
 }
 
 // Rectangular grid
-XYMap xyMap(WIDTH, HEIGHT, false);
+fl::XYMap xyMap(WIDTH, HEIGHT, false);
 
 // map X & Y coordinates onto a horizontal serpentine matrix layout
 uint16_t XY(uint8_t x, uint8_t y) {

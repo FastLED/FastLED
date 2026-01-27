@@ -4,7 +4,6 @@
 #include "fl/ui.h"
 #include "fl/dbg.h"
 
-using namespace fl;
 
 // Done by hand. Old school.
 class ToggleButton {
@@ -12,7 +11,7 @@ class ToggleButton {
   ToggleButton(int pin) : mPin(pin), mOn(false), mDebounceTimestamp(0), mChanged(false) {
     pinMode(mPin, OUTPUT);
     digitalWrite(mPin, LOW);
-    delay(1);
+    fl::delay(1);
   }
 
   // true - button is pressed.
@@ -65,7 +64,7 @@ class MidiShieldButton {
  public:
   MidiShieldButton(int pin) : mPin(pin) {
     pinMode(mPin, INPUT_PULLUP);
-    delay(1);
+    fl::delay(1);
   }
 
   bool Read() {
@@ -100,7 +99,7 @@ typedef MidiShieldButton DigitalButton;
 
 class CountingButton {
  public:
-  explicit CountingButton(int but_pin) : mButton(but_pin), mCurrVal(0), mUIButton("Counting UIButton") {
+  explicit CountingButton(int but_pin) : mButton(but_pin), mCurrVal(0), mUIButton("Counting fl::UIButton") {
     mDebounceTimestamp = fl::millis();
     mOn = Read();
   }
@@ -140,7 +139,7 @@ class CountingButton {
   bool mOn;
   int mCurrVal;
   unsigned long mDebounceTimestamp;
-  UIButton mUIButton;
+  fl::UIButton mUIButton;
 };
 
 class ColorSelector {

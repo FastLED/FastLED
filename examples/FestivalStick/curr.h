@@ -1,11 +1,11 @@
 /*
-Festival Stick - Corkscrew LED Mapping Demo
+Festival Stick - fl::Corkscrew LED Mapping Demo
 
 This example demonstrates proper corkscrew LED mapping for a festival stick
-(19+ turns, 288 LEDs) using the new Corkscrew ScreenMap functionality.
+(19+ turns, 288 LEDs) using the new fl::Corkscrew fl::ScreenMap functionality.
 
 Key Features:
-- Uses Corkscrew.toScreenMap() for accurate web interface visualization
+- Uses fl::Corkscrew.toScreenMap() for accurate web interface visualization
 - Draws patterns into a rectangular grid (frameBuffer)
 - Maps the rectangular grid to the corkscrew LED positions using readFrom()
 - Supports both noise patterns and manual LED positioning
@@ -15,7 +15,7 @@ Workflow:
 1. Draw patterns into frameBuffer (rectangular grid for easy 2D drawing)
 2. Use corkscrew.readFrom(frameBuffer) to map grid to corkscrew LED positions
 3. Display the corkscrew buffer directly via FastLED
-4. Web interface shows actual corkscrew spiral shape via ScreenMap
+4. Web interface shows actual corkscrew spiral shape via fl::ScreenMap
 
 */
 
@@ -39,9 +39,7 @@ Workflow:
 #include "fl/fx/fx_engine.h"
 #include "fl/fx/2d/animartrix.hpp"
 
-// #include "vec3.h"
-
-using namespace fl;
+// #include "fl::vec3.h"
 
 
 
@@ -65,130 +63,130 @@ using namespace fl;
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
-UITitle festivalStickTitle("Festival Stick - Advanced Version");
-UIDescription festivalStickDescription(
+fl::UITitle festivalStickTitle("Festival Stick - Advanced Version");
+fl::UIDescription festivalStickDescription(
     "# Festival Stick Demo\n\n"
     "This example demonstrates **proper corkscrew LED mapping** for a festival stick using FastLED's advanced mapping capabilities.\n\n"
     "## Key Features\n"
     "- **19+ turns** with 288 LEDs total\n"
-    "- Uses `Corkscrew.toScreenMap()` for accurate web interface visualization\n"
-    "- Multiple render modes: **Noise**, **Position**, **Fire**, **Wave**, and **Animartrix** effects\n"
+    "- Uses `fl::Corkscrew.toScreenMap()` for accurate web interface visualization\n"
+    "- Multiple render modes: **Noise**, **Position**, **Fire**, **Wave**, and **fl::Animartrix** effects\n"
     "- Real-time cylindrical surface mapping\n"
     "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects and configurable blur\n"
-    "- **Animartrix mode**: Advanced 2D animation effects with polar coordinate patterns\n\n"
+    "- **fl::Animartrix mode**: Advanced 2D animation effects with polar coordinate patterns\n\n"
     "## How It Works\n"
     "1. Draws patterns into a rectangular grid (`frameBuffer`)\n"
     "2. Maps the grid to corkscrew LED positions using `readFrom()`\n"
-    "3. Web interface shows the actual spiral shape via ScreenMap\n\n"
+    "3. Web interface shows the actual spiral shape via fl::ScreenMap\n\n"
     "*Select different render modes and adjust parameters to see various effects!*");
 
 // UIHelp festivalStickHelp("Festival Stick - Advanced Guide");
 
-// UIHelp corkscrewMappingHelp("Understanding Corkscrew Mapping");
+// UIHelp corkscrewMappingHelp("Understanding fl::Corkscrew Mapping");
 
 // UIHelp uiControlsHelp("UI Controls Guide");
 
 
 
-UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
-UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
-UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
-UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.0001f);
-UISlider brightness("Brightness", 255, 0, 255, 1);
+fl::UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
+fl::UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
+fl::UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
+fl::UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.0001f);
+fl::UISlider brightness("Brightness", 255, 0, 255, 1);
 
-UICheckbox autoAdvance("Auto Advance", true);
-UICheckbox allWhite("All White", false);
-UICheckbox splatRendering("Splat Rendering", true);
+fl::UICheckbox autoAdvance("Auto Advance", true);
+fl::UICheckbox allWhite("All White", false);
+fl::UICheckbox splatRendering("Splat Rendering", true);
 
 // Noise controls (grouped under noiseGroup)
 
-UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
-UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
+fl::UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
+fl::UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
-// UIDropdown examples - noise-related color palette
-string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-string renderModeOptions[] = { "Wave", "Animartrix", "Noise", "Position", "Fire" };
+// fl::UIDropdown examples - noise-related color palette
+fl::string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
+fl::string renderModeOptions[] = { "Wave", "fl::Animartrix", "Noise", "Position", "Fire" };
 
 
-UIDropdown paletteDropdown("Color Palette", paletteOptions);
-UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
+fl::UIDropdown paletteDropdown("Color Palette", paletteOptions);
+fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
 
 
 // fl::array<fl::pair<int, fl::string>> easeInfo = {
-//     pair(EASE_IN_QUAD, "EASE_IN_QUAD"),
-//     pair(EASE_OUT_QUAD, "EASE_OUT_QUAD"),
-//     pair(EASE_IN_OUT_QUAD, "EASE_IN_OUT_QUAD"),
-//     pair(EASE_IN_CUBIC, "EASE_IN_CUBIC"),
-//     pair(EASE_OUT_CUBIC, "EASE_OUT_CUBIC"),
-//     pair(EASE_IN_OUT_CUBIC, "EASE_IN_OUT_CUBIC"),
-//     pair(EASE_IN_SINE, "EASE_IN_SINE"),
-//     pair(EASE_OUT_SINE, "EASE_OUT_SINE"),
-//     pair(EASE_IN_OUT_SINE, "EASE_IN_OUT_SINE")
+//     fl::pair(fl::EASE_IN_QUAD, "fl::EASE_IN_QUAD"),
+//     fl::pair(fl::EASE_OUT_QUAD, "fl::EASE_OUT_QUAD"),
+//     fl::pair(fl::EASE_IN_OUT_QUAD, "fl::EASE_IN_OUT_QUAD"),
+//     fl::pair(fl::EASE_IN_CUBIC, "fl::EASE_IN_CUBIC"),
+//     fl::pair(fl::EASE_OUT_CUBIC, "fl::EASE_OUT_CUBIC"),
+//     fl::pair(fl::EASE_IN_OUT_CUBIC, "fl::EASE_IN_OUT_CUBIC"),
+//     fl::pair(fl::EASE_IN_SINE, "fl::EASE_IN_SINE"),
+//     fl::pair(fl::EASE_OUT_SINE, "fl::EASE_OUT_SINE"),
+//     fl::pair(fl::EASE_IN_OUT_SINE, "fl::EASE_IN_OUT_SINE")
 // };
 
 
 fl::vector<fl::string> easeInfo = {
-    "EASE_NONE",
-    "EASE_IN_QUAD",
-    "EASE_OUT_QUAD",
-    "EASE_IN_OUT_QUAD",
-    "EASE_IN_CUBIC",
-    "EASE_OUT_CUBIC",
-    "EASE_IN_OUT_CUBIC",
-    "EASE_IN_SINE",
-    "EASE_OUT_SINE",
-    "EASE_IN_OUT_SINE"
+    "fl::EASE_NONE",
+    "fl::EASE_IN_QUAD",
+    "fl::EASE_OUT_QUAD",
+    "fl::EASE_IN_OUT_QUAD",
+    "fl::EASE_IN_CUBIC",
+    "fl::EASE_OUT_CUBIC",
+    "fl::EASE_IN_OUT_CUBIC",
+    "fl::EASE_IN_SINE",
+    "fl::EASE_OUT_SINE",
+    "fl::EASE_IN_OUT_SINE"
 };
 
-EaseType getEaseType(fl::string value) {
-    if (value == "EASE_NONE") {
-        return EASE_NONE;
-    } else if (value == "EASE_IN_QUAD") {
-        return EASE_IN_QUAD;
-    } else if (value == "EASE_OUT_QUAD") {
-        return EASE_OUT_QUAD;
-    } else if (value == "EASE_IN_OUT_QUAD") {
-        return EASE_IN_OUT_QUAD;
-    } else if (value == "EASE_IN_CUBIC") {
-        return EASE_IN_CUBIC;
-    } else if (value == "EASE_OUT_CUBIC") {
-        return EASE_OUT_CUBIC;
-    } else if (value == "EASE_IN_OUT_CUBIC") {
-        return EASE_IN_OUT_CUBIC;
-    } else if (value == "EASE_IN_SINE") {
-        return EASE_IN_SINE;
-    } else if (value == "EASE_OUT_SINE") {
-        return EASE_OUT_SINE;
-    } else if (value == "EASE_IN_OUT_SINE") {
-        return EASE_IN_OUT_SINE;
+fl::EaseType getEaseType(fl::string value) {
+    if (value == "fl::EASE_NONE") {
+        return fl::EASE_NONE;
+    } else if (value == "fl::EASE_IN_QUAD") {
+        return fl::EASE_IN_QUAD;
+    } else if (value == "fl::EASE_OUT_QUAD") {
+        return fl::EASE_OUT_QUAD;
+    } else if (value == "fl::EASE_IN_OUT_QUAD") {
+        return fl::EASE_IN_OUT_QUAD;
+    } else if (value == "fl::EASE_IN_CUBIC") {
+        return fl::EASE_IN_CUBIC;
+    } else if (value == "fl::EASE_OUT_CUBIC") {
+        return fl::EASE_OUT_CUBIC;
+    } else if (value == "fl::EASE_IN_OUT_CUBIC") {
+        return fl::EASE_IN_OUT_CUBIC;
+    } else if (value == "fl::EASE_IN_SINE") {
+        return fl::EASE_IN_SINE;
+    } else if (value == "fl::EASE_OUT_SINE") {
+        return fl::EASE_OUT_SINE;
+    } else if (value == "fl::EASE_IN_OUT_SINE") {
+        return fl::EASE_IN_OUT_SINE;
     } else {
-        return EASE_NONE;
+        return fl::EASE_NONE;
     }
 }
 
 // Color boost controls
-UIDropdown saturationFunction("Saturation Function", easeInfo);
-UIDropdown luminanceFunction("Luminance Function", easeInfo);
+fl::UIDropdown saturationFunction("Saturation Function", easeInfo);
+fl::UIDropdown luminanceFunction("Luminance Function", easeInfo);
 
 // Fire-related UI controls (added for cylindrical fire effect)
-UISlider fireScaleXY("Fire Scale", 8, 1, 100, 1);              
-UISlider fireSpeedY("Fire SpeedY", 1.3, 1, 6, .1);             
-UISlider fireScaleX("Fire ScaleX", .3, 0.1, 3, .01);           
-UISlider fireInvSpeedZ("Fire Inverse SpeedZ", 20, 1, 100, 1);  
+fl::UISlider fireScaleXY("Fire Scale", 8, 1, 100, 1);              
+fl::UISlider fireSpeedY("Fire SpeedY", 1.3, 1, 6, .1);             
+fl::UISlider fireScaleX("Fire ScaleX", .3, 0.1, 3, .01);           
+fl::UISlider fireInvSpeedZ("Fire Inverse SpeedZ", 20, 1, 100, 1);  
 UINumberField firePalette("Fire Palette", 0, 0, 2);
 
 // Wave-related UI controls (cylindrical wave effects)
-UISlider waveSpeed("Wave Speed", 0.03f, 0.0f, 1.0f, 0.01f);
-UISlider waveDampening("Wave Dampening", 9.1f, 0.0f, 20.0f, 0.1f);
-UICheckbox waveHalfDuplex("Wave Half Duplex", true);
-UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
-UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
-UIButton waveTriggerButton("Trigger Wave");
+fl::UISlider waveSpeed("Wave Speed", 0.03f, 0.0f, 1.0f, 0.01f);
+fl::UISlider waveDampening("Wave Dampening", 9.1f, 0.0f, 20.0f, 0.1f);
+fl::UICheckbox waveHalfDuplex("Wave Half Duplex", true);
+fl::UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
+fl::UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
+fl::UIButton waveTriggerButton("Trigger Wave");
 UINumberField wavePalette("Wave Palette", 0, 0, 2);
 
 // Wave blur controls (added for smoother wave effects)
-UISlider waveBlurAmount("Wave Blur Amount", 50, 0, 172, 1);
-UISlider waveBlurPasses("Wave Blur Passes", 1, 1, 10, 1);             
+fl::UISlider waveBlurAmount("Wave Blur Amount", 50, 0, 172, 1);
+fl::UISlider waveBlurPasses("Wave Blur Passes", 1, 1, 10, 1);             
 
 // Fire color palettes (from FireCylinder)
 DEFINE_GRADIENT_PALETTE(firepal){
@@ -236,28 +234,28 @@ DEFINE_GRADIENT_PALETTE(waveRainbowpal){
     255, 0,   0,   255  // Blue (maximum wave)
 };
 
-// Create UIGroup for noise controls using variadic constructor
+// Create fl::UIGroup for noise controls using variadic constructor
 // This automatically assigns all specified controls to the "Noise Controls" group
-UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
-UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
-UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
-UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
-UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
-UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
+fl::UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
+fl::UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
+fl::UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
+fl::UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
+fl::UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
+fl::UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
 
-// Animartrix-related UI controls
-UINumberField animartrixIndex("Animartrix Animation", 5, 0, NUM_ANIMATIONS - 1);
-UINumberField animartrixColorOrder("Animartrix Color Order", 0, 0, 5);
-UISlider animartrixTimeSpeed("Animartrix Time Speed", 1, -10, 10, .1);
+// fl::Animartrix-related UI controls
+UINumberField animartrixIndex("fl::Animartrix Animation", 5, 0, fl::NUM_ANIMATIONS - 1);
+UINumberField animartrixColorOrder("fl::Animartrix Color Order", 0, 0, 5);
+fl::UISlider animartrixTimeSpeed("fl::Animartrix Time Speed", 1, -10, 10, .1);
 
-UIGroup animartrixGroup("Animartrix Controls", animartrixIndex, animartrixTimeSpeed, animartrixColorOrder);
+fl::UIGroup animartrixGroup("fl::Animartrix Controls", animartrixIndex, animartrixTimeSpeed, animartrixColorOrder);
 
 // Color palette for noise
-CRGBPalette16 noisePalette = PartyColors_p;
+fl::CRGBPalette16 noisePalette = PartyColors_p;
 uint8_t colorLoop = 1;
 
-// Option 1: Runtime Corkscrew (flexible, configurable at runtime)
-Corkscrew corkscrew(CORKSCREW_TURNS, NUM_LEDS);
+// Option 1: Runtime fl::Corkscrew (flexible, configurable at runtime)
+fl::Corkscrew corkscrew(CORKSCREW_TURNS, NUM_LEDS);
 
 // Simple position tracking - one variable for both modes
 static float currentPosition = 0.0f;
@@ -269,36 +267,36 @@ static uint32_t nextWaveTrigger = 0;
 
 
 
-// Option 2: Constexpr dimensions for compile-time array sizing
+// Option 2: Constexpr dimensions for compile-time fl::array sizing
 constexpr uint16_t CORKSCREW_WIDTH =
-    calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
+    fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
 constexpr uint16_t CORKSCREW_HEIGHT =
-    calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
+    fl::calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
 
-// Now you can use these for array initialization:
-// CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized
-// array
+// Now you can use these for fl::array initialization:
+// fl::CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized
+// fl::array
 
 // Create a corkscrew with:
 // - 30cm total length (300mm)
 // - 5cm width (50mm)
 // - 2mm LED inner diameter
 // - 24 LEDs per turn
-// ScreenMap screenMap = makeCorkScrew(NUM_LEDS,
+// fl::ScreenMap screenMap = makeCorkScrew(NUM_LEDS,
 // 300.0f, 50.0f, 2.0f, 24.0f);
 
-// vector<vec3f> mapCorkScrew = makeCorkScrew(args);
-ScreenMap screenMap;
-fl::shared_ptr<Grid<CRGB>> frameBufferPtr;
+// fl::vector<vec3f> mapCorkScrew = makeCorkScrew(args);
+fl::ScreenMap screenMap;
+fl::shared_ptr<fl::Grid<fl::CRGB>> frameBufferPtr;
 
 // Wave effect objects - declared here but initialized in setup()
-WaveFxPtr waveFx;
-Blend2dPtr waveBlend;
+fl::WaveFxPtr waveFx;
+fl::Blend2dPtr waveBlend;
 
-// Animartrix effect objects - declared here but initialized in setup()
-fl::unique_ptr<Animartrix> animartrix;
-fl::unique_ptr<FxEngine> fxEngine;
-WaveCrgbGradientMapPtr crgMap = fl::make_shared<WaveCrgbGradientMap>();
+// fl::Animartrix effect objects - declared here but initialized in setup()
+fl::unique_ptr<fl::Animartrix> animartrix;
+fl::unique_ptr<fl::FxEngine> fxEngine;
+fl::WaveCrgbGradientMapPtr crgMap = fl::make_shared<fl::WaveCrgbGradientMap>();
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)
@@ -306,7 +304,7 @@ void setup() {
     constexpr int height = CORKSCREW_HEIGHT; // = 18
 
 
-    // Noise controls are now automatically grouped by the UIGroup constructor
+    // Noise controls are now automatically grouped by the fl::UIGroup constructor
     // The noiseGroup variadic constructor automatically called setGroup() on all controls
 
 
@@ -314,7 +312,7 @@ void setup() {
     // int width = corkscrew.cylinder_width();
     // int height = corkscrew.cylinder_height();
 
-    XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);
+    fl::XYMap xyMap = fl::XYMap::constructRectangularGrid(width, height, 0);
 
     // Use the corkscrew's internal buffer for the LED strip
     CLEDController *controller =
@@ -323,13 +321,13 @@ void setup() {
     // CLEDController *controller =
     //     &FastLED.addLeds<WS2812, 3, BGR>(stripLeds, NUM_LEDS);
 
-    // NEW: Create ScreenMap directly from Corkscrew using toScreenMap()
+    // NEW: Create fl::ScreenMap directly from fl::Corkscrew using toScreenMap()
     // This maps each LED index to its exact position on the corkscrew spiral
     // instead of using a rectangular grid mapping
-    ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
+    fl::ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
     
     // OLD WAY (rectangular grid - not accurate for corkscrew visualization):
-    // ScreenMap screenMap = xyMap.toScreenMap();
+    // fl::ScreenMap screenMap = xyMap.toScreenMap();
     // screenMap.setDiameter(.2f);
 
     // Set the corkscrew screen map for the controller
@@ -337,44 +335,44 @@ void setup() {
     controller->setScreenMap(corkscrewScreenMap);
     
     // Initialize wave effects for cylindrical surface
-    XYMap xyRect(width, height, false); // Rectangular grid for wave simulation
-    WaveFx::Args waveArgs;
-    waveArgs.factor = SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
+    fl::XYMap xyRect(width, height, false); // Rectangular grid for wave simulation
+    fl::WaveFx::Args waveArgs;
+    waveArgs.factor = fl::SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
     waveArgs.half_duplex = true;                     // Only positive waves
     waveArgs.auto_updates = true;                    // Auto-update simulation
     waveArgs.speed = 0.16f;                          // Wave propagation speed
     waveArgs.dampening = 6.0f;                       // Wave energy loss
     waveArgs.x_cyclical = true;                      // Enable cylindrical wrapping!
-    waveArgs.crgbMap = fl::make_shared<WaveCrgbGradientMap>(waveBluepal); // Default color palette
-    
+    waveArgs.crgbMap = fl::make_shared<fl::WaveCrgbGradientMap>(waveBluepal); // Default color palette
+
     // Create wave effect with cylindrical mapping
-    waveFx = fl::make_shared<WaveFx>(xyRect, waveArgs);
+    waveFx = fl::make_shared<fl::WaveFx>(xyRect, waveArgs);
     
     // Create blender for wave effects (allows multiple wave layers in future)
-    waveBlend = fl::make_shared<Blend2d>(xyRect);
+    waveBlend = fl::make_shared<fl::Blend2d>(xyRect);
     waveBlend->add(waveFx);
-    
-    // Initialize Animartrix effect
-    XYMap animartrixXyMap = XYMap::constructRectangularGrid(width, height, 0);
-    animartrix.reset(new Animartrix(animartrixXyMap, POLAR_WAVES));
-    fxEngine.reset(new FxEngine(width * height));
+
+    // Initialize fl::Animartrix effect
+    fl::XYMap animartrixXyMap = fl::XYMap::constructRectangularGrid(width, height, 0);
+    animartrix.reset(new fl::Animartrix(animartrixXyMap, fl::POLAR_WAVES));
+    fxEngine.reset(new fl::FxEngine(width * height));
     fxEngine->addFx(*animartrix);
     
-    // Demonstrate UIGroup functionality for noise controls
+    // Demonstrate fl::UIGroup functionality for noise controls
     FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
     FL_WARN("  This group contains noise pattern controls:");
     FL_WARN("  - Use Noise Pattern toggle");
     FL_WARN("  - Noise Scale and Speed sliders");
     FL_WARN("  - Color Palette selection for noise");
-    FL_WARN("  UIGroup automatically applied group membership via variadic constructor");
+    FL_WARN("  fl::UIGroup automatically applied group membership via variadic constructor");
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
     renderModeDropdown.setSelectedIndex(0); // Fire (new default)
     
     // Add onChange callbacks for dropdowns
-    paletteDropdown.onChanged([](UIDropdown &dropdown) {
-        string selectedPalette = dropdown.value();
+    paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
+        fl::string selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
         if (selectedPalette == "Party") {
             noisePalette = PartyColors_p;
@@ -389,8 +387,8 @@ void setup() {
         }
     });
     
-    renderModeDropdown.onChanged([](UIDropdown &dropdown) {
-        string mode = dropdown.value();
+    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
+        fl::string mode = dropdown.value();
         // Simple example of using getOption()
         for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
             if(dropdown.getOption(i) == mode) {
@@ -494,7 +492,7 @@ void fillFrameBufferNoise() {
             
             // Apply data smoothing if enabled
             if(dataSmoothing) {
-                CRGB oldColor = frameBufferPtr->at(x, y);
+                fl::CRGB oldColor = frameBufferPtr->at(x, y);
                 uint8_t olddata = (oldColor.r + oldColor.g + oldColor.b) / 3; // Simple brightness extraction
                 uint8_t newdata = scale8(olddata, dataSmoothing) + scale8(data, 256 - dataSmoothing);
                 data = newdata;
@@ -519,11 +517,11 @@ void fillFrameBufferNoise() {
             // }
             
             // Get color from palette and set pixel
-            CRGB color = ColorFromPalette(noisePalette, index, bri);
+            fl::CRGB color = ColorFromPalette(noisePalette, index, bri);
             
             // Apply color boost using ease functions
-            EaseType sat_ease = getEaseType(saturationFunction.value());
-            EaseType lum_ease = getEaseType(luminanceFunction.value());
+            fl::EaseType sat_ease = getEaseType(saturationFunction.value());
+            fl::EaseType lum_ease = getEaseType(luminanceFunction.value());
             color = color.colorBoost(sat_ease, lum_ease);
             
             frameBufferPtr->at(x, y) = color;
@@ -538,22 +536,22 @@ void drawNoise(uint32_t now) {
 
 void draw(float pos) {
     if (splatRendering) {
-        Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
+        fl::Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         //FL_WARN("pos_tile: " << pos_tile);
-        CRGB color = CRGB::Blue;
+        fl::CRGB color = fl::CRGB::Blue;
         // Apply color boost using ease functions
-        EaseType sat_ease = getEaseType(saturationFunction.value());
-        EaseType lum_ease = getEaseType(luminanceFunction.value());
+        fl::EaseType sat_ease = getEaseType(saturationFunction.value());
+        fl::EaseType lum_ease = getEaseType(luminanceFunction.value());
         color = color.colorBoost(sat_ease, lum_ease);
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
-                Tile2x2_u8_wrap::Entry data = pos_tile.at(dx, dy);
-                vec2<u16> wrapped_pos = data.first; // Already wrapped position
+                fl::Tile2x2_u8_wrap::Entry data = pos_tile.at(dx, dy);
+                fl::vec2<fl::u16> wrapped_pos = data.first; // Already wrapped position
                 uint8_t alpha = data.second;      // Alpha value
 
                 if (alpha > 0) { // Only draw if there's some alpha
-                    CRGB c = color;
+                    fl::CRGB c = color;
                     c.nscale8(alpha); // Scale the color by the alpha value
                     frameBufferPtr->at(wrapped_pos.x, wrapped_pos.y) = c;
                 }
@@ -561,13 +559,13 @@ void draw(float pos) {
         }
     } else {
         // None splat rendering, looks aweful.
-        vec2f pos_vec2f = corkscrew.at_no_wrap(pos);
-        vec2<u16> pos_i16 = vec2<u16>(pos_vec2f.x, pos_vec2f.y);
+        fl::vec2f pos_vec2f = corkscrew.at_no_wrap(pos);
+        fl::vec2<fl::u16> pos_i16 = fl::vec2<fl::u16>(pos_vec2f.x, pos_vec2f.y);
         
-        CRGB color = CRGB::Blue;
+        fl::CRGB color = fl::CRGB::Blue;
         // Apply color boost using ease functions
-        EaseType sat_ease = getEaseType(saturationFunction.value());
-        EaseType lum_ease = getEaseType(luminanceFunction.value());
+        fl::EaseType sat_ease = getEaseType(saturationFunction.value());
+        fl::EaseType lum_ease = getEaseType(luminanceFunction.value());
         color = color.colorBoost(sat_ease, lum_ease);
         
         // Now map the cork screw position to the cylindrical buffer that we
@@ -576,7 +574,7 @@ void draw(float pos) {
     }
 }
 
-CRGBPalette16 getFirePalette() {
+fl::CRGBPalette16 getFirePalette() {
     int paletteIndex = (int)firePalette.value();
     switch (paletteIndex) {
     case 0:
@@ -619,7 +617,7 @@ uint8_t getFirePaletteIndex(uint32_t millis32, int width, int max_width, int hei
 }
 
 void fillFrameBufferFire(uint32_t now) {
-    CRGBPalette16 myPal = getFirePalette();
+    fl::CRGBPalette16 myPal = getFirePalette();
     
     // Calculate the current y-offset for animation (makes the fire move)
     uint32_t y_speed = now * fireSpeedY.value();
@@ -635,11 +633,11 @@ void fillFrameBufferFire(uint32_t now) {
                 getFirePaletteIndex(now, w, width, h, height, y_speed);
             
             // Get the actual RGB color from the palette
-            CRGB color = ColorFromPalette(myPal, palette_index, 255);
+            fl::CRGB color = ColorFromPalette(myPal, palette_index, 255);
             
             // Apply color boost using ease functions
-            EaseType sat_ease = getEaseType(saturationFunction.value());
-            EaseType lum_ease = getEaseType(luminanceFunction.value());
+            fl::EaseType sat_ease = getEaseType(saturationFunction.value());
+            fl::EaseType lum_ease = getEaseType(luminanceFunction.value());
             color = color.colorBoost(sat_ease, lum_ease);
             
             // Set the pixel in the frame buffer
@@ -654,7 +652,7 @@ void drawFire(uint32_t now) {
 }
 
 // Wave effect helper functions
-CRGBPalette16 getWavePalette() {
+fl::CRGBPalette16 getWavePalette() {
     int paletteIndex = (int)wavePalette.value();
     switch (paletteIndex) {
     case 0:
@@ -723,7 +721,7 @@ void drawWave(uint32_t now) {
     waveFx->setXCylindrical(true); // Always keep cylindrical for corkscrew
     
     // Update wave color palette
-    CRGBPalette16 currentPalette = getWavePalette();
+    fl::CRGBPalette16 currentPalette = getWavePalette();
     crgMap->setGradient(currentPalette);
 
 
@@ -742,7 +740,7 @@ void drawWave(uint32_t now) {
     
     // Draw the wave effect directly to the frame buffer
     // Create a DrawContext for the wave renderer
-    Fx::DrawContext waveContext(now, frameBufferPtr->data());
+    fl::Fx::DrawContext waveContext(now, frameBufferPtr->data());
     waveBlend->draw(waveContext);
 }
 
@@ -758,7 +756,7 @@ void drawAnimartrix(uint32_t now) {
     }
     
     // Draw the animartrix effect directly to the frame buffer
-    CRGB* dst = corkscrew.rawData();
+    fl::CRGB* dst = corkscrew.rawData();
     fxEngine->draw(now, dst);
 }
 
@@ -769,9 +767,9 @@ void loop() {
     frameBufferPtr->clear();
 
     if (allWhite) {
-        CRGB whiteColor = CRGB(8, 8, 8);
-        for (u32 x = 0; x < frameBufferPtr->width(); x++) {
-            for (u32 y = 0; y < frameBufferPtr->height(); y++) {
+        fl::CRGB whiteColor = fl::CRGB(8, 8, 8);
+        for (fl::u32 x = 0; x < frameBufferPtr->width(); x++) {
+            for (fl::u32 y = 0; y < frameBufferPtr->height(); y++) {
                 frameBufferPtr->at(x, y) = whiteColor;
             }
         }
@@ -790,7 +788,7 @@ void loop() {
     } else if (renderModeDropdown.value() == "Wave") {
 
         drawWave(now);
-    } else if (renderModeDropdown.value() == "Animartrix") {
+    } else if (renderModeDropdown.value() == "fl::Animartrix") {
         drawAnimartrix(now);
     } else {
         draw(pos);
@@ -798,7 +796,7 @@ void loop() {
 
 
     // Use the new readFrom workflow:
-    // 1. Read directly from the frameBuffer Grid into the corkscrew's internal buffer
+    // 1. Read directly from the frameBuffer fl::Grid into the corkscrew's internal buffer
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
     const bool use_multi_sampling = splatRendering;

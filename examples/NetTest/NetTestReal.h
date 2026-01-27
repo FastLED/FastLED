@@ -75,16 +75,16 @@
 #include "fl/async.h"     // FastLED async utilities (await_top_level, etc.)
 #include <FastLED.h>      // FastLED core library
 
-using namespace fl;      // Use FastLED namespace for cleaner code
+// Use FastLED namespace for cleaner code
 
 // LED CONFIGURATION
 #define NUM_LEDS 10      // Number of LEDs in our strip
 #define DATA_PIN 2       // Arduino pin connected to LED data line
 
-CRGB leds[NUM_LEDS];
+fl::CRGB leds[NUM_LEDS];
 
 // Timing and approach control variables for tutorial cycling
-static u32 last_request_time = 0;        // Track last request time for 10-second intervals
+static fl::u32 last_request_time = 0;        // Track last request time for 10-second intervals
 static int approach_counter = 0;                    // Cycle through 4 different approaches
 
 void setup() {
@@ -92,7 +92,7 @@ void setup() {
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
 
     // Set all LEDs to dark red initially (indicates waiting/starting state)
-    fill_solid(leds, NUM_LEDS, CRGB(64, 0, 0)); // Dark red = starting up
+    fill_solid(leds, NUM_LEDS, fl::CRGB(64, 0, 0)); // Dark red = starting up
     FastLED.show();
 
     // Tutorial introduction messages
@@ -137,7 +137,7 @@ void test_promise_approach() {
             }
 
             // Visual feedback: Green LEDs indicate promise-based success
-            fill_solid(leds, NUM_LEDS, CRGB(0, 64, 0)); // Green for promise success
+            fill_solid(leds, NUM_LEDS, fl::CRGB(0, 64, 0)); // Green for promise success
         } else {
             // HTTP error (like 404, 500, etc.) - still a valid response, just an error status
             FL_WARN("ERROR [Promise] HTTP Error! Status: "
@@ -145,7 +145,7 @@ void test_promise_approach() {
             FL_WARN("CONTENT [Promise] Error content: " << response.text());
 
             // Visual feedback: Orange LEDs indicate HTTP error
-            fill_solid(leds, NUM_LEDS, CRGB(64, 32, 0)); // Orange for HTTP error
+            fill_solid(leds, NUM_LEDS, fl::CRGB(64, 32, 0)); // Orange for HTTP error
         }
     })
     // TUTORIAL: Chain .catch_() for network/connection error handling  
@@ -155,7 +155,7 @@ void test_promise_approach() {
         FL_WARN("ERROR [Promise] Network Error: " << network_error.message);
 
         // Visual feedback: Red LEDs indicate network failure
-        fill_solid(leds, NUM_LEDS, CRGB(64, 0, 0)); // Red for network error
+        fill_solid(leds, NUM_LEDS, fl::CRGB(64, 0, 0)); // Red for network error
     });
 }
 
@@ -205,14 +205,14 @@ void test_await_approach() {
         }
 
         // Visual feedback: Blue LEDs indicate await-based success (different from promise)
-        fill_solid(leds, NUM_LEDS, CRGB(0, 0, 64)); // Blue for await success
+        fill_solid(leds, NUM_LEDS, fl::CRGB(0, 0, 64)); // Blue for await success
     } else {
         // Either HTTP error OR network error - both end up here
         // TUTORIAL: result.error_message() is a convenience method for getting error text
         FL_WARN("ERROR [Await] Request failed: " << result.error_message());
 
         // Visual feedback: Red LEDs for any await error
-        fill_solid(leds, NUM_LEDS, CRGB(64, 0, 0)); // Red for any error
+        fill_solid(leds, NUM_LEDS, fl::CRGB(64, 0, 0)); // Red for any error
     }
 }
 
@@ -259,23 +259,23 @@ void test_json_response() {
                 }
                 
                 // Visual feedback: Blue LEDs for successful JSON parsing
-                fill_solid(leds, NUM_LEDS, CRGB(0, 0, 128)); // Blue for JSON success
+                fill_solid(leds, NUM_LEDS, fl::CRGB(0, 0, 128)); // Blue for JSON success
                 
             } else {
                 FL_WARN("INFO [JSON Promise] Response is not JSON format");
                 // Visual feedback: Yellow for non-JSON response
-                fill_solid(leds, NUM_LEDS, CRGB(64, 64, 0)); // Yellow for non-JSON
+                fill_solid(leds, NUM_LEDS, fl::CRGB(64, 64, 0)); // Yellow for non-JSON
             }
         } else {
             FL_WARN("ERROR [JSON Promise] HTTP error: " << response.status() 
                     << " " << response.status_text());
             // Visual feedback: Red LEDs for HTTP error
-            fill_solid(leds, NUM_LEDS, CRGB(64, 0, 0)); // Red for HTTP error
+            fill_solid(leds, NUM_LEDS, fl::CRGB(64, 0, 0)); // Red for HTTP error
         }
     }).catch_([](const fl::Error& error) {
         FL_WARN("ERROR [JSON Promise] Network error: " << error.message);
         // Visual feedback: Purple LEDs for network error
-        fill_solid(leds, NUM_LEDS, CRGB(64, 0, 64)); // Purple for network error
+        fill_solid(leds, NUM_LEDS, fl::CRGB(64, 0, 64)); // Purple for network error
     });
     
     FastLED.show();
@@ -337,19 +337,19 @@ void test_json_await() {
             }
             
             // Visual feedback: Cyan LEDs for successful await JSON processing
-            fill_solid(leds, NUM_LEDS, CRGB(0, 128, 128)); // Cyan for await JSON success
+            fill_solid(leds, NUM_LEDS, fl::CRGB(0, 128, 128)); // Cyan for await JSON success
             
         } else {
             FL_WARN("INFO [JSON Await] Response is not JSON format");
             // Visual feedback: Orange for non-JSON with await
-            fill_solid(leds, NUM_LEDS, CRGB(128, 32, 0)); // Orange for non-JSON await
+            fill_solid(leds, NUM_LEDS, fl::CRGB(128, 32, 0)); // Orange for non-JSON await
         }
         
     } else {
         // TUTORIAL: Handle request failures (network or HTTP errors)
         FL_WARN("ERROR [JSON Await] Request failed: " << result.error_message());
         // Visual feedback: Red LEDs for any await error
-        fill_solid(leds, NUM_LEDS, CRGB(128, 0, 0)); // Red for await error
+        fill_solid(leds, NUM_LEDS, fl::CRGB(128, 0, 0)); // Red for await error
     }
     
     FastLED.show();
