@@ -552,27 +552,6 @@ void SPIQuadRP2040::cleanup() {
     }
 }
 
-// ============================================================================
-// Static Registration - New Polymorphic Pattern
-// ============================================================================
-
-namespace platform {
-
-/// @brief Initialize RP2040/RP2350 SpiHw4 instances
-///
-/// This function is called lazily by SpiHw4::getAll() on first access.
-/// It replaces the old FL_INIT-based static initialization.
-void initSpiHw4Instances() {
-    // Create 2 logical SPI buses (each uses separate PIO state machine)
-    static auto controller0 = fl::make_shared<SPIQuadRP2040>(0, "SPI0");
-    static auto controller1 = fl::make_shared<SPIQuadRP2040>(1, "SPI1");
-
-    SpiHw4::registerInstance(controller0);
-    SpiHw4::registerInstance(controller1);
-}
-
-}  // namespace platform
-
 }  // namespace fl
 
 #endif  // PICO_RP2040 || PICO_RP2350 || ARDUINO_ARCH_RP2040 || ARDUINO_ARCH_RP2350

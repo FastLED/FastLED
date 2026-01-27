@@ -23,6 +23,11 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/dbg.h"
 
+// Include concrete implementations BEFORE namespace to avoid nested namespace errors
+#include "platforms/arm/rp/rpcommon/spi_hw_2_rp.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/spi_hw_4_rp.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/spi_hw_8_rp.cpp.hpp"
+
 namespace fl {
 namespace detail {
 
@@ -33,9 +38,6 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lowest (2-lane dual-SPI)
 
 /// @brief Register RP2040/RP2350 SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    // Include concrete SPIDualRP2040 implementation
-    #include "platforms/arm/rp/rpcommon/spi_hw_2_rp.cpp.hpp"
-
     FL_DBG("RP2040/RP2350: Registering SpiHw2 instances");
 
     // Create 2 logical SPI buses (each uses separate PIO state machine)
@@ -50,9 +52,6 @@ static void addSpiHw2IfPossible() {
 
 /// @brief Register RP2040/RP2350 SpiHw4 instances
 static void addSpiHw4IfPossible() {
-    // Include concrete SPIQuadRP2040 implementation
-    #include "platforms/arm/rp/rpcommon/spi_hw_4_rp.cpp.hpp"
-
     FL_DBG("RP2040/RP2350: Registering SpiHw4 instances");
 
     // Create 2 logical SPI buses (each uses separate PIO state machine)
@@ -67,14 +66,11 @@ static void addSpiHw4IfPossible() {
 
 /// @brief Register RP2040/RP2350 SpiHw8 instances
 static void addSpiHw8IfPossible() {
-    // Include concrete SPIOctalRP2040 implementation
-    #include "platforms/arm/rp/rpcommon/spi_hw_8_rp.cpp.hpp"
-
     FL_DBG("RP2040/RP2350: Registering SpiHw8 instances");
 
     // Create 2 logical SPI buses (each uses separate PIO state machine)
-    static auto controller0 = fl::make_shared<SPIOctalRP2040>(0, "SPI0");
-    static auto controller1 = fl::make_shared<SPIOctalRP2040>(1, "SPI1");
+    static auto controller0 = fl::make_shared<SpiHw8RP2040>(0, "SPI0");
+    static auto controller1 = fl::make_shared<SpiHw8RP2040>(1, "SPI1");
 
     SpiHw8::registerInstance(controller0);
     SpiHw8::registerInstance(controller1);
@@ -99,7 +95,7 @@ namespace platform {
 /// Platform availability:
 /// - RP2040: All three (2 PIO blocks × 4 state machines = 8 total)
 /// - RP2350: All three (3 PIO blocks × 4 state machines = 12 total)
-void initSpiHardware() {
+inline void initSpiHardware() {
     FL_DBG("RP2040/RP2350: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)

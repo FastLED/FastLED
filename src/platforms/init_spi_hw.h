@@ -15,6 +15,8 @@
 
 // ok no namespace fl - Platform dispatch header only
 
+#include "platforms/is_platform.h"
+
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
     #include "platforms/stub/init_spi_hw.h"
 #elif defined(ESP32)
