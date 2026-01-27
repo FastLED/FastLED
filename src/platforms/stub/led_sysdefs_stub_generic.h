@@ -62,7 +62,8 @@ extern "C" {
     uint32_t millis(void);
     uint32_t micros(void);
 
-    void delay(unsigned long ms);
+    // delay() is provided by fl::delay() via "using fl::delay;" in FastLED.h
+    // This gives sketches the async-pumping version automatically
     void yield(void);
 }
 #endif // FASTLED_NO_ARDUINO_STUBS
