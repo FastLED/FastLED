@@ -7,4 +7,5 @@
 #include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/rmt_5/network_state_tracker.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_controller_lowlevel.cpp.hpp"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.cpp.hpp"
