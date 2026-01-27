@@ -263,7 +263,7 @@ void CFastLED::delay(unsigned long ms) {
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
 		// forward
-		::delay(1);
+		fl::delay(1);
 #endif
 		show();
 		yield();

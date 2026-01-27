@@ -14,8 +14,7 @@ uint32_t millis();
 // Replacement for 'micros' in WebAssembly context
 uint32_t micros();
 
-// Replacement for 'delay' in WebAssembly context
-void delay(int ms);
+// Note: delay() removed - FastLED.h provides via "using fl::delay;"
 void delayMicroseconds(int micros);
 }
 

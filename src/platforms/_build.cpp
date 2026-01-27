@@ -8,6 +8,7 @@
 
 // Subdirectory implementations (alphabetical order)
 #include "platforms/adafruit/_build.hpp"
+#include "platforms/arduino/_build.hpp"
 #include "platforms/arm/d21/_build.hpp"
 #include "platforms/arm/d51/_build.hpp"
 #include "platforms/arm/mgm240/_build.hpp"

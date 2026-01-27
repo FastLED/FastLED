@@ -426,7 +426,7 @@ void SpiPeripheralMockImpl::delay(uint32_t ms) {
     // Use portable delay abstraction:
     // - Arduino: Arduino delay() function
     // - Host: time_stub.h delay() (can be fast-forwarded for testing)
-    ::delay(static_cast<int>(ms));
+    fl::delay(ms);
 }
 
 uint64_t SpiPeripheralMockImpl::getMicroseconds() {

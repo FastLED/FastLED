@@ -355,7 +355,7 @@ uint64_t LcdRgbPeripheralMockImpl::getMicroseconds() {
 }
 
 void LcdRgbPeripheralMockImpl::delay(uint32_t ms) {
-    ::delay(static_cast<int>(ms));
+    fl::delay(ms);
 }
 
 //=============================================================================

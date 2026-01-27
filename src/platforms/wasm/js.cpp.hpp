@@ -26,6 +26,7 @@
 #include "js.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/stl/time.h"
+#include "platforms/delay_platform.h"
 
 // extern setup and loop which will be supplied by the sketch.
 extern void setup();
@@ -42,32 +43,7 @@ namespace fl {
 
 extern "C" {
 
-/// @brief Custom delay implementation for WASM that pumps async tasks
-/// @param ms Number of milliseconds to delay
-/// 
-/// This optimized delay() breaks the delay period into 1ms chunks and pumps
-/// all async tasks (fetch, timers, etc.) during each interval, making delay 
-/// time useful for processing async operations instead of just blocking.
-void delay(int ms) {
-    if (ms <= 0) {
-        return;
-    }
-
-    uint32_t end = fl::millis() + ms;
-
-    // Break delay into 1ms chunks and pump all async tasks
-    while (fl::millis() < end) {
-        // Update all async tasks (fetch, timers, etc.) during delay
-        fl::async_run();
-
-        if (fl::millis() >= end) {
-            break;
-        }
-
-        // In worker thread mode (PROXY_TO_PTHREAD), busy-wait is acceptable
-        // since we're not blocking the browser's main thread or UI
-    }
-}
+// Note: delay() removed - FastLED.h provides via "using fl::delay;"
 
 /// @brief Microsecond delay implementation for WASM  
 /// @param micros Number of microseconds to delay

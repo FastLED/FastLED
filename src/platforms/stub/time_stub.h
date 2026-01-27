@@ -12,11 +12,14 @@
 extern "C" {
     uint32_t millis(void);
     uint32_t micros(void);
-    void delay(unsigned long ms);
+    // Note: delay() removed - FastLED.h provides via "using fl::delay;"
     void delayMicroseconds(unsigned long us);
     void yield(void);
 }
 
 // C++ function to override delay behavior for fast testing
 void setDelayFunction(const fl::function<void(uint32_t)>& delayFunc);
+
+// Check if delay override is active (for fast testing)
+bool isDelayOverrideActive(void);
 #endif  // !ARDUINO || FASTLED_USE_STUB_ARDUINO

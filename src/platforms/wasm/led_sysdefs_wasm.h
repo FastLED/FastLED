@@ -50,6 +50,6 @@ extern "C" {
 // uint32_t millis(void);
 // uint32_t micros(void);
 
-void delay(int ms);
+// Note: delay() removed - FastLED.h provides via "using fl::delay;"
 void yield(void);
 }

@@ -122,7 +122,7 @@ CRGBPalette16 gCurrentPalette;
 CRGBPalette16 gTargetPalette;
 
 void setup() {
-  ::delay( 3000UL ); //safety startup delay
+  delay(3000); // safety startup delay
   FastLED.setMaxPowerInVoltsAndMilliamps( VOLTS, MAX_MA);
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip);

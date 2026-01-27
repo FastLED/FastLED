@@ -11,6 +11,7 @@
 #include "platforms/wasm/js.cpp.hpp"
 #include "platforms/wasm/js_bindings.cpp.hpp"
 #include "platforms/wasm/js_fetch.cpp.hpp"
+#include "platforms/wasm/platform_delay.cpp.hpp"
 #include "platforms/wasm/timer.cpp.hpp"
 #include "platforms/wasm/ui.cpp.hpp"
 #include "platforms/wasm/ui_audio_wasm.cpp.hpp"

@@ -84,19 +84,50 @@ template<cycle_t CYCLES> inline void delaycycles_min1() {
 /// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
 void delay(u32 ms, bool run_async = true);
 
-/// Overload for single-argument int to avoid ambiguity with Arduino's delay(unsigned long)
-/// This provides an exact match for delay(500) style calls with int literals
+/// Overload for signed int to avoid ambiguity with Arduino's delay(unsigned long)
 /// @param ms Milliseconds to delay
 inline void delay(int ms) {
     delay(static_cast<u32>(ms), true);
 }
 
-/// Overload for two-argument int to support delay(500, false) style calls
+/// Overload for signed long to avoid ambiguity with Arduino's delay(unsigned long)
+/// @param ms Milliseconds to delay
+inline void delay(long ms) {
+    delay(static_cast<u32>(ms), true);
+}
+
+#if !defined(__AVR__) && !defined(FL_IS_ARM) && !defined(__arm__) && !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+/// Overload for unsigned long to match Arduino's delay(unsigned long) exactly
+/// Only enabled on platforms where unsigned long != u32 (e.g., ESP32 where u32 is unsigned int)
+/// @param ms Milliseconds to delay
+inline void delay(unsigned long ms) {
+    delay(static_cast<u32>(ms), true);
+}
+#endif
+
+/// Overload for signed int with async flag
 /// @param ms Milliseconds to delay
 /// @param run_async If true, pump async tasks during delay
 inline void delay(int ms, bool run_async) {
     delay(static_cast<u32>(ms), run_async);
 }
+
+/// Overload for signed long with async flag
+/// @param ms Milliseconds to delay
+/// @param run_async If true, pump async tasks during delay
+inline void delay(long ms, bool run_async) {
+    delay(static_cast<u32>(ms), run_async);
+}
+
+#if !defined(__AVR__) && !defined(FL_IS_ARM) && !defined(__arm__)
+/// Overload for unsigned long with async flag
+/// Only enabled on platforms where unsigned long != u32
+/// @param ms Milliseconds to delay
+/// @param run_async If true, pump async tasks during delay
+inline void delay(unsigned long ms, bool run_async) {
+    delay(static_cast<u32>(ms), run_async);
+}
+#endif
 
 /// Delay for a given number of milliseconds (legacy - no async pumping)
 /// @param ms Milliseconds to delay
@@ -117,19 +148,6 @@ inline void delayMicros(u32 us) {
 /// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
 inline void delayMs(u32 ms, bool run_async = true) {
   delay(ms, run_async);
-}
-
-/// Overload for single-argument int to avoid ambiguity
-/// @param ms Milliseconds to delay
-inline void delayMs(int ms) {
-  delay(static_cast<u32>(ms), true);
-}
-
-/// Overload for two-argument int to support delayMs(500, false) style calls
-/// @param ms Milliseconds to delay
-/// @param run_async If true, pump async tasks during delay
-inline void delayMs(int ms, bool run_async) {
-  delay(static_cast<u32>(ms), run_async);
 }
 
 /// Shorter alias for delayMicroseconds

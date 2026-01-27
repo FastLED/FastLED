@@ -355,7 +355,7 @@ uint64_t I2sLcdCamPeripheralMockImpl::getMicroseconds() {
 }
 
 void I2sLcdCamPeripheralMockImpl::delay(uint32_t ms) {
-    ::delay(static_cast<int>(ms));
+    fl::delay(ms);
 }
 
 //=============================================================================

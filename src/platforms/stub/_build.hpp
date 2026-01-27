@@ -7,6 +7,7 @@
 #include "platforms/stub/fastspi_stub_generic.cpp.hpp"
 #include "platforms/stub/fs_stub.cpp.hpp"
 #include "platforms/stub/led_sysdefs_stub.cpp.hpp"
+#include "platforms/stub/platform_delay.cpp.hpp"
 #include "platforms/stub/spi_16_stub.cpp.hpp"
 #include "platforms/stub/spi_1_stub.cpp.hpp"
 #include "platforms/stub/spi_2_stub.cpp.hpp"

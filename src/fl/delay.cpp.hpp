@@ -16,18 +16,19 @@
 // ============================================================================
 
 #include "platforms/delay.h"
+#include "platforms/delay_platform.h"
 
 #if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
 #include "Arduino.h"  // okay banned header (Arduino platform API required for delay functions)
 #endif
 
-#ifdef FASTLED_STUB_IMPL
-#include "fl/stl/thread.h"
-#include "fl/stl/chrono.h"
-#endif
-
 #if SKETCH_HAS_LOTS_OF_MEMORY
 #include "fl/async.h"
+#endif
+
+// Include stub time header for delay override check (only on stub platform)
+#if defined(FASTLED_STUB_IMPL) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
+#include "platforms/stub/time_stub.h"  // ok platform headers (stub-specific delay override check)
 #endif
 
 namespace fl {
@@ -35,28 +36,7 @@ namespace fl {
 // ============================================================================
 // Internal platform-specific delay helpers
 // ============================================================================
-
-namespace {
-
-/// Raw sleep (no async pumping) - platform-agnostic
-inline void raw_sleep_ms(fl::u32 ms) {
-#ifdef FASTLED_STUB_IMPL
-  fl::this_thread::sleep_for(fl::chrono::milliseconds(ms));
-#elif defined(ARDUINO)
-  ::delay((unsigned long)ms);
-#endif
-}
-
-/// Single millisecond sleep (used in async pumping loop)
-inline void raw_sleep_1ms() {
-#ifdef FASTLED_STUB_IMPL
-  fl::this_thread::sleep_for(fl::chrono::milliseconds(1));
-#elif defined(ARDUINO)
-  ::delay(1);
-#endif
-}
-
-}  // anonymous namespace
+// (Moved to fl::platform::delay() - no longer needed here)
 
 // ============================================================================
 // Runtime delayNanoseconds implementations
@@ -195,19 +175,28 @@ template<> void delaycycles<50>() { delaycycles<40>(); delaycycles<10>(); }
 
 void delay(u32 ms, bool run_async) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
+  // Check if delay override is active (for fast testing with stub platform)
+  // When override is active, skip async pumping and use platform delay directly
+#if defined(FASTLED_STUB_IMPL) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
+  if (isDelayOverrideActive()) {
+    fl::platform::delay(ms);  // Use platform override directly
+    return;
+  }
+#endif
+
   if (run_async && ms > 0) {
     // Pump async tasks during delay (1ms granularity)
     u32 start = fl::millis();
     while (fl::millis() - start < ms) {
       async_yield();
-      raw_sleep_1ms();
+      fl::platform::delay(1);  // Use platform layer for raw 1ms delay
     }
   } else {
-    raw_sleep_ms(ms);
+    fl::platform::delay(ms);  // Use platform layer for raw delay
   }
 #else
   (void)run_async;  // Suppress unused parameter warning
-  raw_sleep_ms(ms);
+  fl::platform::delay(ms);  // Use platform layer for raw delay
 #endif
 }
 
