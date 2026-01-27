@@ -101,7 +101,7 @@ fl::SoundToMIDIEngine* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 bool noteIsOn = false;
 
-float rms(fl::Slice<const int16_t> data) {
+float rms(fl::span<const int16_t> data) {
     double sumSq = 0.0;
     const int N = data.size();
     for (int i = 0; i < N; ++i) {

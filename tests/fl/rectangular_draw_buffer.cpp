@@ -75,8 +75,8 @@ TEST_CASE("Rectangular Buffer queue tests") {
         CHECK(buffer.mPinToLedSegment.size() == 2);
         CHECK(buffer.mAllLedsBufferUint8Size == 60);
 
-        fl::Slice<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(1, true);
-        fl::Slice<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(2, true);
+        fl::span<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(1, true);
+        fl::span<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(2, true);
         // Expect that the address of slice1 happens before slice2 in memory.
         CHECK(slice1.data() < slice2.data());
         // Check that the size of each slice is 30 bytes.
@@ -135,9 +135,9 @@ TEST_CASE("Rectangular Buffer queue tests") {
         CHECK(buffer.mPinToLedSegment.size() == 3);
         CHECK(buffer.mAllLedsBufferUint8Size == 90);
 
-        fl::Slice<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(2, true);
-        fl::Slice<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(1, true);
-        fl::Slice<uint8_t> slice3 = buffer.getLedsBufferBytesForPin(3, true);
+        fl::span<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(2, true);
+        fl::span<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(1, true);
+        fl::span<uint8_t> slice3 = buffer.getLedsBufferBytesForPin(3, true);
 
         // Expect that the address of slice1 happens before slice2 in memory.
         CHECK(slice1.data() < slice2.data());
@@ -179,7 +179,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
 
         uint8_t pins[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         for (uint8_t pin : pins) {
-            fl::Slice<uint8_t> slice =
+            fl::span<uint8_t> slice =
                 buffer.getLedsBufferBytesForPin(pin, true);
             CHECK(slice.size() == expected_max_strip_bytes);
             const uint8_t *first_address = &slice.front();

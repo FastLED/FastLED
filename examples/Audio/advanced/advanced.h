@@ -261,7 +261,7 @@ void drawRadialSpectrum(fl::FFTBins* fft, float /* peak */) {
 }
 
 // Visualization: Logarithmic Waveform (prevents saturation)
-void drawWaveform(const fl::Slice<const int16_t>& pcm, float /* peak */) {
+void drawWaveform(const fl::span<const int16_t>& pcm, float /* peak */) {
     clearDisplay();
     fl::CRGBPalette16 palette = getCurrentPalette();
     

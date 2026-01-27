@@ -89,7 +89,7 @@ class XYRasterU8Sparse {
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
-    // increased. void rasterize(const Slice<const Tile2x2_u8> &tiles);
+    // increased. void rasterize(const span<const Tile2x2_u8> &tiles);
     // u8 &at(u16 x, u16 y) { return mGrid.at(x, y); }
     // const u8 &at(u16 x, u16 y) const { return mGrid.at(x,
     // y); }
