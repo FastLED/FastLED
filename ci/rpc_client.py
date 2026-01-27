@@ -2,7 +2,7 @@
 Reusable JSON-RPC client for serial communication with embedded devices.
 
 This module provides a stateful RPC client that handles:
-- Serial connection management with context manager support
+- Serial connection management via fbuild daemon (eliminates port lock conflicts)
 - JSON-RPC command serialization and response parsing
 - Timeout and retry logic
 - Proper KeyboardInterrupt handling
@@ -67,7 +67,7 @@ class RpcError(Exception):
 
 
 class RpcClient:
-    """Stateful JSON-RPC client for serial communication.
+    """Stateful JSON-RPC client for serial communication via fbuild daemon.
 
     Attributes:
         port: Serial port path
@@ -91,7 +91,7 @@ class RpcClient:
             port: Serial port path (e.g., "/dev/ttyUSB0", "COM3")
             baudrate: Serial baud rate (default: 115200)
             timeout: Default timeout for RPC operations in seconds
-            read_timeout: Timeout for individual serial reads
+            read_timeout: Timeout for individual serial reads (unused with fbuild)
         """
         self.port = port
         self.baudrate = baudrate
@@ -105,7 +105,7 @@ class RpcClient:
         return self._monitor is not None
 
     def connect(self, boot_wait: float = 3.0, drain_boot: bool = True) -> None:
-        """Open serial connection.
+        """Open serial connection via fbuild daemon.
 
         Args:
             boot_wait: Time to wait for device boot (seconds)
@@ -114,13 +114,16 @@ class RpcClient:
         if self.is_connected:
             return
 
+        # Create SerialMonitor instance (routes through fbuild daemon)
         self._monitor = SerialMonitor(
             port=self.port,
             baud_rate=self.baudrate,
-            auto_reconnect=True,
+            auto_reconnect=True,  # Handle deploy preemption gracefully
             verbose=False,
         )
-        self._monitor.__enter__()  # Manual context manager entry
+
+        # Attach to daemon serial session
+        self._monitor.__enter__()
 
         if boot_wait > 0:
             # Use interruptible sleep loop for Windows Ctrl+C compatibility.
@@ -134,7 +137,7 @@ class RpcClient:
             self.drain_boot_output()
 
     def close(self) -> None:
-        """Close serial connection."""
+        """Close serial connection via fbuild daemon."""
         if self._monitor is not None:
             self._monitor.__exit__(None, None, None)
             self._monitor = None
@@ -155,42 +158,28 @@ class RpcClient:
         assert self._monitor is not None
 
         lines_drained = 0
-        empty_checks = 0
-        max_empty_checks = 3  # Exit after 3 consecutive empty checks
-        drain_timeout = 0.05  # 50ms timeout per read
 
-        while lines_drained < max_lines:
-            self._check_interrupt()
-            try:
-                # Use read_lines() with short timeout
-                line_found = False
-                for line in self._monitor.read_lines(timeout=drain_timeout):
-                    self._check_interrupt()
-                    empty_checks = 0  # Reset on data received
-                    lines_drained += 1
-                    line_found = True
+        # Poll for boot output with short timeout (wait for buffer to drain)
+        # Use read_lines with a short timeout to drain existing buffer
+        try:
+            for line in self._monitor.read_lines(timeout=1.0):
+                self._check_interrupt()
+                lines_drained += 1
 
-                    if verbose:
-                        if lines_drained <= 3:
-                            print(f"  [boot] {line[:80]}")
-                        elif lines_drained == 4:
-                            print("  [boot] ... (draining boot output)")
-                    break  # Process one line at a time
+                if verbose:
+                    if lines_drained <= 3:
+                        print(f"  [boot] {line[:80]}")
+                    elif lines_drained == 4:
+                        print("  [boot] ... (draining boot output)")
 
-                if not line_found:
-                    if lines_drained > 0:
-                        empty_checks += 1
-                        if empty_checks >= max_empty_checks:
-                            break
-                    # Give a small window for more data
-                    time.sleep(0.05)
-                    self._check_interrupt()
+                if lines_drained >= max_lines:
+                    break
 
-            except KeyboardInterrupt:
-                notify_main_thread()
-                raise
-            except Exception:
-                break
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
+        except Exception:
+            pass  # Timeout is normal when buffer is drained
 
         return lines_drained
 
@@ -231,6 +220,7 @@ class RpcClient:
 
         for _attempt in range(retries):
             try:
+                # Write command via fbuild daemon
                 self._monitor.write(cmd_str + "\n")
 
                 response = self._wait_for_response(attempt_timeout)
@@ -283,36 +273,37 @@ class RpcClient:
 
         for _attempt in range(retries):
             self._check_interrupt()  # Check before each attempt
+
+            # Write command via fbuild daemon
             self._monitor.write(cmd_str + "\n")
 
             start = time.time()
-            while time.time() - start < attempt_timeout:
-                self._check_interrupt()
+            try:
+                for line in self._monitor.read_lines(timeout=attempt_timeout):
+                    self._check_interrupt()
 
-                # Use read_lines() with short timeout for interruptible reading
-                try:
-                    for line in self._monitor.read_lines(timeout=0.05):
-                        self._check_interrupt()
+                    if line.startswith(self.RESPONSE_PREFIX):
+                        json_str = line[len(self.RESPONSE_PREFIX) :]
+                        try:
+                            data = json.loads(json_str)
+                            if match_key is None or match_key in data:
+                                return RpcResponse(
+                                    success=data.get("success", True),
+                                    data=data,
+                                    raw_line=line,
+                                )
+                        except json.JSONDecodeError:
+                            continue
 
-                        if line.startswith(self.RESPONSE_PREFIX):
-                            json_str = line[len(self.RESPONSE_PREFIX) :]
-                            try:
-                                data = json.loads(json_str)
-                                if match_key is None or match_key in data:
-                                    return RpcResponse(
-                                        success=data.get("success", True),
-                                        data=data,
-                                        raw_line=line,
-                                    )
-                            except json.JSONDecodeError:
-                                continue
-                        break  # Process one line at a time
-                except KeyboardInterrupt:
-                    notify_main_thread()
-                    raise
-                except Exception:
-                    time.sleep(0.05)
-                    continue
+                    # Check timeout
+                    if time.time() - start >= attempt_timeout:
+                        break
+
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
+            except Exception:
+                continue
 
         raise RpcTimeoutError(
             f"No response with key '{match_key}' after {retries} attempts"
@@ -334,32 +325,31 @@ class RpcClient:
 
         start = time.time()
 
-        while time.time() - start < timeout:
-            self._check_interrupt()
+        try:
+            for line in self._monitor.read_lines(timeout=timeout):
+                self._check_interrupt()
 
-            # Use read_lines() with short timeout for interruptible reading
-            try:
-                for line in self._monitor.read_lines(timeout=0.05):
-                    self._check_interrupt()
+                if line.startswith(self.RESPONSE_PREFIX):
+                    json_str = line[len(self.RESPONSE_PREFIX) :]
+                    try:
+                        data = json.loads(json_str)
+                        return RpcResponse(
+                            success=data.get("success", True),
+                            data=data,
+                            raw_line=line,
+                        )
+                    except json.JSONDecodeError:
+                        continue
 
-                    if line.startswith(self.RESPONSE_PREFIX):
-                        json_str = line[len(self.RESPONSE_PREFIX) :]
-                        try:
-                            data = json.loads(json_str)
-                            return RpcResponse(
-                                success=data.get("success", True),
-                                data=data,
-                                raw_line=line,
-                            )
-                        except json.JSONDecodeError:
-                            continue
-                    break  # Process one line at a time
-            except KeyboardInterrupt:
-                notify_main_thread()
-                raise
-            except Exception:
-                time.sleep(0.05)
-                continue
+                # Check timeout
+                if time.time() - start >= timeout:
+                    break
+
+        except KeyboardInterrupt:
+            notify_main_thread()
+            raise
+        except Exception:
+            pass  # Timeout or other error
 
         raise RpcTimeoutError(f"No response within {timeout}s")
 

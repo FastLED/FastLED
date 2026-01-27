@@ -92,8 +92,8 @@ DEFAULT_EXPECT_PATTERNS = [
 ]
 
 # Stop pattern - early exit when test suite completes successfully
-# Firmware emits: RESULT: {"reason":"test_matrix_complete","type":"halt","success":true}
-STOP_PATTERN = "test_matrix_complete"
+# Firmware emits: RESULT: {"type":"test_complete",...} after runTest() RPC completes
+STOP_PATTERN = "test_complete"
 
 # Default fail-on pattern
 DEFAULT_FAIL_ON_PATTERN = "ERROR"
@@ -105,8 +105,9 @@ EXIT_ON_ERROR_PATTERNS = [
 ]
 
 # Input-on-trigger configuration
-# Wait for VALIDATION_READY pattern, then send START command with 10s timeout
-INPUT_ON_TRIGGER = "VALIDATION_READY:START:10"
+# Wait for VALIDATION_READY pattern before proceeding
+# NOTE: Tests are triggered via runTest RPC command (in json_rpc_commands), not via "START"
+INPUT_ON_TRIGGER = None  # No legacy START command needed
 
 # GPIO pin definitions (must match Validation.ino)
 PIN_TX = 1  # TX pin used by FastLED drivers
@@ -683,11 +684,16 @@ def run(args: Args | None = None) -> int:
         print()
         return 1
 
-    # Build JSON-RPC command for driver selection
+    # Build JSON-RPC commands for driver selection and test execution
     driver_list_str = ", ".join([f'"{d}"' for d in drivers])
-    json_rpc_cmd_str = f'{{"function":"setDrivers","args":[{driver_list_str}]}}'
+    # Command 1: setDrivers (configures which drivers to test)
+    # Command 2: runTest (actually executes the tests)
+    json_rpc_cmd_str = (
+        f'[{{"function":"setDrivers","args":[{driver_list_str}]}}, '
+        f'{{"function":"runTest","args":[]}}]'
+    )
 
-    # Parse JSON-RPC command
+    # Parse JSON-RPC commands
     try:
         json_rpc_commands = parse_json_rpc_commands(json_rpc_cmd_str)
     except ValueError as e:
@@ -1001,6 +1007,12 @@ def run(args: Args | None = None) -> int:
                     f"{Fore.YELLOW}⚠️  Port not available after {max_wait_time}s, proceeding anyway...{Style.RESET_ALL}"
                 )
 
+        # Kill any processes holding the port before RPC operations
+        # The port availability check above may have left daemon processes holding the port
+        if upload_port:
+            kill_port_users(upload_port)
+            time.sleep(0.5)  # Brief delay to ensure port is fully released
+
         # ============================================================
         # Phase 3.5: Pin Discovery (runs FIRST if enabled)
         # ============================================================
@@ -1133,6 +1145,12 @@ def run(args: Args | None = None) -> int:
             finally:
                 if client is not None:
                     client.close()
+
+        # Kill port users before starting monitor phase
+        # RPC client above may have left the port in a held state
+        if upload_port:
+            kill_port_users(upload_port)
+            time.sleep(0.5)  # Brief delay to ensure port is fully released
 
         success, _output, _rpc_handler = run_monitor(
             build_dir,

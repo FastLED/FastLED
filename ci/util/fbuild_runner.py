@@ -63,6 +63,11 @@ def run_fbuild_compile(
     print("COMPILING (fbuild)")
     print("=" * 60)
 
+    # Ensure daemon is running before attempting to connect
+    if not ensure_fbuild_daemon():
+        print("\n❌ Failed to start fbuild daemon\n")
+        return False
+
     try:
         # Determine environment if not specified
         env_name = environment
@@ -122,6 +127,11 @@ def run_fbuild_upload(
     print("=" * 60)
     print("UPLOADING (fbuild)")
     print("=" * 60)
+
+    # Ensure daemon is running before attempting to connect
+    if not ensure_fbuild_daemon():
+        print("\n❌ Failed to start fbuild daemon\n")
+        return False
 
     try:
         # Determine environment if not specified
@@ -198,6 +208,11 @@ def run_fbuild_deploy(
     print("DEPLOYING (fbuild)")
     print("=" * 60)
 
+    # Ensure daemon is running before attempting to connect
+    if not ensure_fbuild_daemon():
+        print("\n❌ Failed to start fbuild daemon\n")
+        return False
+
     try:
         # Determine environment if not specified
         env_name = environment
@@ -266,6 +281,11 @@ def run_fbuild_monitor(
     Returns:
         True if monitoring succeeded, False otherwise
     """
+    # Ensure daemon is running before attempting to connect
+    if not ensure_fbuild_daemon():
+        print("\n❌ Failed to start fbuild daemon\n")
+        return False
+
     try:
         # Determine environment if not specified
         env_name = environment

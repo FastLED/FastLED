@@ -495,10 +495,13 @@ class Board:
             # Also set upload flash size to override board defaults
             lines.append(f"board_upload.flash_size = {self.board_build_flash_size}")
 
-        # Force DIO flash mode for ESP32 boards to ensure QEMU compatibility
+        # Force DIO flash mode ONLY for QEMU builds
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
-        if self.board_name.startswith("esp32") or (
-            self.real_board_name and self.real_board_name.startswith("esp32")
+        # Hardware builds should use QIO for better performance (30-50% faster)
+        is_qemu_build = self.defines and "QEMU_BUILD=1" in self.defines
+        if is_qemu_build and (
+            self.board_name.startswith("esp32")
+            or (self.real_board_name and self.real_board_name.startswith("esp32"))
         ):
             lines.append("board_build.flash_mode = dio")
             lines.append("board_upload.flash_mode = dio")
