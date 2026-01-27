@@ -23,9 +23,9 @@ TEST_CASE("downscale 2x2 to 1x1") {
         downscaleHalf(src, 2, 2, dst);
         INFO("Src: " << src);
         INFO("Dst: " << dst);
-        CHECK(dst[0].r == 128);
-        CHECK(dst[0].g == 0);
-        CHECK(dst[0].b == 0);
+        FL_CHECK(dst[0].r == 128);
+        FL_CHECK(dst[0].g == 0);
+        FL_CHECK(dst[0].b == 0);
     }
 
     SUBCASE("downscale from 2x2 to 1x1") {
@@ -36,9 +36,9 @@ TEST_CASE("downscale 2x2 to 1x1") {
         downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
         INFO("Dst: " << dst);
-        CHECK(dst[0].r == 128);
-        CHECK(dst[0].g == 0);
-        CHECK(dst[0].b == 0);
+        FL_CHECK(dst[0].r == 128);
+        FL_CHECK(dst[0].g == 0);
+        FL_CHECK(dst[0].b == 0);
     }
 
 
@@ -65,10 +65,10 @@ TEST_CASE("downscale 2x2 to 1x1") {
         CRGB upperLeft = dst[dstMap.mapToIndex(0, 1)];
         CRGB upperRight = dst[dstMap.mapToIndex(1, 1)];
 
-        REQUIRE(lowerLeft == red);
-        REQUIRE(lowerRight == black);
-        REQUIRE(upperLeft == black);
-        REQUIRE(upperRight == red);
+        FL_REQUIRE(lowerLeft == red);
+        FL_REQUIRE(lowerRight == black);
+        FL_REQUIRE(upperLeft == black);
+        FL_REQUIRE(upperRight == red);
     }
 
 }
@@ -98,7 +98,7 @@ TEST_CASE("downscale 3x3 to 2x2") {
 
     for (int i = 0; i < 4; ++i) {
         INFO("Dst[" << i << "]: " << dst[i]);
-        CHECK(dst[i] == CRGB(142, 0, 0));  // Averaged color
+        FL_CHECK(dst[i] == CRGB(142, 0, 0));  // Averaged color
     }
 }
 
@@ -122,6 +122,6 @@ TEST_CASE("downscale 11x11 to 2x2") {
 
     for (int i = 0; i < 4; ++i) {
         INFO("Dst[" << i << "]: " << dst[i]);
-        CHECK(dst[i] == CRGB(129, 0, 0));  // Averaged color
+        FL_CHECK(dst[i] == CRGB(129, 0, 0));  // Averaged color
     }
 }

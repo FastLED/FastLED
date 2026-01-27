@@ -16,7 +16,7 @@ TEST_CASE("FrameTracker basic frame advancement") {
     
     // Shift the time to 500 ms or 50% of the first frame
     tracker.get_interval_frames(500, &currentFrame, &nextFrame, &amountOfNextFrame);
-    CHECK(currentFrame == 0);
-    CHECK(nextFrame == 1);
-    CHECK(amountOfNextFrame == 127);
+    FL_CHECK(currentFrame == 0);
+    FL_CHECK(nextFrame == 1);
+    FL_CHECK(amountOfNextFrame == 127);
 }

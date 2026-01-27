@@ -43,8 +43,8 @@ TEST_CASE("fl::condition_variable basic operations") {
         lock.unlock();
         worker.join();
 
-        CHECK(ready.load() == true);
-        CHECK(processed.load() == true);
+        FL_CHECK(ready.load() == true);
+        FL_CHECK(processed.load() == true);
     }
 
     SUBCASE("notify_all wakes multiple threads") {
@@ -75,7 +75,7 @@ TEST_CASE("fl::condition_variable basic operations") {
             t.join();
         }
 
-        CHECK(wake_count.load() == num_threads);
+        FL_CHECK(wake_count.load() == num_threads);
     }
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("fl::condition_variable with predicate") {
     std::thread consumer([&]() {  // okay std namespace - fl::thread not available
         fl::unique_lock<fl::mutex> lock(mtx);
         cv.wait(lock, [&]() { return value.load() >= 5; });
-        CHECK(value.load() == 5);
+        FL_CHECK(value.load() == 5);
     });
 
     producer.join();
@@ -116,7 +116,7 @@ TEST_CASE("fl::condition_variable single-threaded mode") {
         // These should compile and run without error in single-threaded mode
         cv.notify_one();
         cv.notify_all();
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     // Note: Cannot test wait() in single-threaded mode as it would trigger

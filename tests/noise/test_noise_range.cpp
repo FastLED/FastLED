@@ -107,12 +107,12 @@ TEST_CASE("Noise Range Analysis") {
     FL_WARN("Does 1D range match documented 'roughly 16-238'? " << (matches_documented_range ? "YES" : "NO"));
     
     // Perform basic sanity checks
-    CHECK_GT(max_1d, min_1d);  // Range should be non-zero
-    CHECK_GT(max_2d, min_2d);
-    CHECK_GT(max_3d, min_3d);
-    CHECK_GT(max_raw_1d, min_raw_1d);
-    CHECK_GT(max_raw_2d, min_raw_2d);
-    CHECK_GT(max_raw_3d, min_raw_3d);
+    FL_CHECK_GT(max_1d, min_1d);  // Range should be non-zero
+    FL_CHECK_GT(max_2d, min_2d);
+    FL_CHECK_GT(max_3d, min_3d);
+    FL_CHECK_GT(max_raw_1d, min_raw_1d);
+    FL_CHECK_GT(max_raw_2d, min_raw_2d);
+    FL_CHECK_GT(max_raw_3d, min_raw_3d);
     
     // Test if we're not using the full u8 range (this should likely fail given the user's report)
     if (min_1d > 0 || max_1d < 255) {
@@ -123,12 +123,12 @@ TEST_CASE("Noise Range Analysis") {
     }
     
     // Test if raw values are within expected -64 to +64 range
-    CHECK_GE(min_raw_1d, -64);
-    CHECK_LE(max_raw_1d, 64);
-    CHECK_GE(min_raw_2d, -64);
-    CHECK_LE(max_raw_2d, 64);
-    CHECK_GE(min_raw_3d, -64);
-    CHECK_LE(max_raw_3d, 64);
+    FL_CHECK_GE(min_raw_1d, -64);
+    FL_CHECK_LE(max_raw_1d, 64);
+    FL_CHECK_GE(min_raw_2d, -64);
+    FL_CHECK_LE(max_raw_2d, 64);
+    FL_CHECK_GE(min_raw_3d, -64);
+    FL_CHECK_LE(max_raw_3d, 64);
     
     FL_WARN("=== END NOISE RANGE ANALYSIS ===");
 }

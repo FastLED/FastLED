@@ -19,7 +19,7 @@ TEST_CASE("load_u8_16 loads 16 bytes correctly") {
     simd::store_u8_16(dst, vec);
 
     for (int i = 0; i < 16; ++i) {
-        REQUIRE(dst[i] == src[i]);
+        FL_REQUIRE(dst[i] == src[i]);
     }
 }
 
@@ -31,7 +31,7 @@ TEST_CASE("load_u32_4 loads 4 uint32_t correctly") {
     simd::store_u32_4(dst, vec);
 
     for (int i = 0; i < 4; ++i) {
-        REQUIRE(dst[i] == src[i]);
+        FL_REQUIRE(dst[i] == src[i]);
     }
 }
 
@@ -44,13 +44,13 @@ TEST_CASE("store_u8_16 stores 16 bytes correctly") {
 
     // Check pattern stored correctly
     for (int i = 0; i < 16; ++i) {
-        REQUIRE(buffer[8 + i] == pattern[i]);
+        FL_REQUIRE(buffer[8 + i] == pattern[i]);
     }
 
     // Check boundaries not overwritten
     for (int i = 0; i < 8; ++i) {
-        REQUIRE(buffer[i] == 0);
-        REQUIRE(buffer[24 + i] == 0);
+        FL_REQUIRE(buffer[i] == 0);
+        FL_REQUIRE(buffer[24 + i] == 0);
     }
 }
 
@@ -63,14 +63,14 @@ TEST_CASE("store_u32_4 stores 4 uint32_t correctly") {
 
     // Check pattern stored correctly
     for (int i = 0; i < 4; ++i) {
-        REQUIRE(buffer[2 + i] == pattern[i]);
+        FL_REQUIRE(buffer[2 + i] == pattern[i]);
     }
 
     // Check boundaries not overwritten
-    REQUIRE(buffer[0] == 0);
-    REQUIRE(buffer[1] == 0);
-    REQUIRE(buffer[6] == 0);
-    REQUIRE(buffer[7] == 0);
+    FL_REQUIRE(buffer[0] == 0);
+    FL_REQUIRE(buffer[1] == 0);
+    FL_REQUIRE(buffer[6] == 0);
+    FL_REQUIRE(buffer[7] == 0);
 }
 
 //==============================================================================
@@ -88,12 +88,12 @@ TEST_CASE("add_sat_u8_16 adds without overflow") {
     simd::store_u8_16(dst, result);
 
     // Verify saturating addition
-    REQUIRE(dst[0] == 150);   // 100 + 50 = 150
-    REQUIRE(dst[1] == 250);   // 150 + 100 = 250
-    REQUIRE(dst[2] == 255);   // 200 + 150 = 350 -> saturate to 255
-    REQUIRE(dst[3] == 255);   // 255 + 200 = 455 -> saturate to 255
-    REQUIRE(dst[4] == 0);     // 0 + 0 = 0
-    REQUIRE(dst[5] == 100);   // 50 + 50 = 100
+    FL_REQUIRE(dst[0] == 150);   // 100 + 50 = 150
+    FL_REQUIRE(dst[1] == 250);   // 150 + 100 = 250
+    FL_REQUIRE(dst[2] == 255);   // 200 + 150 = 350 -> saturate to 255
+    FL_REQUIRE(dst[3] == 255);   // 255 + 200 = 455 -> saturate to 255
+    FL_REQUIRE(dst[4] == 0);     // 0 + 0 = 0
+    FL_REQUIRE(dst[5] == 100);   // 50 + 50 = 100
 }
 
 TEST_CASE("add_sat_u8_16 handles edge cases") {
@@ -109,7 +109,7 @@ TEST_CASE("add_sat_u8_16 handles edge cases") {
         simd::store_u8_16(dst, result);
 
         for (int i = 0; i < 16; ++i) {
-            REQUIRE(dst[i] == 0);
+            FL_REQUIRE(dst[i] == 0);
         }
     }
 
@@ -125,7 +125,7 @@ TEST_CASE("add_sat_u8_16 handles edge cases") {
         simd::store_u8_16(dst, result);
 
         for (int i = 0; i < 16; ++i) {
-            REQUIRE(dst[i] == 255);
+            FL_REQUIRE(dst[i] == 255);
         }
     }
 }
@@ -139,11 +139,11 @@ TEST_CASE("scale_u8_16 scales values correctly") {
     auto result = simd::scale_u8_16(vec, 128);
     simd::store_u8_16(dst, result);
 
-    REQUIRE(dst[0] == 0);      // 0 * 128/256 = 0
-    REQUIRE(dst[1] == 32);     // 64 * 128/256 = 32
-    REQUIRE(dst[2] == 64);     // 128 * 128/256 = 64
-    REQUIRE(dst[3] == 96);     // 192 * 128/256 = 96
-    REQUIRE(dst[4] == 127);    // 255 * 128/256 = 127
+    FL_REQUIRE(dst[0] == 0);      // 0 * 128/256 = 0
+    FL_REQUIRE(dst[1] == 32);     // 64 * 128/256 = 32
+    FL_REQUIRE(dst[2] == 64);     // 128 * 128/256 = 64
+    FL_REQUIRE(dst[3] == 96);     // 192 * 128/256 = 96
+    FL_REQUIRE(dst[4] == 127);    // 255 * 128/256 = 127
 }
 
 TEST_CASE("scale_u8_16 handles identity scaling") {
@@ -157,8 +157,8 @@ TEST_CASE("scale_u8_16 handles identity scaling") {
 
     // Values should be very close to original (within 1 due to rounding)
     for (int i = 0; i < 16; ++i) {
-        REQUIRE(dst[i] >= src[i] - 1);
-        REQUIRE(dst[i] <= src[i]);
+        FL_REQUIRE(dst[i] >= src[i] - 1);
+        FL_REQUIRE(dst[i] <= src[i]);
     }
 }
 
@@ -172,7 +172,7 @@ TEST_CASE("scale_u8_16 handles zero scaling") {
     simd::store_u8_16(dst, result);
 
     for (int i = 0; i < 16; ++i) {
-        REQUIRE(dst[i] == 0);
+        FL_REQUIRE(dst[i] == 0);
     }
 }
 
@@ -184,7 +184,7 @@ TEST_CASE("set1_u32_4 broadcasts value to all lanes") {
     simd::store_u32_4(dst, vec);
 
     for (int i = 0; i < 4; ++i) {
-        REQUIRE(dst[i] == pattern);
+        FL_REQUIRE(dst[i] == pattern);
     }
 }
 
@@ -196,7 +196,7 @@ TEST_CASE("set1_u32_4 works with different patterns") {
         auto vec = simd::set1_u32_4(0xFFFFFFFF);
         simd::store_u32_4(dst, vec);
         for (int i = 0; i < 4; ++i) {
-            REQUIRE(dst[i] == 0xFFFFFFFF);
+            FL_REQUIRE(dst[i] == 0xFFFFFFFF);
         }
     }
 
@@ -205,7 +205,7 @@ TEST_CASE("set1_u32_4 works with different patterns") {
         auto vec = simd::set1_u32_4(0x00000000);
         simd::store_u32_4(dst, vec);
         for (int i = 0; i < 4; ++i) {
-            REQUIRE(dst[i] == 0x00000000);
+            FL_REQUIRE(dst[i] == 0x00000000);
         }
     }
 
@@ -214,7 +214,7 @@ TEST_CASE("set1_u32_4 works with different patterns") {
         auto vec = simd::set1_u32_4(0xAAAA5555);
         simd::store_u32_4(dst, vec);
         for (int i = 0; i < 4; ++i) {
-            REQUIRE(dst[i] == 0xAAAA5555);
+            FL_REQUIRE(dst[i] == 0xAAAA5555);
         }
     }
 }
@@ -231,11 +231,11 @@ TEST_CASE("blend_u8_16 blends two vectors correctly") {
     simd::store_u8_16(dst, result);
 
     // Verify blend results: result = a + ((b - a) * 128) / 256
-    REQUIRE(dst[0] == 127);   // 0 + ((255 - 0) * 128) / 256 = 127
-    REQUIRE(dst[1] == 127);
-    REQUIRE(dst[4] == 150);   // 100 + ((200 - 100) * 128) / 256 = 150
-    REQUIRE(dst[8] == 150);   // 200 + ((100 - 200) * 128) / 256 = 150
-    REQUIRE(dst[12] == 100);  // 50 + ((150 - 50) * 128) / 256 = 100
+    FL_REQUIRE(dst[0] == 127);   // 0 + ((255 - 0) * 128) / 256 = 127
+    FL_REQUIRE(dst[1] == 127);
+    FL_REQUIRE(dst[4] == 150);   // 100 + ((200 - 100) * 128) / 256 = 150
+    FL_REQUIRE(dst[8] == 150);   // 200 + ((100 - 200) * 128) / 256 = 150
+    FL_REQUIRE(dst[12] == 100);  // 50 + ((150 - 50) * 128) / 256 = 100
 }
 
 TEST_CASE("blend_u8_16 handles edge cases") {
@@ -251,7 +251,7 @@ TEST_CASE("blend_u8_16 handles edge cases") {
         simd::store_u8_16(dst, result);
 
         for (int i = 0; i < 16; ++i) {
-            REQUIRE(dst[i] == 100);
+            FL_REQUIRE(dst[i] == 100);
         }
     }
 
@@ -264,7 +264,7 @@ TEST_CASE("blend_u8_16 handles edge cases") {
 
         for (int i = 0; i < 16; ++i) {
             // 100 + ((200 - 100) * 255) / 256 = 100 + 99 = 199
-            REQUIRE(dst[i] == 199);
+            FL_REQUIRE(dst[i] == 199);
         }
     }
 }
@@ -283,14 +283,14 @@ TEST_CASE("blend_u8_16 handles blending extremes") {
         auto result = simd::blend_u8_16(va, vb, 64);
         simd::store_u8_16(dst, result);
         for (int i = 0; i < 16; ++i) {
-            REQUIRE(dst[i] == 63);  // 0 + ((255 - 0) * 64) / 256 = 63
+            FL_REQUIRE(dst[i] == 63);  // 0 + ((255 - 0) * 64) / 256 = 63
         }
 
         // 75% blend
         result = simd::blend_u8_16(va, vb, 192);
         simd::store_u8_16(dst, result);
         for (int i = 0; i < 16; ++i) {
-            REQUIRE(dst[i] == 191);  // 0 + ((255 - 0) * 192) / 256 = 191
+            FL_REQUIRE(dst[i] == 191);  // 0 + ((255 - 0) * 192) / 256 = 191
         }
     }
 }
@@ -343,7 +343,7 @@ TEST_CASE("composed operations: scale then add in single loop") {
         uint8_t expected_scaled = static_cast<uint8_t>((static_cast<uint16_t>(src[j]) * 128) >> 8);
         uint16_t expected_sum = static_cast<uint16_t>(expected_scaled) + static_cast<uint16_t>(other[j]);
         uint8_t expected = (expected_sum > 255) ? 255 : static_cast<uint8_t>(expected_sum);
-        REQUIRE(dst[j] == expected);
+        FL_REQUIRE(dst[j] == expected);
     }
 }
 
@@ -366,7 +366,7 @@ TEST_CASE("composed operations: pattern fill with set1 and store") {
 
     // Verify
     for (size_t j = 0; j < 64; ++j) {
-        REQUIRE(buffer[j] == 0xDEADBEEF);
+        FL_REQUIRE(buffer[j] == 0xDEADBEEF);
     }
 }
 
@@ -390,7 +390,7 @@ TEST_CASE("composed operations: multiple adds in sequence") {
     store_u8_16(dst, result);
 
     // Verify first few results
-    REQUIRE(dst[0] == 16);   // 10 + 5 + 1 = 16
-    REQUIRE(dst[1] == 32);   // 20 + 10 + 2 = 32
-    REQUIRE(dst[2] == 48);   // 30 + 15 + 3 = 48
+    FL_REQUIRE(dst[0] == 16);   // 10 + 5 + 1 = 16
+    FL_REQUIRE(dst[1] == 32);   // 20 + 10 + 2 = 32
+    FL_REQUIRE(dst[2] == 48);   // 30 + 15 + 3 = 48
 }

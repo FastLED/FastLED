@@ -30,19 +30,19 @@ TEST_CASE("buildWave8ExpansionLUT") {
 
     // Check bit 3 (MSB, value=1) -> should use bit1 waveform (6 HIGH, 2 LOW)
     // Expected: 0b11111100 = 0xFC
-    REQUIRE(lut.lut[nibble][0].data == 0xFC);
+    FL_REQUIRE(lut.lut[nibble][0].data == 0xFC);
 
     // Check bit 2 (value=0) -> should use bit0 waveform (2 HIGH, 6 LOW)
     // Expected: 0b11000000 = 0xC0
-    REQUIRE(lut.lut[nibble][1].data == 0xC0);
+    FL_REQUIRE(lut.lut[nibble][1].data == 0xC0);
 
     // Check bit 1 (value=1) -> should use bit1 waveform (6 HIGH, 2 LOW)
     // Expected: 0b11111100 = 0xFC
-    REQUIRE(lut.lut[nibble][2].data == 0xFC);
+    FL_REQUIRE(lut.lut[nibble][2].data == 0xFC);
 
     // Check bit 0 (LSB, value=0) -> should use bit0 waveform (2 HIGH, 6 LOW)
     // Expected: 0b11000000 = 0xC0
-    REQUIRE(lut.lut[nibble][3].data == 0xC0);
+    FL_REQUIRE(lut.lut[nibble][3].data == 0xC0);
 }
 
 TEST_CASE("convertToWave8Bit") {
@@ -71,7 +71,7 @@ TEST_CASE("convertToWave8Bit") {
     // - Result: 0b10101010 = 0xAA for every output byte
 
     for (int i = 0; i < 16; i++) {
-        REQUIRE(output[i] == 0xAA);
+        FL_REQUIRE(output[i] == 0xAA);
     }
 }
 
@@ -103,7 +103,7 @@ TEST_CASE("wave8Transpose_4_all_ones_and_zeros") {
     // Result: 0b0101 = 0x5 for high nibble, 0b0101 = 0x5 for low nibble
     // Expected: 0x55 for all 32 output bytes
     for (int i = 0; i < 32; i++) {
-        REQUIRE(output[i] == 0x55);
+        FL_REQUIRE(output[i] == 0x55);
     }
 }
 
@@ -126,7 +126,7 @@ TEST_CASE("wave8Transpose_4_all_ones") {
     // All lanes have 1s → all bits set in output
     // Expected: 0xFF for all 32 output bytes
     for (int i = 0; i < 32; i++) {
-        REQUIRE(output[i] == 0xFF);
+        FL_REQUIRE(output[i] == 0xFF);
     }
 }
 
@@ -149,7 +149,7 @@ TEST_CASE("wave8Transpose_4_all_zeros") {
     // All lanes have 0s → all bits clear in output
     // Expected: 0x00 for all 32 output bytes
     for (int i = 0; i < 32; i++) {
-        REQUIRE(output[i] == 0x00);
+        FL_REQUIRE(output[i] == 0x00);
     }
 }
 
@@ -176,7 +176,7 @@ TEST_CASE("wave8Transpose_4_distinct_patterns") {
     // Verify first symbol (corresponds to bit 7 of input bytes, all 0)
     // All lanes have bit 7 = 0 → output bytes should be 0x00
     for (int i = 0; i < 4; i++) {
-        REQUIRE(output[i] == 0x00); // Symbol 0 (bit 7)
+        FL_REQUIRE(output[i] == 0x00); // Symbol 0 (bit 7)
     }
 
     // Verify last symbol (corresponds to bit 0 of input bytes)
@@ -186,7 +186,7 @@ TEST_CASE("wave8Transpose_4_distinct_patterns") {
     // Lane 3: bit 0 = 0
     // Expected pattern: only lane 0 bits set → 0b00010001 = 0x11
     for (int i = 28; i < 32; i++) {
-        REQUIRE(output[i] == 0x11); // Symbol 7 (bit 0)
+        FL_REQUIRE(output[i] == 0x11); // Symbol 7 (bit 0)
     }
 }
 
@@ -215,22 +215,22 @@ TEST_CASE("wave8Transpose_4_incremental_verification") {
 
     // Symbol 0 (bit 7 = 1): 0xFF (4 bytes)
     for (int i = 0; i < 4; i++) {
-        REQUIRE(output[i] == 0xFF);
+        FL_REQUIRE(output[i] == 0xFF);
     }
 
     // Symbol 1 (bit 6 = 0): 0x00 (4 bytes)
     for (int i = 4; i < 8; i++) {
-        REQUIRE(output[i] == 0x00);
+        FL_REQUIRE(output[i] == 0x00);
     }
 
     // Symbol 2 (bit 5 = 1): 0xFF (4 bytes)
     for (int i = 8; i < 12; i++) {
-        REQUIRE(output[i] == 0xFF);
+        FL_REQUIRE(output[i] == 0xFF);
     }
 
     // Symbol 3 (bit 4 = 0): 0x00 (4 bytes)
     for (int i = 12; i < 16; i++) {
-        REQUIRE(output[i] == 0x00);
+        FL_REQUIRE(output[i] == 0x00);
     }
 }
 
@@ -257,12 +257,12 @@ TEST_CASE("wave8Untranspose_2_simple_pattern") {
     // Verify: untransposed should match the original Wave8Byte structures
     // The first 8 bytes should be all 0xFF (lane0 = 0xff)
     for (int i = 0; i < 8; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 
     // The second 8 bytes should be all 0x00 (lane1 = 0x00)
     for (int i = 8; i < 16; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
 }
 
@@ -289,39 +289,39 @@ TEST_CASE("wave8Untranspose_2_complex_pattern") {
     // Verify: Each symbol should match the expected wave pattern
     // For 0xAA (10101010): alternating 0xFF and 0x00 bytes
     // Symbol 0 (bit 7 = 1): 0xFF
-    REQUIRE(untransposed[0] == 0xFF);
+    FL_REQUIRE(untransposed[0] == 0xFF);
     // Symbol 1 (bit 6 = 0): 0x00
-    REQUIRE(untransposed[1] == 0x00);
+    FL_REQUIRE(untransposed[1] == 0x00);
     // Symbol 2 (bit 5 = 1): 0xFF
-    REQUIRE(untransposed[2] == 0xFF);
+    FL_REQUIRE(untransposed[2] == 0xFF);
     // Symbol 3 (bit 4 = 0): 0x00
-    REQUIRE(untransposed[3] == 0x00);
+    FL_REQUIRE(untransposed[3] == 0x00);
     // Symbol 4 (bit 3 = 1): 0xFF
-    REQUIRE(untransposed[4] == 0xFF);
+    FL_REQUIRE(untransposed[4] == 0xFF);
     // Symbol 5 (bit 2 = 0): 0x00
-    REQUIRE(untransposed[5] == 0x00);
+    FL_REQUIRE(untransposed[5] == 0x00);
     // Symbol 6 (bit 1 = 1): 0xFF
-    REQUIRE(untransposed[6] == 0xFF);
+    FL_REQUIRE(untransposed[6] == 0xFF);
     // Symbol 7 (bit 0 = 0): 0x00
-    REQUIRE(untransposed[7] == 0x00);
+    FL_REQUIRE(untransposed[7] == 0x00);
 
     // For 0x55 (01010101): alternating 0x00 and 0xFF bytes
     // Symbol 0 (bit 7 = 0): 0x00
-    REQUIRE(untransposed[8] == 0x00);
+    FL_REQUIRE(untransposed[8] == 0x00);
     // Symbol 1 (bit 6 = 1): 0xFF
-    REQUIRE(untransposed[9] == 0xFF);
+    FL_REQUIRE(untransposed[9] == 0xFF);
     // Symbol 2 (bit 5 = 0): 0x00
-    REQUIRE(untransposed[10] == 0x00);
+    FL_REQUIRE(untransposed[10] == 0x00);
     // Symbol 3 (bit 4 = 1): 0xFF
-    REQUIRE(untransposed[11] == 0xFF);
+    FL_REQUIRE(untransposed[11] == 0xFF);
     // Symbol 4 (bit 3 = 0): 0x00
-    REQUIRE(untransposed[12] == 0x00);
+    FL_REQUIRE(untransposed[12] == 0x00);
     // Symbol 5 (bit 2 = 1): 0xFF
-    REQUIRE(untransposed[13] == 0xFF);
+    FL_REQUIRE(untransposed[13] == 0xFF);
     // Symbol 6 (bit 1 = 0): 0x00
-    REQUIRE(untransposed[14] == 0x00);
+    FL_REQUIRE(untransposed[14] == 0x00);
     // Symbol 7 (bit 0 = 1): 0xFF
-    REQUIRE(untransposed[15] == 0xFF);
+    FL_REQUIRE(untransposed[15] == 0xFF);
 }
 
 TEST_CASE("wave8Untranspose_4_simple_pattern") {
@@ -346,7 +346,7 @@ TEST_CASE("wave8Untranspose_4_simple_pattern") {
 
     // Verify: all lanes should be 0xFF (8 bytes per lane × 4 lanes)
     for (int i = 0; i < 32; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 }
 
@@ -372,22 +372,22 @@ TEST_CASE("wave8Untranspose_4_alternating_pattern") {
 
     // Verify: Lane 0 (bytes 0-7) should be all 0xFF
     for (int i = 0; i < 8; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 
     // Verify: Lane 1 (bytes 8-15) should be all 0x00
     for (int i = 8; i < 16; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
 
     // Verify: Lane 2 (bytes 16-23) should be all 0xFF
     for (int i = 16; i < 24; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 
     // Verify: Lane 3 (bytes 24-31) should be all 0x00
     for (int i = 24; i < 32; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
 }
 
@@ -414,42 +414,42 @@ TEST_CASE("wave8Untranspose_4_distinct_patterns") {
     // Verify lane 0: 0x01 (0b00000001)
     // Symbols 0-6 should be 0x00 (bits 7-1 are 0)
     for (int i = 0; i < 7; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
     // Symbol 7 should be 0xFF (bit 0 is 1)
-    REQUIRE(untransposed[7] == 0xFF);
+    FL_REQUIRE(untransposed[7] == 0xFF);
 
     // Verify lane 1: 0x02 (0b00000010)
     // Symbols 0-5 should be 0x00 (bits 7-2 are 0)
     for (int i = 8; i < 8 + 6; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
     // Symbol 6 should be 0xFF (bit 1 is 1)
-    REQUIRE(untransposed[14] == 0xFF);
+    FL_REQUIRE(untransposed[14] == 0xFF);
     // Symbol 7 should be 0x00 (bit 0 is 0)
-    REQUIRE(untransposed[15] == 0x00);
+    FL_REQUIRE(untransposed[15] == 0x00);
 
     // Verify lane 2: 0x04 (0b00000100)
     // Symbols 0-4 should be 0x00 (bits 7-3 are 0)
     for (int i = 16; i < 16 + 5; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
     // Symbol 5 should be 0xFF (bit 2 is 1)
-    REQUIRE(untransposed[21] == 0xFF);
+    FL_REQUIRE(untransposed[21] == 0xFF);
     // Symbols 6-7 should be 0x00 (bits 1-0 are 0)
-    REQUIRE(untransposed[22] == 0x00);
-    REQUIRE(untransposed[23] == 0x00);
+    FL_REQUIRE(untransposed[22] == 0x00);
+    FL_REQUIRE(untransposed[23] == 0x00);
 
     // Verify lane 3: 0x08 (0b00001000)
     // Symbols 0-3 should be 0x00 (bits 7-4 are 0)
     for (int i = 24; i < 24 + 4; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
     // Symbol 4 should be 0xFF (bit 3 is 1)
-    REQUIRE(untransposed[28] == 0xFF);
+    FL_REQUIRE(untransposed[28] == 0xFF);
     // Symbols 5-7 should be 0x00 (bits 2-0 are 0)
     for (int i = 29; i < 32; i++) {
-        REQUIRE(untransposed[i] == 0x00);
+        FL_REQUIRE(untransposed[i] == 0x00);
     }
 }
 
@@ -472,7 +472,7 @@ TEST_CASE("wave8Transpose_8_all_ones") {
     // All lanes have 1s → all bits set in output
     // Expected: 0xFF for all 64 output bytes
     for (int i = 0; i < 64; i++) {
-        REQUIRE(output[i] == 0xFF);
+        FL_REQUIRE(output[i] == 0xFF);
     }
 }
 
@@ -495,7 +495,7 @@ TEST_CASE("wave8Transpose_8_all_zeros") {
     // All lanes have 0s → all bits clear in output
     // Expected: 0x00 for all 64 output bytes
     for (int i = 0; i < 64; i++) {
-        REQUIRE(output[i] == 0x00);
+        FL_REQUIRE(output[i] == 0x00);
     }
 }
 
@@ -526,7 +526,7 @@ TEST_CASE("wave8Transpose_8_alternating_pattern") {
     // Lane 7 (0x00) = all 0s → contributes bit 7 (MSB)
     // Result: 0b01010101 = 0x55 for all 64 output bytes
     for (int i = 0; i < 64; i++) {
-        REQUIRE(output[i] == 0x55);
+        FL_REQUIRE(output[i] == 0x55);
     }
 }
 
@@ -550,13 +550,13 @@ TEST_CASE("wave8Transpose_8_distinct_patterns") {
     // Symbol 0 (bit 7): Only lane 7 has bit 7 set (0x80)
     // Expected pattern: 0b10000000 = 0x80
     for (int i = 0; i < 8; i++) {
-        REQUIRE(output[i] == 0x80);
+        FL_REQUIRE(output[i] == 0x80);
     }
 
     // Symbol 7 (bit 0): Only lane 0 has bit 0 set (0x01)
     // Expected pattern: 0b00000001 = 0x01
     for (int i = 56; i < 64; i++) {
-        REQUIRE(output[i] == 0x01);
+        FL_REQUIRE(output[i] == 0x01);
     }
 }
 
@@ -582,7 +582,7 @@ TEST_CASE("wave8Untranspose_8_all_ones") {
 
     // Verify: all lanes should be 0xFF (8 bytes per lane × 8 lanes)
     for (int i = 0; i < 64; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 }
 
@@ -610,7 +610,7 @@ TEST_CASE("wave8Untranspose_8_alternating_pattern") {
     for (int lane = 0; lane < 8; lane++) {
         uint8_t expected = (lane % 2 == 0) ? 0xFF : 0x00;
         for (int i = 0; i < 8; i++) {
-            REQUIRE(untransposed[lane * 8 + i] == expected);
+            FL_REQUIRE(untransposed[lane * 8 + i] == expected);
         }
     }
 }
@@ -651,7 +651,7 @@ TEST_CASE("wave8Untranspose_8_distinct_patterns") {
         // Verify the wave pattern
         for (int symbol = 0; symbol < 8; symbol++) {
             uint8_t expected = (symbol == (7 - set_bit)) ? 0xFF : 0x00;
-            REQUIRE(untransposed[lane * 8 + symbol] == expected);
+            FL_REQUIRE(untransposed[lane * 8 + symbol] == expected);
         }
     }
 }
@@ -676,7 +676,7 @@ TEST_CASE("wave8Transpose_16_all_ones") {
     // All lanes have 1s → all bits set in output
     // Expected: 0xFF for all 128 output bytes
     for (int i = 0; i < 128; i++) {
-        REQUIRE(output[i] == 0xFF);
+        FL_REQUIRE(output[i] == 0xFF);
     }
 }
 
@@ -700,7 +700,7 @@ TEST_CASE("wave8Transpose_16_all_zeros") {
     // All lanes have 0s → all bits clear in output
     // Expected: 0x00 for all 128 output bytes
     for (int i = 0; i < 128; i++) {
-        REQUIRE(output[i] == 0x00);
+        FL_REQUIRE(output[i] == 0x00);
     }
 }
 
@@ -727,7 +727,7 @@ TEST_CASE("wave8Transpose_16_alternating_pattern") {
     // Result: 0b01010101 = 0x55 for low byte (lanes 0-7)
     //         0b01010101 = 0x55 for high byte (lanes 8-15)
     for (int i = 0; i < 128; i++) {
-        REQUIRE(output[i] == 0x55);
+        FL_REQUIRE(output[i] == 0x55);
     }
 }
 
@@ -750,13 +750,13 @@ TEST_CASE("wave8Transpose_16_distinct_patterns") {
 
     // Symbol 0 (bit 7): Only lanes 7 and 15 have bit 7 set (0x80)
     // Expected: low byte = 0x80 (lane 7), high byte = 0x80 (lane 15)
-    REQUIRE(output[0] == 0x80);  // High byte (lanes 8-15)
-    REQUIRE(output[1] == 0x80);  // Low byte (lanes 0-7)
+    FL_REQUIRE(output[0] == 0x80);  // High byte (lanes 8-15)
+    FL_REQUIRE(output[1] == 0x80);  // Low byte (lanes 0-7)
 
     // Symbol 7 (bit 0): Only lanes 0 and 8 have bit 0 set (0x01)
     // Expected: low byte = 0x01 (lane 0), high byte = 0x01 (lane 8)
-    REQUIRE(output[112] == 0x01); // High byte (lanes 8-15)
-    REQUIRE(output[113] == 0x01); // Low byte (lanes 0-7)
+    FL_REQUIRE(output[112] == 0x01); // High byte (lanes 8-15)
+    FL_REQUIRE(output[113] == 0x01); // Low byte (lanes 0-7)
 }
 
 TEST_CASE("wave8Untranspose_16_all_ones") {
@@ -782,7 +782,7 @@ TEST_CASE("wave8Untranspose_16_all_ones") {
 
     // Verify: all lanes should be 0xFF (8 bytes per lane × 16 lanes)
     for (int i = 0; i < 128; i++) {
-        REQUIRE(untransposed[i] == 0xFF);
+        FL_REQUIRE(untransposed[i] == 0xFF);
     }
 }
 
@@ -811,7 +811,7 @@ TEST_CASE("wave8Untranspose_16_alternating_pattern") {
     for (int lane = 0; lane < 16; lane++) {
         uint8_t expected = (lane % 2 == 0) ? 0xFF : 0x00;
         for (int i = 0; i < 8; i++) {
-            REQUIRE(untransposed[lane * 8 + i] == expected);
+            FL_REQUIRE(untransposed[lane * 8 + i] == expected);
         }
     }
 }
@@ -854,7 +854,7 @@ TEST_CASE("wave8Untranspose_16_distinct_patterns") {
         // Verify the wave pattern
         for (int symbol = 0; symbol < 8; symbol++) {
             uint8_t expected = (symbol == (7 - set_bit)) ? 0xFF : 0x00;
-            REQUIRE(untransposed[lane * 8 + symbol] == expected);
+            FL_REQUIRE(untransposed[lane * 8 + symbol] == expected);
         }
     }
 }

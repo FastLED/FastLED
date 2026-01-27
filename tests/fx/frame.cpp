@@ -30,11 +30,11 @@ TEST_CASE("test frame custom allocator") {
     SetPSRamAllocator(custom_malloc, custom_free);
     
     FramePtr frame = fl::make_shared<Frame>(100);  // 100 pixels.
-    CHECK(allocation_count == 1);  // One for RGB.
+    FL_CHECK(allocation_count == 1);  // One for RGB.
     frame.reset();
 
     // Frame should be destroyed here
-    CHECK(allocation_count == 0);
+    FL_CHECK(allocation_count == 0);
 }
 
 
@@ -44,9 +44,9 @@ TEST_CASE("test blend by black") {
     frame->rgb()[0] = CRGB(255, 0, 0);  // Red
     CRGB out;
     frame->draw(&out, DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS);
-    CHECK(out == CRGB(255, 0, 0));  // full red because max luma is 255
+    FL_CHECK(out == CRGB(255, 0, 0));  // full red because max luma is 255
     out = CRGB(0, 0, 0);
     frame->rgb()[0] = CRGB(128, 0, 0);  // Red
     frame->draw(&out, DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS);
-    CHECK(out == CRGB(64, 0, 0));
+    FL_CHECK(out == CRGB(64, 0, 0));
 }

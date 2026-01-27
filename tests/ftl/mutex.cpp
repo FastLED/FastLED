@@ -12,7 +12,7 @@ TEST_CASE("Mutex reentrant") {
         {
             // This should succeed with recursive_mutex
             bool acquired_recursively = m.try_lock();
-            CHECK_EQ(acquired_recursively, true);
+            FL_CHECK_EQ(acquired_recursively, true);
             m.unlock();
         }
     }

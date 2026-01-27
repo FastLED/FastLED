@@ -22,9 +22,9 @@ TEST_CASE("AudioReactive basic functionality") {
     
     // Check initial state
     const AudioData& data = audio.getData();
-    CHECK(data.volume == 0.0f);
-    CHECK(data.volumeRaw == 0.0f);
-    CHECK_FALSE(data.beatDetected);
+    FL_CHECK(data.volume == 0.0f);
+    FL_CHECK(data.volumeRaw == 0.0f);
+    FL_CHECK_FALSE(data.beatDetected);
     
     // Test adding samples - Create AudioSample and add it
     // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
@@ -49,13 +49,13 @@ TEST_CASE("AudioReactive basic functionality") {
     
     // Check that we detected some audio
     const AudioData& processedData = audio.getData();
-    CHECK(processedData.volume > 0.0f);
+    FL_CHECK(processedData.volume > 0.0f);
     
     // Verify that the timestamp was properly captured from the AudioSample
-    CHECK(processedData.timestamp == testTimestamp);
+    FL_CHECK(processedData.timestamp == testTimestamp);
     
     // Verify that the AudioSample correctly stores and returns its timestamp
-    CHECK(audioSample.timestamp() == testTimestamp);
+    FL_CHECK(audioSample.timestamp() == testTimestamp);
 }
 
 TEST_CASE("AudioReactive convenience functions") {
@@ -71,10 +71,10 @@ TEST_CASE("AudioReactive convenience functions") {
     float treble = audio.getTreble();
     bool beat = audio.isBeat();
     
-    CHECK(volume >= 0.0f);
-    CHECK(bass >= 0.0f);
-    CHECK(mid >= 0.0f);
-    CHECK(treble >= 0.0f);
+    FL_CHECK(volume >= 0.0f);
+    FL_CHECK(bass >= 0.0f);
+    FL_CHECK(mid >= 0.0f);
+    FL_CHECK(treble >= 0.0f);
     // beat can be true or false, just check it doesn't crash
     (void)beat; // Suppress unused variable warning
 }
@@ -102,13 +102,13 @@ TEST_CASE("AudioReactive enhanced beat detection") {
     float trebleEnergy = audio.getTrebleEnergy();
     
     // Initial state should be false/zero
-    CHECK_FALSE(bassBeat);
-    CHECK_FALSE(midBeat);
-    CHECK_FALSE(trebleBeat);
-    CHECK_EQ(spectralFlux, 0.0f);
-    CHECK_EQ(bassEnergy, 0.0f);
-    CHECK_EQ(midEnergy, 0.0f);
-    CHECK_EQ(trebleEnergy, 0.0f);
+    FL_CHECK_FALSE(bassBeat);
+    FL_CHECK_FALSE(midBeat);
+    FL_CHECK_FALSE(trebleBeat);
+    FL_CHECK_EQ(spectralFlux, 0.0f);
+    FL_CHECK_EQ(bassEnergy, 0.0f);
+    FL_CHECK_EQ(midEnergy, 0.0f);
+    FL_CHECK_EQ(trebleEnergy, 0.0f);
     
     // Create a bass-heavy sample (low frequency)
     // Reduced from 1000 to 500 samples for performance (still provides excellent coverage)
@@ -133,12 +133,12 @@ TEST_CASE("AudioReactive enhanced beat detection") {
     
     // Check that we detected some bass energy
     const AudioData& data = audio.getData();
-    CHECK(data.bassEnergy > 0.0f);
-    CHECK(data.spectralFlux >= 0.0f);
+    FL_CHECK(data.bassEnergy > 0.0f);
+    FL_CHECK(data.spectralFlux >= 0.0f);
     
     // Energy should be distributed appropriately for bass content
-    CHECK(data.bassEnergy > data.midEnergy);
-    CHECK(data.bassEnergy > data.trebleEnergy);
+    FL_CHECK(data.bassEnergy > data.midEnergy);
+    FL_CHECK(data.bassEnergy > data.trebleEnergy);
 }
 
 TEST_CASE("AudioReactive multi-band beat detection") {
@@ -185,9 +185,9 @@ TEST_CASE("AudioReactive multi-band beat detection") {
     audio.processSample(loudSample);
     
     // Check that energies were calculated
-    CHECK(audio.getBassEnergy() > 0.0f);
-    CHECK(audio.getMidEnergy() > 0.0f);
-    CHECK(audio.getTrebleEnergy() > 0.0f);
+    FL_CHECK(audio.getBassEnergy() > 0.0f);
+    FL_CHECK(audio.getMidEnergy() > 0.0f);
+    FL_CHECK(audio.getTrebleEnergy() > 0.0f);
 }
 
 TEST_CASE("AudioReactive spectral flux detection") {
@@ -235,7 +235,7 @@ TEST_CASE("AudioReactive spectral flux detection") {
     float secondFlux = audio.getSpectralFlux();
     
     // Should have detected spectral flux due to frequency change
-    CHECK(secondFlux >= 0.0f);
+    FL_CHECK(secondFlux >= 0.0f);
     
     // Flux should have increased or stayed the same from processing different content
     (void)firstFlux; // Suppress unused variable warning
@@ -268,8 +268,8 @@ TEST_CASE("AudioReactive perceptual weighting") {
     
     // Check that processing completed without errors
     const AudioData& data = audio.getData();
-    CHECK(data.volume >= 0.0f);
-    CHECK(data.timestamp == 4000);
+    FL_CHECK(data.volume >= 0.0f);
+    FL_CHECK(data.timestamp == 4000);
     
     // Frequency bins should have been processed
     bool hasNonZeroBins = false;
@@ -279,7 +279,7 @@ TEST_CASE("AudioReactive perceptual weighting") {
             break;
         }
     }
-    CHECK(hasNonZeroBins);
+    FL_CHECK(hasNonZeroBins);
 }
 
 TEST_CASE("AudioReactive configuration validation") {
@@ -300,51 +300,51 @@ TEST_CASE("AudioReactive configuration validation") {
     audio.processSample(audioSample);
     
     // Basic functionality should still work
-    CHECK(audio.getVolume() >= 0.0f);
-    CHECK_FALSE(audio.isBassBeat()); // Should be false when multi-band is disabled
-    CHECK_FALSE(audio.isMidBeat());
-    CHECK_FALSE(audio.isTrebleBeat());
+    FL_CHECK(audio.getVolume() >= 0.0f);
+    FL_CHECK_FALSE(audio.isBassBeat()); // Should be false when multi-band is disabled
+    FL_CHECK_FALSE(audio.isMidBeat());
+    FL_CHECK_FALSE(audio.isTrebleBeat());
 }
 
 TEST_CASE("AudioReactive CircularBuffer functionality") {
     // Test the CircularBuffer template directly
     StaticCircularBuffer<float, 8> buffer;
     
-    CHECK(buffer.empty());
-    CHECK_FALSE(buffer.full());
-    CHECK_EQ(buffer.size(), 0);
-    CHECK_EQ(buffer.capacity(), 8);
+    FL_CHECK(buffer.empty());
+    FL_CHECK_FALSE(buffer.full());
+    FL_CHECK_EQ(buffer.size(), 0);
+    FL_CHECK_EQ(buffer.capacity(), 8);
     
     // Test pushing elements
     for (int i = 0; i < 5; ++i) {
         buffer.push(static_cast<float>(i));
     }
     
-    CHECK_EQ(buffer.size(), 5);
-    CHECK_FALSE(buffer.full());
-    CHECK_FALSE(buffer.empty());
+    FL_CHECK_EQ(buffer.size(), 5);
+    FL_CHECK_FALSE(buffer.full());
+    FL_CHECK_FALSE(buffer.empty());
     
     // Test popping elements
     float value;
-    CHECK(buffer.pop(value));
-    CHECK_EQ(value, 0.0f);
-    CHECK_EQ(buffer.size(), 4);
+    FL_CHECK(buffer.pop(value));
+    FL_CHECK_EQ(value, 0.0f);
+    FL_CHECK_EQ(buffer.size(), 4);
     
     // Fill buffer completely
     for (int i = 5; i < 12; ++i) {
         buffer.push(static_cast<float>(i));
     }
     
-    CHECK(buffer.full());
-    CHECK_EQ(buffer.size(), 8);
+    FL_CHECK(buffer.full());
+    FL_CHECK_EQ(buffer.size(), 8);
     
     // Test that old elements are overwritten
     buffer.push(100.0f);
-    CHECK(buffer.full());
-    CHECK_EQ(buffer.size(), 8);
+    FL_CHECK(buffer.full());
+    FL_CHECK_EQ(buffer.size(), 8);
     
     // Clear buffer
     buffer.clear();
-    CHECK(buffer.empty());
-    CHECK_EQ(buffer.size(), 0);
+    FL_CHECK(buffer.empty());
+    FL_CHECK_EQ(buffer.size(), 0);
 } 

@@ -11,7 +11,7 @@ static fl::FileSystem setupCodecFilesystem() {
     fl::setTestFileSystemRoot("tests");
     fl::FileSystem fs;
     bool ok = fs.beginSd(5);
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     return fs;
 }
 
@@ -20,24 +20,24 @@ TEST_CASE("JPEG file loading and decoding") {
 
     // Test that we can load the JPEG file from filesystem
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
-    REQUIRE(handle != nullptr);
-    REQUIRE(handle->valid());
+    FL_REQUIRE(handle != nullptr);
+    FL_REQUIRE(handle->valid());
 
     // Get file size and read into buffer
     fl::size file_size = handle->size();
-    CHECK(file_size > 0);
+    FL_CHECK(file_size > 0);
 
     fl::vector<fl::u8> file_data(file_size);
     fl::size bytes_read = handle->read(file_data.data(), file_size);
-    CHECK_EQ(bytes_read, file_size);
+    FL_CHECK_EQ(bytes_read, file_size);
 
     // JPEG files should start with FF D8 (JPEG SOI marker)
-    CHECK_EQ(file_data[0], 0xFF);
-    CHECK_EQ(file_data[1], 0xD8);
+    FL_CHECK_EQ(file_data[0], 0xFF);
+    FL_CHECK_EQ(file_data[1], 0xD8);
 
     // JPEG files should end with FF D9 (JPEG EOI marker)
-    CHECK_EQ(file_data[file_size - 2], 0xFF);
-    CHECK_EQ(file_data[file_size - 1], 0xD9);
+    FL_CHECK_EQ(file_data[file_size - 2], 0xFF);
+    FL_CHECK_EQ(file_data[file_size - 1], 0xD9);
 
     // Test JPEG decoder
     if (fl::Jpeg::isSupported()) {
@@ -51,19 +51,19 @@ TEST_CASE("JPEG file loading and decoding") {
 
         if (!frame) {
             MESSAGE("JPEG decode failed with error: " << error_msg);
-            REQUIRE_MESSAGE(frame, "JPEG decoder returned null frame with error: " << error_msg);
+            FL_REQUIRE_MESSAGE(frame, "JPEG decoder returned null frame with error: " << error_msg);
         }
 
         if (frame) {
-            CHECK(frame->isValid());
-            CHECK_EQ(frame->getWidth(), 2);
-            CHECK_EQ(frame->getHeight(), 2);
-            CHECK_EQ(frame->getFormat(), fl::PixelFormat::RGB888);
+            FL_CHECK(frame->isValid());
+            FL_CHECK_EQ(frame->getWidth(), 2);
+            FL_CHECK_EQ(frame->getHeight(), 2);
+            FL_CHECK_EQ(frame->getFormat(), fl::PixelFormat::RGB888);
 
             // Expected layout: red-white-blue-black (2x2)
             // Verify pixel values match expected color pattern (JPEG compression affects exact values)
             const CRGB* pixels = frame->rgb();
-            REQUIRE(pixels != nullptr);
+            FL_REQUIRE(pixels != nullptr);
 
             // Verify we have 4 pixels for a 2x2 image
             MESSAGE("Decoded pixel values - Red: (" << (int)pixels[0].r << "," << (int)pixels[0].g << "," << (int)pixels[0].b
@@ -82,13 +82,13 @@ TEST_CASE("JPEG file loading and decoding") {
                     break;
                 }
             }
-            CHECK_MESSAGE(pixels_vary, "Pixels should have some variation, got all identical values");
+            FL_CHECK_MESSAGE(pixels_vary, "Pixels should have some variation, got all identical values");
 
             // Verify that color channel values are within reasonable range (0-255)
             for (int i = 0; i < 4; i++) {
-                CHECK_MESSAGE(pixels[i].r <= 255, "Red channel out of range for pixel " << i << ": " << (int)pixels[i].r);
-                CHECK_MESSAGE(pixels[i].g <= 255, "Green channel out of range for pixel " << i << ": " << (int)pixels[i].g);
-                CHECK_MESSAGE(pixels[i].b <= 255, "Blue channel out of range for pixel " << i << ": " << (int)pixels[i].b);
+                FL_CHECK_MESSAGE(pixels[i].r <= 255, "Red channel out of range for pixel " << i << ": " << (int)pixels[i].r);
+                FL_CHECK_MESSAGE(pixels[i].g <= 255, "Green channel out of range for pixel " << i << ": " << (int)pixels[i].g);
+                FL_CHECK_MESSAGE(pixels[i].b <= 255, "Blue channel out of range for pixel " << i << ": " << (int)pixels[i].b);
             }
 
             // Verify that at least some pixels have non-zero color values
@@ -99,7 +99,7 @@ TEST_CASE("JPEG file loading and decoding") {
                     break;
                 }
             }
-            CHECK_MESSAGE(has_non_zero_pixels, "At least some pixels should have non-zero color values");
+            FL_CHECK_MESSAGE(has_non_zero_pixels, "At least some pixels should have non-zero color values");
 
             // Check if all pixels are black (indicating decoder failure)
             bool all_pixels_black = true;
@@ -111,7 +111,7 @@ TEST_CASE("JPEG file loading and decoding") {
             }
 
             // If all pixels are black, this indicates a decoder failure and should fail the test
-            CHECK_MESSAGE(!all_pixels_black,
+            FL_CHECK_MESSAGE(!all_pixels_black,
                 "JPEG decoder returned all black pixels - decoder failure. "
                 "Frame details: valid=" << frame->isValid()
                 << ", width=" << frame->getWidth()
@@ -125,7 +125,7 @@ TEST_CASE("JPEG file loading and decoding") {
                     break;
                 }
             }
-            CHECK_FALSE_MESSAGE(all_pixels_identical,
+            FL_CHECK_FALSE_MESSAGE(all_pixels_identical,
                 "JPEG decoder returned all identical pixels - indicates improper decoding");
         }
     }

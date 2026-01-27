@@ -14,37 +14,37 @@ TEST_CASE("Test HashMapLRU") {
         fl::HashMapLru<int, int> lru(3);
         
         // Test empty state
-        CHECK(lru.empty());
-        CHECK(lru.size() == 0);
-        CHECK(lru.capacity() == 3);
-        CHECK(lru.find_value(1) == nullptr);
+        FL_CHECK(lru.empty());
+        FL_CHECK(lru.size() == 0);
+        FL_CHECK(lru.capacity() == 3);
+        FL_CHECK(lru.find_value(1) == nullptr);
         
         // Test insertion
         lru.insert(1, 100);
-        CHECK(!lru.empty());
-        CHECK(lru.size() == 1);
-        CHECK(*lru.find_value(1) == 100);
+        FL_CHECK(!lru.empty());
+        FL_CHECK(lru.size() == 1);
+        FL_CHECK(*lru.find_value(1) == 100);
         
         // Test operator[]
         lru[2] = 200;
-        CHECK(lru.size() == 2);
-        CHECK(*lru.find_value(2) == 200);
+        FL_CHECK(lru.size() == 2);
+        FL_CHECK(*lru.find_value(2) == 200);
         
         // Test update
         lru[1] = 150;
-        CHECK(lru.size() == 2);
-        CHECK(*lru.find_value(1) == 150);
+        FL_CHECK(lru.size() == 2);
+        FL_CHECK(*lru.find_value(1) == 150);
         
         // Test removal
-        CHECK(lru.remove(1));
-        CHECK(lru.size() == 1);
-        CHECK(lru.find_value(1) == nullptr);
-        CHECK(!lru.remove(1)); // Already removed
+        FL_CHECK(lru.remove(1));
+        FL_CHECK(lru.size() == 1);
+        FL_CHECK(lru.find_value(1) == nullptr);
+        FL_CHECK(!lru.remove(1)); // Already removed
         
         // Test clear
         lru.clear();
-        CHECK(lru.empty());
-        CHECK(lru.size() == 0);
+        FL_CHECK(lru.empty());
+        FL_CHECK(lru.size() == 0);
     }
     
     SUBCASE("LRU eviction") {
@@ -54,27 +54,27 @@ TEST_CASE("Test HashMapLRU") {
         lru.insert(1, 100);
         lru.insert(2, 200);
         lru.insert(3, 300);
-        CHECK(lru.size() == 3);
+        FL_CHECK(lru.size() == 3);
         
         // Access key 1 to make it most recently used
-        CHECK(*lru.find_value(1) == 100);
+        FL_CHECK(*lru.find_value(1) == 100);
         
         // Insert a new key, should evict key 2 (least recently used)
         lru.insert(4, 400);
-        CHECK(lru.size() == 3);
-        CHECK(lru.find_value(2) == nullptr); // Key 2 should be evicted
-        CHECK(*lru.find_value(1) == 100);
-        CHECK(*lru.find_value(3) == 300);
-        CHECK(*lru.find_value(4) == 400);
+        FL_CHECK(lru.size() == 3);
+        FL_CHECK(lru.find_value(2) == nullptr); // Key 2 should be evicted
+        FL_CHECK(*lru.find_value(1) == 100);
+        FL_CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(*lru.find_value(4) == 400);
         
         // Access key 3, then insert new key
-        CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(*lru.find_value(3) == 300);
         lru.insert(5, 500);
-        CHECK(lru.size() == 3);
-        CHECK(lru.find_value(1) == nullptr); // Key 1 should be evicted
-        CHECK(*lru.find_value(3) == 300);
-        CHECK(*lru.find_value(4) == 400);
-        CHECK(*lru.find_value(5) == 500);
+        FL_CHECK(lru.size() == 3);
+        FL_CHECK(lru.find_value(1) == nullptr); // Key 1 should be evicted
+        FL_CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(*lru.find_value(4) == 400);
+        FL_CHECK(*lru.find_value(5) == 500);
     }
     
     SUBCASE("Operator[] LRU behavior") {
@@ -87,40 +87,40 @@ TEST_CASE("Test HashMapLRU") {
         
         // Access key 1 to make it most recently used
         int val = lru[1];
-        CHECK(val == 100);
+        FL_CHECK(val == 100);
         
         // Insert a new key, should evict key 2
         lru[4] = 400;
-        CHECK(lru.size() == 3);
-        CHECK(lru.find_value(2) == nullptr);
-        CHECK(*lru.find_value(1) == 100);
-        CHECK(*lru.find_value(3) == 300);
-        CHECK(*lru.find_value(4) == 400);
+        FL_CHECK(lru.size() == 3);
+        FL_CHECK(lru.find_value(2) == nullptr);
+        FL_CHECK(*lru.find_value(1) == 100);
+        FL_CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(*lru.find_value(4) == 400);
     }
     
     SUBCASE("Edge cases") {
         // Test with capacity 1
         fl::HashMapLru<int, int> tiny_lru(1);
         tiny_lru.insert(1, 100);
-        CHECK(*tiny_lru.find_value(1) == 100);
+        FL_CHECK(*tiny_lru.find_value(1) == 100);
         
         tiny_lru.insert(2, 200);
-        CHECK(tiny_lru.size() == 1);
-        CHECK(tiny_lru.find_value(1) == nullptr);
-        CHECK(*tiny_lru.find_value(2) == 200);
+        FL_CHECK(tiny_lru.size() == 1);
+        FL_CHECK(tiny_lru.find_value(1) == nullptr);
+        FL_CHECK(*tiny_lru.find_value(2) == 200);
         
         // Test with string keys
         fl::HashMapLru<fl::string, int> str_lru(2);
         str_lru.insert("one", 1);
         str_lru.insert("two", 2);
-        CHECK(*str_lru.find_value("one") == 1);
-        CHECK(*str_lru.find_value("two") == 2);
+        FL_CHECK(*str_lru.find_value("one") == 1);
+        FL_CHECK(*str_lru.find_value("two") == 2);
         
         // This should evict "one" since it's least recently used
         str_lru.insert("three", 3);
-        CHECK(str_lru.find_value("one") == nullptr);
-        CHECK(*str_lru.find_value("two") == 2);
-        CHECK(*str_lru.find_value("three") == 3);
+        FL_CHECK(str_lru.find_value("one") == nullptr);
+        FL_CHECK(*str_lru.find_value("two") == 2);
+        FL_CHECK(*str_lru.find_value("three") == 3);
     }
     
     SUBCASE("Update existing key") {
@@ -133,17 +133,17 @@ TEST_CASE("Test HashMapLRU") {
         
         // Update an existing key
         lru.insert(2, 250);
-        CHECK(lru.size() == 3);
-        CHECK(*lru.find_value(1) == 100);
-        CHECK(*lru.find_value(2) == 250);
-        CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(lru.size() == 3);
+        FL_CHECK(*lru.find_value(1) == 100);
+        FL_CHECK(*lru.find_value(2) == 250);
+        FL_CHECK(*lru.find_value(3) == 300);
         
         // Insert a new key, should evict key 1 (least recently used)
         lru.insert(4, 400);
-        CHECK(lru.size() == 3);
-        CHECK(lru.find_value(1) == nullptr);
-        CHECK(*lru.find_value(2) == 250);
-        CHECK(*lru.find_value(3) == 300);
-        CHECK(*lru.find_value(4) == 400);
+        FL_CHECK(lru.size() == 3);
+        FL_CHECK(lru.find_value(1) == nullptr);
+        FL_CHECK(*lru.find_value(2) == 250);
+        FL_CHECK(*lru.find_value(3) == 300);
+        FL_CHECK(*lru.find_value(4) == 400);
     }
 }

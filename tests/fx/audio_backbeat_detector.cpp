@@ -22,21 +22,21 @@ using namespace fl;
 TEST_CASE("BackbeatDetector - Basic initialization") {
     // Test construction with own BeatDetector
     BackbeatDetector detector1;
-    CHECK_EQ(detector1.isBackbeat(), false);
-    CHECK_EQ(detector1.getConfidence(), 0.0f);
-    CHECK_EQ(detector1.getStrength(), 0.0f);
+    FL_CHECK_EQ(detector1.isBackbeat(), false);
+    FL_CHECK_EQ(detector1.getConfidence(), 0.0f);
+    FL_CHECK_EQ(detector1.getStrength(), 0.0f);
 
     // Test construction with shared BeatDetector
     auto beatDetector = make_shared<BeatDetector>();
     BackbeatDetector detector2(beatDetector);
-    CHECK_EQ(detector2.isBackbeat(), false);
-    CHECK_EQ(detector2.getConfidence(), 0.0f);
+    FL_CHECK_EQ(detector2.isBackbeat(), false);
+    FL_CHECK_EQ(detector2.getConfidence(), 0.0f);
 
     // Test construction with shared BeatDetector and DownbeatDetector
     auto downbeatDetector = make_shared<DownbeatDetector>(beatDetector);
     BackbeatDetector detector3(beatDetector, downbeatDetector);
-    CHECK_EQ(detector3.isBackbeat(), false);
-    CHECK_EQ(detector3.getConfidence(), 0.0f);
+    FL_CHECK_EQ(detector3.isBackbeat(), false);
+    FL_CHECK_EQ(detector3.getConfidence(), 0.0f);
 }
 
 TEST_CASE("BackbeatDetector - Configuration") {
@@ -56,7 +56,7 @@ TEST_CASE("BackbeatDetector - Configuration") {
     detector.setAdaptive(false);
 
     // Basic smoke test - should not crash
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 TEST_CASE("BackbeatDetector - Reset functionality") {
@@ -69,10 +69,10 @@ TEST_CASE("BackbeatDetector - Reset functionality") {
     // Reset should clear state but preserve configuration
     detector.reset();
 
-    CHECK_EQ(detector.isBackbeat(), false);
-    CHECK_EQ(detector.getLastBackbeatNumber(), 0);
-    CHECK_EQ(detector.getConfidence(), 0.0f);
-    CHECK_EQ(detector.getStrength(), 0.0f);
+    FL_CHECK_EQ(detector.isBackbeat(), false);
+    FL_CHECK_EQ(detector.getLastBackbeatNumber(), 0);
+    FL_CHECK_EQ(detector.getConfidence(), 0.0f);
+    FL_CHECK_EQ(detector.getStrength(), 0.0f);
 }
 
 TEST_CASE("BackbeatDetector - Callbacks") {
@@ -113,7 +113,7 @@ TEST_CASE("BackbeatDetector - Callbacks") {
     (void)backbeat_confidence;
     (void)backbeat_strength;
 
-    CHECK(true);  // Smoke test passed
+    FL_CHECK(true);  // Smoke test passed
 }
 
 TEST_CASE("BackbeatDetector - Backbeat ratio") {
@@ -121,8 +121,8 @@ TEST_CASE("BackbeatDetector - Backbeat ratio") {
 
     // Initial ratio should be 1.0 (neutral)
     float ratio = detector.getBackbeatRatio();
-    CHECK_GE(ratio, 0.0f);
-    CHECK_LE(ratio, 10.0f);  // Plausible range
+    FL_CHECK_GE(ratio, 0.0f);
+    FL_CHECK_LE(ratio, 10.0f);  // Plausible range
 }
 
 TEST_CASE("BackbeatDetector - State access") {
@@ -131,12 +131,12 @@ TEST_CASE("BackbeatDetector - State access") {
     BackbeatDetector detector(beatDetector, downbeatDetector);
 
     // Test initial state
-    CHECK_EQ(detector.isBackbeat(), false);
-    CHECK_EQ(detector.getLastBackbeatNumber(), 0);
-    CHECK_GE(detector.getConfidence(), 0.0f);
-    CHECK_LE(detector.getConfidence(), 1.0f);
-    CHECK_GE(detector.getStrength(), 0.0f);
-    CHECK_GE(detector.getBackbeatRatio(), 0.0f);
+    FL_CHECK_EQ(detector.isBackbeat(), false);
+    FL_CHECK_EQ(detector.getLastBackbeatNumber(), 0);
+    FL_CHECK_GE(detector.getConfidence(), 0.0f);
+    FL_CHECK_LE(detector.getConfidence(), 1.0f);
+    FL_CHECK_GE(detector.getStrength(), 0.0f);
+    FL_CHECK_GE(detector.getBackbeatRatio(), 0.0f);
 }
 
 TEST_CASE("BackbeatDetector - Detector dependencies") {
@@ -157,20 +157,20 @@ TEST_CASE("BackbeatDetector - Detector dependencies") {
     detector.update(context);
     detector.reset();
 
-    CHECK(true);  // Smoke test passed
+    FL_CHECK(true);  // Smoke test passed
 }
 
 TEST_CASE("BackbeatDetector - AudioDetector interface") {
     BackbeatDetector detector;
 
     // Test AudioDetector interface methods
-    CHECK_EQ(detector.needsFFT(), true);
-    CHECK_EQ(detector.needsFFTHistory(), false);
-    CHECK(detector.getName() != nullptr);
+    FL_CHECK_EQ(detector.needsFFT(), true);
+    FL_CHECK_EQ(detector.needsFFTHistory(), false);
+    FL_CHECK(detector.getName() != nullptr);
 
     // Verify name is correct
     const char* name = detector.getName();
-    CHECK(fl::strcmp(name, "BackbeatDetector") == 0);
+    FL_CHECK(fl::strcmp(name, "BackbeatDetector") == 0);
 }
 
 TEST_CASE("BackbeatDetector - Multiple update cycles") {
@@ -206,5 +206,5 @@ TEST_CASE("BackbeatDetector - Multiple update cycles") {
     detector.update(context3);
 
     // Should not crash with multiple updates
-    CHECK(true);  // Smoke test passed
+    FL_CHECK(true);  // Smoke test passed
 }

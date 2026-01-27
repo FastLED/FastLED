@@ -28,16 +28,16 @@
 TEST_CASE("LinePath") {
     fl::LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
     fl::vec2<float> xy = path.compute(0.5f);
-    REQUIRE(xy.x == 0.5f);
-    REQUIRE(xy.y == 0.5f);
+    FL_REQUIRE(xy.x == 0.5f);
+    FL_REQUIRE(xy.y == 0.5f);
 
     xy = path.compute(1.0f);
-    REQUIRE(xy.x == 1.0f);
-    REQUIRE(xy.y == 1.0f);
+    FL_REQUIRE(xy.x == 1.0f);
+    FL_REQUIRE(xy.y == 1.0f);
 
     xy = path.compute(0.0f);
-    REQUIRE(xy.x == 0.0f);
-    REQUIRE(xy.y == 0.0f);
+    FL_REQUIRE(xy.x == 0.0f);
+    FL_REQUIRE(xy.y == 0.0f);
 }
 
 TEST_CASE("LinePath at_subpixel") {
@@ -46,9 +46,9 @@ TEST_CASE("LinePath at_subpixel") {
     fl::XYPath path(line);
     path.setDrawBounds(2,2);
     fl::Tile2x2_u8 tile = path.at_subpixel(0);
-    REQUIRE_EQ(fl::vec2<uint16_t>(0, 0), tile.origin());
+    FL_REQUIRE_EQ(fl::vec2<uint16_t>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
-    REQUIRE_EQ(255, tile.at(0, 0));
+    FL_REQUIRE_EQ(255, tile.at(0, 0));
 }
 
 TEST_CASE("LinePath simple float sweep") {
@@ -57,9 +57,9 @@ TEST_CASE("LinePath simple float sweep") {
     fl::XYPath path(point);
     auto xy = path.at(0);
     //MESSAGE_TILE(tile);
-    REQUIRE_EQ(xy, fl::vec2<float>(0.0f, 1.f));
+    FL_REQUIRE_EQ(xy, fl::vec2<float>(0.0f, 1.f));
     xy = path.at(1);
-    REQUIRE_EQ(xy, fl::vec2<float>(1.f, 1.f));
+    FL_REQUIRE_EQ(xy, fl::vec2<float>(1.f, 1.f));
 }
 
 TEST_CASE("Point at exactly the middle") {
@@ -70,7 +70,7 @@ TEST_CASE("Point at exactly the middle") {
     // auto xy = path.at(0);
     fl::Tile2x2_u8 sp = path.at_subpixel(0);
     //MESSAGE_TILE(tile);
-    // REQUIRE_EQ(fl::vec2(0.0f, 0.f), sp);
+    // FL_REQUIRE_EQ(fl::vec2(0.0f, 0.f), sp);
     // print out
     auto origin = sp.origin();
     MESSAGE("Origin: " << origin.x << ", " << origin.y);
@@ -81,10 +81,10 @@ TEST_CASE("Point at exactly the middle") {
     MESSAGE(sp.at(1, 1));
 
     // require that all alpha be the same
-    REQUIRE_EQ(sp.at(0, 0), sp.at(0, 1));
-    REQUIRE_EQ(sp.at(0, 0), sp.at(1, 0));
-    REQUIRE_EQ(sp.at(0, 0), sp.at(1, 1));
-    REQUIRE_EQ(sp.at(0, 0), 64);
+    FL_REQUIRE_EQ(sp.at(0, 0), sp.at(0, 1));
+    FL_REQUIRE_EQ(sp.at(0, 0), sp.at(1, 0));
+    FL_REQUIRE_EQ(sp.at(0, 0), sp.at(1, 1));
+    FL_REQUIRE_EQ(sp.at(0, 0), 64);
 }
 
 TEST_CASE("LinePath simple sweep in draw bounds") {
@@ -95,8 +95,8 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
     path.setDrawBounds(width, width);
     auto begin = path.at(0);
     auto end = path.at(1);
-    REQUIRE_EQ(fl::vec2<float>(0.5f, 0.5f), begin);
-    REQUIRE_EQ(fl::vec2<float>(1.5f, 0.5f), end);
+    FL_REQUIRE_EQ(fl::vec2<float>(0.5f, 0.5f), begin);
+    FL_REQUIRE_EQ(fl::vec2<float>(1.5f, 0.5f), end);
 }
 
 TEST_CASE("LinePath at_subpixel moves x") {
@@ -106,11 +106,11 @@ TEST_CASE("LinePath at_subpixel moves x") {
     path.setDrawBounds(3, 3);
     fl::Tile2x2_u8 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(0, 0));
-    REQUIRE_EQ(tile.at(0, 0), 255);
+    FL_REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(0, 0));
+    FL_REQUIRE_EQ(tile.at(0, 0), 255);
     tile = path.at_subpixel(1.0f);
-    REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(2, 0));
-    REQUIRE_EQ(tile.at(0, 0), 255);
+    FL_REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(2, 0));
+    FL_REQUIRE_EQ(tile.at(0, 0), 255);
 }
 
 
@@ -147,10 +147,10 @@ TEST_CASE("Test HeartPath") {
     MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
     
     // Verify the heart is within the expected bounds
-    REQUIRE(min_x >= -1.0f);
-    REQUIRE(max_x <= 1.0f);
-    REQUIRE(min_y >= -1.0f);
-    REQUIRE(max_y <= 1.0f);
+    FL_REQUIRE(min_x >= -1.0f);
+    FL_REQUIRE(max_x <= 1.0f);
+    FL_REQUIRE(min_y >= -1.0f);
+    FL_REQUIRE(max_y <= 1.0f);
 }
 
 TEST_CASE("Test ArchimedeanSpiralPath") {
@@ -186,10 +186,10 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
     MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
     
     // Verify the spiral is within the expected bounds
-    REQUIRE(min_x >= -1.0f);
-    REQUIRE(max_x <= 1.0f);
-    REQUIRE(min_y >= -1.0f);
-    REQUIRE(max_y <= 1.0f);
+    FL_REQUIRE(min_x >= -1.0f);
+    FL_REQUIRE(max_x <= 1.0f);
+    FL_REQUIRE(min_y >= -1.0f);
+    FL_REQUIRE(max_y <= 1.0f);
 }
 
 TEST_CASE("Test RosePath") {
@@ -227,10 +227,10 @@ TEST_CASE("Test RosePath") {
         MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
         
         // Verify the rose is within the expected bounds
-        REQUIRE(min_x >= -1.0f);
-        REQUIRE(max_x <= 1.0f);
-        REQUIRE(min_y >= -1.0f);
-        REQUIRE(max_y <= 1.0f);
+        FL_REQUIRE(min_x >= -1.0f);
+        FL_REQUIRE(max_x <= 1.0f);
+        FL_REQUIRE(min_y >= -1.0f);
+        FL_REQUIRE(max_y <= 1.0f);
     }
     
     SUBCASE("4-petal rose") {
@@ -256,10 +256,10 @@ TEST_CASE("Test RosePath") {
         }
         
         // Verify the rose is within the expected bounds
-        REQUIRE(min_x >= -1.0f);
-        REQUIRE(max_x <= 1.0f);
-        REQUIRE(min_y >= -1.0f);
-        REQUIRE(max_y <= 1.0f);
+        FL_REQUIRE(min_x >= -1.0f);
+        FL_REQUIRE(max_x <= 1.0f);
+        FL_REQUIRE(min_y >= -1.0f);
+        FL_REQUIRE(max_y <= 1.0f);
     }
 }
 
@@ -293,10 +293,10 @@ TEST_CASE("Check complex types") {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = FL_MIN(1.f, alpha);
                 fl::vec2<float> xy = path->at(alpha);
-                REQUIRE(xy.x >= -1.0f);
-                REQUIRE(xy.x <= 1.0f);
-                REQUIRE(xy.y >= -1.0f);
-                REQUIRE(xy.y <= 1.0f);
+                FL_REQUIRE(xy.x >= -1.0f);
+                FL_REQUIRE(xy.x <= 1.0f);
+                FL_REQUIRE(xy.y >= -1.0f);
+                FL_REQUIRE(xy.y <= 1.0f);
                 if (FL_ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
                     break;
                 }
@@ -312,10 +312,10 @@ TEST_CASE("Check complex types") {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = FL_MIN(1.f, alpha);
                 fl::vec2<float> xy = path->at(alpha, tx);
-                REQUIRE_GE(xy.x, -4.0f);
-                REQUIRE_LE(xy.x, 4.0f);
-                REQUIRE_GE(xy.y, -4.0f);
-                REQUIRE_LE(xy.y, 4.0f);
+                FL_REQUIRE_GE(xy.x, -4.0f);
+                FL_REQUIRE_LE(xy.x, 4.0f);
+                FL_REQUIRE_GE(xy.y, -4.0f);
+                FL_REQUIRE_LE(xy.y, 4.0f);
                 if (FL_ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
                     break;
                 }

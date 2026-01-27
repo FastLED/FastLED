@@ -168,22 +168,22 @@ TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     
     // Basic sanity checks - deviations should be reasonable for RGB->HSV->RGB round-trip
     // Note: RGB->HSV->RGB conversion is inherently lossy due to the approximation function
-    CHECK_LT(rainbow_stats.average, 150.0f);     // Average deviation should be reasonable
-    CHECK_LT(spectrum_stats.average, 150.0f);
-    CHECK_LT(fullspectrum_stats.average, 150.0f);
+    FL_CHECK_LT(rainbow_stats.average, 150.0f);     // Average deviation should be reasonable
+    FL_CHECK_LT(spectrum_stats.average, 150.0f);
+    FL_CHECK_LT(fullspectrum_stats.average, 150.0f);
 
     // Max deviation can exceed single RGB channel distance due to euclidean distance calculation
-    CHECK_LT(rainbow_stats.max, 500.0f);         // Max deviation should be reasonable
-    CHECK_LT(spectrum_stats.max, 500.0f);
-    CHECK_LT(fullspectrum_stats.max, 500.0f);
+    FL_CHECK_LT(rainbow_stats.max, 500.0f);         // Max deviation should be reasonable
+    FL_CHECK_LT(spectrum_stats.max, 500.0f);
+    FL_CHECK_LT(fullspectrum_stats.max, 500.0f);
 
-    CHECK_GE(rainbow_stats.min, 0.0f);           // Min deviation should be non-negative
-    CHECK_GE(spectrum_stats.min, 0.0f);
-    CHECK_GE(fullspectrum_stats.min, 0.0f);
+    FL_CHECK_GE(rainbow_stats.min, 0.0f);           // Min deviation should be non-negative
+    FL_CHECK_GE(spectrum_stats.min, 0.0f);
+    FL_CHECK_GE(fullspectrum_stats.min, 0.0f);
 
     // Verify rainbow has the best (lowest) average deviation
-    CHECK_LT(rainbow_stats.average, spectrum_stats.average);
-    CHECK_LT(rainbow_stats.average, fullspectrum_stats.average);
+    FL_CHECK_LT(rainbow_stats.average, spectrum_stats.average);
+    FL_CHECK_LT(rainbow_stats.average, fullspectrum_stats.average);
 }
 
 TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {

@@ -55,7 +55,7 @@ TEST_CASE("wave8EncodeSingleLane_basic") {
         fl::span<uint8_t>(output, 8),
         lut);
 
-    REQUIRE(written == 8);
+    FL_REQUIRE(written == 8);
 
     // For 0xFF (all bits '1'), all Wave8Bit symbols should use bit1 waveform
     // WS2812 bit1: 2/3 HIGH, 1/3 LOW → wave8 with 8 pulses: ~5-6 HIGH pulses
@@ -64,7 +64,7 @@ TEST_CASE("wave8EncodeSingleLane_basic") {
 
     // Verify all 8 Wave8Bit symbols are non-zero (at least some HIGH pulses)
     for (int i = 0; i < 8; i++) {
-        REQUIRE(output[i] != 0x00);
+        FL_REQUIRE(output[i] != 0x00);
     }
 }
 
@@ -82,7 +82,7 @@ TEST_CASE("wave8EncodeSingleLane_zero_byte") {
         fl::span<uint8_t>(output, 8),
         lut);
 
-    REQUIRE(written == 8);
+    FL_REQUIRE(written == 8);
 
     // For 0x00 (all bits '0'), all Wave8Bit symbols should use bit0 waveform
     // WS2812 bit0: 1/3 HIGH, 2/3 LOW → wave8 with 8 pulses: ~2-3 HIGH pulses
@@ -91,8 +91,8 @@ TEST_CASE("wave8EncodeSingleLane_zero_byte") {
     // Verify all 8 Wave8Bit symbols have SOME HIGH pulses (not all zeros)
     // but not all HIGH (to distinguish from bit1)
     for (int i = 0; i < 8; i++) {
-        REQUIRE(output[i] != 0x00);  // Not all zeros
-        REQUIRE(output[i] != 0xFF);  // Not all ones
+        FL_REQUIRE(output[i] != 0x00);  // Not all zeros
+        FL_REQUIRE(output[i] != 0xFF);  // Not all ones
     }
 }
 
@@ -110,7 +110,7 @@ TEST_CASE("wave8EncodeSingleLane_multiple_bytes") {
         fl::span<uint8_t>(output, 24),
         lut);
 
-    REQUIRE(written == 24);
+    FL_REQUIRE(written == 24);
 
     // Verify output is non-zero (encoding produced data)
     bool has_data = false;
@@ -120,7 +120,7 @@ TEST_CASE("wave8EncodeSingleLane_multiple_bytes") {
             break;
         }
     }
-    REQUIRE(has_data);
+    FL_REQUIRE(has_data);
 }
 
 TEST_CASE("wave8EncodeSingleLane_buffer_too_small") {
@@ -138,7 +138,7 @@ TEST_CASE("wave8EncodeSingleLane_buffer_too_small") {
         lut);
 
     // Should detect buffer too small and return 0
-    REQUIRE(written == 0);
+    FL_REQUIRE(written == 0);
 }
 
 // ============================================================================
@@ -161,7 +161,7 @@ TEST_CASE("wave8EncodeDualLane_basic") {
         fl::span<uint8_t>(output, 16),
         lut);
 
-    REQUIRE(written == 16);
+    FL_REQUIRE(written == 16);
 
     // Verify output has data (non-zero bytes from lane0)
     bool has_data = false;
@@ -171,7 +171,7 @@ TEST_CASE("wave8EncodeDualLane_basic") {
             break;
         }
     }
-    REQUIRE(has_data);
+    FL_REQUIRE(has_data);
 }
 
 TEST_CASE("wave8EncodeDualLane_lane_size_mismatch") {
@@ -191,7 +191,7 @@ TEST_CASE("wave8EncodeDualLane_lane_size_mismatch") {
         lut);
 
     // Should detect lane size mismatch and return 0
-    REQUIRE(written == 0);
+    FL_REQUIRE(written == 0);
 }
 
 TEST_CASE("wave8EncodeDualLane_buffer_too_small") {
@@ -211,7 +211,7 @@ TEST_CASE("wave8EncodeDualLane_buffer_too_small") {
         lut);
 
     // Should detect buffer too small and return 0
-    REQUIRE(written == 0);
+    FL_REQUIRE(written == 0);
 }
 
 // ============================================================================
@@ -240,7 +240,7 @@ TEST_CASE("wave8EncodeQuadLane_basic") {
 
     size_t written = wave8EncodeQuadLane(lanes, fl::span<uint8_t>(output, 32), lut);
 
-    REQUIRE(written == 32);
+    FL_REQUIRE(written == 32);
 
     // Verify output has data (non-zero bytes from active lanes)
     bool has_data = false;
@@ -250,7 +250,7 @@ TEST_CASE("wave8EncodeQuadLane_basic") {
             break;
         }
     }
-    REQUIRE(has_data);
+    FL_REQUIRE(has_data);
 }
 
 TEST_CASE("wave8EncodeQuadLane_lane_size_mismatch") {
@@ -276,7 +276,7 @@ TEST_CASE("wave8EncodeQuadLane_lane_size_mismatch") {
     size_t written = wave8EncodeQuadLane(lanes, fl::span<uint8_t>(output, 64), lut);
 
     // Should detect lane size mismatch and return 0
-    REQUIRE(written == 0);
+    FL_REQUIRE(written == 0);
 }
 
 TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
@@ -302,7 +302,7 @@ TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
     size_t written = wave8EncodeQuadLane(lanes, fl::span<uint8_t>(output, 16), lut);
 
     // Should detect buffer too small and return 0
-    REQUIRE(written == 0);
+    FL_REQUIRE(written == 0);
 }
 
 // ============================================================================
@@ -311,16 +311,16 @@ TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
 
 TEST_CASE("wave8CalculateOutputSize") {
     // Single-lane: 1 byte → 8 bytes
-    REQUIRE(wave8CalculateOutputSize(1, 1) == 8);
-    REQUIRE(wave8CalculateOutputSize(100, 1) == 800);
+    FL_REQUIRE(wave8CalculateOutputSize(1, 1) == 8);
+    FL_REQUIRE(wave8CalculateOutputSize(100, 1) == 800);
 
     // Dual-lane: 1 byte → 16 bytes
-    REQUIRE(wave8CalculateOutputSize(1, 2) == 16);
-    REQUIRE(wave8CalculateOutputSize(100, 2) == 1600);
+    FL_REQUIRE(wave8CalculateOutputSize(1, 2) == 16);
+    FL_REQUIRE(wave8CalculateOutputSize(100, 2) == 1600);
 
     // Quad-lane: 1 byte → 32 bytes
-    REQUIRE(wave8CalculateOutputSize(1, 4) == 32);
-    REQUIRE(wave8CalculateOutputSize(100, 4) == 3200);
+    FL_REQUIRE(wave8CalculateOutputSize(1, 4) == 32);
+    FL_REQUIRE(wave8CalculateOutputSize(100, 4) == 3200);
 }
 
 // ============================================================================
@@ -354,7 +354,7 @@ TEST_CASE("wave8_vs_legacy_encoding") {
 
     // Compare outputs (should match bit-for-bit)
     size_t legacy_bytes = (legacy_bits + 7) / 8;
-    REQUIRE(wave8_bytes == legacy_bytes);
-    REQUIRE(fl::memcmp(wave8_output, legacy_output, legacy_bytes) == 0);
+    FL_REQUIRE(wave8_bytes == legacy_bytes);
+    FL_REQUIRE(fl::memcmp(wave8_output, legacy_output, legacy_bytes) == 0);
 }
 */

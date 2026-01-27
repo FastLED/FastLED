@@ -10,24 +10,24 @@ using namespace fl;
 TEST_CASE("fl::PriorityQueue basic operations") {
     SUBCASE("default constructor") {
         PriorityQueue<int> pq;
-        CHECK(pq.empty());
-        CHECK_EQ(pq.size(), 0u);
+        FL_CHECK(pq.empty());
+        FL_CHECK_EQ(pq.size(), 0u);
     }
 
     SUBCASE("push and top") {
         PriorityQueue<int> pq;
         pq.push(5);
-        CHECK(!pq.empty());
-        CHECK_EQ(pq.size(), 1u);
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK(!pq.empty());
+        FL_CHECK_EQ(pq.size(), 1u);
+        FL_CHECK_EQ(pq.top(), 5);
 
         pq.push(3);
-        CHECK_EQ(pq.size(), 2u);
-        CHECK_EQ(pq.top(), 5);  // Max heap by default
+        FL_CHECK_EQ(pq.size(), 2u);
+        FL_CHECK_EQ(pq.top(), 5);  // Max heap by default
 
         pq.push(7);
-        CHECK_EQ(pq.size(), 3u);
-        CHECK_EQ(pq.top(), 7);
+        FL_CHECK_EQ(pq.size(), 3u);
+        FL_CHECK_EQ(pq.top(), 7);
     }
 
     SUBCASE("pop operations") {
@@ -38,17 +38,17 @@ TEST_CASE("fl::PriorityQueue basic operations") {
         pq.push(1);
         pq.push(9);
 
-        CHECK_EQ(pq.top(), 9);
+        FL_CHECK_EQ(pq.top(), 9);
         pq.pop();
-        CHECK_EQ(pq.top(), 7);
+        FL_CHECK_EQ(pq.top(), 7);
         pq.pop();
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK_EQ(pq.top(), 5);
         pq.pop();
-        CHECK_EQ(pq.top(), 3);
+        FL_CHECK_EQ(pq.top(), 3);
         pq.pop();
-        CHECK_EQ(pq.top(), 1);
+        FL_CHECK_EQ(pq.top(), 1);
         pq.pop();
-        CHECK(pq.empty());
+        FL_CHECK(pq.empty());
     }
 }
 
@@ -66,15 +66,15 @@ TEST_CASE("fl::PriorityQueue with custom comparator") {
         pq.push(9);
 
         // Should return smallest element first
-        CHECK_EQ(pq.top(), 1);
+        FL_CHECK_EQ(pq.top(), 1);
         pq.pop();
-        CHECK_EQ(pq.top(), 3);
+        FL_CHECK_EQ(pq.top(), 3);
         pq.pop();
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK_EQ(pq.top(), 5);
         pq.pop();
-        CHECK_EQ(pq.top(), 7);
+        FL_CHECK_EQ(pq.top(), 7);
         pq.pop();
-        CHECK_EQ(pq.top(), 9);
+        FL_CHECK_EQ(pq.top(), 9);
     }
 
     SUBCASE("custom struct with comparator") {
@@ -97,12 +97,12 @@ TEST_CASE("fl::PriorityQueue with custom comparator") {
         pq.push(Task{7, 3});
         pq.push(Task{1, 4});
 
-        CHECK_EQ(pq.top().priority, 7);
-        CHECK_EQ(pq.top().id, 3);
+        FL_CHECK_EQ(pq.top().priority, 7);
+        FL_CHECK_EQ(pq.top().id, 3);
         pq.pop();
 
-        CHECK_EQ(pq.top().priority, 5);
-        CHECK_EQ(pq.top().id, 1);
+        FL_CHECK_EQ(pq.top().priority, 5);
+        FL_CHECK_EQ(pq.top().id, 1);
     }
 }
 
@@ -110,10 +110,10 @@ TEST_CASE("fl::PriorityQueue edge cases") {
     SUBCASE("single element") {
         PriorityQueue<int> pq;
         pq.push(42);
-        CHECK_EQ(pq.size(), 1u);
-        CHECK_EQ(pq.top(), 42);
+        FL_CHECK_EQ(pq.size(), 1u);
+        FL_CHECK_EQ(pq.top(), 42);
         pq.pop();
-        CHECK(pq.empty());
+        FL_CHECK(pq.empty());
     }
 
     SUBCASE("duplicate elements") {
@@ -124,15 +124,15 @@ TEST_CASE("fl::PriorityQueue edge cases") {
         pq.push(3);
         pq.push(7);
 
-        CHECK_EQ(pq.top(), 7);
+        FL_CHECK_EQ(pq.top(), 7);
         pq.pop();
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK_EQ(pq.top(), 5);
         pq.pop();
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK_EQ(pq.top(), 5);
         pq.pop();
-        CHECK_EQ(pq.top(), 5);
+        FL_CHECK_EQ(pq.top(), 5);
         pq.pop();
-        CHECK_EQ(pq.top(), 3);
+        FL_CHECK_EQ(pq.top(), 3);
     }
 
     SUBCASE("negative numbers") {
@@ -143,15 +143,15 @@ TEST_CASE("fl::PriorityQueue edge cases") {
         pq.push(0);
         pq.push(-1);
 
-        CHECK_EQ(pq.top(), 0);
+        FL_CHECK_EQ(pq.top(), 0);
         pq.pop();
-        CHECK_EQ(pq.top(), -1);
+        FL_CHECK_EQ(pq.top(), -1);
         pq.pop();
-        CHECK_EQ(pq.top(), -3);
+        FL_CHECK_EQ(pq.top(), -3);
         pq.pop();
-        CHECK_EQ(pq.top(), -5);
+        FL_CHECK_EQ(pq.top(), -5);
         pq.pop();
-        CHECK_EQ(pq.top(), -7);
+        FL_CHECK_EQ(pq.top(), -7);
     }
 }
 
@@ -163,13 +163,13 @@ TEST_CASE("fl::PriorityQueue with different types") {
         pq.push(1.41);
         pq.push(4.20);
 
-        CHECK(pq.top() == doctest::Approx(4.20));
+        FL_CHECK(pq.top() == doctest::Approx(4.20));
         pq.pop();
-        CHECK(pq.top() == doctest::Approx(3.14));
+        FL_CHECK(pq.top() == doctest::Approx(3.14));
         pq.pop();
-        CHECK(pq.top() == doctest::Approx(2.71));
+        FL_CHECK(pq.top() == doctest::Approx(2.71));
         pq.pop();
-        CHECK(pq.top() == doctest::Approx(1.41));
+        FL_CHECK(pq.top() == doctest::Approx(1.41));
     }
 
     SUBCASE("char values") {
@@ -179,13 +179,13 @@ TEST_CASE("fl::PriorityQueue with different types") {
         pq.push('z');
         pq.push('m');
 
-        CHECK_EQ(pq.top(), 'z');
+        FL_CHECK_EQ(pq.top(), 'z');
         pq.pop();
-        CHECK_EQ(pq.top(), 'm');
+        FL_CHECK_EQ(pq.top(), 'm');
         pq.pop();
-        CHECK_EQ(pq.top(), 'd');
+        FL_CHECK_EQ(pq.top(), 'd');
         pq.pop();
-        CHECK_EQ(pq.top(), 'a');
+        FL_CHECK_EQ(pq.top(), 'a');
     }
 }
 
@@ -198,18 +198,18 @@ TEST_CASE("fl::PriorityQueue stress test") {
             pq.push(i);
         }
 
-        CHECK_EQ(pq.size(), 100u);
+        FL_CHECK_EQ(pq.size(), 100u);
 
         // Pop all elements, should come out in descending order
         int prev = 100;
         while (!pq.empty()) {
             int curr = pq.top();
-            CHECK(curr < prev);
+            FL_CHECK(curr < prev);
             prev = curr;
             pq.pop();
         }
 
-        CHECK(pq.empty());
+        FL_CHECK(pq.empty());
     }
 
     SUBCASE("alternating push and pop") {
@@ -224,13 +224,13 @@ TEST_CASE("fl::PriorityQueue stress test") {
         }
 
         // Should have some elements left
-        CHECK(!pq.empty());
+        FL_CHECK(!pq.empty());
 
         // Verify they come out in descending order
         int prev = 1000;
         while (!pq.empty()) {
             int curr = pq.top();
-            CHECK(curr <= prev);
+            FL_CHECK(curr <= prev);
             prev = curr;
             pq.pop();
         }
@@ -242,15 +242,15 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
         vector<int> v;
         v.push_back(5);
         push_heap(v.begin(), v.end());
-        CHECK_EQ(v.front(), 5);
+        FL_CHECK_EQ(v.front(), 5);
 
         v.push_back(3);
         push_heap(v.begin(), v.end());
-        CHECK_EQ(v.front(), 5);
+        FL_CHECK_EQ(v.front(), 5);
 
         v.push_back(7);
         push_heap(v.begin(), v.end());
-        CHECK_EQ(v.front(), 7);
+        FL_CHECK_EQ(v.front(), 7);
     }
 
     SUBCASE("pop_heap basic") {
@@ -265,19 +265,19 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
             push_heap(v.begin(), v.begin() + i + 1);
         }
 
-        CHECK_EQ(v.front(), 7);
+        FL_CHECK_EQ(v.front(), 7);
 
         pop_heap(v.begin(), v.end());
-        CHECK_EQ(v.back(), 7);
+        FL_CHECK_EQ(v.back(), 7);
         v.pop_back();
 
-        CHECK_EQ(v.front(), 5);
+        FL_CHECK_EQ(v.front(), 5);
 
         pop_heap(v.begin(), v.end());
-        CHECK_EQ(v.back(), 5);
+        FL_CHECK_EQ(v.back(), 5);
         v.pop_back();
 
-        CHECK_EQ(v.front(), 3);
+        FL_CHECK_EQ(v.front(), 3);
     }
 
     SUBCASE("push_heap with custom comparator") {
@@ -293,7 +293,7 @@ TEST_CASE("fl::push_heap and pop_heap functions") {
         v.push_back(7);
         push_heap(v.begin(), v.end(), comp);
 
-        CHECK_EQ(v.front(), 3);  // Smallest element at front for min heap
+        FL_CHECK_EQ(v.front(), 3);  // Smallest element at front for min heap
     }
 }
 
@@ -307,7 +307,7 @@ TEST_CASE("fl::sift_down function") {
 
         // After sift down, heap property should be maintained
         // Root should be larger than its children
-        CHECK(v[0] >= v[1]);
-        CHECK(v[0] >= v[2]);
+        FL_CHECK(v[0] >= v[1]);
+        FL_CHECK(v[0] >= v[2]);
     }
 }

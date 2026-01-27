@@ -19,35 +19,35 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB red(255, 0, 0);
         fl::HSV16 hsv_red(red);
         CRGB red_result = hsv_red.ToRGB();
-        CHECK_CLOSE(red_result.r, red.r, red_tolerance);
-        CHECK_CLOSE(red_result.g, red.g, red_tolerance);
-        CHECK_CLOSE(red_result.b, red.b, red_tolerance);
+        FL_CHECK_CLOSE(red_result.r, red.r, red_tolerance);
+        FL_CHECK_CLOSE(red_result.g, red.g, red_tolerance);
+        FL_CHECK_CLOSE(red_result.b, red.b, red_tolerance);
 
         // Pure green - try for even better accuracy
         const int green_tolerance = 0; // Reduced from 2 to 0 - try for perfect!
         CRGB green(0, 255, 0);
         fl::HSV16 hsv_green(green);
         CRGB green_result = hsv_green.ToRGB();
-        CHECK_CLOSE(green_result.r, green.r, green_tolerance);
-        CHECK_CLOSE(green_result.g, green.g, green_tolerance);
-        CHECK_CLOSE(green_result.b, green.b, green_tolerance);
+        FL_CHECK_CLOSE(green_result.r, green.r, green_tolerance);
+        FL_CHECK_CLOSE(green_result.g, green.g, green_tolerance);
+        FL_CHECK_CLOSE(green_result.b, green.b, green_tolerance);
 
         // Pure blue - try for even better accuracy
         const int blue_tolerance = 0; // Reduced from 2 to 0 - try for perfect!
         CRGB blue(0, 0, 255);
         fl::HSV16 hsv_blue(blue);
         CRGB blue_result = hsv_blue.ToRGB();
-        CHECK_CLOSE(blue_result.r, blue.r, blue_tolerance);
-        CHECK_CLOSE(blue_result.g, blue.g, blue_tolerance);
-        CHECK_CLOSE(blue_result.b, blue.b, blue_tolerance);
+        FL_CHECK_CLOSE(blue_result.r, blue.r, blue_tolerance);
+        FL_CHECK_CLOSE(blue_result.g, blue.g, blue_tolerance);
+        FL_CHECK_CLOSE(blue_result.b, blue.b, blue_tolerance);
 
         // Test black - perfect conversion expected
         CRGB black(0, 0, 0);
         fl::HSV16 hsv_black(black);
         CRGB black_result = hsv_black.ToRGB();
-        CHECK(black_result.r == black.r);
-        CHECK(black_result.g == black.g);
-        CHECK(black_result.b == black.b);
+        FL_CHECK(black_result.r == black.r);
+        FL_CHECK(black_result.g == black.g);
+        FL_CHECK(black_result.b == black.b);
     }
 
     SUBCASE("White and Grayscale - Good Conversion") {
@@ -56,9 +56,9 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB white(255, 255, 255);
         fl::HSV16 hsv_white(white);
         CRGB white_result = hsv_white.ToRGB();
-        CHECK_CLOSE(white_result.r, white.r, white_tolerance);
-        CHECK_CLOSE(white_result.g, white.g, white_tolerance);
-        CHECK_CLOSE(white_result.b, white.b, white_tolerance);
+        FL_CHECK_CLOSE(white_result.r, white.r, white_tolerance);
+        FL_CHECK_CLOSE(white_result.g, white.g, white_tolerance);
+        FL_CHECK_CLOSE(white_result.b, white.b, white_tolerance);
 
         // Test various shades of gray - some require tolerance 1
         const int gray_tolerance =
@@ -67,26 +67,26 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB gray50(50, 50, 50);
         fl::HSV16 hsv_gray50(gray50);
         CRGB gray50_result = hsv_gray50.ToRGB();
-        CHECK_CLOSE(gray50_result.r, gray50.r,
+        FL_CHECK_CLOSE(gray50_result.r, gray50.r,
                     0); // Gray50 is perfect - use tolerance 0
-        CHECK_CLOSE(gray50_result.g, gray50.g, 0);
-        CHECK_CLOSE(gray50_result.b, gray50.b, 0);
+        FL_CHECK_CLOSE(gray50_result.g, gray50.g, 0);
+        FL_CHECK_CLOSE(gray50_result.b, gray50.b, 0);
 
         CRGB gray128(128, 128, 128);
         fl::HSV16 hsv_gray128(gray128);
         CRGB gray128_result = hsv_gray128.ToRGB();
-        CHECK_CLOSE(gray128_result.r, gray128.r,
+        FL_CHECK_CLOSE(gray128_result.r, gray128.r,
                     gray_tolerance); // Gray128 needs tolerance 1
-        CHECK_CLOSE(gray128_result.g, gray128.g, gray_tolerance);
-        CHECK_CLOSE(gray128_result.b, gray128.b, gray_tolerance);
+        FL_CHECK_CLOSE(gray128_result.g, gray128.g, gray_tolerance);
+        FL_CHECK_CLOSE(gray128_result.b, gray128.b, gray_tolerance);
 
         CRGB gray200(200, 200, 200);
         fl::HSV16 hsv_gray200(gray200);
         CRGB gray200_result = hsv_gray200.ToRGB();
-        CHECK_CLOSE(gray200_result.r, gray200.r,
+        FL_CHECK_CLOSE(gray200_result.r, gray200.r,
                     gray_tolerance); // Gray200 needs tolerance 1
-        CHECK_CLOSE(gray200_result.g, gray200.g, gray_tolerance);
-        CHECK_CLOSE(gray200_result.b, gray200.b, gray_tolerance);
+        FL_CHECK_CLOSE(gray200_result.g, gray200.g, gray_tolerance);
+        FL_CHECK_CLOSE(gray200_result.b, gray200.b, gray_tolerance);
     }
 
     SUBCASE("HSV16 Constructor Values") {
@@ -96,31 +96,31 @@ TEST_CASE("RGB to HSV16 to RGB") {
 
         fl::HSV16 hsv_red_direct(0, 65535, 65535); // Red: H=0, S=max, V=max
         CRGB red_direct_result = hsv_red_direct.ToRGB();
-        CHECK(red_direct_result.r >=
+        FL_CHECK(red_direct_result.r >=
               255 - direct_construction_tolerance); // Should be close to 255
-        CHECK(red_direct_result.g <=
+        FL_CHECK(red_direct_result.g <=
               direct_construction_tolerance); // Should be close to 0
-        CHECK(red_direct_result.b <=
+        FL_CHECK(red_direct_result.b <=
               direct_construction_tolerance); // Should be close to 0
 
         fl::HSV16 hsv_green_direct(21845, 65535,
                                65535); // Green: H=1/3*65535, S=max, V=max
         CRGB green_direct_result = hsv_green_direct.ToRGB();
-        CHECK(green_direct_result.r <=
+        FL_CHECK(green_direct_result.r <=
               direct_construction_tolerance); // Should be close to 0
-        CHECK(green_direct_result.g >=
+        FL_CHECK(green_direct_result.g >=
               255 - direct_construction_tolerance); // Should be close to 255
-        CHECK(green_direct_result.b <=
+        FL_CHECK(green_direct_result.b <=
               direct_construction_tolerance); // Should be close to 0
 
         fl::HSV16 hsv_blue_direct(43690, 65535,
                               65535); // Blue: H=2/3*65535, S=max, V=max
         CRGB blue_direct_result = hsv_blue_direct.ToRGB();
-        CHECK(blue_direct_result.r <=
+        FL_CHECK(blue_direct_result.r <=
               direct_construction_tolerance); // Should be close to 0
-        CHECK(blue_direct_result.g <=
+        FL_CHECK(blue_direct_result.g <=
               direct_construction_tolerance); // Should be close to 0
-        CHECK(blue_direct_result.b >=
+        FL_CHECK(blue_direct_result.b >=
               255 - direct_construction_tolerance); // Should be close to 255
 
         // Test zero saturation (should produce grayscale)
@@ -128,13 +128,13 @@ TEST_CASE("RGB to HSV16 to RGB") {
         fl::HSV16 hsv_gray_direct(32768, 0,
                               32768); // Any hue, no saturation, half value
         CRGB gray_direct_result = hsv_gray_direct.ToRGB();
-        CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g,
+        FL_CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g,
                     grayscale_direct_tolerance);
-        CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b,
+        FL_CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b,
                     grayscale_direct_tolerance);
-        CHECK(gray_direct_result.r >=
+        FL_CHECK(gray_direct_result.r >=
               128 - 1); // Reduced from 2 to 1 - even tighter
-        CHECK(gray_direct_result.r <= 128 + 1);
+        FL_CHECK(gray_direct_result.r <= 128 + 1);
     }
 
     SUBCASE("Secondary Colors - Good Conversion") {
@@ -147,11 +147,11 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB yellow(255, 255, 0);
         fl::HSV16 hsv_yellow(yellow);
         CRGB yellow_result = hsv_yellow.ToRGB();
-        CHECK_CLOSE(yellow_result.r, yellow.r,
+        FL_CHECK_CLOSE(yellow_result.r, yellow.r,
                     yellow_tolerance); // Red should be preserved
-        CHECK_CLOSE(yellow_result.g, yellow.g,
+        FL_CHECK_CLOSE(yellow_result.g, yellow.g,
                     yellow_tolerance); // Green should be preserved
-        CHECK_CLOSE(yellow_result.b, yellow.b,
+        FL_CHECK_CLOSE(yellow_result.b, yellow.b,
                     yellow_tolerance); // Blue should stay 0
 
         // Cyan should preserve both green and blue components
@@ -160,10 +160,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB cyan(0, 255, 255);
         fl::HSV16 hsv_cyan(cyan);
         CRGB cyan_result = hsv_cyan.ToRGB();
-        CHECK_CLOSE(cyan_result.r, cyan.r, cyan_tolerance); // Red should stay 0
-        CHECK_CLOSE(cyan_result.g, cyan.g,
+        FL_CHECK_CLOSE(cyan_result.r, cyan.r, cyan_tolerance); // Red should stay 0
+        FL_CHECK_CLOSE(cyan_result.g, cyan.g,
                     cyan_tolerance); // Green should be preserved
-        CHECK_CLOSE(cyan_result.b, cyan.b,
+        FL_CHECK_CLOSE(cyan_result.b, cyan.b,
                     cyan_tolerance); // Blue should be preserved
 
         // Magenta should preserve both red and blue components
@@ -172,11 +172,11 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB magenta(255, 0, 255);
         fl::HSV16 hsv_magenta(magenta);
         CRGB magenta_result = hsv_magenta.ToRGB();
-        CHECK_CLOSE(magenta_result.r, magenta.r,
+        FL_CHECK_CLOSE(magenta_result.r, magenta.r,
                     magenta_tolerance); // Red should be preserved
-        CHECK_CLOSE(magenta_result.g, magenta.g,
+        FL_CHECK_CLOSE(magenta_result.g, magenta.g,
                     magenta_tolerance); // Green should stay 0
-        CHECK_CLOSE(magenta_result.b, magenta.b,
+        FL_CHECK_CLOSE(magenta_result.b, magenta.b,
                     magenta_tolerance); // Blue should be preserved
     }
 
@@ -189,46 +189,46 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB dark_red(10, 0, 0);
         fl::HSV16 hsv_dark_red(dark_red);
         CRGB dark_red_result = hsv_dark_red.ToRGB();
-        CHECK_CLOSE(dark_red_result.r, dark_red.r, dark_primary_tolerance);
-        CHECK_CLOSE(dark_red_result.g, dark_red.g, dark_primary_tolerance);
-        CHECK_CLOSE(dark_red_result.b, dark_red.b, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_red_result.r, dark_red.r, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_red_result.g, dark_red.g, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_red_result.b, dark_red.b, dark_primary_tolerance);
 
         // Very dark green
         CRGB dark_green(0, 10, 0);
         fl::HSV16 hsv_dark_green(dark_green);
         CRGB dark_green_result = hsv_dark_green.ToRGB();
-        CHECK_CLOSE(dark_green_result.r, dark_green.r, dark_primary_tolerance);
-        CHECK_CLOSE(dark_green_result.g, dark_green.g, dark_primary_tolerance);
-        CHECK_CLOSE(dark_green_result.b, dark_green.b, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_green_result.r, dark_green.r, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_green_result.g, dark_green.g, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_green_result.b, dark_green.b, dark_primary_tolerance);
 
         // Very dark blue
         CRGB dark_blue(0, 0, 10);
         fl::HSV16 hsv_dark_blue(dark_blue);
         CRGB dark_blue_result = hsv_dark_blue.ToRGB();
-        CHECK_CLOSE(dark_blue_result.r, dark_blue.r, dark_primary_tolerance);
-        CHECK_CLOSE(dark_blue_result.g, dark_blue.g, dark_primary_tolerance);
-        CHECK_CLOSE(dark_blue_result.b, dark_blue.b, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_blue_result.r, dark_blue.r, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_blue_result.g, dark_blue.g, dark_primary_tolerance);
+        FL_CHECK_CLOSE(dark_blue_result.b, dark_blue.b, dark_primary_tolerance);
 
         // Barely visible gray - single digit values
         const int barely_visible_tolerance = 0; // Try for perfect conversion
         CRGB barely_gray1(1, 1, 1);
         fl::HSV16 hsv_barely_gray1(barely_gray1);
         CRGB barely_gray1_result = hsv_barely_gray1.ToRGB();
-        CHECK_CLOSE(barely_gray1_result.r, barely_gray1.r,
+        FL_CHECK_CLOSE(barely_gray1_result.r, barely_gray1.r,
                     barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray1_result.g, barely_gray1.g,
+        FL_CHECK_CLOSE(barely_gray1_result.g, barely_gray1.g,
                     barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray1_result.b, barely_gray1.b,
+        FL_CHECK_CLOSE(barely_gray1_result.b, barely_gray1.b,
                     barely_visible_tolerance);
 
         CRGB barely_gray5(5, 5, 5);
         fl::HSV16 hsv_barely_gray5(barely_gray5);
         CRGB barely_gray5_result = hsv_barely_gray5.ToRGB();
-        CHECK_CLOSE(barely_gray5_result.r, barely_gray5.r,
+        FL_CHECK_CLOSE(barely_gray5_result.r, barely_gray5.r,
                     barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray5_result.g, barely_gray5.g,
+        FL_CHECK_CLOSE(barely_gray5_result.g, barely_gray5.g,
                     barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray5_result.b, barely_gray5.b,
+        FL_CHECK_CLOSE(barely_gray5_result.b, barely_gray5.b,
                     barely_visible_tolerance);
 
         // Low saturation, low value - muddy browns/grays
@@ -236,27 +236,27 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB muddy_brown(15, 10, 8);
         fl::HSV16 hsv_muddy_brown(muddy_brown);
         CRGB muddy_brown_result = hsv_muddy_brown.ToRGB();
-        CHECK_CLOSE(muddy_brown_result.r, muddy_brown.r, muddy_tolerance);
-        CHECK_CLOSE(muddy_brown_result.g, muddy_brown.g, muddy_tolerance);
-        CHECK_CLOSE(muddy_brown_result.b, muddy_brown.b, muddy_tolerance);
+        FL_CHECK_CLOSE(muddy_brown_result.r, muddy_brown.r, muddy_tolerance);
+        FL_CHECK_CLOSE(muddy_brown_result.g, muddy_brown.g, muddy_tolerance);
+        FL_CHECK_CLOSE(muddy_brown_result.b, muddy_brown.b, muddy_tolerance);
 
         // Edge case: slightly unequal very dark values
         CRGB dark_unequal(3, 2, 1);
         fl::HSV16 hsv_dark_unequal(dark_unequal);
         CRGB dark_unequal_result = hsv_dark_unequal.ToRGB();
-        CHECK_CLOSE(dark_unequal_result.r, dark_unequal.r, muddy_tolerance);
-        CHECK_CLOSE(dark_unequal_result.g, dark_unequal.g, muddy_tolerance);
-        CHECK_CLOSE(dark_unequal_result.b, dark_unequal.b, muddy_tolerance);
+        FL_CHECK_CLOSE(dark_unequal_result.r, dark_unequal.r, muddy_tolerance);
+        FL_CHECK_CLOSE(dark_unequal_result.g, dark_unequal.g, muddy_tolerance);
+        FL_CHECK_CLOSE(dark_unequal_result.b, dark_unequal.b, muddy_tolerance);
 
         // Very dark but colorful - low value, high saturation
         CRGB dark_saturated_red(20, 1, 1);
         fl::HSV16 hsv_dark_saturated_red(dark_saturated_red);
         CRGB dark_saturated_red_result = hsv_dark_saturated_red.ToRGB();
-        CHECK_CLOSE(dark_saturated_red_result.r, dark_saturated_red.r,
+        FL_CHECK_CLOSE(dark_saturated_red_result.r, dark_saturated_red.r,
                     dark_primary_tolerance);
-        CHECK_CLOSE(dark_saturated_red_result.g, dark_saturated_red.g,
+        FL_CHECK_CLOSE(dark_saturated_red_result.g, dark_saturated_red.g,
                     dark_primary_tolerance);
-        CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b,
+        FL_CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b,
                     dark_primary_tolerance);
     }
 }
@@ -271,9 +271,9 @@ TEST_CASE("Exhaustive round trip") {
                 CRGB rgb(r, g, b);
                 fl::HSV16 hsv(rgb);
                 CRGB rgb_result = hsv.ToRGB();
-                REQUIRE_CLOSE(rgb_result.r, rgb.r, 1);
-                REQUIRE_CLOSE(rgb_result.g, rgb.g, 1);
-                REQUIRE_CLOSE(rgb_result.b, rgb.b, 1);
+                FL_REQUIRE_CLOSE(rgb_result.r, rgb.r, 1);
+                FL_REQUIRE_CLOSE(rgb_result.g, rgb.g, 1);
+                FL_REQUIRE_CLOSE(rgb_result.b, rgb.b, 1);
             }
         }
     }
@@ -299,7 +299,7 @@ TEST_CASE("Exhaustive round trip") {
         \
         uint8_t hue_diff_8bit = fl::map16_to_8(min_hue_diff); \
         \
-        CHECK_LE(hue_diff_8bit, hue_tolerance); \
+        FL_CHECK_LE(hue_diff_8bit, hue_tolerance); \
     } while(0)
 
 TEST_CASE("colorBoost() preserves hue - easy cases") {

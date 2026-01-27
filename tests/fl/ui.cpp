@@ -47,7 +47,7 @@ TEST_CASE("no updateJs handler") {
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
     // Should return empty function when no updateJs handler
-    CHECK(!updateEngineState);
+    FL_CHECK(!updateEngineState);
     
     // Create a mock component for testing
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
@@ -72,7 +72,7 @@ TEST_CASE("internal manager with updateJs") {
     );
     
     // Should return valid function when updateJs handler is provided
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
     
     // Create a mock component for testing
     class MockJsonUiInternal : public fl::JsonUiInternal {
@@ -98,7 +98,7 @@ TEST_CASE("internal manager with updateJs") {
 TEST_CASE("pending component storage without updateJs") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
-    CHECK(!updateEngineState); // Should return empty function
+    FL_CHECK(!updateEngineState); // Should return empty function
     
     // Create mock components for testing
     auto mockComponent1 = fl::make_shared<MockJsonUiInternal>("test_id_1");
@@ -116,7 +116,7 @@ TEST_CASE("pending component storage without updateJs") {
     );
     
     // Should return valid function when updateJs handler is provided
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
     
     // Test the returned updateEngineState function
     updateEngineState("{\"test\": \"data\"}");
@@ -129,7 +129,7 @@ TEST_CASE("pending component storage without updateJs") {
 TEST_CASE("pending component storage with updateJs") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
-    CHECK(!updateEngineState); // Should return empty function
+    FL_CHECK(!updateEngineState); // Should return empty function
     
     // Create mock components for testing
     auto mockComponent1 = fl::make_shared<MockJsonUiInternal>("test_id_1");
@@ -147,7 +147,7 @@ TEST_CASE("pending component storage with updateJs") {
     );
     
     // Should return valid function when updateJs handler is provided
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
     
     // Test the returned updateEngineState function
     updateEngineState("{\"test\": \"data\"}");
@@ -160,7 +160,7 @@ TEST_CASE("pending component storage with updateJs") {
 TEST_CASE("pending component cleanup with destroyed components") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
-    CHECK(!updateEngineState); // Should return empty function
+    FL_CHECK(!updateEngineState); // Should return empty function
     
     // Create scope for component that will be destroyed
     {
@@ -193,7 +193,7 @@ TEST_CASE("pending component cleanup with destroyed components") {
     );
     
     // Should return valid function when updateJs handler is provided
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
     
     // Clean up the valid component
     fl::removeJsonUiComponent(weakValidComponent);
@@ -204,7 +204,7 @@ TEST_CASE("null handlers behavior") {
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
     // Should return empty function when no updateJs handler
-    CHECK(!updateEngineState);
+    FL_CHECK(!updateEngineState);
     
     // Create a mock component for testing
     class MockJsonUiInternal : public fl::JsonUiInternal {
@@ -228,12 +228,12 @@ TEST_CASE("updateEngineState function behavior") {
         [&](const char* jsonStr) { 
             updateJsCallCount++;
             // Verify we receive the JSON string
-            CHECK(jsonStr != nullptr);
+            FL_CHECK(jsonStr != nullptr);
         }
     );
     
     // Should return valid function
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
     
     // Create and add a component to the internal manager
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_component");
@@ -257,7 +257,7 @@ TEST_CASE("manager replacement") {
     auto updateEngineState1 = fl::setJsonUiHandlers(
         [&](const char*) { firstCallCount++; }
     );
-    CHECK(updateEngineState1);
+    FL_CHECK(updateEngineState1);
 
     // Add a component to the first manager
     class MockJsonUiInternal : public fl::JsonUiInternal {
@@ -275,7 +275,7 @@ TEST_CASE("manager replacement") {
     auto updateEngineState2 = fl::setJsonUiHandlers(
         [&](const char*) { secondCallCount++; }
     );
-    CHECK(updateEngineState2);
+    FL_CHECK(updateEngineState2);
 
     // The component should have been transferred to the new manager
     // Both update functions should work
@@ -302,30 +302,30 @@ TEST_CASE("ui component basic functionality test") {
             capturedJsonOutput = jsonStr;
         }
     );
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
 
     // 2. Create a real checkbox component for testing
     fl::JsonCheckboxImpl checkbox("test_checkbox", false);
     
     // Verify initial state
-    CHECK_FALSE(checkbox.value());
+    FL_CHECK_FALSE(checkbox.value());
 
     // 3. Test manual value changes
     checkbox.setValue(true);
-    CHECK(checkbox.value());
+    FL_CHECK(checkbox.value());
     
     checkbox.setValue(false);
-    CHECK_FALSE(checkbox.value());
+    FL_CHECK_FALSE(checkbox.value());
 
     // 4. Test that changes trigger UI updates
     checkbox.setValue(true);
     fl::processJsonUiPendingUpdates();
     
     // Should have triggered at least one updateJs call
-    CHECK(updateJsCallCount > 0);
+    FL_CHECK(updateJsCallCount > 0);
     
     // Should have captured some JSON output
-    CHECK(!capturedJsonOutput.empty());
+    FL_CHECK(!capturedJsonOutput.empty());
 
     // The checkbox will be automatically cleaned up by its destructor
 }
@@ -338,7 +338,7 @@ TEST_CASE("complex ui element serialization") {
             capturedJsonOutput = jsonStr;
         }
     );
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
 
     // 2. Create various UI components
     fl::JsonButtonImpl button("myButton");
@@ -371,8 +371,8 @@ TEST_CASE("complex ui element serialization") {
     
     // Instead of comparing exact JSON strings, let's verify the components are present
     fl::Json parsedOutput = fl::Json::parse(capturedJsonOutput.c_str());
-    CHECK(parsedOutput.is_array());
-    CHECK_EQ(parsedOutput.size(), 9); // Should have 9 components
+    FL_CHECK(parsedOutput.is_array());
+    FL_CHECK_EQ(parsedOutput.size(), 9); // Should have 9 components
     
     // Verify each component type is present
     bool hasButton = false, hasSlider = false, hasCheckbox = false;
@@ -394,15 +394,15 @@ TEST_CASE("complex ui element serialization") {
         else if (type == "help") hasHelp = true;
     }
     
-    CHECK(hasButton);
-    CHECK(hasSlider);
-    CHECK(hasCheckbox);
-    CHECK(hasNumberField);
-    CHECK(hasDropdown);
-    CHECK(hasTitle);
-    CHECK(hasDescription);
-    CHECK(hasAudio);
-    CHECK(hasHelp);
+    FL_CHECK(hasButton);
+    FL_CHECK(hasSlider);
+    FL_CHECK(hasCheckbox);
+    FL_CHECK(hasNumberField);
+    FL_CHECK(hasDropdown);
+    FL_CHECK(hasTitle);
+    FL_CHECK(hasDescription);
+    FL_CHECK(hasAudio);
+    FL_CHECK(hasHelp);
     
     // All component types are present, test passes
 
@@ -482,7 +482,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
         console.reset(); // This should call the destructor
         
         // Verify no crash occurred
-        CHECK(console.get() == nullptr);
+        FL_CHECK(console.get() == nullptr);
     }
     
     // Test destruction of uninitialized console
@@ -509,7 +509,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     }
     
     // If we get here without crashing, the destructor is working correctly
-    CHECK(true); // Test passed if no crashes occurred
+    FL_CHECK(true); // Test passed if no crashes occurred
 }
 
 TEST_CASE("JsonConsole dump function" * doctest::skip()) {
@@ -552,16 +552,16 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
         fl::string dump = dumpOutput.str();
         
         // Verify dump contains expected uninitialized state
-        CHECK(contains(dump, "=== JsonConsole State Dump ==="));
-        CHECK(contains(dump, "Initialized: false"));
-        CHECK(contains(dump, "Input Buffer: \"\""));
-        CHECK(contains(dump, "Input Buffer Length: 0"));
-        CHECK(contains(dump, "Component Count: 0"));
-        CHECK(contains(dump, "No components mapped"));
-        CHECK(contains(dump, "Available Callback: set"));
-        CHECK(contains(dump, "Read Callback: set"));
-        CHECK(contains(dump, "Write Callback: set"));
-        CHECK(contains(dump, "=== End JsonConsole Dump ==="));
+        FL_CHECK(contains(dump, "=== JsonConsole State Dump ==="));
+        FL_CHECK(contains(dump, "Initialized: false"));
+        FL_CHECK(contains(dump, "Input Buffer: \"\""));
+        FL_CHECK(contains(dump, "Input Buffer Length: 0"));
+        FL_CHECK(contains(dump, "Component Count: 0"));
+        FL_CHECK(contains(dump, "No components mapped"));
+        FL_CHECK(contains(dump, "Available Callback: set"));
+        FL_CHECK(contains(dump, "Read Callback: set"));
+        FL_CHECK(contains(dump, "Write Callback: set"));
+        FL_CHECK(contains(dump, "=== End JsonConsole Dump ==="));
     }
     
     // Test 2: Initialized JsonConsole with components
@@ -581,12 +581,12 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
         fl::string dump = dumpOutput.str();
         
         // Verify dump contains expected state
-        CHECK(contains(dump, "=== JsonConsole State Dump ==="));
-        CHECK(contains(dump, "Component Count: 2"));
-        CHECK(contains(dump, "Component Mappings:"));
-        CHECK(contains(dump, "\"slider1\" -> ID 1"));
-        CHECK(contains(dump, "\"slider2\" -> ID 2"));
-        CHECK(contains(dump, "=== End JsonConsole Dump ==="));
+        FL_CHECK(contains(dump, "=== JsonConsole State Dump ==="));
+        FL_CHECK(contains(dump, "Component Count: 2"));
+        FL_CHECK(contains(dump, "Component Mappings:"));
+        FL_CHECK(contains(dump, "\"slider1\" -> ID 1"));
+        FL_CHECK(contains(dump, "\"slider2\" -> ID 2"));
+        FL_CHECK(contains(dump, "=== End JsonConsole Dump ==="));
     }
     
     // Test 3: JsonConsole with input buffer content (simulate partial command)
@@ -601,9 +601,9 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
         fl::string dump = dumpOutput.str();
         
         // Verify basic dump structure
-        CHECK(contains(dump, "=== JsonConsole State Dump ==="));
-        CHECK(contains(dump, "Input Buffer Length:"));
-        CHECK(contains(dump, "=== End JsonConsole Dump ==="));
+        FL_CHECK(contains(dump, "=== JsonConsole State Dump ==="));
+        FL_CHECK(contains(dump, "Input Buffer Length:"));
+        FL_CHECK(contains(dump, "=== End JsonConsole Dump ==="));
     }
     
     // Test 4: Test with null callbacks
@@ -619,9 +619,9 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
         fl::string dump = dumpOutput.str();
         
         // Verify null callbacks are reported correctly
-        CHECK(contains(dump, "Available Callback: null"));
-        CHECK(contains(dump, "Read Callback: null"));
-        CHECK(contains(dump, "Write Callback: null"));
+        FL_CHECK(contains(dump, "Available Callback: null"));
+        FL_CHECK(contains(dump, "Read Callback: null"));
+        FL_CHECK(contains(dump, "Write Callback: null"));
     }
     
     // Test 5: Test with empty component mapping JSON
@@ -635,8 +635,8 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
         console.dump(dumpOutput);
         fl::string dump = dumpOutput.str();
         
-        CHECK(contains(dump, "Component Count: 0"));
-        CHECK(contains(dump, "No components mapped"));
+        FL_CHECK(contains(dump, "Component Count: 0"));
+        FL_CHECK(contains(dump, "No components mapped"));
     }
     
     // Test 6: Test with invalid JSON (should not crash)
@@ -659,8 +659,8 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
 
         FL_WARN("Test 6: Running CHECK assertions");
         // Should still produce valid dump output
-        CHECK(contains(dump, "=== JsonConsole State Dump ==="));
-        CHECK(contains(dump, "=== End JsonConsole Dump ==="));
+        FL_CHECK(contains(dump, "=== JsonConsole State Dump ==="));
+        FL_CHECK(contains(dump, "=== End JsonConsole Dump ==="));
         FL_WARN("Test 6: Test complete, console going out of scope");
     }
     FL_WARN("Test 6: After scope close");
@@ -682,12 +682,12 @@ TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
         slider1.toJson(json1);
         
         // Check that step field is present in JSON
-        CHECK(json1.contains("step"));
+        FL_CHECK(json1.contains("step"));
         
         // Also verify the JSON string contains the step value
         fl::string jsonStr = json1.to_string();
         // 🚨 UPDATED: Expect clean format without trailing zeros
-        CHECK(jsonStr.find("\"step\":0.1") != fl::string::npos);
+        FL_CHECK(jsonStr.find("\"step\":0.1") != fl::string::npos);
     }
     
     // Test 2: Slider with default step should NOT output step field
@@ -696,11 +696,11 @@ TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
         fl::Json json2;
         slider2.toJson(json2);
         
-        CHECK_FALSE(json2.contains("step"));
+        FL_CHECK_FALSE(json2.contains("step"));
         
         // Also verify the JSON string does NOT contain step field
         fl::string jsonStr = json2.to_string();
-        CHECK(jsonStr.find("\"step\":") == fl::string::npos);
+        FL_CHECK(jsonStr.find("\"step\":") == fl::string::npos);
     }
     
     // Test 3: Slider with explicitly set zero step should output step field
@@ -709,12 +709,12 @@ TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
         fl::Json json3;
         slider3.toJson(json3);
         
-        CHECK(json3.contains("step"));
+        FL_CHECK(json3.contains("step"));
         
         // Also verify the JSON string contains zero step value
         fl::string jsonStr = json3.to_string();
         // 🚨 UPDATED: Expect clean format for zero
-        CHECK(jsonStr.find("\"step\":0") != fl::string::npos);
+        FL_CHECK(jsonStr.find("\"step\":0") != fl::string::npos);
     }
     
     // Test 4: Slider with very small step should output step field
@@ -723,12 +723,12 @@ TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
         fl::Json json4;
         slider4.toJson(json4);
         
-        CHECK(json4.contains("step"));
+        FL_CHECK(json4.contains("step"));
         
         // Also verify the JSON string contains the small step value
         fl::string jsonStr = json4.to_string();
         // 🚨 UPDATED: Expect clean format without trailing zeros
-        CHECK(jsonStr.find("\"step\":0.001") != fl::string::npos);
+        FL_CHECK(jsonStr.find("\"step\":0.001") != fl::string::npos);
     }
 }
 
@@ -764,9 +764,9 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
     FL_WARN("Length JSON: " << lengthJson.serialize());
     
     // ✅ VERIFY: C++ correctly generates step values (these should all pass)
-    CHECK(offsetJson.contains("step"));
-    CHECK(stepsJson.contains("step"));
-    CHECK(lengthJson.contains("step"));
+    FL_CHECK(offsetJson.contains("step"));
+    FL_CHECK(stepsJson.contains("step"));
+    FL_CHECK(lengthJson.contains("step"));
     
     // Parse step values as floats to verify correct generation
     FL_WARN("DEBUG: Checking contains:");
@@ -788,14 +788,14 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
          if (optionalStep.has_value()) {
              float offsetStep = *optionalStep;
              printf("DEBUG: Parsed offset step\n");
-             CHECK_CLOSE(offsetStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
+             FL_CHECK_CLOSE(offsetStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
          } else {
              FL_WARN("ERROR: could not parse offset step as float");
-             CHECK(false);
+             FL_CHECK(false);
          }
      } else {
          FL_WARN("ERROR: offset JSON does not contain 'step' field!");
-         CHECK(false);  // Force fail
+         FL_CHECK(false);  // Force fail
      }
      
      if (stepsJson.contains("step")) {
@@ -806,15 +806,15 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
              float stepsStep = *optionalStep;
              printf("DEBUG: After operator* call\n");
              printf("DEBUG: About to use stepsStep value\n");
-             CHECK_CLOSE(stepsStep, 1.0f, 0.001f);
-             printf("DEBUG: CHECK_CLOSE passed\n");
+             FL_CHECK_CLOSE(stepsStep, 1.0f, 0.001f);
+             printf("DEBUG: FL_CHECK_CLOSE passed\n");
          } else {
              FL_WARN("ERROR: could not parse steps step as float");
-             CHECK(false);
+             FL_CHECK(false);
          }
      } else {
          FL_WARN("ERROR: steps JSON does not contain 'step' field!");
-         CHECK(false);  // Force fail
+         FL_CHECK(false);  // Force fail
      }
      
      if (lengthJson.contains("step")) {
@@ -822,16 +822,16 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
          if (optionalStep.has_value()) {
             float lengthStep = *optionalStep;
              printf("DEBUG: Parsed length step\n");
-             // CHECK_CLOSE(lengthStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
-             CHECK_CLOSE(lengthStep, 0.01f, 0.001f);
-             printf("DEBUG: CHECK_CLOSE for lengthStep completed\n");
+             // FL_CHECK_CLOSE(lengthStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
+             FL_CHECK_CLOSE(lengthStep, 0.01f, 0.001f);
+             printf("DEBUG: FL_CHECK_CLOSE for lengthStep completed\n");
          } else {
              FL_WARN("ERROR: could not parse length step as float");
-             CHECK(false);
+             FL_CHECK(false);
          }
      } else {
          FL_WARN("ERROR: length JSON does not contain 'step' field!");
-         CHECK(false);  // Force fail
+         FL_CHECK(false);  // Force fail
      }
     
     // Verify other basic properties
@@ -846,10 +846,10 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
     fl::string stepsName = stepsNameOpt.has_value() ? *stepsNameOpt : fl::string("");
     fl::string lengthName = lengthNameOpt.has_value() ? *lengthNameOpt : fl::string("");
 
-    CHECK_EQ(offsetName, fl::string("Offset"));
-    CHECK_EQ(offsetType, fl::string("slider"));
-    CHECK_EQ(stepsName, fl::string("Steps"));
-    CHECK_EQ(lengthName, fl::string("Length"));
+    FL_CHECK_EQ(offsetName, fl::string("Offset"));
+    FL_CHECK_EQ(offsetType, fl::string("slider"));
+    FL_CHECK_EQ(stepsName, fl::string("Steps"));
+    FL_CHECK_EQ(lengthName, fl::string("Length"));
     
     // CONCLUSION: C++ slider JSON generation is working correctly.
     // The bug reported in browser output (step values like 0.01 become 0)
@@ -865,14 +865,14 @@ TEST_CASE("JsonHelpImpl basic functionality") {
 
     JsonHelpImpl help(markdownContent);
 
-    CHECK(help.name() == "help");
-    CHECK(help.markdownContent() == markdownContent);
-    CHECK(help.groupName().empty());
+    FL_CHECK(help.name() == "help");
+    FL_CHECK(help.markdownContent() == markdownContent);
+    FL_CHECK(help.groupName().empty());
 
     // Test group functionality
     fl::string groupName = "documentation";
     help.Group(groupName);
-    CHECK(help.groupName() == groupName);
+    FL_CHECK(help.groupName() == groupName);
 }
 
 TEST_CASE("JsonHelpImpl JSON serialization") {
@@ -909,19 +909,19 @@ Visit our [documentation](https://fastled.io) for more details!)";
     help.toJson(jsonObj);
 
     fl::string name = jsonObj["name"].as_or(fl::string(""));
-    CHECK(name == fl::string("help"));
+    FL_CHECK(name == fl::string("help"));
     fl::string type = jsonObj["type"].as_or(fl::string(""));
-    CHECK(type == fl::string("help"));
+    FL_CHECK(type == fl::string("help"));
     fl::string group = jsonObj["group"].as_or(fl::string(""));
-    CHECK(group == fl::string("getting-started"));
+    FL_CHECK(group == fl::string("getting-started"));
     int id = jsonObj["id"].as_or(-1);
-    CHECK(id >= 0);
+    FL_CHECK(id >= 0);
     fl::string content = jsonObj["markdownContent"].as_or(fl::string(""));
-    CHECK(content == markdownContent);
+    FL_CHECK(content == markdownContent);
 
     // Also test that operator| still works
     fl::string name2 = jsonObj["name"] | fl::string("");
-    CHECK(name2 == fl::string("help"));
+    FL_CHECK(name2 == fl::string("help"));
 }
 
 TEST_CASE("UIHelp wrapper functionality") {
@@ -930,12 +930,12 @@ TEST_CASE("UIHelp wrapper functionality") {
     UIHelp help(markdownContent.c_str());
 
     // Test markdown content access
-    CHECK(help.markdownContent() == markdownContent);
+    FL_CHECK(help.markdownContent() == markdownContent);
 
     // Test group setting
     fl::string groupName = "reference";
     help.setGroup(groupName);
-    CHECK(help.hasGroup());
+    FL_CHECK(help.hasGroup());
 }
 
 TEST_CASE("UIHelp with complex markdown") {
@@ -980,23 +980,23 @@ And some Unicode: ★ ♪ ⚡)";
 
     // Verify the markdown content is preserved exactly
     fl::string content = jsonObj["markdownContent"].as_or(fl::string(""));
-    CHECK(content == complexMarkdown);
+    FL_CHECK(content == complexMarkdown);
     fl::string type = jsonObj["type"].as_or(fl::string(""));
-    CHECK(type == fl::string("help"));
+    FL_CHECK(type == fl::string("help"));
 
     // Also test operator|
     fl::string content2 = jsonObj["markdownContent"] | fl::string("");
-    CHECK(content2 == complexMarkdown);
+    FL_CHECK(content2 == complexMarkdown);
 }
 
 TEST_CASE("UIHelp edge cases") {
     // Test with empty markdown
     JsonHelpImpl emptyHelp("");
-    CHECK(emptyHelp.markdownContent() == "");
+    FL_CHECK(emptyHelp.markdownContent() == "");
 
     // Test with markdown containing only whitespace
     JsonHelpImpl whitespaceHelp("   \n\t  \n  ");
-    CHECK(whitespaceHelp.markdownContent() == "   \n\t  \n  ");
+    FL_CHECK(whitespaceHelp.markdownContent() == "   \n\t  \n  ");
 
     // Test with very long markdown content
     fl::string longContent;
@@ -1007,36 +1007,36 @@ TEST_CASE("UIHelp edge cases") {
     }
 
     JsonHelpImpl longHelp(longContent);
-    CHECK(longHelp.markdownContent() == longContent);
+    FL_CHECK(longHelp.markdownContent() == longContent);
 
     // Verify JSON serialization works with long content
     fl::Json jsonObj = fl::Json::createObject();
     longHelp.toJson(jsonObj);
     fl::string content = jsonObj["markdownContent"].as_or(fl::string(""));
-    CHECK(content == longContent);
+    FL_CHECK(content == longContent);
 
     // Also test operator|
     fl::string content2 = jsonObj["markdownContent"] | fl::string("");
-    CHECK(content2 == longContent);
+    FL_CHECK(content2 == longContent);
 }
 
 TEST_CASE("UIHelp group operations") {
     JsonHelpImpl help("Test content");
 
     // Test initial state
-    CHECK(help.groupName().empty());
+    FL_CHECK(help.groupName().empty());
 
     // Test setting group via Group() method
     help.Group("group1");
-    CHECK(help.groupName() == "group1");
+    FL_CHECK(help.groupName() == "group1");
 
     // Test setting group via setGroup() method
     help.setGroup("group2");
-    CHECK(help.groupName() == "group2");
+    FL_CHECK(help.groupName() == "group2");
 
     // Test setting empty group
     help.setGroup("");
-    CHECK(help.groupName().empty());
+    FL_CHECK(help.groupName().empty());
 }
 
 // ========================================
@@ -1057,7 +1057,7 @@ TEST_CASE("UI Bug - Memory Corruption") {
             }
         }
     );
-    CHECK(updateEngineState);
+    FL_CHECK(updateEngineState);
 
     // Create UI components - these will be automatically registered
     // with the JsonUiManager through their constructors
@@ -1073,7 +1073,7 @@ TEST_CASE("UI Bug - Memory Corruption") {
         fl::processJsonUiPendingUpdates();
 
         // Verify that the components were properly serialized
-        CHECK(!capturedJsonOutput.empty());
+        FL_CHECK(!capturedJsonOutput.empty());
 
         // Simulate an update from the UI side
         const char* updateJson = R"({

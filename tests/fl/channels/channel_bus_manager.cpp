@@ -102,7 +102,7 @@ TEST_CASE("ChannelBusManager - Basic initialization") {
     ChannelBusManager manager;
 
     // Should be in READY state with no engines
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Add single engine") {
@@ -115,16 +115,16 @@ TEST_CASE("ChannelBusManager - Add single engine") {
     manager.enqueue(channelData);
 
     // Poll before show to ensure clean state
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // Now test actual transmission
     manager.show();
 
     // Poll after show - should still be READY (fake engine completes instantly)
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // Verify engine was actually used
-    CHECK(engine->getTransmitCount() == 1);
+    FL_CHECK(engine->getTransmitCount() == 1);
 }
 
 TEST_CASE("ChannelBusManager - Priority selection (highest priority)") {
@@ -144,9 +144,9 @@ TEST_CASE("ChannelBusManager - Priority selection (highest priority)") {
     manager.show();
 
     // Verify highest priority engine was used
-    CHECK(highEngine->getTransmitCount() == 1);
-    CHECK(midEngine->getTransmitCount() == 0);
-    CHECK(lowEngine->getTransmitCount() == 0);
+    FL_CHECK(highEngine->getTransmitCount() == 1);
+    FL_CHECK(midEngine->getTransmitCount() == 0);
+    FL_CHECK(lowEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - Multiple channels in one frame") {
@@ -163,8 +163,8 @@ TEST_CASE("ChannelBusManager - Multiple channels in one frame") {
     manager.show();
 
     // Should batch all channels into one transmission
-    CHECK(engine->getTransmitCount() == 1);
-    CHECK(engine->getLastChannelCount() == 3);
+    FL_CHECK(engine->getTransmitCount() == 1);
+    FL_CHECK(engine->getLastChannelCount() == 3);
 }
 
 TEST_CASE("ChannelBusManager - Frame reset") {
@@ -178,7 +178,7 @@ TEST_CASE("ChannelBusManager - Frame reset") {
     // First frame
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(highEngine->getTransmitCount() == 1);
+    FL_CHECK(highEngine->getTransmitCount() == 1);
 
     // Simulate frame end event
     manager.onEndFrame();
@@ -186,8 +186,8 @@ TEST_CASE("ChannelBusManager - Frame reset") {
     // Second frame - should still use high priority engine
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(highEngine->getTransmitCount() == 2);
-    CHECK(lowEngine->getTransmitCount() == 0);
+    FL_CHECK(highEngine->getTransmitCount() == 2);
+    FL_CHECK(lowEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - No engines available") {
@@ -199,7 +199,7 @@ TEST_CASE("ChannelBusManager - No engines available") {
     manager.show();
 
     // Should not crash - manager handles gracefully
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Null engine ignored") {
@@ -213,7 +213,7 @@ TEST_CASE("ChannelBusManager - Null engine ignored") {
     manager.show();
 
     // Should handle gracefully (no crash)
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Poll forwards to active engine") {
@@ -223,12 +223,12 @@ TEST_CASE("ChannelBusManager - Poll forwards to active engine") {
     manager.addEngine(100, engine);
 
     // Before any enqueue, should be READY
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // After enqueue and show, should still be READY (fake engine returns READY)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Multiple frames with same engine") {
@@ -240,22 +240,22 @@ TEST_CASE("ChannelBusManager - Multiple frames with same engine") {
     // Frame 1
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(engine->getTransmitCount() == 1);
+    FL_CHECK(engine->getTransmitCount() == 1);
 
     // Frame 2
     manager.onEndFrame();
     manager.enqueue(createDummyChannelData());
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(engine->getTransmitCount() == 2);
-    CHECK(engine->getLastChannelCount() == 2);
+    FL_CHECK(engine->getTransmitCount() == 2);
+    FL_CHECK(engine->getLastChannelCount() == 2);
 
     // Frame 3
     manager.onEndFrame();
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(engine->getTransmitCount() == 3);
-    CHECK(engine->getLastChannelCount() == 1);
+    FL_CHECK(engine->getTransmitCount() == 3);
+    FL_CHECK(engine->getLastChannelCount() == 1);
 }
 
 TEST_CASE("ChannelBusManager - Priority ordering with equal priorities") {
@@ -276,7 +276,7 @@ TEST_CASE("ChannelBusManager - Priority ordering with equal priorities") {
     int totalTransmits = engine1->getTransmitCount() +
                          engine2->getTransmitCount() +
                          engine3->getTransmitCount();
-    CHECK(totalTransmits == 1);
+    FL_CHECK(totalTransmits == 1);
 }
 
 TEST_CASE("ChannelBusManager - Empty show() does nothing") {
@@ -289,7 +289,7 @@ TEST_CASE("ChannelBusManager - Empty show() does nothing") {
     manager.show();
 
     // Should not transmit
-    CHECK(engine->getTransmitCount() == 0);
+    FL_CHECK(engine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - Driver enable/disable") {
@@ -301,14 +301,14 @@ TEST_CASE("ChannelBusManager - Driver enable/disable") {
     manager.addEngine(50, spiEngine, "SPI");
 
     // By default, all engines should be enabled
-    CHECK(manager.isDriverEnabled("RMT") == true);
-    CHECK(manager.isDriverEnabled("SPI") == true);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == true);
 
     // SPI should be selected (higher priority)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(spiEngine->getTransmitCount() == 1);
-    CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
 
     // Reset for next test
     spiEngine->reset();
@@ -317,13 +317,13 @@ TEST_CASE("ChannelBusManager - Driver enable/disable") {
 
     // Disable SPI - should fall back to RMT
     manager.setDriverEnabled("SPI", false);
-    CHECK(manager.isDriverEnabled("SPI") == false);
-    CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
 
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 
     // Reset for next test
     spiEngine->reset();
@@ -332,12 +332,12 @@ TEST_CASE("ChannelBusManager - Driver enable/disable") {
 
     // Re-enable SPI - should go back to SPI
     manager.setDriverEnabled("SPI", true);
-    CHECK(manager.isDriverEnabled("SPI") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == true);
 
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(spiEngine->getTransmitCount() == 1);
-    CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - Disable all drivers") {
@@ -357,11 +357,11 @@ TEST_CASE("ChannelBusManager - Disable all drivers") {
     manager.show();
 
     // Neither engine should be used
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 
     // Should still be in READY state (no crash)
-    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Multiple engines with same name") {
@@ -378,8 +378,8 @@ TEST_CASE("ChannelBusManager - Multiple engines with same name") {
     manager.enqueue(createDummyChannelData());
     manager.show();
 
-    CHECK(rmt1->getTransmitCount() == 0);
-    CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 0);
+    FL_CHECK(rmt2->getTransmitCount() == 0);
 
     // Re-enable RMT - should use highest priority RMT engine
     manager.setDriverEnabled("RMT", true);
@@ -387,8 +387,8 @@ TEST_CASE("ChannelBusManager - Multiple engines with same name") {
     manager.enqueue(createDummyChannelData());
     manager.show();
 
-    CHECK(rmt1->getTransmitCount() == 1);  // Higher priority
-    CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 1);  // Higher priority
+    FL_CHECK(rmt2->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - Query non-existent driver name") {
@@ -398,7 +398,7 @@ TEST_CASE("ChannelBusManager - Query non-existent driver name") {
     manager.addEngine(10, rmtEngine, "RMT");
 
     // Query PARLIO when only RMT is registered
-    CHECK(manager.isDriverEnabled("PARLIO") == false);
+    FL_CHECK(manager.isDriverEnabled("PARLIO") == false);
 
     // Disable PARLIO (even though it doesn't exist) - should not crash
     manager.setDriverEnabled("PARLIO", false);
@@ -406,7 +406,7 @@ TEST_CASE("ChannelBusManager - Query non-existent driver name") {
     // RMT should still work
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
 }
 
 TEST_CASE("ChannelBusManager - Immediate effect of setDriverEnabled") {
@@ -420,7 +420,7 @@ TEST_CASE("ChannelBusManager - Immediate effect of setDriverEnabled") {
     // First transmission - should use SPI
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
 
     spiEngine->reset();
     rmtEngine->reset();
@@ -431,17 +431,17 @@ TEST_CASE("ChannelBusManager - Immediate effect of setDriverEnabled") {
     // Next transmission should immediately use RMT (no onEndFrame needed)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - Query driver info") {
     ChannelBusManager manager;
 
     // Empty manager
-    CHECK(manager.getDriverCount() == 0);
+    FL_CHECK(manager.getDriverCount() == 0);
     auto emptyInfo = manager.getDriverInfos();
-    CHECK(emptyInfo.size() == 0);
+    FL_CHECK(emptyInfo.size() == 0);
 
     // Add named engines
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
@@ -453,11 +453,11 @@ TEST_CASE("ChannelBusManager - Query driver info") {
     manager.addEngine(100, parlioEngine, "PARLIO");
 
     // Check count
-    CHECK(manager.getDriverCount() == 3);
+    FL_CHECK(manager.getDriverCount() == 3);
 
     // Get info (returns span, no allocation!)
     auto info = manager.getDriverInfos();
-    CHECK(info.size() == 3);
+    FL_CHECK(info.size() == 3);
 
     // Verify all names are present (sorted by priority descending)
     bool hasRMT = false;
@@ -470,9 +470,9 @@ TEST_CASE("ChannelBusManager - Query driver info") {
         if (p.name == "PARLIO") hasPARLIO = true;
     }
 
-    CHECK(hasRMT == true);
-    CHECK(hasSPI == true);
-    CHECK(hasPARLIO == true);
+    FL_CHECK(hasRMT == true);
+    FL_CHECK(hasSPI == true);
+    FL_CHECK(hasPARLIO == true);
 }
 
 TEST_CASE("ChannelBusManager - Query with unnamed engines") {
@@ -485,18 +485,18 @@ TEST_CASE("ChannelBusManager - Query with unnamed engines") {
     manager.addEngine(20, unnamedEngine, nullptr);  // Unnamed
 
     // Count includes both
-    CHECK(manager.getDriverCount() == 2);
+    FL_CHECK(manager.getDriverCount() == 2);
 
     // Info includes both (unnamed has empty string)
     auto info = manager.getDriverInfos();
-    CHECK(info.size() == 2);
+    FL_CHECK(info.size() == 2);
 
     // Higher priority first (20 > 10)
-    CHECK(info[0].priority == 20);
-    CHECK(info[0].name == "");  // Unnamed
+    FL_CHECK(info[0].priority == 20);
+    FL_CHECK(info[0].name == "");  // Unnamed
 
-    CHECK(info[1].priority == 10);
-    CHECK(info[1].name == "Named");
+    FL_CHECK(info[1].priority == 10);
+    FL_CHECK(info[1].name == "Named");
 }
 
 TEST_CASE("ChannelBusManager - Query with duplicate names") {
@@ -509,15 +509,15 @@ TEST_CASE("ChannelBusManager - Query with duplicate names") {
     manager.addEngine(50, rmt2, "RMT");
 
     // Count should be 2 (two engines)
-    CHECK(manager.getDriverCount() == 2);
+    FL_CHECK(manager.getDriverCount() == 2);
 
     // Info should include both "RMT" entries (duplicates allowed)
     auto info = manager.getDriverInfos();
-    CHECK(info.size() == 2);
-    CHECK(info[0].name == "RMT");
-    CHECK(info[0].priority == 100);
-    CHECK(info[1].name == "RMT");
-    CHECK(info[1].priority == 50);
+    FL_CHECK(info.size() == 2);
+    FL_CHECK(info[0].name == "RMT");
+    FL_CHECK(info[0].priority == 100);
+    FL_CHECK(info[1].name == "RMT");
+    FL_CHECK(info[1].priority == 50);
 }
 
 TEST_CASE("ChannelBusManager - Query full driver state") {
@@ -533,28 +533,28 @@ TEST_CASE("ChannelBusManager - Query full driver state") {
 
     // Get full info (span, no allocation!)
     auto info = manager.getDriverInfos();
-    CHECK(info.size() == 3);
+    FL_CHECK(info.size() == 3);
 
     // Should be sorted by priority descending (PARLIO=100, SPI=50, RMT=10)
-    CHECK(info[0].name == "PARLIO");
-    CHECK(info[0].priority == 100);
-    CHECK(info[0].enabled == true);
+    FL_CHECK(info[0].name == "PARLIO");
+    FL_CHECK(info[0].priority == 100);
+    FL_CHECK(info[0].enabled == true);
 
-    CHECK(info[1].name == "SPI");
-    CHECK(info[1].priority == 50);
-    CHECK(info[1].enabled == true);
+    FL_CHECK(info[1].name == "SPI");
+    FL_CHECK(info[1].priority == 50);
+    FL_CHECK(info[1].enabled == true);
 
-    CHECK(info[2].name == "RMT");
-    CHECK(info[2].priority == 10);
-    CHECK(info[2].enabled == true);
+    FL_CHECK(info[2].name == "RMT");
+    FL_CHECK(info[2].priority == 10);
+    FL_CHECK(info[2].enabled == true);
 
     // Disable SPI and check state
     manager.setDriverEnabled("SPI", false);
     info = manager.getDriverInfos();
 
-    CHECK(info[0].enabled == true);   // PARLIO still enabled
-    CHECK(info[1].enabled == false);  // SPI disabled
-    CHECK(info[2].enabled == true);   // RMT still enabled
+    FL_CHECK(info[0].enabled == true);   // PARLIO still enabled
+    FL_CHECK(info[1].enabled == false);  // SPI disabled
+    FL_CHECK(info[2].enabled == true);   // RMT still enabled
 }
 
 TEST_CASE("ChannelBusManager - Span validity") {
@@ -568,21 +568,21 @@ TEST_CASE("ChannelBusManager - Span validity") {
 
     // Get span (no allocation)
     auto info = manager.getDriverInfos();
-    CHECK(info.size() == 2);
+    FL_CHECK(info.size() == 2);
 
     // Verify we can iterate multiple times (span is stable)
     int count = 0;
     for (const auto& p : info) {
         count++;
-        CHECK(p.priority > 0);
+        FL_CHECK(p.priority > 0);
     }
-    CHECK(count == 2);
+    FL_CHECK(count == 2);
 
     // Get span again - should work fine
     auto info2 = manager.getDriverInfos();
-    CHECK(info2.size() == 2);
-    CHECK(info2[0].name == "SPI");  // Higher priority
-    CHECK(info2[1].name == "RMT");
+    FL_CHECK(info2.size() == 2);
+    FL_CHECK(info2[0].name == "SPI");  // Higher priority
+    FL_CHECK(info2[1].name == "RMT");
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver with valid name") {
@@ -596,25 +596,25 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver with valid name") {
     manager.addEngine(100, parlioEngine, "PARLIO");
 
     // All drivers should be enabled by default
-    CHECK(manager.isDriverEnabled("RMT") == true);
-    CHECK(manager.isDriverEnabled("SPI") == true);
-    CHECK(manager.isDriverEnabled("PARLIO") == true);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == true);
+    FL_CHECK(manager.isDriverEnabled("PARLIO") == true);
 
     // Set SPI as exclusive driver
     bool result = manager.setExclusiveDriver("SPI");
-    CHECK(result == true);
+    FL_CHECK(result == true);
 
     // Only SPI should be enabled
-    CHECK(manager.isDriverEnabled("SPI") == true);
-    CHECK(manager.isDriverEnabled("RMT") == false);
-    CHECK(manager.isDriverEnabled("PARLIO") == false);
+    FL_CHECK(manager.isDriverEnabled("SPI") == true);
+    FL_CHECK(manager.isDriverEnabled("RMT") == false);
+    FL_CHECK(manager.isDriverEnabled("PARLIO") == false);
 
     // Verify SPI is actually used
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(spiEngine->getTransmitCount() == 1);
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(parlioEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(parlioEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver with invalid name") {
@@ -627,17 +627,17 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver with invalid name") {
 
     // Try to set non-existent driver as exclusive
     bool result = manager.setExclusiveDriver("NONEXISTENT");
-    CHECK(result == false);
+    FL_CHECK(result == false);
 
     // All drivers should be disabled (defensive behavior)
-    CHECK(manager.isDriverEnabled("RMT") == false);
-    CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == false);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
 
     // No transmission should occur
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver with nullptr") {
@@ -650,17 +650,17 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver with nullptr") {
 
     // nullptr should disable all drivers
     bool result = manager.setExclusiveDriver(nullptr);
-    CHECK(result == false);
+    FL_CHECK(result == false);
 
     // All drivers should be disabled
-    CHECK(manager.isDriverEnabled("RMT") == false);
-    CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == false);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
 
     // No transmission should occur
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver with empty string") {
@@ -673,11 +673,11 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver with empty string") {
 
     // Empty string should disable all drivers
     bool result = manager.setExclusiveDriver("");
-    CHECK(result == false);
+    FL_CHECK(result == false);
 
     // All drivers should be disabled
-    CHECK(manager.isDriverEnabled("RMT") == false);
-    CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == false);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver forward compatibility") {
@@ -690,23 +690,23 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver forward compatibility") {
 
     // Set RMT as exclusive
     manager.setExclusiveDriver("RMT");
-    CHECK(manager.isDriverEnabled("RMT") == true);
-    CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
 
     // Simulate adding a new driver (future scenario)
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
     manager.addEngine(100, parlioEngine, "PARLIO");
 
     // New driver should be auto-disabled (not matching "RMT")
-    CHECK(manager.isDriverEnabled("PARLIO") == false);
-    CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("PARLIO") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
 
     // Only RMT should be used (not the new higher-priority PARLIO)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
-    CHECK(spiEngine->getTransmitCount() == 0);
-    CHECK(parlioEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(parlioEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
@@ -720,7 +720,7 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
     // First transmission - should use SPI (higher priority)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
 
     spiEngine->reset();
     rmtEngine->reset();
@@ -731,8 +731,8 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
     // Next transmission should immediately use RMT (no onEndFrame needed)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver with duplicate names") {
@@ -748,15 +748,15 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver with duplicate names") {
     // Set RMT as exclusive - should enable BOTH engines with name "RMT"
     manager.setExclusiveDriver("RMT");
 
-    CHECK(manager.isDriverEnabled("RMT") == true);
-    CHECK(manager.isDriverEnabled("SPI") == false);
+    FL_CHECK(manager.isDriverEnabled("RMT") == true);
+    FL_CHECK(manager.isDriverEnabled("SPI") == false);
 
     // Should use highest priority RMT engine (priority 100)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmt1->getTransmitCount() == 1);
-    CHECK(rmt2->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 1);
+    FL_CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
 TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
@@ -773,9 +773,9 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
     manager.setExclusiveDriver("RMT");
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 1);
-    CHECK(spiEngine->getTransmitCount() == 0);
-    CHECK(parlioEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 1);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(parlioEngine->getTransmitCount() == 0);
 
     // Reset counters
     rmtEngine->reset();
@@ -786,9 +786,9 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
     manager.setExclusiveDriver("SPI");
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 1);
-    CHECK(parlioEngine->getTransmitCount() == 0);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 1);
+    FL_CHECK(parlioEngine->getTransmitCount() == 0);
 
     // Reset counters
     rmtEngine->reset();
@@ -799,9 +799,9 @@ TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
     manager.setExclusiveDriver("PARLIO");
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(rmtEngine->getTransmitCount() == 0);
-    CHECK(spiEngine->getTransmitCount() == 0);
-    CHECK(parlioEngine->getTransmitCount() == 1);
+    FL_CHECK(rmtEngine->getTransmitCount() == 0);
+    FL_CHECK(spiEngine->getTransmitCount() == 0);
+    FL_CHECK(parlioEngine->getTransmitCount() == 1);
 }
 
 // ============================================================================

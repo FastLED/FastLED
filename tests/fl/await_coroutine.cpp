@@ -119,7 +119,7 @@ TEST_CASE("await in coroutine - basic resolution") {
         auto result = fl::await(p);
 
         // Verify result
-        CHECK(result.ok());
+        FL_CHECK(result.ok());
         if (result.ok()) {
             result_value.store(result.value());
         }
@@ -137,8 +137,8 @@ TEST_CASE("await in coroutine - basic resolution") {
         timeout += 10;
     }
 
-    CHECK(test_completed.load());
-    CHECK(result_value.load() == 42);
+    FL_CHECK(test_completed.load());
+    FL_CHECK(result_value.load() == 42);
 
     // Clean up background threads before test exits
     cleanup_threads();
@@ -157,7 +157,7 @@ TEST_CASE("await in coroutine - error handling") {
         auto result = fl::await(p);
 
         // Should have error
-        CHECK(!result.ok());
+        FL_CHECK(!result.ok());
         if (!result.ok()) {
             got_error.store(true);
         }
@@ -175,8 +175,8 @@ TEST_CASE("await in coroutine - error handling") {
         timeout += 10;
     }
 
-    CHECK(test_completed.load());
-    CHECK(got_error.load());
+    FL_CHECK(test_completed.load());
+    FL_CHECK(got_error.load());
 
     // Clean up background threads before test exits
     cleanup_threads();
@@ -194,7 +194,7 @@ TEST_CASE("await in coroutine - already completed promise") {
         // Await should return immediately
         auto result = fl::await(p);
 
-        CHECK(result.ok());
+        FL_CHECK(result.ok());
         if (result.ok()) {
             result_value.store(result.value());
         }
@@ -212,8 +212,8 @@ TEST_CASE("await in coroutine - already completed promise") {
         timeout += 10;
     }
 
-    CHECK(test_completed.load());
-    CHECK(result_value.load() == 123);
+    FL_CHECK(test_completed.load());
+    FL_CHECK(result_value.load() == 123);
 }
 
 TEST_CASE("await in coroutine - multiple concurrent coroutines") {
@@ -262,8 +262,8 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     }
     printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
 
-    CHECK(completed_count.load() == 5);
-    CHECK(sum.load() == 0 + 10 + 20 + 30 + 40);  // Sum of 0, 10, 20, 30, 40
+    FL_CHECK(completed_count.load() == 5);
+    FL_CHECK(sum.load() == 0 + 10 + 20 + 30 + 40);  // Sum of 0, 10, 20, 30, 40
 
     // Clean up background threads before test exits
     cleanup_threads();
@@ -281,7 +281,7 @@ TEST_CASE("await in coroutine - invalid promise") {
         // Await should return error immediately
         auto result = fl::await(p);
 
-        CHECK(!result.ok());
+        FL_CHECK(!result.ok());
         if (!result.ok()) {
             got_error.store(true);
         }
@@ -299,8 +299,8 @@ TEST_CASE("await in coroutine - invalid promise") {
         timeout += 10;
     }
 
-    CHECK(test_completed.load());
-    CHECK(got_error.load());
+    FL_CHECK(test_completed.load());
+    FL_CHECK(got_error.load());
 }
 
 TEST_CASE("await in coroutine - sequential awaits") {
@@ -337,8 +337,8 @@ TEST_CASE("await in coroutine - sequential awaits") {
         timeout += 10;
     }
 
-    CHECK(test_completed.load());
-    CHECK(total.load() == 60);  // 10 + 20 + 30
+    FL_CHECK(test_completed.load());
+    FL_CHECK(total.load() == 60);  // 10 + 20 + 30
 
     // Clean up background threads before test exits
     cleanup_threads();
@@ -359,9 +359,9 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
     config.function = [&]() {
         auto p = delayed_resolve<int>(42, 5);  // 5ms delay (reduced from 50ms)
         auto result = fl::await(p);
-        CHECK(result.ok());
+        FL_CHECK(result.ok());
         if (result.ok()) {
-            CHECK(result.value() == 42);
+            FL_CHECK(result.value() == 42);
         }
         await_completed.store(true);
     };
@@ -375,7 +375,7 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
         delay(10);
         timeout += 10;
     }
-    CHECK(await_completed.load());
+    FL_CHECK(await_completed.load());
 
     // Clean up background threads before test exits
     cleanup_threads();
@@ -471,9 +471,9 @@ TEST_CASE("global coordination - no concurrent execution") {
     }
 
     // Verify no race condition detected
-    CHECK(test_completed.load());
-    CHECK_FALSE(race_detected.load());
-    CHECK(max_concurrent_threads.load() == 1);  // Only one thread at a time
+    FL_CHECK(test_completed.load());
+    FL_CHECK_FALSE(race_detected.load());
+    FL_CHECK(max_concurrent_threads.load() == 1);  // Only one thread at a time
 }
 
 TEST_CASE("global coordination - await releases lock for other threads") {
@@ -496,7 +496,7 @@ TEST_CASE("global coordination - await releases lock for other threads") {
         coroutine1_progress.store(2);  // Completed
 
         // Check if coroutine 2 made progress while we were awaiting
-        CHECK(coroutine2_progress.load() >= 1);
+        FL_CHECK(coroutine2_progress.load() >= 1);
     };
     config1.name = "TestCoro1";
     auto coro1 = task::coroutine(config1);
@@ -512,7 +512,7 @@ TEST_CASE("global coordination - await releases lock for other threads") {
         coroutine2_progress.store(2);  // Completed
 
         // Check if coroutine 1 made progress
-        CHECK(coroutine1_progress.load() >= 1);
+        FL_CHECK(coroutine1_progress.load() >= 1);
 
         both_completed.store(true);
     };
@@ -527,9 +527,9 @@ TEST_CASE("global coordination - await releases lock for other threads") {
         timeout += 10;
     }
 
-    CHECK(both_completed.load());
-    CHECK(coroutine1_progress.load() == 2);
-    CHECK(coroutine2_progress.load() == 2);
+    FL_CHECK(both_completed.load());
+    FL_CHECK(coroutine1_progress.load() == 2);
+    FL_CHECK(coroutine2_progress.load() == 2);
 
     // Clean up background threads before test exits
     cleanup_threads();

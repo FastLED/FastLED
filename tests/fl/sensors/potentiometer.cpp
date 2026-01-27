@@ -15,10 +15,10 @@ TEST_CASE("Potentiometer - raw value reading") {
 
     // Inject test values directly
     pot.injectTestValue(500);
-    CHECK(pot.raw() == 500);
+    FL_CHECK(pot.raw() == 500);
 
     pot.injectTestValue(750);
-    CHECK(pot.raw() == 750);
+    FL_CHECK(pot.raw() == 750);
 }
 
 TEST_CASE("Potentiometer - normalized conversion (full range)") {
@@ -27,15 +27,15 @@ TEST_CASE("Potentiometer - normalized conversion (full range)") {
 
     // Test minimum
     pot.injectTestValue(0);
-    CHECK(pot.normalized() == 0.0f);
+    FL_CHECK(pot.normalized() == 0.0f);
 
     // Test midpoint
     pot.injectTestValue(512);
-    CHECK(pot.normalized() == doctest::Approx(512.0f / 1023.0f).epsilon(0.001));
+    FL_CHECK(pot.normalized() == doctest::Approx(512.0f / 1023.0f).epsilon(0.001));
 
     // Test maximum
     pot.injectTestValue(1023);
-    CHECK(pot.normalized() == 1.0f);
+    FL_CHECK(pot.normalized() == 1.0f);
 }
 
 TEST_CASE("Potentiometer - fractional16 conversion (full range)") {
@@ -43,16 +43,16 @@ TEST_CASE("Potentiometer - fractional16 conversion (full range)") {
 
     // Test minimum
     pot.injectTestValue(0);
-    CHECK(pot.fractional16() == 0);
+    FL_CHECK(pot.fractional16() == 0);
 
     // Test midpoint
     pot.injectTestValue(512);
     uint16_t expected = (uint32_t(512) * 65535U) / 1023U;
-    CHECK(pot.fractional16() == expected);
+    FL_CHECK(pot.fractional16() == expected);
 
     // Test maximum
     pot.injectTestValue(1023);
-    CHECK(pot.fractional16() == 65535);
+    FL_CHECK(pot.fractional16() == 65535);
 }
 
 TEST_CASE("Potentiometer - calibration range setRange()") {
@@ -63,24 +63,24 @@ TEST_CASE("Potentiometer - calibration range setRange()") {
 
     // Test below minimum (should clamp to 0.0)
     pot.injectTestValue(50);
-    CHECK(pot.normalized() == 0.0f);
+    FL_CHECK(pot.normalized() == 0.0f);
 
     // Test at minimum
     pot.injectTestValue(100);
-    CHECK(pot.normalized() == 0.0f);
+    FL_CHECK(pot.normalized() == 0.0f);
 
     // Test midpoint
     pot.injectTestValue(500);
     float expected = (500.0f - 100.0f) / (900.0f - 100.0f);
-    CHECK(pot.normalized() == doctest::Approx(expected).epsilon(0.001));
+    FL_CHECK(pot.normalized() == doctest::Approx(expected).epsilon(0.001));
 
     // Test at maximum
     pot.injectTestValue(900);
-    CHECK(pot.normalized() == 1.0f);
+    FL_CHECK(pot.normalized() == 1.0f);
 
     // Test above maximum (should clamp to 1.0)
     pot.injectTestValue(1023);
-    CHECK(pot.normalized() == 1.0f);
+    FL_CHECK(pot.normalized() == 1.0f);
 }
 
 TEST_CASE("Potentiometer - calibrateMin/calibrateMax") {
@@ -89,23 +89,23 @@ TEST_CASE("Potentiometer - calibrateMin/calibrateMax") {
     // Move to minimum position and calibrate
     pot.injectTestValue(150);
     pot.calibrateMin();
-    CHECK(pot.getRangeMin() == 150);
+    FL_CHECK(pot.getRangeMin() == 150);
 
     // Move to maximum position and calibrate
     pot.injectTestValue(850);
     pot.calibrateMax();
-    CHECK(pot.getRangeMax() == 850);
+    FL_CHECK(pot.getRangeMax() == 850);
 
     // Verify normalized range now uses calibrated values
     pot.injectTestValue(150);
-    CHECK(pot.normalized() == 0.0f);
+    FL_CHECK(pot.normalized() == 0.0f);
 
     pot.injectTestValue(850);
-    CHECK(pot.normalized() == 1.0f);
+    FL_CHECK(pot.normalized() == 1.0f);
 
     pot.injectTestValue(500);
     float expected = (500.0f - 150.0f) / (850.0f - 150.0f);
-    CHECK(pot.normalized() == doctest::Approx(expected).epsilon(0.001));
+    FL_CHECK(pot.normalized() == doctest::Approx(expected).epsilon(0.001));
 }
 
 TEST_CASE("Potentiometer - resetCalibration") {
@@ -113,13 +113,13 @@ TEST_CASE("Potentiometer - resetCalibration") {
 
     // Set custom range
     pot.setRange(200, 800);
-    CHECK(pot.getRangeMin() == 200);
-    CHECK(pot.getRangeMax() == 800);
+    FL_CHECK(pot.getRangeMin() == 200);
+    FL_CHECK(pot.getRangeMax() == 800);
 
     // Reset to full ADC range
     pot.resetCalibration();
-    CHECK(pot.getRangeMin() == 0);
-    CHECK(pot.getRangeMax() == 1023);  // 10-bit ADC on stub platform
+    FL_CHECK(pot.getRangeMin() == 0);
+    FL_CHECK(pot.getRangeMax() == 1023);  // 10-bit ADC on stub platform
 }
 
 TEST_CASE("Potentiometer - fractional16 with calibration") {
@@ -128,16 +128,16 @@ TEST_CASE("Potentiometer - fractional16 with calibration") {
 
     // Test minimum
     pot.injectTestValue(100);
-    CHECK(pot.fractional16() == 0);
+    FL_CHECK(pot.fractional16() == 0);
 
     // Test maximum
     pot.injectTestValue(900);
-    CHECK(pot.fractional16() == 65535);
+    FL_CHECK(pot.fractional16() == 65535);
 
     // Test midpoint
     pot.injectTestValue(500);
     uint16_t expected = (uint32_t(500 - 100) * 65535U) / (900 - 100);
-    CHECK(pot.fractional16() == expected);
+    FL_CHECK(pot.fractional16() == expected);
 }
 
 TEST_CASE("Potentiometer - hysteresis default calculation") {
@@ -146,14 +146,14 @@ TEST_CASE("Potentiometer - hysteresis default calculation") {
     // Default hysteresis: 1% of range or 10, whichever is larger
     // Full range: 0-1023, 1% = 10.23, so should be 10
     uint16_t expected_hyst = 10;
-    CHECK(pot.getHysteresis() == expected_hyst);
+    FL_CHECK(pot.getHysteresis() == expected_hyst);
 }
 
 TEST_CASE("Potentiometer - setHysteresis") {
     Potentiometer pot(0);
 
     pot.setHysteresis(50);
-    CHECK(pot.getHysteresis() == 50);
+    FL_CHECK(pot.getHysteresis() == 50);
 }
 
 TEST_CASE("Potentiometer - setHysteresisPercent") {
@@ -162,11 +162,11 @@ TEST_CASE("Potentiometer - setHysteresisPercent") {
 
     // 5% of 1000 = 50
     pot.setHysteresisPercent(5.0f);
-    CHECK(pot.getHysteresis() == 50);
+    FL_CHECK(pot.getHysteresis() == 50);
 
     // 10% of 1000 = 100
     pot.setHysteresisPercent(10.0f);
-    CHECK(pot.getHysteresis() == 100);
+    FL_CHECK(pot.getHysteresis() == 100);
 }
 
 TEST_CASE("Potentiometer - onChange callback") {
@@ -184,17 +184,17 @@ TEST_CASE("Potentiometer - onChange callback") {
 
     // Initial value
     pot.injectTestValue(500);
-    CHECK(callback_count == 1);  // First change triggers callback
-    CHECK(last_raw == 500);
+    FL_CHECK(callback_count == 1);  // First change triggers callback
+    FL_CHECK(last_raw == 500);
 
     // Small change (within hysteresis) - should NOT trigger
     pot.injectTestValue(520);
-    CHECK(callback_count == 1);  // No change
+    FL_CHECK(callback_count == 1);  // No change
 
     // Large change (beyond hysteresis) - should trigger
     pot.injectTestValue(600);
-    CHECK(callback_count == 2);
-    CHECK(last_raw == 600);
+    FL_CHECK(callback_count == 2);
+    FL_CHECK(last_raw == 600);
 }
 
 TEST_CASE("Potentiometer - onChange normalized callback") {
@@ -212,13 +212,13 @@ TEST_CASE("Potentiometer - onChange normalized callback") {
 
     // Initial value
     pot.injectTestValue(512);
-    CHECK(callback_count == 1);
-    CHECK(last_normalized == doctest::Approx(512.0f / 1023.0f).epsilon(0.001));
+    FL_CHECK(callback_count == 1);
+    FL_CHECK(last_normalized == doctest::Approx(512.0f / 1023.0f).epsilon(0.001));
 
     // Large change
     pot.injectTestValue(800);
-    CHECK(callback_count == 2);
-    CHECK(last_normalized == doctest::Approx(800.0f / 1023.0f).epsilon(0.001));
+    FL_CHECK(callback_count == 2);
+    FL_CHECK(last_normalized == doctest::Approx(800.0f / 1023.0f).epsilon(0.001));
 }
 
 TEST_CASE("Potentiometer - hasChanged flag") {
@@ -227,15 +227,15 @@ TEST_CASE("Potentiometer - hasChanged flag") {
 
     // Initial state
     pot.injectTestValue(500);
-    CHECK(pot.hasChanged() == true);  // First read counts as change
+    FL_CHECK(pot.hasChanged() == true);  // First read counts as change
 
     // Small change (no trigger)
     pot.injectTestValue(520);
-    CHECK(pot.hasChanged() == false);
+    FL_CHECK(pot.hasChanged() == false);
 
     // Large change (triggers)
     pot.injectTestValue(600);
-    CHECK(pot.hasChanged() == true);
+    FL_CHECK(pot.hasChanged() == true);
 }
 
 TEST_CASE("Potentiometer - callback removal") {
@@ -251,14 +251,14 @@ TEST_CASE("Potentiometer - callback removal") {
 
     // Trigger callback
     pot.injectTestValue(500);
-    CHECK(callback_count == 1);
+    FL_CHECK(callback_count == 1);
 
     // Remove callback
     pot.removeOnChange(id);
 
     // Trigger again - should not fire
     pot.injectTestValue(600);
-    CHECK(callback_count == 1);  // Still 1, no increment
+    FL_CHECK(callback_count == 1);  // Still 1, no increment
 }
 
 TEST_CASE("Potentiometer - clamping behavior") {
@@ -267,14 +267,14 @@ TEST_CASE("Potentiometer - clamping behavior") {
 
     // Test values outside range are clamped
     pot.injectTestValue(0);
-    CHECK(pot.raw() == 0);  // Raw value unchanged
-    CHECK(pot.normalized() == 0.0f);  // But normalized is clamped
-    CHECK(pot.fractional16() == 0);
+    FL_CHECK(pot.raw() == 0);  // Raw value unchanged
+    FL_CHECK(pot.normalized() == 0.0f);  // But normalized is clamped
+    FL_CHECK(pot.fractional16() == 0);
 
     pot.injectTestValue(1023);
-    CHECK(pot.raw() == 1023);
-    CHECK(pot.normalized() == 1.0f);  // Clamped to 1.0
-    CHECK(pot.fractional16() == 65535);
+    FL_CHECK(pot.raw() == 1023);
+    FL_CHECK(pot.normalized() == 1.0f);  // Clamped to 1.0
+    FL_CHECK(pot.fractional16() == 65535);
 }
 
 TEST_CASE("Potentiometer - edge case: invalid range") {
@@ -283,13 +283,13 @@ TEST_CASE("Potentiometer - edge case: invalid range") {
     // Attempt to set invalid range (min >= max)
     pot.setRange(500, 500);  // Equal min/max
     // Should not change from default
-    CHECK(pot.getRangeMin() == 0);
-    CHECK(pot.getRangeMax() == 1023);
+    FL_CHECK(pot.getRangeMin() == 0);
+    FL_CHECK(pot.getRangeMax() == 1023);
 
     pot.setRange(600, 400);  // Min > max
     // Should not change
-    CHECK(pot.getRangeMin() == 0);
-    CHECK(pot.getRangeMax() == 1023);
+    FL_CHECK(pot.getRangeMin() == 0);
+    FL_CHECK(pot.getRangeMax() == 1023);
 }
 
 TEST_CASE("Potentiometer - multiple callbacks") {
@@ -311,10 +311,10 @@ TEST_CASE("Potentiometer - multiple callbacks") {
 
     // Both callbacks should fire
     pot.injectTestValue(500);
-    CHECK(callback1_count == 1);
-    CHECK(callback2_count == 1);
+    FL_CHECK(callback1_count == 1);
+    FL_CHECK(callback2_count == 1);
 
     pot.injectTestValue(600);
-    CHECK(callback1_count == 2);
-    CHECK(callback2_count == 2);
+    FL_CHECK(callback1_count == 2);
+    FL_CHECK(callback2_count == 2);
 }

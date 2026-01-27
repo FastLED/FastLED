@@ -11,44 +11,44 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 10);
         // Verify zero initialization
         for (int i = 0; i < 10; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         // Verify writability
         buffer[0] = 42;
-        CHECK_EQ(buffer[0], 42);
+        FL_CHECK_EQ(buffer[0], 42);
     }
 
     SUBCASE("uint16_t array") {
         FASTLED_STACK_ARRAY(uint16_t, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         // Verify writability
         buffer[2] = 1000;
-        CHECK_EQ(buffer[2], 1000);
+        FL_CHECK_EQ(buffer[2], 1000);
     }
 
     SUBCASE("uint32_t array") {
         FASTLED_STACK_ARRAY(uint32_t, buffer, 8);
         // Verify zero initialization
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(buffer[i], 0u);
+            FL_CHECK_EQ(buffer[i], 0u);
         }
         // Verify writability
         buffer[7] = 0xDEADBEEF;
-        CHECK_EQ(buffer[7], 0xDEADBEEFu);
+        FL_CHECK_EQ(buffer[7], 0xDEADBEEFu);
     }
 
     SUBCASE("int32_t array") {
         FASTLED_STACK_ARRAY(int32_t, buffer, 6);
         // Verify zero initialization
         for (int i = 0; i < 6; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         // Verify writability with negative numbers
         buffer[3] = -42;
-        CHECK_EQ(buffer[3], -42);
+        FL_CHECK_EQ(buffer[3], -42);
     }
 }
 
@@ -56,15 +56,15 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
 TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
     SUBCASE("size 1") {
         FASTLED_STACK_ARRAY(int, buffer, 1);
-        CHECK_EQ(buffer[0], 0);
+        FL_CHECK_EQ(buffer[0], 0);
         buffer[0] = 99;
-        CHECK_EQ(buffer[0], 99);
+        FL_CHECK_EQ(buffer[0], 99);
     }
 
     SUBCASE("size 16") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 16);
         for (int i = 0; i < 16; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         // Write pattern
         for (int i = 0; i < 16; i++) {
@@ -72,22 +72,22 @@ TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
         }
         // Verify pattern
         for (int i = 0; i < 16; i++) {
-            CHECK_EQ(buffer[i], static_cast<uint8_t>(i));
+            FL_CHECK_EQ(buffer[i], static_cast<uint8_t>(i));
         }
     }
 
     SUBCASE("size 64") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 64);
         for (int i = 0; i < 64; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         // Spot check
         buffer[0] = 10;
         buffer[31] = 20;
         buffer[63] = 30;
-        CHECK_EQ(buffer[0], 10);
-        CHECK_EQ(buffer[31], 20);
-        CHECK_EQ(buffer[63], 30);
+        FL_CHECK_EQ(buffer[0], 10);
+        FL_CHECK_EQ(buffer[31], 20);
+        FL_CHECK_EQ(buffer[63], 30);
     }
 
     SUBCASE("size 256") {
@@ -100,17 +100,17 @@ TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
                 break;
             }
         }
-        CHECK(all_zero);
+        FL_CHECK(all_zero);
 
         // Write to several locations
         buffer[0] = 1;
         buffer[100] = 2;
         buffer[200] = 3;
         buffer[255] = 4;
-        CHECK_EQ(buffer[0], 1);
-        CHECK_EQ(buffer[100], 2);
-        CHECK_EQ(buffer[200], 3);
-        CHECK_EQ(buffer[255], 4);
+        FL_CHECK_EQ(buffer[0], 1);
+        FL_CHECK_EQ(buffer[100], 2);
+        FL_CHECK_EQ(buffer[200], 3);
+        FL_CHECK_EQ(buffer[255], 4);
     }
 }
 
@@ -120,24 +120,24 @@ TEST_CASE("FASTLED_STACK_ARRAY floating point types") {
         FASTLED_STACK_ARRAY(float, buffer, 10);
         // Verify zero initialization
         for (int i = 0; i < 10; i++) {
-            CHECK_EQ(buffer[i], 0.0f);
+            FL_CHECK_EQ(buffer[i], 0.0f);
         }
         // Verify writability
         buffer[0] = 3.14f;
         buffer[5] = -2.71f;
-        CHECK_EQ(buffer[0], doctest::Approx(3.14f));
-        CHECK_EQ(buffer[5], doctest::Approx(-2.71f));
+        FL_CHECK_EQ(buffer[0], doctest::Approx(3.14f));
+        FL_CHECK_EQ(buffer[5], doctest::Approx(-2.71f));
     }
 
     SUBCASE("double array") {
         FASTLED_STACK_ARRAY(double, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
-            CHECK_EQ(buffer[i], 0.0);
+            FL_CHECK_EQ(buffer[i], 0.0);
         }
         // Verify writability
         buffer[2] = 1.41421356;
-        CHECK_EQ(buffer[2], doctest::Approx(1.41421356));
+        FL_CHECK_EQ(buffer[2], doctest::Approx(1.41421356));
     }
 }
 
@@ -152,18 +152,18 @@ TEST_CASE("FASTLED_STACK_ARRAY struct types") {
         FASTLED_STACK_ARRAY(Point, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
-            CHECK_EQ(buffer[i].x, 0);
-            CHECK_EQ(buffer[i].y, 0);
+            FL_CHECK_EQ(buffer[i].x, 0);
+            FL_CHECK_EQ(buffer[i].y, 0);
         }
         // Verify writability
         buffer[0].x = 10;
         buffer[0].y = 20;
         buffer[3].x = -5;
         buffer[3].y = 15;
-        CHECK_EQ(buffer[0].x, 10);
-        CHECK_EQ(buffer[0].y, 20);
-        CHECK_EQ(buffer[3].x, -5);
-        CHECK_EQ(buffer[3].y, 15);
+        FL_CHECK_EQ(buffer[0].x, 10);
+        FL_CHECK_EQ(buffer[0].y, 20);
+        FL_CHECK_EQ(buffer[3].x, -5);
+        FL_CHECK_EQ(buffer[3].y, 15);
     }
 
     struct RGB {
@@ -176,20 +176,20 @@ TEST_CASE("FASTLED_STACK_ARRAY struct types") {
         FASTLED_STACK_ARRAY(RGB, colors, 8);
         // Verify zero initialization
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(colors[i].r, 0);
-            CHECK_EQ(colors[i].g, 0);
-            CHECK_EQ(colors[i].b, 0);
+            FL_CHECK_EQ(colors[i].r, 0);
+            FL_CHECK_EQ(colors[i].g, 0);
+            FL_CHECK_EQ(colors[i].b, 0);
         }
         // Set some colors
         colors[0].r = 255;
         colors[1].g = 128;
         colors[2].b = 64;
-        CHECK_EQ(colors[0].r, 255);
-        CHECK_EQ(colors[0].g, 0);
-        CHECK_EQ(colors[0].b, 0);
-        CHECK_EQ(colors[1].r, 0);
-        CHECK_EQ(colors[1].g, 128);
-        CHECK_EQ(colors[1].b, 0);
+        FL_CHECK_EQ(colors[0].r, 255);
+        FL_CHECK_EQ(colors[0].g, 0);
+        FL_CHECK_EQ(colors[0].b, 0);
+        FL_CHECK_EQ(colors[1].r, 0);
+        FL_CHECK_EQ(colors[1].g, 128);
+        FL_CHECK_EQ(colors[1].b, 0);
     }
 }
 
@@ -199,16 +199,16 @@ TEST_CASE("FASTLED_STACK_ARRAY pointer types") {
         FASTLED_STACK_ARRAY(int*, buffer, 5);
         // Verify zero initialization (null pointers)
         for (int i = 0; i < 5; i++) {
-            CHECK_EQ(buffer[i], nullptr);
+            FL_CHECK_EQ(buffer[i], nullptr);
         }
         // Create some integers and store pointers
         int a = 10, b = 20, c = 30;
         buffer[0] = &a;
         buffer[1] = &b;
         buffer[2] = &c;
-        CHECK_EQ(*buffer[0], 10);
-        CHECK_EQ(*buffer[1], 20);
-        CHECK_EQ(*buffer[2], 30);
+        FL_CHECK_EQ(*buffer[0], 10);
+        FL_CHECK_EQ(*buffer[1], 20);
+        FL_CHECK_EQ(*buffer[2], 30);
     }
 }
 
@@ -223,7 +223,7 @@ TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
                 break;
             }
         }
-        CHECK(all_zero);
+        FL_CHECK(all_zero);
     }
 
     SUBCASE("verify multi-byte types are zero") {
@@ -235,7 +235,7 @@ TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
                 break;
             }
         }
-        CHECK(all_zero);
+        FL_CHECK(all_zero);
     }
 }
 
@@ -246,7 +246,7 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
         if (condition) {
             FASTLED_STACK_ARRAY(int, buffer, 5);
             buffer[0] = 42;
-            CHECK_EQ(buffer[0], 42);
+            FL_CHECK_EQ(buffer[0], 42);
         }
     }
 
@@ -254,10 +254,10 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
         for (int iter = 0; iter < 3; iter++) {
             FASTLED_STACK_ARRAY(int, buffer, 4);
             // Should be zero initialized each iteration
-            CHECK_EQ(buffer[0], 0);
-            CHECK_EQ(buffer[1], 0);
+            FL_CHECK_EQ(buffer[0], 0);
+            FL_CHECK_EQ(buffer[1], 0);
             buffer[0] = iter;
-            CHECK_EQ(buffer[0], iter);
+            FL_CHECK_EQ(buffer[0], iter);
         }
     }
 
@@ -267,18 +267,18 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
         FASTLED_STACK_ARRAY(uint32_t, buffer3, 3);
 
         // All should be zero initialized
-        CHECK_EQ(buffer1[0], 0);
-        CHECK_EQ(buffer2[0], 0);
-        CHECK_EQ(buffer3[0], 0u);
+        FL_CHECK_EQ(buffer1[0], 0);
+        FL_CHECK_EQ(buffer2[0], 0);
+        FL_CHECK_EQ(buffer3[0], 0u);
 
         // Write to each
         buffer1[0] = 1;
         buffer2[0] = 2;
         buffer3[0] = 3;
 
-        CHECK_EQ(buffer1[0], 1);
-        CHECK_EQ(buffer2[0], 2);
-        CHECK_EQ(buffer3[0], 3u);
+        FL_CHECK_EQ(buffer1[0], 1);
+        FL_CHECK_EQ(buffer2[0], 2);
+        FL_CHECK_EQ(buffer3[0], 3u);
     }
 }
 
@@ -288,17 +288,17 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
         int size = 10;
         FASTLED_STACK_ARRAY(int, buffer, size);
         for (int i = 0; i < size; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         buffer[size - 1] = 99;
-        CHECK_EQ(buffer[size - 1], 99);
+        FL_CHECK_EQ(buffer[size - 1], 99);
     }
 
     SUBCASE("size from expression") {
         int base = 5;
         FASTLED_STACK_ARRAY(uint8_t, buffer, base * 2);
         for (int i = 0; i < base * 2; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
     }
 
@@ -307,7 +307,7 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
         int size = get_size();
         FASTLED_STACK_ARRAY(int, buffer, size);
         for (int i = 0; i < size; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
     }
 }
@@ -316,17 +316,17 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
 TEST_CASE("FASTLED_STACK_ARRAY macro definition") {
     SUBCASE("FASTLED_STACK_ARRAY is defined") {
         #ifdef FASTLED_STACK_ARRAY
-        CHECK(true);
+        FL_CHECK(true);
         #else
-        CHECK(false); // Should never reach here
+        FL_CHECK(false); // Should never reach here
         #endif
     }
 
     SUBCASE("FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION is defined") {
         #ifdef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
-        CHECK(true);
+        FL_CHECK(true);
         #else
-        CHECK(false); // Should never reach here
+        FL_CHECK(false); // Should never reach here
         #endif
     }
 }
@@ -351,7 +351,7 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 10);
         fill_array(buffer, 10, 42);
         for (int i = 0; i < 10; i++) {
-            CHECK_EQ(buffer[i], 42);
+            FL_CHECK_EQ(buffer[i], 42);
         }
     }
 
@@ -361,7 +361,7 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
             buffer[i] = i + 1; // 1, 2, 3, 4, 5
         }
         int sum = sum_array(buffer, 5);
-        CHECK_EQ(sum, 15); // 1+2+3+4+5 = 15
+        FL_CHECK_EQ(sum, 15); // 1+2+3+4+5 = 15
     }
 }
 
@@ -369,9 +369,9 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
 TEST_CASE("FASTLED_STACK_ARRAY edge cases") {
     SUBCASE("size 1 edge case") {
         FASTLED_STACK_ARRAY(uint64_t, buffer, 1);
-        CHECK_EQ(buffer[0], 0ull);
+        FL_CHECK_EQ(buffer[0], 0ull);
         buffer[0] = 0xFFFFFFFFFFFFFFFFull;
-        CHECK_EQ(buffer[0], 0xFFFFFFFFFFFFFFFFull);
+        FL_CHECK_EQ(buffer[0], 0xFFFFFFFFFFFFFFFFull);
     }
 
     SUBCASE("large struct") {
@@ -381,17 +381,17 @@ TEST_CASE("FASTLED_STACK_ARRAY edge cases") {
         };
         FASTLED_STACK_ARRAY(LargeStruct, buffer, 2);
         // Verify zero initialization
-        CHECK_EQ(buffer[0].id, 0);
-        CHECK_EQ(buffer[1].id, 0);
+        FL_CHECK_EQ(buffer[0].id, 0);
+        FL_CHECK_EQ(buffer[1].id, 0);
         for (int i = 0; i < 64; i++) {
-            CHECK_EQ(buffer[0].data[i], 0);
-            CHECK_EQ(buffer[1].data[i], 0);
+            FL_CHECK_EQ(buffer[0].data[i], 0);
+            FL_CHECK_EQ(buffer[1].data[i], 0);
         }
         // Verify writability
         buffer[0].id = 100;
         buffer[0].data[0] = 255;
-        CHECK_EQ(buffer[0].id, 100);
-        CHECK_EQ(buffer[0].data[0], 255);
+        FL_CHECK_EQ(buffer[0].id, 100);
+        FL_CHECK_EQ(buffer[0].data[0], 255);
     }
 }
 
@@ -400,34 +400,34 @@ TEST_CASE("FASTLED_STACK_ARRAY signed types") {
     SUBCASE("int8_t array") {
         FASTLED_STACK_ARRAY(int8_t, buffer, 10);
         for (int i = 0; i < 10; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         buffer[0] = -128;
         buffer[1] = 127;
-        CHECK_EQ(buffer[0], -128);
-        CHECK_EQ(buffer[1], 127);
+        FL_CHECK_EQ(buffer[0], -128);
+        FL_CHECK_EQ(buffer[1], 127);
     }
 
     SUBCASE("int16_t array") {
         FASTLED_STACK_ARRAY(int16_t, buffer, 8);
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(buffer[i], 0);
+            FL_CHECK_EQ(buffer[i], 0);
         }
         buffer[0] = -32768;
         buffer[1] = 32767;
-        CHECK_EQ(buffer[0], -32768);
-        CHECK_EQ(buffer[1], 32767);
+        FL_CHECK_EQ(buffer[0], -32768);
+        FL_CHECK_EQ(buffer[1], 32767);
     }
 
     SUBCASE("int64_t array") {
         FASTLED_STACK_ARRAY(int64_t, buffer, 4);
         for (int i = 0; i < 4; i++) {
-            CHECK_EQ(buffer[i], 0ll);
+            FL_CHECK_EQ(buffer[i], 0ll);
         }
         buffer[0] = -9223372036854775807ll - 1; // INT64_MIN
         buffer[1] = 9223372036854775807ll;      // INT64_MAX
-        CHECK_EQ(buffer[0], -9223372036854775807ll - 1);
-        CHECK_EQ(buffer[1], 9223372036854775807ll);
+        FL_CHECK_EQ(buffer[0], -9223372036854775807ll - 1);
+        FL_CHECK_EQ(buffer[1], 9223372036854775807ll);
     }
 }
 
@@ -437,14 +437,14 @@ TEST_CASE("FASTLED_STACK_ARRAY pointer operations") {
         FASTLED_STACK_ARRAY(int, buffer, 5);
         int* ptr = buffer;
         for (int i = 0; i < 5; i++) {
-            CHECK_EQ(ptr[i], 0);
+            FL_CHECK_EQ(ptr[i], 0);
             ptr[i] = i * 10;
         }
-        CHECK_EQ(buffer[0], 0);
-        CHECK_EQ(buffer[1], 10);
-        CHECK_EQ(buffer[2], 20);
-        CHECK_EQ(buffer[3], 30);
-        CHECK_EQ(buffer[4], 40);
+        FL_CHECK_EQ(buffer[0], 0);
+        FL_CHECK_EQ(buffer[1], 10);
+        FL_CHECK_EQ(buffer[2], 20);
+        FL_CHECK_EQ(buffer[3], 30);
+        FL_CHECK_EQ(buffer[4], 40);
     }
 
     SUBCASE("pointer increment") {
@@ -455,7 +455,7 @@ TEST_CASE("FASTLED_STACK_ARRAY pointer operations") {
             ptr++;
         }
         for (int i = 0; i < 10; i++) {
-            CHECK_EQ(buffer[i], static_cast<uint8_t>(i));
+            FL_CHECK_EQ(buffer[i], static_cast<uint8_t>(i));
         }
     }
 }

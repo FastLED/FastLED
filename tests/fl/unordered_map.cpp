@@ -23,43 +23,43 @@ using namespace fl;
 
 TEST_CASE("Empty map properties") {
     fl::unordered_map<int, int> m;
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(!m.find_value(42));
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(!m.find_value(42));
     // begin()==end() on empty
-    REQUIRE(m.begin() == m.end());
+    FL_REQUIRE(m.begin() == m.end());
 }
 
 TEST_CASE("Single insert, lookup & operator[]") {
     fl::unordered_map<int, int> m;
     m.insert(10, 20);
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m.size(), 1u);
     auto *v = m.find_value(10);
-    REQUIRE(v);
-    REQUIRE_EQ(*v, 20);
+    FL_REQUIRE(v);
+    FL_REQUIRE_EQ(*v, 20);
 
     // operator[] default-construct & assignment
     fl::unordered_map<int, fl::Str> ms;
     auto &ref = ms[5];
-    REQUIRE(ref.empty()); // default-constructed
-    REQUIRE_EQ(ms.size(), 1u);
+    FL_REQUIRE(ref.empty()); // default-constructed
+    FL_REQUIRE_EQ(ms.size(), 1u);
     ref = "hello";
-    REQUIRE_EQ(*ms.find_value(5), "hello");
+    FL_REQUIRE_EQ(*ms.find_value(5), "hello");
 
     // operator[] overwrite existing
     ms[5] = "world";
-    REQUIRE_EQ(ms.size(), 1u);
-    REQUIRE_EQ(*ms.find_value(5), "world");
+    FL_REQUIRE_EQ(ms.size(), 1u);
+    FL_REQUIRE_EQ(*ms.find_value(5), "world");
 }
 
 TEST_CASE("Insert duplicate key overwrites without growing") {
     fl::unordered_map<int, fl::Str> m;
     m.insert(1, "foo");
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find_value(1), "foo");
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(*m.find_value(1), "foo");
 
     m.insert(1, "bar");
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find_value(1), "bar");
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(*m.find_value(1), "bar");
 }
 
 TEST_CASE("Multiple distinct inserts & lookups") {
@@ -69,45 +69,45 @@ TEST_CASE("Multiple distinct inserts & lookups") {
         MESSAGE("insert " << count++);
         m.insert(c, c - 'a');
     }
-    REQUIRE_EQ(m.size(), 10u);
+    FL_REQUIRE_EQ(m.size(), 10u);
     for (char c = 'a'; c < 'a' + 10; ++c) {
         auto *v = m.find_value(c);
-        REQUIRE(v);
-        REQUIRE_EQ(*v, static_cast<int>(c - 'a'));
+        FL_REQUIRE(v);
+        FL_REQUIRE_EQ(*v, static_cast<int>(c - 'a'));
     }
-    REQUIRE(!m.find_value('z'));
+    FL_REQUIRE(!m.find_value('z'));
 }
 
 TEST_CASE("Erase and remove behavior") {
     fl::unordered_map<int, int> m;
     m.insert(5, 55);
     m.insert(6, 66);
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m.size(), 2u);
 
     // erase existing
-    REQUIRE(m.erase(5));
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE(!m.find_value(5));
+    FL_REQUIRE(m.erase(5));
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(!m.find_value(5));
 
     // erase non-existent
-    REQUIRE(!m.erase(5));
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(!m.erase(5));
+    FL_REQUIRE_EQ(m.size(), 1u);
 
-    REQUIRE(m.erase(6));
-    REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.erase(6));
+    FL_REQUIRE_EQ(m.size(), 0u);
 }
 
 TEST_CASE("Re-insert after erase reuses slot") {
     fl::unordered_map<int, int> m(4);
     m.insert(1, 10);
-    REQUIRE(m.erase(1));
-    REQUIRE(!m.find_value(1));
-    REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.erase(1));
+    FL_REQUIRE(!m.find_value(1));
+    FL_REQUIRE_EQ(m.size(), 0u);
 
     m.insert(1, 20);
-    REQUIRE(m.find_value(1));
-    REQUIRE_EQ(*m.find_value(1), 20);
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(m.find_value(1));
+    FL_REQUIRE_EQ(*m.find_value(1), 20);
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("Clear resets map and allows fresh inserts") {
@@ -115,17 +115,17 @@ TEST_CASE("Clear resets map and allows fresh inserts") {
     for (int i = 0; i < 3; ++i)
         m.insert(i, i);
     m.remove(1);
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m.size(), 2u);
 
     m.clear();
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(!m.find_value(0));
-    REQUIRE(!m.find_value(1));
-    REQUIRE(!m.find_value(2));
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(!m.find_value(0));
+    FL_REQUIRE(!m.find_value(1));
+    FL_REQUIRE(!m.find_value(2));
 
     m.insert(5, 50);
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find_value(5), 50);
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(*m.find_value(5), 50);
 }
 
 TEST_CASE("Stress collisions & rehash with small initial capacity") {
@@ -134,13 +134,13 @@ TEST_CASE("Stress collisions & rehash with small initial capacity") {
     for (int i = 0; i < N; ++i) {
         m.insert(i, i * 3);
         // test that size is increasing
-        REQUIRE_EQ(m.size(), static_cast<fl::size>(i + 1));
+        FL_REQUIRE_EQ(m.size(), static_cast<fl::size_t>(i + 1));
     }
-    REQUIRE_EQ(m.size(), static_cast<fl::size>(N));
+    FL_REQUIRE_EQ(m.size(), static_cast<fl::size_t>(N));
     for (int i = 0; i < N; ++i) {
         auto *v = m.find_value(i);
-        REQUIRE(v);
-        REQUIRE_EQ(*v, i * 3);
+        FL_REQUIRE(v);
+        FL_REQUIRE_EQ(*v, i * 3);
     }
 }
 
@@ -151,37 +151,37 @@ TEST_CASE("Iterator round-trip and const-iteration") {
     }
 
     // non-const iteration
-    fl::size count = 0;
+    fl::size_t count = 0;
     for (auto kv : m) {
-        REQUIRE_EQ(kv.second, kv.first + 100);
+        FL_REQUIRE_EQ(kv.second, kv.first + 100);
         ++count;
     }
-    REQUIRE_EQ(count, m.size());
+    FL_REQUIRE_EQ(count, m.size());
 
     // const iteration
     const auto &cm = m;
     count = 0;
     for (auto it = cm.begin(); it != cm.end(); ++it) {
         auto kv = *it;
-        REQUIRE_EQ(kv.second, kv.first + 100);
+        FL_REQUIRE_EQ(kv.second, kv.first + 100);
         ++count;
     }
-    REQUIRE_EQ(count, cm.size());
+    FL_REQUIRE_EQ(count, cm.size());
 }
 
 TEST_CASE("Remove non-existent returns false, find on const map") {
     fl::unordered_map<int, int> m;
-    REQUIRE(!m.remove(999));
+    FL_REQUIRE(!m.remove(999));
 
     const fl::unordered_map<int, int> cm;
-    REQUIRE(!cm.find_value(0));
+    FL_REQUIRE(!cm.find_value(0));
 }
 
 TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
           "rehash") {
     const static int MAX_CAPACITY = 2;
     fl::unordered_map<int, int> m(8 /*capacity*/);
-    REQUIRE_EQ(8, m.capacity());
+    FL_REQUIRE_EQ(8, m.capacity());
     for (int i = 0; i < 8; ++i) {
         m.insert(i, i);
         if (m.size() > MAX_CAPACITY) {
@@ -190,25 +190,22 @@ TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
     }
     size_t new_capacity = m.capacity();
     // should still be 8
-    REQUIRE_EQ(new_capacity, 8u);
+    FL_REQUIRE_EQ(new_capacity, 8u);
     fl::set<int> found_values;
 
     for (auto it = m.begin(); it != m.end(); ++it) {
         auto kv = *it;
         auto key = kv.first;
         auto value = kv.second;
-        REQUIRE_EQ(key, value);
+        FL_REQUIRE_EQ(key, value);
         found_values.insert(kv.second);
     }
 
-    fl::vector<int> found_values_vec;
-    for (auto it = found_values.begin(); it != found_values.end(); ++it) {
-        found_values_vec.push_back(*it);
-    }
-    REQUIRE_EQ(MAX_CAPACITY, found_values_vec.size());
+    fl::vector<int> found_values_vec(found_values.begin(), found_values.end());
+    FL_REQUIRE_EQ(MAX_CAPACITY, found_values_vec.size());
     for (int i = 0; i < MAX_CAPACITY; ++i) {
         auto value = found_values_vec[i];
-        REQUIRE_EQ(value, i);
+        FL_REQUIRE_EQ(value, i);
     }
 }
 
@@ -216,18 +213,18 @@ TEST_CASE("HashMap with standard iterator access") {
     fl::unordered_map<int, int> m;
     m.insert(1, 1);
 
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // standard iterator access
     auto it = m.begin();
     auto entry = *it;
-    REQUIRE_EQ(entry.first, 1);
-    REQUIRE_EQ(entry.second, 1);
+    FL_REQUIRE_EQ(entry.first, 1);
+    FL_REQUIRE_EQ(entry.second, 1);
     ++it;
-    REQUIRE(it == m.end());
+    FL_REQUIRE(it == m.end());
 
     auto bad_it = m.find(0);
-    REQUIRE(bad_it == m.end());
+    FL_REQUIRE(bad_it == m.end());
 }
 
 TEST_CASE("at() method - bounds-checked access") {
@@ -236,12 +233,12 @@ TEST_CASE("at() method - bounds-checked access") {
     m.insert(10, "world");
 
     // Valid access
-    REQUIRE_EQ(m.at(5), "hello");
-    REQUIRE_EQ(m.at(10), "world");
+    FL_REQUIRE_EQ(m.at(5), "hello");
+    FL_REQUIRE_EQ(m.at(10), "world");
 
     // const version
     const fl::unordered_map<int, fl::Str>& cm = m;
-    REQUIRE_EQ(cm.at(5), "hello");
+    FL_REQUIRE_EQ(cm.at(5), "hello");
 
     // Invalid access should trigger assertion (would fail in debug builds)
     // Note: In release builds without assertions, this may cause undefined behavior
@@ -253,13 +250,13 @@ TEST_CASE("count() method - returns 0 or 1") {
     m.insert(1, 10);
     m.insert(2, 20);
 
-    REQUIRE_EQ(m.count(1), 1u);
-    REQUIRE_EQ(m.count(2), 1u);
-    REQUIRE_EQ(m.count(99), 0u);
+    FL_REQUIRE_EQ(m.count(1), 1u);
+    FL_REQUIRE_EQ(m.count(2), 1u);
+    FL_REQUIRE_EQ(m.count(99), 0u);
 
     m.erase(1);
-    REQUIRE_EQ(m.count(1), 0u);
-    REQUIRE_EQ(m.count(2), 1u);
+    FL_REQUIRE_EQ(m.count(1), 0u);
+    FL_REQUIRE_EQ(m.count(2), 1u);
 }
 
 TEST_CASE("equal_range() method") {
@@ -270,30 +267,30 @@ TEST_CASE("equal_range() method") {
 
     // Found element
     auto range = m.equal_range(2);
-    REQUIRE(range.first != m.end());
-    REQUIRE_EQ((*range.first).first, 2);
-    REQUIRE_EQ((*range.first).second, 20);
+    FL_REQUIRE(range.first != m.end());
+    FL_REQUIRE_EQ((*range.first).first, 2);
+    FL_REQUIRE_EQ((*range.first).second, 20);
     // range.second should be one past range.first
-    REQUIRE(range.first != range.second);
+    FL_REQUIRE(range.first != range.second);
 
     // Not found element
     auto range_none = m.equal_range(99);
-    REQUIRE(range_none.first == m.end());
-    REQUIRE(range_none.second == m.end());
+    FL_REQUIRE(range_none.first == m.end());
+    FL_REQUIRE(range_none.second == m.end());
 
     // const version
     const fl::unordered_map<int, int>& cm = m;
     auto crange = cm.equal_range(1);
-    REQUIRE(crange.first != cm.end());
-    REQUIRE_EQ((*crange.first).first, 1);
+    FL_REQUIRE(crange.first != cm.end());
+    FL_REQUIRE_EQ((*crange.first).first, 1);
 }
 
 TEST_CASE("max_size() method") {
     fl::unordered_map<int, int> m;
     fl::size max = m.max_size();
     // max_size should be a large number
-    REQUIRE(max > 0u);
-    REQUIRE(max > 1000u); // should be able to hold at least 1000 elements
+    FL_REQUIRE(max > 0u);
+    FL_REQUIRE(max > 1000u); // should be able to hold at least 1000 elements
 }
 
 TEST_CASE("hash_function() and key_eq() observers") {
@@ -305,12 +302,12 @@ TEST_CASE("hash_function() and key_eq() observers") {
     int key1 = 42;
     int key2 = 42;
     int key3 = 43;
-    REQUIRE_EQ(hash_fn(key1), hash_fn(key2));
+    FL_REQUIRE_EQ(hash_fn(key1), hash_fn(key2));
     // Different keys likely have different hashes (not guaranteed, but probable)
 
     // Test that the equality function works
-    REQUIRE(eq_fn(key1, key2));
-    REQUIRE(!eq_fn(key1, key3));
+    FL_REQUIRE(eq_fn(key1, key2));
+    FL_REQUIRE(!eq_fn(key1, key3));
 }
 
 TEST_CASE("insert() returns pair<iterator, bool> - new elements") {
@@ -318,19 +315,19 @@ TEST_CASE("insert() returns pair<iterator, bool> - new elements") {
 
     // First insert of a new key should return {iterator, true}
     auto result1 = m.insert(5, "hello");
-    REQUIRE(result1.second == true);  // was inserted
-    REQUIRE(result1.first != m.end()); // valid iterator
-    REQUIRE_EQ((*result1.first).first, 5);
-    REQUIRE_EQ((*result1.first).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);  // was inserted
+    FL_REQUIRE(result1.first != m.end()); // valid iterator
+    FL_REQUIRE_EQ((*result1.first).first, 5);
+    FL_REQUIRE_EQ((*result1.first).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Second insert with different key
     auto result2 = m.insert(10, "world");
-    REQUIRE(result2.second == true);  // was inserted
-    REQUIRE(result2.first != m.end());
-    REQUIRE_EQ((*result2.first).first, 10);
-    REQUIRE_EQ((*result2.first).second, "world");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result2.second == true);  // was inserted
+    FL_REQUIRE(result2.first != m.end());
+    FL_REQUIRE_EQ((*result2.first).first, 10);
+    FL_REQUIRE_EQ((*result2.first).second, "world");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("insert() returns pair<iterator, bool> - duplicate keys") {
@@ -338,16 +335,16 @@ TEST_CASE("insert() returns pair<iterator, bool> - duplicate keys") {
 
     // First insert
     auto result1 = m.insert(5, "hello");
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert with same key should return {iterator, false} and update value
     auto result2 = m.insert(5, "goodbye");
-    REQUIRE(result2.second == false);  // not inserted (updated)
-    REQUIRE(result2.first != m.end());
-    REQUIRE_EQ((*result2.first).first, 5);
-    REQUIRE_EQ((*result2.first).second, "goodbye"); // value updated
-    REQUIRE_EQ(m.size(), 1u); // size unchanged
+    FL_REQUIRE(result2.second == false);  // not inserted (updated)
+    FL_REQUIRE(result2.first != m.end());
+    FL_REQUIRE_EQ((*result2.first).first, 5);
+    FL_REQUIRE_EQ((*result2.first).second, "goodbye"); // value updated
+    FL_REQUIRE_EQ(m.size(), 1u); // size unchanged
 }
 
 TEST_CASE("insert() move version returns pair<iterator, bool>") {
@@ -356,34 +353,34 @@ TEST_CASE("insert() move version returns pair<iterator, bool>") {
     // Move insert of new key
     fl::Str s1 = "movable";
     auto result1 = m.insert(7, fl::move(s1));
-    REQUIRE(result1.second == true);
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 7);
-    REQUIRE_EQ((*result1.first).second, "movable");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 7);
+    FL_REQUIRE_EQ((*result1.first).second, "movable");
 
     // Move insert of duplicate key
     fl::Str s2 = "replaced";
     auto result2 = m.insert(7, fl::move(s2));
-    REQUIRE(result2.second == false);  // not inserted (updated)
-    REQUIRE_EQ((*result2.first).second, "replaced");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);  // not inserted (updated)
+    FL_REQUIRE_EQ((*result2.first).second, "replaced");
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("insert() return iterator is usable") {
     fl::unordered_map<int, int> m;
 
     auto result = m.insert(42, 100);
-    REQUIRE(result.second == true);
+    FL_REQUIRE(result.second == true);
 
     // Use the returned iterator
     auto it = result.first;
-    REQUIRE(it != m.end());
-    REQUIRE_EQ((*it).first, 42);
-    REQUIRE_EQ((*it).second, 100);
+    FL_REQUIRE(it != m.end());
+    FL_REQUIRE_EQ((*it).first, 42);
+    FL_REQUIRE_EQ((*it).second, 100);
 
     // Iterator should be incrementable
     ++it;
-    REQUIRE(it == m.end()); // only one element
+    FL_REQUIRE(it == m.end()); // only one element
 }
 
 TEST_CASE("insert(pair) - const pair insert") {
@@ -392,26 +389,26 @@ TEST_CASE("insert(pair) - const pair insert") {
     // Insert using pair
     fl::pair<int, Str> p1(5, "hello");
     auto result1 = m.insert(p1);
-    REQUIRE(result1.second == true);  // was inserted
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 5);
-    REQUIRE_EQ((*result1.first).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);  // was inserted
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 5);
+    FL_REQUIRE_EQ((*result1.first).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with pair
     fl::pair<int, Str> p2(5, "world");
     auto result2 = m.insert(p2);
-    REQUIRE(result2.second == false);  // not inserted (updated)
-    REQUIRE_EQ((*result2.first).second, "world");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);  // not inserted (updated)
+    FL_REQUIRE_EQ((*result2.first).second, "world");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert new key with pair
     fl::pair<int, Str> p3(10, "foo");
     auto result3 = m.insert(p3);
-    REQUIRE(result3.second == true);  // was inserted
-    REQUIRE_EQ((*result3.first).first, 10);
-    REQUIRE_EQ((*result3.first).second, "foo");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result3.second == true);  // was inserted
+    FL_REQUIRE_EQ((*result3.first).first, 10);
+    FL_REQUIRE_EQ((*result3.first).second, "foo");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("insert(pair) - move pair insert") {
@@ -420,18 +417,18 @@ TEST_CASE("insert(pair) - move pair insert") {
     // Insert using moved pair
     fl::pair<int, Str> p1(7, "movable");
     auto result1 = m.insert(fl::move(p1));
-    REQUIRE(result1.second == true);
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 7);
-    REQUIRE_EQ((*result1.first).second, "movable");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 7);
+    FL_REQUIRE_EQ((*result1.first).second, "movable");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with moved pair
     fl::pair<int, Str> p2(7, "replaced");
     auto result2 = m.insert(fl::move(p2));
-    REQUIRE(result2.second == false);  // not inserted (updated)
-    REQUIRE_EQ((*result2.first).second, "replaced");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);  // not inserted (updated)
+    FL_REQUIRE_EQ((*result2.first).second, "replaced");
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("insert(pair) - inline pair creation") {
@@ -439,15 +436,15 @@ TEST_CASE("insert(pair) - inline pair creation") {
 
     // Use inline pair creation (like std::make_pair)
     auto result1 = m.insert(fl::pair<int, int>(42, 100));
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ((*result1.first).first, 42);
-    REQUIRE_EQ((*result1.first).second, 100);
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ((*result1.first).first, 42);
+    FL_REQUIRE_EQ((*result1.first).second, 100);
 
     // Update with inline pair
     auto result2 = m.insert(fl::pair<int, int>(42, 200));
-    REQUIRE(result2.second == false);
-    REQUIRE_EQ((*result2.first).second, 200);
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);
+    FL_REQUIRE_EQ((*result2.first).second, 200);
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
@@ -464,11 +461,11 @@ TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
     m.insert(pairs.begin(), pairs.end());
 
     // Verify all elements were inserted
-    REQUIRE_EQ(m.size(), 4u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
-    REQUIRE_EQ(m[3], "three");
-    REQUIRE_EQ(m[4], "four");
+    FL_REQUIRE_EQ(m.size(), 4u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[3], "three");
+    FL_REQUIRE_EQ(m[4], "four");
 
     // Insert range with duplicate keys (should update values)
     fl::vector<fl::pair<int, Str>> more_pairs;
@@ -478,9 +475,9 @@ TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
     m.insert(more_pairs.begin(), more_pairs.end());
 
     // Size should be 5 (4 original + 1 new)
-    REQUIRE_EQ(m.size(), 5u);
-    REQUIRE_EQ(m[2], "TWO");  // value updated
-    REQUIRE_EQ(m[5], "five"); // new value
+    FL_REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m[2], "TWO");  // value updated
+    FL_REQUIRE_EQ(m[5], "five"); // new value
 }
 
 TEST_CASE("insert(InputIt first, InputIt last) - empty range") {
@@ -491,8 +488,8 @@ TEST_CASE("insert(InputIt first, InputIt last) - empty range") {
     fl::vector<fl::pair<int, int>> empty;
     m.insert(empty.begin(), empty.end());
 
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(m[1], 100);
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m[1], 100);
 }
 
 TEST_CASE("insert(initializer_list) - basic usage") {
@@ -502,10 +499,10 @@ TEST_CASE("insert(initializer_list) - basic usage") {
     m.insert({{1, "one"}, {2, "two"}, {3, "three"}});
 
     // Verify all elements were inserted
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
-    REQUIRE_EQ(m[3], "three");
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[3], "three");
 }
 
 TEST_CASE("insert(initializer_list) - with duplicates") {
@@ -517,11 +514,11 @@ TEST_CASE("insert(initializer_list) - with duplicates") {
     m.insert({{2, 222}, {3, 333}, {4, 444}});
 
     // Size should be 4 (original 1,2 + new 3,4)
-    REQUIRE_EQ(m.size(), 4u);
-    REQUIRE_EQ(m[1], 100);   // unchanged
-    REQUIRE_EQ(m[2], 222);   // updated
-    REQUIRE_EQ(m[3], 333);   // new
-    REQUIRE_EQ(m[4], 444);   // new
+    FL_REQUIRE_EQ(m.size(), 4u);
+    FL_REQUIRE_EQ(m[1], 100);   // unchanged
+    FL_REQUIRE_EQ(m[2], 222);   // updated
+    FL_REQUIRE_EQ(m[3], 333);   // new
+    FL_REQUIRE_EQ(m[4], 444);   // new
 }
 
 TEST_CASE("insert(initializer_list) - empty list") {
@@ -531,8 +528,8 @@ TEST_CASE("insert(initializer_list) - empty list") {
     // Insert empty initializer list
     m.insert({});
 
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(m[1], 100);
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m[1], 100);
 }
 
 TEST_CASE("insert(initializer_list) - complex types") {
@@ -541,10 +538,10 @@ TEST_CASE("insert(initializer_list) - complex types") {
     // Insert complex string types
     m.insert({{10, "hello"}, {20, "world"}, {30, "fastled"}});
 
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[10], "hello");
-    REQUIRE_EQ(m[20], "world");
-    REQUIRE_EQ(m[30], "fastled");
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[10], "hello");
+    FL_REQUIRE_EQ(m[20], "world");
+    FL_REQUIRE_EQ(m[30], "fastled");
 }
 
 TEST_CASE("insert_or_assign() - insert new elements") {
@@ -553,19 +550,19 @@ TEST_CASE("insert_or_assign() - insert new elements") {
     // Insert new element
     fl::Str val1 = "hello";
     auto result1 = m.insert_or_assign(5, fl::move(val1));
-    REQUIRE(result1.second == true);  // was inserted
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 5);
-    REQUIRE_EQ((*result1.first).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);  // was inserted
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 5);
+    FL_REQUIRE_EQ((*result1.first).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert another new element
     fl::Str val2 = "world";
     auto result2 = m.insert_or_assign(10, fl::move(val2));
-    REQUIRE(result2.second == true);
-    REQUIRE_EQ((*result2.first).first, 10);
-    REQUIRE_EQ((*result2.first).second, "world");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result2.second == true);
+    FL_REQUIRE_EQ((*result2.first).first, 10);
+    FL_REQUIRE_EQ((*result2.first).second, "world");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("insert_or_assign() - update existing elements") {
@@ -574,17 +571,17 @@ TEST_CASE("insert_or_assign() - update existing elements") {
     // Insert initial value
     fl::Str val1 = "hello";
     auto result1 = m.insert_or_assign(5, fl::move(val1));
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ(m[5], "hello");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ(m[5], "hello");
 
     // Update with insert_or_assign
     fl::Str val2 = "goodbye";
     auto result2 = m.insert_or_assign(5, fl::move(val2));
-    REQUIRE(result2.second == false);  // not inserted (updated)
-    REQUIRE(result2.first != m.end());
-    REQUIRE_EQ((*result2.first).first, 5);
-    REQUIRE_EQ((*result2.first).second, "goodbye");
-    REQUIRE_EQ(m.size(), 1u);  // size unchanged
+    FL_REQUIRE(result2.second == false);  // not inserted (updated)
+    FL_REQUIRE(result2.first != m.end());
+    FL_REQUIRE_EQ((*result2.first).first, 5);
+    FL_REQUIRE_EQ((*result2.first).second, "goodbye");
+    FL_REQUIRE_EQ(m.size(), 1u);  // size unchanged
 }
 
 TEST_CASE("insert_or_assign() - move key version") {
@@ -594,17 +591,17 @@ TEST_CASE("insert_or_assign() - move key version") {
     int key1 = 42;
     fl::Str val1 = "answer";
     auto result1 = m.insert_or_assign(fl::move(key1), fl::move(val1));
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ((*result1.first).first, 42);
-    REQUIRE_EQ((*result1.first).second, "answer");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ((*result1.first).first, 42);
+    FL_REQUIRE_EQ((*result1.first).second, "answer");
 
     // Update with moved key and value
     int key2 = 42;
     fl::Str val2 = "new answer";
     auto result2 = m.insert_or_assign(fl::move(key2), fl::move(val2));
-    REQUIRE(result2.second == false);
-    REQUIRE_EQ((*result2.first).second, "new answer");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);
+    FL_REQUIRE_EQ((*result2.first).second, "new answer");
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("emplace() - basic usage") {
@@ -612,18 +609,18 @@ TEST_CASE("emplace() - basic usage") {
 
     // Emplace with key and value arguments
     auto result1 = m.emplace(5, "hello");
-    REQUIRE(result1.second == true);  // was inserted
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 5);
-    REQUIRE_EQ((*result1.first).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);  // was inserted
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 5);
+    FL_REQUIRE_EQ((*result1.first).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Emplace another element
     auto result2 = m.emplace(10, "world");
-    REQUIRE(result2.second == true);
-    REQUIRE_EQ((*result2.first).first, 10);
-    REQUIRE_EQ((*result2.first).second, "world");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result2.second == true);
+    FL_REQUIRE_EQ((*result2.first).first, 10);
+    FL_REQUIRE_EQ((*result2.first).second, "world");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("emplace() - duplicate key") {
@@ -631,16 +628,16 @@ TEST_CASE("emplace() - duplicate key") {
 
     // First emplace
     auto result1 = m.emplace(5, "hello");
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ(m[5], "hello");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ(m[5], "hello");
 
     // Emplace with duplicate key (should not insert, returns existing)
     auto result2 = m.emplace(5, "goodbye");
-    REQUIRE(result2.second == false);  // not inserted
-    REQUIRE_EQ((*result2.first).first, 5);
+    FL_REQUIRE(result2.second == false);  // not inserted
+    FL_REQUIRE_EQ((*result2.first).first, 5);
     // Note: Our emplace implementation uses insert, which updates the value
-    REQUIRE_EQ((*result2.first).second, "goodbye");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ((*result2.first).second, "goodbye");
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("emplace() - with POD types") {
@@ -648,15 +645,15 @@ TEST_CASE("emplace() - with POD types") {
 
     // Emplace simple POD types
     auto result1 = m.emplace(1, 100);
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ((*result1.first).first, 1);
-    REQUIRE_EQ((*result1.first).second, 100);
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ((*result1.first).first, 1);
+    FL_REQUIRE_EQ((*result1.first).second, 100);
 
     auto result2 = m.emplace(2, 200);
-    REQUIRE(result2.second == true);
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], 100);
-    REQUIRE_EQ(m[2], 200);
+    FL_REQUIRE(result2.second == true);
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], 100);
+    FL_REQUIRE_EQ(m[2], 200);
 }
 
 TEST_CASE("emplace_hint() - basic usage") {
@@ -664,17 +661,17 @@ TEST_CASE("emplace_hint() - basic usage") {
 
     // emplace_hint with hint (hint is ignored in hash maps)
     auto it1 = m.emplace_hint(m.end(), 5, "hello");
-    REQUIRE(it1 != m.end());
-    REQUIRE_EQ((*it1).first, 5);
-    REQUIRE_EQ((*it1).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(it1 != m.end());
+    FL_REQUIRE_EQ((*it1).first, 5);
+    FL_REQUIRE_EQ((*it1).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // emplace_hint another element
     auto it2 = m.emplace_hint(m.begin(), 10, "world");
-    REQUIRE(it2 != m.end());
-    REQUIRE_EQ((*it2).first, 10);
-    REQUIRE_EQ((*it2).second, "world");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(it2 != m.end());
+    FL_REQUIRE_EQ((*it2).first, 10);
+    FL_REQUIRE_EQ((*it2).second, "world");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("emplace_hint() - hint is ignored") {
@@ -685,10 +682,10 @@ TEST_CASE("emplace_hint() - hint is ignored") {
     // emplace_hint with arbitrary hint - should work same as emplace
     auto hint = m.find(1);
     auto it = m.emplace_hint(hint, 3, 300);
-    REQUIRE(it != m.end());
-    REQUIRE_EQ((*it).first, 3);
-    REQUIRE_EQ((*it).second, 300);
-    REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE(it != m.end());
+    FL_REQUIRE_EQ((*it).first, 3);
+    FL_REQUIRE_EQ((*it).second, 300);
+    FL_REQUIRE_EQ(m.size(), 3u);
 }
 
 TEST_CASE("try_emplace() - insert new elements") {
@@ -696,18 +693,18 @@ TEST_CASE("try_emplace() - insert new elements") {
 
     // try_emplace with new key
     auto result1 = m.try_emplace(5, "hello");
-    REQUIRE(result1.second == true);  // was inserted
-    REQUIRE(result1.first != m.end());
-    REQUIRE_EQ((*result1.first).first, 5);
-    REQUIRE_EQ((*result1.first).second, "hello");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result1.second == true);  // was inserted
+    FL_REQUIRE(result1.first != m.end());
+    FL_REQUIRE_EQ((*result1.first).first, 5);
+    FL_REQUIRE_EQ((*result1.first).second, "hello");
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // try_emplace another new element
     auto result2 = m.try_emplace(10, "world");
-    REQUIRE(result2.second == true);
-    REQUIRE_EQ((*result2.first).first, 10);
-    REQUIRE_EQ((*result2.first).second, "world");
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result2.second == true);
+    FL_REQUIRE_EQ((*result2.first).first, 10);
+    FL_REQUIRE_EQ((*result2.first).second, "world");
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("try_emplace() - does not modify existing key") {
@@ -715,16 +712,16 @@ TEST_CASE("try_emplace() - does not modify existing key") {
 
     // First try_emplace
     auto result1 = m.try_emplace(5, "hello");
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ(m[5], "hello");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ(m[5], "hello");
 
     // try_emplace with duplicate key - should NOT modify the value
     auto result2 = m.try_emplace(5, "goodbye");
-    REQUIRE(result2.second == false);  // not inserted
-    REQUIRE(result2.first != m.end());
-    REQUIRE_EQ((*result2.first).first, 5);
-    REQUIRE_EQ((*result2.first).second, "hello");  // value unchanged!
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);  // not inserted
+    FL_REQUIRE(result2.first != m.end());
+    FL_REQUIRE_EQ((*result2.first).first, 5);
+    FL_REQUIRE_EQ((*result2.first).second, "hello");  // value unchanged!
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("try_emplace() - move key version") {
@@ -733,16 +730,16 @@ TEST_CASE("try_emplace() - move key version") {
     // try_emplace with moved key for new element
     int key1 = 42;
     auto result1 = m.try_emplace(fl::move(key1), "answer");
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ((*result1.first).first, 42);
-    REQUIRE_EQ((*result1.first).second, "answer");
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ((*result1.first).first, 42);
+    FL_REQUIRE_EQ((*result1.first).second, "answer");
 
     // try_emplace with moved key for duplicate - key should NOT be moved
     int key2 = 42;
     auto result2 = m.try_emplace(fl::move(key2), "new answer");
-    REQUIRE(result2.second == false);  // not inserted
-    REQUIRE_EQ((*result2.first).second, "answer");  // value unchanged
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);  // not inserted
+    FL_REQUIRE_EQ((*result2.first).second, "answer");  // value unchanged
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("try_emplace() - with POD types") {
@@ -750,15 +747,15 @@ TEST_CASE("try_emplace() - with POD types") {
 
     // try_emplace simple POD types
     auto result1 = m.try_emplace(1, 100);
-    REQUIRE(result1.second == true);
-    REQUIRE_EQ((*result1.first).first, 1);
-    REQUIRE_EQ((*result1.first).second, 100);
+    FL_REQUIRE(result1.second == true);
+    FL_REQUIRE_EQ((*result1.first).first, 1);
+    FL_REQUIRE_EQ((*result1.first).second, 100);
 
     // Duplicate key
     auto result2 = m.try_emplace(1, 999);
-    REQUIRE(result2.second == false);
-    REQUIRE_EQ((*result2.first).second, 100);  // value unchanged
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE(result2.second == false);
+    FL_REQUIRE_EQ((*result2.first).second, 100);  // value unchanged
+    FL_REQUIRE_EQ(m.size(), 1u);
 }
 
 TEST_CASE("try_emplace() - constructs value in place") {
@@ -766,13 +763,13 @@ TEST_CASE("try_emplace() - constructs value in place") {
 
     // try_emplace constructs value from args
     auto result = m.try_emplace(1, "constructed");
-    REQUIRE(result.second == true);
-    REQUIRE_EQ(m[1], "constructed");
+    FL_REQUIRE(result.second == true);
+    FL_REQUIRE_EQ(m[1], "constructed");
 
     // Verify no construction happens on duplicate
     auto result2 = m.try_emplace(1, "not constructed");
-    REQUIRE(result2.second == false);
-    REQUIRE_EQ(m[1], "constructed");  // still the original
+    FL_REQUIRE(result2.second == false);
+    FL_REQUIRE_EQ(m[1], "constructed");  // still the original
 }
 
 TEST_CASE("try_emplace() vs emplace() - behavior difference") {
@@ -781,18 +778,18 @@ TEST_CASE("try_emplace() vs emplace() - behavior difference") {
     // Both insert new keys similarly
     m.try_emplace(1, "one");
     m.emplace(2, "two");
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
 
     // Difference: try_emplace does NOT update existing key
     auto result1 = m.try_emplace(1, "ONE");
-    REQUIRE(result1.second == false);
-    REQUIRE_EQ(m[1], "one");  // unchanged
+    FL_REQUIRE(result1.second == false);
+    FL_REQUIRE_EQ(m[1], "one");  // unchanged
 
     // emplace DOES update existing key (in our implementation)
     auto result2 = m.emplace(2, "TWO");
-    REQUIRE(result2.second == false);
-    REQUIRE_EQ(m[2], "TWO");  // updated
+    FL_REQUIRE(result2.second == false);
+    FL_REQUIRE_EQ(m[2], "TWO");  // updated
 }
 
 // Phase 3: Constructors & Assignment Operators Tests
@@ -802,39 +799,39 @@ TEST_CASE("Copy constructor - basic usage") {
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
-    REQUIRE_EQ(m1.size(), 3u);
+    FL_REQUIRE_EQ(m1.size(), 3u);
 
     // Copy construct
     fl::unordered_map<int, fl::Str> m2(m1);
 
     // Verify m2 has same contents
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], "one");
-    REQUIRE_EQ(m2[2], "two");
-    REQUIRE_EQ(m2[3], "three");
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2[2], "two");
+    FL_REQUIRE_EQ(m2[3], "three");
 
     // Verify m1 is unchanged
-    REQUIRE_EQ(m1.size(), 3u);
-    REQUIRE_EQ(m1[1], "one");
+    FL_REQUIRE_EQ(m1.size(), 3u);
+    FL_REQUIRE_EQ(m1[1], "one");
 
     // Verify they are independent (modifying m2 doesn't affect m1)
     m2[1] = "ONE";
-    REQUIRE_EQ(m2[1], "ONE");
-    REQUIRE_EQ(m1[1], "one");  // unchanged
+    FL_REQUIRE_EQ(m2[1], "ONE");
+    FL_REQUIRE_EQ(m1[1], "one");  // unchanged
 }
 
 TEST_CASE("Copy constructor - empty map") {
     fl::unordered_map<int, int> m1;
-    REQUIRE_EQ(m1.size(), 0u);
+    FL_REQUIRE_EQ(m1.size(), 0u);
 
     fl::unordered_map<int, int> m2(m1);
-    REQUIRE_EQ(m2.size(), 0u);
-    REQUIRE(m2.empty());
+    FL_REQUIRE_EQ(m2.size(), 0u);
+    FL_REQUIRE(m2.empty());
 
     // Can still insert into copied empty map
     m2.insert(1, 100);
-    REQUIRE_EQ(m2.size(), 1u);
-    REQUIRE_EQ(m1.size(), 0u);  // original unchanged
+    FL_REQUIRE_EQ(m2.size(), 1u);
+    FL_REQUIRE_EQ(m1.size(), 0u);  // original unchanged
 }
 
 TEST_CASE("Copy constructor - with tombstones") {
@@ -843,14 +840,14 @@ TEST_CASE("Copy constructor - with tombstones") {
     m1.insert(2, 20);
     m1.insert(3, 30);
     m1.erase(2);  // Create a tombstone
-    REQUIRE_EQ(m1.size(), 2u);
+    FL_REQUIRE_EQ(m1.size(), 2u);
 
     // Copy should only copy live entries, not tombstones
     fl::unordered_map<int, int> m2(m1);
-    REQUIRE_EQ(m2.size(), 2u);
-    REQUIRE_EQ(m2[1], 10);
-    REQUIRE_EQ(m2[3], 30);
-    REQUIRE_EQ(m2.count(2), 0u);  // tombstone not copied
+    FL_REQUIRE_EQ(m2.size(), 2u);
+    FL_REQUIRE_EQ(m2[1], 10);
+    FL_REQUIRE_EQ(m2[3], 30);
+    FL_REQUIRE_EQ(m2.count(2), 0u);  // tombstone not copied
 }
 
 TEST_CASE("Move constructor - basic usage") {
@@ -858,33 +855,33 @@ TEST_CASE("Move constructor - basic usage") {
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
-    REQUIRE_EQ(m1.size(), 3u);
+    FL_REQUIRE_EQ(m1.size(), 3u);
 
     // Move construct
     fl::unordered_map<int, fl::Str> m2(fl::move(m1));
 
     // Verify m2 has the contents
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], "one");
-    REQUIRE_EQ(m2[2], "two");
-    REQUIRE_EQ(m2[3], "three");
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2[2], "two");
+    FL_REQUIRE_EQ(m2[3], "three");
 
     // Verify m1 is in valid empty state
-    REQUIRE_EQ(m1.size(), 0u);
-    REQUIRE(m1.empty());
+    FL_REQUIRE_EQ(m1.size(), 0u);
+    FL_REQUIRE(m1.empty());
 }
 
 TEST_CASE("Move constructor - empty map") {
     fl::unordered_map<int, int> m1;
-    REQUIRE_EQ(m1.size(), 0u);
+    FL_REQUIRE_EQ(m1.size(), 0u);
 
     fl::unordered_map<int, int> m2(fl::move(m1));
-    REQUIRE_EQ(m2.size(), 0u);
-    REQUIRE(m2.empty());
+    FL_REQUIRE_EQ(m2.size(), 0u);
+    FL_REQUIRE(m2.empty());
 
     // Both should be in valid state
     m2.insert(1, 100);
-    REQUIRE_EQ(m2.size(), 1u);
+    FL_REQUIRE_EQ(m2.size(), 1u);
 }
 
 TEST_CASE("Range constructor - from vector") {
@@ -896,18 +893,18 @@ TEST_CASE("Range constructor - from vector") {
     // Construct from range
     fl::unordered_map<int, fl::Str> m(pairs.begin(), pairs.end());
 
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
-    REQUIRE_EQ(m[3], "three");
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[3], "three");
 }
 
 TEST_CASE("Range constructor - empty range") {
     fl::vector<fl::pair<int, int>> empty;
 
     fl::unordered_map<int, int> m(empty.begin(), empty.end());
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(m.empty());
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.empty());
 }
 
 TEST_CASE("Range constructor - with duplicates") {
@@ -919,33 +916,33 @@ TEST_CASE("Range constructor - with duplicates") {
     fl::unordered_map<int, int> m(pairs.begin(), pairs.end());
 
     // Size should be 2 (keys 1 and 2)
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], 111);  // last value for key 1
-    REQUIRE_EQ(m[2], 200);
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], 111);  // last value for key 1
+    FL_REQUIRE_EQ(m[2], 200);
 }
 
 TEST_CASE("Initializer list constructor - basic usage") {
     fl::unordered_map<int, fl::Str> m({{1, "one"}, {2, "two"}, {3, "three"}});
 
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
-    REQUIRE_EQ(m[3], "three");
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[3], "three");
 }
 
 TEST_CASE("Initializer list constructor - empty list") {
     fl::unordered_map<int, int> m({});
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(m.empty());
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.empty());
 }
 
 TEST_CASE("Initializer list constructor - with duplicates") {
     fl::unordered_map<int, int> m({{1, 100}, {2, 200}, {1, 111}});
 
     // Size should be 2 (keys 1 and 2)
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], 111);  // last value for key 1
-    REQUIRE_EQ(m[2], 200);
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], 111);  // last value for key 1
+    FL_REQUIRE_EQ(m[2], 200);
 }
 
 TEST_CASE("Constructor with hash and equal parameters") {
@@ -958,16 +955,16 @@ TEST_CASE("Constructor with hash and equal parameters") {
     // Verify it's usable
     m.insert(1, "one");
     m.insert(2, "two");
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
 
     // Verify hash and equal functions work
     auto hash_fn = m.hash_function();
     auto eq_fn = m.key_eq();
-    REQUIRE_EQ(hash_fn(5), hash_fn(5));
-    REQUIRE(eq_fn(5, 5));
-    REQUIRE(!eq_fn(5, 6));
+    FL_REQUIRE_EQ(hash_fn(5), hash_fn(5));
+    FL_REQUIRE(eq_fn(5, 5));
+    FL_REQUIRE(!eq_fn(5, 6));
 }
 
 TEST_CASE("Copy assignment operator - basic usage") {
@@ -983,20 +980,20 @@ TEST_CASE("Copy assignment operator - basic usage") {
     m2 = m1;
 
     // Verify m2 has same contents as m1
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], "one");
-    REQUIRE_EQ(m2[2], "two");
-    REQUIRE_EQ(m2[3], "three");
-    REQUIRE_EQ(m2.count(99), 0u);  // old content gone
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2[2], "two");
+    FL_REQUIRE_EQ(m2[3], "three");
+    FL_REQUIRE_EQ(m2.count(99), 0u);  // old content gone
 
     // Verify m1 is unchanged
-    REQUIRE_EQ(m1.size(), 3u);
-    REQUIRE_EQ(m1[1], "one");
+    FL_REQUIRE_EQ(m1.size(), 3u);
+    FL_REQUIRE_EQ(m1[1], "one");
 
     // Verify independence
     m2[1] = "ONE";
-    REQUIRE_EQ(m2[1], "ONE");
-    REQUIRE_EQ(m1[1], "one");
+    FL_REQUIRE_EQ(m2[1], "ONE");
+    FL_REQUIRE_EQ(m1[1], "one");
 }
 
 TEST_CASE("Copy assignment operator - self assignment") {
@@ -1011,9 +1008,9 @@ TEST_CASE("Copy assignment operator - self assignment") {
     FL_DISABLE_WARNING_POP
 
     // Should be unchanged
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
 }
 
 TEST_CASE("Copy assignment operator - to empty map") {
@@ -1024,9 +1021,9 @@ TEST_CASE("Copy assignment operator - to empty map") {
     fl::unordered_map<int, int> m2;  // empty
     m2 = m1;
 
-    REQUIRE_EQ(m2.size(), 2u);
-    REQUIRE_EQ(m2[1], 10);
-    REQUIRE_EQ(m2[2], 20);
+    FL_REQUIRE_EQ(m2.size(), 2u);
+    FL_REQUIRE_EQ(m2[1], 10);
+    FL_REQUIRE_EQ(m2[2], 20);
 }
 
 TEST_CASE("Copy assignment operator - from empty map") {
@@ -1038,8 +1035,8 @@ TEST_CASE("Copy assignment operator - from empty map") {
 
     m2 = m1;
 
-    REQUIRE_EQ(m2.size(), 0u);
-    REQUIRE(m2.empty());
+    FL_REQUIRE_EQ(m2.size(), 0u);
+    FL_REQUIRE(m2.empty());
 }
 
 TEST_CASE("Move assignment operator - basic usage") {
@@ -1055,15 +1052,15 @@ TEST_CASE("Move assignment operator - basic usage") {
     m2 = fl::move(m1);
 
     // Verify m2 has the contents
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], "one");
-    REQUIRE_EQ(m2[2], "two");
-    REQUIRE_EQ(m2[3], "three");
-    REQUIRE_EQ(m2.count(99), 0u);  // old content gone
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2[2], "two");
+    FL_REQUIRE_EQ(m2[3], "three");
+    FL_REQUIRE_EQ(m2.count(99), 0u);  // old content gone
 
     // Verify m1 is in valid empty state
-    REQUIRE_EQ(m1.size(), 0u);
-    REQUIRE(m1.empty());
+    FL_REQUIRE_EQ(m1.size(), 0u);
+    FL_REQUIRE(m1.empty());
 }
 
 TEST_CASE("Move assignment operator - self assignment") {
@@ -1087,23 +1084,23 @@ TEST_CASE("Move assignment operator - from empty map") {
 
     m2 = fl::move(m1);
 
-    REQUIRE_EQ(m2.size(), 0u);
-    REQUIRE(m2.empty());
+    FL_REQUIRE_EQ(m2.size(), 0u);
+    FL_REQUIRE(m2.empty());
 }
 
 TEST_CASE("Initializer list assignment operator - basic usage") {
     fl::unordered_map<int, fl::Str> m;
     m.insert(99, "old");
-    REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m.size(), 1u);
 
     // Assign from initializer list
     m = {{1, "one"}, {2, "two"}, {3, "three"}};
 
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[1], "one");
-    REQUIRE_EQ(m[2], "two");
-    REQUIRE_EQ(m[3], "three");
-    REQUIRE_EQ(m.count(99), 0u);  // old content gone
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[1], "one");
+    FL_REQUIRE_EQ(m[2], "two");
+    FL_REQUIRE_EQ(m[3], "three");
+    FL_REQUIRE_EQ(m.count(99), 0u);  // old content gone
 }
 
 TEST_CASE("Initializer list assignment operator - empty list") {
@@ -1114,8 +1111,8 @@ TEST_CASE("Initializer list assignment operator - empty list") {
     // Assign empty list
     m = {};
 
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(m.empty());
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.empty());
 }
 
 TEST_CASE("Initializer list assignment operator - with duplicates") {
@@ -1125,10 +1122,10 @@ TEST_CASE("Initializer list assignment operator - with duplicates") {
     m = {{1, 100}, {2, 200}, {1, 111}};
 
     // Size should be 2 (keys 1 and 2)
-    REQUIRE_EQ(m.size(), 2u);
-    REQUIRE_EQ(m[1], 111);  // last value for key 1
-    REQUIRE_EQ(m[2], 200);
-    REQUIRE_EQ(m.count(99), 0u);  // old content gone
+    FL_REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m[1], 111);  // last value for key 1
+    FL_REQUIRE_EQ(m[2], 200);
+    FL_REQUIRE_EQ(m.count(99), 0u);  // old content gone
 }
 
 TEST_CASE("Chained assignments") {
@@ -1142,12 +1139,12 @@ TEST_CASE("Chained assignments") {
     // Chained copy assignment
     m3 = m2 = m1;
 
-    REQUIRE_EQ(m3.size(), 2u);
-    REQUIRE_EQ(m3[1], "one");
-    REQUIRE_EQ(m3[2], "two");
+    FL_REQUIRE_EQ(m3.size(), 2u);
+    FL_REQUIRE_EQ(m3[1], "one");
+    FL_REQUIRE_EQ(m3[2], "two");
 
-    REQUIRE_EQ(m2.size(), 2u);
-    REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2.size(), 2u);
+    FL_REQUIRE_EQ(m2[1], "one");
 }
 
 // Phase 4: Erase & Swap Tests
@@ -1159,7 +1156,7 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - basic range") {
     m.insert(3, "three");
     m.insert(4, "four");
     m.insert(5, "five");
-    REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m.size(), 5u);
 
     // Erase range from second to fourth element (not including fourth)
     auto it_begin = m.begin();
@@ -1169,8 +1166,8 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - basic range") {
     ++it_end; // advance two more
 
     auto result = m.erase(it_begin, it_end);
-    REQUIRE(result != m.end());
-    REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE(result != m.end());
+    FL_REQUIRE_EQ(m.size(), 3u);
 }
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - erase all") {
@@ -1178,13 +1175,13 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - erase all") {
     m.insert(1, 10);
     m.insert(2, 20);
     m.insert(3, 30);
-    REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m.size(), 3u);
 
     // Erase entire range
     auto result = m.erase(m.begin(), m.end());
-    REQUIRE(result == m.end());
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(m.empty());
+    FL_REQUIRE(result == m.end());
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.empty());
 }
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - empty range") {
@@ -1192,12 +1189,12 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - empty range") {
     m.insert(1, 10);
     m.insert(2, 20);
     m.insert(3, 30);
-    REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m.size(), 3u);
 
     // Erase empty range (first == last)
     auto it = m.begin();
     m.erase(it, it);
-    REQUIRE_EQ(m.size(), 3u); // size unchanged
+    FL_REQUIRE_EQ(m.size(), 3u); // size unchanged
 }
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - single element") {
@@ -1205,7 +1202,7 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - single element") {
     m.insert(1, "one");
     m.insert(2, "two");
     m.insert(3, "three");
-    REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m.size(), 3u);
 
     // Erase single element using range
     auto it_begin = m.begin();
@@ -1214,8 +1211,8 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - single element") {
     ++it_end; // one past
 
     auto result = m.erase(it_begin, it_end);
-    REQUIRE(result != m.end());
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE(result != m.end());
+    FL_REQUIRE_EQ(m.size(), 2u);
 }
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - after erase") {
@@ -1223,7 +1220,7 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - after erase") {
     for (int i = 1; i <= 10; ++i) {
         m.insert(i, i * 10);
     }
-    REQUIRE_EQ(m.size(), 10u);
+    FL_REQUIRE_EQ(m.size(), 10u);
 
     // Erase first half
     auto mid = m.begin();
@@ -1233,8 +1230,8 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - after erase") {
     auto result = m.erase(m.begin(), mid);
 
     // Verify size
-    REQUIRE_EQ(m.size(), 5u);
-    REQUIRE(result != m.end());
+    FL_REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE(result != m.end());
 }
 
 TEST_CASE("swap() - basic usage") {
@@ -1251,17 +1248,17 @@ TEST_CASE("swap() - basic usage") {
     m1.swap(m2);
 
     // Verify m1 now has m2's old contents
-    REQUIRE_EQ(m1.size(), 2u);
-    REQUIRE_EQ(m1[10], "ten");
-    REQUIRE_EQ(m1[20], "twenty");
-    REQUIRE_EQ(m1.count(1), 0u);
+    FL_REQUIRE_EQ(m1.size(), 2u);
+    FL_REQUIRE_EQ(m1[10], "ten");
+    FL_REQUIRE_EQ(m1[20], "twenty");
+    FL_REQUIRE_EQ(m1.count(1), 0u);
 
     // Verify m2 now has m1's old contents
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], "one");
-    REQUIRE_EQ(m2[2], "two");
-    REQUIRE_EQ(m2[3], "three");
-    REQUIRE_EQ(m2.count(10), 0u);
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], "one");
+    FL_REQUIRE_EQ(m2[2], "two");
+    FL_REQUIRE_EQ(m2[3], "three");
+    FL_REQUIRE_EQ(m2.count(10), 0u);
 }
 
 TEST_CASE("swap() - with empty map") {
@@ -1275,14 +1272,14 @@ TEST_CASE("swap() - with empty map") {
     m1.swap(m2);
 
     // m1 should now be empty
-    REQUIRE_EQ(m1.size(), 0u);
-    REQUIRE(m1.empty());
+    FL_REQUIRE_EQ(m1.size(), 0u);
+    FL_REQUIRE(m1.empty());
 
     // m2 should have old m1 contents
-    REQUIRE_EQ(m2.size(), 3u);
-    REQUIRE_EQ(m2[1], 10);
-    REQUIRE_EQ(m2[2], 20);
-    REQUIRE_EQ(m2[3], 30);
+    FL_REQUIRE_EQ(m2.size(), 3u);
+    FL_REQUIRE_EQ(m2[1], 10);
+    FL_REQUIRE_EQ(m2[2], 20);
+    FL_REQUIRE_EQ(m2[3], 30);
 }
 
 TEST_CASE("swap() - two empty maps") {
@@ -1291,8 +1288,8 @@ TEST_CASE("swap() - two empty maps") {
 
     m1.swap(m2);
 
-    REQUIRE(m1.empty());
-    REQUIRE(m2.empty());
+    FL_REQUIRE(m1.empty());
+    FL_REQUIRE(m2.empty());
 }
 
 TEST_CASE("swap() - preserves independent state") {
@@ -1305,13 +1302,13 @@ TEST_CASE("swap() - preserves independent state") {
 
     // Modify m1 and verify m2 is unaffected
     m1[2] = 999;
-    REQUIRE_EQ(m1[2], 999);
-    REQUIRE_EQ(m2[1], 100);  // m2 unchanged
+    FL_REQUIRE_EQ(m1[2], 999);
+    FL_REQUIRE_EQ(m2[1], 100);  // m2 unchanged
 
     // Modify m2 and verify m1 is unaffected
     m2[1] = 777;
-    REQUIRE_EQ(m2[1], 777);
-    REQUIRE_EQ(m1[2], 999);  // m1 unchanged
+    FL_REQUIRE_EQ(m2[1], 777);
+    FL_REQUIRE_EQ(m1[2], 999);  // m1 unchanged
 }
 
 TEST_CASE("swap() - different capacities") {
@@ -1329,14 +1326,14 @@ TEST_CASE("swap() - different capacities") {
     m1.swap(m2);
 
     // Capacities should be swapped
-    REQUIRE_EQ(m1.capacity(), cap2_before);
-    REQUIRE_EQ(m2.capacity(), cap1_before);
+    FL_REQUIRE_EQ(m1.capacity(), cap2_before);
+    FL_REQUIRE_EQ(m2.capacity(), cap1_before);
 
     // Contents should be swapped
-    REQUIRE_EQ(m1.size(), 10u);
-    REQUIRE_EQ(m2.size(), 1u);
-    REQUIRE_EQ(m2[1], 10);
-    REQUIRE_EQ(m1[10], 100);
+    FL_REQUIRE_EQ(m1.size(), 10u);
+    FL_REQUIRE_EQ(m2.size(), 1u);
+    FL_REQUIRE_EQ(m2[1], 10);
+    FL_REQUIRE_EQ(m1[10], 100);
 }
 
 TEST_CASE("swap() - with tombstones") {
@@ -1345,7 +1342,7 @@ TEST_CASE("swap() - with tombstones") {
     m1.insert(2, 20);
     m1.insert(3, 30);
     m1.erase(2); // create tombstone
-    REQUIRE_EQ(m1.size(), 2u);
+    FL_REQUIRE_EQ(m1.size(), 2u);
 
     fl::unordered_map<int, int> m2;
     m2.insert(100, 1000);
@@ -1353,40 +1350,40 @@ TEST_CASE("swap() - with tombstones") {
     m1.swap(m2);
 
     // m1 should have m2's contents
-    REQUIRE_EQ(m1.size(), 1u);
-    REQUIRE_EQ(m1[100], 1000);
+    FL_REQUIRE_EQ(m1.size(), 1u);
+    FL_REQUIRE_EQ(m1[100], 1000);
 
     // m2 should have m1's contents (including tombstone state)
-    REQUIRE_EQ(m2.size(), 2u);
-    REQUIRE_EQ(m2[1], 10);
-    REQUIRE_EQ(m2[3], 30);
-    REQUIRE_EQ(m2.count(2), 0u); // still deleted
+    FL_REQUIRE_EQ(m2.size(), 2u);
+    FL_REQUIRE_EQ(m2[1], 10);
+    FL_REQUIRE_EQ(m2[3], 30);
+    FL_REQUIRE_EQ(m2.count(2), 0u); // still deleted
 }
 
 // Phase 6: Hash Policy Interface Tests
 
 TEST_CASE("load_factor() - basic usage") {
     fl::unordered_map<int, int> m(8);  // 8 buckets
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE_EQ(m.bucket_count(), 8u);
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);
 
     // Empty map has 0 load factor
-    REQUIRE_EQ(m.load_factor(), 0.0f);
+    FL_REQUIRE_EQ(m.load_factor(), 0.0f);
 
     // Add 2 elements: load_factor = 2/8 = 0.25
     m.insert(1, 10);
     m.insert(2, 20);
-    REQUIRE_EQ(m.size(), 2u);
+    FL_REQUIRE_EQ(m.size(), 2u);
     float lf = m.load_factor();
-    REQUIRE(lf >= 0.24f);
-    REQUIRE(lf <= 0.26f);  // approximately 0.25
+    FL_REQUIRE(lf >= 0.24f);
+    FL_REQUIRE(lf <= 0.26f);  // approximately 0.25
 
     // Add 2 more: load_factor = 4/8 = 0.5
     m.insert(3, 30);
     m.insert(4, 40);
     lf = m.load_factor();
-    REQUIRE(lf >= 0.49f);
-    REQUIRE(lf <= 0.51f);  // approximately 0.5
+    FL_REQUIRE(lf >= 0.49f);
+    FL_REQUIRE(lf <= 0.51f);  // approximately 0.5
 }
 
 TEST_CASE("load_factor() - after rehash") {
@@ -1403,8 +1400,8 @@ TEST_CASE("load_factor() - after rehash") {
     float expected_lf = static_cast<float>(size) / static_cast<float>(buckets);
     float actual_lf = m.load_factor();
 
-    REQUIRE(actual_lf >= expected_lf - 0.01f);
-    REQUIRE(actual_lf <= expected_lf + 0.01f);
+    FL_REQUIRE(actual_lf >= expected_lf - 0.01f);
+    FL_REQUIRE(actual_lf <= expected_lf + 0.01f);
 }
 
 TEST_CASE("max_load_factor() - default value") {
@@ -1412,16 +1409,16 @@ TEST_CASE("max_load_factor() - default value") {
 
     // Default max load factor should be 0.7
     float max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.69f);
-    REQUIRE(max_lf <= 0.71f);
+    FL_REQUIRE(max_lf >= 0.69f);
+    FL_REQUIRE(max_lf <= 0.71f);
 }
 
 TEST_CASE("max_load_factor() - custom value") {
     fl::unordered_map<int, int> m(8, 0.5f);  // Set max load factor to 0.5
 
     float max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.49f);
-    REQUIRE(max_lf <= 0.51f);
+    FL_REQUIRE(max_lf >= 0.49f);
+    FL_REQUIRE(max_lf <= 0.51f);
 }
 
 TEST_CASE("max_load_factor(float) - set new value") {
@@ -1430,14 +1427,14 @@ TEST_CASE("max_load_factor(float) - set new value") {
     // Set max load factor to 0.6
     m.max_load_factor(0.6f);
     float max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.59f);
-    REQUIRE(max_lf <= 0.61f);
+    FL_REQUIRE(max_lf >= 0.59f);
+    FL_REQUIRE(max_lf <= 0.61f);
 
     // Set max load factor to 0.9
     m.max_load_factor(0.9f);
     max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.89f);
-    REQUIRE(max_lf <= 0.91f);
+    FL_REQUIRE(max_lf >= 0.89f);
+    FL_REQUIRE(max_lf <= 0.91f);
 }
 
 TEST_CASE("max_load_factor(float) - clamping") {
@@ -1446,30 +1443,30 @@ TEST_CASE("max_load_factor(float) - clamping") {
     // Values should be clamped to [0, 1]
     m.max_load_factor(1.5f);  // Should clamp to 1.0
     float max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.99f);
-    REQUIRE(max_lf <= 1.01f);
+    FL_REQUIRE(max_lf >= 0.99f);
+    FL_REQUIRE(max_lf <= 1.01f);
 
     m.max_load_factor(-0.5f);  // Should clamp to 0.0
     max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.0f);
-    REQUIRE(max_lf <= 0.01f);
+    FL_REQUIRE(max_lf >= 0.0f);
+    FL_REQUIRE(max_lf <= 0.01f);
 }
 
 TEST_CASE("bucket_count() - basic usage") {
     fl::unordered_map<int, int> m1(4);
-    REQUIRE_EQ(m1.bucket_count(), 4u);
+    FL_REQUIRE_EQ(m1.bucket_count(), 4u);
 
     fl::unordered_map<int, int> m2(16);
-    REQUIRE_EQ(m2.bucket_count(), 16u);
+    FL_REQUIRE_EQ(m2.bucket_count(), 16u);
 
     fl::unordered_map<int, int> m3(100);
     // bucket_count should be next power of 2
-    REQUIRE_EQ(m3.bucket_count(), 128u);
+    FL_REQUIRE_EQ(m3.bucket_count(), 128u);
 }
 
 TEST_CASE("bucket_count() - after rehash") {
     fl::unordered_map<int, int> m(8);
-    REQUIRE_EQ(m.bucket_count(), 8u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);
 
     // Fill to trigger automatic rehash
     for (int i = 0; i < 20; ++i) {
@@ -1477,7 +1474,7 @@ TEST_CASE("bucket_count() - after rehash") {
     }
 
     // Bucket count should have increased
-    REQUIRE(m.bucket_count() > 8u);
+    FL_REQUIRE(m.bucket_count() > 8u);
 }
 
 TEST_CASE("rehash() - increase buckets") {
@@ -1485,20 +1482,20 @@ TEST_CASE("rehash() - increase buckets") {
     m.insert(1, 10);
     m.insert(2, 20);
     m.insert(3, 30);
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m.bucket_count(), 8u);
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);
 
     // Rehash to 32 buckets
     m.rehash(32);
 
     // Verify bucket count increased
-    REQUIRE_EQ(m.bucket_count(), 32u);
+    FL_REQUIRE_EQ(m.bucket_count(), 32u);
 
     // Verify all elements still present
-    REQUIRE_EQ(m.size(), 3u);
-    REQUIRE_EQ(m[1], 10);
-    REQUIRE_EQ(m[2], 20);
-    REQUIRE_EQ(m[3], 30);
+    FL_REQUIRE_EQ(m.size(), 3u);
+    FL_REQUIRE_EQ(m[1], 10);
+    FL_REQUIRE_EQ(m[2], 20);
+    FL_REQUIRE_EQ(m[3], 30);
 }
 
 TEST_CASE("rehash() - with smaller value cleans tombstones") {
@@ -1511,38 +1508,38 @@ TEST_CASE("rehash() - with smaller value cleans tombstones") {
     for (int i = 0; i < 5; ++i) {
         m.erase(i);
     }
-    REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m.size(), 5u);
 
     // Rehash with same or smaller value (should clean tombstones)
     m.rehash(8);
 
     // Elements should still be present
-    REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m.size(), 5u);
     for (int i = 5; i < 10; ++i) {
-        REQUIRE_EQ(m[i], i * 10);
+        FL_REQUIRE_EQ(m[i], i * 10);
     }
 }
 
 TEST_CASE("rehash() - empty map") {
     fl::unordered_map<int, int> m(8);
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE_EQ(m.bucket_count(), 8u);
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);
 
     // Rehash empty map
     m.rehash(16);
 
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE_EQ(m.bucket_count(), 16u);
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE_EQ(m.bucket_count(), 16u);
 
     // Should still be usable
     m.insert(1, 10);
-    REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(m[1], 10);
+    FL_REQUIRE_EQ(m.size(), 1u);
+    FL_REQUIRE_EQ(m[1], 10);
 }
 
 TEST_CASE("reserve() - basic usage") {
     fl::unordered_map<int, int> m(4);
-    REQUIRE_EQ(m.bucket_count(), 4u);
+    FL_REQUIRE_EQ(m.bucket_count(), 4u);
 
     // Reserve space for 20 elements
     // With max_load_factor 0.7, we need at least ceil(20/0.7) = 29 buckets
@@ -1550,15 +1547,15 @@ TEST_CASE("reserve() - basic usage") {
     m.reserve(20);
 
     fl::size buckets = m.bucket_count();
-    REQUIRE(buckets >= 29u);  // At least enough for 20 elements
+    FL_REQUIRE(buckets >= 29u);  // At least enough for 20 elements
 
     // Verify we can insert 20 elements without rehash
     fl::size buckets_before = m.bucket_count();
     for (int i = 0; i < 20; ++i) {
         m.insert(i, i * 10);
     }
-    REQUIRE_EQ(m.bucket_count(), buckets_before);  // No rehash occurred
-    REQUIRE_EQ(m.size(), 20u);
+    FL_REQUIRE_EQ(m.bucket_count(), buckets_before);  // No rehash occurred
+    FL_REQUIRE_EQ(m.size(), 20u);
 }
 
 TEST_CASE("reserve() - no-op if already large enough") {
@@ -1569,7 +1566,7 @@ TEST_CASE("reserve() - no-op if already large enough") {
     m.reserve(10);
 
     // Bucket count should be unchanged
-    REQUIRE_EQ(m.bucket_count(), buckets_before);
+    FL_REQUIRE_EQ(m.bucket_count(), buckets_before);
 }
 
 TEST_CASE("reserve() - with existing elements") {
@@ -1579,15 +1576,15 @@ TEST_CASE("reserve() - with existing elements") {
     for (int i = 0; i < 5; ++i) {
         m.insert(i, i * 10);
     }
-    REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m.size(), 5u);
 
     // Reserve space for 50 more elements
     m.reserve(50);
 
     // All existing elements should still be present
-    REQUIRE_EQ(m.size(), 5u);
+    FL_REQUIRE_EQ(m.size(), 5u);
     for (int i = 0; i < 5; ++i) {
-        REQUIRE_EQ(m[i], i * 10);
+        FL_REQUIRE_EQ(m[i], i * 10);
     }
 
     // Should be able to add more without rehashing
@@ -1595,7 +1592,7 @@ TEST_CASE("reserve() - with existing elements") {
     for (int i = 5; i < 50; ++i) {
         m.insert(i, i * 10);
     }
-    REQUIRE_EQ(m.bucket_count(), buckets_after_reserve);
+    FL_REQUIRE_EQ(m.bucket_count(), buckets_after_reserve);
 }
 
 TEST_CASE("reserve() - empty map") {
@@ -1605,52 +1602,52 @@ TEST_CASE("reserve() - empty map") {
     m.reserve(100);
 
     fl::size buckets = m.bucket_count();
-    REQUIRE(buckets >= 100);  // Should have enough for 100 elements
+    FL_REQUIRE(buckets >= 100);  // Should have enough for 100 elements
 
     // Still empty
-    REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(m.empty());
+    FL_REQUIRE_EQ(m.size(), 0u);
+    FL_REQUIRE(m.empty());
 }
 
 TEST_CASE("Hash policy - comprehensive workflow") {
     fl::unordered_map<int, int> m(8, 0.8f);  // 8 buckets, 0.8 max load factor
 
     // Check initial state
-    REQUIRE_EQ(m.bucket_count(), 8u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);
     float max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.79f);
-    REQUIRE(max_lf <= 0.81f);
-    REQUIRE_EQ(m.load_factor(), 0.0f);
+    FL_REQUIRE(max_lf >= 0.79f);
+    FL_REQUIRE(max_lf <= 0.81f);
+    FL_REQUIRE_EQ(m.load_factor(), 0.0f);
 
     // Insert 6 elements (load factor = 6/8 = 0.75, under 0.8)
     for (int i = 0; i < 6; ++i) {
         m.insert(i, i * 10);
     }
-    REQUIRE_EQ(m.size(), 6u);
-    REQUIRE_EQ(m.bucket_count(), 8u);  // No rehash yet
+    FL_REQUIRE_EQ(m.size(), 6u);
+    FL_REQUIRE_EQ(m.bucket_count(), 8u);  // No rehash yet
     float lf = m.load_factor();
-    REQUIRE(lf >= 0.74f);
-    REQUIRE(lf <= 0.76f);
+    FL_REQUIRE(lf >= 0.74f);
+    FL_REQUIRE(lf <= 0.76f);
 
     // Change max load factor to 0.5 (should stay at current size)
     m.max_load_factor(0.5f);
     max_lf = m.max_load_factor();
-    REQUIRE(max_lf >= 0.49f);
-    REQUIRE(max_lf <= 0.51f);
+    FL_REQUIRE(max_lf >= 0.49f);
+    FL_REQUIRE(max_lf <= 0.51f);
 
     // Reserve for 20 elements
     // With max_load_factor 0.5, need ceil(20/0.5) = 40 buckets
     m.reserve(20);
-    REQUIRE(m.bucket_count() >= 40u);
-    REQUIRE_EQ(m.size(), 6u);  // Elements preserved
+    FL_REQUIRE(m.bucket_count() >= 40u);
+    FL_REQUIRE_EQ(m.size(), 6u);  // Elements preserved
 
     // Verify all elements still accessible
     for (int i = 0; i < 6; ++i) {
-        REQUIRE_EQ(m[i], i * 10);
+        FL_REQUIRE_EQ(m[i], i * 10);
     }
 
     // Load factor should be much lower now
     lf = m.load_factor();
-    REQUIRE(lf < 0.2f);  // 6 elements in 40+ buckets
+    FL_REQUIRE(lf < 0.2f);  // 6 elements in 40+ buckets
 }
 

@@ -47,6 +47,101 @@
         REQUIRE(_result);                                                      \
     } while (0)
 
+// =============================================================================
+// TRAMPOLINE MACROS - Abstraction layer for test framework
+// =============================================================================
+// These macros wrap the underlying doctest framework, allowing future
+// framework changes without modifying all test files. This pattern is already
+// established by CHECK_CLOSE and REQUIRE_CLOSE above.
+
+// ----------------------------------------------------------------------------
+// Basic Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK(expr)                     CHECK(expr)
+#define FL_CHECK_FALSE(expr)               CHECK_FALSE(expr)
+#define FL_CHECK_TRUE(expr)                CHECK_TRUE(expr)
+
+// ----------------------------------------------------------------------------
+// Comparison Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_EQ(a, b)                  CHECK_EQ(a, b)
+#define FL_CHECK_NE(a, b)                  CHECK_NE(a, b)
+#define FL_CHECK_GT(a, b)                  CHECK_GT(a, b)
+#define FL_CHECK_GE(a, b)                  CHECK_GE(a, b)
+#define FL_CHECK_LT(a, b)                  CHECK_LT(a, b)
+#define FL_CHECK_LE(a, b)                  CHECK_LE(a, b)
+
+// ----------------------------------------------------------------------------
+// Floating Point Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_CLOSE(a, b, eps)          CHECK_CLOSE(a, b, eps)
+#define FL_CHECK_DOUBLE_EQ(a, b)           CHECK_DOUBLE_EQ(a, b)
+#define FL_CHECK_APPROX(a, b)              CHECK_APPROX(a, b)
+
+// ----------------------------------------------------------------------------
+// String Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_STREQ(a, b)               CHECK_STREQ(a, b)
+
+// ----------------------------------------------------------------------------
+// Message Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_MESSAGE(expr, msg)        CHECK_MESSAGE(expr, msg)
+#define FL_CHECK_FALSE_MESSAGE(expr, msg)  CHECK_FALSE_MESSAGE(expr, msg)
+
+// ----------------------------------------------------------------------------
+// Trait Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_TRAIT(...)                CHECK_TRAIT(__VA_ARGS__)
+
+// ----------------------------------------------------------------------------
+// Unary Assertions (CHECK family)
+// ----------------------------------------------------------------------------
+#define FL_CHECK_UNARY(expr)               CHECK_UNARY(expr)
+#define FL_CHECK_UNARY_FALSE(expr)         CHECK_UNARY_FALSE(expr)
+
+// ----------------------------------------------------------------------------
+// Fatal Assertions (REQUIRE family - test stops on failure)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE(expr)                   REQUIRE(expr)
+#define FL_REQUIRE_FALSE(expr)             REQUIRE_FALSE(expr)
+
+// ----------------------------------------------------------------------------
+// Comparison Assertions (REQUIRE family)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE_EQ(a, b)                REQUIRE_EQ(a, b)
+#define FL_REQUIRE_NE(a, b)                REQUIRE_NE(a, b)
+#define FL_REQUIRE_GT(a, b)                REQUIRE_GT(a, b)
+#define FL_REQUIRE_GE(a, b)                REQUIRE_GE(a, b)
+#define FL_REQUIRE_LT(a, b)                REQUIRE_LT(a, b)
+#define FL_REQUIRE_LE(a, b)                REQUIRE_LE(a, b)
+
+// ----------------------------------------------------------------------------
+// Floating Point Assertions (REQUIRE family)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE_CLOSE(a, b, eps)        REQUIRE_CLOSE(a, b, eps)
+#define FL_REQUIRE_APPROX(a, b)            REQUIRE_APPROX(a, b)
+
+// ----------------------------------------------------------------------------
+// Message Assertions (REQUIRE family)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE_MESSAGE(expr, msg)      REQUIRE_MESSAGE(expr, msg)
+
+// ----------------------------------------------------------------------------
+// Unary Assertions (REQUIRE family)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE_UNARY(expr)             REQUIRE_UNARY(expr)
+#define FL_REQUIRE_UNARY_FALSE(expr)       REQUIRE_UNARY_FALSE(expr)
+
+// ----------------------------------------------------------------------------
+// Exception Handling (REQUIRE family)
+// ----------------------------------------------------------------------------
+#define FL_REQUIRE_THROWS_WITH_MESSAGE(...)  REQUIRE_THROWS_WITH_MESSAGE(__VA_ARGS__)
+
+// =============================================================================
+// END TRAMPOLINE MACROS
+// =============================================================================
+
 namespace doctest {
 template <> struct StringMaker<CRGB> {
     static String convert(const CRGB &value) {

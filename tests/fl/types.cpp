@@ -8,11 +8,11 @@ using namespace fl;
 TEST_CASE("fl::cycle_t type definition") {
     SUBCASE("cycle_t exists and is signed") {
         cycle_t value = 0;
-        CHECK_EQ(value, 0);
+        FL_CHECK_EQ(value, 0);
 
         // Test that cycle_t is signed
         cycle_t negative = -1;
-        CHECK(negative < 0);
+        FL_CHECK(negative < 0);
     }
 
 #if defined(__AVR__)
@@ -22,7 +22,7 @@ TEST_CASE("fl::cycle_t type definition") {
                      "cycle_t should be int on AVR");
 
         // Verify it's the expected size for AVR
-        CHECK_EQ(sizeof(cycle_t), sizeof(int));
+        FL_CHECK_EQ(sizeof(cycle_t), sizeof(int));
     }
 #else
     SUBCASE("cycle_t is fl::i64 on non-AVR platforms") {
@@ -31,7 +31,7 @@ TEST_CASE("fl::cycle_t type definition") {
                      "cycle_t should be fl::i64 on non-AVR");
 
         // Verify it's 64-bit
-        CHECK_EQ(sizeof(cycle_t), 8);
+        FL_CHECK_EQ(sizeof(cycle_t), 8);
     }
 #endif
 
@@ -39,10 +39,10 @@ TEST_CASE("fl::cycle_t type definition") {
         cycle_t a = 100;
         cycle_t b = 50;
 
-        CHECK_EQ(a + b, 150);
-        CHECK_EQ(a - b, 50);
-        CHECK_EQ(a * 2, 200);
-        CHECK_EQ(a / 2, 50);
+        FL_CHECK_EQ(a + b, 150);
+        FL_CHECK_EQ(a - b, 50);
+        FL_CHECK_EQ(a * 2, 200);
+        FL_CHECK_EQ(a / 2, 50);
     }
 
     SUBCASE("cycle_t can represent fixed-point values") {
@@ -53,8 +53,8 @@ TEST_CASE("fl::cycle_t type definition") {
         cycle_t one_fixed = 256;  // 1.0 in 8.8 fixed point
         cycle_t half_fixed = 128; // 0.5 in 8.8 fixed point
 
-        CHECK_EQ(one_fixed + half_fixed, 384); // 1.5 in 8.8 fixed point
-        CHECK_EQ(one_fixed * 2, 512);          // 2.0 in 8.8 fixed point
+        FL_CHECK_EQ(one_fixed + half_fixed, 384); // 1.5 in 8.8 fixed point
+        FL_CHECK_EQ(one_fixed * 2, 512);          // 2.0 in 8.8 fixed point
     }
 
     SUBCASE("cycle_t comparison operations") {
@@ -62,12 +62,12 @@ TEST_CASE("fl::cycle_t type definition") {
         cycle_t b = 50;
         cycle_t c = 100;
 
-        CHECK(a > b);
-        CHECK(b < a);
-        CHECK(a >= c);
-        CHECK(a <= c);
-        CHECK(a == c);
-        CHECK(a != b);
+        FL_CHECK(a > b);
+        FL_CHECK(b < a);
+        FL_CHECK(a >= c);
+        FL_CHECK(a <= c);
+        FL_CHECK(a == c);
+        FL_CHECK(a != b);
     }
 
     SUBCASE("cycle_t range and limits") {
@@ -80,23 +80,23 @@ TEST_CASE("fl::cycle_t type definition") {
         cycle_t large_val = 1000000000LL;
         cycle_t small_val = -1000000000LL;
 
-        CHECK(large_val > 0);
-        CHECK(small_val < 0);
+        FL_CHECK(large_val > 0);
+        FL_CHECK(small_val < 0);
 #endif
     }
 
     SUBCASE("cycle_t default initialization") {
         cycle_t default_value = cycle_t();
-        CHECK_EQ(default_value, 0);
+        FL_CHECK_EQ(default_value, 0);
     }
 
     SUBCASE("cycle_t assignment and copy") {
         cycle_t a = 42;
         cycle_t b = a;
-        CHECK_EQ(b, 42);
+        FL_CHECK_EQ(b, 42);
 
         cycle_t c;
         c = a;
-        CHECK_EQ(c, 42);
+        FL_CHECK_EQ(c, 42);
     }
 }

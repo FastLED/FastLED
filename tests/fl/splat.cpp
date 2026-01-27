@@ -14,17 +14,17 @@ TEST_CASE("splat simple test") {
     // Call the splat function
     fl::Tile2x2_u8 result = fl::splat(input);
 
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
 
     // Verify the output
-    REQUIRE_EQ(result.lower_left(), 255);  // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 0); // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 0);  // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0); // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 255);  // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 0); // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 0);  // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0); // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (0.0, 0.5)") {
@@ -35,16 +35,16 @@ TEST_CASE("splat test for input (0.0, 0.5)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 128);  // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 128);  // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 128);  // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 128);  // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (0.0, 0.99)") {
@@ -55,16 +55,16 @@ TEST_CASE("splat test for input (0.0, 0.99)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 3);    // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 252);  // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 3);    // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 252);  // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (0.0, 1.0)") {
@@ -75,16 +75,16 @@ TEST_CASE("splat test for input (0.0, 1.0)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 1);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 3);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 1);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 3);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 255);    // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 0);   // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 255);    // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 0);   // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 0);   // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (0.5, 0.0)") {
@@ -95,16 +95,16 @@ TEST_CASE("splat test for input (0.5, 0.0)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 128);  // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 128); // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 128);  // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 128); // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (0.99, 0.0)") {
@@ -115,16 +115,16 @@ TEST_CASE("splat test for input (0.99, 0.0)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 0);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 2);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 0);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 2);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 3);    // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 252); // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 3);    // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 252); // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
 TEST_CASE("splat test for input (1.0, 0.0)") {
@@ -135,14 +135,14 @@ TEST_CASE("splat test for input (1.0, 0.0)") {
     fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
-    REQUIRE(result.bounds().mMin.x == 1);
-    REQUIRE(result.bounds().mMin.y == 0);
-    REQUIRE(result.bounds().mMax.x == 3);
-    REQUIRE(result.bounds().mMax.y == 2);
+    FL_REQUIRE(result.bounds().mMin.x == 1);
+    FL_REQUIRE(result.bounds().mMin.y == 0);
+    FL_REQUIRE(result.bounds().mMax.x == 3);
+    FL_REQUIRE(result.bounds().mMax.y == 2);
 
     // Verify the output intensities
-    REQUIRE_EQ(result.lower_left(), 255);    // Expected intensity for lower-left
-    REQUIRE_EQ(result.lower_right(), 0); // Expected intensity for lower-right
-    REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
-    REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
+    FL_REQUIRE_EQ(result.lower_left(), 255);    // Expected intensity for lower-left
+    FL_REQUIRE_EQ(result.lower_right(), 0); // Expected intensity for lower-right
+    FL_REQUIRE_EQ(result.upper_left(), 0);    // Expected intensity for upper-left
+    FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }

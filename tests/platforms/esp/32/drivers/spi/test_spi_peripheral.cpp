@@ -70,13 +70,13 @@ TEST_CASE("SpiPeripheralMock - initialize bus") {
 
     // Valid configuration
     SpiBusConfig config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(config));
-    CHECK(mock.isInitialized());
+    FL_CHECK(mock.initializeBus(config));
+    FL_CHECK(mock.isInitialized());
 
     // Verify stored configuration
     const auto& stored = mock.getBusConfig();
-    CHECK_EQ(stored.mosi_pin, 23);
-    CHECK_EQ(stored.sclk_pin, 18);
+    FL_CHECK_EQ(stored.mosi_pin, 23);
+    FL_CHECK_EQ(stored.sclk_pin, 18);
 }
 
 TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
@@ -85,8 +85,8 @@ TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
 
     // Invalid: missing SCLK pin
     SpiBusConfig config(/*mosi=*/23, /*sclk=*/-1);
-    CHECK_FALSE(mock.initializeBus(config));
-    CHECK_FALSE(mock.isInitialized());
+    FL_CHECK_FALSE(mock.initializeBus(config));
+    FL_CHECK_FALSE(mock.isInitialized());
 }
 
 TEST_CASE("SpiPeripheralMock - double initialization fails") {
@@ -94,11 +94,11 @@ TEST_CASE("SpiPeripheralMock - double initialization fails") {
     auto& mock = fixture.mock;
 
     SpiBusConfig config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(config));
-    CHECK(mock.isInitialized());
+    FL_CHECK(mock.initializeBus(config));
+    FL_CHECK(mock.isInitialized());
 
     // Second initialization should fail
-    CHECK_FALSE(mock.initializeBus(config));
+    FL_CHECK_FALSE(mock.initializeBus(config));
 }
 
 TEST_CASE("SpiPeripheralMock - free bus") {
@@ -106,16 +106,16 @@ TEST_CASE("SpiPeripheralMock - free bus") {
     auto& mock = fixture.mock;
 
     SpiBusConfig config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(config));
-    CHECK(mock.freeBus());
-    CHECK_FALSE(mock.isInitialized());
+    FL_CHECK(mock.initializeBus(config));
+    FL_CHECK(mock.freeBus());
+    FL_CHECK_FALSE(mock.isInitialized());
 }
 
 TEST_CASE("SpiPeripheralMock - free uninitialized bus fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
-    CHECK_FALSE(mock.freeBus());
+    FL_CHECK_FALSE(mock.freeBus());
 }
 
 TEST_CASE("SpiPeripheralMock - free bus with device attached fails") {
@@ -123,17 +123,17 @@ TEST_CASE("SpiPeripheralMock - free bus with device attached fails") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Cannot free bus while device is attached
-    CHECK_FALSE(mock.freeBus());
+    FL_CHECK_FALSE(mock.freeBus());
 
     // Must remove device first
-    CHECK(mock.removeDevice());
-    CHECK(mock.freeBus());
+    FL_CHECK(mock.removeDevice());
+    FL_CHECK(mock.freeBus());
 }
 
 //=============================================================================
@@ -145,16 +145,16 @@ TEST_CASE("SpiPeripheralMock - add device") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
-    CHECK(mock.hasDevice());
+    FL_CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.hasDevice());
 
     // Verify stored configuration
     const auto& stored = mock.getDeviceConfig();
-    CHECK_EQ(stored.clock_speed_hz, 2500000);
-    CHECK_EQ(stored.queue_size, 3);
+    FL_CHECK_EQ(stored.clock_speed_hz, 2500000);
+    FL_CHECK_EQ(stored.queue_size, 3);
 }
 
 TEST_CASE("SpiPeripheralMock - add device without bus fails") {
@@ -162,8 +162,8 @@ TEST_CASE("SpiPeripheralMock - add device without bus fails") {
     auto& mock = fixture.mock;
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK_FALSE(mock.addDevice(device_config));
-    CHECK_FALSE(mock.hasDevice());
+    FL_CHECK_FALSE(mock.addDevice(device_config));
+    FL_CHECK_FALSE(mock.hasDevice());
 }
 
 TEST_CASE("SpiPeripheralMock - add device with invalid config fails") {
@@ -171,15 +171,15 @@ TEST_CASE("SpiPeripheralMock - add device with invalid config fails") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     // Invalid: zero clock speed
     SpiDeviceConfig bad_clock(/*clock_hz=*/0, /*queue_size=*/3);
-    CHECK_FALSE(mock.addDevice(bad_clock));
+    FL_CHECK_FALSE(mock.addDevice(bad_clock));
 
     // Invalid: zero queue size
     SpiDeviceConfig bad_queue(/*clock_hz=*/2500000, /*queue_size=*/0);
-    CHECK_FALSE(mock.addDevice(bad_queue));
+    FL_CHECK_FALSE(mock.addDevice(bad_queue));
 }
 
 TEST_CASE("SpiPeripheralMock - double add device fails") {
@@ -187,13 +187,13 @@ TEST_CASE("SpiPeripheralMock - double add device fails") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Second add should fail
-    CHECK_FALSE(mock.addDevice(device_config));
+    FL_CHECK_FALSE(mock.addDevice(device_config));
 }
 
 TEST_CASE("SpiPeripheralMock - remove device") {
@@ -201,21 +201,21 @@ TEST_CASE("SpiPeripheralMock - remove device") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
-    CHECK(mock.hasDevice());
+    FL_CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.hasDevice());
 
-    CHECK(mock.removeDevice());
-    CHECK_FALSE(mock.hasDevice());
+    FL_CHECK(mock.removeDevice());
+    FL_CHECK_FALSE(mock.hasDevice());
 }
 
 TEST_CASE("SpiPeripheralMock - remove non-existent device fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
-    CHECK_FALSE(mock.removeDevice());
+    FL_CHECK_FALSE(mock.removeDevice());
 }
 
 //=============================================================================
@@ -228,19 +228,19 @@ TEST_CASE("SpiPeripheralMock - queue single transaction") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Queue transaction
     uint8_t buffer[16] = {0x12, 0x34, 0x56, 0x78};
     SpiTrans trans(buffer, 4);
-    CHECK(mock.queueTransaction(trans));
+    FL_CHECK(mock.queueTransaction(trans));
 
     // Verify transaction was queued
-    CHECK_EQ(mock.getQueuedTransactionCount(), 1);
-    CHECK_EQ(mock.getTransactionCount(), 1);
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 1);
+    FL_CHECK_EQ(mock.getTransactionCount(), 1);
 }
 
 TEST_CASE("SpiPeripheralMock - queue transaction without device fails") {
@@ -248,12 +248,12 @@ TEST_CASE("SpiPeripheralMock - queue transaction without device fails") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     // No device added
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
     SpiTrans trans(buffer, 4);
-    CHECK_FALSE(mock.queueTransaction(trans));
+    FL_CHECK_FALSE(mock.queueTransaction(trans));
 }
 
 TEST_CASE("SpiPeripheralMock - queue transaction without bus fails") {
@@ -263,7 +263,7 @@ TEST_CASE("SpiPeripheralMock - queue transaction without bus fails") {
     // No bus initialized
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
     SpiTrans trans(buffer, 4);
-    CHECK_FALSE(mock.queueTransaction(trans));
+    FL_CHECK_FALSE(mock.queueTransaction(trans));
 }
 
 TEST_CASE("SpiPeripheralMock - queue multiple transactions") {
@@ -272,22 +272,22 @@ TEST_CASE("SpiPeripheralMock - queue multiple transactions") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Queue 3 transactions (queue size is 3)
     uint8_t buffer1[4] = {0x11, 0x22, 0x33, 0x44};
     uint8_t buffer2[4] = {0x55, 0x66, 0x77, 0x88};
     uint8_t buffer3[4] = {0x99, 0xAA, 0xBB, 0xCC};
 
-    CHECK(mock.queueTransaction(SpiTrans(buffer1, 4)));
-    CHECK(mock.queueTransaction(SpiTrans(buffer2, 4)));
-    CHECK(mock.queueTransaction(SpiTrans(buffer3, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer1, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer2, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer3, 4)));
 
-    CHECK_EQ(mock.getQueuedTransactionCount(), 3);
-    CHECK_EQ(mock.getTransactionCount(), 3);
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 3);
+    FL_CHECK_EQ(mock.getTransactionCount(), 3);
 }
 
 TEST_CASE("SpiPeripheralMock - queue overflow") {
@@ -296,22 +296,22 @@ TEST_CASE("SpiPeripheralMock - queue overflow") {
 
     // Setup with queue size 2
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/2);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Queue 2 transactions successfully
     uint8_t buffer1[4] = {0x11, 0x22, 0x33, 0x44};
     uint8_t buffer2[4] = {0x55, 0x66, 0x77, 0x88};
     uint8_t buffer3[4] = {0x99, 0xAA, 0xBB, 0xCC};
 
-    CHECK(mock.queueTransaction(SpiTrans(buffer1, 4)));
-    CHECK(mock.queueTransaction(SpiTrans(buffer2, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer1, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer2, 4)));
 
     // Third transaction should fail (queue full)
-    CHECK_FALSE(mock.queueTransaction(SpiTrans(buffer3, 4)));
-    CHECK_EQ(mock.getQueuedTransactionCount(), 2);
+    FL_CHECK_FALSE(mock.queueTransaction(SpiTrans(buffer3, 4)));
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 2);
 }
 
 TEST_CASE("SpiPeripheralMock - transaction failure injection") {
@@ -320,23 +320,23 @@ TEST_CASE("SpiPeripheralMock - transaction failure injection") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Inject failure
     mock.setTransactionFailure(true);
 
     // Transaction should fail
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
-    CHECK_FALSE(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK_FALSE(mock.queueTransaction(SpiTrans(buffer, 4)));
 
     // Reset failure flag
     mock.setTransactionFailure(false);
 
     // Transaction should succeed
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 }
 
 //=============================================================================
@@ -349,27 +349,27 @@ TEST_CASE("SpiPeripheralMock - capture transaction data") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Queue transaction with known data
     uint8_t buffer[4] = {0xDE, 0xAD, 0xBE, 0xEF};
     SpiTrans trans(buffer, 4);
-    CHECK(mock.queueTransaction(trans));
+    FL_CHECK(mock.queueTransaction(trans));
 
     // Verify data was captured
     const auto& history = mock.getTransactionHistory();
-    CHECK_EQ(history.size(), 1);
+    FL_CHECK_EQ(history.size(), 1);
 
     const auto& record = history[0];
-    CHECK_EQ(record.length_bits, 32);  // 4 bytes * 8 bits
-    CHECK_EQ(record.buffer_copy.size(), 4);
-    CHECK_EQ(record.buffer_copy[0], 0xDE);
-    CHECK_EQ(record.buffer_copy[1], 0xAD);
-    CHECK_EQ(record.buffer_copy[2], 0xBE);
-    CHECK_EQ(record.buffer_copy[3], 0xEF);
+    FL_CHECK_EQ(record.length_bits, 32);  // 4 bytes * 8 bits
+    FL_CHECK_EQ(record.buffer_copy.size(), 4);
+    FL_CHECK_EQ(record.buffer_copy[0], 0xDE);
+    FL_CHECK_EQ(record.buffer_copy[1], 0xAD);
+    FL_CHECK_EQ(record.buffer_copy[2], 0xBE);
+    FL_CHECK_EQ(record.buffer_copy[3], 0xEF);
 }
 
 TEST_CASE("SpiPeripheralMock - get last transaction data") {
@@ -378,26 +378,26 @@ TEST_CASE("SpiPeripheralMock - get last transaction data") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // No transactions yet
     auto last_data = mock.getLastTransactionData();
-    CHECK(last_data.empty());
+    FL_CHECK(last_data.empty());
 
     // Queue transaction
     uint8_t buffer[4] = {0xCA, 0xFE, 0xBA, 0xBE};
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 
     // Verify last data
     last_data = mock.getLastTransactionData();
-    CHECK_EQ(last_data.size(), 4);
-    CHECK_EQ(last_data[0], 0xCA);
-    CHECK_EQ(last_data[1], 0xFE);
-    CHECK_EQ(last_data[2], 0xBA);
-    CHECK_EQ(last_data[3], 0xBE);
+    FL_CHECK_EQ(last_data.size(), 4);
+    FL_CHECK_EQ(last_data[0], 0xCA);
+    FL_CHECK_EQ(last_data[1], 0xFE);
+    FL_CHECK_EQ(last_data[2], 0xBA);
+    FL_CHECK_EQ(last_data[3], 0xBE);
 }
 
 TEST_CASE("SpiPeripheralMock - clear transaction history") {
@@ -406,24 +406,24 @@ TEST_CASE("SpiPeripheralMock - clear transaction history") {
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Queue some transactions
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 
-    CHECK_EQ(mock.getTransactionHistory().size(), 2);
+    FL_CHECK_EQ(mock.getTransactionHistory().size(), 2);
 
     // Clear history
     mock.clearTransactionHistory();
 
-    CHECK_EQ(mock.getTransactionHistory().size(), 0);
-    CHECK_EQ(mock.getTransactionCount(), 0);
-    CHECK_EQ(mock.getQueuedTransactionCount(), 0);
+    FL_CHECK_EQ(mock.getTransactionHistory().size(), 0);
+    FL_CHECK_EQ(mock.getTransactionCount(), 0);
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 0);
 }
 
 //=============================================================================
@@ -435,11 +435,11 @@ TEST_CASE("SpiPeripheralMock - register callback") {
     auto& mock = fixture.mock;
 
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     // Register callback
     void* callback = reinterpret_cast<void*>(testCallback);
-    CHECK(mock.registerCallback(callback, nullptr));
+    FL_CHECK(mock.registerCallback(callback, nullptr));
 }
 
 TEST_CASE("SpiPeripheralMock - register callback without bus fails") {
@@ -447,7 +447,7 @@ TEST_CASE("SpiPeripheralMock - register callback without bus fails") {
     auto& mock = fixture.mock;
 
     void* callback = reinterpret_cast<void*>(testCallback);
-    CHECK_FALSE(mock.registerCallback(callback, nullptr));
+    FL_CHECK_FALSE(mock.registerCallback(callback, nullptr));
 }
 
 TEST_CASE("SpiPeripheralMock - simulate transaction complete triggers callback") {
@@ -456,25 +456,25 @@ TEST_CASE("SpiPeripheralMock - simulate transaction complete triggers callback")
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Register callback
     gCallbackCount = 0;
     void* callback = reinterpret_cast<void*>(testCallback);
-    CHECK(mock.registerCallback(callback, nullptr));
+    FL_CHECK(mock.registerCallback(callback, nullptr));
 
     // Queue transaction
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 
     // Manually trigger completion
     mock.simulateTransactionComplete();
 
     // Verify callback was called
-    CHECK_EQ(gCallbackCount, 1);
+    FL_CHECK_EQ(gCallbackCount, 1);
 }
 
 //=============================================================================
@@ -487,11 +487,11 @@ TEST_CASE("SpiPeripheralMock - allocate DMA buffer") {
 
     // Allocate buffer
     uint8_t* buffer = mock.allocateDma(128);
-    CHECK(buffer != nullptr);
+    FL_CHECK(buffer != nullptr);
 
     // Write to buffer (verify it's usable)
     buffer[0] = 0x42;
-    CHECK_EQ(buffer[0], 0x42);
+    FL_CHECK_EQ(buffer[0], 0x42);
 
     // Free buffer
     mock.freeDma(buffer);
@@ -503,11 +503,11 @@ TEST_CASE("SpiPeripheralMock - allocate DMA buffer with alignment") {
 
     // Allocate non-aligned size (should be rounded up)
     uint8_t* buffer = mock.allocateDma(17);  // Not a multiple of 4
-    CHECK(buffer != nullptr);
+    FL_CHECK(buffer != nullptr);
 
     // Verify 4-byte alignment
     uintptr_t addr = reinterpret_cast<uintptr_t>(buffer);
-    CHECK_EQ(addr % 4, 0);
+    FL_CHECK_EQ(addr % 4, 0);
 
     mock.freeDma(buffer);
 }
@@ -529,25 +529,25 @@ TEST_CASE("SpiPeripheralMock - canQueueTransaction") {
     auto& mock = fixture.mock;
 
     // Not ready initially
-    CHECK_FALSE(mock.canQueueTransaction());
+    FL_CHECK_FALSE(mock.canQueueTransaction());
 
     // Setup
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/2);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     // Now ready
-    CHECK(mock.canQueueTransaction());
+    FL_CHECK(mock.canQueueTransaction());
 
     // Queue 2 transactions (queue size is 2)
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 
     // Queue full
-    CHECK_FALSE(mock.canQueueTransaction());
+    FL_CHECK_FALSE(mock.canQueueTransaction());
 }
 
 TEST_CASE("SpiPeripheralMock - reset clears all state") {
@@ -556,26 +556,26 @@ TEST_CASE("SpiPeripheralMock - reset clears all state") {
 
     // Setup and queue transaction
     SpiBusConfig bus_config(/*mosi=*/23, /*sclk=*/18);
-    CHECK(mock.initializeBus(bus_config));
+    FL_CHECK(mock.initializeBus(bus_config));
 
     SpiDeviceConfig device_config(/*clock_hz=*/2500000, /*queue_size=*/3);
-    CHECK(mock.addDevice(device_config));
+    FL_CHECK(mock.addDevice(device_config));
 
     uint8_t buffer[4] = {0x12, 0x34, 0x56, 0x78};
-    CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
+    FL_CHECK(mock.queueTransaction(SpiTrans(buffer, 4)));
 
-    CHECK(mock.isInitialized());
-    CHECK(mock.hasDevice());
-    CHECK_EQ(mock.getQueuedTransactionCount(), 1);
+    FL_CHECK(mock.isInitialized());
+    FL_CHECK(mock.hasDevice());
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 1);
 
     // Reset
     mock.reset();
 
     // All state cleared
-    CHECK_FALSE(mock.isInitialized());
-    CHECK_FALSE(mock.hasDevice());
-    CHECK_EQ(mock.getQueuedTransactionCount(), 0);
-    CHECK_EQ(mock.getTransactionCount(), 0);
+    FL_CHECK_FALSE(mock.isInitialized());
+    FL_CHECK_FALSE(mock.hasDevice());
+    FL_CHECK_EQ(mock.getQueuedTransactionCount(), 0);
+    FL_CHECK_EQ(mock.getTransactionCount(), 0);
 }
 
 //=============================================================================
@@ -588,12 +588,12 @@ TEST_CASE("SpiPeripheralMock - dual-lane bus configuration") {
 
     // Dual-lane configuration
     SpiBusConfig config(/*data0=*/23, /*data1=*/19, /*sclk=*/18, /*max_sz=*/4096);
-    CHECK(mock.initializeBus(config));
+    FL_CHECK(mock.initializeBus(config));
 
     const auto& stored = mock.getBusConfig();
-    CHECK_EQ(stored.mosi_pin, 23);  // Data0 → MOSI
-    CHECK_EQ(stored.miso_pin, 19);  // Data1 → MISO
-    CHECK_EQ(stored.sclk_pin, 18);
+    FL_CHECK_EQ(stored.mosi_pin, 23);  // Data0 → MOSI
+    FL_CHECK_EQ(stored.miso_pin, 19);  // Data1 → MISO
+    FL_CHECK_EQ(stored.sclk_pin, 18);
 }
 
 TEST_CASE("SpiPeripheralMock - quad-lane bus configuration") {
@@ -602,14 +602,14 @@ TEST_CASE("SpiPeripheralMock - quad-lane bus configuration") {
 
     // Quad-lane configuration
     SpiBusConfig config(/*data0=*/23, /*data1=*/19, /*data2=*/22, /*data3=*/21, /*sclk=*/18, /*max_sz=*/4096);
-    CHECK(mock.initializeBus(config));
+    FL_CHECK(mock.initializeBus(config));
 
     const auto& stored = mock.getBusConfig();
-    CHECK_EQ(stored.mosi_pin, 23);
-    CHECK_EQ(stored.miso_pin, 19);
-    CHECK_EQ(stored.data2_pin, 22);
-    CHECK_EQ(stored.data3_pin, 21);
-    CHECK_EQ(stored.sclk_pin, 18);
+    FL_CHECK_EQ(stored.mosi_pin, 23);
+    FL_CHECK_EQ(stored.miso_pin, 19);
+    FL_CHECK_EQ(stored.data2_pin, 22);
+    FL_CHECK_EQ(stored.data3_pin, 21);
+    FL_CHECK_EQ(stored.sclk_pin, 18);
 }
 
 //=============================================================================
@@ -625,5 +625,5 @@ TEST_CASE("SpiPeripheralMock - getMicroseconds") {
     uint64_t t2 = mock.getMicroseconds();
 
     // Time should advance (may not be exactly 1000us due to scheduling)
-    CHECK(t2 > t1);
+    FL_CHECK(t2 > t1);
 }

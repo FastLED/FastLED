@@ -110,6 +110,181 @@ CHECK("expected" == actual_string);     // Wrong comparison type
 - **Consistent debugging** across all test failures
 - **Type safety** for different comparison types
 
+## Test Macro Naming Standards
+
+**🚨 CRITICAL: Always use FL_ prefixed trampolines instead of direct doctest macros**
+
+### Overview
+All test files must use `FL_CHECK` and `FL_REQUIRE` macro trampolines instead of calling doctest macros directly. This provides a consistent abstraction layer between test code and the underlying test framework (doctest).
+
+### Trampoline Pattern
+The FastLED test suite uses a **trampoline layer** defined in `tests/test.h` that wraps doctest macros:
+
+```cpp
+// tests/test.h defines trampolines
+#define FL_CHECK(...)           CHECK(__VA_ARGS__)
+#define FL_CHECK_EQ(a, b)       CHECK_EQ(a, b)
+#define FL_REQUIRE(...)         REQUIRE(__VA_ARGS__)
+// ... and 30+ more variants
+```
+
+### Usage Examples
+
+**✅ CORRECT - Use FL_ prefixed trampolines:**
+```cpp
+#include "test.h"  // Includes trampolines, not doctest.h directly
+
+TEST_CASE("Example test") {
+    FL_CHECK_EQ(expected, actual);
+    FL_REQUIRE_LT(index, max_size);
+    FL_CHECK_TRUE(condition);
+    FL_CHECK_FALSE(error_flag);
+}
+```
+
+**❌ INCORRECT - Do NOT use doctest macros directly:**
+```cpp
+#include "doctest.h"  // Wrong - use test.h instead
+
+TEST_CASE("Example test") {
+    CHECK_EQ(expected, actual);      // Missing FL_ prefix
+    REQUIRE_LT(index, max_size);     // Missing FL_ prefix
+    CHECK(condition == true);        // Missing FL_ prefix
+}
+```
+
+### Complete Trampoline List
+
+All 35+ trampolines follow the pattern: `FL_<DOCTEST_MACRO_NAME>`
+
+**Basic Assertions:**
+- `FL_CHECK(...)` - Basic check
+- `FL_REQUIRE(...)` - Required check (stops test on failure)
+
+**Equality Comparisons:**
+- `FL_CHECK_EQ(a, b)` / `FL_REQUIRE_EQ(a, b)` - Equal
+- `FL_CHECK_NE(a, b)` / `FL_REQUIRE_NE(a, b)` - Not equal
+
+**Relational Comparisons:**
+- `FL_CHECK_LT(a, b)` / `FL_REQUIRE_LT(a, b)` - Less than
+- `FL_CHECK_LE(a, b)` / `FL_REQUIRE_LE(a, b)` - Less than or equal
+- `FL_CHECK_GT(a, b)` / `FL_REQUIRE_GT(a, b)` - Greater than
+- `FL_CHECK_GE(a, b)` / `FL_REQUIRE_GE(a, b)` - Greater than or equal
+
+**Boolean Assertions:**
+- `FL_CHECK_TRUE(x)` / `FL_REQUIRE_TRUE(x)` - Must be true
+- `FL_CHECK_FALSE(x)` / `FL_REQUIRE_FALSE(x)` - Must be false
+
+**Floating Point:**
+- `FL_CHECK_DOUBLE_EQ(a, b)` / `FL_REQUIRE_DOUBLE_EQ(a, b)` - Double equality
+- `FL_CHECK_DOUBLE_NE(a, b)` / `FL_REQUIRE_DOUBLE_NE(a, b)` - Double inequality
+
+**String Comparisons:**
+- `FL_CHECK_STREQ(a, b)` / `FL_REQUIRE_STREQ(a, b)` - String equal
+- `FL_CHECK_STRNE(a, b)` / `FL_REQUIRE_STRNE(a, b)` - String not equal
+
+**Type Traits:**
+- `FL_CHECK_TRAIT(expr)` / `FL_REQUIRE_TRAIT(expr)` - Type trait validation
+
+**Unary Checks:**
+- `FL_CHECK_UNARY(expr)` / `FL_REQUIRE_UNARY(expr)` - Unary expression
+- `FL_CHECK_UNARY_FALSE(expr)` / `FL_REQUIRE_UNARY_FALSE(expr)` - Unary false
+
+**Throwing Assertions:**
+- `FL_CHECK_THROWS(...)` / `FL_REQUIRE_THROWS(...)` - Must throw any exception
+- `FL_CHECK_THROWS_AS(expr, type)` / `FL_REQUIRE_THROWS_AS(expr, type)` - Must throw specific type
+- `FL_CHECK_THROWS_WITH(expr, str)` / `FL_REQUIRE_THROWS_WITH(expr, str)` - Must throw with message
+- `FL_CHECK_THROWS_WITH_AS(expr, str, type)` / `FL_REQUIRE_THROWS_WITH_AS(expr, str, type)` - Combined
+- `FL_CHECK_NOTHROW(...)` / `FL_REQUIRE_NOTHROW(...)` - Must not throw
+
+### Exceptions (DO NOT Convert)
+
+**These macros should NOT use FL_ prefix:**
+- `CHECK_CLOSE` / `REQUIRE_CLOSE` - Custom floating point comparison macros (not doctest)
+- `TEST_CASE` / `SUBCASE` / `TEST_SUITE` - Test structure macros (remain unchanged)
+- `DOCTEST_CONFIG_*` - Configuration macros (remain unchanged)
+
+### Template Argument Wrapping
+
+**🚨 CRITICAL: Wrap template expressions with commas in parentheses**
+
+When passing template expressions containing commas to FL_ macros, the preprocessor treats commas as argument separators. Wrap the entire expression in parentheses:
+
+**❌ PROBLEM - Preprocessor error:**
+```cpp
+// ERROR: Preprocessor sees 3 arguments instead of 2
+FL_CHECK_EQ(int_scale<T1, T2>(arg), expected)
+//                     ^^^ comma treated as macro argument separator
+```
+
+**✅ SOLUTION - Wrap in parentheses:**
+```cpp
+// Correct: Parentheses protect the comma from preprocessor
+FL_CHECK_EQ((int_scale<T1, T2>(arg)), expected)
+//          ^                      ^
+//          wrap template expression
+```
+
+**More examples:**
+```cpp
+// Multiple template arguments
+FL_CHECK_TRUE((std::is_same<A, B>::value))
+
+// Template function calls
+FL_CHECK_EQ((convert<uint8_t, uint16_t>(input)), output)
+
+// Nested templates
+FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
+```
+
+**When wrapping is needed:**
+- Template instantiations: `func<T1, T2>(...)`
+- Template type traits: `std::is_same<A, B>::value`
+- Template member access: `Container<K, V>::size()`
+- Any expression containing commas that aren't function argument separators
+
+**When wrapping is NOT needed:**
+- Function calls with multiple arguments: `FL_CHECK_EQ(func(a, b, c), expected)` ✅ (commas are function args)
+- Initializer lists: `FL_CHECK_EQ(vec, {1, 2, 3})` ✅ (braces protect commas)
+
+### Verification Commands
+
+**Check for unconverted macros:**
+```bash
+# Should return zero results (or only comments/CHECK_CLOSE)
+rg tests/ "\bCHECK\b" | grep -v "FL_CHECK" | grep -v "CHECK_CLOSE" | grep -v "TEST_CASE"
+rg tests/ "\bREQUIRE\b" | grep -v "FL_REQUIRE" | grep -v "REQUIRE_CLOSE"
+```
+
+**Count trampoline usage:**
+```bash
+# Should return 10,000+ matches across test suite
+rg tests/ "\bFL_CHECK" | wc -l
+rg tests/ "\bFL_REQUIRE" | wc -l
+```
+
+### Why Use Trampolines?
+
+**Benefits of the trampoline layer:**
+1. **Abstraction** - Can swap test frameworks without changing test code
+2. **Consistency** - Single naming convention across entire codebase
+3. **Flexibility** - Can add custom behavior (logging, metrics) at trampoline layer
+4. **Clarity** - `FL_` prefix clearly identifies FastLED test assertions
+5. **Maintainability** - Centralized macro definitions in `tests/test.h`
+
+### Migration Notes
+
+**This project has fully migrated to FL_ trampolines:**
+- ✅ 182 test files converted (14,495 macro invocations)
+- ✅ 35+ trampoline macros defined in `tests/test.h`
+- ✅ Zero bare CHECK/REQUIRE macros remain (except allowed exceptions)
+- ✅ All tests compile and pass with trampolines
+
+**For new test files:**
+- Always include `test.h` (not `doctest.h` directly)
+- Always use `FL_CHECK` / `FL_REQUIRE` prefix
+- Follow template wrapping guidelines for comma-containing expressions
+
 ## Test File Creation Guidelines
 
 **🚨 CRITICAL: Minimize test file proliferation - Consolidate tests whenever possible**

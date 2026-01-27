@@ -11,11 +11,11 @@ TEST_CASE("fl::begin and fl::end for C arrays") {
         int* b = fl::begin(arr);
         int* e = fl::end(arr);
 
-        CHECK_EQ(b, arr);
-        CHECK_EQ(e, arr + 5);
-        CHECK_EQ(e - b, 5);
-        CHECK_EQ(*b, 1);
-        CHECK_EQ(*(e - 1), 5);
+        FL_CHECK_EQ(b, arr);
+        FL_CHECK_EQ(e, arr + 5);
+        FL_CHECK_EQ(e - b, 5);
+        FL_CHECK_EQ(*b, 1);
+        FL_CHECK_EQ(*(e - 1), 5);
     }
 
     SUBCASE("const int array") {
@@ -24,9 +24,9 @@ TEST_CASE("fl::begin and fl::end for C arrays") {
         const int* b = fl::begin(arr);
         const int* e = fl::end(arr);
 
-        CHECK_EQ(b, arr);
-        CHECK_EQ(e, arr + 3);
-        CHECK_EQ(e - b, 3);
+        FL_CHECK_EQ(b, arr);
+        FL_CHECK_EQ(e, arr + 3);
+        FL_CHECK_EQ(e - b, 3);
     }
 
     SUBCASE("double array") {
@@ -35,8 +35,8 @@ TEST_CASE("fl::begin and fl::end for C arrays") {
         double* b = fl::begin(arr);
         double* e = fl::end(arr);
 
-        CHECK_EQ(e - b, 4);
-        CHECK(doctest::Approx(*b).epsilon(0.001) == 1.1);
+        FL_CHECK_EQ(e - b, 4);
+        FL_CHECK(doctest::Approx(*b).epsilon(0.001) == 1.1);
     }
 
     SUBCASE("single element array") {
@@ -45,8 +45,8 @@ TEST_CASE("fl::begin and fl::end for C arrays") {
         int* b = fl::begin(arr);
         int* e = fl::end(arr);
 
-        CHECK_EQ(e - b, 1);
-        CHECK_EQ(*b, 42);
+        FL_CHECK_EQ(e - b, 1);
+        FL_CHECK_EQ(*b, 42);
     }
 
     SUBCASE("iterate with begin/end") {
@@ -57,7 +57,7 @@ TEST_CASE("fl::begin and fl::end for C arrays") {
             sum += *it;
         }
 
-        CHECK_EQ(sum, 15);
+        FL_CHECK_EQ(sum, 15);
     }
 }
 
@@ -68,10 +68,10 @@ TEST_CASE("fl::begin and fl::end for containers") {
         auto b = fl::begin(arr);
         auto e = fl::end(arr);
 
-        CHECK_EQ(b, arr.begin());
-        CHECK_EQ(e, arr.end());
-        CHECK_EQ(e - b, 4);
-        CHECK_EQ(*b, 10);
+        FL_CHECK_EQ(b, arr.begin());
+        FL_CHECK_EQ(e, arr.end());
+        FL_CHECK_EQ(e - b, 4);
+        FL_CHECK_EQ(*b, 10);
     }
 
     SUBCASE("const fl::array") {
@@ -80,9 +80,9 @@ TEST_CASE("fl::begin and fl::end for containers") {
         auto b = fl::begin(arr);
         auto e = fl::end(arr);
 
-        CHECK_EQ(b, arr.begin());
-        CHECK_EQ(e, arr.end());
-        CHECK_EQ(e - b, 3);
+        FL_CHECK_EQ(b, arr.begin());
+        FL_CHECK_EQ(e, arr.end());
+        FL_CHECK_EQ(e - b, 3);
     }
 
     SUBCASE("iterate with range-based constructs") {
@@ -96,7 +96,7 @@ TEST_CASE("fl::begin and fl::end for containers") {
             sum += *it;
         }
 
-        CHECK_EQ(sum, 15);
+        FL_CHECK_EQ(sum, 15);
     }
 }
 
@@ -107,7 +107,7 @@ TEST_CASE("fl::begin and fl::end constexpr") {
         constexpr const int* e = fl::end(arr);
 
         static_assert(e - b == 3, "size should be 3");
-        CHECK_EQ(e - b, 3);
+        FL_CHECK_EQ(e - b, 3);
     }
 
     SUBCASE("runtime with fl::array") {
@@ -118,7 +118,7 @@ TEST_CASE("fl::begin and fl::end constexpr") {
         auto b = fl::begin(arr);
         auto e = fl::end(arr);
 
-        CHECK_EQ(e - b, 4);
+        FL_CHECK_EQ(e - b, 4);
     }
 }
 
@@ -129,8 +129,8 @@ TEST_CASE("fl::begin and fl::end with different types") {
         char* b = fl::begin(str);
         char* e = fl::end(str);
 
-        CHECK_EQ(e - b, 6);  // includes null terminator
-        CHECK_EQ(*b, 'h');
+        FL_CHECK_EQ(e - b, 6);  // includes null terminator
+        FL_CHECK_EQ(*b, 'h');
     }
 
     SUBCASE("float array") {
@@ -139,8 +139,8 @@ TEST_CASE("fl::begin and fl::end with different types") {
         float* b = fl::begin(arr);
         float* e = fl::end(arr);
 
-        CHECK_EQ(e - b, 3);
-        CHECK(doctest::Approx(*b).epsilon(0.001) == 1.5f);
+        FL_CHECK_EQ(e - b, 3);
+        FL_CHECK(doctest::Approx(*b).epsilon(0.001) == 1.5f);
     }
 
     SUBCASE("struct array") {
@@ -153,9 +153,9 @@ TEST_CASE("fl::begin and fl::end with different types") {
         Point* b = fl::begin(arr);
         Point* e = fl::end(arr);
 
-        CHECK_EQ(e - b, 2);
-        CHECK_EQ(b->x, 1);
-        CHECK_EQ(b->y, 2);
+        FL_CHECK_EQ(e - b, 2);
+        FL_CHECK_EQ(b->x, 1);
+        FL_CHECK_EQ(b->y, 2);
     }
 }
 
@@ -163,8 +163,8 @@ TEST_CASE("fl::begin and fl::end for empty-like cases") {
     SUBCASE("single element array") {
         int arr[1] = {99};
 
-        CHECK_EQ(fl::end(arr) - fl::begin(arr), 1);
-        CHECK_EQ(*fl::begin(arr), 99);
+        FL_CHECK_EQ(fl::end(arr) - fl::begin(arr), 1);
+        FL_CHECK_EQ(*fl::begin(arr), 99);
     }
 
     SUBCASE("empty fl::array") {
@@ -173,7 +173,7 @@ TEST_CASE("fl::begin and fl::end for empty-like cases") {
         auto b = fl::begin(arr);
         auto e = fl::end(arr);
 
-        CHECK_EQ(b, e);  // empty container
+        FL_CHECK_EQ(b, e);  // empty container
     }
 }
 
@@ -185,10 +185,10 @@ TEST_CASE("fl::begin and fl::end modify through iterator") {
             *it *= 2;
         }
 
-        CHECK_EQ(arr[0], 2);
-        CHECK_EQ(arr[1], 4);
-        CHECK_EQ(arr[2], 6);
-        CHECK_EQ(arr[3], 8);
+        FL_CHECK_EQ(arr[0], 2);
+        FL_CHECK_EQ(arr[1], 4);
+        FL_CHECK_EQ(arr[2], 6);
+        FL_CHECK_EQ(arr[3], 8);
     }
 
     SUBCASE("modify container elements") {
@@ -198,8 +198,8 @@ TEST_CASE("fl::begin and fl::end modify through iterator") {
             *it += 5;
         }
 
-        CHECK_EQ(arr[0], 15);
-        CHECK_EQ(arr[1], 25);
-        CHECK_EQ(arr[2], 35);
+        FL_CHECK_EQ(arr[0], 15);
+        FL_CHECK_EQ(arr[1], 25);
+        FL_CHECK_EQ(arr[2], 35);
     }
 }

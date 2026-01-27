@@ -57,7 +57,7 @@ TEST_CASE("WS2812 PARLIO encoding - all zeros") {
     // Each bit is 0, so encoding should be 0b1000 for each bit
     // 8 bits × 4 ticks = 32 bits total
     // 0b1000 1000 1000 1000 1000 1000 1000 1000 = 0x88888888
-    CHECK_EQ(result, 0x88888888);
+    FL_CHECK_EQ(result, 0x88888888);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - all ones") {
@@ -67,7 +67,7 @@ TEST_CASE("WS2812 PARLIO encoding - all ones") {
     // Each bit is 1, so encoding should be 0b1110 for each bit
     // 8 bits × 4 ticks = 32 bits total
     // 0b1110 1110 1110 1110 1110 1110 1110 1110 = 0xEEEEEEEE
-    CHECK_EQ(result, 0xEEEEEEEE);
+    FL_CHECK_EQ(result, 0xEEEEEEEE);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0xAA") {
@@ -86,7 +86,7 @@ TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0xAA") {
     //
     // Combined: 1110 1000 1110 1000 1110 1000 1110 1000
     // Hex groups: E    8    E    8    E    8    E    8
-    CHECK_EQ(result, 0xE8E8E8E8);
+    FL_CHECK_EQ(result, 0xE8E8E8E8);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0x55") {
@@ -105,7 +105,7 @@ TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0x55") {
     //
     // Combined: 1000 1110 1000 1110 1000 1110 1000 1110
     // Hex groups: 8    E    8    E    8    E    8    E
-    CHECK_EQ(result, 0x8E8E8E8E);
+    FL_CHECK_EQ(result, 0x8E8E8E8E);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0x0F") {
@@ -118,7 +118,7 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0x0F") {
     //
     // Combined: 1000 1000 1000 1000 1110 1110 1110 1110
     // Hex groups: 8    8    8    8    E    E    E    E
-    CHECK_EQ(result, 0x8888EEEE);
+    FL_CHECK_EQ(result, 0x8888EEEE);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xF0") {
@@ -131,7 +131,7 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xF0") {
     //
     // Combined: 1110 1110 1110 1110 1000 1000 1000 1000
     // Hex groups: E    E    E    E    8    8    8    8
-    CHECK_EQ(result, 0xEEEE8888);
+    FL_CHECK_EQ(result, 0xEEEE8888);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xC3") {
@@ -150,7 +150,7 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xC3") {
     //
     // Combined: 1110 1110 1000 1000 1000 1000 1110 1110
     // Hex groups: E    E    8    8    8    8    E    E
-    CHECK_EQ(result, 0xEE8888EE);
+    FL_CHECK_EQ(result, 0xEE8888EE);
 }
 
 TEST_CASE("WS2812 PARLIO encoding - single bit patterns") {
@@ -159,18 +159,18 @@ TEST_CASE("WS2812 PARLIO encoding - single bit patterns") {
     SUBCASE("Only MSB set (0x80)") {
         uint32_t result = encodeLedByte(0x80);
         // 1000 0000 → 1110 1000 1000 1000 1000 1000 1000 1000
-        CHECK_EQ(result, 0xE8888888);
+        FL_CHECK_EQ(result, 0xE8888888);
     }
 
     SUBCASE("Only LSB set (0x01)") {
         uint32_t result = encodeLedByte(0x01);
         // 0000 0001 → 1000 1000 1000 1000 1000 1000 1000 1110
-        CHECK_EQ(result, 0x8888888E);
+        FL_CHECK_EQ(result, 0x8888888E);
     }
 
     SUBCASE("Middle bit set (0x10)") {
         uint32_t result = encodeLedByte(0x10);
         // 0001 0000 → 1000 1000 1000 1110 1000 1000 1000 1000
-        CHECK_EQ(result, 0x888E8888);
+        FL_CHECK_EQ(result, 0x888E8888);
     }
 }

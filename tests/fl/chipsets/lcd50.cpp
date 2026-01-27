@@ -35,17 +35,17 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2812") {
         3  // 3 words per bit for memory efficiency
     );
 
-    REQUIRE(result.valid);
-    CHECK_EQ(result.n_bit, 3);
+    FL_REQUIRE(result.valid);
+    FL_CHECK_EQ(result.n_bit, 3);
 
     // Total bit period: 350 + 700 + 600 = 1650 ns
     // Ideal slot: 1650 / 3 = 550 ns
     // Ideal PCLK: 1,000,000,000 / 550 ≈ 1.82 MHz
     // Rounded to nearest MHz: 2 MHz
-    CHECK_EQ(result.pclk_hz, 2000000);
+    FL_CHECK_EQ(result.pclk_hz, 2000000);
 
     // Actual slot: 1,000,000,000 / 2,000,000 = 500 ns
-    CHECK_EQ(result.slot_ns, 500);
+    FL_CHECK_EQ(result.slot_ns, 500);
 
     // Verify 3-word pattern timings:
     // Bit-0: [HIGH, LOW, LOW] = 500ns HIGH, 1000ns LOW
@@ -55,19 +55,19 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2812") {
     // T1 = minimum HIGH time (for bit 0) = 500ns
     // T2 = additional HIGH for bit 1 = 500ns (so bit-1 HIGH = T1+T2 = 1000ns)
     // T3 = LOW tail = 500ns
-    CHECK_EQ(result.actual_T1_ns, 500);  // Bit-0 HIGH: 1 slot
-    CHECK_EQ(result.actual_T2_ns, 500);  // Additional HIGH for bit-1: 1 slot
-    CHECK_EQ(result.actual_T3_ns, 500);  // LOW tail: 1 slot
+    FL_CHECK_EQ(result.actual_T1_ns, 500);  // Bit-0 HIGH: 1 slot
+    FL_CHECK_EQ(result.actual_T2_ns, 500);  // Additional HIGH for bit-1: 1 slot
+    FL_CHECK_EQ(result.actual_T3_ns, 500);  // LOW tail: 1 slot
 
     // Check timing errors are within acceptable range
     // WS28xx chips are tolerant (typically ±150ns is acceptable)
-    CHECK(result.error_T1 < 0.5f);  // Less than 50% error
-    CHECK(result.error_T2 < 0.5f);
-    CHECK(result.error_T3 < 0.5f);
+    FL_CHECK(result.error_T1 < 0.5f);  // Less than 50% error
+    FL_CHECK(result.error_T2 < 0.5f);
+    FL_CHECK(result.error_T3 < 0.5f);
 
     // Verify timing is valid (may have high error for 3-word encoding, but that's expected)
     // The design document acknowledges ~20% error is acceptable for WS28xx
-    CHECK(result.valid);
+    FL_CHECK(result.valid);
 }
 
 TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2816") {
@@ -75,17 +75,17 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2816") {
         WS2816_T1, WS2816_T2, WS2816_T3, 3
     );
 
-    REQUIRE(result.valid);
+    FL_REQUIRE(result.valid);
 
     // Total bit period: 300 + 700 + 550 = 1550 ns
     // Ideal slot: 1550 / 3 ≈ 517 ns
     // Ideal PCLK: 1,000,000,000 / 517 ≈ 1.93 MHz
     // Rounded: 2 MHz
-    CHECK_EQ(result.pclk_hz, 2000000);
-    CHECK_EQ(result.slot_ns, 500);
+    FL_CHECK_EQ(result.pclk_hz, 2000000);
+    FL_CHECK_EQ(result.slot_ns, 500);
 
     // Verify timing is valid
-    CHECK(result.valid);
+    FL_CHECK(result.valid);
 }
 
 TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2811 slow variant") {
@@ -93,16 +93,16 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2811 slow variant") {
         WS2811_T1, WS2811_T2, WS2811_T3, 3
     );
 
-    REQUIRE(result.valid);
+    FL_REQUIRE(result.valid);
 
     // Total bit period: 500 + 2000 + 2000 = 4500 ns
     // Ideal slot: 4500 / 3 = 1500 ns
     // Ideal PCLK: 1,000,000,000 / 1500 = 666,666 Hz
     // Rounded: 1 MHz (rounded up to minimum)
-    CHECK_EQ(result.pclk_hz, 1000000);  // 1 MHz
-    CHECK_EQ(result.slot_ns, 1000);
+    FL_CHECK_EQ(result.pclk_hz, 1000000);  // 1 MHz
+    FL_CHECK_EQ(result.slot_ns, 1000);
 
-    CHECK(result.valid);
+    FL_CHECK(result.valid);
 }
 
 TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - SK6812 fast variant") {
@@ -110,37 +110,37 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - SK6812 fast variant") {
         SK6812_T1, SK6812_T2, SK6812_T3, 3
     );
 
-    REQUIRE(result.valid);
+    FL_REQUIRE(result.valid);
 
     // Total bit period: 300 + 600 + 300 = 1200 ns
     // Ideal slot: 1200 / 3 = 400 ns
     // Ideal PCLK: 1,000,000,000 / 400 = 2.5 MHz
     // Rounded to nearest MHz: 2 or 3 MHz (2.5 rounds up to 3 MHz with  +0.5 rounding)
-    CHECK(result.pclk_hz >= 2000000);
-    CHECK(result.pclk_hz <= 3000000);
+    FL_CHECK(result.pclk_hz >= 2000000);
+    FL_CHECK(result.pclk_hz <= 3000000);
 
-    CHECK(result.valid);
+    FL_CHECK(result.valid);
 }
 
 TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - input validation") {
     SUBCASE("Zero T1") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(0, 700, 600, 3);
-        CHECK_FALSE(result.valid);
+        FL_CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero T2") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 0, 600, 3);
-        CHECK_FALSE(result.valid);
+        FL_CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero T3") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 700, 0, 3);
-        CHECK_FALSE(result.valid);
+        FL_CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero n_words_per_bit") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 700, 600, 0);
-        CHECK_FALSE(result.valid);
+        FL_CHECK_FALSE(result.valid);
     }
 }
 
@@ -153,8 +153,8 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
             1000000,  // 1 MHz min
             80000000  // 80 MHz max
         );
-        REQUIRE(result.valid);
-        CHECK(result.pclk_hz >= 1000000);
+        FL_REQUIRE(result.valid);
+        FL_CHECK(result.pclk_hz >= 1000000);
     }
 
     SUBCASE("Maximum frequency clamp") {
@@ -165,8 +165,8 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
             1000000,   // 1 MHz min
             80000000   // 80 MHz max
         );
-        REQUIRE(result.valid);
-        CHECK(result.pclk_hz <= 80000000);
+        FL_REQUIRE(result.valid);
+        FL_CHECK(result.pclk_hz <= 80000000);
     }
 }
 
@@ -179,9 +179,9 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
             80000000,
             true  // Round to MHz
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
         // Should be a multiple of 1 MHz
-        CHECK_EQ(result.pclk_hz % 1000000, 0);
+        FL_CHECK_EQ(result.pclk_hz % 1000000, 0);
     }
 
     SUBCASE("Without MHz rounding") {
@@ -192,9 +192,9 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
             80000000,
             false  // No rounding
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
         // May not be a multiple of MHz
-        CHECK(result.pclk_hz > 0);
+        FL_CHECK(result.pclk_hz > 0);
     }
 }
 
@@ -203,22 +203,22 @@ TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - different word counts")
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 2
         );
-        REQUIRE(result.valid);
-        CHECK_EQ(result.n_bit, 2);
+        FL_REQUIRE(result.valid);
+        FL_CHECK_EQ(result.n_bit, 2);
         // Ideal slot: 1650 / 2 = 825 ns
         // Ideal PCLK: ~1.21 MHz, rounded to 1 MHz
-        CHECK(result.pclk_hz >= 1000000);
+        FL_CHECK(result.pclk_hz >= 1000000);
     }
 
     SUBCASE("4 words per bit") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 4
         );
-        REQUIRE(result.valid);
-        CHECK_EQ(result.n_bit, 4);
+        FL_REQUIRE(result.valid);
+        FL_CHECK_EQ(result.n_bit, 4);
         // Ideal slot: 1650 / 4 = 412.5 ns
         // Ideal PCLK: ~2.42 MHz, rounded to 2 MHz
-        CHECK(result.pclk_hz >= 2000000);
+        FL_CHECK(result.pclk_hz >= 2000000);
     }
 }
 
@@ -236,7 +236,7 @@ TEST_CASE("fl::ClocklessTiming::calculate_buffer_size") {
         // Data: 100 × 24 × 3 × 2 = 14,400 bytes
         // Latch: 300,000 ns / 500 ns = 600 slots × 2 bytes = 1,200 bytes
         // Total: 15,600 bytes
-        CHECK_EQ(size, 15600);
+        FL_CHECK_EQ(size, 15600);
     }
 
     SUBCASE("Large strip") {
@@ -248,7 +248,7 @@ TEST_CASE("fl::ClocklessTiming::calculate_buffer_size") {
         // Data: 1000 × 24 × 3 × 2 = 144,000 bytes
         // Latch: 600 slots × 2 = 1,200 bytes
         // Total: 145,200 bytes
-        CHECK_EQ(size, 145200);
+        FL_CHECK_EQ(size, 145200);
     }
 
     SUBCASE("RGBW LEDs") {
@@ -260,7 +260,7 @@ TEST_CASE("fl::ClocklessTiming::calculate_buffer_size") {
         // Data: 500 × 32 × 3 × 2 = 96,000 bytes
         // Latch: 1,200 bytes
         // Total: 97,200 bytes
-        CHECK_EQ(size, 97200);
+        FL_CHECK_EQ(size, 97200);
     }
 }
 
@@ -277,7 +277,7 @@ TEST_CASE("fl::ClocklessTiming::calculate_frame_time_us") {
         // Transmission: 100 × 24 × 3 × 500 ns = 3,600,000 ns = 3,600 µs
         // Latch: 300 µs
         // Total: 3,900 µs
-        CHECK_EQ(frame_time, 3900);
+        FL_CHECK_EQ(frame_time, 3900);
     }
 
     SUBCASE("1000 LEDs at 2 MHz") {
@@ -288,7 +288,7 @@ TEST_CASE("fl::ClocklessTiming::calculate_frame_time_us") {
         // Transmission: 1000 × 24 × 3 × 500 ns = 36,000,000 ns = 36,000 µs
         // Latch: 300 µs
         // Total: 36,300 µs
-        CHECK_EQ(frame_time, 36300);
+        FL_CHECK_EQ(frame_time, 36300);
     }
 
     SUBCASE("FPS calculation") {
@@ -300,8 +300,8 @@ TEST_CASE("fl::ClocklessTiming::calculate_frame_time_us") {
         float fps = 1000000.0f / frame_time;
 
         // Should be in reasonable range
-        CHECK(fps > 0.0f);
-        CHECK(fps < 1000.0f);
+        FL_CHECK(fps > 0.0f);
+        FL_CHECK(fps < 1000.0f);
     }
 }
 
@@ -310,30 +310,30 @@ TEST_CASE("fl::ClocklessTiming::is_timing_acceptable") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
 
         // WS28xx chips are tolerant, but 3-word encoding may exceed 30% error
         // Just verify it's valid
-        CHECK(result.valid);
+        FL_CHECK(result.valid);
     }
 
     SUBCASE("Invalid result") {
         ClocklessTimingResult result = {};
         result.valid = false;
 
-        CHECK_FALSE(fl::ClocklessTiming::is_timing_acceptable(result));
+        FL_CHECK_FALSE(fl::ClocklessTiming::is_timing_acceptable(result));
     }
 
     SUBCASE("Strict tolerance") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
 
         // With very strict tolerance, may or may not pass
         // (depends on how well the rounding works out)
         bool acceptable_strict = fl::ClocklessTiming::is_timing_acceptable(result, 0.05f);
-        CHECK((acceptable_strict || !acceptable_strict));  // Either outcome is valid
+        FL_CHECK((acceptable_strict || !acceptable_strict));  // Either outcome is valid
     }
 }
 
@@ -370,30 +370,30 @@ TEST_CASE("ClocklessTiming - memory efficiency comparison") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
 
         size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, result.n_bit, 300, result.slot_ns
         );
 
         // Should be ~144-145 KB (memory-efficient)
-        CHECK(buffer_size >= 140000);
-        CHECK(buffer_size <= 150000);
+        FL_CHECK(buffer_size >= 140000);
+        FL_CHECK(buffer_size <= 150000);
     }
 
     SUBCASE("6-word encoding (higher precision)") {
         auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 6
         );
-        REQUIRE(result.valid);
+        FL_REQUIRE(result.valid);
 
         size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, result.n_bit, 300, result.slot_ns
         );
 
         // Should be ~2× the 3-word encoding
-        CHECK(buffer_size >= 280000);
-        CHECK(buffer_size <= 300000);
+        FL_CHECK(buffer_size >= 280000);
+        FL_CHECK(buffer_size <= 300000);
     }
 }
 
@@ -402,7 +402,7 @@ TEST_CASE("ClocklessTiming - realistic scenarios") {
         auto timing = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
-        REQUIRE(timing.valid);
+        FL_REQUIRE(timing.valid);
 
         size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             300, 24, timing.n_bit, 300, timing.slot_ns
@@ -413,15 +413,15 @@ TEST_CASE("ClocklessTiming - realistic scenarios") {
         );
 
         // Verify reasonable values
-        CHECK(buffer_size < 100000);  // Should fit in < 100 KB
-        CHECK(frame_time < 20000);    // Should be < 20 ms (>50 FPS)
+        FL_CHECK(buffer_size < 100000);  // Should fit in < 100 KB
+        FL_CHECK(frame_time < 20000);    // Should be < 20 ms (>50 FPS)
     }
 
     SUBCASE("Scenario: Large installation (1000 LEDs per strip)") {
         auto timing = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
-        REQUIRE(timing.valid);
+        FL_REQUIRE(timing.valid);
 
         size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, timing.n_bit, 300, timing.slot_ns
@@ -432,8 +432,8 @@ TEST_CASE("ClocklessTiming - realistic scenarios") {
         );
 
         // Verify reasonable values
-        CHECK(buffer_size < 200000);  // Should fit in < 200 KB
-        CHECK(frame_time < 50000);    // Should be < 50 ms (>20 FPS)
+        FL_CHECK(buffer_size < 200000);  // Should fit in < 200 KB
+        FL_CHECK(frame_time < 50000);    // Should be < 50 ms (>20 FPS)
     }
 }
 
@@ -492,11 +492,11 @@ TEST_CASE("LCD bit templates - generateTemplates validation") {
         template_bit0[2] = 0x0000;  // Slot 2: LOW
 
         // Verify all 16 lanes are HIGH in slot 0
-        CHECK_EQ(template_bit0[0], 0xFFFF);
+        FL_CHECK_EQ(template_bit0[0], 0xFFFF);
 
         // Verify all 16 lanes are LOW in slots 1 and 2
-        CHECK_EQ(template_bit0[1], 0x0000);
-        CHECK_EQ(template_bit0[2], 0x0000);
+        FL_CHECK_EQ(template_bit0[1], 0x0000);
+        FL_CHECK_EQ(template_bit0[2], 0x0000);
     }
 
     SUBCASE("Bit-1 template structure") {
@@ -507,11 +507,11 @@ TEST_CASE("LCD bit templates - generateTemplates validation") {
         template_bit1[2] = 0x0000;  // Slot 2: LOW
 
         // Verify all 16 lanes are HIGH in slots 0 and 1
-        CHECK_EQ(template_bit1[0], 0xFFFF);
-        CHECK_EQ(template_bit1[1], 0xFFFF);
+        FL_CHECK_EQ(template_bit1[0], 0xFFFF);
+        FL_CHECK_EQ(template_bit1[1], 0xFFFF);
 
         // Verify all 16 lanes are LOW in slot 2
-        CHECK_EQ(template_bit1[2], 0x0000);
+        FL_CHECK_EQ(template_bit1[2], 0x0000);
     }
 }
 
@@ -524,7 +524,7 @@ TEST_CASE("LCD transpose reference - basic functionality") {
 
         // All outputs should be 0 (no bits set in any lane)
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(output[i], 0x0000);
+            FL_CHECK_EQ(output[i], 0x0000);
         }
     }
 
@@ -539,7 +539,7 @@ TEST_CASE("LCD transpose reference - basic functionality") {
 
         // All outputs should be 0xFFFF (all bits set in all lanes)
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(output[i], 0xFFFF);
+            FL_CHECK_EQ(output[i], 0xFFFF);
         }
     }
 
@@ -551,11 +551,11 @@ TEST_CASE("LCD transpose reference - basic functionality") {
         transpose_reference(input, output);
 
         // Bit 7 output should have lane 0 set
-        CHECK_EQ(output[7], 0x0001);
+        FL_CHECK_EQ(output[7], 0x0001);
 
         // All other bits should be clear
         for (int i = 0; i < 7; i++) {
-            CHECK_EQ(output[i], 0x0000);
+            FL_CHECK_EQ(output[i], 0x0000);
         }
     }
 
@@ -567,11 +567,11 @@ TEST_CASE("LCD transpose reference - basic functionality") {
         transpose_reference(input, output);
 
         // Bit 0 output should have lane 15 set
-        CHECK_EQ(output[0], 0x8000);
+        FL_CHECK_EQ(output[0], 0x8000);
 
         // All other bits should be clear
         for (int i = 1; i < 8; i++) {
-            CHECK_EQ(output[i], 0x0000);
+            FL_CHECK_EQ(output[i], 0x0000);
         }
     }
 
@@ -587,14 +587,14 @@ TEST_CASE("LCD transpose reference - basic functionality") {
         // Verify alternating bits across lanes
         // Even lanes: 0xAA = 10101010 (bits 1,3,5,7 set)
         // Odd lanes:  0x55 = 01010101 (bits 0,2,4,6 set)
-        CHECK_EQ(output[0], 0xAAAA);  // Bit 0: even lanes
-        CHECK_EQ(output[1], 0x5555);  // Bit 1: odd lanes
-        CHECK_EQ(output[2], 0xAAAA);  // Bit 2: even lanes
-        CHECK_EQ(output[3], 0x5555);  // Bit 3: odd lanes
-        CHECK_EQ(output[4], 0xAAAA);  // Bit 4: even lanes
-        CHECK_EQ(output[5], 0x5555);  // Bit 5: odd lanes
-        CHECK_EQ(output[6], 0xAAAA);  // Bit 6: even lanes
-        CHECK_EQ(output[7], 0x5555);  // Bit 7: odd lanes
+        FL_CHECK_EQ(output[0], 0xAAAA);  // Bit 0: even lanes
+        FL_CHECK_EQ(output[1], 0x5555);  // Bit 1: odd lanes
+        FL_CHECK_EQ(output[2], 0xAAAA);  // Bit 2: even lanes
+        FL_CHECK_EQ(output[3], 0x5555);  // Bit 3: odd lanes
+        FL_CHECK_EQ(output[4], 0xAAAA);  // Bit 4: even lanes
+        FL_CHECK_EQ(output[5], 0x5555);  // Bit 5: odd lanes
+        FL_CHECK_EQ(output[6], 0xAAAA);  // Bit 6: even lanes
+        FL_CHECK_EQ(output[7], 0x5555);  // Bit 7: odd lanes
     }
 
     SUBCASE("Sequential values") {
@@ -607,22 +607,22 @@ TEST_CASE("LCD transpose reference - basic functionality") {
         transpose_reference(input, output);
 
         // Bit 0: lanes with bit 0 set = 1,3,5,7,9,11,13,15 (odd numbers)
-        CHECK_EQ(output[0], 0xAAAA);
+        FL_CHECK_EQ(output[0], 0xAAAA);
 
         // Bit 1: lanes with bit 1 set = 2,3,6,7,10,11,14,15
-        CHECK_EQ(output[1], 0xCCCC);
+        FL_CHECK_EQ(output[1], 0xCCCC);
 
         // Bit 2: lanes with bit 2 set = 4,5,6,7,12,13,14,15
-        CHECK_EQ(output[2], 0xF0F0);
+        FL_CHECK_EQ(output[2], 0xF0F0);
 
         // Bit 3: lanes with bit 3 set = 8,9,10,11,12,13,14,15
-        CHECK_EQ(output[3], 0xFF00);
+        FL_CHECK_EQ(output[3], 0xFF00);
 
         // Bits 4-7: no lanes have these bits set (all values < 16)
-        CHECK_EQ(output[4], 0x0000);
-        CHECK_EQ(output[5], 0x0000);
-        CHECK_EQ(output[6], 0x0000);
-        CHECK_EQ(output[7], 0x0000);
+        FL_CHECK_EQ(output[4], 0x0000);
+        FL_CHECK_EQ(output[5], 0x0000);
+        FL_CHECK_EQ(output[6], 0x0000);
+        FL_CHECK_EQ(output[7], 0x0000);
     }
 }
 
@@ -642,9 +642,9 @@ TEST_CASE("LCD encoding - template application") {
         }
 
         // Should match template_bit0 exactly
-        CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
-        CHECK_EQ(output[1], 0x0000);  // Slot 1: LOW
-        CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
+        FL_CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
+        FL_CHECK_EQ(output[1], 0x0000);  // Slot 1: LOW
+        FL_CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
     }
 
     SUBCASE("Encode all bit-1") {
@@ -657,9 +657,9 @@ TEST_CASE("LCD encoding - template application") {
         }
 
         // Should match template_bit1 exactly
-        CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
-        CHECK_EQ(output[1], 0xFFFF);  // Slot 1: HIGH
-        CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
+        FL_CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
+        FL_CHECK_EQ(output[1], 0xFFFF);  // Slot 1: HIGH
+        FL_CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
     }
 
     SUBCASE("Encode mixed - alternating lanes") {
@@ -672,13 +672,13 @@ TEST_CASE("LCD encoding - template application") {
         }
 
         // Slot 0: All lanes HIGH (both templates have HIGH)
-        CHECK_EQ(output[0], 0xFFFF);
+        FL_CHECK_EQ(output[0], 0xFFFF);
 
         // Slot 1: Even lanes HIGH (bit-1), odd lanes LOW (bit-0)
-        CHECK_EQ(output[1], 0xAAAA);
+        FL_CHECK_EQ(output[1], 0xAAAA);
 
         // Slot 2: All lanes LOW (both templates have LOW)
-        CHECK_EQ(output[2], 0x0000);
+        FL_CHECK_EQ(output[2], 0x0000);
     }
 
     SUBCASE("Encode single lane active") {
@@ -691,13 +691,13 @@ TEST_CASE("LCD encoding - template application") {
         }
 
         // Slot 0: All lanes HIGH
-        CHECK_EQ(output[0], 0xFFFF);
+        FL_CHECK_EQ(output[0], 0xFFFF);
 
         // Slot 1: Only lane 0 HIGH
-        CHECK_EQ(output[1], 0x0001);
+        FL_CHECK_EQ(output[1], 0x0001);
 
         // Slot 2: All lanes LOW
-        CHECK_EQ(output[2], 0x0000);
+        FL_CHECK_EQ(output[2], 0x0000);
     }
 
     SUBCASE("Encode lane 15 only") {
@@ -710,13 +710,13 @@ TEST_CASE("LCD encoding - template application") {
         }
 
         // Slot 0: All lanes HIGH
-        CHECK_EQ(output[0], 0xFFFF);
+        FL_CHECK_EQ(output[0], 0xFFFF);
 
         // Slot 1: Only lane 15 HIGH
-        CHECK_EQ(output[1], 0x8000);
+        FL_CHECK_EQ(output[1], 0x8000);
 
         // Slot 2: All lanes LOW
-        CHECK_EQ(output[2], 0x0000);
+        FL_CHECK_EQ(output[2], 0x0000);
     }
 }
 
@@ -762,25 +762,25 @@ TEST_CASE("LCD encoding - complete pixel encoding with reference transpose") {
         // Verify Green (0x00) encoding - all bits are 0
         for (int bit = 0; bit < 8; bit++) {
             int idx = bit * 3;
-            CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
-            CHECK_EQ(output_buffer[idx + 1], 0x0000);  // Slot 1: LOW (bit-0)
-            CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
+            FL_CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
+            FL_CHECK_EQ(output_buffer[idx + 1], 0x0000);  // Slot 1: LOW (bit-0)
+            FL_CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
         }
 
         // Verify Red (0xFF) encoding - all bits are 1
         for (int bit = 0; bit < 8; bit++) {
             int idx = (8 + bit) * 3;
-            CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
-            CHECK_EQ(output_buffer[idx + 1], 0xFFFF);  // Slot 1: HIGH (bit-1)
-            CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
+            FL_CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
+            FL_CHECK_EQ(output_buffer[idx + 1], 0xFFFF);  // Slot 1: HIGH (bit-1)
+            FL_CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
         }
 
         // Verify Blue (0x00) encoding - all bits are 0
         for (int bit = 0; bit < 8; bit++) {
             int idx = (16 + bit) * 3;
-            CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
-            CHECK_EQ(output_buffer[idx + 1], 0x0000);  // Slot 1: LOW (bit-0)
-            CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
+            FL_CHECK_EQ(output_buffer[idx + 0], 0xFFFF);  // Slot 0: HIGH
+            FL_CHECK_EQ(output_buffer[idx + 1], 0x0000);  // Slot 1: LOW (bit-0)
+            FL_CHECK_EQ(output_buffer[idx + 2], 0x0000);  // Slot 2: LOW
         }
     }
 
@@ -799,9 +799,9 @@ TEST_CASE("LCD encoding - complete pixel encoding with reference transpose") {
         transpose_reference(pixel_bytes, lane_bits);
 
         // Verify bit extraction
-        CHECK_EQ(lane_bits[0], 0xFFFF);  // Bit 0: all lanes set
+        FL_CHECK_EQ(lane_bits[0], 0xFFFF);  // Bit 0: all lanes set
         for (int i = 1; i < 8; i++) {
-            CHECK_EQ(lane_bits[i], 0x0000);  // Bits 1-7: all clear
+            FL_CHECK_EQ(lane_bits[i], 0x0000);  // Bits 1-7: all clear
         }
 
         // Encode bit 0 (should be all bit-1)
@@ -812,9 +812,9 @@ TEST_CASE("LCD encoding - complete pixel encoding with reference transpose") {
                            (template_bit1[slot] & mask);
         }
 
-        CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
-        CHECK_EQ(output[1], 0xFFFF);  // Slot 1: HIGH (all lanes bit-1)
-        CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
+        FL_CHECK_EQ(output[0], 0xFFFF);  // Slot 0: HIGH
+        FL_CHECK_EQ(output[1], 0xFFFF);  // Slot 1: HIGH (all lanes bit-1)
+        FL_CHECK_EQ(output[2], 0x0000);  // Slot 2: LOW
     }
 
     SUBCASE("Multi-lane different values") {
@@ -833,16 +833,16 @@ TEST_CASE("LCD encoding - complete pixel encoding with reference transpose") {
         // ...
 
         // Bit 4: lanes 1,3,5,7,9,11,13,15 (values with bit 4 set)
-        CHECK_EQ(lane_bits[4], 0xAAAA);
+        FL_CHECK_EQ(lane_bits[4], 0xAAAA);
 
         // Bit 5: lanes 2,3,6,7,10,11,14,15
-        CHECK_EQ(lane_bits[5], 0xCCCC);
+        FL_CHECK_EQ(lane_bits[5], 0xCCCC);
 
         // Bit 6: lanes 4,5,6,7,12,13,14,15
-        CHECK_EQ(lane_bits[6], 0xF0F0);
+        FL_CHECK_EQ(lane_bits[6], 0xF0F0);
 
         // Bit 7: lanes 8,9,10,11,12,13,14,15
-        CHECK_EQ(lane_bits[7], 0xFF00);
+        FL_CHECK_EQ(lane_bits[7], 0xFF00);
     }
 }
 
@@ -855,7 +855,7 @@ TEST_CASE("LCD encoding - edge cases") {
 
         // All bits should be 0
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(lane_bits[i], 0x0000);
+            FL_CHECK_EQ(lane_bits[i], 0x0000);
         }
     }
 
@@ -870,7 +870,7 @@ TEST_CASE("LCD encoding - edge cases") {
 
         // All bits should be 1
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(lane_bits[i], 0xFFFF);
+            FL_CHECK_EQ(lane_bits[i], 0xFFFF);
         }
     }
 
@@ -889,7 +889,7 @@ TEST_CASE("LCD encoding - edge cases") {
 
         // Each bit word should have lower 8 bits set, upper 8 bits clear
         for (int i = 0; i < 8; i++) {
-            CHECK_EQ(lane_bits[i], 0x00FF);
+            FL_CHECK_EQ(lane_bits[i], 0x00FF);
         }
     }
 }

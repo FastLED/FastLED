@@ -13,30 +13,30 @@ TEST_CASE("ThreadLocal - basic functionality") {
     fl::ThreadLocal<int> tls;
     
     // Default constructed value should be 0
-    REQUIRE(tls.access() == 0);
+    FL_REQUIRE(tls.access() == 0);
     
     // Set a value
     tls.set(42);
-    REQUIRE(tls.access() == 42);
+    FL_REQUIRE(tls.access() == 42);
     
     // Use assignment operator
     tls = 100;
-    REQUIRE(tls.access() == 100);
+    FL_REQUIRE(tls.access() == 100);
     
     // Use conversion operator
     int value = tls;
-    REQUIRE(value == 100);
+    FL_REQUIRE(value == 100);
 }
 
 TEST_CASE("ThreadLocal - with default value") {
     fl::ThreadLocal<int> tls(999);
     
     // Should start with default value
-    REQUIRE(tls.access() == 999);
+    FL_REQUIRE(tls.access() == 999);
     
     // Set a different value
     tls.set(123);
-    REQUIRE(tls.access() == 123);
+    FL_REQUIRE(tls.access() == 123);
 }
 
 TEST_CASE("ThreadLocal - with custom type") {
@@ -55,19 +55,19 @@ TEST_CASE("ThreadLocal - with custom type") {
     fl::ThreadLocal<TestStruct> tls;
     
     // Default constructed
-    REQUIRE(tls.access().value == 0);
-    REQUIRE(tls.access().name == "default");
+    FL_REQUIRE(tls.access().value == 0);
+    FL_REQUIRE(tls.access().name == "default");
     
     // Set a value
     TestStruct custom(42, "test");
     tls.set(custom);
-    REQUIRE(tls.access() == custom);
+    FL_REQUIRE(tls.access() == custom);
     
     // Modify in place
     tls.access().value = 99;
     tls.access().name = "modified";
-    REQUIRE(tls.access().value == 99);
-    REQUIRE(tls.access().name == "modified");
+    FL_REQUIRE(tls.access().value == 99);
+    FL_REQUIRE(tls.access().name == "modified");
 }
 
 struct ThreadTestData {
@@ -123,7 +123,7 @@ TEST_CASE("ThreadLocal - thread isolation") {
     // Create threads
     for (int i = 0; i < num_threads; i++) {
         int result = pthread_create(&threads[i], nullptr, thread_test_func, &thread_data[i]);
-        REQUIRE(result == 0);
+        FL_REQUIRE(result == 0);
     }
     
     // Signal threads to start
@@ -145,11 +145,11 @@ TEST_CASE("ThreadLocal - thread isolation") {
     
     // Verify all threads succeeded
     for (int i = 0; i < num_threads; i++) {
-        REQUIRE(thread_data[i].success);
+        FL_REQUIRE(thread_data[i].success);
     }
     
     // Main thread should still have default value
-    REQUIRE(tls.access() == 0);
+    FL_REQUIRE(tls.access() == 0);
 }
 
 struct SharedTLSTestData {
@@ -206,7 +206,7 @@ TEST_CASE("ThreadLocal - multiple instances") {
     // Create threads
     for (int i = 0; i < num_threads; i++) {
         int result = pthread_create(&threads[i], nullptr, shared_tls_test_func, &thread_data[i]);
-        REQUIRE(result == 0);
+        FL_REQUIRE(result == 0);
     }
     
     // Signal threads to start
@@ -228,12 +228,12 @@ TEST_CASE("ThreadLocal - multiple instances") {
     
     // Verify all threads succeeded
     for (int i = 0; i < num_threads; i++) {
-        REQUIRE(thread_data[i].success);
+        FL_REQUIRE(thread_data[i].success);
     }
     
     // Main thread should have default values
-    REQUIRE(tls1.access() == 0);
-    REQUIRE(tls2.access() == 0);
+    FL_REQUIRE(tls1.access() == 0);
+    FL_REQUIRE(tls2.access() == 0);
 }
 
 TEST_CASE("ThreadLocal - copy constructor") {
@@ -241,15 +241,15 @@ TEST_CASE("ThreadLocal - copy constructor") {
     fl::ThreadLocal<int> tls2(tls1);  // Copy constructor
     
     // Both should have the same default value
-    REQUIRE(tls1.access() == 555);
-    REQUIRE(tls2.access() == 555);
+    FL_REQUIRE(tls1.access() == 555);
+    FL_REQUIRE(tls2.access() == 555);
     
     // But they should be independent instances
     tls1.set(111);
     tls2.set(222);
     
-    REQUIRE(tls1.access() == 111);
-    REQUIRE(tls2.access() == 222);
+    FL_REQUIRE(tls1.access() == 111);
+    FL_REQUIRE(tls2.access() == 222);
 }
 
 TEST_CASE("ThreadLocal - assignment operator") {
@@ -259,15 +259,15 @@ TEST_CASE("ThreadLocal - assignment operator") {
     tls2 = tls1;  // Assignment operator
     
     // Both should have the same default value
-    REQUIRE(tls1.access() == 777);
-    REQUIRE(tls2.access() == 777);
+    FL_REQUIRE(tls1.access() == 777);
+    FL_REQUIRE(tls2.access() == 777);
     
     // But they should be independent instances
     tls1.set(333);
     tls2.set(444);
     
-    REQUIRE(tls1.access() == 333);
-    REQUIRE(tls2.access() == 444);
+    FL_REQUIRE(tls1.access() == 333);
+    FL_REQUIRE(tls2.access() == 444);
 }
 
 struct CleanupTestData {
@@ -304,7 +304,7 @@ TEST_CASE("ThreadLocal - thread cleanup") {
     
     pthread_t thread;
     int result = pthread_create(&thread, nullptr, cleanup_test_func, &data);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
     
     // Wait for thread to start and finish
     while (!data.thread_started) {
@@ -318,36 +318,36 @@ TEST_CASE("ThreadLocal - thread cleanup") {
     pthread_join(thread, nullptr);
     
     // Main thread should still have default value
-    REQUIRE(tls.access() == "default");
+    FL_REQUIRE(tls.access() == "default");
     
     // Set a value in main thread
     tls.set("main_value");
-    REQUIRE(tls.access() == "main_value");
+    FL_REQUIRE(tls.access() == "main_value");
 }
 
 TEST_CASE("ThreadLocal - const access") {
     const fl::ThreadLocal<int> tls(888);
     
     // Should be able to access const ThreadLocal
-    REQUIRE(tls.access() == 888);
+    FL_REQUIRE(tls.access() == 888);
     
     // Conversion operator should work with const
     int value = tls;
-    REQUIRE(value == 888);
+    FL_REQUIRE(value == 888);
 }
 
 TEST_CASE("ThreadLocal - RAII behavior") {
     // Test that ThreadLocal properly manages its pthread_key
     {
         fl::ThreadLocal<int> tls(123);
-        REQUIRE(tls.access() == 123);
+        FL_REQUIRE(tls.access() == 123);
         tls.set(456);
-        REQUIRE(tls.access() == 456);
+        FL_REQUIRE(tls.access() == 456);
     } // tls goes out of scope here, should clean up pthread_key
     
     // Create a new ThreadLocal after the previous one was destroyed
     fl::ThreadLocal<int> tls2(789);
-    REQUIRE(tls2.access() == 789);
+    FL_REQUIRE(tls2.access() == 789);
 }
 
 

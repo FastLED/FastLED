@@ -16,31 +16,31 @@ using namespace test_apa102;
 
 // Helper: Verify start frame (4 bytes of 0x00)
 static void verifyStartFrame(const fl::vector<fl::u8>& data, size_t offset = 0) {
-    REQUIRE(data.size() >= offset + 4);
-    CHECK(data[offset + 0] == 0x00);
-    CHECK(data[offset + 1] == 0x00);
-    CHECK(data[offset + 2] == 0x00);
-    CHECK(data[offset + 3] == 0x00);
+    FL_REQUIRE(data.size() >= offset + 4);
+    FL_CHECK(data[offset + 0] == 0x00);
+    FL_CHECK(data[offset + 1] == 0x00);
+    FL_CHECK(data[offset + 2] == 0x00);
+    FL_CHECK(data[offset + 3] == 0x00);
 }
 
 // Helper: Verify LED frame (4 bytes: [0xE0|brightness][B][G][R])
 static void verifyLEDFrame(const fl::vector<fl::u8>& data, size_t offset,
                            fl::u8 expected_brightness, fl::u8 B, fl::u8 G, fl::u8 R) {
-    REQUIRE(data.size() >= offset + 4);
-    CHECK(data[offset + 0] == (0xE0 | (expected_brightness & 0x1F)));
-    CHECK(data[offset + 1] == B);
-    CHECK(data[offset + 2] == G);
-    CHECK(data[offset + 3] == R);
+    FL_REQUIRE(data.size() >= offset + 4);
+    FL_CHECK(data[offset + 0] == (0xE0 | (expected_brightness & 0x1F)));
+    FL_CHECK(data[offset + 1] == B);
+    FL_CHECK(data[offset + 2] == G);
+    FL_CHECK(data[offset + 3] == R);
 }
 
 // Helper: Verify end frame (⌈num_leds/32⌉ DWords of 0xFF)
 static void verifyEndFrame(const fl::vector<fl::u8>& data, size_t offset, size_t num_leds) {
     size_t end_dwords = (num_leds / 32) + 1;
     size_t end_bytes = end_dwords * 4;
-    REQUIRE(data.size() >= offset + end_bytes);
+    FL_REQUIRE(data.size() >= offset + end_bytes);
 
     for (size_t i = 0; i < end_bytes; i++) {
-        CHECK(data[offset + i] == 0xFF);
+        FL_CHECK(data[offset + i] == 0xFF);
     }
 }
 
@@ -64,7 +64,7 @@ TEST_CASE("encodeAPA102() - empty range") {
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Empty range: start frame + end frame (⌈0/32⌉+1 = 1 DWord)
-    CHECK(output.size() == 8);  // 4 (start) + 4 (end)
+    FL_CHECK(output.size() == 8);  // 4 (start) + 4 (end)
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4, 0);
 }
@@ -78,7 +78,7 @@ TEST_CASE("encodeAPA102() - single LED default brightness") {
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Expected: 4 (start) + 4 (LED) + 4 (end for 1 LED)
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 31, 128, 64, 32);  // Default brightness = 31
     verifyEndFrame(output, 8, 1);
@@ -92,7 +92,7 @@ TEST_CASE("encodeAPA102() - single LED custom brightness") {
 
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output), 15);
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 15, 255, 128, 64);
     verifyEndFrame(output, 8, 1);
@@ -107,7 +107,7 @@ TEST_CASE("encodeAPA102() - brightness clamping") {
     // Brightness > 31 should be clamped to 5-bit range
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 31, 100, 200, 50);  // 255 & 0x1F = 31
     verifyEndFrame(output, 8, 1);
@@ -121,7 +121,7 @@ TEST_CASE("encodeAPA102() - zero brightness") {
 
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output), 0);
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 0, 255, 255, 255);
     verifyEndFrame(output, 8, 1);
@@ -137,7 +137,7 @@ TEST_CASE("encodeAPA102() - multiple LEDs") {
 
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output), 20);
 
-    CHECK(output.size() == expectedSize(3));
+    FL_CHECK(output.size() == expectedSize(3));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 20, 255, 0, 0);
     verifyLEDFrame(output, 8, 20, 0, 255, 0);
@@ -153,7 +153,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 31 LEDs") {
 
     // 31 LEDs: ⌈31/32⌉ + 1 = 0 + 1 = 1 DWord = 4 bytes
     size_t expected = 4 + (31 * 4) + 4;
-    CHECK(output.size() == expected);
+    FL_CHECK(output.size() == expected);
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 31 * 4, 31);
 }
@@ -166,7 +166,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 32 LEDs") {
 
     // 32 LEDs: ⌈32/32⌉ + 1 = 1 + 1 = 2 DWords = 8 bytes
     size_t expected = 4 + (32 * 4) + 8;
-    CHECK(output.size() == expected);
+    FL_CHECK(output.size() == expected);
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 32 * 4, 32);
 }
@@ -179,7 +179,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 33 LEDs") {
 
     // 33 LEDs: ⌈33/32⌉ + 1 = 2 + 1 = 3 DWords = 12 bytes
     size_t expected = 4 + (33 * 4) + 8;
-    CHECK(output.size() == expected);
+    FL_CHECK(output.size() == expected);
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 33 * 4, 33);
 }
@@ -192,7 +192,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 40 LEDs") {
     fl::encodeAPA102(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Use helper function to calculate expected size
-    CHECK(output.size() == expectedSize(40));
+    FL_CHECK(output.size() == expectedSize(40));
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 40 * 4, 40);
 }
@@ -209,7 +209,7 @@ TEST_CASE("encodeAPA102_HD() - empty range") {
     fl::encodeAPA102_HD(leds.begin(), leds.end(), brightness.begin(),
                         fl::back_inserter(output));
 
-    CHECK(output.size() == 8);  // 4 (start) + 4 (end)
+    FL_CHECK(output.size() == 8);  // 4 (start) + 4 (end)
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4, 0);
 }
@@ -225,7 +225,7 @@ TEST_CASE("encodeAPA102_HD() - single LED") {
                         fl::back_inserter(output));
 
     // 127 maps to: (127 * 31 + 127) / 255 = (3937 + 127) / 255 = 15
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
     verifyLEDFrame(output, 4, 15, 200, 100, 50);
     verifyEndFrame(output, 8, 1);
@@ -244,7 +244,7 @@ TEST_CASE("encodeAPA102_HD() - brightness mapping 8bit to 5bit") {
     fl::encodeAPA102_HD(leds.begin(), leds.end(), brightness.begin(),
                         fl::back_inserter(output));
 
-    CHECK(output.size() == expectedSize(4));
+    FL_CHECK(output.size() == expectedSize(4));
     verifyStartFrame(output, 0);
 
     // 0 → 0
@@ -274,7 +274,7 @@ TEST_CASE("encodeAPA102_HD() - per-LED brightness variation") {
     fl::encodeAPA102_HD(leds.begin(), leds.end(), brightness.begin(),
                         fl::back_inserter(output));
 
-    CHECK(output.size() == expectedSize(3));
+    FL_CHECK(output.size() == expectedSize(3));
     verifyStartFrame(output, 0);
 
     // 255 → 31
@@ -299,7 +299,7 @@ TEST_CASE("encodeAPA102_HD() - end frame boundary 20 LEDs") {
                         fl::back_inserter(output));
 
     // Use helper function to calculate expected size
-    CHECK(output.size() == expectedSize(20));
+    FL_CHECK(output.size() == expectedSize(20));
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 20 * 4, 20);
 }
@@ -315,7 +315,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
     fl::encodeAPA102_AutoBrightness(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Empty range: only start frame (no end frame for 0 LEDs)
-    CHECK(output.size() == 4);
+    FL_CHECK(output.size() == 4);
     verifyStartFrame(output, 0);
 }
 
@@ -353,16 +353,16 @@ TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {
     // This wraps to 0 when masked with 0x1F.
 
     // Let me test with the actual expected behavior - the code writes 0xE0 (brightness 0)
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
 
     // Actual behavior (from test output): brightness = 31, colors unscaled
     // Note: The formula ((256 * 31 - 1) >> 8) + 1 = 32, but implementation
     // appears to clamp at 31 or use a slightly different path for max values
-    CHECK(output[4] == (0xE0 | 31));  // Brightness = 31
-    CHECK(output[5] == 255);  // Blue (unscaled)
-    CHECK(output[6] == 255);  // Green (unscaled)
-    CHECK(output[7] == 255);  // Red (unscaled)
+    FL_CHECK(output[4] == (0xE0 | 31));  // Brightness = 31
+    FL_CHECK(output[5] == 255);  // Blue (unscaled)
+    FL_CHECK(output[6] == 255);  // Green (unscaled)
+    FL_CHECK(output[7] == 255);  // Red (unscaled)
 
     verifyEndFrame(output, 8, 1);
 }
@@ -379,17 +379,17 @@ TEST_CASE("encodeAPA102_AutoBrightness() - single LED medium brightness") {
     // brightness = (((128 + 1) * 31 - 1) >> 8) + 1 = ((129 * 31 - 1) >> 8) + 1
     //            = ((3999 - 1) >> 8) + 1 = (3998 >> 8) + 1 = 15 + 1 = 16
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
 
     // s0 (Red) = (31 * 32 + 8) / 16 = (992 + 8) / 16 = 62
     // s1 (Green) = (31 * 64 + 8) / 16 = (1984 + 8) / 16 = 124
     // s2 (Blue) = (31 * 128 + 8) / 16 = (3968 + 8) / 16 = 248
 
-    CHECK(output[4] == (0xE0 | 16));
-    CHECK(output[5] == 248);  // Blue (scaled)
-    CHECK(output[6] == 124);  // Green (scaled)
-    CHECK(output[7] == 62);   // Red (scaled)
+    FL_CHECK(output[4] == (0xE0 | 16));
+    FL_CHECK(output[5] == 248);  // Blue (scaled)
+    FL_CHECK(output[6] == 124);  // Green (scaled)
+    FL_CHECK(output[7] == 62);   // Red (scaled)
 
     verifyEndFrame(output, 8, 1);
 }
@@ -408,17 +408,17 @@ TEST_CASE("encodeAPA102_AutoBrightness() - multiple LEDs uses first pixel bright
     // brightness = (((64 + 1) * 31 - 1) >> 8) + 1 = ((65 * 31 - 1) >> 8) + 1
     //            = ((2015 - 1) >> 8) + 1 = (2014 >> 8) + 1 = 7 + 1 = 8
 
-    CHECK(output.size() == expectedSize(3));
+    FL_CHECK(output.size() == expectedSize(3));
     verifyStartFrame(output, 0);
 
     // First LED: scaled components
     // s0 (Red) = (31 * 16 + 4) / 8 = (496 + 4) / 8 = 62
     // s1 (Green) = (31 * 32 + 4) / 8 = (992 + 4) / 8 = 124
     // s2 (Blue) = (31 * 64 + 4) / 8 = (1984 + 4) / 8 = 248
-    CHECK(output[4] == (0xE0 | 8));
-    CHECK(output[5] == 248);  // Blue
-    CHECK(output[6] == 124);  // Green
-    CHECK(output[7] == 62);   // Red
+    FL_CHECK(output[4] == (0xE0 | 8));
+    FL_CHECK(output[5] == 248);  // Blue
+    FL_CHECK(output[6] == 124);  // Green
+    FL_CHECK(output[7] == 62);   // Red
 
     // Remaining LEDs: use global brightness (8), no scaling
     verifyLEDFrame(output, 8, 8, 255, 0, 0);
@@ -439,17 +439,17 @@ TEST_CASE("encodeAPA102_AutoBrightness() - low brightness extraction") {
     // brightness = (((8 + 1) * 31 - 1) >> 8) + 1 = ((9 * 31 - 1) >> 8) + 1
     //            = ((279 - 1) >> 8) + 1 = (278 >> 8) + 1 = 1 + 1 = 2
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
 
-    CHECK(output[4] == (0xE0 | 2));
+    FL_CHECK(output[4] == (0xE0 | 2));
 
     // s0 (Red) = (31 * 2 + 1) / 2 = (62 + 1) / 2 = 31
     // s1 (Green) = (31 * 4 + 1) / 2 = (124 + 1) / 2 = 62
     // s2 (Blue) = (31 * 8 + 1) / 2 = (248 + 1) / 2 = 124
-    CHECK(output[5] == 124);  // Blue
-    CHECK(output[6] == 62);   // Green
-    CHECK(output[7] == 31);   // Red
+    FL_CHECK(output[5] == 124);  // Blue
+    FL_CHECK(output[6] == 62);   // Green
+    FL_CHECK(output[7] == 31);   // Red
 
     verifyEndFrame(output, 8, 1);
 }
@@ -466,17 +466,17 @@ TEST_CASE("encodeAPA102_AutoBrightness() - zero components") {
     // brightness = (((0 + 1) * 31 - 1) >> 8) + 1 = ((1 * 31 - 1) >> 8) + 1
     //            = ((31 - 1) >> 8) + 1 = (30 >> 8) + 1 = 0 + 1 = 1
 
-    CHECK(output.size() == expectedSize(1));
+    FL_CHECK(output.size() == expectedSize(1));
     verifyStartFrame(output, 0);
 
-    CHECK(output[4] == (0xE0 | 1));
+    FL_CHECK(output[4] == (0xE0 | 1));
 
     // s0 = (31 * 0 + 0) / 1 = 0
     // s1 = (31 * 0 + 0) / 1 = 0
     // s2 = (31 * 0 + 0) / 1 = 0
-    CHECK(output[5] == 0);  // Blue
-    CHECK(output[6] == 0);  // Green
-    CHECK(output[7] == 0);  // Red
+    FL_CHECK(output[5] == 0);  // Blue
+    FL_CHECK(output[6] == 0);  // Green
+    FL_CHECK(output[7] == 0);  // Red
 
     verifyEndFrame(output, 8, 1);
 }
@@ -489,7 +489,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - end frame boundary 20 LEDs") {
     fl::encodeAPA102_AutoBrightness(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Use helper function to calculate expected size
-    CHECK(output.size() == expectedSize(20));
+    FL_CHECK(output.size() == expectedSize(20));
     verifyStartFrame(output, 0);
     verifyEndFrame(output, 4 + 20 * 4, 20);
 }

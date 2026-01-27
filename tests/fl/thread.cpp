@@ -14,17 +14,17 @@
 TEST_CASE("fl::thread - basic construction and joinable") {
     // Default constructed thread is not joinable
     fl::thread t1;
-    REQUIRE(!t1.joinable());
+    FL_REQUIRE(!t1.joinable());
 
     // Thread with function is joinable
     bool executed = false;
     fl::thread t2([&executed]() {
         executed = true;
     });
-    REQUIRE(t2.joinable());
+    FL_REQUIRE(t2.joinable());
     t2.join();
-    REQUIRE(executed);
-    REQUIRE(!t2.joinable()); // After join, not joinable
+    FL_REQUIRE(executed);
+    FL_REQUIRE(!t2.joinable()); // After join, not joinable
 }
 
 TEST_CASE("fl::thread - this_thread::get_id") {
@@ -37,9 +37,7 @@ TEST_CASE("fl::thread - this_thread::get_id") {
     t.join();
 
     // Thread ID should be different from main thread
-    // Compare to boolean to avoid doctest stringification issues with thread::id
-    bool ids_different = (thread_id != main_id);
-    REQUIRE(ids_different);
+    FL_REQUIRE(thread_id != main_id);
 }
 
 TEST_CASE("fl::thread - thread with arguments") {
@@ -54,7 +52,7 @@ TEST_CASE("fl::thread - thread with arguments") {
     fl::thread t(thread_func, 10, 20);
     t.join();
 
-    REQUIRE(result == 30);
+    FL_REQUIRE(result == 30);
 }
 
 TEST_CASE("fl::thread - move semantics") {
@@ -64,15 +62,15 @@ TEST_CASE("fl::thread - move semantics") {
         executed.store(true);
     });
 
-    REQUIRE(t1.joinable());
+    FL_REQUIRE(t1.joinable());
 
     // Move construct
     fl::thread t2(fl::move(t1));
-    REQUIRE(!t1.joinable());
-    REQUIRE(t2.joinable());
+    FL_REQUIRE(!t1.joinable());
+    FL_REQUIRE(t2.joinable());
 
     t2.join();
-    REQUIRE(executed.load());
+    FL_REQUIRE(executed.load());
 }
 
 TEST_CASE("fl::thread - detach") {
@@ -84,9 +82,9 @@ TEST_CASE("fl::thread - detach") {
         for (volatile int i = 0; i < 1000000; ++i) {}
     });
 
-    REQUIRE(t.joinable());
+    FL_REQUIRE(t.joinable());
     t.detach();
-    REQUIRE(!t.joinable());
+    FL_REQUIRE(!t.joinable());
 
     // Wait for thread to start
     while (!started.load()) {
@@ -96,7 +94,7 @@ TEST_CASE("fl::thread - detach") {
 
 TEST_CASE("fl::thread - hardware_concurrency") {
     unsigned int cores = fl::thread::hardware_concurrency();
-    REQUIRE(cores >= 1);
+    FL_REQUIRE(cores >= 1);
 }
 
 TEST_CASE("fl::thread - yield") {
@@ -123,7 +121,7 @@ TEST_CASE("fl::thread - multiple threads") {
         threads[i].join();
     }
 
-    REQUIRE(counter.load() == num_threads * iterations);
+    FL_REQUIRE(counter.load() == num_threads * iterations);
 }
 
 TEST_CASE("fl::thread - thread with mutex synchronization") {
@@ -148,5 +146,5 @@ TEST_CASE("fl::thread - thread with mutex synchronization") {
     t1.join();
     t2.join();
 
-    REQUIRE(shared_value == 2 * num_increments);
+    FL_REQUIRE(shared_value == 2 * num_increments);
 }

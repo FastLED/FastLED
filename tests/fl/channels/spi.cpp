@@ -54,12 +54,12 @@ TEST_CASE("WS2812 SPI encoding - basic patterns") {
 
     // Each bit should be encoded as 100b (0x4 in 3-bit chunks)
     // Verify buffer is not all zeros and not all ones
-    CHECK_NE(buf[0], 0x00);
-    CHECK_NE(buf[1], 0x00);
-    CHECK_NE(buf[2], 0x00);
-    CHECK_NE(buf[0], 0xFF);
-    CHECK_NE(buf[1], 0xFF);
-    CHECK_NE(buf[2], 0xFF);
+    FL_CHECK_NE(buf[0], 0x00);
+    FL_CHECK_NE(buf[1], 0x00);
+    FL_CHECK_NE(buf[2], 0x00);
+    FL_CHECK_NE(buf[0], 0xFF);
+    FL_CHECK_NE(buf[1], 0xFF);
+    FL_CHECK_NE(buf[2], 0xFF);
 
     // Test all ones (0xFF)
     fl::memset(buf, 0, 3);
@@ -67,9 +67,9 @@ TEST_CASE("WS2812 SPI encoding - basic patterns") {
 
     // Each bit should be encoded as 110b (0x6 in 3-bit chunks)
     // Verify buffer has more bits set than 0x00 case
-    CHECK_NE(buf[0], 0x00);
-    CHECK_NE(buf[1], 0x00);
-    CHECK_NE(buf[2], 0x00);
+    FL_CHECK_NE(buf[0], 0x00);
+    FL_CHECK_NE(buf[1], 0x00);
+    FL_CHECK_NE(buf[2], 0x00);
 }
 
 TEST_CASE("WS2812 SPI encoding - 3:1 expansion ratio") {
@@ -80,18 +80,18 @@ TEST_CASE("WS2812 SPI encoding - 3:1 expansion ratio") {
     encodeLedByte(0xAA, buf);  // 10101010b pattern
 
     // Verify all 3 bytes are populated
-    CHECK_NE(buf[0], 0x00);
-    CHECK_NE(buf[1], 0x00);
-    CHECK_NE(buf[2], 0x00);
+    FL_CHECK_NE(buf[0], 0x00);
+    FL_CHECK_NE(buf[1], 0x00);
+    FL_CHECK_NE(buf[2], 0x00);
 
     // Test that buffer must be zeroed (encoding uses OR operations)
     uint8_t buf2[3] = {0xFF, 0xFF, 0xFF};
     encodeLedByte(0x00, buf2);
 
     // With pre-filled buffer, result should have all bits set
-    CHECK_EQ(buf2[0], 0xFF);
-    CHECK_EQ(buf2[1], 0xFF);
-    CHECK_EQ(buf2[2], 0xFF);
+    FL_CHECK_EQ(buf2[0], 0xFF);
+    FL_CHECK_EQ(buf2[1], 0xFF);
+    FL_CHECK_EQ(buf2[2], 0xFF);
 }
 
 TEST_CASE("WS2812 SPI encoding - specific bit patterns") {
@@ -102,14 +102,14 @@ TEST_CASE("WS2812 SPI encoding - specific bit patterns") {
     encodeLedByte(0x01, buf);
 
     // Should have bit 1 and bit 2 set in buf[2] (110b pattern for '1')
-    CHECK((buf[2] & (BIT(1) | BIT(2))) != 0);
+    FL_CHECK((buf[2] & (BIT(1) | BIT(2))) != 0);
 
     // Test bit 0 clear (0x00)
     fl::memset(buf, 0, 3);
     encodeLedByte(0x00, buf);
 
     // Should have only bit 2 set in buf[2] (100b pattern for '0')
-    CHECK((buf[2] & BIT(2)) != 0);
+    FL_CHECK((buf[2] & BIT(2)) != 0);
 }
 
 TEST_CASE("WS2812 SPI encoding - alternating pattern") {
@@ -123,9 +123,9 @@ TEST_CASE("WS2812 SPI encoding - alternating pattern") {
     encodeLedByte(0xAA, buf2);
 
     // These should produce different encodings
-    CHECK_NE(buf1[0], buf2[0]);
-    CHECK_NE(buf1[1], buf2[1]);
-    CHECK_NE(buf1[2], buf2[2]);
+    FL_CHECK_NE(buf1[0], buf2[0]);
+    FL_CHECK_NE(buf1[1], buf2[1]);
+    FL_CHECK_NE(buf1[2], buf2[2]);
 }
 
 TEST_CASE("WS2812 SPI encoding - buffer size requirements") {
@@ -137,9 +137,9 @@ TEST_CASE("WS2812 SPI encoding - buffer size requirements") {
     // Calculate SPI buffer size (3:1 expansion)
     size_t spi_bytes = led_bytes * 3;
 
-    CHECK_EQ(spi_bytes, led_bytes * 3);
-    CHECK_EQ(spi_bytes, 100 * 3 * 3);  // 100 LEDs * 3 colors * 3 expansion
-    CHECK_EQ(spi_bytes, 900);
+    FL_CHECK_EQ(spi_bytes, led_bytes * 3);
+    FL_CHECK_EQ(spi_bytes, 100 * 3 * 3);  // 100 LEDs * 3 colors * 3 expansion
+    FL_CHECK_EQ(spi_bytes, 900);
 }
 
 TEST_CASE("WS2812 SPI encoding - msb first") {
@@ -151,14 +151,14 @@ TEST_CASE("WS2812 SPI encoding - msb first") {
     encodeLedByte(0x80, buf);
 
     // Bit 7 should be encoded in buf[0] (first byte transmitted)
-    CHECK_NE(buf[0], 0x00);
+    FL_CHECK_NE(buf[0], 0x00);
 
     // Test 0x01 (bit 0 set, least significant)
     fl::memset(buf, 0, 3);
     encodeLedByte(0x01, buf);
 
     // Bit 0 should be encoded in buf[2] (last byte transmitted)
-    CHECK_NE(buf[2], 0x00);
+    FL_CHECK_NE(buf[2], 0x00);
 }
 
 TEST_CASE("WS2812 SPI encoding - all byte values") {
@@ -172,6 +172,6 @@ TEST_CASE("WS2812 SPI encoding - all byte values") {
         // Verify all 3 bytes are written (at least one bit set per byte)
         // Note: Due to bit patterns, at minimum buf[1] should have BIT(0) set
         bool hasData = (buf[0] != 0 || buf[1] != 0 || buf[2] != 0);
-        CHECK(hasData);
+        FL_CHECK(hasData);
     }
 }

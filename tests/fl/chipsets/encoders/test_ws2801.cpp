@@ -41,10 +41,10 @@ fl::array<u8, 3> makeRGBPixel(u8 r, u8 g, u8 b) {
 
 /// Helper to verify output contains expected RGB bytes at offset
 void verifyRGBAt(const fl::vector<u8>& output, size_t offset, u8 r, u8 g, u8 b) {
-    REQUIRE_LT(offset + 2, output.size());
-    CHECK_EQ(output[offset + 0], r);  // Red
-    CHECK_EQ(output[offset + 1], g);  // Green
-    CHECK_EQ(output[offset + 2], b);  // Blue
+    FL_REQUIRE_LT(offset + 2, output.size());
+    FL_CHECK_EQ(output[offset + 0], r);  // Red
+    FL_CHECK_EQ(output[offset + 1], g);  // Green
+    FL_CHECK_EQ(output[offset + 2], b);  // Blue
 }
 
 using namespace test_ws2801;
@@ -62,7 +62,7 @@ TEST_CASE("WS2801 - Zero LEDs (empty input)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 0 bytes (no frame overhead)
-    REQUIRE_EQ(output.size(), 0);
+    FL_REQUIRE_EQ(output.size(), 0);
 }
 
 TEST_CASE("WS2801 - Single LED (black)") {
@@ -74,7 +74,7 @@ TEST_CASE("WS2801 - Single LED (black)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes (RGB only, no frame overhead)
-    REQUIRE_EQ(output.size(), 3);
+    FL_REQUIRE_EQ(output.size(), 3);
     verifyRGBAt(output, 0, 0x00, 0x00, 0x00);
 }
 
@@ -87,7 +87,7 @@ TEST_CASE("WS2801 - Single LED (white)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes
-    REQUIRE_EQ(output.size(), 3);
+    FL_REQUIRE_EQ(output.size(), 3);
     verifyRGBAt(output, 0, 0xFF, 0xFF, 0xFF);
 }
 
@@ -100,7 +100,7 @@ TEST_CASE("WS2801 - Single LED (red)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes - Red=255, Green=0, Blue=0
-    REQUIRE_EQ(output.size(), 3);
+    FL_REQUIRE_EQ(output.size(), 3);
     verifyRGBAt(output, 0, 0xFF, 0x00, 0x00);
 }
 
@@ -113,7 +113,7 @@ TEST_CASE("WS2801 - Single LED (green)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes - Red=0, Green=255, Blue=0
-    REQUIRE_EQ(output.size(), 3);
+    FL_REQUIRE_EQ(output.size(), 3);
     verifyRGBAt(output, 0, 0x00, 0xFF, 0x00);
 }
 
@@ -126,7 +126,7 @@ TEST_CASE("WS2801 - Single LED (blue)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes - Red=0, Green=0, Blue=255
-    REQUIRE_EQ(output.size(), 3);
+    FL_REQUIRE_EQ(output.size(), 3);
     verifyRGBAt(output, 0, 0x00, 0x00, 0xFF);
 }
 
@@ -141,7 +141,7 @@ TEST_CASE("WS2801 - Multiple LEDs (RGB primaries)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 9 bytes total (3 pixels × 3 bytes)
-    REQUIRE_EQ(output.size(), 9);
+    FL_REQUIRE_EQ(output.size(), 9);
 
     // Verify each LED encoding
     verifyRGBAt(output, 0, 0xFF, 0x00, 0x00);  // LED 0: Red
@@ -160,7 +160,7 @@ TEST_CASE("WS2801 - Multiple LEDs (mixed colors)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 9 bytes total
-    REQUIRE_EQ(output.size(), 9);
+    FL_REQUIRE_EQ(output.size(), 9);
 
     // Verify each LED encoding
     verifyRGBAt(output, 0, 128, 64, 32);
@@ -182,7 +182,7 @@ TEST_CASE("WS2801 - Boundary values (min/max)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 6 bytes
-    REQUIRE_EQ(output.size(), 6);
+    FL_REQUIRE_EQ(output.size(), 6);
     verifyRGBAt(output, 0, 0x00, 0x00, 0x00);
     verifyRGBAt(output, 3, 0xFF, 0xFF, 0xFF);
 }
@@ -203,7 +203,7 @@ TEST_CASE("WS2801 - Many LEDs (typical strip size)") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: NUM_LEDS × 3 bytes
-    REQUIRE_EQ(output.size(), NUM_LEDS * 3);
+    FL_REQUIRE_EQ(output.size(), NUM_LEDS * 3);
 
     // Spot check first and last LED
     verifyRGBAt(output, 0, 0, 255, 0);                              // First LED
@@ -231,10 +231,10 @@ TEST_CASE("WS2801 - RGB wire order verification") {
     fl::vector<u8> output;
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 3);
-    CHECK_EQ(output[0], 0xAA);  // Red first
-    CHECK_EQ(output[1], 0xBB);  // Green second
-    CHECK_EQ(output[2], 0xCC);  // Blue third
+    FL_REQUIRE_EQ(output.size(), 3);
+    FL_CHECK_EQ(output[0], 0xAA);  // Red first
+    FL_CHECK_EQ(output[1], 0xBB);  // Green second
+    FL_CHECK_EQ(output[2], 0xCC);  // Blue third
 }
 
 // ============================================================================
@@ -250,8 +250,8 @@ TEST_CASE("WS2801 - No start frame") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Output should start immediately with LED data (no preamble)
-    REQUIRE_EQ(output.size(), 3);
-    CHECK_EQ(output[0], 128);  // First byte should be LED data, not frame marker
+    FL_REQUIRE_EQ(output.size(), 3);
+    FL_CHECK_EQ(output[0], 128);  // First byte should be LED data, not frame marker
 }
 
 TEST_CASE("WS2801 - No end frame") {
@@ -263,7 +263,7 @@ TEST_CASE("WS2801 - No end frame") {
     encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Output should end immediately after LED data (no termination bytes)
-    REQUIRE_EQ(output.size(), 3);  // Exactly 3 bytes, no extra termination
+    FL_REQUIRE_EQ(output.size(), 3);  // Exactly 3 bytes, no extra termination
 }
 
 TEST_CASE("WS2801 - Byte count calculation (protocol compliance)") {
@@ -277,7 +277,7 @@ TEST_CASE("WS2801 - Byte count calculation (protocol compliance)") {
         encodeWS2801(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
         // Expected: num_leds × 3 bytes (no frame overhead)
-        CHECK_EQ(output.size(), num_leds * 3);
+        FL_CHECK_EQ(output.size(), num_leds * 3);
     }
 }
 

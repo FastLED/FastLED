@@ -25,7 +25,7 @@ TEST_CASE("fl::deprecated_macros_defined") {
     #endif
 
     // If we get here, all macros are defined
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 // Test that deprecated function macro can be applied
@@ -39,7 +39,7 @@ TEST_CASE("fl::deprecated_function_usage") {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     int result = deprecated_test_function();
-    CHECK_EQ(result, 42);
+    FL_CHECK_EQ(result, 42);
     FL_DISABLE_WARNING_POP
 }
 
@@ -57,10 +57,10 @@ TEST_CASE("fl::deprecated_class_usage") {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     DeprecatedTestClass obj;
-    CHECK_EQ(obj.getValue(), 100);
+    FL_CHECK_EQ(obj.getValue(), 100);
 
     obj.value = 200;
-    CHECK_EQ(obj.getValue(), 200);
+    FL_CHECK_EQ(obj.getValue(), 200);
 }
 
 // Test deprecated method in non-deprecated class
@@ -82,11 +82,11 @@ TEST_CASE("fl::deprecated_method_usage") {
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
 
     // Old method should still work
-    CHECK_EQ(obj.oldMethod(), 1);
+    FL_CHECK_EQ(obj.oldMethod(), 1);
 
     FL_DISABLE_WARNING_POP
     // New method should work
-    CHECK_EQ(obj.newMethod(), 2);
+    FL_CHECK_EQ(obj.newMethod(), 2);
 }
 
 // Test that FASTLED_DEPRECATED and FL_DEPRECATED are equivalent
@@ -104,8 +104,8 @@ TEST_CASE("fl::deprecated_macro_equivalence") {
     // Both versions should work
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
-    CHECK_EQ(deprecated_fl(), 1);
-    CHECK_EQ(deprecated_fastled(), 2);
+    FL_CHECK_EQ(deprecated_fl(), 1);
+    FL_CHECK_EQ(deprecated_fastled(), 2);
 }
 
 // Test struct deprecation
@@ -121,8 +121,8 @@ TEST_CASE("fl::deprecated_struct_usage") {
     DeprecatedTestStruct s;
     s.x = 10;
     s.y = 20;
-    CHECK_EQ(s.x, 10);
-    CHECK_EQ(s.y, 20);
+    FL_CHECK_EQ(s.x, 10);
+    FL_CHECK_EQ(s.y, 20);
     FL_DISABLE_WARNING_POP
 }
 
@@ -134,7 +134,7 @@ TEST_CASE("fl::deprecated_typedef_usage") {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     deprecated_int_type value = 42;
-    CHECK_EQ(value, 42);
+    FL_CHECK_EQ(value, 42);
     FL_DISABLE_WARNING_POP
 }
 
@@ -147,9 +147,9 @@ static const int NEW_CONSTANT = 200;
 TEST_CASE("fl::deprecated_variable_usage") {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
-    CHECK_EQ(OLD_CONSTANT, 100);
+    FL_CHECK_EQ(OLD_CONSTANT, 100);
     FL_DISABLE_WARNING_POP
-    CHECK_EQ(NEW_CONSTANT, 200);
+    FL_CHECK_EQ(NEW_CONSTANT, 200);
 }
 
 // Test deprecated template function
@@ -167,10 +167,10 @@ T newTemplateFunction(T value) {
 TEST_CASE("fl::deprecated_template_function") {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
-    CHECK_EQ(oldTemplateFunction(5), 10);
-    CHECK_EQ(oldTemplateFunction(3.0), 6.0);
+    FL_CHECK_EQ(oldTemplateFunction(5), 10);
+    FL_CHECK_EQ(oldTemplateFunction(3.0), 6.0);
     FL_DISABLE_WARNING_POP
 
-    CHECK_EQ(newTemplateFunction(5), 15);
-    CHECK_EQ(newTemplateFunction(3.0), 9.0);
+    FL_CHECK_EQ(newTemplateFunction(5), 15);
+    FL_CHECK_EQ(newTemplateFunction(3.0), 9.0);
 }

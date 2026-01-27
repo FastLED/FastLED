@@ -34,13 +34,13 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             rgb565ToRgb888_reference(rgb565, r_ref, g_ref, b_ref);
 
             // Validate lookup table matches reference
-            CHECK_EQ(r_lookup, r_ref);
-            CHECK_EQ(g_lookup, g_ref);  // Should be 0
-            CHECK_EQ(b_lookup, b_ref);  // Should be 0
+            FL_CHECK_EQ(r_lookup, r_ref);
+            FL_CHECK_EQ(g_lookup, g_ref);  // Should be 0
+            FL_CHECK_EQ(b_lookup, b_ref);  // Should be 0
 
             // Validate expected values
-            CHECK_EQ(g_lookup, 0);      // Green should be 0
-            CHECK_EQ(b_lookup, 0);      // Blue should be 0
+            FL_CHECK_EQ(g_lookup, 0);      // Green should be 0
+            FL_CHECK_EQ(b_lookup, 0);      // Blue should be 0
         }
         MESSAGE("✅ Red component: All 32 values validated against reference");
 
@@ -59,13 +59,13 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             rgb565ToRgb888_reference(rgb565, r_ref, g_ref, b_ref);
 
             // Validate lookup table matches reference
-            CHECK_EQ(r_lookup, r_ref);  // Should be 0
-            CHECK_EQ(g_lookup, g_ref);
-            CHECK_EQ(b_lookup, b_ref);  // Should be 0
+            FL_CHECK_EQ(r_lookup, r_ref);  // Should be 0
+            FL_CHECK_EQ(g_lookup, g_ref);
+            FL_CHECK_EQ(b_lookup, b_ref);  // Should be 0
 
             // Validate expected values
-            CHECK_EQ(r_lookup, 0);      // Red should be 0
-            CHECK_EQ(b_lookup, 0);      // Blue should be 0
+            FL_CHECK_EQ(r_lookup, 0);      // Red should be 0
+            FL_CHECK_EQ(b_lookup, 0);      // Blue should be 0
         }
         MESSAGE("✅ Green component: All 64 values validated against reference");
 
@@ -84,13 +84,13 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             rgb565ToRgb888_reference(rgb565, r_ref, g_ref, b_ref);
 
             // Validate lookup table matches reference
-            CHECK_EQ(r_lookup, r_ref);  // Should be 0
-            CHECK_EQ(g_lookup, g_ref);  // Should be 0
-            CHECK_EQ(b_lookup, b_ref);
+            FL_CHECK_EQ(r_lookup, r_ref);  // Should be 0
+            FL_CHECK_EQ(g_lookup, g_ref);  // Should be 0
+            FL_CHECK_EQ(b_lookup, b_ref);
 
             // Validate expected values
-            CHECK_EQ(r_lookup, 0);      // Red should be 0
-            CHECK_EQ(g_lookup, 0);      // Green should be 0
+            FL_CHECK_EQ(r_lookup, 0);      // Red should be 0
+            FL_CHECK_EQ(g_lookup, 0);      // Green should be 0
         }
         MESSAGE("✅ Blue component: All 32 values validated against reference");
 
@@ -101,22 +101,22 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
         // Test minimum values (all 0)
         fl::rgb565ToRgb888(0x0000, r_lookup, g_lookup, b_lookup);
         rgb565ToRgb888_reference(0x0000, r_ref, g_ref, b_ref);
-        CHECK_EQ(r_lookup, r_ref);
-        CHECK_EQ(g_lookup, g_ref);
-        CHECK_EQ(b_lookup, b_ref);
-        CHECK_EQ(r_lookup, 0);
-        CHECK_EQ(g_lookup, 0);
-        CHECK_EQ(b_lookup, 0);
+        FL_CHECK_EQ(r_lookup, r_ref);
+        FL_CHECK_EQ(g_lookup, g_ref);
+        FL_CHECK_EQ(b_lookup, b_ref);
+        FL_CHECK_EQ(r_lookup, 0);
+        FL_CHECK_EQ(g_lookup, 0);
+        FL_CHECK_EQ(b_lookup, 0);
 
         // Test maximum values (all 1s)
         fl::rgb565ToRgb888(0xFFFF, r_lookup, g_lookup, b_lookup);
         rgb565ToRgb888_reference(0xFFFF, r_ref, g_ref, b_ref);
-        CHECK_EQ(r_lookup, r_ref);
-        CHECK_EQ(g_lookup, g_ref);
-        CHECK_EQ(b_lookup, b_ref);
-        CHECK_EQ(r_lookup, 255);
-        CHECK_EQ(g_lookup, 255);
-        CHECK_EQ(b_lookup, 255);
+        FL_CHECK_EQ(r_lookup, r_ref);
+        FL_CHECK_EQ(g_lookup, g_ref);
+        FL_CHECK_EQ(b_lookup, b_ref);
+        FL_CHECK_EQ(r_lookup, 255);
+        FL_CHECK_EQ(g_lookup, 255);
+        FL_CHECK_EQ(b_lookup, 255);
 
         // Test random RGB565 values
         fl::u16 test_values[] = {
@@ -133,9 +133,9 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             rgb565ToRgb888_reference(rgb565, r_ref, g_ref, b_ref);
 
             // Validate lookup table matches reference exactly
-            CHECK_EQ(r_lookup, r_ref);
-            CHECK_EQ(g_lookup, g_ref);
-            CHECK_EQ(b_lookup, b_ref);
+            FL_CHECK_EQ(r_lookup, r_ref);
+            FL_CHECK_EQ(g_lookup, g_ref);
+            FL_CHECK_EQ(b_lookup, b_ref);
         }
 
     MESSAGE("✅ RGB565 to RGB888 conversion: All tests passed - lookup table validated against reference");
@@ -146,33 +146,33 @@ TEST_CASE("RGB565 specific color values test") {
 
         // Test pure red (RGB565: 0xF800 = 11111 000000 00000)
         fl::rgb565ToRgb888(0xF800, r, g, b);
-        CHECK_EQ(r, 255);  // 5-bit 31 -> 8-bit 255
-        CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
-        CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(r, 255);  // 5-bit 31 -> 8-bit 255
+        FL_CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
 
         // Test pure green (RGB565: 0x07E0 = 00000 111111 00000)
         fl::rgb565ToRgb888(0x07E0, r, g, b);
-        CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
-        CHECK_EQ(g, 255);  // 6-bit 63 -> 8-bit 255
-        CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(g, 255);  // 6-bit 63 -> 8-bit 255
+        FL_CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
 
         // Test pure blue (RGB565: 0x001F = 00000 000000 11111)
         fl::rgb565ToRgb888(0x001F, r, g, b);
-        CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
-        CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
-        CHECK_EQ(b, 255);  // 5-bit 31 -> 8-bit 255
+        FL_CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
+        FL_CHECK_EQ(b, 255);  // 5-bit 31 -> 8-bit 255
 
         // Test white (RGB565: 0xFFFF = 11111 111111 11111)
         fl::rgb565ToRgb888(0xFFFF, r, g, b);
-        CHECK_EQ(r, 255);  // 5-bit 31 -> 8-bit 255
-        CHECK_EQ(g, 255);  // 6-bit 63 -> 8-bit 255
-        CHECK_EQ(b, 255);  // 5-bit 31 -> 8-bit 255
+        FL_CHECK_EQ(r, 255);  // 5-bit 31 -> 8-bit 255
+        FL_CHECK_EQ(g, 255);  // 6-bit 63 -> 8-bit 255
+        FL_CHECK_EQ(b, 255);  // 5-bit 31 -> 8-bit 255
 
         // Test black (RGB565: 0x0000 = 00000 000000 00000)
         fl::rgb565ToRgb888(0x0000, r, g, b);
-    CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
-    CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
-    CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
+    FL_CHECK_EQ(r, 0);    // 5-bit 0 -> 8-bit 0
+    FL_CHECK_EQ(g, 0);    // 6-bit 0 -> 8-bit 0
+    FL_CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
 }
 
 TEST_CASE("RGB565 scaling accuracy test") {
@@ -184,9 +184,9 @@ TEST_CASE("RGB565 scaling accuracy test") {
         fl::rgb565ToRgb888(0x7BEF, r, g, b);
 
         // Verify values match lookup table exactly
-        CHECK_EQ(r, 123);  // rgb565_5to8_table[15] = 123
-        CHECK_EQ(g, 125);  // rgb565_6to8_table[47] = 125
-        CHECK_EQ(b, 123);  // rgb565_5to8_table[15] = 123
+        FL_CHECK_EQ(r, 123);  // rgb565_5to8_table[15] = 123
+        FL_CHECK_EQ(g, 125);  // rgb565_6to8_table[47] = 125
+        FL_CHECK_EQ(b, 123);  // rgb565_5to8_table[15] = 123
 
     MESSAGE("Mid-range test - RGB565: 0x7BEF -> RGB888: (" << (int)r << "," << (int)g << "," << (int)b << ")");
 }
@@ -196,17 +196,17 @@ TEST_CASE("RGB565 full range scaling test") {
 
         // Test that maximum 5-bit value (31) scales to 255
         fl::rgb565ToRgb888(0xF800, r, g, b);  // Red: 11111 000000 00000
-        CHECK_EQ(r, 255);
+        FL_CHECK_EQ(r, 255);
 
         // Test that maximum 6-bit value (63) scales to 255
         fl::rgb565ToRgb888(0x07E0, r, g, b);  // Green: 00000 111111 00000
-        CHECK_EQ(g, 255);
+        FL_CHECK_EQ(g, 255);
 
         // Test that minimum values scale to 0
         fl::rgb565ToRgb888(0x0000, r, g, b);
-    CHECK_EQ(r, 0);
-    CHECK_EQ(g, 0);
-    CHECK_EQ(b, 0);
+    FL_CHECK_EQ(r, 0);
+    FL_CHECK_EQ(g, 0);
+    FL_CHECK_EQ(b, 0);
 }
 
 TEST_CASE("RGB565 intermediate values test") {
@@ -217,12 +217,12 @@ TEST_CASE("RGB565 intermediate values test") {
         fl::u16 rgb565 = (8 << 11) | (16 << 5) | 8;
         fl::rgb565ToRgb888(rgb565, r, g, b);
 
-        CHECK(r > 0);
-        CHECK(r < 255);
-        CHECK(g > 0);
-        CHECK(g < 255);
-        CHECK(b > 0);
-        CHECK(b < 255);
+        FL_CHECK(r > 0);
+        FL_CHECK(r < 255);
+        FL_CHECK(g > 0);
+        FL_CHECK(g < 255);
+        FL_CHECK(b > 0);
+        FL_CHECK(b < 255);
 
     MESSAGE("Intermediate test - RGB565: " << rgb565
             << " -> RGB888: (" << (int)r << "," << (int)g << "," << (int)b << ")");

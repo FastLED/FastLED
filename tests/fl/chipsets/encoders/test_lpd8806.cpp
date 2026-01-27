@@ -30,24 +30,24 @@ TEST_CASE("LPD8806 - lpd8806Encode() helper function") {
     // Range: 0x80 (min) to 0xFF (max)
 
     // Boundary values
-    CHECK_EQ(lpd8806Encode(0), 0x80);      // 0 -> 0x80 (MSB set, 7 bits = 0)
-    CHECK_EQ(lpd8806Encode(255), 0xFF);    // 255 -> 0xFF (MSB set, 7 bits = 127)
-    CHECK_EQ(lpd8806Encode(254), 0xFF);    // 254 -> 0xFF (rounds up)
+    FL_CHECK_EQ(lpd8806Encode(0), 0x80);      // 0 -> 0x80 (MSB set, 7 bits = 0)
+    FL_CHECK_EQ(lpd8806Encode(255), 0xFF);    // 255 -> 0xFF (MSB set, 7 bits = 127)
+    FL_CHECK_EQ(lpd8806Encode(254), 0xFF);    // 254 -> 0xFF (rounds up)
 
     // Mid-range values (rounding adds 1 for non-extremes)
-    CHECK_EQ(lpd8806Encode(128), 0xC1);    // 128 -> 0xC1 (64 + 1 rounding | 0x80)
-    CHECK_EQ(lpd8806Encode(127), 0xBF);    // 127 -> 0xBF (63 + 0 rounding | 0x80)
+    FL_CHECK_EQ(lpd8806Encode(128), 0xC1);    // 128 -> 0xC1 (64 + 1 rounding | 0x80)
+    FL_CHECK_EQ(lpd8806Encode(127), 0xBF);    // 127 -> 0xBF (63 + 0 rounding | 0x80)
 
     // Low values (test rounding behavior: groups values)
-    CHECK_EQ(lpd8806Encode(1), 0x81);      // 1 -> 0x81 (0 + 1 rounding | 0x80)
-    CHECK_EQ(lpd8806Encode(2), 0x81);      // 2 -> 0x81 (1 + 0 rounding | 0x80)
-    CHECK_EQ(lpd8806Encode(3), 0x81);      // 3 -> 0x81 (1 + 0 rounding | 0x80)
+    FL_CHECK_EQ(lpd8806Encode(1), 0x81);      // 1 -> 0x81 (0 + 1 rounding | 0x80)
+    FL_CHECK_EQ(lpd8806Encode(2), 0x81);      // 2 -> 0x81 (1 + 0 rounding | 0x80)
+    FL_CHECK_EQ(lpd8806Encode(3), 0x81);      // 3 -> 0x81 (1 + 0 rounding | 0x80)
 
     // Verify MSB is always set (0x80 bit)
     for (u8 i = 0; i < 255; i++) {
         u8 encoded = lpd8806Encode(i);
-        CHECK_GE(encoded, 0x80);           // Always >= 0x80
-        CHECK_LE(encoded, 0xFF);           // Always <= 0xFF
+        FL_CHECK_GE(encoded, 0x80);           // Always >= 0x80
+        FL_CHECK_LE(encoded, 0xFF);           // Always <= 0xFF
     }
 }
 
@@ -63,15 +63,15 @@ TEST_CASE("LPD8806 - Single LED encoding with GRB order") {
 
     // Expected: 3 LED bytes + 1 latch byte
     // Latch: ((1 * 3 + 63) / 64) = 66 / 64 = 1 byte
-    CHECK_EQ(output.size(), 4);
+    FL_CHECK_EQ(output.size(), 4);
 
     // Verify LED data (GRB order)
-    CHECK_EQ(output[0], lpd8806Encode(100));  // Green
-    CHECK_EQ(output[1], lpd8806Encode(150));  // Red
-    CHECK_EQ(output[2], lpd8806Encode(200));  // Blue
+    FL_CHECK_EQ(output[0], lpd8806Encode(100));  // Green
+    FL_CHECK_EQ(output[1], lpd8806Encode(150));  // Red
+    FL_CHECK_EQ(output[2], lpd8806Encode(200));  // Blue
 
     // Verify latch byte
-    CHECK_EQ(output[3], 0x00);
+    FL_CHECK_EQ(output[3], 0x00);
 }
 
 TEST_CASE("LPD8806 - Multiple LEDs with GRB color order") {
@@ -87,25 +87,25 @@ TEST_CASE("LPD8806 - Multiple LEDs with GRB color order") {
 
     // Expected: 9 LED bytes + 1 latch byte
     // Latch: ((3 * 3 + 63) / 64) = 72 / 64 = 1 byte
-    CHECK_EQ(output.size(), 10);
+    FL_CHECK_EQ(output.size(), 10);
 
     // LED 0: Green=255, Red=0, Blue=0
-    CHECK_EQ(output[0], 0xFF);  // Green (max)
-    CHECK_EQ(output[1], 0x80);  // Red (min)
-    CHECK_EQ(output[2], 0x80);  // Blue (min)
+    FL_CHECK_EQ(output[0], 0xFF);  // Green (max)
+    FL_CHECK_EQ(output[1], 0x80);  // Red (min)
+    FL_CHECK_EQ(output[2], 0x80);  // Blue (min)
 
     // LED 1: Green=0, Red=255, Blue=0
-    CHECK_EQ(output[3], 0x80);  // Green (min)
-    CHECK_EQ(output[4], 0xFF);  // Red (max)
-    CHECK_EQ(output[5], 0x80);  // Blue (min)
+    FL_CHECK_EQ(output[3], 0x80);  // Green (min)
+    FL_CHECK_EQ(output[4], 0xFF);  // Red (max)
+    FL_CHECK_EQ(output[5], 0x80);  // Blue (min)
 
     // LED 2: Green=0, Red=0, Blue=255
-    CHECK_EQ(output[6], 0x80);  // Green (min)
-    CHECK_EQ(output[7], 0x80);  // Red (min)
-    CHECK_EQ(output[8], 0xFF);  // Blue (max)
+    FL_CHECK_EQ(output[6], 0x80);  // Green (min)
+    FL_CHECK_EQ(output[7], 0x80);  // Red (min)
+    FL_CHECK_EQ(output[8], 0xFF);  // Blue (max)
 
     // Verify latch byte
-    CHECK_EQ(output[9], 0x00);
+    FL_CHECK_EQ(output[9], 0x00);
 }
 
 TEST_CASE("LPD8806 - Zero LEDs edge case") {
@@ -116,7 +116,7 @@ TEST_CASE("LPD8806 - Zero LEDs edge case") {
     encodeLPD8806(input.begin(), input.end(), fl::back_inserter(output));
 
     // Latch: ((0 * 3 + 63) / 64) = 63 / 64 = 0 bytes
-    CHECK_EQ(output.size(), 0);
+    FL_CHECK_EQ(output.size(), 0);
 }
 
 TEST_CASE("LPD8806 - Latch calculation boundary - 21 LEDs") {
@@ -129,10 +129,10 @@ TEST_CASE("LPD8806 - Latch calculation boundary - 21 LEDs") {
     encodeLPD8806(input.begin(), input.end(), fl::back_inserter(output));
 
     // Expected: 63 LED bytes + 1 latch byte
-    CHECK_EQ(output.size(), 64);
+    FL_CHECK_EQ(output.size(), 64);
 
     // Verify last byte is latch
-    CHECK_EQ(output[63], 0x00);
+    FL_CHECK_EQ(output[63], 0x00);
 }
 
 TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
@@ -144,11 +144,11 @@ TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
     encodeLPD8806(input.begin(), input.end(), fl::back_inserter(output));
 
     // Expected: 66 LED bytes + 2 latch bytes
-    CHECK_EQ(output.size(), 68);
+    FL_CHECK_EQ(output.size(), 68);
 
     // Verify last two bytes are latch
-    CHECK_EQ(output[66], 0x00);
-    CHECK_EQ(output[67], 0x00);
+    FL_CHECK_EQ(output[66], 0x00);
+    FL_CHECK_EQ(output[67], 0x00);
 }
 
 TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
@@ -161,16 +161,16 @@ TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
     encodeLPD8806(input.begin(), input.end(), fl::back_inserter(output));
 
     // Expected: 120 LED bytes + 2 latch bytes
-    CHECK_EQ(output.size(), 122);
+    FL_CHECK_EQ(output.size(), 122);
 
     // Verify first LED encoding (GRB = 255, 0, 128)
-    CHECK_EQ(output[0], 0xFF);  // Green=255 -> 0xFF
-    CHECK_EQ(output[1], 0x80);  // Red=0 -> 0x80
-    CHECK_EQ(output[2], 0xC1);  // Blue=128 -> 0xC1
+    FL_CHECK_EQ(output[0], 0xFF);  // Green=255 -> 0xFF
+    FL_CHECK_EQ(output[1], 0x80);  // Red=0 -> 0x80
+    FL_CHECK_EQ(output[2], 0xC1);  // Blue=128 -> 0xC1
 
     // Verify latch bytes
-    CHECK_EQ(output[120], 0x00);
-    CHECK_EQ(output[121], 0x00);
+    FL_CHECK_EQ(output[120], 0x00);
+    FL_CHECK_EQ(output[121], 0x00);
 }
 
 TEST_CASE("LPD8806 - MSB always set on all LED bytes") {
@@ -187,11 +187,11 @@ TEST_CASE("LPD8806 - MSB always set on all LED bytes") {
     // Check all LED bytes (9 bytes) have MSB set
     // Latch bytes (last 1 byte) should be 0x00
     for (size_t i = 0; i < 9; i++) {
-        CHECK_GE(output[i], 0x80);  // MSB set
+        FL_CHECK_GE(output[i], 0x80);  // MSB set
     }
 
     // Verify latch is 0x00 (MSB not set)
-    CHECK_EQ(output[9], 0x00);
+    FL_CHECK_EQ(output[9], 0x00);
 }
 
 TEST_CASE("LPD8806 - 7-bit color depth verification") {
@@ -210,13 +210,13 @@ TEST_CASE("LPD8806 - 7-bit color depth verification") {
     u8 val2 = output[2] & 0x7F;  // Blue=255
 
     // Verify 7-bit range
-    CHECK_EQ(val0, 0);    // 0 maps to 0
-    CHECK_EQ(val1, 65);   // 128 maps to 65 (with rounding)
-    CHECK_EQ(val2, 127);  // 255 maps to 127 (max 7-bit value)
+    FL_CHECK_EQ(val0, 0);    // 0 maps to 0
+    FL_CHECK_EQ(val1, 65);   // 128 maps to 65 (with rounding)
+    FL_CHECK_EQ(val2, 127);  // 255 maps to 127 (max 7-bit value)
 
     // Verify proportional spacing (approximate due to integer division)
-    CHECK_LT(val0, val1);
-    CHECK_LT(val1, val2);
+    FL_CHECK_LT(val0, val1);
+    FL_CHECK_LT(val1, val2);
 }
 
 } // anonymous namespace

@@ -21,8 +21,8 @@ TEST_CASE("Transform16::ToBounds(max_value)") {
         fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
         fl::vec2<uint16_t> xy = tx.transform(xy_input);
         INFO("i = " << 128);
-        REQUIRE_EQ(128, xy.x);
-        REQUIRE_EQ(128, xy.y);
+        FL_REQUIRE_EQ(128, xy.x);
+        FL_REQUIRE_EQ(128, xy.y);
     }
 
     SUBCASE("Check identity from 8 -> 16") {
@@ -32,8 +32,8 @@ TEST_CASE("Transform16::ToBounds(max_value)") {
             fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
             fl::vec2<uint16_t> xy = tx.transform(xy_input);
             INFO("i = " << i);
-            REQUIRE_EQ(i, xy.x);
-            REQUIRE_EQ(i, xy.y);
+            FL_REQUIRE_EQ(i, xy.x);
+            FL_REQUIRE_EQ(i, xy.y);
         }
     }
 
@@ -46,14 +46,14 @@ TEST_CASE("Transform16::ToBounds(max_value)") {
             fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
             fl::vec2<uint16_t> xy = tx.transform(xy_input);
             INFO("i = " << i);
-            REQUIRE_LE(xy.x, 255);
-            REQUIRE_LE(xy.y, 255);
+            FL_REQUIRE_LE(xy.x, 255);
+            FL_REQUIRE_LE(xy.y, 255);
             smallest = FL_MIN(smallest, xy.x);
             largest = FL_MAX(largest, xy.x);
         }
 
-        REQUIRE_EQ(0, smallest);
-        REQUIRE_EQ(255, largest);
+        FL_REQUIRE_EQ(0, smallest);
+        FL_REQUIRE_EQ(255, largest);
     }
 }
 
@@ -66,7 +66,7 @@ TEST_CASE("Transform16::ToBounds(min, max)") {
         fl::Transform16 tx = fl::Transform16::ToBounds(min, max);
         auto t1 = tx.transform(fl::vec2<uint16_t>(0, 0));
         auto t2 = tx.transform(fl::vec2<uint16_t>(0xffff, 0xffff));
-        REQUIRE_EQ(fl::vec2<uint16_t>(low, low), t1);
-        REQUIRE_EQ(fl::vec2<uint16_t>(high, high), t2);
+        FL_REQUIRE_EQ(fl::vec2<uint16_t>(low, low), t1);
+        FL_REQUIRE_EQ(fl::vec2<uint16_t>(high, high), t2);
     }
 }

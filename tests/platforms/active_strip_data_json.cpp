@@ -74,9 +74,9 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     // Parse back to verify data
     auto parsed = fl::Json::parse(legacyJson.c_str());
     
-    CHECK(parsed.has_value());
-    CHECK(parsed.is_array());
-    CHECK_EQ(parsed.getSize(), 2);
+    FL_CHECK(parsed.has_value());
+    FL_CHECK(parsed.is_array());
+    FL_CHECK_EQ(parsed.getSize(), 2);
     
     // Verify strip data
     bool found10 = false, found20 = false;
@@ -87,15 +87,15 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
         
         if (id == 10) {
             found10 = true;
-            CHECK_EQ(type, "r8g8b8");
+            FL_CHECK_EQ(type, "r8g8b8");
         } else if (id == 20) {
             found20 = true;
-            CHECK_EQ(type, "r8g8b8");
+            FL_CHECK_EQ(type, "r8g8b8");
         }
     }
     
-    CHECK(found10);
-    CHECK(found20);
+    FL_CHECK(found10);
+    FL_CHECK(found20);
     
     FL_WARN("SUCCESS: Legacy JSON round-trip works correctly!");
     
@@ -108,17 +108,17 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     fl::Json newParsed = fl::Json::parse(newJson.c_str());
     
     // Verify both are arrays with same length
-    CHECK(legacyParsed.is_array());
-    CHECK(newParsed.is_array());
-    CHECK_EQ(legacyParsed.size(), newParsed.size());
+    FL_CHECK(legacyParsed.is_array());
+    FL_CHECK(newParsed.is_array());
+    FL_CHECK_EQ(legacyParsed.size(), newParsed.size());
     
     // Verify each element has the same content (regardless of field order)
     for (fl::size_t i = 0; i < legacyParsed.size(); i++) {
         fl::Json legacyItem = legacyParsed[i];
         fl::Json newItem = newParsed[i];
         
-        CHECK_EQ(legacyItem["strip_id"].as<int>(), newItem["strip_id"].as<int>());
-        CHECK_EQ(legacyItem["type"].as<fl::string>(), newItem["type"].as<fl::string>());
+        FL_CHECK_EQ(legacyItem["strip_id"].as<int>(), newItem["strip_id"].as<int>());
+        FL_CHECK_EQ(legacyItem["type"].as<fl::string>(), newItem["type"].as<fl::string>());
     }
     
     FL_WARN("SUCCESS: Both serializers produce identical output!");

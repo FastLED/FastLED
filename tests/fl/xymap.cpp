@@ -52,7 +52,7 @@ TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpent
     // Validate indices match for all in-bounds coordinates
     for (fl::u16 y = 0; y < H; ++y) {
         for (fl::u16 x = 0; x < W; ++x) {
-            CHECK_EQ(mapFromLut.mapToIndex(x, y), mapFromWrapped.mapToIndex(x, y));
+            FL_CHECK_EQ(mapFromLut.mapToIndex(x, y), mapFromWrapped.mapToIndex(x, y));
         }
     }
 
@@ -62,7 +62,7 @@ TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpent
     XYMap mapFromWrappedOffset = XYMap::constructWithUserFunction(W, H, xy_from_serpentine_formula, OFFSET);
     for (fl::u16 y = 0; y < H; ++y) {
         for (fl::u16 x = 0; x < W; ++x) {
-            CHECK_EQ(mapFromLutOffset.mapToIndex(x, y), mapFromWrappedOffset.mapToIndex(x, y));
+            FL_CHECK_EQ(mapFromLutOffset.mapToIndex(x, y), mapFromWrappedOffset.mapToIndex(x, y));
         }
     }
 }
@@ -85,7 +85,7 @@ TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (custom 
 
     for (fl::u16 y = 0; y < H; ++y) {
         for (fl::u16 x = 0; x < W; ++x) {
-            CHECK_EQ(mapFromLut.mapToIndex(x, y), mapFromWrapped.mapToIndex(x, y));
+            FL_CHECK_EQ(mapFromLut.mapToIndex(x, y), mapFromWrapped.mapToIndex(x, y));
         }
     }
 }
@@ -120,29 +120,29 @@ TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
         // Rows 0..2 should match the single 4x6 map exactly
         for (fl::u16 y = 0; y < H_SEG; ++y) {
             for (fl::u16 x = 0; x < W; ++x) {
-                CHECK_EQ(composedIndexSerp(x, y), fullSerp.mapToIndex(x, y));
+                FL_CHECK_EQ(composedIndexSerp(x, y), fullSerp.mapToIndex(x, y));
             }
         }
 
         // Row 3 (y=3) is expected to mismatch due to parity reset
         {
             fl::u16 y = 3;
-            CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
-            CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
+            FL_CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
+            FL_CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
         }
 
         // Row 4 (y=4) also mismatches due to parity reset within the segment
         {
             fl::u16 y = 4;
-            CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
-            CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
+            FL_CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
+            FL_CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
         }
 
         // Row 5 (y=5) mismatches due to parity reset
         {
             fl::u16 y = 5;
-            CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
-            CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
+            FL_CHECK_NE(composedIndexSerp(0, y), fullSerp.mapToIndex(0, y));
+            FL_CHECK_NE(composedIndexSerp(W - 1, y), fullSerp.mapToIndex(W - 1, y));
         }
     }
 
@@ -172,7 +172,7 @@ TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
         // With absolute parity honored, the composed mapping should match the 4x6 serpentine
         for (fl::u16 y = 0; y < H_FULL; ++y) {
             for (fl::u16 x = 0; x < W; ++x) {
-                CHECK_EQ(composedIndexUF(x, y), fullSerp.mapToIndex(x, y));
+                FL_CHECK_EQ(composedIndexUF(x, y), fullSerp.mapToIndex(x, y));
             }
         }
     }

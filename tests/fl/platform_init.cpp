@@ -15,7 +15,7 @@ TEST_CASE("platform_init") {
         fl::platforms::init();
 
         // If we got here without crashing, the function worked
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("fl::platforms::init() is safe to call multiple times") {
@@ -25,7 +25,7 @@ TEST_CASE("platform_init") {
         fl::platforms::init();
 
         // Should not crash or cause issues
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("FastLED.init() can be called") {
@@ -33,7 +33,7 @@ TEST_CASE("platform_init") {
         FastLED.init();
 
         // If we got here without crashing, the function worked
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("FastLED.init() is safe to call multiple times") {
@@ -43,7 +43,7 @@ TEST_CASE("platform_init") {
         FastLED.init();
 
         // Should not crash or cause issues
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("FastLED.init() calls fl::platforms::init()") {
@@ -57,6 +57,6 @@ TEST_CASE("platform_init") {
         FastLED.init();
 
         // Both should work without issues
-        CHECK(true);
+        FL_CHECK(true);
     }
 }

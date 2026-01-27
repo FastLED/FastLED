@@ -205,9 +205,9 @@ public:
 /// @param bytes Captured byte stream
 /// @param expected_preamble Expected preamble bytes
 void verifyPreamble(fl::span<const uint8_t> bytes, fl::span<const uint8_t> expected_preamble) {
-    REQUIRE_EQ(expected_preamble.size(), 15);
+    FL_REQUIRE_EQ(expected_preamble.size(), 15);
     for (size_t i = 0; i < expected_preamble.size(); i++) {
-        CHECK_EQ(bytes[i], expected_preamble[i]);
+        FL_CHECK_EQ(bytes[i], expected_preamble[i]);
     }
 }
 
@@ -220,9 +220,9 @@ void verifyPixels8bit(fl::span<const uint8_t> bytes, fl::span<const CRGB> pixels
 
     for (size_t i = 0; i < pixels.size(); i++) {
         size_t byte_offset = PREAMBLE_SIZE + (i * BYTES_PER_PIXEL);
-        CHECK_EQ(bytes[byte_offset + 0], pixels[i].r);  // R
-        CHECK_EQ(bytes[byte_offset + 1], pixels[i].g);  // G
-        CHECK_EQ(bytes[byte_offset + 2], pixels[i].b);  // B
+        FL_CHECK_EQ(bytes[byte_offset + 0], pixels[i].r);  // R
+        FL_CHECK_EQ(bytes[byte_offset + 1], pixels[i].g);  // G
+        FL_CHECK_EQ(bytes[byte_offset + 2], pixels[i].b);  // B
     }
 }
 
@@ -241,12 +241,12 @@ void verifyPixels16bit(fl::span<const uint8_t> bytes, fl::span<const RGB16> pixe
         uint16_t b16 = pixels[i].b;
 
         // Verify big-endian 16-bit values
-        CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
-        CHECK_EQ(bytes[byte_offset + 1], r16 & 0xFF);  // R low
-        CHECK_EQ(bytes[byte_offset + 2], g16 >> 8);    // G high
-        CHECK_EQ(bytes[byte_offset + 3], g16 & 0xFF);  // G low
-        CHECK_EQ(bytes[byte_offset + 4], b16 >> 8);    // B high
-        CHECK_EQ(bytes[byte_offset + 5], b16 & 0xFF);  // B low
+        FL_CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
+        FL_CHECK_EQ(bytes[byte_offset + 1], r16 & 0xFF);  // R low
+        FL_CHECK_EQ(bytes[byte_offset + 2], g16 >> 8);    // G high
+        FL_CHECK_EQ(bytes[byte_offset + 3], g16 & 0xFF);  // G low
+        FL_CHECK_EQ(bytes[byte_offset + 4], b16 >> 8);    // B high
+        FL_CHECK_EQ(bytes[byte_offset + 5], b16 & 0xFF);  // B low
     }
 }
 
@@ -259,16 +259,16 @@ void verifyPixels8bitRGBW(fl::span<const uint8_t> bytes, fl::span<const RGBW8> p
 
     // Verify padding bytes are 0x00 (padding comes after preamble, before LED data)
     for (size_t i = 0; i < expected_padding; i++) {
-        CHECK_EQ(bytes[PREAMBLE_SIZE + i], 0x00);
+        FL_CHECK_EQ(bytes[PREAMBLE_SIZE + i], 0x00);
     }
 
     // Verify pixel data (starts after preamble + padding)
     for (size_t i = 0; i < pixels.size(); i++) {
         size_t byte_offset = PREAMBLE_SIZE + expected_padding + (i * BYTES_PER_PIXEL);
-        CHECK_EQ(bytes[byte_offset + 0], pixels[i].r);  // R
-        CHECK_EQ(bytes[byte_offset + 1], pixels[i].g);  // G
-        CHECK_EQ(bytes[byte_offset + 2], pixels[i].b);  // B
-        CHECK_EQ(bytes[byte_offset + 3], pixels[i].w);  // W
+        FL_CHECK_EQ(bytes[byte_offset + 0], pixels[i].r);  // R
+        FL_CHECK_EQ(bytes[byte_offset + 1], pixels[i].g);  // G
+        FL_CHECK_EQ(bytes[byte_offset + 2], pixels[i].b);  // B
+        FL_CHECK_EQ(bytes[byte_offset + 3], pixels[i].w);  // W
     }
 }
 
@@ -281,7 +281,7 @@ void verifyPixels16bitRGBW(fl::span<const uint8_t> bytes, fl::span<const RGBW16>
 
     // Verify padding bytes are 0x00 (padding comes after preamble, before LED data)
     for (size_t i = 0; i < expected_padding; i++) {
-        CHECK_EQ(bytes[PREAMBLE_SIZE + i], 0x00);
+        FL_CHECK_EQ(bytes[PREAMBLE_SIZE + i], 0x00);
     }
 
     // Verify pixel data (starts after preamble + padding)
@@ -294,14 +294,14 @@ void verifyPixels16bitRGBW(fl::span<const uint8_t> bytes, fl::span<const RGBW16>
         uint16_t w16 = pixels[i].w;
 
         // Verify big-endian 16-bit values
-        CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
-        CHECK_EQ(bytes[byte_offset + 1], r16 & 0xFF);  // R low
-        CHECK_EQ(bytes[byte_offset + 2], g16 >> 8);    // G high
-        CHECK_EQ(bytes[byte_offset + 3], g16 & 0xFF);  // G low
-        CHECK_EQ(bytes[byte_offset + 4], b16 >> 8);    // B high
-        CHECK_EQ(bytes[byte_offset + 5], b16 & 0xFF);  // B low
-        CHECK_EQ(bytes[byte_offset + 6], w16 >> 8);    // W high
-        CHECK_EQ(bytes[byte_offset + 7], w16 & 0xFF);  // W low
+        FL_CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
+        FL_CHECK_EQ(bytes[byte_offset + 1], r16 & 0xFF);  // R low
+        FL_CHECK_EQ(bytes[byte_offset + 2], g16 >> 8);    // G high
+        FL_CHECK_EQ(bytes[byte_offset + 3], g16 & 0xFF);  // G low
+        FL_CHECK_EQ(bytes[byte_offset + 4], b16 >> 8);    // B high
+        FL_CHECK_EQ(bytes[byte_offset + 5], b16 & 0xFF);  // B low
+        FL_CHECK_EQ(bytes[byte_offset + 6], w16 >> 8);    // W high
+        FL_CHECK_EQ(bytes[byte_offset + 7], w16 & 0xFF);  // W low
     }
 }
 
@@ -366,7 +366,7 @@ TEST_CASE("UCS7604 8-bit - RGB color order") {
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
-    REQUIRE_EQ(output.size(), 24);
+    FL_REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -392,7 +392,7 @@ TEST_CASE("UCS7604 8-bit - GRB color order") {
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
-    REQUIRE_EQ(output.size(), 24);
+    FL_REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -418,7 +418,7 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
     fl::span<const uint8_t> output = testUCS7604Controller<BRG, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
-    REQUIRE_EQ(output.size(), 24);
+    FL_REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -446,7 +446,7 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
-    REQUIRE_EQ(output.size(), 33);
+    FL_REQUIRE_EQ(output.size(), 33);
 
     // Verify preamble with 16-bit mode byte
     verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
@@ -475,7 +475,7 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
-    REQUIRE_EQ(output.size(), 33);
+    FL_REQUIRE_EQ(output.size(), 33);
 
     // Verify preamble with 16-bit mode byte
     verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
@@ -493,34 +493,34 @@ TEST_CASE("UCS7604 runtime brightness control") {
     // Test set_brightness and brightness functions with single value
     fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x08));
     fl::ucs7604::CurrentControl current = fl::ucs7604::brightness();
-    CHECK_EQ(current.r, 0x08);
-    CHECK_EQ(current.g, 0x08);
-    CHECK_EQ(current.b, 0x08);
-    CHECK_EQ(current.w, 0x08);
+    FL_CHECK_EQ(current.r, 0x08);
+    FL_CHECK_EQ(current.g, 0x08);
+    FL_CHECK_EQ(current.b, 0x08);
+    FL_CHECK_EQ(current.w, 0x08);
 
     // Test clamping to 4-bit range
     fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0xFF));
     current = fl::ucs7604::brightness();
-    CHECK_EQ(current.r, 0x0F);  // Should clamp to 0x0F
-    CHECK_EQ(current.g, 0x0F);
-    CHECK_EQ(current.b, 0x0F);
-    CHECK_EQ(current.w, 0x0F);
+    FL_CHECK_EQ(current.r, 0x0F);  // Should clamp to 0x0F
+    FL_CHECK_EQ(current.g, 0x0F);
+    FL_CHECK_EQ(current.b, 0x0F);
+    FL_CHECK_EQ(current.w, 0x0F);
 
     // Test individual channel control via struct
     fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x03, 0x05, 0x07, 0x09));
     current = fl::ucs7604::brightness();
-    CHECK_EQ(current.r, 0x03);
-    CHECK_EQ(current.g, 0x05);
-    CHECK_EQ(current.b, 0x07);
-    CHECK_EQ(current.w, 0x09);
+    FL_CHECK_EQ(current.r, 0x03);
+    FL_CHECK_EQ(current.g, 0x05);
+    FL_CHECK_EQ(current.b, 0x07);
+    FL_CHECK_EQ(current.w, 0x09);
 
     // Test individual channel control via inline function
     fl::ucs7604::set_brightness(0x02, 0x04, 0x06, 0x08);
     current = fl::ucs7604::brightness();
-    CHECK_EQ(current.r, 0x02);
-    CHECK_EQ(current.g, 0x04);
-    CHECK_EQ(current.b, 0x06);
-    CHECK_EQ(current.w, 0x08);
+    FL_CHECK_EQ(current.r, 0x02);
+    FL_CHECK_EQ(current.g, 0x04);
+    FL_CHECK_EQ(current.b, 0x06);
+    FL_CHECK_EQ(current.w, 0x08);
 
     // Test that controller uses global brightness
     fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x05));
@@ -539,10 +539,10 @@ TEST_CASE("UCS7604 runtime brightness control") {
 
     // Verify preamble has the brightness value (0x05) in current control bytes
     // Preamble bytes 9-12 are RGBW current control
-    CHECK_EQ(output[9], 0x05);   // R current
-    CHECK_EQ(output[10], 0x05);  // G current
-    CHECK_EQ(output[11], 0x05);  // B current
-    CHECK_EQ(output[12], 0x05);  // W current
+    FL_CHECK_EQ(output[9], 0x05);   // R current
+    FL_CHECK_EQ(output[10], 0x05);  // G current
+    FL_CHECK_EQ(output[11], 0x05);  // B current
+    FL_CHECK_EQ(output[12], 0x05);  // W current
 
     // Restore original brightness
     fl::ucs7604::set_brightness(original);
@@ -580,10 +580,10 @@ TEST_CASE("UCS7604 brightness with color order - GRB") {
     // - Position 1 (wire G): r_current = 0x3 (because user's R goes to wire G in GRB)
     // - Position 2 (wire B): b_current = 0x7 (because user's B stays at wire B)
     // - Position 3 (wire W): w_current = 0x9
-    CHECK_EQ(output[9],  0x5);  // Wire R gets user G current
-    CHECK_EQ(output[10], 0x3);  // Wire G gets user R current
-    CHECK_EQ(output[11], 0x7);  // Wire B gets user B current
-    CHECK_EQ(output[12], 0x9);  // Wire W gets user W current
+    FL_CHECK_EQ(output[9],  0x5);  // Wire R gets user G current
+    FL_CHECK_EQ(output[10], 0x3);  // Wire G gets user R current
+    FL_CHECK_EQ(output[11], 0x7);  // Wire B gets user B current
+    FL_CHECK_EQ(output[12], 0x9);  // Wire W gets user W current
 
     // Restore original brightness
     fl::ucs7604::set_brightness(original);
@@ -603,10 +603,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels1);
     fl::span<const uint8_t> output1 = controller.getCapturedBytes();
 
-    CHECK_EQ(output1[9],  0x08);  // R current
-    CHECK_EQ(output1[10], 0x08);  // G current
-    CHECK_EQ(output1[11], 0x08);  // B current
-    CHECK_EQ(output1[12], 0x08);  // W current
+    FL_CHECK_EQ(output1[9],  0x08);  // R current
+    FL_CHECK_EQ(output1[10], 0x08);  // G current
+    FL_CHECK_EQ(output1[11], 0x08);  // B current
+    FL_CHECK_EQ(output1[12], 0x08);  // W current
 
     // Test 2: Set individual channel values
     fl::ucs7604::set_brightness(0x03, 0x05, 0x07, 0x09);
@@ -614,10 +614,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels2);
     fl::span<const uint8_t> output2 = controller.getCapturedBytes();
 
-    CHECK_EQ(output2[9],  0x03);  // R current
-    CHECK_EQ(output2[10], 0x05);  // G current
-    CHECK_EQ(output2[11], 0x07);  // B current
-    CHECK_EQ(output2[12], 0x09);  // W current
+    FL_CHECK_EQ(output2[9],  0x03);  // R current
+    FL_CHECK_EQ(output2[10], 0x05);  // G current
+    FL_CHECK_EQ(output2[11], 0x07);  // B current
+    FL_CHECK_EQ(output2[12], 0x09);  // W current
 
     // Test 3: Test clamping - values > 0x0F should be clamped to 0x0F
     fl::ucs7604::set_brightness(0xFF, 0x1A, 0x23, 0x45);
@@ -625,10 +625,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels3);
     fl::span<const uint8_t> output3 = controller.getCapturedBytes();
 
-    CHECK_EQ(output3[9],  0x0F);  // R current (0xFF clamped to 0x0F)
-    CHECK_EQ(output3[10], 0x0A);  // G current (0x1A clamped to 0x0A)
-    CHECK_EQ(output3[11], 0x03);  // B current (0x23 clamped to 0x03)
-    CHECK_EQ(output3[12], 0x05);  // W current (0x45 clamped to 0x05)
+    FL_CHECK_EQ(output3[9],  0x0F);  // R current (0xFF clamped to 0x0F)
+    FL_CHECK_EQ(output3[10], 0x0A);  // G current (0x1A clamped to 0x0A)
+    FL_CHECK_EQ(output3[11], 0x03);  // B current (0x23 clamped to 0x03)
+    FL_CHECK_EQ(output3[12], 0x05);  // W current (0x45 clamped to 0x05)
 
     // Test 4: Test minimum values
     fl::ucs7604::set_brightness(0x00, 0x00, 0x00, 0x00);
@@ -636,10 +636,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels4);
     fl::span<const uint8_t> output4 = controller.getCapturedBytes();
 
-    CHECK_EQ(output4[9],  0x00);  // R current
-    CHECK_EQ(output4[10], 0x00);  // G current
-    CHECK_EQ(output4[11], 0x00);  // B current
-    CHECK_EQ(output4[12], 0x00);  // W current
+    FL_CHECK_EQ(output4[9],  0x00);  // R current
+    FL_CHECK_EQ(output4[10], 0x00);  // G current
+    FL_CHECK_EQ(output4[11], 0x00);  // B current
+    FL_CHECK_EQ(output4[12], 0x00);  // W current
 
     // Test 5: Test maximum valid values (0x0F)
     fl::ucs7604::set_brightness(0x0F, 0x0F, 0x0F, 0x0F);
@@ -647,10 +647,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels5);
     fl::span<const uint8_t> output5 = controller.getCapturedBytes();
 
-    CHECK_EQ(output5[9],  0x0F);  // R current
-    CHECK_EQ(output5[10], 0x0F);  // G current
-    CHECK_EQ(output5[11], 0x0F);  // B current
-    CHECK_EQ(output5[12], 0x0F);  // W current
+    FL_CHECK_EQ(output5[9],  0x0F);  // R current
+    FL_CHECK_EQ(output5[10], 0x0F);  // G current
+    FL_CHECK_EQ(output5[11], 0x0F);  // B current
+    FL_CHECK_EQ(output5[12], 0x0F);  // W current
 
     // Test 6: Test mixed valid values in range
     fl::ucs7604::set_brightness(0x01, 0x04, 0x08, 0x0C);
@@ -658,10 +658,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     controller.showPixels(pixels6);
     fl::span<const uint8_t> output6 = controller.getCapturedBytes();
 
-    CHECK_EQ(output6[9],  0x01);  // R current
-    CHECK_EQ(output6[10], 0x04);  // G current
-    CHECK_EQ(output6[11], 0x08);  // B current
-    CHECK_EQ(output6[12], 0x0C);  // W current
+    FL_CHECK_EQ(output6[9],  0x01);  // R current
+    FL_CHECK_EQ(output6[10], 0x04);  // G current
+    FL_CHECK_EQ(output6[11], 0x08);  // B current
+    FL_CHECK_EQ(output6[12], 0x0C);  // W current
 
     // Restore original brightness
     fl::ucs7604::set_brightness(original);
@@ -683,10 +683,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
     controller.showPixels(pixels1);
     fl::span<const uint8_t> output1 = controller.getCapturedBytes();
 
-    CHECK_EQ(output1[9],  0x5);  // Wire R gets user G current (0x5)
-    CHECK_EQ(output1[10], 0x3);  // Wire G gets user R current (0x3)
-    CHECK_EQ(output1[11], 0x7);  // Wire B gets user B current (0x7)
-    CHECK_EQ(output1[12], 0x9);  // Wire W gets user W current (0x9)
+    FL_CHECK_EQ(output1[9],  0x5);  // Wire R gets user G current (0x5)
+    FL_CHECK_EQ(output1[10], 0x3);  // Wire G gets user R current (0x3)
+    FL_CHECK_EQ(output1[11], 0x7);  // Wire B gets user B current (0x7)
+    FL_CHECK_EQ(output1[12], 0x9);  // Wire W gets user W current (0x9)
 
     // Test clamping with GRB order
     // User sets: R=0xFF, G=0x1A, B=0x23, W=0x45
@@ -697,10 +697,10 @@ TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
     controller.showPixels(pixels2);
     fl::span<const uint8_t> output2 = controller.getCapturedBytes();
 
-    CHECK_EQ(output2[9],  0x0A);  // Wire R gets user G current (0x1A -> 0x0A)
-    CHECK_EQ(output2[10], 0x0F);  // Wire G gets user R current (0xFF -> 0x0F)
-    CHECK_EQ(output2[11], 0x03);  // Wire B gets user B current (0x23 -> 0x03)
-    CHECK_EQ(output2[12], 0x05);  // Wire W gets user W current (0x45 -> 0x05)
+    FL_CHECK_EQ(output2[9],  0x0A);  // Wire R gets user G current (0x1A -> 0x0A)
+    FL_CHECK_EQ(output2[10], 0x0F);  // Wire G gets user R current (0xFF -> 0x0F)
+    FL_CHECK_EQ(output2[11], 0x03);  // Wire B gets user B current (0x23 -> 0x03)
+    FL_CHECK_EQ(output2[12], 0x05);  // Wire W gets user W current (0x45 -> 0x05)
 
     // Restore original brightness
     fl::ucs7604::set_brightness(original);
@@ -725,10 +725,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         fl::span<const uint8_t> output = controller.getCapturedBytes();
 
         // RGB order: preamble should have R=0x1, G=0x2, B=0x3, W=0x4 (no swap)
-        CHECK_EQ(output[9],  0x1);  // Wire R = user R
-        CHECK_EQ(output[10], 0x2);  // Wire G = user G
-        CHECK_EQ(output[11], 0x3);  // Wire B = user B
-        CHECK_EQ(output[12], 0x4);  // Wire W = user W
+        FL_CHECK_EQ(output[9],  0x1);  // Wire R = user R
+        FL_CHECK_EQ(output[10], 0x2);  // Wire G = user G
+        FL_CHECK_EQ(output[11], 0x3);  // Wire B = user B
+        FL_CHECK_EQ(output[12], 0x4);  // Wire W = user W
     }
 
     // Test GRB order - R and G swapped
@@ -740,10 +740,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         fl::span<const uint8_t> output = controller.getCapturedBytes();
 
         // GRB order: preamble should have R=0x2, G=0x1, B=0x3, W=0x4 (R↔G swap)
-        CHECK_EQ(output[9],  0x2);  // Wire R = user G (swapped)
-        CHECK_EQ(output[10], 0x1);  // Wire G = user R (swapped)
-        CHECK_EQ(output[11], 0x3);  // Wire B = user B (unchanged)
-        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+        FL_CHECK_EQ(output[9],  0x2);  // Wire R = user G (swapped)
+        FL_CHECK_EQ(output[10], 0x1);  // Wire G = user R (swapped)
+        FL_CHECK_EQ(output[11], 0x3);  // Wire B = user B (unchanged)
+        FL_CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
     }
 
     // Test BRG order - rotate left (B→R→G→B)
@@ -755,10 +755,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         fl::span<const uint8_t> output = controller.getCapturedBytes();
 
         // BRG order: preamble should have R=0x3, G=0x1, B=0x2, W=0x4 (rotate left)
-        CHECK_EQ(output[9],  0x3);  // Wire R = user B
-        CHECK_EQ(output[10], 0x1);  // Wire G = user R
-        CHECK_EQ(output[11], 0x2);  // Wire B = user G
-        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+        FL_CHECK_EQ(output[9],  0x3);  // Wire R = user B
+        FL_CHECK_EQ(output[10], 0x1);  // Wire G = user R
+        FL_CHECK_EQ(output[11], 0x2);  // Wire B = user G
+        FL_CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
     }
 
     // Test RBG order - G and B swapped
@@ -770,10 +770,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         fl::span<const uint8_t> output = controller.getCapturedBytes();
 
         // RBG order: preamble should have R=0x1, G=0x3, B=0x2, W=0x4 (G↔B swap)
-        CHECK_EQ(output[9],  0x1);  // Wire R = user R (unchanged)
-        CHECK_EQ(output[10], 0x3);  // Wire G = user B (swapped)
-        CHECK_EQ(output[11], 0x2);  // Wire B = user G (swapped)
-        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+        FL_CHECK_EQ(output[9],  0x1);  // Wire R = user R (unchanged)
+        FL_CHECK_EQ(output[10], 0x3);  // Wire G = user B (swapped)
+        FL_CHECK_EQ(output[11], 0x2);  // Wire B = user G (swapped)
+        FL_CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
     }
 
     // Test GBR order - rotate right (G→B→R→G)
@@ -787,10 +787,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         // GBR order: Wire sends G,B,R which UCS7604 interprets as R,G,B registers
         // So R-register gets G value, G-register gets B value, B-register gets R value
         // Preamble current control: R-reg-current=g_current, G-reg-current=b_current, B-reg-current=r_current
-        CHECK_EQ(output[9],  0x2);  // R-register current = user G current
-        CHECK_EQ(output[10], 0x3);  // G-register current = user B current
-        CHECK_EQ(output[11], 0x1);  // B-register current = user R current
-        CHECK_EQ(output[12], 0x4);  // W-register current = user W current (unchanged)
+        FL_CHECK_EQ(output[9],  0x2);  // R-register current = user G current
+        FL_CHECK_EQ(output[10], 0x3);  // G-register current = user B current
+        FL_CHECK_EQ(output[11], 0x1);  // B-register current = user R current
+        FL_CHECK_EQ(output[12], 0x4);  // W-register current = user W current (unchanged)
     }
 
     // Test BGR order - reverse RGB
@@ -802,10 +802,10 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
         fl::span<const uint8_t> output = controller.getCapturedBytes();
 
         // BGR order: preamble should have R=0x3, G=0x2, B=0x1, W=0x4 (reverse)
-        CHECK_EQ(output[9],  0x3);  // Wire R = user B
-        CHECK_EQ(output[10], 0x2);  // Wire G = user G (unchanged)
-        CHECK_EQ(output[11], 0x1);  // Wire B = user R
-        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+        FL_CHECK_EQ(output[9],  0x3);  // Wire R = user B
+        FL_CHECK_EQ(output[10], 0x2);  // Wire G = user G (unchanged)
+        FL_CHECK_EQ(output[11], 0x1);  // Wire B = user R
+        FL_CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
     }
 
     // Restore original brightness
@@ -837,7 +837,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 3 LEDs (no padding)") {
     };
 
     // Verify total size: 15 (preamble) + 0 (padding) + 12 (3 LEDs * 4 bytes) = 27
-    REQUIRE_EQ(output.size(), 27);
+    FL_REQUIRE_EQ(output.size(), 27);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -873,7 +873,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 4 LEDs (2 bytes padding)") {
     };
 
     // Verify total size: 15 (preamble) + 2 (padding) + 16 (4 LEDs * 4 bytes) = 33
-    REQUIRE_EQ(output.size(), 33);
+    FL_REQUIRE_EQ(output.size(), 33);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -911,7 +911,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 5 LEDs (1 byte padding)") {
     };
 
     // Verify total size: 15 (preamble) + 1 (padding) + 20 (5 LEDs * 4 bytes) = 36
-    REQUIRE_EQ(output.size(), 36);
+    FL_REQUIRE_EQ(output.size(), 36);
 
     // Verify preamble with 8-bit mode byte
     verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
@@ -947,7 +947,7 @@ TEST_CASE("UCS7604 16-bit RGBW - 3 LEDs (no padding)") {
     };
 
     // Verify total size: 15 (preamble) + 0 (padding) + 24 (3 LEDs * 8 bytes) = 39
-    REQUIRE_EQ(output.size(), 39);
+    FL_REQUIRE_EQ(output.size(), 39);
 
     // Verify preamble with 16-bit mode byte
     verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
@@ -985,7 +985,7 @@ TEST_CASE("UCS7604 16-bit RGBW - 4 LEDs (2 bytes padding)") {
     };
 
     // Verify total size: 15 (preamble) + 1 (padding) + 32 (4 LEDs * 8 bytes) = 48
-    REQUIRE_EQ(output.size(), 48);
+    FL_REQUIRE_EQ(output.size(), 48);
 
     // Verify preamble with 16-bit mode byte
     verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
@@ -1025,7 +1025,7 @@ TEST_CASE("UCS7604 16-bit RGBW - 5 LEDs (1 byte padding)") {
     };
 
     // Verify total size: 15 (preamble) + 2 (padding) + 40 (5 LEDs * 8 bytes) = 57
-    REQUIRE_EQ(output.size(), 57);
+    FL_REQUIRE_EQ(output.size(), 57);
 
     // Verify preamble with 16-bit mode byte
     verifyPreamble(output, PREAMBLE_16BIT_800KHZ);

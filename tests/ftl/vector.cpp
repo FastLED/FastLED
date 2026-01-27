@@ -20,9 +20,9 @@ TEST_CASE("Fixed vector simple") {
     fl::FixedVector<int, 5> vec;
 
     SUBCASE("Initial state") {
-        CHECK(vec.size() == 0);
-        CHECK(vec.capacity() == 5);
-        CHECK(vec.empty());
+        FL_CHECK(vec.size() == 0);
+        FL_CHECK(vec.capacity() == 5);
+        FL_CHECK(vec.empty());
     }
 
     SUBCASE("Push back and access") {
@@ -30,11 +30,11 @@ TEST_CASE("Fixed vector simple") {
         vec.push_back(20);
         vec.push_back(30);
 
-        CHECK(vec.size() == 3);
-        CHECK_FALSE(vec.empty());
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK_FALSE(vec.empty());
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 
     SUBCASE("Push back beyond capacity") {
@@ -42,9 +42,9 @@ TEST_CASE("Fixed vector simple") {
             vec.push_back(i * 10);
         }
 
-        CHECK(vec.size() == 5);
-        CHECK(vec.capacity() == 5);
-        CHECK(vec[4] == 40);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec.capacity() == 5);
+        FL_CHECK(vec[4] == 40);
     }
 
     SUBCASE("Clear") {
@@ -52,8 +52,8 @@ TEST_CASE("Fixed vector simple") {
         vec.push_back(20);
         vec.clear();
 
-        CHECK(vec.size() == 0);
-        CHECK(vec.empty());
+        FL_CHECK(vec.size() == 0);
+        FL_CHECK(vec.empty());
     }
 }
 
@@ -65,11 +65,11 @@ TEST_CASE("Fixed vector insert") {
         vec.push_back(30);
         bool inserted = vec.insert(vec.begin(), 10);
 
-        CHECK(inserted);
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(inserted);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 
     SUBCASE("Insert in middle") {
@@ -77,11 +77,11 @@ TEST_CASE("Fixed vector insert") {
         vec.push_back(30);
         bool inserted = vec.insert(vec.begin() + 1, 20);
 
-        CHECK(inserted);
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(inserted);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 
     SUBCASE("Insert at end") {
@@ -89,11 +89,11 @@ TEST_CASE("Fixed vector insert") {
         vec.push_back(20);
         bool inserted = vec.insert(vec.end(), 30);
 
-        CHECK(inserted);
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(inserted);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 
     SUBCASE("Insert when full") {
@@ -104,13 +104,13 @@ TEST_CASE("Fixed vector insert") {
         vec.push_back(50);
         bool inserted = vec.insert(vec.begin() + 2, 25);
 
-        CHECK_FALSE(inserted);
-        CHECK(vec.size() == 5);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
-        CHECK(vec[3] == 40);
-        CHECK(vec[4] == 50);
+        FL_CHECK_FALSE(inserted);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
+        FL_CHECK(vec[3] == 40);
+        FL_CHECK(vec[4] == 50);
     }
 }
 
@@ -125,8 +125,8 @@ TEST_CASE("Fixed vector find_if with predicate") {
         vec.push_back(5);
 
         auto it = vec.find_if([](int n) { return n % 2 == 0; });
-        CHECK(it != vec.end());
-        CHECK(*it == 2);
+        FL_CHECK(it != vec.end());
+        FL_CHECK(*it == 2);
     }
 
     SUBCASE("Find number greater than 3") {
@@ -137,8 +137,8 @@ TEST_CASE("Fixed vector find_if with predicate") {
         vec.push_back(5);
 
         auto it = vec.find_if([](int n) { return n > 3; });
-        CHECK(it != vec.end());
-        CHECK(*it == 4);
+        FL_CHECK(it != vec.end());
+        FL_CHECK(*it == 4);
     }
 
     SUBCASE("Find non-existent condition") {
@@ -147,7 +147,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
         vec.push_back(5);
 
         auto it = vec.find_if([](int n) { return n % 2 == 0; });
-        CHECK(it == vec.end());
+        FL_CHECK(it == vec.end());
     }
 
     SUBCASE("Find in empty vector") {
@@ -155,7 +155,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
             FL_UNUSED(n);
             return true;
         });
-        CHECK(it == vec.end());
+        FL_CHECK(it == vec.end());
     }
 }
 
@@ -175,23 +175,23 @@ TEST_CASE("fl::FixedVector construction and destruction") {
     };
 
     SUBCASE("Construction and destruction") {
-        REQUIRE_EQ(0, live_object_count);
+        FL_REQUIRE_EQ(0, live_object_count);
         live_object_count = 0;
         {
             fl::FixedVector<TestObject, 3> vec;
-            CHECK(live_object_count == 0);
+            FL_CHECK(live_object_count == 0);
 
             vec.push_back(TestObject(1));
             vec.push_back(TestObject(2));
             vec.push_back(TestObject(3));
 
-            CHECK(live_object_count == 3);  // 3 objects in the vector
+            FL_CHECK(live_object_count == 3);  // 3 objects in the vector
 
             vec.pop_back();
-            CHECK(live_object_count == 2);  // 2 objects left in the vector
+            FL_CHECK(live_object_count == 2);  // 2 objects left in the vector
         }
         // vec goes out of scope here
-        REQUIRE_EQ(live_object_count, 0);
+        FL_REQUIRE_EQ(live_object_count, 0);
     }
 
     SUBCASE("Clear") {
@@ -201,13 +201,13 @@ TEST_CASE("fl::FixedVector construction and destruction") {
             vec.push_back(TestObject(1));
             vec.push_back(TestObject(2));
 
-            CHECK(live_object_count == 2);
+            FL_CHECK(live_object_count == 2);
 
             vec.clear();
 
-            CHECK(live_object_count == 0);  // All objects should be destroyed after clear
+            FL_CHECK(live_object_count == 0);  // All objects should be destroyed after clear
         }
-        CHECK(live_object_count == 0);
+        FL_CHECK(live_object_count == 0);
     }
 
     SUBCASE("Stress test clear, insert and remove") {
@@ -223,7 +223,7 @@ TEST_CASE("fl::FixedVector construction and destruction") {
                         vec.push_back(TestObject(i));
                         ++checked_size;
                     } else {
-                        REQUIRE_EQ(20, vec.size());
+                        FL_REQUIRE_EQ(20, vec.size());
                     }
                     break;
                 case 1:
@@ -231,13 +231,13 @@ TEST_CASE("fl::FixedVector construction and destruction") {
                         vec.pop_back();
                         --checked_size;
                     } else {
-                        REQUIRE_EQ(0, checked_size);
+                        FL_REQUIRE_EQ(0, checked_size);
                     }
                     break;
                 case 2:
                     vec.clear();
                     checked_size = 0;
-                    REQUIRE_EQ(0, vec.size());
+                    FL_REQUIRE_EQ(0, vec.size());
                     break;
             }
 
@@ -253,16 +253,16 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         // Implicit conversion from span to FixedVector
         fl::FixedVector<int, 10> vec = s;  // N=10, span has 5 elements
 
-        CHECK(vec.size() == 5);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
-        CHECK(vec[3] == 40);
-        CHECK(vec[4] == 50);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
+        FL_CHECK(vec[3] == 40);
+        FL_CHECK(vec[4] == 50);
 
         // Verify it's a copy
         vec[0] = 99;
-        CHECK(source_data[0] == 10);
+        FL_CHECK(source_data[0] == 10);
     }
 
     SUBCASE("from span larger than capacity") {
@@ -272,12 +272,12 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         // FixedVector with capacity 5 should only copy first 5 elements
         fl::FixedVector<int, 5> vec = s;
 
-        CHECK(vec.size() == 5);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
-        CHECK(vec[3] == 4);
-        CHECK(vec[4] == 5);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
+        FL_CHECK(vec[3] == 4);
+        FL_CHECK(vec[4] == 5);
     }
 
     SUBCASE("from vector via span") {
@@ -289,10 +289,10 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         fl::span<const int> s(heap_vec);
         fl::FixedVector<int, 10> fixed_vec = s;
 
-        CHECK(fixed_vec.size() == 3);
-        CHECK(fixed_vec[0] == 100);
-        CHECK(fixed_vec[1] == 200);
-        CHECK(fixed_vec[2] == 300);
+        FL_CHECK(fixed_vec.size() == 3);
+        FL_CHECK(fixed_vec[0] == 100);
+        FL_CHECK(fixed_vec[1] == 200);
+        FL_CHECK(fixed_vec[2] == 300);
     }
 }
 
@@ -304,8 +304,8 @@ TEST_CASE("Fixed vector advanced") {
         vec.push_back(20);
         vec.pop_back();
 
-        CHECK(vec.size() == 1);
-        CHECK(vec[0] == 10);
+        FL_CHECK(vec.size() == 1);
+        FL_CHECK(vec[0] == 10);
     }
 
     SUBCASE("Front and back") {
@@ -313,8 +313,8 @@ TEST_CASE("Fixed vector advanced") {
         vec.push_back(20);
         vec.push_back(30);
 
-        CHECK(vec.front() == 10);
-        CHECK(vec.back() == 30);
+        FL_CHECK(vec.front() == 10);
+        FL_CHECK(vec.back() == 30);
     }
 
     SUBCASE("Iterator") {
@@ -327,7 +327,7 @@ TEST_CASE("Fixed vector advanced") {
             sum += *it;
         }
 
-        CHECK(sum == 60);
+        FL_CHECK(sum == 60);
     }
 
     SUBCASE("Erase") {
@@ -337,9 +337,9 @@ TEST_CASE("Fixed vector advanced") {
 
         vec.erase(vec.begin() + 1);
 
-        CHECK(vec.size() == 2);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 30);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 30);
     }
 
     SUBCASE("Find and has") {
@@ -347,15 +347,15 @@ TEST_CASE("Fixed vector advanced") {
         vec.push_back(20);
         vec.push_back(30);
 
-        CHECK(vec.has(20));
-        CHECK_FALSE(vec.has(40));
+        FL_CHECK(vec.has(20));
+        FL_CHECK_FALSE(vec.has(40));
 
         auto it = vec.find(20);
-        CHECK(it != vec.end());
-        CHECK(*it == 20);
+        FL_CHECK(it != vec.end());
+        FL_CHECK(*it == 20);
 
         it = vec.find(40);
-        CHECK(it == vec.end());
+        FL_CHECK(it == vec.end());
     }
 }
 
@@ -372,11 +372,11 @@ TEST_CASE("Fixed vector with custom type") {
         vec.push_back(Point(1, 2));
         vec.push_back(Point(3, 4));
 
-        CHECK(vec.size() == 2);
-        CHECK(vec[0].x == 1);
-        CHECK(vec[0].y == 2);
-        CHECK(vec[1].x == 3);
-        CHECK(vec[1].y == 4);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0].x == 1);
+        FL_CHECK(vec[0].y == 2);
+        FL_CHECK(vec[1].x == 3);
+        FL_CHECK(vec[1].y == 4);
     }
 
     SUBCASE("Find custom type") {
@@ -384,9 +384,9 @@ TEST_CASE("Fixed vector with custom type") {
         vec.push_back(Point(3, 4));
 
         auto it = vec.find(Point(3, 4));
-        CHECK(it != vec.end());
-        CHECK(it->x == 3);
-        CHECK(it->y == 4);
+        FL_CHECK(it != vec.end());
+        FL_CHECK(it->x == 3);
+        FL_CHECK(it->y == 4);
     }
 }
 
@@ -404,11 +404,11 @@ TEST_CASE("SortedVector") {
         vec.insert(4);
         vec.insert(2);
 
-        CHECK(vec.size() == 4);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
-        CHECK(vec[3] == 4);
+        FL_CHECK(vec.size() == 4);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
+        FL_CHECK(vec[3] == 4);
     }
 
     SUBCASE("Erase removes element") {
@@ -420,13 +420,13 @@ TEST_CASE("SortedVector") {
         
         vec.erase(3);  // Remove the value 3
         
-        CHECK(vec.size() == 3);
-        CHECK_FALSE(vec.has(3));  // Verify 3 is no longer present
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK_FALSE(vec.has(3));  // Verify 3 is no longer present
         
         // Verify remaining elements are still in order
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 4);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 4);
     }
 
     SUBCASE("Insert when full") {
@@ -442,27 +442,27 @@ TEST_CASE("SortedVector") {
         fl::InsertResult result;
         vec.insert(6, &result);  // Try to insert into full vector
         
-        CHECK_EQ(fl::InsertResult::kMaxSize, result);  // Should return false
-        CHECK(vec.size() == 5);  // Size shouldn't change
-        CHECK(vec[4] == 5);  // Last element should still be 5
+        FL_CHECK_EQ(fl::InsertResult::kMaxSize, result);  // Should return false
+        FL_CHECK(vec.size() == 5);  // Size shouldn't change
+        FL_CHECK(vec[4] == 5);  // Last element should still be 5
     }
 
     SUBCASE("Erase from empty") {
         fl::SortedHeapVector<int, Less> vec;
         bool ok = vec.erase(1);  // Try to erase from empty vector
-        CHECK(!ok);  // Should return false
-        CHECK(vec.size() == 0);  // Should still be empty
-        CHECK(vec.empty());
+        FL_CHECK(!ok);  // Should return false
+        FL_CHECK(vec.size() == 0);  // Should still be empty
+        FL_CHECK(vec.empty());
 
         ok = vec.erase(vec.end());
-        CHECK(!ok);  // Should return false
-        CHECK(vec.size() == 0);  // Should still be empty
-        CHECK(vec.empty());
+        FL_CHECK(!ok);  // Should return false
+        FL_CHECK(vec.size() == 0);  // Should still be empty
+        FL_CHECK(vec.empty());
 
         ok = vec.erase(vec.begin());
-        CHECK(!ok);  // Should return false
-        CHECK(vec.size() == 0);  // Should still be empty
-        CHECK(vec.empty());
+        FL_CHECK(!ok);  // Should return false
+        FL_CHECK(vec.size() == 0);  // Should still be empty
+        FL_CHECK(vec.empty());
     }
 }
 
@@ -470,10 +470,10 @@ TEST_CASE("vector") {
     SUBCASE("resize") {
         fl::vector<int> vec;
         vec.resize(5);
-        CHECK(vec.size() == 5);
-        CHECK(vec.capacity() >= 5);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec.capacity() >= 5);
         for (int i = 0; i < 5; ++i) {
-            CHECK_EQ(0, vec[i]);
+            FL_CHECK_EQ(0, vec[i]);
         }
     }
 
@@ -487,17 +487,17 @@ TEST_CASE("vector") {
         // Test implicit conversion from span to vector
         fl::vector<int> vec = s;  // This should work with the implicit constructor
 
-        CHECK(vec.size() == 5);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
-        CHECK(vec[3] == 40);
-        CHECK(vec[4] == 50);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
+        FL_CHECK(vec[3] == 40);
+        FL_CHECK(vec[4] == 50);
 
         // Verify it's a copy (modifying vec doesn't affect source)
         vec[0] = 99;
-        CHECK(source_data[0] == 10);  // Original unchanged
-        CHECK(vec[0] == 99);           // Copy modified
+        FL_CHECK(source_data[0] == 10);  // Original unchanged
+        FL_CHECK(vec[0] == 99);           // Copy modified
     }
 
     SUBCASE("copy constructor from span of different containers") {
@@ -510,10 +510,10 @@ TEST_CASE("vector") {
         fl::span<const int> fixed_span(fixed_vec);
         fl::vector<int> from_fixed = fixed_span;
 
-        CHECK(from_fixed.size() == 3);
-        CHECK(from_fixed[0] == 1);
-        CHECK(from_fixed[1] == 2);
-        CHECK(from_fixed[2] == 3);
+        FL_CHECK(from_fixed.size() == 3);
+        FL_CHECK(from_fixed[0] == 1);
+        FL_CHECK(from_fixed[1] == 2);
+        FL_CHECK(from_fixed[2] == 3);
 
         // Test with another vector
         fl::vector<int> heap_vec;
@@ -523,9 +523,9 @@ TEST_CASE("vector") {
         fl::span<const int> heap_span(heap_vec);
         fl::vector<int> from_heap = heap_span;
 
-        CHECK(from_heap.size() == 2);
-        CHECK(from_heap[0] == 100);
-        CHECK(from_heap[1] == 200);
+        FL_CHECK(from_heap.size() == 2);
+        FL_CHECK(from_heap[0] == 100);
+        FL_CHECK(from_heap[1] == 200);
     }
 }
 
@@ -535,62 +535,62 @@ TEST_CASE("Initializer list constructors") {
     SUBCASE("FixedVector initializer list") {
         fl::FixedVector<int, 10> vec{1, 2, 3, 4, 5};  
         
-        CHECK(vec.size() == 5);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
-        CHECK(vec[3] == 4);
-        CHECK(vec[4] == 5);
+        FL_CHECK(vec.size() == 5);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
+        FL_CHECK(vec[3] == 4);
+        FL_CHECK(vec[4] == 5);
     }
     
     SUBCASE("FixedVector initializer list with overflow") {
         // Test that overflow is handled gracefully - only first N elements are taken
         fl::FixedVector<int, 3> vec{1, 2, 3, 4, 5, 6, 7};
         
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
     }
     
     SUBCASE("vector initializer list") {
         fl::vector<int> vec{10, 20, 30, 40};
         
-        CHECK(vec.size() == 4);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
-        CHECK(vec[3] == 40);
+        FL_CHECK(vec.size() == 4);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
+        FL_CHECK(vec[3] == 40);
     }
     
     SUBCASE("InlinedVector initializer list - small size") {
         fl::InlinedVector<int, 10> vec{1, 2, 3};
         
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
     }
     
     SUBCASE("InlinedVector initializer list - large size") {
         fl::InlinedVector<int, 3> vec{1, 2, 3, 4, 5, 6};  // Should trigger heap mode
         
-        CHECK(vec.size() == 6);
-        CHECK(vec[0] == 1);
-        CHECK(vec[1] == 2);
-        CHECK(vec[2] == 3);
-        CHECK(vec[3] == 4);
-        CHECK(vec[4] == 5);
-        CHECK(vec[5] == 6);
+        FL_CHECK(vec.size() == 6);
+        FL_CHECK(vec[0] == 1);
+        FL_CHECK(vec[1] == 2);
+        FL_CHECK(vec[2] == 3);
+        FL_CHECK(vec[3] == 4);
+        FL_CHECK(vec[4] == 5);
+        FL_CHECK(vec[5] == 6);
     }
     
     SUBCASE("fl::vector initializer list") {
         fl::vector<int> vec{100, 200, 300};  // This uses vector
         
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 100);
-        CHECK(vec[1] == 200);
-        CHECK(vec[2] == 300);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 100);
+        FL_CHECK(vec[1] == 200);
+        FL_CHECK(vec[2] == 300);
     }
     
     SUBCASE("Empty initializer list") {
@@ -598,12 +598,12 @@ TEST_CASE("Initializer list constructors") {
         fl::vector<int> heap_vec{};
         fl::InlinedVector<int, 3> inlined_vec{};
 
-        CHECK(fixed_vec.size() == 0);
-        CHECK(fixed_vec.empty());
-        CHECK(heap_vec.size() == 0);
-        CHECK(heap_vec.empty());
-        CHECK(inlined_vec.size() == 0);
-        CHECK(inlined_vec.empty());
+        FL_CHECK(fixed_vec.size() == 0);
+        FL_CHECK(fixed_vec.empty());
+        FL_CHECK(heap_vec.size() == 0);
+        FL_CHECK(heap_vec.empty());
+        FL_CHECK(inlined_vec.size() == 0);
+        FL_CHECK(inlined_vec.empty());
     }
 }
 
@@ -618,23 +618,23 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         vec.push_back(20);
         vec.push_back(30);
 
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
 
         // Test resize - this should automatically trigger reallocate() optimization
         vec.resize(10);
-        CHECK(vec.size() == 10);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 10);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
 
         // Test shrink
         vec.resize(2);
-        CHECK(vec.size() == 2);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
     }
 
     SUBCASE("Default allocator with struct POD (trivially copyable)") {
@@ -649,17 +649,17 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         vec.push_back({1, 2});
         vec.push_back({3, 4});
 
-        CHECK(vec.size() == 2);
-        CHECK(vec[0].x == 1);
-        CHECK(vec[0].y == 2);
-        CHECK(vec[1].x == 3);
-        CHECK(vec[1].y == 4);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0].x == 1);
+        FL_CHECK(vec[0].y == 2);
+        FL_CHECK(vec[1].x == 3);
+        FL_CHECK(vec[1].y == 4);
 
         // Trigger reallocation - should automatically use realloc()
         vec.reserve(100);
-        CHECK(vec.capacity() >= 100);
-        CHECK(vec[0].x == 1);
-        CHECK(vec[1].x == 3);
+        FL_CHECK(vec.capacity() >= 100);
+        FL_CHECK(vec[0].x == 1);
+        FL_CHECK(vec[1].x == 3);
     }
 
     SUBCASE("Default allocator stress test with automatic realloc") {
@@ -670,11 +670,11 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
             vec.push_back(i);
         }
 
-        CHECK(vec.size() == 1000);
+        FL_CHECK(vec.size() == 1000);
 
         // Verify all values are correct after many reallocations
         for (int i = 0; i < 1000; ++i) {
-            CHECK(vec[i] == i);
+            FL_CHECK(vec[i] == i);
         }
     }
 
@@ -700,15 +700,15 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         vec.push_back(NonTriviallyCopyable(42));
         vec.push_back(NonTriviallyCopyable(100));
 
-        CHECK(vec.size() == 2);
-        CHECK(*vec[0].ptr == 42);
-        CHECK(*vec[1].ptr == 100);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(*vec[0].ptr == 42);
+        FL_CHECK(*vec[1].ptr == 100);
 
         // Trigger reallocation - should use safe path, not realloc()
         vec.reserve(100);
-        CHECK(vec.capacity() >= 100);
-        CHECK(*vec[0].ptr == 42);
-        CHECK(*vec[1].ptr == 100);
+        FL_CHECK(vec.capacity() >= 100);
+        FL_CHECK(*vec[0].ptr == 42);
+        FL_CHECK(*vec[1].ptr == 100);
     }
 }
 
@@ -722,10 +722,10 @@ TEST_CASE("allocator_realloc backwards compatibility") {
         vec.push_back(20);
         vec.push_back(30);
 
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 }
 
@@ -753,16 +753,16 @@ TEST_CASE("allocator_realloc backwards compatibility") {
 
 TEST_CASE("is_trivially_copyable trait") {
     SUBCASE("Fundamental types are trivially copyable") {
-        CHECK(fl::is_trivially_copyable<int>::value);
-        CHECK(fl::is_trivially_copyable<float>::value);
-        CHECK(fl::is_trivially_copyable<double>::value);
-        CHECK(fl::is_trivially_copyable<char>::value);
-        CHECK(fl::is_trivially_copyable<bool>::value);
+        FL_CHECK(fl::is_trivially_copyable<int>::value);
+        FL_CHECK(fl::is_trivially_copyable<float>::value);
+        FL_CHECK(fl::is_trivially_copyable<double>::value);
+        FL_CHECK(fl::is_trivially_copyable<char>::value);
+        FL_CHECK(fl::is_trivially_copyable<bool>::value);
     }
 
     SUBCASE("Pointers are trivially copyable") {
-        CHECK(fl::is_trivially_copyable<int*>::value);
-        CHECK(fl::is_trivially_copyable<void*>::value);
+        FL_CHECK(fl::is_trivially_copyable<int*>::value);
+        FL_CHECK(fl::is_trivially_copyable<void*>::value);
     }
 
     SUBCASE("Simple POD structs are trivially copyable") {
@@ -770,7 +770,7 @@ TEST_CASE("is_trivially_copyable trait") {
             int x;
             float y;
         };
-        CHECK(fl::is_trivially_copyable<SimplePOD>::value);
+        FL_CHECK(fl::is_trivially_copyable<SimplePOD>::value);
     }
 
     SUBCASE("Types with non-trivial operations are NOT trivially copyable") {
@@ -779,6 +779,6 @@ TEST_CASE("is_trivially_copyable trait") {
             NonTriviallyCopyable() : ptr(nullptr) {}
             ~NonTriviallyCopyable() { delete ptr; }
         };
-        CHECK_FALSE(fl::is_trivially_copyable<NonTriviallyCopyable>::value);
+        FL_CHECK_FALSE(fl::is_trivially_copyable<NonTriviallyCopyable>::value);
     }
 }

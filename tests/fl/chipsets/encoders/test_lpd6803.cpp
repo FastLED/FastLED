@@ -16,11 +16,11 @@ namespace test_lpd6803 {
 
 // Helper: Verify start boundary (4 bytes of 0x00)
 static void verifyStartBoundary(const vector<u8>& data) {
-    REQUIRE(data.size() >= 4);
-    CHECK(data[0] == 0x00);
-    CHECK(data[1] == 0x00);
-    CHECK(data[2] == 0x00);
-    CHECK(data[3] == 0x00);
+    FL_REQUIRE(data.size() >= 4);
+    FL_CHECK(data[0] == 0x00);
+    FL_CHECK(data[1] == 0x00);
+    FL_CHECK(data[2] == 0x00);
+    FL_CHECK(data[3] == 0x00);
 }
 
 // Helper: Verify end boundary ((num_leds/32) DWords of 0xFF000000)
@@ -30,32 +30,32 @@ static void verifyEndBoundary(const vector<u8>& data, size_t num_leds, size_t st
 
     if (expected_dwords == 0) {
         // No end boundary for < 32 LEDs
-        CHECK(data.size() == start_offset);
+        FL_CHECK(data.size() == start_offset);
         return;
     }
 
-    REQUIRE(data.size() >= start_offset + expected_bytes);
+    FL_REQUIRE(data.size() >= start_offset + expected_bytes);
 
     for (size_t i = 0; i < expected_dwords; i++) {
         size_t offset = start_offset + (i * 4);
-        CHECK(data[offset + 0] == 0xFF);
-        CHECK(data[offset + 1] == 0x00);
-        CHECK(data[offset + 2] == 0x00);
-        CHECK(data[offset + 3] == 0x00);
+        FL_CHECK(data[offset + 0] == 0xFF);
+        FL_CHECK(data[offset + 1] == 0x00);
+        FL_CHECK(data[offset + 2] == 0x00);
+        FL_CHECK(data[offset + 3] == 0x00);
     }
 }
 
 // Helper: Verify 16-bit LED frame at specific offset
 static void verifyLEDFrame(const vector<u8>& data, size_t offset, u8 r, u8 g, u8 b) {
-    REQUIRE(data.size() >= offset + 2);
+    FL_REQUIRE(data.size() >= offset + 2);
 
     u16 actual = (static_cast<u16>(data[offset]) << 8) | data[offset + 1];
     u16 expected = lpd6803EncodeRGB(r, g, b);
 
-    CHECK(actual == expected);
+    FL_CHECK(actual == expected);
 
     // Verify marker bit is set
-    CHECK((actual & 0x8000) == 0x8000);
+    FL_CHECK((actual & 0x8000) == 0x8000);
 }
 
 } // namespace test_lpd6803
@@ -68,40 +68,40 @@ using namespace test_lpd6803;
 
 TEST_CASE("lpd6803EncodeRGB() - marker bit set") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 0);
-    CHECK((result & 0x8000) == 0x8000);
+    FL_CHECK((result & 0x8000) == 0x8000);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - black (0,0,0)") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 0);
-    CHECK(result == 0x8000);  // Only marker bit set
+    FL_CHECK(result == 0x8000);  // Only marker bit set
 }
 
 TEST_CASE("lpd6803EncodeRGB() - white (255,255,255)") {
     u16 result = fl::lpd6803EncodeRGB(255, 255, 255);
     // 255 >> 3 = 31 (0x1F) for each component
     // Expected: 1bbbbbgggggrrrrr = 1_11111_11111_11111 = 0xFFFF
-    CHECK(result == 0xFFFF);
+    FL_CHECK(result == 0xFFFF);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - pure red (255,0,0)") {
     u16 result = fl::lpd6803EncodeRGB(255, 0, 0);
     // Red in bits 14-10: (255 & 0xF8) << 7 = 0xF8 << 7 = 0x7C00
     // Expected: 0x8000 | 0x7C00 = 0xFC00
-    CHECK(result == 0xFC00);
+    FL_CHECK(result == 0xFC00);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - pure green (0,255,0)") {
     u16 result = fl::lpd6803EncodeRGB(0, 255, 0);
     // Green in bits 9-5: (255 & 0xF8) << 2 = 0xF8 << 2 = 0x03E0
     // Expected: 0x8000 | 0x03E0 = 0x83E0
-    CHECK(result == 0x83E0);
+    FL_CHECK(result == 0x83E0);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - pure blue (0,0,255)") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 255);
     // Blue in bits 4-0: 255 >> 3 = 0x1F
     // Expected: 0x8000 | 0x001F = 0x801F
-    CHECK(result == 0x801F);
+    FL_CHECK(result == 0x801F);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - mid-range values (128,128,128)") {
@@ -111,13 +111,13 @@ TEST_CASE("lpd6803EncodeRGB() - mid-range values (128,128,128)") {
     // Green: (128 & 0xF8) << 2 = 0x80 << 2 = 0x0200
     // Blue: 128 >> 3 = 0x10
     // Expected: 0x8000 | 0x4000 | 0x0200 | 0x0010 = 0xC210
-    CHECK(result == 0xC210);
+    FL_CHECK(result == 0xC210);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - low values (7,7,7)") {
     u16 result = fl::lpd6803EncodeRGB(7, 7, 7);
     // 7 >> 3 = 0 for each component (all bits lost in 5-bit precision)
-    CHECK(result == 0x8000);
+    FL_CHECK(result == 0x8000);
 }
 
 TEST_CASE("lpd6803EncodeRGB() - boundary (8,8,8)") {
@@ -127,7 +127,7 @@ TEST_CASE("lpd6803EncodeRGB() - boundary (8,8,8)") {
     // Green: (8 & 0xF8) << 2 = 0x08 << 2 = 0x0020
     // Blue: 8 >> 3 = 0x01
     // Expected: 0x8000 | 0x0400 | 0x0020 | 0x0001 = 0x8421
-    CHECK(result == 0x8421);
+    FL_CHECK(result == 0x8421);
 }
 
 // ============================================================================
@@ -141,7 +141,7 @@ TEST_CASE("encodeLPD6803() - empty range (0 LEDs)") {
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Should have only start boundary (4 bytes)
-    REQUIRE(output.size() == 4);
+    FL_REQUIRE(output.size() == 4);
     test_lpd6803::verifyStartBoundary(output);
 }
 
@@ -152,7 +152,7 @@ TEST_CASE("encodeLPD6803() - single LED black") {
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Start boundary (4) + LED data (2) = 6 bytes
-    REQUIRE(output.size() == 6);
+    FL_REQUIRE(output.size() == 6);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyLEDFrame(output, 4, 0, 0, 0);
 }
@@ -163,7 +163,7 @@ TEST_CASE("encodeLPD6803() - single LED white") {
 
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    REQUIRE(output.size() == 6);
+    FL_REQUIRE(output.size() == 6);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyLEDFrame(output, 4, 255, 255, 255);
 }
@@ -174,7 +174,7 @@ TEST_CASE("encodeLPD6803() - single LED red") {
 
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    REQUIRE(output.size() == 6);
+    FL_REQUIRE(output.size() == 6);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyLEDFrame(output, 4, 255, 0, 0);
 }
@@ -190,7 +190,7 @@ TEST_CASE("encodeLPD6803() - multiple LEDs (3 LEDs)") {
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Start boundary (4) + 3 LEDs (6) = 10 bytes
-    REQUIRE(output.size() == 10);
+    FL_REQUIRE(output.size() == 10);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyLEDFrame(output, 4, 255, 0, 0);
     test_lpd6803::verifyLEDFrame(output, 6, 0, 255, 0);
@@ -208,7 +208,7 @@ TEST_CASE("encodeLPD6803() - 31 LEDs (no end boundary)") {
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Start boundary (4) + 31 LEDs (62) = 66 bytes (no end boundary)
-    REQUIRE(output.size() == 66);
+    FL_REQUIRE(output.size() == 66);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyEndBoundary(output, 31, 66);
 }
@@ -220,7 +220,7 @@ TEST_CASE("encodeLPD6803() - 32 LEDs (1 DWord end boundary)") {
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
     // Start boundary (4) + 32 LEDs (64) + end boundary (4) = 72 bytes
-    REQUIRE(output.size() == 72);
+    FL_REQUIRE(output.size() == 72);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyEndBoundary(output, 32, 68);
 }
@@ -234,7 +234,7 @@ TEST_CASE("encodeLPD6803() - 40 LEDs (1 DWord end boundary)") {
 
     // Start boundary (4) + 40 LEDs (80) + end boundary (4) = 88 bytes
     // 40 / 32 = 1 DWord
-    REQUIRE(output.size() == 88);
+    FL_REQUIRE(output.size() == 88);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyEndBoundary(output, 40, 84);
 }
@@ -248,7 +248,7 @@ TEST_CASE("encodeLPD6803() - 70 LEDs (2 DWord end boundary)") {
 
     // Start boundary (4) + 70 LEDs (140) + end boundary (8) = 152 bytes
     // 70 / 32 = 2 DWords
-    REQUIRE(output.size() == 152);
+    FL_REQUIRE(output.size() == 152);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyEndBoundary(output, 70, 144);
 }
@@ -262,7 +262,7 @@ TEST_CASE("encodeLPD6803() - 72 LEDs (2 DWord end boundary)") {
 
     // Start boundary (4) + 72 LEDs (144) + end boundary (8) = 156 bytes
     // 72 / 32 = 2 DWords
-    REQUIRE(output.size() == 156);
+    FL_REQUIRE(output.size() == 156);
     test_lpd6803::verifyStartBoundary(output);
     test_lpd6803::verifyEndBoundary(output, 72, 148);
 }
@@ -287,19 +287,19 @@ TEST_CASE("encodeLPD6803() - color precision loss") {
     // Verify first two LEDs encode identically
     u16 led0 = (static_cast<u16>(output[4]) << 8) | output[5];
     u16 led1 = (static_cast<u16>(output[6]) << 8) | output[7];
-    CHECK(led0 == led1);
+    FL_CHECK(led0 == led1);
 
     // Verify LED 2 and LED 3 encode identically
     u16 led2 = (static_cast<u16>(output[8]) << 8) | output[9];
     u16 led3 = (static_cast<u16>(output[10]) << 8) | output[11];
-    CHECK(led2 == led3);
+    FL_CHECK(led2 == led3);
 
     // Verify LED 2 differs from LED 0
-    CHECK(led2 != led0);
+    FL_CHECK(led2 != led0);
 
     // Verify LED 4 differs from LED 2
     u16 led4 = (static_cast<u16>(output[12]) << 8) | output[13];
-    CHECK(led4 != led2);
+    FL_CHECK(led4 != led2);
 }
 
 TEST_CASE("encodeLPD6803() - 5-bit boundaries") {
@@ -320,7 +320,7 @@ TEST_CASE("encodeLPD6803() - 5-bit boundaries") {
 
         // Expected: marker bit + (i << 10) + (i << 5) + i = 0x8000 | (i * 0x421)
         u16 expected = 0x8000 | (static_cast<u16>(i) * 0x421);
-        CHECK(actual == expected);
+        FL_CHECK(actual == expected);
     }
 }
 
@@ -341,7 +341,7 @@ TEST_CASE("encodeLPD6803() - alternating pattern") {
     fl::vector<fl::u8> output;
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    REQUIRE(output.size() == 24);  // 4 + 20 = 24
+    FL_REQUIRE(output.size() == 24);  // 4 + 20 = 24
 
     // Verify alternating pattern
     for (int i = 0; i < 10; i++) {
@@ -364,7 +364,7 @@ TEST_CASE("encodeLPD6803() - gradient pattern") {
     fl::vector<fl::u8> output;
     fl::encodeLPD6803(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    REQUIRE(output.size() == 36);  // 4 + 32 = 36
+    FL_REQUIRE(output.size() == 36);  // 4 + 32 = 36
 
     // Verify gradient encoding
     for (int i = 0; i < 16; i++) {

@@ -20,11 +20,11 @@ TEST_CASE("Remote: Basic function registration") {
         called = true;
     });
 
-    REQUIRE(remote.hasFunction("test"));
-    REQUIRE_FALSE(remote.hasFunction("unknown"));
+    FL_REQUIRE(remote.hasFunction("test"));
+    FL_REQUIRE_FALSE(remote.hasFunction("unknown"));
 
     remote.processRpc(R"({"timestamp":0,"function":"test","args":[]})");
-    REQUIRE(called);
+    FL_REQUIRE(called);
 }
 
 // Test 4.2 - Immediate Execution
@@ -39,7 +39,7 @@ TEST_CASE("Remote: Immediate execution") {
     });
 
     remote.processRpc(R"({"timestamp":0,"function":"add","args":[5,3]})");
-    REQUIRE_EQ(result, 8);
+    FL_REQUIRE_EQ(result, 8);
 }
 
 // Test 4.3 - Scheduled Execution
@@ -52,15 +52,15 @@ TEST_CASE("Remote: Scheduled execution") {
     });
 
     remote.processRpc(R"({"timestamp":1000,"function":"increment","args":[]})");
-    REQUIRE_EQ(callCount, 0);  // Not executed yet
-    REQUIRE_EQ(remote.pendingCount(), 1);
+    FL_REQUIRE_EQ(callCount, 0);  // Not executed yet
+    FL_REQUIRE_EQ(remote.pendingCount(), 1);
 
     remote.tick(999);  // Before scheduled time
-    REQUIRE_EQ(callCount, 0);
+    FL_REQUIRE_EQ(callCount, 0);
 
     remote.tick(1000);  // At scheduled time
-    REQUIRE_EQ(callCount, 1);
-    REQUIRE_EQ(remote.pendingCount(), 0);
+    FL_REQUIRE_EQ(callCount, 1);
+    FL_REQUIRE_EQ(remote.pendingCount(), 0);
 }
 
 // Test 4.4 - Error Handling
@@ -69,20 +69,20 @@ TEST_CASE("Remote: Error handling") {
 
     // Invalid JSON
     auto err = remote.processRpc("{invalid json}");
-    REQUIRE_EQ(err, fl::Remote::Error::InvalidJson);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::InvalidJson);
 
     // Missing function field
     err = remote.processRpc(R"({"timestamp":0,"args":[]})");
-    REQUIRE_EQ(err, fl::Remote::Error::MissingFunction);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::MissingFunction);
 
     // Unknown function
     err = remote.processRpc(R"({"timestamp":0,"function":"unknown","args":[]})");
-    REQUIRE_EQ(err, fl::Remote::Error::UnknownFunction);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::UnknownFunction);
 
     // Invalid timestamp (should warn but default to 0)
     remote.registerFunction("test", [](const fl::Json&) {});
     err = remote.processRpc(R"({"timestamp":-5,"function":"test","args":[]})");
-    REQUIRE_EQ(err, fl::Remote::Error::InvalidTimestamp);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::InvalidTimestamp);
 }
 
 // Test 4.5 - Argument Extraction
@@ -97,10 +97,10 @@ TEST_CASE("Remote: Argument extraction") {
     });
 
     remote.processRpc(R"({"function":"collect","args":[10,20,30]})");
-    REQUIRE_EQ(received.size(), 3);
-    REQUIRE_EQ(received[0], 10);
-    REQUIRE_EQ(received[1], 20);
-    REQUIRE_EQ(received[2], 30);
+    FL_REQUIRE_EQ(received.size(), 3);
+    FL_REQUIRE_EQ(received[0], 10);
+    FL_REQUIRE_EQ(received[1], 20);
+    FL_REQUIRE_EQ(received[2], 30);
 }
 
 // Test 4.6 - Multiple Scheduled Calls
@@ -116,21 +116,21 @@ TEST_CASE("Remote: Multiple scheduled calls") {
     remote.processRpc(R"({"timestamp":1000,"function":"a","args":[]})");
     remote.processRpc(R"({"timestamp":2000,"function":"b","args":[]})");
 
-    REQUIRE_EQ(remote.pendingCount(), 3);
+    FL_REQUIRE_EQ(remote.pendingCount(), 3);
 
     remote.tick(1500);
-    REQUIRE_EQ(executed.size(), 1);  // Only 'a' should execute
-    REQUIRE_EQ(executed[0], "a");
+    FL_REQUIRE_EQ(executed.size(), 1);  // Only 'a' should execute
+    FL_REQUIRE_EQ(executed[0], "a");
 
     remote.tick(2500);
-    REQUIRE_EQ(executed.size(), 2);  // 'b' should execute
-    REQUIRE_EQ(executed[1], "b");
+    FL_REQUIRE_EQ(executed.size(), 2);  // 'b' should execute
+    FL_REQUIRE_EQ(executed[1], "b");
 
     remote.tick(3500);
-    REQUIRE_EQ(executed.size(), 3);  // 'c' should execute
-    REQUIRE_EQ(executed[2], "c");
+    FL_REQUIRE_EQ(executed.size(), 3);  // 'c' should execute
+    FL_REQUIRE_EQ(executed[2], "c");
 
-    REQUIRE_EQ(remote.pendingCount(), 0);
+    FL_REQUIRE_EQ(remote.pendingCount(), 0);
 }
 
 // Test 4.7 - Clear Operations
@@ -140,21 +140,21 @@ TEST_CASE("Remote: Clear operations") {
     remote.registerFunction("test", [](const fl::Json&) {});
     remote.processRpc(R"({"timestamp":1000,"function":"test","args":[]})");
 
-    REQUIRE_EQ(remote.pendingCount(), 1);
-    REQUIRE(remote.hasFunction("test"));
+    FL_REQUIRE_EQ(remote.pendingCount(), 1);
+    FL_REQUIRE(remote.hasFunction("test"));
 
     remote.clearScheduled();
-    REQUIRE_EQ(remote.pendingCount(), 0);
-    REQUIRE(remote.hasFunction("test"));  // Still registered
+    FL_REQUIRE_EQ(remote.pendingCount(), 0);
+    FL_REQUIRE(remote.hasFunction("test"));  // Still registered
 
     remote.processRpc(R"({"timestamp":1000,"function":"test","args":[]})");
     remote.clearFunctions();
-    REQUIRE_FALSE(remote.hasFunction("test"));
-    REQUIRE_EQ(remote.pendingCount(), 1);  // Still scheduled
+    FL_REQUIRE_FALSE(remote.hasFunction("test"));
+    FL_REQUIRE_EQ(remote.pendingCount(), 1);  // Still scheduled
 
     remote.clear();
-    REQUIRE_EQ(remote.pendingCount(), 0);
-    REQUIRE_FALSE(remote.hasFunction("test"));
+    FL_REQUIRE_EQ(remote.pendingCount(), 0);
+    FL_REQUIRE_FALSE(remote.hasFunction("test"));
 }
 
 // Test 4.8 - Return Values
@@ -170,9 +170,9 @@ TEST_CASE("Remote: Return values") {
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"millis","args":[]})", result);
 
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE(result.has_value());
-    REQUIRE_EQ(result | 0, 12345);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE(result.has_value());
+    FL_REQUIRE_EQ(result | 0, 12345);
 }
 
 // Test 4.9 - Return Values with Arguments
@@ -191,8 +191,8 @@ TEST_CASE("Remote: Return values with arguments") {
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"multiply","args":[6,7]})", result);
 
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE_EQ(result["product"] | 0, 42);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(result["product"] | 0, 42);
 }
 
 // Test 4.10 - Scheduled Functions with Return Values and Timing Metadata
@@ -208,28 +208,28 @@ TEST_CASE("Remote: Scheduled functions with return values and timing metadata") 
     fl::Json result;
     auto err = remote.processRpc(R"({"timestamp":1000,"function":"getCounter","args":[]})", result);
 
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE_FALSE(result.has_value());  // Result not available yet (scheduled)
-    REQUIRE_EQ(remote.pendingCount(), 1);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE_FALSE(result.has_value());  // Result not available yet (scheduled)
+    FL_REQUIRE_EQ(remote.pendingCount(), 1);
 
     // Execute scheduled function
     remote.tick(1000);
 
     // Check results are available with metadata
     auto results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);
+    FL_REQUIRE_EQ(results.size(), 1);
 
     const auto& r = results[0];
-    REQUIRE_EQ(r.functionName, "getCounter");
-    REQUIRE(r.wasScheduled);
-    REQUIRE_EQ(r.scheduledAt, 1000);
-    REQUIRE(r.result.has_value());
-    REQUIRE_EQ(r.result | 0, 100);
-    REQUIRE_EQ(counter, 101);  // Counter was incremented
+    FL_REQUIRE_EQ(r.functionName, "getCounter");
+    FL_REQUIRE(r.wasScheduled);
+    FL_REQUIRE_EQ(r.scheduledAt, 1000);
+    FL_REQUIRE(r.result.has_value());
+    FL_REQUIRE_EQ(r.result | 0, 100);
+    FL_REQUIRE_EQ(counter, 101);  // Counter was incremented
 
     // Verify timing: receivedAt <= scheduledAt <= executedAt
-    REQUIRE(r.receivedAt <= r.scheduledAt);
-    REQUIRE(r.scheduledAt <= r.executedAt);
+    FL_REQUIRE(r.receivedAt <= r.scheduledAt);
+    FL_REQUIRE(r.scheduledAt <= r.executedAt);
 }
 
 // Test 4.11 - Stable Ordering (FIFO for Same Timestamp)
@@ -250,18 +250,18 @@ TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
     remote.processRpc(R"({"timestamp":1000,"function":"c","args":[]})");
     remote.processRpc(R"({"timestamp":1000,"function":"d","args":[]})");
 
-    REQUIRE_EQ(remote.pendingCount(), 4);
+    FL_REQUIRE_EQ(remote.pendingCount(), 4);
 
     // Execute all scheduled functions
     remote.tick(1000);
 
     // Verify FIFO execution order (stable ordering)
-    REQUIRE_EQ(executionOrder.size(), 4);
-    REQUIRE_EQ(executionOrder[0], "a");
-    REQUIRE_EQ(executionOrder[1], "b");
-    REQUIRE_EQ(executionOrder[2], "c");
-    REQUIRE_EQ(executionOrder[3], "d");
-    REQUIRE_EQ(remote.pendingCount(), 0);
+    FL_REQUIRE_EQ(executionOrder.size(), 4);
+    FL_REQUIRE_EQ(executionOrder[0], "a");
+    FL_REQUIRE_EQ(executionOrder[1], "b");
+    FL_REQUIRE_EQ(executionOrder[2], "c");
+    FL_REQUIRE_EQ(executionOrder[3], "d");
+    FL_REQUIRE_EQ(remote.pendingCount(), 0);
 }
 
 // Additional test: Unregister function
@@ -269,15 +269,15 @@ TEST_CASE("Remote: Unregister function") {
     fl::Remote remote;
 
     remote.registerFunction("test", [](const fl::Json&) {});
-    REQUIRE(remote.hasFunction("test"));
+    FL_REQUIRE(remote.hasFunction("test"));
 
     bool removed = remote.unregisterFunction("test");
-    REQUIRE(removed);
-    REQUIRE_FALSE(remote.hasFunction("test"));
+    FL_REQUIRE(removed);
+    FL_REQUIRE_FALSE(remote.hasFunction("test"));
 
     // Try to unregister non-existent function
     removed = remote.unregisterFunction("nonexistent");
-    REQUIRE_FALSE(removed);
+    FL_REQUIRE_FALSE(removed);
 }
 
 // Additional test: Results clearing
@@ -292,11 +292,11 @@ TEST_CASE("Remote: Results clearing") {
     remote.processRpc(R"({"function":"getValue","args":[]})", result);
 
     auto results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);
+    FL_REQUIRE_EQ(results.size(), 1);
 
     remote.clearResults();
     results = remote.getResults();
-    REQUIRE_EQ(results.size(), 0);
+    FL_REQUIRE_EQ(results.size(), 0);
 }
 
 // Additional test: No args field (should default to empty array)
@@ -306,13 +306,13 @@ TEST_CASE("Remote: No args field defaults to empty array") {
     bool called = false;
     remote.registerFunction("noArgs", [&](const fl::Json& args) {
         called = true;
-        REQUIRE(args.is_array());
-        REQUIRE_EQ(args.size(), 0);
+        FL_REQUIRE(args.is_array());
+        FL_REQUIRE_EQ(args.size(), 0);
     });
 
     auto err = remote.processRpc(R"({"function":"noArgs"})");
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE(called);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE(called);
 }
 
 // Additional test: Scheduled function that was already executed should be in results
@@ -326,20 +326,20 @@ TEST_CASE("Remote: Scheduled execution results") {
 
     // Execute first scheduled task
     size_t executed = remote.tick(500);
-    REQUIRE_EQ(executed, 1);
+    FL_REQUIRE_EQ(executed, 1);
 
     auto results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);
-    REQUIRE(results[0].wasScheduled);
-    REQUIRE_EQ(results[0].scheduledAt, 500);
+    FL_REQUIRE_EQ(results.size(), 1);
+    FL_REQUIRE(results[0].wasScheduled);
+    FL_REQUIRE_EQ(results[0].scheduledAt, 500);
 
     // Execute second scheduled task (results should be cleared from previous tick)
     executed = remote.tick(1000);
-    REQUIRE_EQ(executed, 1);
+    FL_REQUIRE_EQ(executed, 1);
 
     results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);  // Previous results cleared
-    REQUIRE_EQ(results[0].scheduledAt, 1000);
+    FL_REQUIRE_EQ(results.size(), 1);  // Previous results cleared
+    FL_REQUIRE_EQ(results[0].scheduledAt, 1000);
 }
 
 // Test: RpcResult::to_json() serialization
@@ -354,28 +354,28 @@ TEST_CASE("Remote: RpcResult to_json serialization") {
     remote.processRpc(R"({"function":"getValue","args":[]})", result);
 
     auto results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);
+    FL_REQUIRE_EQ(results.size(), 1);
 
     // Serialize result to JSON
     fl::Json json = results[0].to_json();
 
     // Verify all fields are present
-    REQUIRE(json.contains("function"));
-    REQUIRE(json.contains("result"));
-    REQUIRE(json.contains("scheduledAt"));
-    REQUIRE(json.contains("receivedAt"));
-    REQUIRE(json.contains("executedAt"));
-    REQUIRE(json.contains("wasScheduled"));
+    FL_REQUIRE(json.contains("function"));
+    FL_REQUIRE(json.contains("result"));
+    FL_REQUIRE(json.contains("scheduledAt"));
+    FL_REQUIRE(json.contains("receivedAt"));
+    FL_REQUIRE(json.contains("executedAt"));
+    FL_REQUIRE(json.contains("wasScheduled"));
 
     // Verify field values
     fl::string functionName = json["function"] | fl::string("");
-    REQUIRE_EQ(functionName, "getValue");
+    FL_REQUIRE_EQ(functionName, "getValue");
     int resultValue = json["result"] | 0;
-    REQUIRE_EQ(resultValue, 42);
+    FL_REQUIRE_EQ(resultValue, 42);
     int64_t scheduledAtValue = json["scheduledAt"] | -1;
-    REQUIRE_EQ(scheduledAtValue, 0);  // Immediate execution
+    FL_REQUIRE_EQ(scheduledAtValue, 0);  // Immediate execution
     bool wasScheduledValue = json["wasScheduled"] | true;
-    REQUIRE_FALSE(wasScheduledValue);  // Should be false for immediate
+    FL_REQUIRE_FALSE(wasScheduledValue);  // Should be false for immediate
 }
 
 // Test: RpcResult::to_json() for scheduled execution
@@ -391,25 +391,25 @@ TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
     remote.tick(1000);
 
     auto results = remote.getResults();
-    REQUIRE_EQ(results.size(), 1);
+    FL_REQUIRE_EQ(results.size(), 1);
 
     fl::Json json = results[0].to_json();
 
     // Verify scheduled execution metadata
     int64_t scheduledAtValue = json["scheduledAt"] | 0;
-    REQUIRE_EQ(scheduledAtValue, 1000);
+    FL_REQUIRE_EQ(scheduledAtValue, 1000);
     bool wasScheduledValue = json["wasScheduled"] | false;
-    REQUIRE(wasScheduledValue);  // Should be true for scheduled
+    FL_REQUIRE(wasScheduledValue);  // Should be true for scheduled
     int resultValue = json["result"] | 0;
-    REQUIRE_EQ(resultValue, 100);
+    FL_REQUIRE_EQ(resultValue, 100);
 
     // Verify timing relationships
     int64_t receivedAt = json["receivedAt"] | 0;
     int64_t scheduledAt = json["scheduledAt"] | 0;
     int64_t executedAt = json["executedAt"] | 0;
 
-    REQUIRE(receivedAt <= scheduledAt);
-    REQUIRE(scheduledAt <= executedAt);
+    FL_REQUIRE(receivedAt <= scheduledAt);
+    FL_REQUIRE(scheduledAt <= executedAt);
 }
 
 // Test: Remote::printJson() output format
@@ -431,22 +431,22 @@ TEST_CASE("Remote: printJson single-line format") {
 
     // Verify output format
     // Should be: "REMOTE: {json}" (single line, no newlines in JSON)
-    REQUIRE_FALSE(captured.empty());
+    FL_REQUIRE_FALSE(captured.empty());
 
     // Check for prefix - expected prefix is "REMOTE: " by default
     fl::string expectedPrefix = "REMOTE: ";
-    REQUIRE(captured.find(expectedPrefix) == 0);  // Should start with prefix
+    FL_REQUIRE(captured.find(expectedPrefix) == 0);  // Should start with prefix
 
     // Verify no newlines in the JSON part (single-line requirement)
     // The captured string might have a trailing newline from println, but the JSON itself should be single-line
     size_t jsonStart = captured.find('{');
     size_t jsonEnd = captured.find('}');
-    REQUIRE(jsonStart != fl::string::npos);
-    REQUIRE(jsonEnd != fl::string::npos);
+    FL_REQUIRE(jsonStart != fl::string::npos);
+    FL_REQUIRE(jsonEnd != fl::string::npos);
 
     fl::string jsonPart = captured.substr(jsonStart, jsonEnd - jsonStart + 1);
-    REQUIRE(jsonPart.find('\n') == fl::string::npos);
-    REQUIRE(jsonPart.find('\r') == fl::string::npos);
+    FL_REQUIRE(jsonPart.find('\n') == fl::string::npos);
+    FL_REQUIRE(jsonPart.find('\r') == fl::string::npos);
 }
 
 // Test: printJson handles newlines in JSON (defensive)
@@ -470,12 +470,12 @@ TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
     // Verify output has no embedded newlines (except possibly trailing from println)
     size_t jsonStart = captured.find('{');
     size_t jsonEnd = captured.find('}');
-    REQUIRE(jsonStart != fl::string::npos);
-    REQUIRE(jsonEnd != fl::string::npos);
+    FL_REQUIRE(jsonStart != fl::string::npos);
+    FL_REQUIRE(jsonEnd != fl::string::npos);
 
     fl::string jsonPart = captured.substr(jsonStart, jsonEnd - jsonStart + 1);
-    REQUIRE(jsonPart.find('\n') == fl::string::npos);
-    REQUIRE(jsonPart.find('\r') == fl::string::npos);
+    FL_REQUIRE(jsonPart.find('\n') == fl::string::npos);
+    FL_REQUIRE(jsonPart.find('\r') == fl::string::npos);
 }
 
 // WLED State Tests
@@ -487,8 +487,8 @@ TEST_CASE("Remote: WLED set state on and brightness") {
     fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
     remote.setState(state);
 
-    REQUIRE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 128);
+    FL_REQUIRE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 128);
 }
 
 // Test: Set WLED state with on=false
@@ -498,12 +498,12 @@ TEST_CASE("Remote: WLED set state off") {
     // Initially on (default is false, so turn it on first)
     fl::Json stateOn = fl::Json::parse(R"({"on":true})");
     remote.setState(stateOn);
-    REQUIRE(remote.getOn());
+    FL_REQUIRE(remote.getOn());
 
     // Turn off
     fl::Json stateOff = fl::Json::parse(R"({"on":false})");
     remote.setState(stateOff);
-    REQUIRE_FALSE(remote.getOn());
+    FL_REQUIRE_FALSE(remote.getOn());
 }
 
 // Test: Get WLED state returns correct JSON
@@ -516,14 +516,14 @@ TEST_CASE("Remote: WLED get state") {
 
     // Get state
     fl::Json stateOut = remote.getState();
-    REQUIRE(stateOut.contains("on"));
-    REQUIRE(stateOut.contains("bri"));
+    FL_REQUIRE(stateOut.contains("on"));
+    FL_REQUIRE(stateOut.contains("bri"));
 
     bool on = stateOut["on"] | false;
     int64_t bri = stateOut["bri"] | 0;
 
-    REQUIRE(on);
-    REQUIRE_EQ(bri, 200);
+    FL_REQUIRE(on);
+    FL_REQUIRE_EQ(bri, 200);
 }
 
 // Test: Partial state updates (missing fields don't corrupt state)
@@ -533,20 +533,20 @@ TEST_CASE("Remote: WLED partial state updates") {
     // Set initial state
     fl::Json fullState = fl::Json::parse(R"({"on":true,"bri":100})");
     remote.setState(fullState);
-    REQUIRE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 100);
+    FL_REQUIRE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 100);
 
     // Update only brightness (on should remain true)
     fl::Json partialBri = fl::Json::parse(R"({"bri":50})");
     remote.setState(partialBri);
-    REQUIRE(remote.getOn());  // Should still be true
-    REQUIRE_EQ(remote.getBrightness(), 50);
+    FL_REQUIRE(remote.getOn());  // Should still be true
+    FL_REQUIRE_EQ(remote.getBrightness(), 50);
 
     // Update only on (brightness should remain 50)
     fl::Json partialOn = fl::Json::parse(R"({"on":false})");
     remote.setState(partialOn);
-    REQUIRE_FALSE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 50);  // Should still be 50
+    FL_REQUIRE_FALSE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 50);  // Should still be 50
 }
 
 // Test: Invalid values are handled gracefully
@@ -560,23 +560,23 @@ TEST_CASE("Remote: WLED invalid values") {
     // Test out-of-range brightness (negative - should clamp to 0)
     fl::Json negativeBri = fl::Json::parse(R"({"bri":-10})");
     remote.setState(negativeBri);
-    REQUIRE_EQ(remote.getBrightness(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getBrightness(), 0);  // Clamped to 0
 
     // Test out-of-range brightness (too high - should clamp to 255)
     fl::Json highBri = fl::Json::parse(R"({"bri":300})");
     remote.setState(highBri);
-    REQUIRE_EQ(remote.getBrightness(), 255);  // Clamped to 255
+    FL_REQUIRE_EQ(remote.getBrightness(), 255);  // Clamped to 255
 
     // Test invalid type for bri (should keep existing value)
     uint8_t currentBri = remote.getBrightness();
     fl::Json invalidBri = fl::Json::parse(R"({"bri":"invalid"})");
     remote.setState(invalidBri);
-    REQUIRE_EQ(remote.getBrightness(), currentBri);  // Should remain unchanged
+    FL_REQUIRE_EQ(remote.getBrightness(), currentBri);  // Should remain unchanged
 
     // Test invalid JSON (should not crash)
     fl::Json invalidJson = fl::Json(nullptr);
     remote.setState(invalidJson);  // Should warn but not crash
-    REQUIRE(remote.getOn());  // State should remain unchanged
+    FL_REQUIRE(remote.getOn());  // State should remain unchanged
 }
 
 // Test: State roundtrip (setState -> getState preserves values)
@@ -594,15 +594,15 @@ TEST_CASE("Remote: WLED state roundtrip") {
     bool on = stateOut["on"] | true;
     int64_t bri = stateOut["bri"] | 0;
 
-    REQUIRE_FALSE(on);
-    REQUIRE_EQ(bri, 64);
+    FL_REQUIRE_FALSE(on);
+    FL_REQUIRE_EQ(bri, 64);
 
     // Set state again from the retrieved JSON
     remote.setState(stateOut);
 
     // Verify still correct
-    REQUIRE_FALSE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 64);
+    FL_REQUIRE_FALSE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 64);
 }
 
 // Test: WLED transition field
@@ -610,33 +610,33 @@ TEST_CASE("Remote: WLED transition field") {
     fl::WLED remote;
 
     // Default transition should be 7 (700ms)
-    REQUIRE_EQ(remote.getTransition(), 7);
+    FL_REQUIRE_EQ(remote.getTransition(), 7);
 
     // Set transition to 0 (instant)
     fl::Json state = fl::Json::parse(R"({"transition":0})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getTransition(), 0);
+    FL_REQUIRE_EQ(remote.getTransition(), 0);
 
     // Set transition to max value (65535)
     state = fl::Json::parse(R"({"transition":65535})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getTransition(), 65535);
+    FL_REQUIRE_EQ(remote.getTransition(), 65535);
 
     // Test clamping: negative value
     state = fl::Json::parse(R"({"transition":-100})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getTransition(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getTransition(), 0);  // Clamped to 0
 
     // Test clamping: too high value
     state = fl::Json::parse(R"({"transition":70000})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getTransition(), 65535);  // Clamped to 65535
+    FL_REQUIRE_EQ(remote.getTransition(), 65535);  // Clamped to 65535
 
     // Test invalid type (should keep existing value)
     uint16_t currentTrans = remote.getTransition();
     state = fl::Json::parse(R"({"transition":"invalid"})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getTransition(), currentTrans);  // Unchanged
+    FL_REQUIRE_EQ(remote.getTransition(), currentTrans);  // Unchanged
 }
 
 // Test: WLED preset field (ps)
@@ -644,38 +644,38 @@ TEST_CASE("Remote: WLED preset field") {
     fl::WLED remote;
 
     // Default preset should be -1 (none)
-    REQUIRE_EQ(remote.getPreset(), -1);
+    FL_REQUIRE_EQ(remote.getPreset(), -1);
 
     // Set preset to 0
     fl::Json state = fl::Json::parse(R"({"ps":0})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), 0);
+    FL_REQUIRE_EQ(remote.getPreset(), 0);
 
     // Set preset to max value (250)
     state = fl::Json::parse(R"({"ps":250})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), 250);
+    FL_REQUIRE_EQ(remote.getPreset(), 250);
 
     // Set preset back to none
     state = fl::Json::parse(R"({"ps":-1})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), -1);
+    FL_REQUIRE_EQ(remote.getPreset(), -1);
 
     // Test clamping: below -1
     state = fl::Json::parse(R"({"ps":-100})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), -1);  // Clamped to -1
+    FL_REQUIRE_EQ(remote.getPreset(), -1);  // Clamped to -1
 
     // Test clamping: above 250
     state = fl::Json::parse(R"({"ps":500})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), 250);  // Clamped to 250
+    FL_REQUIRE_EQ(remote.getPreset(), 250);  // Clamped to 250
 
     // Test invalid type (should keep existing value)
     int16_t currentPreset = remote.getPreset();
     state = fl::Json::parse(R"({"ps":"invalid"})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPreset(), currentPreset);  // Unchanged
+    FL_REQUIRE_EQ(remote.getPreset(), currentPreset);  // Unchanged
 }
 
 // Test: WLED playlist field (pl)
@@ -683,38 +683,38 @@ TEST_CASE("Remote: WLED playlist field") {
     fl::WLED remote;
 
     // Default playlist should be -1 (none)
-    REQUIRE_EQ(remote.getPlaylist(), -1);
+    FL_REQUIRE_EQ(remote.getPlaylist(), -1);
 
     // Set playlist to 5
     fl::Json state = fl::Json::parse(R"({"pl":5})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), 5);
+    FL_REQUIRE_EQ(remote.getPlaylist(), 5);
 
     // Set playlist to max value (250)
     state = fl::Json::parse(R"({"pl":250})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), 250);
+    FL_REQUIRE_EQ(remote.getPlaylist(), 250);
 
     // Set playlist back to none
     state = fl::Json::parse(R"({"pl":-1})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), -1);
+    FL_REQUIRE_EQ(remote.getPlaylist(), -1);
 
     // Test clamping: below -1
     state = fl::Json::parse(R"({"pl":-50})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), -1);  // Clamped to -1
+    FL_REQUIRE_EQ(remote.getPlaylist(), -1);  // Clamped to -1
 
     // Test clamping: above 250
     state = fl::Json::parse(R"({"pl":300})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), 250);  // Clamped to 250
+    FL_REQUIRE_EQ(remote.getPlaylist(), 250);  // Clamped to 250
 
     // Test invalid type (should keep existing value)
     int16_t currentPlaylist = remote.getPlaylist();
     state = fl::Json::parse(R"({"pl":"invalid"})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getPlaylist(), currentPlaylist);  // Unchanged
+    FL_REQUIRE_EQ(remote.getPlaylist(), currentPlaylist);  // Unchanged
 }
 
 // Test: WLED live override field (lor)
@@ -722,38 +722,38 @@ TEST_CASE("Remote: WLED live override field") {
     fl::WLED remote;
 
     // Default live override should be 0 (off)
-    REQUIRE_EQ(remote.getLiveOverride(), 0);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 0);
 
     // Set to override (1)
     fl::Json state = fl::Json::parse(R"({"lor":1})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), 1);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 1);
 
     // Set to until reboot (2)
     state = fl::Json::parse(R"({"lor":2})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), 2);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 2);
 
     // Set back to off (0)
     state = fl::Json::parse(R"({"lor":0})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), 0);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 0);
 
     // Test clamping: negative value
     state = fl::Json::parse(R"({"lor":-5})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 0);  // Clamped to 0
 
     // Test clamping: above 2
     state = fl::Json::parse(R"({"lor":10})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), 2);  // Clamped to 2
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 2);  // Clamped to 2
 
     // Test invalid type (should keep existing value)
     uint8_t currentLor = remote.getLiveOverride();
     state = fl::Json::parse(R"({"lor":"invalid"})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getLiveOverride(), currentLor);  // Unchanged
+    FL_REQUIRE_EQ(remote.getLiveOverride(), currentLor);  // Unchanged
 }
 
 // Test: WLED main segment field (mainseg)
@@ -761,33 +761,33 @@ TEST_CASE("Remote: WLED main segment field") {
     fl::WLED remote;
 
     // Default main segment should be 0
-    REQUIRE_EQ(remote.getMainSegment(), 0);
+    FL_REQUIRE_EQ(remote.getMainSegment(), 0);
 
     // Set to segment 5
     fl::Json state = fl::Json::parse(R"({"mainseg":5})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getMainSegment(), 5);
+    FL_REQUIRE_EQ(remote.getMainSegment(), 5);
 
     // Set to max value (255)
     state = fl::Json::parse(R"({"mainseg":255})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getMainSegment(), 255);
+    FL_REQUIRE_EQ(remote.getMainSegment(), 255);
 
     // Test clamping: negative value
     state = fl::Json::parse(R"({"mainseg":-10})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getMainSegment(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getMainSegment(), 0);  // Clamped to 0
 
     // Test clamping: above 255
     state = fl::Json::parse(R"({"mainseg":500})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getMainSegment(), 255);  // Clamped to 255
+    FL_REQUIRE_EQ(remote.getMainSegment(), 255);  // Clamped to 255
 
     // Test invalid type (should keep existing value)
     uint8_t currentMainseg = remote.getMainSegment();
     state = fl::Json::parse(R"({"mainseg":"invalid"})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getMainSegment(), currentMainseg);  // Unchanged
+    FL_REQUIRE_EQ(remote.getMainSegment(), currentMainseg);  // Unchanged
 }
 
 // Test: WLED complete state with all fields
@@ -807,32 +807,32 @@ TEST_CASE("Remote: WLED complete state with all fields") {
     remote.setState(fullState);
 
     // Verify all fields
-    REQUIRE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 180);
-    REQUIRE_EQ(remote.getTransition(), 15);
-    REQUIRE_EQ(remote.getPreset(), 42);
-    REQUIRE_EQ(remote.getPlaylist(), 10);
-    REQUIRE_EQ(remote.getLiveOverride(), 1);
-    REQUIRE_EQ(remote.getMainSegment(), 3);
+    FL_REQUIRE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 180);
+    FL_REQUIRE_EQ(remote.getTransition(), 15);
+    FL_REQUIRE_EQ(remote.getPreset(), 42);
+    FL_REQUIRE_EQ(remote.getPlaylist(), 10);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 1);
+    FL_REQUIRE_EQ(remote.getMainSegment(), 3);
 
     // Get state and verify roundtrip
     fl::Json retrievedState = remote.getState();
-    REQUIRE(retrievedState.contains("on"));
-    REQUIRE(retrievedState.contains("bri"));
-    REQUIRE(retrievedState.contains("transition"));
-    REQUIRE(retrievedState.contains("ps"));
-    REQUIRE(retrievedState.contains("pl"));
-    REQUIRE(retrievedState.contains("lor"));
-    REQUIRE(retrievedState.contains("mainseg"));
+    FL_REQUIRE(retrievedState.contains("on"));
+    FL_REQUIRE(retrievedState.contains("bri"));
+    FL_REQUIRE(retrievedState.contains("transition"));
+    FL_REQUIRE(retrievedState.contains("ps"));
+    FL_REQUIRE(retrievedState.contains("pl"));
+    FL_REQUIRE(retrievedState.contains("lor"));
+    FL_REQUIRE(retrievedState.contains("mainseg"));
 
     // Verify values in retrieved state
-    REQUIRE((retrievedState["on"] | false) == true);
-    REQUIRE_EQ(retrievedState["bri"] | 0, 180);
-    REQUIRE_EQ(retrievedState["transition"] | 0, 15);
-    REQUIRE_EQ(retrievedState["ps"] | 0, 42);
-    REQUIRE_EQ(retrievedState["pl"] | 0, 10);
-    REQUIRE_EQ(retrievedState["lor"] | 0, 1);
-    REQUIRE_EQ(retrievedState["mainseg"] | 0, 3);
+    FL_REQUIRE((retrievedState["on"] | false) == true);
+    FL_REQUIRE_EQ(retrievedState["bri"] | 0, 180);
+    FL_REQUIRE_EQ(retrievedState["transition"] | 0, 15);
+    FL_REQUIRE_EQ(retrievedState["ps"] | 0, 42);
+    FL_REQUIRE_EQ(retrievedState["pl"] | 0, 10);
+    FL_REQUIRE_EQ(retrievedState["lor"] | 0, 1);
+    FL_REQUIRE_EQ(retrievedState["mainseg"] | 0, 3);
 }
 
 // Test: WLED partial updates preserve all fields
@@ -856,35 +856,35 @@ TEST_CASE("Remote: WLED partial updates preserve all fields") {
     remote.setState(partialUpdate);
 
     // Verify only transition changed, others preserved
-    REQUIRE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 200);
-    REQUIRE_EQ(remote.getTransition(), 20);  // Changed
-    REQUIRE_EQ(remote.getPreset(), 5);
-    REQUIRE_EQ(remote.getPlaylist(), 2);
-    REQUIRE_EQ(remote.getLiveOverride(), 1);
-    REQUIRE_EQ(remote.getMainSegment(), 1);
+    FL_REQUIRE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 200);
+    FL_REQUIRE_EQ(remote.getTransition(), 20);  // Changed
+    FL_REQUIRE_EQ(remote.getPreset(), 5);
+    FL_REQUIRE_EQ(remote.getPlaylist(), 2);
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 1);
+    FL_REQUIRE_EQ(remote.getMainSegment(), 1);
 
     // Update only preset
     partialUpdate = fl::Json::parse(R"({"ps":50})");
     remote.setState(partialUpdate);
 
     // Verify only preset changed
-    REQUIRE_EQ(remote.getTransition(), 20);  // Still 20 from previous
-    REQUIRE_EQ(remote.getPreset(), 50);  // Changed
-    REQUIRE_EQ(remote.getPlaylist(), 2);  // Still 2
+    FL_REQUIRE_EQ(remote.getTransition(), 20);  // Still 20 from previous
+    FL_REQUIRE_EQ(remote.getPreset(), 50);  // Changed
+    FL_REQUIRE_EQ(remote.getPlaylist(), 2);  // Still 2
 
     // Update multiple fields
     partialUpdate = fl::Json::parse(R"({"on":false,"bri":50,"lor":2})");
     remote.setState(partialUpdate);
 
     // Verify specified fields changed, others preserved
-    REQUIRE_FALSE(remote.getOn());  // Changed
-    REQUIRE_EQ(remote.getBrightness(), 50);  // Changed
-    REQUIRE_EQ(remote.getTransition(), 20);  // Preserved
-    REQUIRE_EQ(remote.getPreset(), 50);  // Preserved
-    REQUIRE_EQ(remote.getPlaylist(), 2);  // Preserved
-    REQUIRE_EQ(remote.getLiveOverride(), 2);  // Changed
-    REQUIRE_EQ(remote.getMainSegment(), 1);  // Preserved
+    FL_REQUIRE_FALSE(remote.getOn());  // Changed
+    FL_REQUIRE_EQ(remote.getBrightness(), 50);  // Changed
+    FL_REQUIRE_EQ(remote.getTransition(), 20);  // Preserved
+    FL_REQUIRE_EQ(remote.getPreset(), 50);  // Preserved
+    FL_REQUIRE_EQ(remote.getPlaylist(), 2);  // Preserved
+    FL_REQUIRE_EQ(remote.getLiveOverride(), 2);  // Changed
+    FL_REQUIRE_EQ(remote.getMainSegment(), 1);  // Preserved
 }
 
 // Test: WLED nightlight object parsing
@@ -892,19 +892,19 @@ TEST_CASE("Remote: WLED nightlight object") {
     fl::WLED remote;
 
     // Default nightlight state
-    REQUIRE_FALSE(remote.getNightlightOn());
-    REQUIRE_EQ(remote.getNightlightDuration(), 60);
-    REQUIRE_EQ(remote.getNightlightMode(), 1);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);
+    FL_REQUIRE_FALSE(remote.getNightlightOn());
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 60);
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 1);
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);
 
     // Set nightlight with all fields
     fl::Json state = fl::Json::parse(R"({"nl":{"on":true,"dur":30,"mode":2,"tbri":50}})");
     remote.setState(state);
 
-    REQUIRE(remote.getNightlightOn());
-    REQUIRE_EQ(remote.getNightlightDuration(), 30);
-    REQUIRE_EQ(remote.getNightlightMode(), 2);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 50);
+    FL_REQUIRE(remote.getNightlightOn());
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 30);
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 2);
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 50);
 }
 
 // Test: WLED nightlight partial updates
@@ -919,24 +919,24 @@ TEST_CASE("Remote: WLED nightlight partial updates") {
     state = fl::Json::parse(R"({"nl":{"dur":10}})");
     remote.setState(state);
 
-    REQUIRE(remote.getNightlightOn());  // Preserved
-    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Changed
-    REQUIRE_EQ(remote.getNightlightMode(), 1);  // Preserved
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 100);  // Preserved
+    FL_REQUIRE(remote.getNightlightOn());  // Preserved
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Changed
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 1);  // Preserved
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 100);  // Preserved
 
     // Update only mode
     state = fl::Json::parse(R"({"nl":{"mode":3}})");
     remote.setState(state);
 
-    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
-    REQUIRE_EQ(remote.getNightlightMode(), 3);  // Changed
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 3);  // Changed
 
     // Turn off nightlight
     state = fl::Json::parse(R"({"nl":{"on":false}})");
     remote.setState(state);
 
-    REQUIRE_FALSE(remote.getNightlightOn());  // Changed
-    REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
+    FL_REQUIRE_FALSE(remote.getNightlightOn());  // Changed
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 10);  // Preserved
 }
 
 // Test: WLED nightlight field clamping
@@ -946,32 +946,32 @@ TEST_CASE("Remote: WLED nightlight field clamping") {
     // Test dur clamping: below 1
     fl::Json state = fl::Json::parse(R"({"nl":{"dur":0}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightDuration(), 1);  // Clamped to 1
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 1);  // Clamped to 1
 
     // Test dur clamping: above 255
     state = fl::Json::parse(R"({"nl":{"dur":300}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightDuration(), 255);  // Clamped to 255
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 255);  // Clamped to 255
 
     // Test mode clamping: negative
     state = fl::Json::parse(R"({"nl":{"mode":-1}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightMode(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 0);  // Clamped to 0
 
     // Test mode clamping: above 3
     state = fl::Json::parse(R"({"nl":{"mode":10}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightMode(), 3);  // Clamped to 3
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 3);  // Clamped to 3
 
     // Test tbri clamping: negative
     state = fl::Json::parse(R"({"nl":{"tbri":-50}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);  // Clamped to 0
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 0);  // Clamped to 0
 
     // Test tbri clamping: above 255
     state = fl::Json::parse(R"({"nl":{"tbri":500}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 255);  // Clamped to 255
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 255);  // Clamped to 255
 }
 
 // Test: WLED nightlight invalid types
@@ -986,25 +986,25 @@ TEST_CASE("Remote: WLED nightlight invalid types") {
     uint8_t currentDur = remote.getNightlightDuration();
     state = fl::Json::parse(R"({"nl":{"dur":"invalid"}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightDuration(), currentDur);  // Unchanged
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), currentDur);  // Unchanged
 
     // Test invalid type for mode (should keep existing value)
     uint8_t currentMode = remote.getNightlightMode();
     state = fl::Json::parse(R"({"nl":{"mode":"invalid"}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightMode(), currentMode);  // Unchanged
+    FL_REQUIRE_EQ(remote.getNightlightMode(), currentMode);  // Unchanged
 
     // Test invalid type for tbri (should keep existing value)
     uint8_t currentTbri = remote.getNightlightTargetBrightness();
     state = fl::Json::parse(R"({"nl":{"tbri":"invalid"}})");
     remote.setState(state);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), currentTbri);  // Unchanged
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), currentTbri);  // Unchanged
 
     // Test invalid type for nl object (should warn, state unchanged)
     state = fl::Json::parse(R"({"nl":"invalid"})");
     remote.setState(state);
-    REQUIRE(remote.getNightlightOn());  // State should remain unchanged
-    REQUIRE_EQ(remote.getNightlightDuration(), 20);
+    FL_REQUIRE(remote.getNightlightOn());  // State should remain unchanged
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 20);
 }
 
 // Test: WLED nightlight in getState
@@ -1017,20 +1017,20 @@ TEST_CASE("Remote: WLED nightlight in getState") {
 
     // Get state and verify nightlight is present
     fl::Json outputState = remote.getState();
-    REQUIRE(outputState.contains("nl"));
-    REQUIRE(outputState["nl"].is_object());
+    FL_REQUIRE(outputState.contains("nl"));
+    FL_REQUIRE(outputState["nl"].is_object());
 
     const fl::Json& nl = outputState["nl"];
-    REQUIRE(nl.contains("on"));
-    REQUIRE(nl.contains("dur"));
-    REQUIRE(nl.contains("mode"));
-    REQUIRE(nl.contains("tbri"));
+    FL_REQUIRE(nl.contains("on"));
+    FL_REQUIRE(nl.contains("dur"));
+    FL_REQUIRE(nl.contains("mode"));
+    FL_REQUIRE(nl.contains("tbri"));
 
     // Verify values
-    REQUIRE((nl["on"] | false) == true);
-    REQUIRE_EQ(nl["dur"] | 0, 15);
-    REQUIRE_EQ(nl["mode"] | 0, 3);
-    REQUIRE_EQ(nl["tbri"] | 0, 200);
+    FL_REQUIRE((nl["on"] | false) == true);
+    FL_REQUIRE_EQ(nl["dur"] | 0, 15);
+    FL_REQUIRE_EQ(nl["mode"] | 0, 3);
+    FL_REQUIRE_EQ(nl["tbri"] | 0, 200);
 }
 
 // Test: WLED nightlight roundtrip
@@ -1054,26 +1054,26 @@ TEST_CASE("Remote: WLED nightlight roundtrip") {
     fl::Json outputState = remote.getState();
 
     // Verify main state
-    REQUIRE((outputState["on"] | false) == true);
-    REQUIRE_EQ(outputState["bri"] | 0, 150);
+    FL_REQUIRE((outputState["on"] | false) == true);
+    FL_REQUIRE_EQ(outputState["bri"] | 0, 150);
 
     // Verify nightlight
     const fl::Json& nl = outputState["nl"];
-    REQUIRE((nl["on"] | false) == true);
-    REQUIRE_EQ(nl["dur"] | 0, 25);
-    REQUIRE_EQ(nl["mode"] | 0, 2);
-    REQUIRE_EQ(nl["tbri"] | 0, 75);
+    FL_REQUIRE((nl["on"] | false) == true);
+    FL_REQUIRE_EQ(nl["dur"] | 0, 25);
+    FL_REQUIRE_EQ(nl["mode"] | 0, 2);
+    FL_REQUIRE_EQ(nl["tbri"] | 0, 75);
 
     // Set state again from output
     remote.setState(outputState);
 
     // Verify everything is still correct
-    REQUIRE(remote.getOn());
-    REQUIRE_EQ(remote.getBrightness(), 150);
-    REQUIRE(remote.getNightlightOn());
-    REQUIRE_EQ(remote.getNightlightDuration(), 25);
-    REQUIRE_EQ(remote.getNightlightMode(), 2);
-    REQUIRE_EQ(remote.getNightlightTargetBrightness(), 75);
+    FL_REQUIRE(remote.getOn());
+    FL_REQUIRE_EQ(remote.getBrightness(), 150);
+    FL_REQUIRE(remote.getNightlightOn());
+    FL_REQUIRE_EQ(remote.getNightlightDuration(), 25);
+    FL_REQUIRE_EQ(remote.getNightlightMode(), 2);
+    FL_REQUIRE_EQ(remote.getNightlightTargetBrightness(), 75);
 }
 
 // Test: WLED segment hex color string parsing
@@ -1086,24 +1086,24 @@ TEST_CASE("Remote: WLED segment hex color strings") {
 
     // Retrieve and verify the segment was created
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mColors.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 3);
 
     // Verify red (255, 0, 0)
-    REQUIRE_EQ(segments[0].mColors[0].size(), 3);
-    REQUIRE_EQ(segments[0].mColors[0][0], 255);
-    REQUIRE_EQ(segments[0].mColors[0][1], 0);
-    REQUIRE_EQ(segments[0].mColors[0][2], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[0].size(), 3);
+    FL_REQUIRE_EQ(segments[0].mColors[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[0][1], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[0][2], 0);
 
     // Verify green (0, 255, 0)
-    REQUIRE_EQ(segments[0].mColors[1][0], 0);
-    REQUIRE_EQ(segments[0].mColors[1][1], 255);
-    REQUIRE_EQ(segments[0].mColors[1][2], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[1][0], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[1][1], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[1][2], 0);
 
     // Verify blue (0, 0, 255)
-    REQUIRE_EQ(segments[0].mColors[2][0], 0);
-    REQUIRE_EQ(segments[0].mColors[2][1], 0);
-    REQUIRE_EQ(segments[0].mColors[2][2], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[2][0], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[2][1], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[2][2], 255);
 }
 
 // Test: WLED segment hex color strings (lowercase)
@@ -1115,17 +1115,17 @@ TEST_CASE("Remote: WLED segment hex color strings lowercase") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mColors.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 3);
 
     // Verify colors parsed correctly
-    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // ff
-    REQUIRE_EQ(segments[0].mColors[0][1], 0);    // 00
-    REQUIRE_EQ(segments[0].mColors[0][2], 170);  // aa
+    FL_REQUIRE_EQ(segments[0].mColors[0][0], 255);  // ff
+    FL_REQUIRE_EQ(segments[0].mColors[0][1], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mColors[0][2], 170);  // aa
 
-    REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
-    REQUIRE_EQ(segments[0].mColors[1][1], 170);  // aa
-    REQUIRE_EQ(segments[0].mColors[1][2], 255);  // ff
+    FL_REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mColors[1][1], 170);  // aa
+    FL_REQUIRE_EQ(segments[0].mColors[1][2], 255);  // ff
 }
 
 // Test: WLED segment hex color strings with leading '#'
@@ -1137,23 +1137,23 @@ TEST_CASE("Remote: WLED segment hex color strings with hash") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mColors.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 3);
 
     // Verify white (255, 255, 255)
-    REQUIRE_EQ(segments[0].mColors[0][0], 255);
-    REQUIRE_EQ(segments[0].mColors[0][1], 255);
-    REQUIRE_EQ(segments[0].mColors[0][2], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[0][1], 255);
+    FL_REQUIRE_EQ(segments[0].mColors[0][2], 255);
 
     // Verify black (0, 0, 0)
-    REQUIRE_EQ(segments[0].mColors[1][0], 0);
-    REQUIRE_EQ(segments[0].mColors[1][1], 0);
-    REQUIRE_EQ(segments[0].mColors[1][2], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[1][0], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[1][1], 0);
+    FL_REQUIRE_EQ(segments[0].mColors[1][2], 0);
 
     // Verify gray (128, 128, 128)
-    REQUIRE_EQ(segments[0].mColors[2][0], 128);
-    REQUIRE_EQ(segments[0].mColors[2][1], 128);
-    REQUIRE_EQ(segments[0].mColors[2][2], 128);
+    FL_REQUIRE_EQ(segments[0].mColors[2][0], 128);
+    FL_REQUIRE_EQ(segments[0].mColors[2][1], 128);
+    FL_REQUIRE_EQ(segments[0].mColors[2][2], 128);
 }
 
 // Test: WLED segment mixed RGB arrays and hex strings
@@ -1165,13 +1165,13 @@ TEST_CASE("Remote: WLED segment mixed color formats") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mColors.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 3);
 
     // All should be parsed correctly
-    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Red from array
-    REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Green from hex
-    REQUIRE_EQ(segments[0].mColors[2][2], 255);  // Blue from array
+    FL_REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Red from array
+    FL_REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Green from hex
+    FL_REQUIRE_EQ(segments[0].mColors[2][2], 255);  // Blue from array
 }
 
 // Test: WLED segment invalid hex strings
@@ -1183,9 +1183,9 @@ TEST_CASE("Remote: WLED segment invalid hex strings") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments.size(), 1);
     // Invalid hex strings should be skipped, so colors array should be empty
-    REQUIRE_EQ(segments[0].mColors.size(), 0);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 0);
 }
 
 // Test: WLED segment hex string case insensitivity
@@ -1197,17 +1197,17 @@ TEST_CASE("Remote: WLED segment hex string case insensitivity") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mColors.size(), 2);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mColors.size(), 2);
 
     // Verify parsing works correctly regardless of case
-    REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Ff
-    REQUIRE_EQ(segments[0].mColors[0][1], 170);  // Aa
-    REQUIRE_EQ(segments[0].mColors[0][2], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mColors[0][0], 255);  // Ff
+    FL_REQUIRE_EQ(segments[0].mColors[0][1], 170);  // Aa
+    FL_REQUIRE_EQ(segments[0].mColors[0][2], 0);    // 00
 
-    REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
-    REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Ff
-    REQUIRE_EQ(segments[0].mColors[1][2], 170);  // Aa
+    FL_REQUIRE_EQ(segments[0].mColors[1][0], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mColors[1][1], 255);  // Ff
+    FL_REQUIRE_EQ(segments[0].mColors[1][2], 170);  // Aa
 }
 
 // Test: WLED individual LED control - simple sequential format
@@ -1219,24 +1219,24 @@ TEST_CASE("Remote: WLED individual LED control simple format") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
 
     // Verify LED 0: red (255, 0, 0)
-    REQUIRE_EQ(segments[0].mIndividualLeds[0].size(), 3);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0].size(), 3);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
 
     // Verify LED 1: green (0, 255, 0)
-    REQUIRE_EQ(segments[0].mIndividualLeds[1][0], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[1][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[1][0], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[1][2], 0);
 
     // Verify LED 2: blue (0, 0, 255)
-    REQUIRE_EQ(segments[0].mIndividualLeds[2][0], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[2][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[2][0], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[2][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
 }
 
 // Test: WLED individual LED control - indexed format
@@ -1248,23 +1248,23 @@ TEST_CASE("Remote: WLED individual LED control indexed format") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 16);  // Size expanded to fit LED 15
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 16);  // Size expanded to fit LED 15
 
     // Verify LED 5: red
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
 
     // Verify LED 10: green
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
 
     // Verify LED 15: blue
-    REQUIRE_EQ(segments[0].mIndividualLeds[15][0], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[15][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[15][2], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[15][0], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[15][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[15][2], 255);
 }
 
 // Test: WLED individual LED control - range format
@@ -1276,21 +1276,21 @@ TEST_CASE("Remote: WLED individual LED control range format") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 8);  // Size expanded to fit LED 7
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 8);  // Size expanded to fit LED 7
 
     // Verify LEDs 0-2: red
     for (int i = 0; i <= 2; ++i) {
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
     }
 
     // Verify LEDs 5-7: blue
     for (int i = 5; i <= 7; ++i) {
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
     }
 }
 
@@ -1303,24 +1303,24 @@ TEST_CASE("Remote: WLED individual LED control mixed formats") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 23);  // Size expanded to fit LED 22
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 23);  // Size expanded to fit LED 22
 
     // Verify LED 0: white (sequential format)
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 255);
 
     // Verify LED 10: red (indexed format)
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[10][2], 0);
 
     // Verify LEDs 20-22: blue (range format)
     for (int i = 20; i <= 22; ++i) {
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 255);
     }
 }
 
@@ -1333,17 +1333,17 @@ TEST_CASE("Remote: WLED individual LED control with hash") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments.size(), 1);
 
     // Verify LED 0: red
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);
 
     // Verify LED 5: green
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 0);
 }
 
 // Test: WLED individual LED control - serialization roundtrip
@@ -1356,35 +1356,35 @@ TEST_CASE("Remote: WLED individual LED control serialization roundtrip") {
 
     // Get state back
     fl::Json outputState = remote.getState();
-    REQUIRE(outputState.contains("seg"));
-    REQUIRE(outputState["seg"].is_array());
-    REQUIRE_EQ(outputState["seg"].size(), 1);
+    FL_REQUIRE(outputState.contains("seg"));
+    FL_REQUIRE(outputState["seg"].is_array());
+    FL_REQUIRE_EQ(outputState["seg"].size(), 1);
 
     const fl::Json& seg = outputState["seg"][0];
-    REQUIRE(seg.contains("i"));
-    REQUIRE(seg["i"].is_array());
-    REQUIRE_EQ(seg["i"].size(), 3);
+    FL_REQUIRE(seg.contains("i"));
+    FL_REQUIRE(seg["i"].is_array());
+    FL_REQUIRE_EQ(seg["i"].size(), 3);
 
     // Verify serialized values (should be uppercase hex without '#')
     fl::string led0 = seg["i"][0] | fl::string("");
     fl::string led1 = seg["i"][1] | fl::string("");
     fl::string led2 = seg["i"][2] | fl::string("");
 
-    REQUIRE_EQ(led0, "FF0000");
-    REQUIRE_EQ(led1, "00FF00");
-    REQUIRE_EQ(led2, "0000FF");
+    FL_REQUIRE_EQ(led0, "FF0000");
+    FL_REQUIRE_EQ(led1, "00FF00");
+    FL_REQUIRE_EQ(led2, "0000FF");
 
     // Set state again from output (roundtrip test)
     remote.setState(outputState);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 3);
 
     // Verify colors preserved
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
-    REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[1][1], 255);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[2][2], 255);
 }
 
 // Test: WLED individual LED control - invalid formats
@@ -1396,9 +1396,9 @@ TEST_CASE("Remote: WLED individual LED control invalid formats") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments.size(), 1);
     // Invalid entries should be skipped, so array should be empty
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
 }
 
 // Test: WLED individual LED control - case insensitivity
@@ -1410,23 +1410,23 @@ TEST_CASE("Remote: WLED individual LED control case insensitivity") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments.size(), 1);
 
     // Verify LED 0
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);  // Ff
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 170);  // Aa
-    REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][0], 255);  // Ff
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][1], 170);  // Aa
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[0][2], 0);    // 00
 
     // Verify LED 5
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);    // 00
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);  // Ff
-    REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 170);  // Aa
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][0], 0);    // 00
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][1], 255);  // Ff
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds[5][2], 170);  // Aa
 
     // Verify LEDs 10-12
     for (int i = 10; i <= 12; ++i) {
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 170);  // Aa
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 187);  // Bb
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 204);  // Cc
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 170);  // Aa
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 187);  // Bb
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 204);  // Cc
     }
 }
 
@@ -1439,14 +1439,14 @@ TEST_CASE("Remote: WLED individual LED control empty array") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 2);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 2);
 
     // Clear with empty array
     state = fl::Json::parse(R"({"seg":[{"id":0,"i":[]}]})");
     remote.setState(state);
 
     // Should be empty now
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 0);
 }
 
 // Test: WLED individual LED control - large range
@@ -1458,14 +1458,14 @@ TEST_CASE("Remote: WLED individual LED control large range") {
     remote.setState(state);
 
     const auto& segments = remote.getSegments();
-    REQUIRE_EQ(segments.size(), 1);
-    REQUIRE_EQ(segments[0].mIndividualLeds.size(), 100);
+    FL_REQUIRE_EQ(segments.size(), 1);
+    FL_REQUIRE_EQ(segments[0].mIndividualLeds.size(), 100);
 
     // Verify all LEDs in range are red
     for (int i = 0; i < 100; ++i) {
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
-        REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][0], 255);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][1], 0);
+        FL_REQUIRE_EQ(segments[0].mIndividualLeds[i][2], 0);
     }
 }
 

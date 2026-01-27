@@ -20,10 +20,10 @@ TEST_CASE("Tile2x2_u8") {
     tile.at(1, 1) = 4;
 
     // Verify all values are stored and retrieved correctly
-    REQUIRE_EQ(tile.at(0, 0), 1);
-    REQUIRE_EQ(tile.at(0, 1), 2);
-    REQUIRE_EQ(tile.at(1, 0), 3);
-    REQUIRE_EQ(tile.at(1, 1), 4);
+    FL_REQUIRE_EQ(tile.at(0, 0), 1);
+    FL_REQUIRE_EQ(tile.at(0, 1), 2);
+    FL_REQUIRE_EQ(tile.at(1, 0), 3);
+    FL_REQUIRE_EQ(tile.at(1, 1), 4);
 }
 
 // Test fl::Tile2x2_u8_wrap functionality
@@ -41,14 +41,14 @@ TEST_CASE("Tile2x2_u8_wrap") {
     fl::Tile2x2_u8_wrap wrap(tile, 2, 2);
     // Verify that coordinates are correctly wrapped
     // Each test checks both x and y coordinates of the wrapped position
-    REQUIRE_EQ(wrap.at(0, 0).first.x, 0);
-    REQUIRE_EQ(wrap.at(0, 0).first.y, 0);
-    REQUIRE_EQ(wrap.at(0, 1).first.x, 0);
-    REQUIRE_EQ(wrap.at(0, 1).first.y, 1);
-    REQUIRE_EQ(wrap.at(1, 0).first.x, 1);
-    REQUIRE_EQ(wrap.at(1, 0).first.y, 0);
-    REQUIRE_EQ(wrap.at(1, 1).first.x, 1);
-    REQUIRE_EQ(wrap.at(1, 1).first.y, 1);
+    FL_REQUIRE_EQ(wrap.at(0, 0).first.x, 0);
+    FL_REQUIRE_EQ(wrap.at(0, 0).first.y, 0);
+    FL_REQUIRE_EQ(wrap.at(0, 1).first.x, 0);
+    FL_REQUIRE_EQ(wrap.at(0, 1).first.y, 1);
+    FL_REQUIRE_EQ(wrap.at(1, 0).first.x, 1);
+    FL_REQUIRE_EQ(wrap.at(1, 0).first.y, 0);
+    FL_REQUIRE_EQ(wrap.at(1, 1).first.x, 1);
+    FL_REQUIRE_EQ(wrap.at(1, 1).first.y, 1);
 }
 
 // Test fl::Tile2x2_u8_wrap wrap-around behavior
@@ -67,20 +67,20 @@ TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     fl::Tile2x2_u8_wrap cycTile(originalTile, width, height);
 
     // Verify that the conversion wraps around correctly
-    REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
-    REQUIRE_EQ(cycTile.at(0, 0).first.y, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).first.x, 1); // Wraps around to (1, 0)
-    REQUIRE_EQ(cycTile.at(0, 1).first.y, 0);
-    REQUIRE_EQ(cycTile.at(1, 0).first.x, 0); // Wraps around to (0, 1)
-    REQUIRE_EQ(cycTile.at(1, 0).first.y, 1);
-    REQUIRE_EQ(cycTile.at(1, 1).first.x, 0); // Wraps around to (0, 0)
-    REQUIRE_EQ(cycTile.at(1, 1).first.y, 0);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
+    FL_REQUIRE_EQ(cycTile.at(0, 0).first.y, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).first.x, 1); // Wraps around to (1, 0)
+    FL_REQUIRE_EQ(cycTile.at(0, 1).first.y, 0);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).first.x, 0); // Wraps around to (0, 1)
+    FL_REQUIRE_EQ(cycTile.at(1, 0).first.y, 1);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).first.x, 0); // Wraps around to (0, 0)
+    FL_REQUIRE_EQ(cycTile.at(1, 1).first.y, 0);
 
     // Verify that the values are correct
-    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
-    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
-    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
 // Test fl::Tile2x2_u8_wrap conversion with width and height
@@ -99,10 +99,10 @@ TEST_CASE("Tile2x2_u8_wrap conversion with width and height") {
     fl::Tile2x2_u8_wrap cycTile(originalTile, width, height);
 
     // Verify that the conversion is correct
-    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
-    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
-    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
 // Test fl::Tile2x2_u8_wrap conversion with width only
@@ -120,16 +120,16 @@ TEST_CASE("Tile2x2_u8_wrap conversion test") {
     fl::Tile2x2_u8_wrap cycTile(originalTile, width);
 
     // Verify that the conversion is correct
-    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
-    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
-    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 
     // Verify wrap-around behavior on the x-axis
-    REQUIRE_EQ(cycTile.at(2, 2).second, 1); // Wraps around to (0, 0)
-    REQUIRE_EQ(cycTile.at(2, 3).second, 2); // Wraps around to (0, 1)
-    REQUIRE_EQ(cycTile.at(3, 2).second, 3); // Wraps around to (1, 0)
-    REQUIRE_EQ(cycTile.at(3, 3).second, 4); // Wraps around to (1, 1)
+    FL_REQUIRE_EQ(cycTile.at(2, 2).second, 1); // Wraps around to (0, 0)
+    FL_REQUIRE_EQ(cycTile.at(2, 3).second, 2); // Wraps around to (0, 1)
+    FL_REQUIRE_EQ(cycTile.at(3, 2).second, 3); // Wraps around to (1, 0)
+    FL_REQUIRE_EQ(cycTile.at(3, 3).second, 4); // Wraps around to (1, 1)
 }
 
 TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
@@ -147,20 +147,20 @@ TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     fl::Tile2x2_u8_wrap cycTile(originalTile, width, height);
 
     // Verify that the conversion wraps around correctly
-    REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
-    REQUIRE_EQ(cycTile.at(0, 0).first.y, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).first.x, 1); // Wraps around to (1, 0)
-    REQUIRE_EQ(cycTile.at(0, 1).first.y, 0);
-    REQUIRE_EQ(cycTile.at(1, 0).first.x, 0); // Wraps around to (0, 1)
-    REQUIRE_EQ(cycTile.at(1, 0).first.y, 1);
-    REQUIRE_EQ(cycTile.at(1, 1).first.x, 0); // Wraps around to (0, 0)
-    REQUIRE_EQ(cycTile.at(1, 1).first.y, 0);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
+    FL_REQUIRE_EQ(cycTile.at(0, 0).first.y, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).first.x, 1); // Wraps around to (1, 0)
+    FL_REQUIRE_EQ(cycTile.at(0, 1).first.y, 0);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).first.x, 0); // Wraps around to (0, 1)
+    FL_REQUIRE_EQ(cycTile.at(1, 0).first.y, 1);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).first.x, 0); // Wraps around to (0, 0)
+    FL_REQUIRE_EQ(cycTile.at(1, 1).first.y, 0);
     
     // Verify that the values are correct
-    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
-    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
-    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
-    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+    FL_REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    FL_REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    FL_REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    FL_REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
 TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
@@ -189,20 +189,20 @@ TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
         // Test interpolation at t=0.5
         auto result = fl::Tile2x2_u8_wrap::Interpolate(tile_a, tile_b, 0.5f);
         
-        REQUIRE(result.size() == 1);
+        FL_REQUIRE(result.size() == 1);
         const auto& interpolated = result[0];
         
         // Check interpolated values (should be halfway between a and b)
-        CHECK(interpolated.at(0, 0).second == 150); // (100 + 200) / 2
-        CHECK(interpolated.at(0, 1).second == 200); // (150 + 250) / 2
-        CHECK(interpolated.at(1, 0).second == 125); // (200 + 50) / 2
-        CHECK(interpolated.at(1, 1).second == 175); // (250 + 100) / 2
+        FL_CHECK(interpolated.at(0, 0).second == 150); // (100 + 200) / 2
+        FL_CHECK(interpolated.at(0, 1).second == 200); // (150 + 250) / 2
+        FL_CHECK(interpolated.at(1, 0).second == 125); // (200 + 50) / 2
+        FL_CHECK(interpolated.at(1, 1).second == 175); // (250 + 100) / 2
         
         // Check that positions are preserved from tile_a
-        CHECK(interpolated.at(0, 0).first.x == 0);
-        CHECK(interpolated.at(0, 0).first.y == 0);
-        CHECK(interpolated.at(1, 1).first.x == 1);
-        CHECK(interpolated.at(1, 1).first.y == 1);
+        FL_CHECK(interpolated.at(0, 0).first.x == 0);
+        FL_CHECK(interpolated.at(0, 0).first.y == 0);
+        FL_CHECK(interpolated.at(1, 1).first.x == 1);
+        FL_CHECK(interpolated.at(1, 1).first.y == 1);
     }
     
     SUBCASE("Edge cases") {
@@ -218,22 +218,22 @@ TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
         
         // Test t=0 (should return tile_a)
         auto result_0 = fl::Tile2x2_u8_wrap::Interpolate(tile_a, tile_b, 0.0f);
-        REQUIRE(result_0.size() == 1);
-        CHECK(result_0[0].at(0, 0).second == 100);
+        FL_REQUIRE(result_0.size() == 1);
+        FL_CHECK(result_0[0].at(0, 0).second == 100);
         
         // Test t=1 (should return tile_b)
         auto result_1 = fl::Tile2x2_u8_wrap::Interpolate(tile_a, tile_b, 1.0f);
-        REQUIRE(result_1.size() == 1);
-        CHECK(result_1[0].at(0, 0).second == 200);
+        FL_REQUIRE(result_1.size() == 1);
+        FL_CHECK(result_1[0].at(0, 0).second == 200);
         
         // Test t<0 (should clamp to tile_a)
         auto result_neg = fl::Tile2x2_u8_wrap::Interpolate(tile_a, tile_b, -0.5f);
-        REQUIRE(result_neg.size() == 1);
-        CHECK(result_neg[0].at(0, 0).second == 100);
+        FL_REQUIRE(result_neg.size() == 1);
+        FL_CHECK(result_neg[0].at(0, 0).second == 100);
         
         // Test t>1 (should clamp to tile_b)
         auto result_over = fl::Tile2x2_u8_wrap::Interpolate(tile_a, tile_b, 1.5f);
-        REQUIRE(result_over.size() == 1);
-        CHECK(result_over[0].at(0, 0).second == 200);
+        FL_REQUIRE(result_over.size() == 1);
+        FL_CHECK(result_over[0].at(0, 0).second == 200);
     }
 }

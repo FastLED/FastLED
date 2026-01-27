@@ -43,7 +43,7 @@ TEST_CASE("fl::cout basic operations compile and run without crash") {
     fl::cout << test_str;
     
     // If we got here without crashing, the basic functionality works
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 TEST_CASE("fl::cout type conversions work correctly") {
@@ -54,16 +54,16 @@ TEST_CASE("fl::cout type conversions work correctly") {
     // Test that we can create a temporary string and append different types
     fl::string temp;
     temp.append(42);
-    CHECK_EQ(temp, "42");
+    FL_CHECK_EQ(temp, "42");
     
     temp.clear();
     temp.append(-123);
-    CHECK_EQ(temp, "-123");
+    FL_CHECK_EQ(temp, "-123");
     
     temp.clear();
     temp.append(3.14f);
-    CHECK(temp.find("3.1") != fl::string::npos);
+    FL_CHECK(temp.find("3.1") != fl::string::npos);
     
     // The cout should use the same underlying string append mechanisms
-    CHECK(true);
+    FL_CHECK(true);
 }

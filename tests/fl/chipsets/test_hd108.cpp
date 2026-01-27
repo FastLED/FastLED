@@ -55,18 +55,18 @@ void decodeGains(u8 f0, u8 f1, u8* r_gain, u8* g_gain, u8* b_gain) {
 void checkHeaderBytes(u8 f0, u8 f1, u8 expected_r, u8 expected_g, u8 expected_b) {
     // Verify f0 encoding: 0x80 | ((r_gain & 0x1F) << 2) | ((g_gain >> 3) & 0x03)
     u8 expected_f0 = 0x80 | ((expected_r & 0x1F) << 2) | ((expected_g >> 3) & 0x03);
-    CHECK_EQ(f0, expected_f0);
+    FL_CHECK_EQ(f0, expected_f0);
 
     // Verify f1 encoding: ((g_gain & 0x07) << 5) | (b_gain & 0x1F)
     u8 expected_f1 = ((expected_g & 0x07) << 5) | (expected_b & 0x1F);
-    CHECK_EQ(f1, expected_f1);
+    FL_CHECK_EQ(f1, expected_f1);
 
     // Verify decoded gains match
     u8 r_decoded, g_decoded, b_decoded;
     decodeGains(f0, f1, &r_decoded, &g_decoded, &b_decoded);
-    CHECK_EQ(r_decoded, expected_r);
-    CHECK_EQ(g_decoded, expected_g);
-    CHECK_EQ(b_decoded, expected_b);
+    FL_CHECK_EQ(r_decoded, expected_r);
+    FL_CHECK_EQ(g_decoded, expected_g);
+    FL_CHECK_EQ(b_decoded, expected_b);
 }
 
 /// Test fixture that exposes protected showPixels method
@@ -112,7 +112,7 @@ fl::vector<u8> captureBytes(const CRGB* leds, int num_leds, u8 brightness) {
     const auto& dataMap = stripData.getData();
 
     // Ensure exactly one strip is present (test isolation check)
-    REQUIRE_MESSAGE(dataMap.size() == 1,
+    FL_REQUIRE_MESSAGE(dataMap.size() == 1,
         "Expected exactly 1 strip after capture, got " << dataMap.size());
 
     // CRITICAL: Return a COPY of the data (owned vector) to avoid lifetime issues
@@ -144,16 +144,16 @@ TEST_CASE("HD108 - Protocol format verification") {
 
     fl::vector<u8> capturedBytes = captureBytes<11, 13, RGB>(leds, 1, 255);
 
-    REQUIRE_EQ(capturedBytes.size(), sizeof(expected_byte_sequence));
+    FL_REQUIRE_EQ(capturedBytes.size(), sizeof(expected_byte_sequence));
     for (size_t i = 0; i < capturedBytes.size(); i++) {
-        CHECK_EQ(capturedBytes[i], expected_byte_sequence[i]);
+        FL_CHECK_EQ(capturedBytes[i], expected_byte_sequence[i]);
     }
 
     // Verify gain encoding in header (all gains = 31)
     checkHeaderBytes(capturedBytes[8], capturedBytes[9], 31, 31, 31);
 
     // Verify gamma correction applied
-    CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(255));
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(255));
 }
 
 TEST_CASE("HD108 - Multi-LED with brightness and color order") {
@@ -173,24 +173,24 @@ TEST_CASE("HD108 - Multi-LED with brightness and color order") {
     fl::vector<u8> capturedBytes = captureBytes<28, 29, GRB>(leds, NUM_LEDS, 128);
 
     // Total: 8 (start) + 24 (3 LEDs * 8) + 5 (end: 3/2 + 4) = 37 bytes
-    CHECK_EQ(capturedBytes.size(), 37);
+    FL_CHECK_EQ(capturedBytes.size(), 37);
 
     // Verify gain encoding in header (all gains = 31, brightness applied to PWM values)
     checkHeaderBytes(capturedBytes[8], capturedBytes[9], 31, 31, 31);
 
     // Verify LED 1 (Red) with GRB order: G=0, R=255, B=0
-    CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(0));   // Green first
-    CHECK_EQ(getBigEndian16(capturedBytes, 12), gamma_2_8(255)); // Red second
-    CHECK_EQ(getBigEndian16(capturedBytes, 14), gamma_2_8(0));   // Blue third
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(0));   // Green first
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 12), gamma_2_8(255)); // Red second
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 14), gamma_2_8(0));   // Blue third
 
     // Verify LED 2 (Green) with GRB order: G=255, R=0, B=0
-    CHECK_EQ(getBigEndian16(capturedBytes, 18), gamma_2_8(255)); // Green first
-    CHECK_EQ(getBigEndian16(capturedBytes, 20), gamma_2_8(0));   // Red second
-    CHECK_EQ(getBigEndian16(capturedBytes, 22), gamma_2_8(0));   // Blue third
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 18), gamma_2_8(255)); // Green first
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 20), gamma_2_8(0));   // Red second
+    FL_CHECK_EQ(getBigEndian16(capturedBytes, 22), gamma_2_8(0));   // Blue third
 
     // Verify end frame (5 bytes of 0xFF)
     for (size_t i = 32; i < 37; i++) {
-        CHECK_EQ(capturedBytes[i], 0xFF);
+        FL_CHECK_EQ(capturedBytes[i], 0xFF);
     }
 }
 

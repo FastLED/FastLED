@@ -37,9 +37,9 @@ static u16 getBigEndian16(const fl::vector<u8>& data, size_t offset) {
 
 /// Helper to verify start frame (8 bytes of 0x00)
 static void verifyStartFrame(const fl::vector<u8>& data) {
-    REQUIRE(data.size() >= 8);
+    FL_REQUIRE(data.size() >= 8);
     for (int i = 0; i < 8; i++) {
-        CHECK_EQ(data[i], 0x00);
+        FL_CHECK_EQ(data[i], 0x00);
     }
 }
 
@@ -47,7 +47,7 @@ static void verifyStartFrame(const fl::vector<u8>& data) {
 static void verifyEndFrame(const fl::vector<u8>& data, size_t expected_size) {
     size_t start_offset = data.size() - expected_size;
     for (size_t i = start_offset; i < data.size(); i++) {
-        CHECK_EQ(data[i], 0xFF);
+        FL_CHECK_EQ(data[i], 0xFF);
     }
 }
 
@@ -64,8 +64,8 @@ static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset, u8 expe
     u8 expected_f0 = 0xFF;  // [1][11111][11]
     u8 expected_f1 = 0xFF;  // [111][11111]
 
-    CHECK_EQ(f0, expected_f0);
-    CHECK_EQ(f1, expected_f1);
+    FL_CHECK_EQ(f0, expected_f0);
+    FL_CHECK_EQ(f1, expected_f1);
 }
 
 /// Helper to verify LED RGB16 values with gamma correction
@@ -75,9 +75,9 @@ static void verifyLEDData(const fl::vector<u8>& data, size_t offset, u8 r8, u8 g
     u16 expected_g16 = gamma_2_8(g8);
     u16 expected_b16 = gamma_2_8(b8);
 
-    CHECK_EQ(getBigEndian16(data, offset), expected_r16);
-    CHECK_EQ(getBigEndian16(data, offset + 2), expected_g16);
-    CHECK_EQ(getBigEndian16(data, offset + 4), expected_b16);
+    FL_CHECK_EQ(getBigEndian16(data, offset), expected_r16);
+    FL_CHECK_EQ(getBigEndian16(data, offset + 2), expected_g16);
+    FL_CHECK_EQ(getBigEndian16(data, offset + 4), expected_b16);
 }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ TEST_CASE("encodeHD108() - empty range") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
     // Start frame (8) + End frame (0/2 + 4 = 4) = 12 bytes
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     verifyStartFrame(output);
     verifyEndFrame(output, 4);
@@ -104,7 +104,7 @@ TEST_CASE("encodeHD108() - single LED, max brightness") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
     // Start frame (8) + LED (8) + End frame (1/2 + 4 = 4) = 20 bytes
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     verifyStartFrame(output);
 
@@ -123,7 +123,7 @@ TEST_CASE("encodeHD108() - single LED, mid brightness") {
 
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 128);
 
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     // Verify header: brightness 128 -> 5-bit 16
     verifyHeaderBytes(output, 8, 16);
@@ -137,7 +137,7 @@ TEST_CASE("encodeHD108() - single LED, min brightness") {
 
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 1);
 
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     // Verify header: brightness 1 -> 5-bit 1 (non-zero preservation)
     verifyHeaderBytes(output, 8, 1);
@@ -152,7 +152,7 @@ TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
     // Start frame (8) + LEDs (16) + End frame (2/2 + 4 = 5) = 29 bytes
-    REQUIRE_EQ(output.size(), 29);
+    FL_REQUIRE_EQ(output.size(), 29);
 
     verifyStartFrame(output);
 
@@ -178,7 +178,7 @@ TEST_CASE("encodeHD108() - three LEDs, end frame size") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 200);
 
     // Start frame (8) + LEDs (24) + End frame (3/2 + 4 = 5) = 37 bytes
-    REQUIRE_EQ(output.size(), 37);
+    FL_REQUIRE_EQ(output.size(), 37);
 
     verifyStartFrame(output);
 
@@ -195,7 +195,7 @@ TEST_CASE("encodeHD108() - four LEDs, end frame boundary") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 100);
 
     // Start frame (8) + LEDs (32) + End frame (4/2 + 4 = 6) = 46 bytes
-    REQUIRE_EQ(output.size(), 46);
+    FL_REQUIRE_EQ(output.size(), 46);
 
     verifyEndFrame(output, 6);
 }
@@ -207,7 +207,7 @@ TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 150);
 
     // Start frame (8) + LEDs (64) + End frame (8/2 + 4 = 8) = 80 bytes
-    REQUIRE_EQ(output.size(), 80);
+    FL_REQUIRE_EQ(output.size(), 80);
 
     verifyEndFrame(output, 8);
 }
@@ -257,12 +257,12 @@ TEST_CASE("encodeHD108() - gamma correction verification") {
     u16 b16 = getBigEndian16(output, 14);
 
     // Verify they match gamma_2_8 output
-    CHECK_EQ(r16, gamma_2_8(255));
-    CHECK_EQ(g16, gamma_2_8(128));
-    CHECK_EQ(b16, gamma_2_8(64));
+    FL_CHECK_EQ(r16, gamma_2_8(255));
+    FL_CHECK_EQ(g16, gamma_2_8(128));
+    FL_CHECK_EQ(b16, gamma_2_8(64));
 
     // Gamma 2.8 should produce non-linear values
-    CHECK_GT(r16, g16 * 2);  // 255 gamma'd should be > 2x 128 gamma'd
+    FL_CHECK_GT(r16, g16 * 2);  // 255 gamma'd should be > 2x 128 gamma'd
 }
 
 TEST_CASE("encodeHD108() - RGB color order") {
@@ -273,9 +273,9 @@ TEST_CASE("encodeHD108() - RGB color order") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
     // RGB order: R first (offset 10), G second (12), B third (14)
-    CHECK_EQ(getBigEndian16(output, 10), gamma_2_8(200));  // Red
-    CHECK_EQ(getBigEndian16(output, 12), gamma_2_8(100));  // Green
-    CHECK_EQ(getBigEndian16(output, 14), gamma_2_8(50));   // Blue
+    FL_CHECK_EQ(getBigEndian16(output, 10), gamma_2_8(200));  // Red
+    FL_CHECK_EQ(getBigEndian16(output, 12), gamma_2_8(100));  // Green
+    FL_CHECK_EQ(getBigEndian16(output, 14), gamma_2_8(50));   // Blue
 }
 
 //-----------------------------------------------------------------------------
@@ -290,7 +290,7 @@ TEST_CASE("encodeHD108_HD() - empty range") {
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
     // Start frame (8) + End frame (4) = 12 bytes
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     verifyStartFrame(output);
     verifyEndFrame(output, 4);
@@ -304,7 +304,7 @@ TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
     // Start frame (8) + LED (8) + End frame (4) = 20 bytes
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     verifyStartFrame(output);
 
@@ -328,7 +328,7 @@ TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
     // Start frame (8) + LEDs (24) + End frame (5) = 37 bytes
-    REQUIRE_EQ(output.size(), 37);
+    FL_REQUIRE_EQ(output.size(), 37);
 
     verifyStartFrame(output);
 
@@ -359,7 +359,7 @@ TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
 
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 37);
+    FL_REQUIRE_EQ(output.size(), 37);
 
     // All LEDs should have same header bytes (brightness 200 -> 24)
     verifyHeaderBytes(output, 8, 24);
@@ -382,7 +382,7 @@ TEST_CASE("encodeHD108_HD() - end frame calculation") {
         fl::vector<u8> output;
 
         encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
-        REQUIRE_EQ(output.size(), 8 + 8 + 4);
+        FL_REQUIRE_EQ(output.size(), 8 + 8 + 4);
         verifyEndFrame(output, 4);
     }
 
@@ -393,7 +393,7 @@ TEST_CASE("encodeHD108_HD() - end frame calculation") {
         fl::vector<u8> output;
 
         encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
-        REQUIRE_EQ(output.size(), 8 + 16 + 5);
+        FL_REQUIRE_EQ(output.size(), 8 + 16 + 5);
         verifyEndFrame(output, 5);
     }
 
@@ -404,7 +404,7 @@ TEST_CASE("encodeHD108_HD() - end frame calculation") {
         fl::vector<u8> output;
 
         encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
-        REQUIRE_EQ(output.size(), 8 + 80 + 9);
+        FL_REQUIRE_EQ(output.size(), 8 + 80 + 9);
         verifyEndFrame(output, 9);
     }
 }
@@ -454,8 +454,8 @@ TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
         u8 f0, f1;
         hd108BrightnessHeader(test.brightness_8bit, &f0, &f1);
 
-        CHECK_EQ(f0, test.expected_f0);
-        CHECK_EQ(f1, test.expected_f1);
+        FL_CHECK_EQ(f0, test.expected_f0);
+        FL_CHECK_EQ(f1, test.expected_f1);
 
         // Verify all channels use maximum gain (31)
         u8 extracted_r = (f0 >> 2) & 0x1F;            // Extract R gain (bits 6-2 of f0)
@@ -464,20 +464,20 @@ TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
         u8 extracted_g = (extracted_g_hi << 3) | extracted_g_lo;  // Reconstruct G gain
         u8 extracted_b = f1 & 0x1F;                   // Extract B gain (bits 4-0 of f1)
 
-        CHECK_EQ(extracted_r, test.expected_gain);
-        CHECK_EQ(extracted_g, test.expected_gain);
-        CHECK_EQ(extracted_b, test.expected_gain);
+        FL_CHECK_EQ(extracted_r, test.expected_gain);
+        FL_CHECK_EQ(extracted_g, test.expected_gain);
+        FL_CHECK_EQ(extracted_b, test.expected_gain);
     }
 }
 
 TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
     // Test gamma correction function directly
 
-    CHECK_EQ(hd108GammaCorrect(0), gamma_2_8(0));
-    CHECK_EQ(hd108GammaCorrect(64), gamma_2_8(64));
-    CHECK_EQ(hd108GammaCorrect(128), gamma_2_8(128));
-    CHECK_EQ(hd108GammaCorrect(192), gamma_2_8(192));
-    CHECK_EQ(hd108GammaCorrect(255), gamma_2_8(255));
+    FL_CHECK_EQ(hd108GammaCorrect(0), gamma_2_8(0));
+    FL_CHECK_EQ(hd108GammaCorrect(64), gamma_2_8(64));
+    FL_CHECK_EQ(hd108GammaCorrect(128), gamma_2_8(128));
+    FL_CHECK_EQ(hd108GammaCorrect(192), gamma_2_8(192));
+    FL_CHECK_EQ(hd108GammaCorrect(255), gamma_2_8(255));
 
     // Verify non-linearity (gamma > 1.0 means output grows faster than input)
     u16 v64 = hd108GammaCorrect(64);
@@ -485,10 +485,10 @@ TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
     u16 v255 = hd108GammaCorrect(255);
 
     // Gamma 2.8: 128 should be < 255/2 (non-linear curve)
-    CHECK_LT(v128, v255 / 2);
+    FL_CHECK_LT(v128, v255 / 2);
 
     // 64 should be much less than 128/2
-    CHECK_LT(v64, v128 / 2);
+    FL_CHECK_LT(v64, v128 / 2);
 }
 
 } // namespace test_hd108

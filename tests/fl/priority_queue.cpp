@@ -9,16 +9,16 @@
 TEST_CASE("priority_queue_stable: basic operations") {
     fl::priority_queue_stable<int> queue;
 
-    REQUIRE(queue.empty());
-    REQUIRE_EQ(queue.size(), 0u);
+    FL_REQUIRE(queue.empty());
+    FL_REQUIRE_EQ(queue.size(), 0u);
 
     queue.push(5);
-    REQUIRE_FALSE(queue.empty());
-    REQUIRE_EQ(queue.size(), 1u);
-    REQUIRE_EQ(queue.top(), 5);
+    FL_REQUIRE_FALSE(queue.empty());
+    FL_REQUIRE_EQ(queue.size(), 1u);
+    FL_REQUIRE_EQ(queue.top(), 5);
 
     queue.pop();
-    REQUIRE(queue.empty());
+    FL_REQUIRE(queue.empty());
 }
 
 TEST_CASE("priority_queue_stable: ordering") {
@@ -31,15 +31,15 @@ TEST_CASE("priority_queue_stable: ordering") {
     queue.push(2);
 
     // Should pop in ascending order (min-heap)
-    REQUIRE_EQ(queue.top(), 1);
+    FL_REQUIRE_EQ(queue.top(), 1);
     queue.pop();
-    REQUIRE_EQ(queue.top(), 2);
+    FL_REQUIRE_EQ(queue.top(), 2);
     queue.pop();
-    REQUIRE_EQ(queue.top(), 3);
+    FL_REQUIRE_EQ(queue.top(), 3);
     queue.pop();
-    REQUIRE_EQ(queue.top(), 4);
+    FL_REQUIRE_EQ(queue.top(), 4);
     queue.pop();
-    REQUIRE(queue.empty());
+    FL_REQUIRE(queue.empty());
 }
 
 TEST_CASE("priority_queue_stable: FIFO for equal priorities") {
@@ -51,13 +51,13 @@ TEST_CASE("priority_queue_stable: FIFO for equal priorities") {
     queue.push(5);
 
     // All have same priority
-    REQUIRE_EQ(queue.size(), 3u);
+    FL_REQUIRE_EQ(queue.size(), 3u);
 
     for (int i = 0; i < 3; i++) {
-        REQUIRE_EQ(queue.top(), 5);
+        FL_REQUIRE_EQ(queue.top(), 5);
         queue.pop();
     }
-    REQUIRE(queue.empty());
+    FL_REQUIRE(queue.empty());
 }
 
 struct ScheduledCall {
@@ -80,19 +80,19 @@ TEST_CASE("priority_queue_stable: scheduled calls with different times") {
     queue.push({2000, 3});
 
     // Should execute in time order
-    REQUIRE_EQ(queue.top().mExecuteAt, 1000u);
-    REQUIRE_EQ(queue.top().mId, 1);
+    FL_REQUIRE_EQ(queue.top().mExecuteAt, 1000u);
+    FL_REQUIRE_EQ(queue.top().mId, 1);
     queue.pop();
 
-    REQUIRE_EQ(queue.top().mExecuteAt, 2000u);
-    REQUIRE_EQ(queue.top().mId, 3);
+    FL_REQUIRE_EQ(queue.top().mExecuteAt, 2000u);
+    FL_REQUIRE_EQ(queue.top().mId, 3);
     queue.pop();
 
-    REQUIRE_EQ(queue.top().mExecuteAt, 3000u);
-    REQUIRE_EQ(queue.top().mId, 2);
+    FL_REQUIRE_EQ(queue.top().mExecuteAt, 3000u);
+    FL_REQUIRE_EQ(queue.top().mId, 2);
     queue.pop();
 
-    REQUIRE(queue.empty());
+    FL_REQUIRE(queue.empty());
 }
 
 TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
@@ -105,16 +105,16 @@ TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
     queue.push({1000, 4});
 
     // Should execute in FIFO order (1, 2, 3, 4)
-    REQUIRE_EQ(queue.top().mId, 1);
+    FL_REQUIRE_EQ(queue.top().mId, 1);
     queue.pop();
-    REQUIRE_EQ(queue.top().mId, 2);
+    FL_REQUIRE_EQ(queue.top().mId, 2);
     queue.pop();
-    REQUIRE_EQ(queue.top().mId, 3);
+    FL_REQUIRE_EQ(queue.top().mId, 3);
     queue.pop();
-    REQUIRE_EQ(queue.top().mId, 4);
+    FL_REQUIRE_EQ(queue.top().mId, 4);
     queue.pop();
 
-    REQUIRE(queue.empty());
+    FL_REQUIRE(queue.empty());
 }
 
 TEST_CASE("priority_queue_stable: mixed times") {
@@ -134,12 +134,12 @@ TEST_CASE("priority_queue_stable: mixed times") {
         queue.pop();
     }
 
-    REQUIRE_EQ(executionOrder.size(), 5u);
-    REQUIRE_EQ(executionOrder[0], 1);
-    REQUIRE_EQ(executionOrder[1], 3);
-    REQUIRE_EQ(executionOrder[2], 5);
-    REQUIRE_EQ(executionOrder[3], 2);
-    REQUIRE_EQ(executionOrder[4], 4);
+    FL_REQUIRE_EQ(executionOrder.size(), 5u);
+    FL_REQUIRE_EQ(executionOrder[0], 1);
+    FL_REQUIRE_EQ(executionOrder[1], 3);
+    FL_REQUIRE_EQ(executionOrder[2], 5);
+    FL_REQUIRE_EQ(executionOrder[3], 2);
+    FL_REQUIRE_EQ(executionOrder[4], 4);
 }
 
 TEST_CASE("priority_queue_stable: clear") {
@@ -148,14 +148,14 @@ TEST_CASE("priority_queue_stable: clear") {
     queue.push(1);
     queue.push(2);
     queue.push(3);
-    REQUIRE_EQ(queue.size(), 3u);
+    FL_REQUIRE_EQ(queue.size(), 3u);
 
     queue.clear();
-    REQUIRE(queue.empty());
-    REQUIRE_EQ(queue.size(), 0u);
+    FL_REQUIRE(queue.empty());
+    FL_REQUIRE_EQ(queue.size(), 0u);
 
     // Should be able to use after clear
     queue.push(10);
-    REQUIRE_EQ(queue.size(), 1u);
-    REQUIRE_EQ(queue.top(), 10);
+    FL_REQUIRE_EQ(queue.size(), 1u);
+    FL_REQUIRE_EQ(queue.top(), 10);
 }

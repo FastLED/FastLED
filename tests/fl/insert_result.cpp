@@ -5,30 +5,30 @@ using namespace fl;
 
 TEST_CASE("fl::InsertResult enum values") {
     SUBCASE("kInserted value") {
-        CHECK_EQ(static_cast<int>(kInserted), 0);
-        CHECK_EQ(static_cast<int>(InsertResult::kInserted), 0);
+        FL_CHECK_EQ(static_cast<int>(kInserted), 0);
+        FL_CHECK_EQ(static_cast<int>(InsertResult::kInserted), 0);
     }
 
     SUBCASE("kExists value") {
-        CHECK_EQ(static_cast<int>(kExists), 1);
-        CHECK_EQ(static_cast<int>(InsertResult::kExists), 1);
+        FL_CHECK_EQ(static_cast<int>(kExists), 1);
+        FL_CHECK_EQ(static_cast<int>(InsertResult::kExists), 1);
     }
 
     SUBCASE("kMaxSize value") {
-        CHECK_EQ(static_cast<int>(kMaxSize), 2);
-        CHECK_EQ(static_cast<int>(InsertResult::kMaxSize), 2);
+        FL_CHECK_EQ(static_cast<int>(kMaxSize), 2);
+        FL_CHECK_EQ(static_cast<int>(InsertResult::kMaxSize), 2);
     }
 
     SUBCASE("all values are distinct") {
-        CHECK(kInserted != kExists);
-        CHECK(kInserted != kMaxSize);
-        CHECK(kExists != kMaxSize);
+        FL_CHECK(kInserted != kExists);
+        FL_CHECK(kInserted != kMaxSize);
+        FL_CHECK(kExists != kMaxSize);
     }
 
     SUBCASE("values are sequential") {
-        CHECK_EQ(static_cast<int>(kInserted), 0);
-        CHECK_EQ(static_cast<int>(kExists), 1);
-        CHECK_EQ(static_cast<int>(kMaxSize), 2);
+        FL_CHECK_EQ(static_cast<int>(kInserted), 0);
+        FL_CHECK_EQ(static_cast<int>(kExists), 1);
+        FL_CHECK_EQ(static_cast<int>(kMaxSize), 2);
     }
 }
 
@@ -38,9 +38,9 @@ TEST_CASE("fl::InsertResult usage patterns") {
         InsertResult result2 = kInserted;
         InsertResult result3 = kExists;
 
-        CHECK(result1 == result2);
-        CHECK(result1 != result3);
-        CHECK(result2 != result3);
+        FL_CHECK(result1 == result2);
+        FL_CHECK(result1 != result3);
+        FL_CHECK(result2 != result3);
     }
 
     SUBCASE("switch statement") {
@@ -53,19 +53,19 @@ TEST_CASE("fl::InsertResult usage patterns") {
             case kMaxSize: outcome = 3; break;
         }
 
-        CHECK_EQ(outcome, 2);
+        FL_CHECK_EQ(outcome, 2);
     }
 
     SUBCASE("conditional checks") {
         InsertResult result = kInserted;
-        CHECK(result == kInserted);
-        CHECK(result != kExists);
-        CHECK(result != kMaxSize);
+        FL_CHECK(result == kInserted);
+        FL_CHECK(result != kExists);
+        FL_CHECK(result != kMaxSize);
 
         result = kMaxSize;
-        CHECK(result == kMaxSize);
-        CHECK(result != kInserted);
-        CHECK(result != kExists);
+        FL_CHECK(result == kMaxSize);
+        FL_CHECK(result != kInserted);
+        FL_CHECK(result != kExists);
     }
 }
 
@@ -74,21 +74,21 @@ TEST_CASE("fl::InsertResult semantic meaning") {
         // kInserted means the item was successfully inserted
         InsertResult result = kInserted;
         bool success = (result == kInserted);
-        CHECK(success);
+        FL_CHECK(success);
     }
 
     SUBCASE("already exists case - kExists") {
         // kExists means the item already existed in the container
         InsertResult result = kExists;
         bool already_present = (result == kExists);
-        CHECK(already_present);
+        FL_CHECK(already_present);
     }
 
     SUBCASE("container full case - kMaxSize") {
         // kMaxSize means the container was at max capacity
         InsertResult result = kMaxSize;
         bool container_full = (result == kMaxSize);
-        CHECK(container_full);
+        FL_CHECK(container_full);
     }
 }
 
@@ -98,9 +98,9 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
             return result == kInserted;
         };
 
-        CHECK(check_success(kInserted) == true);
-        CHECK(check_success(kExists) == false);
-        CHECK(check_success(kMaxSize) == false);
+        FL_CHECK(check_success(kInserted) == true);
+        FL_CHECK(check_success(kExists) == false);
+        FL_CHECK(check_success(kMaxSize) == false);
     }
 
     SUBCASE("failure check pattern") {
@@ -108,9 +108,9 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
             return result != kInserted;
         };
 
-        CHECK(check_failure(kInserted) == false);
-        CHECK(check_failure(kExists) == true);
-        CHECK(check_failure(kMaxSize) == true);
+        FL_CHECK(check_failure(kInserted) == false);
+        FL_CHECK(check_failure(kExists) == true);
+        FL_CHECK(check_failure(kMaxSize) == true);
     }
 
     SUBCASE("specific failure type checks") {
@@ -123,12 +123,12 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
         };
 
         InsertResult r1 = kExists;
-        CHECK(is_duplicate(r1) == true);
-        CHECK(is_full(r1) == false);
+        FL_CHECK(is_duplicate(r1) == true);
+        FL_CHECK(is_full(r1) == false);
 
         InsertResult r2 = kMaxSize;
-        CHECK(is_duplicate(r2) == false);
-        CHECK(is_full(r2) == true);
+        FL_CHECK(is_duplicate(r2) == false);
+        FL_CHECK(is_full(r2) == true);
     }
 }
 
@@ -141,8 +141,8 @@ TEST_CASE("fl::InsertResult array indexing") {
             "Container is at max size"
         };
 
-        CHECK_EQ(messages[kInserted], "Inserted successfully");
-        CHECK_EQ(messages[kExists], "Item already exists");
-        CHECK_EQ(messages[kMaxSize], "Container is at max size");
+        FL_CHECK_EQ(messages[kInserted], "Inserted successfully");
+        FL_CHECK_EQ(messages[kExists], "Item already exists");
+        FL_CHECK_EQ(messages[kMaxSize], "Container is at max size");
     }
 }

@@ -54,21 +54,21 @@ TEST_CASE("test_fx_engine") {
     int id0 = engine.addFx(redFx);
     int id1 = engine.addFx(blueFx);
 
-    REQUIRE_EQ(0, id0);
-    REQUIRE_EQ(1, id1);
+    FL_REQUIRE_EQ(0, id0);
+    FL_REQUIRE_EQ(1, id1);
 
     SUBCASE("Initial state") {
         int currId = engine.getCurrentFxId();
-        CHECK(currId == id0);
+        FL_CHECK(currId == id0);
         const bool ok = engine.draw(0, leds);
-        CHECK(ok);
+        FL_CHECK(ok);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            // CHECK(leds[i] == CRGB::Red);
+            // FL_CHECK(leds[i] == CRGB::Red);
             bool is_red = leds[i] == CRGB::Red;
             if (!is_red) {
                 Str err = leds[i].toString();
                 printf("leds[%d] is not red, was instead: %s\n", i, err.c_str());
-                CHECK(is_red);
+                FL_CHECK(is_red);
             }
         }
     }
@@ -84,27 +84,27 @@ TEST_CASE("test_fx_engine") {
             }
             FAIL("Failed to transition to next effect");
         }
-        REQUIRE(ok);
+        FL_REQUIRE(ok);
         
         // Start of transition
         ok = engine.draw(0, leds);
-        REQUIRE(ok);
+        FL_REQUIRE(ok);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            REQUIRE(leds[i] == CRGB::Red);
+            FL_REQUIRE(leds[i] == CRGB::Red);
         }
 
         // Middle of transition
-        REQUIRE(engine.draw(500, leds));
+        FL_REQUIRE(engine.draw(500, leds));
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            REQUIRE(leds[i].r == 128);
-            REQUIRE(leds[i].g == 0);
-            REQUIRE(leds[i].b == 127);
+            FL_REQUIRE(leds[i].r == 128);
+            FL_REQUIRE(leds[i].g == 0);
+            FL_REQUIRE(leds[i].b == 127);
         }
 
         // End of transition
-        REQUIRE(engine.draw(1000, leds));
+        FL_REQUIRE(engine.draw(1000, leds));
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            CHECK(leds[i] == CRGB::Blue);
+            FL_CHECK(leds[i] == CRGB::Blue);
         }
     }
 
@@ -112,7 +112,7 @@ TEST_CASE("test_fx_engine") {
         engine.nextFx(0);
         engine.draw(0, leds);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            CHECK(leds[i] == CRGB::Blue);
+            FL_CHECK(leds[i] == CRGB::Blue);
         }
     }
 
@@ -124,56 +124,56 @@ TEST_CASE("test_transition") {
 
     SUBCASE("Initial state") {
         fl::Transition transition;
-        CHECK(transition.getProgress(0) == 0);
-        CHECK_FALSE(transition.isTransitioning(0));
+        FL_CHECK(transition.getProgress(0) == 0);
+        FL_CHECK_FALSE(transition.isTransitioning(0));
     }
 
     SUBCASE("Start transition") {
         fl::Transition transition;
         transition.start(100, 1000);
-        CHECK(transition.isTransitioning(100));
-        CHECK(transition.isTransitioning(1099));
-        CHECK_FALSE(transition.isTransitioning(1100));
+        FL_CHECK(transition.isTransitioning(100));
+        FL_CHECK(transition.isTransitioning(1099));
+        FL_CHECK_FALSE(transition.isTransitioning(1100));
     }
 
     SUBCASE("Progress calculation") {
         fl::Transition transition;
         transition.start(100, 1000);
-        CHECK(transition.getProgress(100) == 0);
-        CHECK(transition.getProgress(600) == 127);
-        CHECK(transition.getProgress(1100) == 255);
+        FL_CHECK(transition.getProgress(100) == 0);
+        FL_CHECK(transition.getProgress(600) == 127);
+        FL_CHECK(transition.getProgress(1100) == 255);
     }
 
     SUBCASE("Progress before start time") {
         fl::Transition transition;
         transition.start(100, 1000);
-        CHECK(transition.getProgress(50) == 0);
+        FL_CHECK(transition.getProgress(50) == 0);
     }
 
     SUBCASE("Progress after end time") {
         fl::Transition transition;
         transition.start(100, 1000);
-        CHECK(transition.getProgress(1200) == 255);
+        FL_CHECK(transition.getProgress(1200) == 255);
     }
 
     SUBCASE("Multiple transitions") {
         fl::Transition transition;
         transition.start(100, 1000);
-        CHECK(transition.isTransitioning(600));
+        FL_CHECK(transition.isTransitioning(600));
         
         transition.start(2000, 500);
-        CHECK_FALSE(transition.isTransitioning(1500));
-        CHECK(transition.isTransitioning(2200));
-        CHECK(transition.getProgress(2250) == 127);
+        FL_CHECK_FALSE(transition.isTransitioning(1500));
+        FL_CHECK(transition.isTransitioning(2200));
+        FL_CHECK(transition.getProgress(2250) == 127);
     }
 
     SUBCASE("Zero duration transition") {
         fl::Transition transition;
         transition.start(100, 0);
-        CHECK_FALSE(transition.isTransitioning(100));
-        CHECK(transition.getProgress(99) == 0);
-        CHECK(transition.getProgress(100) == 255);
-        CHECK(transition.getProgress(101) == 255);
+        FL_CHECK_FALSE(transition.isTransitioning(100));
+        FL_CHECK(transition.getProgress(99) == 0);
+        FL_CHECK(transition.getProgress(100) == 255);
+        FL_CHECK(transition.getProgress(101) == 255);
     }
 }
 
@@ -212,11 +212,11 @@ TEST_CASE("test_fixed_fps") {
     bool interpolate = true;
     fl::FxEngine engine(1, interpolate);
     int id = engine.addFx(fake);
-    CHECK_EQ(0, id);
+    FL_CHECK_EQ(0, id);
     engine.draw(0, &leds[0]);
-    CHECK_EQ(1, fake.mFrameCounter);
-    CHECK_EQ(leds[0], CRGB(0, 0, 0));
+    FL_CHECK_EQ(1, fake.mFrameCounter);
+    FL_CHECK_EQ(leds[0], CRGB(0, 0, 0));
     engine.draw(500, &leds[0]);
-    CHECK_EQ(2, fake.mFrameCounter);
-    CHECK_EQ(leds[0], CRGB(127, 0, 0));
+    FL_CHECK_EQ(2, fake.mFrameCounter);
+    FL_CHECK_EQ(leds[0], CRGB(127, 0, 0));
 }

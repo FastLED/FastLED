@@ -12,40 +12,40 @@ using namespace fl;
 TEST_CASE("fl::array - Basic construction and initialization") {
     SUBCASE("Default constructor") {
         array<int, 5> arr;
-        CHECK_EQ(arr.size(), 5);
-        CHECK_FALSE(arr.empty());
+        FL_CHECK_EQ(arr.size(), 5);
+        FL_CHECK_FALSE(arr.empty());
     }
 
     // Note: Fill constructor disabled due to undefined fill_n function
     // SUBCASE("Fill constructor") {
     //     array<int, 5> arr(42);
-    //     CHECK_EQ(arr.size(), 5);
+    //     FL_CHECK_EQ(arr.size(), 5);
     //     for (size i = 0; i < 5; ++i) {
-    //         CHECK_EQ(arr[i], 42);
+    //         FL_CHECK_EQ(arr[i], 42);
     //     }
     // }
 
     SUBCASE("Initializer list constructor") {
         array<int, 5> arr = {1, 2, 3, 4, 5};
-        CHECK_EQ(arr[0], 1);
-        CHECK_EQ(arr[1], 2);
-        CHECK_EQ(arr[2], 3);
-        CHECK_EQ(arr[3], 4);
-        CHECK_EQ(arr[4], 5);
+        FL_CHECK_EQ(arr[0], 1);
+        FL_CHECK_EQ(arr[1], 2);
+        FL_CHECK_EQ(arr[2], 3);
+        FL_CHECK_EQ(arr[3], 4);
+        FL_CHECK_EQ(arr[4], 5);
     }
 
     SUBCASE("Initializer list with fewer elements") {
         array<int, 5> arr = {1, 2, 3};
-        CHECK_EQ(arr[0], 1);
-        CHECK_EQ(arr[1], 2);
-        CHECK_EQ(arr[2], 3);
+        FL_CHECK_EQ(arr[0], 1);
+        FL_CHECK_EQ(arr[1], 2);
+        FL_CHECK_EQ(arr[2], 3);
         // Note: arr[3] and arr[4] are default-initialized
     }
 
     SUBCASE("Zero-size array") {
         array<int, 0> arr;
-        CHECK_EQ(arr.size(), 0);
-        CHECK(arr.empty());
+        FL_CHECK_EQ(arr.size(), 0);
+        FL_CHECK(arr.empty());
     }
 }
 
@@ -53,44 +53,44 @@ TEST_CASE("fl::array - Copy and move semantics") {
     SUBCASE("Copy constructor") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2(arr1);
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 
     SUBCASE("Copy assignment") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2;
         arr2 = arr1;
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 
     SUBCASE("Move constructor") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2(fl::move(arr1));
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 
     SUBCASE("Move assignment") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2;
         arr2 = fl::move(arr1);
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 }
 
 TEST_CASE("fl::array - Element access") {
     SUBCASE("operator[] access") {
         array<int, 5> arr = {10, 20, 30, 40, 50};
-        CHECK_EQ(arr[0], 10);
-        CHECK_EQ(arr[2], 30);
-        CHECK_EQ(arr[4], 50);
+        FL_CHECK_EQ(arr[0], 10);
+        FL_CHECK_EQ(arr[2], 30);
+        FL_CHECK_EQ(arr[4], 50);
     }
 
     SUBCASE("operator[] modification") {
@@ -98,16 +98,16 @@ TEST_CASE("fl::array - Element access") {
         arr[0] = 100;
         arr[1] = 200;
         arr[2] = 300;
-        CHECK_EQ(arr[0], 100);
-        CHECK_EQ(arr[1], 200);
-        CHECK_EQ(arr[2], 300);
+        FL_CHECK_EQ(arr[0], 100);
+        FL_CHECK_EQ(arr[1], 200);
+        FL_CHECK_EQ(arr[2], 300);
     }
 
     SUBCASE("at() with valid index") {
         array<int, 5> arr = {10, 20, 30, 40, 50};
-        CHECK_EQ(arr.at(0), 10);
-        CHECK_EQ(arr.at(2), 30);
-        CHECK_EQ(arr.at(4), 50);
+        FL_CHECK_EQ(arr.at(0), 10);
+        FL_CHECK_EQ(arr.at(2), 30);
+        FL_CHECK_EQ(arr.at(4), 50);
     }
 
     SUBCASE("at() with out-of-bounds index returns error value") {
@@ -120,32 +120,32 @@ TEST_CASE("fl::array - Element access") {
 
     SUBCASE("front() and back()") {
         array<int, 5> arr = {10, 20, 30, 40, 50};
-        CHECK_EQ(arr.front(), 10);
-        CHECK_EQ(arr.back(), 50);
+        FL_CHECK_EQ(arr.front(), 10);
+        FL_CHECK_EQ(arr.back(), 50);
     }
 
     SUBCASE("front() and back() modification") {
         array<int, 3> arr = {1, 2, 3};
         arr.front() = 100;
         arr.back() = 300;
-        CHECK_EQ(arr[0], 100);
-        CHECK_EQ(arr[2], 300);
+        FL_CHECK_EQ(arr[0], 100);
+        FL_CHECK_EQ(arr[2], 300);
     }
 
     SUBCASE("data() pointer access") {
         array<int, 3> arr = {10, 20, 30};
         int* ptr = arr.data();
-        CHECK_EQ(ptr[0], 10);
-        CHECK_EQ(ptr[1], 20);
-        CHECK_EQ(ptr[2], 30);
+        FL_CHECK_EQ(ptr[0], 10);
+        FL_CHECK_EQ(ptr[1], 20);
+        FL_CHECK_EQ(ptr[2], 30);
     }
 
     SUBCASE("const data() pointer access") {
         const array<int, 3> arr = {10, 20, 30};
         const int* ptr = arr.data();
-        CHECK_EQ(ptr[0], 10);
-        CHECK_EQ(ptr[1], 20);
-        CHECK_EQ(ptr[2], 30);
+        FL_CHECK_EQ(ptr[0], 10);
+        FL_CHECK_EQ(ptr[1], 20);
+        FL_CHECK_EQ(ptr[2], 30);
     }
 }
 
@@ -153,12 +153,12 @@ TEST_CASE("fl::array - Iterators") {
     SUBCASE("begin() and end()") {
         array<int, 5> arr = {1, 2, 3, 4, 5};
         auto it = arr.begin();
-        CHECK_EQ(*it, 1);
+        FL_CHECK_EQ(*it, 1);
         ++it;
-        CHECK_EQ(*it, 2);
+        FL_CHECK_EQ(*it, 2);
 
         // Check distance
-        CHECK_EQ(arr.end() - arr.begin(), 5);
+        FL_CHECK_EQ(arr.end() - arr.begin(), 5);
     }
 
     SUBCASE("Range-based for loop") {
@@ -167,7 +167,7 @@ TEST_CASE("fl::array - Iterators") {
         for (int val : arr) {
             sum += val;
         }
-        CHECK_EQ(sum, 150);
+        FL_CHECK_EQ(sum, 150);
     }
 
     SUBCASE("const iterators") {
@@ -176,7 +176,7 @@ TEST_CASE("fl::array - Iterators") {
         for (auto it = arr.begin(); it != arr.end(); ++it) {
             count++;
         }
-        CHECK_EQ(count, 3);
+        FL_CHECK_EQ(count, 3);
     }
 
     SUBCASE("cbegin() and cend()") {
@@ -185,7 +185,7 @@ TEST_CASE("fl::array - Iterators") {
         for (auto it = arr.cbegin(); it != arr.cend(); ++it) {
             sum += *it;
         }
-        CHECK_EQ(sum, 30);
+        FL_CHECK_EQ(sum, 30);
     }
 
     SUBCASE("Iterator modification") {
@@ -193,27 +193,27 @@ TEST_CASE("fl::array - Iterators") {
         for (auto it = arr.begin(); it != arr.end(); ++it) {
             *it *= 2;
         }
-        CHECK_EQ(arr[0], 2);
-        CHECK_EQ(arr[1], 4);
-        CHECK_EQ(arr[2], 6);
+        FL_CHECK_EQ(arr[0], 2);
+        FL_CHECK_EQ(arr[1], 4);
+        FL_CHECK_EQ(arr[2], 6);
     }
 }
 
 TEST_CASE("fl::array - Capacity") {
     SUBCASE("size() and max_size()") {
         array<int, 10> arr;
-        CHECK_EQ(arr.size(), 10);
-        CHECK_EQ(arr.max_size(), 10);
+        FL_CHECK_EQ(arr.size(), 10);
+        FL_CHECK_EQ(arr.max_size(), 10);
     }
 
     SUBCASE("empty() for non-empty array") {
         array<int, 5> arr;
-        CHECK_FALSE(arr.empty());
+        FL_CHECK_FALSE(arr.empty());
     }
 
     SUBCASE("empty() for zero-size array") {
         array<int, 0> arr;
-        CHECK(arr.empty());
+        FL_CHECK(arr.empty());
     }
 }
 
@@ -222,16 +222,16 @@ TEST_CASE("fl::array - Operations") {
         array<int, 5> arr;
         arr.fill(42);
         for (size i = 0; i < 5; ++i) {
-            CHECK_EQ(arr[i], 42);
+            FL_CHECK_EQ(arr[i], 42);
         }
     }
 
     SUBCASE("fill() with different types") {
         array<double, 3> arr;
         arr.fill(3.14);
-        CHECK_EQ(arr[0], doctest::Approx(3.14));
-        CHECK_EQ(arr[1], doctest::Approx(3.14));
-        CHECK_EQ(arr[2], doctest::Approx(3.14));
+        FL_CHECK_EQ(arr[0], doctest::Approx(3.14));
+        FL_CHECK_EQ(arr[1], doctest::Approx(3.14));
+        FL_CHECK_EQ(arr[2], doctest::Approx(3.14));
     }
 
     SUBCASE("swap() member function") {
@@ -239,13 +239,13 @@ TEST_CASE("fl::array - Operations") {
         array<int, 3> arr2 = {10, 20, 30};
         arr1.swap(arr2);
 
-        CHECK_EQ(arr1[0], 10);
-        CHECK_EQ(arr1[1], 20);
-        CHECK_EQ(arr1[2], 30);
+        FL_CHECK_EQ(arr1[0], 10);
+        FL_CHECK_EQ(arr1[1], 20);
+        FL_CHECK_EQ(arr1[2], 30);
 
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 
     SUBCASE("swap() non-member function") {
@@ -253,13 +253,13 @@ TEST_CASE("fl::array - Operations") {
         array<int, 3> arr2 = {10, 20, 30};
         fl::swap(arr1, arr2);
 
-        CHECK_EQ(arr1[0], 10);
-        CHECK_EQ(arr1[1], 20);
-        CHECK_EQ(arr1[2], 30);
+        FL_CHECK_EQ(arr1[0], 10);
+        FL_CHECK_EQ(arr1[1], 20);
+        FL_CHECK_EQ(arr1[2], 30);
 
-        CHECK_EQ(arr2[0], 1);
-        CHECK_EQ(arr2[1], 2);
-        CHECK_EQ(arr2[2], 3);
+        FL_CHECK_EQ(arr2[0], 1);
+        FL_CHECK_EQ(arr2[1], 2);
+        FL_CHECK_EQ(arr2[2], 3);
     }
 }
 
@@ -267,72 +267,72 @@ TEST_CASE("fl::array - Comparison operators") {
     SUBCASE("operator== for equal arrays") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2 = {1, 2, 3};
-        CHECK(arr1 == arr2);
+        FL_CHECK(arr1 == arr2);
     }
 
     SUBCASE("operator== for different arrays") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2 = {1, 2, 4};
-        CHECK_FALSE(arr1 == arr2);
+        FL_CHECK_FALSE(arr1 == arr2);
     }
 
     SUBCASE("operator!= for different arrays") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2 = {1, 2, 4};
-        CHECK(arr1 != arr2);
+        FL_CHECK(arr1 != arr2);
     }
 
     SUBCASE("operator!= for equal arrays") {
         array<int, 3> arr1 = {1, 2, 3};
         array<int, 3> arr2 = {1, 2, 3};
-        CHECK_FALSE(arr1 != arr2);
+        FL_CHECK_FALSE(arr1 != arr2);
     }
 }
 
 TEST_CASE("fl::array - Different types") {
     SUBCASE("array<float>") {
         array<float, 3> arr = {1.5f, 2.5f, 3.5f};
-        CHECK_EQ(arr[0], doctest::Approx(1.5f));
-        CHECK_EQ(arr[1], doctest::Approx(2.5f));
-        CHECK_EQ(arr[2], doctest::Approx(3.5f));
+        FL_CHECK_EQ(arr[0], doctest::Approx(1.5f));
+        FL_CHECK_EQ(arr[1], doctest::Approx(2.5f));
+        FL_CHECK_EQ(arr[2], doctest::Approx(3.5f));
     }
 
     SUBCASE("array<double>") {
         array<double, 3> arr = {1.5, 2.5, 3.5};
-        CHECK_EQ(arr[0], doctest::Approx(1.5));
-        CHECK_EQ(arr[1], doctest::Approx(2.5));
-        CHECK_EQ(arr[2], doctest::Approx(3.5));
+        FL_CHECK_EQ(arr[0], doctest::Approx(1.5));
+        FL_CHECK_EQ(arr[1], doctest::Approx(2.5));
+        FL_CHECK_EQ(arr[2], doctest::Approx(3.5));
     }
 
     SUBCASE("array<char>") {
         array<char, 5> arr = {'H', 'e', 'l', 'l', 'o'};
-        CHECK_EQ(arr[0], 'H');
-        CHECK_EQ(arr[4], 'o');
+        FL_CHECK_EQ(arr[0], 'H');
+        FL_CHECK_EQ(arr[4], 'o');
     }
 
     SUBCASE("array<bool>") {
         array<bool, 3> arr = {true, false, true};
-        CHECK(arr[0]);
-        CHECK_FALSE(arr[1]);
-        CHECK(arr[2]);
+        FL_CHECK(arr[0]);
+        FL_CHECK_FALSE(arr[1]);
+        FL_CHECK(arr[2]);
     }
 }
 
 TEST_CASE("fl::array - Edge cases") {
     SUBCASE("Single element array") {
         array<int, 1> arr = {42};
-        CHECK_EQ(arr.size(), 1);
-        CHECK_EQ(arr[0], 42);
-        CHECK_EQ(arr.front(), 42);
-        CHECK_EQ(arr.back(), 42);
+        FL_CHECK_EQ(arr.size(), 1);
+        FL_CHECK_EQ(arr[0], 42);
+        FL_CHECK_EQ(arr.front(), 42);
+        FL_CHECK_EQ(arr.back(), 42);
     }
 
     SUBCASE("Large array") {
         array<int, 100> arr;
         arr.fill(7);
-        CHECK_EQ(arr.size(), 100);
-        CHECK_EQ(arr[0], 7);
-        CHECK_EQ(arr[99], 7);
+        FL_CHECK_EQ(arr.size(), 100);
+        FL_CHECK_EQ(arr[0], 7);
+        FL_CHECK_EQ(arr[99], 7);
     }
 
     SUBCASE("Array of arrays") {
@@ -342,10 +342,10 @@ TEST_CASE("fl::array - Edge cases") {
         arr[1][0] = 3;
         arr[1][1] = 4;
 
-        CHECK_EQ(arr[0][0], 1);
-        CHECK_EQ(arr[0][1], 2);
-        CHECK_EQ(arr[1][0], 3);
-        CHECK_EQ(arr[1][1], 4);
+        FL_CHECK_EQ(arr[0][0], 1);
+        FL_CHECK_EQ(arr[0][1], 2);
+        FL_CHECK_EQ(arr[1][0], 3);
+        FL_CHECK_EQ(arr[1][1], 4);
     }
 }
 
@@ -370,18 +370,18 @@ TEST_CASE("fl::array - Type traits") {
 TEST_CASE("fl::array - Const correctness") {
     SUBCASE("const array element access") {
         const array<int, 3> arr = {10, 20, 30};
-        CHECK_EQ(arr[0], 10);
-        CHECK_EQ(arr.at(1), 20);
-        CHECK_EQ(arr.front(), 10);
-        CHECK_EQ(arr.back(), 30);
+        FL_CHECK_EQ(arr[0], 10);
+        FL_CHECK_EQ(arr.at(1), 20);
+        FL_CHECK_EQ(arr.front(), 10);
+        FL_CHECK_EQ(arr.back(), 30);
     }
 
     SUBCASE("const array data pointer") {
         const array<int, 3> arr = {10, 20, 30};
         const int* ptr = arr.data();
-        CHECK_EQ(ptr[0], 10);
-        CHECK_EQ(ptr[1], 20);
-        CHECK_EQ(ptr[2], 30);
+        FL_CHECK_EQ(ptr[0], 10);
+        FL_CHECK_EQ(ptr[1], 20);
+        FL_CHECK_EQ(ptr[2], 30);
     }
 
     SUBCASE("const array iterators") {
@@ -390,7 +390,7 @@ TEST_CASE("fl::array - Const correctness") {
         for (const auto& val : arr) {
             sum += val;
         }
-        CHECK_EQ(sum, 6);
+        FL_CHECK_EQ(sum, 6);
     }
 }
 
@@ -402,16 +402,16 @@ TEST_CASE("fl::array - to_array() helper function from span") {
         // Convert span to array using to_array helper
         fl::array<int, 5> arr = fl::to_array<5>(s);
 
-        CHECK_EQ(arr.size(), 5);
-        CHECK_EQ(arr[0], 10);
-        CHECK_EQ(arr[1], 20);
-        CHECK_EQ(arr[2], 30);
-        CHECK_EQ(arr[3], 40);
-        CHECK_EQ(arr[4], 50);
+        FL_CHECK_EQ(arr.size(), 5);
+        FL_CHECK_EQ(arr[0], 10);
+        FL_CHECK_EQ(arr[1], 20);
+        FL_CHECK_EQ(arr[2], 30);
+        FL_CHECK_EQ(arr[3], 40);
+        FL_CHECK_EQ(arr[4], 50);
 
         // Verify it's a copy
         arr[0] = 99;
-        CHECK_EQ(source_data[0], 10);
+        FL_CHECK_EQ(source_data[0], 10);
     }
 
     SUBCASE("from C array via static extent span") {
@@ -421,10 +421,10 @@ TEST_CASE("fl::array - to_array() helper function from span") {
         // Convert static extent span to array using to_array helper
         fl::array<int, 3> arr = fl::to_array(s);
 
-        CHECK_EQ(arr.size(), 3);
-        CHECK_EQ(arr[0], 100);
-        CHECK_EQ(arr[1], 200);
-        CHECK_EQ(arr[2], 300);
+        FL_CHECK_EQ(arr.size(), 3);
+        FL_CHECK_EQ(arr[0], 100);
+        FL_CHECK_EQ(arr[1], 200);
+        FL_CHECK_EQ(arr[2], 300);
     }
 
     SUBCASE("from vector via span") {
@@ -437,11 +437,11 @@ TEST_CASE("fl::array - to_array() helper function from span") {
         fl::span<const int> s(heap_vec);
         fl::array<int, 4> arr = fl::to_array<4>(s);
 
-        CHECK_EQ(arr.size(), 4);
-        CHECK_EQ(arr[0], 1);
-        CHECK_EQ(arr[1], 2);
-        CHECK_EQ(arr[2], 3);
-        CHECK_EQ(arr[3], 4);
+        FL_CHECK_EQ(arr.size(), 4);
+        FL_CHECK_EQ(arr[0], 1);
+        FL_CHECK_EQ(arr[1], 2);
+        FL_CHECK_EQ(arr[2], 3);
+        FL_CHECK_EQ(arr[3], 4);
     }
 
     SUBCASE("from FixedVector via span") {
@@ -453,9 +453,9 @@ TEST_CASE("fl::array - to_array() helper function from span") {
         fl::span<const int> s(fixed_vec);
         fl::array<int, 3> arr = fl::to_array<3>(s);
 
-        CHECK_EQ(arr.size(), 3);
-        CHECK_EQ(arr[0], 5);
-        CHECK_EQ(arr[1], 6);
-        CHECK_EQ(arr[2], 7);
+        FL_CHECK_EQ(arr.size(), 3);
+        FL_CHECK_EQ(arr[0], 5);
+        FL_CHECK_EQ(arr[1], 6);
+        FL_CHECK_EQ(arr[2], 7);
     }
 }

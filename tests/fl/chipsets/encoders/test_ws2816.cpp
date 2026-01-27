@@ -49,14 +49,14 @@ void verifyDualPixel(const CRGB& pixel1, const CRGB& pixel2,
                      u8 expected_r_hi, u8 expected_r_lo, u8 expected_g_hi,
                      u8 expected_g_lo, u8 expected_b_hi, u8 expected_b_lo) {
     // First pixel: [R_hi, R_lo, G_hi]
-    CHECK_EQ(pixel1.r, expected_r_hi);
-    CHECK_EQ(pixel1.g, expected_r_lo);
-    CHECK_EQ(pixel1.b, expected_g_hi);
+    FL_CHECK_EQ(pixel1.r, expected_r_hi);
+    FL_CHECK_EQ(pixel1.g, expected_r_lo);
+    FL_CHECK_EQ(pixel1.b, expected_g_hi);
 
     // Second pixel: [G_lo, B_hi, B_lo]
-    CHECK_EQ(pixel2.r, expected_g_lo);
-    CHECK_EQ(pixel2.g, expected_b_hi);
-    CHECK_EQ(pixel2.b, expected_b_lo);
+    FL_CHECK_EQ(pixel2.r, expected_g_lo);
+    FL_CHECK_EQ(pixel2.g, expected_b_hi);
+    FL_CHECK_EQ(pixel2.b, expected_b_lo);
 }
 
 using namespace test_ws2816;
@@ -69,24 +69,24 @@ TEST_CASE("packWS2816Pixel - all zeros") {
     // Test packing (0, 0, 0) → two black CRGB pixels
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0x0000);
 
-    CHECK_EQ(packed.first.r, 0x00);
-    CHECK_EQ(packed.first.g, 0x00);
-    CHECK_EQ(packed.first.b, 0x00);
-    CHECK_EQ(packed.second.r, 0x00);
-    CHECK_EQ(packed.second.g, 0x00);
-    CHECK_EQ(packed.second.b, 0x00);
+    FL_CHECK_EQ(packed.first.r, 0x00);
+    FL_CHECK_EQ(packed.first.g, 0x00);
+    FL_CHECK_EQ(packed.first.b, 0x00);
+    FL_CHECK_EQ(packed.second.r, 0x00);
+    FL_CHECK_EQ(packed.second.g, 0x00);
+    FL_CHECK_EQ(packed.second.b, 0x00);
 }
 
 TEST_CASE("packWS2816Pixel - all max values") {
     // Test packing (0xFFFF, 0xFFFF, 0xFFFF) → two white CRGB pixels
     auto packed = packWS2816Pixel(0xFFFF, 0xFFFF, 0xFFFF);
 
-    CHECK_EQ(packed.first.r, 0xFF);
-    CHECK_EQ(packed.first.g, 0xFF);
-    CHECK_EQ(packed.first.b, 0xFF);
-    CHECK_EQ(packed.second.r, 0xFF);
-    CHECK_EQ(packed.second.g, 0xFF);
-    CHECK_EQ(packed.second.b, 0xFF);
+    FL_CHECK_EQ(packed.first.r, 0xFF);
+    FL_CHECK_EQ(packed.first.g, 0xFF);
+    FL_CHECK_EQ(packed.first.b, 0xFF);
+    FL_CHECK_EQ(packed.second.r, 0xFF);
+    FL_CHECK_EQ(packed.second.g, 0xFF);
+    FL_CHECK_EQ(packed.second.b, 0xFF);
 }
 
 TEST_CASE("packWS2816Pixel - red channel only (high byte)") {
@@ -94,12 +94,12 @@ TEST_CASE("packWS2816Pixel - red channel only (high byte)") {
     // Expected: [0xFF, 0x00, 0x00] and [0x00, 0x00, 0x00]
     auto packed = packWS2816Pixel(0xFF00, 0x0000, 0x0000);
 
-    CHECK_EQ(packed.first.r, 0xFF);   // R_hi
-    CHECK_EQ(packed.first.g, 0x00);   // R_lo
-    CHECK_EQ(packed.first.b, 0x00);   // G_hi
-    CHECK_EQ(packed.second.r, 0x00);  // G_lo
-    CHECK_EQ(packed.second.g, 0x00);  // B_hi
-    CHECK_EQ(packed.second.b, 0x00);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0xFF);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0x00);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0x00);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0x00);  // G_lo
+    FL_CHECK_EQ(packed.second.g, 0x00);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - red channel only (low byte)") {
@@ -107,12 +107,12 @@ TEST_CASE("packWS2816Pixel - red channel only (low byte)") {
     // Expected: [0x00, 0xFF, 0x00] and [0x00, 0x00, 0x00]
     auto packed = packWS2816Pixel(0x00FF, 0x0000, 0x0000);
 
-    CHECK_EQ(packed.first.r, 0x00);   // R_hi
-    CHECK_EQ(packed.first.g, 0xFF);   // R_lo
-    CHECK_EQ(packed.first.b, 0x00);   // G_hi
-    CHECK_EQ(packed.second.r, 0x00);  // G_lo
-    CHECK_EQ(packed.second.g, 0x00);  // B_hi
-    CHECK_EQ(packed.second.b, 0x00);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0x00);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0xFF);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0x00);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0x00);  // G_lo
+    FL_CHECK_EQ(packed.second.g, 0x00);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - green channel split") {
@@ -120,12 +120,12 @@ TEST_CASE("packWS2816Pixel - green channel split") {
     // Expected: [0x00, 0x00, 0xAA] and [0xBB, 0x00, 0x00]
     auto packed = packWS2816Pixel(0x0000, 0xAABB, 0x0000);
 
-    CHECK_EQ(packed.first.r, 0x00);   // R_hi
-    CHECK_EQ(packed.first.g, 0x00);   // R_lo
-    CHECK_EQ(packed.first.b, 0xAA);   // G_hi
-    CHECK_EQ(packed.second.r, 0xBB);  // G_lo ← split point!
-    CHECK_EQ(packed.second.g, 0x00);  // B_hi
-    CHECK_EQ(packed.second.b, 0x00);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0x00);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0x00);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0xAA);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0xBB);  // G_lo ← split point!
+    FL_CHECK_EQ(packed.second.g, 0x00);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - blue channel only (high byte)") {
@@ -133,12 +133,12 @@ TEST_CASE("packWS2816Pixel - blue channel only (high byte)") {
     // Expected: [0x00, 0x00, 0x00] and [0x00, 0xFF, 0x00]
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0xFF00);
 
-    CHECK_EQ(packed.first.r, 0x00);   // R_hi
-    CHECK_EQ(packed.first.g, 0x00);   // R_lo
-    CHECK_EQ(packed.first.b, 0x00);   // G_hi
-    CHECK_EQ(packed.second.r, 0x00);  // G_lo
-    CHECK_EQ(packed.second.g, 0xFF);  // B_hi
-    CHECK_EQ(packed.second.b, 0x00);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0x00);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0x00);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0x00);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0x00);  // G_lo
+    FL_CHECK_EQ(packed.second.g, 0xFF);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - blue channel only (low byte)") {
@@ -146,12 +146,12 @@ TEST_CASE("packWS2816Pixel - blue channel only (low byte)") {
     // Expected: [0x00, 0x00, 0x00] and [0x00, 0x00, 0xFF]
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0x00FF);
 
-    CHECK_EQ(packed.first.r, 0x00);   // R_hi
-    CHECK_EQ(packed.first.g, 0x00);   // R_lo
-    CHECK_EQ(packed.first.b, 0x00);   // G_hi
-    CHECK_EQ(packed.second.r, 0x00);  // G_lo
-    CHECK_EQ(packed.second.g, 0x00);  // B_hi
-    CHECK_EQ(packed.second.b, 0xFF);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0x00);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0x00);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0x00);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0x00);  // G_lo
+    FL_CHECK_EQ(packed.second.g, 0x00);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0xFF);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - mixed values") {
@@ -159,12 +159,12 @@ TEST_CASE("packWS2816Pixel - mixed values") {
     // Expected: [0x12, 0x34, 0x56] and [0x78, 0x9A, 0xBC]
     auto packed = packWS2816Pixel(0x1234, 0x5678, 0x9ABC);
 
-    CHECK_EQ(packed.first.r, 0x12);   // R_hi
-    CHECK_EQ(packed.first.g, 0x34);   // R_lo
-    CHECK_EQ(packed.first.b, 0x56);   // G_hi
-    CHECK_EQ(packed.second.r, 0x78);  // G_lo
-    CHECK_EQ(packed.second.g, 0x9A);  // B_hi
-    CHECK_EQ(packed.second.b, 0xBC);  // B_lo
+    FL_CHECK_EQ(packed.first.r, 0x12);   // R_hi
+    FL_CHECK_EQ(packed.first.g, 0x34);   // R_lo
+    FL_CHECK_EQ(packed.first.b, 0x56);   // G_hi
+    FL_CHECK_EQ(packed.second.r, 0x78);  // G_lo
+    FL_CHECK_EQ(packed.second.g, 0x9A);  // B_hi
+    FL_CHECK_EQ(packed.second.b, 0xBC);  // B_lo
 }
 
 TEST_CASE("packWS2816Pixel - sequential pattern") {
@@ -172,12 +172,12 @@ TEST_CASE("packWS2816Pixel - sequential pattern") {
     // Expected: [0x01, 0x02, 0x03] and [0x04, 0x05, 0x06]
     auto packed = packWS2816Pixel(0x0102, 0x0304, 0x0506);
 
-    CHECK_EQ(packed.first.r, 0x01);
-    CHECK_EQ(packed.first.g, 0x02);
-    CHECK_EQ(packed.first.b, 0x03);
-    CHECK_EQ(packed.second.r, 0x04);
-    CHECK_EQ(packed.second.g, 0x05);
-    CHECK_EQ(packed.second.b, 0x06);
+    FL_CHECK_EQ(packed.first.r, 0x01);
+    FL_CHECK_EQ(packed.first.g, 0x02);
+    FL_CHECK_EQ(packed.first.b, 0x03);
+    FL_CHECK_EQ(packed.second.r, 0x04);
+    FL_CHECK_EQ(packed.second.g, 0x05);
+    FL_CHECK_EQ(packed.second.b, 0x06);
 }
 
 // ============================================================================
@@ -192,7 +192,7 @@ TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 0 CRGB pixels (no frame overhead for WS2816)
-    REQUIRE_EQ(output.size(), 0);
+    FL_REQUIRE_EQ(output.size(), 0);
 }
 
 TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
@@ -204,7 +204,7 @@ TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 2 CRGB pixels (1 input → 2 output)
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 }
 
@@ -217,7 +217,7 @@ TEST_CASE("encodeWS2816 - single pixel (all max)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 2 CRGB pixels
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
 }
 
@@ -229,7 +229,7 @@ TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00);
 }
 
@@ -241,7 +241,7 @@ TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00);
 }
 
@@ -253,7 +253,7 @@ TEST_CASE("encodeWS2816 - single pixel (green split)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0xAA, 0xBB, 0x00, 0x00);
 }
 
@@ -265,7 +265,7 @@ TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00);
 }
 
@@ -277,7 +277,7 @@ TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF);
 }
 
@@ -289,7 +289,7 @@ TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC);
 }
 
@@ -303,7 +303,7 @@ TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 CRGB pixels (2 input → 4 output)
-    REQUIRE_EQ(output.size(), 4);
+    FL_REQUIRE_EQ(output.size(), 4);
 
     // First input pixel
     verifyDualPixel(output[0], output[1], 0x11, 0x22, 0x33, 0x44, 0x55, 0x66);
@@ -323,7 +323,7 @@ TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 6 CRGB pixels (3 input → 6 output)
-    REQUIRE_EQ(output.size(), 6);
+    FL_REQUIRE_EQ(output.size(), 6);
 
     verifyDualPixel(output[0], output[1], 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00);
     verifyDualPixel(output[2], output[3], 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00);
@@ -338,7 +338,7 @@ TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x80, 0x00, 0xFF, 0xFF);
 }
 
@@ -350,13 +350,13 @@ TEST_CASE("encodeWS2816 - sequential hex pattern") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
-    CHECK_EQ(output[0].r, 0x01);
-    CHECK_EQ(output[0].g, 0x02);
-    CHECK_EQ(output[0].b, 0x03);
-    CHECK_EQ(output[1].r, 0x04);
-    CHECK_EQ(output[1].g, 0x05);
-    CHECK_EQ(output[1].b, 0x06);
+    FL_REQUIRE_EQ(output.size(), 2);
+    FL_CHECK_EQ(output[0].r, 0x01);
+    FL_CHECK_EQ(output[0].g, 0x02);
+    FL_CHECK_EQ(output[0].b, 0x03);
+    FL_CHECK_EQ(output[1].r, 0x04);
+    FL_CHECK_EQ(output[1].g, 0x05);
+    FL_CHECK_EQ(output[1].b, 0x06);
 }
 
 TEST_CASE("encodeWS2816 - large array (30 pixels)") {
@@ -371,7 +371,7 @@ TEST_CASE("encodeWS2816 - large array (30 pixels)") {
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 60 CRGB pixels (30 input → 60 output)
-    REQUIRE_EQ(output.size(), 60);
+    FL_REQUIRE_EQ(output.size(), 60);
 
     // Spot check first pixel
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
@@ -407,17 +407,17 @@ TEST_CASE("encodeWS2816 - channel layout documentation") {
     fl::vector<CRGB> output;
     encodeWS2816(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 2);
+    FL_REQUIRE_EQ(output.size(), 2);
 
     // First CRGB: [R_hi=0xAB, R_lo=0xCD, G_hi=0xEF]
-    CHECK_EQ(output[0].r, 0xAB);
-    CHECK_EQ(output[0].g, 0xCD);
-    CHECK_EQ(output[0].b, 0xEF);
+    FL_CHECK_EQ(output[0].r, 0xAB);
+    FL_CHECK_EQ(output[0].g, 0xCD);
+    FL_CHECK_EQ(output[0].b, 0xEF);
 
     // Second CRGB: [G_lo=0x01, B_hi=0x23, B_lo=0x45]
-    CHECK_EQ(output[1].r, 0x01);
-    CHECK_EQ(output[1].g, 0x23);
-    CHECK_EQ(output[1].b, 0x45);
+    FL_CHECK_EQ(output[1].r, 0x01);
+    FL_CHECK_EQ(output[1].g, 0x23);
+    FL_CHECK_EQ(output[1].b, 0x45);
 }
 
 } // namespace test_ws2816

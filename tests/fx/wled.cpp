@@ -16,12 +16,12 @@ TEST_CASE("WLEDClient construction") {
     WLEDClient client(mock);
 
     SUBCASE("Initial state is off with max brightness") {
-        CHECK(client.getOn() == false);
-        CHECK(client.getBrightness() == 255);
+        FL_CHECK(client.getOn() == false);
+        FL_CHECK(client.getBrightness() == 255);
     }
 
     SUBCASE("LED count is accessible") {
-        CHECK(client.getNumLEDs() == 50);
+        FL_CHECK(client.getNumLEDs() == 50);
     }
 }
 
@@ -31,29 +31,29 @@ TEST_CASE("WLEDClient brightness control") {
 
     SUBCASE("Setting brightness when off does not affect controller") {
         client.setBrightness(128);
-        CHECK(client.getBrightness() == 128);
+        FL_CHECK(client.getBrightness() == 128);
         // Controller should still have default brightness (not changed)
-        CHECK(mock->getBrightness() == 255);
+        FL_CHECK(mock->getBrightness() == 255);
     }
 
     SUBCASE("Setting brightness when on applies to controller") {
         client.setOn(true);
         client.setBrightness(128);
-        CHECK(client.getBrightness() == 128);
-        CHECK(mock->getBrightness() == 128);
+        FL_CHECK(client.getBrightness() == 128);
+        FL_CHECK(mock->getBrightness() == 128);
     }
 
     SUBCASE("Brightness is preserved when turning off and on") {
         client.setBrightness(100);
         client.setOn(true);
-        CHECK(mock->getBrightness() == 100);
+        FL_CHECK(mock->getBrightness() == 100);
 
         client.setOn(false);
-        CHECK(client.getBrightness() == 100);  // Internal brightness preserved
-        CHECK(mock->getBrightness() == 0);      // Controller brightness is 0
+        FL_CHECK(client.getBrightness() == 100);  // Internal brightness preserved
+        FL_CHECK(mock->getBrightness() == 0);      // Controller brightness is 0
 
         client.setOn(true);
-        CHECK(mock->getBrightness() == 100);    // Restored to internal brightness
+        FL_CHECK(mock->getBrightness() == 100);    // Restored to internal brightness
     }
 }
 
@@ -64,16 +64,16 @@ TEST_CASE("WLEDClient on/off control") {
     SUBCASE("Turning on applies current brightness") {
         client.setBrightness(150);
         client.setOn(true);
-        CHECK(client.getOn() == true);
-        CHECK(mock->getBrightness() == 150);
+        FL_CHECK(client.getOn() == true);
+        FL_CHECK(mock->getBrightness() == 150);
     }
 
     SUBCASE("Turning off sets controller brightness to 0") {
         client.setBrightness(200);
         client.setOn(true);
         client.setOn(false);
-        CHECK(client.getOn() == false);
-        CHECK(mock->getBrightness() == 0);
+        FL_CHECK(client.getOn() == false);
+        FL_CHECK(mock->getBrightness() == 0);
     }
 
     SUBCASE("Multiple on/off cycles") {
@@ -81,10 +81,10 @@ TEST_CASE("WLEDClient on/off control") {
 
         for (int i = 0; i < 3; i++) {
             client.setOn(true);
-            CHECK(mock->getBrightness() == 80);
+            FL_CHECK(mock->getBrightness() == 80);
 
             client.setOn(false);
-            CHECK(mock->getBrightness() == 0);
+            FL_CHECK(mock->getBrightness() == 0);
         }
     }
 }
@@ -95,14 +95,14 @@ TEST_CASE("WLEDClient clear operation") {
 
     SUBCASE("Clear without write increments clear count but not show count") {
         client.clear(false);
-        CHECK(mock->getClearCallCount() == 1);
-        CHECK(mock->getShowCallCount() == 0);
+        FL_CHECK(mock->getClearCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 0);
     }
 
     SUBCASE("Clear with write increments both clear and show count") {
         client.clear(true);
-        CHECK(mock->getClearCallCount() == 1);
-        CHECK(mock->getShowCallCount() == 1);
+        FL_CHECK(mock->getClearCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 1);
     }
 
     SUBCASE("Clear sets all LEDs to black") {
@@ -117,7 +117,7 @@ TEST_CASE("WLEDClient clear operation") {
 
         // Verify all black
         for (size_t i = 0; i < leds.size(); i++) {
-            CHECK(leds[i] == CRGB::Black);
+            FL_CHECK(leds[i] == CRGB::Black);
         }
     }
 }
@@ -128,10 +128,10 @@ TEST_CASE("WLEDClient update operation") {
 
     SUBCASE("Update calls show on controller") {
         client.update();
-        CHECK(mock->getShowCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 1);
 
         client.update();
-        CHECK(mock->getShowCallCount() == 2);
+        FL_CHECK(mock->getShowCallCount() == 2);
     }
 
     SUBCASE("LED changes are visible after update") {
@@ -142,10 +142,10 @@ TEST_CASE("WLEDClient update operation") {
 
         client.update();
 
-        CHECK(mock->getShowCallCount() == 1);
-        CHECK(leds[0] == CRGB::Red);
-        CHECK(leds[1] == CRGB::Green);
-        CHECK(leds[2] == CRGB::Blue);
+        FL_CHECK(mock->getShowCallCount() == 1);
+        FL_CHECK(leds[0] == CRGB::Red);
+        FL_CHECK(leds[1] == CRGB::Green);
+        FL_CHECK(leds[2] == CRGB::Blue);
     }
 }
 
@@ -155,7 +155,7 @@ TEST_CASE("WLEDClient LED array access") {
 
     SUBCASE("Can read and write LEDs directly") {
         auto leds = client.getLEDs();
-        CHECK(leds.size() == 50);
+        FL_CHECK(leds.size() == 50);
 
         // Write colors
         leds[0] = CRGB(255, 0, 0);
@@ -163,17 +163,17 @@ TEST_CASE("WLEDClient LED array access") {
         leds[20] = CRGB(0, 0, 255);
 
         // Read them back
-        CHECK(leds[0].r == 255);
-        CHECK(leds[0].g == 0);
-        CHECK(leds[0].b == 0);
+        FL_CHECK(leds[0].r == 255);
+        FL_CHECK(leds[0].g == 0);
+        FL_CHECK(leds[0].b == 0);
 
-        CHECK(leds[10].r == 0);
-        CHECK(leds[10].g == 255);
-        CHECK(leds[10].b == 0);
+        FL_CHECK(leds[10].r == 0);
+        FL_CHECK(leds[10].g == 255);
+        FL_CHECK(leds[10].b == 0);
 
-        CHECK(leds[20].r == 0);
-        CHECK(leds[20].g == 0);
-        CHECK(leds[20].b == 255);
+        FL_CHECK(leds[20].r == 0);
+        FL_CHECK(leds[20].g == 0);
+        FL_CHECK(leds[20].b == 255);
     }
 }
 
@@ -185,7 +185,7 @@ TEST_CASE("WLEDClient complete workflow") {
         // Set brightness and turn on
         client.setBrightness(128);
         client.setOn(true);
-        CHECK(mock->getBrightness() == 128);
+        FL_CHECK(mock->getBrightness() == 128);
 
         // Set some LED colors
         auto leds = client.getLEDs();
@@ -195,21 +195,21 @@ TEST_CASE("WLEDClient complete workflow") {
 
         // Update the strip
         client.update();
-        CHECK(mock->getShowCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 1);
 
         // Change brightness
         client.setBrightness(200);
-        CHECK(mock->getBrightness() == 200);
+        FL_CHECK(mock->getBrightness() == 200);
 
         // Clear and show
         client.clear(true);
-        CHECK(mock->getClearCallCount() == 1);
-        CHECK(mock->getShowCallCount() == 2);
+        FL_CHECK(mock->getClearCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 2);
 
         // Turn off
         client.setOn(false);
-        CHECK(mock->getBrightness() == 0);
-        CHECK(client.getBrightness() == 200);  // Internal brightness preserved
+        FL_CHECK(mock->getBrightness() == 0);
+        FL_CHECK(client.getBrightness() == 200);  // Internal brightness preserved
     }
 }
 
@@ -217,8 +217,8 @@ TEST_CASE("WLEDClient null controller handling") {
     WLEDClient client(nullptr);
 
     SUBCASE("Operations with null controller don't crash") {
-        CHECK(client.getNumLEDs() == 0);
-        CHECK(client.getLEDs().size() == 0);
+        FL_CHECK(client.getNumLEDs() == 0);
+        FL_CHECK(client.getLEDs().size() == 0);
 
         // These should not crash
         client.setBrightness(128);
@@ -238,8 +238,8 @@ TEST_CASE("WLEDClient segment operations") {
 
         // getLEDs should return only segment range
         auto leds = client.getLEDs();
-        CHECK(leds.size() == 10);
-        CHECK(client.getNumLEDs() == 10);
+        FL_CHECK(leds.size() == 10);
+        FL_CHECK(client.getNumLEDs() == 10);
 
         // Write colors to segment
         for (size_t i = 0; i < leds.size(); i++) {
@@ -250,28 +250,28 @@ TEST_CASE("WLEDClient segment operations") {
         client.clearSegment();
         auto fullArray = client.getLEDs();
         for (size_t i = 10; i < 20; i++) {
-            CHECK(fullArray[i] == CRGB::Red);
+            FL_CHECK(fullArray[i] == CRGB::Red);
         }
     }
 
     SUBCASE("Clear segment restores full array access") {
         // Set a segment first
         client.setSegment(20, 30);
-        CHECK(client.getNumLEDs() == 10);
+        FL_CHECK(client.getNumLEDs() == 10);
 
         // Clear the segment
         client.clearSegment();
 
         // Should have access to full array now
         auto leds = client.getLEDs();
-        CHECK(leds.size() == 100);
-        CHECK(client.getNumLEDs() == 100);
+        FL_CHECK(leds.size() == 100);
+        FL_CHECK(client.getNumLEDs() == 100);
     }
 
     SUBCASE("Multiple segment operations") {
         // First segment
         client.setSegment(0, 25);
-        CHECK(client.getNumLEDs() == 25);
+        FL_CHECK(client.getNumLEDs() == 25);
 
         auto leds = client.getLEDs();
         for (size_t i = 0; i < leds.size(); i++) {
@@ -281,7 +281,7 @@ TEST_CASE("WLEDClient segment operations") {
 
         // Second segment
         client.setSegment(25, 50);
-        CHECK(client.getNumLEDs() == 25);
+        FL_CHECK(client.getNumLEDs() == 25);
 
         leds = client.getLEDs();
         for (size_t i = 0; i < leds.size(); i++) {
@@ -291,7 +291,7 @@ TEST_CASE("WLEDClient segment operations") {
 
         // Third segment
         client.setSegment(50, 75);
-        CHECK(client.getNumLEDs() == 25);
+        FL_CHECK(client.getNumLEDs() == 25);
 
         leds = client.getLEDs();
         for (size_t i = 0; i < leds.size(); i++) {
@@ -305,16 +305,16 @@ TEST_CASE("WLEDClient segment operations") {
 
         // Verify all three segments
         for (size_t i = 0; i < 25; i++) {
-            CHECK(fullArray[i] == CRGB::Red);
+            FL_CHECK(fullArray[i] == CRGB::Red);
         }
         for (size_t i = 25; i < 50; i++) {
-            CHECK(fullArray[i] == CRGB::Green);
+            FL_CHECK(fullArray[i] == CRGB::Green);
         }
         for (size_t i = 50; i < 75; i++) {
-            CHECK(fullArray[i] == CRGB::Blue);
+            FL_CHECK(fullArray[i] == CRGB::Blue);
         }
 
-        CHECK(mock->getShowCallCount() == 3);
+        FL_CHECK(mock->getShowCallCount() == 3);
     }
 
     SUBCASE("Segment with clear operation") {
@@ -333,13 +333,13 @@ TEST_CASE("WLEDClient segment operations") {
         auto fullArray = client.getLEDs();
 
         for (size_t i = 0; i < 40; i++) {
-            CHECK(fullArray[i] == CRGB::White);  // Not in segment, unchanged
+            FL_CHECK(fullArray[i] == CRGB::White);  // Not in segment, unchanged
         }
         for (size_t i = 40; i < 60; i++) {
-            CHECK(fullArray[i] == CRGB::Black);  // In segment, cleared
+            FL_CHECK(fullArray[i] == CRGB::Black);  // In segment, cleared
         }
         for (size_t i = 60; i < 100; i++) {
-            CHECK(fullArray[i] == CRGB::White);  // Not in segment, unchanged
+            FL_CHECK(fullArray[i] == CRGB::White);  // Not in segment, unchanged
         }
     }
 }
@@ -353,7 +353,7 @@ TEST_CASE("WLEDClient color correction and temperature") {
         client.setCorrection(correction);
 
         // Verify mock recorded the correction
-        CHECK(mock->getLastCorrection() == correction);
+        FL_CHECK(mock->getLastCorrection() == correction);
     }
 
     SUBCASE("Set color temperature") {
@@ -361,7 +361,7 @@ TEST_CASE("WLEDClient color correction and temperature") {
         client.setTemperature(temperature);
 
         // Verify mock recorded the temperature
-        CHECK(mock->getLastTemperature() == temperature);
+        FL_CHECK(mock->getLastTemperature() == temperature);
     }
 
     SUBCASE("Apply both correction and temperature") {
@@ -371,8 +371,8 @@ TEST_CASE("WLEDClient color correction and temperature") {
         client.setCorrection(correction);
         client.setTemperature(temperature);
 
-        CHECK(mock->getLastCorrection() == correction);
-        CHECK(mock->getLastTemperature() == temperature);
+        FL_CHECK(mock->getLastCorrection() == correction);
+        FL_CHECK(mock->getLastTemperature() == temperature);
     }
 
     SUBCASE("Typical white balance workflow") {
@@ -388,8 +388,8 @@ TEST_CASE("WLEDClient color correction and temperature") {
         // Update
         client.update();
 
-        CHECK(mock->getShowCallCount() == 1);
-        CHECK(mock->getLastTemperature() == CRGB(255, 230, 180));
+        FL_CHECK(mock->getShowCallCount() == 1);
+        FL_CHECK(mock->getLastTemperature() == CRGB(255, 230, 180));
     }
 }
 
@@ -399,19 +399,19 @@ TEST_CASE("WLEDClient max refresh rate") {
 
     SUBCASE("Set and get max refresh rate") {
         client.setMaxRefreshRate(60);
-        CHECK(client.getMaxRefreshRate() == 60);
-        CHECK(mock->getMaxRefreshRate() == 60);
+        FL_CHECK(client.getMaxRefreshRate() == 60);
+        FL_CHECK(mock->getMaxRefreshRate() == 60);
     }
 
     SUBCASE("Change max refresh rate multiple times") {
         client.setMaxRefreshRate(30);
-        CHECK(client.getMaxRefreshRate() == 30);
+        FL_CHECK(client.getMaxRefreshRate() == 30);
 
         client.setMaxRefreshRate(120);
-        CHECK(client.getMaxRefreshRate() == 120);
+        FL_CHECK(client.getMaxRefreshRate() == 120);
 
         client.setMaxRefreshRate(0);  // No limit
-        CHECK(client.getMaxRefreshRate() == 0);
+        FL_CHECK(client.getMaxRefreshRate() == 0);
     }
 
     SUBCASE("Max refresh rate with rapid updates") {
@@ -423,7 +423,7 @@ TEST_CASE("WLEDClient max refresh rate") {
         }
 
         // All updates should have been called (mock doesn't rate limit)
-        CHECK(mock->getShowCallCount() == 10);
+        FL_CHECK(mock->getShowCallCount() == 10);
     }
 }
 
@@ -469,18 +469,18 @@ TEST_CASE("WLEDClient advanced integration workflow") {
 
         // Clear segment and work with full array
         client.clearSegment();
-        CHECK(client.getNumLEDs() == 100);
+        FL_CHECK(client.getNumLEDs() == 100);
 
         // Verify state
-        CHECK(mock->getShowCallCount() == 3);
-        CHECK(mock->getBrightness() == 200);
-        CHECK(mock->getLastCorrection() == CRGB(255, 200, 150));
-        CHECK(mock->getLastTemperature() == CRGB(255, 230, 180));
-        CHECK(mock->getMaxRefreshRate() == 60);
+        FL_CHECK(mock->getShowCallCount() == 3);
+        FL_CHECK(mock->getBrightness() == 200);
+        FL_CHECK(mock->getLastCorrection() == CRGB(255, 200, 150));
+        FL_CHECK(mock->getLastTemperature() == CRGB(255, 230, 180));
+        FL_CHECK(mock->getMaxRefreshRate() == 60);
 
         // Final clear
         client.clear(true);
-        CHECK(mock->getShowCallCount() == 4);
-        CHECK(mock->getClearCallCount() == 1);
+        FL_CHECK(mock->getShowCallCount() == 4);
+        FL_CHECK(mock->getClearCallCount() == 1);
     }
 }

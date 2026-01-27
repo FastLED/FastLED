@@ -22,8 +22,8 @@ TEST_CASE("XYRasterU8SparseTest should match bounds of pixels draw area") {
     fl::XYRasterU8Sparse raster(4, 4);
     raster.rasterize(subpixels);
     auto obligatory_bounds = raster.bounds();
-    REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), obligatory_bounds);
+    FL_REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), obligatory_bounds);
 
     auto pixel_bounds = raster.bounds_pixels();
-    REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), pixel_bounds);
+    FL_REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), pixel_bounds);
 }

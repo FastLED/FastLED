@@ -23,9 +23,9 @@ TEST_CASE("Traverse grid") {
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
 
-        CHECK(visitor.visited.size() == 5);
+        FL_CHECK(visitor.visited.size() == 5);
         for (int x = 1; x <= 5; ++x) {
-            CHECK(visitor.visited.count({x, 2}) == 1);
+            FL_CHECK(visitor.visited.count({x, 2}) == 1);
         }
     }
 
@@ -36,9 +36,9 @@ TEST_CASE("Traverse grid") {
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
 
-        CHECK(visitor.visited.size() == 4);
+        FL_CHECK(visitor.visited.size() == 4);
         for (int y = 1; y <= 4; ++y) {
-            CHECK(visitor.visited.count({3, y}) == 1);
+            FL_CHECK(visitor.visited.count({3, y}) == 1);
         }
     }
 
@@ -54,9 +54,9 @@ TEST_CASE("Traverse grid") {
             {1,1}, {1,2}, {2,2}, {2,3}, {3,3}, {3,4}, {4,4}
         };
 
-        CHECK(visitor.visited.size() == expected.size());
+        FL_CHECK(visitor.visited.size() == expected.size());
         for (const auto& cell : expected) {
-            CHECK(visitor.visited.count(cell) == 1);
+            FL_CHECK(visitor.visited.count(cell) == 1);
         }
     }
 
@@ -71,9 +71,9 @@ TEST_CASE("Traverse grid") {
             {4,1}, {4,2}, {3,2}, {3,3}, {2,3}, {2,4}, {1,4}
         };
 
-        CHECK(visitor.visited.size() == expected.size());
+        FL_CHECK(visitor.visited.size() == expected.size());
         for (const auto& cell : expected) {
-            CHECK(visitor.visited.count(cell) == 1);
+            FL_CHECK(visitor.visited.count(cell) == 1);
         }
     }
 
@@ -84,7 +84,7 @@ TEST_CASE("Traverse grid") {
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
 
-        CHECK(visitor.visited.size() == 1);
-        CHECK(visitor.visited.count({2, 3}) == 1);
+        FL_CHECK(visitor.visited.size() == 1);
+        FL_CHECK(visitor.visited.count({2, 3}) == 1);
     }
 }

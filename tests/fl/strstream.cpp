@@ -44,20 +44,20 @@
 TEST_CASE("StrStream basic operations") {
     SUBCASE("Construction and assignment") {
         fl::StrStream s;
-        CHECK(s.str().size() == 0);
-        CHECK(s.str().c_str()[0] == '\0');
+        FL_CHECK(s.str().size() == 0);
+        FL_CHECK(s.str().c_str()[0] == '\0');
 
         fl::StrStream s2("hello");
-        CHECK(s2.str().size() == 5);
-        CHECK(fl::strcmp(s2.str().c_str(), "hello") == 0);
+        FL_CHECK(s2.str().size() == 5);
+        FL_CHECK(fl::strcmp(s2.str().c_str(), "hello") == 0);
 
         fl::StrStream s3 = s2;
-        CHECK(s3.str().size() == 5);
-        CHECK(fl::strcmp(s3.str().c_str(), "hello") == 0);
+        FL_CHECK(s3.str().size() == 5);
+        FL_CHECK(fl::strcmp(s3.str().c_str(), "hello") == 0);
 
         s = "world";
-        CHECK(s.str().size() == 5);
-        CHECK(fl::strcmp(s.str().c_str(), "world") == 0);
+        FL_CHECK(s.str().size() == 5);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "world") == 0);
     }
 
     SUBCASE("Comparison operators") {
@@ -65,30 +65,30 @@ TEST_CASE("StrStream basic operations") {
         fl::StrStream s2("hello");
         fl::StrStream s3("world");
 
-        CHECK(s1.str() == s2.str());
-        CHECK(s1.str() != s3.str());
+        FL_CHECK(s1.str() == s2.str());
+        FL_CHECK(s1.str() != s3.str());
     }
 
     SUBCASE("Indexing") {
         fl::StrStream s("hello");
-        CHECK(s.str()[0] == 'h');
-        CHECK(s.str()[4] == 'o');
-        CHECK(s.str()[5] == '\0');  // Null terminator
+        FL_CHECK(s.str()[0] == 'h');
+        FL_CHECK(s.str()[4] == 'o');
+        FL_CHECK(s.str()[5] == '\0');  // Null terminator
     }
 
     SUBCASE("Append") {
         fl::StrStream s("hello");
         s << " world";
-        CHECK(s.str().size() == 11);
-        CHECK(fl::strcmp(s.str().c_str(), "hello world") == 0);
+        FL_CHECK(s.str().size() == 11);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "hello world") == 0);
     }
 
     SUBCASE("CRGB to fl::StrStream") {
         CRGB c(255, 0, 0);
         fl::StrStream s;
         s << c;
-        CHECK(s.str().size() == 13);  // "CRGB(255,0,0)" is 13 chars
-        CHECK(fl::strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0);
+        FL_CHECK(s.str().size() == 13);  // "CRGB(255,0,0)" is 13 chars
+        FL_CHECK(fl::strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0);
     }
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("StrStream integer type handling") {
         fl::u8 val = 65;  // ASCII 'A'
         s << val;
         // Should display as "65" (number), not "A" (character)
-        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("unsigned char displays as number") {
@@ -106,7 +106,7 @@ TEST_CASE("StrStream integer type handling") {
         unsigned char val = 65;
         s << val;
         // Should display as "65" (number) due to 1-byte unsigned → u16 cast
-        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("char and integer types compile") {
@@ -121,7 +121,7 @@ TEST_CASE("StrStream integer type handling") {
         s << c << sc << uc;
 
         // Basic sanity check - string should have some content
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("integer types that are NOT char display as numbers") {
@@ -131,7 +131,7 @@ TEST_CASE("StrStream integer type handling") {
         // Test a type that's definitely not char
         short val = 65;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("char with mTreatCharAsInt") {
@@ -140,7 +140,7 @@ TEST_CASE("StrStream integer type handling") {
         char c = 65;
         s << c;
         // With mTreatCharAsInt=true, char should display as number
-        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("all fundamental integer types") {
@@ -162,10 +162,10 @@ TEST_CASE("StrStream integer type handling") {
         // Verify output contains expected values
         fl::string result_str = s.str(); // Store string before accessing c_str()
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-10") != nullptr);
-        CHECK(fl::strstr(result, "200") != nullptr);
-        CHECK(fl::strstr(result, "-1000") != nullptr);
-        CHECK(fl::strstr(result, "50000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-10") != nullptr);
+        FL_CHECK(fl::strstr(result, "200") != nullptr);
+        FL_CHECK(fl::strstr(result, "-1000") != nullptr);
+        FL_CHECK(fl::strstr(result, "50000") != nullptr);
     }
 
     SUBCASE("fl:: types work correctly") {
@@ -185,10 +185,10 @@ TEST_CASE("StrStream integer type handling") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-10") != nullptr);
-        CHECK(fl::strstr(result, "200") != nullptr);
-        CHECK(fl::strstr(result, "-1000") != nullptr);
-        CHECK(fl::strstr(result, "50000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-10") != nullptr);
+        FL_CHECK(fl::strstr(result, "200") != nullptr);
+        FL_CHECK(fl::strstr(result, "-1000") != nullptr);
+        FL_CHECK(fl::strstr(result, "50000") != nullptr);
     }
 
     SUBCASE("chaining multiple types") {
@@ -196,7 +196,7 @@ TEST_CASE("StrStream integer type handling") {
         s << (short)1 << (long)2 << (unsigned char)3 << (int)4;
 
         // Should produce "1234"
-        CHECK(fl::strcmp(s.str().c_str(), "1234") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "1234") == 0);
     }
 }
 
@@ -206,91 +206,91 @@ TEST_CASE("StrStream comprehensive fl:: integer types") {
         fl::i8 val = -10;
         s << val;
         // fl::i8 is signed char, which displays as a number due to fl::StrStream's handling
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("fl::u8") {
         fl::StrStream s;
         fl::u8 val = 200;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
     }
 
     SUBCASE("fl::i16") {
         fl::StrStream s;
         fl::i16 val = -1000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
     }
 
     SUBCASE("fl::u16") {
         fl::StrStream s;
         fl::u16 val = 50000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
     }
 
     SUBCASE("fl::i32") {
         fl::StrStream s;
         fl::i32 val = -100000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
     }
 
     SUBCASE("fl::u32") {
         fl::StrStream s;
         fl::u32 val = 4000000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
     }
 
     SUBCASE("fl::i64") {
         fl::StrStream s;
         fl::i64 val = -1000000000LL;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
     }
 
     SUBCASE("fl::u64") {
         fl::StrStream s;
         fl::u64 val = 1000000000ULL;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
     }
 
     SUBCASE("fl::size") {
         fl::StrStream s;
         fl::size val = 12345;
         s << val;
-        CHECK(fl::strstr(s.str().c_str(), "12345") != nullptr);
+        FL_CHECK(fl::strstr(s.str().c_str(), "12345") != nullptr);
     }
 
     SUBCASE("fl::uptr") {
         fl::StrStream s;
         fl::uptr val = 0x1234;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("fl::iptr") {
         fl::StrStream s;
         fl::iptr val = -5000;
         s << val;
-        CHECK(fl::strstr(s.str().c_str(), "-5000") != nullptr);
+        FL_CHECK(fl::strstr(s.str().c_str(), "-5000") != nullptr);
     }
 
     SUBCASE("fl::ptrdiff") {
         fl::StrStream s;
         fl::ptrdiff val = -1234;
         s << val;
-        CHECK(fl::strstr(s.str().c_str(), "-1234") != nullptr);
+        FL_CHECK(fl::strstr(s.str().c_str(), "-1234") != nullptr);
     }
 
     SUBCASE("fl::uint") {
         fl::StrStream s;
         fl::uint val = 999999;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "999999") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "999999") == 0);
     }
 }
 
@@ -299,7 +299,7 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         fl::StrStream s;
         char val = 'A';
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("signed char") {
@@ -307,70 +307,70 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         signed char val = -10;
         s << val;
         // signed char may display as character or number depending on fl::StrStream implementation
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("unsigned char") {
         fl::StrStream s;
         unsigned char val = 200;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
     }
 
     SUBCASE("short") {
         fl::StrStream s;
         short val = -1000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
     }
 
     SUBCASE("unsigned short") {
         fl::StrStream s;
         unsigned short val = 50000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
     }
 
     SUBCASE("int") {
         fl::StrStream s;
         int val = -100000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
     }
 
     SUBCASE("unsigned int") {
         fl::StrStream s;
         unsigned int val = 4000000;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
     }
 
     SUBCASE("long") {
         fl::StrStream s;
         long val = -1000000L;
         s << val;
-        CHECK(fl::strstr(s.str().c_str(), "-1000000") != nullptr);
+        FL_CHECK(fl::strstr(s.str().c_str(), "-1000000") != nullptr);
     }
 
     SUBCASE("unsigned long") {
         fl::StrStream s;
         unsigned long val = 4000000000UL;
         s << val;
-        CHECK(fl::strstr(s.str().c_str(), "4000000000") != nullptr);
+        FL_CHECK(fl::strstr(s.str().c_str(), "4000000000") != nullptr);
     }
 
     SUBCASE("long long") {
         fl::StrStream s;
         long long val = -1000000000LL;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
     }
 
     SUBCASE("unsigned long long") {
         fl::StrStream s;
         unsigned long long val = 1000000000ULL;
         s << val;
-        CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
     }
 
     SUBCASE("bool") {
@@ -378,7 +378,7 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         bool val_true = true;
         bool val_false = false;
         s << val_true << " " << val_false;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 }
 
@@ -387,84 +387,84 @@ TEST_CASE("StrStream fractional types") {
         fl::StrStream s;
         fract8 val = 128;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("sfract7") {
         fl::StrStream s;
         sfract7 val = 64;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("fract16") {
         fl::StrStream s;
         fract16 val = 30000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("sfract15") {
         fl::StrStream s;
         sfract15 val = -1000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("fract32") {
         fl::StrStream s;
         fract32 val = 2000000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("sfract31") {
         fl::StrStream s;
         sfract31 val = -100000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("accum88") {
         fl::StrStream s;
         accum88 val = 12800;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("saccum78") {
         fl::StrStream s;
         saccum78 val = -6400;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("accum1616") {
         fl::StrStream s;
         accum1616 val = 2000000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("saccum1516") {
         fl::StrStream s;
         saccum1516 val = -100000;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("accum124") {
         fl::StrStream s;
         accum124 val = 4096;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("saccum114") {
         fl::StrStream s;
         saccum114 val = -2048;
         s << val;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 }
 
@@ -480,10 +480,10 @@ TEST_CASE("StrStream mixed type chains") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-10") != nullptr);
-        CHECK(fl::strstr(result, "50000") != nullptr);
-        CHECK(fl::strstr(result, "-100000") != nullptr);
-        CHECK(fl::strstr(result, "1000000000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-10") != nullptr);
+        FL_CHECK(fl::strstr(result, "50000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-100000") != nullptr);
+        FL_CHECK(fl::strstr(result, "1000000000") != nullptr);
     }
 
     SUBCASE("mixed fundamental types") {
@@ -497,10 +497,10 @@ TEST_CASE("StrStream mixed type chains") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-10") != nullptr);
-        CHECK(fl::strstr(result, "50000") != nullptr);
-        CHECK(fl::strstr(result, "-100000") != nullptr);
-        CHECK(fl::strstr(result, "1000000000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-10") != nullptr);
+        FL_CHECK(fl::strstr(result, "50000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-100000") != nullptr);
+        FL_CHECK(fl::strstr(result, "1000000000") != nullptr);
     }
 
     SUBCASE("fl:: and fundamental types mixed") {
@@ -514,9 +514,9 @@ TEST_CASE("StrStream mixed type chains") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-10") != nullptr);
-        CHECK(fl::strstr(result, "-1000") != nullptr);
-        CHECK(fl::strstr(result, "4000000") != nullptr);
+        FL_CHECK(fl::strstr(result, "-10") != nullptr);
+        FL_CHECK(fl::strstr(result, "-1000") != nullptr);
+        FL_CHECK(fl::strstr(result, "4000000") != nullptr);
     }
 }
 
@@ -529,7 +529,7 @@ TEST_CASE("StrStream edge value testing") {
         s << fl::u8(255);            // max u8
 
         // Just check that output was generated, values depend on char handling
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("16-bit edge values") {
@@ -543,7 +543,7 @@ TEST_CASE("StrStream edge value testing") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strcmp(result, "-32768 32767 0 65535") == 0);
+        FL_CHECK(fl::strcmp(result, "-32768 32767 0 65535") == 0);
     }
 
     SUBCASE("32-bit edge values") {
@@ -558,10 +558,10 @@ TEST_CASE("StrStream edge value testing") {
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "-2147483647") != nullptr);
-        CHECK(fl::strstr(result, "2147483647") != nullptr);
-        CHECK(fl::strstr(result, "0") != nullptr);
-        CHECK(fl::strstr(result, "4294967295") != nullptr);
+        FL_CHECK(fl::strstr(result, "-2147483647") != nullptr);
+        FL_CHECK(fl::strstr(result, "2147483647") != nullptr);
+        FL_CHECK(fl::strstr(result, "0") != nullptr);
+        FL_CHECK(fl::strstr(result, "4294967295") != nullptr);
     }
 }
 
@@ -573,13 +573,13 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         const fl::i16 ci16 = 300;
 
         s << ci32 << " " << cu32 << " " << ci16;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
         fl::string result_str = s.str(); // Store string before accessing c_str()
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "100") != nullptr);
-        CHECK(fl::strstr(result, "200") != nullptr);
-        CHECK(fl::strstr(result, "300") != nullptr);
+        FL_CHECK(fl::strstr(result, "100") != nullptr);
+        FL_CHECK(fl::strstr(result, "200") != nullptr);
+        FL_CHECK(fl::strstr(result, "300") != nullptr);
     }
 
     SUBCASE("volatile integer types") {
@@ -588,12 +588,12 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         volatile fl::i16 vi16 = -300;
 
         s << vu32 << " " << vi16;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
         fl::string result_str = s.str(); // Store string before accessing c_str()
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "200") != nullptr);
-        CHECK(fl::strstr(result, "-300") != nullptr);
+        FL_CHECK(fl::strstr(result, "200") != nullptr);
+        FL_CHECK(fl::strstr(result, "-300") != nullptr);
     }
 
     SUBCASE("const volatile integer types") {
@@ -602,12 +602,12 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         const volatile fl::u8 cvu8 = 255;
 
         s << cvi16 << " " << cvu8;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
         fl::string result_str = s.str(); // Store string before accessing c_str()
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "300") != nullptr);
-        CHECK(fl::strstr(result, "255") != nullptr);
+        FL_CHECK(fl::strstr(result, "300") != nullptr);
+        FL_CHECK(fl::strstr(result, "255") != nullptr);
     }
 }
 
@@ -618,7 +618,7 @@ TEST_CASE("StrStream reference types") {
         fl::i32& ref = val;
 
         s << ref;
-        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
     }
 
     SUBCASE("const references") {
@@ -627,7 +627,7 @@ TEST_CASE("StrStream reference types") {
         const fl::i32& cref = val;
 
         s << cref;
-        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
     }
 
     SUBCASE("mixed references") {
@@ -638,7 +638,7 @@ TEST_CASE("StrStream reference types") {
         const fl::u16& cref2 = val2;
 
         s << ref1 << " " << cref2;
-        CHECK(fl::strcmp(s.str().c_str(), "100 200") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "100 200") == 0);
     }
 }
 
@@ -652,17 +652,17 @@ bool test_template_type(T val) {
 
 TEST_CASE("StrStream template deduction") {
     SUBCASE("fl:: types") {
-        CHECK(test_template_type(fl::i8(10)));
-        CHECK(test_template_type(fl::u16(1000)));
-        CHECK(test_template_type(fl::i32(-50000)));
-        CHECK(test_template_type(fl::u64(1000000ULL)));
+        FL_CHECK(test_template_type(fl::i8(10)));
+        FL_CHECK(test_template_type(fl::u16(1000)));
+        FL_CHECK(test_template_type(fl::i32(-50000)));
+        FL_CHECK(test_template_type(fl::u64(1000000ULL)));
     }
 
     SUBCASE("fundamental types") {
-        CHECK(test_template_type((short)(100)));
-        CHECK(test_template_type((unsigned long)(1000000UL)));
-        CHECK(test_template_type((int)(-500)));
-        CHECK(test_template_type((unsigned char)(255)));
+        FL_CHECK(test_template_type((short)(100)));
+        FL_CHECK(test_template_type((unsigned long)(1000000UL)));
+        FL_CHECK(test_template_type((int)(-500)));
+        FL_CHECK(test_template_type((unsigned char)(255)));
     }
 }
 
@@ -680,7 +680,7 @@ TEST_CASE("FakeStrStream integer types") {
         s << fl::size(12345);
         s << fl::uint(999999);
         // Should compile without errors
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("all fundamental types") {
@@ -698,7 +698,7 @@ TEST_CASE("FakeStrStream integer types") {
         s << true;
         s << false;
         // Should compile without errors
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("fractional types") {
@@ -716,7 +716,7 @@ TEST_CASE("FakeStrStream integer types") {
         s << accum124(4096);
         s << saccum114(-2048);
         // Should compile without errors
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     SUBCASE("mixed type chains") {
@@ -726,7 +726,7 @@ TEST_CASE("FakeStrStream integer types") {
           << fl::u32(4000000) << " "
           << (unsigned long)(4000000000UL);
         // Should compile without errors
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -740,14 +740,14 @@ TEST_CASE("StrStream platform-specific aliased types") {
         fl::i32 i32 = 100000;
 
         s << i << " " << l << " " << i16 << " " << i32;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
 
         fl::string result_str = s.str(); // Store string before accessing c_str()
 
 
         const char* result = result_str.c_str();
-        CHECK(fl::strstr(result, "100") != nullptr);
-        CHECK(fl::strstr(result, "100000") != nullptr);
+        FL_CHECK(fl::strstr(result, "100") != nullptr);
+        FL_CHECK(fl::strstr(result, "100000") != nullptr);
     }
 
     SUBCASE("pointer-sized types") {
@@ -759,7 +759,7 @@ TEST_CASE("StrStream platform-specific aliased types") {
         fl::ptrdiff pd = -123;
 
         s << sz << " " << up << " " << ip << " " << pd;
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 }
 
@@ -863,13 +863,13 @@ TEST_CASE("StrStream and FakeStrStream - string types compatibility") {
     SUBCASE("StrStream handles strings") {
         fl::StrStream stream;
         test_string_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles strings") {
         fl::FakeStrStream stream;
         test_string_types(stream);
-        CHECK(true);  // FakeStrStream is no-op but must compile
+        FL_CHECK(true);  // FakeStrStream is no-op but must compile
     }
 }
 
@@ -877,13 +877,13 @@ TEST_CASE("StrStream and FakeStrStream - character types compatibility") {
     SUBCASE("StrStream handles character types") {
         fl::StrStream stream;
         test_char_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles character types") {
         fl::FakeStrStream stream;
         test_char_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -891,13 +891,13 @@ TEST_CASE("StrStream and FakeStrStream - fundamental integer types compatibility
     SUBCASE("StrStream handles all fundamental integer types") {
         fl::StrStream stream;
         test_fundamental_int_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles all fundamental integer types") {
         fl::FakeStrStream stream;
         test_fundamental_int_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -905,13 +905,13 @@ TEST_CASE("StrStream and FakeStrStream - fl:: integer types compatibility") {
     SUBCASE("StrStream handles all fl:: integer types") {
         fl::StrStream stream;
         test_fl_int_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles all fl:: integer types") {
         fl::FakeStrStream stream;
         test_fl_int_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -919,13 +919,13 @@ TEST_CASE("StrStream and FakeStrStream - floating point types compatibility") {
     SUBCASE("StrStream handles floating point types") {
         fl::StrStream stream;
         test_floating_point_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles floating point types") {
         fl::FakeStrStream stream;
         test_floating_point_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -933,13 +933,13 @@ TEST_CASE("StrStream and FakeStrStream - bool type compatibility") {
     SUBCASE("StrStream handles bool") {
         fl::StrStream stream;
         test_bool_type(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles bool") {
         fl::FakeStrStream stream;
         test_bool_type(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -947,13 +947,13 @@ TEST_CASE("StrStream and FakeStrStream - CRGB type compatibility") {
     SUBCASE("StrStream handles CRGB") {
         fl::StrStream stream;
         test_crgb_type(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles CRGB") {
         fl::FakeStrStream stream;
         test_crgb_type(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -961,13 +961,13 @@ TEST_CASE("StrStream and FakeStrStream - fl::string type compatibility") {
     SUBCASE("StrStream handles fl::string") {
         fl::StrStream stream;
         test_cpp_string_type(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles fl::string") {
         fl::FakeStrStream stream;
         test_cpp_string_type(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -975,13 +975,13 @@ TEST_CASE("StrStream and FakeStrStream - mixed types compatibility") {
     SUBCASE("StrStream handles mixed types") {
         fl::StrStream stream;
         test_mixed_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles mixed types") {
         fl::FakeStrStream stream;
         test_mixed_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -997,7 +997,7 @@ TEST_CASE("Template function instantiation with both stream types") {
         test_crgb_type(s);
         test_cpp_string_type(s);
         test_mixed_types(s);
-        CHECK(s.str().size() > 0);
+        FL_CHECK(s.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream instantiation") {
@@ -1011,7 +1011,7 @@ TEST_CASE("Template function instantiation with both stream types") {
         test_crgb_type(s);
         test_cpp_string_type(s);
         test_mixed_types(s);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -1020,14 +1020,14 @@ TEST_CASE("StrStream and FakeStrStream - const and reference types compatibility
         fl::StrStream stream;
         test_const_types(stream);
         test_reference_types(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream handles const and references") {
         fl::FakeStrStream stream;
         test_const_types(stream);
         test_reference_types(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -1035,13 +1035,13 @@ TEST_CASE("StrStream and FakeStrStream - operator chaining compatibility") {
     SUBCASE("StrStream supports operator chaining") {
         fl::StrStream stream;
         test_operator_chaining(stream);
-        CHECK(stream.str().size() > 0);
+        FL_CHECK(stream.str().size() > 0);
     }
 
     SUBCASE("FakeStrStream supports operator chaining") {
         fl::FakeStrStream stream;
         test_operator_chaining(stream);
-        CHECK(true);
+        FL_CHECK(true);
     }
 }
 
@@ -1049,19 +1049,19 @@ TEST_CASE("StrStream hex formatting") {
     SUBCASE("hex manipulator for unsigned integers") {
         fl::StrStream s;
         s << fl::hex << fl::u32(255);
-        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
     }
 
     SUBCASE("hex manipulator for signed integers") {
         fl::StrStream s;
         s << fl::hex << fl::i32(255);
-        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
     }
 
     SUBCASE("hex manipulator with multiple values") {
         fl::StrStream s;
         s << fl::hex << fl::u32(16) << " " << fl::u32(255) << " " << fl::u32(4096);
-        CHECK(fl::strcmp(s.str().c_str(), "10 ff 1000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "10 ff 1000") == 0);
     }
 
     SUBCASE("switching between dec and hex") {
@@ -1069,25 +1069,25 @@ TEST_CASE("StrStream hex formatting") {
         s << fl::u32(255);  // decimal by default
         s << " " << fl::hex << fl::u32(255);  // switch to hex
         s << " " << fl::dec << fl::u32(255);  // switch back to decimal
-        CHECK(fl::strcmp(s.str().c_str(), "255 ff 255") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "255 ff 255") == 0);
     }
 
     SUBCASE("hex with 8-bit values") {
         fl::StrStream s;
         s << fl::hex << fl::u8(255);
-        CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "ff") == 0);
     }
 
     SUBCASE("hex with 16-bit values") {
         fl::StrStream s;
         s << fl::hex << fl::u16(0xABCD);
-        CHECK(fl::strcmp(s.str().c_str(), "abcd") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "abcd") == 0);
     }
 
     SUBCASE("hex with 64-bit values") {
         fl::StrStream s;
         s << fl::hex << fl::u64(0xDEADBEEF);
-        CHECK(fl::strcmp(s.str().c_str(), "deadbeef") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "deadbeef") == 0);
     }
 
     SUBCASE("hex persists across multiple insertions") {
@@ -1098,18 +1098,18 @@ TEST_CASE("StrStream hex formatting") {
         s << fl::u32(20);
         s << " ";
         s << fl::u32(30);
-        CHECK(fl::strcmp(s.str().c_str(), "a 14 1e") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "a 14 1e") == 0);
     }
 
     SUBCASE("getBase returns correct value") {
         fl::StrStream s;
-        CHECK(s.getBase() == 10);  // default is decimal
+        FL_CHECK(s.getBase() == 10);  // default is decimal
         s << fl::hex;
-        CHECK(s.getBase() == 16);
+        FL_CHECK(s.getBase() == 16);
         s << fl::oct;
-        CHECK(s.getBase() == 8);
+        FL_CHECK(s.getBase() == 8);
         s << fl::dec;
-        CHECK(s.getBase() == 10);
+        FL_CHECK(s.getBase() == 10);
     }
 }
 
@@ -1117,13 +1117,13 @@ TEST_CASE("StrStream octal formatting") {
     SUBCASE("oct manipulator for unsigned integers") {
         fl::StrStream s;
         s << fl::oct << fl::u32(64);
-        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
     }
 
     SUBCASE("oct manipulator with multiple values") {
         fl::StrStream s;
         s << fl::oct << fl::u32(8) << " " << fl::u32(64) << " " << fl::u32(512);
-        CHECK(fl::strcmp(s.str().c_str(), "10 100 1000") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "10 100 1000") == 0);
     }
 
     SUBCASE("switching between dec, hex, and oct") {
@@ -1132,6 +1132,6 @@ TEST_CASE("StrStream octal formatting") {
         s << " " << fl::hex << fl::u32(64);  // switch to hex
         s << " " << fl::oct << fl::u32(64);  // switch to octal
         s << " " << fl::dec << fl::u32(64);  // switch back to decimal
-        CHECK(fl::strcmp(s.str().c_str(), "64 40 100 64") == 0);
+        FL_CHECK(fl::strcmp(s.str().c_str(), "64 40 100 64") == 0);
     }
 }

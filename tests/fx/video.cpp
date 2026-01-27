@@ -71,21 +71,21 @@ TEST_CASE("video with memory stream") {
         testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
-    REQUIRE_EQ(pixels_written, LEDS_PER_FRAME);
+    FL_REQUIRE_EQ(pixels_written, LEDS_PER_FRAME);
     video.beginStream(memoryStream);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME + 1, leds);
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i], testData[i]);
+        FL_CHECK_EQ(leds[i], testData[i]);
     }
     ok = video.draw(2 * FRAME_TIME + 1, leds);
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        // CHECK_EQ(leds[i], testData[i]);
-        REQUIRE_EQ(leds[i].r, testData[i].r);
-        REQUIRE_EQ(leds[i].g, testData[i].g);
-        REQUIRE_EQ(leds[i].b, testData[i].b);
+        // FL_CHECK_EQ(leds[i], testData[i]);
+        FL_REQUIRE_EQ(leds[i].r, testData[i].r);
+        FL_REQUIRE_EQ(leds[i].g, testData[i].g);
+        FL_REQUIRE_EQ(leds[i].b, testData[i].b);
     }
 }
 
@@ -100,24 +100,24 @@ TEST_CASE("video with memory stream, interpolated") {
         testData[i] = CRGB::Red;
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
-    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
+    FL_CHECK_EQ(pixels_written, LEDS_PER_FRAME);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = CRGB::Black;
     }
     pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
-    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
+    FL_CHECK_EQ(pixels_written, LEDS_PER_FRAME);
     video.beginStream(memoryStream); // One frame per second.
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(0, leds); // First frame starts time 0.
     ok = video.draw(500, leds);    // Half a frame.
-    CHECK(ok);
+    FL_CHECK(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         int r = leds[i].r;
         int g = leds[i].g;
         int b = leds[i].b;
-        REQUIRE_EQ(128, r); // We expect the color to be interpolated to 128.
-        REQUIRE_EQ(0, g);
-        REQUIRE_EQ(0, b);
+        FL_REQUIRE_EQ(128, r); // We expect the color to be interpolated to 128.
+        FL_REQUIRE_EQ(0, g);
+        FL_REQUIRE_EQ(0, b);
     }
 }
 
@@ -133,18 +133,18 @@ TEST_CASE("video with file handle") {
     }
     // now write the data
     size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
-    CHECK_EQ(leds_written, LEDS_PER_FRAME);
+    FL_CHECK_EQ(leds_written, LEDS_PER_FRAME);
     video.begin(fileHandle);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME + 1, leds);
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i], led_frame[i]);
+        FL_CHECK_EQ(leds[i], led_frame[i]);
     }
     ok = video.draw(2 * FRAME_TIME + 1, leds);
-    CHECK(ok);
+    FL_CHECK(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i], led_frame[i]);
+        FL_CHECK_EQ(leds[i], led_frame[i]);
     }
 }
 
@@ -160,13 +160,13 @@ TEST_CASE("Video duration") {
     // fill frames for all of one second
     for (uint32_t i = 0; i < FPS; i++) {
         size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
-        CHECK_EQ(leds_written, LEDS_PER_FRAME);
+        FL_CHECK_EQ(leds_written, LEDS_PER_FRAME);
     }
 
     video.begin(fileHandle);
     int32_t duration = video.durationMicros();
     float duration_f = duration / 1000.0;
-    CHECK_EQ(1000, uint32_t(duration_f + 0.5));
+    FL_CHECK_EQ(1000, uint32_t(duration_f + 0.5));
 }
 
 TEST_CASE("video with end frame fadeout") {
@@ -182,50 +182,50 @@ TEST_CASE("video with end frame fadeout") {
     // fill frames for all of one second
     for (uint32_t i = 0; i < FPS; i++) {
         size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
-        CHECK_EQ(leds_written, LEDS_PER_FRAME);
+        FL_CHECK_EQ(leds_written, LEDS_PER_FRAME);
     }
 
     video.begin(fileHandle);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(0, leds);
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i], led_frame[i]);
+        FL_CHECK_EQ(leds[i], led_frame[i]);
     }
     ok = video.draw(500, leds);
     // test that the leds are about half as bright
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
 
 
 
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         // This is what the values should be but we don't do inter-frame
-        // interpolation yet. CHECK_EQ(leds[i].r, 127); CHECK_EQ(leds[i].g,
-        // 127); CHECK_EQ(leds[i].b, 127);
-        CHECK_EQ(leds[i].r, 110);
-        CHECK_EQ(leds[i].g, 110);
-        CHECK_EQ(leds[i].b, 110);
+        // interpolation yet. FL_CHECK_EQ(leds[i].r, 127); FL_CHECK_EQ(leds[i].g,
+        // 127); FL_CHECK_EQ(leds[i].b, 127);
+        FL_CHECK_EQ(leds[i].r, 110);
+        FL_CHECK_EQ(leds[i].g, 110);
+        FL_CHECK_EQ(leds[i].b, 110);
     }
 
     ok = video.draw(900, leds); // close to last frame
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i].r, 8);
-        CHECK_EQ(leds[i].g, 8);
-        CHECK_EQ(leds[i].b, 8);
+        FL_CHECK_EQ(leds[i].r, 8);
+        FL_CHECK_EQ(leds[i].g, 8);
+        FL_CHECK_EQ(leds[i].b, 8);
     }
 
     ok = video.draw(965, leds); // Last frame
-    REQUIRE(ok);
+    FL_REQUIRE(ok);
     // test that the leds are almost black
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        REQUIRE_EQ(leds[i], CRGB(0, 0, 0));
+        FL_REQUIRE_EQ(leds[i], CRGB(0, 0, 0));
     }
     #if 0  // Bug - we do not handle wrapping around
     ok = video.draw(1000, leds); // Bug - we have to let the buffer drain with one frame.
     ok = video.draw(1000, leds); // After last frame we flip around
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        REQUIRE_EQ(leds[i], CRGB(4, 4, 4));
+        FL_REQUIRE_EQ(leds[i], CRGB(4, 4, 4));
     }
     #endif  //
 }

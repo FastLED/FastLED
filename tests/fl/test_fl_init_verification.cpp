@@ -15,46 +15,46 @@ TEST_CASE("FL_INIT verification - SPI stub instances are registered") {
 
     SUBCASE("SpiHw1 instances registered") {
         auto instances = fl::SpiHw1::getAll();
-        CHECK(instances.size() == 2);
+        FL_CHECK(instances.size() == 2);
         if (instances.size() == 2) {
-            CHECK(fl::string(instances[0]->getName()) == "MockSingle0");
-            CHECK(fl::string(instances[1]->getName()) == "MockSingle1");
+            FL_CHECK(fl::string(instances[0]->getName()) == "MockSingle0");
+            FL_CHECK(fl::string(instances[1]->getName()) == "MockSingle1");
         }
     }
 
     SUBCASE("SpiHw2 instances registered") {
         auto instances = fl::SpiHw2::getAll();
-        CHECK(instances.size() == 2);
+        FL_CHECK(instances.size() == 2);
         if (instances.size() == 2) {
-            CHECK(fl::string(instances[0]->getName()) == "MockDual0");
-            CHECK(fl::string(instances[1]->getName()) == "MockDual1");
+            FL_CHECK(fl::string(instances[0]->getName()) == "MockDual0");
+            FL_CHECK(fl::string(instances[1]->getName()) == "MockDual1");
         }
     }
 
     SUBCASE("SpiHw4 instances registered") {
         auto instances = fl::SpiHw4::getAll();
-        CHECK(instances.size() == 2);
+        FL_CHECK(instances.size() == 2);
         if (instances.size() == 2) {
-            CHECK(fl::string(instances[0]->getName()) == "MockQuad2");
-            CHECK(fl::string(instances[1]->getName()) == "MockQuad3");
+            FL_CHECK(fl::string(instances[0]->getName()) == "MockQuad2");
+            FL_CHECK(fl::string(instances[1]->getName()) == "MockQuad3");
         }
     }
 
     SUBCASE("SpiHw8 instances registered") {
         auto instances = fl::SpiHw8::getAll();
-        CHECK(instances.size() == 2);
+        FL_CHECK(instances.size() == 2);
         if (instances.size() == 2) {
-            CHECK(fl::string(instances[0]->getName()) == "MockOctal2");
-            CHECK(fl::string(instances[1]->getName()) == "MockOctal3");
+            FL_CHECK(fl::string(instances[0]->getName()) == "MockOctal2");
+            FL_CHECK(fl::string(instances[1]->getName()) == "MockOctal3");
         }
     }
 
     SUBCASE("SpiHw16 instances registered") {
         auto instances = fl::SpiHw16::getAll();
-        CHECK(instances.size() == 2);
+        FL_CHECK(instances.size() == 2);
         if (instances.size() == 2) {
-            CHECK(fl::string(instances[0]->getName()) == "MockHexadeca2");
-            CHECK(fl::string(instances[1]->getName()) == "MockHexadeca3");
+            FL_CHECK(fl::string(instances[0]->getName()) == "MockHexadeca2");
+            FL_CHECK(fl::string(instances[1]->getName()) == "MockHexadeca3");
         }
     }
 }

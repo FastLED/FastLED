@@ -15,26 +15,26 @@ TEST_CASE("back_inserter with vector") {
         *inserter = 20;
         *inserter = 30;
 
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 
     SUBCASE("Pre-increment") {
         auto inserter = fl::back_inserter(vec);
         ++inserter = 10;
 
-        CHECK(vec.size() == 1);
-        CHECK(vec[0] == 10);
+        FL_CHECK(vec.size() == 1);
+        FL_CHECK(vec[0] == 10);
     }
 
     SUBCASE("Post-increment") {
         auto inserter = fl::back_inserter(vec);
         inserter++ = 10;
 
-        CHECK(vec.size() == 1);
-        CHECK(vec[0] == 10);
+        FL_CHECK(vec.size() == 1);
+        FL_CHECK(vec[0] == 10);
     }
 
     SUBCASE("Dereference") {
@@ -42,9 +42,9 @@ TEST_CASE("back_inserter with vector") {
         *inserter = 10;
         *inserter = 20;
 
-        CHECK(vec.size() == 2);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
     }
 }
 
@@ -57,10 +57,10 @@ TEST_CASE("back_inserter with FixedVector") {
         *inserter = 20;
         *inserter = 30;
 
-        CHECK(vec.size() == 3);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
+        FL_CHECK(vec.size() == 3);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
     }
 }
 
@@ -72,9 +72,9 @@ TEST_CASE("back_inserter with InlinedVector") {
         *inserter = 10;
         *inserter = 20;
 
-        CHECK(vec.size() == 2);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
+        FL_CHECK(vec.size() == 2);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
     }
 
     SUBCASE("Insertion beyond inline capacity (heap allocation)") {
@@ -84,11 +84,11 @@ TEST_CASE("back_inserter with InlinedVector") {
         *inserter = 30;
         *inserter = 40;
 
-        CHECK(vec.size() == 4);
-        CHECK(vec[0] == 10);
-        CHECK(vec[1] == 20);
-        CHECK(vec[2] == 30);
-        CHECK(vec[3] == 40);
+        FL_CHECK(vec.size() == 4);
+        FL_CHECK(vec[0] == 10);
+        FL_CHECK(vec[1] == 20);
+        FL_CHECK(vec[2] == 30);
+        FL_CHECK(vec[3] == 40);
     }
 }
 
@@ -120,8 +120,8 @@ TEST_CASE("back_inserter with move semantics") {
         auto inserter = fl::back_inserter(vec);
         *inserter = MoveOnly(42);
 
-        CHECK(vec.size() == 1);
-        CHECK(vec[0].value == 42);
+        FL_CHECK(vec.size() == 1);
+        FL_CHECK(vec[0].value == 42);
     }
 }
 
@@ -140,9 +140,9 @@ TEST_CASE("back_inserter with algorithm integration") {
             *inserter++ = *it;
         }
 
-        CHECK(dest.size() == 3);
-        CHECK(dest[0] == 1);
-        CHECK(dest[1] == 2);
-        CHECK(dest[2] == 3);
+        FL_CHECK(dest.size() == 3);
+        FL_CHECK(dest[0] == 1);
+        FL_CHECK(dest[1] == 2);
+        FL_CHECK(dest[2] == 3);
     }
 }

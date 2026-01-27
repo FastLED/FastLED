@@ -45,7 +45,7 @@ TEST_CASE("WS2812_RGB - Zero LEDs (empty input)") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 0 bytes (no frame overhead for WS2812)
-    REQUIRE_EQ(output.size(), 0);
+    FL_REQUIRE_EQ(output.size(), 0);
 }
 
 TEST_CASE("WS2812_RGB - Single LED (black)") {
@@ -57,10 +57,10 @@ TEST_CASE("WS2812_RGB - Single LED (black)") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes
-    REQUIRE_EQ(output.size(), 3);
-    CHECK_EQ(output[0], 0x00);  // First byte
-    CHECK_EQ(output[1], 0x00);  // Second byte
-    CHECK_EQ(output[2], 0x00);  // Third byte
+    FL_REQUIRE_EQ(output.size(), 3);
+    FL_CHECK_EQ(output[0], 0x00);  // First byte
+    FL_CHECK_EQ(output[1], 0x00);  // Second byte
+    FL_CHECK_EQ(output[2], 0x00);  // Third byte
 }
 
 TEST_CASE("WS2812_RGB - Single LED (white)") {
@@ -72,10 +72,10 @@ TEST_CASE("WS2812_RGB - Single LED (white)") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes
-    REQUIRE_EQ(output.size(), 3);
-    CHECK_EQ(output[0], 0xFF);
-    CHECK_EQ(output[1], 0xFF);
-    CHECK_EQ(output[2], 0xFF);
+    FL_REQUIRE_EQ(output.size(), 3);
+    FL_CHECK_EQ(output[0], 0xFF);
+    FL_CHECK_EQ(output[1], 0xFF);
+    FL_CHECK_EQ(output[2], 0xFF);
 }
 
 TEST_CASE("WS2812_RGB - Single LED (red)") {
@@ -87,10 +87,10 @@ TEST_CASE("WS2812_RGB - Single LED (red)") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 3 bytes, first byte should be 255
-    REQUIRE_EQ(output.size(), 3);
-    CHECK_EQ(output[0], 0xFF);  // Red
-    CHECK_EQ(output[1], 0x00);  // Green
-    CHECK_EQ(output[2], 0x00);  // Blue
+    FL_REQUIRE_EQ(output.size(), 3);
+    FL_CHECK_EQ(output[0], 0xFF);  // Red
+    FL_CHECK_EQ(output[1], 0x00);  // Green
+    FL_CHECK_EQ(output[2], 0x00);  // Blue
 }
 
 TEST_CASE("WS2812_RGB - Multiple LEDs") {
@@ -105,27 +105,27 @@ TEST_CASE("WS2812_RGB - Multiple LEDs") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 LEDs × 3 bytes = 12 bytes
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     // LED 0: Red
-    CHECK_EQ(output[0], 255);
-    CHECK_EQ(output[1], 0);
-    CHECK_EQ(output[2], 0);
+    FL_CHECK_EQ(output[0], 255);
+    FL_CHECK_EQ(output[1], 0);
+    FL_CHECK_EQ(output[2], 0);
 
     // LED 1: Green
-    CHECK_EQ(output[3], 0);
-    CHECK_EQ(output[4], 255);
-    CHECK_EQ(output[5], 0);
+    FL_CHECK_EQ(output[3], 0);
+    FL_CHECK_EQ(output[4], 255);
+    FL_CHECK_EQ(output[5], 0);
 
     // LED 2: Blue
-    CHECK_EQ(output[6], 0);
-    CHECK_EQ(output[7], 0);
-    CHECK_EQ(output[8], 255);
+    FL_CHECK_EQ(output[6], 0);
+    FL_CHECK_EQ(output[7], 0);
+    FL_CHECK_EQ(output[8], 255);
 
     // LED 3: Mixed
-    CHECK_EQ(output[9], 128);
-    CHECK_EQ(output[10], 64);
-    CHECK_EQ(output[11], 32);
+    FL_CHECK_EQ(output[9], 128);
+    FL_CHECK_EQ(output[10], 64);
+    FL_CHECK_EQ(output[11], 32);
 }
 
 TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
@@ -143,17 +143,17 @@ TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
     encodeWS2812_RGB(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 40 LEDs × 3 bytes = 120 bytes
-    REQUIRE_EQ(output.size(), 120);
+    FL_REQUIRE_EQ(output.size(), 120);
 
     // Verify first and last LEDs
-    CHECK_EQ(output[0], 0);     // First LED R
-    CHECK_EQ(output[1], 1);     // First LED G
-    CHECK_EQ(output[2], 2);     // First LED B
+    FL_CHECK_EQ(output[0], 0);     // First LED R
+    FL_CHECK_EQ(output[1], 1);     // First LED G
+    FL_CHECK_EQ(output[2], 2);     // First LED B
 
     u8 last_val = static_cast<u8>((NUM_LEDS - 1) % 256);
-    CHECK_EQ(output[117], last_val);       // Last LED R
-    CHECK_EQ(output[118], last_val + 1);   // Last LED G
-    CHECK_EQ(output[119], last_val + 2);   // Last LED B
+    FL_CHECK_EQ(output[117], last_val);       // Last LED R
+    FL_CHECK_EQ(output[118], last_val + 1);   // Last LED G
+    FL_CHECK_EQ(output[119], last_val + 2);   // Last LED B
 }
 
 // ============================================================================
@@ -168,7 +168,7 @@ TEST_CASE("WS2812_RGBW - Zero LEDs (empty input)") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 0 bytes (no frame overhead for WS2812)
-    REQUIRE_EQ(output.size(), 0);
+    FL_REQUIRE_EQ(output.size(), 0);
 }
 
 TEST_CASE("WS2812_RGBW - Single LED (black)") {
@@ -180,11 +180,11 @@ TEST_CASE("WS2812_RGBW - Single LED (black)") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 bytes
-    REQUIRE_EQ(output.size(), 4);
-    CHECK_EQ(output[0], 0x00);
-    CHECK_EQ(output[1], 0x00);
-    CHECK_EQ(output[2], 0x00);
-    CHECK_EQ(output[3], 0x00);
+    FL_REQUIRE_EQ(output.size(), 4);
+    FL_CHECK_EQ(output[0], 0x00);
+    FL_CHECK_EQ(output[1], 0x00);
+    FL_CHECK_EQ(output[2], 0x00);
+    FL_CHECK_EQ(output[3], 0x00);
 }
 
 TEST_CASE("WS2812_RGBW - Single LED (white via W channel)") {
@@ -196,11 +196,11 @@ TEST_CASE("WS2812_RGBW - Single LED (white via W channel)") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 bytes
-    REQUIRE_EQ(output.size(), 4);
-    CHECK_EQ(output[0], 0x00);  // R
-    CHECK_EQ(output[1], 0x00);  // G
-    CHECK_EQ(output[2], 0x00);  // B
-    CHECK_EQ(output[3], 0xFF);  // W
+    FL_REQUIRE_EQ(output.size(), 4);
+    FL_CHECK_EQ(output[0], 0x00);  // R
+    FL_CHECK_EQ(output[1], 0x00);  // G
+    FL_CHECK_EQ(output[2], 0x00);  // B
+    FL_CHECK_EQ(output[3], 0xFF);  // W
 }
 
 TEST_CASE("WS2812_RGBW - Single LED (all channels active)") {
@@ -212,11 +212,11 @@ TEST_CASE("WS2812_RGBW - Single LED (all channels active)") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 bytes
-    REQUIRE_EQ(output.size(), 4);
-    CHECK_EQ(output[0], 255);  // R
-    CHECK_EQ(output[1], 128);  // G
-    CHECK_EQ(output[2], 64);   // B
-    CHECK_EQ(output[3], 32);   // W
+    FL_REQUIRE_EQ(output.size(), 4);
+    FL_CHECK_EQ(output[0], 255);  // R
+    FL_CHECK_EQ(output[1], 128);  // G
+    FL_CHECK_EQ(output[2], 64);   // B
+    FL_CHECK_EQ(output[3], 32);   // W
 }
 
 TEST_CASE("WS2812_RGBW - Multiple LEDs") {
@@ -232,37 +232,37 @@ TEST_CASE("WS2812_RGBW - Multiple LEDs") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 5 LEDs × 4 bytes = 20 bytes
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     // LED 0: Red
-    CHECK_EQ(output[0], 255);
-    CHECK_EQ(output[1], 0);
-    CHECK_EQ(output[2], 0);
-    CHECK_EQ(output[3], 0);
+    FL_CHECK_EQ(output[0], 255);
+    FL_CHECK_EQ(output[1], 0);
+    FL_CHECK_EQ(output[2], 0);
+    FL_CHECK_EQ(output[3], 0);
 
     // LED 1: Green
-    CHECK_EQ(output[4], 0);
-    CHECK_EQ(output[5], 255);
-    CHECK_EQ(output[6], 0);
-    CHECK_EQ(output[7], 0);
+    FL_CHECK_EQ(output[4], 0);
+    FL_CHECK_EQ(output[5], 255);
+    FL_CHECK_EQ(output[6], 0);
+    FL_CHECK_EQ(output[7], 0);
 
     // LED 2: Blue
-    CHECK_EQ(output[8], 0);
-    CHECK_EQ(output[9], 0);
-    CHECK_EQ(output[10], 255);
-    CHECK_EQ(output[11], 0);
+    FL_CHECK_EQ(output[8], 0);
+    FL_CHECK_EQ(output[9], 0);
+    FL_CHECK_EQ(output[10], 255);
+    FL_CHECK_EQ(output[11], 0);
 
     // LED 3: White
-    CHECK_EQ(output[12], 0);
-    CHECK_EQ(output[13], 0);
-    CHECK_EQ(output[14], 0);
-    CHECK_EQ(output[15], 255);
+    FL_CHECK_EQ(output[12], 0);
+    FL_CHECK_EQ(output[13], 0);
+    FL_CHECK_EQ(output[14], 0);
+    FL_CHECK_EQ(output[15], 255);
 
     // LED 4: Mixed
-    CHECK_EQ(output[16], 128);
-    CHECK_EQ(output[17], 64);
-    CHECK_EQ(output[18], 32);
-    CHECK_EQ(output[19], 16);
+    FL_CHECK_EQ(output[16], 128);
+    FL_CHECK_EQ(output[17], 64);
+    FL_CHECK_EQ(output[18], 32);
+    FL_CHECK_EQ(output[19], 16);
 }
 
 TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
@@ -280,19 +280,19 @@ TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
     encodeWS2812_RGBW(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 40 LEDs × 4 bytes = 160 bytes
-    REQUIRE_EQ(output.size(), 160);
+    FL_REQUIRE_EQ(output.size(), 160);
 
     // Verify first and last LEDs
-    CHECK_EQ(output[0], 0);     // First LED R
-    CHECK_EQ(output[1], 1);     // First LED G
-    CHECK_EQ(output[2], 2);     // First LED B
-    CHECK_EQ(output[3], 3);     // First LED W
+    FL_CHECK_EQ(output[0], 0);     // First LED R
+    FL_CHECK_EQ(output[1], 1);     // First LED G
+    FL_CHECK_EQ(output[2], 2);     // First LED B
+    FL_CHECK_EQ(output[3], 3);     // First LED W
 
     u8 last_val = static_cast<u8>((NUM_LEDS - 1) % 256);
-    CHECK_EQ(output[156], last_val);       // Last LED R
-    CHECK_EQ(output[157], last_val + 1);   // Last LED G
-    CHECK_EQ(output[158], last_val + 2);   // Last LED B
-    CHECK_EQ(output[159], last_val + 3);   // Last LED W
+    FL_CHECK_EQ(output[156], last_val);       // Last LED R
+    FL_CHECK_EQ(output[157], last_val + 1);   // Last LED G
+    FL_CHECK_EQ(output[158], last_val + 2);   // Last LED B
+    FL_CHECK_EQ(output[159], last_val + 3);   // Last LED W
 }
 
 // ============================================================================

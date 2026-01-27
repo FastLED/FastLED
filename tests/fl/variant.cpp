@@ -77,19 +77,19 @@ TEST_CASE("Variant move semantics and RAII") {
     // Test 1: Verify moved-from variant is empty
     {
         fl::variant<int, TrackedObject> source(TrackedObject(42));
-        CHECK(source.is<TrackedObject>());
+        FL_CHECK(source.is<TrackedObject>());
         
         // Move construct - this is where the bug was
         fl::variant<int, TrackedObject> destination(fl::move(source));
         
         // Critical test: source should be empty after move
-        CHECK(source.empty());
-        CHECK(!source.is<TrackedObject>());
-        CHECK(!source.is<int>());
+        FL_CHECK(source.empty());
+        FL_CHECK(!source.is<TrackedObject>());
+        FL_CHECK(!source.is<int>());
         
         // destination should have the object
-        CHECK(destination.is<TrackedObject>());
-        CHECK_EQ(destination.ptr<TrackedObject>()->value, 42);
+        FL_CHECK(destination.is<TrackedObject>());
+        FL_CHECK_EQ(destination.ptr<TrackedObject>()->value, 42);
     }
     
     TrackedObject::reset_counters();
@@ -99,20 +99,20 @@ TEST_CASE("Variant move semantics and RAII") {
         fl::variant<int, TrackedObject> source(TrackedObject(100));
         fl::variant<int, TrackedObject> destination;
         
-        CHECK(source.is<TrackedObject>());
-        CHECK(destination.empty());
+        FL_CHECK(source.is<TrackedObject>());
+        FL_CHECK(destination.empty());
         
         // Move assign - this is where the bug was
         destination = fl::move(source);
         
         // Critical test: source should be empty after move
-        CHECK(source.empty());
-        CHECK(!source.is<TrackedObject>());
-        CHECK(!source.is<int>());
+        FL_CHECK(source.empty());
+        FL_CHECK(!source.is<TrackedObject>());
+        FL_CHECK(!source.is<int>());
         
         // destination should have the object
-        CHECK(destination.is<TrackedObject>());
-        CHECK_EQ(destination.ptr<TrackedObject>()->value, 100);
+        FL_CHECK(destination.is<TrackedObject>());
+        FL_CHECK_EQ(destination.ptr<TrackedObject>()->value, 100);
     }
     
     TrackedObject::reset_counters();
@@ -132,18 +132,18 @@ TEST_CASE("Variant move semantics and RAII") {
         
         // Store in variant (like WasmFetchCallbackManager did)
         fl::variant<int, MockCallback> callback_variant(fl::move(callback));
-        CHECK(callback_variant.is<MockCallback>());
+        FL_CHECK(callback_variant.is<MockCallback>());
         
         // Extract via move (like takeCallback did) - this was causing heap-use-after-free
         fl::variant<int, MockCallback> extracted_callback(fl::move(callback_variant));
         
         // Original variant should be empty - this is the key fix
-        CHECK(callback_variant.empty());
-        CHECK(!callback_variant.is<MockCallback>());
+        FL_CHECK(callback_variant.empty());
+        FL_CHECK(!callback_variant.is<MockCallback>());
         
         // Extracted callback should work and shared_ptr should be valid
-        CHECK(extracted_callback.is<MockCallback>());
-        CHECK_EQ(shared_resource.use_count(), 2); // One in extracted callback, one local
+        FL_CHECK(extracted_callback.is<MockCallback>());
+        FL_CHECK_EQ(shared_resource.use_count(), 2); // One in extracted callback, one local
         
         // Call the extracted callback - should not crash
         if (auto* cb = extracted_callback.ptr<MockCallback>()) {
@@ -151,7 +151,7 @@ TEST_CASE("Variant move semantics and RAII") {
         }
         
         // Shared resource should still be valid
-        CHECK_EQ(shared_resource.use_count(), 2);
+        FL_CHECK_EQ(shared_resource.use_count(), 2);
     }
 }
 
@@ -165,144 +165,144 @@ TEST_CASE("HashMap iterator-based erase") {
     map[4] = "four";
     map[5] = "five";
     
-    CHECK_EQ(map.size(), 5);
+    FL_CHECK_EQ(map.size(), 5);
     
     // Test iterator-based erase
     auto it = map.find(3);
-    CHECK(it != map.end());
-    CHECK_EQ(it->second, "three");
+    FL_CHECK(it != map.end());
+    FL_CHECK_EQ(it->second, "three");
     
     // Erase using iterator - should return iterator to next element
     auto next_it = map.erase(it);
-    CHECK_EQ(map.size(), 4);
-    CHECK(map.find(3) == map.end()); // Element should be gone
+    FL_CHECK_EQ(map.size(), 4);
+    FL_CHECK(map.find(3) == map.end()); // Element should be gone
     
     // Verify all other elements are still there
-    CHECK(map.find(1) != map.end());
-    CHECK(map.find(2) != map.end());
-    CHECK(map.find(4) != map.end());
-    CHECK(map.find(5) != map.end());
+    FL_CHECK(map.find(1) != map.end());
+    FL_CHECK(map.find(2) != map.end());
+    FL_CHECK(map.find(4) != map.end());
+    FL_CHECK(map.find(5) != map.end());
     
     // Test erasing at end
     auto end_it = map.find(999); // Non-existent key
-    CHECK(end_it == map.end());
+    FL_CHECK(end_it == map.end());
     auto result_it = map.erase(end_it); // Should handle gracefully
-    CHECK(result_it == map.end());
-    CHECK_EQ(map.size(), 4); // Size should be unchanged
+    FL_CHECK(result_it == map.end());
+    FL_CHECK_EQ(map.size(), 4); // Size should be unchanged
     
     // Test erasing all remaining elements using iterators
     while (!map.empty()) {
         auto first = map.begin();
         map.erase(first);
     }
-    CHECK_EQ(map.size(), 0);
-    CHECK(map.empty());
+    FL_CHECK_EQ(map.size(), 0);
+    FL_CHECK(map.empty());
 }
 
 // Test the original test cases
 TEST_CASE("Variant tests") {
     // 1) Default is empty
     fl::variant<int, fl::string> v;
-    REQUIRE(v.empty());
-    REQUIRE(!v.is<int>());
-    REQUIRE(!v.is<fl::string>());
+    FL_REQUIRE(v.empty());
+    FL_REQUIRE(!v.is<int>());
+    FL_REQUIRE(!v.is<fl::string>());
 
     // 2) Emplace a T
     v = 123;
-    REQUIRE(v.is<int>());
-    REQUIRE(!v.is<fl::string>());
-    REQUIRE_EQ(*v.ptr<int>(), 123);
+    FL_REQUIRE(v.is<int>());
+    FL_REQUIRE(!v.is<fl::string>());
+    FL_REQUIRE_EQ(*v.ptr<int>(), 123);
 
     // 3) Reset back to empty
     v.reset();
-    REQUIRE(v.empty());
+    FL_REQUIRE(v.empty());
 
 
     // 4) Emplace a U
     v = fl::string("hello");
-    REQUIRE(v.is<fl::string>());
-    REQUIRE(!v.is<int>());
-    REQUIRE(v.equals(fl::string("hello")));
+    FL_REQUIRE(v.is<fl::string>());
+    FL_REQUIRE(!v.is<int>());
+    FL_REQUIRE(v.equals(fl::string("hello")));
 
 
     // 5) Copy‐construct preserves the U
     fl::variant<int, fl::string> v2(v);
-    REQUIRE(v2.is<fl::string>());
+    FL_REQUIRE(v2.is<fl::string>());
 
     fl::string* str_ptr = v2.ptr<fl::string>();
-    REQUIRE_NE(str_ptr, nullptr);
-    REQUIRE_EQ(*str_ptr, fl::string("hello"));
+    FL_REQUIRE_NE(str_ptr, nullptr);
+    FL_REQUIRE_EQ(*str_ptr, fl::string("hello"));
     const bool is_str = v2.is<fl::string>();
     const bool is_int = v2.is<int>();
 
-    CHECK(is_str);
-    CHECK(!is_int);
+    FL_CHECK(is_str);
+    FL_CHECK(!is_int);
 
 #if 0
     // 6) Move‐construct leaves source empty
     fl::variant<int, fl::string> v3(fl::move(v2));
-    REQUIRE(v3.is<fl::string>());
-    REQUIRE_EQ(v3.getU(), fl::string("hello"));
-    REQUIRE(v2.isEmpty());
+    FL_REQUIRE(v3.is<fl::string>());
+    FL_REQUIRE_EQ(v3.getU(), fl::string("hello"));
+    FL_REQUIRE(v2.isEmpty());
 
     // 7) Copy‐assign
     fl::variant<int, fl::string> v4;
     v4 = v3;
-    REQUIRE(v4.is<fl::string>());
-    REQUIRE_EQ(v4.getU(), fl::string("hello"));
+    FL_REQUIRE(v4.is<fl::string>());
+    FL_REQUIRE_EQ(v4.getU(), fl::string("hello"));
 
 
     // 8) Swap two variants
     v4.emplaceT(7);
     v3.swap(v4);
-    REQUIRE(v3.is<int>());
-    REQUIRE_EQ(v3.getT(), 7);
-    REQUIRE(v4.is<fl::string>());
-    REQUIRE_EQ(v4.getU(), fl::string("hello"));
+    FL_REQUIRE(v3.is<int>());
+    FL_REQUIRE_EQ(v3.getT(), 7);
+    FL_REQUIRE(v4.is<fl::string>());
+    FL_REQUIRE_EQ(v4.getU(), fl::string("hello"));
 #endif
 }
 
 TEST_CASE("Variant") {
     // 1) Default is empty
     fl::variant<int, fl::string, double> v;
-    REQUIRE(v.empty());
-    REQUIRE(!v.is<int>());
-    REQUIRE(!v.is<fl::string>());
-    REQUIRE(!v.is<double>());
+    FL_REQUIRE(v.empty());
+    FL_REQUIRE(!v.is<int>());
+    FL_REQUIRE(!v.is<fl::string>());
+    FL_REQUIRE(!v.is<double>());
 
     // 2) Construct with a value
     fl::variant<int, fl::string, double> v1(123);
-    REQUIRE(v1.is<int>());
-    REQUIRE(!v1.is<fl::string>());
-    REQUIRE(!v1.is<double>());
-    REQUIRE_EQ(*v1.ptr<int>(), 123);
+    FL_REQUIRE(v1.is<int>());
+    FL_REQUIRE(!v1.is<fl::string>());
+    FL_REQUIRE(!v1.is<double>());
+    FL_REQUIRE_EQ(*v1.ptr<int>(), 123);
 
     // 3) Construct with a different type
     fl::variant<int, fl::string, double> v2(fl::string("hello"));
-    REQUIRE(!v2.is<int>());
-    REQUIRE(v2.is<fl::string>());
-    REQUIRE(!v2.is<double>());
-    REQUIRE_EQ(*v2.ptr<fl::string>(), fl::string("hello"));
+    FL_REQUIRE(!v2.is<int>());
+    FL_REQUIRE(v2.is<fl::string>());
+    FL_REQUIRE(!v2.is<double>());
+    FL_REQUIRE_EQ(*v2.ptr<fl::string>(), fl::string("hello"));
 
     // 4) Copy construction
     fl::variant<int, fl::string, double> v3(v2);
-    REQUIRE(v3.is<fl::string>());
-    REQUIRE(v3.equals(fl::string("hello")));
+    FL_REQUIRE(v3.is<fl::string>());
+    FL_REQUIRE(v3.equals(fl::string("hello")));
 
     // 5) Assignment
     v = v1;
-    REQUIRE(v.is<int>());
-    REQUIRE_EQ(*v.ptr<int>(), 123);
+    FL_REQUIRE(v.is<int>());
+    FL_REQUIRE_EQ(*v.ptr<int>(), 123);
 
     // 6) Reset
     v.reset();
-    REQUIRE(v.empty());
+    FL_REQUIRE(v.empty());
 
     // 7) Assignment of a value
     v = 3.14;
-    REQUIRE(v.is<double>());
-    // REQUIRE_EQ(v.get<double>(), 3.14);
-    REQUIRE_EQ(*v.ptr<double>(), 3.14);
+    FL_REQUIRE(v.is<double>());
+    // FL_REQUIRE_EQ(v.get<double>(), 3.14);
+    FL_REQUIRE_EQ(*v.ptr<double>(), 3.14);
 
     // 8) Visitor pattern
     struct TestVisitor {
@@ -315,30 +315,30 @@ TEST_CASE("Variant") {
 
     TestVisitor visitor;
     v.visit(visitor);
-    REQUIRE_EQ(visitor.result, 3); // 3.14 truncated to 3
+    FL_REQUIRE_EQ(visitor.result, 3); // 3.14 truncated to 3
 
     v = fl::string("hello world");
     v.visit(visitor);
-    REQUIRE_EQ(visitor.result, 11); // length of "hello world"
+    FL_REQUIRE_EQ(visitor.result, 11); // length of "hello world"
 
     v = 42;
     v.visit(visitor);
-    REQUIRE_EQ(visitor.result, 42);
+    FL_REQUIRE_EQ(visitor.result, 42);
 }
 
 
 // TEST_CASE("Optional") {
 //     Optional<int> opt;
-//     REQUIRE(opt.empty());
+//     FL_REQUIRE(opt.empty());
 
 //     opt = 42;
-//     REQUIRE(!opt.empty());
-//     REQUIRE_EQ(*opt.ptr(), 42);
+//     FL_REQUIRE(!opt.empty());
+//     FL_REQUIRE_EQ(*opt.ptr(), 42);
 
 //     Optional<int> opt2 = opt;
-//     REQUIRE(!opt2.empty());
-//     REQUIRE_EQ(*opt2.ptr(), 42);
+//     FL_REQUIRE(!opt2.empty());
+//     FL_REQUIRE_EQ(*opt2.ptr(), 42);
 
 //     opt2 = 100;
-//     REQUIRE_EQ(*opt2.ptr(), 100);
+//     FL_REQUIRE_EQ(*opt2.ptr(), 100);
 // }

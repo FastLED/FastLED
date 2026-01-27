@@ -55,10 +55,10 @@ TEST_CASE("test_fixed_fps") {
     CRGB leds[1];
     fl::Fx::DrawContext context(0, leds);
     wrapper.draw(context);
-    CHECK_EQ(1, fake->mFrameCounter);
-    CHECK_EQ(leds[0], CRGB(0, 0, 0));
+    FL_CHECK_EQ(1, fake->mFrameCounter);
+    FL_CHECK_EQ(leds[0], CRGB(0, 0, 0));
     context.now = 500;
     wrapper.draw(context);
-    CHECK_EQ(2, fake->mFrameCounter);
-    CHECK_EQ(leds[0], CRGB(127, 0, 0));
+    FL_CHECK_EQ(2, fake->mFrameCounter);
+    FL_CHECK_EQ(leds[0], CRGB(127, 0, 0));
 }

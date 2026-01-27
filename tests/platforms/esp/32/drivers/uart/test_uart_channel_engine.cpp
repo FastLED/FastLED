@@ -91,15 +91,15 @@ TEST_CASE("ChannelEngineUART - Lifecycle") {
     ChannelEngineUARTFixture fixture;
 
     SUBCASE("Initial state is READY") {
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
     SUBCASE("Engine name is UART") {
-        CHECK(fl::string(fixture.mEngine.getName()) == "UART");
+        FL_CHECK(fl::string(fixture.mEngine.getName()) == "UART");
     }
 
     SUBCASE("Peripheral not initialized before first show") {
-        CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
+        FL_CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
     }
 }
 
@@ -111,7 +111,7 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         fixture.mEngine.enqueue(channel);
 
         // State should still be READY (show not called yet)
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
     SUBCASE("Show triggers initialization") {
@@ -120,7 +120,7 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         fixture.mEngine.show();
 
         // Peripheral should be initialized after show
-        CHECK(fixture.mMockPeripheral->isInitialized());
+        FL_CHECK(fixture.mMockPeripheral->isInitialized());
     }
 
     SUBCASE("Show transmits encoded data") {
@@ -132,13 +132,13 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         fixture.mMockPeripheral->forceTransmissionComplete();
 
         // Poll until ready
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         // Verify encoded data was transmitted
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
 
         // Expected: 30 bytes * 4 expansion = 120 bytes
-        CHECK(captured.size() == 120);
+        FL_CHECK(captured.size() == 120);
     }
 
     SUBCASE("Encoding correctness - single byte") {
@@ -152,29 +152,29 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 12); // 3 bytes * 4 = 12 bytes
+        FL_CHECK(captured.size() == 12); // 3 bytes * 4 = 12 bytes
 
         // Verify first byte (0xE4 = 0b11100100) encoding
         // Using rotated LUT: 0b00→0x11, 0b01→0x19, 0b10→0x91, 0b11→0x99
-        CHECK(captured[0] == 0x99); // Bits 7-6 (0b11)
-        CHECK(captured[1] == 0x91); // Bits 5-4 (0b10)
-        CHECK(captured[2] == 0x19); // Bits 3-2 (0b01)
-        CHECK(captured[3] == 0x11); // Bits 1-0 (0b00)
+        FL_CHECK(captured[0] == 0x99); // Bits 7-6 (0b11)
+        FL_CHECK(captured[1] == 0x91); // Bits 5-4 (0b10)
+        FL_CHECK(captured[2] == 0x19); // Bits 3-2 (0b01)
+        FL_CHECK(captured[3] == 0x11); // Bits 1-0 (0b00)
 
         // Verify second byte (0x00)
-        CHECK(captured[4] == 0x11);
-        CHECK(captured[5] == 0x11);
-        CHECK(captured[6] == 0x11);
-        CHECK(captured[7] == 0x11);
+        FL_CHECK(captured[4] == 0x11);
+        FL_CHECK(captured[5] == 0x11);
+        FL_CHECK(captured[6] == 0x11);
+        FL_CHECK(captured[7] == 0x11);
 
         // Verify third byte (0xFF)
-        CHECK(captured[8] == 0x99);
-        CHECK(captured[9] == 0x99);
-        CHECK(captured[10] == 0x99);
-        CHECK(captured[11] == 0x99);
+        FL_CHECK(captured[8] == 0x99);
+        FL_CHECK(captured[9] == 0x99);
+        FL_CHECK(captured[10] == 0x99);
+        FL_CHECK(captured[11] == 0x99);
     }
 }
 
@@ -189,17 +189,17 @@ TEST_CASE("ChannelEngineUART - State machine") {
         fixture.mEngine.enqueue(channel);
 
         // Initial: READY
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
 
         // After show: DRAINING (transmission in progress)
         fixture.mEngine.show();
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::DRAINING);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::DRAINING);
 
         // Complete transmission
         fixture.mMockPeripheral->forceTransmissionComplete();
 
         // After completion: READY
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
     }
 
     SUBCASE("Multiple show() calls with different data") {
@@ -208,10 +208,10 @@ TEST_CASE("ChannelEngineUART - State machine") {
         fixture.mEngine.enqueue(channel1);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured1 = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured1.size() == 60); // 5 LEDs * 3 bytes * 4 = 60
+        FL_CHECK(captured1.size() == 60); // 5 LEDs * 3 bytes * 4 = 60
 
         // Reset mock
         fixture.mMockPeripheral->resetCapturedData();
@@ -221,10 +221,10 @@ TEST_CASE("ChannelEngineUART - State machine") {
         fixture.mEngine.enqueue(channel2);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured2 = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured2.size() == 120); // 10 LEDs * 3 bytes * 4 = 120
+        FL_CHECK(captured2.size() == 120); // 10 LEDs * 3 bytes * 4 = 120
     }
 }
 
@@ -241,13 +241,13 @@ TEST_CASE("ChannelEngineUART - Multiple channels sequential transmission") {
 
         // Engine should handle multiple channels sequentially (UART is single-lane)
         // First channel should trigger initialization
-        CHECK(fixture.mMockPeripheral->isInitialized());
+        FL_CHECK(fixture.mMockPeripheral->isInitialized());
 
         // Complete first channel and verify second channel is transmitted
         fixture.mMockPeripheral->forceTransmissionComplete();
         fixture.mEngine.poll(); // Start second channel
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
     }
 }
 
@@ -259,10 +259,10 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 120); // 10 * 3 * 4 = 120
+        FL_CHECK(captured.size() == 120); // 10 * 3 * 4 = 120
     }
 
     SUBCASE("Medium buffer (50 LEDs)") {
@@ -271,10 +271,10 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 600); // 50 * 3 * 4 = 600
+        FL_CHECK(captured.size() == 600); // 50 * 3 * 4 = 600
     }
 
     SUBCASE("Large buffer (500 LEDs)") {
@@ -283,10 +283,10 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 6000); // 500 * 3 * 4 = 6000
+        FL_CHECK(captured.size() == 6000); // 500 * 3 * 4 = 6000
     }
 }
 
@@ -303,10 +303,10 @@ TEST_CASE("ChannelEngineUART - Empty channel handling") {
         fixture.mEngine.show();
 
         // Should remain READY (no transmission)
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
 
         // Peripheral should NOT be initialized
-        CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
+        FL_CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
     }
 
     SUBCASE("Null channel") {
@@ -314,7 +314,7 @@ TEST_CASE("ChannelEngineUART - Empty channel handling") {
         fixture.mEngine.show();
 
         // Should remain READY
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 }
 
@@ -327,11 +327,11 @@ TEST_CASE("ChannelEngineUART - Chipset grouping") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         // Verify single transmission occurred
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 120);
+        FL_CHECK(captured.size() == 120);
     }
 
     // Note: Multiple chipset groups would require different timing configs
@@ -354,27 +354,27 @@ TEST_CASE("ChannelEngineUART - Waveform validation") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
 
         // Byte 0x00: all 0b00 → all 0x11 (rotated LUT)
-        CHECK(captured[0] == 0x11);
-        CHECK(captured[1] == 0x11);
-        CHECK(captured[2] == 0x11);
-        CHECK(captured[3] == 0x11);
+        FL_CHECK(captured[0] == 0x11);
+        FL_CHECK(captured[1] == 0x11);
+        FL_CHECK(captured[2] == 0x11);
+        FL_CHECK(captured[3] == 0x11);
 
         // Byte 0x55: alternating 0b01 → all 0x19 (rotated LUT)
-        CHECK(captured[4] == 0x19);
-        CHECK(captured[5] == 0x19);
-        CHECK(captured[6] == 0x19);
-        CHECK(captured[7] == 0x19);
+        FL_CHECK(captured[4] == 0x19);
+        FL_CHECK(captured[5] == 0x19);
+        FL_CHECK(captured[6] == 0x19);
+        FL_CHECK(captured[7] == 0x19);
 
         // Byte 0xAA: alternating 0b10 → all 0x91 (rotated LUT)
-        CHECK(captured[8] == 0x91);
-        CHECK(captured[9] == 0x91);
-        CHECK(captured[10] == 0x91);
-        CHECK(captured[11] == 0x91);
+        FL_CHECK(captured[8] == 0x91);
+        FL_CHECK(captured[9] == 0x91);
+        FL_CHECK(captured[10] == 0x91);
+        FL_CHECK(captured[11] == 0x91);
     }
 
     SUBCASE("Extract waveform from mock") {
@@ -387,16 +387,16 @@ TEST_CASE("ChannelEngineUART - Waveform validation") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         // Get waveform with start/stop bits
         auto waveform = fixture.mMockPeripheral->getWaveformWithFraming();
 
         // Verify waveform size: 12 bytes * 10 bits = 120 bits
-        CHECK(waveform.size() == 120);
+        FL_CHECK(waveform.size() == 120);
 
         // Verify start/stop bits are present
-        CHECK(fixture.mMockPeripheral->verifyStartStopBits());
+        FL_CHECK(fixture.mMockPeripheral->verifyStartStopBits());
     }
 }
 
@@ -409,7 +409,7 @@ TEST_CASE("ChannelEngineUART - Stress test") {
             fixture.mEngine.enqueue(channel);
             fixture.mEngine.show();
             fixture.mMockPeripheral->forceTransmissionComplete();
-            CHECK(fixture.pollUntilReady());
+            FL_CHECK(fixture.pollUntilReady());
             fixture.mMockPeripheral->resetCapturedData();
         }
     }
@@ -420,10 +420,10 @@ TEST_CASE("ChannelEngineUART - Stress test") {
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
 
         auto captured = fixture.mMockPeripheral->getCapturedBytes();
-        CHECK(captured.size() == 24000); // 2000 * 3 * 4 = 24000
+        FL_CHECK(captured.size() == 24000); // 2000 * 3 * 4 = 24000
     }
 }
 
@@ -432,7 +432,7 @@ TEST_CASE("ChannelEngineUART - Edge cases") {
 
     SUBCASE("Show with no enqueued channels") {
         fixture.mEngine.show();
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
     SUBCASE("Multiple enqueue before show") {
@@ -445,7 +445,7 @@ TEST_CASE("ChannelEngineUART - Edge cases") {
 
         // UART is single-lane but handles multiple channels sequentially
         // First channel should be transmitted immediately
-        CHECK(fixture.mMockPeripheral->isInitialized());
+        FL_CHECK(fixture.mMockPeripheral->isInitialized());
 
         // Complete first transmission
         fixture.mMockPeripheral->forceTransmissionComplete();
@@ -455,10 +455,10 @@ TEST_CASE("ChannelEngineUART - Edge cases") {
 
         // Complete second transmission
         fixture.mMockPeripheral->forceTransmissionComplete();
-        CHECK(fixture.pollUntilReady());
+        FL_CHECK(fixture.pollUntilReady());
     }
 
     SUBCASE("Poll before initialization") {
-        CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 }

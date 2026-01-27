@@ -180,17 +180,17 @@ TEST_CASE("vector - Allocator move constructor") {
         // Verify move constructor was called
         // Note: The allocator may be moved or copied depending on implementation
         // The key is that the vector's data is transferred
-        CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
+        FL_CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
 
         // Verify vector contents were transferred
-        CHECK(vec3.size() == 3);
-        CHECK(vec3[0] == 1);
-        CHECK(vec3[1] == 2);
-        CHECK(vec3[2] == 3);
+        FL_CHECK(vec3.size() == 3);
+        FL_CHECK(vec3[0] == 1);
+        FL_CHECK(vec3[1] == 2);
+        FL_CHECK(vec3[2] == 3);
 
         // Verify source vector is in moved-from state
-        CHECK(vec2.size() == 0);
-        CHECK(vec2.empty());
+        FL_CHECK(vec2.size() == 0);
+        FL_CHECK(vec2.empty());
     }
 }
 
@@ -216,17 +216,17 @@ TEST_CASE("vector - Allocator move assignment") {
         vec1 = fl::move(vec2);
 
         // Verify move assignment was called
-        CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
+        FL_CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
 
         // Verify vector contents were transferred
-        CHECK(vec1.size() == 3);
-        CHECK(vec1[0] == 1);
-        CHECK(vec1[1] == 2);
-        CHECK(vec1[2] == 3);
+        FL_CHECK(vec1.size() == 3);
+        FL_CHECK(vec1[0] == 1);
+        FL_CHECK(vec1[1] == 2);
+        FL_CHECK(vec1[2] == 3);
 
         // Verify source vector is in moved-from state
-        CHECK(vec2.size() == 0);
-        CHECK(vec2.empty());
+        FL_CHECK(vec2.size() == 0);
+        FL_CHECK(vec2.empty());
     }
 }
 
@@ -241,14 +241,14 @@ TEST_CASE("SortedHeapMap - Move constructor transfers data") {
         fl::SortedHeapMap<int, int> map2(fl::move(map1));
 
         // Verify map contents were transferred
-        CHECK(map2.size() == 3);
-        CHECK(map2.has(1));
-        CHECK(map2.has(2));
-        CHECK(map2.has(3));
+        FL_CHECK(map2.size() == 3);
+        FL_CHECK(map2.has(1));
+        FL_CHECK(map2.has(2));
+        FL_CHECK(map2.has(3));
 
         // Verify source map is empty
-        CHECK(map1.size() == 0);
-        CHECK(map1.empty());
+        FL_CHECK(map1.size() == 0);
+        FL_CHECK(map1.empty());
     }
 
     SUBCASE("Move constructor moves allocator") {
@@ -267,17 +267,17 @@ TEST_CASE("SortedHeapMap - Move constructor transfers data") {
         fl::SortedHeapMap<int, int, fl::less<int>, TrackingAllocator<fl::pair<int, int>>> map2(fl::move(map1));
 
         // Verify move constructor was called
-        CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
+        FL_CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
 
         // Verify map contents were transferred
-        CHECK(map2.size() == 3);
-        CHECK(map2.has(1));
-        CHECK(map2.has(2));
-        CHECK(map2.has(3));
+        FL_CHECK(map2.size() == 3);
+        FL_CHECK(map2.has(1));
+        FL_CHECK(map2.has(2));
+        FL_CHECK(map2.has(3));
 
         // Verify source map is empty
-        CHECK(map1.size() == 0);
-        CHECK(map1.empty());
+        FL_CHECK(map1.size() == 0);
+        FL_CHECK(map1.empty());
     }
 }
 
@@ -295,14 +295,14 @@ TEST_CASE("SortedHeapMap - Move assignment transfers data") {
         map1 = fl::move(map2);
 
         // Verify map contents were transferred
-        CHECK(map1.size() == 3);
-        CHECK(map1.has(1));
-        CHECK(map1.has(2));
-        CHECK(map1.has(3));
+        FL_CHECK(map1.size() == 3);
+        FL_CHECK(map1.has(1));
+        FL_CHECK(map1.has(2));
+        FL_CHECK(map1.has(3));
 
         // Verify source map is empty
-        CHECK(map2.size() == 0);
-        CHECK(map2.empty());
+        FL_CHECK(map2.size() == 0);
+        FL_CHECK(map2.empty());
     }
 
     SUBCASE("Move assignment moves allocator") {
@@ -324,17 +324,17 @@ TEST_CASE("SortedHeapMap - Move assignment transfers data") {
         map1 = fl::move(map2);
 
         // Verify move assignment was called
-        CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
+        FL_CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
 
         // Verify map contents were transferred
-        CHECK(map1.size() == 3);
-        CHECK(map1.has(1));
-        CHECK(map1.has(2));
-        CHECK(map1.has(3));
+        FL_CHECK(map1.size() == 3);
+        FL_CHECK(map1.has(1));
+        FL_CHECK(map1.has(2));
+        FL_CHECK(map1.has(3));
 
         // Verify source map is empty
-        CHECK(map2.size() == 0);
-        CHECK(map2.empty());
+        FL_CHECK(map2.size() == 0);
+        FL_CHECK(map2.empty());
     }
 }
 
@@ -356,17 +356,17 @@ TEST_CASE("VectorSet - Allocator move constructor") {
         fl::VectorSet<int, TrackingAllocator<int>> set2(fl::move(set1));
 
         // Verify move constructor was called
-        CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
+        FL_CHECK((stats.move_constructs > 0 || stats.copy_constructs >= 0));
 
         // Verify set contents were transferred
-        CHECK(set2.size() == 3);
-        CHECK(set2.has(1));
-        CHECK(set2.has(2));
-        CHECK(set2.has(3));
+        FL_CHECK(set2.size() == 3);
+        FL_CHECK(set2.has(1));
+        FL_CHECK(set2.has(2));
+        FL_CHECK(set2.has(3));
 
         // Verify source set is empty
-        CHECK(set1.size() == 0);
-        CHECK(set1.empty());
+        FL_CHECK(set1.size() == 0);
+        FL_CHECK(set1.empty());
     }
 }
 
@@ -391,17 +391,17 @@ TEST_CASE("VectorSet - Allocator move assignment") {
         set1 = fl::move(set2);
 
         // Verify move assignment was called
-        CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
+        FL_CHECK((stats.move_assigns > 0 || stats.copy_assigns >= 0));
 
         // Verify set contents were transferred
-        CHECK(set1.size() == 3);
-        CHECK(set1.has(1));
-        CHECK(set1.has(2));
-        CHECK(set1.has(3));
+        FL_CHECK(set1.size() == 3);
+        FL_CHECK(set1.has(1));
+        FL_CHECK(set1.has(2));
+        FL_CHECK(set1.has(3));
 
         // Verify source set is empty
-        CHECK(set2.size() == 0);
-        CHECK(set2.empty());
+        FL_CHECK(set2.size() == 0);
+        FL_CHECK(set2.empty());
     }
 }
 
@@ -418,14 +418,14 @@ TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
         fl::InlinedVector<int, 2> vec2(fl::move(vec1));
 
         // Verify vector contents were transferred
-        CHECK(vec2.size() == 5);
+        FL_CHECK(vec2.size() == 5);
         for (int i = 0; i < 5; ++i) {
-            CHECK(vec2[i] == i * 10);
+            FL_CHECK(vec2[i] == i * 10);
         }
 
         // Verify source vector is empty
-        CHECK(vec1.size() == 0);
-        CHECK(vec1.empty());
+        FL_CHECK(vec1.size() == 0);
+        FL_CHECK(vec1.empty());
     }
 
     SUBCASE("Move assignment transfers heap storage") {
@@ -442,14 +442,14 @@ TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
         vec1 = fl::move(vec2);
 
         // Verify vector contents were transferred
-        CHECK(vec1.size() == 5);
+        FL_CHECK(vec1.size() == 5);
         for (int i = 0; i < 5; ++i) {
-            CHECK(vec1[i] == i * 10);
+            FL_CHECK(vec1[i] == i * 10);
         }
 
         // Verify source vector is empty
-        CHECK(vec2.size() == 0);
-        CHECK(vec2.empty());
+        FL_CHECK(vec2.size() == 0);
+        FL_CHECK(vec2.empty());
     }
 }
 
@@ -464,11 +464,11 @@ TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
         fl::vector<int> vec2(fl::move(vec1));
 
         // Should still work correctly even though allocator is stateless
-        CHECK(vec2.size() == 3);
-        CHECK(vec2[0] == 1);
-        CHECK(vec2[1] == 2);
-        CHECK(vec2[2] == 3);
-        CHECK(vec1.size() == 0);
+        FL_CHECK(vec2.size() == 3);
+        FL_CHECK(vec2[0] == 1);
+        FL_CHECK(vec2[1] == 2);
+        FL_CHECK(vec2[2] == 3);
+        FL_CHECK(vec1.size() == 0);
     }
 
     SUBCASE("Stateless allocator move assignment") {
@@ -482,9 +482,9 @@ TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
         // Move assign with stateless allocator
         vec1 = fl::move(vec2);
 
-        CHECK(vec1.size() == 2);
-        CHECK(vec1[0] == 1);
-        CHECK(vec1[1] == 2);
-        CHECK(vec2.size() == 0);
+        FL_CHECK(vec1.size() == 2);
+        FL_CHECK(vec1[0] == 1);
+        FL_CHECK(vec1[1] == 2);
+        FL_CHECK(vec2.size() == 0);
     }
 }

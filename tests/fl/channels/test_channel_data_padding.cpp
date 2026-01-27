@@ -87,9 +87,9 @@ TEST_CASE("writeWithPadding - no padding generator, exact size") {
     uint8_t dst[3] = {0};
     channelData->writeWithPadding(fl::span<uint8_t>(dst, 3));
 
-    REQUIRE(dst[0] == 0xAA);
-    REQUIRE(dst[1] == 0xBB);
-    REQUIRE(dst[2] == 0xCC);
+    FL_REQUIRE(dst[0] == 0xAA);
+    FL_REQUIRE(dst[1] == 0xBB);
+    FL_REQUIRE(dst[2] == 0xCC);
 }
 
 TEST_CASE("writeWithPadding - no padding generator, left-pad with zeros") {
@@ -105,11 +105,11 @@ TEST_CASE("writeWithPadding - no padding generator, left-pad with zeros") {
     uint8_t dst[5] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     channelData->writeWithPadding(fl::span<uint8_t>(dst, 5));
 
-    REQUIRE(dst[0] == 0x00); // Left-padding (transmitted first to non-existent pixels)
-    REQUIRE(dst[1] == 0x00);
-    REQUIRE(dst[2] == 0x00);
-    REQUIRE(dst[3] == 0xAA); // Actual data
-    REQUIRE(dst[4] == 0xBB);
+    FL_REQUIRE(dst[0] == 0x00); // Left-padding (transmitted first to non-existent pixels)
+    FL_REQUIRE(dst[1] == 0x00);
+    FL_REQUIRE(dst[2] == 0x00);
+    FL_REQUIRE(dst[3] == 0xAA); // Actual data
+    FL_REQUIRE(dst[4] == 0xBB);
 }
 
 TEST_CASE("writeWithPadding - with padding generator") {
@@ -131,11 +131,11 @@ TEST_CASE("writeWithPadding - with padding generator") {
     uint8_t dst[5] = {0};
     channelData->writeWithPadding(fl::span<uint8_t>(dst, 5));
 
-    REQUIRE(dst[0] == 0xAA);
-    REQUIRE(dst[1] == 0xBB);
-    REQUIRE(dst[2] == 0xFF); // Padded with 0xFF
-    REQUIRE(dst[3] == 0xFF);
-    REQUIRE(dst[4] == 0xFF);
+    FL_REQUIRE(dst[0] == 0xAA);
+    FL_REQUIRE(dst[1] == 0xBB);
+    FL_REQUIRE(dst[2] == 0xFF); // Padded with 0xFF
+    FL_REQUIRE(dst[3] == 0xFF);
+    FL_REQUIRE(dst[4] == 0xFF);
 }
 
 TEST_CASE("writeWithPadding - UCS7604 complex padding") {
@@ -155,27 +155,27 @@ TEST_CASE("writeWithPadding - UCS7604 complex padding") {
     buffer.push_back(0xCC);
     buffer.push_back(0xDD);
 
-    REQUIRE(buffer.size() == 19);
+    FL_REQUIRE(buffer.size() == 19);
 
     // Write to destination with padding to 21 bytes
     uint8_t dst[21] = {0};
     channelData->writeWithPadding(fl::span<uint8_t>(dst, 21));
 
     // Verify preamble is intact (first 15 bytes)
-    REQUIRE(dst[0] == 0xFF);
-    REQUIRE(dst[14] == 0x00);
+    FL_REQUIRE(dst[0] == 0xFF);
+    FL_REQUIRE(dst[14] == 0x00);
 
     // Verify padding inserted at index 15 and 16
-    REQUIRE(dst[15] == 0x00);
-    REQUIRE(dst[16] == 0x00);
+    FL_REQUIRE(dst[15] == 0x00);
+    FL_REQUIRE(dst[16] == 0x00);
 
     // Verify LED data moved after padding
-    REQUIRE(dst[17] == 0xAA);
-    REQUIRE(dst[18] == 0xBB);
-    REQUIRE(dst[19] == 0xCC);
-    REQUIRE(dst[20] == 0xDD);
+    FL_REQUIRE(dst[17] == 0xAA);
+    FL_REQUIRE(dst[18] == 0xBB);
+    FL_REQUIRE(dst[19] == 0xCC);
+    FL_REQUIRE(dst[20] == 0xDD);
 
     // Original buffer should remain unchanged
-    REQUIRE(buffer.size() == 19);
-    REQUIRE(buffer[15] == 0xAA);
+    FL_REQUIRE(buffer.size() == 19);
+    FL_REQUIRE(buffer[15] == 0xAA);
 }

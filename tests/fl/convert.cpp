@@ -15,13 +15,13 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
         // T0H = T1
-        CHECK_EQ(T0H, 100);
+        FL_CHECK_EQ(T0H, 100);
         // T0L = T2 + T3
-        CHECK_EQ(T0L, 500);
+        FL_CHECK_EQ(T0L, 500);
         // T1H = T1 + T2
-        CHECK_EQ(T1H, 300);
+        FL_CHECK_EQ(T1H, 300);
         // T1L = T3
-        CHECK_EQ(T1L, 300);
+        FL_CHECK_EQ(T1L, 300);
     }
 
     SUBCASE("zero values") {
@@ -29,10 +29,10 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 
         convert_fastled_timings_to_timedeltas(0, 0, 0, &T0H, &T0L, &T1H, &T1L);
 
-        CHECK_EQ(T0H, 0);
-        CHECK_EQ(T0L, 0);
-        CHECK_EQ(T1H, 0);
-        CHECK_EQ(T1L, 0);
+        FL_CHECK_EQ(T0H, 0);
+        FL_CHECK_EQ(T0L, 0);
+        FL_CHECK_EQ(T1H, 0);
+        FL_CHECK_EQ(T1L, 0);
     }
 
     SUBCASE("maximum values") {
@@ -43,10 +43,10 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
-        CHECK_EQ(T0H, 0xFFFF);
-        CHECK_EQ(T0L, 0);
-        CHECK_EQ(T1H, 0xFFFF);
-        CHECK_EQ(T1L, 0);
+        FL_CHECK_EQ(T0H, 0xFFFF);
+        FL_CHECK_EQ(T0L, 0);
+        FL_CHECK_EQ(T1H, 0xFFFF);
+        FL_CHECK_EQ(T1L, 0);
     }
 
     SUBCASE("typical LED timing values (WS2812B-like)") {
@@ -62,18 +62,18 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
         // For 0-bit:
-        CHECK_EQ(T0H, 350);  // T0H = 350ns
-        CHECK_EQ(T0L, 900);  // T0L = 350 + 550 = 900ns
+        FL_CHECK_EQ(T0H, 350);  // T0H = 350ns
+        FL_CHECK_EQ(T0L, 900);  // T0L = 350 + 550 = 900ns
 
         // For 1-bit:
-        CHECK_EQ(T1H, 700);  // T1H = 350 + 350 = 700ns
-        CHECK_EQ(T1L, 550);  // T1L = 550ns
+        FL_CHECK_EQ(T1H, 700);  // T1H = 350 + 350 = 700ns
+        FL_CHECK_EQ(T1L, 550);  // T1L = 550ns
 
         // Verify total period is the same for both bits
         u16 period_0 = T0H + T0L;
         u16 period_1 = T1H + T1L;
-        CHECK_EQ(period_0, period_1);
-        CHECK_EQ(period_0, 1250);  // Total period = 1250ns
+        FL_CHECK_EQ(period_0, period_1);
+        FL_CHECK_EQ(period_0, 1250);  // Total period = 1250ns
     }
 
     SUBCASE("edge case - T2 and T3 sum") {
@@ -85,10 +85,10 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
-        CHECK_EQ(T0H, 10);
-        CHECK_EQ(T0L, 50000);  // 20000 + 30000
-        CHECK_EQ(T1H, 20010);  // 10 + 20000
-        CHECK_EQ(T1L, 30000);
+        FL_CHECK_EQ(T0H, 10);
+        FL_CHECK_EQ(T0L, 50000);  // 20000 + 30000
+        FL_CHECK_EQ(T1H, 20010);  // 10 + 20000
+        FL_CHECK_EQ(T1L, 30000);
     }
 
     SUBCASE("overflow handling with wraparound") {
@@ -101,12 +101,12 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
-        CHECK_EQ(T0H, 0x8000);
+        FL_CHECK_EQ(T0H, 0x8000);
         // T0L = 0x8000 + 0x1000 = 0x9000 (no overflow)
-        CHECK_EQ(T0L, 0x9000);
+        FL_CHECK_EQ(T0L, 0x9000);
         // T1H = 0x8000 + 0x8000 = 0x10000, wraps to 0x0000
-        CHECK_EQ(T1H, 0);
-        CHECK_EQ(T1L, 0x1000);
+        FL_CHECK_EQ(T1H, 0);
+        FL_CHECK_EQ(T1L, 0x1000);
     }
 
     SUBCASE("realistic APA102 timing") {
@@ -118,10 +118,10 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 
         convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
-        CHECK_EQ(T0H, 250);
-        CHECK_EQ(T0L, 750);  // 250 + 500
-        CHECK_EQ(T1H, 500);  // 250 + 250
-        CHECK_EQ(T1L, 500);
+        FL_CHECK_EQ(T0H, 250);
+        FL_CHECK_EQ(T0L, 750);  // 250 + 500
+        FL_CHECK_EQ(T1H, 500);  // 250 + 250
+        FL_CHECK_EQ(T1L, 500);
     }
 }
 
@@ -139,7 +139,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas input preservation") {
     convert_fastled_timings_to_timedeltas(T1, T2, T3, &T0H, &T0L, &T1H, &T1L);
 
     // Verify inputs weren't modified
-    CHECK_EQ(T1, T1_orig);
-    CHECK_EQ(T2, T2_orig);
-    CHECK_EQ(T3, T3_orig);
+    FL_CHECK_EQ(T1, T1_orig);
+    FL_CHECK_EQ(T2, T2_orig);
+    FL_CHECK_EQ(T3, T3_orig);
 }

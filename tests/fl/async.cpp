@@ -41,17 +41,17 @@ TEST_CASE("fl::async_runner interface") {
     SUBCASE("basic implementation") {
         TestAsyncRunner runner;
 
-        CHECK_EQ(runner.update_count, 0);
-        CHECK_EQ(runner.has_active_tasks(), false);
-        CHECK_EQ(runner.active_task_count(), 0);
+        FL_CHECK_EQ(runner.update_count, 0);
+        FL_CHECK_EQ(runner.has_active_tasks(), false);
+        FL_CHECK_EQ(runner.active_task_count(), 0);
 
         runner.update();
-        CHECK_EQ(runner.update_count, 1);
+        FL_CHECK_EQ(runner.update_count, 1);
 
         runner.set_active(true);
         runner.set_task_count(5);
-        CHECK_EQ(runner.has_active_tasks(), true);
-        CHECK_EQ(runner.active_task_count(), 5);
+        FL_CHECK_EQ(runner.has_active_tasks(), true);
+        FL_CHECK_EQ(runner.active_task_count(), 5);
     }
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("fl::AsyncManager") {
     SUBCASE("singleton instance") {
         AsyncManager& mgr1 = AsyncManager::instance();
         AsyncManager& mgr2 = AsyncManager::instance();
-        CHECK_EQ(&mgr1, &mgr2);
+        FL_CHECK_EQ(&mgr1, &mgr2);
     }
 
     SUBCASE("register and unregister runners") {
@@ -73,14 +73,14 @@ TEST_CASE("fl::AsyncManager") {
 
         // Verify they're registered by calling update
         mgr.update_all();
-        CHECK_EQ(runner1.update_count, 1);
-        CHECK_EQ(runner2.update_count, 1);
+        FL_CHECK_EQ(runner1.update_count, 1);
+        FL_CHECK_EQ(runner2.update_count, 1);
 
         // Unregister one
         mgr.unregister_runner(&runner1);
         mgr.update_all();
-        CHECK_EQ(runner1.update_count, 1); // Not updated again
-        CHECK_EQ(runner2.update_count, 2); // Updated again
+        FL_CHECK_EQ(runner1.update_count, 1); // Not updated again
+        FL_CHECK_EQ(runner2.update_count, 2); // Updated again
 
         // Cleanup
         mgr.unregister_runner(&runner2);
@@ -97,7 +97,7 @@ TEST_CASE("fl::AsyncManager") {
 
         // Should only be registered once
         mgr.update_all();
-        CHECK_EQ(runner.update_count, 1);
+        FL_CHECK_EQ(runner.update_count, 1);
 
         // Cleanup
         mgr.unregister_runner(&runner);
@@ -122,14 +122,14 @@ TEST_CASE("fl::AsyncManager") {
 
         runner1.set_active(false);
         runner2.set_active(false);
-        CHECK_EQ(mgr.has_active_tasks(), false);
+        FL_CHECK_EQ(mgr.has_active_tasks(), false);
 
         runner1.set_active(true);
-        CHECK_EQ(mgr.has_active_tasks(), true);
+        FL_CHECK_EQ(mgr.has_active_tasks(), true);
 
         runner1.set_active(false);
         runner2.set_active(true);
-        CHECK_EQ(mgr.has_active_tasks(), true);
+        FL_CHECK_EQ(mgr.has_active_tasks(), true);
 
         // Cleanup
         mgr.unregister_runner(&runner1);
@@ -147,10 +147,10 @@ TEST_CASE("fl::AsyncManager") {
         runner1.set_task_count(3);
         runner2.set_task_count(5);
 
-        CHECK_EQ(mgr.total_active_tasks(), 8);
+        FL_CHECK_EQ(mgr.total_active_tasks(), 8);
 
         runner1.set_task_count(0);
-        CHECK_EQ(mgr.total_active_tasks(), 5);
+        FL_CHECK_EQ(mgr.total_active_tasks(), 5);
 
         // Cleanup
         mgr.unregister_runner(&runner1);
@@ -165,11 +165,11 @@ TEST_CASE("fl::async_run") {
 
         mgr.register_runner(&runner);
 
-        CHECK_EQ(runner.update_count, 0);
+        FL_CHECK_EQ(runner.update_count, 0);
         async_run();
-        CHECK_EQ(runner.update_count, 1);
+        FL_CHECK_EQ(runner.update_count, 1);
         async_run();
-        CHECK_EQ(runner.update_count, 2);
+        FL_CHECK_EQ(runner.update_count, 2);
 
         // Cleanup
         mgr.unregister_runner(&runner);
@@ -188,7 +188,7 @@ TEST_CASE("fl::async_active_tasks") {
         runner1.set_task_count(2);
         runner2.set_task_count(3);
 
-        CHECK_EQ(async_active_tasks(), 5);
+        FL_CHECK_EQ(async_active_tasks(), 5);
 
         // Cleanup
         mgr.unregister_runner(&runner1);
@@ -204,10 +204,10 @@ TEST_CASE("fl::async_has_tasks") {
         mgr.register_runner(&runner);
 
         runner.set_active(false);
-        CHECK_EQ(async_has_tasks(), false);
+        FL_CHECK_EQ(async_has_tasks(), false);
 
         runner.set_active(true);
-        CHECK_EQ(async_has_tasks(), true);
+        FL_CHECK_EQ(async_has_tasks(), true);
 
         // Cleanup
         mgr.unregister_runner(&runner);
@@ -221,10 +221,10 @@ TEST_CASE("fl::async_yield") {
 
         mgr.register_runner(&runner);
 
-        CHECK_EQ(runner.update_count, 0);
+        FL_CHECK_EQ(runner.update_count, 0);
         async_yield();
         // async_yield calls async_run at least once, plus additional pumps
-        CHECK(runner.update_count >= 1);
+        FL_CHECK(runner.update_count >= 1);
 
         // Cleanup
         mgr.unregister_runner(&runner);
@@ -236,32 +236,32 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
         auto promise = fl::promise<int>::resolve(42);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(result.ok());
-        CHECK_EQ(result.value(), 42);
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 42);
     }
 
     SUBCASE("await_top_level rejected promise returns error") {
         auto promise = fl::promise<int>::reject(fl::Error("Test error"));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(!result.ok());
-        CHECK_EQ(result.error().message, "Test error");
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Test error");
     }
 
     SUBCASE("await_top_level invalid promise returns error") {
         fl::promise<int> invalid_promise; // Default constructor creates invalid promise
         auto result = fl::await_top_level(invalid_promise);  // Type automatically deduced!
 
-        CHECK(!result.ok());
-        CHECK_EQ(result.error().message, "Invalid promise");
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Invalid promise");
     }
 
     SUBCASE("explicit template parameter still works") {
         auto promise = fl::promise<int>::resolve(42);
         auto result = fl::await_top_level<int>(promise);  // Explicit template parameter
 
-        CHECK(result.ok());
-        CHECK_EQ(result.value(), 42);
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 42);
     }
 }
 
@@ -280,9 +280,9 @@ TEST_CASE("fl::await_top_level - Asynchronous Completion") {
 
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(promise_completed);
-        CHECK(result.ok());
-        CHECK_EQ(result.value(), 123);
+        FL_CHECK(promise_completed);
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 123);
     }
 
     SUBCASE("await_top_level waits for promise to be rejected") {
@@ -295,9 +295,9 @@ TEST_CASE("fl::await_top_level - Asynchronous Completion") {
 
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(promise_completed);
-        CHECK(!result.ok());
-        CHECK_EQ(result.error().message, "Async error");
+        FL_CHECK(promise_completed);
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Async error");
     }
 }
 
@@ -306,8 +306,8 @@ TEST_CASE("fl::await_top_level - Different Value Types") {
         auto promise = fl::promise<fl::string>::resolve(fl::string("Hello, World!"));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(result.ok());
-        CHECK_EQ(result.value(), "Hello, World!");
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), "Hello, World!");
     }
 
     SUBCASE("await_top_level with custom struct") {
@@ -324,8 +324,8 @@ TEST_CASE("fl::await_top_level - Different Value Types") {
         auto promise = fl::promise<TestData>::resolve(expected);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(result.ok());
-        CHECK(result.value() == expected);
+        FL_CHECK(result.ok());
+        FL_CHECK(result.value() == expected);
     }
 }
 
@@ -335,8 +335,8 @@ TEST_CASE("fl::await_top_level - Error Handling") {
         auto promise = fl::promise<int>::reject(fl::Error(error_msg));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(!result.ok());
-        CHECK_EQ(result.error().message, error_msg);
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, error_msg);
     }
 
     SUBCASE("await_top_level with custom error") {
@@ -344,8 +344,8 @@ TEST_CASE("fl::await_top_level - Error Handling") {
         auto promise = fl::promise<fl::string>::reject(custom_error);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
-        CHECK(!result.ok());
-        CHECK_EQ(result.error().message, "Custom error with details");
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Custom error with details");
     }
 }
 
@@ -360,16 +360,16 @@ TEST_CASE("fl::await_top_level - Multiple Awaits") {
         auto result3 = fl::await_top_level(promise3);  // Type automatically deduced!
 
         // Check first result
-        CHECK(result1.ok());
-        CHECK_EQ(result1.value(), 10);
+        FL_CHECK(result1.ok());
+        FL_CHECK_EQ(result1.value(), 10);
 
         // Check second result
-        CHECK(result2.ok());
-        CHECK_EQ(result2.value(), 20);
+        FL_CHECK(result2.ok());
+        FL_CHECK_EQ(result2.value(), 20);
 
         // Check third result (error)
-        CHECK(!result3.ok());
-        CHECK_EQ(result3.error().message, "Error in promise 3");
+        FL_CHECK(!result3.ok());
+        FL_CHECK_EQ(result3.error().message, "Error in promise 3");
     }
 
     SUBCASE("await_top_level same promise multiple times") {
@@ -379,11 +379,11 @@ TEST_CASE("fl::await_top_level - Multiple Awaits") {
         auto result2 = fl::await_top_level(promise);  // Type automatically deduced!
 
         // Both awaits should return the same result
-        CHECK(result1.ok());
-        CHECK(result2.ok());
+        FL_CHECK(result1.ok());
+        FL_CHECK(result2.ok());
 
-        CHECK_EQ(result1.value(), 999);
-        CHECK_EQ(result2.value(), 999);
+        FL_CHECK_EQ(result1.value(), 999);
+        FL_CHECK_EQ(result2.value(), 999);
     }
 }
 
@@ -396,12 +396,12 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
         auto error_result = fl::await_top_level(error_promise);
 
         // Test boolean conversion (should work like ok())
-        CHECK(success_result);   // Implicit conversion to bool
-        CHECK(!error_result);    // Implicit conversion to bool
+        FL_CHECK(success_result);   // Implicit conversion to bool
+        FL_CHECK(!error_result);    // Implicit conversion to bool
 
         // Equivalent to ok() method
-        CHECK(success_result.ok());
-        CHECK(!error_result.ok());
+        FL_CHECK(success_result.ok());
+        FL_CHECK(!error_result.ok());
     }
 
     SUBCASE("error_message convenience method") {
@@ -412,8 +412,8 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
         auto error_result = fl::await_top_level(error_promise);
 
         // Test error_message convenience method
-        CHECK_EQ(success_result.error_message(), "");  // Empty string for success
-        CHECK_EQ(error_result.error_message(), "Test error");  // Error message for failure
+        FL_CHECK_EQ(success_result.error_message(), "");  // Empty string for success
+        FL_CHECK_EQ(error_result.error_message(), "Test error");  // Error message for failure
     }
 }
 
@@ -421,7 +421,7 @@ TEST_CASE("fl::Scheduler") {
     SUBCASE("singleton instance") {
         Scheduler& sched1 = Scheduler::instance();
         Scheduler& sched2 = Scheduler::instance();
-        CHECK_EQ(&sched1, &sched2);
+        FL_CHECK_EQ(&sched1, &sched2);
     }
 
     SUBCASE("add_task returns task id") {
@@ -434,7 +434,7 @@ TEST_CASE("fl::Scheduler") {
         });
 
         int task_id = sched.add_task(fl::move(t));
-        CHECK(task_id > 0);
+        FL_CHECK(task_id > 0);
 
         sched.clear_all_tasks();
     }
@@ -450,9 +450,9 @@ TEST_CASE("fl::Scheduler") {
 
         sched.add_task(fl::move(t));
 
-        CHECK_EQ(executed, false);
+        FL_CHECK_EQ(executed, false);
         sched.update();
-        CHECK_EQ(executed, true);
+        FL_CHECK_EQ(executed, true);
 
         sched.clear_all_tasks();
     }
@@ -470,7 +470,7 @@ TEST_CASE("fl::Scheduler") {
         sched.clear_all_tasks();
         sched.update();
 
-        CHECK_EQ(executed, false); // Task was cleared before execution
+        FL_CHECK_EQ(executed, false); // Task was cleared before execution
     }
 
     SUBCASE("update_before_frame_tasks") {
@@ -492,11 +492,11 @@ TEST_CASE("fl::Scheduler") {
         sched.add_task(fl::move(after_task));
 
         sched.update_before_frame_tasks();
-        CHECK_EQ(before_executed, true);
-        CHECK_EQ(after_executed, false);
+        FL_CHECK_EQ(before_executed, true);
+        FL_CHECK_EQ(after_executed, false);
 
         sched.update_after_frame_tasks();
-        CHECK_EQ(after_executed, true);
+        FL_CHECK_EQ(after_executed, true);
 
         sched.clear_all_tasks();
     }
@@ -512,9 +512,9 @@ TEST_CASE("fl::Scheduler") {
 
         sched.add_task(fl::move(t));
 
-        CHECK_EQ(executed, false);
+        FL_CHECK_EQ(executed, false);
         sched.update_after_frame_tasks();
-        CHECK_EQ(executed, true);
+        FL_CHECK_EQ(executed, true);
 
         sched.clear_all_tasks();
     }
@@ -532,9 +532,9 @@ TEST_CASE("fl::async integration") {
 
         sched.add_task(fl::move(t));
 
-        CHECK_EQ(executed, false);
+        FL_CHECK_EQ(executed, false);
         async_run(); // Should update scheduler and async manager
-        CHECK_EQ(executed, true);
+        FL_CHECK_EQ(executed, true);
 
         sched.clear_all_tasks();
     }

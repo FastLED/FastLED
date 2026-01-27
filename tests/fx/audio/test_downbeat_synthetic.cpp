@@ -329,7 +329,7 @@ TEST_CASE("DownbeatDetector - Basic downbeat pattern detection") {
     }
 
     // Should detect at least one downbeat in 8 beats
-    CHECK_GT(downbeatCount, 0);
+    FL_CHECK_GT(downbeatCount, 0);
 }
 
 TEST_CASE("DownbeatDetector - Meter setting and beat counting") {
@@ -338,8 +338,8 @@ TEST_CASE("DownbeatDetector - Meter setting and beat counting") {
     DownbeatDetector detector;
     detector.setTimeSignature(3); // 3/4 time
 
-    CHECK_EQ(detector.getBeatsPerMeasure(), 3);
-    CHECK_EQ(detector.getCurrentBeat(), 1); // Should start at beat 1
+    FL_CHECK_EQ(detector.getBeatsPerMeasure(), 3);
+    FL_CHECK_EQ(detector.getCurrentBeat(), 1); // Should start at beat 1
 }
 
 TEST_CASE("DownbeatDetector - Confidence bounds") {
@@ -354,8 +354,8 @@ TEST_CASE("DownbeatDetector - Confidence bounds") {
         detector.update(context);
 
         float confidence = detector.getConfidence();
-        CHECK_GE(confidence, 0.0f);
-        CHECK_LE(confidence, 1.0f);
+        FL_CHECK_GE(confidence, 0.0f);
+        FL_CHECK_LE(confidence, 1.0f);
 
         timestamp += 500;
     }
@@ -373,8 +373,8 @@ TEST_CASE("DownbeatDetector - Measure phase tracking") {
         detector.update(context);
 
         float phase = detector.getMeasurePhase();
-        CHECK_GE(phase, 0.0f);
-        CHECK_LT(phase, 1.0f);
+        FL_CHECK_GE(phase, 0.0f);
+        FL_CHECK_LT(phase, 1.0f);
 
         timestamp += 500;
     }
@@ -399,12 +399,12 @@ TEST_CASE("DownbeatDetector - Basic functionality") {
     detector.update(context);
 
     // Basic state checks
-    CHECK_GE(detector.getCurrentBeat(), 1);
-    CHECK_LE(detector.getCurrentBeat(), detector.getBeatsPerMeasure());
-    CHECK_GE(detector.getMeasurePhase(), 0.0f);
-    CHECK_LE(detector.getMeasurePhase(), 1.0f);
-    CHECK_GE(detector.getConfidence(), 0.0f);
-    CHECK_LE(detector.getConfidence(), 1.0f);
+    FL_CHECK_GE(detector.getCurrentBeat(), 1);
+    FL_CHECK_LE(detector.getCurrentBeat(), detector.getBeatsPerMeasure());
+    FL_CHECK_GE(detector.getMeasurePhase(), 0.0f);
+    FL_CHECK_LE(detector.getMeasurePhase(), 1.0f);
+    FL_CHECK_GE(detector.getConfidence(), 0.0f);
+    FL_CHECK_LE(detector.getConfidence(), 1.0f);
 }
 
 // ===== Phase 2: Confidence Mechanism Analysis Tests =====
@@ -440,7 +440,7 @@ TEST_CASE("DownbeatDetector - Strong accent strength (2x multiplier)") {
     // Note: F1 is currently 0 due to lack of warm-up period (see LOOP.md Iteration 5)
     // This will be fixed in Phase 3 when warm-up is added to tests
     // For now, just verify metrics are calculable
-    CHECK_GE(metrics.precision(), 0.0f);
+    FL_CHECK_GE(metrics.precision(), 0.0f);
 }
 
 TEST_CASE("DownbeatDetector - Weak accent strength (0.6x multiplier)") {
@@ -471,8 +471,8 @@ TEST_CASE("DownbeatDetector - Weak accent strength (0.6x multiplier)") {
 
     // Weak accents may have lower recall but should maintain precision
     // Just verify metrics are calculable
-    CHECK_GE(metrics.precision(), 0.0f);
-    CHECK_LE(metrics.precision(), 1.0f);
+    FL_CHECK_GE(metrics.precision(), 0.0f);
+    FL_CHECK_LE(metrics.precision(), 1.0f);
 }
 
 TEST_CASE("DownbeatDetector - Timing jitter tolerance") {
@@ -504,7 +504,7 @@ TEST_CASE("DownbeatDetector - Timing jitter tolerance") {
 
     // Note: Currently failing due to lack of warm-up (see Iteration 5 analysis)
     // Metrics are valid even if F1=0
-    CHECK_GE(metrics.precision(), 0.0f);
+    FL_CHECK_GE(metrics.precision(), 0.0f);
 }
 
 TEST_CASE("DownbeatDetector - Confidence threshold impact") {
@@ -540,8 +540,8 @@ TEST_CASE("DownbeatDetector - Confidence threshold impact") {
     // Lower threshold should have higher recall (catches more, may have false positives)
     // Higher threshold should have higher precision (fewer false positives, may miss some)
     // Note: Due to test variability, we just check that metrics are valid
-    CHECK_GE(metrics1.precision(), 0.0f);
-    CHECK_GE(metrics2.precision(), 0.0f);
+    FL_CHECK_GE(metrics1.precision(), 0.0f);
+    FL_CHECK_GE(metrics2.precision(), 0.0f);
 }
 
 TEST_CASE("DownbeatDetector - 3/4 waltz pattern") {
@@ -573,7 +573,7 @@ TEST_CASE("DownbeatDetector - 3/4 waltz pattern") {
 
     // Target: F1 > 0.7 for clean synthetic data
     // With warm-up and proper alignment, should achieve good F1 score
-    CHECK_GE(metrics.precision(), 0.0f);
+    FL_CHECK_GE(metrics.precision(), 0.0f);
 }
 
 // ===== Phase 2: Diagnostic Tests with Confidence Logging =====
@@ -637,7 +637,7 @@ TEST_CASE("DownbeatDetector - Confidence analysis: strong vs weak accents") {
     }
 
     // This test is for diagnostics only - always passes
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 TEST_CASE("DownbeatDetector - No time-skipping comparison") {
@@ -746,5 +746,5 @@ TEST_CASE("DownbeatDetector - No time-skipping comparison") {
             " F1:", metrics.f1Score());
 
     // This test is for diagnostics only - always passes
-    CHECK(true);
+    FL_CHECK(true);
 }

@@ -10,15 +10,15 @@ using namespace fl;
 TEST_CASE("blend8_endpoints") {
     // Test that blend8 properly handles endpoint values
     // When amountOfB = 0, result should be a
-    CHECK_EQ(blend8(100, 200, 0), 100);
-    CHECK_EQ(blend8(0, 255, 0), 0);
-    CHECK_EQ(blend8(255, 0, 0), 255);
+    FL_CHECK_EQ(blend8(100, 200, 0), 100);
+    FL_CHECK_EQ(blend8(0, 255, 0), 0);
+    FL_CHECK_EQ(blend8(255, 0, 0), 255);
 
     // When amountOfB = 255, result should be b (or very close due to rounding)
     // With proper implementation, blend8(a, b, 255) should equal b
-    CHECK_EQ(blend8(100, 200, 255), 200);
-    CHECK_EQ(blend8(0, 255, 255), 255);
-    CHECK_EQ(blend8(255, 0, 255), 0);
+    FL_CHECK_EQ(blend8(100, 200, 255), 200);
+    FL_CHECK_EQ(blend8(0, 255, 255), 255);
+    FL_CHECK_EQ(blend8(255, 0, 255), 0);
 }
 
 TEST_CASE("blend8_midpoint") {
@@ -27,9 +27,9 @@ TEST_CASE("blend8_midpoint") {
     // With proper rounding, we expect correct results
 
     // Simple midpoint cases
-    CHECK_EQ(blend8(0, 255, 128), 128);     // Should be exactly halfway
-    CHECK_EQ(blend8(0, 100, 128), 50);      // 0 + (100-0)*128/256 + rounding
-    CHECK_EQ(blend8(100, 200, 128), 150);   // Should be 150
+    FL_CHECK_EQ(blend8(0, 255, 128), 128);     // Should be exactly halfway
+    FL_CHECK_EQ(blend8(0, 100, 128), 50);      // 0 + (100-0)*128/256 + rounding
+    FL_CHECK_EQ(blend8(100, 200, 128), 150);   // Should be 150
 }
 
 TEST_CASE("blend8_low_value_interpolation") {
@@ -39,17 +39,17 @@ TEST_CASE("blend8_low_value_interpolation") {
 
     // Test case from issue: A=0, B=1
     // For amountOfB=128: Expected result with rounding: round(0 + (1-0)*128/256) = round(0.5) = 1
-    CHECK_EQ(blend8(0, 1, 128), 1);
+    FL_CHECK_EQ(blend8(0, 1, 128), 1);
 
     // For amountOfB=64: Expected: round(0 + (1-0)*64/256) = round(0.25) = 0
-    CHECK_EQ(blend8(0, 1, 64), 0);
+    FL_CHECK_EQ(blend8(0, 1, 64), 0);
 
     // For amountOfB=192: Expected: round(0 + (1-0)*192/256) = round(0.75) = 1
-    CHECK_EQ(blend8(0, 1, 192), 1);
+    FL_CHECK_EQ(blend8(0, 1, 192), 1);
 
     // More low-value tests
-    CHECK_EQ(blend8(0, 2, 128), 1);  // Should be 1
-    CHECK_EQ(blend8(0, 4, 128), 2);  // Should be 2
+    FL_CHECK_EQ(blend8(0, 2, 128), 1);  // Should be 1
+    FL_CHECK_EQ(blend8(0, 4, 128), 2);  // Should be 2
 }
 
 TEST_CASE("blend8_rounding_accuracy") {
@@ -57,12 +57,12 @@ TEST_CASE("blend8_rounding_accuracy") {
     // The +0x80 (or +0x8000 for 16-bit) ensures proper rounding
 
     // These values should round correctly with the new implementation
-    CHECK_EQ(blend8(0, 10, 25), 1);   // 0 + 10*25/256 + rounding ≈ 0.98 + 0.5 = 1
-    CHECK_EQ(blend8(0, 10, 26), 1);   // 0 + 10*26/256 + rounding ≈ 1.02 + 0.5 = 2
+    FL_CHECK_EQ(blend8(0, 10, 25), 1);   // 0 + 10*25/256 + rounding ≈ 0.98 + 0.5 = 1
+    FL_CHECK_EQ(blend8(0, 10, 26), 1);   // 0 + 10*26/256 + rounding ≈ 1.02 + 0.5 = 2
 
     // Check that we properly reach the overlay color
-    CHECK_EQ(blend8(10, 20, 255), 20);
-    CHECK_EQ(blend8(100, 150, 255), 150);
+    FL_CHECK_EQ(blend8(10, 20, 255), 20);
+    FL_CHECK_EQ(blend8(100, 150, 255), 150);
 }
 
 TEST_CASE("blend8_full_range") {
@@ -81,8 +81,8 @@ TEST_CASE("blend8_full_range") {
                 // Allow for rounding tolerance (split checks to avoid doctest || restriction)
                 bool min_check = (result >= min_val) || (result == (min_val - 1));
                 bool max_check = (result <= max_val) || (result == (max_val + 1));
-                CHECK(min_check);
-                CHECK(max_check);
+                FL_CHECK(min_check);
+                FL_CHECK(max_check);
             }
         }
     }
@@ -103,7 +103,7 @@ TEST_CASE("blend8_iterative_convergence") {
 
     // After 10 iterations with 200/255 blend, should be very close to target
     // With proper rounding, we should reach or be very close to 255
-    CHECK(color >= 250);  // Should be at least 250 out of 255
+    FL_CHECK(color >= 250);  // Should be at least 250 out of 255
 }
 
 TEST_CASE("blend8_symmetry") {
@@ -115,17 +115,17 @@ TEST_CASE("blend8_symmetry") {
 
     // Results should be close (within 1 due to rounding)
     int diff = result1 > result2 ? result1 - result2 : result2 - result1;
-    CHECK(diff <= 1);
+    FL_CHECK(diff <= 1);
 }
 
 TEST_CASE("blend8_no_overflow") {
     // Ensure that blend8 doesn't produce values outside [0, 255]
     // Test extreme cases
 
-    CHECK_EQ(blend8(255, 255, 128), 255);
-    CHECK_EQ(blend8(0, 0, 128), 0);
-    CHECK_EQ(blend8(255, 0, 128), 127);
-    CHECK_EQ(blend8(0, 255, 128), 128);
+    FL_CHECK_EQ(blend8(255, 255, 128), 255);
+    FL_CHECK_EQ(blend8(0, 0, 128), 0);
+    FL_CHECK_EQ(blend8(255, 0, 128), 127);
+    FL_CHECK_EQ(blend8(0, 255, 128), 128);
 }
 
 TEST_CASE("blend8_8bit_vs_16bit") {
@@ -133,14 +133,14 @@ TEST_CASE("blend8_8bit_vs_16bit") {
     // This validates that both Option 1 (8-bit) and Option 2 (16-bit) work
 
     // Test some key values with both implementations
-    CHECK_EQ(blend8_8bit(0, 255, 128), 128);
-    CHECK_EQ(blend8_16bit(0, 255, 128), 128);
+    FL_CHECK_EQ(blend8_8bit(0, 255, 128), 128);
+    FL_CHECK_EQ(blend8_16bit(0, 255, 128), 128);
 
-    CHECK_EQ(blend8_8bit(100, 200, 128), 150);
-    CHECK_EQ(blend8_16bit(100, 200, 128), 150);
+    FL_CHECK_EQ(blend8_8bit(100, 200, 128), 150);
+    FL_CHECK_EQ(blend8_16bit(100, 200, 128), 150);
 
-    CHECK_EQ(blend8_8bit(0, 1, 128), 1);
-    CHECK_EQ(blend8_16bit(0, 1, 128), 1);
+    FL_CHECK_EQ(blend8_8bit(0, 1, 128), 1);
+    FL_CHECK_EQ(blend8_16bit(0, 1, 128), 1);
 
     // The 16-bit version should be slightly more accurate in edge cases
     // but for most cases they should match
@@ -150,13 +150,13 @@ TEST_CASE("blend8_comparison_values") {
     // Additional test cases to verify correct mathematical behavior
 
     // Quarter blends
-    CHECK_EQ(blend8(0, 255, 64), 64);   // 0 + 255*64/256 + rounding ≈ 64
-    CHECK_EQ(blend8(0, 255, 192), 192); // 0 + 255*192/256 + rounding ≈ 192
+    FL_CHECK_EQ(blend8(0, 255, 64), 64);   // 0 + 255*64/256 + rounding ≈ 64
+    FL_CHECK_EQ(blend8(0, 255, 192), 192); // 0 + 255*192/256 + rounding ≈ 192
 
     // Test with middle values
-    CHECK_EQ(blend8(100, 200, 0), 100);
-    CHECK_EQ(blend8(100, 200, 64), 125);
-    CHECK_EQ(blend8(100, 200, 128), 150);
-    CHECK_EQ(blend8(100, 200, 192), 175);
-    CHECK_EQ(blend8(100, 200, 255), 200);
+    FL_CHECK_EQ(blend8(100, 200, 0), 100);
+    FL_CHECK_EQ(blend8(100, 200, 64), 125);
+    FL_CHECK_EQ(blend8(100, 200, 128), 150);
+    FL_CHECK_EQ(blend8(100, 200, 192), 175);
+    FL_CHECK_EQ(blend8(100, 200, 255), 200);
 }

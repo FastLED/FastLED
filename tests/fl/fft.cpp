@@ -72,7 +72,7 @@ TEST_CASE("fft tester 512") {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
-        CHECK(almost_equal);
+        FL_CHECK(almost_equal);
     }
 
     fl::string info = fft.info();
@@ -127,7 +127,7 @@ TEST_CASE("fft tester 256") {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
-        CHECK(almost_equal);
+        FL_CHECK(almost_equal);
     }
 
     fl::string info = fft.info();
@@ -203,7 +203,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
-        CHECK(almost_equal);
+        FL_CHECK(almost_equal);
     }
     fl::string info = fft.info();
     FASTLED_WARN("FFTImpl info: " << info);

@@ -7,53 +7,53 @@ using namespace fl;
 TEST_CASE("fl::less<T>") {
     SUBCASE("int comparisons") {
         less<int> cmp;
-        CHECK(cmp(1, 2));
-        CHECK(!cmp(2, 1));
-        CHECK(!cmp(5, 5));
-        CHECK(cmp(-10, 0));
-        CHECK(cmp(-5, -3));
+        FL_CHECK(cmp(1, 2));
+        FL_CHECK(!cmp(2, 1));
+        FL_CHECK(!cmp(5, 5));
+        FL_CHECK(cmp(-10, 0));
+        FL_CHECK(cmp(-5, -3));
     }
 
     SUBCASE("unsigned comparisons") {
         less<unsigned int> cmp;
-        CHECK(cmp(0u, 1u));
-        CHECK(cmp(100u, 200u));
-        CHECK(!cmp(200u, 100u));
-        CHECK(!cmp(50u, 50u));
+        FL_CHECK(cmp(0u, 1u));
+        FL_CHECK(cmp(100u, 200u));
+        FL_CHECK(!cmp(200u, 100u));
+        FL_CHECK(!cmp(50u, 50u));
     }
 
     SUBCASE("float comparisons") {
         less<float> cmp;
-        CHECK(cmp(1.0f, 2.0f));
-        CHECK(cmp(-1.0f, 0.0f));
-        CHECK(!cmp(2.0f, 1.0f));
-        CHECK(!cmp(3.14f, 3.14f));
-        CHECK(cmp(0.0f, 0.1f));
+        FL_CHECK(cmp(1.0f, 2.0f));
+        FL_CHECK(cmp(-1.0f, 0.0f));
+        FL_CHECK(!cmp(2.0f, 1.0f));
+        FL_CHECK(!cmp(3.14f, 3.14f));
+        FL_CHECK(cmp(0.0f, 0.1f));
     }
 
     SUBCASE("double comparisons") {
         less<double> cmp;
-        CHECK(cmp(1.0, 2.0));
-        CHECK(cmp(-1.0, 0.0));
-        CHECK(!cmp(2.0, 1.0));
-        CHECK(!cmp(3.14159, 3.14159));
+        FL_CHECK(cmp(1.0, 2.0));
+        FL_CHECK(cmp(-1.0, 0.0));
+        FL_CHECK(!cmp(2.0, 1.0));
+        FL_CHECK(!cmp(3.14159, 3.14159));
     }
 
     SUBCASE("char comparisons") {
         less<char> cmp;
-        CHECK(cmp('a', 'b'));
-        CHECK(cmp('A', 'Z'));
-        CHECK(!cmp('z', 'a'));
-        CHECK(!cmp('m', 'm'));
+        FL_CHECK(cmp('a', 'b'));
+        FL_CHECK(cmp('A', 'Z'));
+        FL_CHECK(!cmp('z', 'a'));
+        FL_CHECK(!cmp('m', 'm'));
     }
 
     SUBCASE("const types") {
         less<const int> cmp;
         const int a = 5;
         const int b = 10;
-        CHECK(cmp(a, b));
-        CHECK(!cmp(b, a));
-        CHECK(!cmp(a, a));
+        FL_CHECK(cmp(a, b));
+        FL_CHECK(!cmp(b, a));
+        FL_CHECK(!cmp(a, a));
     }
 
     SUBCASE("constexpr evaluation") {
@@ -69,36 +69,36 @@ TEST_CASE("fl::less<void> - transparent comparator") {
     less<void> cmp;
 
     SUBCASE("same types") {
-        CHECK(cmp(1, 2));
-        CHECK(!cmp(2, 1));
-        CHECK(!cmp(5, 5));
+        FL_CHECK(cmp(1, 2));
+        FL_CHECK(!cmp(2, 1));
+        FL_CHECK(!cmp(5, 5));
     }
 
     SUBCASE("different integer types") {
-        CHECK(cmp(short(10), int(20)));
-        CHECK(cmp(int(5), long(10)));
-        CHECK(cmp(char(10), int(20)));
-        CHECK(!cmp(long(100), int(50)));
+        FL_CHECK(cmp(short(10), int(20)));
+        FL_CHECK(cmp(int(5), long(10)));
+        FL_CHECK(cmp(char(10), int(20)));
+        FL_CHECK(!cmp(long(100), int(50)));
     }
 
     SUBCASE("signed and unsigned") {
         // Note: signed/unsigned comparisons have platform-dependent behavior
         // These tests verify that less<void> compiles and works with mixed types
-        CHECK(cmp(short(10), int(20)));
-        CHECK(cmp(char(5), int(10)));
+        FL_CHECK(cmp(short(10), int(20)));
+        FL_CHECK(cmp(char(5), int(10)));
     }
 
     SUBCASE("integer and floating point") {
-        CHECK(cmp(1, 1.5));
-        CHECK(cmp(5, 10.0));
-        CHECK(!cmp(10, 5.0));
-        CHECK(cmp(int(3), float(3.14)));
+        FL_CHECK(cmp(1, 1.5));
+        FL_CHECK(cmp(5, 10.0));
+        FL_CHECK(!cmp(10, 5.0));
+        FL_CHECK(cmp(int(3), float(3.14)));
     }
 
     SUBCASE("float and double") {
-        CHECK(cmp(float(1.0), double(2.0)));
-        CHECK(cmp(double(1.5), float(2.5)));
-        CHECK(!cmp(float(5.0), double(3.0)));
+        FL_CHECK(cmp(float(1.0), double(2.0)));
+        FL_CHECK(cmp(double(1.5), float(2.5)));
+        FL_CHECK(!cmp(float(5.0), double(3.0)));
     }
 
     SUBCASE("forward semantics") {
@@ -114,7 +114,7 @@ TEST_CASE("fl::less<void> - transparent comparator") {
         };
 
         // This should compile because less<void> uses perfect forwarding
-        CHECK(cmp(MoveOnly(1), MoveOnly(2)));
+        FL_CHECK(cmp(MoveOnly(1), MoveOnly(2)));
     }
 
     SUBCASE("constexpr with void") {
@@ -129,18 +129,18 @@ TEST_CASE("fl::DefaultLess - backward compatibility") {
     SUBCASE("alias works correctly") {
         // DefaultLess should be an alias for less
         DefaultLess<int> cmp;
-        CHECK(cmp(1, 2));
-        CHECK(!cmp(2, 1));
-        CHECK(!cmp(5, 5));
+        FL_CHECK(cmp(1, 2));
+        FL_CHECK(!cmp(2, 1));
+        FL_CHECK(!cmp(5, 5));
     }
 
     SUBCASE("same behavior as less<T>") {
         less<int> less_cmp;
         DefaultLess<int> default_cmp;
 
-        CHECK(less_cmp(1, 2) == default_cmp(1, 2));
-        CHECK(less_cmp(5, 3) == default_cmp(5, 3));
-        CHECK(less_cmp(10, 10) == default_cmp(10, 10));
+        FL_CHECK(less_cmp(1, 2) == default_cmp(1, 2));
+        FL_CHECK(less_cmp(5, 3) == default_cmp(5, 3));
+        FL_CHECK(less_cmp(10, 10) == default_cmp(10, 10));
     }
 
     SUBCASE("constexpr compatibility") {
@@ -152,35 +152,35 @@ TEST_CASE("fl::DefaultLess - backward compatibility") {
 TEST_CASE("fl::less - edge cases") {
     SUBCASE("zero comparisons") {
         less<int> cmp;
-        CHECK(cmp(-1, 0));
-        CHECK(cmp(0, 1));
-        CHECK(!cmp(0, 0));
-        CHECK(!cmp(0, -1));
+        FL_CHECK(cmp(-1, 0));
+        FL_CHECK(cmp(0, 1));
+        FL_CHECK(!cmp(0, 0));
+        FL_CHECK(!cmp(0, -1));
     }
 
     SUBCASE("boundary values") {
         less<int> cmp;
-        CHECK(cmp(fl::numeric_limits<int>::min(), 0));
-        CHECK(cmp(0, fl::numeric_limits<int>::max()));
-        CHECK(cmp(fl::numeric_limits<int>::min(), fl::numeric_limits<int>::max()));
-        CHECK(!cmp(fl::numeric_limits<int>::max(), fl::numeric_limits<int>::min()));
+        FL_CHECK(cmp(fl::numeric_limits<int>::min(), 0));
+        FL_CHECK(cmp(0, fl::numeric_limits<int>::max()));
+        FL_CHECK(cmp(fl::numeric_limits<int>::min(), fl::numeric_limits<int>::max()));
+        FL_CHECK(!cmp(fl::numeric_limits<int>::max(), fl::numeric_limits<int>::min()));
     }
 
     SUBCASE("floating point special values") {
         less<float> cmp;
 
         // Normal values
-        CHECK(cmp(1.0f, 2.0f));
+        FL_CHECK(cmp(1.0f, 2.0f));
 
         // Very small values
-        CHECK(cmp(0.0f, 0.001f));
-        CHECK(cmp(-0.001f, 0.0f));
+        FL_CHECK(cmp(0.0f, 0.001f));
+        FL_CHECK(cmp(-0.001f, 0.0f));
 
         // Negative zero (treated as equal to positive zero)
         float neg_zero = -0.0f;
         float pos_zero = 0.0f;
-        CHECK(!cmp(neg_zero, pos_zero));
-        CHECK(!cmp(pos_zero, neg_zero));
+        FL_CHECK(!cmp(neg_zero, pos_zero));
+        FL_CHECK(!cmp(pos_zero, neg_zero));
     }
 
     SUBCASE("pointer comparisons") {
@@ -188,10 +188,10 @@ TEST_CASE("fl::less - edge cases") {
         int arr[5] = {1, 2, 3, 4, 5};
 
         // Pointers in array are ordered
-        CHECK(cmp(&arr[0], &arr[1]));
-        CHECK(cmp(&arr[0], &arr[4]));
-        CHECK(!cmp(&arr[3], &arr[1]));
-        CHECK(!cmp(&arr[2], &arr[2]));
+        FL_CHECK(cmp(&arr[0], &arr[1]));
+        FL_CHECK(cmp(&arr[0], &arr[4]));
+        FL_CHECK(!cmp(&arr[3], &arr[1]));
+        FL_CHECK(!cmp(&arr[2], &arr[2]));
     }
 }
 
@@ -202,21 +202,21 @@ TEST_CASE("fl::less - use with standard algorithms pattern") {
         less<int> cmp;
 
         // Manually verify sorting logic using less
-        CHECK(cmp(arr[1], arr[0]));  // 2 < 5
-        CHECK(cmp(arr[3], arr[1]));  // 1 < 2
-        CHECK(!cmp(arr[4], arr[2])); // 9 < 8 is false
+        FL_CHECK(cmp(arr[1], arr[0]));  // 2 < 5
+        FL_CHECK(cmp(arr[3], arr[1]));  // 1 < 2
+        FL_CHECK(!cmp(arr[4], arr[2])); // 9 < 8 is false
     }
 
     SUBCASE("transparent comparison in generic context") {
         less<void> cmp;
 
         // Can compare different types without explicit template instantiation
-        CHECK(cmp(1, 2));
-        CHECK(cmp(1.5f, 2.5));
-        CHECK(cmp('a', 'z'));
+        FL_CHECK(cmp(1, 2));
+        FL_CHECK(cmp(1.5f, 2.5));
+        FL_CHECK(cmp('a', 'z'));
 
         // Verify it works with different type combinations
-        CHECK(cmp(short(10), long(20)));
-        CHECK(cmp(float(1.5), double(2.5)));
+        FL_CHECK(cmp(short(10), long(20)));
+        FL_CHECK(cmp(float(1.5), double(2.5)));
     }
 }

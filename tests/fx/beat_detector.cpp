@@ -27,11 +27,11 @@ TEST_CASE("BeatDetector - Basic initialization") {
 
     // Test initial state - detector may have default tempo set
     TempoEstimate tempo = detector.getTempo();
-    CHECK_GE(tempo.bpm, 0.0f); // May have default value
-    CHECK_GE(tempo.confidence, 0.0f);
+    FL_CHECK_GE(tempo.bpm, 0.0f); // May have default value
+    FL_CHECK_GE(tempo.confidence, 0.0f);
 
     float odf = detector.getCurrentODF();
-    CHECK_GE(odf, 0.0f); // Should be non-negative
+    FL_CHECK_GE(odf, 0.0f); // Should be non-negative
 }
 
 TEST_CASE("BeatDetector - EDM beat detection from MP3") {
@@ -39,27 +39,27 @@ TEST_CASE("BeatDetector - EDM beat detection from MP3") {
     setTestFileSystemRoot("tests/data");
 
     FileSystem fs;
-    CHECK(fs.beginSd(0)); // CS pin doesn't matter for test
+    FL_CHECK(fs.beginSd(0)); // CS pin doesn't matter for test
 
     // Open the EDM beat MP3 file
     FileHandlePtr file = fs.openRead("codec/edm_beat.mp3");
-    REQUIRE(file != nullptr);
-    REQUIRE(file->valid());
+    FL_REQUIRE(file != nullptr);
+    FL_REQUIRE(file->valid());
 
     // Read entire file into buffer
     fl::size file_size = file->size();
-    CHECK_GT(file_size, 0);
+    FL_CHECK_GT(file_size, 0);
 
     fl::vector<fl::u8> mp3_data;
     mp3_data.resize(file_size);
     fl::size bytes_read = file->read(mp3_data.data(), file_size);
-    CHECK_EQ(bytes_read, file_size);
+    FL_CHECK_EQ(bytes_read, file_size);
 
     file->close();
 
     // Decode MP3 data
     Mp3HelixDecoder decoder;
-    CHECK(decoder.init());
+    FL_CHECK(decoder.init());
 
     // Collect all decoded audio samples
     fl::vector<float> audio_samples;
@@ -87,8 +87,8 @@ TEST_CASE("BeatDetector - EDM beat detection from MP3") {
         }
     });
 
-    CHECK_GT(audio_samples.size(), 0);
-    CHECK_GT(sample_rate, 0);
+    FL_CHECK_GT(audio_samples.size(), 0);
+    FL_CHECK_GT(sample_rate, 0);
 
     printf("Decoded %d audio samples at %d Hz, %d channels (converted to mono)\n",
                (int)audio_samples.size(), sample_rate, channels);
@@ -170,13 +170,13 @@ TEST_CASE("BeatDetector - EDM beat detection from MP3") {
     printf("Onsets: %d, Beats: %d\n", onset_count, beat_count);
 
     // Verify basic operation (may or may not detect beats depending on audio/config)
-    CHECK_GE(onset_count, 0);
-    CHECK_GE(beat_count, 0);
+    FL_CHECK_GE(onset_count, 0);
+    FL_CHECK_GE(beat_count, 0);
 
     // Tempo should be in plausible range if detected
     if (tempo.bpm > 0.0f) {
-        CHECK_GE(tempo.bpm, 40.0f);   // Min plausible tempo
-        CHECK_LE(tempo.bpm, 240.0f);  // Max plausible tempo
+        FL_CHECK_GE(tempo.bpm, 40.0f);   // Min plausible tempo
+        FL_CHECK_LE(tempo.bpm, 240.0f);  // Max plausible tempo
     }
 }
 
@@ -191,19 +191,19 @@ TEST_CASE("BeatDetector - Configuration options") {
     SUBCASE("Energy ODF") {
         config.odf_type = OnsetDetectionFunction::Energy;
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
     SUBCASE("SpectralFlux ODF") {
         config.odf_type = OnsetDetectionFunction::SpectralFlux;
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
     SUBCASE("SuperFlux ODF") {
         config.odf_type = OnsetDetectionFunction::SuperFlux;
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
     SUBCASE("MultiBand ODF") {
@@ -213,7 +213,7 @@ TEST_CASE("BeatDetector - Configuration options") {
         config.bands.push_back({160.0f, 2000.0f, 1.0f}); // Mid
         config.bands.push_back({2000.0f, 8000.0f, 1.2f}); // High
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 }
 
@@ -227,19 +227,19 @@ TEST_CASE("BeatDetector - Peak picking modes") {
         config.peak_mode = PeakPickingMode::LocalMaximum;
         BeatDetector detector(config);
         // Just verify it initializes
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
     SUBCASE("AdaptiveThreshold mode") {
         config.peak_mode = PeakPickingMode::AdaptiveThreshold;
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
     SUBCASE("SuperFluxPeaks mode") {
         config.peak_mode = PeakPickingMode::SuperFluxPeaks;
         BeatDetector detector(config);
-        CHECK_EQ(detector.getCurrentODF(), 0.0f);
+        FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 }
 
@@ -254,7 +254,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
         // May have default BPM
-        CHECK_GE(tempo.bpm, 0.0f);
+        FL_CHECK_GE(tempo.bpm, 0.0f);
     }
 
     SUBCASE("CombFilter tempo tracking") {
@@ -262,7 +262,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
         // May have default BPM
-        CHECK_GE(tempo.bpm, 0.0f);
+        FL_CHECK_GE(tempo.bpm, 0.0f);
     }
 
     SUBCASE("Autocorrelation tempo tracking") {
@@ -270,7 +270,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
         // May have default BPM
-        CHECK_GE(tempo.bpm, 0.0f);
+        FL_CHECK_GE(tempo.bpm, 0.0f);
     }
 }
 

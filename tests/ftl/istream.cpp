@@ -17,7 +17,7 @@ TEST_CASE("fl::istream basic instantiation compiles") {
     
     // Test that global cin exists
     fl::istream* cin_ptr = &fl::cin;
-    CHECK(cin_ptr != nullptr);
+    FL_CHECK(cin_ptr != nullptr);
     
     // Test basic state methods compile
     bool good = test_stream.good();
@@ -30,13 +30,13 @@ TEST_CASE("fl::istream basic instantiation compiles") {
     (void)fail;
     (void)eof;
     
-    CHECK(true); // If we got here, compilation succeeded
+    FL_CHECK(true); // If we got here, compilation succeeded
 }
 
 TEST_CASE("fl::cin_real global instance compiles") {
     // Test that we can use the fl::cin_real() function
     fl::istream_real* cin_real_ptr = &fl::cin_real();
-    CHECK(cin_real_ptr != nullptr);
+    FL_CHECK(cin_real_ptr != nullptr);
     
     // Test that we can call methods on cin_real()
     bool cin_real_good = fl::cin_real().good();
@@ -49,7 +49,7 @@ TEST_CASE("fl::cin_real global instance compiles") {
     (void)cin_real_fail;
     (void)cin_real_eof;
     
-    CHECK(true); // If we got here, cin_real() compiled and is accessible
+    FL_CHECK(true); // If we got here, cin_real() compiled and is accessible
 }
 
 TEST_CASE("fl::istream input operators compile") {
@@ -95,7 +95,7 @@ TEST_CASE("fl::istream input operators compile") {
     (void)float_val;
     (void)double_val;
     
-    CHECK(true); // If we got here, all operators compiled
+    FL_CHECK(true); // If we got here, all operators compiled
 }
 
 TEST_CASE("fl::istream chaining operations compile") {
@@ -117,7 +117,7 @@ TEST_CASE("fl::istream chaining operations compile") {
     (void)str1;
     (void)str2;
     
-    CHECK(true); // If we got here, chaining compiled
+    FL_CHECK(true); // If we got here, chaining compiled
 }
 
 TEST_CASE("fl::istream additional methods compile") {
@@ -137,7 +137,7 @@ TEST_CASE("fl::istream additional methods compile") {
     (void)ch;
     (void)peek_ch;
     
-    CHECK(true); // If we got here, all methods compiled
+    FL_CHECK(true); // If we got here, all methods compiled
 }
 
 TEST_CASE("fl::cin global instance compiles") {
@@ -174,26 +174,26 @@ TEST_CASE("fl::cin global instance compiles") {
     (void)cin_eof;
     (void)line;
     
-    CHECK(true); // If we got here, global cin compiled
+    FL_CHECK(true); // If we got here, global cin compiled
 }
 
 TEST_CASE("fl::istream state management compiles") {
     fl::istream test_stream;
     
     // Test all state management methods
-    CHECK_FALSE(test_stream.fail()); // Initially should not fail
-    CHECK(test_stream.good()); // Initially should be good
+    FL_CHECK_FALSE(test_stream.fail()); // Initially should not fail
+    FL_CHECK(test_stream.good()); // Initially should be good
     
     // Test that we can call clear to reset state
     test_stream.clear();
-    CHECK_FALSE(test_stream.fail());
-    CHECK(test_stream.good());
+    FL_CHECK_FALSE(test_stream.fail());
+    FL_CHECK(test_stream.good());
     
     // Test eof checking (should not be EOF initially when no input attempted)
     bool eof_result = test_stream.eof();
     (void)eof_result; // Suppress unused warning
     
-    CHECK(true); // State management compiled and basic checks passed
+    FL_CHECK(true); // State management compiled and basic checks passed
 }
 
 TEST_CASE("fl::istream types match expected interfaces") {
@@ -209,16 +209,16 @@ TEST_CASE("fl::istream types match expected interfaces") {
     auto& result2 = (result1 >> num);
     
     // Test that the return is the same object (reference)
-    CHECK(&result1 == &test_stream);
-    CHECK(&result2 == &test_stream);
+    FL_CHECK(&result1 == &test_stream);
+    FL_CHECK(&result2 == &test_stream);
     
     // Test that getline returns istream&
     auto& result3 = test_stream.getline(str);
-    CHECK(&result3 == &test_stream);
+    FL_CHECK(&result3 == &test_stream);
     
     // Test that putback returns istream&
     auto& result4 = test_stream.putback('X');
-    CHECK(&result4 == &test_stream);
+    FL_CHECK(&result4 == &test_stream);
     
     // Suppress unused variable warnings
     (void)str;
@@ -274,10 +274,10 @@ TEST_CASE("fl::istream handler injection test") {
         int avail = fl::available();
         int ch = fl::read();
         
-        CHECK(available_called);
-        CHECK(read_called);
-        CHECK(avail == 5);
-        CHECK(ch == 'H');
+        FL_CHECK(available_called);
+        FL_CHECK(read_called);
+        FL_CHECK(avail == 5);
+        FL_CHECK(ch == 'H');
     }
     
     // Clean up handlers
@@ -305,9 +305,9 @@ TEST_CASE("fl::istream simple debug test") {
         FL_WARN("Stream good: " << test_stream.good());
         FL_WARN("Stream fail: " << test_stream.fail());
         
-        CHECK(test_stream.good());
-        CHECK(word.size() == 5);
-        CHECK(fl::strcmp(word.c_str(), "Hello") == 0);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(word.size() == 5);
+        FL_CHECK(fl::strcmp(word.c_str(), "Hello") == 0);
     }
     
     // Clean up handlers
@@ -330,9 +330,9 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "Number:");
-        CHECK(number == 10);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "Number:");
+        FL_CHECK(number == 10);
     }
     
     SUBCASE("Parse negative integer from 'Value: -42'") {
@@ -347,9 +347,9 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "Value:");
-        CHECK(number == -42);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "Value:");
+        FL_CHECK(number == -42);
     }
     
     SUBCASE("Parse unsigned integer from 'count: 255'") {
@@ -364,9 +364,9 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "count:");
-        CHECK(number == 255);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "count:");
+        FL_CHECK(number == 255);
     }
     
     SUBCASE("Parse int8_t from 'byte: 127'") {
@@ -381,9 +381,9 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "byte:");
-        CHECK(number == 127);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "byte:");
+        FL_CHECK(number == 127);
     }
     
     SUBCASE("Parse int16_t from 'short: -1000'") {
@@ -398,9 +398,9 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "short:");
-        CHECK(number == -1000);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "short:");
+        FL_CHECK(number == -1000);
     }
     
     // Clean up handlers
@@ -423,9 +423,9 @@ TEST_CASE("fl::istream float parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "number:");
-        CHECK(number == doctest::Approx(1.0f));
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "number:");
+        FL_CHECK(number == doctest::Approx(1.0f));
     }
     
     SUBCASE("Parse float from 'pi: 3.14159'") {
@@ -440,9 +440,9 @@ TEST_CASE("fl::istream float parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "pi:");
-        CHECK(number == doctest::Approx(3.14159f));
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "pi:");
+        FL_CHECK(number == doctest::Approx(3.14159f));
     }
     
     SUBCASE("Parse negative float from 'temp: -25.5'") {
@@ -457,9 +457,9 @@ TEST_CASE("fl::istream float parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "temp:");
-        CHECK(number == doctest::Approx(-25.5f));
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "temp:");
+        FL_CHECK(number == doctest::Approx(-25.5f));
     }
     
     SUBCASE("Parse double from 'precision: 123.456789'") {
@@ -474,9 +474,9 @@ TEST_CASE("fl::istream float parsing with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(test_stream.good());
-        CHECK(label == "precision:");
-        CHECK(number == doctest::Approx(123.456789));
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "precision:");
+        FL_CHECK(number == doctest::Approx(123.456789));
     }
     
     // Clean up handlers
@@ -498,9 +498,9 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         
         test_stream >> label >> value;
         
-        CHECK(test_stream.good());
-        CHECK(label == "name:");
-        CHECK(value == "FastLED");
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "name:");
+        FL_CHECK(value == "FastLED");
     }
     
     SUBCASE("Parse character from 'letter: A'") {
@@ -515,9 +515,9 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         
         test_stream >> label >> ch;
         
-        CHECK(test_stream.good());
-        CHECK(label == "letter:");
-        CHECK(ch == 'A');
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label == "letter:");
+        FL_CHECK(ch == 'A');
     }
     
     SUBCASE("Parse multiple words with spaces") {
@@ -532,11 +532,11 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         
         test_stream >> word1 >> word2 >> word3 >> number;
         
-        CHECK(test_stream.good());
-        CHECK(word1 == "Hello");
-        CHECK(word2 == "World");
-        CHECK(word3 == "Test");
-        CHECK(number == 42);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(word1 == "Hello");
+        FL_CHECK(word2 == "World");
+        FL_CHECK(word3 == "Test");
+        FL_CHECK(number == 42);
     }
     
     // Clean up handlers
@@ -561,14 +561,14 @@ TEST_CASE("fl::istream mixed data type parsing") {
         
         test_stream >> led_label >> strip_label >> count >> bright_label >> brightness >> enabled_label >> enabled;
         
-        CHECK(test_stream.good());
-        CHECK(led_label == "LED");
-        CHECK(strip_label == "strip:");
-        CHECK(count == 144);
-        CHECK(bright_label == "brightness:");
-        CHECK(brightness == doctest::Approx(0.8f));
-        CHECK(enabled_label == "enabled:");
-        CHECK(enabled == 'Y');
+        FL_CHECK(test_stream.good());
+        FL_CHECK(led_label == "LED");
+        FL_CHECK(strip_label == "strip:");
+        FL_CHECK(count == 144);
+        FL_CHECK(bright_label == "brightness:");
+        FL_CHECK(brightness == doctest::Approx(0.8f));
+        FL_CHECK(enabled_label == "enabled:");
+        FL_CHECK(enabled == 'Y');
     }
     
     SUBCASE("Parse configuration data 'width: 32 height: 16 fps: 60.0'") {
@@ -584,13 +584,13 @@ TEST_CASE("fl::istream mixed data type parsing") {
         
         test_stream >> width_label >> width >> height_label >> height >> fps_label >> fps;
         
-        CHECK(test_stream.good());
-        CHECK(width_label == "width:");
-        CHECK(width == 32);
-        CHECK(height_label == "height:");
-        CHECK(height == 16);
-        CHECK(fps_label == "fps:");
-        CHECK(fps == doctest::Approx(60.0f));
+        FL_CHECK(test_stream.good());
+        FL_CHECK(width_label == "width:");
+        FL_CHECK(width == 32);
+        FL_CHECK(height_label == "height:");
+        FL_CHECK(height == 16);
+        FL_CHECK(fps_label == "fps:");
+        FL_CHECK(fps == doctest::Approx(60.0f));
     }
     
     // Clean up handlers
@@ -613,9 +613,9 @@ TEST_CASE("fl::istream error handling with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(label == "value:");
-        CHECK(test_stream.fail());
-        CHECK_FALSE(test_stream.good());
+        FL_CHECK(label == "value:");
+        FL_CHECK(test_stream.fail());
+        FL_CHECK_FALSE(test_stream.good());
     }
     
     SUBCASE("Integer overflow handling") {
@@ -630,9 +630,9 @@ TEST_CASE("fl::istream error handling with mock input") {
         
         test_stream >> label >> number;
         
-        CHECK(label == "big:");
-        CHECK(test_stream.fail());
-        CHECK_FALSE(test_stream.good());
+        FL_CHECK(label == "big:");
+        FL_CHECK(test_stream.fail());
+        FL_CHECK_FALSE(test_stream.good());
     }
     
     SUBCASE("Clear error state and continue") {
@@ -647,18 +647,18 @@ TEST_CASE("fl::istream error handling with mock input") {
         
         // First read should fail
         test_stream >> label1 >> number1;
-        CHECK(label1 == "bad:");
-        CHECK(test_stream.fail());
+        FL_CHECK(label1 == "bad:");
+        FL_CHECK(test_stream.fail());
         
         // Clear error state
         test_stream.clear();
-        CHECK(test_stream.good());
+        FL_CHECK(test_stream.good());
         
         // Continue reading should work
         test_stream >> label2 >> number2;
-        CHECK(test_stream.good());
-        CHECK(label2 == "good:");
-        CHECK(number2 == 123);
+        FL_CHECK(test_stream.good());
+        FL_CHECK(label2 == "good:");
+        FL_CHECK(number2 == 123);
     }
     
     // Clean up handlers
@@ -681,9 +681,9 @@ TEST_CASE("fl::istream getline with mock input") {
         test_stream.getline(line1);
         test_stream.getline(line2);
         
-        CHECK(test_stream.good());
-        CHECK(line1 == "This is a complete line with spaces");
-        CHECK(line2 == "Second line");
+        FL_CHECK(test_stream.good());
+        FL_CHECK(line1 == "This is a complete line with spaces");
+        FL_CHECK(line2 == "Second line");
     }
     
     // Clean up handlers

@@ -70,7 +70,7 @@ static void test_isr_handler(void* user_data) {
 
 TEST_CASE("test_isr_platform_info") {
     const char* platform = isr::getPlatformName();
-    REQUIRE(platform != nullptr);
+    FL_REQUIRE(platform != nullptr);
 
     // Just call the functions to verify they exist and don't crash
     (void)isr::getMaxTimerFrequency();
@@ -95,24 +95,24 @@ TEST_CASE("test_isr_timer_basic") {
     isr::isr_handle_t handle;
     int result = isr::attachTimerHandler(config, &handle);
 
-    REQUIRE(result == 0);
-    REQUIRE(handle.is_valid());
+    FL_REQUIRE(result == 0);
+    FL_REQUIRE(handle.is_valid());
 
     // Wait for at least 2 calls (with 200ms timeout = 20 expected calls at 100 Hz)
     // This ensures the timer is working, even under heavy system load
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() >= 2; },
                                         std::chrono::milliseconds(200)); // okay std namespace
-    REQUIRE(got_calls);
+    FL_REQUIRE(got_calls);
 
     int call_count = g_isr_call_count.load();
     // Should have gotten at least 2 calls, upper bound is generous for slow systems
-    REQUIRE(call_count >= 2);
-    REQUIRE(call_count <= 25);  // At most 25 calls in 200ms at 100Hz (allowing overhead)
+    FL_REQUIRE(call_count >= 2);
+    FL_REQUIRE(call_count <= 25);  // At most 25 calls in 200ms at 100Hz (allowing overhead)
 
     // Detach handler - use release memory order to ensure visibility
     result = isr::detachHandler(handle);
-    REQUIRE(result == 0);
-    REQUIRE(!handle.is_valid());
+    FL_REQUIRE(result == 0);
+    FL_REQUIRE(!handle.is_valid());
 
     // Capture count immediately after detach
     int final_count = g_isr_call_count.load();
@@ -141,8 +141,8 @@ TEST_CASE("test_isr_timer_basic") {
     lock.unlock();
 
     int count_after_detach = g_isr_call_count.load();
-    REQUIRE(!spurious_call);
-    REQUIRE(final_count == count_after_detach);
+    FL_REQUIRE(!spurious_call);
+    FL_REQUIRE(final_count == count_after_detach);
 }
 
 TEST_CASE("test_isr_timer_user_data") {
@@ -162,7 +162,7 @@ TEST_CASE("test_isr_timer_user_data") {
     isr::isr_handle_t handle;
     int result = isr::attachTimerHandler(config, &handle);
 
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 
     // Wait for user data to be set (timeout 200ms = 10 expected calls at 50 Hz)
     bool got_user_data = wait_for_condition(
@@ -170,12 +170,12 @@ TEST_CASE("test_isr_timer_user_data") {
         std::chrono::milliseconds(200)); // okay std namespace
 
     // Verify user data was passed correctly
-    REQUIRE(got_user_data);
-    REQUIRE(g_isr_user_data_value.load() == test_value);
+    FL_REQUIRE(got_user_data);
+    FL_REQUIRE(g_isr_user_data_value.load() == test_value);
 
     // Cleanup
     result = isr::detachHandler(handle);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 }
 
 TEST_CASE("test_isr_timer_enable_disable") {
@@ -191,19 +191,19 @@ TEST_CASE("test_isr_timer_enable_disable") {
 
     isr::isr_handle_t handle;
     int result = isr::attachTimerHandler(config, &handle);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 
     // Wait for at least one call (with 200ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
                                         std::chrono::milliseconds(200)); // okay std namespace
-    REQUIRE(got_calls);
+    FL_REQUIRE(got_calls);
     int count_before_disable = g_isr_call_count.load();
-    REQUIRE(count_before_disable > 0);
+    FL_REQUIRE(count_before_disable > 0);
 
     // Disable handler
     result = isr::disableHandler(handle);
-    REQUIRE(result == 0);
-    REQUIRE(!isr::isHandlerEnabled(handle));
+    FL_REQUIRE(result == 0);
+    FL_REQUIRE(!isr::isHandlerEnabled(handle));
 
     // Wait up to 50ms to ensure count stabilizes (no more ISR calls)
     // Use condition variable to detect any calls immediately
@@ -234,20 +234,20 @@ TEST_CASE("test_isr_timer_enable_disable") {
 
     // Re-enable handler
     result = isr::enableHandler(handle);
-    REQUIRE(result == 0);
-    REQUIRE(isr::isHandlerEnabled(handle));
+    FL_REQUIRE(result == 0);
+    FL_REQUIRE(isr::isHandlerEnabled(handle));
 
     // Wait for at least one new call after re-enabling (with 200ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_after_disable](){ return g_isr_call_count.load() > count_after_disable; },
         std::chrono::milliseconds(200)); // okay std namespace
-    REQUIRE(got_new_calls);
+    FL_REQUIRE(got_new_calls);
     int count_after_enable = g_isr_call_count.load();
-    REQUIRE(count_after_enable > count_after_disable);
+    FL_REQUIRE(count_after_enable > count_after_disable);
 
     // Cleanup
     result = isr::detachHandler(handle);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 }
 
 TEST_CASE("test_isr_error_handling") {
@@ -258,44 +258,44 @@ TEST_CASE("test_isr_error_handling") {
 
     isr::isr_handle_t handle;
     int result = isr::attachTimerHandler(config, &handle);
-    REQUIRE(result != 0);
-    REQUIRE(!handle.is_valid());
+    FL_REQUIRE(result != 0);
+    FL_REQUIRE(!handle.is_valid());
 
     // Test zero frequency
     config.handler = test_isr_handler;
     config.frequency_hz = 0;  // Invalid
     result = isr::attachTimerHandler(config, &handle);
-    REQUIRE(result != 0);
-    REQUIRE(!handle.is_valid());
+    FL_REQUIRE(result != 0);
+    FL_REQUIRE(!handle.is_valid());
 
     // Test invalid handle operations
     isr::isr_handle_t invalid_handle;
     result = isr::detachHandler(invalid_handle);
-    REQUIRE(result != 0);
+    FL_REQUIRE(result != 0);
 
     result = isr::enableHandler(invalid_handle);
-    REQUIRE(result != 0);
+    FL_REQUIRE(result != 0);
 
     result = isr::disableHandler(invalid_handle);
-    REQUIRE(result != 0);
+    FL_REQUIRE(result != 0);
 
-    REQUIRE(!isr::isHandlerEnabled(invalid_handle));
+    FL_REQUIRE(!isr::isHandlerEnabled(invalid_handle));
 }
 
 TEST_CASE("test_interrupts_global_state") {
     // Interrupts should start enabled
-    REQUIRE(interruptsEnabled());
-    REQUIRE(!interruptsDisabled());
+    FL_REQUIRE(interruptsEnabled());
+    FL_REQUIRE(!interruptsDisabled());
 
     // Disable interrupts
     interruptsDisable();
-    REQUIRE(interruptsDisabled());
-    REQUIRE(!interruptsEnabled());
+    FL_REQUIRE(interruptsDisabled());
+    FL_REQUIRE(!interruptsEnabled());
 
     // Re-enable interrupts
     interruptsEnable();
-    REQUIRE(interruptsEnabled());
-    REQUIRE(!interruptsDisabled());
+    FL_REQUIRE(interruptsEnabled());
+    FL_REQUIRE(!interruptsDisabled());
 }
 
 TEST_CASE("test_interrupts_global_disable_blocks_isr") {
@@ -314,18 +314,18 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
 
     isr::isr_handle_t handle;
     int result = isr::attachTimerHandler(config, &handle);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 
     // Wait for at least one call to verify timer is firing (with 200ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
                                         std::chrono::milliseconds(200)); // okay std namespace
-    REQUIRE(got_calls);
+    FL_REQUIRE(got_calls);
     int count_enabled = g_isr_call_count.load();
-    REQUIRE(count_enabled > 0);
+    FL_REQUIRE(count_enabled > 0);
 
     // Globally disable interrupts
     interruptsDisable();
-    REQUIRE(interruptsDisabled());
+    FL_REQUIRE(interruptsDisabled());
 
     // Wait up to 50ms to ensure count stabilizes (no more ISR calls)
     // Use condition variable to detect any calls immediately
@@ -356,19 +356,19 @@ TEST_CASE("test_interrupts_global_disable_blocks_isr") {
 
     // Re-enable global interrupts
     interruptsEnable();
-    REQUIRE(interruptsEnabled());
+    FL_REQUIRE(interruptsEnabled());
 
     // Wait for at least one new call after re-enabling (with 200ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_disabled](){ return g_isr_call_count.load() > count_disabled; },
         std::chrono::milliseconds(200)); // okay std namespace
-    REQUIRE(got_new_calls);
+    FL_REQUIRE(got_new_calls);
     int count_reenabled = g_isr_call_count.load();
-    REQUIRE(count_reenabled > count_disabled);
+    FL_REQUIRE(count_reenabled > count_disabled);
 
     // Cleanup
     result = isr::detachHandler(handle);
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 }
 
 // =============================================================================

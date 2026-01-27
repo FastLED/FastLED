@@ -44,19 +44,19 @@ TEST_CASE("P9813 - Zero LEDs (empty input)") {
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 bytes start + 4 bytes end = 8 bytes total
-    REQUIRE_EQ(output.size(), 8);
+    FL_REQUIRE_EQ(output.size(), 8);
 
     // Start boundary: 4 bytes of 0x00
-    CHECK_EQ(output[0], 0x00);
-    CHECK_EQ(output[1], 0x00);
-    CHECK_EQ(output[2], 0x00);
-    CHECK_EQ(output[3], 0x00);
+    FL_CHECK_EQ(output[0], 0x00);
+    FL_CHECK_EQ(output[1], 0x00);
+    FL_CHECK_EQ(output[2], 0x00);
+    FL_CHECK_EQ(output[3], 0x00);
 
     // End boundary: 4 bytes of 0x00
-    CHECK_EQ(output[4], 0x00);
-    CHECK_EQ(output[5], 0x00);
-    CHECK_EQ(output[6], 0x00);
-    CHECK_EQ(output[7], 0x00);
+    FL_CHECK_EQ(output[4], 0x00);
+    FL_CHECK_EQ(output[5], 0x00);
+    FL_CHECK_EQ(output[6], 0x00);
+    FL_CHECK_EQ(output[7], 0x00);
 }
 
 TEST_CASE("P9813 - Single LED (all black)") {
@@ -73,25 +73,25 @@ TEST_CASE("P9813 - Single LED (all black)") {
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 (start) + 4 (LED) + 4 (end) = 12 bytes
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     // Start boundary
-    CHECK_EQ(output[0], 0x00);
-    CHECK_EQ(output[1], 0x00);
-    CHECK_EQ(output[2], 0x00);
-    CHECK_EQ(output[3], 0x00);
+    FL_CHECK_EQ(output[0], 0x00);
+    FL_CHECK_EQ(output[1], 0x00);
+    FL_CHECK_EQ(output[2], 0x00);
+    FL_CHECK_EQ(output[3], 0x00);
 
     // LED data: [Flag][B][G][R]
-    CHECK_EQ(output[4], 0xFF);  // Flag byte
-    CHECK_EQ(output[5], 0x00);  // Blue
-    CHECK_EQ(output[6], 0x00);  // Green
-    CHECK_EQ(output[7], 0x00);  // Red
+    FL_CHECK_EQ(output[4], 0xFF);  // Flag byte
+    FL_CHECK_EQ(output[5], 0x00);  // Blue
+    FL_CHECK_EQ(output[6], 0x00);  // Green
+    FL_CHECK_EQ(output[7], 0x00);  // Red
 
     // End boundary
-    CHECK_EQ(output[8], 0x00);
-    CHECK_EQ(output[9], 0x00);
-    CHECK_EQ(output[10], 0x00);
-    CHECK_EQ(output[11], 0x00);
+    FL_CHECK_EQ(output[8], 0x00);
+    FL_CHECK_EQ(output[9], 0x00);
+    FL_CHECK_EQ(output[10], 0x00);
+    FL_CHECK_EQ(output[11], 0x00);
 }
 
 TEST_CASE("P9813 - Single LED (all white)") {
@@ -107,13 +107,13 @@ TEST_CASE("P9813 - Single LED (all white)") {
     fl::vector<u8> output;
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     // LED data: [Flag][B][G][R]
-    CHECK_EQ(output[4], 0xC0);  // Flag byte
-    CHECK_EQ(output[5], 0xFF);  // Blue
-    CHECK_EQ(output[6], 0xFF);  // Green
-    CHECK_EQ(output[7], 0xFF);  // Red
+    FL_CHECK_EQ(output[4], 0xC0);  // Flag byte
+    FL_CHECK_EQ(output[5], 0xFF);  // Blue
+    FL_CHECK_EQ(output[6], 0xFF);  // Green
+    FL_CHECK_EQ(output[7], 0xFF);  // Red
 }
 
 TEST_CASE("P9813 - Single LED (pure red)") {
@@ -130,16 +130,16 @@ TEST_CASE("P9813 - Single LED (pure red)") {
     fl::vector<u8> output;
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     u8 expectedFlag = expectedFlagByte(255, 0, 0);
-    CHECK_EQ(expectedFlag, 0xFC);
+    FL_CHECK_EQ(expectedFlag, 0xFC);
 
     // LED data: [Flag][B][G][R]
-    CHECK_EQ(output[4], expectedFlag);  // Flag byte
-    CHECK_EQ(output[5], 0x00);          // Blue
-    CHECK_EQ(output[6], 0x00);          // Green
-    CHECK_EQ(output[7], 0xFF);          // Red
+    FL_CHECK_EQ(output[4], expectedFlag);  // Flag byte
+    FL_CHECK_EQ(output[5], 0x00);          // Blue
+    FL_CHECK_EQ(output[6], 0x00);          // Green
+    FL_CHECK_EQ(output[7], 0xFF);          // Red
 }
 
 TEST_CASE("P9813 - Single LED (pure green)") {
@@ -156,16 +156,16 @@ TEST_CASE("P9813 - Single LED (pure green)") {
     fl::vector<u8> output;
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     u8 expectedFlag = expectedFlagByte(0, 255, 0);
-    CHECK_EQ(expectedFlag, 0xF3);
+    FL_CHECK_EQ(expectedFlag, 0xF3);
 
     // LED data: [Flag][B][G][R]
-    CHECK_EQ(output[4], expectedFlag);  // Flag byte
-    CHECK_EQ(output[5], 0x00);          // Blue
-    CHECK_EQ(output[6], 0xFF);          // Green
-    CHECK_EQ(output[7], 0x00);          // Red
+    FL_CHECK_EQ(output[4], expectedFlag);  // Flag byte
+    FL_CHECK_EQ(output[5], 0x00);          // Blue
+    FL_CHECK_EQ(output[6], 0xFF);          // Green
+    FL_CHECK_EQ(output[7], 0x00);          // Red
 }
 
 TEST_CASE("P9813 - Single LED (pure blue)") {
@@ -182,16 +182,16 @@ TEST_CASE("P9813 - Single LED (pure blue)") {
     fl::vector<u8> output;
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    REQUIRE_EQ(output.size(), 12);
+    FL_REQUIRE_EQ(output.size(), 12);
 
     u8 expectedFlag = expectedFlagByte(0, 0, 255);
-    CHECK_EQ(expectedFlag, 0xCF);
+    FL_CHECK_EQ(expectedFlag, 0xCF);
 
     // LED data: [Flag][B][G][R]
-    CHECK_EQ(output[4], expectedFlag);  // Flag byte
-    CHECK_EQ(output[5], 0xFF);          // Blue
-    CHECK_EQ(output[6], 0x00);          // Green
-    CHECK_EQ(output[7], 0x00);          // Red
+    FL_CHECK_EQ(output[4], expectedFlag);  // Flag byte
+    FL_CHECK_EQ(output[5], 0xFF);          // Blue
+    FL_CHECK_EQ(output[6], 0x00);          // Green
+    FL_CHECK_EQ(output[7], 0x00);          // Red
 }
 
 TEST_CASE("P9813 - Checksum boundary values") {
@@ -210,8 +210,8 @@ TEST_CASE("P9813 - Checksum boundary values") {
         encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
         u8 expectedFlag = expectedFlagByte(64, 64, 64);
-        CHECK_EQ(expectedFlag, 0xEA);
-        CHECK_EQ(output[4], expectedFlag);
+        FL_CHECK_EQ(expectedFlag, 0xEA);
+        FL_CHECK_EQ(output[4], expectedFlag);
     }
 
     SUBCASE("RGB = 128,128,128 (top 2 bits all 10)") {
@@ -228,8 +228,8 @@ TEST_CASE("P9813 - Checksum boundary values") {
         encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
         u8 expectedFlag = expectedFlagByte(128, 128, 128);
-        CHECK_EQ(expectedFlag, 0xD5);
-        CHECK_EQ(output[4], expectedFlag);
+        FL_CHECK_EQ(expectedFlag, 0xD5);
+        FL_CHECK_EQ(output[4], expectedFlag);
     }
 
     SUBCASE("RGB = 192,192,192 (top 2 bits all 11)") {
@@ -246,8 +246,8 @@ TEST_CASE("P9813 - Checksum boundary values") {
         encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
         u8 expectedFlag = expectedFlagByte(192, 192, 192);
-        CHECK_EQ(expectedFlag, 0xC0);
-        CHECK_EQ(output[4], expectedFlag);
+        FL_CHECK_EQ(expectedFlag, 0xC0);
+        FL_CHECK_EQ(output[4], expectedFlag);
     }
 }
 
@@ -262,37 +262,37 @@ TEST_CASE("P9813 - Multiple LEDs (three different colors)") {
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 (start) + 3*4 (LEDs) + 4 (end) = 20 bytes
-    REQUIRE_EQ(output.size(), 20);
+    FL_REQUIRE_EQ(output.size(), 20);
 
     // Start boundary
-    CHECK_EQ(output[0], 0x00);
-    CHECK_EQ(output[1], 0x00);
-    CHECK_EQ(output[2], 0x00);
-    CHECK_EQ(output[3], 0x00);
+    FL_CHECK_EQ(output[0], 0x00);
+    FL_CHECK_EQ(output[1], 0x00);
+    FL_CHECK_EQ(output[2], 0x00);
+    FL_CHECK_EQ(output[3], 0x00);
 
     // LED 1: Red (255,0,0)
-    CHECK_EQ(output[4], expectedFlagByte(255, 0, 0));
-    CHECK_EQ(output[5], 0x00);   // Blue
-    CHECK_EQ(output[6], 0x00);   // Green
-    CHECK_EQ(output[7], 0xFF);   // Red
+    FL_CHECK_EQ(output[4], expectedFlagByte(255, 0, 0));
+    FL_CHECK_EQ(output[5], 0x00);   // Blue
+    FL_CHECK_EQ(output[6], 0x00);   // Green
+    FL_CHECK_EQ(output[7], 0xFF);   // Red
 
     // LED 2: Green (0,255,0)
-    CHECK_EQ(output[8], expectedFlagByte(0, 255, 0));
-    CHECK_EQ(output[9], 0x00);   // Blue
-    CHECK_EQ(output[10], 0xFF);  // Green
-    CHECK_EQ(output[11], 0x00);  // Red
+    FL_CHECK_EQ(output[8], expectedFlagByte(0, 255, 0));
+    FL_CHECK_EQ(output[9], 0x00);   // Blue
+    FL_CHECK_EQ(output[10], 0xFF);  // Green
+    FL_CHECK_EQ(output[11], 0x00);  // Red
 
     // LED 3: Blue (0,0,255)
-    CHECK_EQ(output[12], expectedFlagByte(0, 0, 255));
-    CHECK_EQ(output[13], 0xFF);  // Blue
-    CHECK_EQ(output[14], 0x00);  // Green
-    CHECK_EQ(output[15], 0x00);  // Red
+    FL_CHECK_EQ(output[12], expectedFlagByte(0, 0, 255));
+    FL_CHECK_EQ(output[13], 0xFF);  // Blue
+    FL_CHECK_EQ(output[14], 0x00);  // Green
+    FL_CHECK_EQ(output[15], 0x00);  // Red
 
     // End boundary
-    CHECK_EQ(output[16], 0x00);
-    CHECK_EQ(output[17], 0x00);
-    CHECK_EQ(output[18], 0x00);
-    CHECK_EQ(output[19], 0x00);
+    FL_CHECK_EQ(output[16], 0x00);
+    FL_CHECK_EQ(output[17], 0x00);
+    FL_CHECK_EQ(output[18], 0x00);
+    FL_CHECK_EQ(output[19], 0x00);
 }
 
 TEST_CASE("P9813 - Multiple LEDs (five LEDs with mixed values)") {
@@ -308,72 +308,72 @@ TEST_CASE("P9813 - Multiple LEDs (five LEDs with mixed values)") {
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // Expected: 4 (start) + 5*4 (LEDs) + 4 (end) = 28 bytes
-    REQUIRE_EQ(output.size(), 28);
+    FL_REQUIRE_EQ(output.size(), 28);
 
     // Verify start boundary
     for (int i = 0; i < 4; i++) {
-        CHECK_EQ(output[i], 0x00);
+        FL_CHECK_EQ(output[i], 0x00);
     }
 
     // Verify each LED frame
     int offset = 4;
 
     // LED 1: (255, 128, 64) in BGR wire order: (64, 128, 255)
-    CHECK_EQ(output[offset], expectedFlagByte(255, 128, 64));
-    CHECK_EQ(output[offset + 1], 64);   // Blue
-    CHECK_EQ(output[offset + 2], 128);  // Green
-    CHECK_EQ(output[offset + 3], 255);  // Red
+    FL_CHECK_EQ(output[offset], expectedFlagByte(255, 128, 64));
+    FL_CHECK_EQ(output[offset + 1], 64);   // Blue
+    FL_CHECK_EQ(output[offset + 2], 128);  // Green
+    FL_CHECK_EQ(output[offset + 3], 255);  // Red
     offset += 4;
 
     // LED 2: (0, 0, 0)
-    CHECK_EQ(output[offset], expectedFlagByte(0, 0, 0));
-    CHECK_EQ(output[offset + 1], 0);    // Blue
-    CHECK_EQ(output[offset + 2], 0);    // Green
-    CHECK_EQ(output[offset + 3], 0);    // Red
+    FL_CHECK_EQ(output[offset], expectedFlagByte(0, 0, 0));
+    FL_CHECK_EQ(output[offset + 1], 0);    // Blue
+    FL_CHECK_EQ(output[offset + 2], 0);    // Green
+    FL_CHECK_EQ(output[offset + 3], 0);    // Red
     offset += 4;
 
     // LED 3: (255, 255, 255)
-    CHECK_EQ(output[offset], expectedFlagByte(255, 255, 255));
-    CHECK_EQ(output[offset + 1], 255);  // Blue
-    CHECK_EQ(output[offset + 2], 255);  // Green
-    CHECK_EQ(output[offset + 3], 255);  // Red
+    FL_CHECK_EQ(output[offset], expectedFlagByte(255, 255, 255));
+    FL_CHECK_EQ(output[offset + 1], 255);  // Blue
+    FL_CHECK_EQ(output[offset + 2], 255);  // Green
+    FL_CHECK_EQ(output[offset + 3], 255);  // Red
     offset += 4;
 
     // LED 4: (100, 200, 50) in BGR wire order: (50, 200, 100)
-    CHECK_EQ(output[offset], expectedFlagByte(100, 200, 50));
-    CHECK_EQ(output[offset + 1], 50);   // Blue
-    CHECK_EQ(output[offset + 2], 200);  // Green
-    CHECK_EQ(output[offset + 3], 100);  // Red
+    FL_CHECK_EQ(output[offset], expectedFlagByte(100, 200, 50));
+    FL_CHECK_EQ(output[offset + 1], 50);   // Blue
+    FL_CHECK_EQ(output[offset + 2], 200);  // Green
+    FL_CHECK_EQ(output[offset + 3], 100);  // Red
     offset += 4;
 
     // LED 5: (192, 64, 128) in BGR wire order: (128, 64, 192)
-    CHECK_EQ(output[offset], expectedFlagByte(192, 64, 128));
-    CHECK_EQ(output[offset + 1], 128);  // Blue
-    CHECK_EQ(output[offset + 2], 64);   // Green
-    CHECK_EQ(output[offset + 3], 192);  // Red
+    FL_CHECK_EQ(output[offset], expectedFlagByte(192, 64, 128));
+    FL_CHECK_EQ(output[offset + 1], 128);  // Blue
+    FL_CHECK_EQ(output[offset + 2], 64);   // Green
+    FL_CHECK_EQ(output[offset + 3], 192);  // Red
     offset += 4;
 
     // Verify end boundary
     for (int i = 24; i < 28; i++) {
-        CHECK_EQ(output[i], 0x00);
+        FL_CHECK_EQ(output[i], 0x00);
     }
 }
 
 TEST_CASE("P9813 - Flag byte helper function verification") {
     // Direct tests of p9813FlagByte() helper function
-    CHECK_EQ(p9813FlagByte(0, 0, 0), 0xFF);           // All black
-    CHECK_EQ(p9813FlagByte(255, 255, 255), 0xC0);    // All white
-    CHECK_EQ(p9813FlagByte(255, 0, 0), 0xFC);        // Pure red
-    CHECK_EQ(p9813FlagByte(0, 255, 0), 0xF3);        // Pure green
-    CHECK_EQ(p9813FlagByte(0, 0, 255), 0xCF);        // Pure blue
-    CHECK_EQ(p9813FlagByte(64, 64, 64), 0xEA);       // Gray (01 pattern)
-    CHECK_EQ(p9813FlagByte(128, 128, 128), 0xD5);    // Gray (10 pattern)
-    CHECK_EQ(p9813FlagByte(192, 192, 192), 0xC0);    // Gray (11 pattern)
+    FL_CHECK_EQ(p9813FlagByte(0, 0, 0), 0xFF);           // All black
+    FL_CHECK_EQ(p9813FlagByte(255, 255, 255), 0xC0);    // All white
+    FL_CHECK_EQ(p9813FlagByte(255, 0, 0), 0xFC);        // Pure red
+    FL_CHECK_EQ(p9813FlagByte(0, 255, 0), 0xF3);        // Pure green
+    FL_CHECK_EQ(p9813FlagByte(0, 0, 255), 0xCF);        // Pure blue
+    FL_CHECK_EQ(p9813FlagByte(64, 64, 64), 0xEA);       // Gray (01 pattern)
+    FL_CHECK_EQ(p9813FlagByte(128, 128, 128), 0xD5);    // Gray (10 pattern)
+    FL_CHECK_EQ(p9813FlagByte(192, 192, 192), 0xC0);    // Gray (11 pattern)
 
     // Edge cases with mixed bit patterns
-    CHECK_EQ(p9813FlagByte(192, 0, 0), 0xFC);        // Red with high bits set
-    CHECK_EQ(p9813FlagByte(0, 192, 0), 0xF3);        // Green with high bits set
-    CHECK_EQ(p9813FlagByte(0, 0, 192), 0xCF);        // Blue with high bits set
+    FL_CHECK_EQ(p9813FlagByte(192, 0, 0), 0xFC);        // Red with high bits set
+    FL_CHECK_EQ(p9813FlagByte(0, 192, 0), 0xF3);        // Green with high bits set
+    FL_CHECK_EQ(p9813FlagByte(0, 0, 192), 0xCF);        // Blue with high bits set
 }
 
 TEST_CASE("P9813 - BGR wire order verification") {
@@ -389,12 +389,12 @@ TEST_CASE("P9813 - BGR wire order verification") {
 
     // Flag byte should be calculated from RGB values: R=200, G=150, B=100
     u8 expectedFlag = expectedFlagByte(200, 150, 100);
-    CHECK_EQ(output[4], expectedFlag);
+    FL_CHECK_EQ(output[4], expectedFlag);
 
     // Data bytes should be in BGR order as stored
-    CHECK_EQ(output[5], 100);  // Blue (pixel[0])
-    CHECK_EQ(output[6], 150);  // Green (pixel[1])
-    CHECK_EQ(output[7], 200);  // Red (pixel[2])
+    FL_CHECK_EQ(output[5], 100);  // Blue (pixel[0])
+    FL_CHECK_EQ(output[6], 150);  // Green (pixel[1])
+    FL_CHECK_EQ(output[7], 200);  // Red (pixel[2])
 }
 
 TEST_CASE("P9813 - Output iterator compatibility") {
@@ -408,8 +408,8 @@ TEST_CASE("P9813 - Output iterator compatibility") {
 
     encodeP9813(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    CHECK_EQ(output.size(), 12);
-    CHECK_EQ(output[4], expectedFlagByte(128, 128, 128));
+    FL_CHECK_EQ(output.size(), 12);
+    FL_CHECK_EQ(output[4], expectedFlagByte(128, 128, 128));
 }
 
 } // anonymous namespace

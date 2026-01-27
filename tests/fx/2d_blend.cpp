@@ -84,9 +84,9 @@ TEST_CASE("Test FX2d Layered Blending") {
     blendFx.draw(context);
 
     // Verify the result - should be red
-    CHECK(led.r == 255);
-    CHECK(led.g == 0);
-    CHECK(led.b == 0);
+    FL_CHECK(led.r == 255);
+    FL_CHECK(led.g == 0);
+    FL_CHECK(led.b == 0);
 }
 
 TEST_CASE("Test FX2d Layered with XYMap") {
@@ -125,21 +125,21 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         fl::cout << "Layered Effect Output: " << led[3].toString().c_str() << fl::endl;
 
         // Verify the result - should be blue
-        CHECK(led[0].r == 0);
-        CHECK(led[0].g == 0);
-        CHECK(led[0].b == 255);
+        FL_CHECK(led[0].r == 0);
+        FL_CHECK(led[0].g == 0);
+        FL_CHECK(led[0].b == 255);
 
-        CHECK(led[1].r == 255);
-        CHECK(led[1].g == 0);
-        CHECK(led[1].b == 0);
+        FL_CHECK(led[1].r == 255);
+        FL_CHECK(led[1].g == 0);
+        FL_CHECK(led[1].b == 0);
 
-        CHECK(led[2].r == 0);
-        CHECK(led[2].g == 255);
-        CHECK(led[2].b == 0);
+        FL_CHECK(led[2].r == 0);
+        FL_CHECK(led[2].g == 255);
+        FL_CHECK(led[2].b == 0);
 
-        CHECK(led[3].r == 0);
-        CHECK(led[3].g == 0);
-        CHECK(led[3].b == 0);
+        FL_CHECK(led[3].r == 0);
+        FL_CHECK(led[3].g == 0);
+        FL_CHECK(led[3].b == 0);
     }
 
     SUBCASE("Serpentine") {
@@ -168,21 +168,21 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         fl::cout << "Layered Effect Output: " << led[3].toString().c_str() << fl::endl;
 
         // Verify the result - should be blue
-        CHECK(led[0].r == 0);
-        CHECK(led[0].g == 0);
-        CHECK(led[0].b == 255);
+        FL_CHECK(led[0].r == 0);
+        FL_CHECK(led[0].g == 0);
+        FL_CHECK(led[0].b == 255);
 
-        CHECK(led[1].r == 255);
-        CHECK(led[1].g == 0);
-        CHECK(led[1].b == 0);
+        FL_CHECK(led[1].r == 255);
+        FL_CHECK(led[1].g == 0);
+        FL_CHECK(led[1].b == 0);
 
         // Now it's supposed to go up to the next line at the same column.
-        CHECK(led[2].r == 0);
-        CHECK(led[2].g == 0);
-        CHECK(led[2].b == 0);
+        FL_CHECK(led[2].r == 0);
+        FL_CHECK(led[2].g == 0);
+        FL_CHECK(led[2].b == 0);
 
-        CHECK(led[3].r == 0);
-        CHECK(led[3].g == 255);
-        CHECK(led[3].b == 0);
+        FL_CHECK(led[3].r == 0);
+        FL_CHECK(led[3].g == 255);
+        FL_CHECK(led[3].b == 0);
     }
 }

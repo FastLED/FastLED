@@ -9,13 +9,13 @@ using namespace fl;
 TEST_CASE("not_null - construct from non-null pointer") {
     int value = 42;
     not_null<int*> ptr(&value);
-    CHECK(ptr.get() == &value);
+    FL_CHECK(ptr.get() == &value);
 }
 
 TEST_CASE("not_null - dereference operator") {
     int value = 42;
     not_null<int*> ptr(&value);
-    CHECK(*ptr == 42);
+    FL_CHECK(*ptr == 42);
 }
 
 TEST_CASE("not_null - arrow operator") {
@@ -25,29 +25,29 @@ TEST_CASE("not_null - arrow operator") {
     };
     Point p{10, 20};
     not_null<Point*> ptr(&p);
-    CHECK(ptr->x == 10);
-    CHECK(ptr->y == 20);
+    FL_CHECK(ptr->x == 10);
+    FL_CHECK(ptr->y == 20);
 }
 
 TEST_CASE("not_null - implicit conversion to raw pointer") {
     int value = 42;
     not_null<int*> ptr(&value);
     int* raw = ptr;  // Should compile (implicit conversion)
-    CHECK(raw == &value);
+    FL_CHECK(raw == &value);
 }
 
 TEST_CASE("not_null - copy construction") {
     int value = 42;
     not_null<int*> ptr1(&value);
     not_null<int*> ptr2(ptr1);
-    CHECK(ptr2.get() == &value);
+    FL_CHECK(ptr2.get() == &value);
 }
 
 TEST_CASE("not_null - move construction") {
     int value = 42;
     not_null<int*> ptr1(&value);
     not_null<int*> ptr2(fl::move(ptr1));
-    CHECK(ptr2.get() == &value);
+    FL_CHECK(ptr2.get() == &value);
 }
 
 TEST_CASE("not_null - assign non-null pointer") {
@@ -55,13 +55,13 @@ TEST_CASE("not_null - assign non-null pointer") {
     int val2 = 20;
     not_null<int*> ptr(&val1);
     ptr = &val2;
-    CHECK(ptr.get() == &val2);
+    FL_CHECK(ptr.get() == &val2);
 }
 
 TEST_CASE("not_null - compare with raw pointer") {
     int value = 42;
     not_null<int*> ptr(&value);
-    CHECK(ptr == &value);
+    FL_CHECK(ptr == &value);
 }
 
 TEST_CASE("not_null - compare with another not_null") {
@@ -71,22 +71,22 @@ TEST_CASE("not_null - compare with another not_null") {
     not_null<int*> ptr2(&val2);
     not_null<int*> ptr3(&val1);
 
-    CHECK(ptr1 != ptr2);
-    CHECK(ptr1 == ptr3);
+    FL_CHECK(ptr1 != ptr2);
+    FL_CHECK(ptr1 == ptr3);
 }
 
 TEST_CASE("not_null - const pointer") {
     const int value = 42;
     not_null<const int*> ptr(&value);
-    CHECK(*ptr == 42);
+    FL_CHECK(*ptr == 42);
 }
 
 TEST_CASE("not_null - array subscript operator") {
     int arr[5] = {1, 2, 3, 4, 5};
     not_null<int*> ptr(arr);
-    CHECK(ptr[0] == 1);
-    CHECK(ptr[2] == 3);
-    CHECK(ptr[4] == 5);
+    FL_CHECK(ptr[0] == 1);
+    FL_CHECK(ptr[2] == 3);
+    FL_CHECK(ptr[4] == 5);
 }
 
 TEST_CASE("not_null - polymorphic pointer") {
@@ -101,22 +101,22 @@ TEST_CASE("not_null - polymorphic pointer") {
 
     Derived d;
     not_null<Base*> ptr(&d);
-    CHECK(ptr->get() == 2);
+    FL_CHECK(ptr->get() == 2);
 }
 
 TEST_CASE("not_null - const conversion") {
     int value = 42;
     not_null<int*> ptr1(&value);
     not_null<const int*> ptr2(ptr1);  // Should compile
-    CHECK(*ptr2 == 42);
+    FL_CHECK(*ptr2 == 42);
 }
 
 TEST_CASE("not_null - modify through pointer") {
     int value = 42;
     not_null<int*> ptr(&value);
     *ptr = 100;
-    CHECK(value == 100);
-    CHECK(*ptr == 100);
+    FL_CHECK(value == 100);
+    FL_CHECK(*ptr == 100);
 }
 
 TEST_CASE("not_null - copy assignment") {
@@ -125,7 +125,7 @@ TEST_CASE("not_null - copy assignment") {
     not_null<int*> ptr1(&val1);
     not_null<int*> ptr2(&val2);
     ptr1 = ptr2;
-    CHECK(ptr1.get() == &val2);
+    FL_CHECK(ptr1.get() == &val2);
 }
 
 TEST_CASE("not_null - move assignment") {
@@ -134,7 +134,7 @@ TEST_CASE("not_null - move assignment") {
     not_null<int*> ptr1(&val1);
     not_null<int*> ptr2(&val2);
     ptr1 = fl::move(ptr2);
-    CHECK(ptr1.get() == &val2);
+    FL_CHECK(ptr1.get() == &val2);
 }
 
 TEST_CASE("not_null - converting constructor") {
@@ -144,7 +144,7 @@ TEST_CASE("not_null - converting constructor") {
     Derived d;
     not_null<Derived*> ptr1(&d);
     not_null<Base*> ptr2(ptr1);  // Should compile
-    CHECK(static_cast<Base*>(&d) == ptr2.get());
+    FL_CHECK(static_cast<Base*>(&d) == ptr2.get());
 }
 
 TEST_CASE("not_null - ordering comparisons") {
@@ -153,17 +153,17 @@ TEST_CASE("not_null - ordering comparisons") {
     not_null<int*> ptr2(&arr[1]);
     not_null<int*> ptr3(&arr[2]);
 
-    CHECK(ptr1 < ptr2);
-    CHECK(ptr2 < ptr3);
-    CHECK(ptr1 <= ptr1);
-    CHECK(ptr3 > ptr2);
-    CHECK(ptr3 >= ptr3);
+    FL_CHECK(ptr1 < ptr2);
+    FL_CHECK(ptr2 < ptr3);
+    FL_CHECK(ptr1 <= ptr1);
+    FL_CHECK(ptr3 > ptr2);
+    FL_CHECK(ptr3 >= ptr3);
 }
 
 TEST_CASE("not_null - function pointer") {
     auto func = +[](int x) { return x * 2; };
     not_null<int(*)(int)> ptr(func);
-    CHECK((*ptr)(5) == 10);
+    FL_CHECK((*ptr)(5) == 10);
 }
 
 // Smart pointer integration tests
@@ -173,21 +173,21 @@ TEST_CASE("not_null - function pointer") {
 TEST_CASE("not_null - works with unique_ptr") {
     auto uptr = fl::make_unique<int>(42);
     not_null<int*> ptr(uptr.get());
-    CHECK(*ptr == 42);
+    FL_CHECK(*ptr == 42);
 }
 
 TEST_CASE("not_null - works with shared_ptr") {
     auto sptr = fl::make_shared<int>(42);
     not_null<int*> ptr(sptr.get());
-    CHECK(*ptr == 42);
+    FL_CHECK(*ptr == 42);
 }
 
 TEST_CASE("not_null - modify through smart pointer") {
     auto uptr = fl::make_unique<int>(42);
     not_null<int*> ptr(uptr.get());
     *ptr = 100;
-    CHECK(*uptr == 100);
-    CHECK(*ptr == 100);
+    FL_CHECK(*uptr == 100);
+    FL_CHECK(*ptr == 100);
 }
 
 // ============================================================================
@@ -202,9 +202,9 @@ TEST_CASE("not_null - works with CRGB pointer") {
     fl::CRGB pixel(255, 128, 64);
     not_null<fl::CRGB*> ptr(&pixel);
 
-    CHECK(ptr->r == 255);
-    CHECK(ptr->g == 128);
-    CHECK(ptr->b == 64);
+    FL_CHECK(ptr->r == 255);
+    FL_CHECK(ptr->g == 128);
+    FL_CHECK(ptr->b == 64);
 }
 
 TEST_CASE("not_null - array of CRGB pixels") {
@@ -215,9 +215,9 @@ TEST_CASE("not_null - array of CRGB pixels") {
 
     not_null<fl::CRGB*> ptr(pixels);
 
-    CHECK(ptr[0].r == 255);
-    CHECK(ptr[1].g == 255);
-    CHECK(ptr[2].b == 255);
+    FL_CHECK(ptr[0].r == 255);
+    FL_CHECK(ptr[1].g == 255);
+    FL_CHECK(ptr[2].b == 255);
 }
 
 TEST_CASE("not_null - modify CRGB through pointer") {
@@ -228,18 +228,18 @@ TEST_CASE("not_null - modify CRGB through pointer") {
     ptr->g = 128;
     ptr->b = 64;
 
-    CHECK(pixel.r == 255);
-    CHECK(pixel.g == 128);
-    CHECK(pixel.b == 64);
+    FL_CHECK(pixel.r == 255);
+    FL_CHECK(pixel.g == 128);
+    FL_CHECK(pixel.b == 64);
 }
 
 TEST_CASE("not_null - const CRGB pointer") {
     const fl::CRGB pixel(255, 128, 64);
     not_null<const fl::CRGB*> ptr(&pixel);
 
-    CHECK(ptr->r == 255);
-    CHECK(ptr->g == 128);
-    CHECK(ptr->b == 64);
+    FL_CHECK(ptr->r == 255);
+    FL_CHECK(ptr->g == 128);
+    FL_CHECK(ptr->b == 64);
 }
 
 // ============================================================================
@@ -259,9 +259,9 @@ TEST_CASE("not_null - function parameter pattern") {
     setPixelsRed(pixels, 5);  // Implicit conversion from array to not_null
 
     for (int i = 0; i < 5; i++) {
-        CHECK(pixels[i].r == 255);
-        CHECK(pixels[i].g == 0);
-        CHECK(pixels[i].b == 0);
+        FL_CHECK(pixels[i].r == 255);
+        FL_CHECK(pixels[i].g == 0);
+        FL_CHECK(pixels[i].b == 0);
     }
 }
 
@@ -279,8 +279,8 @@ TEST_CASE("not_null - struct with multiple pointers") {
     LedStrip strip{pixels, 10};
 
     not_null<LedStrip*> ptr(&strip);
-    CHECK(ptr->mPixels == pixels);
-    CHECK(ptr->mCount == 10);
+    FL_CHECK(ptr->mPixels == pixels);
+    FL_CHECK(ptr->mCount == 10);
 }
 
 // ============================================================================
@@ -295,7 +295,7 @@ TEST_CASE("not_null - pointer arithmetic remains valid") {
     int* raw = ptr;
     int* next = raw + 2;
 
-    CHECK(*next == 30);
+    FL_CHECK(*next == 30);
 }
 
 // ============================================================================
@@ -307,12 +307,12 @@ TEST_CASE("not_null - comparison symmetry with raw pointer") {
     not_null<int*> ptr(&value);
 
     // Both directions should work (member and non-member operators)
-    CHECK(ptr == &value);
-    CHECK(&value == ptr);  // Non-member operator
+    FL_CHECK(ptr == &value);
+    FL_CHECK(&value == ptr);  // Non-member operator
 
     int other = 100;
-    CHECK(ptr != &other);
-    CHECK(&other != ptr);  // Non-member operator
+    FL_CHECK(ptr != &other);
+    FL_CHECK(&other != ptr);  // Non-member operator
 }
 
 // ============================================================================
@@ -327,21 +327,21 @@ TEST_CASE("not_null - compile-time type constraints") {
     // (this test compiles = constraint satisfied)
     int value = 42;
     not_null<int*> ptr1(&value);
-    CHECK(ptr1.get() == &value);
+    FL_CHECK(ptr1.get() == &value);
 
     // Verify works with const pointers
     const int cvalue = 100;
     not_null<const int*> ptr2(&cvalue);
-    CHECK(ptr2.get() == &cvalue);
+    FL_CHECK(ptr2.get() == &cvalue);
 
     // Verify works with pointer to const
     not_null<const int*> ptr3(&value);
-    CHECK(ptr3.get() == &value);
+    FL_CHECK(ptr3.get() == &value);
 
     // Verify works with smart pointer get()
     auto uptr = fl::make_unique<int>(42);
     not_null<int*> ptr4(uptr.get());
-    CHECK(*ptr4 == 42);
+    FL_CHECK(*ptr4 == 42);
 }
 
 // Test that verifies the type traits are working correctly
@@ -371,7 +371,7 @@ TEST_CASE("not_null - type traits verification") {
                   "CRGB* should be dereferenceable");
 
     // This test passes if all static_assert succeed at compile time
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 // Test deleted constructors and assignment operators
@@ -385,5 +385,5 @@ TEST_CASE("not_null - deleted operations are compile-time enforced") {
     // This test verifies the implementation has deleted operations
     // The fact that the above lines are commented out and would fail to compile
     // is the test itself. We just need a passing check to keep the test framework happy.
-    CHECK(true);
+    FL_CHECK(true);
 }

@@ -12,9 +12,9 @@ TEST_CASE("FL_ALIGN_BYTES") {
         constexpr int bytes = FL_ALIGN_BYTES;
 
 #ifdef __EMSCRIPTEN__
-        CHECK_EQ(bytes, 8);
+        FL_CHECK_EQ(bytes, 8);
 #else
-        CHECK_EQ(bytes, 1);
+        FL_CHECK_EQ(bytes, 1);
 #endif
     }
 
@@ -22,7 +22,7 @@ TEST_CASE("FL_ALIGN_BYTES") {
         // Test that FL_ALIGN_BYTES can be used as array size
         char buffer[FL_ALIGN_BYTES];
         (void)buffer; // Suppress unused variable warning
-        CHECK(true); // If we get here, array declaration worked
+        FL_CHECK(true); // If we get here, array declaration worked
     }
 }
 
@@ -39,11 +39,11 @@ TEST_CASE("FL_ALIGN") {
 
 #ifdef __EMSCRIPTEN__
         // On Emscripten, should be 8-byte aligned
-        CHECK_EQ(alignof(AlignedStruct), 8);
+        FL_CHECK_EQ(alignof(AlignedStruct), 8);
 #else
         // On other platforms, FL_ALIGN is a no-op
         // Alignment is natural alignment of the struct
-        CHECK(alignof(AlignedStruct) >= 1);
+        FL_CHECK(alignof(AlignedStruct) >= 1);
 #endif
     }
 
@@ -59,10 +59,10 @@ TEST_CASE("FL_ALIGN") {
 
 #ifdef __EMSCRIPTEN__
         // On Emscripten, should be 8-byte aligned
-        CHECK_EQ(alignof(AlignedClass), 8);
+        FL_CHECK_EQ(alignof(AlignedClass), 8);
 #else
         // On other platforms, alignment is natural
-        CHECK(alignof(AlignedClass) >= 1);
+        FL_CHECK(alignof(AlignedClass) >= 1);
 #endif
     }
 
@@ -77,7 +77,7 @@ TEST_CASE("FL_ALIGN") {
         (void)cnt; // Suppress unused variable warning
 
         // Container should compile successfully
-        CHECK(sizeof(Container) >= 3 * sizeof(int));
+        FL_CHECK(sizeof(Container) >= 3 * sizeof(int));
     }
 }
 
@@ -93,10 +93,10 @@ TEST_CASE("FL_ALIGN_AS") {
 
 #ifdef __AVR__
         // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
-        CHECK(alignof(AlignedToInt) >= 1);
+        FL_CHECK(alignof(AlignedToInt) >= 1);
 #else
         // Should be aligned to int (4 bytes on most platforms)
-        CHECK_EQ(alignof(AlignedToInt), alignof(int));
+        FL_CHECK_EQ(alignof(AlignedToInt), alignof(int));
 #endif
     }
 
@@ -111,10 +111,10 @@ TEST_CASE("FL_ALIGN_AS") {
 
 #ifdef __AVR__
         // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
-        CHECK(alignof(AlignedToDouble) >= 1);
+        FL_CHECK(alignof(AlignedToDouble) >= 1);
 #else
         // Should be aligned to double (8 bytes on most platforms)
-        CHECK_EQ(alignof(AlignedToDouble), alignof(double));
+        FL_CHECK_EQ(alignof(AlignedToDouble), alignof(double));
 #endif
     }
 
@@ -132,11 +132,11 @@ TEST_CASE("FL_ALIGN_AS") {
 
 #ifdef __AVR__
         // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
-        CHECK(alignof(AlignedToCustom) >= 1);
+        FL_CHECK(alignof(AlignedToCustom) >= 1);
 #else
         // Should be aligned to CustomAligned (16 bytes)
-        CHECK_EQ(alignof(AlignedToCustom), alignof(CustomAligned));
-        CHECK_EQ(alignof(AlignedToCustom), 16);
+        FL_CHECK_EQ(alignof(AlignedToCustom), alignof(CustomAligned));
+        FL_CHECK_EQ(alignof(AlignedToCustom), 16);
 #endif
     }
 
@@ -150,10 +150,10 @@ TEST_CASE("FL_ALIGN_AS") {
 
 #ifdef __AVR__
         // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
-        CHECK(alignof(AlignedToPointer) >= 1);
+        FL_CHECK(alignof(AlignedToPointer) >= 1);
 #else
         // Should be aligned to pointer size
-        CHECK_EQ(alignof(AlignedToPointer), alignof(void*));
+        FL_CHECK_EQ(alignof(AlignedToPointer), alignof(void*));
 #endif
     }
 }
@@ -167,10 +167,10 @@ TEST_CASE("FL_ALIGN memory layout") {
 
 #ifdef __EMSCRIPTEN__
         // With 8-byte alignment, struct should be padded to 8 bytes
-        CHECK_EQ(sizeof(LargeAligned), 8);
+        FL_CHECK_EQ(sizeof(LargeAligned), 8);
 #else
         // Without alignment, struct can be 1 byte
-        CHECK_EQ(sizeof(LargeAligned), 1);
+        FL_CHECK_EQ(sizeof(LargeAligned), 1);
 #endif
     }
 
@@ -184,12 +184,12 @@ TEST_CASE("FL_ALIGN memory layout") {
 
 #ifdef __EMSCRIPTEN__
         // Each element should be 8 bytes apart
-        CHECK_EQ(sizeof(Element), 8);
-        CHECK_EQ(sizeof(array), 24);
+        FL_CHECK_EQ(sizeof(Element), 8);
+        FL_CHECK_EQ(sizeof(array), 24);
 #else
         // Each element is just 1 byte
-        CHECK_EQ(sizeof(Element), 1);
-        CHECK_EQ(sizeof(array), 3);
+        FL_CHECK_EQ(sizeof(Element), 1);
+        FL_CHECK_EQ(sizeof(array), 3);
 #endif
     }
 }
@@ -205,7 +205,7 @@ TEST_CASE("FL_ALIGN compile-time checks") {
         constexpr size_t alignment = alignof(TestStruct);
         (void)alignment; // Suppress unused variable warning
 
-        CHECK(alignment >= 1);
+        FL_CHECK(alignment >= 1);
     }
 
     SUBCASE("FL_ALIGN_AS is constexpr") {
@@ -217,7 +217,7 @@ TEST_CASE("FL_ALIGN compile-time checks") {
         constexpr size_t alignment = alignof(TestStruct);
         (void)alignment; // Suppress unused variable warning
 
-        CHECK(alignment >= 1);
+        FL_CHECK(alignment >= 1);
     }
 }
 
@@ -231,7 +231,7 @@ TEST_CASE("FL_ALIGN edge cases") {
         (void)ea; // Suppress unused variable warning
 
         // Even empty structs have size of at least 1
-        CHECK(sizeof(EmptyAligned) >= 1);
+        FL_CHECK(sizeof(EmptyAligned) >= 1);
     }
 
     SUBCASE("nested aligned structs") {
@@ -247,7 +247,7 @@ TEST_CASE("FL_ALIGN edge cases") {
         Outer outer;
         (void)outer; // Suppress unused variable warning
 
-        CHECK(sizeof(Outer) >= sizeof(Inner) + sizeof(int));
+        FL_CHECK(sizeof(Outer) >= sizeof(Inner) + sizeof(int));
     }
 
     SUBCASE("alignment with union") {
@@ -262,10 +262,10 @@ TEST_CASE("FL_ALIGN edge cases") {
 
 #ifdef __EMSCRIPTEN__
         // Should be aligned to 8 bytes
-        CHECK_EQ(alignof(AlignedUnion), 8);
+        FL_CHECK_EQ(alignof(AlignedUnion), 8);
 #else
         // Natural alignment of union (max of members)
-        CHECK(alignof(AlignedUnion) >= 1);
+        FL_CHECK(alignof(AlignedUnion) >= 1);
 #endif
     }
 }
@@ -282,10 +282,10 @@ TEST_CASE("FL_ALIGN macro combinations") {
 
 #ifdef __AVR__
         // On AVR (8-bit), both macros are no-ops to save RAM
-        CHECK(alignof(BothAligned) >= 1);
+        FL_CHECK(alignof(BothAligned) >= 1);
 #else
         // Both macros should apply - FL_ALIGN_AS(double) takes precedence
-        CHECK_EQ(alignof(BothAligned), alignof(double));
+        FL_CHECK_EQ(alignof(BothAligned), alignof(double));
 #endif
     }
 
@@ -299,6 +299,6 @@ TEST_CASE("FL_ALIGN macro combinations") {
         (void)cnt; // Suppress unused variable warning
 
         // Should compile successfully
-        CHECK(sizeof(Container) >= 2);
+        FL_CHECK(sizeof(Container) >= 2);
     }
 }

@@ -57,28 +57,28 @@ TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
     ChipsetTimingConfig timing = getWS2812TimingForDmaTests();
 
     bool init_ok = engine.initialize(1, pins, timing, 10);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     // Simple test pattern: Single LED with RGB = 0xFF, 0x00, 0xAA
     uint8_t scratch[3] = {0xFF, 0x00, 0xAA};
 
     bool tx_ok = engine.beginTransmission(scratch, 3, 1, 3);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     // Access mock to verify data capture
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     // Verify first transmission captured data
     const auto& first_tx = history[0];
-    CHECK(first_tx.bit_count > 0);
-    CHECK(first_tx.buffer_copy.size() > 0);
+    FL_CHECK(first_tx.bit_count > 0);
+    FL_CHECK(first_tx.buffer_copy.size() > 0);
 
     // Each byte (8 bits) expands to 8 bytes in Wave8 format (64 bits total)
     // 3 input bytes = 24 bytes Wave8 minimum
-    CHECK(first_tx.buffer_copy.size() >= 24);
+    FL_CHECK(first_tx.buffer_copy.size() >= 24);
 }
 
 TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
@@ -100,12 +100,12 @@ TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
     };
 
     bool tx_ok = engine.beginTransmission(scratch, 15, 1, 15);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     const auto& tx = history[0];
     const auto& buffer = tx.buffer_copy;
@@ -118,7 +118,7 @@ TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
             break;
         }
     }
-    CHECK(has_nonzero);
+    FL_CHECK(has_nonzero);
 }
 
 TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
@@ -137,7 +137,7 @@ TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
     size_t total_bytes = num_lanes * lane_stride;         // 36 bytes total
 
     bool init_ok = engine.initialize(num_lanes, pins, timing, leds_per_lane);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     // Create per-lane scratch buffer with distinct patterns
     fl::vector<uint8_t> scratch(total_bytes);
@@ -163,22 +163,22 @@ TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
     }
 
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, lane_stride);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     // Verify multi-lane transmission captured data
     const auto& tx = history[0];
-    CHECK(tx.buffer_copy.size() > 0);
+    FL_CHECK(tx.buffer_copy.size() > 0);
 
     // For multi-lane, the output buffer should be larger due to bit-parallel layout
     // Each lane's data is transposed and interleaved
     // Wave8 expansion creates approximately 2-3x the original data size
     // (actual ratio depends on ring buffer chunking and alignment)
-    CHECK(tx.buffer_copy.size() >= total_bytes * 2);
+    FL_CHECK(tx.buffer_copy.size() >= total_bytes * 2);
 }
 
 TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
@@ -200,18 +200,18 @@ TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
     engine.beginTransmission(scratch1, 3, 1, 3);
 
     size_t count_after_first = mock.getTransmissionHistory().size();
-    CHECK(count_after_first > 0);
+    FL_CHECK(count_after_first > 0);
 
     // Second transmission
     uint8_t scratch2[3] = {0x00, 0xFF, 0x00};  // Green
     engine.beginTransmission(scratch2, 3, 1, 3);
 
     size_t count_after_second = mock.getTransmissionHistory().size();
-    CHECK(count_after_second >= count_after_first);
+    FL_CHECK(count_after_second >= count_after_first);
 
     // History should contain both transmissions
     const auto& history = mock.getTransmissionHistory();
-    CHECK(history.size() >= 2);
+    FL_CHECK(history.size() >= 2);
 }
 
 TEST_CASE("ParlioEngine - verify bit count matches expected") {
@@ -232,12 +232,12 @@ TEST_CASE("ParlioEngine - verify bit count matches expected") {
     }
 
     bool tx_ok = engine.beginTransmission(scratch, 15, 1, 15);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     const auto& tx = history[0];
 
@@ -245,11 +245,11 @@ TEST_CASE("ParlioEngine - verify bit count matches expected") {
     // Input: 15 bytes = 120 bits
     // Wave8 expansion creates approximately 2-3x the bit count
     // (actual ratio depends on ring buffer chunking)
-    CHECK(tx.bit_count >= 160);
+    FL_CHECK(tx.bit_count >= 160);
 
     // Verify buffer size matches bit count
     size_t expected_bytes = (tx.bit_count + 7) / 8;  // Round up
-    CHECK(tx.buffer_copy.size() >= expected_bytes);
+    FL_CHECK(tx.buffer_copy.size() >= expected_bytes);
 }
 
 TEST_CASE("ParlioEngine - verify idle value is captured") {
@@ -264,18 +264,18 @@ TEST_CASE("ParlioEngine - verify idle value is captured") {
     uint8_t scratch[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
     bool tx_ok = engine.beginTransmission(scratch, 6, 1, 6);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     const auto& tx = history[0];
 
     // Idle value should be set (typically 0x0000 for WS2812B)
     // This is implementation-specific, but should be captured
-    CHECK(tx.idle_value == 0x0000);
+    FL_CHECK(tx.idle_value == 0x0000);
 }
 
 TEST_CASE("ParlioEngine - large buffer streaming with capture") {
@@ -291,7 +291,7 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
     size_t num_bytes = num_leds * 3;
 
     bool init_ok = engine.initialize(1, pins, timing, num_leds);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     fl::vector<uint8_t> scratch(num_bytes);
     for (size_t i = 0; i < num_bytes; i++) {
@@ -299,14 +299,14 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
     }
 
     bool tx_ok = engine.beginTransmission(scratch.data(), num_bytes, 1, num_bytes);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
 
     // For large buffers, engine may split into multiple DMA submissions
-    CHECK(history.size() > 0);
+    FL_CHECK(history.size() > 0);
 
     // Verify total captured data is reasonable
     size_t total_bits = 0;
@@ -316,7 +316,7 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
 
     // At minimum: num_bytes × 8 bits × 8 (Wave8 expansion)
     size_t expected_min_bits = num_bytes * 8 * 8;
-    CHECK(total_bits >= expected_min_bits);
+    FL_CHECK(total_bits >= expected_min_bits);
 }
 
 //=============================================================================
@@ -334,23 +334,23 @@ TEST_CASE("ParlioEngine - verify timing parameters are applied") {
     ChipsetTimingConfig custom_timing(400, 850, 500, 80, "CustomTiming");
 
     bool init_ok = engine.initialize(1, pins, custom_timing, 5);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F, 0xC3, 0x3C, 0x99, 0x66,
                            0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
     bool tx_ok = engine.beginTransmission(scratch, 15, 1, 15);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     // Verify transmission occurred with custom timing
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     // The actual waveform validation would require inspecting the bit patterns
     // For now, verify that transmission succeeded with custom timing
-    CHECK(history[0].buffer_copy.size() > 0);
+    FL_CHECK(history[0].buffer_copy.size() > 0);
 }
 
 TEST_CASE("ParlioEngine - zero-length transmission edge case") {
@@ -373,7 +373,7 @@ TEST_CASE("ParlioEngine - zero-length transmission edge case") {
 
     // If transmission was allowed, history might be empty or contain zero-length record
     // Just verify no crash occurred
-    CHECK(true);
+    FL_CHECK(true);
 }
 
 TEST_CASE("ParlioEngine - single byte transmission") {
@@ -389,19 +389,19 @@ TEST_CASE("ParlioEngine - single byte transmission") {
     uint8_t scratch[1] = {0xA5};
 
     bool tx_ok = engine.beginTransmission(scratch, 1, 1, 1);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     const auto& tx = history[0];
 
     // Single byte = 8 bits input
     // Wave8 expansion = 64 bits output
-    CHECK(tx.bit_count >= 64);
-    CHECK(tx.buffer_copy.size() >= 8);
+    FL_CHECK(tx.bit_count >= 64);
+    FL_CHECK(tx.buffer_copy.size() >= 8);
 }
 
 TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
@@ -424,7 +424,7 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     size_t total_bytes = num_lanes * lane_stride;
 
     bool init_ok = engine.initialize(num_lanes, pins, timing, leds_per_lane);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     fl::vector<uint8_t> scratch(total_bytes);
     for (size_t i = 0; i < total_bytes; i++) {
@@ -432,19 +432,19 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     }
 
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, lane_stride);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     // Verify max-lane transmission captured data
     const auto& tx = history[0];
-    CHECK(tx.buffer_copy.size() > 0);
+    FL_CHECK(tx.buffer_copy.size() > 0);
 
     // With 16 lanes, output should be substantial
-    CHECK(tx.bit_count > 0);
+    FL_CHECK(tx.bit_count > 0);
 }
 
 TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
@@ -472,7 +472,7 @@ TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
     size_t total_bytes = num_lanes * max_channel_bytes;  // 30 bytes total
 
     bool init_ok = engine.initialize(num_lanes, pins, timing, lane0_leds);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     // Create per-lane scratch buffer
     fl::vector<uint8_t> scratch(total_bytes);
@@ -493,24 +493,24 @@ TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
     }
 
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, max_channel_bytes);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     // Verify transmission captured data
     const auto& tx = history[0];
-    CHECK(tx.buffer_copy.size() > 0);
+    FL_CHECK(tx.buffer_copy.size() > 0);
 
     // Each lane's data is expanded by Wave8
     // Wave8 expansion creates approximately 2-3x the original data size
     // (actual ratio depends on ring buffer chunking)
-    CHECK(tx.buffer_copy.size() >= total_bytes * 2);
+    FL_CHECK(tx.buffer_copy.size() >= total_bytes * 2);
 
     // Verify that transmission includes both channels' data
-    CHECK(tx.bit_count > 0);
+    FL_CHECK(tx.bit_count > 0);
 
     // Note: The actual bit-parallel layout verification would require
     // detailed Wave8 decoding. The key validation here is:
@@ -537,7 +537,7 @@ TEST_CASE("ParlioEngine - verify reset padding is applied for different channel 
     size_t total_bytes = leds_per_lane * bytes_per_led;  // 6 bytes
 
     bool init_ok = engine.initialize(num_lanes, pins, timing, leds_per_lane);
-    REQUIRE(init_ok);
+    FL_REQUIRE(init_ok);
 
     // Create data buffer with known pattern
     fl::vector<uint8_t> scratch(total_bytes);
@@ -546,12 +546,12 @@ TEST_CASE("ParlioEngine - verify reset padding is applied for different channel 
     }
 
     bool tx_ok = engine.beginTransmission(scratch.data(), total_bytes, num_lanes, total_bytes);
-    REQUIRE(tx_ok);
+    FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
 
     const auto& history = mock.getTransmissionHistory();
-    REQUIRE(history.size() > 0);
+    FL_REQUIRE(history.size() > 0);
 
     const auto& tx = history[0];
 
@@ -561,11 +561,11 @@ TEST_CASE("ParlioEngine - verify reset padding is applied for different channel 
     // (actual size depends on ring buffer chunking and reset timing)
 
     // Verify that reset padding increases buffer size beyond just the data
-    CHECK(tx.buffer_copy.size() > total_bytes * 2);
+    FL_CHECK(tx.buffer_copy.size() > total_bytes * 2);
 
     // The exact buffer size depends on timing parameters, but bit count
     // should account for Wave8 expansion of the data
-    CHECK(tx.bit_count > total_bytes * 8 * 2);
+    FL_CHECK(tx.bit_count > total_bytes * 8 * 2);
 }
 
 #endif // FASTLED_STUB_IMPL

@@ -29,7 +29,7 @@ TEST_CASE("ClocklessController - LED Data Capture") {
     const auto& stripData = data.getData();
 
     // Should have at least one strip registered
-    CHECK(stripData.size() >= 1);
+    FL_CHECK(stripData.size() >= 1);
 
     FL_WARN("StubSPIOutput LED capture test: " << stripData.size() << " strips captured");
 }

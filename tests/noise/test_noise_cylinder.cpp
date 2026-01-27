@@ -41,7 +41,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal smoothness - small time delta") {
     // At 1ms, the noise should change only minimally
     // This tests that the noise function provides smooth animation
     // as time progresses in small increments
-    CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
 TEST_CASE("[.]noiseCylinderHSV8 temporal evolution - large time delta") {
@@ -78,7 +78,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal evolution - large time delta") {
 
     // At 1 second, the noise should have evolved significantly
     // This tests that the pattern changes meaningfully over time
-    CHECK_GT(avg_diff_1sec, 0.01f);
+    FL_CHECK_GT(avg_diff_1sec, 0.01f);
 }
 
 TEST_CASE("[.]noiseCylinderHSV8 temporal response ratio") {
@@ -126,7 +126,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal response ratio") {
 
     // Small time changes should produce proportionally smaller differences
     // Large time changes should produce proportionally larger differences
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseCylinderCRGB temporal test") {
@@ -167,10 +167,10 @@ TEST_CASE("[.]noiseCylinderCRGB temporal test") {
     FL_WARN("Δt=1s average difference: " << avg_diff_1sec);
 
     // Small delta should be small
-    CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
 
     // Large delta should be larger than small delta
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
@@ -216,13 +216,13 @@ TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
     FL_WARN("Val - min: " << min_hsv.v << ", max: " << max_hsv.v << ", avg: " << v_avg << ", span: " << (max_hsv.v - min_hsv.v));
 
     // All components should have decent range variation
-    CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
-    CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
-    CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
+    FL_CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
+    FL_CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
+    FL_CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
 
     // Averages should be reasonably distributed (not clipped)
-    CHECK_GT(h_avg, 0x2000);
-    CHECK_LT(h_avg, 0xD000);
+    FL_CHECK_GT(h_avg, 0x2000);
+    FL_CHECK_LT(h_avg, 0xD000);
 }
 
 TEST_CASE("[.]noiseCylinderHSV8 radius level of detail") {
@@ -256,7 +256,7 @@ TEST_CASE("[.]noiseCylinderHSV8 radius level of detail") {
     FL_WARN("Different radius values should sample different detail levels");
 
     // Different radius values should produce noticeably different patterns
-    CHECK_GT(avg_diff, 10.0f);
+    FL_CHECK_GT(avg_diff, 10.0f);
 }
 
 TEST_CASE("[.]noiseCylinderHSV8 height variation") {
@@ -290,7 +290,7 @@ TEST_CASE("[.]noiseCylinderHSV8 height variation") {
     FL_WARN("Different heights should produce different patterns");
 
     // Different heights should produce noticeably different patterns
-    CHECK_GT(avg_diff, 5.0f);
+    FL_CHECK_GT(avg_diff, 5.0f);
 }
 
 TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
@@ -343,13 +343,13 @@ TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
     FL_WARN("Val - min: " << min_hsv.v << ", max: " << max_hsv.v << ", avg: " << v_avg << ", span: " << (max_hsv.v - min_hsv.v));
 
     // All components should have decent range variation
-    CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
-    CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
-    CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
+    FL_CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
+    FL_CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
+    FL_CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
 
     // Averages should be reasonably distributed (not clipped)
-    CHECK_GT(h_avg, 0x2000);
-    CHECK_LT(h_avg, 0xD000);
+    FL_CHECK_GT(h_avg, 0x2000);
+    FL_CHECK_LT(h_avg, 0xD000);
 }
 
 TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
@@ -403,13 +403,13 @@ TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
     FL_WARN("Blue  - min: " << min_b << ", max: " << max_b << ", avg: " << b_avg << ", span: " << (max_b - min_b));
 
     // All components should have decent range variation
-    CHECK_GT(max_r - min_r, 30);  // Good red variation
-    CHECK_GT(max_g - min_g, 30);  // Good green variation
-    CHECK_GT(max_b - min_b, 30);  // Good blue variation
+    FL_CHECK_GT(max_r - min_r, 30);  // Good red variation
+    FL_CHECK_GT(max_g - min_g, 30);  // Good green variation
+    FL_CHECK_GT(max_b - min_b, 30);  // Good blue variation
 
     // Averages should be reasonably distributed (not too dark or bright)
-    CHECK_GT(r_avg, 25);
-    CHECK_LT(r_avg, 230);
+    FL_CHECK_GT(r_avg, 25);
+    FL_CHECK_LT(r_avg, 230);
 }
 
 #endif  // End disabled noise tests

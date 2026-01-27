@@ -11,8 +11,8 @@ TEST_CASE("Basic Queue Operations") {
     fl::queue<int> q;
 
     SUBCASE("Initial state") {
-        CHECK(q.empty());
-        CHECK_EQ(q.size(), 0);
+        FL_CHECK(q.empty());
+        FL_CHECK_EQ(q.size(), 0);
     }
 
     SUBCASE("Push and front/back access") {
@@ -20,10 +20,10 @@ TEST_CASE("Basic Queue Operations") {
         q.push(20);
         q.push(30);
 
-        CHECK_FALSE(q.empty());
-        CHECK_EQ(q.size(), 3);
-        CHECK_EQ(q.front(), 10);  // First in
-        CHECK_EQ(q.back(), 30);   // Last in
+        FL_CHECK_FALSE(q.empty());
+        FL_CHECK_EQ(q.size(), 3);
+        FL_CHECK_EQ(q.front(), 10);  // First in
+        FL_CHECK_EQ(q.back(), 30);   // Last in
     }
 
     SUBCASE("FIFO behavior (pop)") {
@@ -31,30 +31,30 @@ TEST_CASE("Basic Queue Operations") {
         q.push(20);
         q.push(30);
 
-        CHECK_EQ(q.front(), 10);
+        FL_CHECK_EQ(q.front(), 10);
         q.pop();
-        CHECK_EQ(q.front(), 20);
+        FL_CHECK_EQ(q.front(), 20);
         q.pop();
-        CHECK_EQ(q.front(), 30);
+        FL_CHECK_EQ(q.front(), 30);
         q.pop();
-        CHECK(q.empty());
+        FL_CHECK(q.empty());
     }
 
     SUBCASE("Size changes correctly") {
-        CHECK_EQ(q.size(), 0);
+        FL_CHECK_EQ(q.size(), 0);
         
         q.push(1);
-        CHECK_EQ(q.size(), 1);
+        FL_CHECK_EQ(q.size(), 1);
         
         q.push(2);
-        CHECK_EQ(q.size(), 2);
+        FL_CHECK_EQ(q.size(), 2);
         
         q.pop();
-        CHECK_EQ(q.size(), 1);
+        FL_CHECK_EQ(q.size(), 1);
         
         q.pop();
-        CHECK_EQ(q.size(), 0);
-        CHECK(q.empty());
+        FL_CHECK_EQ(q.size(), 0);
+        FL_CHECK(q.empty());
     }
 }
 
@@ -66,13 +66,13 @@ TEST_CASE("Queue Copy and Move Semantics") {
         q1.push(3);
 
         fl::queue<int> q2(q1);
-        CHECK_EQ(q2.size(), 3);
-        CHECK_EQ(q2.front(), 1);
-        CHECK_EQ(q2.back(), 3);
+        FL_CHECK_EQ(q2.size(), 3);
+        FL_CHECK_EQ(q2.front(), 1);
+        FL_CHECK_EQ(q2.back(), 3);
         
         // Original should be unchanged
-        CHECK_EQ(q1.size(), 3);
-        CHECK_EQ(q1.front(), 1);
+        FL_CHECK_EQ(q1.size(), 3);
+        FL_CHECK_EQ(q1.front(), 1);
     }
 
     SUBCASE("Copy assignment") {
@@ -84,9 +84,9 @@ TEST_CASE("Queue Copy and Move Semantics") {
         q2.push(99);  // Different data
         
         q2 = q1;
-        CHECK_EQ(q2.size(), 2);
-        CHECK_EQ(q2.front(), 1);
-        CHECK_EQ(q2.back(), 2);
+        FL_CHECK_EQ(q2.size(), 2);
+        FL_CHECK_EQ(q2.front(), 1);
+        FL_CHECK_EQ(q2.back(), 2);
     }
 
     SUBCASE("Move constructor") {
@@ -96,9 +96,9 @@ TEST_CASE("Queue Copy and Move Semantics") {
         q1.push(3);
 
         fl::queue<int> q2(fl::move(q1));
-        CHECK_EQ(q2.size(), 3);
-        CHECK_EQ(q2.front(), 1);
-        CHECK_EQ(q2.back(), 3);
+        FL_CHECK_EQ(q2.size(), 3);
+        FL_CHECK_EQ(q2.front(), 1);
+        FL_CHECK_EQ(q2.back(), 3);
     }
 
     SUBCASE("Move assignment") {
@@ -108,9 +108,9 @@ TEST_CASE("Queue Copy and Move Semantics") {
 
         fl::queue<int> q2;
         q2 = fl::move(q1);
-        CHECK_EQ(q2.size(), 2);
-        CHECK_EQ(q2.front(), 1);
-        CHECK_EQ(q2.back(), 2);
+        FL_CHECK_EQ(q2.size(), 2);
+        FL_CHECK_EQ(q2.front(), 1);
+        FL_CHECK_EQ(q2.back(), 2);
     }
 }
 
@@ -124,10 +124,10 @@ TEST_CASE("Queue with Custom Container") {
         fl::queue<int, fl::deque<int>> q;
         q.push(1);
         q.push(2);
-        CHECK_EQ(q.size(), 2);
-        CHECK_EQ(q.front(), 1);
+        FL_CHECK_EQ(q.size(), 2);
+        FL_CHECK_EQ(q.front(), 1);
         q.pop();
-        CHECK_EQ(q.front(), 2);
+        FL_CHECK_EQ(q.front(), 2);
     }
 }
 
@@ -144,13 +144,13 @@ TEST_CASE("Queue Swap Functionality") {
 
     q1.swap(q2);
 
-    CHECK_EQ(q1.size(), 3);
-    CHECK_EQ(q1.front(), 10);
-    CHECK_EQ(q1.back(), 30);
+    FL_CHECK_EQ(q1.size(), 3);
+    FL_CHECK_EQ(q1.front(), 10);
+    FL_CHECK_EQ(q1.back(), 30);
 
-    CHECK_EQ(q2.size(), 2);
-    CHECK_EQ(q2.front(), 1);
-    CHECK_EQ(q2.back(), 2);
+    FL_CHECK_EQ(q2.size(), 2);
+    FL_CHECK_EQ(q2.front(), 1);
+    FL_CHECK_EQ(q2.back(), 2);
 }
 
 TEST_CASE("Queue Container Access") {
@@ -161,19 +161,19 @@ TEST_CASE("Queue Container Access") {
 
     SUBCASE("Const container access") {
         const auto& container = q.get_container();
-        CHECK_EQ(container.size(), 3);
-        CHECK_EQ(container.front(), 1);
-        CHECK_EQ(container.back(), 3);
+        FL_CHECK_EQ(container.size(), 3);
+        FL_CHECK_EQ(container.front(), 1);
+        FL_CHECK_EQ(container.back(), 3);
     }
 
     SUBCASE("Non-const container access") {
         auto& container = q.get_container();
-        CHECK_EQ(container.size(), 3);
+        FL_CHECK_EQ(container.size(), 3);
         
         // We can modify through the container
         container.push_back(4);
-        CHECK_EQ(q.size(), 4);
-        CHECK_EQ(q.back(), 4);
+        FL_CHECK_EQ(q.size(), 4);
+        FL_CHECK_EQ(q.back(), 4);
     }
 }
 
@@ -207,18 +207,18 @@ TEST_CASE("Queue with Move-Only Type") {
     
     MoveOnly item1(42);
     q.push(fl::move(item1));
-    CHECK_EQ(item1.value, -1);  // Should be moved
+    FL_CHECK_EQ(item1.value, -1);  // Should be moved
     
     MoveOnly item2(99);
     q.push(fl::move(item2));
-    CHECK_EQ(item2.value, -1);  // Should be moved
+    FL_CHECK_EQ(item2.value, -1);  // Should be moved
     
-    CHECK_EQ(q.size(), 2);
-    CHECK_EQ(q.front().value, 42);
-    CHECK_EQ(q.back().value, 99);
+    FL_CHECK_EQ(q.size(), 2);
+    FL_CHECK_EQ(q.front().value, 42);
+    FL_CHECK_EQ(q.back().value, 99);
     
     q.pop();
-    CHECK_EQ(q.front().value, 99);
+    FL_CHECK_EQ(q.front().value, 99);
 }
 
 TEST_CASE("Queue Stress Test") {
@@ -230,15 +230,15 @@ TEST_CASE("Queue Stress Test") {
         q.push(i);
     }
     
-    CHECK_EQ(q.size(), num_elements);
-    CHECK_EQ(q.front(), 0);
-    CHECK_EQ(q.back(), num_elements - 1);
+    FL_CHECK_EQ(q.size(), num_elements);
+    FL_CHECK_EQ(q.front(), 0);
+    FL_CHECK_EQ(q.back(), num_elements - 1);
     
     // Pop all elements and verify FIFO order
     for (int i = 0; i < num_elements; ++i) {
-        CHECK_EQ(q.front(), i);
+        FL_CHECK_EQ(q.front(), i);
         q.pop();
     }
     
-    CHECK(q.empty());
+    FL_CHECK(q.empty());
 } 

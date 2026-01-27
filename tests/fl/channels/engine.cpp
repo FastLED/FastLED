@@ -93,10 +93,10 @@ TEST_CASE("Channel basic operations") {
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 10), RGB, options);
     auto channel = Channel::create(config);
 
-    REQUIRE(channel != nullptr);
-    CHECK(channel->getPin() == 1);
-    CHECK(channel->size() == 10);
-    CHECK(channel->getChannelEngine() == mockEngine.get());
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->getPin() == 1);
+    FL_CHECK(channel->size() == 10);
+    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Clean up: disable mock engine after test
     manager.setDriverEnabled("MOCK", false);
@@ -124,8 +124,8 @@ TEST_CASE("Channel transmission") {
     // Engine's show() triggers transmission
     mockEngine->show();
 
-    CHECK(mockEngine->transmitCount == 1);
-    CHECK(mockEngine->lastChannelCount == 1);
+    FL_CHECK(mockEngine->transmitCount == 1);
+    FL_CHECK(mockEngine->lastChannelCount == 1);
 
     // Clean up: disable mock engine after test
     manager.setDriverEnabled("MOCK_TX", false);
@@ -165,7 +165,7 @@ TEST_CASE("FastLED.show() with channels") {
     // We need to explicitly call show() or FastLED.show() needs to call it
     mockEngine->show();
 
-    CHECK(mockEngine->transmitCount > before);
+    FL_CHECK(mockEngine->transmitCount > before);
 
     // Clean up
     channel->removeFromDrawList();

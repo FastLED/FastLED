@@ -41,7 +41,7 @@ TEST_CASE("[.]noiseRingHSV8 temporal smoothness - small time delta") {
     // At 1ms, the noise should change only minimally
     // This tests that the noise function provides smooth animation
     // as time progresses in small increments
-    CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
 TEST_CASE("[.]noiseRingHSV8 temporal evolution - large time delta") {
@@ -77,7 +77,7 @@ TEST_CASE("[.]noiseRingHSV8 temporal evolution - large time delta") {
 
     // At 1 second, the noise should have evolved significantly
     // This tests that the pattern changes meaningfully over time
-    CHECK_GT(avg_diff_1sec, 1.0f);
+    FL_CHECK_GT(avg_diff_1sec, 1.0f);
 }
 
 TEST_CASE("[.]noiseRingHSV8 temporal response ratio") {
@@ -124,7 +124,7 @@ TEST_CASE("[.]noiseRingHSV8 temporal response ratio") {
 
     // Small time changes should produce proportionally smaller differences
     // Large time changes should produce proportionally larger differences
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseRingCRGB temporal test") {
@@ -164,10 +164,10 @@ TEST_CASE("[.]noiseRingCRGB temporal test") {
     FL_WARN("Δt=1s average difference: " << avg_diff_1sec);
 
     // Small delta should be small
-    CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
 
     // Large delta should be larger than small delta
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseRingHSV16 full ring coverage") {
@@ -212,13 +212,13 @@ TEST_CASE("[.]noiseRingHSV16 full ring coverage") {
     FL_WARN("Val - min: " << min_hsv.v << ", max: " << max_hsv.v << ", avg: " << v_avg << ", span: " << (max_hsv.v - min_hsv.v));
 
     // All components should have decent range variation
-    CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
-    CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
-    CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
+    FL_CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
+    FL_CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
+    FL_CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
 
     // Averages should be reasonably distributed (not clipped)
-    CHECK_GT(h_avg, 0x2000);
-    CHECK_LT(h_avg, 0xD000);
+    FL_CHECK_GT(h_avg, 0x2000);
+    FL_CHECK_LT(h_avg, 0xD000);
 }
 
 TEST_CASE("[.]noiseRingHSV8 radius level of detail") {
@@ -251,7 +251,7 @@ TEST_CASE("[.]noiseRingHSV8 radius level of detail") {
     FL_WARN("Different radius values should sample different detail levels");
 
     // Different radius values should produce noticeably different patterns
-    CHECK_GT(avg_diff, 10.0f);
+    FL_CHECK_GT(avg_diff, 10.0f);
 }
 
 // Sphere noise tests
@@ -287,7 +287,7 @@ TEST_CASE("[.]noiseSphereHSV8 temporal smoothness - small time delta") {
     FL_WARN("Average color pixel difference: " << avg_diff_1ms);
     FL_WARN("Threshold for smooth animation: < 5.0");
 
-    CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
 TEST_CASE("[.]noiseSphereHSV8 temporal evolution - large time delta") {
@@ -322,7 +322,7 @@ TEST_CASE("[.]noiseSphereHSV8 temporal evolution - large time delta") {
     FL_WARN("Average color pixel difference: " << avg_diff_1sec);
     FL_WARN("Threshold for significant evolution: > 0.1");
 
-    CHECK_GT(avg_diff_1sec, 0.1f);
+    FL_CHECK_GT(avg_diff_1sec, 0.1f);
 }
 
 TEST_CASE("[.]noiseSphereHSV8 temporal response ratio") {
@@ -370,7 +370,7 @@ TEST_CASE("[.]noiseSphereHSV8 temporal response ratio") {
     FL_WARN("Ratio (1s / 1ms): " << ratio);
     FL_WARN("Expected ratio: > 1.0x (1 second change > 1 millisecond change)");
 
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseSphereCRGB temporal test") {
@@ -412,8 +412,8 @@ TEST_CASE("[.]noiseSphereCRGB temporal test") {
     FL_WARN("Δt=1ms average difference: " << avg_diff_1ms);
     FL_WARN("Δt=1s average difference: " << avg_diff_1sec);
 
-    CHECK_LT(avg_diff_1ms, 5.0f);
-    CHECK_GT(avg_diff_1sec, avg_diff_1ms);
+    FL_CHECK_LT(avg_diff_1ms, 5.0f);
+    FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
 TEST_CASE("[.]noiseSphereHSV16 full sphere coverage") {
@@ -466,13 +466,13 @@ TEST_CASE("[.]noiseSphereHSV16 full sphere coverage") {
     FL_WARN("Val - min: " << min_hsv.v << ", max: " << max_hsv.v << ", avg: " << v_avg << ", span: " << (max_hsv.v - min_hsv.v));
 
     // All components should have decent range variation
-    CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
-    CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
-    CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
+    FL_CHECK_GT(max_hsv.h - min_hsv.h, 5000);  // Good hue variation
+    FL_CHECK_GT(max_hsv.s - min_hsv.s, 5000);  // Good saturation variation
+    FL_CHECK_GT(max_hsv.v - min_hsv.v, 5000);  // Good value variation
 
     // Averages should be reasonably distributed (not clipped)
-    CHECK_GT(h_avg, 0x2000);
-    CHECK_LT(h_avg, 0xD000);
+    FL_CHECK_GT(h_avg, 0x2000);
+    FL_CHECK_LT(h_avg, 0xD000);
 }
 
 TEST_CASE("[.]noiseSphereHSV8 radius level of detail") {
@@ -507,7 +507,7 @@ TEST_CASE("[.]noiseSphereHSV8 radius level of detail") {
     FL_WARN("Different radius values should sample different detail levels");
 
     // Different radius values should produce noticeably different patterns
-    CHECK_GT(avg_diff, 10.0f);
+    FL_CHECK_GT(avg_diff, 10.0f);
 }
 
 TEST_CASE("[.]noiseSphereHSV8 polar angle variation") {
@@ -542,7 +542,7 @@ TEST_CASE("[.]noiseSphereHSV8 polar angle variation") {
     FL_WARN("Different polar positions should produce different patterns");
 
     // North and south poles should have different color patterns
-    CHECK_GT(avg_diff, 5.0f);
+    FL_CHECK_GT(avg_diff, 5.0f);
 }
 
 TEST_CASE("[.]noiseRingHSV16 stress test - 1M time samples") {
@@ -601,9 +601,9 @@ TEST_CASE("[.]noiseRingHSV16 stress test - 1M time samples") {
     FL_WARN("Issue: Hue should span 0-65535 for circular nature (currently " << h_percent << "%)");
 
     // Verify all components have some range
-    CHECK_GT(h_span, 0);
-    CHECK_GT(s_span, 0);
-    CHECK_GT(v_span, 0);
+    FL_CHECK_GT(h_span, 0);
+    FL_CHECK_GT(s_span, 0);
+    FL_CHECK_GT(v_span, 0);
 }
 
 TEST_CASE("[.]noiseRingHSV16 angle sweep - full ring coverage at fixed time") {
@@ -660,9 +660,9 @@ TEST_CASE("[.]noiseRingHSV16 angle sweep - full ring coverage at fixed time") {
     FL_WARN("");
     FL_WARN("Note: For circular hue, full 0-65535 range required (currently " << h_percent << "%)");
 
-    CHECK_GT(h_span, 0);
-    CHECK_GT(s_span, 0);
-    CHECK_GT(v_span, 0);
+    FL_CHECK_GT(h_span, 0);
+    FL_CHECK_GT(s_span, 0);
+    FL_CHECK_GT(v_span, 0);
 }
 
 TEST_CASE("[.]noiseRingHSV16 2D parameter space - time + angle variation") {
@@ -722,9 +722,9 @@ TEST_CASE("[.]noiseRingHSV16 2D parameter space - time + angle variation") {
     FL_WARN("");
     FL_WARN("Critical issue: Hue achieves only " << h_percent << "% of full 0-65535 range");
 
-    CHECK_GT(h_span, 0);
-    CHECK_GT(s_span, 0);
-    CHECK_GT(v_span, 0);
+    FL_CHECK_GT(h_span, 0);
+    FL_CHECK_GT(s_span, 0);
+    FL_CHECK_GT(v_span, 0);
 }
 
 TEST_CASE("[.]noiseRingHSV16 random angle + time - 1M samples") {
@@ -792,9 +792,9 @@ TEST_CASE("[.]noiseRingHSV16 random angle + time - 1M samples") {
     FL_WARN("Analysis: Testing if variance in min/max is due to spatial position or time slices");
 
     // All components should achieve near-full range with random sampling
-    CHECK_GT(h_span, 0);
-    CHECK_GT(s_span, 0);
-    CHECK_GT(v_span, 0);
+    FL_CHECK_GT(h_span, 0);
+    FL_CHECK_GT(s_span, 0);
+    FL_CHECK_GT(v_span, 0);
 }
 
 TEST_CASE("[.]noiseRingHSV16 find optimal extents for 98% coverage - 100k raw samples") {

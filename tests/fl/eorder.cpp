@@ -6,57 +6,57 @@ using namespace fl;
 TEST_CASE("fl::EOrder enum values") {
     SUBCASE("RGB channel ordering") {
         // RGB = 0012 (octal)
-        CHECK_EQ(static_cast<int>(RGB), 0012);
-        CHECK_EQ(static_cast<int>(RGB), 10); // decimal
+        FL_CHECK_EQ(static_cast<int>(RGB), 0012);
+        FL_CHECK_EQ(static_cast<int>(RGB), 10); // decimal
     }
 
     SUBCASE("RBG channel ordering") {
         // RBG = 0021 (octal)
-        CHECK_EQ(static_cast<int>(RBG), 0021);
-        CHECK_EQ(static_cast<int>(RBG), 17); // decimal
+        FL_CHECK_EQ(static_cast<int>(RBG), 0021);
+        FL_CHECK_EQ(static_cast<int>(RBG), 17); // decimal
     }
 
     SUBCASE("GRB channel ordering") {
         // GRB = 0102 (octal)
-        CHECK_EQ(static_cast<int>(GRB), 0102);
-        CHECK_EQ(static_cast<int>(GRB), 66); // decimal
+        FL_CHECK_EQ(static_cast<int>(GRB), 0102);
+        FL_CHECK_EQ(static_cast<int>(GRB), 66); // decimal
     }
 
     SUBCASE("GBR channel ordering") {
         // GBR = 0120 (octal)
-        CHECK_EQ(static_cast<int>(GBR), 0120);
-        CHECK_EQ(static_cast<int>(GBR), 80); // decimal
+        FL_CHECK_EQ(static_cast<int>(GBR), 0120);
+        FL_CHECK_EQ(static_cast<int>(GBR), 80); // decimal
     }
 
     SUBCASE("BRG channel ordering") {
         // BRG = 0201 (octal)
-        CHECK_EQ(static_cast<int>(BRG), 0201);
-        CHECK_EQ(static_cast<int>(BRG), 129); // decimal
+        FL_CHECK_EQ(static_cast<int>(BRG), 0201);
+        FL_CHECK_EQ(static_cast<int>(BRG), 129); // decimal
     }
 
     SUBCASE("BGR channel ordering") {
         // BGR = 0210 (octal)
-        CHECK_EQ(static_cast<int>(BGR), 0210);
-        CHECK_EQ(static_cast<int>(BGR), 136); // decimal
+        FL_CHECK_EQ(static_cast<int>(BGR), 0210);
+        FL_CHECK_EQ(static_cast<int>(BGR), 136); // decimal
     }
 
     SUBCASE("all orderings are distinct") {
         // Verify each ordering is unique
-        CHECK(RGB != RBG);
-        CHECK(RGB != GRB);
-        CHECK(RGB != GBR);
-        CHECK(RGB != BRG);
-        CHECK(RGB != BGR);
-        CHECK(RBG != GRB);
-        CHECK(RBG != GBR);
-        CHECK(RBG != BRG);
-        CHECK(RBG != BGR);
-        CHECK(GRB != GBR);
-        CHECK(GRB != BRG);
-        CHECK(GRB != BGR);
-        CHECK(GBR != BRG);
-        CHECK(GBR != BGR);
-        CHECK(BRG != BGR);
+        FL_CHECK(RGB != RBG);
+        FL_CHECK(RGB != GRB);
+        FL_CHECK(RGB != GBR);
+        FL_CHECK(RGB != BRG);
+        FL_CHECK(RGB != BGR);
+        FL_CHECK(RBG != GRB);
+        FL_CHECK(RBG != GBR);
+        FL_CHECK(RBG != BRG);
+        FL_CHECK(RBG != BGR);
+        FL_CHECK(GRB != GBR);
+        FL_CHECK(GRB != BRG);
+        FL_CHECK(GRB != BGR);
+        FL_CHECK(GBR != BRG);
+        FL_CHECK(GBR != BGR);
+        FL_CHECK(BRG != BGR);
     }
 
     SUBCASE("channel extraction") {
@@ -68,39 +68,39 @@ TEST_CASE("fl::EOrder enum values") {
         int g_pos = (rgb_val / 8) % 8;   // eights position in octal
         int r_pos = (rgb_val / 64) % 8;  // sixty-fours position in octal
 
-        CHECK_EQ(r_pos, 0); // Red is first
-        CHECK_EQ(g_pos, 1); // Green is second
-        CHECK_EQ(b_pos, 2); // Blue is third
+        FL_CHECK_EQ(r_pos, 0); // Red is first
+        FL_CHECK_EQ(g_pos, 1); // Green is second
+        FL_CHECK_EQ(b_pos, 2); // Blue is third
     }
 }
 
 TEST_CASE("fl::EOrderW enum values") {
     SUBCASE("white position values") {
-        CHECK_EQ(static_cast<int>(W3), 0x3);
-        CHECK_EQ(static_cast<int>(W2), 0x2);
-        CHECK_EQ(static_cast<int>(W1), 0x1);
-        CHECK_EQ(static_cast<int>(W0), 0x0);
+        FL_CHECK_EQ(static_cast<int>(W3), 0x3);
+        FL_CHECK_EQ(static_cast<int>(W2), 0x2);
+        FL_CHECK_EQ(static_cast<int>(W1), 0x1);
+        FL_CHECK_EQ(static_cast<int>(W0), 0x0);
     }
 
     SUBCASE("white default value") {
-        CHECK_EQ(WDefault, W3);
-        CHECK_EQ(static_cast<int>(WDefault), 0x3);
+        FL_CHECK_EQ(WDefault, W3);
+        FL_CHECK_EQ(static_cast<int>(WDefault), 0x3);
     }
 
     SUBCASE("white positions are sequential") {
-        CHECK_EQ(static_cast<int>(W0), 0);
-        CHECK_EQ(static_cast<int>(W1), 1);
-        CHECK_EQ(static_cast<int>(W2), 2);
-        CHECK_EQ(static_cast<int>(W3), 3);
+        FL_CHECK_EQ(static_cast<int>(W0), 0);
+        FL_CHECK_EQ(static_cast<int>(W1), 1);
+        FL_CHECK_EQ(static_cast<int>(W2), 2);
+        FL_CHECK_EQ(static_cast<int>(W3), 3);
     }
 
     SUBCASE("all white positions are distinct") {
-        CHECK(W0 != W1);
-        CHECK(W0 != W2);
-        CHECK(W0 != W3);
-        CHECK(W1 != W2);
-        CHECK(W1 != W3);
-        CHECK(W2 != W3);
+        FL_CHECK(W0 != W1);
+        FL_CHECK(W0 != W2);
+        FL_CHECK(W0 != W3);
+        FL_CHECK(W1 != W2);
+        FL_CHECK(W1 != W3);
+        FL_CHECK(W2 != W3);
     }
 }
 
@@ -110,8 +110,8 @@ TEST_CASE("fl::EOrder usage patterns") {
         EOrder order2 = RGB;
         EOrder order3 = BGR;
 
-        CHECK(order1 == order2);
-        CHECK(order1 != order3);
+        FL_CHECK(order1 == order2);
+        FL_CHECK(order1 != order3);
     }
 
     SUBCASE("switch statement") {
@@ -127,7 +127,7 @@ TEST_CASE("fl::EOrder usage patterns") {
             case BGR: result = 6; break;
         }
 
-        CHECK_EQ(result, 3);
+        FL_CHECK_EQ(result, 3);
     }
 }
 
@@ -137,8 +137,8 @@ TEST_CASE("fl::EOrderW usage patterns") {
         EOrderW pos2 = W2;
         EOrderW pos3 = W0;
 
-        CHECK(pos1 == pos2);
-        CHECK(pos1 != pos3);
+        FL_CHECK(pos1 == pos2);
+        FL_CHECK(pos1 != pos3);
     }
 
     SUBCASE("switch statement") {
@@ -152,11 +152,11 @@ TEST_CASE("fl::EOrderW usage patterns") {
             case W3: result = 3; break;
         }
 
-        CHECK_EQ(result, 1);
+        FL_CHECK_EQ(result, 1);
     }
 
     SUBCASE("default white position") {
         EOrderW default_pos = WDefault;
-        CHECK(default_pos == W3);
+        FL_CHECK(default_pos == W3);
     }
 }

@@ -16,16 +16,16 @@ TEST_CASE("Timeout - rollover test") {
     Timeout timeout(start, duration);
 
     // At start: not done, zero elapsed
-    CHECK_FALSE(timeout.done(start));
-    CHECK(timeout.elapsed(start) == 0);
+    FL_CHECK_FALSE(timeout.done(start));
+    FL_CHECK(timeout.elapsed(start) == 0);
 
     // 256 ticks later: at rollover point (0x00000000), still not done
     uint32_t at_rollover = start + 256;  // = 0x00000000 due to wraparound
-    CHECK_FALSE(timeout.done(at_rollover));
-    CHECK(timeout.elapsed(at_rollover) == 256);
+    FL_CHECK_FALSE(timeout.done(at_rollover));
+    FL_CHECK(timeout.elapsed(at_rollover) == 256);
 
     // 256 more ticks: past rollover (0x00000100), now done
     uint32_t past_rollover = at_rollover + 256;  // = 0x00000100
-    CHECK(timeout.done(past_rollover));
-    CHECK(timeout.elapsed(past_rollover) == 512);
+    FL_CHECK(timeout.done(past_rollover));
+    FL_CHECK(timeout.elapsed(past_rollover) == 512);
 }

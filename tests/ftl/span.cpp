@@ -14,15 +14,15 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         
         // ✅ These explicit conversions should work
         fl::span<const int> const_span(vec);
-        CHECK(const_span.size() == 5);
-        CHECK(const_span[0] == 1);
-        CHECK(const_span[4] == 5);
+        FL_CHECK(const_span.size() == 5);
+        FL_CHECK(const_span[0] == 1);
+        FL_CHECK(const_span[4] == 5);
         
         // ✅ Mutable conversion should work
         fl::span<int> mutable_span(vec);
-        CHECK(mutable_span.size() == 5);
+        FL_CHECK(mutable_span.size() == 5);
         mutable_span[0] = 10;
-        CHECK(vec[0] == 10);  // Verify it's a view, not a copy
+        FL_CHECK(vec[0] == 10);  // Verify it's a view, not a copy
     }
     
     SUBCASE("fl::array to fl::span conversions") {
@@ -30,15 +30,15 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         
         // ✅ These explicit conversions should work
         fl::span<const int> const_span(arr);
-        CHECK(const_span.size() == 4);
-        CHECK(const_span[0] == 10);
-        CHECK(const_span[3] == 40);
+        FL_CHECK(const_span.size() == 4);
+        FL_CHECK(const_span[0] == 10);
+        FL_CHECK(const_span[3] == 40);
         
         // ✅ Mutable conversion should work
         fl::span<int> mutable_span(arr);
-        CHECK(mutable_span.size() == 4);
+        FL_CHECK(mutable_span.size() == 4);
         mutable_span[0] = 100;
-        CHECK(arr[0] == 100);  // Verify it's a view
+        FL_CHECK(arr[0] == 100);  // Verify it's a view
     }
     
     SUBCASE("C-style array to fl::span conversions") {
@@ -46,15 +46,15 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         
         // ✅ These explicit conversions should work
         fl::span<const int> const_span(c_array);
-        CHECK(const_span.size() == 4);
-        CHECK(const_span[0] == 5);
-        CHECK(const_span[3] == 20);
+        FL_CHECK(const_span.size() == 4);
+        FL_CHECK(const_span[0] == 5);
+        FL_CHECK(const_span[3] == 20);
         
         // ✅ Mutable conversion should work
         fl::span<int> mutable_span(c_array);
-        CHECK(mutable_span.size() == 4);
+        FL_CHECK(mutable_span.size() == 4);
         mutable_span[0] = 50;
-        CHECK(c_array[0] == 50);  // Verify it's a view
+        FL_CHECK(c_array[0] == 50);  // Verify it's a view
     }
     
     SUBCASE("const array to const span") {
@@ -62,9 +62,9 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         
         // ✅ Const array to const span should work
         fl::span<const int> const_span(const_array);
-        CHECK(const_span.size() == 3);
-        CHECK(const_span[0] == 100);
-        CHECK(const_span[2] == 300);
+        FL_CHECK(const_span.size() == 3);
+        FL_CHECK(const_span[0] == 100);
+        FL_CHECK(const_span[2] == 300);
     }
 }
 
@@ -91,12 +91,12 @@ TEST_CASE("fl::span non-template function conversions work") {
         
         // ✅ This should work - implicit conversion to function parameter
         int result = process_const_span(vec);
-        CHECK(result == 15);
+        FL_CHECK(result == 15);
         
         // ✅ Mutable function should work too
         modify_span(vec);
-        CHECK(vec[0] == 2);
-        CHECK(vec[4] == 6);
+        FL_CHECK(vec[0] == 2);
+        FL_CHECK(vec[4] == 6);
     }
     
     SUBCASE("fl::array implicit conversion to non-template function") {
@@ -104,12 +104,12 @@ TEST_CASE("fl::span non-template function conversions work") {
         
         // ✅ This should work
         int result = process_const_span(arr);
-        CHECK(result == 60);
+        FL_CHECK(result == 60);
         
         // ✅ Mutable function should work
         modify_span(arr);
-        CHECK(arr[0] == 11);
-        CHECK(arr[2] == 31);
+        FL_CHECK(arr[0] == 11);
+        FL_CHECK(arr[2] == 31);
     }
     
     SUBCASE("C-style array implicit conversion to non-template function") {
@@ -117,12 +117,12 @@ TEST_CASE("fl::span non-template function conversions work") {
         
         // ✅ This should work
         int result = process_const_span(c_array);
-        CHECK(result == 42);
+        FL_CHECK(result == 42);
         
         // ✅ Mutable function should work
         modify_span(c_array);
-        CHECK(c_array[0] == 8);
-        CHECK(c_array[2] == 22);
+        FL_CHECK(c_array[0] == 8);
+        FL_CHECK(c_array[2] == 22);
     }
 }
 
@@ -146,7 +146,7 @@ TEST_CASE("fl::span limitations - template argument deduction") {
         };
         
         int result = template_func(fl::span<int>(vec));  // Explicit conversion
-        CHECK(result == 6);
+        FL_CHECK(result == 6);
         
         // 📝 This is correct C++ behavior - template argument deduction only 
         // considers exact type matches, not constructor conversions

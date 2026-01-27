@@ -24,10 +24,10 @@ TEST_SUITE("ClocklessBlockGeneric") {
         constexpr int T3_NS = 850;
 
         // Verify timing constraints are satisfied
-        CHECK(T1_NS > 0);
-        CHECK(T2_NS > 0);
-        CHECK(T3_NS > 0);
-        CHECK((T1_NS + T2_NS) > T3_NS);  // 1250 > 850 ✓
+        FL_CHECK(T1_NS > 0);
+        FL_CHECK(T2_NS > 0);
+        FL_CHECK(T3_NS > 0);
+        FL_CHECK((T1_NS + T2_NS) > T3_NS);  // 1250 > 850 ✓
     }
 
     // Test SK6812 timing (slightly different from WS2812B)
@@ -41,10 +41,10 @@ TEST_SUITE("ClocklessBlockGeneric") {
         constexpr int T3_NS = 600;
 
         // Verify timing constraints are satisfied
-        CHECK(T1_NS > 0);
-        CHECK(T2_NS > 0);
-        CHECK(T3_NS > 0);
-        CHECK((T1_NS + T2_NS) > T3_NS);
+        FL_CHECK(T1_NS > 0);
+        FL_CHECK(T2_NS > 0);
+        FL_CHECK(T3_NS > 0);
+        FL_CHECK((T1_NS + T2_NS) > T3_NS);
     }
 
     TEST_CASE("Controller Compilation") {
@@ -58,7 +58,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         // but the template should at least be instantiable without errors
 
         // If we reached here, the templates compiled correctly
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     TEST_CASE("Timing Assertions") {
@@ -73,7 +73,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         // 3. T3 <= 0: ClocklessBlockController<5, 100, 100, 0>
         // 4. (T1+T2) <= T3: ClocklessBlockController<5, 100, 100, 200>
 
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     TEST_CASE("Nanosecond Delay Support") {
@@ -89,7 +89,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         // Test SK6812 timing (300ns, 900ns, 600ns)
         // These would use ::fl::delayNanoseconds<300>(), etc.
 
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     TEST_CASE("Supported Protocols Documentation") {
@@ -111,7 +111,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         //   - 400 kHz bit rate (2.5µs per bit)
         //   - T1=1200ns, T2=1200ns, T3=1200ns (approximate)
 
-        CHECK(true);
+        FL_CHECK(true);
     }
 
     TEST_CASE("WS2812 100 LED Bit-Bang Timing Simulation") {
@@ -200,7 +200,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         // Verify that the operation took longer than 1ms
         // 100 LEDs * 3 bytes * 8 bits * 1250ns = 3ms minimum
         // So we should see at least 3-4ms
-        CHECK(elapsed_ms > 1);
+        FL_CHECK(elapsed_ms > 1);
     }
 
     TEST_CASE("SK6812 100 LED Bit-Bang Timing Simulation") {
@@ -262,7 +262,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         uint32_t elapsed_ms = end_time - start_time;
 
         // 100 LEDs * 3 bytes * 8 bits * 1200ns = 2.88ms minimum
-        CHECK(elapsed_ms > 1);
+        FL_CHECK(elapsed_ms > 1);
     }
 
 }  // TEST_SUITE

@@ -51,13 +51,13 @@ TEST_CASE("Sketch Runner - Basic Functionality") {
     printf("RUNNER: Calling sketch_setup()\n");
     sketch_setup();
     
-    CHECK_EQ(setup_call_count, 1);
+    FL_CHECK_EQ(setup_call_count, 1);
     
     // Call sketch_loop() five times
     for (int i = 1; i <= 5; i++) {
         printf("RUNNER: Calling sketch_loop() - iteration %d\n", i);
         sketch_loop();
-        CHECK_EQ(loop_call_count, i);
+        FL_CHECK_EQ(loop_call_count, i);
     }
     
     printf("RUNNER: Test completed successfully\n");
@@ -65,8 +65,8 @@ TEST_CASE("Sketch Runner - Basic Functionality") {
            setup_call_count, loop_call_count);
     
     // Verify final state
-    CHECK_EQ(setup_call_count, 1);
-    CHECK_EQ(loop_call_count, 5);
+    FL_CHECK_EQ(setup_call_count, 1);
+    FL_CHECK_EQ(loop_call_count, 5);
     
     // Disable test mode
     test_mode = false;

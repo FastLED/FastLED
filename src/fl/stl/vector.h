@@ -639,8 +639,8 @@ public:
               typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
     void assign(InputIt begin, InputIt end) {
         clear();
-        fl::size n = static_cast<fl::size>(end - begin);
-        reserve(n);
+        // Don't try to compute distance for non-random-access iterators
+        // Just push_back each element - reserve will grow as needed
         for (InputIt it = begin; it != end; ++it) {
             push_back(*it);
         }
