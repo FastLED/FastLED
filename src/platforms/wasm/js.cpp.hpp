@@ -26,7 +26,6 @@
 #include "js.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/stl/time.h"
-#include "platforms/delay_platform.h"
 
 // extern setup and loop which will be supplied by the sketch.
 extern void setup();
@@ -41,35 +40,8 @@ namespace fl {
 // WASM-SPECIFIC UTILITY FUNCTIONS
 //////////////////////////////////////////////////////////////////////////
 
-extern "C" {
-
-// Note: delay() removed - FastLED.h provides via "using fl::delay;"
-
-/// @brief Microsecond delay implementation for WASM  
-/// @param micros Number of microseconds to delay
-///
-/// For microsecond delays, we use Emscripten's busywait since pumping
-/// fetch requests every microsecond would be too expensive.
-void delayMicroseconds(int micros) {
-    if (micros <= 0) {
-        return;
-    }
-    
-    // For microsecond precision, use busy wait
-    // Converting microseconds to milliseconds for emscripten_sleep would lose precision
-    double start = emscripten_get_now();
-    double target = start + (micros / 1000.0); // Convert to milliseconds
-    
-    while (emscripten_get_now() < target) {
-        // Busy wait for microsecond precision
-        // No fetch pumping here as it would be too expensive
-    }
-}
-
-// NOTE: millis() and micros() functions are defined in timer.cpp with EMSCRIPTEN_KEEPALIVE
-// to avoid duplicate definitions in unified builds
-
-} // extern "C"
+// NOTE: All timing functions (millis, micros, delayMicroseconds) moved to platform_time.cpp.hpp
+// Timer implementation (millis, micros) is in timer.cpp.hpp with EMSCRIPTEN_KEEPALIVE
 
 namespace fl {
 

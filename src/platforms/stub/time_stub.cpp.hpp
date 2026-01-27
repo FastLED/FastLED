@@ -4,42 +4,32 @@
 
 #include "time_stub.h"
 #include "fl/stl/function.h"
-#include "platforms/delay_platform.h"
-#include <chrono>
-#include <thread>
 
-#if defined(FASTLED_USE_PTHREAD_DELAY) || defined(FASTLED_USE_PTHREAD_YIELD)
-#include <time.h>
-#include <errno.h>
+#if defined(FASTLED_USE_PTHREAD_YIELD)
 #include <sched.h>
 #endif
 
-static auto start_time = std::chrono::system_clock::now();  // okay std namespace
+#ifndef __EMSCRIPTEN__
+#include <thread>
+#endif
 
-// Global delay function override for fast testing (non-static for access from platform_delay.cpp.hpp)
+// Global delay function override for fast testing (non-static for access from platform_time.cpp.hpp)
 fl::function<void(uint32_t)> g_delay_override;
 
 extern "C" {
 
 #if !defined(__EMSCRIPTEN__) && !defined(FASTLED_NO_ARDUINO_STUBS)
 // STUB timing functions - excluded for WASM builds which provide their own implementations
-// WASM timing functions are in src/platforms/wasm/timer.cpp and src/platforms/wasm/js.cpp
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
+// Global millis() and micros() forward to platform layer
+// These are needed for Arduino API compatibility
 uint32_t millis() {
-    auto current_time = std::chrono::system_clock::now();  // okay std namespace
-    return std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();  // okay std namespace
+    return fl::platform::millis();
 }
 
 uint32_t micros() {
-    auto current_time = std::chrono::system_clock::now();  // okay std namespace
-    return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();  // okay std namespace
-}
-
-// Note: delay() removed - FastLED.h provides via "using fl::delay;"
-
-void delayMicroseconds(unsigned long us) {
-    std::this_thread::sleep_for(std::chrono::microseconds(us));  // okay std namespace
+    return fl::platform::micros();
 }
 
 void yield() {

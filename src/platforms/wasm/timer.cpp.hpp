@@ -74,6 +74,7 @@ double get_time_since_epoch() {
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
+// These extern "C" functions are accessed via fl::platform::millis() and fl::platform::micros()
 extern "C" {
 
 // Replacement for 'millis' in WebAssembly context
@@ -105,8 +106,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros() {
     return result;
 }
 
-// NOTE: delay() and delayMicroseconds() are implemented in js.cpp
-// with async task pumping for better performance during delays
+// NOTE: delay() and delayMicroseconds() are implemented in platform_time.cpp.hpp
 
 // Replacement for 'yield' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void yield() {

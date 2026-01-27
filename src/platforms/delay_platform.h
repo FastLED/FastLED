@@ -1,13 +1,9 @@
+// ok no namespace fl
 #pragma once
 
-#include "fl/stl/stdint.h"
+// Backward compatibility: delay_platform.h is deprecated
+// Include time_platform.h which contains all timing functions
+#include "platforms/time_platform.h"
 
-namespace fl {
-namespace platform {
-
-/// Raw platform delay without async task pumping
-/// @param ms Milliseconds to delay
-void delay(fl::u32 ms);
-
-}  // namespace platform
-}  // namespace fl
+// Note: This file will be removed in a future release
+// Update includes to use "platforms/time_platform.h" directly

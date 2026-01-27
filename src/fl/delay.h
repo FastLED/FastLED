@@ -137,9 +137,9 @@ void delayMillis(u32 ms);
 /// @param us Microseconds to delay
 void delayMicroseconds(u32 us);
 
-/// Alias for delayMicroseconds (shorter name for convenience)
+/// Shorter alias for delayMicroseconds
 /// @param us Microseconds to delay
-inline void delayMicros(u32 us) {
+inline void delayUs(u32 us) {
   delayMicroseconds(us);
 }
 
@@ -148,12 +148,6 @@ inline void delayMicros(u32 us) {
 /// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
 inline void delayMs(u32 ms, bool run_async = true) {
   delay(ms, run_async);
-}
-
-/// Shorter alias for delayMicroseconds
-/// @param us Microseconds to delay
-inline void delayUs(u32 us) {
-  delayMicroseconds(us);
 }
 
 /// Shorter alias for delayNanoseconds (template version)

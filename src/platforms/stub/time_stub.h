@@ -10,10 +10,10 @@
 
 #if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 extern "C" {
+    // Global timing functions for Arduino compatibility
+    // These are provided by the platform layer but need to be declared globally
     uint32_t millis(void);
     uint32_t micros(void);
-    // Note: delay() removed - FastLED.h provides via "using fl::delay;"
-    void delayMicroseconds(unsigned long us);
     void yield(void);
 }
 

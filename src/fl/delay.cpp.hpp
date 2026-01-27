@@ -16,11 +16,7 @@
 // ============================================================================
 
 #include "platforms/delay.h"
-#include "platforms/delay_platform.h"
-
-#if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
-#include "Arduino.h"  // okay banned header (Arduino platform API required for delay functions)
-#endif
+#include "platforms/time_platform.h"
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
 #include "fl/async.h"
@@ -206,9 +202,8 @@ void delayMillis(u32 ms) {
 }
 
 void delayMicroseconds(u32 us) {
-#ifdef ARDUINO
-  ::delayMicroseconds((unsigned int)us);
-#endif
+  // Direct pass-through to platform layer (no async pumping for microsecond precision)
+  fl::platform::delayMicroseconds(us);
 }
 
 

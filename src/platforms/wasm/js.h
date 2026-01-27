@@ -6,16 +6,11 @@
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
+// NOTE: millis(), micros(), delayMicroseconds() moved to platform_time.cpp.hpp
 extern "C" {
-
-// Replacement for 'millis' in WebAssembly context
+// Timer functions declared in timer.cpp.hpp
 uint32_t millis();
-
-// Replacement for 'micros' in WebAssembly context
 uint32_t micros();
-
-// Note: delay() removed - FastLED.h provides via "using fl::delay;"
-void delayMicroseconds(int micros);
 }
 
 //////////////////////////////////////////////////////////////////////////
