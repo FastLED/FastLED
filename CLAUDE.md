@@ -488,6 +488,10 @@ The package installation daemon is a singleton background process that ensures P
   - Clang 21.1.5 provides proper MSVC compatibility layer and resolves these issues
   - test.py automatically uses clang on Windows (can override with `--gcc` flag)
   - The clang-tool-chain wrappers include sccache integration for fast builds
+- **🚫 NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way
+  - ✅ If sccache fails: Investigate and fix the root cause (e.g., `sccache --stop-server` to reset)
+  - ❌ Never use: `SCCACHE_DISABLE=1` as a workaround for sccache errors
+  - Rationale: sccache provides critical compilation performance optimization - disabling it dramatically slows down builds
 
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`
