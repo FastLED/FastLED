@@ -52,5 +52,4 @@
     defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #define FL_IS_ARM
-#define FASTLED_ARM  // Deprecated: Use FL_IS_ARM instead
 #endif  // ARM platform detection

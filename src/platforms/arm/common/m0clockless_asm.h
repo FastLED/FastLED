@@ -159,7 +159,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     // m0pad macro: Inserts a NOP on M0+ where needed for timing balance.
     //              On M0, it expands to nothing (already slower).
     ///////////////////////////////////////////////////////////////////////////
-#ifdef FASTLED_ARM_M0_PLUS
+#ifdef FL_IS_ARM_M0_PLUS
     "  .set fl_is_m0p, 1;"           // Mark as Cortex-M0+
     "  .macro m0pad;"
     "    nop;"                        // M0+ needs padding NOPs
