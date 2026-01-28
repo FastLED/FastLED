@@ -423,7 +423,7 @@ TEST_CASE("fl::millis64 - basic functionality") {
 TEST_CASE("fl::time - alias for millis64") {
     SUBCASE("time() returns same type as millis64()") {
         fl::millis64_reset();
-        fl::u64 t1 = fl::time();
+        fl::u64 t1 = fl::millis64();
         fl::u64 t2 = fl::millis64();
 
         // Both should return u64
@@ -433,7 +433,7 @@ TEST_CASE("fl::time - alias for millis64") {
 
     SUBCASE("time() and millis64() are consistent") {
         fl::millis64_reset();
-        fl::u64 t1 = fl::time();
+        fl::u64 t1 = fl::millis64();
         fl::u64 m1 = fl::millis64();
 
         // Should be very close (within a few milliseconds)
@@ -443,13 +443,13 @@ TEST_CASE("fl::time - alias for millis64") {
 
     SUBCASE("time() is monotonically increasing") {
         fl::millis64_reset();
-        fl::u64 t1 = fl::time();
+        fl::u64 t1 = fl::millis64();
         // Small delay
         volatile int dummy = 0;
         for (int i = 0; i < 10000; ++i) {
             dummy += i;
         }
-        fl::u64 t2 = fl::time();
+        fl::u64 t2 = fl::millis64();
         FL_CHECK(t2 >= t1);
     }
 }
@@ -514,12 +514,12 @@ TEST_CASE("fl::millis64 - wraparound handling") {
         MockTimeProvider mock(0xFFFFFFF0u);
         inject_time_provider([&mock]() { return mock(); });
 
-        fl::u64 start_time = fl::time();
+        fl::u64 start_time = fl::millis64();
         fl::u64 start_millis64 = fl::millis64();
 
         mock.advance(0x20);
 
-        fl::u64 end_time = fl::time();
+        fl::u64 end_time = fl::millis64();
         fl::u64 end_millis64 = fl::millis64();
 
         // Both should handle wraparound identically
