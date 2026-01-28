@@ -17,7 +17,8 @@
 #include "platforms/arm/rp/rp2040/_build.hpp"
 #include "platforms/arm/rp/rpcommon/_build.hpp"
 #include "platforms/arm/stm32/_build.hpp"
-#include "platforms/arm/stm32/drivers/_build.hpp"
+// Note: platforms/arm/stm32/drivers/_build.hpp removed - spi_hw_manager_stm32.cpp.hpp
+// is included via platforms/arm/init_spi_hw.h dispatch header
 #include "platforms/arm/teensy/_build.hpp"
 #include "platforms/arm/teensy/teensy4_common/_build.hpp"
 #include "platforms/avr/_build.hpp"

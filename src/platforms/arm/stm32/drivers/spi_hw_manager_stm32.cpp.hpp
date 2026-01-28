@@ -13,7 +13,6 @@
 /// - STM32F2/F4/F7/H7/L4: Stream-based DMA (SpiHw2, SpiHw4, SpiHw8)
 /// - STM32F1/G4/U5: Software fallback (channel-based DMA not yet implemented)
 ///
-// allow-include-after-namespace
 
 #include "platforms/arm/stm32/is_stm32.h"
 
@@ -26,6 +25,20 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 
+// Include SPI implementation files BEFORE opening fl::detail namespace
+// to avoid nested namespace issues in unity build
+#ifdef FL_STM32_HAS_SPI_HW_2
+    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"
+#endif
+
+#ifdef FL_STM32_HAS_SPI_HW_4
+    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"
+#endif
+
+#ifdef FL_STM32_HAS_SPI_HW_8
+    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"
+#endif
+
 namespace fl {
 namespace detail {
 
@@ -37,15 +50,6 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lowest (2-lane dual-SPI)
 /// @brief Register STM32 SpiHw2 instances if available
 static void addSpiHw2IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_2
-    }  // namespace detail
-    }  // namespace fl
-
-    // Include concrete SPIDualSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"  // ok include cpp.hpp
-
-    namespace fl {
-    namespace detail {
-
     FL_DBG("STM32: Registering SpiHw2 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -65,15 +69,6 @@ static void addSpiHw2IfPossible() {
 /// @brief Register STM32 SpiHw4 instances if available
 static void addSpiHw4IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_4
-    }  // namespace detail
-    }  // namespace fl
-
-    // Include concrete SPIQuadSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"  // ok include cpp.hpp
-
-    namespace fl {
-    namespace detail {
-
     FL_DBG("STM32: Registering SpiHw4 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -93,15 +88,6 @@ static void addSpiHw4IfPossible() {
 /// @brief Register STM32 SpiHw8 instances if available
 static void addSpiHw8IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_8
-    }  // namespace detail
-    }  // namespace fl
-
-    // Include concrete SPIOctalSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"  // ok include cpp.hpp
-
-    namespace fl {
-    namespace detail {
-
     FL_DBG("STM32: Registering SpiHw8 instances");
 
     // Create 2 logical octal-SPI buses
