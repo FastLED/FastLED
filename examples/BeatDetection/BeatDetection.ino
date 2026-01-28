@@ -114,7 +114,7 @@ void loop() {
         if (currentBPM > 0) {
             // Pulse frequency based on BPM
             float period_ms = (60000.0f / currentBPM);
-            float phase = fmod(static_cast<float>(fl::millis()), period_ms) / period_ms;
+            float phase = fl::fmod(static_cast<float>(fl::millis()), period_ms) / period_ms;
             uint8_t brightness = static_cast<uint8_t>((fl::sin(phase * 2.0f * 3.14159f) + 1.0f) * 32.0f);
 
             fl::CRGB idleColor = getBPMColor(currentBPM);

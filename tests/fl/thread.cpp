@@ -2,13 +2,10 @@
 #include "fl/stl/mutex.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/algorithm.h"
-#include "fl/stl/ostream.h"
-#include "fl/stl/thread.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
 #include "doctest.h"
 #include "fl/stl/move.h"
-#include "ios"
 #include "mutex_stub_stl.h"
 
 TEST_CASE("fl::thread - basic construction and joinable") {
