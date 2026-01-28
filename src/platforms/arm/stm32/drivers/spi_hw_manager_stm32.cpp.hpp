@@ -37,8 +37,15 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lowest (2-lane dual-SPI)
 /// @brief Register STM32 SpiHw2 instances if available
 static void addSpiHw2IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_2
-    // Note: SPIDualSTM32 class is defined in spi_hw_2_stm32.cpp.hpp
-    // which is included by _build.hpp before this file
+    }  // namespace detail
+    }  // namespace fl
+
+    // Include concrete SPIDualSTM32 implementation (closes/reopens namespace)
+    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"
+
+    namespace fl {
+    namespace detail {
+
     FL_DBG("STM32: Registering SpiHw2 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -58,8 +65,15 @@ static void addSpiHw2IfPossible() {
 /// @brief Register STM32 SpiHw4 instances if available
 static void addSpiHw4IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_4
-    // Note: SPIQuadSTM32 class is defined in spi_hw_4_stm32.cpp.hpp
-    // which is included by _build.hpp before this file
+    }  // namespace detail
+    }  // namespace fl
+
+    // Include concrete SPIQuadSTM32 implementation (closes/reopens namespace)
+    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"
+
+    namespace fl {
+    namespace detail {
+
     FL_DBG("STM32: Registering SpiHw4 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -79,8 +93,15 @@ static void addSpiHw4IfPossible() {
 /// @brief Register STM32 SpiHw8 instances if available
 static void addSpiHw8IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_8
-    // Note: SPIOctalSTM32 class is defined in spi_hw_8_stm32.cpp.hpp
-    // which is included by _build.hpp before this file
+    }  // namespace detail
+    }  // namespace fl
+
+    // Include concrete SPIOctalSTM32 implementation (closes/reopens namespace)
+    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"
+
+    namespace fl {
+    namespace detail {
+
     FL_DBG("STM32: Registering SpiHw8 instances");
 
     // Create 2 logical octal-SPI buses
@@ -119,7 +140,8 @@ namespace platform {
 /// Platform availability:
 /// - STM32F2/F4/F7/H7/L4: All three (stream-based DMA)
 /// - STM32F1/G4/U5: None (channel-based DMA not yet implemented)
-void initSpiHardware() {
+#if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
+inline void initSpiHardware() {
     FL_DBG("STM32: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
@@ -129,6 +151,7 @@ void initSpiHardware() {
 
     FL_DBG("STM32: SPI hardware initialized");
 }
+#endif  // Hardware SPI available
 
 }  // namespace platform
 }  // namespace fl

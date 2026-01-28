@@ -47,7 +47,7 @@ namespace platform {
 // ============================================================================
 
 inline void pinMode(int pin, PinMode mode) {
-#ifdef HAL_GPIO_MODULE_ENABLED
+#if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
     uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
@@ -134,7 +134,7 @@ inline void pinMode(int pin, PinMode mode) {
 // ============================================================================
 
 inline void digitalWrite(int pin, PinValue val) {
-#ifdef HAL_GPIO_MODULE_ENABLED
+#if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
     uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
@@ -153,7 +153,7 @@ inline void digitalWrite(int pin, PinValue val) {
 }
 
 inline PinValue digitalRead(int pin) {
-#ifdef HAL_GPIO_MODULE_ENABLED
+#if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
     uint32_t pin_mask = fl::stm32::getGPIOPin(pin);

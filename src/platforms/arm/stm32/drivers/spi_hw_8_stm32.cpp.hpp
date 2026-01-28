@@ -59,6 +59,7 @@
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers
 
 namespace fl {
+
 /// - Timer (PWM mode) for synchronized clock generation
 /// - 8 GPIO outputs for data lanes (D0-D7)
 /// - 8 DMA channels for parallel, non-blocking data transmission

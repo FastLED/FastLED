@@ -1,14 +1,34 @@
 #pragma once
 
-// Spark Core/Photon pin definitions
-// Reference: https://docs.particle.io/reference/hardware/wifi/spark-core/
+#warning "pin_def_stm32.h is deprecated. Use core/armpin_template.h instead. See src/platforms/arm/stm32/pins/README.md for migration guide."
+
+// DEPRECATED: This file is deprecated in favor of the new unified architecture
+// Please use core/armpin_template.h which provides a single template for all STM32 families
+// This file will be removed in a future release
+
+// STM32 base definitions - shared class and macros for all STM32 pin definitions
+// Used by fastpin_stm32f1.h, fastpin_stm32_spark.h, and other STM32 board-specific files
 
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 
+// Arduino constants for pinMode()
+// These are typically provided by Arduino.h, but we define them here
+// if not already defined to make the header self-contained
+#ifndef INPUT
+#define INPUT 0
+#endif
+#ifndef OUTPUT
+#define OUTPUT 1
+#endif
+#ifndef INPUT_PULLUP
+#define INPUT_PULLUP 2
+#endif
+
 namespace fl {
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.
+/// This class is shared across STM32F1, Spark Core, and similar STM32 boards that use BRR register.
 template<uint8_t PIN, uint8_t _BIT, uint32_t _MASK, typename _GPIO> class _ARMPIN {
 public:
   typedef volatile uint32_t * port_ptr_t;
@@ -40,38 +60,5 @@ public:
 
 #define _R(T) struct __gen_struct_ ## T
 #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
-
-// Spark-specific register access
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
-#define _IO32(L) _RD32(GPIO ## L)
-
-_IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E); _IO32(F); _IO32(G);
-
-#define MAX_PIN 19
-_DEFPIN_ARM(0, 7, B);
-_DEFPIN_ARM(1, 6, B);
-_DEFPIN_ARM(2, 5, B);
-_DEFPIN_ARM(3, 4, B);
-_DEFPIN_ARM(4, 3, B);
-_DEFPIN_ARM(5, 15, A);
-_DEFPIN_ARM(6, 14, A);
-_DEFPIN_ARM(7, 13, A);
-_DEFPIN_ARM(8, 8, A);
-_DEFPIN_ARM(9, 9, A);
-_DEFPIN_ARM(10, 0, A);
-_DEFPIN_ARM(11, 1, A);
-_DEFPIN_ARM(12, 4, A);
-_DEFPIN_ARM(13, 5, A);
-_DEFPIN_ARM(14, 6, A);
-_DEFPIN_ARM(15, 7, A);
-_DEFPIN_ARM(16, 0, B);
-_DEFPIN_ARM(17, 1, B);
-_DEFPIN_ARM(18, 3, A);
-_DEFPIN_ARM(19, 2, A);
-
-#define SPI_DATA 15
-#define SPI_CLOCK 13
-
-#define HAS_HARDWARE_PIN_SUPPORT
 
 }  // namespace fl

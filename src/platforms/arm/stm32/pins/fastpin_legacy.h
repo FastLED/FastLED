@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/force_inline.h"
-#include "armpin.h"
+#include "platforms/arm/stm32/armpin.h"
 
 namespace fl {
 

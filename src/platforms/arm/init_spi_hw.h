@@ -23,6 +23,11 @@
 #include "platforms/arm/samd/is_samd.h"
 #include "platforms/arm/nrf52/is_nrf52.h"
 
+#if defined(FL_IS_STM32)
+    // STM32 family - use STM32-specific manager
+    #include "platforms/arm/stm32/drivers/spi_hw_manager_stm32.cpp.hpp"
+#endif
+
 namespace fl {
 namespace platform {
 

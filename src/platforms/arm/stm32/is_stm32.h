@@ -26,6 +26,11 @@
 /// 2. Roger Clark STM32 (STM32F103C): __STM32F1__
 /// 3. Older STM32duino/Arduino_STM32: STM32F1, STM32F4
 /// 4. Particle (Photon): STM32F10X_MD, STM32F2XX
+///
+/// Core differentiation is handled by core_detection.h which defines:
+/// - FL_STM32_CORE_STMDUINO, FL_STM32_CORE_LIBMAPLE, FL_STM32_CORE_PARTICLE, or FL_STM32_CORE_UNKNOWN
+
+#include "core_detection.h"
 
 // ============================================================================
 // FL_IS_STM32 - General STM32 platform detection
