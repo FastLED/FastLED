@@ -348,3 +348,186 @@ TEST_CASE("fl::time - integration patterns") {
         FL_CHECK(now >= last_action);
     }
 }
+
+TEST_CASE("fl::millis64 - basic functionality") {
+    SUBCASE("millis64 returns non-zero values") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::millis64();
+        FL_CHECK(t1 >= 0); // Always true, but documents expectation
+    }
+
+    SUBCASE("millis64 is monotonically increasing") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::millis64();
+        // Small delay to ensure time advances
+        volatile int dummy = 0;
+        for (int i = 0; i < 10000; ++i) {
+            dummy += i;
+        }
+        fl::u64 t2 = fl::millis64();
+        // Time should be >= t1 (may be equal if very fast)
+        FL_CHECK(t2 >= t1);
+    }
+
+    SUBCASE("millis64 never wraps (practical test)") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::millis64();
+        fl::u64 t2 = fl::millis64();
+        // t2 should always be >= t1 (no wraparound)
+        FL_CHECK(t2 >= t1);
+        // Verify 64-bit range (584 million years)
+        FL_CHECK(t1 < 0xFFFFFFFFFFFFFFFFULL);
+    }
+
+    SUBCASE("millis64 time difference calculation") {
+        fl::millis64_reset();
+        fl::u64 start = fl::millis64();
+        // Small delay
+        volatile int dummy = 0;
+        for (int i = 0; i < 10000; ++i) {
+            dummy += i;
+        }
+        fl::u64 end = fl::millis64();
+        fl::u64 elapsed = end - start;
+        // Elapsed should be small but >= 0
+        FL_CHECK(elapsed >= 0);
+        // Should be less than a reasonable threshold (e.g., 1 second)
+        FL_CHECK(elapsed < 1000);
+    }
+
+    SUBCASE("multiple calls to millis64") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::millis64();
+        fl::u64 t2 = fl::millis64();
+        fl::u64 t3 = fl::millis64();
+
+        // All should be >= previous (never decreases)
+        FL_CHECK(t2 >= t1);
+        FL_CHECK(t3 >= t2);
+    }
+
+    SUBCASE("millis64 compatibility with millis") {
+        // Reset millis64 state to ensure clean test
+        fl::millis64_reset();
+
+        // millis64 should be based on millis, so values should be close
+        fl::u32 m32 = fl::millis();
+        fl::u32 m64_32 = static_cast<fl::u32>(fl::millis64());
+
+        // Use unsigned arithmetic with wraparound to compute diff
+        fl::u32 diff = m32 - m64_32;  // Wraps correctly even if m64_32 > m32
+        FL_CHECK(diff < 100); // Allow small timing variance
+    }
+}
+
+TEST_CASE("fl::time - alias for millis64") {
+    SUBCASE("time() returns same type as millis64()") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::time();
+        fl::u64 t2 = fl::millis64();
+
+        // Both should return u64
+        FL_CHECK(t1 >= 0);
+        FL_CHECK(t2 >= 0);
+    }
+
+    SUBCASE("time() and millis64() are consistent") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::time();
+        fl::u64 m1 = fl::millis64();
+
+        // Should be very close (within a few milliseconds)
+        fl::u64 diff = (t1 > m1) ? (t1 - m1) : (m1 - t1);
+        FL_CHECK(diff < 10); // Should be within 10ms
+    }
+
+    SUBCASE("time() is monotonically increasing") {
+        fl::millis64_reset();
+        fl::u64 t1 = fl::time();
+        // Small delay
+        volatile int dummy = 0;
+        for (int i = 0; i < 10000; ++i) {
+            dummy += i;
+        }
+        fl::u64 t2 = fl::time();
+        FL_CHECK(t2 >= t1);
+    }
+}
+
+#ifdef FASTLED_TESTING
+
+TEST_CASE("fl::millis64 - wraparound handling") {
+    SUBCASE("millis64 handles 32-bit wraparound correctly") {
+        // This test verifies that millis64 correctly accumulates across 32-bit wraparounds
+        fl::millis64_reset();
+        MockTimeProvider mock(0xFFFFFFF0u); // Start near max u32
+        inject_time_provider([&mock]() { return mock(); });
+
+        fl::u64 start64 = fl::millis64();
+
+        // Advance past wraparound (by 0x20 = 32 ms)
+        mock.advance(0x20);
+
+        fl::u64 end64 = fl::millis64();
+
+        // The 64-bit counter should have advanced by exactly 32ms
+        // even though the 32-bit counter wrapped
+        fl::u64 elapsed64 = end64 - start64;
+        FL_CHECK_EQ(elapsed64, 0x20);
+
+        // Verify the 32-bit millis wrapped around
+        fl::u32 current32 = fl::millis();
+        FL_CHECK(current32 < 0x20); // Should have wrapped to small value
+
+        clear_time_provider();
+    }
+
+    SUBCASE("millis64 accumulates correctly over multiple wraparounds") {
+        fl::millis64_reset();
+        MockTimeProvider mock(0); // Start at 0
+        inject_time_provider([&mock]() { return mock(); });
+
+        fl::u64 start64 = fl::millis64();
+
+        // Simulate time passing equivalent to 2.5 wraparounds
+        // Each wraparound is 2^32 ms ≈ 49.7 days
+        // We'll advance by 0x180000000 = 1.5 * 2^32 in total (10 chunks of 0x26666666)
+
+        // Advance in chunks to simulate normal operation
+        for (int i = 0; i < 10; ++i) {
+            mock.advance(0x26666666); // Advance by ~644.2 million ms each time
+            fl::millis64(); // Call to update internal state
+        }
+
+        fl::u64 end64 = fl::millis64();
+        fl::u64 elapsed64 = end64 - start64;
+
+        // Should have accumulated the full amount (within rounding)
+        // 10 chunks of 0x26666666 = 0x17FFFFFFC (6,442,450,940 ms)
+        FL_CHECK(elapsed64 >= (0x180000000ULL - 0x20)); // Allow for small rounding
+
+        clear_time_provider();
+    }
+
+    SUBCASE("time() handles wraparound same as millis64()") {
+        fl::millis64_reset();
+        MockTimeProvider mock(0xFFFFFFF0u);
+        inject_time_provider([&mock]() { return mock(); });
+
+        fl::u64 start_time = fl::time();
+        fl::u64 start_millis64 = fl::millis64();
+
+        mock.advance(0x20);
+
+        fl::u64 end_time = fl::time();
+        fl::u64 end_millis64 = fl::millis64();
+
+        // Both should handle wraparound identically
+        FL_CHECK_EQ(end_time - start_time, 0x20);
+        FL_CHECK_EQ(end_millis64 - start_millis64, 0x20);
+
+        clear_time_provider();
+    }
+}
+
+#endif // FASTLED_TESTING

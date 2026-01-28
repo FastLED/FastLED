@@ -1,5 +1,6 @@
 #include "fl/stl/time.h"
 #include "fl/warn.h"
+#include "fl/stl/mutex.h"
 #include "platforms/time_platform.h"
 
 #ifdef FASTLED_TESTING
@@ -79,6 +80,55 @@ fl::u32 millis() {
 fl::u32 micros() {
     // Note: micros() does not support time injection
     return fl::platform::micros();
+}
+
+namespace {
+    // Thread-safe 64-bit millisecond counter state
+    struct Millis64State {
+        fl::u64 accumulated = 0;
+        fl::u32 last_millis = 0;
+        bool initialized = false;
+        fl::mutex mutex;
+    };
+
+    Millis64State& get_millis64_state() {
+        static Millis64State state;
+        return state;
+    }
+}
+
+void millis64_reset() {
+    Millis64State& state = get_millis64_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.accumulated = 0;
+    state.last_millis = 0;
+    state.initialized = false;
+}
+
+fl::u64 millis64() {
+    Millis64State& state = get_millis64_state();
+    fl::u32 current_millis = fl::millis();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+
+    if (!state.initialized) {
+        // First call, set initial value
+        state.accumulated = current_millis;
+        state.last_millis = current_millis;
+        state.initialized = true;
+        return state.accumulated;
+    }
+
+    // Detect wraparound: current < last means 32-bit counter wrapped
+    // Delta calculation handles wraparound correctly via unsigned arithmetic
+    fl::u32 delta = current_millis - state.last_millis;
+
+    // Accumulate the delta into 64-bit counter
+    state.accumulated += delta;
+
+    // Update last value for next call
+    state.last_millis = current_millis;
+
+    return state.accumulated;
 }
 
 } // namespace fl 

@@ -131,6 +131,50 @@ fl::u32 millis();
 /// @endcode
 fl::u32 micros();
 
+/// 64-bit millisecond timer - returns milliseconds since system startup without wraparound
+///
+/// This function provides a 64-bit millisecond counter that never wraps around in any
+/// practical timeframe (584 million years). It's built on top of fl::millis() and
+/// automatically detects and corrects for 32-bit wraparound.
+///
+/// The implementation uses a function-local static for thread-safe accumulation on
+/// platforms that support it. On platforms with native 64-bit timers, this function
+/// may be optimized to use the native implementation directly.
+///
+/// @return Number of milliseconds since system startup as a 64-bit value
+/// @note Thread-safe on platforms with proper static initialization guards
+/// @note No wraparound in practical usage (584+ million years)
+/// @note Slightly higher overhead than millis() due to wraparound detection
+///
+/// @section Usage Examples
+/// @code
+/// // Long-running timing without wraparound concerns
+/// fl::u64 start = fl::millis64();
+/// long_running_operation();
+/// fl::u64 elapsed = fl::millis64() - start;
+///
+/// // Safe duration tracking across 49+ day boundaries
+/// static fl::u64 session_start = fl::millis64();
+/// fl::u64 uptime = fl::millis64() - session_start; // Never wraps
+///
+/// // Timestamps for logging and analytics
+/// fl::u64 event_time = fl::millis64();
+/// log_event("operation_complete", event_time);
+/// @endcode
+fl::u64 millis64();
+
+/// Alias for millis64() - returns 64-bit millisecond time
+///
+/// This function is an alias for fl::millis64() and provides a convenient
+/// shorter name for getting the 64-bit millisecond timer value.
+///
+/// @return Number of milliseconds since system startup as a 64-bit value
+/// @note Inline function - zero overhead
+/// @see millis64() for full documentation
+inline fl::u64 time() {
+    return fl::millis64();
+}
+
 #ifdef FASTLED_TESTING
 
 /// Type alias for time provider functions used in testing
@@ -169,6 +213,16 @@ void inject_time_provider(const time_provider_t& provider);
 /// @note Thread-safe: Uses appropriate locking in multi-threaded environments
 /// @note Safe to call multiple times or when no provider is injected
 void clear_time_provider();
+
+/// Reset the millis64() internal state for testing
+///
+/// This function resets the internal accumulation state of millis64() to allow
+/// tests to start with a clean state. Should be called between test cases that
+/// use MockTimeProvider to ensure consistent behavior.
+///
+/// @note Only available in testing builds (when FASTLED_TESTING is defined)
+/// @note Thread-safe: Uses appropriate locking in multi-threaded environments
+void millis64_reset();
 
 /// Mock time provider for controlled testing
 ///

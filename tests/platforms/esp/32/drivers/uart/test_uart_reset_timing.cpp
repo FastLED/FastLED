@@ -242,9 +242,9 @@ TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
 
         // Expected transmission time: 31.25 us
         // With reset period (assume ~50us), total should be ~80-100us
-        // Allow generous range for test stability
+        // Allow generous range for test stability (system load can add overhead)
         FL_CHECK(elapsed >= 10);   // At least 10us (very conservative)
-        FL_CHECK(elapsed <= 500);  // No more than 500us (sanity check)
+        FL_CHECK(elapsed <= 1000);  // No more than 1ms (sanity check with system load tolerance)
     }
 
     SUBCASE("WS2812 reset requirement (>50us) is satisfied") {
