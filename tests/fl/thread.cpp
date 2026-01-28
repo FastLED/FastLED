@@ -34,7 +34,9 @@ TEST_CASE("fl::thread - this_thread::get_id") {
     t.join();
 
     // Thread ID should be different from main thread
-    FL_REQUIRE(thread_id != main_id);
+    // Compare as bool to avoid stringification issues with GCC 14's thread::id operator<<
+    bool ids_are_different = (thread_id != main_id);
+    FL_REQUIRE(ids_are_different);
 }
 
 TEST_CASE("fl::thread - thread with arguments") {
