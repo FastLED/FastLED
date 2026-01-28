@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 
-from ci.boards import NATIVE
+from ci.boards import WEBTARGET
 from ci.compiler.board_example_utils import should_skip_example_for_board
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
@@ -59,13 +59,13 @@ def main() -> int:
     # Extract example name from sketch_dir (e.g., "examples/Blink" -> "Blink")
     example_name = args.sketch_dir.split("/")[-1]
 
-    # Check if sketch is filtered out for native/WASM platform
+    # Check if sketch is filtered out for WASM platform
     try:
-        should_skip, reason = should_skip_example_for_board(NATIVE, example_name)
+        should_skip, reason = should_skip_example_for_board(WEBTARGET, example_name)
         if should_skip:
             console.print()
             console.print(
-                f"[bold yellow]⚠️  WARNING:[/bold yellow] Example '{example_name}' is filtered for native/WASM platform"
+                f"[bold yellow]⚠️  WARNING:[/bold yellow] Example '{example_name}' is filtered for WASM platform"
             )
             console.print(f"[dim]Reason: {reason}[/dim]")
             console.print()

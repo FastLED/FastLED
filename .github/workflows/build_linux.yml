@@ -97,4 +97,5 @@ jobs:
       - name: Run Native Build
         working-directory: trusted
         run: |
-          uv run ci/ci-compile-native.py
+          # Run C++ unit tests (uses Meson for native compilation)
+          uv run test.py --cpp

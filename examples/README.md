@@ -68,8 +68,7 @@ Tips:
 
 - Board-based workflows: create a `platformio.ini` that targets your MCU and copy an example sketch into a project `src/` folder
 - Host/STUB workflows: use the STUB platform for local testing where appropriate (no hardware); advanced builds hook into `src/platforms/stub/`
-
-The repository includes `ci/native/` and `ci/kitchensink/` PlatformIO configs you can reference for host builds and integration tests.
+- For native host compilation, FastLED uses Meson (see `meson.build` and run `uv run test.py --cpp`)
 
 ### Teensy/OctoWS2811
 

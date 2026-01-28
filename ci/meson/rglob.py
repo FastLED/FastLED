@@ -47,6 +47,11 @@ def main() -> None:
     for p in matches:
         # Normalize path for comparison (use forward slashes)
         path_str = str(p).replace(os.sep, "/")
+
+        # Skip .cpp.hpp and .cpp.h files (header-only implementation files)
+        if path_str.endswith(".cpp.hpp") or path_str.endswith(".cpp.h"):
+            continue
+
         if exclude_path is None or exclude_path not in path_str:
             print(str(p))
 

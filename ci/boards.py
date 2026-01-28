@@ -593,35 +593,6 @@ WEBTARGET = Board(
     board_name="web",
 )
 
-# Native host compilation target using PlatformIO's "native" platform.
-# This allows compiling FastLED for the host machine (Linux/macOS/Windows)
-# which is useful for CI compile-tests and static analysis.  We replicate
-# the build flags present in ci/native/platformio.ini so that the same
-# stub implementation and main-file inclusion are used.
-
-NATIVE = Board(
-    board_name="native",
-    platform="platformio/native",
-    no_board_spec=True,  # Native platform doesn't need a board specification
-    lib_compat_mode="off",  # Disable library compatibility checking for native platform
-    build_flags=[
-        "-DFASTLED_STUB_IMPL",  # Enable stub platform implementations
-        "-DFASTLED_USE_STUB_ARDUINO",  # Enable Arduino stub implementations
-        "-DPLATFORM_NATIVE",  # Enable native platform stub compilation
-        "-std=c++17",
-        "-I../../../src/platforms/stub",  # Include path for Arduino.h and other stub headers (relative to project dir)
-        "-I../../../src",  # Include path for FastLED.h and other source headers (relative to project dir)
-    ],
-    build_unflags=[
-        "-mwindows",  # Remove GUI subsystem flag if present
-        "-Wl,-Map,firmware.map",  # Remove GCC/ld map file flag (incompatible with zig's lld linker)
-        "-fopt-info-all",  # Remove GCC-only optimization report flag (incompatible with Clang)
-    ],
-    extra_scripts=[
-        "pre:../../../ci/native/zig_toolchain_override.py",  # Override toolchain with zig's Clang (runs BEFORE library compilation - CRITICAL for ABI compatibility)
-    ],
-)
-
 SAM3X8E_DUE = Board(
     board_name="sam3x8e_due",
     real_board_name="due",
