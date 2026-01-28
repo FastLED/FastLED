@@ -274,6 +274,7 @@ bool ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, 
     // Prepare transmission payload
     parlio_transmit_config_t payload = {};
     payload.idle_value = idle_value;
+    payload.flags.queue_nonblocking = 1;  // ISR-safe: don't block if queue full
 
     // Delegate to ESP-IDF (ISR-safe call)
     esp_err_t err = parlio_tx_unit_transmit(mTxUnit, buffer, bit_count, &payload);
