@@ -13,8 +13,18 @@
 
 #ifdef FL_IS_ESP32
 
-// Include the manager implementation
-#include "platforms/esp/32/drivers/spi_hw_manager_esp32.cpp.hpp"
+// Declaration only - implementation in spi_hw_manager_esp32.cpp.hpp
+namespace fl {
+namespace platform {
+
+/// @brief Initialize SPI hardware for ESP32
+///
+/// Registers platform-specific SPI hardware instances with the appropriate registries.
+/// Implementation is in platforms/esp/32/drivers/spi_hw_manager_esp32.cpp.hpp
+void initSpiHardware();
+
+}  // namespace platform
+}  // namespace fl
 
 #else
 

@@ -96,7 +96,7 @@ namespace platform {
 /// Platform availability:
 /// - RP2040: All three (2 PIO blocks × 4 state machines = 8 total)
 /// - RP2350: All three (3 PIO blocks × 4 state machines = 12 total)
-inline void initSpiHardware() {
+void initSpiHardware() {
     FL_DBG("RP2040/RP2350: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
