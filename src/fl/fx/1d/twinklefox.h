@@ -142,7 +142,7 @@ class TwinkleFox : public Fx1d {
         // this function is called, so that the sequence of 'random'
         // numbers that it generates is (paradoxically) stable.
         uint16_t PRNG16 = 11337;
-        fl::u32 clock32 = millis();
+        fl::u32 clock32 = fl::millis();
 
         CRGB bg = backgroundColor;
         if (autoSelectBackgroundColor &&

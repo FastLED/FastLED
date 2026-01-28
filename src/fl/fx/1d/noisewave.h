@@ -22,7 +22,7 @@ class NoiseWave : public Fx1d {
             start_time = context.now;
         }
 
-        unsigned long time_now = millis() - start_time;
+        unsigned long time_now = fl::millis() - start_time;
 
         for (int32_t i = 0; i < mNumLeds; ++i) {
             int r = noiseGeneratorRed.LedValue(i, time_now);

@@ -98,7 +98,7 @@ void Particles1d::Particle::spawn(u16 numLeds) {
     baseVel = random8(2) ? speed : -speed;
     baseColor = CHSV(random8(), random8(), 120 + random8(81));
     lifetime = 4000 * (500 + random16(1000)) / 1000;  // 2-6 seconds
-    birthTime = millis();
+    birthTime = fl::millis();
     active = true;
 }
 
@@ -107,7 +107,7 @@ void Particles1d::Particle::spawn(float pos, float baseVel, CHSV baseColor, u32 
     this->baseVel = baseVel;
     this->baseColor = baseColor;
     this->lifetime = lifetime;
-    this->birthTime = millis();
+    this->birthTime = fl::millis();
     this->active = true;
 }
 

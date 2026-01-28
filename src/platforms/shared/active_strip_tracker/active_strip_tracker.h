@@ -98,7 +98,7 @@ public:
     /// @brief Update strip data with RGB pixel data
     /// @param pixel_data Span of RGB pixel data (3 bytes per pixel: R, G, B)
     void update(fl::span<const uint8_t> pixel_data) {
-        fl::ActiveStripData::Instance().update(mId, millis(), pixel_data);
+        fl::ActiveStripData::Instance().update(mId, fl::millis(), pixel_data);
     }
 
     /// @brief Update strip data with CRGB pixel data

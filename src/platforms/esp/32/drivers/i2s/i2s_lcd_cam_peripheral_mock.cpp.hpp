@@ -18,9 +18,9 @@
 #include <stdlib.h> // ok include for aligned_alloc on POSIX
 
 #ifdef ARDUINO
-#include <Arduino.h>  // For micros() and delay() on Arduino platforms
+#include <Arduino.h>  // For fl::micros() and delay() on Arduino platforms
 #else
-#include "platforms/stub/time_stub.h"  // For micros() and delay() on host tests
+#include "platforms/stub/time_stub.h"  // For fl::micros() and delay() on host tests
 #endif
 
 namespace fl {
@@ -261,7 +261,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_b
     record.buffer_copy.resize(word_count);
     fl::memcpy(record.buffer_copy.data(), buffer, size_bytes);
     record.size_bytes = size_bytes;
-    record.timestamp_us = micros();
+    record.timestamp_us = fl::micros();
 
     mHistory.push_back(fl::move(record));
 
@@ -274,7 +274,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_b
 
         // Enqueue for simulation thread
         PendingTransmit pending;
-        pending.completion_time_us = micros() + transmit_delay_us;
+        pending.completion_time_us = fl::micros() + transmit_delay_us;
         mPendingQueue.push_back(pending);
     }
 
@@ -303,7 +303,7 @@ bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(uint32_t timeout_ms) {
     }
 
     // Wait for completion
-    uint32_t start_us = micros();
+    uint32_t start_us = fl::micros();
     uint32_t timeout_us = timeout_ms * 1000;
 
     while (true) {
@@ -315,7 +315,7 @@ bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(uint32_t timeout_ms) {
             }
         }
 
-        if ((micros() - start_us) >= timeout_us) {
+        if ((fl::micros() - start_us) >= timeout_us) {
             return false;  // Timeout
         }
 
@@ -351,7 +351,7 @@ const I2sLcdCamConfig& I2sLcdCamPeripheralMockImpl::getConfig() const {
 }
 
 uint64_t I2sLcdCamPeripheralMockImpl::getMicroseconds() {
-    return micros();
+    return fl::micros();
 }
 
 void I2sLcdCamPeripheralMockImpl::delay(uint32_t ms) {
@@ -467,7 +467,7 @@ void I2sLcdCamPeripheralMockImpl::simulationThreadFunc() {
         }
 
         // Check if first transmit has completed
-        uint64_t now_us = micros();
+        uint64_t now_us = fl::micros();
 
         if (now_us >= mPendingQueue[0].completion_time_us) {
             // Remove from queue

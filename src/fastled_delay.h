@@ -34,12 +34,12 @@ public:
 	void wait() {
 		fl::u16 diff;
 		do {
-			diff = (micros() & 0xFFFF) - mLastMicros;
+			diff = (fl::micros() & 0xFFFF) - mLastMicros;
 		} while(diff < WAIT);
 	}
 
 	/// Reset the timestamp that marks the start of the wait period
-	void mark() { mLastMicros = micros() & 0xFFFF; }
+	void mark() { mLastMicros = fl::micros() & 0xFFFF; }
 };
 
 #else

@@ -52,16 +52,16 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
         // Wait for previous transmission to complete and release buffer
-        uint32_t startTime = millis();
+        uint32_t startTime = fl::millis();
         uint32_t lastWarnTime = startTime;
         while (mChannelData->isInUse()) {
             mEngine->poll();  // Keep polling until buffer is released
 
             // Warn every second if still waiting (possible deadlock or hardware issue)
-            uint32_t elapsed = millis() - startTime;
-            if (elapsed > 1000 && (millis() - lastWarnTime) >= 1000) {
+            uint32_t elapsed = fl::millis() - startTime;
+            if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
                 FL_WARN("ClocklessIdf5: Buffer still busy after " << elapsed << "ms total - possible deadlock or slow hardware");
-                lastWarnTime = millis();
+                lastWarnTime = fl::millis();
             }
         }
 

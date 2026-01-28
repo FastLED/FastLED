@@ -262,7 +262,7 @@ bool UartPeripheralEsp::waitTxDone(uint32_t timeout_ms) {
         const uint64_t DEFAULT_RESET_DURATION_US = 1000;
 
         const uint64_t reset_duration = (mConfig.mBaudRate > 0) ? DEFAULT_RESET_DURATION_US : MIN_RESET_DURATION_US;
-        mResetExpireTime = micros() + reset_duration;
+        mResetExpireTime = fl::micros() + reset_duration;
     }
 
     // ESP_OK means all done, ESP_ERR_TIMEOUT means still busy (not an error)
@@ -275,7 +275,7 @@ bool UartPeripheralEsp::isBusy() const {
     }
 
     // Check reset period FIRST (channel draining)
-    const uint64_t now = micros();
+    const uint64_t now = fl::micros();
     if (now < mResetExpireTime) {
         return true;  // Still in reset period
     }

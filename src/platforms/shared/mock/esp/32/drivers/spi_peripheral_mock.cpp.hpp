@@ -21,9 +21,9 @@
 #endif
 
 #ifdef ARDUINO
-#include <Arduino.h>  // ok include - For micros() and delay() on Arduino platforms
+#include <Arduino.h>  // ok include - For fl::micros() and delay() on Arduino platforms
 #else
-#include "platforms/stub/time_stub.h"  // For micros() and delay() on host tests
+#include "platforms/stub/time_stub.h"  // For fl::micros() and delay() on host tests
 #endif
 
 namespace fl {
@@ -291,7 +291,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) {
     record.length_bits = trans.length_bits;
     record.flags = trans.flags;
     record.user = trans.user;
-    record.timestamp_us = micros();
+    record.timestamp_us = fl::micros();
 
     // Store in history
     mHistory.push_back(fl::move(record));
@@ -339,10 +339,10 @@ bool SpiPeripheralMockImpl::pollTransaction(uint32_t timeout_ms) {
     }
 
     // Wait for transaction completion with timeout
-    uint32_t start_us = micros();
+    uint32_t start_us = fl::micros();
     uint32_t timeout_us = timeout_ms * 1000;
 
-    while (mPendingTransactions > 0 && (micros() - start_us) < timeout_us) {
+    while (mPendingTransactions > 0 && (fl::micros() - start_us) < timeout_us) {
         // Busy wait (simulation)
         std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
     }
@@ -431,7 +431,7 @@ void SpiPeripheralMockImpl::delay(uint32_t ms) {
 
 uint64_t SpiPeripheralMockImpl::getMicroseconds() {
     // Use the same timestamp source as queueTransaction() for consistency
-    return micros();
+    return fl::micros();
 }
 
 //=============================================================================

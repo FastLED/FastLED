@@ -4,9 +4,9 @@
 #include "uart_peripheral_mock.h"
 
 #if defined(ARDUINO) || defined(ESP_PLATFORM) || defined(ESP32)
-#include <Arduino.h>  // ok include - For micros() on Arduino/ESP platforms
+#include <Arduino.h>  // ok include - For fl::micros() on Arduino/ESP platforms
 #else
-#include "platforms/stub/time_stub.h"  // For micros() on host tests
+#include "platforms/stub/time_stub.h"  // For fl::micros() on host tests
 #endif
 
 namespace fl {
@@ -304,7 +304,7 @@ uint64_t UartPeripheralMock::getCurrentTimestamp() const {
     if (mVirtualTimeEnabled) {
         return mVirtualTime;
     }
-    return micros();
+    return fl::micros();
 }
 
 bool UartPeripheralMock::isTransmissionComplete() const {

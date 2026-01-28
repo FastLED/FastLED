@@ -48,7 +48,7 @@ bool TeensyAudioRecorder::queueBlock(const audio_block_t* block, u8 channel) {
     // Copy block data to our queue
     QueuedBlock qb;
     qb.channel = channel;
-    qb.timestamp = millis();
+    qb.timestamp = fl::millis();
     // Copy samples from audio_block_t (128 samples of int16)
     for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
         qb.samples[i] = block->data[i];

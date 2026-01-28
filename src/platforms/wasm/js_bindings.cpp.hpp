@@ -218,7 +218,7 @@ EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     fl::Json doc = fl::Json::object();
     doc.set("strip_id", stripId);
     doc.set("event", "strip_update");
-    doc.set("timestamp", static_cast<int>(millis()));
+    doc.set("timestamp", static_cast<int>(fl::millis()));
 
     fl::Str jsonBuffer = doc.to_string();
 
@@ -247,7 +247,7 @@ EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     // Export basic UI update structure
     fl::Json doc = fl::Json::object();
     doc.set("event", "ui_update");
-    doc.set("timestamp", static_cast<int>(millis()));
+    doc.set("timestamp", static_cast<int>(fl::millis()));
 
     fl::Str jsonBuffer = doc.to_string();
 

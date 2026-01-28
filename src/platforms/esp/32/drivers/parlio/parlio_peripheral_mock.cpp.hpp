@@ -362,7 +362,7 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
     fl::memcpy(record.buffer_copy.data(), buffer, byte_count);
     record.bit_count = bit_count;
     record.idle_value = idle_value;
-    record.timestamp_us = micros();
+    record.timestamp_us = fl::micros();
 
     // Store in history
     mHistory.push_back(fl::move(record));
@@ -397,7 +397,7 @@ bool ParlioPeripheralMockImpl::transmit(const uint8_t* buffer, size_t bit_count,
 
         // Enqueue this transmission for the simulation thread
         PendingTransmission pending;
-        pending.completion_time_us = micros() + transmission_delay_us;
+        pending.completion_time_us = fl::micros() + transmission_delay_us;
         mPendingQueue.push_back(pending);
     }
 
@@ -434,7 +434,7 @@ bool ParlioPeripheralMockImpl::waitAllDone(uint32_t timeout_ms) {
     // (In real tests, simulateTransmitComplete() is called explicitly)
     // This is a fallback for simple tests that don't need precise timing control
     if (mTransmitDelayUs > 0) {
-        uint32_t start_us = micros();
+        uint32_t start_us = fl::micros();
         uint32_t timeout_us = timeout_ms * 1000;
 
         while (true) {
@@ -445,7 +445,7 @@ bool ParlioPeripheralMockImpl::waitAllDone(uint32_t timeout_ms) {
                 }
             }
 
-            if ((micros() - start_us) >= timeout_us) {
+            if ((fl::micros() - start_us) >= timeout_us) {
                 return false;  // Timeout
             }
 
@@ -523,7 +523,7 @@ void ParlioPeripheralMockImpl::delay(uint32_t ms) {
 
 uint64_t ParlioPeripheralMockImpl::getMicroseconds() {
     // Use the same timestamp source as transmit() for consistency
-    return micros();
+    return fl::micros();
 }
 
 void ParlioPeripheralMockImpl::freeDmaBuffer(void* ptr) {
@@ -695,7 +695,7 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
         // Check if there are pending transmissions in the queue
         if (!mPendingQueue.empty()) {
             // Get current time
-            uint64_t now_us = micros();
+            uint64_t now_us = fl::micros();
 
             // Check if the first transmission has completed
             if (now_us >= mPendingQueue[0].completion_time_us) {

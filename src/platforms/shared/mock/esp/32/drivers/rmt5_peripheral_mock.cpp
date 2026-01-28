@@ -20,9 +20,9 @@
 #endif
 
 #ifdef ARDUINO
-#include <Arduino.h>  // ok include - For micros() on Arduino platforms
+#include <Arduino.h>  // ok include - For fl::micros() on Arduino platforms
 #else
-#include "platforms/stub/time_stub.h"  // For micros() on host tests
+#include "platforms/stub/time_stub.h"  // For fl::micros() on host tests
 #endif
 
 namespace fl {
@@ -339,9 +339,9 @@ bool Rmt5PeripheralMockImpl::transmit(void* channel_handle, void* encoder_handle
     record.used_dma = channel->config.with_dma;
 
     #ifdef ARDUINO
-    record.timestamp_us = micros();
+    record.timestamp_us = fl::micros();
     #else
-    record.timestamp_us = stub::micros();
+    record.timestamp_us = stub::fl::micros();
     #endif
 
     mHistory.push_back(record);

@@ -472,7 +472,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
     state->memPtr = state->memStart;
     state->transmissionComplete = false;
     state->lastFill = 0;
-    state->transmissionStartTime = millis();  // Start timeout timer
+    state->transmissionStartTime = fl::millis();  // Start timeout timer
 
     // Fill both halves of the double-buffer
     // (false = skip time check on initial fill)
@@ -564,7 +564,7 @@ IChannelEngine::EngineState ChannelEngineRMT4Impl::poll() {
         } else {
             // Channel still transmitting - check for timeout
 #if FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS > 0
-            uint32_t elapsed = millis() - state.transmissionStartTime;
+            uint32_t elapsed = fl::millis() - state.transmissionStartTime;
             if (elapsed > FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS) {
                 // Timeout detected - force channel reset
                 FL_WARN("poll: Channel " << state.channel << " timed out after "

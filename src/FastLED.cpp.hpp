@@ -125,8 +125,8 @@ static void* gControllersData[MAX_CLED_CONTROLLERS];
 FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
-	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
-	lastshow = micros();
+	while(m_nMinMicros && ((fl::micros()-lastshow) < m_nMinMicros));
+	lastshow = fl::micros();
 
 	// If we have a function for computing power, use it!
 	if(m_pPowerFunc) {
@@ -200,8 +200,8 @@ CLEDController & CFastLED::operator[](int x) {
 }
 
 void CFastLED::showColor(const CRGB & color, uint8_t scale) {
-	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
-	lastshow = micros();
+	while(m_nMinMicros && ((fl::micros()-lastshow) < m_nMinMicros));
+	lastshow = fl::micros();
 
 	// If we have a function for computing power, use it!
 	if(m_pPowerFunc) {
@@ -258,7 +258,7 @@ void CFastLED::clearData() {
 }
 
 void CFastLED::delay(unsigned long ms) {
-	unsigned long start = millis();
+	unsigned long start = fl::millis();
         do {
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
@@ -268,7 +268,7 @@ void CFastLED::delay(unsigned long ms) {
 		show();
 		yield();
 	}
-	while((millis()-start) < ms);
+	while((fl::millis()-start) < ms);
 }
 
 void CFastLED::setTemperature(const CRGB & temp) {
@@ -348,17 +348,17 @@ extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
 	static int br = 0;
-	static fl::u32 lastframe = 0; // millis();
+	static fl::u32 lastframe = 0; // fl::millis();
 
 	if(br++ >= nFrames) {
-		fl::u32 now = millis();
+		fl::u32 now = fl::millis();
 		now -= lastframe;
 		if(now == 0) {
 			now = 1; // prevent division by zero below
 		}
 		m_nFPS = (br * 1000) / now;
 		br = 0;
-		lastframe = millis();
+		lastframe = fl::millis();
 	}
 }
 

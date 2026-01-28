@@ -587,7 +587,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
     // Wait for DMA completion with timeout
 #if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
     // Record start time for timeout checking
-    uint32_t start_ms = millis();
+    uint32_t start_ms = fl::millis();
     bool timeout_enabled = (timeout_ms != fl::numeric_limits<uint32_t>::max());
 
     // Poll DMA completion flags for both streams
@@ -603,7 +603,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
 
         // Check timeout
         if (timeout_enabled) {
-            uint32_t elapsed_ms = millis() - start_ms;
+            uint32_t elapsed_ms = fl::millis() - start_ms;
             if (elapsed_ms >= timeout_ms) {
                 FL_WARN("SPIDualSTM32: DMA transfer timeout after " << elapsed_ms << " ms");
 

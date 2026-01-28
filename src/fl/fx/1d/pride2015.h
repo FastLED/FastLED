@@ -43,7 +43,7 @@ void Pride2015::draw(Fx::DrawContext ctx) {
     uint16_t hue16 = mHue16;
     uint16_t hueinc16 = beatsin88(113, 1, 3000);
 
-    uint16_t ms = millis();
+    uint16_t ms = fl::millis();
     uint16_t deltams = ms - mLastMillis;
     mLastMillis = ms;
     mPseudotime += deltams * msmultiplier;

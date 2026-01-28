@@ -26,7 +26,7 @@ class DemoReel100 : public Fx1d {
             return;
         }
         if (start_time == 0) {
-            start_time = millis();
+            start_time = fl::millis();
         }
 
         // Call the current pattern function once, updating the 'leds' array

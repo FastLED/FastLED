@@ -22,14 +22,14 @@ extern "C" {
 // STUB timing functions - excluded for WASM builds which provide their own implementations
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
-// Global millis() and micros() forward to platform layer
+// Global millis() and micros() forward to fl:: layer (which handles time injection in tests)
 // These are needed for Arduino API compatibility
 uint32_t millis() {
-    return fl::platform::millis();
+    return fl::millis();
 }
 
 uint32_t micros() {
-    return fl::platform::micros();
+    return fl::micros();
 }
 
 void yield() {
