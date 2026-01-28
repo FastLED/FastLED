@@ -31,9 +31,8 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 
 /// @brief Register SAMD51 SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    // Include concrete SPIDualSAMD51 implementation
-    #include "platforms/arm/d51/spi_hw_2_samd51.cpp.hpp"
-
+    // Note: SPIDualSAMD51 class is defined in spi_hw_2_samd51.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("SAMD51: Registering SpiHw2 instances");
 
     // SAMD51 has multiple SERCOM peripherals available for SPI
@@ -48,9 +47,8 @@ static void addSpiHw2IfPossible() {
 
 /// @brief Register SAMD51 SpiHw4 instances
 static void addSpiHw4IfPossible() {
-    // Include concrete SPIQuadSAMD51 implementation
-    #include "platforms/arm/d51/spi_hw_4_samd51.cpp.hpp"
-
+    // Note: SPIQuadSAMD51 class is defined in spi_hw_4_samd51.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("SAMD51: Registering SpiHw4 instances");
 
     // SAMD51 has multiple SERCOM peripherals available for SPI

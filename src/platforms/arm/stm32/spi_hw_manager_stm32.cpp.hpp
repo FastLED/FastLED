@@ -37,10 +37,8 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lowest (2-lane dual-SPI)
 /// @brief Register STM32 SpiHw2 instances if available
 static void addSpiHw2IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_2
-    // Include concrete SPIDualSTM32 implementation
-    // This is safe because we're inside the feature flag guard
-    #include "platforms/arm/stm32/spi_hw_2_stm32.cpp.hpp"
-
+    // Note: SPIDualSTM32 class is defined in spi_hw_2_stm32.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("STM32: Registering SpiHw2 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -60,9 +58,8 @@ static void addSpiHw2IfPossible() {
 /// @brief Register STM32 SpiHw4 instances if available
 static void addSpiHw4IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_4
-    // Include concrete SPIQuadSTM32 implementation
-    #include "platforms/arm/stm32/spi_hw_4_stm32.cpp.hpp"
-
+    // Note: SPIQuadSTM32 class is defined in spi_hw_4_stm32.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("STM32: Registering SpiHw4 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
@@ -82,9 +79,8 @@ static void addSpiHw4IfPossible() {
 /// @brief Register STM32 SpiHw8 instances if available
 static void addSpiHw8IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_8
-    // Include concrete SPIOctalSTM32 implementation
-    #include "platforms/arm/stm32/spi_hw_8_stm32.cpp.hpp"
-
+    // Note: SPIOctalSTM32 class is defined in spi_hw_8_stm32.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("STM32: Registering SpiHw8 instances");
 
     // Create 2 logical octal-SPI buses

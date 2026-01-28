@@ -28,9 +28,8 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Dual-SPI (only mode available on SAMD2
 
 /// @brief Register SAMD21 SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    // Include concrete SPIDualSAMD21 implementation
-    #include "platforms/arm/d21/spi_hw_2_samd21.cpp.hpp"
-
+    // Note: SPIDualSAMD21 class is defined in spi_hw_2_samd21.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("SAMD21: Registering SpiHw2 instances");
 
     // SAMD21 typically has 2-3 SERCOM peripherals available for SPI

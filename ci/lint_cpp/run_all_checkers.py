@@ -22,6 +22,7 @@ from ci.lint_cpp.banned_headers_checker import (
 from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
+from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
@@ -109,6 +110,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     # Global checkers (run on all src/, examples/, tests/ files)
     checkers_by_scope["global"] = [
         CppIncludeChecker(),
+        CppHppIncludesChecker(),
         IncludeAfterNamespaceChecker(),
         GoogleMemberStyleChecker(),
         NumericLimitMacroChecker(),

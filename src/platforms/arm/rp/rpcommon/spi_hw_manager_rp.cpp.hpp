@@ -23,10 +23,11 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/dbg.h"
 
-// Include concrete implementations BEFORE namespace to avoid nested namespace errors
-#include "platforms/arm/rp/rpcommon/spi_hw_2_rp.cpp.hpp"
-#include "platforms/arm/rp/rpcommon/spi_hw_4_rp.cpp.hpp"
-#include "platforms/arm/rp/rpcommon/spi_hw_8_rp.cpp.hpp"
+// Note: SPIDualRP2040, SPIQuadRP2040, and SpiHw8RP2040 classes are defined in:
+// - spi_hw_2_rp.cpp.hpp
+// - spi_hw_4_rp.cpp.hpp
+// - spi_hw_8_rp.cpp.hpp
+// These files are included by _build.hpp before this file, ensuring the classes are available.
 
 namespace fl {
 namespace detail {

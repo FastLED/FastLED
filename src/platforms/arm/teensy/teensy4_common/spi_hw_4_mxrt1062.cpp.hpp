@@ -375,32 +375,6 @@ void SpiHw4MXRT1062::cleanup() {
     }
 }
 
-// ============================================================================
-// Static Registration - New Polymorphic Pattern
-// ============================================================================
-
-namespace platform {
-
-/// @brief Initialize Teensy 4.x SpiHw4 instances
-///
-/// This function is called lazily by SpiHw4::getAll() on first access.
-/// It replaces the old FL_INIT-based static initialization.
-inline void initSpiHw4Instances() {
-    FL_LOG_SPI("SpiHw4MXRT1062::Registrar - Teensy 4.x hardware SPI registration active");
-
-    // Teensy 4.x has 3 LPSPI peripherals available
-    // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
-    static auto controller0 = fl::make_shared<SpiHw4MXRT1062>(0, "SPI");
-    static auto controller1 = fl::make_shared<SpiHw4MXRT1062>(1, "SPI1");
-    static auto controller2 = fl::make_shared<SpiHw4MXRT1062>(2, "SPI2");
-
-    SpiHw4::registerInstance(controller0);
-    SpiHw4::registerInstance(controller1);
-    SpiHw4::registerInstance(controller2);
-}
-
-}  // namespace platform
-
 }  // namespace fl
 
 #endif  // FL_IS_TEENSY_4X

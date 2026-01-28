@@ -23,6 +23,11 @@
 #include "fl/dbg.h"
 #include "fl/log.h"
 
+// Note: SpiHw2MXRT1062 and SpiHw4MXRT1062 classes are defined in:
+// - spi_hw_2_mxrt1062.cpp.hpp
+// - spi_hw_4_mxrt1062.cpp.hpp
+// These files are included by _build.hpp before this file, ensuring the classes are available.
+
 namespace fl {
 namespace detail {
 
@@ -32,9 +37,8 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 
 /// @brief Register Teensy 4.x SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    // Include concrete SpiHw2MXRT1062 implementation
-    #include "platforms/arm/teensy/teensy4_common/spi_hw_2_mxrt1062.cpp.hpp"
-
+    // Note: SpiHw2MXRT1062 class is defined in spi_hw_2_mxrt1062.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("Teensy 4.x: Registering SpiHw2 instances");
 
     // Teensy 4.x has 3 LPSPI peripherals available
@@ -52,9 +56,8 @@ static void addSpiHw2IfPossible() {
 
 /// @brief Register Teensy 4.x SpiHw4 instances
 static void addSpiHw4IfPossible() {
-    // Include concrete SpiHw4MXRT1062 implementation
-    #include "platforms/arm/teensy/teensy4_common/spi_hw_4_mxrt1062.cpp.hpp"
-
+    // Note: SpiHw4MXRT1062 class is defined in spi_hw_4_mxrt1062.cpp.hpp
+    // which is included by _build.hpp before this file
     FL_DBG("Teensy 4.x: Registering SpiHw4 instances");
 
     // Teensy 4.x has 3 LPSPI peripherals available

@@ -33,7 +33,7 @@ inline void pinMode(int pin, fl::PinMode mode) {
     // Translate PinMode to Teensy core constants
     // PinMode::Input=0, Output=1, InputPullup=2, InputPulldown=3
     // Teensy: INPUT=0, OUTPUT=1, INPUT_PULLUP=2, INPUT_PULLDOWN (Teensy-specific)
-    int teensy_mode;
+    int teensy_mode = INPUT;  // Initialize to safe default
     switch (mode) {
         case fl::PinMode::Input:
             teensy_mode = INPUT;  // 0
