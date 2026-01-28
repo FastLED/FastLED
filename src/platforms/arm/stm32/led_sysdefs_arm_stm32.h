@@ -3,7 +3,7 @@
 
 #include "platforms/arm/is_arm.h"
 
-#ifndef FASTLED_ARM
+#ifndef FL_IS_ARM
 #error "This is not an arm board."
 #endif
 

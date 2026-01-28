@@ -262,7 +262,7 @@ Update `platforms/init_spi_hw.h` to include your platform family:
     #include "platforms/stub/init_spi_hw.h"
 #elif defined(FL_IS_ESP)
     #include "platforms/esp/init_spi_hw.h"
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     #include "platforms/arm/init_spi_hw.h"
 // Add your platform family here:
 #elif defined(YOUR_PLATFORM_FAMILY)

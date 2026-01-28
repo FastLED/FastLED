@@ -20,7 +20,7 @@
     // Teensy 3.x family (MK20DX/MKL26Z Cortex-M4/M0+) - needs special handling for system headers
     // - Teensy 3.0 (MK20DX128), Teensy 3.1/3.2 (MK20DX256), Teensy LC (MKL26Z64)
     #include "platforms/arm/teensy/teensy3_common/int.h"
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     // All other ARM platforms (Due, STM32, nRF52, Apollo3, etc.)
     #include "platforms/arm/int.h"
 #elif defined(__EMSCRIPTEN__)

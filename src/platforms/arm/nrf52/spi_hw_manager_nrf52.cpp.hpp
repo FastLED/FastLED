@@ -9,12 +9,16 @@
 /// - spi_hw_4_nrf52.cpp.hpp::initSpiHw4Instances()
 ///
 /// Platform support:
-/// - nRF52832/nRF52840 (Adafruit Feather nRF52): SpiHw2 and SpiHw4
+/// - nRF52832/nRF52833/nRF52840 (Adafruit Feather nRF52): SpiHw2 and SpiHw4
 /// - Uses Timer/PPI peripherals for synchronized multi-lane SPI
 ///
 // allow-include-after-namespace
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(ARDUINO_NRF52_ADAFRUIT)
+#pragma once
+
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#ifdef FL_IS_NRF52
 
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
@@ -43,7 +47,8 @@ static void addSpiHw2IfPossible() {
     FL_DBG("nRF52: SpiHw2 instances registered");
 }
 
-/// @brief Register nRF52 SpiHw4 instances
+#if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
+/// @brief Register nRF52 SpiHw4 instances (NRF52840/52833 only)
 static void addSpiHw4IfPossible() {
     FL_DBG("nRF52: Registering SpiHw4 instances");
 
@@ -56,6 +61,7 @@ static void addSpiHw4IfPossible() {
 
     FL_DBG("nRF52: SpiHw4 instances registered");
 }
+#endif
 
 }  // namespace detail
 
@@ -67,17 +73,20 @@ namespace platform {
 /// Registers all available SPI hardware controllers in priority order.
 ///
 /// Registration priority (highest to lowest):
-/// - SpiHw4 (priority 7): Quad-SPI, 4 parallel lanes (Timer/PPI-based)
-/// - SpiHw2 (priority 6): Dual-SPI, 2 parallel lanes (Timer/PPI-based)
+/// - SpiHw4 (priority 7): Quad-SPI, 4 parallel lanes (Timer/PPI-based) [NRF52840/52833 only]
+/// - SpiHw2 (priority 6): Dual-SPI, 2 parallel lanes (Timer/PPI-based) [All variants]
 ///
 /// Platform availability:
-/// - nRF52832/nRF52840: Both SpiHw2 and SpiHw4 (via Timer/PPI peripherals)
-void initSpiHardware() {
+/// - nRF52832: SpiHw2 only (via Timer/PPI peripherals)
+/// - nRF52840/52833: Both SpiHw2 and SpiHw4 (via Timer/PPI peripherals)
+inline void initSpiHardware() {
     FL_DBG("nRF52: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
-    detail::addSpiHw4IfPossible();  // Priority 7
-    detail::addSpiHw2IfPossible();  // Priority 6
+#if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
+    detail::addSpiHw4IfPossible();  // Priority 7 (NRF52840/52833 only)
+#endif
+    detail::addSpiHw2IfPossible();  // Priority 6 (all variants)
 
     FL_DBG("nRF52: SPI hardware initialized");
 }
@@ -85,4 +94,4 @@ void initSpiHardware() {
 }  // namespace platform
 }  // namespace fl
 
-#endif  // nRF52 platform guards
+#endif  // FL_IS_NRF52

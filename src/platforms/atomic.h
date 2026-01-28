@@ -19,7 +19,7 @@
 #elif defined(__AVR__)
     // AVR-GCC supports __atomic builtins
     #include "platforms/shared/atomic.h"
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     // ARM GCC supports __atomic builtins
     #include "platforms/shared/atomic.h"
 #elif defined(__EMSCRIPTEN__)

@@ -20,7 +20,7 @@
     // AVR platforms currently have no memory barrier implementation
     // For ISR synchronization on AVR, use volatile variables
     #define FL_MEMORY_BARRIER ((void)0)
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     // ARM platforms (Teensy, SAMD, RP2040, STM32, nRF52, etc.)
     // Provides FL_MEMORY_BARRIER for ARM Cortex-M architectures
     #include "platforms/arm/memory_barrier.h"

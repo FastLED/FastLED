@@ -26,7 +26,7 @@ public:
     int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
     /// @copydoc operator*(uint32_t)
     int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
-#if defined(FASTLED_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
+#if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
     /// @copydoc operator*(uint32_t)
     int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
@@ -36,7 +36,7 @@ template<class T, int F, int I> static uint32_t operator*(uint32_t v, qfx<T,F,I>
 template<class T, int F, int I> static uint16_t operator*(uint16_t v, qfx<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int32_t operator*(int32_t v, qfx<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int16_t operator*(int16_t v, qfx<T,F,I> & q) { return q * v; }
-#if defined(FASTLED_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
+#if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
 template<class T, int F, int I> static int operator*(int v, qfx<T,F,I> & q) { return q * v; }
 #endif
 

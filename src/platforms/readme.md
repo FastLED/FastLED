@@ -99,7 +99,7 @@ FastLED has evolved its platform directory to contain **dispatch headers** that 
 
 #### Why this pattern?
 
-1. **Coarse headers stay simple**: Only check for broad platform families (`ESP32`, `__AVR__`, `FASTLED_ARM`)
+1. **Coarse headers stay simple**: Only check for broad platform families (`ESP32`, `__AVR__`, `FL_IS_ARM`)
 2. **Fine-grained logic isolated**: Variant-specific detection (`ESP32S3`, `CONFIG_IDF_TARGET_ESP32C6`) lives in platform subdirectories
 3. **Easy to maintain**: Adding new variants only requires changes in platform-specific headers
 4. **Follows existing patterns**: See `platforms/int.h`, `platforms/audio.h` for reference implementations
@@ -127,7 +127,7 @@ FastLED uses a **unified hardware manager pattern** for initializing SPI control
     #include "platforms/stub/init_spi_hw.h"
 #elif defined(FL_IS_ESP)
     #include "platforms/esp/init_spi_hw.h"
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     #include "platforms/arm/init_spi_hw.h"
 #endif
 

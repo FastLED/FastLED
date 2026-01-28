@@ -13,7 +13,7 @@
     #include "platforms/esp/new.h"  // IWYU pragma: export
 #elif defined(__AVR__)
     #include "platforms/avr/new.h"  // IWYU pragma: export
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     // All ARM platforms (Due, STM32, Teensy, nRF52, Apollo3, etc.)
     #include "platforms/arm/new.h"  // IWYU pragma: export
 #elif defined(__EMSCRIPTEN__)

@@ -5,7 +5,7 @@
 /// ARM platform detection header
 ///
 /// This header detects ARM-based platforms by checking compiler-defined macros
-/// and defines FASTLED_ARM when an ARM platform is detected.
+/// and defines FL_IS_ARM when an ARM platform is detected.
 ///
 /// Used by platforms/int.h for platform dispatching and by ARM platform headers
 /// for validation that ARM detection has occurred.
@@ -51,5 +51,6 @@
     /* Microchip SAMD51/SAME51 */ \
     defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-#define FASTLED_ARM
+#define FL_IS_ARM
+#define FASTLED_ARM  // Deprecated: Use FL_IS_ARM instead
 #endif  // ARM platform detection

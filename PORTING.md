@@ -31,7 +31,7 @@ The ```HAS_HARDWARE_PIN_SUPPORT``` define tells the rest of the FastLED library 
 
 * Create platform directory (e.g. platforms/arm/kl26)
 * Create configuration header led_sysdefs_arm_kl26.h:
-  * Define platform flags (like FASTLED_ARM/FASTLED_TEENSY)
+  * Define platform flags (like FL_IS_ARM/FASTLED_TEENSY)
   * Define configuration parameters re: interrupts, or clock doubling
   * Include extar system header files if needed
 * Create main platform include, fastled_arm_kl26.h

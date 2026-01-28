@@ -18,7 +18,9 @@
 
 #pragma once
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#ifdef FL_IS_NRF52
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/numeric_limits.h"
@@ -176,4 +178,4 @@ private:
 
 }  // namespace fl
 
-#endif  // NRF52 variants
+#endif  // FL_IS_NRF52

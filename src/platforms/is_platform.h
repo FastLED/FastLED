@@ -11,7 +11,7 @@
 /// This header defines standardized platform detection macros:
 ///
 /// ARM Platforms:
-/// - FASTLED_ARM: ARM-based platforms (Cortex-M, RP2040, nRF52, etc.)
+/// - FL_IS_ARM: ARM-based platforms (Cortex-M, RP2040, nRF52, etc.)
 ///
 /// STM32 Platforms (ARM-based):
 /// - FL_IS_STM32: General STM32 platform (any STM32 family)
@@ -125,7 +125,7 @@
 ///     // ATtiny specific code
 /// #endif
 ///
-/// #ifdef FASTLED_ARM
+/// #ifdef FL_IS_ARM
 ///     // ARM platform code
 /// #endif
 /// @endcode

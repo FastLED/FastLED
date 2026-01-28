@@ -39,7 +39,7 @@
     #include "platforms/generic_pin.h"
     #include "platforms/avr/fastpin_avr.h"
 
-#elif defined(FASTLED_ARM)
+#elif defined(FL_IS_ARM)
     // ARM microcontroller family (Teensy, Arduino GIGA, Pico, etc.)
     #include "platforms/generic_pin.h"
     #include "platforms/arm/fastpin_arm.h"

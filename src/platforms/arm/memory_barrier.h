@@ -10,7 +10,7 @@
 
 #pragma once
 
-#ifdef FASTLED_ARM
+#ifdef FL_IS_ARM
 
 //=============================================================================
 // ARM Cortex-M Memory Barriers
@@ -85,4 +85,4 @@
     #define FL_MEMORY_BARRIER __asm__ __volatile__ ("" ::: "memory")
 #endif
 
-#endif // FASTLED_ARM
+#endif // FL_IS_ARM

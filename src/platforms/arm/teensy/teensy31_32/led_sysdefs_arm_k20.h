@@ -3,8 +3,8 @@
 #define __INC_LED_SYSDEFS_ARM_K20_H
 
 #define FASTLED_TEENSY3
-#ifndef FASTLED_ARM
-#error "FASTLED_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
+#ifndef FL_IS_ARM
+#error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
 #endif
 
 #ifndef INTERRUPT_THRESHOLD

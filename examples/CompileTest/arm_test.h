@@ -3,8 +3,8 @@
 #include "FastLED.h"
 
 void arm_tests() {
-#ifndef FASTLED_ARM
-#error "FASTLED_ARM should be defined for ARM platforms"
+#ifndef FL_IS_ARM
+#error "FL_IS_ARM should be defined for ARM platforms"
 #endif
 
 #if FASTLED_USE_PROGMEM != 0 && FASTLED_USE_PROGMEM != 1
