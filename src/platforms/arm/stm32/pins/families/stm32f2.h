@@ -11,9 +11,9 @@
 // - Spark Core (STM32F103-based, but uses F2-style registers)
 // - Particle Photon (STM32F205)
 
-#include "../core/armpin_template.h"
-#include "../core/gpio_port_init.h"
-#include "../core/pin_macros.h"
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
 
 namespace fl {
 

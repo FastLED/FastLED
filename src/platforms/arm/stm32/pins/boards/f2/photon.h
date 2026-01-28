@@ -1,4 +1,5 @@
 #pragma once
+// ok no namespace fl
 
 // Particle Photon (STM32F205) Pin Definitions
 // Included by families/stm32f2.h - do not include directly

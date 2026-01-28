@@ -41,7 +41,7 @@ static void addSpiHw2IfPossible() {
     }  // namespace fl
 
     // Include concrete SPIDualSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"
+    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"  // ok include cpp.hpp
 
     namespace fl {
     namespace detail {
@@ -69,7 +69,7 @@ static void addSpiHw4IfPossible() {
     }  // namespace fl
 
     // Include concrete SPIQuadSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"
+    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"  // ok include cpp.hpp
 
     namespace fl {
     namespace detail {
@@ -97,7 +97,7 @@ static void addSpiHw8IfPossible() {
     }  // namespace fl
 
     // Include concrete SPIOctalSTM32 implementation (closes/reopens namespace)
-    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"
+    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"  // ok include cpp.hpp
 
     namespace fl {
     namespace detail {

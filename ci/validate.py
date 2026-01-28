@@ -377,6 +377,12 @@ class Args:
     # Lane configuration (NEW)
     lanes: str | None
 
+    # Per-lane LED counts (NEW)
+    lane_counts: str | None
+
+    # Color pattern (NEW)
+    color_pattern: str | None
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -394,6 +400,8 @@ Examples:
   %(prog)s --i2s --lanes 2 --strip-sizes 100,300  # Test I2S with 2 lanes, strips of 100 and 300 LEDs
   %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
   %(prog)s --rmt --strip-sizes small   # Test RMT with 'small' preset (100/500 LEDs)
+  %(prog)s --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs per lane)
+  %(prog)s --parlio --color-pattern 0xff00aa  # Test PARLIO with custom color pattern (RGB hex)
   %(prog)s --help                      # Show this help message
 
 Driver Selection (JSON-RPC):
@@ -426,11 +434,21 @@ Strip Size Configuration:
 Lane Configuration:
   Configure number of lanes for validation testing via JSON-RPC:
     --lanes <N or MIN-MAX>   Set lane count or range
+    --lane-counts <LED1,LED2,...>  Set per-lane LED counts (comma-separated)
 
   Examples:
     --lanes 2          Test with exactly 2 lanes
     --lanes 1-4        Test with 1 to 4 lanes (tests all combinations)
+    --lane-counts 100,200,300  3 lanes with 100, 200, 300 LEDs per lane
     Default: 1-8 lanes (firmware default)
+
+Color Pattern Configuration:
+  Configure custom color pattern for validation testing:
+    --color-pattern <HEX>  Set RGB color pattern (hex format: RRGGBB or 0xRRGGBB)
+
+  Examples:
+    --color-pattern ff00aa      Custom color (pink)
+    --color-pattern 0x00ff00    Custom color (green)
 
 Exit Codes:
   0   Success (all patterns found, no failures)
@@ -618,6 +636,24 @@ See Also:
             metavar="N or MIN-MAX",
             help="Lane count: single number (e.g., '2') or range (e.g., '1-4'). Default: 1-8",
         )
+        lane_group.add_argument(
+            "--lane-counts",
+            type=str,
+            metavar="LED1,LED2,...",
+            help="Per-lane LED counts (comma-separated, e.g., '100,200,300' for 3 lanes with different counts)",
+        )
+
+        # Color pattern configuration (NEW)
+        color_group = parser.add_argument_group(
+            "Color Pattern Configuration",
+            "Configure custom color pattern for validation testing.",
+        )
+        color_group.add_argument(
+            "--color-pattern",
+            type=str,
+            metavar="HEX",
+            help="RGB color pattern in hex format (e.g., 'ff00aa' or '0x00ff00')",
+        )
 
         parsed = parser.parse_args()
 
@@ -649,6 +685,8 @@ See Also:
             no_fbuild=parsed.no_fbuild,
             strip_sizes=parsed.strip_sizes,  # NEW - Phase 8
             lanes=parsed.lanes,  # NEW
+            lane_counts=parsed.lane_counts,  # NEW
+            color_pattern=parsed.color_pattern,  # NEW
         )
 
 
@@ -786,6 +824,61 @@ def run(args: Args | None = None) -> int:
                 print(f"❌ Error: Invalid lane count '{args.lanes}' (expected integer)")
                 return 1
 
+    # Parse --lane-counts argument (NEW)
+    per_lane_counts: list[int] | None = None
+
+    if args.lane_counts:
+        try:
+            per_lane_counts = [int(c.strip()) for c in args.lane_counts.split(",")]
+            if not per_lane_counts:
+                print(f"❌ Error: No lane counts provided in '{args.lane_counts}'")
+                return 1
+            if any(c <= 0 for c in per_lane_counts):
+                print(f"❌ Error: All lane counts must be positive integers")
+                return 1
+            # Validate lane count (1-8)
+            if len(per_lane_counts) < 1 or len(per_lane_counts) > 8:
+                print(
+                    f"❌ Error: Lane count must be 1-8, got {len(per_lane_counts)} lanes"
+                )
+                return 1
+        except ValueError:
+            print(
+                f"❌ Error: Invalid lane counts '{args.lane_counts}' (expected comma-separated integers like '100,200,300')"
+            )
+            return 1
+
+    # Parse --color-pattern argument (NEW)
+    custom_color: tuple[int, int, int] | None = None
+
+    if args.color_pattern:
+        # Remove optional 0x prefix
+        hex_str = args.color_pattern.strip()
+        if hex_str.startswith("0x") or hex_str.startswith("0X"):
+            hex_str = hex_str[2:]
+
+        # Validate hex format (should be 6 characters: RRGGBB)
+        if len(hex_str) != 6:
+            print(
+                f"❌ Error: Color pattern must be 6 hex digits (RRGGBB), got '{args.color_pattern}'"
+            )
+            return 1
+
+        try:
+            # Parse RGB components
+            r = int(hex_str[0:2], 16)
+            g = int(hex_str[2:4], 16)
+            b = int(hex_str[4:6], 16)
+            custom_color = (r, g, b)
+            print(
+                f"ℹ️  Using custom color pattern: RGB({r}, {g}, {b}) = 0x{hex_str.upper()}"
+            )
+        except ValueError:
+            print(
+                f"❌ Error: Invalid hex color '{args.color_pattern}' (expected format: 'RRGGBB' or '0xRRGGBB')"
+            )
+            return 1
+
     # Build JSON-RPC command with named arguments (NEW consolidated format)
     # Single runTest call replaces: setDrivers + setLaneRange + setStripSizes + runTest
     config: dict[str, Any] = {}
@@ -842,10 +935,40 @@ def run(args: Args | None = None) -> int:
                 )
                 return 1
 
-    # Create single RPC command with args as config object (NOT wrapped in array)
+    # Build list of RPC commands
+    rpc_commands_list: list[dict[str, Any]] = []
+
+    # Add setLaneSizes command if per-lane counts are specified (NEW)
+    if per_lane_counts is not None:
+        # setLaneSizes command takes [[size1, size2, ...]] (array wrapped in array)
+        set_lane_sizes_cmd = {"function": "setLaneSizes", "args": [per_lane_counts]}
+        rpc_commands_list.append(set_lane_sizes_cmd)
+        print(
+            f"ℹ️  Setting per-lane LED counts: {', '.join(str(c) for c in per_lane_counts)} ({len(per_lane_counts)} lanes)"
+        )
+
+    # Add custom color command if specified (NEW)
+    # NOTE: This requires firmware support for a setSolidColor or setCustomPattern RPC command
+    # For now, we'll add a placeholder that the firmware can implement
+    if custom_color is not None:
+        r, g, b = custom_color
+        # Proposed RPC format: {"function": "setSolidColor", "args": [{"r": R, "g": G, "b": B}]}
+        set_color_cmd = {
+            "function": "setSolidColor",
+            "args": [{"r": r, "g": g, "b": b}],
+        }
+        rpc_commands_list.append(set_color_cmd)
+        print(
+            f"⚠️  Note: setSolidColor RPC command requires firmware support (may need implementation)"
+        )
+
+    # Add runTest command with config
     # Result: {"function":"runTest","args":{"drivers":["I2S"],"laneRange":{"min":2,"max":2},"stripSizes":[100,300]}}
     rpc_command = {"function": "runTest", "args": config}
-    json_rpc_cmd_str = "[" + json.dumps(rpc_command) + "]"
+    rpc_commands_list.append(rpc_command)
+
+    # Convert to JSON string
+    json_rpc_cmd_str = json.dumps(rpc_commands_list)
 
     # Parse JSON-RPC commands
     try:

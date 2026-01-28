@@ -225,11 +225,29 @@ bash validate --i2s --lanes 4                      # Test with exactly 4 lanes
 bash validate --rmt --lanes 1-4                    # Test with 1 to 4 lanes (tests all combinations)
 bash validate --spi --lanes 2-8                    # Test with 2 to 8 lanes
 
+# Set per-lane LED counts (NEW)
+bash validate --i2s --lane-counts 100,200,300      # 3 lanes with 100, 200, 300 LEDs per lane
+bash validate --parlio --lane-counts 50,100        # 2 lanes with 50 and 100 LEDs per lane
+
 # Combined with strip sizes
 bash validate --i2s --lanes 2 --strip-sizes 100,300  # 2 lanes, strips of 100 and 300 LEDs
 ```
 
 **Default:** 1-8 lanes (firmware default)
+
+**Color Pattern Configuration:**
+Configure custom RGB color pattern for validation testing:
+```bash
+# Custom color patterns (hex RGB format)
+bash validate --parlio --color-pattern ff00aa      # Pink color (RGB: 255, 0, 170)
+bash validate --rmt --color-pattern 0x00ff00       # Green color (RGB: 0, 255, 0)
+bash validate --i2s --color-pattern 112233         # Dark blue (RGB: 17, 34, 51)
+
+# Combined with lane configuration
+bash validate --parlio --lane-counts 100,200 --color-pattern ff0000  # 2 lanes, red color
+```
+
+**Note:** Custom color patterns require firmware support via the `setSolidColor` RPC command. This command may need to be implemented in the firmware if not already available.
 
 **Error Handling:**
 If you run `bash validate` without specifying a driver, you'll get a helpful error message:

@@ -1,4 +1,5 @@
 #pragma once
+// ok no namespace fl
 
 // Maple Mini (STM32F103CB) Pin Definitions
 // Included by families/stm32f1.h - do not include directly

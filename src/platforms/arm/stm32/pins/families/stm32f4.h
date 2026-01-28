@@ -16,9 +16,9 @@
 // - https://www.eevblog.com/forum/microcontrollers/bsrr-in-stm32f4xx-h/
 // - https://community.st.com/t5/stm32-mcus-products/rm0385-has-references-to-nonexistent-gpiox-brr-register/td-p/138531
 
-#include "../core/armpin_template.h"
-#include "../core/gpio_port_init.h"
-#include "../core/pin_macros.h"
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
 
 namespace fl {
 

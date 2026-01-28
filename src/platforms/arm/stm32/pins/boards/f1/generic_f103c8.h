@@ -1,4 +1,5 @@
 #pragma once
+// ok no namespace fl
 
 // Generic STM32F103C8 (STM32duino) Pin Definitions
 // Included by families/stm32f1.h - do not include directly

@@ -1,4 +1,5 @@
 #pragma once
+// ok no namespace fl
 
 // Generic STM32F1 (BluePill F103C8 and similar) Pin Definitions
 // Included by families/stm32f1.h - do not include directly

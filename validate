@@ -44,6 +44,13 @@ Options:
   --no-fail-on        Clear default --fail-on pattern (use custom only)
   --verbose, -v       Enable verbose output
 
+Lane Configuration:
+  --lanes N or MIN-MAX      Set lane count or range (e.g., '2' or '1-4')
+  --lane-counts LED1,LED2,... Set per-lane LED counts (e.g., '100,200,300')
+
+Color Configuration:
+  --color-pattern HEX       Set RGB color pattern (e.g., 'ff00aa' or '0x00ff00')
+
 Description:
   Runs the Validation.ino sketch with comprehensive pattern matching and
   JSON-RPC driver selection. Features include:
@@ -60,6 +67,10 @@ Examples:
   bash validate --all                       # Test all drivers
   bash validate --parlio --skip-lint        # Skip linting for faster iteration
   bash validate --all --timeout 120         # Longer timeout
+  bash validate --i2s --lanes 2             # Test I2S with exactly 2 lanes
+  bash validate --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
+  bash validate --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs)
+  bash validate --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
 
 Exit Codes:
   0   Success (all patterns found, no failures)

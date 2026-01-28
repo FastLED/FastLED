@@ -17,6 +17,7 @@
 #include "platforms/arm/rp/rp2040/_build.hpp"
 #include "platforms/arm/rp/rpcommon/_build.hpp"
 #include "platforms/arm/stm32/_build.hpp"
+#include "platforms/arm/stm32/drivers/_build.hpp"
 #include "platforms/arm/teensy/_build.hpp"
 #include "platforms/arm/teensy/teensy4_common/_build.hpp"
 #include "platforms/avr/_build.hpp"
