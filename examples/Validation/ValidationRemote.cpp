@@ -248,13 +248,10 @@ void ValidationRemoteControl::registerFunctions(
         lane_range.push_back(static_cast<int64_t>(mpTestMatrix->max_lanes));
         config.set("laneRange", lane_range);
 
-        // Strip sizes
+        // Strip sizes (runtime-configurable list of LED counts)
         fl::Json strip_sizes = fl::Json::array();
-        if (mpTestMatrix->test_small_strips) {
-            strip_sizes.push_back(static_cast<int64_t>(SHORT_STRIP_SIZE));
-        }
-        if (mpTestMatrix->test_large_strips) {
-            strip_sizes.push_back(static_cast<int64_t>(LONG_STRIP_SIZE));
+        for (fl::size i = 0; i < mpTestMatrix->strip_sizes.size(); i++) {
+            strip_sizes.push_back(static_cast<int64_t>(mpTestMatrix->strip_sizes[i]));
         }
         config.set("stripSizes", strip_sizes);
 
@@ -376,49 +373,46 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
-    // Register "setStripSizes" function - configure strip sizes
+    // Register "setStripSizes" function - set LED counts to test
     mRemote->registerFunctionWithReturn("setStripSizes", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
-        // Validate args is an array with 1 or 2 elements
-        if (!args.is_array() || args.size() == 0 || args.size() > 2) {
+        // Validate args is an array of integers
+        if (!args.is_array()) {
             response.set("error", "InvalidArgs");
-            response.set("message", "Expected array with [size] or [short_size, long_size]");
+            response.set("message", "Expected array of LED counts, e.g., [100, 300, 1000]");
             return response;
         }
 
-        // Extract and validate sizes
+        // Extract and validate LED counts
         fl::vector<int> sizes;
+        const int max_leds = mRxBuffer.size() / 32;
+
         for (fl::size i = 0; i < args.size(); i++) {
             if (!args[i].is_int()) {
                 response.set("error", "InvalidSizeType");
-                response.set("message", "Strip sizes must be integers");
+                fl::sstream msg;
+                msg << "Element " << i << " is not an integer";
+                response.set("message", msg.str().c_str());
                 return response;
             }
 
-            auto size_opt = args[i].as_int();
-            if (!size_opt.has_value()) {
-                response.set("error", "InvalidSizeType");
-                response.set("message", "Failed to extract size as integer");
-                return response;
-            }
+            int size = static_cast<int>(args[i].as_int().value());
 
-            int size = static_cast<int>(size_opt.value());
-
+            // Validate size > 0
             if (size <= 0) {
                 response.set("error", "InvalidSize");
-                response.set("message", "Strip sizes must be > 0");
+                fl::sstream msg;
+                msg << "Element " << i << " (" << size << ") must be > 0";
+                response.set("message", msg.str().c_str());
                 return response;
             }
 
-            // Check against RX buffer capacity (approximate)
-            // Each LED = ~32 symbols worst case
-            const int RX_BUFFER_SIZE = mRxBuffer.size();
-            if (size > (RX_BUFFER_SIZE / 32)) {
+            // Validate against RX buffer capacity
+            if (size > max_leds) {
                 response.set("error", "SizeTooLarge");
                 fl::sstream msg;
-                msg << "Strip size " << size << " exceeds RX buffer capacity (max ~"
-                    << (RX_BUFFER_SIZE / 32) << " LEDs)";
+                msg << "Element " << i << " (" << size << ") exceeds RX buffer capacity (max ~" << max_leds << " LEDs)";
                 response.set("message", msg.str().c_str());
                 return response;
             }
@@ -426,21 +420,22 @@ void ValidationRemoteControl::registerFunctions(
             sizes.push_back(size);
         }
 
-        // Update test matrix based on size count
-        if (sizes.size() == 1) {
-            // Single size - use as both short and long
-            mpTestMatrix->test_small_strips = true;
-            mpTestMatrix->test_large_strips = false;
-        } else {
-            // Two sizes - short and long
-            mpTestMatrix->test_small_strips = true;
-            mpTestMatrix->test_large_strips = true;
+        // Update configuration
+        mpTestMatrix->strip_sizes.clear();
+        for (int size : sizes) {
+            mpTestMatrix->strip_sizes.push_back(size);
         }
 
         regenerateTestCasesLocal();
 
+        // Build response with configured sizes
+        fl::Json sizes_response = fl::Json::array();
+        for (int size : mpTestMatrix->strip_sizes) {
+            sizes_response.push_back(static_cast<int64_t>(size));
+        }
+
         response.set("success", true);
-        response.set("stripSizesSet", static_cast<int64_t>(sizes.size()));
+        response.set("stripSizes", sizes_response);
         response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
         return response;
     });
@@ -995,13 +990,13 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "configure" function - complete configuration in one call
-    // Supports both laneSizes array (preferred) and ledCount/laneCount (legacy)
+    // Supports laneSizes array, ledCount/laneCount, strip sizes, lane range, etc.
     mRemote->registerFunctionWithReturn("configure", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_object()) {
             response.set("error", "InvalidArgs");
-            response.set("message", "Expected [{driver, laneSizes, pattern, iterations}]");
+            response.set("message", "Expected [{driver, laneSizes, pattern, iterations, stripSizes?, ...}]");
             return response;
         }
 
@@ -1012,6 +1007,25 @@ void ValidationRemoteControl::registerFunctions(
             fl::string driver = config["driver"].as_string().value();
             mpTestMatrix->enabled_drivers.clear();
             mpTestMatrix->enabled_drivers.push_back(driver);
+        }
+
+        // Apply strip sizes (array of LED counts to test)
+        if (config.contains("stripSizes") && config["stripSizes"].is_array()) {
+            fl::Json sizes_array = config["stripSizes"];
+            mpTestMatrix->strip_sizes.clear();
+            for (fl::size i = 0; i < sizes_array.size(); i++) {
+                if (sizes_array[i].is_int()) {
+                    mpTestMatrix->strip_sizes.push_back(static_cast<int>(sizes_array[i].as_int().value()));
+                }
+            }
+        }
+
+        // Apply lane range (NEW)
+        if (config.contains("minLanes") && config["minLanes"].is_int()) {
+            mpTestMatrix->min_lanes = static_cast<int>(config["minLanes"].as_int().value());
+        }
+        if (config.contains("maxLanes") && config["maxLanes"].is_int()) {
+            mpTestMatrix->max_lanes = static_cast<int>(config["maxLanes"].as_int().value());
         }
 
         // Apply lane sizes - PRIORITY: laneSizes takes precedence over ledCount/laneCount
@@ -1062,6 +1076,17 @@ void ValidationRemoteControl::registerFunctions(
             confirmed.set("driver", mpTestMatrix->enabled_drivers[0].c_str());
         }
 
+        // Strip sizes configuration
+        fl::Json strip_sizes_response = fl::Json::array();
+        for (int size : mpTestMatrix->strip_sizes) {
+            strip_sizes_response.push_back(static_cast<int64_t>(size));
+        }
+        confirmed.set("stripSizes", strip_sizes_response);
+
+        // Lane range
+        confirmed.set("minLanes", static_cast<int64_t>(mpTestMatrix->min_lanes));
+        confirmed.set("maxLanes", static_cast<int64_t>(mpTestMatrix->max_lanes));
+
         // Build laneSizes array
         fl::Json sizes_response = fl::Json::array();
         int total_leds = 0;
@@ -1085,8 +1110,199 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
-    // Register "runTest" function - run configured test and return full state
-    mRemote->registerFunctionWithReturn("runTest", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
+    // Register "runTest" function - run configured test with optional named arguments
+    // Supports both legacy format (empty array uses current state) and new format (named config object)
+    mRemote->registerFunctionWithReturn("runTest", [this, serializeTestResult, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // NEW FORMAT: args is config object directly
+        // Format: {"drivers":["PARLIO","RMT"], "laneRange":{"min":1,"max":4}, "stripSizes":[100,300]}
+        if (args.is_object()) {
+            // 1. Validate and extract drivers (required)
+            if (!args.contains("drivers")) {
+                response.set("success", false);
+                response.set("error", "MissingDrivers");
+                response.set("message", "Required field 'drivers' missing");
+                return response;
+            }
+
+            fl::Json drivers_json = args["drivers"];
+            if (!drivers_json.is_array() || drivers_json.size() == 0) {
+                response.set("success", false);
+                response.set("error", "InvalidDrivers");
+                response.set("message", "Field 'drivers' must be non-empty array");
+                return response;
+            }
+
+            fl::vector<fl::string> drivers;
+            for (fl::size i = 0; i < drivers_json.size(); i++) {
+                auto driver_opt = drivers_json[i].as_string();
+                if (!driver_opt.has_value()) {
+                    response.set("success", false);
+                    response.set("error", "InvalidDriverType");
+                    response.set("message", "Driver names must be strings");
+                    return response;
+                }
+                fl::string driver_name = driver_opt.value();
+
+                // Validate driver exists
+                bool found = false;
+                for (fl::size j = 0; j < mpDriversAvailable->size(); j++) {
+                    if ((*mpDriversAvailable)[j].name == driver_name) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    response.set("success", false);
+                    response.set("error", "UnknownDriver");
+                    fl::sstream msg;
+                    msg << "Driver '" << driver_name.c_str() << "' not available";
+                    response.set("message", msg.str().c_str());
+                    return response;
+                }
+
+                drivers.push_back(driver_name);
+            }
+
+            // 2. Extract optional laneRange
+            int min_lanes = 1;
+            int max_lanes = 8;
+            if (args.contains("laneRange")) {
+                fl::Json lane_range = args["laneRange"];
+                if (!lane_range.is_object()) {
+                    response.set("success", false);
+                    response.set("error", "InvalidLaneRange");
+                    response.set("message", "Field 'laneRange' must be object with 'min' and 'max'");
+                    return response;
+                }
+
+                if (lane_range.contains("min")) {
+                    auto min_opt = lane_range["min"].as_int();
+                    if (!min_opt.has_value()) {
+                        response.set("success", false);
+                        response.set("error", "InvalidLaneMin");
+                        response.set("message", "Field 'laneRange.min' must be integer");
+                        return response;
+                    }
+                    min_lanes = static_cast<int>(min_opt.value());
+                }
+
+                if (lane_range.contains("max")) {
+                    auto max_opt = lane_range["max"].as_int();
+                    if (!max_opt.has_value()) {
+                        response.set("success", false);
+                        response.set("error", "InvalidLaneMax");
+                        response.set("message", "Field 'laneRange.max' must be integer");
+                        return response;
+                    }
+                    max_lanes = static_cast<int>(max_opt.value());
+                }
+
+                // Validate range
+                if (min_lanes < 1 || min_lanes > 8 || max_lanes < 1 || max_lanes > 8) {
+                    response.set("success", false);
+                    response.set("error", "InvalidLaneRange");
+                    response.set("message", "Lane range must be 1-8");
+                    return response;
+                }
+                if (min_lanes > max_lanes) {
+                    response.set("success", false);
+                    response.set("error", "InvalidLaneRange");
+                    response.set("message", "min_lanes cannot exceed max_lanes");
+                    return response;
+                }
+            }
+
+            // 3. Extract optional stripSizes
+            fl::vector<int> strip_sizes;
+            if (args.contains("stripSizes")) {
+                fl::Json sizes_json = args["stripSizes"];
+                if (!sizes_json.is_array()) {
+                    response.set("success", false);
+                    response.set("error", "InvalidStripSizes");
+                    response.set("message", "Field 'stripSizes' must be array of integers");
+                    return response;
+                }
+
+                const int max_leds = mRxBuffer.size() / 32;
+                for (fl::size i = 0; i < sizes_json.size(); i++) {
+                    auto size_opt = sizes_json[i].as_int();
+                    if (!size_opt.has_value()) {
+                        response.set("success", false);
+                        response.set("error", "InvalidStripSize");
+                        fl::sstream msg;
+                        msg << "Strip size at index " << i << " must be integer";
+                        response.set("message", msg.str().c_str());
+                        return response;
+                    }
+                    int size = static_cast<int>(size_opt.value());
+                    if (size <= 0) {
+                        response.set("success", false);
+                        response.set("error", "InvalidStripSize");
+                        fl::sstream msg;
+                        msg << "Strip size " << size << " must be > 0";
+                        response.set("message", msg.str().c_str());
+                        return response;
+                    }
+                    if (size > max_leds) {
+                        response.set("success", false);
+                        response.set("error", "StripSizeTooLarge");
+                        fl::sstream msg;
+                        msg << "Strip size " << size << " exceeds max " << max_leds;
+                        response.set("message", msg.str().c_str());
+                        return response;
+                    }
+                    strip_sizes.push_back(size);
+                }
+            }
+
+            // 4. Apply configuration to internal state
+            FL_PRINT("[RPC] runTest with config: drivers=" << drivers.size()
+                     << ", lanes=" << min_lanes << "-" << max_lanes
+                     << ", stripSizes=" << strip_sizes.size());
+
+            // Update drivers
+            for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
+                bool should_enable = false;
+                for (fl::size j = 0; j < drivers.size(); j++) {
+                    if ((*mpDriversAvailable)[i].name == drivers[j]) {
+                        should_enable = true;
+                        break;
+                    }
+                }
+                (*mpDriversAvailable)[i].enabled = should_enable;
+            }
+
+            // Update lane range
+            mpTestMatrix->min_lanes = min_lanes;
+            mpTestMatrix->max_lanes = max_lanes;
+
+            // Update strip sizes if provided
+            if (!strip_sizes.empty()) {
+                mpTestMatrix->strip_sizes = strip_sizes;
+            }
+
+            // Regenerate test cases with new config
+            regenerateTestCasesLocal();
+
+            // Fall through to run test with updated config
+        }
+        // LEGACY FORMAT: Empty array uses current state
+        else if (args.is_array() && args.size() == 0) {
+            FL_PRINT("[RPC] runTest (legacy mode - using current state)");
+            // Use existing state from previous setDrivers/setLaneRange/setStripSizes calls
+        }
+        else {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected config object or empty array (legacy)");
+            return response;
+        }
+
+        // ========================================================================
+        // Run the test (common code for both legacy and new format)
+        // ========================================================================
         uint32_t start_ms = millis();
 
         // Emit test_start event (JSONL streaming)
@@ -1176,7 +1392,6 @@ void ValidationRemoteControl::registerFunctions(
         }
 
         // Return minimal response (full details streamed above)
-        fl::Json response = fl::Json::object();
         response.set("success", true);
         response.set("streamMode", true);
         return response;
@@ -1309,6 +1524,17 @@ void ValidationRemoteControl::registerFunctions(
         if (!mpTestMatrix->enabled_drivers.empty()) {
             config.set("driver", mpTestMatrix->enabled_drivers[0].c_str());
         }
+
+        // Strip sizes configuration
+        fl::Json strip_sizes_json = fl::Json::array();
+        for (int size : mpTestMatrix->strip_sizes) {
+            strip_sizes_json.push_back(static_cast<int64_t>(size));
+        }
+        config.set("stripSizes", strip_sizes_json);
+
+        // Lane range
+        config.set("minLanes", static_cast<int64_t>(mpTestMatrix->min_lanes));
+        config.set("maxLanes", static_cast<int64_t>(mpTestMatrix->max_lanes));
 
         // Build laneSizes array
         fl::Json sizes_response = fl::Json::array();

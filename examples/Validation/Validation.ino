@@ -234,9 +234,10 @@ int g_pin_rx = DEFAULT_PIN_RX;
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
 
-// RX buffer sized for largest possible strip (LONG_STRIP_SIZE LEDs)
+// RX buffer sized for maximum expected strip size
 // Each LED = 24 bits = 24 symbols, plus headroom for RESET pulses
-#define RX_BUFFER_SIZE (LONG_STRIP_SIZE * 32 + 100)  // LEDs × 32:1 expansion + headroom
+// Maximum: 3000 LEDs (hardcoded for ESP32/S3 with PSRAM support)
+#define RX_BUFFER_SIZE (3000 * 32 + 100)  // LEDs × 32:1 expansion + headroom
 
 // Use PSRAM-backed vector for dynamic allocation (avoids DRAM overflow on ESP32S2)
 fl::vector_psram<uint8_t> rx_buffer;  // Shared RX buffer - initialized in setup()
@@ -463,29 +464,30 @@ void setup() {
     }
     FL_PRINT(ss.str());
 
-    // Lane range - machine-parseable for --expect validation
+    // Lane range - machine-parseable for --expect validation (runtime configured)
     ss.clear();
-    ss << "  Lane Range: " << MIN_LANES << "-" << MAX_LANES << " lanes\n";
+    ss << "  Lane Range: " << test_matrix.min_lanes << "-" << test_matrix.max_lanes << " lanes\n";
     ss << "    → Lane N has base_size - N LEDs (decreasing pattern)\n";
     ss << "    → Multi-lane: Only Lane 0 validated (hardware limitation)\n";
     // Explicit validation prints: "LANE_MIN: X" and "LANE_MAX: Y"
-    ss << "  LANE_MIN: " << MIN_LANES << "\n";
-    ss << "  LANE_MAX: " << MAX_LANES << "\n";
+    ss << "  LANE_MIN: " << test_matrix.min_lanes << "\n";
+    ss << "  LANE_MAX: " << test_matrix.max_lanes << "\n";
 
-    // Strip sizes - machine-parseable for --expect validation
-    #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
-        ss << "  Strip Sizes: Short only (" << SHORT_STRIP_SIZE << " LEDs)\n";
-        ss << "  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE << "\n";
-        ss << "  JUST_SMALL_STRIPS\n";
-    #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
-        ss << "  Strip Sizes: Long only (" << LONG_STRIP_SIZE << " LEDs)\n";
-        ss << "  STRIP_SIZE_TESTED: " << LONG_STRIP_SIZE << "\n";
-        ss << "  JUST_LARGE_STRIPS\n";
-    #else
-        ss << "  Strip Sizes: Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")\n";
-        ss << "  STRIP_SIZE_TESTED: " << SHORT_STRIP_SIZE << "\n";
-        ss << "  STRIP_SIZE_TESTED: " << LONG_STRIP_SIZE << "\n";
-    #endif
+    // Strip sizes - machine-parseable for --expect validation (runtime configured)
+    if (test_matrix.strip_sizes.empty()) {
+        ss << "  Strip Sizes: None (ERROR: no strip sizes configured)\n";
+    } else {
+        ss << "  Strip Sizes: [";
+        for (fl::size i = 0; i < test_matrix.strip_sizes.size(); i++) {
+            if (i > 0) ss << ", ";
+            ss << test_matrix.strip_sizes[i];
+        }
+        ss << "] LEDs\n";
+        // Emit STRIP_SIZE_TESTED for each size (for --expect validation)
+        for (fl::size i = 0; i < test_matrix.strip_sizes.size(); i++) {
+            ss << "  STRIP_SIZE_TESTED: " << test_matrix.strip_sizes[i] << "\n";
+        }
+    }
 
     // Bit patterns
     ss << "  Bit Patterns: 4 mixed RGB patterns (MSB/LSB testing)\n";

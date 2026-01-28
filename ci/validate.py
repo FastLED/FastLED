@@ -13,12 +13,11 @@ JSON-RPC Workflow (Fail-Fast Model):
        → Returns: {connected: true/false, rxWhenTxLow, rxWhenTxHigh}
        → Fail-fast: Exit if connection test fails
 
-    3. setDrivers([...])         - Configure which drivers to test
-       → Returns: {success, drivers}
-
-    4. runTest()                 - Execute test matrix
+    3. runTest({drivers, laneRange?, stripSizes?}) - Configure and execute test matrix
+       → Args: Named config object with drivers (required), laneRange (optional), stripSizes (optional)
        → Streams: test_start, case_result, test_complete events
        → Returns: {success, passedTests, totalTests}
+       → Replaces: setDrivers + setLaneRange + setStripSizes + runTest (legacy multi-call format)
 
 Legacy Text Patterns:
     - Text output is for human diagnostics ONLY
@@ -48,6 +47,7 @@ Architecture:
 """
 
 import argparse
+import json
 import sys
 import time
 from dataclasses import dataclass
@@ -371,6 +371,12 @@ class Args:
     use_fbuild: bool
     no_fbuild: bool
 
+    # Strip size configuration (NEW - Phase 8)
+    strip_sizes: str | None
+
+    # Lane configuration (NEW)
+    lanes: str | None
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -385,6 +391,9 @@ Examples:
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
   %(prog)s --rmt --timeout 120         # Custom timeout (default: 60s)
+  %(prog)s --i2s --lanes 2 --strip-sizes 100,300  # Test I2S with 2 lanes, strips of 100 and 300 LEDs
+  %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
+  %(prog)s --rmt --strip-sizes small   # Test RMT with 'small' preset (100/500 LEDs)
   %(prog)s --help                      # Show this help message
 
 Driver Selection (JSON-RPC):
@@ -397,6 +406,31 @@ Driver Selection (JSON-RPC):
     --spi       Test only SPI driver
     --uart      Test only UART driver
     --all       Test all drivers (equivalent to --parlio --rmt --spi --uart)
+
+Strip Size Configuration:
+  Configure LED strip sizes for validation testing via JSON-RPC:
+    --strip-sizes <preset or custom>   Set strip sizes (preset or comma-separated counts)
+
+  Presets (shortcuts for common configurations):
+    tiny    - 10, 100 LEDs
+    small   - 100, 500 LEDs (default)
+    medium  - 300, 1000 LEDs
+    large   - 500, 3000 LEDs
+    xlarge  - 1000, 5000 LEDs (high-memory devices only)
+
+  Custom arrays (comma-separated LED counts):
+    --strip-sizes 100,300         Test with 100 and 300 LED strips
+    --strip-sizes 100,300,1000    Test with 100, 300, and 1000 LED strips
+    --strip-sizes 500             Test with single 500 LED strip
+
+Lane Configuration:
+  Configure number of lanes for validation testing via JSON-RPC:
+    --lanes <N or MIN-MAX>   Set lane count or range
+
+  Examples:
+    --lanes 2          Test with exactly 2 lanes
+    --lanes 1-4        Test with 1 to 4 lanes (tests all combinations)
+    Default: 1-8 lanes (firmware default)
 
 Exit Codes:
   0   Success (all patterns found, no failures)
@@ -561,6 +595,30 @@ See Also:
             help="Force PlatformIO even for esp32s3/esp32c6 (disables fbuild default)",
         )
 
+        # Strip size configuration (NEW - Phase 8)
+        strip_size_group = parser.add_argument_group(
+            "Strip Size Configuration",
+            "Configure LED strip sizes for validation testing.",
+        )
+        strip_size_group.add_argument(
+            "--strip-sizes",
+            type=str,
+            metavar="PRESET or SIZE1,SIZE2,...",
+            help="Strip sizes: preset name (tiny/small/medium/large/xlarge) OR comma-separated LED counts (e.g., '100,300,1000')",
+        )
+
+        # Lane configuration (NEW)
+        lane_group = parser.add_argument_group(
+            "Lane Configuration",
+            "Configure number of lanes for validation testing.",
+        )
+        lane_group.add_argument(
+            "--lanes",
+            type=str,
+            metavar="N or MIN-MAX",
+            help="Lane count: single number (e.g., '2') or range (e.g., '1-4'). Default: 1-8",
+        )
+
         parsed = parser.parse_args()
 
         # Convert argparse.Namespace to Args dataclass
@@ -589,6 +647,8 @@ See Also:
             and not parsed.no_auto_discover_pins,
             use_fbuild=parsed.use_fbuild,
             no_fbuild=parsed.no_fbuild,
+            strip_sizes=parsed.strip_sizes,  # NEW - Phase 8
+            lanes=parsed.lanes,  # NEW
         )
 
 
@@ -700,14 +760,92 @@ def run(args: Args | None = None) -> int:
         print()
         return 1
 
-    # Build JSON-RPC commands for driver selection and test execution
-    driver_list_str = ", ".join([f'"{d}"' for d in drivers])
-    # Command 1: setDrivers (configures which drivers to test)
-    # Command 2: runTest (actually executes the tests)
-    json_rpc_cmd_str = (
-        f'[{{"function":"setDrivers","args":[{driver_list_str}]}}, '
-        f'{{"function":"runTest","args":[]}}]'
-    )
+    # Parse --lanes argument
+    min_lanes: int | None = None
+    max_lanes: int | None = None
+
+    if args.lanes:
+        if "-" in args.lanes:
+            # Range format: "1-4"
+            parts = args.lanes.split("-", 1)
+            try:
+                min_lanes = int(parts[0])
+                max_lanes = int(parts[1])
+            except ValueError:
+                print(
+                    f"❌ Error: Invalid lane range '{args.lanes}' (expected format: '1-4')"
+                )
+                return 1
+        else:
+            # Single number: "2"
+            try:
+                lane_count = int(args.lanes)
+                min_lanes = lane_count
+                max_lanes = lane_count
+            except ValueError:
+                print(f"❌ Error: Invalid lane count '{args.lanes}' (expected integer)")
+                return 1
+
+    # Build JSON-RPC command with named arguments (NEW consolidated format)
+    # Single runTest call replaces: setDrivers + setLaneRange + setStripSizes + runTest
+    config: dict[str, Any] = {}
+
+    # Drivers (required)
+    config["drivers"] = drivers
+
+    # Lane range (optional)
+    if min_lanes is not None and max_lanes is not None:
+        config["laneRange"] = {"min": min_lanes, "max": max_lanes}
+
+    # Strip sizes (optional)
+    if args.strip_sizes:
+        # Check if it's a preset name
+        preset_map = {
+            "tiny": (10, 100),
+            "small": (100, 500),
+            "medium": (300, 1000),
+            "large": (500, 3000),
+            "xlarge": (1000, 5000),
+        }
+
+        if args.strip_sizes in preset_map:
+            # Use preset (convert to array)
+            short, long = preset_map[args.strip_sizes]
+            config["stripSizes"] = [short, long]
+        elif "," in args.strip_sizes:
+            # Parse comma-separated array
+            try:
+                sizes = [int(s.strip()) for s in args.strip_sizes.split(",")]
+                if not sizes:
+                    print(f"❌ Error: No strip sizes provided in '{args.strip_sizes}'")
+                    return 1
+                if any(s <= 0 for s in sizes):
+                    print(f"❌ Error: Strip sizes must be positive integers")
+                    return 1
+                config["stripSizes"] = sizes
+            except ValueError:
+                print(
+                    f"❌ Error: Invalid strip sizes '{args.strip_sizes}' (expected comma-separated integers or preset name)"
+                )
+                return 1
+        else:
+            # Single integer
+            try:
+                size = int(args.strip_sizes)
+                if size <= 0:
+                    print(f"❌ Error: Strip size must be positive")
+                    return 1
+                config["stripSizes"] = [size]
+            except ValueError:
+                print(
+                    f"❌ Error: Invalid strip size '{args.strip_sizes}' (expected integer, comma-separated integers, or preset name)"
+                )
+                return 1
+
+    # Create single RPC command with args as config object (NOT wrapped in array)
+    # Result: {"function":"runTest","args":{"drivers":["I2S"],"laneRange":{"min":2,"max":2},"stripSizes":[100,300]}}
+    rpc_command = {"function": "runTest", "args": config}
+    json_rpc_cmd_str = "[" + json.dumps(rpc_command) + "]"
 
     # Parse JSON-RPC commands
     try:

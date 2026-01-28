@@ -42,6 +42,15 @@ LANE_SIZE_PRESETS: dict[str, Callable[[int], list[int]]] = {
     ],  # [300, 50, 300, 50]
 }
 
+# Predefined strip size configurations for testing (NEW - Phase 7)
+STRIP_SIZE_PRESETS: dict[str, tuple[int, int]] = {
+    "tiny": (10, 100),  # Small tests (short: 10, long: 100)
+    "small": (100, 500),  # Medium tests (short: 100, long: 500)
+    "medium": (300, 1000),  # Larger tests (short: 300, long: 1000)
+    "large": (500, 3000),  # Stress tests (short: 500, long: 3000)
+    "xlarge": (1000, 5000),  # Extreme (high-memory devices only)
+}
+
 
 def generate_lane_configs(
     lane_count: int,
@@ -85,6 +94,8 @@ def run_validation_loop(
     lane_size_configs: list[list[int]] | None = None,
     patterns: list[str] | None = None,
     iterations: int = 1,
+    strip_size_preset: str | None = None,
+    test_large_strips: bool = False,
 ) -> dict[str, Any]:
     """Run comprehensive validation loop across all configurations.
 
@@ -95,6 +106,8 @@ def run_validation_loop(
                           Each inner array specifies per-lane LED counts
         patterns: List of patterns to test
         iterations: Number of test iterations per configuration
+        strip_size_preset: Strip size preset name (e.g., "small", "medium", "large")
+        test_large_strips: Enable large strip testing (default: False)
 
     Returns:
         Summary of all test results
@@ -120,6 +133,19 @@ def run_validation_loop(
             ]
 
         patterns = patterns or ["MSB_LSB_A", "SOLID_RGB"]
+
+        # Apply strip size preset if specified (NEW - Phase 7)
+        if strip_size_preset and strip_size_preset in STRIP_SIZE_PRESETS:
+            short_size, long_size = STRIP_SIZE_PRESETS[strip_size_preset]
+            print(
+                f"Applying strip size preset '{strip_size_preset}': short={short_size}, long={long_size}"
+            )
+            agent.set_strip_size_values(short_size, long_size)
+
+        # Apply large strip testing flag (NEW - Phase 7)
+        if test_large_strips:
+            print("Enabling large strip testing")
+            agent.set_strip_sizes_enabled(small=True, large=True)
 
         # Results accumulator
         all_results = []
@@ -287,6 +313,13 @@ Lane Size Presets:
   one_big_rest_small - [300, 10, 10, ...]
   one_small_rest_big - [1, 300, 300, ...]
   alternating      - [300, 50, 300, 50, ...]
+
+Strip Size Presets (NEW - Phase 7):
+  tiny    - short: 10, long: 100 LEDs
+  small   - short: 100, long: 500 LEDs (default)
+  medium  - short: 300, long: 1000 LEDs
+  large   - short: 500, long: 3000 LEDs
+  xlarge  - short: 1000, long: 5000 LEDs (high-memory devices only)
         """,
     )
     parser.add_argument("--port", "-p", required=True, help="Serial port")
@@ -308,6 +341,17 @@ Lane Size Presets:
     parser.add_argument("--patterns", nargs="+", help="Patterns to test")
     parser.add_argument(
         "--iterations", "-i", type=int, default=1, help="Test iterations"
+    )
+    parser.add_argument(
+        "--strip-sizes",
+        type=str,
+        choices=list(STRIP_SIZE_PRESETS.keys()),
+        help="Strip size preset (tiny/small/medium/large/xlarge)",
+    )
+    parser.add_argument(
+        "--test-large-strips",
+        action="store_true",
+        help="Enable large strip testing (default: False for memory safety)",
     )
 
     args = parser.parse_args()
@@ -331,6 +375,8 @@ Lane Size Presets:
             lane_size_configs=lane_size_configs,
             patterns=args.patterns,
             iterations=args.iterations,
+            strip_size_preset=args.strip_sizes,  # NEW - Phase 7
+            test_large_strips=args.test_large_strips,  # NEW - Phase 7
         )
 
         # Exit with error code if any tests failed

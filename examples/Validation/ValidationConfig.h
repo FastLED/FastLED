@@ -26,21 +26,17 @@
 // Hypothesis: Debug logging adds delays that affect 10 LED case timing
 // Testing 10 LEDs WITHOUT debug logging to confirm
 
-// Driver selection
-// #define JUST_PARLIO  // Testing PARLIO only
-// #define JUST_RMT
-// #define JUST_SPI
-// #define JUST_UART
-#define JUST_I2S     // Test I2S LCD_CAM driver (ESP32-S3 only)
-// Note: No JUST_* define = test all available drivers
+// Driver selection - Controlled via JSON-RPC setDrivers() command
+// Example: setDrivers(["PARLIO", "RMT"]) or setDrivers(["I2S"])
+// Default: All available drivers are tested
 
-// Lane range (MUST be defined BEFORE Common.h)
-#define MIN_LANES 2  // Testing 2 lanes for I2S
-#define MAX_LANES 2  // Testing 2 lanes for I2S
+// Lane range - Controlled via JSON-RPC setLaneRange() command
+// Example: setLaneRange([1, 4]) to test 1-4 lanes
+// Default: Tests lanes 1-8
 
-// Strip size selection - PARLIO baseline: Small strips (10 LEDs per lane)
-#define JUST_SMALL_STRIPS  // Testing with 15 LEDs
-// #define JUST_LARGE_STRIPS  // Will test larger strips after baseline
+// Strip size selection - Controlled via JSON-RPC setStripSizes() / setStripSizeValues() commands
+// Example: setStripSizeValues([100, 1000]) or setStripSizes([{small: true, large: false}])
+// Default: Tests small strips only (conservative, avoids OOM)
 
 // Memory configuration
 // Define SKETCH_HAS_LOTS_OF_MEMORY=1 for platforms with >320KB RAM (ESP32, ESP32S3)
@@ -53,12 +49,6 @@
     #endif
 #endif
 
-// Strip size constants (MUST be defined BEFORE Common.h)
-// I2S testing: 100 LEDs as user-specified baseline
-#define SHORT_STRIP_SIZE 100  // Test with 100 LEDs (user-specified)
-
-#if SKETCH_HAS_LOTS_OF_MEMORY
-    #define LONG_STRIP_SIZE 3000  // Large strip for platforms with lots of RAM
-#else
-    #define LONG_STRIP_SIZE 300   // Reduced for ESP32S2 (320KB DRAM limit)
-#endif
+// Strip size configuration moved to runtime (JSON-RPC)
+// Default values: short=100, long=300 (set in TestMatrixConfig constructor)
+// Configure at runtime via: setStripSizeValues(short, long)

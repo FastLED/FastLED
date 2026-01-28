@@ -8,23 +8,10 @@
 // ============================================================================
 // Test Configuration Constants
 // ============================================================================
-// These can be overridden in Validation.ino if needed
-
-#ifndef MIN_LANES
-#define MIN_LANES 1  // Default: start at 1 lane
-#endif
-
-#ifndef MAX_LANES
-#define MAX_LANES 8  // Default: test up to 8 lanes
-#endif
-
-#ifndef SHORT_STRIP_SIZE
-#define SHORT_STRIP_SIZE 10   // Short strip: 10 LEDs
-#endif
-
-#ifndef LONG_STRIP_SIZE
-#define LONG_STRIP_SIZE 300   // Long strip: 300 LEDs
-#endif
+// Strip sizes are now fully runtime-configurable via JSON-RPC commands:
+// - setStripSizeValues(short, long)
+// - setStripSizes({small: bool, large: bool})
+// Default values are set in TestMatrixConfig constructor
 
 namespace fl {
 
@@ -61,7 +48,7 @@ struct LaneConfig {
 struct TestCaseConfig {
     fl::string driver_name;     ///< Driver to test (e.g., "RMT", "SPI", "PARLIO")
     int lane_count;             ///< Number of lanes (1-8)
-    int base_strip_size;        ///< Base LED count (SHORT_STRIP_SIZE or LONG_STRIP_SIZE)
+    int base_strip_size;        ///< Base LED count (from short_strip_size or long_strip_size)
     fl::vector<LaneConfig> lanes;  ///< Per-lane configurations
 
     // Constructor for uniform lane sizes (legacy)
@@ -103,27 +90,29 @@ struct TestCaseConfig {
 
 /// @brief Test matrix configuration - controls which test combinations to run
 struct TestMatrixConfig {
-    fl::vector<fl::string> enabled_drivers;  ///< Drivers to test (filtered by JUST_* defines)
+    fl::vector<fl::string> enabled_drivers;  ///< Drivers to test (configured via setDrivers())
     int min_lanes;                           ///< Minimum lane count to test
     int max_lanes;                           ///< Maximum lane count to test
-    bool test_small_strips;                  ///< Test short strips (10 LEDs)?
-    bool test_large_strips;                  ///< Test long strips (300 LEDs)?
 
-    // NEW: Variable lane sizing support
+    // Strip size configuration (fully dynamic via JSON-RPC)
+    fl::vector<int> strip_sizes;             ///< LED counts to test (e.g., [100, 300, 1000])
+
+    // Variable lane sizing support
     fl::vector<int> lane_sizes;              ///< Per-lane LED counts (overrides uniform sizing when set)
-    int custom_led_count;                    ///< Custom LED count for uniform sizing (overrides base sizes)
+    int custom_led_count;                    ///< Custom LED count for uniform sizing (overrides strip_sizes)
     fl::string test_pattern;                 ///< Test pattern name ("MSB_LSB_A", "SOLID_RGB", etc.)
     int test_iterations;                     ///< Number of test iterations per configuration
 
     TestMatrixConfig()
-        : min_lanes(1)
-        , max_lanes(8)
-        , test_small_strips(true)
-        , test_large_strips(true)
+        : min_lanes(1)                       // Default: start at 1 lane
+        , max_lanes(8)                       // Default: test up to 8 lanes
         , lane_sizes()                       // Empty = use uniform sizing
-        , custom_led_count(100)              // Default: 100 LEDs per lane
+        , custom_led_count(100)              // Default LED count when strip_sizes is empty
         , test_pattern("MSB_LSB_A")
-        , test_iterations(1) {}
+        , test_iterations(1) {
+        // Default strip sizes: conservative (100 LEDs only to avoid OOM)
+        strip_sizes.push_back(100);
+    }
 
     /// @brief Get total number of test cases in the matrix
     int getTotalTestCases() const {
@@ -134,10 +123,10 @@ struct TestMatrixConfig {
             return driver_count;  // One test per driver with specific lane config
         }
 
-        // Legacy: lane range × strip sizes
+        // Standard matrix: drivers × lane range × strip sizes
         int lane_range = (max_lanes - min_lanes + 1);
-        int strip_sizes = (test_small_strips ? 1 : 0) + (test_large_strips ? 1 : 0);
-        return driver_count * lane_range * strip_sizes;
+        int strip_size_count = strip_sizes.size();
+        return driver_count * lane_range * strip_size_count;
     }
 
     /// @brief Get lane count (from lane_sizes or min_lanes)

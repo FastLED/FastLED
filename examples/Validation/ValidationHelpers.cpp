@@ -262,47 +262,18 @@ void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
 fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_available) {
     fl::TestMatrixConfig matrix;
 
-    // Filter drivers based on JUST_* defines
+    // Driver selection: Include all available drivers by default
+    // Can be overridden at runtime via setDrivers() JSON-RPC command
     for (fl::size i = 0; i < drivers_available.size(); i++) {
         const char* driver_name = drivers_available[i].name.c_str();
-        bool include = false;
-
-        #if defined(JUST_PARLIO)
-            if (fl::strcmp(driver_name, "PARLIO") == 0) include = true;
-        #elif defined(JUST_RMT)
-            if (fl::strcmp(driver_name, "RMT") == 0) include = true;
-        #elif defined(JUST_SPI)
-            if (fl::strcmp(driver_name, "SPI") == 0) include = true;
-        #elif defined(JUST_UART)
-            if (fl::strcmp(driver_name, "UART") == 0) include = true;
-        #elif defined(JUST_I2S)
-            if (fl::strcmp(driver_name, "I2S") == 0) include = true;
-        #else
-            // No filter - include all drivers
-            include = true;
-        #endif
-
-        if (include) {
-            matrix.enabled_drivers.push_back(fl::string(driver_name));
-        }
+        matrix.enabled_drivers.push_back(fl::string(driver_name));
     }
 
-    // Set lane range from defines
-    matrix.min_lanes = MIN_LANES;
-    matrix.max_lanes = MAX_LANES;
-
-    // Set strip size flags from defines
-    #if defined(JUST_SMALL_STRIPS) && !defined(JUST_LARGE_STRIPS)
-        matrix.test_small_strips = true;
-        matrix.test_large_strips = false;
-    #elif defined(JUST_LARGE_STRIPS) && !defined(JUST_SMALL_STRIPS)
-        matrix.test_small_strips = false;
-        matrix.test_large_strips = true;
-    #else
-        // Default: test both sizes
-        matrix.test_small_strips = true;
-        matrix.test_large_strips = true;
-    #endif
+    // Lane range and strip size flags use constructor defaults
+    // Can be overridden at runtime via JSON-RPC commands:
+    // - setLaneRange([min, max])
+    // - setStripSizes({small: bool, large: bool})
+    // - setStripSizeValues(short, long)
 
     return matrix;
 }
@@ -331,18 +302,10 @@ fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& mat
         const char* driver_name = matrix_config.enabled_drivers[driver_idx].c_str();
 
         for (int lane_count = matrix_config.min_lanes; lane_count <= matrix_config.max_lanes; lane_count++) {
-            // Generate test cases for enabled strip sizes
-            if (matrix_config.test_small_strips) {
-                fl::TestCaseConfig test_case(driver_name, lane_count, SHORT_STRIP_SIZE);
-                // Assign consecutive GPIO pins for multi-lane
-                for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
-                    test_case.lanes[lane_idx].pin = pin_tx + lane_idx;
-                }
-                test_cases.push_back(test_case);
-            }
-
-            if (matrix_config.test_large_strips) {
-                fl::TestCaseConfig test_case(driver_name, lane_count, LONG_STRIP_SIZE);
+            // Generate test cases for each configured strip size
+            for (fl::size size_idx = 0; size_idx < matrix_config.strip_sizes.size(); size_idx++) {
+                int led_count = matrix_config.strip_sizes[size_idx];
+                fl::TestCaseConfig test_case(driver_name, lane_count, led_count);
                 // Assign consecutive GPIO pins for multi-lane
                 for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
                     test_case.lanes[lane_idx].pin = pin_tx + lane_idx;
@@ -374,16 +337,17 @@ void printTestMatrixSummary(const fl::TestMatrixConfig& matrix_config) {
     FL_WARN("Lane Range: " << matrix_config.min_lanes << "-" << matrix_config.max_lanes
             << " (" << lane_range << " configurations)");
 
-    // Strip sizes
+    // Strip sizes (runtime-configurable list)
     fl::sstream strip_info;
-    if (matrix_config.test_small_strips && matrix_config.test_large_strips) {
-        strip_info << "Both (Short=" << SHORT_STRIP_SIZE << ", Long=" << LONG_STRIP_SIZE << ")";
-    } else if (matrix_config.test_small_strips) {
-        strip_info << "Short only (" << SHORT_STRIP_SIZE << " LEDs)";
-    } else if (matrix_config.test_large_strips) {
-        strip_info << "Long only (" << LONG_STRIP_SIZE << " LEDs)";
+    if (matrix_config.strip_sizes.empty()) {
+        strip_info << "None (ERROR: no strip sizes configured)";
     } else {
-        strip_info << "None (ERROR)";
+        strip_info << "[";
+        for (fl::size i = 0; i < matrix_config.strip_sizes.size(); i++) {
+            if (i > 0) strip_info << ", ";
+            strip_info << matrix_config.strip_sizes[i];
+        }
+        strip_info << "] LEDs";
     }
     FL_WARN("Strip Sizes: " << strip_info.str().c_str());
 

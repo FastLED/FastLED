@@ -47,6 +47,16 @@ class TestConfig:
     pattern: str
     iterations: int = 1
 
+    # Runtime strip size configuration (fully dynamic)
+    short_strip_size: int | None = None  # Short strip LED count (default: 100)
+    long_strip_size: int | None = None  # Long strip LED count (default: 300)
+    test_small_strips: bool = True  # Enable small strip testing
+    test_large_strips: bool = False  # Enable large strip testing
+
+    # Lane range configuration (NEW - Phase 6)
+    min_lanes: int | None = None  # Minimum lane count for test matrix
+    max_lanes: int | None = None  # Maximum lane count for test matrix
+
     @property
     def lane_count(self) -> int:
         """Number of lanes (derived from lane_sizes length)."""
@@ -172,7 +182,7 @@ class ValidationAgent:
         raise TimeoutError(f"No response within {self.timeout}s")
 
     def configure(self, config: TestConfig) -> dict[str, Any]:
-        """Configure test parameters with per-lane sizes.
+        """Configure test parameters with per-lane sizes and strip size settings.
 
         Args:
             config: Test configuration object
@@ -180,17 +190,31 @@ class ValidationAgent:
         Returns:
             Configuration confirmation dict from device
         """
-        return self.send_rpc(
-            "configure",
-            [
-                {
-                    "driver": config.driver,
-                    "laneSizes": config.lane_sizes,  # Array of per-lane LED counts
-                    "pattern": config.pattern,
-                    "iterations": config.iterations,
-                }
-            ],
-        )
+        # Build config dict with mandatory fields
+        config_dict = {
+            "driver": config.driver,
+            "laneSizes": config.lane_sizes,  # Array of per-lane LED counts
+            "pattern": config.pattern,
+            "iterations": config.iterations,
+        }
+
+        # Add optional strip size configuration (NEW - Phase 6)
+        if config.short_strip_size is not None:
+            config_dict["shortStripSize"] = config.short_strip_size
+        if config.long_strip_size is not None:
+            config_dict["longStripSize"] = config.long_strip_size
+        if config.test_small_strips is not None:
+            config_dict["testSmallStrips"] = config.test_small_strips
+        if config.test_large_strips is not None:
+            config_dict["testLargeStrips"] = config.test_large_strips
+
+        # Add optional lane range configuration (NEW - Phase 6)
+        if config.min_lanes is not None:
+            config_dict["minLanes"] = config.min_lanes
+        if config.max_lanes is not None:
+            config_dict["maxLanes"] = config.max_lanes
+
+        return self.send_rpc("configure", [config_dict])
 
     def set_lane_sizes(self, sizes: list[int]) -> dict[str, Any]:
         """Set per-lane LED counts directly.
@@ -224,6 +248,66 @@ class ValidationAgent:
             Response dict with pattern, description
         """
         return self.send_rpc("setPattern", [pattern])
+
+    def set_short_strip_size(self, size: int) -> dict[str, Any]:
+        """Set the short strip size (default: 100 LEDs).
+
+        Args:
+            size: LED count for short strips
+
+        Returns:
+            Response dict with shortStripSize, testCases
+        """
+        return self.send_rpc("setShortStripSize", [size])
+
+    def set_long_strip_size(self, size: int) -> dict[str, Any]:
+        """Set the long strip size (default: 3000 LEDs).
+
+        Args:
+            size: LED count for long strips
+
+        Returns:
+            Response dict with longStripSize, testCases
+        """
+        return self.send_rpc("setLongStripSize", [size])
+
+    def set_strip_size_values(self, short: int, long: int) -> dict[str, Any]:
+        """Set both short and long strip sizes in one call.
+
+        Args:
+            short: LED count for short strips
+            long: LED count for long strips
+
+        Returns:
+            Response dict with shortStripSize, longStripSize, testCases
+        """
+        return self.send_rpc("setStripSizeValues", [short, long])
+
+    def set_lane_range(self, min_lanes: int, max_lanes: int) -> dict[str, Any]:
+        """Set the lane count range for test matrix generation.
+
+        Args:
+            min_lanes: Minimum number of lanes to test
+            max_lanes: Maximum number of lanes to test
+
+        Returns:
+            Response dict with minLanes, maxLanes, testCases
+        """
+        return self.send_rpc("setLaneRange", [min_lanes, max_lanes])
+
+    def set_strip_sizes_enabled(
+        self, small: bool = True, large: bool = False
+    ) -> dict[str, Any]:
+        """Enable/disable testing of small and large strip sizes.
+
+        Args:
+            small: Enable small strip testing (default: True)
+            large: Enable large strip testing (default: False)
+
+        Returns:
+            Response dict with testSmallStrips, testLargeStrips, testCases
+        """
+        return self.send_rpc("setStripSizes", [{"small": small, "large": large}])
 
     def run_test(self) -> TestResult:
         """Run configured test and return results.

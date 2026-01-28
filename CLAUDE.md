@@ -190,6 +190,47 @@ bash validate --all --skip-lint --timeout 180
 - `--timeout <seconds>` - Custom timeout (default: 120s)
 - `--help` - See all options
 
+**Strip Size Configuration:**
+Configure LED strip sizes for validation testing via JSON-RPC:
+```bash
+# Use strip size presets
+bash validate --parlio --strip-sizes small         # 100, 500 LEDs
+bash validate --rmt --strip-sizes medium           # 300, 1000 LEDs
+bash validate --spi --strip-sizes large            # 500, 3000 LEDs
+
+# Use custom strip sizes (comma-separated LED counts)
+bash validate --parlio --strip-sizes 100,300       # Test with 100 and 300 LED strips
+bash validate --rmt --strip-sizes 100,300,1000     # Test with 100, 300, and 1000 LED strips
+bash validate --i2s --strip-sizes 500              # Test with single 500 LED strip
+
+# Combined configuration
+bash validate --all --strip-sizes 100,500,3000
+```
+
+**Strip Size Presets:**
+- `tiny` - 10, 100 LEDs
+- `small` - 100, 500 LEDs (default)
+- `medium` - 300, 1000 LEDs
+- `large` - 500, 3000 LEDs
+- `xlarge` - 1000, 5000 LEDs (high-memory devices only)
+
+**Lane Configuration:**
+Configure number of lanes for validation testing via JSON-RPC:
+```bash
+# Test with specific lane count
+bash validate --parlio --lanes 2                   # Test with exactly 2 lanes
+bash validate --i2s --lanes 4                      # Test with exactly 4 lanes
+
+# Test with lane range
+bash validate --rmt --lanes 1-4                    # Test with 1 to 4 lanes (tests all combinations)
+bash validate --spi --lanes 2-8                    # Test with 2 to 8 lanes
+
+# Combined with strip sizes
+bash validate --i2s --lanes 2 --strip-sizes 100,300  # 2 lanes, strips of 100 and 300 LEDs
+```
+
+**Default:** 1-8 lanes (firmware default)
+
 **Error Handling:**
 If you run `bash validate` without specifying a driver, you'll get a helpful error message:
 ```
@@ -265,11 +306,12 @@ with RpcClient("/dev/ttyUSB0") as client:
     if not result["connected"]:
         exit(1)  # Fail-fast: hardware not connected
 
-    # Configure drivers
-    client.send("setDrivers", args=[["PARLIO", "RMT"]])
-
-    # Run test (returns immediately with results)
-    result = client.send("runTest")
+    # Configure and run test in single call (NEW consolidated format)
+    result = client.send("runTest", args={
+        "drivers": ["PARLIO", "RMT"],
+        "laneRange": {"min": 1, "max": 4},
+        "stripSizes": [100, 300]
+    })
     exit(0 if result["success"] else 1)
 ```
 
@@ -314,28 +356,43 @@ with ValidationAgent("COM18") as agent:
 | `ping` | - | Health check, returns timestamp and uptime |
 | `drivers` | - | List available LED drivers with enabled status |
 | `getState` | - | Query current device state and configuration |
-| `configure` | `{driver, laneSizes, pattern, iterations}` | Set up test parameters |
+| `runTest` | `{drivers, laneRange?, stripSizes?}` | **NEW**: Configure and execute test in single call with named arguments (recommended) |
+| `setDrivers` | `[driver_names...]` | Legacy: Set which drivers to test (use `runTest` with config instead) |
+| `setLaneRange` | `min, max` | Legacy: Set lane count range (use `runTest` with config instead) |
+| `setStripSizes` | `[sizes...]` | Legacy: Set strip sizes array (use `runTest` with config instead) |
+| `configure` | `{driver, laneSizes, pattern, iterations, shortStripSize?, longStripSize?, testSmallStrips?, testLargeStrips?}` | Set up test parameters (extended with strip size config) |
 | `setLaneSizes` | `[sizes...]` | Set per-lane LED counts directly |
 | `setLedCount` | `count` | Set uniform LED count for all lanes |
 | `setPattern` | `name` | Set test pattern (MSB_LSB_A, SOLID_RGB, etc.) |
-| `runTest` | - | Execute configured test, returns streaming results |
+| `setShortStripSize` | `size` | Set short strip LED count |
+| `setLongStripSize` | `size` | Set long strip LED count |
+| `setStripSizeValues` | `short, long` | Set both strip sizes at once |
 | `reset` | - | Reset device state |
 
-**Raw JSON-RPC Example** (for custom integrations):
+**NEW: Consolidated `runTest` with Named Arguments** (recommended):
 ```json
 // Device emits ready event after setup:
 RESULT: {"type":"ready","ready":true,"setupTimeMs":2340,"testCases":48,"drivers":3}
 
+// NEW: Single call with config (replaces setDrivers + setLaneRange + setStripSizes + runTest)
 // Send:
-{"function":"configure","args":[{"driver":"PARLIO","laneSizes":[100],"pattern":"MSB_LSB_A","iterations":1}]}
-
-// Receive:
-REMOTE: {"success":true,"config":{"driver":"PARLIO","laneSizes":[100],"totalLeds":100}}
-
-// Send:
-{"function":"runTest","args":[]}
+{"function":"runTest","args":{"drivers":["PARLIO","RMT"],"laneRange":{"min":2,"max":4},"stripSizes":[100,300]}}
 
 // Receive (streaming JSONL):
+REMOTE: {"success":true,"streamMode":true}
+RESULT: {"type":"test_start","testCases":16}
+RESULT: {"type":"test_complete","passed":true,"totalTests":64,"passedTests":64,"durationMs":8230}
+```
+
+**Legacy Multi-Call Format** (still supported for backward compatibility):
+```json
+// Send (4 separate calls):
+{"function":"setDrivers","args":["PARLIO"]}
+{"function":"setLaneRange","args":[2,4]}
+{"function":"setStripSizes","args":[[100,300]]}
+{"function":"runTest","args":[]}
+
+// Receive:
 REMOTE: {"success":true,"streamMode":true}
 RESULT: {"type":"test_start","driver":"PARLIO","totalLeds":100}
 RESULT: {"type":"test_complete","passed":true,"totalTests":4,"passedTests":4,"durationMs":2830}
@@ -348,6 +405,25 @@ config = TestConfig.uniform("RMT", led_count=100, lane_count=4, pattern="MSB_LSB
 
 # Asymmetric: different sizes per lane
 config = TestConfig(driver="PARLIO", lane_sizes=[300, 200, 100, 50], pattern="SOLID_RGB")
+```
+
+**Strip Size Configuration (NEW)**:
+```python
+# Option 1: Individual RPC commands
+agent.set_strip_size_values(short=100, long=500)  # Set both sizes at once
+agent.set_strip_sizes_enabled(small=True, large=True)  # Enable both strip sizes
+
+# Option 2: Via TestConfig
+config = TestConfig(
+    driver="PARLIO",
+    lane_sizes=[100, 100],
+    pattern="MSB_LSB_A",
+    short_strip_size=300,      # Override default short strip size
+    long_strip_size=1000,      # Override default long strip size
+    test_small_strips=True,    # Enable small strip testing
+    test_large_strips=True,    # Enable large strip testing (requires sufficient memory)
+)
+agent.configure(config)
 ```
 
 **Extending the Protocol**:
