@@ -334,9 +334,14 @@ FastLED 3.10.3
     * Updated 18 ARM platform clockless controllers (Apollo3, STM32, SAMD, Teensy, etc.)
     * ESP8266 clockless controller timing updated for better reliability
     * Maintains backward compatibility while supporting newer WS2812B chip revisions
-  * **STM32F4 Support Added**: BlackPill STM32F411CE and STM32F4 family support
+  * **STM32F4 Support Added**: BlackPill STM32F411CE, Nucleo F429ZI/F439ZI, and STM32F4 family support
     * Added STM32F4 platform detection using canonical `STM32F4` preprocessor define
     * Full GPIO pin mapping support for WeAct Studio BlackPill V2.0 (STM32F411CE)
+    * **NEW: ST Nucleo-144 Board Support**: Added complete pin mappings for Nucleo F429ZI and F439ZI boards
+      * STM32F429ZIT6 (180MHz, 192KB RAM, 2MB Flash) - 117 GPIO pins mapped
+      * STM32F439ZIT6 (180MHz, 192KB RAM, 2MB Flash) - 117 GPIO pins mapped
+      * Full hardware support for all GPIO ports (A-H) on Nucleo-144 form factor
+      * PlatformIO board names: `nucleo_f429zi`, `nucleo_f439zi`
     * Consolidated STM32F1/STM32F4 pin definitions to reduce code duplication
     * Added CI testing with GitHub Actions build badge for continuous validation
     * Compatible with PlatformIO `ststm32` platform and Arduino framework

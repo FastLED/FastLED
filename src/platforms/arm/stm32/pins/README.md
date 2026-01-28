@@ -29,7 +29,8 @@ pins/
 │       ├── f407vg_disco.h       # Discovery F407VG
 │       ├── f411ce_blackpill.h   # BlackPill F411CE
 │       ├── f411re_nucleo.h      # Nucleo F411RE
-│       └── f446re_nucleo.h      # Nucleo F446RE
+│       ├── f446re_nucleo.h      # Nucleo F446RE
+│       └── f4x9zi_nucleo.h      # Nucleo F429ZI/F439ZI
 │
 ├── fastpin_dispatcher.h         # Main dispatcher (board detection)
 └── fastpin_legacy.h             # Legacy fallback (compatibility)
@@ -213,7 +214,7 @@ _DEFPIN_ARM_F4(1, 1, A);   // Arduino pin 1 = PA1
 ## Migration Status
 
 - [x] Phase 1: Framework setup (core/, families/, boards/ directories)
-- [x] Phase 2: F4 migration (6 boards: F411CE BlackPill, F411RE Nucleo, F401CC/CE BlackPill, F401RE Nucleo, F407VG Disco, F446RE Nucleo)
+- [x] Phase 2: F4 migration (7 boards: F411CE BlackPill, F411RE Nucleo, F401CC/CE BlackPill, F401RE Nucleo, F407VG Disco, F446RE Nucleo, F429ZI/F439ZI Nucleo)
 - [x] Phase 3: F1 migration (3 boards: Maple Mini, Generic F103C8TX, Generic STM32F1)
 - [x] Phase 4: F2 migration (2 boards: Spark Core, Particle Photon)
 - [x] Phase 5: Deprecation warnings added to old files
@@ -222,7 +223,7 @@ _DEFPIN_ARM_F4(1, 1, A);   // Arduino pin 1 = PA1
 
 **✅ Reorganization Complete** - All phases finished. The new architecture is fully functional:
 - 90% code duplication eliminated (F1/F2/F4 families share single template)
-- Explicit board registry in dispatcher (14 boards supported)
+- Explicit board registry in dispatcher (15 boards supported)
 - Zero runtime overhead (`if constexpr` compiled away)
 - Easy to extend for F0/F3/F7/H7/L4/G0/G4 families (~30 lines per family)
 

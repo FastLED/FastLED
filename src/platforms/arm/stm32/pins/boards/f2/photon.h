@@ -7,6 +7,13 @@
 //
 // Reference: https://github.com/focalintent/FastLED-Sparkcore/blob/master/firmware/fastpin_arm_stm32.h
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f2.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f2.h"
+
 #define MAX_PIN 20
 
 _DEFPIN_ARM_F2(0, 7, B);

@@ -7,6 +7,13 @@
 //
 // Uses libmaple pin numbering (not STM32duino)
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f1.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f1.h"
+
 #define MAX_PIN 46
 
 _DEFPIN_ARM_F1(10, 0, A);  // PA0 - PA7

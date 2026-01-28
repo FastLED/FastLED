@@ -9,6 +9,13 @@
 // rather than Arduino pin numbers, as F1 boards don't always use STM32duino's
 // pin numbering scheme.
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f1.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f1.h"
+
 #define MAX_PIN PB1
 
 // Port B pins

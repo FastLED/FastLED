@@ -968,6 +968,17 @@ STM32F411CE_BLACKPILL = Board(
     platform="ststm32",
 )
 
+# STM32 Nucleo-144 boards - addresses GitHub issue #2160
+NUCLEO_F429ZI = Board(
+    board_name="nucleo_f429zi",
+    platform="ststm32",
+)
+
+NUCLEO_F439ZI = Board(
+    board_name="nucleo_f439zi",
+    platform="ststm32",
+)
+
 # Silicon Labs MGM240S boards (Arduino Nano Matter, SparkFun Thing Plus Matter)
 # Uses Silicon Labs EFM32 platform with Arduino framework support
 # Based on EFR32MG24 SoC with ARM Cortex-M33 @ 78MHz

@@ -6,6 +6,13 @@
 // Defines pin mappings inside fl:: namespace
 // STM32F411CE - 36 pins
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f4.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f4.h"
+
 // Port A
 _DEFPIN_ARM_F4(0, 0, A);   // PA_0
 _DEFPIN_ARM_F4(1, 1, A);   // PA_1

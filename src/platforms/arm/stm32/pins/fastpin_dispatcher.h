@@ -77,6 +77,10 @@
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f446re_nucleo.h"
   #include "families/stm32f4.h"  // nolint
 
+#elif defined(ARDUINO_NUCLEO_F429ZI) || defined(ARDUINO_NUCLEO_F439ZI)
+  #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f4x9zi_nucleo.h"
+  #include "families/stm32f4.h"  // nolint
+
 // ========================================
 // Unknown Board - Error with Guidance
 // ========================================

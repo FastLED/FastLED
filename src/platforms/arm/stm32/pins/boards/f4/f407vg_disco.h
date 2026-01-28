@@ -6,6 +6,13 @@
 // Defines pin mappings inside fl:: namespace
 // STM32F407VGT6 - 79 pins
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f4.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f4.h"
+
 // Port C
 _DEFPIN_ARM_F4(0, 0, C);   // PC_0
 _DEFPIN_ARM_F4(1, 2, C);   // PC_2

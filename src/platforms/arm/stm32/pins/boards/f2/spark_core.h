@@ -7,6 +7,13 @@
 //
 // Note: Despite being F103-based, Spark Core uses F2-style register access
 
+// IWYU pragma: private, include "platforms/arm/stm32/pins/families/stm32f2.h"
+
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
+#include "platforms/arm/stm32/pins/core/gpio_port_init.h"
+#include "platforms/arm/stm32/pins/core/pin_macros.h"
+#include "platforms/arm/stm32/pins/families/stm32f2.h"
+
 #define MAX_PIN 19
 
 _DEFPIN_ARM_F2(0, 7, B);
