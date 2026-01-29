@@ -298,7 +298,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (!mStorage.template is<InlinedBuffer>()) {
                 mStorage = InlinedBuffer{};
             }
-            fl::memcpy(inlineData(), str, len + 1);
+            char* data = inlineData();
+            fl::memcpy(data, str, len);
+            data[len] = '\0';
         } else {
             // StringHolder constructor already copies data and null-terminates
             mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
