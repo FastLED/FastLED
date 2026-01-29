@@ -5,6 +5,7 @@
 
 #include "coroutine_runner.h"
 #include "fl/singleton.h"
+#include "fl/thread_local.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"  // Provides fl::mutex, fl::recursive_mutex, fl::unique_lock
 #include "fl/stl/condition_variable.h"  // Provides fl::condition_variable
@@ -217,32 +218,40 @@ static fl::mutex gGlobalExecutionMutex;
 // Thread-local flag to track if current thread holds the global execution lock.
 // Each thread has its own copy, so coroutines and main thread track independently.
 // This prevents undefined behavior from unlocking a mutex we don't own.
-thread_local bool gHoldingExecutionLock = false;
+//
+// CRITICAL: Function-local fl::ThreadLocal ensures deterministic initialization
+// only when first accessed, avoiding undefined behavior during global static
+// initialization (before main() starts). File-scope thread_local variables may
+// not be fully initialized when accessed from global static constructors.
+static bool& get_holding_execution_lock() {
+    static fl::ThreadLocal<bool> holding(false);  // okay static in header
+    return holding.access();
+}
 
 void global_execution_lock() {
     gGlobalExecutionMutex.lock();
-    gHoldingExecutionLock = true;
+    get_holding_execution_lock() = true;
 }
 
 void global_execution_unlock() {
-    gHoldingExecutionLock = false;
+    get_holding_execution_lock() = false;
     gGlobalExecutionMutex.unlock();
 }
 
 bool global_execution_try_lock() {
     bool acquired = gGlobalExecutionMutex.try_lock();
     if (acquired) {
-        gHoldingExecutionLock = true;
+        get_holding_execution_lock() = true;
     }
     return acquired;
 }
 
 bool global_execution_is_held() {
-    return gHoldingExecutionLock;
+    return get_holding_execution_lock();
 }
 
 void global_execution_set_held(bool held) {
-    gHoldingExecutionLock = held;
+    get_holding_execution_lock() = held;
 }
 
 } // namespace detail
