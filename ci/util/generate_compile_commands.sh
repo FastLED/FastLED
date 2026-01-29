@@ -19,11 +19,15 @@ if ! command -v meson &> /dev/null; then
     uv pip install meson ninja
 fi
 
+# Note: Build system uses mode-specific directories (.build/meson-quick, .build/meson-debug, etc.)
+# We use the default "quick" mode for IDE integration
+BUILD_DIR=".build/meson-quick"
+
 # Check if build directory exists
-if [ ! -d ".build/meson" ]; then
+if [ ! -d "$BUILD_DIR" ]; then
     echo "Setting up Meson build directory..."
-    mkdir -p .build/meson
-    cd .build/meson
+    mkdir -p "$BUILD_DIR"
+    cd "$BUILD_DIR"
     meson setup . ../..
     cd ../..
 else
@@ -32,12 +36,12 @@ fi
 
 # Compile to ensure compile_commands.json is up-to-date
 echo "Building with Meson to generate compile_commands.json..."
-meson compile -C .build/meson
+meson compile -C "$BUILD_DIR"
 
 # Check if compile_commands.json was generated
-if [ -f ".build/meson/compile_commands.json" ]; then
+if [ -f "$BUILD_DIR/compile_commands.json" ]; then
     echo "✅ compile_commands.json generated successfully"
-    cp .build/meson/compile_commands.json .
+    cp "$BUILD_DIR/compile_commands.json" .
     echo "Size: $(wc -c < compile_commands.json) bytes"
     # Count entries (number of lines starting with {)
     echo "Entries: $(grep -c '"file":' compile_commands.json 2>/dev/null || echo "unknown")"

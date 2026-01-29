@@ -145,7 +145,7 @@
             "command": "sh",
             "args": [
                 "-c",
-                "if [ -f .build/meson/compile_commands.json ]; then cp .build/meson/compile_commands.json .; echo 'Copied compile_commands.json from Meson build'; else echo 'Warning: compile_commands.json not found'; fi"
+                "if [ -f .build/meson-quick/compile_commands.json ]; then cp .build/meson-quick/compile_commands.json .; echo 'Copied compile_commands.json from Meson build'; else echo 'Warning: compile_commands.json not found'; fi"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -159,7 +159,7 @@
                 "showReuseMessage": false,
                 "clear": false
             },
-            "detail": "Copy compile_commands.json from Meson build to project root for clangd"
+            "detail": "Copy compile_commands.json from Meson build (quick mode) to project root for clangd"
         },
         {
             "type": "shell",

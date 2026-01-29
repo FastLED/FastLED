@@ -53,15 +53,16 @@ fi
 # 2. Handles platform-specific configuration automatically
 # 3. Sets up sccache integration correctly
 echo "Configuring Meson and building FastLED..."
-mkdir -p .build/meson
 
 # Use test.py to configure Meson and generate compile_commands.json
 # Use --no-fingerprint to force a build (ensure compile_commands.json is generated)
+# Note: test.py creates .build/meson-quick/ directory (build mode-specific)
 uv run test.py --cpp --quick --no-fingerprint 2>/dev/null || true
 
 # Copy compile_commands.json to project root for clangd
-if [ -f ".build/meson/compile_commands.json" ]; then
-    cp .build/meson/compile_commands.json .
+# Note: Build system uses mode-specific directories (.build/meson-quick, etc.)
+if [ -f ".build/meson-quick/compile_commands.json" ]; then
+    cp .build/meson-quick/compile_commands.json .
     echo "✅ Generated compile_commands.json for VSCode IntelliSense"
 else
     echo "⚠️  Warning: compile_commands.json not found. Meson setup may have failed."
