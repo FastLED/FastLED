@@ -30,8 +30,6 @@
 /// Core differentiation is handled by core_detection.h which defines:
 /// - FL_STM32_CORE_STMDUINO, FL_STM32_CORE_LIBMAPLE, FL_STM32_CORE_PARTICLE, or FL_STM32_CORE_UNKNOWN
 
-#include "core_detection.h"
-
 // ============================================================================
 // FL_IS_STM32 - General STM32 platform detection
 // ============================================================================
@@ -57,6 +55,10 @@
     /* STM32U5 Family (160 MHz, Ultra Low Power) */ \
     defined(STM32U5) || defined(STM32U5xx)
 #define FL_IS_STM32
+
+// Only include core_detection.h when on STM32 platform
+#include "core_detection.h"
+
 #endif
 
 // ============================================================================
