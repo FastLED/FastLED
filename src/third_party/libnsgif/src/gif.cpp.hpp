@@ -1747,7 +1747,7 @@ nsgif_error nsgif_data_scan(
 	}
 
 	if (gif->lzw_ctx == nullptr) {
-		struct lzw_ctx *lzw_ctx_ptr;
+		struct lzw_ctx *lzw_ctx_ptr = nullptr;
 		lzw_result res = lzw_context_create(&lzw_ctx_ptr);
 		gif->lzw_ctx = lzw_ctx_ptr;
 		if (res != LZW_OK) {

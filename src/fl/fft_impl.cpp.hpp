@@ -27,15 +27,37 @@
 
 #include "fl/stl/cstring.h"
 
-#define AUDIO_SAMPLE_RATE 44100
-#define SAMPLES 512
-#define BANDS 16
-#define SAMPLING_FREQUENCY AUDIO_SAMPLE_RATE
-#define MAX_FREQUENCY 4698.3
-#define MIN_FREQUENCY 174.6
-#define MIN_VAL 5000 // Equivalent to 0.15 in Q15
+#ifndef FL_AUDIO_SAMPLE_RATE
+#define FL_AUDIO_SAMPLE_RATE 44100
+#endif
 
-#define PRINT_HEADER 1
+#ifndef FL_FFT_SAMPLE_RATE
+#define FL_FFT_SAMPLE_RATE FL_AUDIO_SAMPLE_RATE
+#endif
+
+#ifndef FL_FFT_SAMPLES
+#define FL_FFT_SAMPLES 512
+#endif
+
+#ifndef FL_FFT_BANDS
+#define FL_FFT_BANDS 16
+#endif
+
+#ifndef FL_FFT_MAX_FREQUENCY
+#define FL_FFT_MAX_FREQUENCY 4698.3
+#endif
+
+#ifndef FL_FFT_MIN_FREQUENCY
+#define FL_FFT_MIN_FREQUENCY 174.6
+#endif
+
+#ifndef FL_FFT_MIN_VAL
+#define FL_FFT_MIN_VAL 5000 // Equivalent to 0.15 in Q15
+#endif
+
+#ifndef FL_FFT_PRINT_HEADER
+#define FL_FFT_PRINT_HEADER 1
+#endif
 
 namespace fl {
 
@@ -49,7 +71,7 @@ class FFTContext {
         m_cq_cfg.fmin = fmin;
         m_cq_cfg.fmax = fmax;
         m_cq_cfg.fs = sample_rate;
-        m_cq_cfg.min_val = MIN_VAL;
+        m_cq_cfg.min_val = FL_FFT_MIN_VAL;
         m_fftr_cfg = kiss_fftr_alloc(samples, 0, nullptr, nullptr);
         if (!m_fftr_cfg) {
             FASTLED_WARN("Failed to allocate FFTImpl context");

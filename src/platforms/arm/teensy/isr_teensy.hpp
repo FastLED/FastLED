@@ -53,14 +53,6 @@ static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) {
     return static_cast<teensy_isr_handle_data*>(handle.platform_handle);
 }
 
-// Wrapper ISR that calls user handler
-static void teensy_timer_isr_wrapper() {
-    // Note: Teensy doesn't provide user_data in ISR callback, so we need static storage
-    // This is handled by storing one handle per timer instance
-    // For now, we'll use the IntervalTimer's internal mechanism
-    // The actual user handler will be called via the platform_handle lookup
-}
-
 // Global timer data pointer
 // Note: Teensy IntervalTimer API only supports one active timer at a time
 // due to lack of user_data parameter in ISR callback. This limitation means
