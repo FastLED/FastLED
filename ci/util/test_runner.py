@@ -1493,7 +1493,7 @@ def runner(
     # Skip if fingerprint cache indicates no changes
     if test_categories.unit_only:
         if cpp_test_change:
-            from ci.util.meson_runner import run_meson_build_and_test
+            from ci.meson.runner import run_meson_build_and_test
             from ci.util.paths import PROJECT_ROOT
 
             build_dir = PROJECT_ROOT / ".build" / "meson"
@@ -1530,7 +1530,7 @@ def runner(
 
     if test_categories.unit and not test_categories.unit_only:
         if cpp_test_change:
-            from ci.util.meson_runner import run_meson_build_and_test
+            from ci.meson.runner import run_meson_build_and_test
             from ci.util.paths import PROJECT_ROOT
 
             build_dir = PROJECT_ROOT / ".build" / "meson"

@@ -10,14 +10,10 @@ from pathlib import Path
 
 from running_process import RunningProcess
 
+from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
+from ci.meson.compiler import check_meson_installed, get_meson_executable
+from ci.meson.test_execution import MesonTestResult
 from ci.util.build_lock import libfastled_build_lock
-from ci.util.meson_runner import (
-    MesonTestResult,
-    check_meson_installed,
-    get_meson_executable,
-    perform_ninja_maintenance,
-    setup_meson_build,
-)
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
 

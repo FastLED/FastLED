@@ -1,6 +1,123 @@
-# Meson Build System Helper Scripts
+# Meson Build System Integration Package
 
-This directory contains Python helper scripts used by the Meson build system for file discovery and source organization.
+This directory contains the complete Meson build system integration for FastLED, refactored from the monolithic `ci/util/meson_runner.py` (2,760 lines) into focused modules for better maintainability.
+
+## Package Structure
+
+The `ci.meson` package is organized into 9 focused modules following a tier-based dependency hierarchy:
+
+### Tier 1: Leaf Modules (No Internal Dependencies)
+
+- **`output.py`** (~100 lines) - Output formatting and colored printing
+  - Functions: `_print_success()`, `_print_error()`, `_print_warning()`, `_print_info()`, `_print_banner()`
+
+- **`io_utils.py`** (~90 lines) - Safe file I/O operations
+  - Functions: `atomic_write_text()`, `write_if_different()`
+
+- **`compiler.py`** (~150 lines) - Compiler detection and Meson executable resolution
+  - Functions: `get_meson_executable()`, `check_meson_installed()`, `get_compiler_version()`
+
+### Tier 2: Basic Operations
+
+- **`test_discovery.py`** (~140 lines) - Test discovery and fuzzy matching
+  - Functions: `get_fuzzy_test_candidates()`, `get_source_files_hash()`
+
+### Tier 3: Core Operations
+
+- **`build_config.py`** (~650 lines) - Build configuration and setup
+  - Types: `CleanupResult` dataclass
+  - Functions: `cleanup_build_artifacts()`, `detect_system_llvm_tools()`, `setup_meson_build()`, `perform_ninja_maintenance()`
+
+- **`compile.py`** (~280 lines) - Compilation execution with IWYU support
+  - Functions: `compile_meson()`, `_create_error_context_filter()`
+
+- **`test_execution.py`** (~150 lines) - Individual test execution
+  - Types: `MesonTestResult` dataclass
+  - Functions: `run_meson_test()`
+
+### Tier 4: Advanced Operations
+
+- **`streaming.py`** (~300 lines) - Parallel streaming compilation and testing
+  - Functions: `stream_compile_and_run_tests()`
+
+### Tier 5: Orchestration
+
+- **`runner.py`** (~450 lines) - Main orchestration and CLI entry point
+  - Functions: `run_meson_build_and_test()`, `main()`
+
+## Migration Guide
+
+The old `ci.util.meson_runner` module is now a backward compatibility shim that shows a deprecation warning. Update your imports as follows:
+
+```python
+# OLD (deprecated)
+from ci.util.meson_runner import MesonTestResult
+from ci.util.meson_runner import run_meson_build_and_test
+from ci.util.meson_runner import setup_meson_build
+from ci.util.meson_runner import _print_banner
+
+# NEW (modular imports)
+from ci.meson.test_execution import MesonTestResult
+from ci.meson.runner import run_meson_build_and_test
+from ci.meson.build_config import setup_meson_build
+from ci.meson.output import _print_banner
+
+# OR use package-level exports for common functions
+from ci.meson import (
+    MesonTestResult,
+    run_meson_build_and_test,
+    setup_meson_build,
+    check_meson_installed,
+    get_meson_executable,
+    perform_ninja_maintenance,
+    _print_banner,
+)
+```
+
+### Updated Client Files
+
+The following files have been migrated to the new module structure:
+- ✅ `ci/util/meson_example_runner.py`
+- ✅ `ci/util/test_args.py`
+- ✅ `ci/util/test_runner.py`
+
+## Public API
+
+The `ci.meson` package exports these public APIs:
+
+| Export | Source Module | Description |
+|--------|---------------|-------------|
+| `MesonTestResult` | `test_execution` | Test result dataclass with success/duration/counts |
+| `run_meson_build_and_test()` | `runner` | Main build and test orchestration function |
+| `setup_meson_build()` | `build_config` | Set up Meson build directory with configuration |
+| `perform_ninja_maintenance()` | `build_config` | Periodic Ninja dependency database optimization |
+| `check_meson_installed()` | `compiler` | Check if Meson is installed and accessible |
+| `get_meson_executable()` | `compiler` | Resolve Meson executable path (venv preferred) |
+| `_print_banner()` | `output` | Print section separator banner |
+
+## Dependency Graph
+
+```
+runner.py (Tier 5)
+  ├─> streaming.py (Tier 4)
+  │   ├─> compile.py (Tier 3)
+  │   ├─> test_execution.py (Tier 3)
+  │   ├─> compiler.py (Tier 1)
+  │   └─> output.py (Tier 1)
+  ├─> build_config.py (Tier 3)
+  │   ├─> test_discovery.py (Tier 2)
+  │   │   └─> compiler.py (Tier 1)
+  │   ├─> io_utils.py (Tier 1)
+  │   ├─> compiler.py (Tier 1)
+  │   └─> output.py (Tier 1)
+  ├─> compile.py (Tier 3)
+  ├─> test_execution.py (Tier 3)
+  └─> test_discovery.py (Tier 2)
+```
+
+## Helper Scripts
+
+This directory also contains Python helper scripts used by the Meson build system for file discovery and source organization.
 
 ## Active Scripts
 
