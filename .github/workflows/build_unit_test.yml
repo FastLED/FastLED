@@ -133,11 +133,11 @@ jobs:
       - name: Run All Unit Tests
         working-directory: trusted
         run: |
-          ./test --clang --no-parallel --unit --verbose
+          ./test --clang --no-parallel --unit --verbose --debug
         shell: bash
 
       - name: Run All Examples
         working-directory: trusted
         run: |
-          ./test --clang --no-parallel --examples --verbose
+          ./test --clang --no-parallel --examples --verbose --debug
         shell: bash
