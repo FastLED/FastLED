@@ -190,11 +190,48 @@ public:
     /// Use this instead of std::this_thread::sleep_for() for deterministic testing.
     void advanceTime(uint64_t microseconds);
 
+    /// @brief Pump virtual time forward (semantic alias for advanceTime)
+    /// @param microseconds Amount to advance virtual time
+    ///
+    /// Convenience method for test readability. Equivalent to advanceTime().
+    /// Use this in test code to make time advancement explicit.
+    void pumpTime(uint64_t microseconds);
+
     /// @brief Get current virtual time
     /// @return Current virtual time in microseconds
     ///
     /// Returns 0 if virtual time mode is disabled.
     uint64_t getVirtualTime() const;
+
+    //-------------------------------------------------------------------------
+    // Timing Inspection (for deterministic testing)
+    //-------------------------------------------------------------------------
+
+    /// @brief Get calculated transmission duration for last writeBytes() call
+    /// @return Transmission duration in microseconds
+    ///
+    /// Returns the transmission delay calculated based on baud rate and byte count.
+    /// Useful for tests that need to pump time forward by exact amounts.
+    uint64_t getTransmissionDuration() const;
+
+    /// @brief Get calculated reset period duration
+    /// @return Reset duration in microseconds
+    ///
+    /// Returns the reset period duration (minimum 50μs for WS2812 compatibility).
+    /// The reset period equals transmission duration or 50μs, whichever is larger.
+    uint64_t getResetDuration() const;
+
+    /// @brief Get time remaining until transmission complete
+    /// @return Microseconds until transmission finishes (0 if not transmitting)
+    ///
+    /// Returns time remaining in transmission phase (before reset period).
+    uint64_t getRemainingTransmissionTime() const;
+
+    /// @brief Get time remaining until reset period complete
+    /// @return Microseconds until reset expires (0 if not in reset)
+    ///
+    /// Returns time remaining in reset period (after transmission).
+    uint64_t getRemainingResetTime() const;
 
     //-------------------------------------------------------------------------
     // Waveform Extraction (for validation)
@@ -256,6 +293,13 @@ private:
     /// @brief Check if transmission is complete based on timing
     /// @return true if enough time has elapsed, false otherwise
     bool isTransmissionComplete() const;
+
+    /// @brief Update transmission state based on elapsed time
+    ///
+    /// Transitions mBusy from true to false when transmission completes,
+    /// and sets reset timer. Separates state updates from state queries
+    /// to make isBusy() const-correct.
+    void updateTransmissionState();
 };
 
 } // namespace fl

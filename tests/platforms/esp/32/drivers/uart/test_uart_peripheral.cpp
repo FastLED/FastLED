@@ -306,29 +306,43 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
     UartConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Automatic transmission timing (default)") {
+    SUBCASE("Automatic transmission timing (deterministic)") {
+        // Enable virtual time mode for deterministic testing
+        mock.setVirtualTimeMode(true);
+
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
         // With automatic timing calculation, transmission delay is calculated from baud rate
         // 1 byte × 10 bits (8N1) = 10 bits at 3200000 baud = ~3.125 microseconds + 10us overhead
-        FL_CHECK(mock.isBusy());  // Should be busy (transmission not instant)
-        FL_CHECK(mock.waitTxDone(1000));  // Wait should succeed within timeout
-        // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
-        fl::this_thread::sleep_for(fl::chrono::microseconds(60));
-        FL_CHECK_FALSE(mock.isBusy());
+        FL_CHECK(mock.isBusy());  // Should be busy immediately after write
+
+        // Pump time through transmission delay
+        uint64_t tx_duration = mock.getTransmissionDuration();
+        mock.pumpTime(tx_duration);
+        FL_CHECK(mock.isBusy());  // Still busy (in reset period)
+
+        // Pump time through reset period
+        uint64_t reset_duration = mock.getResetDuration();
+        mock.pumpTime(reset_duration);
+        FL_CHECK_FALSE(mock.isBusy());  // Now idle
     }
 
-    SUBCASE("Delayed transmission") {
+    SUBCASE("Delayed transmission (deterministic)") {
+        // Enable virtual time mode for deterministic testing
+        mock.setVirtualTimeMode(true);
         mock.setTransmissionDelay(1000);  // 1ms delay
 
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.isBusy());
 
-        // Wait should succeed within timeout
-        FL_CHECK(mock.waitTxDone(5000));
-        // Wait for reset period (50us WS2812 reset requirement) - reduced from 100us to 60us for performance
-        fl::this_thread::sleep_for(fl::chrono::microseconds(60));
+        // Pump time through transmission delay
+        mock.pumpTime(1000);
+        FL_CHECK(mock.isBusy());  // Still busy (in reset period)
+
+        // Pump time through reset period
+        uint64_t reset_duration = mock.getResetDuration();
+        mock.pumpTime(reset_duration);
         FL_CHECK_FALSE(mock.isBusy());
     }
 
@@ -443,5 +457,127 @@ TEST_CASE("UartPeripheralMock - Edge cases") {
         FL_CHECK(waveform[7] == false);   // B6 = 0
         FL_CHECK(waveform[8] == true);    // B7 = 1
         FL_CHECK(waveform[9] == true);    // Stop bit
+    }
+}
+
+TEST_CASE("UartPeripheralMock - Virtual time control") {
+    UartPeripheralMock mock;
+    UartConfig config = createDefaultConfig();
+    FL_CHECK(mock.initialize(config));
+    mock.setVirtualTimeMode(true);
+
+    SUBCASE("Manual time pumping - transmission lifecycle") {
+        uint8_t data = 0xA5;
+        FL_CHECK(mock.writeBytes(&data, 1));
+
+        // Immediately after write: busy
+        FL_CHECK(mock.isBusy());
+        FL_CHECK(mock.getRemainingTransmissionTime() > 0);
+        FL_CHECK(mock.getRemainingResetTime() == 0);  // Not in reset yet
+
+        // Query calculated delays
+        uint64_t tx_duration = mock.getTransmissionDuration();
+        uint64_t reset_duration = mock.getResetDuration();
+        FL_CHECK(tx_duration > 0);
+        FL_CHECK(reset_duration >= 50);  // Minimum WS2812 reset
+
+        // Pump time forward to transmission complete (but not past reset)
+        mock.pumpTime(tx_duration);
+        FL_CHECK(mock.isBusy());  // Still busy (in reset period)
+        FL_CHECK(mock.getRemainingTransmissionTime() == 0);  // Transmission done
+        FL_CHECK(mock.getRemainingResetTime() > 0);  // In reset period
+
+        // Pump time forward through reset period
+        mock.pumpTime(reset_duration);
+        FL_CHECK_FALSE(mock.isBusy());  // Now idle
+        FL_CHECK(mock.getRemainingTransmissionTime() == 0);
+        FL_CHECK(mock.getRemainingResetTime() == 0);
+
+        // Verify captured data
+        auto captured = mock.getCapturedBytes();
+        FL_REQUIRE(captured.size() == 1);
+        FL_CHECK(captured[0] == 0xA5);
+    }
+
+    SUBCASE("Partial time advancement") {
+        uint8_t data = 0xA5;
+        FL_CHECK(mock.writeBytes(&data, 1));
+
+        uint64_t tx_duration = mock.getTransmissionDuration();
+        uint64_t remaining = mock.getRemainingTransmissionTime();
+        FL_CHECK(remaining == tx_duration);
+
+        // Pump halfway through transmission
+        mock.pumpTime(tx_duration / 2);
+        uint64_t new_remaining = mock.getRemainingTransmissionTime();
+        FL_CHECK(new_remaining < remaining);
+        FL_CHECK(new_remaining > 0);
+        FL_CHECK(mock.isBusy());  // Still transmitting
+
+        // Pump to completion
+        mock.pumpTime(new_remaining);
+        FL_CHECK(mock.getRemainingTransmissionTime() == 0);
+        FL_CHECK(mock.getRemainingResetTime() > 0);  // Now in reset period
+        FL_CHECK(mock.isBusy());  // Still busy (reset)
+
+        // Complete reset period
+        uint64_t reset_remaining = mock.getRemainingResetTime();
+        mock.pumpTime(reset_remaining);
+        FL_CHECK_FALSE(mock.isBusy());
+    }
+
+    SUBCASE("Virtual time query methods") {
+        FL_CHECK(mock.getVirtualTime() > 0);  // Should be initialized to non-zero
+        uint64_t start_time = mock.getVirtualTime();
+
+        mock.pumpTime(1000);
+        FL_CHECK(mock.getVirtualTime() == start_time + 1000);
+
+        mock.pumpTime(500);
+        FL_CHECK(mock.getVirtualTime() == start_time + 1500);
+    }
+
+    SUBCASE("Multiple transmissions with virtual time") {
+        // First transmission
+        uint8_t data1 = 0xAA;
+        FL_CHECK(mock.writeBytes(&data1, 1));
+        uint64_t tx1 = mock.getTransmissionDuration();
+        uint64_t reset1 = mock.getResetDuration();
+        mock.pumpTime(tx1 + reset1);
+        FL_CHECK_FALSE(mock.isBusy());
+
+        // Second transmission
+        uint8_t data2 = 0x55;
+        FL_CHECK(mock.writeBytes(&data2, 1));
+        uint64_t tx2 = mock.getTransmissionDuration();
+        uint64_t reset2 = mock.getResetDuration();
+        mock.pumpTime(tx2 + reset2);
+        FL_CHECK_FALSE(mock.isBusy());
+
+        // Verify both captures
+        auto captured = mock.getCapturedBytes();
+        FL_REQUIRE(captured.size() == 2);
+        FL_CHECK(captured[0] == 0xAA);
+        FL_CHECK(captured[1] == 0x55);
+    }
+
+    SUBCASE("waitTxDone() in virtual time mode") {
+        uint8_t data = 0xA5;
+        FL_CHECK(mock.writeBytes(&data, 1));
+
+        // In virtual time mode, waitTxDone() is non-blocking
+        // It only checks/updates current state based on virtual time
+        FL_CHECK(mock.isBusy());  // Still busy (time not advanced)
+
+        // Must manually pump time to advance
+        uint64_t tx_duration = mock.getTransmissionDuration();
+        uint64_t reset_duration = mock.getResetDuration();
+
+        // Pump through both transmission and reset
+        mock.pumpTime(tx_duration + reset_duration);
+
+        // Now fully complete
+        FL_CHECK_FALSE(mock.isBusy());
+        FL_CHECK(mock.waitTxDone(1000));  // Returns true (complete)
     }
 }
