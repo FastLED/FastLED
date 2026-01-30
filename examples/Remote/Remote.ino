@@ -167,6 +167,10 @@ void loop() {
                     response.set("result", result);
                 }
                 break;
+            case fl::Remote::Error::InvalidParams:
+                response.set("status", "error");
+                response.set("error", "Invalid parameters for typed RPC method");
+                break;
         }
 
         // Output prefixed single-line JSON response

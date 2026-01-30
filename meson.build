@@ -101,6 +101,7 @@ base_warnings = [
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
   '-Werror=unused-result',     # Treat ignored FL_NODISCARD return values as errors
+  '-Werror=switch',            # Treat missing switch cases as errors
 ]
 
 # Add GCC-specific warnings (maybe-uninitialized is GCC-only, not available in Clang)
