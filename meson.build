@@ -292,17 +292,12 @@ else
 endif
 
 # ============================================================================
-# Detect libunwind library for enhanced stack traces (Unix only)
+# libunwind for enhanced stack traces (Unix only)
 # ============================================================================
 # libunwind provides detailed stack unwinding for crash handlers on Unix systems
-# When found, enables USE_LIBUNWIND define for crash_handler_libunwind.h
-libunwind_dep = dependency('libunwind', required: false)
-if libunwind_dep.found()
-  message('libunwind found - enhanced stack traces enabled')
-  base_defines += ['-DUSE_LIBUNWIND']
-else
-  message('libunwind not found - using fallback crash handler')
-endif
+# Always enabled - libunwind is injected via DLL at runtime by clang-tool-chain
+message('libunwind enabled via DLL injection - enhanced stack traces enabled')
+base_defines += ['-DUSE_LIBUNWIND']
 
 # Build main FastLED static library (includes ALL sources EXCEPT platforms/shared)
 # platforms/shared files are intentionally excluded to avoid weak/strong symbol conflicts

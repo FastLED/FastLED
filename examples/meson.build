@@ -126,16 +126,11 @@ stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 # ============================================================================
 # Build crash handler library for example_runner.exe
 # Reuse the crash handler from tests (same implementation)
-crash_handler_deps_example = []
-if libunwind_dep.found()
-  crash_handler_deps_example += [libunwind_dep]
-endif
-
+# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
 crash_handler_example = static_library('crash_handler_example',
   files('../tests/shared/crash_handler_main.cpp'),
   include_directories: [src_dir, stub_dir, tests_dir],
   cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
-  dependencies: crash_handler_deps_example,
   install: false
 )
 
@@ -150,20 +145,13 @@ crash_handler_example = static_library('crash_handler_example',
 #
 # NOTE: runner_link_args and runner_cpp_args are defined in root meson.build
 # and shared with tests/meson.build for consistency.
-example_runner_deps = []
-if libunwind_dep.found() and build_mode != 'debug'
-  # Only add libunwind in non-debug modes (debug uses dynamic linking)
-  # clang-tool-chain provides libunwind on all platforms including Windows
-  example_runner_deps += [libunwind_dep]
-endif
-
+# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
   include_directories: [src_dir, stub_dir],
   cpp_args: runner_cpp_args,
   link_args: runner_link_args,
   link_with: [crash_handler_example, fastled_lib],
-  dependencies: example_runner_deps,
   install: false
 )
 
