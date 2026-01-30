@@ -186,10 +186,19 @@ is_windows = build_machine.system() == 'windows'
 
 # Common link arguments for all platforms (LLD is forced via -fuse-ld=lld)
 # This ensures consistent linker behavior across Windows, Linux, and macOS.
-common_link_args = [
-  '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
-  '-Wl,--no-undefined',       # Catch undefined symbols at link time
-]
+# NOTE: -Wl,--no-undefined is only added in quick/release modes because
+# sanitizers (ASan/UBSan) have symbols resolved at runtime, not link time.
+# See: https://github.com/google/sanitizers/issues/380
+if build_mode == 'debug'
+  common_link_args = [
+    '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
+  ]
+else
+  common_link_args = [
+    '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
+    '-Wl,--no-undefined',       # Catch undefined symbols at link time
+  ]
+endif
 
 # Base link arguments (shared foundation for all link types)
 if is_windows
