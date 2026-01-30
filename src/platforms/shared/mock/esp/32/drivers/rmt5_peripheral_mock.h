@@ -117,7 +117,8 @@ public:
                         uint32_t resolution_hz) override = 0;
     void deleteEncoder(void* encoder_handle) override = 0;
     bool resetEncoder(void* encoder_handle) override = 0;
-    bool registerTxCallback(void* channel_handle, void* callback,
+    bool registerTxCallback(void* channel_handle,
+                            Rmt5TxDoneCallback callback,
                             void* user_ctx) override = 0;
     void configureLogging() override = 0;
     bool syncCache(void* buffer, size_t size) override = 0;

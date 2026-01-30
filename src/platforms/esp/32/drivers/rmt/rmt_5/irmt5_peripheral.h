@@ -56,6 +56,26 @@ struct ChipsetTiming;
 namespace detail {
 
 //=============================================================================
+// Callback Types
+//=============================================================================
+
+/// @brief TX done callback type for RMT transmission completion
+///
+/// This callback is invoked when RMT transmission completes.
+/// It runs in ISR context on ESP32, so it must be ISR-safe.
+///
+/// @param channel_handle Opaque channel handle (rmt_channel_handle_t on ESP32)
+/// @param event_data Opaque event data pointer (rmt_tx_done_event_data_t* on ESP32, may be nullptr)
+/// @param user_ctx User context pointer from registerTxCallback
+/// @return true if high-priority task was woken, false otherwise
+///
+/// Note: Uses void* for event_data to match ESP-IDF's callback signature exactly,
+/// avoiding any function pointer casting which would trigger UBSan.
+using Rmt5TxDoneCallback = bool (*)(void* channel_handle,
+                                     const void* event_data,
+                                     void* user_ctx);
+
+//=============================================================================
 // Configuration Structures
 //=============================================================================
 
@@ -295,21 +315,16 @@ public:
 
     /// @brief Register ISR callback for transmission completion events
     /// @param channel_handle Channel handle from createTxChannel()
-    /// @param callback Function pointer to ISR callback (cast to void*)
+    /// @param callback Function pointer to ISR callback
     /// @param user_ctx User context pointer (passed to callback)
     /// @return true on success, false on error
     ///
     /// Maps to ESP-IDF: rmt_tx_register_event_callbacks()
     ///
-    /// Callback signature (cast from void*):
-    /// ```cpp
-    /// bool callback(void* channel, const void* edata, void* user_ctx);
-    /// ```
-    ///
     /// The callback:
     /// - Runs in ISR context (MUST be ISR-safe)
     /// - Receives opaque channel handle (implementation-specific)
-    /// - Receives event data (implementation-specific, typically nullptr)
+    /// - Receives event data (may be nullptr)
     /// - Receives user context pointer (set via this method)
     /// - Returns true if high-priority task woken, false otherwise
     ///
@@ -318,7 +333,8 @@ public:
     /// - NO blocking operations (mutex, delay, heap allocation)
     /// - MINIMIZE execution time (<10µs ideal)
     /// - Use atomic operations and memory barriers for shared state
-    virtual bool registerTxCallback(void* channel_handle, void* callback,
+    virtual bool registerTxCallback(void* channel_handle,
+                                    Rmt5TxDoneCallback callback,
                                     void* user_ctx) = 0;
 
     //=========================================================================

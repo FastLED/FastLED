@@ -36,7 +36,7 @@ struct MockChannel {
     int id;
     Rmt5ChannelConfig config;
     bool enabled;
-    void* callback;
+    Rmt5TxDoneCallback callback;
     void* user_ctx;
 
     MockChannel()
@@ -85,7 +85,8 @@ public:
                         uint32_t resolution_hz) override;
     void deleteEncoder(void* encoder_handle) override;
     bool resetEncoder(void* encoder_handle) override;
-    bool registerTxCallback(void* channel_handle, void* callback,
+    bool registerTxCallback(void* channel_handle,
+                            Rmt5TxDoneCallback callback,
                             void* user_ctx) override;
     void configureLogging() override;
     bool syncCache(void* buffer, size_t size) override;
@@ -372,7 +373,8 @@ bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, uint32_t timeout_
 // ISR Callback Registration
 //=============================================================================
 
-bool Rmt5PeripheralMockImpl::registerTxCallback(void* channel_handle, void* callback,
+bool Rmt5PeripheralMockImpl::registerTxCallback(void* channel_handle,
+                                                 Rmt5TxDoneCallback callback,
                                                  void* user_ctx) {
     MockChannel* channel = findChannel(channel_handle);
     if (channel == nullptr) {
@@ -514,13 +516,9 @@ void Rmt5PeripheralMockImpl::simulateTransmitDone(void* channel_handle) {
         return;
     }
 
-    // Call the TX callback
-    // Signature: bool callback(void* channel, const void* edata, void* user_ctx)
-    using CallbackType = bool (*)(void*, const void*, void*);
-    CallbackType cb = fl::bit_cast<CallbackType>(channel->callback);
-
     FL_DBG("RMT5_MOCK: Triggering TX callback for channel " << channel->id);
-    cb(channel_handle, nullptr, channel->user_ctx);
+    // Pass nullptr for event_data (matches ESP-IDF behavior for simple transmissions)
+    channel->callback(channel_handle, nullptr, channel->user_ctx);
 }
 
 void Rmt5PeripheralMockImpl::setTransmitFailure(bool should_fail) {

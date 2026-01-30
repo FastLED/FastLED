@@ -1155,8 +1155,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief ISR callback for transmission completion
     static bool IRAM_ATTR transmitDoneCallback(
-        rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata,
-        void *user_data);
+        void* channel, const void* edata,
+        void* user_data);
 
     /// @brief Peripheral interface (real or mock)
     IRMT5Peripheral& mPeripheral;
@@ -1324,7 +1324,7 @@ bool ChannelEngineRMTImpl::registerChannelCallback(ChannelState *state) {
     // vector reallocation)
     bool success = mPeripheral.registerTxCallback(
         state->channel,
-        fl::bit_cast<void*>(&transmitDoneCallback),
+        &transmitDoneCallback,
         state);
     if (!success) {
         FL_WARN("Failed to register callbacks");
@@ -1457,8 +1457,9 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) {
 /// This multi-layered approach provides both correctness (hardware wait) and
 /// fail-fast debugging (assertions catch any timing bugs).
 bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
-    rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata,
-    void *user_data) {
+    void* channel, const void* edata,
+    void* user_data) {
+    // Note: edata is rmt_tx_done_event_data_t* on ESP32, but we don't use it
     ChannelState *state = static_cast<ChannelState *>(user_data);
     if (!state) {
         // ISR callback received null user_data - this is a bug

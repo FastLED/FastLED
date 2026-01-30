@@ -64,7 +64,8 @@ public:
                         uint32_t resolution_hz) override;
     void deleteEncoder(void* encoder_handle) override;
     bool resetEncoder(void* encoder_handle) override;
-    bool registerTxCallback(void* channel_handle, void* callback,
+    bool registerTxCallback(void* channel_handle,
+                            Rmt5TxDoneCallback callback,
                             void* user_ctx) override;
     void configureLogging() override;
     bool syncCache(void* buffer, size_t size) override;
@@ -254,20 +255,21 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, uint32_t timeout_m
 // ISR Callback Registration
 //=============================================================================
 
-bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle, void* callback,
+bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
+                                                Rmt5TxDoneCallback callback,
                                                 void* user_ctx) {
     if (channel_handle == nullptr || callback == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Invalid parameter (nullptr)");
         return false;
     }
 
-    // Cast callback to proper type
-    using CallbackType = bool (*)(rmt_channel_handle_t, const rmt_tx_done_event_data_t*, void*);
-    CallbackType cb = fl::bit_cast<CallbackType>(callback);
-
     // Configure callbacks structure
+    // Rmt5TxDoneCallback signature matches rmt_tx_event_callback_t exactly:
+    // - Both use void* for channel (rmt_channel_handle_t is void*)
+    // - Both use const void* for event data
+    // - Both use void* for user context
     rmt_tx_event_callbacks_t cbs = {};
-    cbs.on_trans_done = cb;
+    cbs.on_trans_done = callback;
 
     // Delegate to ESP-IDF
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
