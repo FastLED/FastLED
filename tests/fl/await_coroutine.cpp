@@ -482,7 +482,6 @@ TEST_CASE("global coordination - await releases lock for other threads") {
 
     fl::atomic<int> coroutine1_progress(0);
     fl::atomic<int> coroutine2_progress(0);
-    fl::atomic<bool> both_completed(false);
 
     // Spawn two coroutines that await different promises
     CoroutineConfig config1;
@@ -513,21 +512,19 @@ TEST_CASE("global coordination - await releases lock for other threads") {
 
         // Check if coroutine 1 made progress
         FL_CHECK(coroutine1_progress.load() >= 1);
-
-        both_completed.store(true);
     };
     config2.name = "TestCoro2";
     auto coro2 = task::coroutine(config2);
 
-    // Wait for both coroutines to complete (5000ms total timeout)
+    // Wait for BOTH coroutines to actually complete (progress == 2)
+    // This avoids race condition where one coroutine finishes before the other
     int timeout = 0;
-    while (!both_completed.load() && timeout < 5000) {
+    while ((coroutine1_progress.load() < 2 || coroutine2_progress.load() < 2) && timeout < 5000) {
         async_yield();
         delay(10);
         timeout += 10;
     }
 
-    FL_CHECK(both_completed.load());
     FL_CHECK(coroutine1_progress.load() == 2);
     FL_CHECK(coroutine2_progress.load() == 2);
 
