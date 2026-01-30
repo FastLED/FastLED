@@ -196,15 +196,14 @@ private:
     fl::queue<fl::weak_ptr<CoroutineContext>> mQueue;
 };
 
-// CRITICAL: File-scope static instance to ensure DLL boundary sharing on Windows.
-// Function-local statics and template singletons create separate instances per DLL/EXE,
-// causing coroutine synchronization failures. A file-scope static in the .cpp ensures
-// the singleton lives in the DLL and is shared by all consumers (EXE + DLL).
-static CoroutineRunnerImpl gCoroutineRunnerInstance;
-
-// CoroutineRunner singleton accessor
+// CoroutineRunner singleton accessor using fl::Singleton pattern.
+// Uses function-local fl::Singleton to guarantee construction on first use,
+// avoiding the static initialization order fiasco. This is critical because
+// fl::delay() may be called from global constructors (e.g., button debounce
+// delays). fl::Singleton also ensures the destructor is never called, avoiding
+// shutdown order issues.
 CoroutineRunner& CoroutineRunner::instance() {
-    return gCoroutineRunnerInstance;
+    return fl::Singleton<CoroutineRunnerImpl>::instance();
 }
 
 // ===== Global execution lock for cooperative multitasking =====
@@ -212,8 +211,17 @@ CoroutineRunner& CoroutineRunner::instance() {
 // This lock ensures only one thread executes "user code" at a time.
 // It provides a single-threaded execution model on top of real threads.
 
-// File-scope static mutex for DLL boundary sharing (same rationale as CoroutineRunner)
-static fl::mutex gGlobalExecutionMutex;
+// Wrapper struct to use with fl::Singleton (which requires a class type).
+struct GlobalExecutionMutex {
+    fl::mutex mutex;
+};
+
+// Returns the global execution mutex using fl::Singleton pattern.
+// This avoids static initialization order fiasco when fl::delay() is called
+// from global constructors, and ensures the destructor is never called.
+static fl::mutex& get_global_execution_mutex() {
+    return fl::Singleton<GlobalExecutionMutex>::instance().mutex;
+}
 
 // Thread-local flag to track if current thread holds the global execution lock.
 // Each thread has its own copy, so coroutines and main thread track independently.
@@ -229,17 +237,17 @@ static bool& get_holding_execution_lock() {
 }
 
 void global_execution_lock() {
-    gGlobalExecutionMutex.lock();
+    get_global_execution_mutex().lock();
     get_holding_execution_lock() = true;
 }
 
 void global_execution_unlock() {
     get_holding_execution_lock() = false;
-    gGlobalExecutionMutex.unlock();
+    get_global_execution_mutex().unlock();
 }
 
 bool global_execution_try_lock() {
-    bool acquired = gGlobalExecutionMutex.try_lock();
+    bool acquired = get_global_execution_mutex().try_lock();
     if (acquired) {
         get_holding_execution_lock() = true;
     }
