@@ -123,9 +123,12 @@ base_common = [
 # Stack trace preservation flags (used in debug and quick modes only)
 stack_trace_flags = [
   '-fno-omit-frame-pointer',      # Keep frame pointers for stack traces
-  '-fno-inline-small-functions',  # Preserve function names (don't inline small funcs)
   '-fno-optimize-sibling-calls',  # Preserve tail call frames for complete stack traces
 ]
+# Add GCC-specific stack trace flag (not supported by Clang)
+if cpp_compiler.get_id() == 'gcc'
+  stack_trace_flags += ['-fno-inline-small-functions']  # Preserve function names (GCC only)
+endif
 
 # Mode-specific optimization flags
 build_mode = get_option('build_mode')
