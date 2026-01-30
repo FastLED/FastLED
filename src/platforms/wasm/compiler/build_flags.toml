@@ -7,10 +7,9 @@
 #
 # Key Features:
 # - Single source of truth for all compiler flags, defines, and build settings
-# - Auto-regenerates cmake_flags.cmake when this file changes
 # - Supports fallback loading from FastLED source tree
 # - Dynamic DWARF source resolution with ~1 second reload interval
-# - Consistent flags across CMake builds (Docker) and native builds (direct emcc)
+# - Consistent flags across Docker and native builds (direct emcc)
 #
 # Performance Optimization Override:
 # - Set FASTLED_FORCE_BUILTIN_FLAGS=1 to force using this optimized configuration

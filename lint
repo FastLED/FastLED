@@ -81,7 +81,6 @@ done
 # Unset VIRTUAL_ENV to avoid warnings about mismatched paths
 unset VIRTUAL_ENV
 
-echo "Linting tests/ for temporary cmake files"
 # Remove Visual Studio project files if they exist
 find tests/ -name "*.vcxproj" -exec rm {} \; 2>/dev/null || true
 find tests/ -name "*.vcxproj.filters" -exec rm {} \; 2>/dev/null || true

@@ -1265,11 +1265,11 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                 
                 if "ubuntu" in distro_info or "debian" in distro_info:
                     install_commands.append("sudo apt-get update")
-                    install_commands.append("sudo apt-get install -y libunwind-dev build-essential cmake")
+                    install_commands.append("sudo apt-get install -y libunwind-dev build-essential")
                 elif "centos" in distro_info or "rhel" in distro_info:
-                    install_commands.append("sudo yum install -y libunwind-devel gcc-c++ cmake")
+                    install_commands.append("sudo yum install -y libunwind-devel gcc-c++")
                 elif "fedora" in distro_info:
-                    install_commands.append("sudo dnf install -y libunwind-devel gcc-c++ cmake")
+                    install_commands.append("sudo dnf install -y libunwind-devel gcc-c++")
                 else:
                     result_text += "⚠️  Unknown Linux distribution. Manual installation required.\n"
                     result_text += "Common package names: libunwind-dev, libunwind-devel\n\n"
@@ -1281,11 +1281,11 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                 # Still need build tools
                 if "ubuntu" in distro_info or "debian" in distro_info:
                     install_commands.append("sudo apt-get update")
-                    install_commands.append("sudo apt-get install -y build-essential cmake")
+                    install_commands.append("sudo apt-get install -y build-essential")
                 elif "centos" in distro_info or "rhel" in distro_info:
-                    install_commands.append("sudo yum install -y gcc-c++ cmake")
+                    install_commands.append("sudo yum install -y gcc-c++")
                 elif "fedora" in distro_info:
-                    install_commands.append("sudo dnf install -y gcc-c++ cmake")
+                    install_commands.append("sudo dnf install -y gcc-c++")
             
             # Run installation commands
             for cmd in install_commands:
@@ -1321,10 +1321,8 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             result_text += "Building crash test programs...\n"
             
             try:
-                # Clean and rebuild
-                _ = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
-                _ = await run_command(["cmake", "."], tests_dir)
-                _ = await run_command(["make", "-j4"], tests_dir)
+                # Build using uv run test.py
+                _ = await run_command(["uv", "run", "test.py", "--cpp"], project_root)
                 result_text += "[OK] FastLED test framework built successfully\n\n"
                 
                 # Test by running a simple unit test to verify stack traces work
@@ -1357,8 +1355,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
         
         result_text += "### Testing Stack Trace Integration\n"
         result_text += "```bash\n"
-        result_text += "cd tests\n"
-        result_text += "cmake . && make\n"
+        result_text += "uv run test.py --cpp\n"
         result_text += "# Stack traces are automatically enabled in test executables\n"
         result_text += "# Run any test to see crash handling in action if a test fails\n"
         result_text += "```\n\n"

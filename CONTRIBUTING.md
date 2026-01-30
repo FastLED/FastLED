@@ -52,16 +52,6 @@ Shared code is unit-tested on the host machine. They can be found at `tests/` at
 
 The easiest way to run the tests is just use `./test`
 
-Alternatively, tests can be built and run for your development machine with CMake:
-
-```bash
-cmake -S tests -B tests/.build
-ctest --test-dir tests/.build --output-on-failure
-# Not that this will fail if you do not have gcc installed. When in doubt
-# use ./test to compile the unit tests, as a compiler is guaranteed to be
-# available via this tool.
-```
-
 ## QEMU Emulation Testing
 
 FastLED supports testing ESP32-S3 examples in QEMU emulation, providing a powerful way to validate code without physical hardware.

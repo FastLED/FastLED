@@ -21,13 +21,12 @@ Click this button or visit `https://gitpod.io/#https://github.com/FastLED/FastLE
 
 - **Python 3.11** with uv package manager
 - **PlatformIO** for embedded development
-- **C++ toolchain** (clang, gcc, cmake, ninja)
+- **C++ toolchain** (clang, gcc, ninja, meson)
 - **QEMU** for ESP32 emulation
 - **VS Code extensions**:
   - PlatformIO IDE
   - Python + Pylance
   - C/C++ tools
-  - CMake tools
 
 ## Available Commands
 

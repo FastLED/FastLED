@@ -20,7 +20,6 @@ dependencies = [
     "clang-tool-chain[sccache]>=1.0.39",
     "ninja",
     "meson>=1.10.0",
-    "cmake",
     "download",
     "playwright",
     "httpx",

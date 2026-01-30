@@ -22,8 +22,7 @@
         "platformio.platformio-ide",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-vscode.cpptools-extension-pack",
-        "ms-vscode.cmake-tools"
+        "ms-vscode.cpptools-extension-pack"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python3.11",

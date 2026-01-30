@@ -5,7 +5,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
     build-essential \
     clang-format \
-    cmake \
     ninja-build \
     git-lfs \
     qemu-system \

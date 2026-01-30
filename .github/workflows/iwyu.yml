@@ -48,7 +48,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
             build-essential \
-            cmake \
             llvm-19 \
             clang-19 \
             libclang-19-dev \
