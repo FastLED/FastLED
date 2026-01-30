@@ -20,7 +20,7 @@ This project uses directory-specific agent guidelines. See:
 - `uv run test.py` - Run all tests
 - `uv run test.py --cpp` - Run C++ tests only
 - `uv run test.py TestName` - Run specific C++ test (e.g., `uv run test.py xypath`)
-- `uv run test.py --no-fingerprint` - Disable fingerprint caching (force rebuild/rerun)
+- `uv run test.py --no-fingerprint` - Disable fingerprint caching (force rebuild/rerun) ⚠️ **Avoid unless necessary - very slow**
 - `bash lint` - Run code formatting/linting
 - `bash validate` - 🎯 **AI agents: Use this for live device testing** (hardware-in-the-loop validation)
 - `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
@@ -84,7 +84,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run python ci/util/meson_example_runner.py Blink --build-mode release` - Direct invocation (release)
 
 **Build Modes:**
-- **quick** (default): Fast compilation with minimal debug info (`-O0 -g1`)
+- **quick** (default): Light optimization with minimal debug info (`-O1 -g1`)
   - Build directory: `.build/meson-quick/examples/`
   - Binary size: Baseline (e.g., Blink: 2.8M)
   - Use case: Fast iteration and testing
@@ -96,7 +96,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
   - Use case: Debugging crashes, memory issues, undefined behavior
   - Benefits: Detects buffer overflows, use-after-free, memory leaks, integer overflow, null dereference
 
-- **release**: Optimized production build (`-O0 -g1`)
+- **release**: Optimized production build (`-O2 -DNDEBUG`)
   - Build directory: `.build/meson-release/examples/`
   - Binary size: Smallest, 20% smaller than quick (e.g., Blink: 2.3M)
   - Use case: Performance testing
@@ -506,6 +506,12 @@ The package installation daemon is a singleton background process that ensures P
   - Clang 21.1.5 provides proper MSVC compatibility layer and resolves these issues
   - test.py automatically uses clang on Windows (can override with `--gcc` flag)
   - The clang-tool-chain wrappers include sccache integration for fast builds
+- **Unified GNU Build (Windows ≈ Linux)**: clang-tool-chain provides a uniform GNU-style build environment across all platforms:
+  - **Same link flags**: `-fuse-ld=lld`, `-pthread`, `-static`, `-rdynamic` work identically on Windows and Linux
+  - **Same libraries**: Libraries like `libunwind` are available on Windows via DLL injection - no platform-specific code needed
+  - **Meson configuration**: The root `meson.build` defines shared `runner_link_args`, `runner_cpp_args`, and `dll_link_args` used by both tests and examples
+  - **Platform differences are minimal**: Only `dbghelp`/`psapi` (Windows debug libs) and macOS static linking restrictions require platform checks
+  - **Benefits**: Write platform-agnostic build logic; avoid `if is_windows` conditionals for most cases
 - **🚫 NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way
   - ✅ If sccache fails: Investigate and fix the root cause (e.g., `sccache --stop-server` to reset)
   - ❌ Never use: `SCCACHE_DISABLE=1` as a workaround for sccache errors

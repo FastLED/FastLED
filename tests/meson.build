@@ -82,61 +82,22 @@ crash_handler_runner = static_library('crash_handler_runner',
 # instead of in each test_X.dll (176 times), significantly reducing build time.
 # The runner.exe provides these symbols to the loaded DLL at runtime.
 # Crash handler is also setup in runner.exe before loading any DLL.
-# Runner link arguments: Force LLD linker on all platforms for consistency.
-# LLD is used everywhere via -fuse-ld=lld (set in root meson.build common_link_args).
-# Static linking flags work with clang-tool-chain's MinGW mode on Windows and GNU mode on Linux.
-# macOS doesn't support fully static binaries (system libs unavailable as static).
+#
+# NOTE: runner_link_args and runner_cpp_args are defined in root meson.build
+# and shared with examples/meson.build for consistency.
 runner_deps = []
-if build_machine.system() == 'windows'
-  # Windows: Static linking + system libraries (MinGW mode)
-  runner_link_args = [
-    '-fuse-ld=lld',             # Force LLD linker
-    '-static',                  # Static linking
-    '-static-libgcc',           # Statically link libgcc
-    '-static-libstdc++',        # Statically link libstdc++
-    '-lpthread',                # POSIX threads (winpthreads)
-    '-ldbghelp',                # Debug helper library (for stack traces)
-    '-lpsapi',                  # Process status API (for memory info)
-  ]
-elif build_machine.system() == 'darwin'
-  # macOS: Dynamic linking (static not supported), but force LLD
-  runner_link_args = [
-    '-fuse-ld=lld',             # Force LLD linker
-    '-pthread',                 # POSIX threads
-  ]
-else
-  # Linux: Dynamic linking (static linking breaks backtrace() in crash handler)
-  # backtrace() and backtrace_symbols() require dynamic symbol information
-  runner_link_args = [
-    '-fuse-ld=lld',             # Force LLD linker
-    '-pthread',                 # POSIX threads
-  ]
-  if libunwind_dep.found()
-    runner_deps += [libunwind_dep]
-  endif
-endif
-
-# Add sanitizer flags when in debug mode (required because fastled_lib is compiled with sanitizers)
-if build_mode == 'debug'
-  runner_link_args += [
-    '-fsanitize=address',
-    '-fsanitize=undefined',
-  ]
+if libunwind_dep.found() and build_mode != 'debug'
+  # Only add libunwind in non-debug modes (debug uses dynamic linking)
+  # clang-tool-chain provides libunwind on all platforms including Windows
+  runner_deps += [libunwind_dep]
 endif
 
 runner_exe = executable('runner',
   'shared/runner.cpp',
-  include_directories: [src_dir, stub_dir],  # For platforms/run_unit_test.h
-  cpp_args: [
-    '-std=c++11',
-    '-O2',
-    '-g',
-    '-DFASTLED_STUB_IMPL',  # Required for fl:: types
-    # Suppress warnings from Windows SDK headers
-    '-Wno-pragma-pack',
-  ],
+  include_directories: [src_dir, stub_dir],
+  cpp_args: runner_cpp_args,
   link_args: runner_link_args,
-  link_with: [crash_handler_runner, fastled_lib],  # Link crash handler and fastled library
+  link_with: [crash_handler_runner, fastled_lib],
   dependencies: runner_deps,
   install: false
 )
@@ -222,7 +183,7 @@ foreach test_name : test_names
   # NOTE: No dependencies needed - libunwind moved to runner.exe
   test_dll = shared_library(test_name,
     test_sources,
-    include_directories: [src_dir, tests_dir, stub_dir],
+    include_directories: [src_dir, stub_dir, tests_dir],
     cpp_args: test_cpp_args,
     link_args: unit_test_link_args,
     link_with: [fastled_lib, doctest_dll_main],  # Use DLL-mode doctest main

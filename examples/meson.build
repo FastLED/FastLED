@@ -147,75 +147,22 @@ crash_handler_example = static_library('crash_handler_example',
 # instead of in each example-X.dll (96 times), significantly reducing build time.
 # The example_runner.exe provides these symbols to the loaded DLL at runtime.
 # Crash handler is also setup in example_runner.exe before loading any DLL.
-# Example runner link arguments: Force LLD linker on all platforms for consistency.
-# Static linking flags work with clang-tool-chain's MinGW mode on Windows and GNU mode on Linux.
-# macOS doesn't support fully static binaries (system libs unavailable as static).
+#
+# NOTE: runner_link_args and runner_cpp_args are defined in root meson.build
+# and shared with tests/meson.build for consistency.
 example_runner_deps = []
-if build_machine.system() == 'windows'
-  # Windows: Static linking + system libraries (MinGW mode)
-  example_runner_link_args = [
-    '-fuse-ld=lld',             # Force LLD linker
-    '-static',                  # Static linking
-    '-static-libgcc',           # Statically link libgcc
-    '-static-libstdc++',        # Statically link libstdc++
-    '-lpthread',                # POSIX threads (winpthreads)
-    '-ldbghelp',                # Debug helper library (for stack traces)
-    '-lpsapi',                  # Process status API (for memory info)
-  ]
-elif build_machine.system() == 'darwin'
-  # macOS: Dynamic linking (static not supported), but force LLD
-  example_runner_link_args = [
-    '-fuse-ld=lld',             # Force LLD linker
-    '-pthread',                 # POSIX threads
-  ]
-  if libunwind_dep.found()
-    example_runner_deps += [libunwind_dep]
-  endif
-else
-  # Linux: Dynamic linking in debug mode (sanitizers incompatible with static linking)
-  # Static linking in quick/release modes for portable binaries
-  _build_mode = get_option('build_mode')
-  if _build_mode == 'debug'
-    # Debug mode: Dynamic linking required for AddressSanitizer/UBSan
-    # Sanitizers intercept memory operations at runtime, which requires dynamic linking
-    example_runner_link_args = [
-      '-fuse-ld=lld',             # Force LLD linker
-      '-pthread',                 # POSIX threads
-    ]
-    if libunwind_dep.found()
-      example_runner_deps += [libunwind_dep]
-    endif
-  else
-    # Quick/Release modes: Static linking + pthread
-    # Note: libunwind is NOT included in static Linux builds because it's typically
-    # only available as a dynamic library (.so) on most distributions. Attempting to
-    # statically link libunwind results in: "ld.lld: error: attempted static link of
-    # dynamic object /usr/lib/x86_64-linux-gnu/libunwind.so"
-    # For development with enhanced stack traces, use dynamic builds or install
-    # libunwind static libraries (libunwind-dev package provides only .so files).
-    example_runner_link_args = [
-      '-fuse-ld=lld',             # Force LLD linker
-      '-static',                  # Static linking
-      '-static-libgcc',           # Statically link libgcc
-      '-static-libstdc++',        # Statically link libstdc++
-      '-pthread',                 # POSIX threads
-    ]
-    # Skip libunwind on Linux static builds to avoid linking errors
-    # Crash handler will fall back to execinfo or no-op handler
-  endif
+if libunwind_dep.found() and build_mode != 'debug'
+  # Only add libunwind in non-debug modes (debug uses dynamic linking)
+  # clang-tool-chain provides libunwind on all platforms including Windows
+  example_runner_deps += [libunwind_dep]
 endif
 
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
-  include_directories: [src_dir, stub_dir],  # For platforms/run_example.h
-  cpp_args: [
-    '-std=c++11',
-    '-O0',
-    '-g',
-    '-DFASTLED_STUB_IMPL',  # Required for fl:: types
-  ],
-  link_args: example_runner_link_args,
-  link_with: [crash_handler_example, fastled_lib],  # Link crash handler and fastled library
+  include_directories: [src_dir, stub_dir],
+  cpp_args: runner_cpp_args,
+  link_args: runner_link_args,
+  link_with: [crash_handler_example, fastled_lib],
   dependencies: example_runner_deps,
   install: false
 )

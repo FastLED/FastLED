@@ -12,7 +12,7 @@ project('fastled', 'cpp',
 src_dir = include_directories('src')
 tests_dir = include_directories('tests')
 
-# Platform-specific stub include
+# Platform-specific stub include (provides Arduino.h and other stub headers)
 stub_dir = include_directories('src/platforms/stub')
 
 # Recursively discover all .cpp source files in src/ directory
@@ -131,15 +131,15 @@ if build_mode == 'debug'
   ]
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
-  # Minimal optimization, minimal debug info, no sanitizers
+  # Light optimization, minimal debug info, no sanitizers
   base_optimization = base_common + [
-    '-O0',                      # No optimization (fast compilation)
+    '-O1',                      # Light optimization (good balance of speed and debuggability)
     '-g1',                      # Minimal debug info (function names + line numbers)
   ]
 elif build_mode == 'release'
-  # Release mode: Maximum optimization, no debug info
+  # Release mode: Optimized production build
   base_optimization = base_common + [
-    '-O3',                      # Maximum optimization
+    '-O2',                      # Standard optimization (good performance, reasonable compile time)
     '-DNDEBUG',                 # Disable assertions
   ]
 else
@@ -176,105 +176,119 @@ unit_test_compile_args = base_compile_args + test_specific_args
 example_compile_args = base_compile_args + example_specific_args
 
 # ============================================================================
-# Platform-specific link arguments
+# UNIFIED LINK CONFIGURATION
 # ============================================================================
-# Force LLD linker on all platforms for consistent behavior.
-# LLD supports the same flags across Windows, Linux, and macOS.
+# clang-tool-chain provides uniform GNU-style behavior across all platforms.
+# This allows us to use the same link flags everywhere with minimal exceptions.
 
-# Detect platform
+# Detect platform for the few remaining differences
 is_windows = build_machine.system() == 'windows'
+is_darwin = build_machine.system() == 'darwin'
 
-# Common link arguments for all platforms (LLD is forced via -fuse-ld=lld)
-# This ensures consistent linker behavior across Windows, Linux, and macOS.
+# ============================================================================
+# Core link arguments (shared by all targets)
+# ============================================================================
 # NOTE: -Wl,--no-undefined is only added in quick/release modes because
 # sanitizers (ASan/UBSan) have symbols resolved at runtime, not link time.
 # See: https://github.com/google/sanitizers/issues/380
+core_link_args = ['-fuse-ld=lld']
+if build_mode != 'debug'
+  core_link_args += ['-Wl,--no-undefined']
+endif
+
+# Sanitizer link flags (used in debug mode)
+sanitizer_link_args = []
 if build_mode == 'debug'
-  common_link_args = [
-    '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
-  ]
-else
-  common_link_args = [
-    '-fuse-ld=lld',             # CRITICAL: Force LLD linker on all platforms
-    '-Wl,--no-undefined',       # Catch undefined symbols at link time
+  sanitizer_link_args = [
+    '-fsanitize=address',
+    '-fsanitize=undefined',
   ]
 endif
 
-# Base link arguments (shared foundation for all link types)
+# ============================================================================
+# DLL/shared library link arguments
+# ============================================================================
+# Used for test DLLs and example DLLs. Minimal linking - heavy deps in runner.
+dll_link_args = core_link_args + sanitizer_link_args
 if is_windows
-  # Windows-specific base flags
-  base_link_args = common_link_args + [
-    '-mconsole',                # Console application subsystem
-    '-lpthread',                # POSIX threads (winpthreads) - required for thread_local.h
-    '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
-  ]
-else
-  # Unix (Linux/macOS) base flags - same for both with LLD
-  base_link_args = common_link_args + [
-    '-pthread',                 # Enable POSIX threads
-    '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
-  ]
-endif
-
-# Test-specific link arguments (includes debug libraries on Windows)
-if is_windows
-  test_link_args = base_link_args + [
-    '-ldbghelp',                # Debug helper library (for stack traces in crash handler)
-    '-lpsapi',                  # Process status API (for memory info in crash handler)
-  ]
-else
-  # Unix uses same flags for all link types
-  test_link_args = base_link_args
-endif
-
-# DLL-specific link arguments: Minimize linking by moving libraries to runner.exe
-# This optimization moves library linking from N test DLLs (176×) to runner.exe (1×)
-# Moved to runner.exe:
-#   - pthread (POSIX threads) - required by FastLED
-#   - dbghelp (Windows debug helper) - for crash handler stack traces
-#   - psapi (Windows process API) - for crash handler memory info
-#   - libunwind (Unix) - for enhanced stack traces
-# Result: ~10-15% build time improvement
-if is_windows
-  # Windows: Minimal DLL linking (crash handler moved to runner.exe)
-  dll_link_args = common_link_args + [
-    '-static-libgcc',           # Statically link libgcc
-    '-static-libstdc++',        # Statically link libstdc++
-    '-mconsole',                # Console application subsystem
-    '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
-  ]
-else
-  # Unix (Linux/macOS): Minimal DLL linking with LLD
-  dll_link_args = common_link_args + [
-    '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
-  ]
-endif
-
-# Legacy alias for backward compatibility with tests/meson.build
-# NOTE: This now points to dll_link_args (optimized), not test_link_args (full)
-unit_test_link_args = dll_link_args
-
-# Example-specific link arguments (currently same as base on all platforms)
-example_link_args = base_link_args
-
-# Add sanitizer flags to link arguments when in debug mode
-if build_mode == 'debug'
-  test_link_args += [
-    '-fsanitize=address',       # Link AddressSanitizer runtime
-    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
-  ]
   dll_link_args += [
-    '-fsanitize=address',       # Link AddressSanitizer runtime
-    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+    '-static-libgcc',
+    '-static-libstdc++',
+    '-mconsole',
+    '-Wl,--stack,16777216',
   ]
-  unit_test_link_args += [
-    '-fsanitize=address',       # Link AddressSanitizer runtime
-    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+else
+  dll_link_args += ['-rdynamic']
+endif
+
+# ============================================================================
+# Runner executable link arguments (shared by tests and examples)
+# ============================================================================
+# The runner loads DLLs and provides system libraries (pthread, dbghelp, etc.)
+# In debug mode: dynamic linking (required for sanitizers)
+# In quick/release modes: static linking for portable binaries (except macOS)
+if build_mode == 'debug'
+  # Debug mode: dynamic linking required for sanitizers
+  runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
+  if is_windows
+    runner_link_args += ['-ldbghelp', '-lpsapi']
+  endif
+else
+  # Quick/Release modes: static linking where possible
+  if is_darwin
+    # macOS: static linking not supported
+    runner_link_args = core_link_args + ['-pthread']
+  else
+    # Windows and Linux: static linking
+    runner_link_args = core_link_args + [
+      '-static',
+      '-static-libgcc',
+      '-static-libstdc++',
+      '-pthread',
+    ]
+    if is_windows
+      runner_link_args += ['-ldbghelp', '-lpsapi']
+    endif
+  endif
+endif
+
+# ============================================================================
+# Runner executable compile arguments
+# ============================================================================
+# Shared by both test runner and example runner. Uses same optimization as rest of app.
+runner_cpp_args = [
+  '-std=c++11',
+  '-DFASTLED_STUB_IMPL',
+  '-Wno-pragma-pack',
+]
+if build_mode == 'debug'
+  runner_cpp_args += [
+    '-O0',
+    '-g3',
+    '-fsanitize=address',
+    '-fsanitize=undefined',
   ]
-  example_link_args += [
-    '-fsanitize=address',       # Link AddressSanitizer runtime
-    '-fsanitize=undefined',     # Link UndefinedBehaviorSanitizer runtime
+elif build_mode == 'quick'
+  runner_cpp_args += [
+    '-O1',
+    '-g1',
   ]
+elif build_mode == 'release'
+  runner_cpp_args += [
+    '-O2',
+    '-DNDEBUG',
+  ]
+endif
+
+# ============================================================================
+# Legacy aliases for backward compatibility
+# ============================================================================
+unit_test_link_args = dll_link_args
+example_link_args = core_link_args + sanitizer_link_args
+if is_windows
+  example_link_args += ['-mconsole', '-lpthread', '-Wl,--stack,16777216']
+else
+  example_link_args += ['-pthread', '-rdynamic']
 endif
 
 # ============================================================================
