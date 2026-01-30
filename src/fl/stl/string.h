@@ -219,8 +219,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size len = sv.size();
         mLength = len;
         if (len + 1 <= SIZE) {
-            fl::memcpy(inlineData(), sv.data(), len);
-            inlineData()[len] = '\0';
+            char* data = inlineData();
+            fl::memcpy(data, sv.data(), len);
+            data[len] = '\0';
         } else {
             mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(sv.data(), len));
         }
@@ -438,8 +439,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (!mStorage.template is<InlinedBuffer>()) {
                 mStorage = InlinedBuffer{};
             }
-            fl::memcpy(inlineData(), str, len);  // Copy only len characters, not len+1
-            inlineData()[len] = '\0';        // Add null terminator manually
+            char* data = inlineData();
+            fl::memcpy(data, str, len);  // Copy only len characters, not len+1
+            data[len] = '\0';        // Add null terminator manually
         } else {
             heapData() = fl::make_shared<StringHolder>(str, len);
         }
@@ -542,12 +544,13 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // The bounds check above protects this memcpy, but aggressive inlining
             // causes GCC's optimizer to lose track of the invariant (mLength < SIZE).
             // See: https://github.com/FastLED/FastLED/issues/2150
+            char* data = inlineData();
             FL_DISABLE_WARNING_PUSH
             FL_DISABLE_WARNING(array-bounds)
-            fl::memcpy(inlineData() + mLength, str, n);
+            fl::memcpy(data + mLength, str, n);
             FL_DISABLE_WARNING_POP
             mLength = newLen;
-            inlineData()[mLength] = '\0';
+            data[mLength] = '\0';
             return mLength;
         }
         // Need to transition from inline to heap storage
@@ -2149,6 +2152,20 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
   private:
     // Helper accessors for variant storage
+    //
+    // WARNING: inlineData() has SIDE EFFECTS! If storage is not InlinedBuffer,
+    // it transitions to a NEW EMPTY InlinedBuffer, discarding any existing data.
+    // ALWAYS cache the result if you need to call it multiple times:
+    //
+    //   CORRECT:
+    //     char* data = inlineData();
+    //     fl::memcpy(data, str, len);
+    //     data[len] = '\0';
+    //
+    //   WRONG (may cause bugs on some platforms):
+    //     fl::memcpy(inlineData(), str, len);
+    //     inlineData()[len] = '\0';  // Second call - don't do this!
+    //
     char* inlineData() {
         // Auto-transition to inline storage if not already there
         // This prevents nullptr returns that cause segfaults
