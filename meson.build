@@ -193,7 +193,7 @@ is_darwin = build_machine.system() == 'darwin'
 # NOTE: -Wl,--no-undefined is only added in quick/release modes because
 # sanitizers (ASan/UBSan) have symbols resolved at runtime, not link time.
 # See: https://github.com/google/sanitizers/issues/380
-core_link_args = ['-fuse-ld=lld']
+core_link_args = ['-fuse-ld=lld', '--deploy-dependencies']
 if build_mode != 'debug'
   core_link_args += ['-Wl,--no-undefined']
 endif
