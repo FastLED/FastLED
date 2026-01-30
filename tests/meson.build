@@ -116,6 +116,14 @@ else
   endif
 endif
 
+# Add sanitizer flags when in debug mode (required because fastled_lib is compiled with sanitizers)
+if build_mode == 'debug'
+  runner_link_args += [
+    '-fsanitize=address',
+    '-fsanitize=undefined',
+  ]
+endif
+
 runner_exe = executable('runner',
   'shared/runner.cpp',
   include_directories: [src_dir, stub_dir],  # For platforms/run_unit_test.h
