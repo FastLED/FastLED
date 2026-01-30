@@ -17,7 +17,7 @@ dependencies = [
     "pytest-xdist",
     "fpvgcc",
     "uv",
-    "clang-tool-chain[sccache]>=1.0.36",
+    "clang-tool-chain[sccache]>=1.0.37",
     "ninja",
     "meson>=1.10.0",
     "cmake",
