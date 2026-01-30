@@ -22,6 +22,15 @@ EXCLUDED_FILES = [
     "crash_handler_libunwind.h",
     "crash_handler_noop.h",
     "crash_handler_win.h",
+    # DLL/SO loader runners - intentionally use std:: to avoid FastLED dependencies
+    "run_example.h",
+    "run_unit_test.h",
+    "platforms/apple/run_example.hpp",
+    "platforms/apple/run_unit_test.hpp",
+    "platforms/posix/run_example.hpp",
+    "platforms/posix/run_unit_test.hpp",
+    "platforms/win/run_example.hpp",
+    "platforms/win/run_unit_test.hpp",
 ]
 
 

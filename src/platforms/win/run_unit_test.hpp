@@ -9,6 +9,8 @@
 ///
 /// Usage: runner.exe <test_dll_path> [doctest args...]
 /// Or:    <test_name>.exe (auto-loads <test_name>.dll from same directory)
+///
+/// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
 #ifdef _WIN32
 
@@ -22,7 +24,7 @@ int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any DLLs
     // This ensures crash handling is active for the entire process lifetime
     runner_setup_crash_handler();
-    fl::string dll_path;
+    std::string dll_path;
 
     // Determine DLL path: explicit argument or inferred from exe name
     if (argc > 1 && argv[1][0] != '-') {
@@ -34,22 +36,22 @@ int main(int argc, char** argv) {
         DWORD result = GetModuleFileNameA(NULL, exe_path, MAX_PATH);
 
         if (result == 0 || result == MAX_PATH) {
-            fl::cout << "Error: Failed to get executable path" << fl::endl;
+            std::cout << "Error: Failed to get executable path" << std::endl;
             return 1;
         }
 
         // Extract directory and filename
-        fl::string full_path(exe_path);
+        std::string full_path(exe_path);
         size_t last_slash = full_path.find_last_of("\\/");
-        fl::string exe_dir = (last_slash != fl::string::npos) ? full_path.substr(0, last_slash) : ".";
-        fl::string exe_file = (last_slash != fl::string::npos) ? full_path.substr(last_slash + 1) : full_path;
+        std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
+        std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
 
         // Remove .exe extension
         size_t dot_pos = exe_file.find_last_of('.');
-        fl::string exe_name = (dot_pos != fl::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
+        std::string exe_name = (dot_pos != std::string::npos) ? exe_file.substr(0, dot_pos) : exe_file;
 
         // Construct DLL path
-        fl::string dll_name = exe_name + ".dll";
+        std::string dll_name = exe_name + ".dll";
         dll_path = exe_dir + "\\" + dll_name;
     }
 
@@ -57,14 +59,14 @@ int main(int argc, char** argv) {
     HMODULE dll = LoadLibraryA(dll_path.c_str());
     if (!dll) {
         DWORD error = GetLastError();
-        fl::cout << "Error: Failed to load " << dll_path << " (error code: " << error << ")" << fl::endl;
+        std::cout << "Error: Failed to load " << dll_path << " (error code: " << error << ")" << std::endl;
         return 1;
     }
 
     // Get run_tests function
     RunTestsFunc run_tests = (RunTestsFunc)GetProcAddress(dll, "run_tests");
     if (!run_tests) {
-        fl::cout << "Error: Failed to find run_tests() in " << dll_path << fl::endl;
+        std::cout << "Error: Failed to find run_tests() in " << dll_path << std::endl;
         FreeLibrary(dll);
         return 1;
     }
@@ -72,7 +74,7 @@ int main(int argc, char** argv) {
     // Prepare arguments for run_tests (skip DLL path if it was provided)
     int test_argc;
     const char** test_argv;
-    fl::vector<const char*> adjusted_argv;
+    std::vector<const char*> adjusted_argv;
 
     if (argc > 1 && argv[1][0] != '-') {
         // DLL path was provided: skip it in arguments passed to tests

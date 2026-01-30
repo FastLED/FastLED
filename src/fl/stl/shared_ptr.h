@@ -29,34 +29,23 @@ struct ControlBlockBase {
     // Special value indicating no-tracking mode
     static constexpr fl::u32 NO_TRACKING_VALUE = 0xffffffff;
     
-    ControlBlockBase(bool track = true) 
+    ControlBlockBase(bool track = true)
         : shared_count(track ? 1 : NO_TRACKING_VALUE), weak_count(1) {}
-    virtual ~ControlBlockBase() = default;
+    // Destructor defined out-of-line in shared_ptr.cpp.hpp to anchor vtable
+    // to a single translation unit, preventing ODR violations when using shared libraries.
+    virtual ~ControlBlockBase();
     virtual void destroy_object() = 0;
     virtual void destroy_control_block() = 0;
     
-    // NEW: No-tracking aware increment/decrement
-    void add_shared_ref() {
-        if (shared_count != NO_TRACKING_VALUE) {
-            ++shared_count;
-        }
-    }
-    
-    bool remove_shared_ref() {
-        //FASTLED_WARN("ControlBlockBase::remove_shared_ref() called: this=" << this);
-        if (shared_count == NO_TRACKING_VALUE) {
-            //FASTLED_WARN("In no-tracking mode, returning false");
-            return false;  // Never destroy in no-tracking mode
-        }
-        bool result = (--shared_count == 0);
-        //FASTLED_WARN("After decrement, returning: " << result);
-        return result;
-    }
-    
+    // Reference counting functions - defined out-of-line in shared_ptr.cpp.hpp
+    // to prevent UBSAN vptr mismatch errors when objects cross shared library boundaries.
+    // When these are inline, different binaries get different vtables, and UBSAN
+    // detects the mismatch when checking member access.
+    void add_shared_ref();
+    bool remove_shared_ref();
+
     // Check if this control block is in no-tracking mode
-    bool is_no_tracking() const {
-        return shared_count == NO_TRACKING_VALUE;
-    }
+    bool is_no_tracking() const;
 };
 
 // Default deleter implementation

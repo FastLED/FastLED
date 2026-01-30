@@ -16,11 +16,15 @@
 /// - Windows (_WIN32) -> win/run_example.hpp (uses LoadLibraryA, GetProcAddress)
 /// - Apple (__APPLE__) -> apple/run_example.hpp (uses dlopen, _NSGetExecutablePath)
 /// - Linux/POSIX -> posix/run_example.hpp (uses dlopen, /proc/self/exe)
+///
+/// NOTE: This file intentionally uses std:: types instead of fl:: types to avoid
+/// linking the runner against libfastled.a. The runner should be a lightweight
+/// DLL loader with no FastLED dependencies - only the example DLLs link FastLED.
 
-#include "fl/stl/string.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/iostream.h"
-#include "fl/stl/cstddef.h"
+#include <string>
+#include <vector>
+#include <iostream>
+#include <cstddef>
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();

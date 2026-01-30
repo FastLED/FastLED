@@ -330,6 +330,19 @@ endif
 message('libunwind enabled via DLL injection - enhanced stack traces enabled')
 base_defines += ['-DUSE_LIBUNWIND']
 
+# ============================================================================
+# SHARED CRASH HANDLER (used by both test runner and example runner)
+# ============================================================================
+# Build crash handler library once - provides crash handler setup that runs
+# BEFORE any DLL is loaded. Links to dbghelp/psapi on Windows.
+# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
+crash_handler_lib = static_library('crash_handler',
+  'tests/shared/crash_handler_main.cpp',
+  include_directories: [tests_dir, src_dir, stub_dir],
+  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
+  install: false
+)
+
 # Build main FastLED static library (includes ALL sources EXCEPT platforms/shared)
 # platforms/shared files are intentionally excluded to avoid weak/strong symbol conflicts
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)

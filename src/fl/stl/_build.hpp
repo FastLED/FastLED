@@ -16,6 +16,7 @@
 #include "fl/stl/not_null.cpp.hpp"
 #include "fl/stl/ostream.cpp.hpp"
 #include "fl/stl/random.cpp.hpp"
+#include "fl/stl/shared_ptr.cpp.hpp"
 #include "fl/stl/string.cpp.hpp"
 #include "fl/stl/strstream.cpp.hpp"
 #include "fl/stl/time.cpp.hpp"

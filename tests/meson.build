@@ -58,34 +58,29 @@ doctest_dll_main = static_library('doctest_dll_main',
   install: false
 )
 
-# Crash handler library for runner.exe
-# This provides crash handler setup that runs BEFORE any DLL is loaded
-# Links to dbghelp/psapi on Windows; libunwind is injected via DLL at runtime
-crash_handler_runner = static_library('crash_handler_runner',
-  'shared/crash_handler_main.cpp',
-  include_directories: [tests_dir, src_dir, stub_dir],
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
-  install: false
-)
-
 # Build runner executable (static, generic DLL loader)
 # This executable loads a test DLL and calls its run_tests() function
 # It will be copied to each test directory as <test_name>.exe
 #
-# OPTIMIZATION: System libraries (pthread, dbghelp, psapi) are linked here (once)
+# IMPORTANT: The runner intentionally does NOT link against fastled_lib.
+# Only the test DLLs should link FastLED to avoid duplicate vtables/symbols
+# which cause UBSAN "invalid vptr" errors when objects cross library boundaries.
+# The runner uses std:: types instead of fl:: types to stay lightweight.
+#
+# System libraries (pthread, dbghelp, psapi) are linked here (once)
 # instead of in each test_X.dll (176 times), significantly reducing build time.
 # The runner.exe provides these symbols to the loaded DLL at runtime.
 # Crash handler is also setup in runner.exe before loading any DLL.
 #
-# NOTE: runner_link_args and runner_cpp_args are defined in root meson.build
-# and shared with examples/meson.build for consistency.
+# NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
+# in root meson.build and shared with examples/meson.build for consistency.
 # libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
 runner_exe = executable('runner',
   'shared/runner.cpp',
   include_directories: [src_dir, stub_dir],
   cpp_args: runner_cpp_args,
   link_args: runner_link_args,
-  link_with: [crash_handler_runner, fastled_lib],
+  link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
   install: false
 )
 

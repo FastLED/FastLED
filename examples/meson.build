@@ -124,34 +124,29 @@ stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 # ============================================================================
 # BUILD EXAMPLE RUNNER (DLL LOADER)
 # ============================================================================
-# Build crash handler library for example_runner.exe
-# Reuse the crash handler from tests (same implementation)
-# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
-crash_handler_example = static_library('crash_handler_example',
-  files('../tests/shared/crash_handler_main.cpp'),
-  include_directories: [src_dir, stub_dir, tests_dir],
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
-  install: false
-)
-
 # Build example_runner.exe (static, generic DLL loader)
 # This executable loads an example DLL and calls its run_example() function
 # It will be copied to each example directory as example-<name>.exe
 #
-# OPTIMIZATION: System libraries (pthread, dbghelp, psapi) are linked here (once)
+# IMPORTANT: The runner intentionally does NOT link against fastled_lib.
+# Only the example DLLs should link FastLED to avoid duplicate vtables/symbols
+# which cause UBSAN "invalid vptr" errors when objects cross library boundaries.
+# The runner uses std:: types instead of fl:: types to stay lightweight.
+#
+# System libraries (pthread, dbghelp, psapi) are linked here (once)
 # instead of in each example-X.dll (96 times), significantly reducing build time.
 # The example_runner.exe provides these symbols to the loaded DLL at runtime.
 # Crash handler is also setup in example_runner.exe before loading any DLL.
 #
-# NOTE: runner_link_args and runner_cpp_args are defined in root meson.build
-# and shared with tests/meson.build for consistency.
+# NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
+# in root meson.build and shared with tests/meson.build for consistency.
 # libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
   include_directories: [src_dir, stub_dir],
   cpp_args: runner_cpp_args,
   link_args: runner_link_args,
-  link_with: [crash_handler_example, fastled_lib],
+  link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
   install: false
 )
 
