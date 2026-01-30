@@ -1,6 +1,7 @@
 #include "cstdio.h"
 
 #include "fl/stl/stdint.h"
+#include "fl/compiler_control.h"
 
 // Platform-specific I/O implementations
 #ifdef __EMSCRIPTEN__
@@ -242,6 +243,22 @@ void clear_available_handler() {
 void clear_read_handler() {
     get_read_handler() = read_handler_t{};
 }
+
+// Force early initialization of function-level statics to avoid
+// static initialization order issues on macOS. The fl::function
+// objects may allocate memory during construction, and if the first
+// access happens during a memory allocation callback, we get recursion.
+namespace cstdio_init {
+    void init_io_handlers() {
+        // Touch each handler to force initialization during static construction
+        (void)get_print_handler();
+        (void)get_println_handler();
+        (void)get_available_handler();
+        (void)get_read_handler();
+    }
+}
+
+FL_INIT(cstdio_init_wrapper, cstdio_init::init_io_handlers)
 
 #endif // FASTLED_TESTING
 

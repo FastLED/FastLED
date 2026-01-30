@@ -5,6 +5,7 @@
 #include "fl/stl/cstdlib.h"
 #include "fl/str.h"
 #include "fl/stl/cstring.h"
+#include "fl/compiler_control.h"
 
 #ifdef ESP32
 #include "esp_heap_caps.h"
@@ -70,6 +71,18 @@ struct MemoryGuard {
         return reintrancy_count <= 1;
     }
 };
+
+// Force early initialization of thread-local storage to avoid
+// static initialization order issues on macOS. The ThreadLocal<int>
+// uses pthread_setspecific which calls operator new during first access.
+// If the first access happens during a memory allocation callback, we get
+// recursion. By initializing during static construction, we ensure the
+// ThreadLocal is ready before any test code runs.
+void init_tls_reentrancy() {
+    (void)tls_reintrancy_count();
+}
+
+FL_INIT(allocator_init_wrapper, init_tls_reentrancy)
 
 #endif
 
