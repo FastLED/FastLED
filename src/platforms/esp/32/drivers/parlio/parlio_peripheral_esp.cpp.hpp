@@ -30,6 +30,10 @@ FL_EXTERN_C_END
 
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
+#ifndef CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM
+#warning \
+    "PARLIO: CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is not defined! Add 'build_flags = -DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1' to platformio.ini or your build system"
+#endif
 
 namespace fl {
 namespace detail {
