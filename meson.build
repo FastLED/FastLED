@@ -97,6 +97,7 @@ base_warnings = [
   '-Wno-narrowing',
   '-Wno-macro-redefined',      # Suppress redefinition warnings (libc++ hardening mode conflict)
   '-Werror=unused-variable',
+  '-Werror=unused-but-set-variable',  # Treat set-but-unused variables as errors
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
