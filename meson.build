@@ -117,15 +117,21 @@ base_common = [
   '-std=gnu++11',              # GNU C++11 standard
   '-fno-exceptions',           # Disable C++ exceptions (ABI compatibility)
   '-fno-rtti',                 # Disable runtime type information
-  '-fno-omit-frame-pointer',   # Keep frame pointers for stack traces
   '-fno-strict-aliasing',      # Prevent strict aliasing optimizations
+]
+
+# Stack trace preservation flags (used in debug and quick modes only)
+stack_trace_flags = [
+  '-fno-omit-frame-pointer',      # Keep frame pointers for stack traces
+  '-fno-inline-small-functions',  # Preserve function names (don't inline small funcs)
+  '-fno-optimize-sibling-calls',  # Preserve tail call frames for complete stack traces
 ]
 
 # Mode-specific optimization flags
 build_mode = get_option('build_mode')
 if build_mode == 'debug'
   # Debug mode: No optimization, full debug symbols, sanitizers
-  base_optimization = base_common + [
+  base_optimization = base_common + stack_trace_flags + [
     '-O0',                      # No optimization (fastest compilation)
     '-g3',                      # Full debug symbols (variables, macros, everything)
     '-fsanitize=address',       # Address sanitizer (detect memory errors)
@@ -134,12 +140,13 @@ if build_mode == 'debug'
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
   # Light optimization, minimal debug info, no sanitizers
-  base_optimization = base_common + [
+  # Preserves function names and stack frames for proper call stack translation
+  base_optimization = base_common + stack_trace_flags + [
     '-O1',                      # Light optimization (good balance of speed and debuggability)
     '-g1',                      # Minimal debug info (function names + line numbers)
   ]
 elif build_mode == 'release'
-  # Release mode: Optimized production build
+  # Release mode: Optimized production build (no stack trace preservation)
   base_optimization = base_common + [
     '-O2',                      # Standard optimization (good performance, reasonable compile time)
     '-DNDEBUG',                 # Disable assertions
@@ -228,15 +235,34 @@ endif
 # ============================================================================
 # The runner loads DLLs and provides system libraries (pthread, dbghelp, etc.)
 # In debug mode: dynamic linking (required for sanitizers)
-# In quick/release modes: static linking for portable binaries (except macOS)
+# In quick mode: static linking with libunwind for stack traces
+# In release mode: static linking without stack trace support
 if build_mode == 'debug'
   # Debug mode: dynamic linking required for sanitizers
   runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
   if is_windows
     runner_link_args += ['-ldbghelp', '-lpsapi']
   endif
+elif build_mode == 'quick'
+  # Quick mode: static linking, libunwind loaded dynamically via DLL injection
+  if is_darwin
+    # macOS: static linking not supported
+    runner_link_args = core_link_args + ['-pthread']
+  else
+    # Windows and Linux: static linking
+    # libunwind is injected at runtime by clang-tool-chain, no explicit linking needed
+    runner_link_args = core_link_args + [
+      '-static',
+      '-static-libgcc',
+      '-static-libstdc++',
+      '-pthread',
+    ]
+    if is_windows
+      runner_link_args += ['-ldbghelp', '-lpsapi']
+    endif
+  endif
 else
-  # Quick/Release modes: static linking where possible
+  # Release mode: static linking, no stack trace support
   if is_darwin
     # macOS: static linking not supported
     runner_link_args = core_link_args + ['-pthread']
@@ -264,14 +290,14 @@ runner_cpp_args = [
   '-Wno-pragma-pack',
 ]
 if build_mode == 'debug'
-  runner_cpp_args += [
+  runner_cpp_args += stack_trace_flags + [
     '-O0',
     '-g3',
     '-fsanitize=address',
     '-fsanitize=undefined',
   ]
 elif build_mode == 'quick'
-  runner_cpp_args += [
+  runner_cpp_args += stack_trace_flags + [
     '-O1',
     '-g1',
   ]
