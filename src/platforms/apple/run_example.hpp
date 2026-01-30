@@ -59,8 +59,9 @@ int main(int argc, char** argv) {
         so_path = exe_dir + "/" + so_name;
     }
 
-    // Load shared library
-    void* handle = dlopen(so_path.c_str(), RTLD_LAZY);
+    // Load shared library with RTLD_NOW for immediate symbol resolution
+    // This helps ASAN properly track symbols from the loaded library
+    void* handle = dlopen(so_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
         std::cout << "Error: Failed to load " << so_path << " (" << dlerror() << ")" << std::endl;
         return 1;
@@ -96,8 +97,18 @@ int main(int argc, char** argv) {
     // Call example function with arguments
     int example_result = run_example(example_argc, example_argv);
 
-    // Cleanup
+    // Cleanup: Skip dlclose when running with AddressSanitizer
+    // ASAN runs leak detection at program exit. If we dlclose() the shared library
+    // before that, ASAN cannot symbolize addresses from the unloaded library,
+    // resulting in "<unknown module>" in stack traces.
+    // See: https://github.com/google/sanitizers/issues/899
+#if !defined(__SANITIZE_ADDRESS__) && !defined(__has_feature)
     dlclose(handle);
+#elif defined(__has_feature)
+#if !__has_feature(address_sanitizer)
+    dlclose(handle);
+#endif
+#endif
 
     return example_result;
 }

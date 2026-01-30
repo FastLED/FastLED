@@ -198,12 +198,32 @@ is_windows = build_machine.system() == 'windows'
 is_darwin = build_machine.system() == 'darwin'
 
 # ============================================================================
+# Detect if clang-tool-chain is being used
+# ============================================================================
+# clang-tool-chain provides special flags like --deploy-dependencies that
+# stock clang doesn't support. We detect this by checking the compiler command.
+cpp_cmd_array = cpp_compiler.cmd_array()
+is_clang_tool_chain = false
+foreach cmd_part : cpp_cmd_array
+  if cmd_part.contains('clang-tool-chain')
+    is_clang_tool_chain = true
+  endif
+endforeach
+
+# ============================================================================
 # Core link arguments (shared by all targets)
 # ============================================================================
 # NOTE: -Wl,--no-undefined is only added in quick/release modes because
 # sanitizers (ASan/UBSan) have symbols resolved at runtime, not link time.
 # See: https://github.com/google/sanitizers/issues/380
-core_link_args = ['-fuse-ld=lld', '--deploy-dependencies']
+#
+# --deploy-dependencies is a clang-tool-chain specific flag that copies
+# required runtime libraries to the build directory. Stock clang doesn't
+# support this flag.
+core_link_args = ['-fuse-ld=lld']
+if is_clang_tool_chain
+  core_link_args += ['--deploy-dependencies']
+endif
 if build_mode != 'debug'
   core_link_args += ['-Wl,--no-undefined']
 endif
@@ -214,6 +234,7 @@ if build_mode == 'debug'
   sanitizer_link_args = [
     '-fsanitize=address',
     '-fsanitize=undefined',
+    '-shared-libasan',  # Use shared ASan runtime (required for DLL architecture)
   ]
 endif
 
@@ -231,6 +252,12 @@ if is_windows
   ]
 else
   dll_link_args += ['-rdynamic']
+  # In debug mode with sanitizers, shared libraries need to allow undefined symbols
+  # that will be provided by the sanitizer runtime when the runner loads them.
+  # LLD by default enforces no undefined symbols even in shared libraries.
+  if build_mode == 'debug'
+    dll_link_args += ['-Wl,--allow-shlib-undefined']
+  endif
 endif
 
 # ============================================================================
