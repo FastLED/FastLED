@@ -255,6 +255,37 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, uint32_t timeout_m
 // ISR Callback Registration
 //=============================================================================
 
+/// @brief Wrapper context for callback forwarding
+///
+/// ESP-IDF's rmt_tx_done_callback_t has a specific signature with typed pointers
+/// (rmt_channel_handle_t, const rmt_tx_done_event_data_t*), but our interface
+/// uses void* for portability with mocks. This wrapper stores the original
+/// callback and user context, allowing a thin ISR wrapper to forward calls.
+struct TxCallbackContext {
+    Rmt5TxDoneCallback callback;
+    void* user_ctx;
+};
+
+/// @brief ISR wrapper that adapts ESP-IDF callback to FastLED callback signature
+///
+/// This static function matches ESP-IDF's rmt_tx_done_callback_t signature and
+/// forwards to the user's Rmt5TxDoneCallback. The adaptation is trivial since
+/// both channel and event data are passed through as opaque pointers.
+static bool FL_IRAM txDoneCallbackWrapper(
+    rmt_channel_handle_t channel,
+    const rmt_tx_done_event_data_t* edata,
+    void* user_data) {
+    TxCallbackContext* ctx = static_cast<TxCallbackContext*>(user_data);
+    if (ctx == nullptr || ctx->callback == nullptr) {
+        return false;
+    }
+    // Forward to user callback with void* casts
+    return ctx->callback(
+        static_cast<void*>(channel),
+        static_cast<const void*>(edata),
+        ctx->user_ctx);
+}
+
 bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
                                                 Rmt5TxDoneCallback callback,
                                                 void* user_ctx) {
@@ -263,19 +294,25 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
         return false;
     }
 
-    // Configure callbacks structure
-    // Rmt5TxDoneCallback signature matches rmt_tx_event_callback_t exactly:
-    // - Both use void* for channel (rmt_channel_handle_t is void*)
-    // - Both use const void* for event data
-    // - Both use void* for user context
+    // Allocate wrapper context for callback forwarding
+    // Note: This is a small, one-time allocation per channel. The context
+    // lives for the lifetime of the channel and is not freed (channels are
+    // typically created once and reused). For strict correctness, this could
+    // be tracked and freed in deleteChannel(), but the overhead is minimal.
+    TxCallbackContext* ctx = new TxCallbackContext();
+    ctx->callback = callback;
+    ctx->user_ctx = user_ctx;
+
+    // Configure callbacks structure with our wrapper
     rmt_tx_event_callbacks_t cbs = {};
-    cbs.on_trans_done = callback;
+    cbs.on_trans_done = txDoneCallbackWrapper;
 
     // Delegate to ESP-IDF
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
-    esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, user_ctx);
+    esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, ctx);
     if (err != ESP_OK) {
         FL_LOG_RMT("RMT5_PERIPH: Failed to register callback: " << esp_err_to_name(err));
+        delete ctx;
         return false;
     }
 
