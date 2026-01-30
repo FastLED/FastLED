@@ -3,8 +3,12 @@
 // What is bit cast?
 // Bit cast is a safe version of reinterpret_cast that is robust against strict aliasing rules
 // that are used in aggressive compiler optimizations.
+//
+// Uses memcpy internally which is the only standard-compliant way to type-pun safely.
+// Compilers recognize this pattern and optimize it to a single register move.
 
 #include "fl/stl/type_traits.h"
+#include "fl/stl/cstring.h"
 #include "fl/int.h"
 
 namespace fl {
@@ -36,19 +40,17 @@ struct is_bitcast_compatible<T*> {
 };
 
 // C++20-style bit_cast for safe type reinterpretation
-// Uses union for zero-cost type punning - compiler optimizes to direct assignment
+// Uses memcpy which is the standard-compliant way to type-pun safely.
+// Compilers recognize this pattern and optimize it to a single register move.
 template <typename To, typename From>
 To bit_cast(const From& from) noexcept {
     static_assert(sizeof(To) == sizeof(From), "bit_cast: types must have the same size");
     static_assert(is_bitcast_compatible<To>::value, "bit_cast: destination type must be bitcast compatible");
     static_assert(is_bitcast_compatible<From>::value, "bit_cast: source type must be bitcast compatible");
-    
-    union {  // robust against strict aliasing rules
-        From from_val;
-        To to_val;
-    } u;
-    u.from_val = from;
-    return u.to_val;
+
+    To to;
+    fl::memcpy(&to, &from, sizeof(To));
+    return to;
 }
 
 // Overload for pointer types - converts storage pointer to typed pointer safely

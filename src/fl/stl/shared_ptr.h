@@ -180,6 +180,15 @@ public:
     // Constructor from weak_ptr
     template<typename Y>
     explicit shared_ptr(const weak_ptr<Y>& weak);
+
+    // Aliasing constructor (C++11 standard §20.7.2.2.1)
+    // Shares ownership with 'other' but stores 'ptr'
+    // Used by pointer cast functions (static_pointer_cast, etc.)
+    template<typename Y>
+    shared_ptr(const shared_ptr<Y>& other, T* ptr) noexcept
+        : mPtr(ptr), mControlBlock(other.mControlBlock) {
+        acquire();
+    }
     
     // Destructor
     ~shared_ptr() {
@@ -468,24 +477,20 @@ void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
-// Casts
+// Casts - using aliasing constructor (matches std::shared_ptr behavior)
 template<typename T, typename Y>
 shared_ptr<T> static_pointer_cast(const shared_ptr<Y>& other) noexcept {
-    auto ptr = static_cast<T*>(other.get());
-    return shared_ptr<T>(ptr, other.mControlBlock, detail::make_shared_tag{});
+    return shared_ptr<T>(other, static_cast<T*>(other.get()));
 }
-
 
 template<typename T, typename Y>
 shared_ptr<T> const_pointer_cast(const shared_ptr<Y>& other) noexcept {
-    auto ptr = const_cast<T*>(other.get());
-    return shared_ptr<T>(ptr, other.mControlBlock, detail::make_shared_tag{});
+    return shared_ptr<T>(other, const_cast<T*>(other.get()));
 }
 
 template<typename T, typename Y>
 shared_ptr<T> reinterpret_pointer_cast(const shared_ptr<Y>& other) noexcept {
-    auto ptr = fl::bit_cast<T*>(other.get());
-    return shared_ptr<T>(ptr, other.mControlBlock, detail::make_shared_tag{});
+    return shared_ptr<T>(other, fl::bit_cast<T*>(other.get()));
 }
 
 } // namespace fl
