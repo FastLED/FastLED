@@ -209,8 +209,6 @@ public:
     virtual const SpiDeviceConfig& getDeviceConfig() const = 0;
 
     /// @brief Reset mock to uninitialized state (for testing)
-    /// @note Waits for worker thread to finish pending transactions
-    /// @note Does NOT stop or restart the worker thread
     virtual void reset() = 0;
 };
 

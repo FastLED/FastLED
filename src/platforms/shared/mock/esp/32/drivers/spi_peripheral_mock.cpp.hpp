@@ -1,7 +1,9 @@
 /// @file spi_peripheral_mock.cpp
 /// @brief Mock SPI peripheral implementation for unit testing
+///
+/// This is a synchronous mock that requires manual event pumping via
+/// simulateTransactionComplete(). No background threads are used.
 
-// This mock is only for host testing (uses std::thread which is not available on embedded platforms)
 // Compile for stub platform testing OR non-Arduino host platforms
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
@@ -9,10 +11,6 @@
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
-#include "fl/stl/atomic.h"
-
-#include <thread>  // ok include
-#include <chrono>  // ok include
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
@@ -37,6 +35,7 @@ namespace detail {
 ///
 /// This class contains all the actual implementation details.
 /// It simulates SPI hardware behavior for unit testing.
+/// Fully synchronous - no background threads.
 class SpiPeripheralMockImpl : public SpiPeripheralMock {
 public:
     //=========================================================================
@@ -44,7 +43,7 @@ public:
     //=========================================================================
 
     SpiPeripheralMockImpl();
-    ~SpiPeripheralMockImpl() override;
+    ~SpiPeripheralMockImpl() override = default;
 
     //=========================================================================
     // ISpiPeripheral Interface Implementation
@@ -110,11 +109,6 @@ private:
 
     // Pending transaction state
     size_t mPendingTransactions;
-
-    // Simulation thread for automatic callback triggering
-    void simulationThreadFunc();
-    fl::unique_ptr<std::thread> mSimulationThread;  // okay std namespace
-    fl::atomic<bool> mSimulationThreadShouldStop;
 };
 
 //=============================================================================
@@ -142,19 +136,8 @@ SpiPeripheralMockImpl::SpiPeripheralMockImpl()
       mTransactionDelayUs(0),
       mShouldFailTransaction(false),
       mHistory(),
-      mPendingTransactions(0),
-      mSimulationThread(),
-      mSimulationThreadShouldStop(false) {
-    // Start simulation thread
-    mSimulationThread = fl::make_unique<std::thread>([this]() { simulationThreadFunc(); });  // okay std namespace
-}
-
-SpiPeripheralMockImpl::~SpiPeripheralMockImpl() {
-    // Stop simulation thread
-    mSimulationThreadShouldStop = true;
-    if (mSimulationThread && mSimulationThread->joinable()) {
-        mSimulationThread->join();
-    }
+      mPendingTransactions(0) {
+    // No background thread - fully synchronous mock
 }
 
 //=============================================================================
@@ -266,19 +249,6 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) {
         return false;
     }
 
-    // Calculate realistic transaction delay based on clock frequency and bit count
-    // clock_speed_hz is stored in mDeviceConfig.clock_speed_hz (e.g., 2500000 Hz for WS2812)
-    // Transmission time = (length_bits / clock_speed_hz) seconds = (length_bits * 1000000 / clock_speed_hz) microseconds
-    if (mDeviceConfig.clock_speed_hz > 0 && trans.length_bits > 0) {
-        // Calculate transmission time in microseconds
-        uint64_t transmission_time_us = (static_cast<uint64_t>(trans.length_bits) * 1000000ULL) / mDeviceConfig.clock_speed_hz;
-        // Add small overhead for buffer switching (10 microseconds)
-        mTransactionDelayUs = static_cast<uint32_t>(transmission_time_us) + 10;
-    } else {
-        // Fallback: Use a small default delay if clock not configured
-        mTransactionDelayUs = 100;  // 100 microseconds default
-    }
-
     // Calculate buffer size in bytes
     size_t byte_count = (trans.length_bits + 7) / 8;
 
@@ -303,12 +273,14 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) {
     mTransactionCount++;
     mPendingTransactions++;
 
-    // Simulation thread will automatically trigger callback after mTransactionDelayUs
+    // Tests must call simulateTransactionComplete() to trigger callbacks
 
     return true;
 }
 
 bool SpiPeripheralMockImpl::pollTransaction(uint32_t timeout_ms) {
+    (void)timeout_ms;  // Unused in synchronous mock
+
     if (!mInitialized) {
         FL_WARN("SpiPeripheralMock: Cannot poll - not initialized");
         return false;
@@ -319,44 +291,19 @@ bool SpiPeripheralMockImpl::pollTransaction(uint32_t timeout_ms) {
         return false;
     }
 
-    // Check if there are completed transactions
+    // In synchronous mock, poll just checks if there are completed transactions
+    // (i.e., transactions that have been processed via simulateTransactionComplete)
     if (mQueuedTransactions.empty()) {
-        // No queued transactions - nothing to poll
         return false;
     }
 
-    // Simulate instant completion if no delay set
-    if (mTransactionDelayUs == 0 || mPendingTransactions == 0) {
-        // Remove oldest transaction from queue (FIFO)
+    // If there are no pending transactions, the queued ones are "complete"
+    if (mPendingTransactions == 0) {
         mQueuedTransactions.erase(mQueuedTransactions.begin());
         return true;
     }
 
-    // For non-zero timeout, wait for transaction to complete
-    if (timeout_ms == 0) {
-        // Non-blocking poll - return false if still pending
-        return false;
-    }
-
-    // Wait for transaction completion with timeout
-    uint32_t start_us = fl::micros();
-    uint32_t timeout_us = timeout_ms * 1000;
-
-    while (mPendingTransactions > 0 && (fl::micros() - start_us) < timeout_us) {
-        // Busy wait (simulation)
-        std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
-    }
-
-    if (mPendingTransactions > 0) {
-        return false;  // Timeout
-    }
-
-    // Remove completed transaction from queue
-    if (!mQueuedTransactions.empty()) {
-        mQueuedTransactions.erase(mQueuedTransactions.begin());
-    }
-
-    return true;
+    return false;
 }
 
 //=============================================================================
@@ -536,39 +483,6 @@ void SpiPeripheralMockImpl::reset() {
     mShouldFailTransaction = false;
     mHistory.clear();
     mPendingTransactions = 0;
-}
-
-//=============================================================================
-// Simulation Thread
-//=============================================================================
-
-void SpiPeripheralMockImpl::simulationThreadFunc() {
-    while (!mSimulationThreadShouldStop) {
-        // Check if there are pending transactions
-        if (mPendingTransactions > 0 && mTransactionDelayUs > 0) {
-            // Sleep for the transaction delay
-            std::this_thread::sleep_for(std::chrono::microseconds(mTransactionDelayUs));  // okay std namespace
-
-            // After delay, simulate transaction complete by calling callback
-            if (mCallback && mPendingTransactions > 0) {
-                // Decrement pending count
-                mPendingTransactions--;
-
-                // Remove oldest transaction from queue
-                if (!mQueuedTransactions.empty()) {
-                    mQueuedTransactions.erase(mQueuedTransactions.begin());
-                }
-
-                // Call post-transaction callback
-                using CallbackType = void (*)(void*);
-                auto callback_fn = reinterpret_cast<CallbackType>(mCallback);  // ok reinterpret cast
-                callback_fn(nullptr);
-            }
-        } else {
-            // No pending transactions - sleep briefly to avoid busy-wait
-            std::this_thread::sleep_for(std::chrono::microseconds(100));  // okay std namespace
-        }
-    }
 }
 
 } // namespace detail
