@@ -209,7 +209,7 @@ TEST_CASE("RMT5 engine - two channels different pins") {
     CHECK(mock.getChannelCount() >= 1);
 
     // Complete transmissions to allow clean shutdown
-    for (int ch_id = 1; ch_id <= mock.getChannelCount(); ch_id++) {
+    for (size_t ch_id = 1; ch_id <= mock.getChannelCount(); ch_id++) {
         void* channel_handle = reinterpret_cast<void*>(ch_id);
         mock.simulateTransmitDone(channel_handle);
     }
