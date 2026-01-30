@@ -101,6 +101,18 @@ def run_meson_build_and_test(
     # Pass debug=True when build_mode is "debug" to enable sanitizers and full symbols
     # Also pass explicit build_mode to ensure proper cache invalidation on mode changes
     use_debug = build_mode == "debug"
+
+    # Configure ASan options for debug mode
+    # For dynamically loaded shared libraries (dlopen), ASan needs fast_unwind_on_malloc=0
+    # to properly unwind the stack and symbolize addresses. Without this, stack traces
+    # show "<unknown module>" for code in the loaded DLLs.
+    # TODO: remove this code, as clang-tool-chain should handle this automatically now.
+    if use_debug:
+        existing_asan = os.environ.get("ASAN_OPTIONS", "")
+        asan_opts = "fast_unwind_on_malloc=0:symbolize=1"
+        if existing_asan:
+            asan_opts = f"{existing_asan}:{asan_opts}"
+        os.environ["ASAN_OPTIONS"] = asan_opts
     if not setup_meson_build(
         source_dir,
         build_dir,
@@ -187,6 +199,8 @@ def run_meson_build_and_test(
                 def test_callback(test_path: Path) -> bool:
                     """Run a single test executable and return success status"""
                     try:
+                        # Use current environment which includes ASAN_OPTIONS if in debug mode
+                        # (set at top of run_meson_build_and_test)
                         proc = RunningProcess(
                             [str(test_path)],
                             cwd=source_dir,  # Run from project root
