@@ -219,4 +219,13 @@ double tan_impl_double(double value) {
     return ::tan(value);
 }
 
+// Load exponent implementations (ldexp) - multiply by power of 2: value * 2^exp
+float ldexp_impl_float(float value, int exp) {
+    return ::ldexpf(value, exp);
+}
+
+double ldexp_impl_double(double value, int exp) {
+    return ::ldexp(value, exp);
+}
+
 } // namespace fl

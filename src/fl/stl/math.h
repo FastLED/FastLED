@@ -45,6 +45,8 @@ float acos_impl_float(float value);
 double acos_impl_double(double value);
 float tan_impl_float(float value);
 double tan_impl_double(double value);
+float ldexp_impl_float(float value, int exp);
+double ldexp_impl_double(double value, int exp);
 
 // Constexpr version for compile-time evaluation (compatible with older C++
 // standards)
@@ -177,5 +179,10 @@ template<typename T> inline T acos(T value) { return acos_impl_float(value); }
 inline float tanf(float value) { return tan_impl_float(value); }
 inline double tan(double value) { return tan_impl_double(value); }
 template<typename T> inline T tan(T value) { return tan_impl_float(value); }
+
+// Load exponent functions (ldexp) - multiply by power of 2: value * 2^exp
+inline float ldexpf(float value, int exp) { return ldexp_impl_float(value, exp); }
+inline double ldexp(double value, int exp) { return ldexp_impl_double(value, exp); }
+template<typename T> inline T ldexp(T value, int exp) { return ldexp_impl_float(static_cast<float>(value), exp); }
 
 } // namespace fl

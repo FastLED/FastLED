@@ -7,6 +7,8 @@
 // expects standard C library functions like malloc, free, exit, etc.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "fl/stl/stdint.h"
+
 namespace fl {
 
 // Convert string to long integer
@@ -24,5 +26,12 @@ long atol(const char* str);
 
 // Convert string to double
 double strtod(const char* str, char** endptr);
+
+// C-style comparison function type for qsort
+typedef int (*qsort_compare_fn)(const void*, const void*);
+
+// qsort - Quick sort function compatible with C stdlib qsort
+// Sorts an array of elements using the provided comparison function
+void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar);
 
 } // namespace fl
