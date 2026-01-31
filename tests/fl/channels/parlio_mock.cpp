@@ -811,19 +811,6 @@ TEST_CASE("parlio_mock_untransposition_empty_inputs") {
 }
 
 //=============================================================================
-// Test Suite: Cleanup (LSAN Leak Prevention)
-//=============================================================================
-
-TEST_CASE("parlio_mock_cleanup") {
-    // Clean up the parlio mock singleton to prevent LSAN memory leak reports
-    // The Singleton pattern never destroys instances, so we manually clear
-    // allocated memory at the end of the test suite
-    //
-    // This test must run last (doctest runs tests in file order by default)
-    fl::detail::cleanup_parlio_mock();
-}
-
-//=============================================================================
 // Test Suite: LSB vs MSB Bit Packing Modes
 //=============================================================================
 
