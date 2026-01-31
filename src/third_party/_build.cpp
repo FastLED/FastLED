@@ -12,3 +12,4 @@
 #include "third_party/libnsgif/src/_build.hpp"
 #include "third_party/mpeg1_decoder/_build.hpp"
 #include "third_party/object_fled/src/_build.hpp"
+#include "third_party/stb/_build.hpp"

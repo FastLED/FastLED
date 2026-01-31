@@ -7,3 +7,4 @@
 #include "fl/codec/mp3.cpp.hpp"
 #include "fl/codec/mpeg1.cpp.hpp"
 #include "fl/codec/pixel.cpp.hpp"
+#include "fl/codec/vorbis.cpp.hpp"
