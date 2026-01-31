@@ -55,7 +55,6 @@ from pathlib import Path
 from typing import Any, cast
 
 from colorama import Fore, Style, init
-from fbuild.api import SerialMonitor
 
 # Import phase functions from debug_attached
 from ci.debug_attached import (
@@ -315,14 +314,14 @@ def run_pin_discovery(
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
         print(f"   Serial error: {e}")
-        print(f"   Falling back to default pins")
+        print("   Falling back to default pins")
         print()
         return (False, None, None)
     except Exception as e:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
         print(f"   Unexpected error: {e}")
-        print(f"   Falling back to default pins")
+        print("   Falling back to default pins")
         print()
         return (False, None, None)
 
@@ -834,7 +833,7 @@ def run(args: Args | None = None) -> int:
                 print(f"❌ Error: No lane counts provided in '{args.lane_counts}'")
                 return 1
             if any(c <= 0 for c in per_lane_counts):
-                print(f"❌ Error: All lane counts must be positive integers")
+                print("❌ Error: All lane counts must be positive integers")
                 return 1
             # Validate lane count (1-8)
             if len(per_lane_counts) < 1 or len(per_lane_counts) > 8:
@@ -913,7 +912,7 @@ def run(args: Args | None = None) -> int:
                     print(f"❌ Error: No strip sizes provided in '{args.strip_sizes}'")
                     return 1
                 if any(s <= 0 for s in sizes):
-                    print(f"❌ Error: Strip sizes must be positive integers")
+                    print("❌ Error: Strip sizes must be positive integers")
                     return 1
                 config["stripSizes"] = sizes
             except ValueError:
@@ -926,7 +925,7 @@ def run(args: Args | None = None) -> int:
             try:
                 size = int(args.strip_sizes)
                 if size <= 0:
-                    print(f"❌ Error: Strip size must be positive")
+                    print("❌ Error: Strip size must be positive")
                     return 1
                 config["stripSizes"] = [size]
             except ValueError:
@@ -959,7 +958,7 @@ def run(args: Args | None = None) -> int:
         }
         rpc_commands_list.append(set_color_cmd)
         print(
-            f"⚠️  Note: setSolidColor RPC command requires firmware support (may need implementation)"
+            "⚠️  Note: setSolidColor RPC command requires firmware support (may need implementation)"
         )
 
     # Add runTest command with config
@@ -1079,8 +1078,15 @@ def run(args: Args | None = None) -> int:
     if not final_environment:
         print("🔍 Detecting attached chip type...")
 
-        # Try fbuild ledger first (faster when cached)
-        if FBUILD_LEDGER_AVAILABLE and fbuild_detect_and_cache is not None:
+        # Try fbuild ledger first (faster when cached), but only if fbuild is not disabled
+        skip_fbuild_detection = args.no_fbuild
+        if skip_fbuild_detection:
+            print("   (skipping fbuild ledger due to --no-fbuild)")
+        if (
+            not skip_fbuild_detection
+            and FBUILD_LEDGER_AVAILABLE
+            and fbuild_detect_and_cache is not None
+        ):
             try:
                 # Use cast(Any, ...) to silence pyright errors from unresolved fbuild module
                 ledger_result = cast(Any, fbuild_detect_and_cache)(upload_port)
@@ -1182,12 +1188,36 @@ def run(args: Args | None = None) -> int:
     print()
 
     try:
-        # Phase 0: Package Installation (handled by pio_package_client with its own banner)
-        from ci.util.pio_package_client import ensure_packages_installed
+        # Phase 0: Package Installation
+        # When --no-fbuild is specified, skip daemon and use simple PIO commands
+        if args.no_fbuild:
+            print("=" * 60)
+            print("PHASE 0: PACKAGE INSTALLATION (--no-fbuild mode)")
+            print("=" * 60)
+            print("📦 Using direct PlatformIO commands (no daemon)")
 
-        if not ensure_packages_installed(build_dir, final_environment, timeout=1800):
-            print("\n❌ Package installation failed or timed out")
-            return 1
+            import subprocess
+
+            from ci.compiler.build_utils import get_utf8_env
+
+            cmd = ["pio", "pkg", "install", "--project-dir", str(build_dir)]
+            if final_environment:
+                cmd.extend(["--environment", final_environment])
+
+            result = subprocess.run(cmd, env=get_utf8_env())
+            if result.returncode != 0:
+                print("\n❌ Package installation failed")
+                return 1
+            print("✅ Package installation completed\n")
+        else:
+            # Use daemon-based approach (default)
+            from ci.util.pio_package_client import ensure_packages_installed
+
+            if not ensure_packages_installed(
+                build_dir, final_environment, timeout=1800
+            ):
+                print("\n❌ Package installation failed or timed out")
+                return 1
 
         print()
 
@@ -1210,9 +1240,15 @@ def run(args: Args | None = None) -> int:
             final_environment, args.use_fbuild, args.no_fbuild
         )
         if use_fbuild:
-            print("📦 Using fbuild (default for esp32s3/esp32c6)")
+            if args.use_fbuild:
+                print("📦 Using fbuild (--use-fbuild specified)")
+            else:
+                print("📦 Using fbuild (default for esp32s3/esp32c6)")
         else:
-            print("📦 Using PlatformIO")
+            if args.no_fbuild:
+                print("📦 Using PlatformIO (--no-fbuild specified)")
+            else:
+                print("📦 Using PlatformIO")
 
         if use_fbuild:
             from ci.util.fbuild_runner import run_fbuild_compile
@@ -1263,12 +1299,25 @@ def run(args: Args | None = None) -> int:
                 kill_port_users(upload_port)
 
                 try:
-                    # Try to open the serial port briefly using SerialMonitor
-                    with SerialMonitor(upload_port, baud_rate=115200) as _mon:
-                        port_ready = True
-                        elapsed = time.time() - start_time
-                        print(f"✅ Serial port available after {elapsed:.1f}s")
-                        break
+                    # Try to open the serial port briefly
+                    if args.no_fbuild:
+                        # Use pyserial directly when --no-fbuild is specified
+                        import serial
+
+                        with serial.Serial(upload_port, 115200, timeout=0.1) as _ser:
+                            port_ready = True
+                            elapsed = time.time() - start_time
+                            print(f"✅ Serial port available after {elapsed:.1f}s")
+                            break
+                    else:
+                        # Use fbuild's SerialMonitor (default)
+                        from fbuild.api import SerialMonitor as FbuildSerialMonitor
+
+                        with FbuildSerialMonitor(upload_port, baud_rate=115200) as _mon:
+                            port_ready = True
+                            elapsed = time.time() - start_time
+                            print(f"✅ Serial port available after {elapsed:.1f}s")
+                            break
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise
@@ -1350,7 +1399,7 @@ def run(args: Args | None = None) -> int:
         if simd_test_mode:
             pass  # Already printed skip message above
         elif pins_discovered:
-            print(f"\n✅ Skipping GPIO pre-test (pins verified during discovery)")
+            print("\n✅ Skipping GPIO pre-test (pins verified during discovery)")
         elif not run_gpio_pretest(
             upload_port, effective_tx_pin or PIN_TX, effective_rx_pin or PIN_RX
         ):
@@ -1442,6 +1491,7 @@ def run(args: Args | None = None) -> int:
             device_error_keywords=None,  # Use defaults
             stop_keyword=STOP_PATTERN,
             json_rpc_commands=json_rpc_commands,
+            use_pyserial=args.no_fbuild,  # Use pyserial when --no-fbuild is specified
         )
 
         if not success:

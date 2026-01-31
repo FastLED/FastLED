@@ -363,6 +363,7 @@ def run_monitor(
     device_error_keywords: list[str] | None = None,
     stop_keyword: str | None = None,
     json_rpc_commands: list[dict[str, Any]] | None = None,
+    use_pyserial: bool = False,
 ) -> tuple[bool, list[str], JsonRpcHandler]:
     """Attach to serial monitor and capture output.
 
@@ -387,6 +388,7 @@ def run_monitor(
                                (default: ["ClearCommError", "PermissionError"])
         stop_keyword: Regex pattern that triggers early successful exit if all expect patterns found
         json_rpc_commands: List of JSON-RPC commands to send to device at startup (before trigger)
+        use_pyserial: If True, use pyserial directly instead of fbuild SerialMonitor (for --no-fbuild)
 
     Returns:
         Tuple of (success, output_lines, json_rpc_handler)
@@ -532,7 +534,6 @@ def run_monitor(
         print(f"📡 Auto-detected serial port: {monitor_port}")
 
     # Note: SerialMonitor will be opened in the try block using context manager
-    monitor: SerialMonitor | None = None
 
     # Print compact monitor start message
     print("\n" + "─" * 25 + " SERIAL MONITOR " + "─" * 19)
@@ -569,7 +570,17 @@ def run_monitor(
         trigger_deadline = start_time + trigger_timeout_seconds
 
     try:
-        with SerialMonitor(
+        # Select appropriate SerialMonitor implementation
+        if use_pyserial:
+            from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitor
+
+            monitor_cls = PySerialMonitor
+        else:
+            monitor_cls = (
+                SerialMonitor  # fbuild SerialMonitor (imported at module level)
+            )
+
+        with monitor_cls(
             port=monitor_port,
             baud_rate=115200,
             auto_reconnect=True,
@@ -726,7 +737,7 @@ def run_monitor(
                                             )
                                             break
                                     else:
-                                        print(f"\n  ✓ Stop pattern matched")
+                                        print("\n  ✓ Stop pattern matched")
                                         break
 
                             # Check for fail patterns - TERMINATE IMMEDIATELY
@@ -782,7 +793,7 @@ def run_monitor(
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise
-                except Exception as e:
+                except Exception:
                     # SerialMonitor exceptions are simpler - just pass
                     # No need for device stuck detection with SerialMonitor
                     pass

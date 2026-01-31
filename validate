@@ -44,6 +44,10 @@ Options:
   --no-fail-on        Clear default --fail-on pattern (use custom only)
   --verbose, -v       Enable verbose output
 
+Build System:
+  --use-fbuild        Use fbuild for compile/upload (default for esp32s3/esp32c6)
+  --no-fbuild         Force PlatformIO even for esp32s3/esp32c6 (disables fbuild)
+
 Lane Configuration:
   --lanes N or MIN-MAX      Set lane count or range (e.g., '2' or '1-4')
   --lane-counts LED1,LED2,... Set per-lane LED counts (e.g., '100,200,300')
@@ -71,6 +75,7 @@ Examples:
   bash validate --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
   bash validate --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs)
   bash validate --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
+  bash validate --parlio --no-fbuild             # Force PlatformIO (skip fbuild)
 
 Exit Codes:
   0   Success (all patterns found, no failures)
