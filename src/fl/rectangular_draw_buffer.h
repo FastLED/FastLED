@@ -83,7 +83,8 @@ class RectangularDrawBuffer {
     typedef fl::vector<DrawItem> DrawList;
     // We manually manage the memory for the buffer of all LEDs so that it can
     // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
-    scoped_array<u8> mAllLedsBufferUint8;
+    // Use PSRamDeleter to properly free memory allocated with PSRamAllocator.
+    scoped_array<u8, PSRamDeleter<u8>> mAllLedsBufferUint8;
     u32 mAllLedsBufferUint8Size = 0;
     fl::SortedHeapMap<u8, fl::span<u8>> mPinToLedSegment;
     DrawList mDrawList;

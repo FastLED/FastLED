@@ -13,6 +13,16 @@ template <typename T> struct ArrayDeleter {
     void operator()(T *ptr) { delete[] ptr; }
 };
 
+// Deleter for memory allocated via fl::PSRamAllocator (uses fl::malloc/PSRamDeallocate)
+template <typename T> struct PSRamDeleter {
+    PSRamDeleter() = default;
+    void operator()(T *ptr) {
+        if (ptr) {
+            PSRamDeallocate(ptr);
+        }
+    }
+};
+
 // Keep existing PointerDeleter for compatibility (though default_delete is preferred)
 template <typename T> struct PointerDeleter {
     void operator()(T *ptr) { delete ptr; }
