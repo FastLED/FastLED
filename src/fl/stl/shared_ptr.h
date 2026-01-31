@@ -109,10 +109,10 @@ private:
         // Control block was created with reference count 1, no need to increment
     }
     
-    // Internal constructor for no-tracking
-    shared_ptr(T* ptr, detail::ControlBlockBase* control_block, detail::no_tracking_tag) 
+    // Internal constructor for no-tracking (control_block should be nullptr)
+    shared_ptr(T* ptr, detail::ControlBlockBase* control_block, detail::no_tracking_tag)
         : mPtr(ptr), mControlBlock(control_block) {
-        // Control block created with no_tracking=true, no reference increment needed
+        // No control block - this is a zero-overhead wrapper around a raw pointer
     }
         
     // void release() {
@@ -376,21 +376,12 @@ shared_ptr<T> make_shared_with_deleter(Deleter d, Args&&... args) {
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});
 }
 
-namespace detail {
-    template<typename T>
-    struct NoDeleter {
-        void operator()(T*) const {
-            // Intentionally do nothing - object lifetime managed externally
-        }
-    };
-}
-
 // NEW: Creates a shared_ptr that does not modify the reference count
-// The shared_ptr and any copies will not affect object lifetime
+// The shared_ptr and any copies will not affect object lifetime.
+// No control block is allocated - this is a zero-overhead wrapper around a raw pointer.
 template<typename T>
 shared_ptr<T> make_shared_no_tracking(T& obj) {
-    auto* control = new detail::ControlBlock<T, detail::NoDeleter<T>>(&obj, detail::NoDeleter<T>{}, false);  // track = false (enables no-tracking mode)
-    return shared_ptr<T>(&obj, control, detail::no_tracking_tag{});
+    return shared_ptr<T>(&obj, nullptr, detail::no_tracking_tag{});
 }
 
 // make_shared_array for array allocations

@@ -472,4 +472,65 @@ TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
     FL_CHECK(nodeB_destroyed); // Now nodeB should be destroyed
 }
 
+TEST_CASE("fl::make_shared_no_tracking control block cleanup") {
+    // Test that make_shared_no_tracking properly cleans up the control block
+    // while NOT deleting the managed object
+    bool destructor_called = false;
+    TestClass static_object(42, &destructor_called);
+
+    {
+        // Create a no-tracking shared_ptr to an externally managed object
+        auto ptr = fl::make_shared_no_tracking(static_object);
+        FL_CHECK(ptr);
+        FL_CHECK_EQ(ptr.get(), &static_object);
+        FL_CHECK_EQ(ptr->getValue(), 42);
+
+        // use_count should return 0 for no-tracking ptrs
+        FL_CHECK_EQ(ptr.use_count(), 0);
+
+        // Test copy construction
+        auto ptr2 = ptr;
+        FL_CHECK_EQ(ptr2.get(), &static_object);
+        FL_CHECK_EQ(ptr2->getValue(), 42);
+
+        // Both should still report 0 for use_count (no-tracking mode)
+        FL_CHECK_EQ(ptr.use_count(), 0);
+        FL_CHECK_EQ(ptr2.use_count(), 0);
+    }
+
+    // Object destructor should NOT be called - it's managed externally
+    FL_CHECK(!destructor_called);
+
+    // Object should still be valid
+    FL_CHECK_EQ(static_object.getValue(), 42);
+}
+
+TEST_CASE("fl::make_shared_no_tracking copy and move semantics") {
+    TestClass static_object(100);
+
+    auto ptr1 = fl::make_shared_no_tracking(static_object);
+    FL_CHECK(ptr1);
+
+    // Copy construction
+    auto ptr2 = ptr1;
+    FL_CHECK_EQ(ptr1.get(), ptr2.get());
+    FL_CHECK_EQ(ptr2.get(), &static_object);
+
+    // Move construction
+    auto ptr3 = fl::move(ptr1);
+    FL_CHECK(!ptr1);  // ptr1 should be null after move
+    FL_CHECK_EQ(ptr3.get(), &static_object);
+
+    // Assignment
+    fl::shared_ptr<TestClass> ptr4;
+    ptr4 = ptr2;
+    FL_CHECK_EQ(ptr4.get(), &static_object);
+
+    // Move assignment
+    fl::shared_ptr<TestClass> ptr5;
+    ptr5 = fl::move(ptr2);
+    FL_CHECK(!ptr2);  // ptr2 should be null after move
+    FL_CHECK_EQ(ptr5.get(), &static_object);
+}
+
 } // namespace shared_ptr_test
