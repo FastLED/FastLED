@@ -44,6 +44,7 @@ EXCLUDED_TEST_FILES = {
     "crash_handler_main.cpp",  # Shared infrastructure for crash handling in runner
     "example_runner.cpp",  # Generic example runner that loads and executes example DLLs
     "fltest_self_test.cpp",  # Self-test for fl::test framework (tests fltest.h)
+    "asan_leak.cpp",  # ASAN/LSAN symbolization verification test (no src header)
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)

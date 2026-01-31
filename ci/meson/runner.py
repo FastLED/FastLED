@@ -3,11 +3,13 @@
 
 import argparse
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
 from typing import Optional
 
+from clang_tool_chain import prepare_sanitizer_environment
 from running_process import RunningProcess
 
 from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
@@ -93,8 +95,6 @@ def run_meson_build_and_test(
     # Clean if requested
     if clean and build_dir.exists():
         _ts_print(f"[MESON] Cleaning build directory: {build_dir}")
-        import shutil
-
         shutil.rmtree(build_dir)
 
     # Setup build
@@ -102,17 +102,28 @@ def run_meson_build_and_test(
     # Also pass explicit build_mode to ensure proper cache invalidation on mode changes
     use_debug = build_mode == "debug"
 
-    # Configure ASan options for debug mode
-    # For dynamically loaded shared libraries (dlopen), ASan needs fast_unwind_on_malloc=0
-    # to properly unwind the stack and symbolize addresses. Without this, stack traces
-    # show "<unknown module>" for code in the loaded DLLs.
-    # TODO: remove this code, as clang-tool-chain should handle this automatically now.
+    # Configure ASan/LSan options for debug mode using clang-tool-chain's API
+    # This automatically:
+    # - Sets ASAN_OPTIONS with optimal settings (fast_unwind_on_malloc=0:symbolize=1)
+    # - Sets LSAN_OPTIONS with optimal settings
+    # - Sets ASAN_SYMBOLIZER_PATH to llvm-symbolizer from clang-tool-chain
+    # The API only injects settings when sanitizers are detected in compiler flags
     if use_debug:
-        existing_asan = os.environ.get("ASAN_OPTIONS", "")
-        asan_opts = "fast_unwind_on_malloc=0:symbolize=1"
-        if existing_asan:
-            asan_opts = f"{existing_asan}:{asan_opts}"
-        os.environ["ASAN_OPTIONS"] = asan_opts
+        # Get sanitizer-configured environment from clang-tool-chain
+        # Pass compiler flags so the API knows sanitizers are active
+        sanitizer_flags = ["-fsanitize=address"]
+        sanitizer_env = prepare_sanitizer_environment(
+            base_env=os.environ.copy(),
+            compiler_flags=sanitizer_flags,
+        )
+        # Update current environment with sanitizer settings
+        os.environ.update(sanitizer_env)
+
+        if verbose:
+            symbolizer_path = sanitizer_env.get("ASAN_SYMBOLIZER_PATH")
+            if symbolizer_path:
+                _ts_print(f"[MESON] Set ASAN_SYMBOLIZER_PATH={symbolizer_path}")
+
     if not setup_meson_build(
         source_dir,
         build_dir,
