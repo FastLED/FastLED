@@ -9,6 +9,9 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 
+// Global Interrupt Control (interruptsDisable/interruptsEnable)
+#include "platforms/arm/stm32/interrupts_stm32_inline.h"
+
 namespace fl {
 namespace isr {
 namespace platform {
@@ -86,21 +89,6 @@ bool requires_assembly_handler(uint8_t priority) {
 
 } // namespace platform
 } // namespace isr
-
-// =============================================================================
-// Global Interrupt Control (noInterrupts/interrupts)
-// =============================================================================
-
-/// Disable interrupts on ARM Cortex-M (STM32)
-inline void interruptsDisable() {
-    __asm__ __volatile__("cpsid i" ::: "memory");
-}
-
-/// Enable interrupts on ARM Cortex-M (STM32)
-inline void interruptsEnable() {
-    __asm__ __volatile__("cpsie i" ::: "memory");
-}
-
 } // namespace fl
 
 #endif // FL_IS_STM32

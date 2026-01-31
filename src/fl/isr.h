@@ -471,3 +471,4 @@ public:
 
 // Include platform-specific ISR implementation after API declaration
 // This provides both ISR handler functions AND interrupt control functions
+// NOTE: Platform implementations are in platforms/isr.h, included by fl/isr.cpp.hpp

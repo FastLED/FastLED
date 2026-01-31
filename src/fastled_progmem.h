@@ -1,10 +1,13 @@
 #pragma once
 
+#include "platforms/is_platform.h"
 
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/progmem_esp8266.h"
+#elif defined(FL_IS_STM32)
+#include "platforms/arm/stm32/progmem_stm32.h"
 #else
 
 
@@ -106,4 +109,4 @@
 #endif
 #endif
 
-#endif  // defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
+#endif  // platform progmem selection

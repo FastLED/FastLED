@@ -3,6 +3,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"
+#include "platforms/arm/stm32/interrupts_stm32_inline.h"
 
 namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
@@ -46,9 +47,9 @@ protected:
         mWait.wait();
         Rgbw rgbw = this->getRgbw();
         if(!showRGBInternal(pixels, rgbw)) {
-            // showRGBInternal already called sei() before returning 0, so no need to call it again
+            // showRGBInternal already re-enabled interrupts before returning 0
             delayMicroseconds(WAIT_TIME);
-            cli(); // Disable interrupts for retry
+            fl::interruptsDisable(); // Disable interrupts for retry
             showRGBInternal(pixels, rgbw);
         }
         mWait.mark();
@@ -97,7 +98,7 @@ protected:
         FASTLED_REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
         *port = lo;
 
-        cli();
+        fl::interruptsDisable();
 
         uint32_t next_mark = (T1+T2+T3);
 
@@ -115,14 +116,14 @@ protected:
         while(pixels.has(1)) {
             pixels.stepDithering();
             #if (FASTLED_ALLOW_INTERRUPTS == 1)
-            // Only call cli() after the first pixel, since line 99 already disabled interrupts initially
+            // Only disable after the first pixel, since we already disabled interrupts initially
             if (!first_pixel) {
-                cli();
+                fl::interruptsDisable();
             }
             first_pixel = false;
             // if interrupts took longer than 45µs, punt on the current frame
             if(DWT->CYCCNT > next_mark) {
-                if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
+                if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { fl::interruptsEnable(); return 0; }
             }
 
             hi = *port | FastPin<DATA_PIN>::mask();
@@ -151,13 +152,13 @@ protected:
 
             pixels.advanceData();
             #if (FASTLED_ALLOW_INTERRUPTS == 1)
-            sei();
+            fl::interruptsEnable();
             #endif
         }
 
         #if (FASTLED_ALLOW_INTERRUPTS == 0)
-        // Only need final sei() if interrupts weren't re-enabled in the loop
-        sei();
+        // Only need final enable if interrupts weren't re-enabled in the loop
+        fl::interruptsEnable();
         #endif
         return DWT->CYCCNT;
     }

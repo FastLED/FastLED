@@ -5,7 +5,7 @@
 
 // Only compile if FreeRTOS is available
 // Maple/libmaple core doesn't have FreeRTOS support
-#if __has_include("FreeRTOS.h") && !defined(FL_STM32_CORE_LIBMAPLE)
+#if __has_include("FreeRTOS.h") && !defined(FL_IS_STM32_LIBMAPLE)
 
 #include "mutex_stm32.h"
 #include "fl/warn.h"
