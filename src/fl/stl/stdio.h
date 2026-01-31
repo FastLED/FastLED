@@ -265,7 +265,11 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
 inline void format_arg(StrStream& stream, const FormatSpec& spec, const char* arg) {
     switch (spec.type) {
         case 's':
-            stream << arg;
+            if (arg) {
+                stream << arg;
+            } else {
+                stream << "(null)";
+            }
             break;
         case 'x':
             stream << "<string_not_hex>";

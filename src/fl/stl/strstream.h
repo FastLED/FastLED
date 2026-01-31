@@ -227,7 +227,9 @@ class StrStream {
     }
 
     StrStream &operator<<(const char *str) {
-        mStr.append(str);
+        if (str) {
+            mStr.append(str);
+        }
         return *this;
     }
 
