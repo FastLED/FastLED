@@ -74,6 +74,11 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     void *dma_buf = nullptr;
     size_t dma_buf_size = 0;
 
+    // Store PIO and state machine for use in showPixels (needed to reset SM between frames)
+    PIO mPio = nullptr;
+    int mSm = -1;
+    int mPioOffset = -1;  // PIO program offset for restart
+
     float pio_clock_multiplier;
     int T1_mult, T2_mult, T3_mult;
 
@@ -176,39 +181,43 @@ public:
             break; // found pio and sm that work
         }
         if (offset == -1) return; // couldn't find good pio and sm
-        
-        
+
+        // Store PIO, state machine, and offset for later use
+        mPio = pio;
+        mSm = sm;
+        mPioOffset = offset;
+
         // claim an unused DMA channel (there's 12 in total,, so this should also usually work out fine)
         dma_channel = dma_claim_unused_channel(false);
         if (dma_channel == -1) return; // no free DMA channel
-        
-        
+
+
         // setup PIO state machine
-        pio_gpio_init(pio, DATA_PIN);
-        pio_sm_set_consecutive_pindirs(pio, sm, DATA_PIN, 1, true);
-        
-        pio_sm_config c = clockless_pio_program_get_default_config(offset);
+        pio_gpio_init(mPio, DATA_PIN);
+        pio_sm_set_consecutive_pindirs(mPio, mSm, DATA_PIN, 1, true);
+
+        pio_sm_config c = clockless_pio_program_get_default_config(mPioOffset);
         sm_config_set_set_pins(&c, DATA_PIN, 1);
         sm_config_set_out_pins(&c, DATA_PIN, 1);
         sm_config_set_out_shift(&c, false, true, 32);
-        
+
         // uncommenting this makes the FIFO 8 words long,
         // which seems like it won't actually benefit us
         // sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-        
+
         float div = clock_get_hz(clk_sys) / (pio_clock_multiplier * CLOCKLESS_FREQUENCY);
         sm_config_set_clkdiv(&c, div);
-        
-        pio_sm_init(pio, sm, offset, &c);
-        pio_sm_set_enabled(pio, sm, true);
+
+        pio_sm_init(mPio, mSm, mPioOffset, &c);
+        pio_sm_set_enabled(mPio, mSm, true);
         
         
         // setup DMA
         dma_channel_config channel_config = dma_channel_get_default_config(dma_channel);
-        channel_config_set_dreq(&channel_config, pio_get_dreq(pio, sm, true));
+        channel_config_set_dreq(&channel_config, pio_get_dreq(mPio, mSm, true));
         dma_channel_configure(dma_channel,
                               &channel_config,
-                              &pio->txf[sm],
+                              &mPio->txf[mSm],
                               nullptr,   // address set when making transfer
                               1,      // count set when making transfer
                               false); // don't trigger now
@@ -243,11 +252,11 @@ public:
 #endif
             return;
         }
-        
+
         // wait for past transfer to finish
         // call when previous pixels are done will run without blocking,
         // call when previous pixels are still being transmitted should block until complete
-        
+
         // a potential improvement here would be to prepare data for the output before waiting,
         // but that would require a smarter DMA buffer system
         // (currently, the gap between LEDs is greater than 50us due to the time taken)
@@ -255,7 +264,15 @@ public:
             dma_channel_wait_for_finish_blocking(dma_channel);
         }
         mWait.wait();
-        
+
+        // Reset the PIO state machine before starting new transfer to prevent freeze
+        // This clears any stale state from the previous transfer (RP2350 fix)
+        pio_sm_set_enabled(mPio, mSm, false);
+        pio_sm_clear_fifos(mPio, mSm);
+        pio_sm_restart(mPio, mSm);
+        pio_sm_exec(mPio, mSm, pio_encode_jmp(mPioOffset));  // Jump back to program start
+        pio_sm_set_enabled(mPio, mSm, true);
+
         showRGBInternal(pixels);
 #else
         mWait.wait();
