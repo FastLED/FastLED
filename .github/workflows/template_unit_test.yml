@@ -1,38 +1,16 @@
-name: unit tests
+name: unit tests template
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
-  pull_request_target:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+        description: 'Runner OS (ubuntu-latest, macos-latest, or windows-latest)'
 
 permissions:
   contents: read        # Required to checkout code
-  actions: read         # Required for artifact operations  
+  actions: read         # Required for artifact operations
   id-token: write      # Required for artifact upload (OIDC)
   pull-requests: read   # If needed to read PR info
 
@@ -42,13 +20,7 @@ defaults:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        compiler: ["clang"]
-    
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout trusted base branch code
         uses: actions/checkout@v4
@@ -123,7 +95,7 @@ jobs:
           uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
 
 
-      
+
       - name: Run Example Blink
         working-directory: trusted
         run: |

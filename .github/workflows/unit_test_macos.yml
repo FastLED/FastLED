@@ -1,0 +1,39 @@
+name: unit tests macos
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/build_unit_test*.yml'
+      - '.github/workflows/template_unit_test.yml'
+      - 'CMakeLists.txt'
+      - 'meson.build'
+      - 'examples/meson.build'
+      - 'pyproject.toml'
+      - 'test'
+      - 'test.py'
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/build_unit_test*.yml'
+      - '.github/workflows/template_unit_test.yml'
+      - 'CMakeLists.txt'
+      - 'meson.build'
+      - 'examples/meson.build'
+      - 'pyproject.toml'
+      - 'test'
+      - 'test.py'
+
+jobs:
+  test:
+    uses: ./.github/workflows/template_unit_test.yml
+    with:
+      os: macos-latest
