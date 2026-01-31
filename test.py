@@ -48,10 +48,10 @@ def _load_backends():
 _RUN_PLATFORM_BACKENDS = _load_backends()
 
 
-if os.environ.get("_GITHUB"):
-    _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub Linux builds
+if os.environ.get("GITHUB_ACTIONS"):
+    _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub CI builds
     ts_print(
-        f"GitHub Windows environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
+        f"GitHub Actions environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
     )
 
 
