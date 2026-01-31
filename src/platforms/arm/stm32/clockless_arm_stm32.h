@@ -20,12 +20,6 @@ namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-    // Extract timing values from struct and convert from nanoseconds to clock cycles
-    // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
-    // The +500 provides rounding to nearest integer
-    static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t data_t;
 
@@ -45,49 +39,66 @@ public:
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
         mWait.wait();
+
+        // Compute timing from CPU frequency
+        uint32_t cpu_freq = F_CPU;
+        // Convert nanoseconds to clock cycles: cycles = nanoseconds * frequency / 1e9
+        // Use uint64_t to avoid overflow (e.g., 900ns * 180MHz = 162 billion)
+        uint32_t t1_clocks = static_cast<uint64_t>(TIMING::T1) * cpu_freq / 1000000000ULL;
+        uint32_t t2_clocks = static_cast<uint64_t>(TIMING::T2) * cpu_freq / 1000000000ULL;
+        uint32_t t3_clocks = static_cast<uint64_t>(TIMING::T3) * cpu_freq / 1000000000ULL;
+
         Rgbw rgbw = this->getRgbw();
-        if(!showRGBInternal(pixels, rgbw)) {
+        if(!showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks)) {
             // showRGBInternal already re-enabled interrupts before returning 0
             delayMicroseconds(WAIT_TIME);
             fl::interruptsDisable(); // Disable interrupts for retry
-            showRGBInternal(pixels, rgbw);
+            showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks);
         }
         mWait.mark();
     }
 
 #define _CYCCNT (*(volatile uint32_t*)(0xE0001004UL))
 
-    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b)  {
+    template<int BITS> __attribute__ ((always_inline))
+    inline static void writeBits(
+        FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port,
+        FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b,
+        uint32_t t1_clocks, uint32_t t1t2_clocks, uint32_t t1t2t3_clocks)  {
         for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
-            while(_CYCCNT < (T1+T2+T3-ADJ));
+            while(_CYCCNT < (t1t2t3_clocks-ADJ));
             FastPin<DATA_PIN>::fastset(port, hi);
             _CYCCNT = 4;
             if(b&0x80) {
-                while(_CYCCNT < (T1+T2-ADJ));
+                while(_CYCCNT < (t1t2_clocks-ADJ));
                 FastPin<DATA_PIN>::fastset(port, lo);
             } else {
-                while(_CYCCNT < (T1-ADJ/2));
+                while(_CYCCNT < (t1_clocks-ADJ/2));
                 FastPin<DATA_PIN>::fastset(port, lo);
             }
             b <<= 1;
         }
 
-        while(_CYCCNT < (T1+T2+T3-ADJ));
+        while(_CYCCNT < (t1t2t3_clocks-ADJ));
         FastPin<DATA_PIN>::fastset(port, hi);
         _CYCCNT = 4;
 
         if(b&0x80) {
-            while(_CYCCNT < (T1+T2-ADJ));
+            while(_CYCCNT < (t1t2_clocks-ADJ));
             FastPin<DATA_PIN>::fastset(port, lo);
         } else {
-            while(_CYCCNT < (T1-ADJ/2));
+            while(_CYCCNT < (t1_clocks-ADJ/2));
             FastPin<DATA_PIN>::fastset(port, lo);
         }
     }
 
-    // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
-    // gcc will use register Y for the this pointer.
-    static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels, Rgbw rgbw) {
+    static uint32_t showRGBInternal(
+            PixelController<RGB_ORDER> pixels, Rgbw rgbw,
+            uint32_t t1_clocks, uint32_t t2_clocks, uint32_t t3_clocks) {
+        // Pre-calculate combined timing values for the hot loop
+        const uint32_t t1t2_clocks = t1_clocks + t2_clocks;
+        const uint32_t t1t2t3_clocks = t1t2_clocks + t3_clocks;
+
         // Get access to the clock
         CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
         DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -100,7 +111,7 @@ protected:
 
         fl::interruptsDisable();
 
-        uint32_t next_mark = (T1+T2+T3);
+        uint32_t next_mark = t1t2t3_clocks;
 
         DWT->CYCCNT = 0;
 
@@ -147,7 +158,7 @@ protected:
 
             // Write all bytes
             for (fl::size i = 0; i < bytes.size(); ++i) {
-                writeBits<8+XTRA0>(next_mark, port, hi, lo, bytes[i]);
+                writeBits<8+XTRA0>(next_mark, port, hi, lo, bytes[i], t1_clocks, t1t2_clocks, t1t2t3_clocks);
             }
 
             pixels.advanceData();
