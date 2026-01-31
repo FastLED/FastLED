@@ -551,6 +551,39 @@ template <> struct is_signed<long double> {
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
+// make_unsigned - converts signed integer types to their unsigned counterparts
+//-------------------------------------------------------------------------------
+// Uses size-based selection to work with any integer type (including platform-specific types)
+// Only valid for integral types excluding bool (matches std::make_unsigned behavior)
+
+namespace make_unsigned_detail {
+
+// Size-based unsigned type selector
+template <fl::size Size> struct unsigned_by_size;
+template <> struct unsigned_by_size<1> { using type = unsigned char; };
+template <> struct unsigned_by_size<2> { using type = unsigned short; };
+template <> struct unsigned_by_size<4> { using type = unsigned int; };
+template <> struct unsigned_by_size<8> { using type = unsigned long long; };
+
+} // namespace make_unsigned_detail
+
+// Primary template - triggers static_assert for invalid types (float, double, bool, etc.)
+template <typename T, typename Enable = void>
+struct make_unsigned {
+    // Dependent false to delay static_assert until instantiation
+    static_assert(is_integral<T>::value && !is_same<typename remove_cv<T>::type, bool>::value,
+                  "make_unsigned requires a non-bool integral type");
+};
+
+// Specialization for valid integral types (excludes bool)
+template <typename T>
+struct make_unsigned<T, typename enable_if<
+    is_integral<T>::value && !is_same<typename remove_cv<T>::type, bool>::value
+>::type> {
+    using type = typename make_unsigned_detail::unsigned_by_size<sizeof(T)>::type;
+};
+
+//-------------------------------------------------------------------------------
 // Type size ranking for promotion rules
 //-------------------------------------------------------------------------------
 template <typename T> struct type_rank {
