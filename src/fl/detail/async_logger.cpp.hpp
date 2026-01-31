@@ -155,8 +155,8 @@ bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_p
     config.priority = fl::isr::ISR_PRIORITY_LOW;  // Low priority to avoid interfering with LED timing
     config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
 
-    // Attach timer ISR
-    if (!fl::isr::attachTimerHandler(config, &state.mTimerHandle)) {
+    // Attach timer ISR (returns 0 on success, negative on error)
+    if (fl::isr::attachTimerHandler(config, &state.mTimerHandle) != 0) {
         return false;  // Platform doesn't support timers or attachment failed
     }
 
