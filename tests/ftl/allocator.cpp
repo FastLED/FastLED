@@ -1060,6 +1060,11 @@ TEST_CASE("fl::allocator_inlined - Clear functionality") {
             ptrs.push_back(ptr);
         }
 
+        // Deallocate all pointers before clearing
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+
         // Clear the allocator
         allocator.clear();
 
@@ -1287,13 +1292,14 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         
         // Test Malloc function
         ClearTrackingData();
-        fl::Malloc(200);
-        
+        void* ptr2 = fl::Malloc(200);
+
         FL_CHECK(gMallocCalls.size() == 1);
         FL_CHECK(gMallocSizes[0] == 200);
-        
+
         // Cleanup
         fl::PSRamDeallocate(ptr1);
+        fl::Free(ptr2);
         fl::ClearMallocFreeHook();
     }
     
@@ -1378,8 +1384,11 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         if (ptr == nullptr) {
             FL_CHECK(gMallocCalls.empty());
             FL_CHECK(gMallocSizes.empty());
+        } else {
+            // Some allocators return non-null for zero-size allocations
+            fl::PSRamDeallocate(ptr);
         }
-        
+
         fl::ClearMallocFreeHook();
     }
     
