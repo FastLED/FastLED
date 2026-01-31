@@ -419,11 +419,15 @@ TEST_CASE("fl::weak_ptr circular reference - basic linked list") {
         FL_CHECK_EQ(nodeB.use_count(), 2); // nodeB and nodeA->next_
         FL_CHECK(!nodeA_destroyed);
         FL_CHECK(!nodeB_destroyed);
+
+        // Break the cycle to allow cleanup (otherwise LSAN detects leak)
+        // In real code, you'd use weak_ptr to break cycles instead
+        nodeA->setNext(nullptr);
     } // nodeA and nodeB local variables destroyed
-    
-    // Due to circular reference, objects are NOT destroyed yet
-    // This is expected behavior - circular references prevent cleanup
-    // In real code, you'd use weak_ptr to break cycles
+
+    // After breaking the cycle, objects should be destroyed
+    FL_CHECK(nodeA_destroyed);
+    FL_CHECK(nodeB_destroyed);
 }
 
 TEST_CASE("fl::weak_ptr circular reference - broken with weak_ptr") {
