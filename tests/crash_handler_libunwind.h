@@ -3,6 +3,7 @@
 
 #ifdef USE_LIBUNWIND
 
+#define UNW_LOCAL_ONLY
 #include <libunwind.h>
 #include <csignal>
 #include <cstdio>
