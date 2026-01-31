@@ -45,6 +45,14 @@ template <typename T> class ThreadLocalReal {
     // Destructor - cleanup pthread key
     ~ThreadLocalReal() {
         if (mKeyInitialized) {
+            // Manually clean up storage for the current thread.
+            // pthread_key_delete does NOT call the cleanup function - it only
+            // removes the key. Thread-specific data must be freed manually.
+            ThreadStorage* storage = getStorage();
+            if (storage) {
+                pthread_setspecific(mKey, nullptr);
+                delete storage;
+            }
             pthread_key_delete(mKey);
         }
     }
