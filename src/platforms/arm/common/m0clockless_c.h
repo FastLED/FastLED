@@ -124,9 +124,11 @@ FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
  * @return Current cycle count (32-bit, wraps around)
  */
 FL_FORCE_INLINE uint32_t get_cycle_count() {
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-    // M3/M4/M7: Use DWT CYCCNT (Data Watchpoint and Trace cycle counter)
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || \
+    defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
+    // M3/M4/M7/M23/M33: Use DWT CYCCNT (Data Watchpoint and Trace cycle counter)
     // Note: DWT may need to be enabled first (usually done by Arduino core)
+    // ARMv8-M (M23/M33) also has DWT with compatible register layout
     #define DWT_CYCCNT  (*(volatile uint32_t *)0xE0001004)
     return DWT_CYCCNT;
 #elif defined(__ARM_ARCH_6M__)

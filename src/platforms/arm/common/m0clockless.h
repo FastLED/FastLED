@@ -46,6 +46,11 @@
     #define __USE_M0_C_VERSION__ 1
 #elif defined(FASTLED_M0_FORCE_ASM)
     #define __USE_M0_C_VERSION__ 0
+#elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
+    // ARMv8-M (Cortex-M23/M33/M35P): Use C++ version
+    // M0 assembly is incompatible with ARMv8-M instruction set
+    // Examples: RP2350 (M33), Silicon Labs MGM240 (M33)
+    #define __USE_M0_C_VERSION__ 1
 #elif defined(__ARM_ARCH_6M__)
     // Cortex-M0: Use assembly for best performance
     #define __USE_M0_C_VERSION__ 0

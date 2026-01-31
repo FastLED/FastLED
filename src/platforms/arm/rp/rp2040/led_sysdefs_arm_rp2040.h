@@ -4,6 +4,11 @@
 
 // RP2040-specific system defines
 // RP2040 default clock: 125 MHz
+// RP2040 uses dual ARM Cortex-M0+ cores
+
+// Define processor architecture for RP2040 (Cortex-M0+)
+// This is used by m0clockless.h to select appropriate implementation
+#define FL_IS_ARM_M0_PLUS
 
 // #define F_CPU clock_get_hz(clk_sys) // can't use runtime function call
 // is the boot-time value in another var already for any platforms?

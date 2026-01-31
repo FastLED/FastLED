@@ -20,7 +20,10 @@
 #ifndef FL_IS_ARM
 #error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
 #endif
-#define FL_IS_ARM_M0_PLUS
+
+// NOTE: FL_IS_ARM_M0_PLUS is now defined per-platform:
+// - RP2040: Cortex-M0+ → defined in led_sysdefs_arm_rp2040.h
+// - RP2350: Cortex-M33 → NOT defined (uses compiler's __ARM_ARCH_8M_MAIN__)
 
 // TODO: PORT SPI TO HW
 //#define FASTLED_SPI_BYTE_ONLY

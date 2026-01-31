@@ -4,6 +4,9 @@
 
 // RP2350-specific system defines
 // RP2350 default clock: 150 MHz
+// RP2350 uses dual ARM Cortex-M33 cores (ARMv8-M Mainline)
+// NOTE: FL_IS_ARM_M0_PLUS is NOT defined here - RP2350 is NOT M0+!
+// The compiler defines __ARM_ARCH_8M_MAIN__ for Cortex-M33
 
 // #define F_CPU clock_get_hz(clk_sys) // can't use runtime function call
 // is the boot-time value in another var already for any platforms?
