@@ -286,32 +286,31 @@ def setup_meson_build(
     # Get current source file hash (used for change detection and saving after setup)
     current_source_hash, current_source_files = get_source_files_hash(source_dir)
 
+    # ============================================================================
+    # CONSOLIDATED MARKER CHECKING
+    # ============================================================================
+    # Instead of printing multiple "forcing reconfigure" messages for each missing
+    # marker, we collect all reasons and print a single consolidated message.
+    # This reduces noise when switching build modes or on first run.
+    # ============================================================================
+    reconfigure_reasons: list[str] = []  # Collect reasons for reconfiguration
+    debug_changed = False
+    build_mode_changed = False
+    last_build_mode: Optional[str] = None
+
     if already_configured:
         # Check if thin archive setting has changed since last configure
         if thin_archive_marker.exists():
             try:
                 last_thin_setting = thin_archive_marker.read_text().strip() == "True"
                 if last_thin_setting != use_thin_archives:
-                    _ts_print(
-                        f"[MESON] ⚠️  Thin archive setting changed: {last_thin_setting} → {use_thin_archives}"
+                    reconfigure_reasons.append(
+                        f"thin archive changed: {last_thin_setting} → {use_thin_archives}"
                     )
-                    _ts_print(
-                        "[MESON] 🔄 Forcing reconfigure to update AR tool configuration"
-                    )
-                    force_reconfigure = True
             except (OSError, IOError):
-                # If we can't read the marker, force reconfigure to be safe
-                _ts_print(
-                    "[MESON] ⚠️  Could not read thin archive marker, forcing reconfigure"
-                )
-                force_reconfigure = True
+                reconfigure_reasons.append("thin archive marker unreadable")
         else:
-            # No marker file exists from previous configure
-            # This can happen on first run after updating to this version
-            # Force reconfigure because we don't know what thin archive setting
-            # the cached libfastled.a was built with
-            _ts_print("[MESON] ℹ️  No thin archive marker found, forcing reconfigure")
-            force_reconfigure = True
+            reconfigure_reasons.append("thin archive marker missing")
 
         # Check if source/test files have changed since last configure
         # This detects when files are added or removed, which requires reconfigure
@@ -321,62 +320,29 @@ def setup_meson_build(
                 try:
                     last_hash = source_files_marker.read_text().strip()
                     if last_hash != current_source_hash:
-                        _ts_print(
-                            "[MESON] ⚠️  Source/test file list changed (files added/removed)"
-                        )
-                        _ts_print(
-                            "[MESON] 🔄 Forcing reconfigure to update build graph and test discovery"
-                        )
-                        force_reconfigure = True
+                        reconfigure_reasons.append("source/test files changed")
                 except (OSError, IOError):
-                    # If we can't read the marker, force reconfigure to be safe
-                    _ts_print(
-                        "[MESON] ⚠️  Could not read source/test files marker, forcing reconfigure"
-                    )
-                    force_reconfigure = True
+                    reconfigure_reasons.append("source files marker unreadable")
             else:
-                # No marker file exists from previous configure
-                # Force reconfigure to ensure build graph matches current source files
-                _ts_print(
-                    "[MESON] ℹ️  No source/test files marker found, forcing reconfigure"
-                )
-                force_reconfigure = True
+                reconfigure_reasons.append("source files marker missing")
 
         # Check if debug mode setting has changed since last configure
         # This is critical because debug mode changes compiler flags (sanitizers, optimization)
         # Using old object files with different flags causes linker errors
         # CRITICAL: When debug mode changes, we must delete all object files and archives
         # because they were compiled with different sanitizer/optimization flags
-        debug_changed = False
         if debug_marker.exists():
             try:
                 last_debug_setting = debug_marker.read_text().strip() == "True"
                 if last_debug_setting != debug:
-                    _ts_print(
-                        f"[MESON] ⚠️  Debug mode changed: {last_debug_setting} → {debug}"
+                    reconfigure_reasons.append(
+                        f"debug mode changed: {last_debug_setting} → {debug}"
                     )
-                    _ts_print(
-                        "[MESON] 🔄 Forcing reconfigure to update sanitizer/optimization flags"
-                    )
-                    force_reconfigure = True
                     debug_changed = True
             except (OSError, IOError):
-                # If we can't read the marker, force reconfigure to be safe
-                _ts_print("[MESON] ⚠️  Could not read debug marker, forcing reconfigure")
-                force_reconfigure = True
+                reconfigure_reasons.append("debug marker unreadable")
         else:
-            # No marker file exists from previous configure
-            # This can happen on first run after updating to this version
-            # Force reconfigure because we don't know what debug setting
-            # the cached objects/PCH were built with - sanitizers could mismatch
-            _ts_print("[MESON] ℹ️  No debug marker found, forcing reconfigure")
-            force_reconfigure = True
-
-        # CRITICAL: Delete all object files and archives when debug mode changes
-        # Object files compiled with sanitizers cannot be linked without sanitizer runtime
-        # We must force a complete rebuild with the new compiler flags
-        if debug_changed:
-            cleanup_build_artifacts(build_dir, "Debug mode changed")
+            reconfigure_reasons.append("debug marker missing")
 
         # Check if IWYU check setting has changed since last configure
         # When check mode changes, we must reconfigure to update the C++ compiler wrapper
@@ -384,56 +350,60 @@ def setup_meson_build(
             try:
                 last_check_setting = check_marker.read_text().strip() == "True"
                 if last_check_setting != check:
-                    _ts_print(
-                        f"[MESON] ⚠️  IWYU check mode changed: {last_check_setting} → {check}"
+                    reconfigure_reasons.append(
+                        f"IWYU check mode changed: {last_check_setting} → {check}"
                     )
-                    _ts_print(
-                        "[MESON] 🔄 Forcing reconfigure to update C++ compiler wrapper"
-                    )
-                    force_reconfigure = True
             except (OSError, IOError):
-                # If we can't read the marker, force reconfigure to be safe
-                _ts_print("[MESON] ⚠️  Could not read check marker, forcing reconfigure")
-                force_reconfigure = True
+                reconfigure_reasons.append("check marker unreadable")
         else:
-            # No marker file exists from previous configure
-            # This can happen on first run after updating to this version
-            # Force reconfigure because we don't know what IWYU setting
-            # the cached compiler wrapper was configured with
-            _ts_print("[MESON] ℹ️  No check marker found, forcing reconfigure")
-            force_reconfigure = True
+            reconfigure_reasons.append("check marker missing")
 
         # Check if build_mode setting has changed since last configure
         # CRITICAL: This detects quick <-> release transitions which both have debug=False
         # but have different optimization flags (-O0 vs -O3)
         # When build_mode changes, we must clean objects to avoid mixing different compiler flags
-        build_mode_changed = False
-        last_build_mode: Optional[str] = None
         if build_mode_marker.exists():
             try:
                 last_build_mode = build_mode_marker.read_text().strip()
                 if last_build_mode != build_mode:
-                    _ts_print(
-                        f"[MESON] ⚠️  Build mode changed: {last_build_mode} → {build_mode}"
+                    reconfigure_reasons.append(
+                        f"build mode changed: {last_build_mode} → {build_mode}"
                     )
-                    _ts_print(
-                        "[MESON] 🔄 Forcing reconfigure to update optimization/debug flags"
-                    )
-                    force_reconfigure = True
                     build_mode_changed = True
             except (OSError, IOError):
-                # If we can't read the marker, force reconfigure to be safe
-                _ts_print(
-                    "[MESON] ⚠️  Could not read build_mode marker, forcing reconfigure"
-                )
-                force_reconfigure = True
+                reconfigure_reasons.append("build_mode marker unreadable")
         else:
-            # No marker file exists from previous configure
-            # This can happen on first run after updating to this version
-            # CRITICAL: Force reconfigure because we don't know what mode the cached
-            # objects/PCH were built with - they could be incompatible with current mode
-            _ts_print("[MESON] ℹ️  No build_mode marker found, forcing reconfigure")
+            reconfigure_reasons.append("build_mode marker missing")
+
+        # Print consolidated reconfigure message if there are any reasons
+        if reconfigure_reasons:
             force_reconfigure = True
+            # For missing markers (common case on first run), use a simpler message
+            missing_markers = [r for r in reconfigure_reasons if "missing" in r]
+            changed_settings = [
+                r
+                for r in reconfigure_reasons
+                if "missing" not in r and "unreadable" not in r
+            ]
+            unreadable_markers = [r for r in reconfigure_reasons if "unreadable" in r]
+
+            if missing_markers and not changed_settings and not unreadable_markers:
+                # All reasons are just missing markers - common on first run or mode switch
+                num_missing = len(missing_markers)
+                _ts_print(
+                    f"[MESON] ℹ️  Build directory needs configuration ({num_missing} marker files missing)"
+                )
+            else:
+                # Mix of reasons - show details
+                _ts_print("[MESON] 🔄 Reconfiguration required:")
+                for reason in reconfigure_reasons:
+                    _ts_print(f"[MESON]     - {reason}")
+
+        # CRITICAL: Delete all object files and archives when debug mode changes
+        # Object files compiled with sanitizers cannot be linked without sanitizer runtime
+        # We must force a complete rebuild with the new compiler flags
+        if debug_changed:
+            cleanup_build_artifacts(build_dir, "Debug mode changed")
 
         # CRITICAL: Delete all object files and archives when build_mode changes
         # Object files compiled with different optimization flags cannot be safely mixed
@@ -474,8 +444,8 @@ def setup_meson_build(
             meson_build_modified = True
 
     # Force reconfigure if meson.build files were modified
+    # Note: The detection message is already printed above, no need for duplicate
     if meson_build_modified:
-        _ts_print("[MESON] 🔄 Forcing reconfigure due to meson.build modifications")
         force_reconfigure = True
 
     # Check if test files have been added or removed (requires reconfigure)
@@ -590,8 +560,8 @@ def setup_meson_build(
             test_files_changed = True
 
     # Force reconfigure if test files were added or removed
+    # Note: The detection message is already printed above, no need for duplicate
     if test_files_changed:
-        _ts_print("[MESON] 🔄 Forcing reconfigure due to test file additions/removals")
         force_reconfigure = True
 
     # Determine if we need to run meson setup/reconfigure
@@ -734,32 +704,27 @@ def setup_meson_build(
         else:
             print(f"Toolchain: {current_compiler_version}")
 
+    # Late-stage compiler version check (requires compiler detection above)
+    # This check is separate because we need the detected compiler version
     if already_configured:
+        compiler_version_reason: Optional[str] = None
         if compiler_version_marker.exists():
             try:
                 last_compiler_version = compiler_version_marker.read_text().strip()
                 if last_compiler_version != current_compiler_version:
-                    _ts_print(
-                        f"[MESON] ⚠️  Compiler version changed: {last_compiler_version} → {current_compiler_version}"
-                    )
-                    _ts_print(
-                        "[MESON] 🔄 Forcing reconfigure and cleaning cached objects/PCH"
-                    )
-                    force_reconfigure = True
+                    compiler_version_reason = f"compiler version changed: {last_compiler_version} → {current_compiler_version}"
                     compiler_version_changed = True
-                    # Re-evaluate skip_meson_setup since we're forcing reconfigure
-                    skip_meson_setup = False
             except (OSError, IOError):
-                _ts_print(
-                    "[MESON] ⚠️  Could not read compiler version marker, forcing reconfigure"
-                )
-                force_reconfigure = True
-                skip_meson_setup = False
+                compiler_version_reason = "compiler version marker unreadable"
         else:
-            # No marker file exists from previous configure
-            _ts_print(
-                "[MESON] ℹ️  No compiler version marker found, forcing reconfigure"
-            )
+            compiler_version_reason = "compiler version marker missing"
+
+        if compiler_version_reason:
+            # Only print if we haven't already printed a reconfigure message
+            if not force_reconfigure:
+                _ts_print(
+                    f"[MESON] 🔄 Reconfiguration required: {compiler_version_reason}"
+                )
             force_reconfigure = True
             skip_meson_setup = False
 
@@ -771,9 +736,7 @@ def setup_meson_build(
         # CRITICAL: If compiler version forced a reconfigure, we need to update cmd
         # The original cmd assignment was based on pre-compiler-check values
         if force_reconfigure and cmd is None:
-            _ts_print(
-                f"[MESON] Reconfiguring build directory (forced by compiler version change): {build_dir}"
-            )
+            _ts_print(f"[MESON] Reconfiguring build directory: {build_dir}")
             cmd = [
                 get_meson_executable(),
                 "setup",
