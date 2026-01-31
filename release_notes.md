@@ -51,6 +51,18 @@ FastLED 3.10.4 (Next Release)
     * See detailed protocol documentation in [src/chipsets.h:1040-1183](src/chipsets.h)
     * Unit tests: Comprehensive test suite in [tests/chipsets/test_hd108.cpp](tests/chipsets/test_hd108.cpp)
     * Related: GitHub Issue #1045, Pull Request #2119 (thanks to @arfoll for initial implementation)
+  * **NEW: Vorbis Audio Decoder**: Added support for decoding Ogg Vorbis audio files via stb_vorbis integration
+    * **Streaming Decoder**: `VorbisDecoder` class provides frame-by-frame audio decoding from ByteStream
+    * **Convenience API**: `Vorbis::decodeAll()` decodes entire files to AudioSample vectors in one call
+    * **Metadata Parsing**: `Vorbis::parseVorbisInfo()` extracts sample rate, channels, and stream info without full decoding
+    * **Float PCM Output**: Decodes to floating-point audio samples (-1.0 to 1.0 range) compatible with FastLED audio processing
+    * **Low-Level Wrapper**: `StbVorbisDecoder` provides direct access to stb_vorbis for advanced use cases
+    * **Memory-Based**: Requires entire Vorbis file in memory (suitable for embedded audio playback)
+    * **Platform Support**: Works on all platforms with sufficient memory for audio buffers
+    * **Third-Party Integration**: Uses Sean Barrett's stb_vorbis single-header library
+    * Usage: `auto decoder = Vorbis::createDecoder(); decoder->begin(byteStream); decoder->decodeNextFrame(&sample);`
+    * See API documentation in [src/fl/codec/vorbis.h](src/fl/codec/vorbis.h)
+    * Comprehensive unit tests in [tests/fl/vorbis.cpp](tests/fl/vorbis.cpp)
   * **DEPRECATED: BulkClockless API (Teensy 4.x, ESP32)**: The BulkClockless API has been superseded by the Channel/ChannelEngine API
     * **Note**: The BulkClockless API and its methods (`FastLED.addBulkLeds()`, `BulkClockless`, `BulkStripConfig`) have been deprecated and removed
     * **Migration Path**: Use the new Channel API for multi-strip LED control
