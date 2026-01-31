@@ -93,8 +93,14 @@ int main(int argc, char** argv) {
     // Call test function with arguments
     int test_result = run_tests(test_argc, test_argv);
 
-    // Cleanup
+    // Cleanup: Skip FreeLibrary when running with AddressSanitizer
+    // ASAN runs leak detection at program exit. If we FreeLibrary() the DLL
+    // before that, ASAN cannot symbolize addresses from the unloaded library,
+    // resulting in "<unknown module>" in stack traces.
+    // See: https://github.com/google/sanitizers/issues/899
+#if !defined(__SANITIZE_ADDRESS__)
     FreeLibrary(dll);
+#endif
 
     return test_result;
 }
