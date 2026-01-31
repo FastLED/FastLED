@@ -281,10 +281,10 @@ void stb_vorbis_flush_pushdata(stb_vorbis *f);
 // just want to go ahead and use pushdata.)
 
 #if !defined(FL_STB_VORBIS_NO_STDIO) && !defined(FL_STB_VORBIS_NO_INTEGER_CONVERSION)
-int32_t stb_vorbis_decode_filename(const char *filename, int32_t *channels, int32_t *sample_rate, short **output);
+int32_t stb_vorbis_decode_filename(const char *filename, int32_t *channels, int32_t *sample_rate, int16_t **output);
 #endif
 #if !defined(FL_STB_VORBIS_NO_INTEGER_CONVERSION)
-int32_t stb_vorbis_decode_memory(const unsigned char *mem, int32_t len, int32_t *channels, int32_t *sample_rate, short **output);
+int32_t stb_vorbis_decode_memory(const unsigned char *mem, int32_t len, int32_t *channels, int32_t *sample_rate, int16_t **output);
 #endif
 // decode an entire file and output the data interleaved into a malloc()ed
 // buffer stored in *output. The return value is the number of samples
@@ -348,8 +348,8 @@ int32_t stb_vorbis_get_frame_float(stb_vorbis *f, int32_t *channels, float ***ou
 // and stb_vorbis_get_samples_*(), since the latter calls the former.
 
 #ifndef FL_STB_VORBIS_NO_INTEGER_CONVERSION
-int32_t stb_vorbis_get_frame_short_interleaved(stb_vorbis *f, int32_t num_c, short *buffer, int32_t num_shorts);
-int32_t stb_vorbis_get_frame_short            (stb_vorbis *f, int32_t num_c, short **buffer, int32_t num_samples);
+int32_t stb_vorbis_get_frame_short_interleaved(stb_vorbis *f, int32_t num_c, int16_t *buffer, int32_t num_shorts);
+int32_t stb_vorbis_get_frame_short            (stb_vorbis *f, int32_t num_c, int16_t **buffer, int32_t num_samples);
 #endif
 // decode the next frame and return the number of *samples* per channel.
 // Note that for interleaved data, you pass in the number of shorts (the
@@ -384,8 +384,8 @@ int32_t stb_vorbis_get_samples_float(stb_vorbis *f, int32_t channels, float **bu
 // at the end of the file. If there are no more samples in the file, returns 0.
 
 #ifndef FL_STB_VORBIS_NO_INTEGER_CONVERSION
-int32_t stb_vorbis_get_samples_short_interleaved(stb_vorbis *f, int32_t channels, short *buffer, int32_t num_shorts);
-int32_t stb_vorbis_get_samples_short(stb_vorbis *f, int32_t channels, short **buffer, int32_t num_samples);
+int32_t stb_vorbis_get_samples_short_interleaved(stb_vorbis *f, int32_t channels, int16_t *buffer, int32_t num_shorts);
+int32_t stb_vorbis_get_samples_short(stb_vorbis *f, int32_t channels, int16_t **buffer, int32_t num_samples);
 #endif
 // gets num_samples samples, not necessarily on a frame boundary--this requires
 // buffering so you have to supply the buffers. Applies the coercion rules above

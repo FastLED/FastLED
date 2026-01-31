@@ -42,8 +42,8 @@ StbVorbisDecoder::~StbVorbisDecoder() {
 bool StbVorbisDecoder::openMemory(fl::span<const fl::u8> data) {
     close();  // Close any existing stream
 
-    int error = 0;
-    mVorbis = stb_vorbis_open_memory(data.data(), static_cast<int>(data.size()), &error, nullptr);
+    fl::i32 error = 0;
+    mVorbis = stb_vorbis_open_memory(data.data(), static_cast<fl::i32>(data.size()), &error, nullptr);
     return mVorbis != nullptr;
 }
 
@@ -73,11 +73,12 @@ VorbisInfo StbVorbisDecoder::getInfo() const {
 
 fl::i32 StbVorbisDecoder::getSamplesShortInterleaved(fl::i32 channels, fl::i16* buffer, fl::i32 numShorts) {
     if (!mVorbis) return 0;
+    // Cast to short* for AVR compatibility where fl::i16 is int but stb_vorbis expects short
     return static_cast<fl::i32>(stb_vorbis_get_samples_short_interleaved(
         static_cast<stb_vorbis*>(mVorbis),
-        static_cast<int>(channels),
+        static_cast<fl::i32>(channels),
         buffer,
-        static_cast<int>(numShorts)
+        static_cast<fl::i32>(numShorts)
     ));
 }
 
@@ -85,9 +86,9 @@ fl::i32 StbVorbisDecoder::getSamplesFloat(fl::i32 channels, float** buffer, fl::
     if (!mVorbis) return 0;
     return static_cast<fl::i32>(stb_vorbis_get_samples_float(
         static_cast<stb_vorbis*>(mVorbis),
-        static_cast<int>(channels),
+        static_cast<fl::i32>(channels),
         buffer,
-        static_cast<int>(numSamples)
+        static_cast<fl::i32>(numSamples)
     ));
 }
 
