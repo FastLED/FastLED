@@ -18,8 +18,10 @@ from running_process import RunningProcess
 
 from ci.meson.compiler import (
     check_meson_installed,
+    check_meson_version_compatibility,
     get_compiler_version,
     get_meson_executable,
+    get_meson_version,
 )
 from ci.meson.io_utils import atomic_write_text, write_if_different
 from ci.meson.output import _print_banner, _print_warning
@@ -202,6 +204,34 @@ def setup_meson_build(
     # Check if already configured
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
+
+    # ============================================================================
+    # CRITICAL: Check meson version compatibility BEFORE proceeding
+    # ============================================================================
+    # Meson 1.9.x and 1.10.x create INCOMPATIBLE build directories!
+    # A build directory created by one version cannot be used by another version.
+    # If we detect a version mismatch, warn the user and suggest solutions.
+    if already_configured:
+        is_compatible, compatibility_message = check_meson_version_compatibility(
+            build_dir
+        )
+        if not is_compatible:
+            _ts_print("=" * 80)
+            _ts_print("[MESON] ❌ MESON VERSION INCOMPATIBILITY DETECTED!")
+            _ts_print("=" * 80)
+            _ts_print(f"[MESON] {compatibility_message}")
+            _ts_print("[MESON]")
+            _ts_print("[MESON] This typically happens when:")
+            _ts_print("[MESON]   1. Using a system meson instead of the venv meson")
+            _ts_print("[MESON]   2. The pyproject.toml meson version was upgraded")
+            _ts_print("[MESON]")
+            _ts_print("[MESON] Solutions:")
+            _ts_print(f"[MESON]   1. Delete the build directory: rm -rf {build_dir}")
+            _ts_print("[MESON]   2. Always use 'uv run test.py' or 'uv run meson'")
+            _ts_print("[MESON]   3. Never run bare 'meson' commands from the terminal")
+            _ts_print("=" * 80)
+            # Don't raise - let it fail naturally so user sees the full error
+            # This warning helps them understand WHY it's failing
 
     # ============================================================================
     # THIN ARCHIVES: ENABLED FOR CLANG-TOOL-CHAIN

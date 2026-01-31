@@ -16,7 +16,12 @@ Module Structure:
 """
 
 from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
-from ci.meson.compiler import check_meson_installed, get_meson_executable
+from ci.meson.compiler import (
+    check_meson_installed,
+    check_meson_version_compatibility,
+    get_meson_executable,
+    get_meson_version,
+)
 from ci.meson.output import _print_banner
 from ci.meson.runner import run_meson_build_and_test
 from ci.meson.test_execution import MesonTestResult
@@ -24,7 +29,9 @@ from ci.meson.test_execution import MesonTestResult
 
 __all__ = [
     "check_meson_installed",
+    "check_meson_version_compatibility",
     "get_meson_executable",
+    "get_meson_version",
     "run_meson_build_and_test",
     "MesonTestResult",
     "perform_ninja_maintenance",

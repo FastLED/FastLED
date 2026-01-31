@@ -4,20 +4,28 @@ set -e
 
 echo "Generating compile_commands.json using Meson..."
 
-# Check if virtual environment exists
-if [ -d .venv ]; then
-    source .venv/bin/activate
+# CRITICAL: Always use venv meson to avoid version incompatibility
+# Meson 1.9.x and 1.10.x create INCOMPATIBLE build directories!
+# System meson cannot interact with venv meson build directories and vice versa.
+
+# Determine the correct meson executable
+if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
+    # Windows (Git Bash / MSYS2)
+    MESON_EXE=".venv/Scripts/meson"
 else
-    echo "Virtual environment not found. Please run ./install first."
+    # Linux / macOS
+    MESON_EXE=".venv/bin/meson"
+fi
+
+# Check if venv meson exists
+if [ ! -f "$MESON_EXE" ]; then
+    echo "❌ Error: Venv meson not found at $MESON_EXE"
+    echo "Please run ./install first to set up the virtual environment."
+    echo "Or use: uv pip install meson ninja"
     exit 1
 fi
 
-# Check if Meson is available
-if ! command -v meson &> /dev/null; then
-    echo "❌ Error: Meson is not installed"
-    echo "Installing Meson and Ninja..."
-    uv pip install meson ninja
-fi
+echo "Using meson: $MESON_EXE ($($MESON_EXE --version))"
 
 # Note: Build system uses mode-specific directories (.build/meson-quick, .build/meson-debug, etc.)
 # We use the default "quick" mode for IDE integration
@@ -28,7 +36,7 @@ if [ ! -d "$BUILD_DIR" ]; then
     echo "Setting up Meson build directory..."
     mkdir -p "$BUILD_DIR"
     cd "$BUILD_DIR"
-    meson setup . ../..
+    "../../$MESON_EXE" setup . ../..
     cd ../..
 else
     echo "Meson build directory already configured."
@@ -36,7 +44,7 @@ fi
 
 # Compile to ensure compile_commands.json is up-to-date
 echo "Building with Meson to generate compile_commands.json..."
-meson compile -C "$BUILD_DIR"
+"$MESON_EXE" compile -C "$BUILD_DIR"
 
 # Check if compile_commands.json was generated
 if [ -f "$BUILD_DIR/compile_commands.json" ]; then

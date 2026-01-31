@@ -51,6 +51,88 @@ def check_meson_installed() -> bool:
         return False
 
 
+def get_meson_version() -> str:
+    """
+    Get the version of the meson executable that will be used.
+
+    Returns:
+        Version string (e.g., "1.10.1") or "unknown" on error
+    """
+    try:
+        result = subprocess.run(
+            [get_meson_executable(), "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return "unknown"
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return "unknown"
+
+
+def check_meson_version_compatibility(build_dir: Path) -> tuple[bool, str]:
+    """
+    Check if the current meson version is compatible with the build directory.
+
+    CRITICAL: Meson versions 1.9.x and 1.10.x create INCOMPATIBLE build directories!
+    A build directory created by one version cannot be used by the other version.
+    This function checks for version mismatches that would cause reconfiguration.
+
+    Args:
+        build_dir: Path to the meson build directory
+
+    Returns:
+        Tuple of (is_compatible, message)
+        - is_compatible: True if versions match or no stored version exists
+        - message: Description of any incompatibility found
+    """
+    current_version = get_meson_version()
+    if current_version == "unknown":
+        return True, "Could not determine meson version"
+
+    # Check the stored meson version in coredata.dat
+    coredata_path = build_dir / "meson-private" / "coredata.dat"
+    if not coredata_path.exists():
+        return True, "Build directory not configured yet"
+
+    try:
+        import pickle
+
+        with open(coredata_path, "rb") as f:
+            coredata = pickle.load(f)
+            stored_version = getattr(coredata, "version", None)
+
+        if stored_version is None:
+            return True, "No version info in coredata"
+
+        # Check if major.minor versions match
+        current_major_minor = ".".join(current_version.split(".")[:2])
+        stored_major_minor = ".".join(stored_version.split(".")[:2])
+
+        if current_major_minor != stored_major_minor:
+            return False, (
+                f"Meson version mismatch! Build directory was created with meson {stored_version}, "
+                f"but current meson is {current_version}. These versions are INCOMPATIBLE. "
+                f"Either delete the build directory or ensure you use the same meson version."
+            )
+
+        return (
+            True,
+            f"Meson versions compatible ({current_version} vs {stored_version})",
+        )
+
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        # If we can't check, assume compatible to avoid breaking builds
+        return True, f"Could not check version compatibility: {e}"
+
+
 def get_compiler_version(compiler_path: str) -> str:
     """
     Get compiler version string for cache invalidation.
