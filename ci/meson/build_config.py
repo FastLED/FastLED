@@ -294,6 +294,9 @@ def setup_meson_build(
     # This reduces noise when switching build modes or on first run.
     # ============================================================================
     reconfigure_reasons: list[str] = []  # Collect reasons for reconfiguration
+    force_reconfigure_reason: Optional[str] = (
+        None  # Primary reason for forced reconfigure
+    )
     debug_changed = False
     build_mode_changed = False
     last_build_mode: Optional[str] = None
@@ -378,6 +381,7 @@ def setup_meson_build(
         # Print consolidated reconfigure message if there are any reasons
         if reconfigure_reasons:
             force_reconfigure = True
+            force_reconfigure_reason = "configuration markers changed"
             # For missing markers (common case on first run), use a simpler message
             missing_markers = [r for r in reconfigure_reasons if "missing" in r]
             changed_settings = [
@@ -447,6 +451,7 @@ def setup_meson_build(
     # Note: The detection message is already printed above, no need for duplicate
     if meson_build_modified:
         force_reconfigure = True
+        force_reconfigure_reason = "meson.build modified"
 
     # Check if test files have been added or removed (requires reconfigure)
     # This ensures Meson discovers new tests and removes deleted tests
@@ -563,6 +568,7 @@ def setup_meson_build(
     # Note: The detection message is already printed above, no need for duplicate
     if test_files_changed:
         force_reconfigure = True
+        force_reconfigure_reason = "test files changed"
 
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
@@ -578,12 +584,13 @@ def setup_meson_build(
         # Build already configured, check wrappers below (message consolidated below)
         pass
     elif already_configured and (reconfigure or force_reconfigure):
-        # Reconfigure existing build (explicitly requested or forced by thin archive change)
-        reason = (
-            "forced by thin archive change"
-            if force_reconfigure
-            else "explicitly requested"
-        )
+        # Reconfigure existing build (explicitly requested or forced by config change)
+        if force_reconfigure and force_reconfigure_reason:
+            reason = force_reconfigure_reason
+        elif force_reconfigure:
+            reason = "configuration changed"
+        else:
+            reason = "explicitly requested"
         _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
         cmd = [
             get_meson_executable(),
@@ -726,6 +733,7 @@ def setup_meson_build(
                     f"[MESON] 🔄 Reconfiguration required: {compiler_version_reason}"
                 )
             force_reconfigure = True
+            force_reconfigure_reason = compiler_version_reason
             skip_meson_setup = False
 
         # CRITICAL: Delete all object files, archives, and PCH when compiler version changes

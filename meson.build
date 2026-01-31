@@ -274,39 +274,39 @@ if build_mode == 'debug'
     runner_link_args += ['-ldbghelp', '-lpsapi']
   endif
 elif build_mode == 'quick'
-  # Quick mode: static linking, libunwind loaded dynamically via DLL injection
-  if is_darwin
-    # macOS: static linking not supported
-    runner_link_args = core_link_args + ['-pthread']
-  else
-    # Windows and Linux: static linking
-    # libunwind is injected at runtime by clang-tool-chain, no explicit linking needed
+  # Quick mode: static linking on Windows, dynamic on Unix
+  # NOTE: Linux with glibc doesn't support static linking + dlopen() properly.
+  # When a statically linked executable loads shared libraries via dlopen(),
+  # there are conflicts with thread-local storage and other glibc internals
+  # that cause SIGSEGV crashes. Use dynamic linking on Linux like macOS.
+  if is_windows
+    # Windows: static linking works well with LoadLibrary
     runner_link_args = core_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
       '-pthread',
+      '-ldbghelp', '-lpsapi',
     ]
-    if is_windows
-      runner_link_args += ['-ldbghelp', '-lpsapi']
-    endif
+  else
+    # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
+    runner_link_args = core_link_args + ['-pthread']
   endif
 else
-  # Release mode: static linking, no stack trace support
-  if is_darwin
-    # macOS: static linking not supported
-    runner_link_args = core_link_args + ['-pthread']
-  else
-    # Windows and Linux: static linking
+  # Release mode: static linking on Windows, dynamic on Unix
+  # NOTE: Linux with glibc doesn't support static linking + dlopen() properly.
+  if is_windows
+    # Windows: static linking works well with LoadLibrary
     runner_link_args = core_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
       '-pthread',
+      '-ldbghelp', '-lpsapi',
     ]
-    if is_windows
-      runner_link_args += ['-ldbghelp', '-lpsapi']
-    endif
+  else
+    # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
+    runner_link_args = core_link_args + ['-pthread']
   endif
 endif
 
@@ -366,7 +366,7 @@ base_defines += ['-DUSE_LIBUNWIND']
 crash_handler_lib = static_library('crash_handler',
   'tests/shared/crash_handler_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],
+  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL', '-DUSE_LIBUNWIND'],
   install: false
 )
 
