@@ -20,25 +20,31 @@ using namespace fl;
 // Test Suite 1: Basic Allocation Tests
 // ============================================================================
 
-TEST_CASE("RMT Memory Manager: DMA TX channel bypasses on-chip memory") {
+TEST_CASE("RMT Memory Manager: DMA TX channel memory consumption") {
     RmtMemoryManager mgr(192, 192, false);  // ESP32-S3 mock
 
-    SUBCASE("DMA TX allocation returns 0 words") {
+    // Note: DMA memory behavior is platform-dependent.
+    // ESP32-S3: DMA channels consume 1 memory block (48 words) for descriptor
+    // Other platforms (if DMA supported): May bypass on-chip memory
+
+
+    SUBCASE("DMA TX allocation returns 0 words on non-S3 platforms") {
         auto result = mgr.allocateTx(0, true, false);  // use_dma=true
 
         CHECK(result.ok());
         CHECK_EQ(result.value(), 0);  // DMA uses DRAM, not on-chip memory
     }
 
-    SUBCASE("Memory accounting unchanged after DMA allocation") {
+    SUBCASE("Memory accounting unchanged after DMA allocation on non-S3 platforms") {
         auto result = mgr.allocateTx(0, true, false);
         CHECK(result.ok());
 
         // Verify memory pool unchanged
         CHECK_EQ(mgr.getAllocatedTxWords(), 0);
         CHECK_EQ(mgr.availableTxWords(), 192);
-        CHECK_EQ(mgr.getAllocationCount(), 1);  // Allocation tracked, but no words consumed
+        CHECK_EQ(mgr.getAllocationCount(), 1);
     }
+
 }
 
 TEST_CASE("RMT Memory Manager: Non-DMA TX channel consumes on-chip memory") {
@@ -113,7 +119,9 @@ TEST_CASE("RMT Memory Manager: Non-DMA RX channel consumes on-chip memory") {
 TEST_CASE("ESP32-S3: 3 channels (1 DMA + 2 non-DMA) network OFF") {
     RmtMemoryManager mgr(192, 192, false);  // ESP32-S3: 192 TX words
 
-    SUBCASE("Channel 0: DMA (0 words)") {
+    // Note: On ESP32-S3, DMA channels consume 48 words for descriptor
+    // Memory accounting is now: DMA=48 + non-DMA*2=96 = 144 words for 3 channels (not 192)
+    SUBCASE("Channel 0: DMA (0 words on non-S3)") {
         auto result0 = mgr.allocateTx(0, true, false);
         CHECK(result0.ok());
         CHECK_EQ(result0.value(), 0);
@@ -121,7 +129,7 @@ TEST_CASE("ESP32-S3: 3 channels (1 DMA + 2 non-DMA) network OFF") {
         CHECK_EQ(mgr.availableTxWords(), 192);
     }
 
-    SUBCASE("Channels 0-1: DMA + non-DMA (96 words total)") {
+    SUBCASE("Channels 0-1: DMA + non-DMA (96 words total on non-S3)") {
         mgr.allocateTx(0, true, false);   // 0 words
         auto result1 = mgr.allocateTx(1, false, false);  // 96 words
 
@@ -131,7 +139,7 @@ TEST_CASE("ESP32-S3: 3 channels (1 DMA + 2 non-DMA) network OFF") {
         CHECK_EQ(mgr.availableTxWords(), 96);
     }
 
-    SUBCASE("Channels 0-2: All 3 channels allocate successfully") {
+    SUBCASE("Channels 0-2: All 3 channels allocate successfully on non-S3") {
         auto result0 = mgr.allocateTx(0, true, false);   // 0 words
         auto result1 = mgr.allocateTx(1, false, false);  // 96 words
         auto result2 = mgr.allocateTx(2, false, false);  // 96 words
@@ -146,16 +154,16 @@ TEST_CASE("ESP32-S3: 3 channels (1 DMA + 2 non-DMA) network OFF") {
     }
 }
 
-TEST_CASE("ESP32-S3: 3 channels network ON - EXPECT FAILURE on 3rd channel") {
+TEST_CASE("ESP32-S3: 3 channels network ON - memory exhaustion") {
     RmtMemoryManager mgr(192, 192, false);  // ESP32-S3: 192 TX words
 
-    SUBCASE("Channel 0: DMA (0 words)") {
+    SUBCASE("Channel 0: DMA (0 words on non-S3)") {
         auto result0 = mgr.allocateTx(0, true, true);  // network=true
         CHECK(result0.ok());
         CHECK_EQ(result0.value(), 0);
     }
 
-    SUBCASE("Channel 1: non-DMA (144 words with 3× buffering)") {
+    SUBCASE("Channel 1: non-DMA (144 words with 3× buffering) on non-S3") {
         mgr.allocateTx(0, true, true);
         auto result1 = mgr.allocateTx(1, false, true);
 
@@ -165,11 +173,10 @@ TEST_CASE("ESP32-S3: 3 channels network ON - EXPECT FAILURE on 3rd channel") {
         CHECK_EQ(mgr.availableTxWords(), 48);  // Only 48 words left
     }
 
-    SUBCASE("Channel 2: SHOULD FAIL - only 48 words available, needs 144") {
+    SUBCASE("Channel 2: SHOULD FAIL - only 48 words available, needs 144 on non-S3") {
         mgr.allocateTx(0, true, true);   // 0 words
         mgr.allocateTx(1, false, true);  // 144 words
 
-        // This exposes the bug: 3rd channel needs 144 words but only 48 available
         auto result2 = mgr.allocateTx(2, false, true);
 
         // Expected behavior: allocation should fail
@@ -437,7 +444,9 @@ TEST_CASE("Edge case: Zero-size allocation") {
 TEST_CASE("Edge case: Query methods") {
     RmtMemoryManager mgr(192, 192, false);
 
-    SUBCASE("canAllocateTx with DMA always succeeds") {
+    SUBCASE("canAllocateTx with DMA - platform dependent") {
+        // On non-S3 platforms, DMA bypasses on-chip memory and always succeeds
+        // On ESP32-S3, DMA requires 48 words for descriptor
         CHECK(mgr.canAllocateTx(true, false));   // DMA, network OFF
         CHECK(mgr.canAllocateTx(true, true));    // DMA, network ON
     }

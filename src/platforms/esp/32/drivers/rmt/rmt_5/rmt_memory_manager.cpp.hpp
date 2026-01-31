@@ -246,12 +246,38 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
         return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
     }
 
-    // DMA channels bypass on-chip memory
+    // DMA channels on ESP32-S3 still consume one memory block from on-chip RMT memory
+    // Fix for issue #2156: The DMA controller needs a memory block for its descriptor/control.
+    // Previous code assumed DMA bypasses on-chip memory (0 words), but ESP32-S3 hardware
+    // requires one block (48 words) for DMA channel operation.
+    //
+    // Reference: https://github.com/FastLED/FastLED/issues/2156
+    // Related ESP-IDF issues:
+    // - https://github.com/espressif/esp-idf/issues/12564
+    // - https://github.com/espressif/idf-extra-components/issues/466
     if (use_dma) {
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+        // ESP32-S3: DMA channel consumes 1 memory block (48 words)
+        size_t dma_words = SOC_RMT_MEM_WORDS_PER_CHANNEL;
+        if (!tryAllocateWords(dma_words, true)) {
+            FL_WARN("RMT TX DMA allocation failed for channel "
+                    << static_cast<int>(channel_id)
+                    << " - insufficient on-chip memory");
+            FL_WARN("  Requested: " << dma_words << " words (1 block for DMA descriptor)");
+            FL_WARN("  Available: " << getAvailableWords(true) << " words");
+            return Result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+        }
+        mLedger.allocations.push_back(ChannelAllocation(channel_id, dma_words, true, true));
+        FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
+                   << " allocated (DMA, " << dma_words << " words for descriptor)");
+        return Result<size_t, RmtMemoryError>::success(dma_words);
+#else
+        // Other platforms (if DMA supported): Assume DMA bypasses on-chip memory
         mLedger.allocations.push_back(ChannelAllocation(channel_id, 0, true, true));
         FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
                    << " allocated (DMA, bypasses on-chip memory)");
         return Result<size_t, RmtMemoryError>::success(0);
+#endif
     }
 
     // Calculate adaptive buffer size based on network state
@@ -484,7 +510,17 @@ bool RmtMemoryManager::isGlobalPool() const {
 
 bool RmtMemoryManager::isDMAAvailable() const {
 #if FASTLED_RMT5_DMA_SUPPORTED
-    return !mDMAAllocation.allocated;
+    if (mDMAAllocation.allocated) {
+        return false;  // DMA slot already in use
+    }
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+    // ESP32-S3: DMA channel still requires 1 memory block (48 words) for descriptor
+    // Check if there's enough on-chip memory for DMA descriptor
+    if (getAvailableWords(true) < SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+        return false;  // Not enough memory for DMA descriptor
+    }
+#endif
+    return true;
 #else
     return false;  // No DMA support on this platform
 #endif

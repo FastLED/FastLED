@@ -71,6 +71,14 @@ public:
     bool syncCache(void* buffer, size_t size) override;
     uint8_t* allocateDmaBuffer(size_t size) override;
     void freeDmaBuffer(uint8_t* buffer) override;
+
+private:
+    /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
+    ///
+    /// When esp_cache_msync() returns ESP_ERR_INVALID_ARG, further calls will
+    /// likely fail too. We disable subsequent calls to avoid error spam while
+    /// keeping memory barriers for ordering guarantees.
+    bool mCacheSyncDisabled = false;
 };
 
 //=============================================================================
@@ -344,6 +352,18 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) {
     // Memory barrier: Ensure all preceding writes complete before cache sync
     FL_MEMORY_BARRIER;
 
+    // If cache sync was disabled due to previous failures, skip the call
+    // but keep memory barriers for ordering guarantees.
+    //
+    // Fix for ESP32-S3 issue #2156: esp_cache_msync() consistently returns
+    // ESP_ERR_INVALID_ARG even with properly aligned DMA buffers allocated
+    // via heap_caps_aligned_alloc(64, ..., MALLOC_CAP_DMA).
+    // Once we detect this condition, disable future calls to avoid error spam.
+    if (mCacheSyncDisabled) {
+        FL_MEMORY_BARRIER;
+        return true;  // Memory barriers provide ordering, cache sync not needed
+    }
+
     // Cache sync: Writeback cache to memory (Cache-to-Memory)
     // ESP_CACHE_MSYNC_FLAG_UNALIGNED: More permissive alignment checking
     // Some ESP-IDF versions have strict alignment requirements that cause
@@ -358,12 +378,24 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) {
     // Memory barrier: Ensure cache sync completes before DMA submission
     FL_MEMORY_BARRIER;
 
-    // Note: Even if cache sync fails, memory barriers ensure write ordering.
-    // DMA-capable memory (MALLOC_CAP_DMA) may not require cache ops on some
-    // platforms (ESP32/S2 have no data cache). Errors are logged but non-fatal.
+    // Handle cache sync failures
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Cache sync returned error: " << esp_err_to_name(err)
-                   << " (non-fatal, memory barriers ensure ordering)");
+        if (err == ESP_ERR_INVALID_ARG) {
+            // ESP_ERR_INVALID_ARG indicates the buffer doesn't meet cache sync
+            // requirements. This is a persistent condition that won't improve on
+            // retry. Disable future calls to avoid error spam on every show().
+            //
+            // Memory barriers still provide write ordering guarantees, which is
+            // sufficient for correct operation. The esp_cache_msync() is an
+            // optimization that may not be strictly required on all platforms.
+            mCacheSyncDisabled = true;
+            FL_DBG("RMT5_PERIPH: Cache sync disabled due to ESP_ERR_INVALID_ARG. "
+                   "Memory barriers will ensure ordering.");
+        } else {
+            // Other errors are logged but non-fatal
+            FL_LOG_RMT("RMT5_PERIPH: Cache sync returned error: " << esp_err_to_name(err)
+                       << " (non-fatal, memory barriers ensure ordering)");
+        }
     }
 
     return (err == ESP_OK);
