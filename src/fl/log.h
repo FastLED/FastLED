@@ -2,6 +2,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
+#include "fl/stl/time.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
 
 // Conditional include for async logger functions (only when logging features are enabled)
 #if defined(FASTLED_LOG_SPI_ENABLED) || defined(FASTLED_LOG_RMT_ENABLED) || defined(FASTLED_LOG_PARLIO_ENABLED) || defined(FASTLED_LOG_AUDIO_ENABLED) || defined(FASTLED_LOG_INTERRUPT_ENABLED)
@@ -90,6 +91,17 @@ const char *fastled_file_offset(const char *file);
 // FL_WARN_FMT: Alias for FL_WARN (kept for backwards compatibility)
 #define FL_WARN_FMT(X) FL_WARN(X)
 #define FL_WARN_FMT_IF(COND, MSG) FL_WARN_IF(COND, MSG)
+
+// FL_WARN_EVERY: Rate-limited warning that prints at most once per interval
+// Uses static timestamp to track last print time - throttles output in tight loops
+#define FL_WARN_EVERY(MILLIS, X) do { \
+    static fl::u32 _last_warn_time = 0; \
+    fl::u32 _now = fl::millis(); \
+    if (_now - _last_warn_time >= (MILLIS)) { \
+        _last_warn_time = _now; \
+        FL_WARN(X); \
+    } \
+} while(0)
 #else
 // No-op macros for memory-constrained platforms
 #define FL_WARN(X) do { } while(0)
@@ -97,6 +109,7 @@ const char *fastled_file_offset(const char *file);
 #define FL_WARN_ONCE(X) do { } while(0)
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
+#define FL_WARN_EVERY(MILLIS, X) do { } while(0)
 #endif
 #endif
 
@@ -184,6 +197,21 @@ const char *fastled_file_offset(const char *file);
 #ifndef FL_DBG
 #define FL_DBG FASTLED_DBG
 #define FL_DBG_IF FASTLED_DBG_IF
+
+// FL_DBG_EVERY: Rate-limited debug output that prints at most once per interval
+// Uses static timestamp to track last print time - throttles output in tight loops
+#if FASTLED_HAS_DBG
+#define FL_DBG_EVERY(MILLIS, X) do { \
+    static fl::u32 _last_dbg_time = 0; \
+    fl::u32 _now = fl::millis(); \
+    if (_now - _last_dbg_time >= (MILLIS)) { \
+        _last_dbg_time = _now; \
+        FL_DBG(X); \
+    } \
+} while(0)
+#else
+#define FL_DBG_EVERY(MILLIS, X) FL_DBG_NO_OP(X)
+#endif
 #endif
 
 // =============================================================================
@@ -223,9 +251,21 @@ const char *fastled_file_offset(const char *file);
 #ifndef FL_PRINT
 #if SKETCH_HAS_LOTS_OF_MEMORY
 #define FL_PRINT(X) fl::println((fl::StrStream() << X).c_str())
+
+// FL_PRINT_EVERY: Rate-limited print that outputs at most once per interval
+// Uses static timestamp to track last print time - throttles output in tight loops
+#define FL_PRINT_EVERY(MILLIS, X) do { \
+    static fl::u32 _last_print_time = 0; \
+    fl::u32 _now = fl::millis(); \
+    if (_now - _last_print_time >= (MILLIS)) { \
+        _last_print_time = _now; \
+        FL_PRINT(X); \
+    } \
+} while(0)
 #else
 // No-op macro for memory-constrained platforms
 #define FL_PRINT(X) do { } while(0)
+#define FL_PRINT_EVERY(MILLIS, X) do { } while(0)
 #endif
 #endif
 
