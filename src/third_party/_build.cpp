@@ -4,6 +4,7 @@
 /// This is the ONLY .cpp file in src/third_party/** that should be compiled
 
 // Subdirectory implementations (alphabetical order)
+#include "third_party/stb/truetype/_build.hpp"
 #include "third_party/TJpg_Decoder/_build.hpp"
 #include "third_party/TJpg_Decoder/src/_build.hpp"
 #include "third_party/cq_kernel/_build.hpp"

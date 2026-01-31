@@ -3,6 +3,56 @@
 
 FastLED 3.10.4 (Next Release)
 ==============
+  * **NEW: TrueType Font Rendering Support**: Full TrueType font (.ttf/.ttc) rendering API with embedded default font
+    * **High-quality text rendering**: Render scalable TrueType fonts to LED matrices with antialiasing support
+    * **stb_truetype integration**: Built on industry-standard stb_truetype library (5108 lines, compact and efficient)
+    * **Embedded default font**: Includes Covenant5x5 pixel font (9.9KB) with 5x5 pixel cell size, perfect for LED displays
+    * **Custom font support**: Load any TrueType font from memory (`.ttf` single fonts or `.ttc` font collections)
+    * **FontRenderer API**: Convenient high-level wrapper for rendering at specific pixel heights
+      * `fl::Font::loadDefault()` - Load embedded Covenant5x5 font
+      * `fl::Font::load(fontData)` - Load custom TrueType font from memory
+      * `fl::FontRenderer(font, pixelHeight)` - Create renderer at specified size
+      * `renderer.render('A')` - Render character with 2x2 antialiasing (default)
+      * `renderer.renderNoAA('A')` - Render without antialiasing for crisp pixels
+      * `renderer.measureString("Hello")` - Calculate string width with kerning
+    * **Advanced features**:
+      * Grayscale antialiasing with configurable oversampling (1x1 to NxN)
+      * Automatic kerning support for professional text layout
+      * Font metrics query (ascent, descent, line gap, bounding boxes)
+      * Glyph metrics (advance width, side bearings, per-character bounds)
+      * Unicode codepoint support
+      * Scaled metrics calculation for any pixel height
+    * **GlyphBitmap output**: Rendered glyphs as 8-bit grayscale bitmaps (0=transparent, 255=opaque)
+      * Easy pixel access via `getPixel(x, y)` with bounds checking
+      * Proper glyph positioning with xOffset/yOffset for baseline alignment
+      * Direct mapping to LED coordinates for seamless integration
+    * **Minimal API**: Simple 3-step workflow - load font, create renderer, render glyphs
+    * **Memory efficient**: Shared font instances via `fl::shared_ptr`, on-demand rendering
+    * **Platform agnostic**: Works on all FastLED platforms with C++ support
+    * **Example usage**:
+      ```cpp
+      #include "fl/font/truetype.h"
+      #include "fl/font/truetype.cpp.hpp"  // Include ONCE
+
+      auto font = fl::Font::loadDefault();          // Load embedded font
+      fl::FontRenderer renderer(font, 10.0f);       // 10px height
+      fl::GlyphBitmap glyph = renderer.render('A'); // Render with AA
+
+      // Draw to LED matrix
+      for (int y = 0; y < glyph.height; ++y) {
+          for (int x = 0; x < glyph.width; ++x) {
+              uint8_t alpha = glyph.getPixel(x, y);  // 0-255
+              // Blend alpha onto LED at (x + glyph.xOffset, y + glyph.yOffset)
+          }
+      }
+      ```
+    * **Unit tested**: Comprehensive test suite with 303 lines covering font loading, metrics, glyph queries, bitmap rendering, and kerning
+    * **Files**:
+      * API: [src/fl/font/truetype.h](src/fl/font/truetype.h) (185 lines)
+      * Implementation: [src/fl/font/truetype.cpp.hpp](src/fl/font/truetype.cpp.hpp) (264 lines)
+      * Embedded font: [src/fl/font/ttf_covenant5x5.cpp.hpp](src/fl/font/ttf_covenant5x5.cpp.hpp) (657 lines, 9.9KB font data)
+      * stb_truetype: [src/third_party/stb/truetype/stb_truetype.h](src/third_party/stb/truetype/stb_truetype.h) (414 lines header, 5108 lines implementation)
+      * Tests: [tests/fl/font/truetype.cpp](tests/fl/font/truetype.cpp)
   * **NEW: WS2812B-V5 and WS2812B-Mini-V3 Chipset Support**: Added support for newer WS2812B variants with tighter timing specifications
     * **WS2812B-V5**: Newer variant with 220/580ns timing (T0H: 220-380ns, T1H: 580-1000ns)
     * **WS2812B-Mini-V3**: Compact 3535 package with identical timing to V5
