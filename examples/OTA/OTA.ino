@@ -238,12 +238,10 @@ void loop() {
   // Async WiFi mode: Show connection status via LEDs
   if (!ota.isConnected()) {
     // Connecting: Show pulsing blue animation
-    static uint8_t pulse = 0;
     uint8_t brightness = beatsin8(60, 30, 255);  // Pulse at 60 BPM
     fill_solid(leds, NUM_LEDS, CRGB::Blue);
     FastLED.setBrightness(brightness);
     FastLED.show();
-    pulse++;
     delay(20);
     return;  // Skip normal animation while connecting
   } else if (!wifi_connected_notified) {

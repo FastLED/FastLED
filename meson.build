@@ -15,20 +15,49 @@ tests_dir = include_directories('tests')
 # Platform-specific stub include (provides Arduino.h and other stub headers)
 stub_dir = include_directories('src/platforms/stub')
 
-# Recursively discover all .cpp source files in src/ directory
+# Recursively discover all .cpp source files in src/ directory with caching
 # Note: Meson doesn't have native rglob, so we use Python's pathlib
 # All files should always be included, no exceptions.
 # If there is a build issue then the cpp file does not have
 # the right #if-def guard in it to prevent compilation
 uv_prog = find_program('uv', required: true)
 
-# Discover ALL sources in one call
-discovered_sources = run_command(
-  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src', '*.cpp',
-  check: true,
-  capture: true
+# Setup cache paths
+src_cache_script = meson.project_source_root() / 'ci' / 'meson' / 'src_metadata_cache.py'
+rglob_script = meson.project_source_root() / 'ci' / 'meson' / 'rglob.py'
+src_dir_path = meson.project_source_root() / 'src'
+build_dir_path = meson.current_build_dir()
+
+# Check if cache is valid
+cache_check = run_command(
+  'python', src_cache_script, '--check', src_dir_path, build_dir_path, '--pattern', '*.cpp',
+  check: false
 )
-all_sources = discovered_sources.stdout().strip().split('\n')
+
+if cache_check.returncode() == 0
+  # Cache hit - use cached metadata
+  all_sources_output = cache_check.stdout().strip()
+  message('Using cached source file metadata (no changes detected)')
+else
+  # Cache miss - run full discovery
+  message('Running source file discovery (cache invalid or missing)')
+
+  discovered_sources = run_command(
+    uv_prog, 'run', 'python', rglob_script, 'src', '*.cpp',
+    check: true,
+    capture: true
+  )
+  all_sources_output = discovered_sources.stdout().strip()
+
+  # Update cache
+  run_command(
+    'python', src_cache_script, '--update',
+    src_dir_path, build_dir_path, all_sources_output, '--pattern', '*.cpp',
+    check: true
+  )
+endif
+
+all_sources = all_sources_output.split('\n')
 
 # Separate platforms/shared sources (to avoid weak/strong symbol conflicts)
 platforms_shared_sources = []

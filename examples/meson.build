@@ -36,85 +36,87 @@ fs = import('fs')
 # Compiles all Arduino examples for the host platform using STUB backend.
 # Discovers all .ino files and uses their parent directory as the sketch directory.
 
-# Discover all .ino files using Python helper scripts
-discover_script = project_root / 'ci' / 'meson' / 'discover_examples.py'
-discover_includes_script = project_root / 'ci' / 'meson' / 'discover_example_includes.py'
-discover_sources_script = project_root / 'ci' / 'meson' / 'discover_example_sources.py'
-filter_script = project_root / 'ci' / 'meson' / 'filter_examples_for_stub.py'
+# Discover all .ino files using Python helper scripts with caching
+cache_script = project_root / 'ci' / 'meson' / 'example_metadata_cache.py'
+discover_all_script = project_root / 'ci' / 'meson' / 'discover_examples_all.py'
 examples_dir = project_root / 'examples'
+examples_build_dir = meson.current_build_dir()
 
-# Get include directories for each example - this also gives us the example paths
-result_includes = run_command(
-    'python', discover_includes_script, examples_dir,
-    check: true,
-    capture: true
+# Check if cache is valid
+cache_check = run_command(
+    'python', cache_script, '--check', examples_dir, examples_build_dir,
+    check: false
 )
 
-# Get additional source files for each example (.cpp files in subdirectories)
-result_sources = run_command(
-    'python', discover_sources_script, examples_dir,
-    check: true,
-    capture: true
-)
+if cache_check.returncode() == 0
+    # Cache hit - use cached metadata
+    example_metadata_output = cache_check.stdout().strip()
+    message('Using cached example metadata (no changes detected)')
+else
+    # Cache miss - run full discovery
+    message('Running example discovery (cache invalid or missing)')
 
-# Get @filter-based exclusions for stub platform
-result_filter = run_command(
-    'python', filter_script, examples_dir,
-    check: true,
-    capture: true
-)
+    discovery_result = run_command(
+        'python', discover_all_script, examples_dir,
+        check: true
+    )
+    example_metadata_output = discovery_result.stdout().strip()
 
-# Parse filter results: SKIP:<name>:<reason>
-# Build list of examples that should be skipped for stub platform
+    # Update cache
+    run_command(
+        'python', cache_script, '--update',
+        examples_dir, examples_build_dir, example_metadata_output,
+        check: true
+    )
+endif
+
+# Parse consolidated metadata in single pass
+# Format: EXAMPLE|<name>|<dir1>|..., SOURCES|<name>|<src1>|..., SKIP|<name>|<reason>
+# Note: Using | delimiter instead of : to avoid Windows path issues (C:\...)
 stub_incompatible_examples = []
 filter_reasons = {}  # Map example name to skip reason
-foreach line : result_filter.stdout().strip().split('\n')
-    if line != ''
-        parts = line.split(':')
-        if parts.length() >= 3 and parts[0] == 'SKIP'
-            example_name = parts[1]
-            reason = parts[2]
-            stub_incompatible_examples += [example_name]
-            filter_reasons += {example_name: reason}
-        endif
-    endif
-endforeach
-
-# Parse include information: EXAMPLE:<name>:<dir1>:<dir2>:...
-# The first directory (dir1) is always the example's root directory (sketch directory)
 example_includes = {}
 example_paths = {}  # Map example name to its root directory path
-foreach line : result_includes.stdout().strip().split('\n')
-    parts = line.split(':')
-    if parts.length() >= 3
-        example_name = parts[1]
-        # First include dir is the example's root directory (sketch directory)
-        example_root = parts[2]
-        example_paths += {example_name: example_root}
-
-        # Collect all include dirs
-        include_dirs = []
-        foreach i : range(2, parts.length())
-            include_dirs += [parts[i]]
-        endforeach
-        example_includes += {example_name: include_dirs}
-    endif
-endforeach
-
-# Parse source file information: SOURCES:<name>:<source1>:<source2>:...
 example_sources = {}
-foreach line : result_sources.stdout().strip().split('\n')
-    parts = line.split(':')
-    if parts.length() >= 2
-        example_name = parts[1]
-        # Collect additional .cpp source files (beyond the .ino)
-        source_files = []
-        foreach i : range(2, parts.length())
-            if parts[i] != ''
-                source_files += [parts[i]]
+
+foreach line : example_metadata_output.split('\n')
+    if line != ''
+        parts = line.split('|')
+        if parts.length() >= 2
+            line_type = parts[0]
+            example_name = parts[1]
+
+            if line_type == 'EXAMPLE' and parts.length() >= 3
+                # Parse EXAMPLE|<name>|<dir1>|<dir2>|...
+                # First include dir is the example's root directory (sketch directory)
+                example_root = parts[2]
+                example_paths += {example_name: example_root}
+
+                # Collect all include dirs
+                include_dirs = []
+                foreach i : range(2, parts.length())
+                    include_dirs += [parts[i]]
+                endforeach
+                example_includes += {example_name: include_dirs}
+
+            elif line_type == 'SOURCES'
+                # Parse SOURCES|<name>|<source1>|<source2>|...
+                # Collect additional .cpp source files (beyond the .ino)
+                source_files = []
+                foreach i : range(2, parts.length())
+                    if parts[i] != ''
+                        source_files += [parts[i]]
+                    endif
+                endforeach
+                example_sources += {example_name: source_files}
+
+            elif line_type == 'SKIP' and parts.length() >= 3
+                # Parse SKIP|<name>|<reason>
+                reason = parts[2]
+                stub_incompatible_examples += [example_name]
+                filter_reasons += {example_name: reason}
             endif
-        endforeach
-        example_sources += {example_name: source_files}
+        endif
     endif
 endforeach
 
@@ -167,10 +169,7 @@ foreach example_name : example_paths.keys()
     example_root = example_paths[example_name]
 
     # Get include directories for this example
-    example_include_dirs = []
-    if example_includes.has_key(example_name)
-        example_include_dirs = example_includes[example_name]
-    endif
+    example_include_dirs = example_includes.get(example_name, [])
 
     # Build include_directories objects
     # inc_dir is relative to project root (e.g., "examples/Blink")
@@ -208,8 +207,9 @@ foreach example_name : example_paths.keys()
 
     # Get additional source files for this example (e.g., src/*.cpp)
     additional_sources = []
-    if example_sources.has_key(example_name) and example_sources[example_name].length() > 0
-        foreach src_file : example_sources[example_name]
+    example_source_list = example_sources.get(example_name, [])
+    if example_source_list.length() > 0
+        foreach src_file : example_source_list
             additional_sources += files(project_root / src_file)
         endforeach
     endif
@@ -261,8 +261,10 @@ foreach example_name : example_paths.keys()
     example_executables += [example_dll, example_runner_copy]
 endforeach
 
-# Create alias target to build all examples
-alias_target('examples-host', example_executables)
+# Create alias target to build all examples (only if we have examples)
+if example_executables.length() > 0
+    alias_target('examples-host', example_executables)
+endif
 
 example_count = example_executables.length()
 total_discovered = example_paths.keys().length()
