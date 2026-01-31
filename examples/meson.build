@@ -152,9 +152,6 @@ example_runner_exe = executable('example_runner',
   install: false
 )
 
-# Cache python program to avoid repeated lookups in the loop
-python_prog = find_program('python')
-
 # List to store all example executables for the alias target
 example_executables = []
 
@@ -187,20 +184,9 @@ foreach example_name : example_paths.keys()
     # Construct proper path: <example_root>/<example_name>.ino
     ino_file = project_root / example_root / (example_name + '.ino')
 
-    # Generate a wrapper .cpp file that includes the .ino and provides main()
-    # This approach is cleaner than using preprocessor macros
-    wrapper_cpp = custom_target(
-        'wrapper-' + example_name,
-        output: 'example-' + example_name + '-wrapper.cpp',
-        command: [
-            python_prog,
-            project_root / 'ci' / 'util' / 'generate_wrapper.py',
-            '@OUTPUT@',
-            example_name,
-            ino_file,
-        ],
-        build_by_default: false
-    )
+    # Use static wrapper template instead of generating wrapper at build time
+    # This eliminates custom_target overhead and Python script dependency
+    wrapper_cpp = files(project_root / 'tests' / 'shared' / 'example_dll_wrapper_template.cpp')
 
     # Add FastLED includes (src, stub platform, and tests for shared infrastructure) to the example includes
     all_includes = [src_dir, stub_dir, tests_dir] + include_objs
@@ -221,6 +207,15 @@ foreach example_name : example_paths.keys()
     #     debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
     # endif
 
+    # Pass .ino path via preprocessor define to the static wrapper template
+    # This eliminates the need for dynamic wrapper generation
+    # Add -fvisibility=hidden to make all symbols private by default
+    # Only explicitly exported symbols (run_example) will be visible
+    example_specific_cpp_args = [
+        '-DEXAMPLE_INO_PATH="' + ino_file + '"',
+        '-fvisibility=hidden'
+    ]
+
     # Collect all source files: wrapper + any additional .cpp files from subdirectories
     all_sources = [wrapper_cpp] + additional_sources
 
@@ -231,7 +226,7 @@ foreach example_name : example_paths.keys()
         all_sources,  # Wrapper + additional .cpp files
         include_directories: all_includes,
         link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args + ['-DEXAMPLE_DLL_MODE'],
+        cpp_args: example_compile_args + debug_cpp_args + example_specific_cpp_args + ['-DEXAMPLE_DLL_MODE'],
         link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
         name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
         build_by_default: false,  # Only build when explicitly requested
