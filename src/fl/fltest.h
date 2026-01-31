@@ -179,7 +179,7 @@ public:
     typedef void (*TestFunc)();
     struct TestCaseInfo {
         TestFunc mFunc;
-        const char* mName;
+        fl::string mName;  // Owns the string to handle dynamically generated names (e.g., template tests)
         const char* mFile;
         int mLine;
     };

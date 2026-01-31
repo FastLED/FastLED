@@ -124,7 +124,7 @@ int TestContext::run(const char* filter) {
     for (fl::size i = 0; i < mTestCases.size(); ++i) {
         // Apply filter if provided
         if (filter && filter[0] != '\0') {
-            if (!matchesFilter(mTestCases[i].mName, filter)) {
+            if (!matchesFilter(mTestCases[i].mName.c_str(), filter)) {
                 continue;  // Skip tests that don't match
             }
         }
@@ -143,12 +143,12 @@ fl::size TestContext::listTests(const char* filter) const {
     for (fl::size i = 0; i < mTestCases.size(); ++i) {
         // Apply filter if provided
         if (filter && filter[0] != '\0') {
-            if (!matchesFilter(mTestCases[i].mName, filter)) {
+            if (!matchesFilter(mTestCases[i].mName.c_str(), filter)) {
                 continue;
             }
         }
         count++;
-        fl::printf("  [%u] %s\n", static_cast<fl::u32>(count), mTestCases[i].mName);
+        fl::printf("  [%u] %s\n", static_cast<fl::u32>(count), mTestCases[i].mName.c_str());
         fl::printf("      File: %s:%d\n", mTestCases[i].mFile, mTestCases[i].mLine);
     }
 
@@ -232,11 +232,11 @@ static const char* sSkipReason = nullptr;
 
 void TestContext::runTestCase(const TestCaseInfo& info) {
     mStats.mTestCasesRun++;
-    mReporter->testCaseStart(info.mName);
+    mReporter->testCaseStart(info.mName.c_str());
 
     mCurrentTestFailed = false;
     mCurrentTestTimedOut = false;
-    mCurrentTestName = info.mName;
+    mCurrentTestName = info.mName.c_str();
     mSubcaseStack.clear();
     mNextSubcaseStack.clear();
     mFullyTraversedHashes.clear();
