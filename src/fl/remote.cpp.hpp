@@ -159,9 +159,13 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
     // If timestamp field missing, default to 0 (immediate) - not an error
 
     // Extract arguments (optional, defaults to empty array)
+    // IMPORTANT: args can be array (legacy) OR object (new config format)
     fl::Json args = doc["args"];
-    if (!args.has_value() || !args.is_array()) {
+    if (!args.has_value()) {
         FL_DBG("RPC: No args provided, using empty array");
+        args = fl::Json::array();
+    } else if (!args.is_array() && !args.is_object()) {
+        FL_WARN("RPC: Invalid args type (must be array or object), using empty array");
         args = fl::Json::array();
     }
 

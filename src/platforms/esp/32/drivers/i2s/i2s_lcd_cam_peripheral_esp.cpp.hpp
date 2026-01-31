@@ -92,8 +92,20 @@ I2sLcdCamPeripheralEsp::~I2sLcdCamPeripheralEsp() {
 
 bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) {
     if (mInitialized) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Already initialized");
-        return false;
+        // Check if config matches - if so, reuse existing peripheral
+        if (mConfig.num_lanes == config.num_lanes &&
+            mConfig.pclk_hz == config.pclk_hz &&
+            mConfig.max_transfer_bytes >= config.max_transfer_bytes &&
+            mConfig.use_psram == config.use_psram) {
+            // GPIOs might differ for different channels, but peripheral can be shared
+            // as long as all GPIOs are configured in the bus
+            FL_WARN_ONCE("I2sLcdCamPeripheralEsp: Already initialized, reusing peripheral");
+            return true;
+        }
+
+        // Config doesn't match - need to reinitialize
+        FL_WARN_ONCE("I2sLcdCamPeripheralEsp: Config changed, reinitializing peripheral");
+        deinitialize();
     }
 
     mConfig = config;

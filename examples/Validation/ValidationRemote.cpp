@@ -1262,7 +1262,7 @@ void ValidationRemoteControl::registerFunctions(
                      << ", lanes=" << min_lanes << "-" << max_lanes
                      << ", stripSizes=" << strip_sizes.size());
 
-            // Update drivers
+            // Update drivers in both mpDriversAvailable (for FastLED) and mpTestMatrix (for test generation)
             for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
                 bool should_enable = false;
                 for (fl::size j = 0; j < drivers.size(); j++) {
@@ -1273,6 +1273,8 @@ void ValidationRemoteControl::registerFunctions(
                 }
                 (*mpDriversAvailable)[i].enabled = should_enable;
             }
+
+            mpTestMatrix->enabled_drivers = drivers;
 
             // Update lane range
             mpTestMatrix->min_lanes = min_lanes;

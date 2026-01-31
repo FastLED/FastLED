@@ -505,7 +505,7 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
 
     // Now initialize the channel (this will attach ISR with correct pointer)
     if (!createChannel(channelPtr, pin, timing, dataSize)) {
-        FL_WARN("ChannelEngineSpi: Failed to create channel for pin " << pin);
+        FL_WARN_ONCE("ChannelEngineSpi: Failed to create channel for pin " << pin);
         // Remove the partially created channel
         mChannels.pop_back();
         return nullptr;
@@ -546,7 +546,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     // Acquire SPI host
     state->spi_host = acquireSpiHost();
     if (state->spi_host == SPI_HOST_MAX) {
-        FL_WARN("ChannelEngineSpi: No available SPI host");
+        FL_WARN_ONCE("ChannelEngineSpi: No available SPI host");
         return false;
     }
 
@@ -857,7 +857,7 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() {
         }
     }
 
-    FL_WARN("ChannelEngineSpi: No available SPI hosts (max " << num_hosts
+    FL_WARN_ONCE("ChannelEngineSpi: No available SPI hosts (max " << num_hosts
                                                              << " hosts)");
     return SPI_HOST_MAX;
 }
