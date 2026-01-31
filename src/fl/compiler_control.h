@@ -192,12 +192,22 @@
 #endif
 
 #if defined(__GNUC__)
-  #define _FL_STR1(x) #x
-  #define _FL_STR(x)  _FL_STR1(x)
+  // Note: _Pragma requires a single string literal, so we can't use token pasting
+  // to build the optimization level string. Instead, we use conditional compilation.
+  #if FL_TIMING_OPT_LEVEL == 0
+    #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O0\")")
+  #elif FL_TIMING_OPT_LEVEL == 1
+    #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O1\")")
+  #elif FL_TIMING_OPT_LEVEL == 3
+    #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O3\")")
+  #else
+    // Default to O2 for unrecognized or level 2
+    #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O2\")")
+  #endif
 
   #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING        \
       _Pragma("GCC push_options")                   \
-      _Pragma("GCC optimize(\"O" _FL_STR(FL_TIMING_OPT_LEVEL) "\")") \
+      _FL_TIMING_OPT_PRAGMA                         \
       _Pragma("GCC optimize(\"-fno-lto\")")         \
       _Pragma("GCC optimize(\"-fno-schedule-insns\")")  \
       _Pragma("GCC optimize(\"-fno-schedule-insns2\")") \

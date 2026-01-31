@@ -4,6 +4,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "hardware/structs/sio.h"
 #include "fastled_delay.h"
+#include "platforms/arm/rp/is_rp.h"  // FL_IS_RP2040, FL_IS_RP2350
 
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
 #include "platforms/arm/common/m0clockless.h"
@@ -158,13 +159,15 @@ public:
         int sm;
         int offset = -1;
         
-	#if defined(PICO_RP2040)
-        // find an unclaimed PIO state machine and upload the clockless program if possible
-        // there's two PIO instances, each with four state machines, so this should usually work out fine
-		const PIO pios[NUM_PIOS] = { pio0, pio1 };
-	#elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+	#if defined(FL_IS_RP2350)
 		// RP2350 features three PIO instances!
 		const PIO pios[NUM_PIOS] = { pio0, pio1, pio2 };
+	#elif defined(FL_IS_RP2040)
+        // RP2040: find an unclaimed PIO state machine and upload the clockless program
+        // There are two PIO instances, each with four state machines
+		const PIO pios[NUM_PIOS] = { pio0, pio1 };
+	#else
+		#error "Unsupported RP platform: expected FL_IS_RP2040 or FL_IS_RP2350"
 	#endif
         // iterate over PIO instances
         for (unsigned int i = 0; i < NUM_PIOS; i++) {

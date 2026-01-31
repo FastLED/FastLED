@@ -90,7 +90,9 @@ struct M0ClocklessData {
   #if defined(__ARMCC_VERSION)
     #define FL_DSB() __dsb(0xF)
   #elif defined(__GNUC__) || defined(__clang__)
-    #define FL_DSB() __builtin_arm_dsb(0xF)
+    // Use inline assembly for maximum compatibility across ARM toolchains
+    // __builtin_arm_dsb is not available on all GCC/Clang versions for ARM
+    #define FL_DSB() __asm__ volatile ("dsb 0xF" ::: "memory")
   #else
     #define FL_DSB() do {} while(0)
   #endif
@@ -345,8 +347,8 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     static constexpr uint32_t T3_CYCLES = ns_to_cycles(TIMING::T3);
 
 
-    // RGB channel ordering macro
-    #define RO(X) (RGB_ORDER == RGB ? X : (RGB_ORDER == RBG && X == 1 ? 2 : (RGB_ORDER == RBG && X == 2 ? 1 : \
+    // RGB channel ordering macro (use unique name to avoid collision with pixel_controller.h)
+    #define M0_RO(X) (RGB_ORDER == RGB ? X : (RGB_ORDER == RBG && X == 1 ? 2 : (RGB_ORDER == RBG && X == 2 ? 1 : \
                    (RGB_ORDER == GRB && X == 0 ? 1 : (RGB_ORDER == GRB && X == 1 ? 0 : \
                    (RGB_ORDER == GBR && X == 0 ? 1 : (RGB_ORDER == GBR && X == 1 ? 2 : \
                    (RGB_ORDER == GBR && X == 2 ? 0 : (RGB_ORDER == BRG && X == 0 ? 2 : \
@@ -367,11 +369,11 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     // Helper macro: Process a byte (load, dither, scale)
     /////////////////////////////////////////////////////////////////////////////
     #define PROCESS_BYTE(channel, bn) do { \
-        uint8_t pixel = load_led_byte(leds, RO(channel)); \
-        uint8_t dither = load_and_prepare_dither(pixel, pData, RO(channel)); \
+        uint8_t pixel = load_led_byte(leds, M0_RO(channel)); \
+        uint8_t dither = load_and_prepare_dither(pixel, pData, M0_RO(channel)); \
         pixel = qadd8(pixel, dither); \
-        pixel = apply_scale(pixel, pData->s[RO(channel)]); \
-        adjust_dither(pData, RO(channel)); \
+        pixel = apply_scale(pixel, pData->s[M0_RO(channel)]); \
+        adjust_dither(pData, M0_RO(channel)); \
         bn = prepare_byte_for_output(pixel); \
     } while(0)
 
@@ -529,7 +531,7 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
 #endif
 
     // Clean up macros
-    #undef RO
+    #undef M0_RO
     #undef PROCESS_BYTE
     #undef OUTPUT_BIT
     #undef OUTPUT_BYTE
