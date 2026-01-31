@@ -50,7 +50,6 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
 
-
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
 //
@@ -81,6 +80,7 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
     // Clean up all background threads before DLL unload to prevent access violations
     // This includes both coroutine threads and promise resolver threads
     fl::platforms::cleanup_coroutine_threads();
+
     return result;
 }
 

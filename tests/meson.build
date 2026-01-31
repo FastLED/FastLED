@@ -153,6 +153,7 @@ foreach test_name : test_names
   # Some tests need additional source files for ESP32 parallel SPI host simulation
   test_sources = [test_file, test_pch]
   test_cpp_args = unit_test_compile_args + [
+    '-DTEST_DLL_MODE',                          # Define TEST_DLL_MODE for DLL builds
     '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
     '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
     '-fpch-validate-input-files-content',       # Validate based on content, not mtime

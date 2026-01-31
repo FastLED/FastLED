@@ -792,6 +792,25 @@ fl::vector<fl::pair<int, fl::vector<uint8_t>>> ParlioPeripheralMock::untranspose
     return result;
 }
 
+//=============================================================================
+// Global Cleanup Function
+//=============================================================================
+
+void cleanup_parlio_mock() {
+    // Get the mock instance and perform cleanup
+    // This clears allocated memory to prevent LSAN leaks
+    auto& mock = ParlioPeripheralMock::instance();
+    mock.clearTransmissionHistory();
+
+    // Note: We don't stop the simulation thread here because:
+    // 1. The Singleton is designed to never be destroyed
+    // 2. The thread will be forcefully terminated when the DLL unloads
+    // 3. Trying to access thread state during DLL unload can cause hangs
+    //
+    // The important thing is that mPerPinData (heap allocations) is cleared
+    // before LSAN runs, which happens before DLL destruction.
+}
+
 } // namespace detail
 } // namespace fl
 

@@ -239,9 +239,17 @@ public:
 };
 
 //=============================================================================
-// Singleton Access for Tests
+// Global Cleanup Function
 //=============================================================================
 
+/// @brief Clean up mock peripheral before DLL/process exit
+///
+/// This function should be called before DLL unload or program exit to:
+/// 1. Stop the simulation thread gracefully
+/// 2. Clear all allocated memory to prevent LSAN leaks
+///
+/// Call this from run_tests() before returning, similar to cleanup_coroutine_threads().
+void cleanup_parlio_mock();
 
 } // namespace detail
 } // namespace fl
