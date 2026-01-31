@@ -45,28 +45,15 @@ private:
 
 // Custom deleter for testing
 struct CustomDeleter {
-    mutable bool* called_flag;
-    
-    CustomDeleter() : called_flag(new bool(false)) {}
-    
-    // Copy constructor shares the flag
-    CustomDeleter(const CustomDeleter& other) : called_flag(other.called_flag) {}
-    
-    // Assignment operator shares the flag  
-    CustomDeleter& operator=(const CustomDeleter& other) {
-        called_flag = other.called_flag;
-        return *this;
-    }
-    
-    ~CustomDeleter() {
-        // Don't delete called_flag here since it's shared
-    }
-    
+    mutable fl::shared_ptr<bool> called_flag;
+
+    CustomDeleter() : called_flag(fl::make_shared<bool>(false)) {}
+
     void operator()(TestClass* ptr) const {
         *called_flag = true;
         delete ptr;
     }
-    
+
     bool called() const { return *called_flag; }
 };
 
