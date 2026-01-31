@@ -272,6 +272,9 @@ if build_mode == 'debug'
   runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
   if is_windows
     runner_link_args += ['-ldbghelp', '-lpsapi']
+  else
+    # Unix: Link libunwind for crash handler stack traces
+    runner_link_args += ['-lunwind']
   endif
 elif build_mode == 'quick'
   # Quick mode: static linking on Windows, dynamic on Unix
@@ -290,7 +293,8 @@ elif build_mode == 'quick'
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
-    runner_link_args = core_link_args + ['-pthread']
+    # Link libunwind for crash handler stack traces
+    runner_link_args = core_link_args + ['-pthread', '-lunwind']
   endif
 else
   # Release mode: static linking on Windows, dynamic on Unix
@@ -306,7 +310,8 @@ else
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
-    runner_link_args = core_link_args + ['-pthread']
+    # Link libunwind for crash handler stack traces
+    runner_link_args = core_link_args + ['-pthread', '-lunwind']
   endif
 endif
 
@@ -353,8 +358,8 @@ endif
 # libunwind for enhanced stack traces (Unix only)
 # ============================================================================
 # libunwind provides detailed stack unwinding for crash handlers on Unix systems
-# Always enabled - libunwind is injected via DLL at runtime by clang-tool-chain
-message('libunwind enabled via DLL injection - enhanced stack traces enabled')
+# Always enabled on Unix - explicitly linked via -lunwind in runner_link_args
+message('libunwind enabled for Unix platforms - enhanced stack traces enabled')
 base_defines += ['-DUSE_LIBUNWIND']
 
 # ============================================================================
@@ -362,7 +367,7 @@ base_defines += ['-DUSE_LIBUNWIND']
 # ============================================================================
 # Build crash handler library once - provides crash handler setup that runs
 # BEFORE any DLL is loaded. Links to dbghelp/psapi on Windows.
-# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
+# On Unix, libunwind is explicitly linked via -lunwind in runner_link_args.
 crash_handler_lib = static_library('crash_handler',
   'tests/shared/crash_handler_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],
