@@ -884,7 +884,7 @@ static void compute_accelerated_huffman(Codebook *c)
    }
 }
 
-static int32_t uint32_compare(const void *p, const void *q)
+static int uint32_compare(const void *p, const void *q)
 {
    uint32 x = * (uint32 *) p;
    uint32 y = * (uint32 *) q;
@@ -1042,7 +1042,7 @@ typedef struct
    uint16 x,id;
 } stbv__floor_ordering;
 
-static int32_t point_compare(const void *p, const void *q)
+static int point_compare(const void *p, const void *q)
 {
    stbv__floor_ordering *a = (stbv__floor_ordering *) p;
    stbv__floor_ordering *b = (stbv__floor_ordering *) q;
