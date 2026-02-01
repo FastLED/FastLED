@@ -119,6 +119,16 @@ def run_meson_build_and_test(
         # Update current environment with sanitizer settings
         os.environ.update(sanitizer_env)
 
+        # Add LSAN suppression file for known false positives (pthread library leaks)
+        lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"
+        if lsan_suppressions.exists():
+            existing_lsan = os.environ.get("LSAN_OPTIONS", "")
+            suppression_opt = f"suppressions={lsan_suppressions}"
+            if existing_lsan:
+                os.environ["LSAN_OPTIONS"] = f"{existing_lsan}:{suppression_opt}"
+            else:
+                os.environ["LSAN_OPTIONS"] = suppression_opt
+
         if verbose:
             symbolizer_path = sanitizer_env.get("ASAN_SYMBOLIZER_PATH")
             if symbolizer_path:

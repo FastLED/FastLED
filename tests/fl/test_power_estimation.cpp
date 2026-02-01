@@ -1,6 +1,7 @@
 #include "test.h"
 #include "FastLED.h"
 #include "power_mgt.h"
+#include "fl/cled_controller.h"
 
 using namespace fl;
 
@@ -8,6 +9,16 @@ using namespace fl;
 // FastLED being a singleton. Each addLeds() call adds a new controller to the
 // global list. This is intentional FastLED behavior and tests account for it
 // by using relative comparisons rather than absolute power values.
+
+// Static LED arrays to ensure they outlive the controllers that reference them
+// Each test case uses its own static array to prevent use-after-scope issues
+static CRGB gLeds0[10];    // For basic smoke test
+static CRGB gLeds1[10];    // For brightness scaling
+static CRGB gLeds2[10];    // For no power limiting
+static CRGB gLeds3[100];   // For with power limiting
+static CRGB gLeds4[10];    // For zero brightness
+static CRGB gLeds5[10];    // For high power limit
+static CRGB gLeds6[50];    // For brightness scaling with limiting
 
 // Fixture to reset power model to default before each test
 // This prevents power_mgt.cpp tests from affecting power_estimation.cpp tests
@@ -20,11 +31,10 @@ struct PowerEstimationFixture {
 
 // Simple test to verify the function exists and returns a reasonable value
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - basic smoke test") {
-    CRGB leds[10];
-    fill_solid(leds, 10, CRGB::Black);
+    fill_solid(gLeds0, 10, CRGB::Black);
 
     // Initialize FastLED with a single controller
-    FastLED.addLeds<WS2812, 0, GRB>(leds, 10);
+    FastLED.addLeds<WS2812, 0, GRB>(gLeds0, 10);
     FastLED.setBrightness(255);
 
     // Should not crash
@@ -43,10 +53,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - basic smoke test") 
 
 // Test brightness scaling
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scaling") {
-    CRGB leds[10];
-    fill_solid(leds, 10, CRGB(255, 255, 255));  // All white
+    fill_solid(gLeds1, 10, CRGB(255, 255, 255));  // All white
 
-    FastLED.addLeds<WS2812, 1, GRB>(leds, 10);
+    FastLED.addLeds<WS2812, 1, GRB>(gLeds1, 10);
 
     // Full brightness
     FastLED.setBrightness(255);
@@ -68,10 +77,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scaling"
 
 // Test power estimation without power limiting
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - no power limiting") {
-    CRGB leds[10];
-    fill_solid(leds, 10, CRGB(255, 255, 255));  // All white
+    fill_solid(gLeds2, 10, CRGB(255, 255, 255));  // All white
 
-    FastLED.addLeds<WS2812, 2, GRB>(leds, 10);
+    FastLED.addLeds<WS2812, 2, GRB>(gLeds2, 10);
     FastLED.setBrightness(255);
 
     // Without power limiting, limited and unlimited should be the same
@@ -84,10 +92,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - no power limiting")
 
 // Test power estimation with power limiting enabled
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - with power limiting") {
-    CRGB leds[100];
-    fill_solid(leds, 100, CRGB(255, 255, 255));  // All white - high power demand
+    fill_solid(gLeds3, 100, CRGB(255, 255, 255));  // All white - high power demand
 
-    FastLED.addLeds<WS2812, 3, GRB>(leds, 100);
+    FastLED.addLeds<WS2812, 3, GRB>(gLeds3, 100);
     FastLED.setBrightness(255);
 
     // Set a low power limit (1000mW) - should force brightness reduction
@@ -107,10 +114,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - with power limiting
 
 // Test power estimation - edge case with zero brightness
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - zero brightness") {
-    CRGB leds[10];
-    fill_solid(leds, 10, CRGB(255, 255, 255));
+    fill_solid(gLeds4, 10, CRGB(255, 255, 255));
 
-    FastLED.addLeds<WS2812, 4, GRB>(leds, 10);
+    FastLED.addLeds<WS2812, 4, GRB>(gLeds4, 10);
     FastLED.setBrightness(0);
     FastLED.setMaxPowerInMilliWatts(1000);
 
@@ -124,10 +130,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - zero brightness") {
 
 // Test power estimation - power limit high enough to not limit
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - high power limit (no limiting)") {
-    CRGB leds[10];
-    fill_solid(leds, 10, CRGB(255, 255, 255));
+    fill_solid(gLeds5, 10, CRGB(255, 255, 255));
 
-    FastLED.addLeds<WS2812, 5, GRB>(leds, 10);
+    FastLED.addLeds<WS2812, 5, GRB>(gLeds5, 10);
     FastLED.setBrightness(255);
 
     // Set a very high power limit (100W) - should not cause limiting
@@ -146,10 +151,9 @@ TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - high power limit (n
 
 // Test power estimation - brightness scaling with limiting
 TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scaling with limiting") {
-    CRGB leds[50];
-    fill_solid(leds, 50, CRGB(200, 200, 200));
+    fill_solid(gLeds6, 50, CRGB(200, 200, 200));
 
-    FastLED.addLeds<WS2812, 6, GRB>(leds, 50);
+    FastLED.addLeds<WS2812, 6, GRB>(gLeds6, 50);
     FastLED.setMaxPowerInMilliWatts(5000);  // Higher limit to allow brightness scaling
 
     // Test at different brightness levels
