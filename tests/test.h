@@ -59,7 +59,7 @@
 // ----------------------------------------------------------------------------
 #define FL_CHECK(expr)                     CHECK(expr)
 #define FL_CHECK_FALSE(expr)               CHECK_FALSE(expr)
-#define FL_CHECK_TRUE(expr)                CHECK_TRUE(expr)
+#define FL_CHECK_TRUE(expr)                CHECK_UNARY(expr)
 
 // ----------------------------------------------------------------------------
 // Comparison Assertions (CHECK family)
