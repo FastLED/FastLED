@@ -6,6 +6,16 @@
 /// as a bit-banging engine. The SPI clock is used internally for timing but is NEVER
 /// physically connected to the LED strip - only the MOSI/data pin is used.
 /// See channel_engine_spi.h for detailed explanation.
+///
+/// @todo Known issues and future improvements:
+/// - [ ] ESP32-S3 CACHE COHERENCE (~50% memory overhead): Fix with manual cache flush.
+///       Currently using non-aligned staging buffers to force SPI driver internal copy,
+///       which wastes ~50% memory. Root cause: esp_cache_msync() fails with
+///       ESP_ERR_INVALID_ARG on internal SRAM allocated via heap_caps_malloc().
+///       To fix: Find the correct memory allocation method or cache flush API that
+///       works on ESP32-S3 internal SRAM. Once fixed, switch back to cache-aligned
+///       DMA buffers (esp_dma_capable_calloc) + manual esp_cache_msync() calls.
+///       See staging buffer allocation (~line 970) for details.
 
 #ifdef ESP32
 
@@ -35,6 +45,12 @@ FL_EXTERN_C_BEGIN
 #define FASTLED_SPI_HAS_CACHE_API 1
 #else
 #define FASTLED_SPI_HAS_CACHE_API 0
+#endif
+#if __has_include("esp_dma_utils.h")
+#include "esp_dma_utils.h"  // For esp_dma_capable_malloc (ESP-IDF 5.x)
+#define FASTLED_SPI_HAS_DMA_UTILS 1
+#else
+#define FASTLED_SPI_HAS_DMA_UTILS 0
 #endif
 FL_EXTERN_C_END
 
@@ -91,12 +107,12 @@ ChannelEngineSpi::~ChannelEngineSpi() {
             fl::isr::detachHandler(channel.timerHandle);
         }
 
-        // Free staging buffers (allocated with spi_bus_dma_memory_alloc)
+        // Free staging buffers (allocated with heap_caps_malloc)
         if (channel.stagingA) {
-            free(channel.stagingA);
+            heap_caps_free(channel.stagingA);
         }
         if (channel.stagingB) {
-            free(channel.stagingB);
+            heap_caps_free(channel.stagingB);
         }
         // Free LED source buffer
         if (channel.ledSourceBuffer) {
@@ -495,20 +511,17 @@ void ChannelEngineSpi::beginTransmission(
         channel->sourceData = data;
 
         // =========================================================================
-        // CRITICAL FIX: Pre-encode first chunk and sync cache BEFORE ISR runs
+        // ASYNC SPI TRANSMISSION: Pre-encode in main task, queue via timer ISR
         // =========================================================================
-        // On ESP32-S3/C6, the CPU writes to cache and DMA reads from memory.
-        // Without explicit cache sync, DMA may read stale/zero data.
-        // esp_cache_msync() is NOT ISR-safe, so we must encode in main task context.
-        //
-        // This fixes the "staging buffer shows 240 but GPIO outputs 128" bug.
+        // Pre-encode ALL LED data in main task context, then let the timer ISR
+        // queue the pre-encoded buffer for async DMA transmission.
         // =========================================================================
 
-        // Encode ALL LED data in main task context and sync cache
+        // Encode ALL LED data in main task context
         preEncodeAllData(channel);
 
         // Kick-start the timer ISR by setting hasNewData flag
-        // The timer ISR will queue the pre-encoded buffer and encode subsequent chunks
+        // The timer ISR will queue the pre-encoded buffer for async transmission
         channel->hasNewData = true;
     }
 }
@@ -722,13 +735,13 @@ void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
         }
 
         // Free staging buffers to prevent memory leak on reinitialization
-        // (allocated with spi_bus_dma_memory_alloc)
+        // (allocated with heap_caps_malloc)
         if (channel->stagingA) {
-            free(channel->stagingA);
+            heap_caps_free(channel->stagingA);
             channel->stagingA = nullptr;
         }
         if (channel->stagingB) {
-            free(channel->stagingB);
+            heap_caps_free(channel->stagingB);
             channel->stagingB = nullptr;
         }
         channel->stagingCapacity = 0;
@@ -943,31 +956,43 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         }
     }
 
-    // Allocate double-buffered staging buffers (4KB each, DMA-capable)
-    // Use spi_bus_dma_memory_alloc which handles cache alignment internally on ESP32-S3
+    // Allocate double-buffered staging buffers (4KB each)
+    //
+    // ⚠️ ESP32-S3 CACHE COHERENCE WORKAROUND - See @todo at top of file
+    //
+    // We deliberately use NON-ALIGNED memory here. This forces the ESP-IDF SPI
+    // driver to copy our data to an internal DMA buffer before transmission.
+    // The copy operation handles cache coherence (CPU cache → physical memory).
+    //
+    // Why: On ESP32-S3, internal SRAM is cacheable. CPU writes stay in cache,
+    // but DMA reads from physical memory (stale data). esp_cache_msync() fails
+    // with ESP_ERR_INVALID_ARG, so we use this workaround instead.
+    //
+    // Cost: ~50% memory overhead (8KB ours + 4KB driver internal = 12KB peak)
+    //
     const size_t staging_size = 4096;
-
-    state->stagingA = (uint8_t *)spi_bus_dma_memory_alloc(
-        state->spi_host, staging_size, MALLOC_CAP_INTERNAL);
-    state->stagingB = (uint8_t *)spi_bus_dma_memory_alloc(
-        state->spi_host, staging_size, MALLOC_CAP_INTERNAL);
+    state->stagingA = (uint8_t *)heap_caps_malloc(
+        staging_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    state->stagingB = (uint8_t *)heap_caps_malloc(
+        staging_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
 
     if (!state->stagingA || !state->stagingB) {
         FL_WARN("ChannelEngineSpi: Failed to allocate staging buffers");
         if (state->stagingA)
-            free(state->stagingA);  // spi_bus_dma_memory_alloc uses free()
+            heap_caps_free(state->stagingA);
         if (state->stagingB)
-            free(state->stagingB);
+            heap_caps_free(state->stagingB);
         spi_bus_remove_device(state->spi_device);
         spi_bus_free(state->spi_host);
         releaseSpiHost(state->spi_host);
         return false;
     }
 
-    // CRITICAL: Zero the staging buffers - encodeLedByte() uses |= which
-    // assumes zero-initialized memory
+    // Zero the staging buffers - wave8 encoding assumes zero-initialized memory
     fl::memset(state->stagingA, 0, staging_size);
     fl::memset(state->stagingB, 0, staging_size);
+
+    FL_DBG("ChannelEngineSpi: Allocated staging buffers (non-aligned, forces SPI driver copy for cache coherence)");
 
     state->stagingCapacity = staging_size;
     state->currentStaging = state->stagingA;
@@ -1413,10 +1438,10 @@ void ChannelEngineSpi::processPendingChannels() {
         // Store reference to source data for cleanup
         channel->sourceData = pending.data;
 
-        // Pre-encode ALL LED data and sync cache (same as in beginTransmission)
+        // Pre-encode ALL LED data
         preEncodeAllData(channel);
 
-        // Kick-start the timer ISR
+        // Kick-start the timer ISR for async transmission
         channel->hasNewData = true;
     }
 
@@ -1426,8 +1451,8 @@ void ChannelEngineSpi::processPendingChannels() {
 
 void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
     // =========================================================================
-    // Pre-encode ALL LED data into staging buffer and sync cache to memory
-    // This function runs in MAIN TASK context (not ISR) so esp_cache_msync is safe
+    // Pre-encode ALL LED data into staging buffer
+    // This function runs in MAIN TASK context (not ISR)
     // =========================================================================
 
     if (!channel || !channel->ledSource || channel->ledBytesRemaining == 0) {
@@ -1522,41 +1547,9 @@ void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
 
     channel->stagingOffset = total_bytes_written;
 
-    // =========================================================================
-    // CRITICAL: Sync cache to memory BEFORE DMA can read the data
-    // This is the key fix for the cache coherence bug!
-    // =========================================================================
-#if FASTLED_SPI_HAS_CACHE_API
-    // ESP32-S3/C6/C3/H2 have cache API - use it to ensure data reaches memory
-    if (total_bytes_written > 0) {
-        // ESP_CACHE_MSYNC_FLAG_DIR_C2M: Writeback cache to memory (CPU→Memory)
-        // This ensures DMA will see the data we just wrote
-        //
-        // NOTE: esp_cache_msync may fail with ESP_ERR_INVALID_ARG if:
-        // 1. The buffer is in non-cacheable memory (which is fine - DMA can access it directly)
-        // 2. The address is not cache-line aligned (spi_bus_dma_memory_alloc should handle this)
-        //
-        // If it fails, we fall back to memory barriers which should be sufficient
-        // for DMA-capable internal memory allocated via spi_bus_dma_memory_alloc.
-        esp_err_t ret = esp_cache_msync(channel->currentStaging, total_bytes_written,
-                                         ESP_CACHE_MSYNC_FLAG_DIR_C2M);
-        if (ret == ESP_OK) {
-            FL_DBG_EVERY(100, "ChannelEngineSpi: Cache synced " << total_bytes_written << " bytes to memory");
-        } else if (ret == ESP_ERR_INVALID_ARG) {
-            // Buffer might be in non-cacheable region - this is OK, DMA can access it directly
-            // Use memory barrier as fallback
-            __asm__ __volatile__("" ::: "memory");
-            __sync_synchronize();
-            FL_DBG_EVERY(100, "ChannelEngineSpi: Cache sync not needed (non-cacheable memory)");
-        } else {
-            FL_WARN_ONCE("ChannelEngineSpi: esp_cache_msync failed: " << static_cast<int>(ret));
-        }
-    }
-#else
-    // Original ESP32 doesn't have cache API - memory barriers should be sufficient
+    // Memory barrier to ensure all writes are visible before SPI transmit
     __asm__ __volatile__("" ::: "memory");
     __sync_synchronize();
-#endif
 
     FL_DBG("ChannelEngineSpi: Pre-encoded " << (total_led_bytes - channel->ledBytesRemaining)
            << " LED bytes → " << total_bytes_written << " SPI bytes");
