@@ -80,6 +80,7 @@
 // Include the standalone header for API declarations
 //
 #include "third_party/stb/stb_vorbis.h"
+#include "fl/stl/assert.h"    // For FASTLED_ASSERT
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -253,14 +254,7 @@
 
 // FastLED: Use fl/stl headers for FL_ASSERT macro and limits
 #ifndef FL_STB_VORBIS_NO_CRT
-   #include "fl/stl/assert.h"    // For FL_ASSERT base
-
-   // Override FL_ASSERT with single-argument version for stb_vorbis compatibility
-   // stb_vorbis uses the C-style assert(condition) pattern without messages
-   #ifdef FL_ASSERT
-   #undef FL_ASSERT
-   #endif
-   #define FL_ASSERT(x) FASTLED_ASSERT(x, "stb_vorbis assertion failed")
+   
 
    // FastLED stl wrappers instead of standard library headers
    // Note: These provide malloc, free, memset, memcpy, floor, exp, etc.
@@ -822,8 +816,8 @@ static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *val
    memset(available, 0, sizeof(available));
    // find the first entry
    for (k=0; k < n; ++k) if (len[k] < NO_CODE) break;
-   if (k == n) { FL_ASSERT(c->sorted_entries == 0); return true; }
-   FL_ASSERT(len[k] < 32); // no error return required, code reading lens checks this
+   if (k == n) { FL_ASSERT(c->sorted_entries == 0, "sorted_entries must be 0"); return true; }
+   FL_ASSERT(len[k] < 32, "len must be < 32"); // no error return required, code reading lens checks this
    // add to the list
    add_entry(c, 0, k, m++, len[k], values);
    // add all available leaves
@@ -837,7 +831,7 @@ static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *val
       uint32 res;
       int32_t z = len[i], y;
       if (z == NO_CODE) continue;
-      FL_ASSERT(z < 32); // no error return required, code reading lens checks this
+      FL_ASSERT(z < 32, "z must be < 32"); // no error return required, code reading lens checks this
       // find lowest available leaf (should always be earliest,
       // which is what the specification calls for)
       // note that this property, and the fact we can never have
@@ -852,7 +846,7 @@ static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *val
       // propagate availability up the tree
       if (z != len[i]) {
          for (y=len[i]; y > z; --y) {
-            FL_ASSERT(available[y] == 0);
+            FL_ASSERT(available[y] == 0, "available must be 0");
             available[y] = res + (1 << (32-y));
          }
       }
@@ -893,7 +887,7 @@ static int uint32_compare(const void *p, const void *q)
 
 static int32_t include_in_sort(Codebook *c, uint8 len)
 {
-   if (c->sparse) { FL_ASSERT(len != NO_CODE); return true; }
+   if (c->sparse) { FL_ASSERT(len != NO_CODE, "len must not be NO_CODE"); return true; }
    if (len == NO_CODE) return false;
    if (len > FL_STB_VORBIS_FAST_HUFFMAN_LENGTH) return true;
    return false;
@@ -913,7 +907,7 @@ static void compute_sorted_huffman(Codebook *c, uint8 *lengths, uint32 *values)
       for (i=0; i < c->entries; ++i)
          if (include_in_sort(c, lengths[i]))
             c->sorted_codewords[k++] = bit_reverse(c->codewords[i]);
-      FL_ASSERT(k == c->sorted_entries);
+      FL_ASSERT(k == c->sorted_entries, "k must equal sorted_entries");
    } else {
       for (i=0; i < c->sorted_entries; ++i)
          c->sorted_codewords[i] = bit_reverse(c->codewords[i]);
@@ -943,7 +937,7 @@ static void compute_sorted_huffman(Codebook *c, uint8 *lengths, uint32 *values)
                n >>= 1;
             }
          }
-         FL_ASSERT(c->sorted_codewords[x] == code);
+         FL_ASSERT(c->sorted_codewords[x] == code, "sorted_codewords must match code");
          if (c->sparse) {
             c->sorted_values[x] = values[i];
             c->codeword_lengths[x] = huff_len;
@@ -1277,7 +1271,7 @@ static int32_t next_segment(vorb *f)
    }
    if (f->next_seg >= f->segment_count)
       f->next_seg = -1;
-   FL_ASSERT(f->bytes_in_seg == 0);
+   FL_ASSERT(f->bytes_in_seg == 0, "bytes_in_seg must be 0");
    f->bytes_in_seg = len;
    return len;
 }
@@ -1291,7 +1285,7 @@ static int32_t get8_packet_raw(vorb *f)
       if (f->last_seg) return EOP;
       else if (!next_segment(f)) return EOP;
    }
-   FL_ASSERT(f->bytes_in_seg > 0);
+   FL_ASSERT(f->bytes_in_seg > 0, "bytes_in_seg must be > 0");
    --f->bytes_in_seg;
    ++f->packet_bytes;
    return get8(f);
@@ -1345,7 +1339,7 @@ static uint32 get_bits(vorb *f, int32_t n)
       }
    }
 
-   FL_ASSERT(f->valid_bits >= n);
+   FL_ASSERT(f->valid_bits >= n, "valid_bits must be >= n");
    z = f->acc & ((1 << n)-1);
    f->acc >>= n;
    f->valid_bits -= n;
@@ -1418,7 +1412,7 @@ static int32_t codebook_decode_scalar_raw(vorb *f, Codebook *c)
    }
 
    // if small, linear search
-   FL_ASSERT(!c->sparse);
+   FL_ASSERT(!c->sparse, "codebook must not be sparse");
    for (i=0; i < c->entries; ++i) {
       if (c->codeword_lengths[i] == NO_CODE) continue;
       if (c->codewords[i] == (f->acc & ((1 << c->codeword_lengths[i])-1))) {
@@ -1506,7 +1500,7 @@ static int32_t codebook_decode_start(vorb *f, Codebook *c)
       error(f, VORBIS_invalid_stream);
    else {
       FL_STBV_DECODE_VQ(z,f,c);
-      if (c->sparse) FL_ASSERT(z < c->sorted_entries);
+      if (c->sparse) FL_ASSERT(z < c->sorted_entries, "z must be < sorted_entries");
       if (z < 0) {  // check for EOP
          if (!f->bytes_in_seg)
             if (f->last_seg)
@@ -1600,7 +1594,7 @@ static int32_t codebook_decode_deinterleave_repeat(vorb *f, Codebook *c, float *
       float last = FL_STBV_CODEBOOK_ELEMENT_BASE(c);
       FL_STBV_DECODE_VQ(z,f,c);
       #ifndef FL_STB_VORBIS_DIVIDES_IN_CODEBOOK
-      FL_ASSERT(!c->sparse || z < c->sorted_entries);
+      FL_ASSERT(!c->sparse || z < c->sorted_entries, "sparse codebook z must be < sorted_entries");
       #endif
       if (z < 0) {
          if (!f->bytes_in_seg)
@@ -2136,7 +2130,7 @@ static void imdct_step3_iter0_loop(int32_t n, float *e, int32_t i_off, int32_t k
    float *ee2 = ee0 + k_off;
    int32_t i;
 
-   FL_ASSERT((n & 3) == 0);
+   FL_ASSERT((n & 3) == 0, "n must be multiple of 4");
    for (i=(n>>2); i > 0; --i) {
       float k00_20, k01_21;
       k00_20  = ee0[ 0] - ee2[ 0];
@@ -2538,7 +2532,7 @@ static void inverse_mdct(float *buffer, int32_t n, vorb *f, int32_t blocktype)
 
 
    // data must be in buf2
-   FL_ASSERT(v == buf2);
+   FL_ASSERT(v == buf2, "v must equal buf2");
 
    // step 7   (paper output is v, now v)
    // this is now in place
@@ -2725,7 +2719,7 @@ void inverse_mdct_naive(float *buffer, int32_t n)
    // step 4
    for (i=0; i < n8; ++i) {
       int32_t j = bit_reverse(i) >> (32-ld+3);
-      FL_ASSERT(j < n8);
+      FL_ASSERT(j < n8, "j must be < n8");
       if (i == j) {
          // paper bug: original code probably swapped in place; if copying,
          //            need to directly copy in this case
@@ -2865,7 +2859,7 @@ static int32_t vorbis_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_le
    }
 
    if (f->alloc.alloc_buffer)
-      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset);
+      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset, "alloc_buffer_length must equal temp_offset");
 
    i = get_bits(f, ilog(f->mode_count-1));
    if (i == EOP) return false;
@@ -3015,7 +3009,7 @@ static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t 
    // at this point we've decoded all floors
 
    if (f->alloc.alloc_buffer)
-      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset);
+      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset, "alloc_buffer_length must equal temp_offset");
 
    // re-enable coupled channels if necessary
    memcpy(really_zero_channel, zero_channel, sizeof(really_zero_channel[0]) * f->channels);
@@ -3048,7 +3042,7 @@ static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t 
    }
 
    if (f->alloc.alloc_buffer)
-      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset);
+      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset, "alloc_buffer_length must equal temp_offset");
    FL_STBV_CHECK(f);
 
 // INVERSE COUPLING
@@ -3164,7 +3158,7 @@ static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t 
       f->current_loc += (right_start - left_start);
 
    if (f->alloc.alloc_buffer)
-      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset);
+      FL_ASSERT(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset, "alloc_buffer_length must equal temp_offset");
    *len = right_end;  // ignore samples after the window goes to 0
    FL_STBV_CHECK(f);
 
@@ -3936,7 +3930,7 @@ static int32_t start_decoder(vorb *f)
 
 
    if (f->alloc.alloc_buffer) {
-      FL_ASSERT(f->temp_offset == f->alloc.alloc_buffer_length_in_bytes);
+      FL_ASSERT(f->temp_offset == f->alloc.alloc_buffer_length_in_bytes, "temp_offset must equal alloc_buffer_length");
       // check if there's enough temp memory so we don't error later
       if (f->setup_offset + sizeof(*f) + f->temp_memory_required > (unsigned) f->temp_offset)
          return error(f, VORBIS_outofmem);
@@ -4480,7 +4474,7 @@ static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number)
    }
 
    right = f->p_last;
-   FL_ASSERT(right.last_decoded_sample != ~0U);
+   FL_ASSERT(right.last_decoded_sample != ~0U, "right sample must be decoded");
 
    // starting from the start is handled differently
    if (last_sample_limit <= left.last_decoded_sample) {
@@ -4493,7 +4487,7 @@ static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number)
    }
 
    while (left.page_end != right.page_start) {
-      FL_ASSERT(left.page_end < right.page_start);
+      FL_ASSERT(left.page_end < right.page_start, "left page_end must be < right page_start");
       // search range in bytes
       delta = right.page_start - left.page_end;
       if (delta <= 65536) {
@@ -4535,7 +4529,7 @@ static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number)
          if (mid.last_decoded_sample != ~0U) break;
          // (untested) no frames end on this page
          set_file_offset(f, mid.page_end);
-         FL_ASSERT(mid.page_start < right.page_start);
+         FL_ASSERT(mid.page_start < right.page_start, "mid page_start must be < right page_start");
       }
 
       // if we've just found the last page again then we're in a tricky file,
@@ -4558,7 +4552,7 @@ static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number)
    set_file_offset(f, page_start);
    if (!start_page(f)) return error(f, VORBIS_seek_failed);
    end_pos = f->end_seg_with_known_loc;
-   FL_ASSERT(end_pos >= 0);
+   FL_ASSERT(end_pos >= 0, "end_pos must be >= 0");
 
    for (;;) {
       for (i = end_pos; i > 0; --i)
@@ -4640,8 +4634,8 @@ int32_t stb_vorbis_seek_frame(stb_vorbis *f, uint32_t sample_number)
    if (!seek_to_sample_coarse(f, sample_number))
       return 0;
 
-   FL_ASSERT(f->current_loc_valid);
-   FL_ASSERT(f->current_loc <= sample_number);
+   FL_ASSERT(f->current_loc_valid, "current_loc must be valid");
+   FL_ASSERT(f->current_loc <= sample_number, "current_loc must be <= sample_number");
 
    // linear search for the relevant packet
    max_frame_samples = (f->blocksize_1*3 - f->blocksize_0) >> 2;
@@ -4678,8 +4672,8 @@ int32_t stb_vorbis_seek(stb_vorbis *f, uint32_t sample_number)
       int32_t n;
       uint32 frame_start = f->current_loc;
       stb_vorbis_get_frame_float(f, &n, nullptr);
-      FL_ASSERT(sample_number > frame_start);
-      FL_ASSERT(f->channel_buffer_start + (int32_t) (sample_number-frame_start) <= f->channel_buffer_end);
+      FL_ASSERT(sample_number > frame_start, "sample_number must be > frame_start");
+      FL_ASSERT(f->channel_buffer_start + (int32_t) (sample_number-frame_start) <= f->channel_buffer_end, "buffer bounds check");
       f->channel_buffer_start += (sample_number - frame_start);
    }
 
@@ -5032,7 +5026,7 @@ static void convert_channels_short_interleaved(int32_t buf_c, short *buffer, int
    int32_t i;
    fl_stbv_check_endianness();
    if (buf_c != data_c && buf_c <= 2 && data_c <= 6) {
-      FL_ASSERT(buf_c == 2);
+      FL_ASSERT(buf_c == 2, "buf_c must be 2");
       for (i=0; i < buf_c; ++i)
          compute_stereo_samples(buffer, data_c, data, d_offset, len);
    } else {
