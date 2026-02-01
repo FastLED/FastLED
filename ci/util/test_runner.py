@@ -487,7 +487,7 @@ def create_examples_test_process(
         1800 if args.no_parallel else 600
     )  # 30 minutes for sequential, 10 minutes for parallel
 
-    return RunningProcess(cmd, auto_run=False, timeout=timeout)
+    return RunningProcess(cmd, auto_run=False, timeout=timeout, output_formatter=TimestampFormatter())
 
 
 def create_python_test_process(

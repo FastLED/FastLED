@@ -21,6 +21,7 @@ from typing import Optional
 
 from running_process import RunningProcess
 
+from ci.util.output_formatter import TimestampFormatter
 from ci.util.test_exceptions import TestExecutionFailedException, TestFailureInfo
 
 
@@ -282,6 +283,7 @@ def run_test(
             shell=False,
             auto_run=True,
             timeout=timeout,
+            output_formatter=TimestampFormatter(),
         )
 
         with process.line_iter(timeout=30) as it:
