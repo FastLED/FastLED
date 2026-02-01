@@ -24,6 +24,22 @@ from ci.util.timestamp_print import ts_print as _ts_print
 _IS_CI = os.environ.get("GITHUB_ACTIONS") == "true" or os.environ.get("CI") == "true"
 
 
+def _get_memory_usage_mb() -> float | None:
+    """Get current process memory usage in MB. Returns None if unavailable."""
+    try:
+        import psutil
+
+        process = psutil.Process()
+        return process.memory_info().rss / (1024 * 1024)
+    except ImportError:
+        return None
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception:
+        return None
+
+
 class CompilationHeartbeat:
     """Provides periodic heartbeat output during long compilations to prevent CI timeouts."""
 
@@ -64,10 +80,18 @@ class CompilationHeartbeat:
             elapsed = time.time() - self._start_time
             minutes = int(elapsed // 60)
             seconds = int(elapsed % 60)
-            # Print heartbeat with elapsed time
+
+            # Build heartbeat message with optional memory info
+            mem_mb = _get_memory_usage_mb()
+            if mem_mb is not None:
+                mem_info = f", mem: {mem_mb:.0f}MB"
+            else:
+                mem_info = ""
+
+            # Print heartbeat with elapsed time and memory usage
             _ts_print(
                 f"[HEARTBEAT {heartbeat_count}] {self._last_message} "
-                f"(elapsed: {minutes}m {seconds}s)",
+                f"(elapsed: {minutes}m {seconds}s{mem_info})",
                 file=sys.stderr,
             )
             # Flush to ensure CI captures the output
@@ -110,10 +134,16 @@ def compile_examples(
     if examples is None:
         # Build all examples via the alias target
         cmd.append("examples-host")
+        target_desc = "all examples"
     else:
         # Build specific example targets
         for example_name in examples:
             cmd.append(f"example-{example_name}")
+        target_desc = ", ".join(examples)
+
+    # Start heartbeat for CI environments during long compilations
+    heartbeat = CompilationHeartbeat(interval_seconds=30)
+    heartbeat.start(f"Compiling {target_desc} ({build_mode} mode)")
 
     try:
         # Use RunningProcess for streaming output
@@ -129,6 +159,9 @@ def compile_examples(
         # Use filtering callback in verbose mode to suppress noise patterns
         echo_callback = create_filtering_echo_callback() if verbose else False
         returncode = proc.wait(echo=echo_callback)
+
+        # Stop heartbeat before reporting result
+        heartbeat.stop()
 
         if returncode != 0:
             _ts_print(
@@ -148,9 +181,11 @@ def compile_examples(
         return True
 
     except KeyboardInterrupt:
+        heartbeat.stop()
         handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
+        heartbeat.stop()
         _ts_print(f"Compilation failed: {e}", file=sys.stderr)
         return False
 
@@ -188,6 +223,7 @@ def run_examples(
     if examples is None:
         # Run all tests in the 'examples' suite
         cmd.extend(["--suite", "examples"])
+        target_desc = "all examples"
         if not verbose:
             _ts_print("Running all examples...")
     else:
@@ -196,14 +232,19 @@ def run_examples(
         for example_name in examples:
             # Add each example as a separate test argument
             cmd.append(f"example-{example_name}")
+        target_desc = ", ".join(examples)
         # In verbose mode, meson output shows running tests - skip redundant message
         if not verbose:
-            _ts_print(f"Running: {', '.join(examples)}")
+            _ts_print(f"Running: {target_desc}")
 
     start_time = time.time()
     num_passed = 0
     num_failed = 0
     num_run = 0
+
+    # Start heartbeat for CI environments during long test runs
+    heartbeat = CompilationHeartbeat(interval_seconds=30)
+    heartbeat.start(f"Running {target_desc} ({build_mode} mode)")
 
     try:
         # Use RunningProcess for streaming output
@@ -219,6 +260,9 @@ def run_examples(
         # Use filtering callback in verbose mode to suppress noise patterns
         echo_callback = create_filtering_echo_callback() if verbose else False
         returncode = proc.wait(echo=echo_callback)
+
+        # Stop heartbeat before reporting result
+        heartbeat.stop()
 
         if returncode != 0:
             _ts_print(
@@ -243,9 +287,11 @@ def run_examples(
         )
 
     except KeyboardInterrupt:
+        heartbeat.stop()
         handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
+        heartbeat.stop()
         duration = time.time() - start_time
         _ts_print(f"Execution failed: {e}", file=sys.stderr)
         return MesonTestResult(
