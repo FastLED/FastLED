@@ -46,7 +46,7 @@ call_python_util() {
     local action=$1
     shift
 
-    python3 -m ci.docker.docker_build_utils "$action" "$@"
+    python3 -m ci.docker_utils.docker_build_utils "$action" "$@"
 }
 
 # Generate platformio.ini from board configuration
@@ -54,7 +54,7 @@ generate_platformio_ini() {
     local board_name="${1:-$FIRST_PLATFORM}"
     echo "Generating platformio.ini from board: $board_name"
 
-    python3 -m ci.docker.generate_platformio_ini "$board_name" "$PROJECT_ROOT"
+    python3 -m ci.docker_utils.generate_platformio_ini "$board_name" "$PROJECT_ROOT"
 
     if [ $? -ne 0 ]; then
         echo "Error: Failed to generate platformio.ini"

@@ -6,7 +6,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 Generate platformio.ini from board configuration.
 
 Usage:
-    python3 -m ci.docker.generate_platformio_ini <board_name> [project_root]
+    python3 -m ci.docker_utils.generate_platformio_ini <board_name> [project_root]
 """
 
 import sys
@@ -16,7 +16,7 @@ def main():
     if len(sys.argv) < 2:
         print("Error: board_name argument required", file=sys.stderr)
         print(
-            "Usage: python3 -m ci.docker.generate_platformio_ini <board_name> [project_root]",
+            "Usage: python3 -m ci.docker_utils.generate_platformio_ini <board_name> [project_root]",
             file=sys.stderr,
         )
         sys.exit(1)
