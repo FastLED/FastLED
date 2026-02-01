@@ -6,6 +6,7 @@
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 #include "fl/delay.h"
+#include "platforms/cpu_frequency.h"
 
 // Note: micros() is used in inline templates below but not declared here.
 // It will be provided by platform headers (Arduino.h, etc.) included via led_sysdefs.h
@@ -82,15 +83,18 @@ public:
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
 
-/// CPU speed, in megahertz (MHz)
-#define F_CPU_MHZ (F_CPU / 1000000L)
+/// CPU speed, in megahertz (MHz) - compile-time constant
+/// Uses GET_CPU_FREQUENCY() from platforms/cpu_frequency.h which provides
+/// a compile-time constant value, avoiding issues with platforms like STM32duino
+/// where F_CPU may be defined as a runtime variable (SystemCoreClock)
+#define F_CPU_MHZ (GET_CPU_FREQUENCY() / 1000000L)
 
 // #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
 
-/// Convert from nanoseconds to number of clock cycles 
+/// Convert from nanoseconds to number of clock cycles
 #define NS(_NS) (((_NS * F_CPU_MHZ) + 999) / 1000)
-/// Convert from number of clock cycles to microseconds 
-#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
+/// Convert from number of clock cycles to microseconds
+#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (GET_CPU_FREQUENCY() / 1000000L)
 
 /// Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)

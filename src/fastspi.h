@@ -34,6 +34,7 @@
 #include "fastspi_types.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
+#include "platforms/cpu_frequency.h"
 
 // Include platform-specific SPI device proxy implementations BEFORE FastLED.h
 // These provide the hardware SPI abstractions for each platform
@@ -83,8 +84,10 @@
 
 #else
 // Software SPI platforms: return clock divider (CPU cycles per bit)
-#define FL_DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
-#define FL_DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
+// Use GET_CPU_FREQUENCY() for compile-time constant, avoiding issues with
+// STM32duino where F_CPU may be defined as runtime SystemCoreClock variable
+#define FL_DATA_RATE_MHZ(X) ((GET_CPU_FREQUENCY() / 1000000L) / X)
+#define FL_DATA_RATE_KHZ(X) ((GET_CPU_FREQUENCY() / 1000L) / X)
 #define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
 #endif
 
