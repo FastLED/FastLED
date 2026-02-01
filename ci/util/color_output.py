@@ -83,7 +83,8 @@ class ColorOutput:
             text = Text()
             text.append("✓ ", style="bright_green bold")
             text.append(message, style="green")
-            self.console.print(text)
+            # Disable word wrapping to keep the message on one line
+            self.console.print(text, soft_wrap=True)
         else:
             self._fallback_print(message, "✓ ")
 

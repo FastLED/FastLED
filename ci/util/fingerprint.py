@@ -39,6 +39,10 @@ class FingerprintManager:
                         hash=data.get("hash", ""),
                         elapsed_seconds=data.get("elapsed_seconds"),
                         status=data.get("status"),
+                        num_tests_run=data.get("num_tests_run"),
+                        num_tests_passed=data.get("num_tests_passed"),
+                        duration_seconds=data.get("duration_seconds"),
+                        test_name=data.get("test_name"),
                     )
                 except json.JSONDecodeError:
                     ts_print(f"Invalid {name} fingerprint file. Recalculating...")
@@ -46,11 +50,20 @@ class FingerprintManager:
 
     def write(self, name: str, fingerprint: FingerprintResult) -> None:
         fingerprint_file = self._get_fingerprint_file(name)
-        fingerprint_dict = {
+        fingerprint_dict: dict[str, Optional[str | int | float]] = {
             "hash": fingerprint.hash,
             "elapsed_seconds": fingerprint.elapsed_seconds,
             "status": fingerprint.status,
         }
+        # Include test metadata if available
+        if fingerprint.num_tests_run is not None:
+            fingerprint_dict["num_tests_run"] = fingerprint.num_tests_run
+        if fingerprint.num_tests_passed is not None:
+            fingerprint_dict["num_tests_passed"] = fingerprint.num_tests_passed
+        if fingerprint.duration_seconds is not None:
+            fingerprint_dict["duration_seconds"] = fingerprint.duration_seconds
+        if fingerprint.test_name is not None:
+            fingerprint_dict["test_name"] = fingerprint.test_name
         with open(fingerprint_file, "w") as f:
             json.dump(fingerprint_dict, f, indent=2)
 
@@ -68,7 +81,36 @@ class FingerprintManager:
     def save_all(self, status: str) -> None:
         for name, fingerprint in self._fingerprints.items():
             fingerprint.status = status
+            # Preserve test metadata from previous fingerprint if current one doesn't have it
+            # This happens when tests are skipped (cache hit) - we want to keep the old metadata
+            if fingerprint.num_tests_run is None:
+                prev_fp = self._prev_fingerprints.get(name)
+                if prev_fp is not None:
+                    fingerprint.num_tests_run = prev_fp.num_tests_run
+                    fingerprint.num_tests_passed = prev_fp.num_tests_passed
+                    fingerprint.duration_seconds = prev_fp.duration_seconds
+                    fingerprint.test_name = prev_fp.test_name
             self.write(name, fingerprint)
+
+    def update_test_metadata(
+        self,
+        name: str,
+        num_tests_run: int,
+        num_tests_passed: int,
+        duration_seconds: float,
+        test_name: Optional[str] = None,
+    ) -> None:
+        """Update the test metadata for a fingerprint before saving"""
+        if name in self._fingerprints:
+            self._fingerprints[name].num_tests_run = num_tests_run
+            self._fingerprints[name].num_tests_passed = num_tests_passed
+            self._fingerprints[name].duration_seconds = duration_seconds
+            if test_name:
+                self._fingerprints[name].test_name = test_name
+
+    def get_prev_fingerprint(self, name: str) -> Optional[FingerprintResult]:
+        """Get the previous fingerprint data (from last run) for display"""
+        return self._prev_fingerprints.get(name)
 
     def check_cpp(self, args: TestArgs) -> bool:
         return self.check("cpp_test", lambda: calculate_cpp_test_fingerprint(args))

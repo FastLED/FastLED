@@ -336,6 +336,7 @@ def main() -> None:
                     force_cpp_test_change,
                     force_examples_change,
                     force_python_test_change,
+                    fingerprint_manager=fingerprint_manager,
                 )
 
             # If we got here, tests passed

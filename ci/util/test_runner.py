@@ -19,12 +19,18 @@ import time
 import traceback
 from dataclasses import dataclass
 from queue import Queue
-from typing import Callable, Optional, Protocol, cast
+
+# Import for type annotation only
+from typing import TYPE_CHECKING, Callable, Optional, Protocol, cast
 
 from running_process import RunningProcess
 from typeguard import typechecked
 
 from ci.util.color_output import print_cache_hit
+
+
+if TYPE_CHECKING:
+    from ci.util.fingerprint import FingerprintManager
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_exceptions import (
@@ -649,9 +655,32 @@ def _extract_test_name(command: str | list[str]) -> str:
     return "unknown_test"
 
 
-def _create_skipped_timing(test_name: str, command: str = "") -> ProcessTiming:
+def _create_skipped_timing(
+    test_name: str, command: str = "", cached_summary: str = ""
+) -> ProcessTiming:
     """Create a ProcessTiming entry for a skipped test"""
-    return ProcessTiming(name=test_name, duration=0.0, command=command, skipped=True)
+    # Include cached summary in the name if available
+    display_name = f"{test_name} ({cached_summary})" if cached_summary else test_name
+    return ProcessTiming(name=display_name, duration=0.0, command=command, skipped=True)
+
+
+def _format_cache_hit_message(
+    fingerprint_manager: Optional["FingerprintManager"],
+    fingerprint_name: str,
+    default_message: str,
+) -> str:
+    """Format cache hit message with test metadata if available"""
+    if fingerprint_manager is None:
+        return default_message
+
+    prev_fp = fingerprint_manager.get_prev_fingerprint(fingerprint_name)
+    if prev_fp is None:
+        return default_message
+
+    summary = prev_fp.get_cache_summary()
+    if summary:
+        return f"{default_message} [{summary}]"
+    return default_message
 
 
 def _get_friendly_test_name(command: str | list[str]) -> str:
@@ -722,8 +751,7 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
 def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     """Format a summary of process execution times.
 
-    For single tests: Returns compact inline format (e.g., "Blink: 3.27s")
-    For multiple tests: Returns a table format
+    Always returns a table format for consistent display.
     """
     if not process_timings:
         return ""
@@ -731,43 +759,29 @@ def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     # Sort by skipped status first (non-skipped first), then by duration (longest first)
     sorted_timings = sorted(process_timings, key=lambda x: (x.skipped, -x.duration))
 
-    # For single test, use compact inline format
-    if len(sorted_timings) == 1:
-        timing = sorted_timings[0]
-        if timing.skipped:
-            return f"{timing.name}: skipped"
-        else:
-            return f"✅ {timing.name}: {timing.duration:.2f}s"
-
-    # For 2-3 tests, use compact comma-separated format
-    if len(sorted_timings) <= 3:
-        parts: list[str] = []
-        for timing in sorted_timings:
-            if timing.skipped:
-                parts.append(f"{timing.name}: skipped")
-            else:
-                parts.append(f"{timing.name} ({timing.duration:.2f}s)")
-        # Show success indicator if all passed
-        prefix = "✅ " if not any(t.skipped for t in sorted_timings) else ""
-        return f"{prefix}{', '.join(parts)}"
-
-    # 4+ tests: use table format
+    # Always use table format for consistent display
     # Calculate column widths dynamically
     max_name_width = max(len(timing.name) for timing in sorted_timings)
     max_name_width = max(max_name_width, len("Test"))  # Use shorter header
 
+    # Calculate max duration width for alignment
+    duration_values: list[str] = []
+    for timing in sorted_timings:
+        if timing.skipped:
+            duration_values.append("skipped")
+        else:
+            duration_values.append(f"{timing.duration:.2f}s")
+    max_duration_width = max(len(d) for d in duration_values)
+    max_duration_width = max(max_duration_width, len("Duration"))
+
     # Create header with compact formatting
-    header = f"{'Test':<{max_name_width}} | Duration"
-    separator = f"{'-' * max_name_width}-+-{'-' * 8}"
+    header = f"{'Test':<{max_name_width}} | {'Duration':<{max_duration_width}}"
+    separator = f"{'-' * max_name_width}-+-{'-' * max_duration_width}"
 
     # Create rows with compact formatting
     rows: list[str] = []
-    for timing in sorted_timings:
-        if timing.skipped:
-            duration_str = "skipped"
-        else:
-            duration_str = f"{timing.duration:.2f}s"
-        row = f"{timing.name:<{max_name_width}} | {duration_str}"
+    for timing, duration_str in zip(sorted_timings, duration_values):
+        row = f"{timing.name:<{max_name_width}} | {duration_str:<{max_duration_width}}"
         rows.append(row)
 
     # Combine all parts (header before separator, no bottom border)
@@ -1442,6 +1456,7 @@ def runner(
     cpp_test_change: bool = True,
     examples_change: bool = True,
     python_test_change: bool = True,
+    fingerprint_manager: Optional["FingerprintManager"] = None,
 ) -> None:
     """
     Main test runner function that determines what to run and executes tests
@@ -1452,6 +1467,7 @@ def runner(
         cpp_test_change: Whether C++ test-related files (src/ or tests/) have changed
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
+        fingerprint_manager: Optional fingerprint manager for test metadata
     """
     # Debug logging - only shown in verbose mode to reduce UI clutter
     if args.verbose:
@@ -1515,11 +1531,24 @@ def runner(
             # so we don't need a second boxed summary here
             if not result.success:
                 sys.exit(1)
+
+            # Update fingerprint metadata for cache display on next run
+            if fingerprint_manager is not None:
+                fingerprint_manager.update_test_metadata(
+                    "cpp_test",
+                    num_tests_run=result.num_tests_run,
+                    num_tests_passed=result.num_tests_passed,
+                    duration_seconds=result.duration,
+                    test_name="cpp_unit_tests",
+                )
         else:
             # Fingerprint cache hit - skip unit tests
-            print_cache_hit(
-                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in C++ test-related files)"
+            cache_msg = _format_cache_hit_message(
+                fingerprint_manager,
+                "cpp_test",
+                "Fingerprint cache valid - skipping C++ unit tests (no changes detected)",
             )
+            print_cache_hit(cache_msg)
 
         return
 
@@ -1555,14 +1584,35 @@ def runner(
                 skipped=False,
             )
 
+            # Update fingerprint metadata for cache display on next run
+            if fingerprint_manager is not None:
+                fingerprint_manager.update_test_metadata(
+                    "cpp_test",
+                    num_tests_run=result.num_tests_run,
+                    num_tests_passed=result.num_tests_passed,
+                    duration_seconds=result.duration,
+                    test_name="cpp_unit_tests",
+                )
+
             if not result.success:
                 sys.exit(1)
         else:
             # Fingerprint cache hit - skip unit tests
-            print_cache_hit(
-                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in C++ test-related files)"
+            cache_msg = _format_cache_hit_message(
+                fingerprint_manager,
+                "cpp_test",
+                "Fingerprint cache valid - skipping C++ unit tests (no changes detected)",
             )
-            meson_test_timing = _create_skipped_timing("cpp_unit_tests")
+            print_cache_hit(cache_msg)
+            # Get cached summary for the skipped timing display
+            cached_summary = ""
+            if fingerprint_manager:
+                prev_fp = fingerprint_manager.get_prev_fingerprint("cpp_test")
+                if prev_fp:
+                    cached_summary = prev_fp.get_cache_summary()
+            meson_test_timing = _create_skipped_timing(
+                "cpp_unit_tests", cached_summary=cached_summary
+            )
 
         # Continue to run other tests (examples, Python, etc.) - don't return
 
@@ -1611,10 +1661,21 @@ def runner(
                 create_python_test_process(False, run_slow)
             )  # Disable stack trace for Python tests
         elif (test_categories.py or test_categories.py_only) and not python_test_change:
-            print_cache_hit(
-                "Fingerprint cache valid - skipping Python tests (no changes detected in Python test-related files)"
+            cache_msg = _format_cache_hit_message(
+                fingerprint_manager,
+                "python_test",
+                "Fingerprint cache valid - skipping Python tests (no changes detected)",
             )
-            skipped_timings.append(_create_skipped_timing("python_tests"))
+            print_cache_hit(cache_msg)
+            # Get cached summary for the skipped timing display
+            cached_summary = ""
+            if fingerprint_manager:
+                prev_fp = fingerprint_manager.get_prev_fingerprint("python_test")
+                if prev_fp:
+                    cached_summary = prev_fp.get_cache_summary()
+            skipped_timings.append(
+                _create_skipped_timing("python_tests", cached_summary=cached_summary)
+            )
 
         # Examples are now compiled via uno compilation test (ci-compile.py)
         # The uno compilation test above already covers example compilation
@@ -1622,10 +1683,21 @@ def runner(
         if (
             test_categories.examples or test_categories.examples_only
         ) and not examples_change:
-            print_cache_hit(
-                "Fingerprint cache valid - skipping example tests (no changes detected in example-related files)"
+            cache_msg = _format_cache_hit_message(
+                fingerprint_manager,
+                "examples",
+                "Fingerprint cache valid - skipping examples (no changes detected)",
             )
-            skipped_timings.append(_create_skipped_timing("uno_compilation"))
+            print_cache_hit(cache_msg)
+            # Get cached summary for the skipped timing display
+            cached_summary = ""
+            if fingerprint_manager:
+                prev_fp = fingerprint_manager.get_prev_fingerprint("examples")
+                if prev_fp:
+                    cached_summary = prev_fp.get_cache_summary()
+            skipped_timings.append(
+                _create_skipped_timing("examples", cached_summary=cached_summary)
+            )
 
         # Determine if we'll run in parallel
         will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
