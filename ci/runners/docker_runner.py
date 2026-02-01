@@ -4,23 +4,86 @@
 Builds and runs C++ unit tests inside a Docker container to provide
 a consistent Linux environment with sanitizers (ASAN/LSAN) for detecting
 memory issues.
+
+Optimized for fast incremental builds:
+- Container and volume names are unique per project folder (via path hash)
+- Named volumes persist .venv and .build across runs
+- Source code is mounted read-only (no COPY in Dockerfile)
+- Garbage collection removes old containers/volumes when limit exceeded
 """
 
+import hashlib
 import subprocess
 from pathlib import Path
 
+from ci.docker_utils.container_db import (
+    ContainerDatabase,
+    cleanup_orphaned_containers,
+    docker_container_exists,
+    docker_force_remove_container,
+    garbage_collect_platform_containers,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
 
 
+# Maximum containers to keep per project path (for garbage collection)
+MAX_CONTAINERS_PER_PROJECT = 2
+
+
+def _get_path_hash(project_root: Path) -> str:
+    """Generate a short hash from the project path for unique naming.
+
+    Args:
+        project_root: Path to the project root
+
+    Returns:
+        8-character hex hash of the path
+    """
+    # Normalize path (resolve symlinks, convert to absolute)
+    normalized_path = str(project_root.resolve()).lower()
+    # Use SHA256 and take first 8 characters
+    return hashlib.sha256(normalized_path.encode()).hexdigest()[:8]
+
+
+def _get_container_name(project_root: Path) -> str:
+    """Get unique container name based on project path.
+
+    Args:
+        project_root: Path to the project root
+
+    Returns:
+        Container name in format: fastled-unit-tests-{hash}
+    """
+    path_hash = _get_path_hash(project_root)
+    return f"fastled-unit-tests-{path_hash}"
+
+
+def _get_volume_names(project_root: Path) -> tuple[str, str]:
+    """Get unique volume names based on project path.
+
+    Args:
+        project_root: Path to the project root
+
+    Returns:
+        Tuple of (venv_volume_name, build_volume_name)
+    """
+    path_hash = _get_path_hash(project_root)
+    return (
+        f"fastled-docker-venv-{path_hash}",
+        f"fastled-docker-build-{path_hash}",
+    )
+
+
 def _check_docker_available() -> bool:
     """Check if Docker is available and running."""
     try:
+        # Use 30s timeout - Docker Desktop on Windows can be slow to respond
         result = subprocess.run(
             ["docker", "info"],
             capture_output=True,
-            timeout=10,
+            timeout=30,
         )
         return result.returncode == 0
     except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -62,6 +125,9 @@ def _build_docker_image(project_root: Path, rebuild: bool = False) -> bool:
     ts_print("This may take a few minutes on first run...")
     ts_print("")
 
+    # Use the Dockerfile directory as build context (minimal context since no COPY)
+    dockerfile_dir = dockerfile_path.parent
+
     try:
         result = subprocess.run(
             [
@@ -72,7 +138,7 @@ def _build_docker_image(project_root: Path, rebuild: bool = False) -> bool:
                 str(dockerfile_path),
                 "-t",
                 image_name,
-                str(project_root),
+                str(dockerfile_dir),  # Minimal build context (just Dockerfile dir)
             ],
             cwd=project_root,
             timeout=600,  # 10 minute timeout for build
@@ -134,8 +200,51 @@ def _build_test_command(args: TestArgs) -> list[str]:
     return cmd
 
 
+def _run_garbage_collection() -> None:
+    """Run garbage collection to clean up orphaned containers and old volumes.
+
+    This is best-effort and non-critical - don't let GC errors block the build.
+    Runs in a subprocess with timeout to prevent hanging.
+    """
+    import concurrent.futures
+
+    def _gc_task() -> tuple[int, int]:
+        """Run GC in a separate thread with timeout protection."""
+        db = ContainerDatabase()
+        orphans = cleanup_orphaned_containers(db)
+        old = garbage_collect_platform_containers(
+            "unit-tests", max_containers=MAX_CONTAINERS_PER_PROJECT, db=db
+        )
+        return orphans, old
+
+    try:
+        # Run GC with a 30-second timeout to prevent hanging on Docker API errors
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_gc_task)
+            try:
+                orphans_cleaned, old_cleaned = future.result(timeout=30)
+                if orphans_cleaned > 0:
+                    ts_print(f"Cleaned up {orphans_cleaned} orphaned container(s)")
+                if old_cleaned > 0:
+                    ts_print(
+                        f"Garbage collected {old_cleaned} old unit-test container(s)"
+                    )
+            except concurrent.futures.TimeoutError:
+                ts_print("Warning: Garbage collection timed out (30s) - skipping")
+                future.cancel()
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        # Don't fail the build if garbage collection fails
+        ts_print(f"Warning: Garbage collection failed: {e}")
+
+
 def run_docker_tests(args: TestArgs) -> int:
     """Run tests inside Docker container.
+
+    Uses path-based unique naming for containers and volumes to support
+    multiple project folders and enable efficient caching.
 
     Args:
         args: Test arguments
@@ -157,6 +266,18 @@ def run_docker_tests(args: TestArgs) -> int:
     if not _build_docker_image(project_root, rebuild=args.clean):
         return 1
 
+    # Get unique container and volume names based on project path
+    container_name = _get_container_name(project_root)
+    venv_volume, build_volume = _get_volume_names(project_root)
+    path_hash = _get_path_hash(project_root)
+
+    ts_print(f"Project path hash: {path_hash}")
+    ts_print(f"Container: {container_name}")
+    ts_print(f"Volumes: {venv_volume}, {build_volume}")
+
+    # Run garbage collection (non-blocking, best-effort)
+    _run_garbage_collection()
+
     # Build the test command
     test_cmd = _build_test_command(args)
     test_cmd_str = " ".join(test_cmd)
@@ -165,13 +286,23 @@ def run_docker_tests(args: TestArgs) -> int:
     ts_print(f"Command: {test_cmd_str}")
     ts_print("")
 
+    # Remove any existing container with same name (in case of previous crash)
+    existing_container_id = docker_container_exists(container_name)
+    if existing_container_id:
+        ts_print(f"Removing existing container: {container_name}")
+        success, error_msg = docker_force_remove_container(existing_container_id)
+        if not success:
+            ts_print(f"Warning: Failed to remove existing container: {error_msg}")
+
     # Run tests in Docker
-    # Use a named volume for .venv to avoid conflicts with Windows host
+    # Use named volumes unique to this project path for .venv and .build
     # Mount source directories individually to avoid .venv conflicts
     docker_cmd = [
         "docker",
         "run",
         "--rm",
+        "--name",
+        container_name,
         # Mount source code (read-only where possible)
         "-v",
         f"{project_root}/src:/fastled/src:ro",
@@ -189,11 +320,11 @@ def run_docker_tests(args: TestArgs) -> int:
         f"{project_root}/test.py:/fastled/test.py:ro",
         "-v",
         f"{project_root}/meson.build:/fastled/meson.build:ro",
-        # Use a named volume for build artifacts (persistent across runs)
+        # Use named volumes unique to this project path (persistent across runs)
         "-v",
-        "fastled-docker-venv:/fastled/.venv",
+        f"{venv_volume}:/fastled/.venv",
         "-v",
-        "fastled-docker-build:/fastled/.build",
+        f"{build_volume}:/fastled/.build",
         "-w",
         "/fastled",
         # Pass through terminal for colors

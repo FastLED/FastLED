@@ -40,6 +40,10 @@
 #endif
 
 namespace fl {
+
+// Only define helper functions when hardware SPI is available
+#if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
+
 namespace detail {
 
 /// Priority constants for SPI hardware (higher = preferred)
@@ -106,6 +110,8 @@ static void addSpiHw8IfPossible() {
 
 }  // namespace detail
 
+#endif  // Hardware SPI available
+
 namespace platform {
 
 /// @brief Unified STM32 SPI hardware initialization entry point
@@ -136,6 +142,13 @@ inline void initSpiHardware() {
     detail::addSpiHw2IfPossible();  // Priority 6
 
     FL_DBG("STM32: SPI hardware initialized");
+}
+#else
+// Stub implementation for STM32 platforms without hardware SPI support
+// (e.g., Mbed framework, channel-based DMA not yet implemented)
+inline void initSpiHardware() {
+    // No-op: Hardware SPI not available on this STM32 configuration
+    // FastLED will fall back to software bitbang implementation
 }
 #endif  // Hardware SPI available
 

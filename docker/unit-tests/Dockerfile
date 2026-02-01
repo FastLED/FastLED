@@ -28,8 +28,9 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Set working directory
 WORKDIR /fastled
 
-# Copy the entire repository (excluding .dockerignore patterns)
-COPY . .
+# NOTE: Files are NOT copied into the image.
+# Source code is mounted via volume at runtime for faster builds.
+# The .venv and .build directories use named volumes for persistence.
 
 # Default command
 CMD ["/bin/bash"]
