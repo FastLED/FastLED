@@ -20,11 +20,17 @@ def generate_main_cpp(ino_files: list[str]) -> str:
 
     Returns:
         Content for main.cpp file
+
+    Note:
+        We do NOT include FastLED.h here because some sketches define macros
+        (like USE_OCTOWS2811) before including FastLED.h. The sketch must include
+        FastLED.h itself at the appropriate point.
     """
     includes: list[str] = []
     for ino_file in sorted(ino_files):
         includes.append("#include <Arduino.h>")
-        includes.append("#include <FastLED.h>")
+        # Don't include FastLED.h here - let the sketch include it after any
+        # required #defines (like USE_OCTOWS2811, USE_WS2812SERIAL, etc.)
         includes.append(f'#include "sketch/{ino_file}"')
 
     include_lines = "\n".join(includes)

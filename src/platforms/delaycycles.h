@@ -11,6 +11,7 @@
 
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
+#include "platforms/is_platform.h"
 
 // ============================================================================
 // Platform-specific cycle delay includes (delaycycles)
@@ -34,9 +35,16 @@
 #elif defined(ARDUINO_ARCH_SAMD)
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/arm/d21/delaycycles.h"
-#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+#elif defined(FL_IS_TEENSY)
+// Teensy uses generic ARM delay cycles - DWT works on Cortex-M4/M7
+#include "platforms/shared/delay_cycles_generic.h"
+#elif defined(FL_IS_STM32)
+// STM32 has specific DWT-based delay cycles implementation
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/arm/stm32/delaycycles.h"
+#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+// Other ARM Cortex-M3/M4/M7 platforms - use generic delay cycles
+#include "platforms/shared/delay_cycles_generic.h"
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/arm/renesas/delaycycles.h"

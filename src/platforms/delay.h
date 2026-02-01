@@ -37,8 +37,15 @@
 #include "platforms/arm/nrf52/delay.h"
 #elif defined(ARDUINO_ARCH_SAMD)
 #include "platforms/arm/d21/delay.h"
-#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+#elif defined(FL_IS_TEENSY)
+// Teensy uses generic ARM delay - DWT cycle counter works on Cortex-M4/M7
+#include "platforms/delay_generic.h"
+#elif defined(FL_IS_STM32)
+// STM32 has specific DWT-based delay implementation
 #include "platforms/arm/stm32/delay.h"
+#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+// Other ARM Cortex-M3/M4/M7 platforms - use generic delay
+#include "platforms/delay_generic.h"
 #elif defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/delay.h"
 #else
