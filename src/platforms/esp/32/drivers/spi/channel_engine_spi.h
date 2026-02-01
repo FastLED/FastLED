@@ -324,6 +324,7 @@ private:
         ChannelDataPtr data;
         int pin;
         SpiTimingConfig timing;
+        int retry_count = 0;  ///< Number of failed acquisition attempts
     };
 
     /// @brief SPI host allocation tracking (global across all channels)

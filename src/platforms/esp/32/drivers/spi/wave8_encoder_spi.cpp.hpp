@@ -68,11 +68,13 @@ ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming) 
         }
     }
 
-    // Build ChipsetTiming
+    // Build ChipsetTiming (must initialize ALL fields)
     ChipsetTiming chipsetTiming;
     chipsetTiming.T1 = bit1_high_count * spi_bit_period_ns;           // High time for '1'
     chipsetTiming.T2 = (spiTiming.bits_per_led_bit - bit1_high_count) * spi_bit_period_ns;  // Low time for '1'
     chipsetTiming.T3 = bit0_high_count * spi_bit_period_ns;           // High time for '0'
+    chipsetTiming.RESET = 50;                                          // Default reset time (50µs, same as WS2812B)
+    chipsetTiming.name = "SPI_TIMING";                                 // Generic name for SPI-derived timing
 
     // Debug output temporarily commented due to nested namespace issues with FL_DBG macro
     // TODO(iteration 12): Fix FL_DBG macro usage inside nested namespace

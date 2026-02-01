@@ -541,12 +541,31 @@ void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
 bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
                                      const SpiTimingConfig &timing,
                                      size_t dataSize) {
-    FL_DBG("ChannelEngineSpi: Creating channel for pin " << pin);
+    // Safety counter to detect infinite channel creation loops
+    static int creation_count = 0;
+    static uint32_t last_reset_ms = 0;
+    uint32_t now_ms = millis();
+
+    // Reset counter every 5 seconds
+    if (now_ms - last_reset_ms > 5000) {
+        creation_count = 0;
+        last_reset_ms = now_ms;
+    }
+
+    creation_count++;
+    FL_DBG_EVERY(10, "ChannelEngineSpi: Creating channel for pin " << pin
+           << " (attempt " << creation_count << " in last 5s)");
+
+    if (creation_count > 100) {
+        FL_ERROR("ChannelEngineSpi: ABORT - Too many channel creation attempts ("
+                 << creation_count << " in 5s). Possible infinite loop or resource leak.");
+        return false;
+    }
 
     // Acquire SPI host
     state->spi_host = acquireSpiHost();
     if (state->spi_host == SPI_HOST_MAX) {
-        FL_WARN_ONCE("ChannelEngineSpi: No available SPI host");
+        FL_WARN("ChannelEngineSpi: No available SPI host (attempt " << creation_count << ")");
         return false;
     }
 
@@ -628,6 +647,10 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     dev_config.post_cb =
         spiPostTransactionCallback; // ISR callback when transaction completes
 
+    FL_DBG("ChannelEngineSpi: SPI clock_hz=" << timing.clock_hz
+           << ", bits_per_led_bit=" << static_cast<int>(timing.bits_per_led_bit)
+           << ", buffer_size=" << spiBufferSize << " bytes");
+
     // Set HALFDUPLEX flag for multi-lane modes (required for dual/quad SPI)
     if (state->numLanes >= 2) {
         dev_config.flags = SPI_DEVICE_HALFDUPLEX;
@@ -695,7 +718,36 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     // Build wave8 expansion LUT once during channel creation (not in ISR)
     ChipsetTiming chipsetTiming = convertSpiTimingToChipsetTiming(timing);
     state->mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
-    FL_DBG("ChannelEngineSpi: Initialized wave8 LUT for channel");
+
+    // CRITICAL: Memory barriers to ensure LUT is written before ISR can access it
+    // This fixes the race condition where early ISR fires see zero-filled LUT entries
+    asm volatile("" ::: "memory");  // Compiler barrier prevents instruction reordering
+    __sync_synchronize();           // Hardware memory barrier ensures cache flush
+
+    // Verify LUT is non-zero (diagnostic for race condition bug)
+    // LUT structure: lut[16][4] - 16 nibbles, 4 Wave8Bit bytes per nibble
+    bool lut_valid = false;
+    for (size_t nibble = 0; nibble < 16 && !lut_valid; ++nibble) {
+        for (size_t byte = 0; byte < 4 && !lut_valid; ++byte) {
+            if (state->mWave8Lut.lut[nibble][byte].data != 0) {
+                lut_valid = true;
+            }
+        }
+    }
+    if (!lut_valid) {
+        FL_WARN("ChannelEngineSpi: Wave8 LUT appears to be all zeros - memory barrier may have failed!");
+    }
+
+    FL_DBG_EVERY(10, "ChannelEngineSpi: Initialized wave8 LUT for channel (lut_valid=" << lut_valid << ")");
+    FL_DBG_EVERY(10, "  SPI Clock: " << timing.clock_hz << " Hz, Bits per LED bit: " << timing.bits_per_led_bit);
+    FL_DBG_EVERY(10, "  Chipset Timing: T0H=" << chipsetTiming.T1 << "ns, T1H=" << (chipsetTiming.T1 + chipsetTiming.T2)
+           << "ns, T0L=" << chipsetTiming.T3 << "ns, T1L=" << (chipsetTiming.T1 + chipsetTiming.T2 + chipsetTiming.T3) << "ns");
+    FL_DBG_EVERY(10, "  LUT sample nibble[0][0-3]="
+           << static_cast<int>(state->mWave8Lut.lut[0][0].data) << ","
+           << static_cast<int>(state->mWave8Lut.lut[0][1].data) << ","
+           << static_cast<int>(state->mWave8Lut.lut[0][2].data) << ","
+           << static_cast<int>(state->mWave8Lut.lut[0][3].data)
+           << " nibble[15][0]=" << static_cast<int>(state->mWave8Lut.lut[15][0].data));
 
     // Set up timer ISR (4 kHz = 250μs period)
     fl::isr::isr_config_t isr_config;
@@ -998,7 +1050,19 @@ void ChannelEngineSpi::processPendingChannels() {
         SpiChannelState *channel =
             acquireChannel(pin, pending.timing, ledData.size());
         if (!channel) {
-            // Still no hardware - keep pending
+            // Still no hardware - increment retry count
+            pending.retry_count++;
+
+            // Give up after 50 failed attempts to prevent infinite retry storms
+            if (pending.retry_count > 50) {
+                FL_ERROR("ChannelEngineSpi: Giving up on pending channel for pin "
+                         << pin << " after " << pending.retry_count << " failed attempts. "
+                         << "Possible resource leak or hardware unavailability.");
+                // Drop this pending channel (don't add to stillPending)
+                continue;
+            }
+
+            // Keep pending for next poll()
             stillPending.push_back(pending);
             continue;
         }
