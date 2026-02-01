@@ -513,3 +513,19 @@ FL_DISABLE_WARNING_POP
   // Fallback: Use __func__ (C99 standard)
   #define FL_FUNCTION __func__
 #endif
+
+// Sanitizer detection macros
+// Detect if compiling with AddressSanitizer (ASAN includes LSAN - LeakSanitizer)
+// GCC: __SANITIZE_ADDRESS__ is defined when -fsanitize=address is used
+// Clang: __has_feature(address_sanitizer) evaluates to 1
+#if defined(__SANITIZE_ADDRESS__)
+#  define FL_HAS_SANITIZER_LSAN 1
+#elif defined(__has_feature)
+#  if __has_feature(address_sanitizer)
+#    define FL_HAS_SANITIZER_LSAN 1
+#  endif
+#endif
+
+#ifndef FL_HAS_SANITIZER_LSAN
+#  define FL_HAS_SANITIZER_LSAN 0
+#endif

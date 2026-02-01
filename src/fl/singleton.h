@@ -1,7 +1,12 @@
 #pragma once
 
 #include "fl/align.h"           // FL_ALIGN_AS_T macro for aligned storage
-#include "fl/stl/new.h"          // Placement new operator
+#include "fl/stl/new.h"         // Placement new operator
+#include "fl/compiler_control.h" // FL_HAS_SANITIZER_LSAN macro
+
+#if FL_HAS_SANITIZER_LSAN
+#  include <sanitizer/lsan_interface.h>
+#endif
 
 namespace fl {
 
@@ -18,17 +23,15 @@ namespace fl {
 // The instance is constructed on first call to instance() and lives until
 // process termination (or forever in embedded systems).
 //
-// LSAN COMPATIBILITY: We use a two-level static design:
-// 1. instanceInner() holds the aligned storage with placement new
-// 2. instance() holds a static T* pointer initialized from instanceInner()
-// This ensures LSAN can trace the typed T* pointer to find heap allocations
-// reachable from the singleton, preventing false "direct leak" reports.
+// LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
+// LSAN cannot properly trace through char[] storage to find heap allocations
+// reachable from singleton members. The scoped disabler tells LSAN to ignore
+// all allocations during singleton construction (both the placement new and
+// any heap allocations in T's constructor).
 template <typename T, int N = 0> class Singleton {
   public:
     static T &instance() {
         // Thread-safe initialization using C++11 magic statics
-        // The static T* pointer allows LSAN to trace heap allocations
-        // reachable from the singleton instance.
         static T* ptr = instanceInner();
         return *ptr;
     }
@@ -52,9 +55,14 @@ template <typename T, int N = 0> class Singleton {
         // Static storage persists for program lifetime
         static AlignedStorage storage;
 
+#if FL_HAS_SANITIZER_LSAN
+        __lsan::ScopedDisabler disabler;  // Ignore all allocations in this scope
+#endif
+
         // Placement new: construct instance in pre-allocated storage
         // INTENTIONAL: Destructor is NEVER called - this is a permanent leak
-        return new (&storage.data) T();
+        T* ptr = new (&storage.data) T();
+        return ptr;
     }
 };
 
