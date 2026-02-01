@@ -2222,14 +2222,15 @@ static void imdct_step3_inner_r_loop(int32_t lim, float *e, int32_t d0, int32_t 
 static void imdct_step3_inner_s_loop(int32_t n, float *e, int32_t i_off, int32_t k_off, float *A, int32_t a_off, int32_t k0)
 {
    int32_t i;
-   float A0 = A[0];
-   float A1 = A[0+1];
-   float A2 = A[0+a_off];
-   float A3 = A[0+a_off+1];
-   float A4 = A[0+a_off*2+0];
-   float A5 = A[0+a_off*2+1];
-   float A6 = A[0+a_off*3+0];
-   float A7 = A[0+a_off*3+1];
+   // Renamed from A0-A7 to avoid conflict with Arduino analog pin macros
+   float aa0 = A[0];
+   float aa1 = A[0+1];
+   float aa2 = A[0+a_off];
+   float aa3 = A[0+a_off+1];
+   float aa4 = A[0+a_off*2+0];
+   float aa5 = A[0+a_off*2+1];
+   float aa6 = A[0+a_off*3+0];
+   float aa7 = A[0+a_off*3+1];
 
    float k00,k11;
 
@@ -2241,29 +2242,29 @@ static void imdct_step3_inner_s_loop(int32_t n, float *e, int32_t i_off, int32_t
       k11     = ee0[-1] - ee2[-1];
       ee0[ 0] =  ee0[ 0] + ee2[ 0];
       ee0[-1] =  ee0[-1] + ee2[-1];
-      ee2[ 0] = (k00) * A0 - (k11) * A1;
-      ee2[-1] = (k11) * A0 + (k00) * A1;
+      ee2[ 0] = (k00) * aa0 - (k11) * aa1;
+      ee2[-1] = (k11) * aa0 + (k00) * aa1;
 
       k00     = ee0[-2] - ee2[-2];
       k11     = ee0[-3] - ee2[-3];
       ee0[-2] =  ee0[-2] + ee2[-2];
       ee0[-3] =  ee0[-3] + ee2[-3];
-      ee2[-2] = (k00) * A2 - (k11) * A3;
-      ee2[-3] = (k11) * A2 + (k00) * A3;
+      ee2[-2] = (k00) * aa2 - (k11) * aa3;
+      ee2[-3] = (k11) * aa2 + (k00) * aa3;
 
       k00     = ee0[-4] - ee2[-4];
       k11     = ee0[-5] - ee2[-5];
       ee0[-4] =  ee0[-4] + ee2[-4];
       ee0[-5] =  ee0[-5] + ee2[-5];
-      ee2[-4] = (k00) * A4 - (k11) * A5;
-      ee2[-5] = (k11) * A4 + (k00) * A5;
+      ee2[-4] = (k00) * aa4 - (k11) * aa5;
+      ee2[-5] = (k11) * aa4 + (k00) * aa5;
 
       k00     = ee0[-6] - ee2[-6];
       k11     = ee0[-7] - ee2[-7];
       ee0[-6] =  ee0[-6] + ee2[-6];
       ee0[-7] =  ee0[-7] + ee2[-7];
-      ee2[-6] = (k00) * A6 - (k11) * A7;
-      ee2[-7] = (k11) * A6 + (k00) * A7;
+      ee2[-6] = (k00) * aa6 - (k11) * aa7;
+      ee2[-7] = (k11) * aa6 + (k00) * aa7;
 
       ee0 -= k0;
       ee2 -= k0;
@@ -2305,7 +2306,8 @@ FL_ALWAYS_INLINE void iter_54(float *z)
 static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, float *A, int32_t base_n)
 {
    int32_t a_off = base_n >> 3;
-   float A2 = A[0+a_off];
+   // Renamed from A2 to avoid conflict with Arduino analog pin macro
+   float aa2 = A[0+a_off];
    float *z = e + i_off;
    float *base = z - 16 * n;
 
@@ -2323,8 +2325,8 @@ static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, f
       z[ -3] = z[-3] + z[-11];
       z[ -8] = k00;
       z[ -9] = k11;
-      z[-10] = (l00+l11) * A2;
-      z[-11] = (l11-l00) * A2;
+      z[-10] = (l00+l11) * aa2;
+      z[-11] = (l11-l00) * aa2;
 
       k00    = z[ -4] - z[-12];
       k11    = z[ -5] - z[-13];
@@ -2336,8 +2338,8 @@ static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, f
       z[ -7] = z[ -7] + z[-15];
       z[-12] = k11;
       z[-13] = -k00;
-      z[-14] = (l11-l00) * A2;
-      z[-15] = (l00+l11) * -A2;
+      z[-14] = (l11-l00) * aa2;
+      z[-15] = (l00+l11) * -aa2;
 
       iter_54(z);
       iter_54(z-8);
