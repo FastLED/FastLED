@@ -59,20 +59,15 @@ static const uint8_t gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
 static uint8_t  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
 
 
-uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) //25354
-{
+// Span-based version (primary implementation)
+uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
     uint32_t red32 = 0, green32 = 0, blue32 = 0;
-    const CRGB* firstled = &(ledbuffer[0]);
-    uint8_t* p = (uint8_t*)(firstled);
 
-    uint16_t count = numLeds;
-
-    // This loop might benefit from an AVR assembly version -MEK
-    while( count) {
-        red32   += *p++;
-        green32 += *p++;
-        blue32  += *p++;
-        --count;
+    // Iterate using span's safe indexing
+    for(size_t i = 0; i < leds.size(); i++) {
+        red32   += leds[i].r;
+        green32 += leds[i].g;
+        blue32  += leds[i].b;
     }
 
     red32   *= gPowerModel.red_mW;
@@ -83,9 +78,15 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) 
     green32 >>= 8;
     blue32  >>= 8;
 
-    uint32_t total = red32 + green32 + blue32 + (gPowerModel.dark_mW * numLeds);
+    uint32_t total = red32 + green32 + blue32 + (gPowerModel.dark_mW * leds.size());
 
     return total;
+}
+
+// Pointer-based version (delegates to span version)
+uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) //25354
+{
+    return calculate_unscaled_power_mW(fl::span<const CRGB>(ledbuffer, numLeds));
 }
 
 
