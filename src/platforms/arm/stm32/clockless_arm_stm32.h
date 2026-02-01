@@ -4,6 +4,7 @@
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
+#include "platforms/arm/stm32/core_detection.h"
 
 namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
@@ -40,20 +41,25 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
         mWait.wait();
 
-        // Compute timing from CPU frequency
+        // Compute timing from actual CPU frequency (just-in-time per-frame calculation)
+        // F_CPU is runtime SystemCoreClock on STM32duino, compile-time constant elsewhere
         uint32_t cpu_freq = F_CPU;
+
         // Convert nanoseconds to clock cycles: cycles = nanoseconds * frequency / 1e9
         // Use uint64_t to avoid overflow (e.g., 900ns * 180MHz = 162 billion)
         uint32_t t1_clocks = static_cast<uint64_t>(TIMING::T1) * cpu_freq / 1000000000ULL;
         uint32_t t2_clocks = static_cast<uint64_t>(TIMING::T2) * cpu_freq / 1000000000ULL;
         uint32_t t3_clocks = static_cast<uint64_t>(TIMING::T3) * cpu_freq / 1000000000ULL;
 
+        // Clocks per microsecond for interrupt timeout checks
+        uint32_t clks_per_us = cpu_freq / 1000000;
+
         Rgbw rgbw = this->getRgbw();
-        if(!showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks)) {
+        if(!showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks, clks_per_us)) {
             // showRGBInternal already re-enabled interrupts before returning 0
             delayMicroseconds(WAIT_TIME);
             fl::interruptsDisable(); // Disable interrupts for retry
-            showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks);
+            showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks, clks_per_us);
         }
         mWait.mark();
     }
@@ -94,7 +100,7 @@ protected:
 
     static uint32_t showRGBInternal(
             PixelController<RGB_ORDER> pixels, Rgbw rgbw,
-            uint32_t t1_clocks, uint32_t t2_clocks, uint32_t t3_clocks) {
+            uint32_t t1_clocks, uint32_t t2_clocks, uint32_t t3_clocks, uint32_t clks_per_us) {
         // Pre-calculate combined timing values for the hot loop
         const uint32_t t1t2_clocks = t1_clocks + t2_clocks;
         const uint32_t t1t2t3_clocks = t1t2_clocks + t3_clocks;
@@ -134,7 +140,9 @@ protected:
             first_pixel = false;
             // if interrupts took longer than 45µs, punt on the current frame
             if(DWT->CYCCNT > next_mark) {
-                if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { fl::interruptsEnable(); return 0; }
+                if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*clks_per_us)) {
+                    fl::interruptsEnable(); return 0;\
+                }
             }
 
             hi = *port | FastPin<DATA_PIN>::mask();

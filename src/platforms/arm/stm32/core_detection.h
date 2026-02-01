@@ -120,3 +120,10 @@
 #else
   #define FL_STM32_EXPECTS_F_CPU_FROM_CORE 0
 #endif
+
+// ============================================================================
+// F_CPU Notes
+// ============================================================================
+// STM32duino defines F_CPU as SystemCoreClock (runtime variable).
+// Other cores define F_CPU as a compile-time constant.
+// All code should use F_CPU directly - it handles the delegation automatically.

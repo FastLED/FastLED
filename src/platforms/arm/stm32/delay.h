@@ -2,6 +2,7 @@
 
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
+#include "platforms/arm/stm32/core_detection.h"
 
 /// @file platforms/arm/stm32/delay.h
 /// ARM Cortex-M3/M4 (STM32) platform-specific nanosecond-precision delay utilities
@@ -30,11 +31,8 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) {
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (STM32)
 /// @param ns Number of nanoseconds
 FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
-  #if defined(F_CPU)
+  // F_CPU is runtime SystemCoreClock on STM32duino, compile-time constant elsewhere
   u32 hz = F_CPU;
-  #else
-  u32 hz = 16000000UL;  // Default fallback
-  #endif
   delayNanoseconds_impl(ns, hz);
 }
 
