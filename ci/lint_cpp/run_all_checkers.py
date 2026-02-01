@@ -40,6 +40,7 @@ from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
+from ci.lint_cpp.weak_attribute_checker import WeakAttributeChecker
 from ci.util.check_files import (
     CheckerResults,
     FileContentChecker,
@@ -117,6 +118,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         StaticInHeaderChecker(),
         LoggingInIramChecker(),
         PlatformIncludesChecker(),
+        WeakAttributeChecker(),
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
     ]
 

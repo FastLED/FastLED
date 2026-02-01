@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-on-save.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

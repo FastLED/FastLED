@@ -250,9 +250,28 @@ static void timer_interrupt_handler(int timer_idx, uint8_t channel) {
     }
 }
 
+// Map GPIOTE channel index to event enum
+static nrf_gpiote_event_t get_gpiote_event(uint8_t channel) {
+    // Use proper enum values defined by Nordic SDK (offsetof-based)
+    switch (channel) {
+        case 0: return NRF_GPIOTE_EVENT_IN_0;
+        case 1: return NRF_GPIOTE_EVENT_IN_1;
+        case 2: return NRF_GPIOTE_EVENT_IN_2;
+        case 3: return NRF_GPIOTE_EVENT_IN_3;
+#if MAX_GPIOTE_CHANNELS > 4
+        case 4: return NRF_GPIOTE_EVENT_IN_4;
+        case 5: return NRF_GPIOTE_EVENT_IN_5;
+        case 6: return NRF_GPIOTE_EVENT_IN_6;
+        case 7: return NRF_GPIOTE_EVENT_IN_7;
+#endif
+        default: return NRF_GPIOTE_EVENT_IN_0;  // Fallback (should never happen)
+    }
+}
+
 // Timer ISR wrappers for each instance
+// Marked as weak to allow Arduino framework or user code to override
 extern "C" {
-    void TIMER0_IRQHandler(void) {
+    FL_LINK_WEAK void TIMER0_IRQHandler(void) {
         for (uint8_t ch = 0; ch < 4; ch++) {
             if (timer_handles[0][ch]) {
                 timer_interrupt_handler(0, ch);
@@ -260,7 +279,7 @@ extern "C" {
         }
     }
 
-    void TIMER1_IRQHandler(void) {
+    FL_LINK_WEAK void TIMER1_IRQHandler(void) {
         for (uint8_t ch = 0; ch < 4; ch++) {
             if (timer_handles[1][ch]) {
                 timer_interrupt_handler(1, ch);
@@ -268,7 +287,7 @@ extern "C" {
         }
     }
 
-    void TIMER2_IRQHandler(void) {
+    FL_LINK_WEAK void TIMER2_IRQHandler(void) {
         for (uint8_t ch = 0; ch < 4; ch++) {
             if (timer_handles[2][ch]) {
                 timer_interrupt_handler(2, ch);
@@ -277,7 +296,7 @@ extern "C" {
     }
 
 #ifdef TIMER3_IRQn
-    void TIMER3_IRQHandler(void) {
+    FL_LINK_WEAK void TIMER3_IRQHandler(void) {
         for (uint8_t ch = 0; ch < 6; ch++) {
             if (timer_handles[3][ch]) {
                 timer_interrupt_handler(3, ch);
@@ -287,7 +306,7 @@ extern "C" {
 #endif
 
 #ifdef TIMER4_IRQn
-    void TIMER4_IRQHandler(void) {
+    FL_LINK_WEAK void TIMER4_IRQHandler(void) {
         for (uint8_t ch = 0; ch < 6; ch++) {
             if (timer_handles[4][ch]) {
                 timer_interrupt_handler(4, ch);
@@ -296,25 +315,8 @@ extern "C" {
     }
 #endif
 
-    // Map GPIOTE channel index to event enum
-    static nrf_gpiote_event_t get_gpiote_event(uint8_t channel) {
-        // Use proper enum values defined by Nordic SDK (offsetof-based)
-        switch (channel) {
-            case 0: return NRF_GPIOTE_EVENT_IN_0;
-            case 1: return NRF_GPIOTE_EVENT_IN_1;
-            case 2: return NRF_GPIOTE_EVENT_IN_2;
-            case 3: return NRF_GPIOTE_EVENT_IN_3;
-#if MAX_GPIOTE_CHANNELS > 4
-            case 4: return NRF_GPIOTE_EVENT_IN_4;
-            case 5: return NRF_GPIOTE_EVENT_IN_5;
-            case 6: return NRF_GPIOTE_EVENT_IN_6;
-            case 7: return NRF_GPIOTE_EVENT_IN_7;
-#endif
-            default: return NRF_GPIOTE_EVENT_IN_0;  // Fallback (should never happen)
-        }
-    }
-
-    void GPIOTE_IRQHandler(void) {
+    // GPIOTE handler - weak to allow Arduino framework (WInterrupts.c) to override
+    FL_LINK_WEAK void GPIOTE_IRQHandler(void) {
         for (uint8_t ch = 0; ch < MAX_GPIOTE_CHANNELS; ch++) {
             nrf_gpiote_event_t event = get_gpiote_event(ch);
 
