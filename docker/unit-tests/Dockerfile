@@ -1,11 +1,13 @@
-# Use Ubuntu 22.04 LTS as base
-FROM ubuntu:22.04
+# Use Debian Bookworm slim as base (~28MB vs ~75MB for Ubuntu 22.04)
+# debian:bookworm-slim is glibc-based (unlike Alpine's musl) for full compatibility
+FROM debian:bookworm-slim
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required dependencies
-RUN apt-get update && apt-get install -y \
+# Install required dependencies in a single layer to minimize image size
+# Using --no-install-recommends to skip optional packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     git \
@@ -17,7 +19,9 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     pkg-config \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Install uv (Python package manager)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh

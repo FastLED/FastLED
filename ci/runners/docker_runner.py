@@ -320,6 +320,12 @@ def run_docker_tests(args: TestArgs) -> int:
         f"{project_root}/test.py:/fastled/test.py:ro",
         "-v",
         f"{project_root}/meson.build:/fastled/meson.build:ro",
+        "-v",
+        f"{project_root}/meson.options:/fastled/meson.options:ro",
+        "-v",
+        f"{project_root}/README.md:/fastled/README.md:ro",
+        "-v",
+        f"{project_root}/lint_plugins:/fastled/lint_plugins:ro",
         # Use named volumes unique to this project path (persistent across runs)
         "-v",
         f"{venv_volume}:/fastled/.venv",
