@@ -25,6 +25,7 @@ def stream_compile_and_run_tests(
     test_callback: Callable[[Path], bool],
     target: Optional[str] = None,
     verbose: bool = False,
+    compile_timeout: int = 600,
 ) -> tuple[bool, int, int]:
     """
     Stream test compilation and execution in parallel.
@@ -38,6 +39,7 @@ def stream_compile_and_run_tests(
                       Returns True if test passed, False if failed.
         target: Specific target to build (None = all)
         verbose: Show detailed progress messages (default: False)
+        compile_timeout: Timeout in seconds for compilation (default: 600)
 
     Returns:
         Tuple of (overall_success, num_passed, num_failed)
@@ -81,7 +83,7 @@ def stream_compile_and_run_tests(
             # Note: No formatter here - we need raw Ninja output for regex pattern matching
             proc = RunningProcess(
                 cmd,
-                timeout=600,  # 10 minute timeout for compilation
+                timeout=compile_timeout,
                 auto_run=True,
                 check=False,
                 env=os.environ.copy(),

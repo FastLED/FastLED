@@ -246,6 +246,11 @@ def run_meson_build_and_test(
                         _ts_print(f"[MESON] Test execution error: {e}", file=sys.stderr)
                         return False
 
+                # Determine compile timeout based on build mode
+                # Debug builds with ASAN are significantly slower, especially on Windows CI
+                # Default: 10 minutes (600s), Debug: 45 minutes (2700s)
+                compile_timeout = 2700 if use_debug else 600
+
                 # Run streaming compilation and testing for UNIT TESTS
                 overall_success_tests, num_passed_tests, num_failed_tests = (
                     stream_compile_and_run_tests(
@@ -253,6 +258,7 @@ def run_meson_build_and_test(
                         test_callback=test_callback,
                         target=None,  # Build all default test targets (unit tests)
                         verbose=verbose,
+                        compile_timeout=compile_timeout,
                     )
                 )
 
@@ -265,6 +271,7 @@ def run_meson_build_and_test(
                         test_callback=test_callback,
                         target="examples-host",  # Build examples explicitly
                         verbose=verbose,
+                        compile_timeout=compile_timeout,
                     )
                 )
 
