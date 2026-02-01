@@ -1120,7 +1120,11 @@ static int32_t set_file_offset(stb_vorbis *f, uint32_t loc)
    #endif
    f->eof = 0;
    if (FL_STBV_USE_MEMORY(f)) {
-      if (f->stream_start + loc >= f->stream_end || f->stream_start + loc < f->stream_start) {
+      // Original check commented out: pointer overflow check triggers -Wtautological-compare
+      // because compiler assumes no undefined behavior (pointer arithmetic overflow is UB).
+      // Replaced with equivalent buffer size check using integer arithmetic.
+      // if (f->stream_start + loc >= f->stream_end || f->stream_start + loc < f->stream_start) {
+      if (loc >= (size_t)(f->stream_end - f->stream_start)) {
          f->stream = f->stream_end;
          f->eof = 1;
          return 0;
