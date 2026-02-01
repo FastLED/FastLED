@@ -123,6 +123,23 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 #endif
 }
 
+/// Scale a 32-bit unsigned value by an 8-bit value (C implementation for ATtiny)
+/// Promotes to 64-bit to prevent overflow during multiplication
+FL_ALWAYS_INLINE uint32_t scale32by8(uint32_t i, fract8 scale) {
+    if (scale == 0) {
+        return 0;
+    }
+#if FASTLED_SCALE8_FIXED == 1
+    uint32_t result;
+    result = (((uint64_t)(i) * (1 + ((uint64_t)scale))) >> 8);
+    return result;
+#else
+    uint32_t result;
+    result = (((uint64_t)i * (uint64_t)scale) >> 8);
+    return result;
+#endif
+}
+
 /// @} Scaling_ATtiny
 
 }  // namespace fl

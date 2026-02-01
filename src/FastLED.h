@@ -1088,6 +1088,34 @@ public:
 		return get_power_model();
 	}
 
+	/// Get estimated power consumption in milliwatts
+	///
+	/// Calculates the estimated power consumption based on current LED buffer contents,
+	/// brightness setting, and configured power model. This provides visibility into
+	/// power usage for monitoring and debugging.
+	///
+	/// @returns Estimated LED power consumption in milliwatts:
+	///          - All LED controllers' RGB data scaled by current brightness
+	///          - Per-channel power from current power model
+	///
+	/// @note MCU power consumption is NOT included in this calculation.
+	///       Add your platform-specific MCU power separately:
+	///       @code
+	///       uint32_t mcu_power_mW = 25 * 5;  // 25mA @ 5V = 125mW (Arduino Uno example)
+	///       uint32_t total_power = FastLED.getEstimatedPowerInMilliWatts() + mcu_power_mW;
+	///       @endcode
+	///
+	/// @note Power is calculated from LED buffer state, not accounting for
+	///       automatic brightness limiting. For actual consumption after
+	///       power limiting, use the power budget set by setMaxPowerInMilliWatts().
+	///
+	/// @note Uses linear brightness scaling (conservative estimate).
+	///       Power = sum(channel_values * channel_power) * (brightness/255)
+	///
+	/// @see setMaxPowerInMilliWatts()
+	/// @see setPowerModel()
+	fl::u32 getEstimatedPowerInMilliWatts() const;
+
 	/// @} Power Model Configuration
 
 	/// Update all our controllers with the current led colors, using the passed in brightness

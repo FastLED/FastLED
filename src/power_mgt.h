@@ -184,6 +184,12 @@ void delay_at_max_brightness_for_power( uint16_t ms);
 /// @returns the number of milliwatts the LED data would consume at max brightness
 uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds);
 
+/// @copydoc calculate_unscaled_power_mW(const CRGB*, uint16_t)
+/// @param leds span of LED data to check
+inline uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
+    return calculate_unscaled_power_mW(leds.data(), leds.size());
+}
+
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for a given set of LEDs.
 /// @param ledbuffer the LED data to check

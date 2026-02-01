@@ -295,6 +295,23 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 	}
 }
 
+fl::u32 CFastLED::getEstimatedPowerInMilliWatts() const {
+	fl::u32 total_power_mW = 0;
+
+	// Sum unscaled power from all LED controllers using visitor pattern
+	CLEDController::visitControllers([&total_power_mW](const CLEDController* /*controller*/, fl::span<const CRGB> leds) {
+		if (!leds.empty()) {
+			total_power_mW += calculate_unscaled_power_mW(leds);
+		}
+	});
+
+	// Scale by current brightness (linear scaling)
+	// Power = unscaled_power * (brightness / 255)
+	// Uses scale32by8() to prevent overflow and ensure proper rounding
+	// Note: MCU power consumption is NOT included - caller should add platform-specific MCU power if needed
+	return fl::scale32by8(total_power_mW, m_Scale);
+}
+
 //
 // template<int m, int n> void transpose8(unsigned char A[8], unsigned char B[8]) {
 // 	uint32_t x, y, t;

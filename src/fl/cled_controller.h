@@ -156,6 +156,23 @@ public:
     /// @returns CLEDController::m_pNext
     CLEDController *next() { return m_pNext; }
 
+    /// Visit all controllers in the linked list with a visitor
+    /// The visitor must be a callable that accepts (const CLEDController*, fl::span<const CRGB>)
+    /// @param visitor the visitor callable to call for each controller
+    /// @tparam Visitor callable type (function, lambda, functor, etc.)
+    template<typename Visitor>
+    static void visitControllers(Visitor&& visitor) {
+        const CLEDController *pCur = head();
+        while(pCur) {
+            visitor(pCur, fl::span<const CRGB>(pCur->leds(), pCur->size()));
+            pCur = pCur->next();
+        }
+    }
+
+    /// Get the next controller in the linked list after this one (const version).  Will return nullptr at the end of the linked list.
+    /// @returns CLEDController::m_pNext
+    const CLEDController *next() const { return m_pNext; }
+
     /// Set the default array of LEDs to be used by this controller
     /// @param data pointer to the LED data
     /// @param nLeds the number of LEDs in the LED data
@@ -196,6 +213,10 @@ public:
     /// Pointer to the CRGB array for this controller
     /// @returns CLEDController::m_Leds.data()
     CRGB* leds() { return m_Leds.data(); }
+
+    /// Const pointer to the CRGB array for this controller
+    /// @returns CLEDController::m_Leds.data()
+    const CRGB* leds() const { return m_Leds.data(); }
 
     /// Span of LEDs managed by this controller
     /// @returns CLEDController::m_Leds

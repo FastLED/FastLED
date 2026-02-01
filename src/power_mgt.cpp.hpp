@@ -96,7 +96,7 @@ uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t n
 uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW) {
  	uint32_t total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
 
-	uint32_t requested_power_mW = ((uint32_t)total_mW * target_brightness) / 256;
+	uint32_t requested_power_mW = fl::scale32by8(total_mW, target_brightness);
 
 	uint8_t recommended_brightness = target_brightness;
 	if(requested_power_mW > max_power_mW) { 
@@ -124,7 +124,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u3
     Serial.println( total_mW);
 #endif
 
-    uint32_t requested_power_mW = ((uint32_t)total_mW * target_brightness) / 256;
+    uint32_t requested_power_mW = fl::scale32by8(total_mW, target_brightness);
 #if POWER_DEBUG_PRINT == 1
     if( target_brightness != 255 ) {
         Serial.print("power demand at scaled brightness mW = ");
