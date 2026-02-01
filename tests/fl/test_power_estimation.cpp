@@ -1,5 +1,6 @@
 #include "test.h"
 #include "FastLED.h"
+#include "power_mgt.h"
 
 using namespace fl;
 
@@ -8,8 +9,17 @@ using namespace fl;
 // global list. This is intentional FastLED behavior and tests account for it
 // by using relative comparisons rather than absolute power values.
 
+// Fixture to reset power model to default before each test
+// This prevents power_mgt.cpp tests from affecting power_estimation.cpp tests
+struct PowerEstimationFixture {
+    PowerEstimationFixture() {
+        // Reset power model to WS2812 @ 5V default (80, 55, 75, 5)
+        set_power_model(PowerModelRGB());
+    }
+};
+
 // Simple test to verify the function exists and returns a reasonable value
-TEST_CASE("Power estimation - basic smoke test") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - basic smoke test") {
     CRGB leds[10];
     fill_solid(leds, 10, CRGB::Black);
 
@@ -32,7 +42,7 @@ TEST_CASE("Power estimation - basic smoke test") {
 }
 
 // Test brightness scaling
-TEST_CASE("Power estimation - brightness scaling") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scaling") {
     CRGB leds[10];
     fill_solid(leds, 10, CRGB(255, 255, 255));  // All white
 
@@ -57,7 +67,7 @@ TEST_CASE("Power estimation - brightness scaling") {
 }
 
 // Test power estimation without power limiting
-TEST_CASE("Power estimation - no power limiting") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - no power limiting") {
     CRGB leds[10];
     fill_solid(leds, 10, CRGB(255, 255, 255));  // All white
 
@@ -73,7 +83,7 @@ TEST_CASE("Power estimation - no power limiting") {
 }
 
 // Test power estimation with power limiting enabled
-TEST_CASE("Power estimation - with power limiting") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - with power limiting") {
     CRGB leds[100];
     fill_solid(leds, 100, CRGB(255, 255, 255));  // All white - high power demand
 
@@ -96,7 +106,7 @@ TEST_CASE("Power estimation - with power limiting") {
 }
 
 // Test power estimation - edge case with zero brightness
-TEST_CASE("Power estimation - zero brightness") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - zero brightness") {
     CRGB leds[10];
     fill_solid(leds, 10, CRGB(255, 255, 255));
 
@@ -113,7 +123,7 @@ TEST_CASE("Power estimation - zero brightness") {
 }
 
 // Test power estimation - power limit high enough to not limit
-TEST_CASE("Power estimation - high power limit (no limiting)") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - high power limit (no limiting)") {
     CRGB leds[10];
     fill_solid(leds, 10, CRGB(255, 255, 255));
 
@@ -135,7 +145,7 @@ TEST_CASE("Power estimation - high power limit (no limiting)") {
 }
 
 // Test power estimation - brightness scaling with limiting
-TEST_CASE("Power estimation - brightness scaling with limiting") {
+TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scaling with limiting") {
     CRGB leds[50];
     fill_solid(leds, 50, CRGB(200, 200, 200));
 
