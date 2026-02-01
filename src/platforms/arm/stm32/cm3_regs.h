@@ -1,16 +1,32 @@
 // ok no namespace fl
 #pragma once
 
+/// @file cm3_regs.h
+/// ARM Cortex-M Debug Watch and Trace (DWT) and CoreDebug register definitions.
+///
+/// Fallback for legacy libmaple core which lacks CMSIS headers.
+/// For STM32duino, use stm32_def.h instead which includes core_cmX.h.
+
 #include "fl/stl/stdint.h"
 
+#ifndef CoreDebug_BASE
+
+// CMSIS-style register access qualifiers
+#ifndef __I
 #ifdef __cplusplus
 #define   __I     volatile             /*!< Defines 'read only' permissions                 */
 #else
 #define   __I     volatile const       /*!< Defines 'read only' permissions                 */
 #endif
-#define   __O     volatile             /*!< Defines 'write only' permissions                */
-#define   __IO    volatile             /*!< Defines 'read / write' permissions              */
+#endif
 
+#ifndef __O
+#define   __O     volatile             /*!< Defines 'write only' permissions                */
+#endif
+
+#ifndef __IO
+#define   __IO    volatile             /*!< Defines 'read / write' permissions              */
+#endif
 
 typedef struct
 {
@@ -59,3 +75,5 @@ typedef struct
 
 #define DWT_CTRL_CYCCNTENA_Pos              0                                          /*!< DWT CTRL: CYCCNTENA Position */
 #define DWT_CTRL_CYCCNTENA_Msk             (0x1UL << DWT_CTRL_CYCCNTENA_Pos)           /*!< DWT CTRL: CYCCNTENA Mask */
+
+#endif // CoreDebug_BASE

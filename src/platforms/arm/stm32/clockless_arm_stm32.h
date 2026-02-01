@@ -6,6 +6,15 @@
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
 #include "platforms/arm/stm32/core_detection.h"
 
+// Get CMSIS DWT/CoreDebug registers from framework or fallback
+#if __has_include("stm32_def.h")
+    // STM32duino core - stm32_def.h includes device header which includes core_cmX.h
+    #include <stm32_def.h>
+#else
+    // Libmaple or other cores without CMSIS - use our definitions
+    #include "platforms/arm/stm32/cm3_regs.h"
+#endif
+
 namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
