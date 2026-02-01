@@ -1,7 +1,7 @@
 #pragma once
 
-// Only compile for stub platform
-#ifdef FASTLED_STUB_IMPL
+// Only compile for stub platform (exclude WASM which has its own implementation)
+#if defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 
 #include "platforms/time_platform.h"
 #include "fl/stl/thread.h"
@@ -54,4 +54,4 @@ fl::u32 micros() {
 }  // namespace platform
 }  // namespace fl
 
-#endif  // FASTLED_STUB_IMPL
+#endif  // FASTLED_STUB_IMPL && !__EMSCRIPTEN__

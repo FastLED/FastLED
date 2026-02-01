@@ -2481,11 +2481,11 @@ static void inverse_mdct(float *buffer, int32_t n, vorb *f, int32_t blocktype)
       int32_t rlim = n >> (l+6), r;
       int32_t lim = 1 << (l+1);
       int32_t i_off;
-      float *A0 = A;
+      float *Aptr = A;  // Renamed from A0 to avoid conflict with Arduino analog pin macro
       i_off = n2-1;
       for (r=rlim; r > 0; --r) {
-         imdct_step3_inner_s_loop(lim, u, i_off, -k0_2, A0, k1, k0);
-         A0 += k1*4;
+         imdct_step3_inner_s_loop(lim, u, i_off, -k0_2, Aptr, k1, k0);
+         Aptr += k1*4;
          i_off -= 8;
       }
    }
