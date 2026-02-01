@@ -1637,14 +1637,11 @@ def runner(
         if test_categories.integration or test_categories.integration_only:
             processes.append(create_integration_test_process(args, enable_stack_trace))
 
-        # Add example compilation test if source changed OR examples explicitly requested
-        # This uses the restored host-based Clang compiler for fast compilation
-        examples_explicitly_requested = (
-            test_categories.examples or test_categories.examples_only
-        )
-        should_compile_examples = (
-            src_code_change or examples_explicitly_requested
-        ) and not test_categories.py_only
+        # Add example compilation test if examples fingerprint indicates change
+        # The examples_change parameter respects fingerprint caching:
+        # - False when fingerprint matches (no code changes in examples/ or src/)
+        # - True when fingerprint differs OR user explicitly requested examples
+        should_compile_examples = examples_change and not test_categories.py_only
         if should_compile_examples:
             processes.append(create_examples_test_process(args, enable_stack_trace))
 

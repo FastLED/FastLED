@@ -311,9 +311,12 @@ def main() -> None:
                     or args.no_fingerprint
                     or args.force
                 )
+                # Note: args.examples == [] means "all examples" (e.g., default mode or --examples flag)
+                # args.examples with specific items (e.g., ['Blink']) means specific examples requested
+                # Only force when specific examples are requested, not for "run all examples"
                 force_examples_change = (
                     examples_change
-                    or (args.examples is not None)
+                    or (args.examples is not None and len(args.examples) > 0)
                     or args.no_fingerprint
                     or args.force
                 )
