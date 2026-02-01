@@ -34,33 +34,26 @@ ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming) 
     // - bit0_pattern: SPI bit pattern for LED bit '0' (e.g., 0b100 for WS2812)
     // - bit1_pattern: SPI bit pattern for LED bit '1' (e.g., 0b110 for WS2812)
     //
-    // ChipsetTiming structure (3-phase LED protocol):
-    // - T1: High time for bit '1' (nanoseconds)
-    // - T2: Low time for bit '1' (nanoseconds)
-    // - T3: High time for bit '0' (nanoseconds)
+    // ChipsetTiming structure (3-phase LED protocol, per led_timing.h):
+    // - T1: High time for bit 0 = T0H (nanoseconds)
+    // - T2: ADDITIONAL high time for bit 1 = T1H - T0H (nanoseconds)
+    // - T3: Low tail duration (nanoseconds)
     //
-    // Conversion strategy:
-    // 1. Calculate SPI bit period: T_spi = 1/clock_hz (nanoseconds)
-    // 2. Count HIGH bits in bit1_pattern → T1 = count * T_spi
-    // 3. Count LOW bits in bit1_pattern → T2 = (bits_per_led_bit - count) * T_spi
-    // 4. Count HIGH bits in bit0_pattern → T3 = count * T_spi
-    // 5. Total period for bit '1': T1 + T2
-    // 6. Total period for bit '0': T3 + (bits_per_led_bit - count) * T_spi
+    // Example for WS2812 @ 2.5MHz (400ns/bit):
+    //   bit0_pattern = 0b100 → 1 high bit → T0H = 400ns
+    //   bit1_pattern = 0b110 → 2 high bits → T1H = 800ns
+    //   T1 = T0H = 400ns
+    //   T2 = T1H - T0H = 800 - 400 = 400ns
+    //   T3 = low tail = (3 - 2) * 400 = 400ns (for bit 1)
     //
-    // Note: LED protocols typically have T1+T2 ≈ T3+T4 (same total period)
+    // This matches the wave8 LUT builder expectations in wave8.cpp.hpp:
+    //   t0h = T1 (high time for bit 0)
+    //   t1h = T1 + T2 (high time for bit 1)
 
     // Calculate SPI bit period in nanoseconds
     const uint32_t spi_bit_period_ns = 1000000000U / spiTiming.clock_hz;
 
-    // Count HIGH bits in bit1_pattern (these become T1)
-    uint8_t bit1_high_count = 0;
-    for (uint8_t i = 0; i < spiTiming.bits_per_led_bit; i++) {
-        if (spiTiming.bit1_pattern & (1U << (spiTiming.bits_per_led_bit - 1 - i))) {
-            bit1_high_count++;
-        }
-    }
-
-    // Count HIGH bits in bit0_pattern (these become T3)
+    // Count HIGH bits in bit0_pattern → T0H
     uint8_t bit0_high_count = 0;
     for (uint8_t i = 0; i < spiTiming.bits_per_led_bit; i++) {
         if (spiTiming.bit0_pattern & (1U << (spiTiming.bits_per_led_bit - 1 - i))) {
@@ -68,23 +61,21 @@ ChipsetTiming convertSpiTimingToChipsetTiming(const SpiTimingConfig& spiTiming) 
         }
     }
 
+    // Count HIGH bits in bit1_pattern → T1H
+    uint8_t bit1_high_count = 0;
+    for (uint8_t i = 0; i < spiTiming.bits_per_led_bit; i++) {
+        if (spiTiming.bit1_pattern & (1U << (spiTiming.bits_per_led_bit - 1 - i))) {
+            bit1_high_count++;
+        }
+    }
+
     // Build ChipsetTiming (must initialize ALL fields)
     ChipsetTiming chipsetTiming;
-    chipsetTiming.T1 = bit1_high_count * spi_bit_period_ns;           // High time for '1'
-    chipsetTiming.T2 = (spiTiming.bits_per_led_bit - bit1_high_count) * spi_bit_period_ns;  // Low time for '1'
-    chipsetTiming.T3 = bit0_high_count * spi_bit_period_ns;           // High time for '0'
+    chipsetTiming.T1 = bit0_high_count * spi_bit_period_ns;           // T0H: high time for bit 0
+    chipsetTiming.T2 = (bit1_high_count - bit0_high_count) * spi_bit_period_ns;  // T1H - T0H: additional high time for bit 1
+    chipsetTiming.T3 = (spiTiming.bits_per_led_bit - bit1_high_count) * spi_bit_period_ns;  // Low tail duration (T1L)
     chipsetTiming.RESET = 50;                                          // Default reset time (50µs, same as WS2812B)
     chipsetTiming.name = "SPI_TIMING";                                 // Generic name for SPI-derived timing
-
-    // Debug output temporarily commented due to nested namespace issues with FL_DBG macro
-    // TODO(iteration 12): Fix FL_DBG macro usage inside nested namespace
-    // FL_DBG("convertSpiTimingToChipsetTiming: clock=" << spiTiming.clock_hz
-    //        << "Hz, bits_per_led_bit=" << static_cast<int>(spiTiming.bits_per_led_bit)
-    //        << ", bit0_pattern=0x" << ::fl::hex(spiTiming.bit0_pattern)
-    //        << ", bit1_pattern=0x" << ::fl::hex(spiTiming.bit1_pattern)
-    //        << " → T1=" << chipsetTiming.T1 << "ns"
-    //        << ", T2=" << chipsetTiming.T2 << "ns"
-    //        << ", T3=" << chipsetTiming.T3 << "ns");
 
     return chipsetTiming;
 }

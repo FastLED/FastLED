@@ -171,9 +171,6 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
             return -4;  // Timer creation failed
         }
 
-        ESP_LOGD(ESP32_ISR_TAG, "Timer config: %lu Hz using %lu Hz resolution → %llu ticks",
-                 (unsigned long)config.frequency_hz, (unsigned long)timer_resolution_hz, (unsigned long long)alarm_count);
-
         // Configure alarm
         gptimer_alarm_config_t alarm_config = {};
         alarm_config.reload_count = 0;
@@ -219,7 +216,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
             return -8;  // Timer start failed
         }
 
-        ESP_LOGD(ESP32_ISR_TAG, "Timer started at %lu Hz", (unsigned long)config.frequency_hz);
+        // Timer started successfully
 
         // Populate output handle
         if (out_handle) {

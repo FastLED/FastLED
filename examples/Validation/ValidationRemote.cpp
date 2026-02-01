@@ -1115,6 +1115,13 @@ void ValidationRemoteControl::registerFunctions(
     mRemote->registerFunctionWithReturn("runTest", [this, serializeTestResult, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
+        // DEBUG: Log received args to diagnose driver filter issue
+        FL_WARN("[RPC DEBUG] runTest received args type: " << (args.is_object() ? "object" : (args.is_array() ? "array" : "other")));
+        if (args.is_object() || args.is_array()) {
+            fl::string args_json = args.serialize();
+            FL_WARN("[RPC DEBUG] runTest args content: " << args_json.c_str());
+        }
+
         // NEW FORMAT: args is config object directly
         // Format: {"drivers":["PARLIO","RMT"], "laneRange":{"min":1,"max":4}, "stripSizes":[100,300]}
         if (args.is_object()) {

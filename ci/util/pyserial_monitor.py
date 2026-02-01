@@ -90,6 +90,10 @@ class SerialMonitor:
                 timeout=0.1,  # Short timeout for non-blocking reads
                 write_timeout=1.0,
             )
+            # Flush any stale data from previous sessions (crash output, etc.)
+            # This prevents false positives from old crash messages in the buffer
+            self._ser.reset_input_buffer()
+            self._ser.reset_output_buffer()
             self._attached = True
             if self.verbose:
                 print(f"✓ Serial port opened: {self.port} @ {self.baud_rate} baud")

@@ -296,6 +296,7 @@ private:
 
         // Event-driven streaming state
         volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction
+        volatile bool isShuttingDown;      ///< Set during releaseChannel(), prevents ISR from accessing freed memory
 
         // Double-buffered staging (4KB each for DMA efficiency)
         uint8_t* stagingA;                 ///< Staging buffer A (DMA-capable memory)
@@ -305,6 +306,9 @@ private:
         size_t stagingCapacity;            ///< Size of each staging buffer (4096 bytes)
 
         // LED source data
+        // CRITICAL: LED data must be in internal SRAM for ISR access (PSRAM not ISR-safe)
+        uint8_t* ledSourceBuffer;          ///< Internal SRAM copy of LED data (DMA-capable)
+        size_t ledSourceBufferSize;        ///< Size of ledSourceBuffer allocation
         const uint8_t* ledSource;          ///< Current position in source LED data
         size_t ledBytesRemaining;          ///< LED bytes left to encode
         ChannelDataPtr sourceData;         ///< Reference to source ChannelData for cleanup
@@ -317,6 +321,10 @@ private:
 
         // Timer ISR handle
         fl::isr::isr_handle_t timerHandle; ///< Timer ISR handle
+
+        // Debug: ISR tx_buffer capture for diagnosis
+        volatile bool debugTxCaptured;     ///< Flag: first tx_buffer captured
+        uint8_t debugTxBuffer[8];          ///< First 8 bytes of tx_buffer at queue time
     };
 
     /// @brief Pending channel data waiting for hardware availability
@@ -357,8 +365,9 @@ private:
 
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes
+    /// @param originalTiming Original chipset timing (for wave8 LUT precision)
     /// @return Pointer to channel state, or nullptr if no hardware available
-    SpiChannelState* acquireChannel(gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize);
+    SpiChannelState* acquireChannel(gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig& originalTiming);
 
     /// @brief Release a channel (marks as available for reuse)
     void releaseChannel(SpiChannelState* channel);
@@ -368,8 +377,9 @@ private:
     /// @param pin GPIO pin
     /// @param timing SPI timing configuration
     /// @param dataSize Size of LED data in bytes
+    /// @param originalTiming Original chipset timing (for wave8 LUT, optional - uses SPI-derived timing if nullptr)
     /// @return true if channel created successfully
-    bool createChannel(SpiChannelState* state, gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize);
+    bool createChannel(SpiChannelState* state, gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig* originalTiming = nullptr);
 
     /// @brief Encode LED data to SPI buffer
     /// @param ledData Source LED data (RGB/RGBW bytes)
@@ -387,6 +397,18 @@ private:
     /// @param output_bit_offset Bit offset in output buffer (for non-byte-aligned patterns)
     /// @return Number of bits written to buffer
     static uint32_t encodeLedByte(uint8_t data, uint8_t* buf, const SpiTimingConfig& timing, uint32_t output_bit_offset = 0);
+
+    /// @brief Pre-encode ALL LED data and sync cache (called from main task, NOT ISR)
+    /// @param channel Channel state with LED data to encode
+    ///
+    /// CRITICAL: This must be called from main task context because:
+    /// 1. esp_cache_msync() is NOT ISR-safe
+    /// 2. On ESP32-S3/C6, CPU writes stay in cache until explicitly flushed
+    /// 3. DMA reads from memory, not cache, so it sees stale data without sync
+    ///
+    /// This function encodes the ENTIRE LED buffer into staging buffers, then
+    /// syncs cache to memory. The ISR only queues pre-encoded data.
+    void preEncodeAllData(SpiChannelState* channel);
 
     /// @brief Acquire SPI host for new channel
     /// @return SPI host, or SPI_HOST_MAX on failure
