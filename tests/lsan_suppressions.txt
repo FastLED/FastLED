@@ -1,5 +1,15 @@
 # LeakSanitizer suppression file for FastLED tests
-# These are false positives from the threading library
+# These are false positives from system libraries and the threading library
+
+# macOS system library false positives
+# Reference: https://github.com/google/sanitizers/issues/1026
+leak:libobjc.A.dylib
+leak:libxpc.dylib
+leak:dyld
+leak:libdyld.dylib
+leak:libsystem_malloc.dylib
+leak:CoreFoundation
+leak:libSystem.B.dylib
 
 # Thread initialization leaks (false positives)
 leak:pthread_getattr_np
