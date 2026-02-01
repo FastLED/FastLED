@@ -75,6 +75,20 @@ def check() -> tuple[bool, list[str]]:
                 rel_build = build_hpp.relative_to(PROJECT_ROOT)
                 violations.append(f"{rel_build.as_posix()}: missing {include_path}")
 
+    # Build a map of which _build.hpp files are included by other _build.hpp files
+    # This handles the cascading pattern: _build.cpp -> subdir/_build.hpp -> subdir/nested/_build.hpp
+    build_hpp_includes: dict[Path, set[Path]] = {}
+    for build_hpp in all_build_hpp_files:
+        build_hpp_content = build_hpp.read_text(encoding="utf-8")
+        includes: set[Path] = set()
+        for other_build_hpp in all_build_hpp_files:
+            if other_build_hpp == build_hpp:
+                continue
+            include_path = other_build_hpp.relative_to(src_dir).as_posix()
+            if include_path in build_hpp_content:
+                includes.add(other_build_hpp)
+        build_hpp_includes[build_hpp] = includes
+
     # Check that all _build.hpp files are included in their corresponding _build.cpp
     # Find all _build.cpp files in the source tree
     all_build_cpp_files = list(src_dir.rglob("_build.cpp"))
@@ -93,12 +107,22 @@ def check() -> tuple[bool, list[str]]:
 
             # Only check immediate subdirectories (not nested subdirectories with their own _build.cpp)
             # If the subdirectory has its own _build.cpp, skip it (it will be checked separately)
+            # Also skip if the immediate subdirectory has a _build.hpp that acts as an intermediary
             if rel_to_cpp_dir.parts[0] != "_build.hpp":
                 # This is a subdirectory _build.hpp
                 subdir = build_cpp_dir / rel_to_cpp_dir.parts[0]
                 if (subdir / "_build.cpp").exists():
                     # Subdirectory has its own _build.cpp, so parent shouldn't include its _build.hpp
                     continue
+                intermediate_build_hpp = subdir / "_build.hpp"
+                if intermediate_build_hpp.exists() and len(rel_to_cpp_dir.parts) > 1:
+                    # Subdirectory has a _build.hpp that could act as an intermediary
+                    # Check if the intermediate _build.hpp actually includes this nested _build.hpp
+                    if build_hpp in build_hpp_includes.get(
+                        intermediate_build_hpp, set()
+                    ):
+                        # The intermediate _build.hpp includes the nested one, so skip
+                        continue
 
             # Expected include path: "path/to/_build.hpp" (relative to src/)
             rel_path = build_hpp.relative_to(src_dir)
