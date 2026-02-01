@@ -46,6 +46,7 @@
 
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/stl/iostream.h"  // For debug output
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
@@ -56,15 +57,18 @@
 // When building as a DLL (TEST_DLL_MODE defined), it exports a run_tests() function
 // instead of defining main()
 
-#ifdef TEST_DLL_MODE
-// DLL mode: Export run_tests function
-#ifdef _WIN32
-    #define TEST_DLL_EXPORT __declspec(dllexport)
-#else
-    #define TEST_DLL_EXPORT __attribute__((visibility("default")))
-#endif
+namespace testing_detail {
 
-extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
+void fl_cleanup() {
+    // Clean up all background threads before DLL unload to prevent access violations
+    // This includes both coroutine threads and promise resolver threads
+    fl::platforms::cleanup_coroutine_threads();
+
+    // Clean up PARLIO mock to prevent LSAN leak false positive reports.
+    fl::detail::cleanup_parlio_mock();
+}
+
+int fl_run_tests(int argc, const char** argv) {
     // NOTE: Crash handler is setup by runner.exe BEFORE loading this DLL
     // We do NOT call setup_crash_handler() here to avoid duplicate setup
     // and to keep crash handler dependencies (dbghelp, psapi) in runner.exe only
@@ -76,20 +80,38 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
     // Run doctest
     doctest::Context context(argc, argv);
     int result = context.run();
-
-    // Clean up all background threads before DLL unload to prevent access violations
-    // This includes both coroutine threads and promise resolver threads
-    fl::platforms::cleanup_coroutine_threads();
-
+    fl_cleanup();
     return result;
+}
+
+int fl_main(int argc, char** argv) {
+#ifdef ENABLE_CRASH_HANDLER
+    setup_crash_handler();
+#endif
+    int result = doctest::Context(argc, argv).run();
+    fl_cleanup();
+    return result;
+}
+
+
+
+} // namespace testing_detail
+
+#ifdef TEST_DLL_MODE
+// DLL mode: Export run_tests function
+#ifdef _WIN32
+    #define TEST_DLL_EXPORT __declspec(dllexport)
+#else
+    #define TEST_DLL_EXPORT __attribute__((visibility("default")))
+#endif
+
+extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
+    return testing_detail::fl_run_tests(argc, argv);
 }
 
 #else
 // Standard mode: Define main function
 int main(int argc, char** argv) {
-#ifdef ENABLE_CRASH_HANDLER
-    setup_crash_handler();
-#endif
-    return doctest::Context(argc, argv).run();
+    testing_detail::fl_main(argc, argv);
 }
 #endif // TEST_DLL_MODE
