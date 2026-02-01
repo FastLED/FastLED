@@ -1,3 +1,4 @@
+// @filter: (board is not stm32f103cb)
 
 #include <Arduino.h>
 #include <FastLED.h>

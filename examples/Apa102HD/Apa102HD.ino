@@ -1,3 +1,5 @@
+// @filter: (board is not stm32f103cb)
+
 /// @file    Apa102HD.ino
 /// @brief   Example showing how to use the APA102HD gamma correction.
 ///

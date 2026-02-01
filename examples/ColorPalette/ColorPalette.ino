@@ -1,3 +1,5 @@
+// @filter: (board is not stm32f103cb)
+
 /// @file    ColorPalette.ino
 /// @brief   Demonstrates how to use @ref ColorPalettes
 /// @example ColorPalette.ino
