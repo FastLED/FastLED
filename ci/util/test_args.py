@@ -166,6 +166,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="This option will be re-enabled in the near future. How we always assume no unity builds.",
     )
+    parser.add_argument(
+        "--docker",
+        action="store_true",
+        help="Run tests inside Docker container (Linux environment). Implies --debug unless --quick or --release is specified.",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -199,7 +204,25 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         force=parsed_args.force,
         build=parsed_args.build,
         no_unity=parsed_args.no_unity,
+        docker=parsed_args.docker,
     )
+
+    # Handle --docker flag: implies --debug unless --quick or --release is specified
+    if test_args.docker:
+        # Determine the effective build mode
+        if test_args.build_mode is None and not test_args.quick:
+            # No explicit build mode and no --quick flag: default to debug
+            test_args.debug = True
+            ts_print(
+                "⚠️  --docker implies --debug mode (sanitizers enabled). "
+                "Use --quick or --build-mode release for faster builds."
+            )
+        elif test_args.quick:
+            ts_print("Docker mode: using quick build (--quick specified)")
+        elif test_args.build_mode:
+            ts_print(
+                f"Docker mode: using {test_args.build_mode} build (--build-mode specified)"
+            )
 
     # Auto-enable --py or --cpp mode when a specific test is provided
     if test_args.test:

@@ -1526,9 +1526,6 @@ def runner(
                 check=args.check,
             )
 
-            # Print summary with timing
-            # Note: The meson_runner already prints "✅ All tests passed (n/n in X.XXs)"
-            # so we don't need a second boxed summary here
             if not result.success:
                 sys.exit(1)
 
@@ -1541,6 +1538,17 @@ def runner(
                     duration_seconds=result.duration,
                     test_name="cpp_unit_tests",
                 )
+
+            # Print timing summary table for unit-only mode
+            show_sccache_stats()
+            unit_timing = ProcessTiming(
+                name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
+                duration=result.duration,
+                command="meson test",
+                skipped=False,
+            )
+            summary = _format_timing_summary([unit_timing])
+            print(summary)
         else:
             # Fingerprint cache hit - skip unit tests
             cache_msg = _format_cache_hit_message(

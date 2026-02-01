@@ -27,6 +27,35 @@ This project uses directory-specific agent guidelines. See:
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
 
+### Docker Testing (Linux Environment)
+Run tests inside a Docker container for consistent Linux environment with ASAN/LSAN sanitizers:
+
+```bash
+# Run all C++ tests in Docker (implies --debug with sanitizers)
+bash test --docker
+
+# Run specific unit test in Docker
+bash test --docker tests/fl/async
+
+# Run with quick mode (no sanitizers, faster)
+bash test --docker --quick
+
+# Run with release mode (optimized)
+bash test --docker --build-mode release
+
+# Run only unit tests
+bash test --docker --unit
+
+# Run only examples
+bash test --docker --examples
+```
+
+**Notes:**
+- `--docker` implies `--debug` mode (ASAN/LSAN sanitizers enabled) unless `--quick` or `--build-mode` is specified
+- Warning shown: `⚠️  --docker implies --debug mode (sanitizers enabled). Use --quick or --build-mode release for faster builds.`
+- First run downloads Docker image and Python packages (cached for subsequent runs)
+- Uses named volumes for `.venv` and `.build` to persist between runs
+
 ### fbuild (Default for ESP32-S3 and ESP32-C6)
 The project uses `fbuild` as the **default build system** for ESP32-S3 and ESP32-C6 (RISC-V) boards. fbuild provides:
 - **Daemon-based compilation** - Background process handles builds, survives agent interrupts

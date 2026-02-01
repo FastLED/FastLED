@@ -11,6 +11,7 @@ import warnings
 from pathlib import Path
 
 from ci.runners.avr8js_runner import run_avr8js_tests
+from ci.runners.docker_runner import run_docker_tests
 from ci.runners.qemu_runner import run_qemu_tests
 from ci.util.fingerprint import FingerprintManager
 from ci.util.global_interrupt_handler import (
@@ -165,6 +166,12 @@ def main() -> None:
         cpp_test_change = fingerprint_manager.check_cpp(args)
         examples_change = fingerprint_manager.check_examples(args)
         python_test_change = fingerprint_manager.check_python()
+
+        # Handle --docker flag: run tests in Docker container
+        if args.docker:
+            ts_print("=== Docker Testing ===")
+            exit_code = run_docker_tests(args)
+            sys.exit(exit_code)
 
         # Handle --run flag (unified emulation interface)
         if args.run is not None:

@@ -95,6 +95,9 @@ class TestArgs:
     build: bool = False  # Build Docker images if missing (use with --run)
     force: bool = False  # Force rerun of all tests, ignore fingerprint cache
     no_unity: bool = False  # Not in use any more, maybe revived later
+    docker: bool = (
+        False  # Run tests inside Docker container (implies --debug unless overridden)
+    )
 
 
 @typechecked

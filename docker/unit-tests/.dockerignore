@@ -1,0 +1,7 @@
+# Ignore all directories starting with .
+.*
+
+# But allow necessary files
+!.clang-format
+!.clang-tidy
+!.editorconfig
