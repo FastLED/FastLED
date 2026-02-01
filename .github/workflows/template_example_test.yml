@@ -95,5 +95,10 @@ jobs:
       - name: Run All Examples
         working-directory: trusted
         run: |
+          # Enable unbuffered Python output for better CI log streaming
+          export PYTHONUNBUFFERED=1
+          # Force line-buffered output for better log streaming
+          export PYTHONIOENCODING=utf-8
+          # Run examples with debug mode
           ./test --clang --no-parallel --examples --verbose --debug
         shell: bash

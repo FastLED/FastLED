@@ -82,6 +82,7 @@ def run_meson_test(
     num_passed = 0
     num_failed = 0
     num_run = 0
+    expected_total = 0  # Track Meson's expected total from output
 
     try:
         # Use RunningProcess for streaming output
@@ -120,6 +121,9 @@ def run_meson_test(
                         duration_str = match.group(5)
 
                         num_run = current
+                        expected_total = (
+                            total  # Update expected total from Meson output
+                        )
                         if status == "OK":
                             num_passed += 1
                             # Show brief progress for passed tests in green
@@ -166,15 +170,22 @@ def run_meson_test(
                 num_tests_failed=num_failed,
             )
 
+        # When Meson returns success (exit code 0), all tests passed.
+        # Use expected_total from Meson's output as the true count, since parallel
+        # test execution may cause some output lines to get interleaved and not
+        # be parsed by our regex (causing num_passed to undercount).
+        actual_passed = expected_total if expected_total > 0 else num_passed
+        actual_run = expected_total if expected_total > 0 else num_run
+
         _print_success(
-            f"✅ All tests passed ({num_passed}/{num_run} in {duration:.2f}s)"
+            f"✅ All tests passed ({actual_passed}/{actual_run} in {duration:.2f}s)"
         )
         return MesonTestResult(
             success=True,
             duration=duration,
-            num_tests_run=num_run,
-            num_tests_passed=num_passed,
-            num_tests_failed=num_failed,
+            num_tests_run=actual_run,
+            num_tests_passed=actual_passed,
+            num_tests_failed=0,  # Meson returned 0, so no failures
         )
 
     except KeyboardInterrupt:

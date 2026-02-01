@@ -4,7 +4,9 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 #!/usr/bin/env python3
 """Meson build system integration for FastLED example compilation and execution."""
 
+import os
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -16,6 +18,61 @@ from ci.meson.test_execution import MesonTestResult
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+# Detect CI environment for enhanced logging
+_IS_CI = os.environ.get("GITHUB_ACTIONS") == "true" or os.environ.get("CI") == "true"
+
+
+class CompilationHeartbeat:
+    """Provides periodic heartbeat output during long compilations to prevent CI timeouts."""
+
+    def __init__(self, interval_seconds: int = 30):
+        self.interval = interval_seconds
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._start_time = time.time()
+        self._last_message = ""
+
+    def start(self, message: str = "Compiling") -> None:
+        """Start the heartbeat thread."""
+        if not _IS_CI:
+            return  # Only run heartbeat in CI environments
+
+        self._last_message = message
+        self._start_time = time.time()
+        self._stop_event.clear()
+        self._thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._thread.start()
+
+    def update_message(self, message: str) -> None:
+        """Update the status message shown in heartbeat."""
+        self._last_message = message
+
+    def stop(self) -> None:
+        """Stop the heartbeat thread."""
+        self._stop_event.set()
+        if self._thread:
+            self._thread.join(timeout=2.0)
+            self._thread = None
+
+    def _heartbeat_loop(self) -> None:
+        """Periodically print status to keep CI alive and show progress."""
+        heartbeat_count = 0
+        while not self._stop_event.wait(self.interval):
+            heartbeat_count += 1
+            elapsed = time.time() - self._start_time
+            minutes = int(elapsed // 60)
+            seconds = int(elapsed % 60)
+            # Print heartbeat with elapsed time
+            _ts_print(
+                f"[HEARTBEAT {heartbeat_count}] {self._last_message} "
+                f"(elapsed: {minutes}m {seconds}s)",
+                file=sys.stderr,
+            )
+            # Flush to ensure CI captures the output
+            sys.stderr.flush()
+            sys.stdout.flush()
 
 
 def compile_examples(
