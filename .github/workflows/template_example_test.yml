@@ -1,4 +1,4 @@
-name: unit tests template
+name: example tests template
 
 on:
   workflow_call:
@@ -39,9 +39,6 @@ jobs:
           # Copy ONLY safe source files from PR, never executable scripts
           if [ -d "pr-code/src" ]; then
             cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
-          fi
-          if [ -d "pr-code/tests" ]; then
-            cp -r pr-code/tests/* trusted/tests/ 2>/dev/null || true
           fi
           if [ -d "pr-code/examples" ]; then
             cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
@@ -89,13 +86,14 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: No namespace after headers
+      - name: Run Example Blink
         working-directory: trusted
         run: |
-          uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
+          ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
+        shell: bash
 
-      - name: Run All Unit Tests
+      - name: Run All Examples
         working-directory: trusted
         run: |
-          ./test --clang --no-parallel --unit --verbose --debug
+          ./test --clang --no-parallel --examples --verbose --debug
         shell: bash
