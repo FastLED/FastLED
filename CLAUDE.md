@@ -56,6 +56,11 @@ bash test --docker --examples
 - First run downloads Docker image and Python packages (cached for subsequent runs)
 - Uses named volumes for `.venv` and `.build` to persist between runs
 
+**⚠️ AI AGENTS: Avoid `bash test --docker` unless necessary** - Docker testing is slow (3-5 minutes per test). Use `uv run test.py` for quick local testing. Only use Docker when:
+- You need Linux-specific sanitizers (ASAN/LSAN) that aren't working locally
+- Reproducing CI failures that only occur in the Linux environment
+- Testing cross-platform compatibility issues
+
 ### fbuild (Default for ESP32-S3 and ESP32-C6)
 The project uses `fbuild` as the **default build system** for ESP32-S3 and ESP32-C6 (RISC-V) boards. fbuild provides:
 - **Daemon-based compilation** - Background process handles builds, survives agent interrupts

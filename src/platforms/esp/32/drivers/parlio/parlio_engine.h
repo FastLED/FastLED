@@ -178,6 +178,13 @@ public:
     /// @brief Get debug metrics for transmission analysis
     ParlioDebugMetrics getDebugMetrics() const;
 
+    /// @brief Clean up debug task before DLL unload (TEST_DLL_MODE only)
+    ///
+    /// Call this function before DLL unload to properly join the debug task thread.
+    /// The singleton is NOT destroyed - only the debug task is cleaned up.
+    /// This prevents memory leaks detected by LeakSanitizer in test mode.
+    void cleanup();
+
     /// @brief Destructor - cleans up PARLIO hardware
     ~ParlioEngine();
 
@@ -208,10 +215,12 @@ private:
     /// @param user_data ParlioEngine instance pointer
     static void FL_IRAM workerIsrCallback(void* user_data);
 
+#ifdef FL_DEBUG
     /// @brief Debug task function for periodic ISR state logging
     /// @param arg ParlioEngine instance pointer
     /// @note Runs at low priority (1), logs ISR state every 500ms during transmission
     static void debugTaskFunction(void* arg);
+#endif
 
     /// @brief Populate a DMA buffer with waveform data
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
@@ -261,8 +270,10 @@ private:
     // Main task handle for transmission completion signaling (TaskHandle_t)
     void* mMainTaskHandle;
 
+#ifdef FL_DEBUG
     // Debug task for periodic ISR state logging (unified task API)
     fl::task mDebugTask;
+#endif
 
     // Ring buffer for DMA streaming (fixed 3-buffer architecture)
     fl::unique_ptr<ParlioRingBuffer3> mRingBuffer;

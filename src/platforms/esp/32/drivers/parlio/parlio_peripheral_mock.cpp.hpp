@@ -6,6 +6,7 @@
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
 #include "parlio_peripheral_mock.h"
+#include "parlio_engine.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
@@ -797,6 +798,10 @@ fl::vector<fl::pair<int, fl::vector<uint8_t>>> ParlioPeripheralMock::untranspose
 //=============================================================================
 
 void cleanup_parlio_mock() {
+    // Clean up ParlioEngine debug task first (before clearing mock)
+    // This ensures the debug task thread is properly joined before DLL unload
+    ParlioEngine::getInstance().cleanup();
+
     // Get the mock instance and perform cleanup
     // This clears allocated memory to prevent LSAN leaks
     auto& mock = ParlioPeripheralMock::instance();

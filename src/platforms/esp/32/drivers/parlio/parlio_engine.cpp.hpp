@@ -354,6 +354,7 @@ ParlioEngine::~ParlioEngine() {
     // DMA buffers and waveform expansion buffer are automatically freed
     // by fl::unique_ptr destructors (RAII)
 
+#ifdef FL_DEBUG
     // Clean up debug task
     if (mDebugTask.is_valid()) {
         // Signal task to exit by setting flags to false (task checks: while (mTransmitting || mStreamComplete))
@@ -373,6 +374,7 @@ ParlioEngine::~ParlioEngine() {
         // Cancel the task to release resources (task object cleaned up automatically)
         mDebugTask.cancel();
     }
+#endif
 
     // Clean up ring buffer (unique_ptr handles deletion automatically)
     mRingBuffer.reset();
@@ -388,6 +390,28 @@ ParlioEngine& ParlioEngine::getInstance() {
     return fl::Singleton<ParlioEngine>::instance();
 }
 
+void ParlioEngine::cleanup() {
+#ifdef FL_DEBUG
+    // Clean up debug task only - singleton remains alive
+    // This is called before DLL unload to properly join threads
+    if (mDebugTask.is_valid()) {
+        // Signal task to exit by setting flags to false
+        if (mIsrContext) {
+            mIsrContext->mTransmitting = false;
+            mIsrContext->mStreamComplete = false;
+            FL_MEMORY_BARRIER;
+        }
+        // Give task time to self-delete (task sleeps for 500ms)
+        if (mPeripheral) {
+            mPeripheral->delay(600);
+        }
+        // Cancel the task to release resources
+        mDebugTask.cancel();
+    }
+#endif
+}
+
+#ifdef FL_DEBUG
 //=============================================================================
 // Debug Task - Periodic ISR State Logging
 //=============================================================================
@@ -446,6 +470,7 @@ void ParlioEngine::debugTaskFunction(void* arg) {
     fl::task::exitCurrent();
     // UNREACHABLE CODE on ESP32
 }
+#endif  // FL_DEBUG
 
 //=============================================================================
 // ISR Callback - Hardware Transmission Completion
@@ -1532,6 +1557,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
     }
     #endif
 
+#ifdef FL_DEBUG
     // Debug task: Logs ISR state every 500ms for diagnostics
     // Iteration 7 confirmed: Debug task is NOT the cause of crash
     if (!mDebugTask.is_valid()) {
@@ -1546,6 +1572,7 @@ bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
 
         FL_LOG_PARLIO("PARLIO: Debug task created (500ms logging interval)");
     }
+#endif
 
     // Debug: Print initial counter state
     // Note: read_idx and ring_count already advanced before buffer submission (Iteration 2 fix)
