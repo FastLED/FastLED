@@ -295,7 +295,7 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 	}
 }
 
-fl::u32 CFastLED::getEstimatedPowerInMilliWatts() const {
+fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 	fl::u32 total_power_mW = 0;
 
 	// Sum unscaled power from all LED controllers using visitor pattern
@@ -305,11 +305,20 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts() const {
 		}
 	});
 
-	// Scale by current brightness (linear scaling)
+	// Determine effective brightness
+	fl::u8 effective_brightness = m_Scale;
+
+	if (apply_limiter && m_pPowerFunc) {
+		// Power limiting is enabled and user wants limited power - calculate brightness after limiting
+		// This calls calculate_max_brightness_for_power_mW(m_Scale, m_nPowerData)
+		effective_brightness = (*m_pPowerFunc)(m_Scale, m_nPowerData);
+	}
+
+	// Scale by effective brightness (linear scaling)
 	// Power = unscaled_power * (brightness / 255)
 	// Uses scale32by8() to prevent overflow and ensure proper rounding
 	// Note: MCU power consumption is NOT included - caller should add platform-specific MCU power if needed
-	return fl::scale32by8(total_power_mW, m_Scale);
+	return fl::scale32by8(total_power_mW, effective_brightness);
 }
 
 //

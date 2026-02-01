@@ -1094,9 +1094,22 @@ public:
 	/// brightness setting, and configured power model. This provides visibility into
 	/// power usage for monitoring and debugging.
 	///
+	/// @param apply_limiter If true (default), applies power limiting to calculate actual power.
+	///                      If false, returns requested power before limiting.
+	///
 	/// @returns Estimated LED power consumption in milliwatts:
-	///          - All LED controllers' RGB data scaled by current brightness
-	///          - Per-channel power from current power model
+	///          - apply_limiter=true: Power AFTER applying max-power cap (actual power)
+	///          - apply_limiter=false: Power BEFORE limiting (requested power)
+	///
+	/// @note Usage examples:
+	///       @code
+	///       uint32_t actual = FastLED.getEstimatedPowerInMilliWatts();        // With limiting (default)
+	///       uint32_t requested = FastLED.getEstimatedPowerInMilliWatts(false); // Without limiting
+	///       @endcode
+	///
+	/// @note When apply_limiter=true:
+	///       - If power limiting is NOT enabled, returns unrestricted power
+	///       - If power limiting IS enabled, returns power after brightness reduction
 	///
 	/// @note MCU power consumption is NOT included in this calculation.
 	///       Add your platform-specific MCU power separately:
@@ -1105,16 +1118,12 @@ public:
 	///       uint32_t total_power = FastLED.getEstimatedPowerInMilliWatts() + mcu_power_mW;
 	///       @endcode
 	///
-	/// @note Power is calculated from LED buffer state, not accounting for
-	///       automatic brightness limiting. For actual consumption after
-	///       power limiting, use the power budget set by setMaxPowerInMilliWatts().
-	///
 	/// @note Uses linear brightness scaling (conservative estimate).
 	///       Power = sum(channel_values * channel_power) * (brightness/255)
 	///
 	/// @see setMaxPowerInMilliWatts()
 	/// @see setPowerModel()
-	fl::u32 getEstimatedPowerInMilliWatts() const;
+	fl::u32 getEstimatedPowerInMilliWatts(bool apply_limiter = true) const;
 
 	/// @} Power Model Configuration
 

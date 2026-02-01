@@ -3,6 +3,11 @@
 
 using namespace fl;
 
+// NOTE: LED controllers accumulate across all TEST_CASEs in this file due to
+// FastLED being a singleton. Each addLeds() call adds a new controller to the
+// global list. This is intentional FastLED behavior and tests account for it
+// by using relative comparisons rather than absolute power values.
+
 // Simple test to verify the function exists and returns a reasonable value
 TEST_CASE("Power estimation - basic smoke test") {
     CRGB leds[10];
@@ -49,4 +54,121 @@ TEST_CASE("Power estimation - brightness scaling") {
     REQUIRE(power_full > power_half);
     REQUIRE(power_half > power_zero);
     REQUIRE(power_zero == 0);
+}
+
+// Test power estimation without power limiting
+TEST_CASE("Power estimation - no power limiting") {
+    CRGB leds[10];
+    fill_solid(leds, 10, CRGB(255, 255, 255));  // All white
+
+    FastLED.addLeds<WS2812, 2, GRB>(leds, 10);
+    FastLED.setBrightness(255);
+
+    // Without power limiting, limited and unlimited should be the same
+    uint32_t with_limiter = FastLED.getEstimatedPowerInMilliWatts(true);
+    uint32_t without_limiter = FastLED.getEstimatedPowerInMilliWatts(false);
+
+    REQUIRE(with_limiter == without_limiter);
+    REQUIRE(with_limiter > 0);  // Should have some power with white LEDs
+}
+
+// Test power estimation with power limiting enabled
+TEST_CASE("Power estimation - with power limiting") {
+    CRGB leds[100];
+    fill_solid(leds, 100, CRGB(255, 255, 255));  // All white - high power demand
+
+    FastLED.addLeds<WS2812, 3, GRB>(leds, 100);
+    FastLED.setBrightness(255);
+
+    // Set a low power limit (1000mW) - should force brightness reduction
+    FastLED.setMaxPowerInMilliWatts(1000);
+
+    uint32_t with_limiter = FastLED.getEstimatedPowerInMilliWatts(true);     // Actual power
+    uint32_t without_limiter = FastLED.getEstimatedPowerInMilliWatts(false);  // Requested power
+
+    // Limited power should be less than unlimited power due to limiting
+    REQUIRE(with_limiter < without_limiter);
+
+    // Limited power should be significantly reduced
+    // Note: power limiter includes MCU power (125mW) in calculations, so LED-only
+    // limited power will be within ~(limit - MCU) with some rounding tolerance
+    REQUIRE(with_limiter < without_limiter * 0.9);  // At least 10% reduction
+}
+
+// Test power estimation - edge case with zero brightness
+TEST_CASE("Power estimation - zero brightness") {
+    CRGB leds[10];
+    fill_solid(leds, 10, CRGB(255, 255, 255));
+
+    FastLED.addLeds<WS2812, 4, GRB>(leds, 10);
+    FastLED.setBrightness(0);
+    FastLED.setMaxPowerInMilliWatts(1000);
+
+    uint32_t with_limiter = FastLED.getEstimatedPowerInMilliWatts(true);
+    uint32_t without_limiter = FastLED.getEstimatedPowerInMilliWatts(false);
+
+    // Both should be zero at zero brightness
+    REQUIRE(with_limiter == 0);
+    REQUIRE(without_limiter == 0);
+}
+
+// Test power estimation - power limit high enough to not limit
+TEST_CASE("Power estimation - high power limit (no limiting)") {
+    CRGB leds[10];
+    fill_solid(leds, 10, CRGB(255, 255, 255));
+
+    FastLED.addLeds<WS2812, 5, GRB>(leds, 10);
+    FastLED.setBrightness(255);
+
+    // Set a very high power limit (100W) - should not cause limiting
+    FastLED.setMaxPowerInMilliWatts(100000);
+
+    uint32_t with_limiter = FastLED.getEstimatedPowerInMilliWatts(true);
+    uint32_t without_limiter = FastLED.getEstimatedPowerInMilliWatts(false);
+
+    // With high enough limit, both should be very close
+    // Allow tolerance for:
+    // 1. Integer division rounding in scale32by8 (divides by 256 instead of 255)
+    // 2. Controller accumulation from previous tests in this file
+    uint32_t diff = (with_limiter > without_limiter) ? (with_limiter - without_limiter) : (without_limiter - with_limiter);
+    REQUIRE(diff <= 500);  // Within 500mW tolerance (about 2% for typical cases)
+}
+
+// Test power estimation - brightness scaling with limiting
+TEST_CASE("Power estimation - brightness scaling with limiting") {
+    CRGB leds[50];
+    fill_solid(leds, 50, CRGB(200, 200, 200));
+
+    FastLED.addLeds<WS2812, 6, GRB>(leds, 50);
+    FastLED.setMaxPowerInMilliWatts(5000);  // Higher limit to allow brightness scaling
+
+    // Test at different brightness levels
+    FastLED.setBrightness(255);
+    uint32_t power_full = FastLED.getEstimatedPowerInMilliWatts(true);
+
+    FastLED.setBrightness(128);
+    uint32_t power_half = FastLED.getEstimatedPowerInMilliWatts(true);
+
+    FastLED.setBrightness(64);
+    uint32_t power_quarter = FastLED.getEstimatedPowerInMilliWatts(true);
+
+    // Power should scale with brightness (or hit the limit)
+    // Use tolerance to account for integer rounding in scale32by8
+    int32_t diff_full_half = (int32_t)power_full - (int32_t)power_half;
+    int32_t diff_half_quarter = (int32_t)power_half - (int32_t)power_quarter;
+
+    REQUIRE(diff_full_half >= -10);  // Allow 10mW rounding tolerance
+    REQUIRE(diff_half_quarter >= -10);
+
+    // All should be reasonably close to power limit
+    // Note: getEstimatedPowerInMilliWatts() returns LED-only power (excludes MCU ~125mW)
+    // The power limiter includes MCU, so LED power might approach (limit - MCU)
+    // Allow tolerance for:
+    //   - MCU power offset (~125mW)
+    //   - Controller accumulation from previous tests
+    //   - Integer rounding in scale32by8
+    const uint32_t tolerance = 500;  // 500mW tolerance (~10%)
+    REQUIRE(power_full <= 5000 + tolerance);
+    REQUIRE(power_half <= 5000 + tolerance);
+    REQUIRE(power_quarter <= 5000 + tolerance);
 }
