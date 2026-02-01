@@ -114,6 +114,28 @@ private:
 FASTLED_SHARED_PTR(VorbisDecoder);
 
 // Vorbis factory for creating decoders and parsing metadata
+//
+// PERFORMANCE NOTE:
+// Benchmark testing (see REPORT.md) compared MP3 vs OGG Vorbis decoding performance
+// using FFmpeg on a host machine (not embedded platform). Results showed:
+//   - OGG decode time: 327ms (10 second audio sample)
+//   - MP3 decode time: 420ms (OGG 28.6% faster than MP3)
+//   - OGG file size: 108KB at 128kbps
+//   - MP3 file size: 157KB at 128kbps (OGG 31% smaller than MP3)
+//   - Audio quality difference: 0.67% RMS error (negligible)
+//
+// IMPORTANT: These benchmarks used native FFmpeg decoders on a desktop host.
+// Performance on embedded platforms (ESP32, ARM, etc.) using the stb_vorbis
+// decoder may differ significantly due to:
+//   - Different decoder implementations (stb_vorbis vs FFmpeg)
+//   - CPU architecture differences (ARM Cortex-M vs x86/x64)
+//   - Clock speeds and available RAM
+//   - Compiler optimizations and platform-specific code paths
+//
+// RECOMMENDATION: Always profile on your target platform before choosing a codec.
+// What works best on desktop FFmpeg may not match embedded performance characteristics.
+// Run your own benchmarks using your specific hardware, sample data, and use case.
+//
 class Vorbis {
 public:
     // Create a Vorbis decoder for streaming playback

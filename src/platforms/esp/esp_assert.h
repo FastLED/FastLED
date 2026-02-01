@@ -8,8 +8,8 @@ namespace fl {
 }
 
 #define FASTLED_ASSERT(x, MSG)                                                 \
-    {                                                                          \
+    do {                                                                       \
         if (!(x)) {                                                            \
             fl::println((fl::StrStream() << "FASTLED ASSERT FAILED: " << MSG).c_str());  \
         }                                                                      \
-    }
+    } while (0)

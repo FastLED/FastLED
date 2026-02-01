@@ -170,6 +170,28 @@ private:
 FASTLED_SHARED_PTR(Mp3Decoder);
 
 // MP3 factory for creating decoders and parsing metadata
+//
+// PERFORMANCE NOTE:
+// Benchmark testing (see REPORT.md) compared MP3 vs OGG Vorbis decoding performance
+// using FFmpeg on a host machine (not embedded platform). Results showed:
+//   - MP3 decode time: 420ms (10 second audio sample)
+//   - OGG decode time: 327ms (28.6% faster than MP3)
+//   - MP3 file size: 157KB at 128kbps
+//   - OGG file size: 108KB at 128kbps (31% smaller than MP3)
+//   - Audio quality difference: 0.67% RMS error (negligible)
+//
+// IMPORTANT: These benchmarks used native FFmpeg decoders on a desktop host.
+// Performance on embedded platforms (ESP32, ARM, etc.) using the Helix MP3
+// fixed-point decoder may differ significantly due to:
+//   - Different decoder implementations (Helix vs FFmpeg)
+//   - CPU architecture differences (ARM Cortex-M vs x86/x64)
+//   - Clock speeds and available RAM
+//   - Compiler optimizations and platform-specific code paths
+//
+// RECOMMENDATION: Always profile on your target platform before choosing a codec.
+// What works best on desktop FFmpeg may not match embedded performance characteristics.
+// Run your own benchmarks using your specific hardware, sample data, and use case.
+//
 class Mp3 {
 public:
     // Create an MP3 decoder for streaming playback

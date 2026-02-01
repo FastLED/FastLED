@@ -5,9 +5,9 @@
 #include <emscripten.h>
 
 #define FASTLED_ASSERT(x, MSG)                                                 \
-    {                                                                          \
+    do {                                                                       \
         if (!(x)) {                                                            \
             FASTLED_WARN(MSG);                                                 \
             emscripten_debugger();                                             \
         }                                                                      \
-    }
+    } while (0)
