@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fbuild>=1.3.35",
+    "fbuild>=1.3.38",
     "platformio==6.1.18",
     "python-dateutil",
     "ruff",

@@ -7,6 +7,13 @@
 /// physically connected to the LED strip - only the MOSI/data pin is used.
 /// See channel_engine_spi.h for detailed explanation.
 ///
+/// ENCODING: Uses Espressif led_strip 3-bit encoding (NOT wave8):
+/// - LED bit '0' → SPI bits: 100 (binary) = short high, long low
+/// - LED bit '1' → SPI bits: 110 (binary) = long high, short low
+/// - Each LED byte (8 bits) expands to 3 SPI bytes (24 bits)
+/// - SPI clock: 2.5 MHz (400ns per bit)
+/// Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+///
 /// @todo Known issues and future improvements:
 /// - [x] ESP32-S3 CACHE COHERENCE: Fixed by using non-aligned heap_caps_malloc()
 ///       which forces the SPI driver to copy data internally. This copy flushes
@@ -21,13 +28,11 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "channel_engine_spi.h"
-#include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h" // wave8 encoding (need after main header)
 #include "fl/dbg.h"
 #include "fl/delay.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
 #include "fl/stl/time.h"
-#include "fl/channels/detail/wave8.hpp" // Inline wave8 functions
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
 #include "platforms/memory_barrier.h" // FL_MEMORY_BARRIER for cache coherence
@@ -38,6 +43,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_check.h"
 #include "esp_heap_caps.h"
 #include "soc/spi_periph.h"
+#include "soc/spi_reg.h"    // SPI_DMA_CONF_REG for ESP32-S3 DMA fix
 #include "soc/gpio_sig_map.h"  // GPIO matrix signal IDs (FSPID_OUT_IDX, HSPID_OUT_IDX, etc.)
 #include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal for manual GPIO routing
 #if __has_include("esp_cache.h")
@@ -61,6 +67,64 @@ vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>
     ChannelEngineSpi::sSpiHostUsage;
 
 namespace {
+
+// ============================================================================
+// Espressif 3-bit LED Encoding (matches led_strip_spi_dev.c)
+// ============================================================================
+// Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+//
+// Encoding scheme:
+// - Each LED bit expands to 3 SPI bits
+// - LED bit '0' → SPI bits: 100 (binary) = 0x4 (high nibble position)
+// - LED bit '1' → SPI bits: 110 (binary) = 0x6 (high nibble position)
+// - Each LED color byte (8 bits) expands to 24 SPI bits (3 bytes)
+// - SPI clock: 2.5 MHz = 400ns per SPI bit
+//
+// Timing achieved:
+// - LED '0': T0H = 400ns (1 SPI bit), T0L = 800ns (2 SPI bits)
+// - LED '1': T1H = 800ns (2 SPI bits), T1L = 400ns (1 SPI bit)
+
+/// @brief Number of SPI bytes per LED color byte (3:1 expansion)
+constexpr size_t SPI_BYTES_PER_COLOR_BYTE = 3;
+
+/// @brief Encode a single LED color byte into 3 SPI bytes
+/// @param data The LED color value (0-255)
+/// @param buf Pointer to 3-byte output buffer (must be pre-cleared)
+///
+/// EXACT copy of Espressif led_strip encoding function:
+/// https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+///
+/// Each color bit (8 bits) is represented by 3 SPI bits:
+///   - low_level (LED '0'): 100 (binary)
+///   - high_level (LED '1'): 110 (binary)
+/// So a color byte occupies 3 bytes of SPI data.
+///
+/// Bit mapping (buf is treated as little-endian within each byte):
+///   Input bit 0 → buf[2] bits 0-2 (3 bits starting at LSB)
+///   Input bit 1 → buf[2] bits 3-5
+///   Input bit 2 → buf[2] bit 6-7 + buf[1] bit 0
+///   Input bit 3 → buf[1] bits 1-3
+///   Input bit 4 → buf[1] bits 4-6
+///   Input bit 5 → buf[1] bit 7 + buf[0] bits 0-1
+///   Input bit 6 → buf[0] bits 2-4
+///   Input bit 7 → buf[0] bits 5-7
+FASTLED_FORCE_INLINE
+void led_strip_encode_byte(uint8_t data, uint8_t* buf) {
+    // Exact Espressif implementation - DO NOT MODIFY
+    // Each color of 1 bit is represented by 3 bits of SPI,
+    // low_level:100, high_level:110
+    // So a color byte occupies 3 bytes of SPI.
+    *(buf + 2) |= data & (1 << 0) ? (1 << 2) | (1 << 1) : (1 << 2);
+    *(buf + 2) |= data & (1 << 1) ? (1 << 5) | (1 << 4) : (1 << 5);
+    *(buf + 2) |= data & (1 << 2) ? (1 << 7) : 0x00;
+    *(buf + 1) |= (1 << 0);
+    *(buf + 1) |= data & (1 << 3) ? (1 << 3) | (1 << 2) : (1 << 3);
+    *(buf + 1) |= data & (1 << 4) ? (1 << 6) | (1 << 5) : (1 << 6);
+    *(buf + 0) |= data & (1 << 5) ? (1 << 1) | (1 << 0) : (1 << 1);
+    *(buf + 0) |= data & (1 << 6) ? (1 << 4) | (1 << 3) : (1 << 4);
+    *(buf + 0) |= data & (1 << 7) ? (1 << 7) | (1 << 6) : (1 << 7);
+}
+
 /// @brief Calculate greatest common divisor using Euclidean algorithm
 constexpr uint32_t gcd(uint32_t a, uint32_t b) {
     while (b != 0) {
@@ -232,8 +296,8 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
         if (!channel.inUse)
             continue;
 
-        // With blocking transmit (Iteration 5 cache fix), transmission is complete
-        // as soon as beginTransmission() returns. Check transmissionComplete flag.
+        // With blocking transmit, transmission is complete as soon as
+        // beginTransmission() returns. Check transmissionComplete flag.
         if (channel.transmissionComplete) {
             // Clear in-use flag on source data
             if (channel.sourceData) {
@@ -431,11 +495,11 @@ void ChannelEngineSpi::beginTransmission(
         // Get timing configuration from channel data
         SpiTimingConfig timing = getSpiTimingFromChannel(data);
 
-        // Get original chipset timing for wave8 LUT precision
+        // Get original chipset timing for reference (not used for encoding, kept for debug)
         const ChipsetTimingConfig& originalTiming = data->getTiming();
 
         // DEBUG: Trace timing values received from channel data
-        FL_WARN_EVERY(100, "ChannelEngineSpi: Received timing from ChannelData: t1_ns="
+        FL_DBG_EVERY(100, "ChannelEngineSpi: Received timing from ChannelData: t1_ns="
                << originalTiming.t1_ns << ", t2_ns=" << originalTiming.t2_ns
                << ", t3_ns=" << originalTiming.t3_ns << ", reset_us=" << originalTiming.reset_us);
 
@@ -490,38 +554,27 @@ void ChannelEngineSpi::beginTransmission(
                    << static_cast<int>(ledData[4]) << ","
                    << static_cast<int>(ledData[5]) << "]");
 
-            // DEBUG: Verify encoding works OUTSIDE ISR by testing first byte
-            // This helps diagnose if the issue is in the LUT or ISR access
+            // DEBUG: Verify Espressif 3-bit encoding works by testing first byte
             if (channel->ledSourceBuffer && ledData.size() >= 1) {
                 uint8_t test_byte = channel->ledSourceBuffer[0];
-                ::fl::Wave8Byte test_output;
-                ::fl::detail::wave8_convert_byte_to_wave8byte(test_byte, channel->mWave8Lut, &test_output);
+                uint8_t test_output[SPI_BYTES_PER_COLOR_BYTE] = {0, 0, 0};  // Must be pre-cleared
+                led_strip_encode_byte(test_byte, test_output);
                 FL_DBG_EVERY(100, "ChannelEngineSpi: Test encode byte " << static_cast<int>(test_byte)
-                       << " → Wave8Byte[0..3]: [" << static_cast<int>(test_output.symbols[0].data)
-                       << "," << static_cast<int>(test_output.symbols[1].data)
-                       << "," << static_cast<int>(test_output.symbols[2].data)
-                       << "," << static_cast<int>(test_output.symbols[3].data) << "]");
+                       << " → SPI[0..2]: [" << static_cast<int>(test_output[0])
+                       << "," << static_cast<int>(test_output[1])
+                       << "," << static_cast<int>(test_output[2]) << "]");
             }
         }
 
         // Store reference to source data for cleanup
         channel->sourceData = data;
 
-        // =========================================================================
-        // BLOCKING SPI TRANSMISSION (Cache Coherence Fix - Iteration 5)
-        // =========================================================================
         // Use blocking polling transmit from main task. This ensures:
         // 1. SPI driver handles cache coherence internally during polling
         // 2. Transaction completes before returning (no async DMA race conditions)
         // 3. No timer ISR needed for transmission
         //
-        // Previous async approach failed due to ESP32-S3 cache coherence issues:
-        // - esp_cache_msync() returns ESP_ERR_INVALID_ARG on our buffers
-        // - DMA reads stale/zero data from physical memory while CPU cache holds
-        //   the correct encoded data
-        //
         // Blocking transmit is simpler and works reliably across all ESP32 variants.
-        // =========================================================================
 
         // Encode ALL LED data in main task context
         preEncodeAllData(channel);
@@ -600,7 +653,6 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
     SpiChannelState *channelPtr = &mChannels.back();
 
     // Now initialize the channel (this will attach ISR with correct pointer)
-    // Pass original timing for high-precision wave8 LUT generation
     if (!createChannel(channelPtr, pin, timing, dataSize, &originalTiming)) {
         FL_WARN_ONCE("ChannelEngineSpi: Failed to create channel for pin " << pin);
         // Remove the partially created channel
@@ -787,117 +839,55 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Calculate buffer size for wave8 encoding (8 SPI bits per LED bit)
-    // Total bits = dataSize * 8 LED bits/byte * 8 SPI bits/LED bit = dataSize * 64
-    // Convert to bytes = dataSize * 8
-    const size_t spiBufferSize = dataSize * 8;
+    // Calculate buffer size for Espressif 3-bit encoding (3 SPI bits per LED bit)
+    // Each LED byte (8 bits) expands to 24 SPI bits (3 bytes)
+    // Total: dataSize * 3 bytes
+    const size_t spiBufferSize = dataSize * SPI_BYTES_PER_COLOR_BYTE;
 
     // Determine if we should use DMA
     // Use DMA for larger buffers (>64 bytes) similar to Espressif driver
     state->useDMA = (spiBufferSize > 64);
 
-    // =========================================================================
-    // =========================================================================
-    // ITERATION 14 INVESTIGATION: gpio_reset_pin() behavior
-    // =========================================================================
-    // Previously we called gpio_reset_pin() to disconnect from UART, but
-    // Espressif's led_strip driver does NOT call gpio_reset_pin() at all.
-    // They rely solely on spi_bus_initialize() to configure the GPIO.
-    //
-    // However, we still call it because:
-    // 1. GPIO 1 may be connected to UART0 TX on startup
-    // 2. Without reset, the UART signal could interfere with SPI
-    //
-    // If this continues to fail, try commenting out gpio_reset_pin() to test.
-    // =========================================================================
-    gpio_reset_pin(pin);
-    FL_DBG("ChannelEngineSpi: Reset GPIO " << static_cast<int>(pin) << " to disconnect from previous peripheral");
+    // Espressif's led_strip driver does NOT call gpio_reset_pin() before
+    // spi_bus_initialize(). The SPI driver handles GPIO configuration internally.
+    FL_DBG("ChannelEngineSpi: Skipping gpio_reset_pin for GPIO " << static_cast<int>(pin) << " (following Espressif pattern)");
 
-    // Configure SPI bus with multi-lane support
+    // Configure SPI bus matching Espressif led_strip pattern EXACTLY
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    //
+    // CRITICAL: Match Espressif led_strip_spi_dev.c configuration:
+    //   .mosi_io_num = led_config->strip_gpio_num,  // Only data pin used
+    //   .miso_io_num = -1,                          // Not used for LED output
+    //   .sclk_io_num = -1,                          // Not used (internal timing only)
+    //
+    // The SPI peripheral generates clock internally (2.5MHz for 3-bit encoding) but
+    // the clock signal is NEVER connected to the LED strip - only MOSI carries data.
     spi_bus_config_t bus_config = {};
-    bus_config.mosi_io_num = pin; // Data0 (always present)
+    bus_config.mosi_io_num = pin;   // Data pin (only pin connected to LED strip)
+    bus_config.miso_io_num = -1;    // Match Espressif led_strip: not used
+    bus_config.sclk_io_num = -1;    // Match Espressif led_strip: not used (internal only)
+    bus_config.quadwp_io_num = -1;  // Not used for LED strips
+    bus_config.quadhd_io_num = -1;  // Not used for LED strips
+    bus_config.max_transfer_sz = spiBufferSize;
 
-    // =========================================================================
-    // ESP32-S3 FSPI DMA FIX: Set MISO to a valid GPIO even when unused
-    // =========================================================================
-    // Known issue on ESP32-S3: When using SPI2 (FSPI) with DMA and MISO=-1,
-    // MOSI output doesn't work (stays low). The workaround is to set MISO
-    // to a valid unused GPIO. This is applied after SCLK is determined below.
-    //
-    // Reference: https://github.com/Bodmer/TFT_eSPI/discussions/2233
-    // "FSPI still doesn't work with DMA... MOSI stays at low level"
-    // =========================================================================
-    bus_config.miso_io_num =
-        state->data1_pin;        // Data1 for dual/quad mode (-1 if unused)
-
-    // ⚠️ CLOCKLESS-OVER-SPI ARCHITECTURE: Clock pin is internal-only, NOT connected to LEDs!
-    //
-    // CRITICAL: The SPI peripheral requires a clock signal for precise MOSI timing generation,
-    // BUT this clock is NEVER physically connected to the LED strip. This is what makes this
-    // a "clockless-over-SPI" driver:
-    //
-    //   1. ESP32 SPI peripheral generates clock internally (e.g., 6.5MHz for wave8 encoding)
-    //   2. This clock controls the exact timing of MOSI bit transitions
-    //   3. MOSI pin sends encoded bit patterns to the LEDs (wave8: 8 SPI bits per LED bit)
-    //   4. Clock pin is NOT used - set to -1 like Espressif led_strip driver
-    //   5. LEDs decode the data stream based on pulse widths (T0H/T0L vs T1H/T1L)
-    //
-    // =========================================================================
-    // ITERATION 6 FIX: Match Espressif led_strip driver configuration EXACTLY
-    // =========================================================================
-    // Espressif's led_strip_spi_dev.c uses:
-    //   - sclk_io_num = -1 (no clock pin)
-    //   - miso_io_num = -1 (no MISO pin)
-    //   - Only mosi_io_num is set
-    //
-    // Previous iterations tried real SCLK/MISO GPIOs but this didn't help.
-    // Now matching Espressif's exact configuration for consistency.
-    // =========================================================================
-    bus_config.sclk_io_num = -1;  // Match Espressif: no clock pin
-    bus_config.miso_io_num = -1;  // Match Espressif: no MISO pin
-
-    FL_DBG("ChannelEngineSpi: SPI bus config - MOSI=" << static_cast<int>(pin)
+    FL_DBG("ChannelEngineSpi: SPI bus config (Espressif led_strip pattern) - MOSI=" << static_cast<int>(pin)
            << ", SCLK=-1 (internal), MISO=-1 (unused)"
            << ", host=" << static_cast<int>(state->spi_host));
 
-    // Warn if using non-IO_MUX pin for MOSI (may have GPIO matrix routing issues)
-#if defined(FL_IS_ESP_32S3)
-    // ESP32-S3: GPIO 11 is native SPI2 MOSI, GPIO 37 is native SPI3 MOSI
-    // Other pins go through GPIO matrix which works but may have timing variations
-    if (state->spi_host == SPI3_HOST && pin != GPIO_NUM_37) {
-        FL_DBG("ChannelEngineSpi: GPIO " << static_cast<int>(pin) << " routed via GPIO matrix (not native SPI3 MOSI)");
-    }
-#endif
-    bus_config.quadwp_io_num =
-        state->data2_pin; // Data2 for quad mode (-1 if unused)
-    bus_config.quadhd_io_num =
-        state->data3_pin; // Data3 for quad mode (-1 if unused)
-    bus_config.max_transfer_sz = spiBufferSize;
+    // Match Espressif led_strip pattern EXACTLY: NO bus flags set
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    // Espressif led_strip does NOT set .flags at all (implicitly 0)
+    // SPICOMMON_BUSFLAG_MASTER was causing issues on ESP32-S3
+    // if (state->numLanes >= 4) {
+    //     bus_config.flags = SPICOMMON_BUSFLAG_QUAD; // Quad mode (4 lanes)
+    // } else if (state->numLanes >= 2) {
+    //     bus_config.flags = SPICOMMON_BUSFLAG_DUAL; // Dual mode (2 lanes)
+    // } else {
+    //     bus_config.flags = 0;  // Single-lane: match Espressif (no flags)
+    // }
+    bus_config.flags = 0;
 
-    // Set flags based on lane count (1, 2, or 4 lanes)
-    bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
-    if (state->numLanes >= 4) {
-        bus_config.flags |= SPICOMMON_BUSFLAG_QUAD; // Quad mode (4 lanes)
-    } else if (state->numLanes >= 2) {
-        bus_config.flags |= SPICOMMON_BUSFLAG_DUAL; // Dual mode (2 lanes)
-    }
-    // else: standard SPI (1 data line)
-
-    // Initialize SPI bus
-    // =========================================================================
-    // ITERATION 7 FINDINGS: Non-DMA mode also fails
-    // =========================================================================
-    // Testing revealed that the ~7µs high pulse at start occurs even when the
-    // SPI transaction is rejected (transfer too large for non-DMA mode). This
-    // indicates the pulse is NOT from actual data transmission - it's likely
-    // from GPIO initialization or bus acquisition.
-    //
-    // The real issue: GPIO matrix is not routing SPI MOSI signal to the pin.
-    // The SPI peripheral transmits correctly (proven by timing), but the
-    // MOSI output isn't appearing on the physical GPIO.
-    //
-    // Using DMA for now since non-DMA has 64-byte limit.
-    // =========================================================================
+    // Initialize SPI bus with DMA (non-DMA has 64-byte limit)
     esp_err_t ret =
         spi_bus_initialize(state->spi_host, &bus_config, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK) {
@@ -908,62 +898,46 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     }
 
     // Configure SPI device
-    // =========================================================================
-    // ITERATION 13 FIX: Use calculated wave8 clock, NOT hardcoded 2.5MHz
-    // =========================================================================
-    // The wave8 LUT is built based on the chipset timing period. Each LED bit
-    // expands to 8 SPI bits. To maintain correct timing, the SPI clock must be:
-    //   wave8_clock_hz = 8 / period_ns * 1e9
-    //
-    // For WS2812B: period=1225ns → wave8_clock = 6.53MHz → ~153ns per SPI bit
-    //   - bit0: 1 high pulse = 153ns (T0H target=225ns, acceptable)
-    //   - bit1: 4 high pulses = 612ns (T1H target=580ns, good match)
-    //
-    // CRITICAL: Using 2.5MHz was WRONG because:
-    //   - At 2.5MHz: 1 pulse = 400ns, 4 pulses = 1600ns (2.6x too slow!)
-    //   - The LUT was built for 6.5MHz timing, not 2.5MHz
-    //   - This caused the RX to see only 1 long pulse instead of proper waveforms
-    // =========================================================================
-    uint32_t wave8_clock_hz;
-    if (originalTiming) {
-        const uint32_t period_ns = originalTiming->t1_ns + originalTiming->t2_ns + originalTiming->t3_ns;
-        wave8_clock_hz = (8ULL * 1000000000ULL) / period_ns;
-        FL_DBG("ChannelEngineSpi: Calculated wave8 clock: " << wave8_clock_hz << "Hz (period=" << period_ns << "ns)");
-    } else {
-        // Fallback: use SPI timing's clock (already wave8-adjusted)
-        wave8_clock_hz = timing.clock_hz;
-        FL_DBG("ChannelEngineSpi: Using SPI timing clock: " << wave8_clock_hz << "Hz");
-    }
+    // Use Espressif led_strip default: 2.5 MHz (400ns per SPI bit)
+    // With 3-bit encoding: LED '0' = 100 (T0H=400ns, T0L=800ns), LED '1' = 110 (T1H=800ns, T1L=400ns)
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    constexpr uint32_t LED_STRIP_SPI_DEFAULT_RESOLUTION = 2500000;  // 2.5 MHz
+    const uint32_t spi_clock_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION;
+    FL_DBG("ChannelEngineSpi: Using Espressif led_strip clock: " << spi_clock_hz << "Hz (2.5MHz, 3-bit encoding)");
 
     spi_device_interface_config_t dev_config = {};
+    dev_config.clock_source = SPI_CLK_SRC_DEFAULT;  // Match Espressif led_strip (ESP-IDF 5.x)
     dev_config.command_bits = 0;
     dev_config.address_bits = 0;
     dev_config.dummy_bits = 0;
-    dev_config.clock_speed_hz = wave8_clock_hz;
+    dev_config.clock_speed_hz = spi_clock_hz;
     dev_config.mode = 0;          // SPI mode 0
     dev_config.spics_io_num = -1; // No CS pin
     dev_config.queue_size = 4;    // Transaction queue size
-    dev_config.post_cb =
-        spiPostTransactionCallback; // ISR callback when transaction completes
+    // Match Espressif led_strip: NO post_cb callback
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    dev_config.post_cb = nullptr;
 
-    FL_DBG("ChannelEngineSpi: SPI clock_hz=" << wave8_clock_hz
-           << " (wave8 adjusted from " << timing.clock_hz << ")"
-           << ", bits_per_led_bit=8 (wave8)"
+    FL_DBG("ChannelEngineSpi: SPI clock_hz=" << spi_clock_hz
+           << " (Espressif 2.5MHz)"
+           << ", bits_per_led_bit=3 (Espressif encoding)"
            << ", buffer_size=" << spiBufferSize << " bytes");
 
-    // =========================================================================
-    // ITERATION 7: Try SPI_DEVICE_HALFDUPLEX for TX-only operation
-    // =========================================================================
-    // For LED strip driving, we only transmit (TX) and never receive (RX).
-    // Half-duplex mode is designed for such unidirectional operations.
-    //
-    // Previous iterations used full-duplex mode (flags=0) which may have
-    // caused issues with GPIO output configuration on ESP32-S3.
-    //
-    // Reference: ESP-IDF documentation recommends HALFDUPLEX for TX-only
-    // or RX-only operations when DMA is involved.
-    // =========================================================================
-    dev_config.flags = SPI_DEVICE_HALFDUPLEX;
+    // Device flags configuration:
+    // Match Espressif led_strip pattern: minimal flags
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    // Espressif led_strip uses NO flags (dev_config.flags = 0 implicitly)
+    // - SPI_DEVICE_HALFDUPLEX: Required for multi-lane (dual/quad) mode per ESP-IDF docs.
+    if (state->numLanes >= 2) {
+        // Multi-lane mode REQUIRES HALFDUPLEX flag per ESP-IDF documentation
+        dev_config.flags = SPI_DEVICE_HALFDUPLEX;
+        FL_DBG("ChannelEngineSpi: Multi-lane mode (" << static_cast<int>(state->numLanes)
+               << " lanes) - using SPI_DEVICE_HALFDUPLEX");
+    } else {
+        // Single-lane: match Espressif led_strip (no flags)
+        dev_config.flags = 0;
+        FL_DBG("ChannelEngineSpi: Single-lane mode - no device flags (matches Espressif led_strip)");
+    }
 
     // Add device to bus
     ret = spi_bus_add_device(state->spi_host, &dev_config, &state->spi_device);
@@ -975,16 +949,16 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Verify actual clock frequency
+    // Verify actual clock frequency (match Espressif led_strip tolerance: ±300 kHz)
     int actual_freq_khz = 0;
     spi_device_get_actual_freq(state->spi_device, &actual_freq_khz);
-    int requested_freq_khz = timing.clock_hz / 1000;
+    constexpr int requested_freq_khz = LED_STRIP_SPI_DEFAULT_RESOLUTION / 1000;  // 2500 kHz
     FL_DBG("ChannelEngineSpi: Actual SPI clock frequency: " << actual_freq_khz << " kHz");
     if (actual_freq_khz < requested_freq_khz - 300 ||
         actual_freq_khz > requested_freq_khz + 300) {
         FL_WARN_ONCE("ChannelEngineSpi: Clock frequency mismatch - requested "
                 << requested_freq_khz << " kHz, actual " << actual_freq_khz
-                << " kHz");
+                << " kHz (Espressif tolerance: ±300kHz)");
     }
 
     // DEBUG: Verify GPIO is configured as output by using ESP-IDF API
@@ -992,112 +966,23 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     int gpio_level = gpio_get_level(pin);
     FL_DBG("ChannelEngineSpi: GPIO " << static_cast<int>(pin) << " current level: " << gpio_level);
 
-    // =========================================================================
-    // ITERATION 6 FIX: Manual GPIO Matrix MOSI Signal Routing
-    // =========================================================================
-    // The ESP-IDF SPI driver should configure the GPIO matrix automatically,
-    // but on ESP32-S3, the MOSI signal may not be properly routed to the GPIO pin.
-    //
-    // DIAGNOSIS (Iteration 5):
-    // - SPI peripheral is working: 8ms transmit time for 2400 bytes @ 2.5MHz ✓
-    // - GPIO baseline test passes: manual digitalWrite works on GPIO 1 ✓
-    // - BUT: MOSI signal not appearing on GPIO - RMT RX captures 0 edges ✗
-    //
-    // ROOT CAUSE HYPOTHESIS: GPIO matrix not routing SPI MOSI output to GPIO pin.
-    //
-    // FIX: Manually connect the SPI MOSI output signal to the GPIO pin via GPIO matrix.
-    // This is the same technique used by Espressif's led_strip driver for output inversion.
-    //
-    // Signal IDs (from soc/gpio_sig_map.h):
-    // - SPI2 (FSPI): FSPID_OUT_IDX (signal 66 on ESP32-S3)
-    // - SPI3 (HSPI): SPI3_D_OUT_IDX (signal 92 on ESP32-S3)
-    //
-    // Reference: Espressif led_strip_spi_dev.c uses esp_rom_gpio_connect_out_signal()
-    // =========================================================================
-    // =========================================================================
-    // ITERATION 8 FIX: RE-ADD manual GPIO matrix routing
-    // =========================================================================
-    // Research from GitHub issues (#13478, #12759) and ESP32 forum shows that
-    // the ESP-IDF SPI driver may NOT properly configure GPIO matrix routing
-    // for non-IO_MUX pins on ESP32-S3.
-    //
-    // Evidence:
-    // - GitHub #13478: "MISO line seems to not register, it is reading only LOW"
-    //   when using custom SPI pins via GPIO matrix on ESP32-S3
-    // - GitHub #12759: SPI MOSI output fixed by calling esp_rom_gpio_connect_out_signal()
-    //   AFTER spi_bus_initialize()
-    //
-    // The workaround is to explicitly call esp_rom_gpio_connect_out_signal()
-    // after SPI bus initialization to ensure proper GPIO matrix routing.
-    //
-    // Signal IDs (from soc/spi_periph.h via spi_periph_signal[host].spid_out):
-    // - SPI2_HOST (FSPI): spi_periph_signal[SPI2_HOST].spid_out
-    // - SPI3_HOST (HSPI): spi_periph_signal[SPI3_HOST].spid_out
-    //
-    // Parameters for esp_rom_gpio_connect_out_signal():
-    // - gpio_num: The GPIO pin to route to
-    // - signal_idx: The peripheral signal ID (MOSI output)
-    // - out_inv: false (no output inversion - WS2812 needs non-inverted data)
-    // - out_en_inv: false (no output enable inversion)
-    // =========================================================================
+    // Set maximum GPIO drive capability for better signal integrity
+    esp_err_t drive_err = gpio_set_drive_capability(pin, GPIO_DRIVE_CAP_3);
+    if (drive_err != ESP_OK) {
+        FL_WARN("ChannelEngineSpi: Failed to set GPIO drive capability: " << drive_err);
+    } else {
+        FL_DBG("ChannelEngineSpi: Set GPIO " << static_cast<int>(pin) << " drive to GPIO_DRIVE_CAP_3 (strongest)");
+    }
 
-    // =========================================================================
-    // ITERATION 14: RE-ADD MANUAL GPIO ROUTING (CORRECTED)
-    // =========================================================================
-    // The ESP-IDF SPI driver SHOULD handle GPIO matrix routing automatically,
-    // but ESP32-S3 with non-IO_MUX pins (like GPIO 1) may need manual help.
-    //
-    // Espressif's led_strip driver calls esp_rom_gpio_connect_out_signal()
-    // only for output inversion, but some GitHub issues suggest it's needed
-    // for proper GPIO matrix connection on non-IO_MUX pins.
-    //
-    // Signal IDs from soc/spi_periph.h via spi_periph_signal[host].spid_out:
-    // - SPI2_HOST (FSPI): 103 on ESP32-S3
-    // - SPI3_HOST (HSPI): varies by chip
-    //
-    // Parameters for esp_rom_gpio_connect_out_signal():
-    // - gpio_num: The GPIO pin to route to
-    // - signal_idx: The peripheral signal ID (MOSI output)
-    // - out_inv: false (no output inversion - WS2812 needs non-inverted data)
-    // - out_en_inv: false (no output enable inversion)
-    // =========================================================================
-
-    // Get the correct MOSI signal for the SPI host
-    int mosi_signal = spi_periph_signal[state->spi_host].spid_out;
-
-    // Manually route SPI MOSI output to the GPIO pin via GPIO matrix
-    esp_rom_gpio_connect_out_signal(pin, mosi_signal, false, false);
-
-    // Ensure GPIO is configured as output
-    gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-
-    FL_DBG("ChannelEngineSpi: Manually routed MOSI signal " << mosi_signal
-           << " to GPIO " << static_cast<int>(pin) << " via GPIO matrix");
-
-    // NOTE: Removed test transmission during channel creation (Iteration 8)
-    // The test transmission interfered with validation RX capture by triggering
-    // edge detection before the actual LED data was sent. The test pattern
-    // (0xFF 0x00 alternating) produced ~30µs of edges that the RMT RX captured
-    // instead of the actual LED data.
-    //
-    // If SPI output verification is needed, it should be done outside the
-    // show() path when RX is not armed.
+    // Rely on spi_bus_initialize() for GPIO configuration (matches Espressif led_strip)
+    FL_DBG("ChannelEngineSpi: Relying on spi_bus_initialize() for GPIO "
+           << static_cast<int>(pin) << " routing");
 
     // Allocate double-buffered staging buffers (4KB each)
-    //
-    // =========================================================================
-    // ESP32-S3 DMA BUFFER ALLOCATION (Iteration 12):
-    // =========================================================================
     // Following Espressif's led_strip driver pattern:
     // - MALLOC_CAP_INTERNAL: Forces allocation in internal SRAM
     // - MALLOC_CAP_DMA: Ensures DMA-accessible memory alignment
-    //
-    // Using internal DMA memory eliminates cache coherence issues. The internal
-    // SRAM on ESP32-S3 is directly accessible by DMA without cache intervention,
-    // so no esp_cache_msync() calls are needed.
-    //
-    // Reference: idf-extra-components/led_strip/src/led_strip_spi_dev.c
-    // =========================================================================
+    // Using internal DMA memory eliminates cache coherence issues.
     const size_t staging_size = 4096;
 
     state->stagingA = (uint8_t *)heap_caps_malloc(
@@ -1117,7 +1002,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Zero the staging buffers - wave8 encoding assumes zero-initialized memory
+    // Zero the staging buffers - Espressif 3-bit encoding assumes zero-initialized memory
     fl::memset(state->stagingA, 0, staging_size);
     fl::memset(state->stagingB, 0, staging_size);
 
@@ -1154,66 +1039,10 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     fl::memset(&state->transA, 0, sizeof(spi_transaction_t));
     fl::memset(&state->transB, 0, sizeof(spi_transaction_t));
 
-    // Build wave8 expansion LUT once during channel creation (not in ISR)
-    // CRITICAL FIX: Use original chipset timing for wave8 LUT if available
-    // This provides higher precision than the SPI-quantized timing.
-    // The SPI timing is quantized to bit patterns (e.g., 3-bit for WS2812),
-    // which loses timing precision. The original ChipsetTimingConfig has
-    // nanosecond-precise values that produce a more accurate wave8 LUT.
-    ChipsetTiming chipsetTiming;
-    if (originalTiming) {
-        // Use original timing for maximum precision
-        chipsetTiming.T1 = originalTiming->t1_ns;
-        chipsetTiming.T2 = originalTiming->t2_ns;
-        chipsetTiming.T3 = originalTiming->t3_ns;
-        chipsetTiming.RESET = originalTiming->reset_us;
-        chipsetTiming.name = originalTiming->name;
-        FL_DBG("ChannelEngineSpi: Using ORIGINAL chipset timing for wave8 LUT (high precision)");
-    } else {
-        // Fall back to SPI-derived timing (lower precision due to quantization)
-        chipsetTiming = convertSpiTimingToChipsetTiming(timing);
-        FL_DBG("ChannelEngineSpi: Using SPI-derived timing for wave8 LUT (reduced precision)");
-    }
-    state->mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
-
-    // CRITICAL: Memory barriers to ensure LUT is written before ISR can access it
-    // This fixes the race condition where early ISR fires see zero-filled LUT entries
-    asm volatile("" ::: "memory");  // Compiler barrier prevents instruction reordering
-    __sync_synchronize();           // Hardware memory barrier ensures cache flush
-
-    // Verify LUT is non-zero (diagnostic for race condition bug)
-    // LUT structure: lut[16][4] - 16 nibbles, 4 Wave8Bit bytes per nibble
-    bool lut_valid = false;
-    for (size_t nibble = 0; nibble < 16 && !lut_valid; ++nibble) {
-        for (size_t byte = 0; byte < 4 && !lut_valid; ++byte) {
-            if (state->mWave8Lut.lut[nibble][byte].data != 0) {
-                lut_valid = true;
-            }
-        }
-    }
-    if (!lut_valid) {
-        FL_WARN("ChannelEngineSpi: Wave8 LUT appears to be all zeros - memory barrier may have failed!");
-    }
-
-    // Calculate wave8 clock for debug output (8 bits per LED bit instead of timing.bits_per_led_bit)
-    const uint32_t wave8_clk = (8 * timing.clock_hz) / timing.bits_per_led_bit;
-    FL_DBG("ChannelEngineSpi: Initialized wave8 LUT for channel (lut_valid=" << lut_valid << ", usedOriginalTiming=" << (originalTiming ? 1 : 0) << ")");
-    FL_DBG("  SPI Clock: " << wave8_clk << " Hz (wave8, 8 bits per LED bit)");
-    FL_DBG("  Chipset Timing: T0H=" << chipsetTiming.T1 << "ns, T1H=" << (chipsetTiming.T1 + chipsetTiming.T2)
-           << "ns, T0L=" << chipsetTiming.T3 << "ns");
-    // Log LUT entries to verify bit0 vs bit1 waveforms
-    // nibble[0] = 0b0000 → all bit0_waveforms
-    // nibble[15] = 0b1111 → all bit1_waveforms
-    FL_DBG("  LUT nibble[0] (all 0s): ["
-           << static_cast<int>(state->mWave8Lut.lut[0][0].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[0][1].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[0][2].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[0][3].data) << "]");
-    FL_DBG("  LUT nibble[15] (all 1s): ["
-           << static_cast<int>(state->mWave8Lut.lut[15][0].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[15][1].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[15][2].data) << ","
-           << static_cast<int>(state->mWave8Lut.lut[15][3].data) << "]");
+    // NOTE: Using Espressif 3-bit encoding (no LUT needed)
+    // The encoding is done inline in preEncodeAllData() using led_strip_encode_byte()
+    // This matches the Espressif led_strip reference implementation
+    FL_DBG("ChannelEngineSpi: Using Espressif 3-bit encoding (no LUT)");
 
     // Set up timer ISR (1 kHz = 1ms period, reduced from 4kHz to avoid stack overflow)
     // The ISR encodes LED data into SPI staging buffers. Lower frequency reduces
@@ -1344,17 +1173,17 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() {
     //
     // Multi-lane SPI (dual/quad) is still supported on the SINGLE host.
     // Sequential channel transmission through batching handles multiple strips.
+    // Following Espressif led_strip pattern: try SPI2 (FSPI) first.
     static const spi_host_device_t hosts[] = {
-// ITERATION 5: Try SPI2_HOST on ESP32-S3
-// Previous iterations showed SPI3 transmission taking 8ms (correct!) but GPIO
-// output not appearing. SPI2 has its own dedicated DMA channel and may have
-// different GPIO matrix routing behavior.
-#if defined(SPI2_HOST)
-        SPI2_HOST,  // Try FSPI - SPI2 has its own DMA channel
-#endif
-#if defined(FL_IS_ESP_32S3) && defined(SPI3_HOST)
-        SPI3_HOST,  // Fallback to HSPI if SPI2 fails
-#endif
+// #if defined(SPI2_HOST)
+//         SPI2_HOST,  // FSPI - primary choice (matches Espressif led_strip)
+// #endif
+// #if defined(FL_IS_ESP_32S3) && defined(SPI3_HOST)
+//         SPI3_HOST,  // ESP32-S3: SPI3 as fallback
+// #elif defined(SPI3_HOST)
+//         SPI3_HOST,  // Other variants: SPI3 as fallback
+// #endif
+        SPI2_HOST
         // SPI1_HOST intentionally omitted - reserved for flash
     };
     static const size_t num_hosts = sizeof(hosts) / sizeof(hosts[0]);
@@ -1539,7 +1368,7 @@ void ChannelEngineSpi::processPendingChannels() {
         gpio_num_t pin = static_cast<gpio_num_t>(pending.pin);
         const auto &ledData = pending.data->getData();
 
-        // Get original chipset timing for wave8 LUT precision
+        // Get original chipset timing for reference (passed to acquireChannel)
         const ChipsetTimingConfig& originalTiming = pending.data->getTiming();
 
         SpiChannelState *channel =
@@ -1598,15 +1427,20 @@ void ChannelEngineSpi::processPendingChannels() {
 
 void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
     // =========================================================================
-    // Pre-encode ALL LED data into staging buffer
+    // Pre-encode ALL LED data into staging buffer using Espressif 3-bit encoding
     // This function runs in MAIN TASK context (not ISR)
+    //
+    // Espressif encoding scheme:
+    // - Each LED byte (8 bits) → 24 SPI bits (3 bytes)
+    // - LED bit '0' → SPI bits: 100 (binary)
+    // - LED bit '1' → SPI bits: 110 (binary)
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
     // =========================================================================
 
     if (!channel || !channel->ledSource || channel->ledBytesRemaining == 0) {
         return;
     }
 
-    const Wave8BitExpansionLut& lut = channel->mWave8Lut;
     size_t total_led_bytes = channel->ledBytesRemaining;
     size_t total_bytes_written = 0;
 
@@ -1614,107 +1448,41 @@ void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
     channel->stagingOffset = 0;
     channel->currentStaging = channel->stagingA;
 
+    // Clear staging buffer (Espressif encoding uses |= so buffer must be zeroed)
+    fl::memset(channel->currentStaging, 0, channel->stagingCapacity);
+
     // Encode ALL LED data into staging buffer
-    // For wave8 encoding: each LED byte expands to 8 SPI bytes
-    // With 4KB staging buffer, we can hold ~512 LED bytes (1536 RGB LEDs worth of one color)
+    // For Espressif 3-bit encoding: each LED byte expands to 3 SPI bytes
+    // With 4KB staging buffer, we can hold ~1365 LED bytes (455 RGB LEDs)
     // For typical use cases, this is sufficient. For larger strips, we fill what fits.
 
     uint8_t* output = channel->currentStaging;
     const size_t max_output = channel->stagingCapacity;
 
-    if (channel->numLanes == 1) {
-        // Single-lane encoding - each LED byte → 8 output bytes
-        const size_t max_led_bytes = max_output / 8;
-        const size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
-
-        for (size_t i = 0; i < bytes_to_encode; i++) {
-            uint8_t input_byte = channel->ledSource[i];
-            ::fl::Wave8Byte wave8_output;
-            ::fl::detail::wave8_convert_byte_to_wave8byte(input_byte, lut, &wave8_output);
-            fl::memcpy(output + total_bytes_written, &wave8_output, sizeof(::fl::Wave8Byte));
-            total_bytes_written += 8;
-        }
-
-        channel->ledSource += bytes_to_encode;
-        channel->ledBytesRemaining -= bytes_to_encode;
-
-    } else if (channel->numLanes == 2) {
-        // Dual-lane encoding - each 2 LED bytes → 16 output bytes
-        const size_t max_led_bytes = (max_output / 16) * 2;
-        size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
-        bytes_to_encode = (bytes_to_encode / 2) * 2; // Align to pairs
-
-        for (size_t i = 0; i < bytes_to_encode / 2; i++) {
-            const uint8_t lane0_byte = channel->ledSource[i * 2];
-            const uint8_t lane1_byte = channel->ledSource[i * 2 + 1];
-
-            ::fl::Wave8Byte wave8_lane0, wave8_lane1;
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane0_byte, lut, &wave8_lane0);
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane1_byte, lut, &wave8_lane1);
-
-            ::fl::Wave8Byte lane_array[2] = {wave8_lane0, wave8_lane1};
-            uint8_t transposed[16];
-            ::fl::detail::wave8_transpose_2(lane_array, transposed);
-
-            fl::memcpy(output + total_bytes_written, transposed, 16);
-            total_bytes_written += 16;
-        }
-
-        channel->ledSource += bytes_to_encode;
-        channel->ledBytesRemaining -= bytes_to_encode;
-
-    } else if (channel->numLanes == 4) {
-        // Quad-lane encoding - each 4 LED bytes → 32 output bytes
-        const size_t max_led_bytes = (max_output / 32) * 4;
-        size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
-        bytes_to_encode = (bytes_to_encode / 4) * 4; // Align to quads
-
-        for (size_t i = 0; i < bytes_to_encode / 4; i++) {
-            const uint8_t lane0_byte = channel->ledSource[i * 4];
-            const uint8_t lane1_byte = channel->ledSource[i * 4 + 1];
-            const uint8_t lane2_byte = channel->ledSource[i * 4 + 2];
-            const uint8_t lane3_byte = channel->ledSource[i * 4 + 3];
-
-            ::fl::Wave8Byte wave8_lanes[4];
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane0_byte, lut, &wave8_lanes[0]);
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane1_byte, lut, &wave8_lanes[1]);
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane2_byte, lut, &wave8_lanes[2]);
-            ::fl::detail::wave8_convert_byte_to_wave8byte(lane3_byte, lut, &wave8_lanes[3]);
-
-            uint8_t transposed[32];
-            ::fl::detail::wave8_transpose_4(wave8_lanes, transposed);
-
-            fl::memcpy(output + total_bytes_written, transposed, 32);
-            total_bytes_written += 32;
-        }
-
-        channel->ledSource += bytes_to_encode;
-        channel->ledBytesRemaining -= bytes_to_encode;
+    // NOTE: Multi-lane SPI is NOT supported with Espressif 3-bit encoding
+    // The Espressif led_strip driver only supports single-lane mode
+    // For multi-lane support, use PARLIO or RMT drivers instead
+    if (channel->numLanes > 1) {
+        FL_WARN_ONCE("ChannelEngineSpi: Multi-lane mode not supported with Espressif 3-bit encoding, using single-lane");
     }
+
+    // Single-lane encoding - each LED byte → 3 output bytes (Espressif encoding)
+    const size_t max_led_bytes = max_output / SPI_BYTES_PER_COLOR_BYTE;
+    const size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
+
+    for (size_t i = 0; i < bytes_to_encode; i++) {
+        uint8_t input_byte = channel->ledSource[i];
+        led_strip_encode_byte(input_byte, output + total_bytes_written);
+        total_bytes_written += SPI_BYTES_PER_COLOR_BYTE;
+    }
+
+    channel->ledSource += bytes_to_encode;
+    channel->ledBytesRemaining -= bytes_to_encode;
 
     channel->stagingOffset = total_bytes_written;
 
-    // =========================================================================
-    // ESP32-S3 CACHE COHERENCE (Iteration 12):
-    // =========================================================================
-    // ITERATION 12 FIX: Removed esp_cache_msync() calls entirely.
-    //
-    // Following Espressif's led_strip driver pattern:
-    // - Staging buffers are allocated with MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA
-    // - Internal SRAM on ESP32-S3 is non-cacheable for DMA operations
-    // - Memory barriers alone are sufficient for ordering guarantees
-    //
-    // Previous iterations tried esp_cache_msync() which failed with
-    // ESP_ERR_INVALID_ARG because internal DMA memory doesn't require
-    // (or support) explicit cache synchronization operations.
-    //
-    // References:
-    // - Espressif led_strip_spi_dev.c: Uses MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA
-    //   without any esp_cache_msync() calls
-    // - ESP-IDF cache API: Internal SRAM regions may not support cache ops
-    // =========================================================================
-
-    // Memory barrier: Ensure all CPU writes complete before DMA reads
+    // Cache coherence: Staging buffers use MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA
+    // Internal SRAM is non-cacheable for DMA, so memory barriers are sufficient.
     FL_MEMORY_BARRIER;
 
     FL_DBG_EVERY(100, "ChannelEngineSpi: Pre-encoded " << (total_led_bytes - channel->ledBytesRemaining)
@@ -1722,16 +1490,8 @@ void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
 }
 
 void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
-    // =========================================================================
-    // BLOCKING POLLED TRANSMIT (Iteration 12 - Simplified)
-    // =========================================================================
     // Transmits pre-encoded LED data from staging buffer via SPI DMA.
-    //
-    // NOTE (Iteration 12): Cache coherence is now handled at allocation time
-    // using MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA. No explicit cache sync needed.
-    // The spi_bus_dma_memory_alloc() for the DMA buffer also handles alignment.
-    // =========================================================================
-
+    // Cache coherence is handled at allocation time using MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA.
     if (!channel || !channel->currentStaging || channel->stagingOffset == 0) {
         FL_WARN_EVERY(100, "ChannelEngineSpi: transmitBlockingPolled - no data to transmit");
         return;
@@ -1760,61 +1520,15 @@ void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
            << static_cast<int>(channel->currentStaging[14]) << ","
            << static_cast<int>(channel->currentStaging[15]) << "]");
 
-    // =========================================================================
-    // ITERATION 7: Use spi_bus_dma_memory_alloc for proper cache handling
-    // =========================================================================
-    // The ESP-IDF documentation states:
-    //   "This API will take care of the cache and hardware alignment internally.
-    //    To free/release memory allocated by this helper function, simply
-    //    calling free()."
-    //
-    // Signature: void* spi_bus_dma_memory_alloc(host_id, size, extra_heap_caps)
-    //
-    // Previous attempts used heap_caps_calloc which may not have proper cache
-    // attributes for ESP32-S3 DMA. The spi_bus_dma_memory_alloc function is
-    // specifically designed for SPI DMA buffers.
-    // =========================================================================
-    uint8_t* dma_buf = static_cast<uint8_t*>(spi_bus_dma_memory_alloc(
-        channel->spi_host, bytes_to_send, 0));
+    // Match Espressif led_strip pattern EXACTLY
+    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+    spi_transaction_t trans;
+    fl::memset(&trans, 0, sizeof(trans));  // Zero-initialize like Espressif
 
-    if (!dma_buf) {
-        FL_WARN_EVERY(100, "ChannelEngineSpi: spi_bus_dma_memory_alloc failed (" << bytes_to_send << " bytes)");
-        channel->stagingOffset = 0;
-        return;
-    }
-
-    // Copy encoded data from staging to DMA buffer
-    fl::memcpy(dma_buf, channel->currentStaging, bytes_to_send);
-
-    // Memory barrier to ensure all writes are visible
-    FL_MEMORY_BARRIER;
-
-    // DEBUG: Print first 16 bytes of DMA buffer AFTER copy
-    FL_DBG_EVERY(100, "ChannelEngineSpi: DMA buf (after copy) [0..15]: ["
-           << static_cast<int>(dma_buf[0]) << ","
-           << static_cast<int>(dma_buf[1]) << ","
-           << static_cast<int>(dma_buf[2]) << ","
-           << static_cast<int>(dma_buf[3]) << ","
-           << static_cast<int>(dma_buf[4]) << ","
-           << static_cast<int>(dma_buf[5]) << ","
-           << static_cast<int>(dma_buf[6]) << ","
-           << static_cast<int>(dma_buf[7]) << " | "
-           << static_cast<int>(dma_buf[8]) << ","
-           << static_cast<int>(dma_buf[9]) << ","
-           << static_cast<int>(dma_buf[10]) << ","
-           << static_cast<int>(dma_buf[11]) << ","
-           << static_cast<int>(dma_buf[12]) << ","
-           << static_cast<int>(dma_buf[13]) << ","
-           << static_cast<int>(dma_buf[14]) << ","
-           << static_cast<int>(dma_buf[15]) << "]");
-
-    // Setup transaction with the fresh DMA buffer
-    spi_transaction_t trans = {};
     trans.length = bytes_to_send * 8;  // Convert to bits
-    trans.tx_buffer = dma_buf;
-    trans.rx_buffer = nullptr;
-    trans.rxlength = 0;
-    trans.user = nullptr;  // No callback needed for blocking transmit
+    trans.tx_buffer = channel->currentStaging;
+    trans.rx_buffer = NULL;
+    // NOTE: Espressif does NOT set rxlength, user, or flags - leave as 0 from memset
 
     // DEBUG: Log transaction configuration
     FL_DBG_EVERY(100, "ChannelEngineSpi: Transaction config - length_bits=" << trans.length
@@ -1823,63 +1537,32 @@ void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
            << ", host=" << static_cast<int>(channel->spi_host)
            << ", device=" << fl::ptr_to_int(channel->spi_device));
 
-    // Set transaction mode based on lane count
+    // Multi-lane mode flags (only set if needed)
     if (channel->numLanes >= 4) {
         trans.flags = SPI_TRANS_MODE_QIO;
     } else if (channel->numLanes >= 2) {
         trans.flags = SPI_TRANS_MODE_DIO;
-    } else {
-        trans.flags = 0;
     }
+    // else: flags remain 0 from memset (single-lane, matches Espressif)
 
     // DEBUG: Capture first 8 bytes of tx_buffer for diagnostics
     if (bytes_to_send >= 8) {
         channel->debugTxCaptured = true;
         for (int i = 0; i < 8; i++) {
-            channel->debugTxBuffer[i] = dma_buf[i];
+            channel->debugTxBuffer[i] = channel->currentStaging[i];
         }
     }
 
-    // =========================================================================
-    // SPI TRANSMISSION DEBUG (Iteration 5)
-    // =========================================================================
+    // Use spi_device_transmit() (queue-based blocking API, matches Espressif led_strip)
     uint32_t start_time = millis();
 
-    // Acquire bus before transmission
-    esp_err_t acq_ret = spi_device_acquire_bus(channel->spi_device, portMAX_DELAY);
-    if (acq_ret != ESP_OK) {
-        FL_WARN_EVERY(100, "ChannelEngineSpi: spi_device_acquire_bus failed: " << acq_ret);
-        free(dma_buf);
-        channel->stagingOffset = 0;
-        return;
-    }
-    FL_DBG_EVERY(100, "ChannelEngineSpi: Bus acquired");
-
-    // =========================================================================
-    // ITERATION 14: RE-ADD PRE-TRANSMIT GPIO ROUTING
-    // =========================================================================
-    // The SPI driver may reconfigure GPIO during bus acquisition/release.
-    // Re-apply GPIO matrix routing right before transmission to ensure
-    // the MOSI signal is properly connected to the physical pin.
-    //
-    // This is called AFTER spi_device_acquire_bus() to ensure we don't
-    // conflict with any GPIO setup the driver does during acquisition.
-    // =========================================================================
-    int mosi_signal = spi_periph_signal[channel->spi_host].spid_out;
-    esp_rom_gpio_connect_out_signal(channel->pin, mosi_signal, false, false);
-    gpio_set_direction(channel->pin, GPIO_MODE_OUTPUT);
-    FL_DBG_EVERY(100, "ChannelEngineSpi: Pre-TX GPIO routing: signal " << mosi_signal << " → GPIO " << static_cast<int>(channel->pin));
-
-    // Try spi_device_polling_transmit with bus acquired (this should use the hardware directly)
-    esp_err_t ret = spi_device_polling_transmit(channel->spi_device, &trans);
+    // Transmit data via SPI (queue-based API, matches Espressif led_strip)
+    esp_err_t ret = spi_device_transmit(channel->spi_device, &trans);
 
     uint32_t elapsed_ms = millis() - start_time;
 
-    // Release bus
-    spi_device_release_bus(channel->spi_device);
-
     if (ret != ESP_OK) {
-        FL_WARN_EVERY(100, "ChannelEngineSpi: spi_device_polling_transmit failed: " << ret);
+        FL_WARN_EVERY(100, "ChannelEngineSpi: spi_device_transmit failed: " << ret);
     } else {
         FL_DBG_EVERY(100, "ChannelEngineSpi: Transmit complete, sent " << bytes_to_send << " bytes in " << elapsed_ms << "ms");
 
@@ -1892,8 +1575,7 @@ void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
         }
     }
 
-    // Free the temporary DMA buffer (allocated with spi_bus_dma_memory_alloc)
-    free(dma_buf);
+    // No free() needed - staging buffer is managed by channel lifecycle
 
     // Clear staging offset (buffer consumed)
     channel->stagingOffset = 0;

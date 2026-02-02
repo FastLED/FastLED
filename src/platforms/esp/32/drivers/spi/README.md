@@ -126,29 +126,24 @@ Default: 2.5 MHz for WS2812-over-SPI encoding
 - **Encoding**: `100` for bit 0, `110` for bit 1 (MSB first)
 - **Timing**: Precise timing via SPI clock frequency
 
-### Wave8 Encoding (New in v6.0)
+### Espressif 3-Bit Encoding
 
-The SPI engine uses **wave8 encoding**, a high-performance lookup-table-based bit expansion system that replaces the previous bit-by-bit encoding:
+The SPI engine uses **Espressif led_strip 3-bit encoding**, matching the official ESP-IDF led_strip component:
 
-**Key Features**:
-- **8x expansion ratio**: Each LED byte → 8 SPI bytes (configurable via LUT)
-- **Lookup table**: Pre-computed nibble-to-wave8 mapping cached per channel
-- **Zero-copy**: Encodes directly into DMA staging buffers (ISR-safe)
-- **Multi-lane support**: Automatic transposition for dual/quad-lane modes
+**Reference**: [ESP-IDF led_strip SPI implementation](https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c)
 
-**Performance**:
-- **~20x faster** than bit-by-bit encoding during ISR preparation
-- **Memory overhead**: +64 bytes per SPI channel (LUT cache)
-- **ISR overhead**: ~10 CPU cycles per input byte (negligible)
+**How it works**:
+- **3x expansion ratio**: Each LED bit → 3 SPI bits
+- **Bit patterns** (MSB first):
+  - LED bit `0` → SPI pattern `100` (binary) = short high, long low
+  - LED bit `1` → SPI pattern `110` (binary) = long high, short low
+- **Timing**: 2.5 MHz SPI clock = 400ns per SPI bit
+  - T0H = 400ns (1 high bit), T0L = 800ns (2 low bits)
+  - T1H = 800ns (2 high bits), T1L = 400ns (1 low bit)
 
-**Architecture Alignment**: Wave8 encoding matches the PARLIO engine architecture, providing consistent encoding behavior across ESP32 LED drivers.
+**Implementation**: See `led_strip_spi_bit()` and `led_strip_encode_byte()` in `channel_engine_spi.cpp.hpp`.
 
-**Implementation Details**:
-- Single-lane: Direct wave8 conversion (no transposition)
-- Dual-lane: Wave8 + 2-lane bit transposition (inline de-interleaving)
-- Quad-lane: Wave8 + 4-lane bit transposition (inline de-interleaving)
-
-**See**: `src/platforms/esp/32/drivers/spi/wave8_encoder_spi.{h,cpp}` for implementation details.
+**Note**: Multi-lane SPI (dual/quad) is NOT supported with this encoding. For multi-lane support, use PARLIO or RMT drivers instead.
 
 ## Performance
 

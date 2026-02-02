@@ -3,6 +3,7 @@ Reusable JSON-RPC client for serial communication with embedded devices.
 
 This module provides a stateful RPC client that handles:
 - Serial connection management via fbuild daemon (eliminates port lock conflicts)
+- Or direct pyserial connection (when --no-fbuild is specified)
 - JSON-RPC command serialization and response parsing
 - Timeout and retry logic
 - Proper KeyboardInterrupt handling
@@ -12,6 +13,10 @@ Usage:
     with RpcClient("/dev/ttyUSB0") as client:
         response = client.send("ping")
         print(response)  # {"timestamp": ..., "uptimeMs": ...}
+
+    # With pyserial (no fbuild daemon):
+    with RpcClient("/dev/ttyUSB0", use_pyserial=True) as client:
+        response = client.send("ping")
 
     # Or with explicit connection management:
     client = RpcClient("/dev/ttyUSB0")
@@ -26,11 +31,17 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
-from typing import Any
-
-from fbuild.api import SerialMonitor
+from typing import TYPE_CHECKING, Any
 
 from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
+
+
+if TYPE_CHECKING:
+    from fbuild.api import SerialMonitor as FbuildSerialMonitorType
+
+    from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitorType
+
+    SerialMonitorType = PySerialMonitorType | FbuildSerialMonitorType
 
 
 @dataclass
@@ -67,13 +78,18 @@ class RpcError(Exception):
 
 
 class RpcClient:
-    """Stateful JSON-RPC client for serial communication via fbuild daemon.
+    """Stateful JSON-RPC client for serial communication.
+
+    Supports two serial backends:
+    - fbuild daemon (default): Better for concurrent access and deploy coordination
+    - pyserial direct (use_pyserial=True): For --no-fbuild mode, avoids asyncio issues
 
     Attributes:
         port: Serial port path
         baudrate: Serial baud rate (default: 115200)
         timeout: Default RPC response timeout in seconds
         response_prefix: Prefix for RPC responses (default: "REMOTE: ")
+        use_pyserial: If True, use pyserial directly instead of fbuild daemon
     """
 
     RESPONSE_PREFIX = "REMOTE: "
@@ -84,6 +100,7 @@ class RpcClient:
         baudrate: int = 115200,
         timeout: float = 10.0,
         read_timeout: float = 0.5,
+        use_pyserial: bool = False,
     ):
         """Initialize RPC client.
 
@@ -92,12 +109,14 @@ class RpcClient:
             baudrate: Serial baud rate (default: 115200)
             timeout: Default timeout for RPC operations in seconds
             read_timeout: Timeout for individual serial reads (unused with fbuild)
+            use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
         """
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
         self.read_timeout = read_timeout
-        self._monitor: SerialMonitor | None = None
+        self.use_pyserial = use_pyserial
+        self._monitor: Any = None  # SerialMonitor (fbuild or pyserial)
 
     @property
     def is_connected(self) -> bool:
@@ -105,7 +124,9 @@ class RpcClient:
         return self._monitor is not None
 
     def connect(self, boot_wait: float = 3.0, drain_boot: bool = True) -> None:
-        """Open serial connection via fbuild daemon.
+        """Open serial connection.
+
+        Uses either fbuild daemon or direct pyserial based on use_pyserial setting.
 
         Args:
             boot_wait: Time to wait for device boot (seconds)
@@ -114,15 +135,27 @@ class RpcClient:
         if self.is_connected:
             return
 
-        # Create SerialMonitor instance (routes through fbuild daemon)
-        self._monitor = SerialMonitor(
-            port=self.port,
-            baud_rate=self.baudrate,
-            auto_reconnect=True,  # Handle deploy preemption gracefully
-            verbose=False,
-        )
+        # Select appropriate SerialMonitor implementation
+        if self.use_pyserial:
+            from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitor
 
-        # Attach to daemon serial session
+            self._monitor = PySerialMonitor(
+                port=self.port,
+                baud_rate=self.baudrate,
+                auto_reconnect=True,
+                verbose=False,
+            )
+        else:
+            from fbuild.api import SerialMonitor as FbuildSerialMonitor
+
+            self._monitor = FbuildSerialMonitor(
+                port=self.port,
+                baud_rate=self.baudrate,
+                auto_reconnect=True,  # Handle deploy preemption gracefully
+                verbose=False,
+            )
+
+        # Attach to serial session (works for both implementations)
         self._monitor.__enter__()
 
         if boot_wait > 0:

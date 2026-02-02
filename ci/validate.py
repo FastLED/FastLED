@@ -135,7 +135,11 @@ PIN_RX = 2  # RX pin used by RMT receiver
 
 
 def run_gpio_pretest(
-    port: str, tx_pin: int = PIN_TX, rx_pin: int = PIN_RX, timeout: float = 15.0
+    port: str,
+    tx_pin: int = PIN_TX,
+    rx_pin: int = PIN_RX,
+    timeout: float = 15.0,
+    use_pyserial: bool = False,
 ) -> bool:
     """Test GPIO connectivity between TX and RX pins before running validation.
 
@@ -147,6 +151,7 @@ def run_gpio_pretest(
         tx_pin: TX pin number (default: PIN_TX)
         rx_pin: RX pin number (default: PIN_RX)
         timeout: Timeout in seconds for response
+        use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
 
     Returns:
         True if pins are connected, False otherwise
@@ -160,7 +165,7 @@ def run_gpio_pretest(
 
     try:
         print("  Waiting for device to boot...")
-        with RpcClient(port, timeout=timeout) as client:
+        with RpcClient(port, timeout=timeout, use_pyserial=use_pyserial) as client:
             print()
             print("  Sending GPIO test command...")
 
@@ -232,7 +237,11 @@ def run_gpio_pretest(
 
 
 def run_pin_discovery(
-    port: str, start_pin: int = 0, end_pin: int = 21, timeout: float = 15.0
+    port: str,
+    start_pin: int = 0,
+    end_pin: int = 21,
+    timeout: float = 15.0,
+    use_pyserial: bool = False,
 ) -> tuple[bool, int | None, int | None]:
     """Auto-discover connected pin pairs by probing adjacent GPIO pins.
 
@@ -244,6 +253,7 @@ def run_pin_discovery(
         start_pin: Start of pin range to search (default: 0)
         end_pin: End of pin range to search (default: 21)
         timeout: Timeout in seconds for response
+        use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
 
     Returns:
         Tuple of (success, tx_pin, rx_pin) where:
@@ -260,7 +270,7 @@ def run_pin_discovery(
 
     try:
         print("  Waiting for device to boot...")
-        with RpcClient(port, timeout=timeout) as client:
+        with RpcClient(port, timeout=timeout, use_pyserial=use_pyserial) as client:
             print()
             print("  Probing adjacent pin pairs for jumper wire connection...")
 
@@ -1366,7 +1376,9 @@ def run(args: Args | None = None) -> int:
         # Auto-discover pins if enabled and no CLI override
         elif args.auto_discover_pins:
             print("\n🔍 Auto-discovery enabled - searching for connected pins...")
-            success, discovered_tx, discovered_rx = run_pin_discovery(upload_port)
+            success, discovered_tx, discovered_rx = run_pin_discovery(
+                upload_port, use_pyserial=args.no_fbuild
+            )
 
             if success and discovered_tx is not None and discovered_rx is not None:
                 effective_tx_pin = discovered_tx
@@ -1401,7 +1413,10 @@ def run(args: Args | None = None) -> int:
         elif pins_discovered:
             print("\n✅ Skipping GPIO pre-test (pins verified during discovery)")
         elif not run_gpio_pretest(
-            upload_port, effective_tx_pin or PIN_TX, effective_rx_pin or PIN_RX
+            upload_port,
+            effective_tx_pin or PIN_TX,
+            effective_rx_pin or PIN_RX,
+            use_pyserial=args.no_fbuild,
         ):
             print()
             print(f"{Fore.RED}=" * 60)
@@ -1432,7 +1447,9 @@ def run(args: Args | None = None) -> int:
             try:
                 # Use short boot_wait - device already rebooted and we waited for port
                 print("   ⏳ Connecting to device...", end="", flush=True)
-                client = RpcClient(upload_port, timeout=10.0)
+                client = RpcClient(
+                    upload_port, timeout=10.0, use_pyserial=args.no_fbuild
+                )
                 client.connect(
                     boot_wait=1.0
                 )  # Reduced from 3.0s since we already waited

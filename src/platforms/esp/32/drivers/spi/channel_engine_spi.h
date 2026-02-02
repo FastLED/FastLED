@@ -19,10 +19,15 @@
 /// Why use SPI for clockless protocols?
 /// - Precise timing: SPI hardware generates exact bit patterns without CPU intervention
 /// - DMA support: Large LED buffers transmit without blocking the CPU
-/// - Multi-lane: Dual/quad SPI modes enable parallel transmission to multiple strips
 /// - ISR-safe: Encoding and transmission happen in background (timer ISR + DMA)
 ///
-/// Replaces third-party Espressif LED strip implementation with direct ESP-IDF integration.
+/// Uses Espressif led_strip encoding (3-bit expansion):
+/// - Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+/// - SPI clock: 2.5 MHz (400ns per SPI bit)
+/// - Each LED byte expands to 3 SPI bytes (24 bits)
+///
+/// NOTE: Multi-lane SPI (dual/quad) is NOT supported with this encoding.
+/// For multi-lane support, use PARLIO or RMT drivers instead.
 
 #pragma once
 
@@ -43,7 +48,6 @@
 #include "fl/stl/time.h"
 #include "fl/timeout.h"
 #include "fl/isr.h"
-#include "fl/channels/wave8.h"
 
 // EXCEPTION: Platform headers in .h file (technical debt)
 // Normally platform-specific headers (driver/*.h, soc/*.h) should only be in .cpp files
@@ -286,13 +290,11 @@ private:
         bool useDMA;                       ///< DMA enabled for this channel
 
         // Multi-lane SPI support (dual/quad modes)
-        uint8_t numLanes;                  ///< Number of active data lanes (1, 2, or 4)
-        gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1 if unused)
-        gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1 if unused)
-        gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1 if unused)
-
-        // wave8 encoding LUT (cached to avoid rebuilding in ISR)
-        Wave8BitExpansionLut mWave8Lut;    ///< Precomputed wave8 expansion lookup table
+        // NOTE: Multi-lane NOT supported with Espressif 3-bit encoding
+        uint8_t numLanes;                  ///< Number of active data lanes (always 1 for Espressif encoding)
+        gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1, unused)
+        gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1, unused)
+        gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1, unused)
 
         // Event-driven streaming state
         volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction
@@ -368,7 +370,7 @@ private:
 
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes
-    /// @param originalTiming Original chipset timing (for wave8 LUT precision)
+    /// @param originalTiming Original chipset timing (preserved for timing validation)
     /// @return Pointer to channel state, or nullptr if no hardware available
     SpiChannelState* acquireChannel(gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig& originalTiming);
 
@@ -380,7 +382,7 @@ private:
     /// @param pin GPIO pin
     /// @param timing SPI timing configuration
     /// @param dataSize Size of LED data in bytes
-    /// @param originalTiming Original chipset timing (for wave8 LUT, optional - uses SPI-derived timing if nullptr)
+    /// @param originalTiming Original chipset timing (optional, for timing validation)
     /// @return true if channel created successfully
     bool createChannel(SpiChannelState* state, gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig* originalTiming = nullptr);
 
