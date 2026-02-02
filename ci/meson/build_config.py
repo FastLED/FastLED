@@ -964,8 +964,11 @@ endian = 'little'
 
     # Run meson setup using RunningProcess for proper streaming output
     assert cmd is not None, "cmd should be set when not skipping meson setup"
+    meson_cmd: list[str] = cmd  # Type narrowing for use in nested function
     _print_banner("MESON CONFIGURATION", "⚙️")
-    try:
+
+    def _run_meson_setup() -> tuple[int, str]:
+        """Run meson setup and return (returncode, stdout)."""
         # Disable sccache during Meson setup phase to avoid probe command conflicts
         # sccache tries to detect compilers with -E flag which confuses Zig's command structure
         # This will be unset for the actual ninja build phase
@@ -973,7 +976,7 @@ endian = 'little'
         setup_env["FASTLED_DISABLE_SCCACHE"] = "1"
 
         proc = RunningProcess(
-            cmd,
+            meson_cmd,
             cwd=source_dir,
             timeout=600,
             auto_run=True,
@@ -983,6 +986,39 @@ endian = 'little'
         )
 
         returncode = proc.wait(echo=True)
+        return returncode, proc.stdout
+
+    def _clear_stale_caches() -> None:
+        """Clear stale test metadata caches that may reference deleted files."""
+        _ts_print("[MESON] 🔄 Clearing stale test metadata caches...")
+        cache_files = [
+            build_dir / "tests" / "test_metadata.cache",
+            build_dir / "test_list_cache.txt",
+            source_files_marker,  # Force re-discovery of source files
+        ]
+        for cache_file in cache_files:
+            if cache_file.exists():
+                try:
+                    cache_file.unlink()
+                    _ts_print(f"[MESON]   Deleted: {cache_file.name}")
+                except (OSError, IOError) as e:
+                    _ts_print(
+                        f"[MESON]   Warning: Could not delete {cache_file.name}: {e}"
+                    )
+
+    try:
+        returncode, stdout = _run_meson_setup()
+
+        # Self-healing: If meson setup fails with "does not exist" error,
+        # it's likely due to stale test metadata cache referencing deleted files.
+        # Clear caches and retry once.
+        if returncode != 0 and "does not exist" in stdout:
+            _ts_print(
+                "[MESON] ⚠️  Setup failed due to missing file (stale cache detected)"
+            )
+            _clear_stale_caches()
+            _ts_print("[MESON] 🔄 Retrying meson setup...")
+            returncode, stdout = _run_meson_setup()
 
         if returncode != 0:
             _ts_print(
