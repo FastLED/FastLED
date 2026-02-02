@@ -540,6 +540,39 @@ def main() -> int:
         return 1
     else:
         print(f"\nAll compilations completed successfully in {time_str}")
+
+        # Write build info to file if requested
+        if config.build_info and boards and examples:
+            import json
+            import shutil
+
+            board_name = boards[0].board_name
+            example_name = examples[0]
+            # Build info is generated per-example at .build/pio/<board>/build_info_<example>.json
+            build_info_path = (
+                Path(".build") / "pio" / board_name / f"build_info_{example_name}.json"
+            )
+
+            try:
+                if build_info_path.exists():
+                    shutil.copy(build_info_path, config.build_info)
+                    print(f"Build info written to: {config.build_info}")
+                else:
+                    with open(config.build_info, "w") as f:
+                        json.dump(
+                            {"error": f"Build info not found at {build_info_path}"},
+                            f,
+                            indent=2,
+                        )
+                    print(
+                        yellow_text(
+                            f"Warning: Build info not found at {build_info_path}"
+                        )
+                    )
+            except OSError as e:
+                print(red_text(f"ERROR: Failed to write build info: {e}"))
+                return 1
+
         return 0
 
 

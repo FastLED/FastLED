@@ -54,6 +54,9 @@ class CompilationConfig:
     )
     no_parallel: bool = False  # Disable parallel compilation (currently a no-op)
 
+    # Info options
+    build_info: Optional[Path] = None  # Output file path for build info JSON
+
     def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
         errors: list[str] = []
@@ -263,6 +266,12 @@ class CompilationArgumentParser:
             help="Print the list of supported boards and exit",
         )
         parser.add_argument(
+            "--build-info",
+            type=str,
+            metavar="FILE",
+            help="After compilation, write build information (defines, compiler flags) as JSON to FILE",
+        )
+        parser.add_argument(
             "--no-interactive",
             action="store_true",
             help="Disables interactive mode (deprecated)",
@@ -317,6 +326,9 @@ class CompilationArgumentParser:
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,
             skip_filters=skip_filters,
             no_parallel=args.no_parallel,
+            build_info=Path(args.build_info)
+            if hasattr(args, "build_info") and args.build_info
+            else None,
         )
 
     def _resolve_boards(self, board_spec: Optional[str]) -> list[Board]:
