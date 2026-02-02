@@ -1,4 +1,4 @@
-// @filter: (memory is high)
+// @filter: (memory is high) and not (platform is stm32)
 
 /// This is a work in progress showcasing a complex MIDI keyboard
 /// visualizer.
