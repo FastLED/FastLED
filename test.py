@@ -112,8 +112,15 @@ def main() -> None:
 
         timeout = _TIMEOUT_EVERYTHING
         # Adjust watchdog timeout based on test configuration
+        # Sequential builds with debug mode (sanitizers) are very slow, especially on Windows
+        if args.debug and args.no_parallel:
+            # 45 minutes for sequential debug builds (sanitizers are slow)
+            timeout = 2700
+            ts_print(
+                f"Adjusted watchdog timeout for sequential debug builds: {timeout} seconds"
+            )
         # Sequential examples compilation can take up to 30 minutes
-        if args.examples is not None and args.no_parallel:
+        elif args.examples is not None and args.no_parallel:
             # 35 minutes for sequential examples compilation
             timeout = 2100
             ts_print(
