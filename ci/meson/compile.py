@@ -296,7 +296,9 @@ def compile_meson(
         return False
 
 
-def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], None]:
+def _create_error_context_filter(
+    context_lines: int = 20, max_unique_errors: int = 3
+) -> Callable[[str], None]:
     """
     Create a filter function that only shows output when errors are detected.
 
@@ -309,6 +311,8 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
 
     Args:
         context_lines: Number of lines to show before and after error detection
+        max_unique_errors: Maximum unique errors to show before summarizing.
+                          Use 0 for unlimited (show all errors).
 
     Returns:
         Filter function that takes a line and returns None (consumes line)
@@ -333,9 +337,7 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
     # Track seen error signatures to avoid showing identical errors repeatedly
     seen_errors: set[str] = set()
     error_count = 0
-    max_unique_errors_to_show = (
-        3  # Show first 3 unique errors to stay under 30KB Bash limit
-    )
+    max_unique_errors_to_show = max_unique_errors  # 0 means show all
 
     # Track file context for better error reporting
     current_file: str | None = None
@@ -389,7 +391,11 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
                 seen_errors.add(error_sig)
 
             # Only show first N unique errors to prevent truncation
-            should_show = len(seen_errors) <= max_unique_errors_to_show
+            # max_unique_errors_to_show == 0 means unlimited (show all)
+            should_show = (
+                max_unique_errors_to_show == 0
+                or len(seen_errors) <= max_unique_errors_to_show
+            )
 
             if should_show:
                 # Error detected! Output all buffered pre-context
@@ -415,8 +421,12 @@ def _create_error_context_filter(context_lines: int = 20) -> Callable[[str], Non
                 # Start counting post-error lines
                 post_error_lines = context_lines
 
-            elif is_new_error and len(seen_errors) == max_unique_errors_to_show + 1:
-                # First suppressed error - show summary
+            elif (
+                is_new_error
+                and max_unique_errors_to_show > 0
+                and len(seen_errors) == max_unique_errors_to_show + 1
+            ):
+                # First suppressed error - show summary (only when limit is active)
                 _ts_print("\n" + "=" * 80)
                 _ts_print(
                     f"[MESON] 📋 Showing first {max_unique_errors_to_show} unique errors - suppressing duplicates to prevent truncation"

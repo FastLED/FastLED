@@ -134,6 +134,8 @@ def run_meson_build_and_test(
             if symbolizer_path:
                 _ts_print(f"[MESON] Set ASAN_SYMBOLIZER_PATH={symbolizer_path}")
 
+    _ts_print(f"Preparing build ({build_mode} mode)...")
+
     if not setup_meson_build(
         source_dir,
         build_dir,
