@@ -147,7 +147,7 @@ private:
     NRF_TIMER_Type* mTimer;  ///< TIMER0 for clock generation
 
     // DMA buffer management (must be in RAM for EasyDMA)
-    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for dual-lane)
+    DMABuffer mDMABuffer;            ///< Allocated DMA buffer (interleaved format for dual-lane)
     size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * num_lanes)
     bool mBufferAcquired;            ///< True if buffer has been acquired for transmission

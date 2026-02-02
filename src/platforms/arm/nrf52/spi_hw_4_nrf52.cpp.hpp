@@ -162,13 +162,13 @@ void SPIQuadNRF52::end() {
 
 DMABuffer SPIQuadNRF52::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -179,31 +179,28 @@ DMABuffer SPIQuadNRF52::acquireDMABuffer(size_t bytes_per_lane) {
     // Validate size against platform max (256KB for embedded systems)
     constexpr size_t MAX_SIZE = 256 * 1024;
     if (total_size > MAX_SIZE) {
-        return SPIError::BUFFER_TOO_LARGE;
+        return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
 
     // Reallocate buffer only if we need more capacity
     if (bytes_per_lane > mMaxBytesPerLane) {
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+        // Release old buffer
+        mDMABuffer.reset();
+
+        // Allocate new DMABuffer with the required size
+        mDMABuffer = DMABuffer(total_size);
+        if (!mDMABuffer.ok()) {
+            return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        // Allocate DMA-capable memory (regular malloc for NRF52)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
-        if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
-        }
-
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
     mBufferAcquired = true;
     mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return a copy of the buffer (shared_ptr will be shared)
+    return mDMABuffer;
 }
 
 bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
@@ -298,10 +295,11 @@ bool SPIQuadNRF52::transmit(TransmitMode mode) {
 
     // De-interleave mDMABuffer into lane-specific buffers
     // mDMABuffer contains interleaved data: quarters for each lane
-    fl::memcpy(mLane0Buffer, mDMABuffer.data(), bytes_per_lane);
-    fl::memcpy(mLane1Buffer, mDMABuffer.data() + bytes_per_lane, bytes_per_lane);
-    fl::memcpy(mLane2Buffer, mDMABuffer.data() + (bytes_per_lane * 2), bytes_per_lane);
-    fl::memcpy(mLane3Buffer, mDMABuffer.data() + (bytes_per_lane * 3), bytes_per_lane);
+    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::memcpy(mLane0Buffer, buffer_span.data(), bytes_per_lane);
+    fl::memcpy(mLane1Buffer, buffer_span.data() + bytes_per_lane, bytes_per_lane);
+    fl::memcpy(mLane2Buffer, buffer_span.data() + (bytes_per_lane * 2), bytes_per_lane);
+    fl::memcpy(mLane3Buffer, buffer_span.data() + (bytes_per_lane * 3), bytes_per_lane);
 
     // Configure SPIM0 transmission (lane 0)
     nrf_spim_tx_buffer_set(mSPIM0, mLane0Buffer, bytes_per_lane);
@@ -422,13 +420,10 @@ void SPIQuadNRF52::cleanup() {
                            (1UL << mPPIChannel6) | (1UL << mPPIChannel7);
 
         // Free DMA buffer
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-            mMaxBytesPerLane = 0;
-            mCurrentTotalSize = 0;
-            mBufferAcquired = false;
-        }
+        mDMABuffer.reset();
+        mMaxBytesPerLane = 0;
+        mCurrentTotalSize = 0;
+        mBufferAcquired = false;
 
         // Free lane buffers
         if (mLane0Buffer != nullptr) {
@@ -478,7 +473,7 @@ void SPIQuadNRF52::configureTimer(uint32_t clock_speed_hz) {
     nrf_timer_event_clear(mTimer, NRF_TIMER_EVENT_COMPARE0);
 
     // Configure timer in one-shot mode (stops after compare)
-    nrf_timer_shorts_set(mTimer, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
+    nrf_timer_shorts_enable(mTimer, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
 }
 
 void SPIQuadNRF52::configurePPI() {
