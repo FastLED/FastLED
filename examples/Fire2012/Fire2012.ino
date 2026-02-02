@@ -1,3 +1,4 @@
+// @filter: (board is not stm32f103cb)  // Maple Mini lacks pin 5 (uses libmaple numbering)
 /// @file    Fire2012.ino
 /// @brief   Simple one-dimensional fire animation
 /// @example Fire2012.ino

@@ -1,3 +1,4 @@
+// @filter: (board is not stm32f103cb)  // Maple Mini lacks pins 1-4 (uses libmaple numbering)
 /// @file    HD107.ino
 /// @brief   Example showing how to use the HD107 and HD which has built in gamma correction.
 ///          This simply the HD107HD examles but with this chipsets.
