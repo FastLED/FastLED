@@ -298,6 +298,9 @@ private:
         volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction
         volatile bool isShuttingDown;      ///< Set during releaseChannel(), prevents ISR from accessing freed memory
 
+        // Cache coherence control (ESP32-S3/C6 workaround)
+        bool cacheSyncDisabled;            ///< Set when esp_cache_msync() returns ESP_ERR_INVALID_ARG
+
         // Double-buffered staging (4KB each for DMA efficiency)
         uint8_t* stagingA;                 ///< Staging buffer A (DMA-capable memory)
         uint8_t* stagingB;                 ///< Staging buffer B (DMA-capable memory)
@@ -409,6 +412,13 @@ private:
     /// This function encodes the ENTIRE LED buffer into staging buffers, then
     /// syncs cache to memory. The ISR only queues pre-encoded data.
     void preEncodeAllData(SpiChannelState* channel);
+
+    /// @brief Transmit pre-encoded data using blocking polling (cache coherence fix)
+    /// @param channel Channel state with pre-encoded staging data
+    ///
+    /// Uses spi_device_polling_transmit() which handles cache coherence internally.
+    /// This approach trades some throughput for reliability on ESP32-S3.
+    void transmitBlockingPolled(SpiChannelState* channel);
 
     /// @brief Acquire SPI host for new channel
     /// @return SPI host, or SPI_HOST_MAX on failure
