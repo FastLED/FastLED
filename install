@@ -23,7 +23,7 @@ if [ ! -d ".venv" ]; then
 else
     echo "Virtual environment already exists. Skipping."
 fi
-uv pip install -e . --refresh-package fastled
+uv sync --refresh && uv sync --refresh
 # This is needed to force the installation to finalize.
 uv run python -c "import os; _ = os.getcwd()"
 set +e
