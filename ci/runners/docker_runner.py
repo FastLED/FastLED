@@ -341,7 +341,13 @@ def run_docker_tests(args: TestArgs) -> int:
         "fastled-unit-tests",
         "bash",
         "-c",
-        f"uv sync && {test_cmd_str}",
+        # Pre-warm clang toolchain before running tests (without sccache)
+        # First call downloads clang toolchain (~190MB, takes ~30-60s)
+        # sccache is disabled in Docker via FASTLED_DOCKER=1 to avoid 80+ second daemon startup
+        f"uv sync && export PATH=/fastled/.venv/bin:$PATH && "
+        f"echo 'Pre-warming clang toolchain (first run downloads ~190MB)...' && "
+        f"(clang-tool-chain-cpp --version || true) && "
+        f"echo 'Pre-warm complete.' && {test_cmd_str}",
     ]
 
     try:

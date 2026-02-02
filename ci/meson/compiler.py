@@ -154,7 +154,7 @@ def get_compiler_version(compiler_path: str) -> str:
             encoding="utf-8",
             errors="replace",
             check=True,
-            timeout=10,
+            timeout=30,  # Increased from 10s for first-time clang toolchain download
         )
         # Return first line which contains version info
         return result.stdout.split("\n")[0].strip()

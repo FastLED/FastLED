@@ -696,12 +696,18 @@ def setup_meson_build(
     # For sccache integration, use clang-tool-chain's built-in sccache wrappers
 
     # Check if sccache-enabled wrappers are available
+    # Skip sccache in Docker to avoid 80+ second toolchain download + daemon startup delay
+    # The FASTLED_DOCKER environment variable is set by docker_runner.py
+    in_docker = os.environ.get("FASTLED_DOCKER", "0") == "1"
     sccache_c_wrapper = shutil.which("clang-tool-chain-sccache-c")
     sccache_cpp_wrapper = shutil.which("clang-tool-chain-sccache-cpp")
     sccache_available = (
         sccache_c_wrapper is not None and sccache_cpp_wrapper is not None
     )
-    use_sccache = sccache_available
+    # Disable sccache in Docker - the startup time is too long for fresh containers
+    use_sccache = sccache_available and not in_docker
+    if in_docker and sccache_available:
+        _ts_print("[MESON] Skipping sccache in Docker (startup delay too long)")
 
     # Use sccache wrappers if available, otherwise fall back to plain wrappers
     if use_sccache:
