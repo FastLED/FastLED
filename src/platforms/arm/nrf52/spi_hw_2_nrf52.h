@@ -28,7 +28,7 @@
 #include <nrf_gpio.h>
 
 // Include Nordic SDK headers for TIMER, PPI, GPIOTE
-#if defined(NRF52840) || defined(NRF52833)
+#if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
     #include <nrfx_timer.h>
     #include <nrfx_ppi.h>
     #include <nrfx_gpiote.h>

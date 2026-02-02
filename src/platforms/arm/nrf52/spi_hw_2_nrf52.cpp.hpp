@@ -4,7 +4,9 @@
 /// This file provides the SPIDualNRF52 class implementation for Nordic nRF52 platforms.
 /// All implementation is contained in this single file.
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#ifdef FL_IS_NRF52
 
 #include "spi_hw_2_nrf52.h"
 #include "fl/stl/cstring.h"
@@ -488,4 +490,4 @@ void initSpiHw2Instances() {
 
 }  // namespace fl
 
-#endif  // NRF52 variants
+#endif  // FL_IS_NRF52

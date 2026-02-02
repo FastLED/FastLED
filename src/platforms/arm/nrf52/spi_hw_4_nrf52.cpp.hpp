@@ -4,8 +4,10 @@
 /// This file provides the SPIQuadNRF52 class implementation for Nordic nRF52840/52833 platforms.
 /// All implementation is contained in this single file.
 
+#include "platforms/arm/nrf52/is_nrf52.h"
+
 // Only compile on nRF52840/52833 (requires SPIM3 for quad-lane operation)
-#if defined(NRF52840) || defined(NRF52833)
+#if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
 
 #include "spi_hw_4_nrf52.h"
 #include "fl/stl/cstring.h"
@@ -554,4 +556,4 @@ void initSpiHw4Instances() {
 
 }  // namespace fl
 
-#endif  // NRF52840 || NRF52833
+#endif  // FL_IS_NRF52840 || FL_IS_NRF52833
