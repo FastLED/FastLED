@@ -3,6 +3,14 @@
 /// Compiles entire fl/ namespace into single object file
 /// This is the ONLY .cpp file in src/fl/** that should be compiled
 
+// Teensy compatibility: Include new.h before any code that uses
+// function-local statics, to prevent __cxa_guard_* signature conflicts.
+// See CLAUDE.md "Function-local statics and Teensy 3.x" for details.
+#include "platforms/arm/teensy/is_teensy.h"
+#if defined(FL_IS_TEENSY)
+#include <new.h>
+#endif
+
 // Root directory implementations
 #include "fl/_build.hpp"
 
