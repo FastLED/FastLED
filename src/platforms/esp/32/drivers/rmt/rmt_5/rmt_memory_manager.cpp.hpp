@@ -403,6 +403,35 @@ void RmtMemoryManager::free(uint8_t channel_id, bool is_tx) {
     }
 }
 
+void RmtMemoryManager::recordRecoveryAllocation(uint8_t channel_id, size_t words, bool is_tx) {
+    // Check if already exists (shouldn't, but be safe)
+    ChannelAllocation* existing = findAllocation(channel_id, is_tx);
+    if (existing) {
+        FL_WARN("RMT " << (is_tx ? "TX" : "RX") << " channel "
+                << static_cast<int>(channel_id) << " already has allocation during recovery");
+        return;
+    }
+
+    // Record the allocation in ledger
+    // Note: The words are already "used" by ESP-IDF, we're just recording it
+    mLedger.allocations.push_back(ChannelAllocation(channel_id, words, is_tx, false));
+
+    // Update accounting (the memory is in use even though we didn't formally allocate it)
+    if (mLedger.is_global_pool) {
+        mLedger.allocated_words += words;
+    } else {
+        if (is_tx) {
+            mLedger.allocated_tx_words += words;
+        } else {
+            mLedger.allocated_rx_words += words;
+        }
+    }
+
+    FL_LOG_RMT("RMT " << (is_tx ? "TX" : "RX") << " channel "
+               << static_cast<int>(channel_id) << " recovery allocation recorded: "
+               << words << " words");
+}
+
 size_t RmtMemoryManager::availableTxWords() const {
     return getAvailableWords(true);
 }
@@ -494,6 +523,16 @@ size_t RmtMemoryManager::getAllocatedRxWords() const {
     } else {
         return mLedger.allocated_rx_words;
     }
+}
+
+bool RmtMemoryManager::hasActiveRxChannels() const {
+    // Check if any RX allocations exist
+    for (const auto& alloc : mLedger.allocations) {
+        if (!alloc.is_tx) {
+            return true;  // Found an RX allocation
+        }
+    }
+    return false;
 }
 
 size_t RmtMemoryManager::getAllocationCount() const {

@@ -214,6 +214,14 @@ struct RxConfig {
     uint32_t skip_signals = 0;              ///< Number of signals to skip before capturing (default: 0)
     bool start_low = true;                  ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
 
+    // Internal loopback configuration (ESP32 RMT only)
+    // When true, RX receives from TX output internally (no external wire needed).
+    // IMPORTANT: For RMT TX → RMT RX loopback on ESP32-S3, both TX and RX MUST be
+    // configured on the SAME GPIO with io_loop_back=true. This is required because
+    // ESP32-S3 has a hardware limitation where RMT TX GPIO output stops when RMT RX
+    // is actively receiving on a different GPIO.
+    bool io_loop_back = false;              ///< Enable internal RMT loopback (RMT only, default: false)
+
     /// Default constructor with common WS2812B defaults
     constexpr RxConfig() = default;
 };

@@ -202,7 +202,8 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 // They can be overridden at runtime via JSON-RPC (setPins, setTxPin, setRxPin).
 
 #if defined(FL_IS_ESP_32S3)
-    // ESP32-S3: GPIO 0 has boot-mode issues on XIAO and some other boards
+    // ESP32-S3: Standard configuration with jumper wire
+    // Connect GPIO 1 (TX) to GPIO 2 (RX) with a physical jumper wire
     constexpr int DEFAULT_PIN_TX = 1;
     constexpr int DEFAULT_PIN_RX = 2;
 #elif defined(FL_IS_ESP_32S2)

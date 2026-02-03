@@ -94,11 +94,13 @@ public:
 
     AllocationResult allocateTx(uint8_t, bool, bool) { return AllocationResult{}; }
     void free(uint8_t, bool) {}
+    void recordRecoveryAllocation(uint8_t, fl::size, bool) {}
     bool isDMAAvailable() { return false; }
     bool allocateDMA(uint8_t, bool) { return false; }
     void freeDMA(uint8_t, bool) {}
     fl::size availableTxWords() { return 256; }
     int getDMAChannelsInUse() { return 0; }
+    bool hasActiveRxChannels() const { return false; }
 };
 
 //=============================================================================

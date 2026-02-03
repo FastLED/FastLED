@@ -172,6 +172,16 @@ public:
     /// @param is_tx true for TX channel, false for RX channel
     void free(uint8_t channel_id, bool is_tx);
 
+    /// @brief Record allocation after recovery (channel already created externally)
+    /// @param channel_id RMT channel ID
+    /// @param words Number of words actually allocated
+    /// @param is_tx true for TX channel, false for RX channel
+    ///
+    /// This is used during memory recovery when the ESP-IDF channel was created
+    /// successfully but our internal allocation attempt had already been freed.
+    /// Adds the allocation to the ledger without re-allocating memory.
+    void recordRecoveryAllocation(uint8_t channel_id, size_t words, bool is_tx);
+
     /// @brief Query available TX memory
     /// @return Number of words available for TX allocation
     size_t availableTxWords() const;
@@ -216,6 +226,14 @@ public:
     /// @brief Get currently allocated RX memory words
     /// @return Allocated RX words
     size_t getAllocatedRxWords() const;
+
+    /// @brief Check if any RX channels are currently active (registered)
+    /// @return true if at least one RX channel is allocated
+    ///
+    /// Used by TX driver to detect RX activity and avoid DMA conflicts.
+    /// On ESP32-S3, simultaneous RMT TX (with DMA) and RMT RX can cause
+    /// transmission issues. When RX is active, TX should use non-DMA mode.
+    bool hasActiveRxChannels() const;
 
     /// @brief Get number of active allocations
     /// @return Count of allocated channels (TX + RX)

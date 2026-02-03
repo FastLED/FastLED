@@ -417,20 +417,33 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         bool networkActive = NetworkDetector::isAnyNetworkActive();
 
         // ============================================================================
-        // DMA ALLOCATION POLICY - ESP32-S3 First Channel Only (TX or RX)
+        // DMA ALLOCATION POLICY - ESP32-S3 TX/RX Conflict Avoidance
         // ============================================================================
         // ESP32-S3 has ONLY ONE RMT DMA channel (hardware limitation).
         // This DMA channel is SHARED between TX and RX channels.
         //
-        // Allocation priority:
-        //   1. FIRST channel created (TX or RX): Uses DMA (if data size > 0)
-        //   2. ALL subsequent channels: Use non-DMA (on-chip double-buffer)
+        // CRITICAL: On ESP32-S3, using DMA for TX while RX is active can cause
+        // transmission issues where TX callbacks never fire and RX receives 0 symbols.
+        // This has been observed in validation testing where I2S TX + RMT RX works
+        // but RMT TX (DMA) + RMT RX fails.
+        //
+        // Policy:
+        //   1. If RX channels are active: Force non-DMA for TX (avoid conflict)
+        //   2. If no RX channels: Use DMA if available
         //
         // DMA allocation is managed centrally by RmtMemoryManager to coordinate
         // between TX (ChannelEngineRMT) and RX (RmtRxChannel) drivers.
         // ============================================================================
         // Check with memory manager if DMA is available (handles platform detection)
         bool tryDMA = memMgr.isDMAAvailable();
+
+        // ESP32-S3 TX/RX conflict avoidance: Disable TX DMA when RX is active
+        // This prevents the observed issue where TX transmissions never complete
+        // when both TX (DMA) and RX are using the RMT peripheral simultaneously.
+        if (tryDMA && memMgr.hasActiveRxChannels()) {
+            FL_WARN("TX Channel: RX channel detected - disabling DMA to avoid TX/RX conflict");
+            tryDMA = false;
+        }
         if (tryDMA) {
             // DMA slot available - first channel across TX/RX
             FL_LOG_RMT("TX Channel #" << (mChannels.size() + 1)
@@ -618,9 +631,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             bool recovery_succeeded = false;
 
             // Progressively reduce memory until it works or we hit minimum
-            for (size_t reduced_symbols = mem_block_symbols - 1;
+            // CRITICAL: mem_block_symbols MUST be a multiple of SOC_RMT_MEM_WORDS_PER_CHANNEL
+            // Step down by whole blocks (48 symbols on ESP32-S3), not by 1 symbol
+            for (size_t reduced_symbols = mem_block_symbols - SOC_RMT_MEM_WORDS_PER_CHANNEL;
                  reduced_symbols >= min_symbols;
-                 reduced_symbols--) {
+                 reduced_symbols -= SOC_RMT_MEM_WORDS_PER_CHANNEL) {
                 retry_count++;
 
                 // Free previous allocation attempt
@@ -668,7 +683,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     }
 
                     // Re-allocate through memory manager with reduced size
-                    // (This ensures accounting stays synchronized)
+                    // to keep accounting synchronized
+                    // Note: We bypass allocateTx() since channel already created,
+                    // but we need to update the ledger manually
+                    memMgr.recordRecoveryAllocation(state->memoryChannelId, reduced_symbols, true);
+                    FL_LOG_RMT("Recovery: Re-added allocation to ledger: "
+                               << reduced_symbols << " words for channel "
+                               << static_cast<int>(state->memoryChannelId));
+
                     mem_block_symbols = reduced_symbols;
                     recovery_succeeded = true;
                     break; // Exit retry loop
@@ -732,9 +754,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             return false;
         }
 
-        FL_LOG_RMT("Non-DMA RMT channel created on GPIO "
-                   << static_cast<int>(pin) << " (" << mem_block_symbols
-                   << " symbols) with dedicated encoder");
+        FL_WARN("[RMT TX] Channel created on GPIO " << static_cast<int>(pin)
+                << " (" << mem_block_symbols << " symbols, non-DMA)");
         return true;
     }
 
@@ -965,11 +986,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             }
 
             // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
+            FL_WARN("[RMT TX] Transmitting " << pooledBuffer.size() << " bytes on pin "
+                    << static_cast<int>(channel->pin) << " (DMA=" << channel->useDMA << ")");
             bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
                                                     pooledBuffer.data(),
                                                     pooledBuffer.size());
             if (!tx_success) {
-                FL_LOG_RMT("Failed to transmit");
+                FL_WARN("[RMT TX] transmit() FAILED on pin " << static_cast<int>(channel->pin));
                 mPeripheral.disableChannel(channel->channel);
                 // Release buffer back to pool before releasing channel
                 if (channel->useDMA) {
@@ -1307,9 +1330,11 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) {
     channel->inUse = false;
     channel->transmissionComplete = false;
 
-    // Restore GPIO pulldown when RMT releases pin
-    // This ensures pin returns to stable LOW state between transmissions
-    fl::pinMode(channel->pin, fl::PinMode::InputPulldown);
+    // NOTE: Removed GPIO reconfiguration to InputPulldown
+    // This was breaking RMT's GPIO matrix routing on ESP32-S3.
+    // The RMT peripheral maintains ownership of the GPIO, and reconfiguring
+    // it as input breaks the TX output routing for subsequent transmissions.
+    // fl::pinMode(channel->pin, fl::PinMode::InputPulldown);
 
     // NOTE: Keep channel and encoder alive for reuse
 }

@@ -12,6 +12,7 @@
 
 #include "rmt5_peripheral_esp.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/delay.h"
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/error.h"
@@ -19,11 +20,14 @@
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
+#include "driver/gpio.h"
 #include "driver/rmt_tx.h"
 #include "esp_cache.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "esp_rom_gpio.h"  // For esp_rom_gpio_connect_out_signal
+#include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 FL_EXTERN_C_END
 
 // Platform memory barrier
@@ -113,6 +117,9 @@ Rmt5PeripheralESPImpl::~Rmt5PeripheralESPImpl() {
 // Channel Lifecycle Methods
 //=============================================================================
 
+/// Track the GPIO number for the last created TX channel (for diagnostic purposes)
+static volatile int s_lastTxChannelGpio = -1;
+
 bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
                                              void** out_handle) {
     if (out_handle == nullptr) {
@@ -129,21 +136,50 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     esp_config.trans_queue_depth = config.trans_queue_depth;
     esp_config.flags.invert_out = config.invert_out ? 1U : 0U;
     esp_config.flags.with_dma = config.with_dma ? 1U : 0U;
+    // GPIO configuration flags:
+    // io_od_mode=0: Push-pull output (not open-drain)
+    esp_config.flags.io_od_mode = 0;
+
+    // io_loop_back: Internal loopback mode (routes TX output back to RX input internally)
+    // Setting to 0 because we use physical jumper cable, not internal loopback.
+    // With io_loop_back=1, ESP-IDF may reconfigure GPIO in ways that break subsequent TX.
+    esp_config.flags.io_loop_back = 0;
     esp_config.intr_priority = config.intr_priority;
 
+    // NOTE: Removed gpio_reset_pin() call - ESP-IDF rmt_new_tx_channel() handles GPIO configuration
+    // gpio_reset_pin() was interfering with GPIO matrix routing when both TX and RX are active
+
+    gpio_num_t gpio = static_cast<gpio_num_t>(config.gpio_num);
+
     // Delegate to ESP-IDF
-    FL_LOG_RMT("RMT5_PERIPH: Creating TX channel on GPIO "
-               << config.gpio_num << " (DMA: " << config.with_dma << ")");
+    FL_LOG_RMT("RMT5_PERIPH: Creating TX channel on GPIO " << config.gpio_num);
 
     rmt_channel_handle_t channel;
     esp_err_t err = rmt_new_tx_channel(&esp_config, &channel);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to create TX channel: " << esp_err_to_name(err));
+        FL_WARN("[RMT5_PERIPH] Failed to create TX channel: " << esp_err_to_name(err)
+                << " (err=" << static_cast<int>(err) << ")");
         return false;
     }
 
+    FL_LOG_RMT("RMT5_PERIPH: TX channel created successfully on GPIO " << config.gpio_num);
+
+    // NOTE: Previous workaround for ESP32-S3 TX+RX GPIO conflict has been removed.
+    // The workaround was routing RMT_SIG_OUT0_IDX to the GPIO, but this was wrong:
+    // ESP-IDF allocates a channel dynamically (could be 0, 1, 2, or 3), and
+    // routing the wrong channel's signal breaks the correct routing.
+    //
+    // Diagnostic testing showed that the FIRST transmission works (gpio_high=4)
+    // but subsequent transmissions fail (gpio_high=0) after the workaround code
+    // re-routed the wrong signal to the GPIO.
+    //
+    // The root cause appears to be something else - need to investigate further.
+    // Reference: GitHub ESP-IDF issues #11768, #15861
+
+    // Store GPIO for later diagnostic access
+    s_lastTxChannelGpio = config.gpio_num;
+
     *out_handle = static_cast<void*>(channel);
-    FL_LOG_RMT("RMT5_PERIPH: TX channel created successfully");
     return true;
 }
 
@@ -173,13 +209,15 @@ bool Rmt5PeripheralESPImpl::enableChannel(void* channel_handle) {
 
     // Delegate to ESP-IDF
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
+
     esp_err_t err = rmt_enable(channel);
     if (err != ESP_OK) {
         FL_LOG_RMT("RMT5_PERIPH: Failed to enable channel: " << esp_err_to_name(err));
         return false;
     }
 
-    FL_LOG_RMT("RMT5_PERIPH: Channel enabled successfully");
+    FL_LOG_RMT("RMT5_PERIPH: TX channel enabled successfully");
+
     return true;
 }
 
@@ -205,6 +243,15 @@ bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) {
 // Transmission Methods
 //=============================================================================
 
+/// Static counter to track TX done callback invocations (for debugging RMT TX → RX issues)
+static volatile uint32_t s_txDoneCallbackCount = 0;
+
+/// Static counter to track encoder encode callback invocations (ISR context)
+static volatile uint32_t s_encoderCallCount = 0;
+
+/// Static counter to track total symbols encoded
+static volatile size_t s_totalSymbolsEncoded = 0;
+
 bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
                                       const uint8_t* buffer, size_t buffer_size) {
     if (channel_handle == nullptr || encoder_handle == nullptr || buffer == nullptr) {
@@ -223,11 +270,10 @@ bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
 
     esp_err_t err = rmt_transmit(channel, encoder, buffer, buffer_size, &tx_config);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to transmit: " << esp_err_to_name(err));
+        FL_WARN("RMT5_PERIPH: rmt_transmit() FAILED: " << esp_err_to_name(err));
         return false;
     }
 
-    FL_LOG_RMT("RMT5_PERIPH: Transmission started (" << buffer_size << " bytes)");
     return true;
 }
 
@@ -246,16 +292,21 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, uint32_t timeout_m
         : pdMS_TO_TICKS(timeout_ms);
 
     esp_err_t err = rmt_tx_wait_all_done(channel, timeout_ticks);
+
     if (err != ESP_OK) {
         if (err == ESP_ERR_TIMEOUT) {
-            FL_LOG_RMT("RMT5_PERIPH: Wait timeout after " << timeout_ms << " ms");
+            FL_WARN("RMT5_PERIPH: TX wait TIMEOUT after " << timeout_ms << " ms");
         } else {
-            FL_LOG_RMT("RMT5_PERIPH: Wait failed: " << esp_err_to_name(err));
+            FL_WARN("RMT5_PERIPH: TX wait FAILED: " << esp_err_to_name(err));
         }
         return false;
     }
 
-    FL_LOG_RMT("RMT5_PERIPH: Transmission completed");
+    // Brief delay to ensure RMT hardware has fully completed output
+    // The rmt_tx_wait_all_done() returns when the TX queue is empty,
+    // but there may be a small window before the last bits propagate to GPIO.
+    fl::delayMicroseconds(10);
+
     return true;
 }
 
@@ -283,6 +334,8 @@ static bool FL_IRAM txDoneCallbackWrapper(
     rmt_channel_handle_t channel,
     const rmt_tx_done_event_data_t* edata,
     void* user_data) {
+    // Increment callback counter (avoiding deprecated volatile++ warning)
+    s_txDoneCallbackCount = s_txDoneCallbackCount + 1;
     TxCallbackContext* ctx = static_cast<TxCallbackContext*>(user_data);
     if (ctx == nullptr || ctx->callback == nullptr) {
         return false;
@@ -530,6 +583,9 @@ private:
     size_t FL_IRAM encode(rmt_channel_handle_t channel,
                           const void* primary_data, size_t data_size,
                           rmt_encode_state_t* ret_state) {
+        // Increment call counter (ISR safe - atomic on 32-bit)
+        s_encoderCallCount = s_encoderCallCount + 1;
+
         rmt_encode_state_t session_state = RMT_ENCODING_RESET;
         rmt_encode_state_t state = RMT_ENCODING_RESET;
         size_t encoded_symbols = 0;
@@ -566,6 +622,8 @@ private:
         }
 
     out:
+        // Track total symbols encoded (ISR safe)
+        s_totalSymbolsEncoded = s_totalSymbolsEncoded + encoded_symbols;
         *ret_state = state;
         return encoded_symbols;
     }
@@ -606,6 +664,12 @@ private:
         mBit1LowTicks = static_cast<uint32_t>((timing.T3 + half_ns_per_tick) / ns_per_tick);
         mResetTicks = static_cast<uint32_t>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
+        FL_WARN("[RMT5_ENCODER] Timing config: resolution=" << resolution_hz
+                << "Hz, ns_per_tick=" << ns_per_tick);
+        FL_WARN("[RMT5_ENCODER] Bit0: high=" << mBit0HighTicks << " ticks, low=" << mBit0LowTicks << " ticks");
+        FL_WARN("[RMT5_ENCODER] Bit1: high=" << mBit1HighTicks << " ticks, low=" << mBit1LowTicks << " ticks");
+        FL_WARN("[RMT5_ENCODER] Reset: " << mResetTicks << " ticks");
+
         rmt_bytes_encoder_config_t bytes_config = {};
         bytes_config.bit0.level0 = 1;
         bytes_config.bit0.duration0 = mBit0HighTicks;
@@ -619,12 +683,14 @@ private:
 
         esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
         if (ret != ESP_OK) {
+            FL_WARN("[RMT5_ENCODER] Failed to create bytes encoder: " << esp_err_to_name(ret));
             return ret;
         }
 
         rmt_copy_encoder_config_t copy_config = {};
         ret = rmt_new_copy_encoder(&copy_config, &mCopyEncoder);
         if (ret != ESP_OK) {
+            FL_WARN("[RMT5_ENCODER] Failed to create copy encoder: " << esp_err_to_name(ret));
             rmt_del_encoder(mBytesEncoder);
             mBytesEncoder = nullptr;
             return ret;
@@ -635,6 +701,7 @@ private:
         mResetCode.duration1 = 0;
         mResetCode.level1 = 0;
 
+        FL_WARN("[RMT5_ENCODER] Encoder created successfully");
         return ESP_OK;
     }
 

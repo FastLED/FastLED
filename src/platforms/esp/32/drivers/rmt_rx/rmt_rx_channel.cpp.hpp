@@ -41,6 +41,9 @@ FL_EXTERN_C_END
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/type_traits.h"
 
+// Include RMT memory manager for TX/RX resource coordination
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+
 namespace fl {
 
 // Ensure RmtSymbol (uint32_t) and rmt_symbol_word_t have the same size
@@ -538,10 +541,32 @@ class RmtRxChannelImpl : public RmtRxChannel {
           mSignalRangeMaxNs(
               4000000) // 40us - Allow gaps between PARLIO streaming chunks
           ,
-          mSkipCounter(0), mStartLow(true), mInternalBuffer(),
-          mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0) {
+          mSkipCounter(0), mStartLow(true), mIoLoopBack(false), mInternalBuffer(),
+          mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0),
+          mMemoryRegistered(false), mMemoryChannelId(0) {
         FL_LOG_RX("RmtRxChannel constructed with pin="
                << pin << " (other hardware params will be set in begin())");
+
+        // CRITICAL: Register with RMT memory manager immediately in constructor
+        // This ensures TX channels can detect RX presence BEFORE they are created
+        // (TX channels are created on first show() call, which may happen before
+        // RX begin() is called). On ESP32-S3, TX DMA must be disabled when RX is
+        // active due to shared DMA channel.
+        //
+        // We use a minimum allocation (64 symbols) here just to mark RX as active.
+        // The actual allocation size may be adjusted in begin() if needed.
+        auto &memMgr = RmtMemoryManager::instance();
+        mMemoryChannelId = static_cast<uint8_t>(128 + (mPin & 0x7F));
+        constexpr uint32_t kMinRxSymbols = 64;  // Minimum RX buffer size
+        auto alloc_result = memMgr.allocateRx(mMemoryChannelId, kMinRxSymbols, false);
+        if (alloc_result.ok()) {
+            mMemoryRegistered = true;
+            FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
+                      << static_cast<int>(mMemoryChannelId) << ")");
+        } else {
+            FL_WARN("RMT RX failed to pre-register with memory manager (channel_id="
+                    << static_cast<int>(mMemoryChannelId) << ")");
+        }
     }
 
     ~RmtRxChannelImpl() override {
@@ -553,6 +578,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
+        }
+
+        // Unregister from RMT memory manager to release resources for TX channels
+        if (mMemoryRegistered) {
+            auto &memMgr = RmtMemoryManager::instance();
+            memMgr.free(mMemoryChannelId, false);  // false = RX channel
+            FL_LOG_RX("RMT RX channel unregistered from memory manager (channel_id="
+                      << static_cast<int>(mMemoryChannelId) << ")");
+            mMemoryRegistered = false;
         }
     }
 
@@ -581,6 +615,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSignalRangeMaxNs = config.signal_range_max_ns;
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
+        mIoLoopBack = config.io_loop_back;
 
         FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
@@ -660,14 +695,45 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.flags.invert_in = false; // No signal inversion
         rx_config.flags.with_dma =
             false; // Start with non-DMA (universal compatibility)
-        rx_config.flags.io_loop_back =
-            false; // Disable internal loopback - using external jumper wire (TX
-                   // pin → RX pin)
+        // Internal loopback configuration:
+        // When io_loop_back=true, RX receives from TX output internally (same GPIO).
+        // This is REQUIRED for RMT TX → RMT RX validation on ESP32-S3 because
+        // ESP32-S3 has a hardware limitation where TX GPIO output stops when RX
+        // is actively receiving on a different GPIO. With loopback enabled,
+        // TX output is routed both to the GPIO AND internally to RX.
+        rx_config.flags.io_loop_back = mIoLoopBack ? 1 : 0;
+        if (mIoLoopBack) {
+            FL_WARN("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO " << static_cast<int>(mPin));
+        }
+
+        // Note: RX channel is already registered with RmtMemoryManager in constructor
+        // to ensure TX channels can detect RX presence before they are created.
+        // The registration happens early so that TX channels disable DMA when RX is active
+        // (ESP32-S3 has shared DMA channel between TX and RX).
+        if (!mMemoryRegistered) {
+            FL_WARN("RMT RX was not pre-registered in constructor - registering now");
+            auto &memMgr = RmtMemoryManager::instance();
+            mMemoryChannelId = static_cast<uint8_t>(128 + (mPin & 0x7F));
+            auto alloc_result = memMgr.allocateRx(mMemoryChannelId, rx_config.mem_block_symbols, false);
+            if (!alloc_result.ok()) {
+                FL_WARN("RMT RX memory allocation failed for channel "
+                        << static_cast<int>(mMemoryChannelId));
+                return false;
+            }
+            mMemoryRegistered = true;
+        }
 
         // Create RX channel
         esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
         if (err != ESP_OK) {
-            FL_WARN("Failed to create RX channel: " << static_cast<int>(err));
+            FL_WARN("Failed to create RX channel: " << static_cast<int>(err)
+                    << " (" << esp_err_to_name(err) << ")");
+            // Unregister from memory manager on failure
+            if (mMemoryRegistered) {
+                auto &memMgr = RmtMemoryManager::instance();
+                memMgr.free(mMemoryChannelId, false);
+                mMemoryRegistered = false;
+            }
             return false;
         }
 
@@ -1355,6 +1421,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter; ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
                       ///< (inverted)
+    bool mIoLoopBack; ///< Enable internal RMT loopback (TX→RX on same GPIO)
     fl::vector<RmtSymbol>
         mInternalBuffer; ///< DMA buffer for hardware RX (small, ≤4096 symbols)
     fl::vector<RmtSymbol>
@@ -1365,6 +1432,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
                              ///< (updated by ISR)
     volatile uint32_t mCallbackCount; ///< Debug: Count ISR callbacks (TEMP -
                                       ///< for testing en_partial_rx)
+
+    // RMT Memory Manager coordination (prevents TX/RX conflicts on ESP32-S3)
+    bool mMemoryRegistered;       ///< Whether this RX channel is registered with memory manager
+    uint8_t mMemoryChannelId;     ///< Channel ID for memory manager tracking (pin + 128)
 };
 
 // Factory method implementation
