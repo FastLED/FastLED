@@ -22,12 +22,16 @@
 CRGB leds[NUM_LEDS];
 
 void setup() {
+    Serial.begin(115200);
+    Serial.println("\n==============================================");
+    Serial.println("   BLINK.INO - Simple LED Blink Example");
+    Serial.println("==============================================\n");
 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
     FastLED.addLeds<NEOPIXEL, PIN_DATA>(leds, NUM_LEDS);  // GRB ordering is assumed
 
-    //Serial.println("BLINK setup complete");
+    Serial.println("✓ Blink setup complete - starting blink loop\n");
     // FastLED.addLeds<SM16824E, PIN_DATA, RGB>(leds, NUM_LEDS);  // RGB ordering (uses SM16824EController)
     // FastLED.addLeds<SM16703, PIN_DATA, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1829, PIN_DATA, RGB>(leds, NUM_LEDS);

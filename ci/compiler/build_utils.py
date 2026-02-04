@@ -35,14 +35,33 @@ def get_pio_execution_env() -> dict[str, str]:
     Returns:
         Environment dict suitable for running PlatformIO commands
     """
+    import os
+
     from ci.util.windows_cmd_runner import get_clean_windows_env, should_use_cmd_runner
 
     if should_use_cmd_runner():
         # Windows Git Bash: Use clean environment without Git Bash indicators
-        return get_clean_windows_env()
+        env = get_clean_windows_env()
     else:
         # Linux/Mac or native Windows shell: Use UTF-8 environment
-        return get_utf8_env()
+        env = get_utf8_env()
+
+    # Verify PLATFORMIO_SRC_DIR is preserved (debugging)
+    if "PLATFORMIO_SRC_DIR" in os.environ and "PLATFORMIO_SRC_DIR" not in env:
+        # This should never happen - log error for debugging
+        import sys
+
+        print(
+            "⚠️  WARNING: PLATFORMIO_SRC_DIR was set but not preserved in subprocess environment!",
+            file=sys.stderr,
+        )
+        print(
+            f"   Parent process has: PLATFORMIO_SRC_DIR={os.environ['PLATFORMIO_SRC_DIR']}",
+            file=sys.stderr,
+        )
+        print("   This is a bug in get_pio_execution_env()", file=sys.stderr)
+
+    return env
 
 
 def create_building_banner(example: str) -> str:

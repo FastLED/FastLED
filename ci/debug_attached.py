@@ -191,6 +191,20 @@ def run_compile(
     print("COMPILING")
     print("=" * 60)
 
+    # Log which sketch is being compiled (from PLATFORMIO_SRC_DIR env var)
+    src_dir = os.environ.get("PLATFORMIO_SRC_DIR")
+    if src_dir:
+        # Convert to relative path for cleaner output
+        try:
+            rel_path = Path(src_dir).relative_to(build_dir)
+            print(f"📁 Source: {rel_path}")
+        except ValueError:
+            # Not relative to build_dir, show absolute path
+            print(f"📁 Source: {src_dir}")
+    else:
+        print("📁 Source: (using platformio.ini default)")
+    print()
+
     formatter = TimestampFormatter()
     # Use create_pio_process() for Git Bash compatibility
     proc = create_pio_process(
@@ -1172,7 +1186,9 @@ def main() -> int:
                 print()
                 return 1
 
-            os.environ["PLATFORMIO_SRC_DIR"] = resolved_sketch
+            # Use absolute path for PLATFORMIO_SRC_DIR (matches validate.py behavior)
+            absolute_sketch_path = str(build_dir / resolved_sketch)
+            os.environ["PLATFORMIO_SRC_DIR"] = absolute_sketch_path
             print(f"📁 Sketch: {resolved_sketch}")
         except SystemExit:
             # resolve_sketch_path already printed error message
