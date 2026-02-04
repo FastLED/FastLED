@@ -9,6 +9,11 @@
 #include "fl/dbg.h"
 #include "fl/thread_local.h"
 
+// Teensy 3.x compatibility: Include new.h before function-local statics
+#if defined(FL_IS_TEENSY_3X)
+    #include <new.h>
+#endif
+
 // Platform-specific includes
 #ifdef __EMSCRIPTEN__
 extern "C" void emscripten_sleep(unsigned int ms);
