@@ -245,6 +245,7 @@ class Board:
             "teensylc",
             "teensy30",
             "teensy31",
+            "teensy32",
             "stm32f103c8",
             "stm32f103cb",
             "stm32f103tb",
