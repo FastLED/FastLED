@@ -898,6 +898,25 @@ TEENSY31 = Board(
     framework="arduino",
 )
 
+TEENSY32 = Board(
+    board_name="teensy32",
+    real_board_name="teensy31",  # Teensy 3.2 uses teensy31 board ID in PlatformIO
+    platform="teensy",
+    framework="arduino",
+)
+
+TEENSY35 = Board(
+    board_name="teensy35",
+    platform="teensy",
+    framework="arduino",
+)
+
+TEENSY36 = Board(
+    board_name="teensy36",
+    platform="teensy",
+    framework="arduino",
+)
+
 TEENSY40 = Board(
     board_name="teensy40",
     platform="teensy",
