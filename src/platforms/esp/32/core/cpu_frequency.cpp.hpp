@@ -5,7 +5,7 @@
 
 #include "fl/int.h"
 
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#if defined(FL_IS_ESP32)
 
 // ESP-IDF provides esp_clk_cpu_freq() as a C function
 extern "C" {
@@ -23,4 +23,4 @@ fl::u32 esp_clk_cpu_freq_impl() {
 
 }  // namespace fl
 
-#endif  // defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#endif  // defined(FL_IS_ESP32)
