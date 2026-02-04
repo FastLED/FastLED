@@ -5,8 +5,10 @@
 // For desktop/generic platforms with standard library support
 
 #if !defined(__has_include)
-    // Platforms without __has_include support - assume no <new> header
-    #include "platforms/shared/inplacenew.h"
+    // Platforms without __has_include support - define placement new manually
+    #include "fl/stl/stdint.h"
+    #include "fl/int.h"
+    inline void *operator new(fl::size, void *ptr) noexcept { return ptr; }
 #elif __has_include(<new>)
     // Modern platforms with standard library support
     #include <new>  // ok include // IWYU pragma: export
@@ -15,5 +17,7 @@
     #include <new.h>  // ok include // IWYU pragma: export
 #else
     // Fallback to manual definition
-    #include "platforms/shared/inplacenew.h"  // IWYU pragma: export
+    #include "fl/stl/stdint.h"
+    #include "fl/int.h"
+    inline void *operator new(fl::size, void *ptr) noexcept { return ptr; }
 #endif
