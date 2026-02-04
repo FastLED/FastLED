@@ -160,7 +160,6 @@ async def main() -> None:
                     )
                     raise Exception("FastLED.js failed to initialize")
 
-                handle_keyboard_interrupt_properly()
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise

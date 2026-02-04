@@ -38,7 +38,6 @@ BUILD_FLAGS_TOML = (
 )
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
 LTO_CACHE_DIR = BUILD_DIR / "lto_cache"
-ENTRY_POINT_CPP = PROJECT_ROOT / "src" / "platforms" / "wasm" / "entry_point.cpp"
 
 
 def load_build_flags(
@@ -152,7 +151,6 @@ def create_wrapper_for_example(example_name: str, output_path: Path) -> Path:
 
 def needs_linking(
     sketch_object: Path,
-    entry_point_object: Path,
     library_archive: Path,
     output_wasm: Path,
 ) -> bool:
@@ -161,8 +159,7 @@ def needs_linking(
 
     Args:
         sketch_object: Sketch .o file
-        entry_point_object: Entry point .o file
-        library_archive: Library .a archive
+        library_archive: Library .a archive (includes entry_point via _build.hpp)
         output_wasm: Output .wasm file
 
     Returns:
@@ -176,7 +173,7 @@ def needs_linking(
     output_mtime = output_wasm.stat().st_mtime
 
     # Check if any input is newer than output
-    inputs = [sketch_object, entry_point_object, library_archive]
+    inputs = [sketch_object, library_archive]
     for input_file in inputs:
         if not input_file.exists():
             return True  # Input missing, need to link
@@ -246,20 +243,25 @@ def compile_object(
     pch_file = BUILD_DIR / "wasm_pch.h.pch"
 
     # Build compilation command
-    cmd = (
+    cmd = [
+        emcc,
+        "-c",
+    ]
+
+    # For .hpp files, explicitly specify language as C++ (fixes .cpp.hpp extension)
+    if source_file.suffix == ".hpp":
+        cmd.extend(["-x", "c++"])
+
+    cmd.extend(
         [
-            emcc,
-            "-c",
             str(source_file),
             "-o",
             str(output_object),
             "-include-pch",
             str(pch_file),
         ]
-        + includes
-        + flags["defines"]
-        + flags["compiler_flags"]
     )
+    cmd += includes + flags["defines"] + flags["compiler_flags"]
 
     if verbose:
         print(f"Compiling {source_file.name}...")
@@ -343,18 +345,8 @@ def compile_wasm(
         if verbose:
             print(f"Sketch compilation: {phase3_time:.2f}s")
 
-        # Phase 3b: Compile entry_point.cpp to object file
-        entry_point_object = BUILD_DIR / "entry_point.o"
-        if needs_compilation(ENTRY_POINT_CPP, entry_point_object) or force:
-            print(f"Compiling entry point: {ENTRY_POINT_CPP.name}")
-            if not compile_object(
-                ENTRY_POINT_CPP, entry_point_object, emcc, flags, verbose, force
-            ):
-                print("✗ Entry point compilation failed")
-                return 1
-        else:
-            print("✓ Entry point is up-to-date")
-        phase3_time += time.time() - phase3_start
+        # NOTE: entry_point.cpp.hpp is compiled as part of libfastled.a via _build.hpp
+        # No separate compilation needed
 
         # Phase 4: Link everything together
         phase4_start = time.time()
@@ -366,9 +358,7 @@ def compile_wasm(
 
         # Check if linking is needed (incremental linking)
         wasm_output = output_file.with_suffix(".wasm")
-        if not force and not needs_linking(
-            sketch_object, entry_point_object, library_archive, wasm_output
-        ):
+        if not force and not needs_linking(sketch_object, library_archive, wasm_output):
             phase4_time = time.time() - phase4_start
             total_time = time.time() - start_time
             print("✓ WASM output is up-to-date, skipping linking")
@@ -391,12 +381,12 @@ def compile_wasm(
             "-Isrc/platforms/wasm/compiler",
         ]
 
-        # Link command: sketch.o + entry_point.o + libfastled.a -> output
+        # Link command: sketch.o + libfastled.a -> output
+        # (libfastled.a includes entry_point via _build.hpp)
         link_cmd = (
             [
                 emcc,
                 str(sketch_object),
-                str(entry_point_object),
                 str(library_archive),
             ]
             + includes
