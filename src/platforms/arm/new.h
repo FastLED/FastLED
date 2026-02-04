@@ -4,6 +4,12 @@
 // ARM placement new operator - in global namespace
 // Most ARM platforms have <new> header available
 
+// Teensy 3.x/LC compatibility: Include new.h early to declare __cxa_guard_* functions
+// before any function-local statics are seen by the compiler
+#if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
+    #include <new.h>  // ok include // IWYU pragma: export
+#endif
+
 #if !defined(__has_include)
     // Platforms without __has_include support - define placement new manually
     #include "fl/stl/stdint.h"

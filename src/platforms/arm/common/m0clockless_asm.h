@@ -621,8 +621,8 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   //                 (set LOW)
   /////////////////////////////////////////////////////////////////////////////
   // Loop control
-#define LOOP            "  loop_%=:"                    // Define loop label
-#define CMPLOOP5        "  cmploop5 %[counter], loop_%=;"   // Decrement counter and loop
+#define FASTLED_ASM_LOOP "  loop_%=:"                       // Define loop label
+#define CMPLOOP5         "  cmploop5 %[counter], loop_%=;"  // Decrement counter and loop
 
   // Bit timing operations
 #define HI2             "  qset2 %[bitmask], %[port], %[hi_off];"   // Set pin HIGH
@@ -874,7 +874,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     //
     // This creates a continuous stream of precisely-timed bits with no gaps.
     /////////////////////////////////////////////////////////////////////////////
-    LOOP
+    FASTLED_ASM_LOOP
       // Write out byte 0, prepping byte 1
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
       HI2 _D1 QLO4 LOADLEDS3(1)    _D2(3) LO2 _D3(0)
