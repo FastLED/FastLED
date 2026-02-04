@@ -12,6 +12,7 @@
 
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
+#include "fl/compiler_control.h"
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
 #include "esp_system.h"
@@ -161,7 +162,8 @@ void watchdog_setup(uint32_t timeout_ms,
 // ESP-IDF v4.x panic handler override
 // Overrides weak symbol in esp-idf/components/esp_system/panic.c
 // IMPORTANT: Must qualify with fl::detail:: to access function in detail namespace
-extern "C" void esp_panic_handler_reconfigure_wdts(void) {
+// NOTE: Marked as weak to avoid multiple definition conflicts with ESP-IDF
+extern "C" FL_LINK_WEAK void esp_panic_handler_reconfigure_wdts(void) {
     fl::detail::handle_system_reset("PANIC FastLED idfv4");
 }
 

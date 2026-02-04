@@ -26,6 +26,7 @@
 #include "platforms/esp/_build.hpp"
 #include "platforms/esp/32/_build.hpp"
 #include "platforms/esp/32/audio/_build.hpp"
+#include "platforms/esp/32/core/_build.hpp"
 #include "platforms/esp/32/drivers/_build.hpp"
 #include "platforms/esp/32/drivers/gpio_isr_rx/_build.hpp"
 #include "platforms/esp/32/drivers/i2s/_build.hpp"
