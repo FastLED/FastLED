@@ -1,0 +1,55 @@
+name: check_teensy36_size
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/esp/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - '!src/platforms/arm/rp2040/**'
+      - '!src/platforms/arm/sam/**'
+      - 'src/platforms/arm/k20/**'
+      - 'src/platforms/arm/k66/**'
+      - 'src/platforms/arm/kl26/**'
+      - 'src/platforms/arm/mxrt1062/**'
+      - 'examples/**'
+      - 'ci/**'
+      - '.github/workflows/check_teensy36_size.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/esp/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - '!src/platforms/arm/rp2040/**'
+      - '!src/platforms/arm/sam/**'
+      - 'src/platforms/arm/k20/**'
+      - 'src/platforms/arm/k66/**'
+      - 'src/platforms/arm/kl26/**'
+      - 'src/platforms/arm/mxrt1062/**'
+      - 'examples/**'
+      - 'ci/**'
+      - '.github/workflows/check_teensy36_size.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: teensy36
+      max_size: 120000
+      max_size_apa102: 100000
