@@ -173,9 +173,8 @@ void Teensy_I2S_Audio::start() {
 #endif
 
     // Log channel selection
-    const char* channelName = (mConfig.mAudioChannel == AudioChannel::Left) ? "Left" :
-                              (mConfig.mAudioChannel == AudioChannel::Right) ? "Right" : "Both (downmixed)";
-    FL_WARN("  Channel: " << channelName);
+    FL_WARN("  Channel: " << ((mConfig.mAudioChannel == AudioChannel::Left) ? "Left" :
+                              (mConfig.mAudioChannel == AudioChannel::Right) ? "Right" : "Both (downmixed)"));
 }
 
 void Teensy_I2S_Audio::stop() {
