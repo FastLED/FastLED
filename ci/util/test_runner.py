@@ -560,6 +560,23 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
     )
 
 
+def create_wasm_test_process(enable_stack_trace: bool = True) -> RunningProcess:
+    """Create a WASM compilation test process without starting it"""
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/wasm_compile.py",
+        "examples/wasm",
+        "--run",
+    ]
+
+    # Use 5 minute timeout for WASM compilation and testing
+    return RunningProcess(
+        cmd, auto_run=False, timeout=300, output_formatter=TimestampFormatter()
+    )
+
+
 def get_cpp_test_processes(
     args: TestArgs, test_categories: TestCategories, enable_stack_trace: bool
 ) -> list[RunningProcess]:
@@ -745,6 +762,8 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
         return "integration_tests"
     elif "ci-compile" in command and "uno" in command:
         return "uno_compilation"
+    elif "wasm_compile.py" in command:
+        return "wasm_compilation"
     else:
         # Fallback to the existing extraction logic
         return _extract_test_name(command)
@@ -1458,6 +1477,7 @@ def runner(
     cpp_test_change: bool = True,
     examples_change: bool = True,
     python_test_change: bool = True,
+    wasm_change: bool = True,
     fingerprint_manager: Optional["FingerprintManager"] = None,
 ) -> None:
     """
@@ -1469,6 +1489,7 @@ def runner(
         cpp_test_change: Whether C++ test-related files (src/ or tests/) have changed
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
+        wasm_change: Whether WASM-related files have changed
         fingerprint_manager: Optional fingerprint manager for test metadata
     """
     # Debug logging - only shown in verbose mode to reduce UI clutter
@@ -1682,6 +1703,27 @@ def runner(
                     cached_summary = prev_fp.get_cache_summary()
             skipped_timings.append(
                 _create_skipped_timing("python_tests", cached_summary=cached_summary)
+            )
+
+        # Add WASM compilation test if WASM is enabled and files have changed
+        # WASM runs by default unless specific test flags are used
+        if (test_categories.wasm or test_categories.wasm_only) and wasm_change:
+            processes.append(create_wasm_test_process(enable_stack_trace))
+        elif (test_categories.wasm or test_categories.wasm_only) and not wasm_change:
+            cache_msg = _format_cache_hit_message(
+                fingerprint_manager,
+                "wasm",
+                "Fingerprint cache valid - skipping WASM compilation (no changes detected)",
+            )
+            print_cache_hit(cache_msg)
+            # Get cached summary for the skipped timing display
+            cached_summary = ""
+            if fingerprint_manager:
+                prev_fp = fingerprint_manager.get_prev_fingerprint("wasm")
+                if prev_fp:
+                    cached_summary = prev_fp.get_cache_summary()
+            skipped_timings.append(
+                _create_skipped_timing("wasm", cached_summary=cached_summary)
             )
 
         # Examples are now compiled via uno compilation test (ci-compile.py)

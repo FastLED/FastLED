@@ -9,6 +9,7 @@ from ci.util.test_types import (
     calculate_examples_fingerprint,
     calculate_fingerprint,
     calculate_python_test_fingerprint,
+    calculate_wasm_fingerprint,
 )
 from ci.util.timestamp_print import ts_print
 
@@ -120,6 +121,9 @@ class FingerprintManager:
 
     def check_python(self) -> bool:
         return self.check("python_test", calculate_python_test_fingerprint)
+
+    def check_wasm(self) -> bool:
+        return self.check("wasm", calculate_wasm_fingerprint)
 
     def check_all(self) -> bool:
         return self.check("all", calculate_fingerprint)

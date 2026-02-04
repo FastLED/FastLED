@@ -173,6 +173,7 @@ def main() -> None:
         cpp_test_change = fingerprint_manager.check_cpp(args)
         examples_change = fingerprint_manager.check_examples(args)
         python_test_change = fingerprint_manager.check_python()
+        wasm_change = fingerprint_manager.check_wasm()
 
         # Handle --docker flag: run tests in Docker container
         if args.docker:
@@ -340,6 +341,7 @@ def main() -> None:
                     or args.no_fingerprint
                     or args.force
                 )
+                force_wasm_change = wasm_change or args.no_fingerprint or args.force
                 force_src_code_change = (
                     src_code_change or args.no_fingerprint or args.force
                 )
@@ -353,6 +355,7 @@ def main() -> None:
                     force_cpp_test_change,
                     force_examples_change,
                     force_python_test_change,
+                    force_wasm_change,
                     fingerprint_manager=fingerprint_manager,
                 )
 

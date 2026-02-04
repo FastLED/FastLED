@@ -98,6 +98,7 @@ class TestArgs:
     docker: bool = (
         False  # Run tests inside Docker container (implies --debug unless overridden)
     )
+    default_mode: bool = False  # True when no specific test flags were provided
 
 
 @typechecked
@@ -109,10 +110,12 @@ class TestCategories:
     examples: bool
     py: bool
     integration: bool
+    wasm: bool
     unit_only: bool
     examples_only: bool
     py_only: bool
     integration_only: bool
+    wasm_only: bool
     qemu_esp32s3: bool
     qemu_esp32s3_only: bool
 
@@ -123,10 +126,12 @@ class TestCategories:
             "examples",
             "py",
             "integration",
+            "wasm",
             "unit_only",
             "examples_only",
             "py_only",
             "integration_only",
+            "wasm_only",
             "qemu_esp32s3",
             "qemu_esp32s3_only",
         ]:
@@ -245,6 +250,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.unit = True
         args.examples = []  # Empty list means run all examples
         args.py = True
+        args.default_mode = True  # Mark that we're in default mode (enables WASM)
         # print("No test flags specified: Running all tests (unit, examples, Python)")
 
         # Auto-enable verbose mode for unit tests (disabled)
@@ -266,37 +272,53 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     integration_enabled = args.full and args.examples is None
     qemu_esp32s3_enabled = args.qemu is not None
 
+    # WASM compilation runs in default mode (when no specific test flags were provided)
+    # When user explicitly specifies test categories (--cpp, --unit, --examples, --py), WASM is disabled
+    wasm_enabled = args.default_mode
+
     return TestCategories(
         unit=unit_enabled,
         examples=examples_enabled,
         py=py_enabled,
         integration=integration_enabled,
+        wasm=wasm_enabled,
         qemu_esp32s3=qemu_esp32s3_enabled,
         unit_only=unit_enabled
         and not examples_enabled
         and not py_enabled
         and not integration_enabled
+        and not wasm_enabled
         and not qemu_esp32s3_enabled,
         examples_only=examples_enabled
         and not unit_enabled
         and not py_enabled
         and not integration_enabled
+        and not wasm_enabled
         and not qemu_esp32s3_enabled,
         py_only=py_enabled
         and not unit_enabled
         and not examples_enabled
         and not integration_enabled
+        and not wasm_enabled
         and not qemu_esp32s3_enabled,
         integration_only=integration_enabled
         and not unit_enabled
         and not examples_enabled
         and not py_enabled
+        and not wasm_enabled
+        and not qemu_esp32s3_enabled,
+        wasm_only=wasm_enabled
+        and not unit_enabled
+        and not examples_enabled
+        and not py_enabled
+        and not integration_enabled
         and not qemu_esp32s3_enabled,
         qemu_esp32s3_only=qemu_esp32s3_enabled
         and not unit_enabled
         and not examples_enabled
         and not py_enabled
-        and not integration_enabled,
+        and not integration_enabled
+        and not wasm_enabled,
     )
 
 
@@ -559,6 +581,55 @@ def calculate_python_test_fingerprint() -> FingerprintResult:
                 config_content = f.read()
                 hasher.update(
                     f"config:{config_file.name}:{hashlib.sha256(config_content).hexdigest()}".encode(
+                        "utf-8"
+                    )
+                )
+
+    elapsed_time = time.time() - start_time
+
+    return FingerprintResult(
+        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+    )
+
+
+def calculate_wasm_fingerprint() -> FingerprintResult:
+    """
+    Calculate fingerprint for WASM compilation tests.
+
+    Returns:
+        The fingerprint result covering files that affect WASM compilation
+    """
+    start_time = time.time()
+    cwd = Path.cwd()
+
+    # Combine fingerprints from relevant directories
+    hasher = hashlib.sha256()
+
+    # Process src/ directory (affects WASM compilation)
+    src_dir = cwd / "src"
+    if src_dir.exists():
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        hasher.update(f"src:{src_result.hash}".encode("utf-8"))
+
+    # Process examples/wasm directory (the default WASM test example)
+    wasm_example_dir = cwd / "examples" / "wasm"
+    if wasm_example_dir.exists():
+        wasm_result = fingerprint_code_base(
+            wasm_example_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp,**/*.js,**/*.html"
+        )
+        hasher.update(f"wasm_example:{wasm_result.hash}".encode("utf-8"))
+
+    # Include WASM compilation scripts
+    wasm_compile_files = [
+        cwd / "ci" / "wasm_compile.py",
+        cwd / "ci" / "boards.py",
+    ]
+    for script_file in wasm_compile_files:
+        if script_file.exists():
+            with open(script_file, "rb") as f:
+                script_content = f.read()
+                hasher.update(
+                    f"script:{script_file.name}:{hashlib.sha256(script_content).hexdigest()}".encode(
                         "utf-8"
                     )
                 )
