@@ -64,11 +64,7 @@ public:
   uint8_t jpgScale = 0;
 
   SketchCallback tft_output = nullptr;
-
-  TJpg_Decoder *thisPtr = nullptr;
 };
-
-extern TJpg_Decoder TJpgDec;
 
 } // namespace third_party
 } // namespace fl

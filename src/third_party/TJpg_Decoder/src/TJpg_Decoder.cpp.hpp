@@ -15,16 +15,12 @@ https://github.com/Bodmer/TJpg_Decoder
 namespace fl {
 namespace third_party {
 
-// Create a class instance to be used by the sketch (defined as extern in header)
-TJpg_Decoder TJpgDec;
-
 /***************************************************************************************
 ** Function name:           TJpg_Decoder
 ** Description:             Constructor
 ***************************************************************************************/
 TJpg_Decoder::TJpg_Decoder(){
-  // Setup a pointer to this class for static functions
-  thisPtr = this;
+  // Constructor
 }
 
 /***************************************************************************************
@@ -83,8 +79,8 @@ void TJpg_Decoder::setCallback(SketchCallback sketchCallback)
 ***************************************************************************************/
 size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
 {
-  TJpg_Decoder *thisPtr = TJpgDec.thisPtr;
-  FL_UNUSED(jdec);
+  // Retrieve instance pointer from JDEC device context
+  TJpg_Decoder *thisPtr = static_cast<TJpg_Decoder*>(jdec->device);
 
   // Handle an array input
   if (thisPtr->jpg_source == TJPG_ARRAY) {
@@ -110,11 +106,8 @@ size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
 // Pass image block back to the sketch for rendering, may be a complete or partial MCU
 int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect)
 {
-
-  // This is a static function so create a pointer to access other members of the class
-  TJpg_Decoder *thisPtr = TJpgDec.thisPtr;
-
-  FL_UNUSED(jdec);
+  // Retrieve instance pointer from JDEC device context
+  TJpg_Decoder *thisPtr = static_cast<TJpg_Decoder*>(jdec->device);
 
   // Check if we have a valid thisPtr
   if (!thisPtr) {
@@ -152,13 +145,10 @@ JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], s
   jpeg_x = x;
   jpeg_y = y;
 
-  // Set global pointer for static callback (missing in original - bug fix)
-  TJpgDec.thisPtr = this;
-
   jdec.swap = _swap;
 
-  // Analyse input data
-  jresult = jd_prepare(&jdec, jd_input, workspace, TJPGD_WORKSPACE_SIZE, 0);
+  // Analyse input data - pass 'this' as device pointer for callbacks
+  jresult = jd_prepare(&jdec, jd_input, workspace, TJPGD_WORKSPACE_SIZE, this);
 
   // Extract image and render
   if (jresult == JDR_OK) {
@@ -186,11 +176,8 @@ JRESULT TJpg_Decoder::getJpgSize(uint16_t *w, uint16_t *h, const uint8_t jpeg_da
   array_data  = jpeg_data;
   array_size  = data_size;
 
-  // Set global pointer for static callback
-  TJpgDec.thisPtr = this;
-
-  // Analyse input data
-  jresult = jd_prepare(&jdec, jd_input, workspace, TJPGD_WORKSPACE_SIZE, 0);
+  // Analyse input data - pass 'this' as device pointer for callbacks
+  jresult = jd_prepare(&jdec, jd_input, workspace, TJPGD_WORKSPACE_SIZE, this);
 
   if (jresult == JDR_OK) {
     *w = jdec.width;
