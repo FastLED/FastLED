@@ -518,6 +518,25 @@ template <typename T> struct is_floating_point<T &> {
 };
 
 //-------------------------------------------------------------------------------
+// is_arithmetic trait - integral or floating-point types
+//-------------------------------------------------------------------------------
+template <typename T> struct is_arithmetic {
+    enum : bool { value = is_integral<T>::value || is_floating_point<T>::value };
+};
+
+template <typename T> struct is_arithmetic<const T> {
+    static constexpr bool value = is_arithmetic<T>::value;
+};
+
+template <typename T> struct is_arithmetic<volatile T> {
+    static constexpr bool value = is_arithmetic<T>::value;
+};
+
+template <typename T> struct is_arithmetic<T &> {
+    static constexpr bool value = is_arithmetic<T>::value;
+};
+
+//-------------------------------------------------------------------------------
 // is_signed trait
 //-------------------------------------------------------------------------------
 template <typename T> struct is_signed {

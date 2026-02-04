@@ -10,6 +10,7 @@
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 #include "fl/int.h"
+#include "fl/stl/type_traits.h"
 // ============================================================================
 // Platform-specific includes via trampoline header
 // ============================================================================
@@ -84,54 +85,23 @@ template<cycle_t CYCLES> inline void delaycycles_min1() {
 /// @param run_async If true, pump async tasks during delay (only on platforms with SKETCH_HAS_LOTS_OF_MEMORY==1)
 void delay(u32 ms, bool run_async = true);
 
-/// Overload for signed int to avoid ambiguity with Arduino's delay(unsigned long)
-/// @param ms Milliseconds to delay
-inline void delay(int ms) {
+/// Template overload for all arithmetic types - coexists with Arduino's extern "C" delay()
+/// Templates have different overload resolution rules and don't conflict with C-linkage functions
+/// This allows "using fl::delay;" to work universally on all platforms including Arduino
+/// @param ms Milliseconds to delay (accepts integers, floats, doubles)
+/// @note Similar technique used by fl::round to coexist with Arduino's ::round()
+/// @note Accepts all integer types (char, short, int, long, etc.) and floating-point types (float, double)
+template<typename T, typename = fl::enable_if_t<fl::is_arithmetic<T>::value>>
+inline void delay(T ms) {
     delay(static_cast<u32>(ms), true);
 }
 
-/// Overload for signed long to avoid ambiguity with Arduino's delay(unsigned long)
-/// @param ms Milliseconds to delay
-inline void delay(long ms) {
-    delay(static_cast<u32>(ms), true);
-}
-
-// Platform detection: Does this platform need delay(unsigned long) overload?
-// Required when: unsigned long != uint32_t (e.g., x64 Linux/Mac where unsigned long is 64-bit)
-// Excluded when: unsigned long == uint32_t OR conflicts with Arduino's delay(uint32_t)
-//
-// Excluded platforms:
-// - AVR: unsigned long == uint32_t
-// - ARM: unsigned long == uint32_t
-// - Windows: unsigned long == uint32_t (Win32 LLP64 model)
-// - WASM: unsigned long == uint32_t
-// - ESP32: unsigned long == uint32_t AND conflicts with Arduino delay(uint32_t)
-#if defined(__AVR__) || defined(FL_IS_ARM) || defined(__arm__) || defined(_WIN32) || defined(__EMSCRIPTEN__) || defined(FL_IS_ESP32)
-    #define FL_DELAY_UNSIGNED_LONG_SAME_AS_U32 1
-#else
-    #define FL_DELAY_UNSIGNED_LONG_SAME_AS_U32 0
-#endif
-
-#if !FL_DELAY_UNSIGNED_LONG_SAME_AS_U32
-/// Overload for unsigned long (only on platforms where unsigned long != u32)
-/// Provides seamless compatibility with Arduino's delay(unsigned long) signature
-/// @param ms Milliseconds to delay
-inline void delay(unsigned long ms) {
-    delay(static_cast<u32>(ms), true);
-}
-#endif
-
-/// Overload for signed int with async flag
-/// @param ms Milliseconds to delay
+/// Template overload with async flag for all arithmetic types
+/// @param ms Milliseconds to delay (accepts integers, floats, doubles)
 /// @param run_async If true, pump async tasks during delay
-inline void delay(int ms, bool run_async) {
-    delay(static_cast<u32>(ms), run_async);
-}
-
-/// Overload for signed long with async flag
-/// @param ms Milliseconds to delay
-/// @param run_async If true, pump async tasks during delay
-inline void delay(long ms, bool run_async) {
+/// @note Accepts all integer types (char, short, int, long, etc.) and floating-point types (float, double)
+template<typename T, typename = fl::enable_if_t<fl::is_arithmetic<T>::value>>
+inline void delay(T ms, bool run_async) {
     delay(static_cast<u32>(ms), run_async);
 }
 
