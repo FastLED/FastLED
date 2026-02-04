@@ -59,9 +59,25 @@ def run_fbuild_compile(
     Returns:
         True if compilation succeeded, False otherwise
     """
+    import os
+
     print("=" * 60)
     print("COMPILING (fbuild)")
     print("=" * 60)
+
+    # Log which sketch is being compiled (from PLATFORMIO_SRC_DIR env var)
+    src_dir = os.environ.get("PLATFORMIO_SRC_DIR")
+    if src_dir:
+        # Convert to relative path for cleaner output
+        try:
+            rel_path = Path(src_dir).relative_to(build_dir)
+            print(f"📁 Source: {rel_path}")
+        except ValueError:
+            # Not relative to build_dir, show absolute path
+            print(f"📁 Source: {src_dir}")
+    else:
+        print("📁 Source: (using platformio.ini default)")
+    print()
 
     # Ensure daemon is running before attempting to connect
     if not ensure_fbuild_daemon():
