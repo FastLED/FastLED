@@ -30,6 +30,16 @@ FL_EXTERN_C_BEGIN
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 FL_EXTERN_C_END
 
+// ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M
+// In ESP-IDF < 5.2, esp_cache_msync() defaults to C2M (cache-to-memory) direction
+// In ESP-IDF 5.2+, the direction flag was added to be explicit
+#include "platforms/esp/esp_version.h"
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 2, 0)
+    #ifndef ESP_CACHE_MSYNC_FLAG_DIR_C2M
+        #define ESP_CACHE_MSYNC_FLAG_DIR_C2M 0  // Default behavior in < 5.2
+    #endif
+#endif
+
 // Platform memory barrier
 #include "platforms/memory_barrier.h"
 
