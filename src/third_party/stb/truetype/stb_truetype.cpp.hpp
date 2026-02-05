@@ -1310,8 +1310,8 @@ static stbtt__buf stbtt__cff_index_get(stbtt__buf b, int32_t i)
 
 static stbtt_uint16 ttUSHORT(stbtt_uint8 *p) { return p[0]*256 + p[1]; }
 static stbtt_int16 ttSHORT(stbtt_uint8 *p)   { return p[0]*256 + p[1]; }
-static stbtt_uint32 ttULONG(stbtt_uint8 *p)  { return (p[0]<<24) + (p[1]<<16) + (p[2]<<8) + p[3]; }
-static stbtt_int32 ttLONG(stbtt_uint8 *p)    { return (p[0]<<24) + (p[1]<<16) + (p[2]<<8) + p[3]; }
+static stbtt_uint32 ttULONG(stbtt_uint8 *p)  { return ((stbtt_uint32)p[0]<<24) + ((stbtt_uint32)p[1]<<16) + ((stbtt_uint32)p[2]<<8) + p[3]; }
+static stbtt_int32 ttLONG(stbtt_uint8 *p)    { return ((stbtt_uint32)p[0]<<24) + ((stbtt_uint32)p[1]<<16) + ((stbtt_uint32)p[2]<<8) + p[3]; }
 
 #define stbtt_tag4(p,c0,c1,c2,c3) ((p)[0] == (c0) && (p)[1] == (c1) && (p)[2] == (c2) && (p)[3] == (c3))
 #define stbtt_tag(p,str)           stbtt_tag4(p,str[0],str[1],str[2],str[3])
@@ -1441,7 +1441,10 @@ static int32_t stbtt_InitFont_internal(stbtt_fontinfo *info, unsigned char *data
       info->fdselect = stbtt__new_buf(nullptr, 0);
 
       // @TODO this should use size from table (not 512MB)
-      info->cff = stbtt__new_buf(data+cff, 512*1024*1024);
+      // On 8-bit platforms (size_t < 4 bytes), use max size_t value to avoid overflow
+      #define STBTT_CFF_SIZE_LIMIT (512L*1024L*1024L)
+      info->cff = stbtt__new_buf(data+cff,
+         (sizeof(size_t) < 4) ? (size_t)-1 : (size_t)STBTT_CFF_SIZE_LIMIT);
       b = info->cff;
 
       // read the header

@@ -724,7 +724,7 @@ static void crc32_init(void)
    uint32 s;
    for(i=0; i < 256; i++) {
       for (s=(uint32) i << 24, j=0; j < 8; ++j)
-         s = (s << 1) ^ (s >= (1U<<31) ? CRC32_POLY : 0);
+         s = (s << 1) ^ (s >= (1UL<<31) ? CRC32_POLY : 0);
       crc_table[i] = s;
    }
 }
@@ -764,10 +764,10 @@ static int32_t ilog(int32 n)
         if (n < (1 <<  4))            return  0 + log2_4[n      ];
         else if (n < (1 <<  9))       return  5 + log2_4[n >>  5];
              else                     return 10 + log2_4[n >> 10];
-   else if (n < (1 << 24))
-             if (n < (1 << 19))       return 15 + log2_4[n >> 15];
+   else if (n < (1L << 24))
+             if (n < (1L << 19))       return 15 + log2_4[n >> 15];
              else                     return 20 + log2_4[n >> 20];
-        else if (n < (1 << 29))       return 25 + log2_4[n >> 25];
+        else if (n < (1L << 29))       return 25 + log2_4[n >> 25];
              else                     return 30 + log2_4[n >> 30];
 }
 
@@ -1074,7 +1074,7 @@ static uint32 get32(vorb *f)
    uint32 x;
    x = get8(f);
    x += get8(f) << 8;
-   x += get8(f) << 16;
+   x += (uint32) get8(f) << 16;
    x += (uint32) get8(f) << 24;
    return x;
 }
@@ -4142,13 +4142,13 @@ static int32_t vorbis_search_for_page_pushdata(vorb *f, uint8 *data, int32_t dat
                n = f->page_crc_tests++;
                f->scan[n].bytes_left = len-j;
                f->scan[n].crc_so_far = crc;
-               f->scan[n].goal_crc = data[i+22] + (data[i+23] << 8) + (data[i+24]<<16) + (data[i+25]<<24);
+               f->scan[n].goal_crc = data[i+22] + (data[i+23] << 8) + ((uint32)data[i+24]<<16) + ((uint32)data[i+25]<<24);
                // if the last frame on a page is continued to the next, then
                // we can't recover the sample_loc immediately
                if (data[i+27+data[i+26]-1] == 255)
                   f->scan[n].sample_loc = ~0;
                else
-                  f->scan[n].sample_loc = data[i+6] + (data[i+7] << 8) + (data[i+ 8]<<16) + (data[i+ 9]<<24);
+                  f->scan[n].sample_loc = data[i+6] + (data[i+7] << 8) + ((uint32)data[i+ 8]<<16) + ((uint32)data[i+ 9]<<24);
                f->scan[n].bytes_done = i+j;
                if (f->page_crc_tests == FL_STB_VORBIS_PUSHDATA_CRC_COUNT)
                   break;
@@ -4337,7 +4337,7 @@ static uint32 vorbis_find_page(stb_vorbis *f, uint32 *end, uint32 *last)
                header[i] = get8(f);
             if (f->eof) return 0;
             if (header[4] != 0) goto invalid;
-            goal = header[22] + (header[23] << 8) + (header[24]<<16) + ((uint32)header[25]<<24);
+            goal = header[22] + (header[23] << 8) + ((uint32)header[24]<<16) + ((uint32)header[25]<<24);
             for (i=22; i < 26; ++i)
                header[i] = 0;
             crc = 0;
@@ -4416,7 +4416,7 @@ static int32_t get_seek_page_info(stb_vorbis *f, ProbedPage *z)
    z->page_end = z->page_start + 27 + header[26] + len;
 
    // read the last-decoded sample out of the data
-   z->last_decoded_sample = header[6] + (header[7] << 8) + (header[8] << 16) + (header[9] << 24);
+   z->last_decoded_sample = header[6] + (header[7] << 8) + ((uint32)header[8] << 16) + ((uint32)header[9] << 24);
 
    // restore file state to where we were
    set_file_offset(f, z->page_start);
@@ -4914,12 +4914,12 @@ static int8 channel_position[7][6] =
    typedef char stb_vorbis_float_size_test[sizeof(float)==4 && sizeof(int32_t) == 4];
    #define FL_STBV_FASTDEF(x) float_conv x
    // add (1<<23) to convert to int, then divide by 2^SHIFT, then add 0.5/2^SHIFT to round
-   #define FL_STBV_MAGIC(SHIFT) (1.5f * (1 << (23-SHIFT)) + 0.5f/(1 << SHIFT))
-   #define FL_STBV_ADDEND(SHIFT) (((150-SHIFT) << 23) + (1 << 22))
+   #define FL_STBV_MAGIC(SHIFT) (1.5f * (1L << (23-SHIFT)) + 0.5f/(1L << SHIFT))
+   #define FL_STBV_ADDEND(SHIFT) (((int32_t)(150-SHIFT) << 23) + (1L << 22))
    #define FL_STBV_FAST_SCALED_FLOAT_TO_INT(temp,x,s) (temp.f = (x) + FL_STBV_MAGIC(s), temp.i - FL_STBV_ADDEND(s))
    #define fl_stbv_check_endianness()
 #else
-   #define FL_STBV_FAST_SCALED_FLOAT_TO_INT(temp,x,s) ((int32_t) ((x) * (1 << (s))))
+   #define FL_STBV_FAST_SCALED_FLOAT_TO_INT(temp,x,s) ((int32_t) ((x) * (1L << (s))))
    #define fl_stbv_check_endianness()
    #define FL_STBV_FASTDEF(x)
 #endif
