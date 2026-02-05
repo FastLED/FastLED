@@ -157,6 +157,137 @@ def save_metadata(metadata: dict[str, str]) -> None:
         json.dump(metadata, f, indent=2)
 
 
+def parse_dependency_file(depfile: Path) -> list[Path]:
+    """
+    Parse a .d dependency file and extract all dependency paths.
+
+    Args:
+        depfile: Path to .d dependency file
+
+    Returns:
+        List of dependency file paths (excluding the target itself)
+    """
+    if not depfile.exists():
+        return []
+
+    try:
+        with open(depfile, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        # Dependency files have format: target: dep1 dep2 dep3 \
+        #                                dep4 dep5 ...
+        # The first line contains "target: [optional deps] \"
+        # Subsequent lines contain more dependencies
+
+        if not lines:
+            return []
+
+        # Parse first line to get target
+        first_line = lines[0].rstrip("\r\n")
+
+        # Find the separator ": " or ":\\" in the first line
+        # (target paths may contain colons on Windows, e.g., C:/path)
+        # Look for ": " pattern which separates target from deps
+        sep_idx = first_line.find(": ")
+        if sep_idx == -1:
+            # Try ":\" pattern (no space before backslash)
+            sep_idx = first_line.find(":\\")
+            if sep_idx == -1:
+                return []
+            sep_len = 2  # Length of ":\\"
+        else:
+            sep_len = 2  # Length of ": "
+
+        target_str = first_line[:sep_idx]
+        target = Path(target_str.strip()).resolve()
+
+        # Collect all dependency text from continuation lines
+        # Line format: each line ends with " \" except the last one
+        deps_text = first_line[sep_idx + sep_len :].rstrip()
+
+        # Remove trailing backslash if present (line continuation)
+        if deps_text.endswith("\\"):
+            deps_text = deps_text[:-1]
+
+        # Process continuation lines
+        for line in lines[1:]:
+            line_clean = line.rstrip("\r\n").strip()
+            # Remove trailing backslash if present
+            if line_clean.endswith("\\"):
+                line_clean = line_clean[:-1].strip()
+            deps_text += " " + line_clean
+
+        # Split by whitespace and filter out empty strings
+        deps = [d.strip() for d in deps_text.split() if d.strip()]
+
+        # Convert to Path objects and resolve to absolute paths
+        dep_paths: list[Path] = []
+        for dep in deps:
+            try:
+                dep_path = Path(dep).resolve()
+                # Filter out the target itself (shouldn't be in deps, but be safe)
+                if dep_path != target and dep_path.exists():
+                    dep_paths.append(dep_path)
+            except (ValueError, OSError):
+                # Skip invalid paths
+                continue
+
+        return dep_paths
+
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        print(f"Warning: Could not parse dependency file: {e}")
+        return []
+
+
+def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, str]:
+    """
+    Check if any PCH dependencies are newer than the PCH output.
+
+    Args:
+        depfile: Path to .d dependency file
+        pch_output: Path to PCH output file
+
+    Returns:
+        (changed, reason) tuple
+    """
+    if not depfile.exists():
+        return False, ""  # No depfile, can't check dependencies
+
+    if not pch_output.exists():
+        return True, "PCH output does not exist"
+
+    # Get PCH output modification time
+    pch_mtime = pch_output.stat().st_mtime
+    depfile_mtime = depfile.stat().st_mtime
+
+    # If depfile is older than PCH, it's stale - ignore it
+    # (This can happen after PCH is rebuilt but before depfile is regenerated)
+    if depfile_mtime < pch_mtime:
+        return False, ""  # Stale depfile, rely on other checks
+
+    # Parse dependencies
+    deps = parse_dependency_file(depfile)
+    if not deps:
+        return False, ""  # Empty or unparseable depfile
+
+    # Check each dependency
+    for dep in deps:
+        if not dep.exists():
+            # Dependency was deleted - rebuild needed
+            # Note: This is expected during initial builds or after clean
+            return True, f"dependency missing: {dep.name}"
+
+        dep_mtime = dep.stat().st_mtime
+        if dep_mtime > pch_mtime:
+            # Dependency is newer than PCH - rebuild needed
+            return True, f"dependency changed: {dep.name}"
+
+    return False, ""
+
+
 def needs_rebuild(
     emcc: str,
     flags: dict[str, list[str]],
@@ -193,6 +324,11 @@ def needs_rebuild(
     current_compiler_version = get_compiler_version(emcc)
     if metadata.get("compiler_version") != current_compiler_version:
         return True, "compiler version changed"
+
+    # Check if any dependencies have changed (NEW: dependency tracking)
+    deps_changed, reason = check_dependencies_changed(PCH_DEPFILE, PCH_OUTPUT)
+    if deps_changed:
+        return True, reason
 
     return False, "PCH is up to date"
 
