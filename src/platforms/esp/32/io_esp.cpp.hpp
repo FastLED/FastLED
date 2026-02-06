@@ -3,11 +3,13 @@
 
 // ok no namespace fl
 
+// FL_ESP_USE_IDF_SERIAL is defined in io_esp.cpp.hpp
+#ifndef FL_ESP_USE_IDF_SERIAL
 #define FL_ESP_USE_IDF_SERIAL 0
+#endif
 
 #if FL_ESP_USE_IDF_SERIAL
-// src\platforms\esp\32\io_esp_idf.hpp
-#include "platforms/esp/32/detail/io_uart.hpp"
+#include "platforms/esp/32/drivers/uart_esp32_idf.hpp"
 #else
 #include "platforms/arduino/io_arduino.hpp"
 #endif
