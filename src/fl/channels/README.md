@@ -85,15 +85,14 @@ void loop() {
 
 **Note:** Most users don't need `setExclusiveDriver()` - the automatic selection provides optimal performance for each platform.
 
-## Advanced: Direct Engine Selection with Channel API
+## Advanced: Runtime Channel Creation with Channel API
 
-For advanced use cases requiring direct engine control, you can use the Channel API:
+For advanced use cases requiring runtime configuration or engine affinity control, you can use the Channel API:
 
 ```cpp
 #include "FastLED.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_config.h"
-#include "platforms/esp/32/drivers/parlio/channel_engine_parlio.h"
 
 #define NUM_LEDS 60
 #define PIN 16
@@ -105,11 +104,12 @@ void setup() {
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfig config(PIN, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
 
-    // Create channel with specific engine type
-    auto channel = fl::Channel::create<fl::ChannelEnginePARLIO>(config);
+    // Option 1: Create channel (automatic engine selection)
+    auto channel = fl::Channel::create(config);
+    FastLED.addChannel(channel);
 
-    // Register with FastLED
-    FastLED.addLedChannel(channel);
+    // Option 2: Create and register in one call (preferred)
+    auto channel2 = FastLED.addChannel(config);
 }
 
 void loop() {
@@ -119,13 +119,18 @@ void loop() {
 }
 ```
 
-**Available Engine Types:**
-- `fl::ChannelEnginePARLIO` - ESP32-P4, C6, H2 (parallel I/O)
-- `fl::ChannelEngineSpi` - ESP32, S2, S3 (SPI-based)
-- `fl::ChannelEngineRMT` - RMT5 (ESP32-C6, H2, P4)
-- `fl::ChannelEngineRMT4` - RMT4 (ESP32 classic, S2, S3)
+**Engine Selection:**
+- Engine selection happens automatically based on platform capabilities
+- Use affinity to bind to a specific engine:
+  ```cpp
+  fl::ChannelOptions options;
+  options.mAffinity = "PARLIO";  // or "RMT", "SPI", etc.
+  fl::ChannelConfig config(pin, timing, leds, RGB, options);
+  ```
+- Available engines: PARLIO (ESP32-P4/C6/H2), SPI (ESP32/S2/S3), RMT (all ESP32 variants)
+- See `setExclusiveDriver()` for forcing specific engines globally
 
-**Note:** This advanced API is primarily for testing or special use cases. Most users should use `FastLED.addLeds<>()` which automatically selects the best engine.
+**Note:** This advanced API is primarily for runtime configuration or testing. Most users should use `FastLED.addLeds<>()` which automatically selects the best engine and uses static storage.
 
 ## Minimal Example: 4 Parallel LED Strips
 
@@ -191,7 +196,7 @@ The `IChannelEngine` uses a 4-state machine to manage non-blocking LED transmiss
 - **READY** - Hardware idle; ready to accept `beginTransmission()` non-blocking
 - **BUSY** - Active: channels transmitting or queued (scheduler still enqueuing)
 - **DRAINING** - All channels submitted; DMA still transmitting; `beginTransmission()` will block
-- **ERROR** - Engine encountered an error; check `getLastError()` for details
+- **ERROR** - Engine encountered an error; error message included in `EngineState.error`
 
 **Typical state flow**: **READY** → `beginTransmission()` → **BUSY** → (all queued) → **DRAINING** → (transmission done) → **READY**
 
@@ -207,24 +212,34 @@ The channel engine provides a non-blocking `poll()` API for advanced use cases:
 // Start transmission (may block if previous frame still transmitting)
 engine->beginTransmission(channels);
 
-// Poll until ready (non-blocking)
-IChannelEngine::EngineState state;
-while ((state = engine->poll()) != IChannelEngine::EngineState::READY) {
-    if (state == IChannelEngine::EngineState::ERROR) {
-        // Handle error
-        Serial.println(engine->getLastError().c_str());
+// Poll until ready or draining (non-blocking)
+while (true) {
+    IChannelEngine::EngineState result = engine->poll();
+
+    if (result == IChannelEngine::EngineState::READY ||
+        result == IChannelEngine::EngineState::DRAINING) {
+        break;  // Transmission queued/started (DRAINING) or complete (READY)
+    }
+
+    if (result == IChannelEngine::EngineState::ERROR) {
+        // Handle error - error message is in result.error
+        Serial.print("Engine error: ");
+        Serial.println(result.error.c_str());
         break;
     }
-    // Do other work while DMA transmits...
+
+    // State is BUSY - transmission still being queued
+    // Do other work while waiting...
     // Examples: process input, compute next frame, handle network, etc.
 }
 ```
 
 **How it works:**
 - `beginTransmission()` - Queues channels and starts DMA transmission (may block if poll() returns BUSY or DRAINING)
-- `poll()` - Non-blocking state check; returns current engine state and may advance state machine
-- `getLastError()` - Returns error description string when poll() returns ERROR state
+- `poll()` - Non-blocking state check; returns `EngineState` with state and optional error message
 - User code can interleave computation while DMA hardware handles LED updates asynchronously
+- Error messages are returned in `EngineState.error` field when state == ERROR
+- Backward compatible: `poll() == EngineState::READY` still works via implicit conversion
 
 **Blocking Behavior:**
 - `FastLED.show()` may or may not block, depending on engine state
@@ -232,9 +247,57 @@ while ((state = engine->poll()) != IChannelEngine::EngineState::READY) {
 - This means transmission has been queued/started and may still be transmitting (DRAINING), already complete (READY), or encountered an error (ERROR)
 - Most users don't need to interact with the engine directly - the poll() API is for advanced scenarios requiring fine-grained control over CPU/DMA parallelism
 
-### "Chipset timing mismatch"
+### Mixing Chipset Timings
 
-All strips managed by a single engine must use compatible chipset timing. If you need to mix chipsets (e.g., WS2812 + SK6812), you'll need to use separate engines for each timing configuration.
+Channel engines can handle different chipset timings in two ways:
+
+**Sequential (Single Engine)**: A single engine can drive strips with different timings by transmitting them one after another in the same frame. This works automatically with no special configuration:
+
+```cpp
+// Single engine handles both WS2812 (800kHz) and WS2816 (different timing) sequentially
+CRGB ws2812_leds[60];
+CRGB ws2816_leds[60];
+
+FastLED.addLeds<WS2812, 16>(ws2812_leds, 60);  // First strip
+FastLED.addLeds<WS2816, 17>(ws2816_leds, 60);  // Second strip (different timing)
+
+// Both strips update sequentially through the same engine
+FastLED.show();
+```
+
+**Parallel (Multiple Engines)**: To transmit different chipset timings **simultaneously**, bind each timing group to a separate engine using affinity:
+
+```cpp
+// Parallel transmission: WS2812 strips on one engine, WS2816 on another
+CRGB ws2812_strip1[100];
+CRGB ws2812_strip2[100];
+CRGB ws2816_strip1[100];
+CRGB ws2816_strip2[100];
+
+// WS2812 strips bound to RMT engine
+fl::ChannelOptions ws2812_opts;
+ws2812_opts.mAffinity = "RMT";
+auto timing_ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+
+FastLED.addChannel(fl::ChannelConfig(16, timing_ws2812, ws2812_strip1, RGB, ws2812_opts));
+FastLED.addChannel(fl::ChannelConfig(17, timing_ws2812, ws2812_strip2, RGB, ws2812_opts));
+
+// WS2816 strips bound to SPI engine (parallel with RMT)
+fl::ChannelOptions ws2816_opts;
+ws2816_opts.mAffinity = "SPI";
+auto timing_ws2816 = fl::makeTimingConfig<fl::TIMING_WS2816>();
+
+FastLED.addChannel(fl::ChannelConfig(18, timing_ws2816, ws2816_strip1, RGB, ws2816_opts));
+FastLED.addChannel(fl::ChannelConfig(19, timing_ws2816, ws2816_strip2, RGB, ws2816_opts));
+
+// All strips update: RMT engine handles WS2812 strips in parallel with SPI engine handling WS2816
+FastLED.show();
+```
+
+**Key Points:**
+- Sequential: Automatic, no configuration needed, strips update one after another
+- Parallel: Requires affinity binding to separate engines, all strips update simultaneously
+- Use parallel for maximum performance when mixing chipset timings
 
 ## API Status
 

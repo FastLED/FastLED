@@ -28,7 +28,7 @@
 #if defined(__EMSCRIPTEN__)
   #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
-  #include "platforms/stub/clockless_stub_generic.h"
+  #include "platforms/stub/clockless_stub.h"
 #elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
   #include "platforms/esp/clockless.h"
 #elif defined(FASTLED_TEENSY4)

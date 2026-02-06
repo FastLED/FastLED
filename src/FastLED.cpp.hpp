@@ -114,6 +114,20 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+void CFastLED::addChannel(fl::ChannelPtr channel) {
+	// Add channel to the CLEDController linked list
+	// Channel uses DeferRegister mode, so explicit addToList() call is required
+	if (channel) {
+		channel->addToList();
+	}
+}
+
+void CFastLED::removeChannel(fl::ChannelPtr channel) {
+	if (channel) {
+		channel->removeFromDrawList();
+	}
+}
+
 // This is bad code. But it produces the smallest binaries for reasons
 // beyond mortal comprehensions.
 // Instead of iterating through the link list for onBeginFrame(), beginShowLeds()
@@ -487,7 +501,9 @@ fl::ChannelPtr CFastLED::addChannel(const fl::ChannelConfig& config) {
     fl::ChannelBusManager& manager = fl::channelBusManager();
     FL_ASSERT(manager.getDriverCount() > 0,
               "No channel drivers available - channel API requires at least one registered driver");
-    return fl::Channel::create(config);
+    auto channel = fl::Channel::create(config);
+    addChannel(channel);
+    return channel;
 }
 
 // ============================================================================

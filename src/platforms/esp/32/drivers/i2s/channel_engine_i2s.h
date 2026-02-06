@@ -144,6 +144,12 @@ public:
     /// @return "I2S"
     const char* getName() const override { return "I2S"; }
 
+    /// @brief Get engine capabilities (CLOCKLESS protocols only)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
 private:
     /// @brief Begin LED data transmission for current chipset group
     /// @param channelData Span of channel data to transmit

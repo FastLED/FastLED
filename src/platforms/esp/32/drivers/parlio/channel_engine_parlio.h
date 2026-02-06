@@ -459,6 +459,12 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     /// @return "PARLIO"
     const char* getName() const override { return "PARLIO"; }
 
+    /// @brief Get engine capabilities (CLOCKLESS protocols only)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
     void setReversedPinOrder(bool reversed_pin_order);
 
   private:
@@ -583,6 +589,12 @@ class ChannelEnginePARLIO : public IChannelEngine {
     /// @brief Get the engine name for affinity binding
     /// @return "PARLIO"
     const char* getName() const override { return "PARLIO"; }
+
+    /// @brief Get engine capabilities (CLOCKLESS protocols only)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
 
   private:
     /// @brief Begin LED data transmission with lazy init and reconfiguration

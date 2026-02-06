@@ -5,6 +5,7 @@
 #include "color.h"
 #include "dither_mode.h"
 #include "rgbw.h"
+#include "fl/string.h"
 
 namespace fl {
 
@@ -15,7 +16,7 @@ struct ChannelOptions {
     CRGB mTemperature = UncorrectedTemperature;
     fl::u8 mDitherMode = BINARY_DITHER;
     Rgbw mRgbw = RgbwInvalid::value(); // RGBW is RGB by default
-    const char* mAffinity = nullptr;   // Engine affinity (nullptr = let ChannelBusManager decide)
+    fl::string mAffinity;              // Engine affinity (empty = let ChannelBusManager decide)
 };
 
 } // namespace fl

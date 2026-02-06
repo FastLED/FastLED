@@ -21,7 +21,10 @@
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, fl::u32 MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-
+    /// @brief Protected constructor with registration mode
+    /// @param mode Registration mode (AutoRegister or DeferRegister)
+    /// @note Subclasses can use DeferRegister to control when they join the linked list
+    CPixelLEDController(RegistrationMode mode) : CLEDController(mode) {}
 
     /// Set all the LEDs on the controller to a given color
     /// @param data the CRGB color to set the LEDs to

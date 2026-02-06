@@ -10,6 +10,17 @@
 #include "fl/eorder.h"
 #include "fl/fill.h"
 #include "hsv2rgb.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/config.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
+#include "fl/channels/bus_manager.h"
+#include "fl/channels/options.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/move.h"
+#include "fl/stl/shared_ptr.h"
 
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000
@@ -72,4 +83,322 @@ TEST_CASE("Legacy aliases resolve to FastLED instance") {
         CHECK(FastSPI_LED2.getBrightness() == 64);
         CHECK(LEDS.getBrightness() == 64);
     }
+}
+
+// Channel API tests - validates new channels API (addresses GitHub issue #2167)
+namespace {
+
+/// @brief Mock channel engine for testing the channels API
+///
+/// This mock engine validates that:
+/// - enqueue() is called when channel data is submitted
+/// - show() triggers transmission
+/// - getName() returns "MOCK" for affinity binding
+class ChannelEngineMock : public fl::IChannelEngine {
+public:
+    int mEnqueueCount = 0;
+    int mShowCount = 0;
+    fl::vector<fl::ChannelDataPtr> mEnqueuedChannels;
+
+    bool canHandle(const fl::ChannelDataPtr& data) const override {
+        (void)data;
+        return true;  // Test engine accepts all channel types
+    }
+
+    void enqueue(fl::ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueueCount++;
+            mEnqueuedChannels.push_back(channelData);
+        }
+    }
+
+    void show() override {
+        mShowCount++;
+        mEnqueuedChannels.clear();
+    }
+
+    EngineState poll() override {
+        return EngineState(EngineState::READY);
+    }
+
+    const char* getName() const override { return "MOCK"; }
+
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, true);  // Mock accepts both clockless and SPI
+    }
+
+    void reset() {
+        mEnqueueCount = 0;
+        mShowCount = 0;
+        mEnqueuedChannels.clear();
+    }
+};
+
+} // anonymous namespace
+
+TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
+    // This test validates the complete workflow reported in issue #2167:
+    // 1. Create ChannelEngineMock with string name "MOCK"
+    // 2. Inject it into ChannelBusManager
+    // 3. Construct ChannelConfig with affinity string "MOCK"
+    // 4. Add channel to FastLED
+    // 5. Call FastLED.show()
+    // 6. Verify engine received data via enqueue()
+
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+
+    // Step 1 & 2: Register mock engine
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK");  // High priority
+
+    // Verify registration
+    auto* registeredEngine = manager.getEngineByName("MOCK");
+    REQUIRE(registeredEngine != nullptr);
+    CHECK(registeredEngine == mockEngine.get());
+
+    // Step 3: Create channel with affinity "MOCK"
+    static CRGB leds[10];
+    fl::fill_solid(leds, 10, CRGB::Red);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mAffinity = "MOCK";  // Bind to mock engine
+
+    fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, options);
+
+    // Create channel
+    auto channel = fl::Channel::create(config);
+    REQUIRE(channel != nullptr);
+    CHECK(channel->getChannelEngine() == mockEngine.get());
+
+    // Verify channel is NOT in controller list yet (deferred registration)
+    CHECK(!channel->isInList());
+
+    // Step 4: Add to FastLED
+    FastLED.addChannel(channel);
+
+    // Verify channel IS NOW in controller list (explicit registration)
+    CHECK(channel->isInList());
+
+    // Double-check by walking the list
+    bool found = false;
+    CLEDController* pCur = CLEDController::head();
+    while (pCur) {
+        if (pCur == channel.get()) {
+            found = true;
+            break;
+        }
+        pCur = pCur->next();
+    }
+    CHECK(found);
+
+    // Step 5 & 6: Call FastLED.show() and verify enqueue()
+    int enqueueBefore = mockEngine->mEnqueueCount;
+    FastLED.show();
+
+    // Validate: engine received data via enqueue()
+    CHECK(mockEngine->mEnqueueCount > enqueueBefore);
+
+    // Clean up
+    channel->removeFromDrawList();
+    manager.setDriverEnabled("MOCK", false);
+}
+
+TEST_CASE("Channel API: Double add protection") {
+    // Verify that calling addChannel() multiple times doesn't create duplicates
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_DOUBLE");
+
+    static CRGB leds[5];
+    fl::fill_solid(leds, 5, CRGB::Green);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mAffinity = "MOCK_DOUBLE";
+
+    fl::ChannelConfig config(10, timing, fl::span<CRGB>(leds, 5), GRB, options);
+    auto channel = fl::Channel::create(config);
+
+    REQUIRE(channel != nullptr);
+
+    // Before adding: not in list
+    CHECK(!channel->isInList());
+
+    // First add
+    FastLED.addChannel(channel);
+    CHECK(channel->isInList());
+
+    // Second add (should be safe, no duplicate)
+    FastLED.addChannel(channel);
+    CHECK(channel->isInList());
+
+    // Third add (should still be safe)
+    FastLED.addChannel(channel);
+    CHECK(channel->isInList());
+
+    // Walk the list and count occurrences of this channel
+    int occurrenceCount = 0;
+    CLEDController* pCur = CLEDController::head();
+    while (pCur) {
+        if (pCur == channel.get()) {
+            occurrenceCount++;
+        }
+        pCur = pCur->next();
+    }
+
+    // Should appear exactly once, not multiple times
+    CHECK(occurrenceCount == 1);
+
+    // Clean up
+    channel->removeFromDrawList();
+    manager.setDriverEnabled("MOCK_DOUBLE", false);
+}
+
+TEST_CASE("Channel API: Add and remove symmetry") {
+    // Verify that addChannel() and removeChannel() work symmetrically
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_REMOVE");
+
+    static CRGB leds[8];
+    fl::fill_solid(leds, 8, CRGB::Blue);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mAffinity = "MOCK_REMOVE";
+
+    fl::ChannelConfig config(12, timing, fl::span<CRGB>(leds, 8), GRB, options);
+    auto channel = fl::Channel::create(config);
+
+    REQUIRE(channel != nullptr);
+
+    // Initial state: not in list
+    CHECK(!channel->isInList());
+
+    // Add to list
+    FastLED.addChannel(channel);
+    CHECK(channel->isInList());
+
+    // Remove from list
+    FastLED.removeChannel(channel);
+    CHECK(!channel->isInList());
+
+    // Verify channel object is still valid (not destroyed)
+    CHECK(channel->size() == 8);
+    CHECK(channel->getPin() == 12);
+    CHECK(channel->getChannelEngine() == mockEngine.get());
+
+    // Can re-add if needed
+    FastLED.addChannel(channel);
+    CHECK(channel->isInList());
+
+    // Remove again
+    FastLED.removeChannel(channel);
+    CHECK(!channel->isInList());
+
+    // Safe to call remove multiple times
+    FastLED.removeChannel(channel);
+    FastLED.removeChannel(channel);
+    CHECK(!channel->isInList());
+
+    // Clean up
+    manager.setDriverEnabled("MOCK_REMOVE", false);
+}
+
+TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
+    // This test validates that the legacy FastLED.addLeds<>() API works with channel engines:
+    // - Use template-based FastLED.addLeds<WS2812, PIN>() (no explicit channel creation)
+    // - Set different colors on each strip
+    // - Call FastLED.show()
+    // - Verify engine received all 4 strips with correct data
+
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+
+    // Register mock engine with high priority
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_LEGACY");
+
+    // Verify registration
+    auto* registeredEngine = manager.getEngineByName("MOCK_LEGACY");
+    REQUIRE(registeredEngine != nullptr);
+    CHECK(registeredEngine == mockEngine.get());
+
+    // Create 4 LED strips using legacy template API (no affinity, no explicit channel)
+    #define NUM_LEDS 60
+    #define PIN1 16
+    #define PIN2 17
+    #define PIN3 18
+    #define PIN4 19
+
+    static CRGB strip1[NUM_LEDS];
+    static CRGB strip2[NUM_LEDS];
+    static CRGB strip3[NUM_LEDS];
+    static CRGB strip4[NUM_LEDS];
+
+    // Use legacy API - should automatically use highest priority engine (our mock)
+    FastLED.addLeds<WS2812, PIN1>(strip1, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN2>(strip2, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN3>(strip3, NUM_LEDS);
+    FastLED.addLeds<WS2812, PIN4>(strip4, NUM_LEDS);
+
+    // Set different colors on each strip (from README example)
+    fl::fill_solid(strip1, NUM_LEDS, CRGB::Red);
+    fl::fill_solid(strip2, NUM_LEDS, CRGB::Green);
+    fl::fill_solid(strip3, NUM_LEDS, CRGB::Blue);
+    fl::fill_solid(strip4, NUM_LEDS, CRGB::Yellow);
+
+    // Reset mock counters before show
+    mockEngine->reset();
+
+    // Call FastLED.show() - should enqueue all 4 strips
+    FastLED.show();
+
+    // Verify engine received all 4 strips
+    CHECK(mockEngine->mEnqueueCount == 4);
+    CHECK(mockEngine->mShowCount == 1);
+    CHECK(mockEngine->mEnqueuedChannels.size() == 0);  // Cleared by show()
+
+    // Verify the channels have the correct data (spot check first LED of each strip)
+    CHECK(strip1[0] == CRGB::Red);
+    CHECK(strip2[0] == CRGB::Green);
+    CHECK(strip3[0] == CRGB::Blue);
+    CHECK(strip4[0] == CRGB::Yellow);
+
+    // Verify all LEDs in strip1 are red
+    for (int i = 0; i < NUM_LEDS; i++) {
+        CHECK(strip1[i] == CRGB::Red);
+    }
+
+    // Test second frame with different pattern (rainbow effect from README)
+    mockEngine->reset();
+    static uint8_t hue = 0;
+    for(int i = 0; i < NUM_LEDS; i++) {
+        strip1[i] = CHSV(hue + (i * 4), 255, 255);
+        strip2[i] = CHSV(hue + (i * 4) + 64, 255, 255);
+        strip3[i] = CHSV(hue + (i * 4) + 128, 255, 255);
+        strip4[i] = CHSV(hue + (i * 4) + 192, 255, 255);
+    }
+
+    FastLED.show();
+
+    // Verify engine received all 4 strips again
+    CHECK(mockEngine->mEnqueueCount == 4);
+    CHECK(mockEngine->mShowCount == 1);
+
+    // Cleanup - clear all controllers (legacy API doesn't return handles)
+    FastLED.clear(true);  // Clear and deallocate
+    manager.removeEngine(mockEngine);
+
+    #undef NUM_LEDS
+    #undef PIN1
+    #undef PIN2
+    #undef PIN3
+    #undef PIN4
 }

@@ -4,7 +4,11 @@
 #if defined(__EMSCRIPTEN__)
 #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL)
-#include "platforms/stub/clockless_stub_generic.h"
+// Use channel-based controller for stub platform (mirrors ESP32 architecture)
+// This allows legacy FastLED.addLeds<>() API to route through channel engines
+#include "platforms/stub/clockless_channel_stub.h"
+// Keep old implementation available if needed (not currently used)
+// #include "platforms/stub/clockless_stub_generic.h"
 #else
 #error "This file should only be included for stub or emscripten builds"
 #endif

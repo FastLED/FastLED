@@ -149,6 +149,12 @@ public:
     /// @return "LCD_RGB"
     const char* getName() const override { return "LCD_RGB"; }
 
+    /// @brief Get engine capabilities (CLOCKLESS protocols only)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
 private:
     /// @brief Begin LED data transmission for current chipset group
     /// @param channelData Span of channel data to transmit

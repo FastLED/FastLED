@@ -17,17 +17,37 @@
 #include "fl/slice.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/string.h"
+#include "fl/stl/cstdio.h"
 
 namespace channel_bus_manager_test {
 
 using namespace fl;
 
+// Test helper for capturing debug output
+namespace test_helper {
+    static fl::string captured_output;
+
+    void capture_print(const char* str) {
+        captured_output += str;
+    }
+
+    void clear_capture() {
+        captured_output.clear();
+    }
+
+    fl::string get_capture() {
+        return captured_output;
+    }
+}
+
 /// Simple fake engine for testing - no mocks needed
 /// Tracks transmission calls without actually transmitting
 class FakeEngine : public IChannelEngine {
 public:
-    FakeEngine(const char* name, bool shouldFail = false)
-        : mName(name), mShouldFail(shouldFail) {
+    FakeEngine(const char* name, bool shouldFail = false,
+               bool supportsClockless = true, bool supportsSpi = false)
+        : mName(name), mShouldFail(shouldFail),
+          mCapabilities(supportsClockless, supportsSpi) {
     }
 
     ~FakeEngine() override {
@@ -37,6 +57,7 @@ public:
     int getTransmitCount() const { return mTransmitCount; }
     int getLastChannelCount() const { return mLastChannelCount; }
     const char* getName() const override { return mName; }
+    Capabilities getCapabilities() const override { return mCapabilities; }
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
     void setShouldFail(bool shouldFail) { mShouldFail = shouldFail; }
 
@@ -82,6 +103,7 @@ private:
 
     const char* mName;
     bool mShouldFail;
+    Capabilities mCapabilities;
     int mTransmitCount = 0;
     int mLastChannelCount = 0;
     fl::string mLastError;
@@ -820,6 +842,10 @@ public:
 
     ~FakeSpiHardwareEngine() override {}
 
+    Capabilities getCapabilities() const override {
+        return Capabilities(false, true);  // SPI only
+    }
+
     bool canHandle(const ChannelDataPtr& data) const override {
         if (!data) {
             return false;
@@ -867,6 +893,10 @@ public:
     }
 
     ~FakeClocklessEngine() override {}
+
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
 
     bool canHandle(const ChannelDataPtr& data) const override {
         if (!data) {
@@ -1062,6 +1092,48 @@ TEST_CASE("ChannelBusManager - SK6812 routes to clockless engine") {
     // Verify SK6812 routed to clockless engine
     CHECK_EQ(hwSpiEngine->getTransmitCount(), 0);
     CHECK_EQ(clocklessEngine->getTransmitCount(), 1);
+}
+
+TEST_CASE("ChannelBusManager - Capability logging") {
+    // Setup output capture (FL_DBG uses println)
+    fl::inject_println_handler(test_helper::capture_print);
+    test_helper::clear_capture();
+
+    ChannelBusManager manager;
+
+    // Add engines with different capabilities
+    auto clocklessEngine = fl::make_shared<FakeEngine>("RMT", false, true, false);  // Clockless only
+    auto spiEngine = fl::make_shared<FakeEngine>("HW_SPI", false, false, true);     // SPI only
+    auto bothEngine = fl::make_shared<FakeEngine>("BOTH", false, true, true);       // Both
+
+    manager.addEngine(10, clocklessEngine, "RMT");
+    manager.addEngine(50, spiEngine, "HW_SPI");
+    manager.addEngine(100, bothEngine, "BOTH");
+
+    // Get captured output
+    fl::string output = test_helper::get_capture();
+
+    // Verify capability strings appear in output
+    // RMT should show CLOCKLESS capability
+    SUBCASE("RMT shows CLOCKLESS") {
+        CHECK(output.find("RMT") != fl::string::npos);
+        CHECK(output.find("caps: CLOCKLESS") != fl::string::npos);
+    }
+
+    // HW_SPI should show SPI capability
+    SUBCASE("HW_SPI shows SPI") {
+        CHECK(output.find("HW_SPI") != fl::string::npos);
+        CHECK(output.find("caps: SPI") != fl::string::npos);
+    }
+
+    // BOTH should show CLOCKLESS|SPI capabilities
+    SUBCASE("BOTH shows CLOCKLESS|SPI") {
+        CHECK(output.find("BOTH") != fl::string::npos);
+        CHECK(output.find("caps: CLOCKLESS|SPI") != fl::string::npos);
+    }
+
+    // Cleanup
+    fl::clear_io_handlers();
 }
 
 } // namespace channel_bus_manager_test

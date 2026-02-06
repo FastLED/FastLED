@@ -86,6 +86,14 @@ public:
      */
     const char* getName() const override { return "RMT"; }
 
+    /**
+     * @brief Get engine capabilities (CLOCKLESS protocols only)
+     * @return Capabilities with supportsClockless=true, supportsSpi=false
+     */
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
 protected:
     ChannelEngineRMT() = default;
     ChannelEngineRMT(const ChannelEngineRMT&) = delete;

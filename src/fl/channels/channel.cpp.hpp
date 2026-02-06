@@ -35,7 +35,7 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
     IChannelEngine* selectedEngine = nullptr;
 
     // Handle affinity binding if specified
-    if (config.options.mAffinity && config.options.mAffinity[0]) {
+    if (!config.options.mAffinity.empty()) {
         selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.mAffinity);
         if (selectedEngine) {
             FL_DBG("Channel: Bound to engine '" << config.options.mAffinity << "' via affinity");
@@ -70,7 +70,7 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
-    : CPixelLEDController<RGB>()
+    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until addChannel()
     , mChipset(chipset)
     , mPin(getDataPinFromChipset(chipset))
     , mTiming(getTimingFromChipset(chipset))
@@ -105,7 +105,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
 // Backwards-compatible constructor (deprecated)
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
                  EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
-    : CPixelLEDController<RGB>()
+    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until addChannel()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mPin(pin)
     , mTiming(timing)
@@ -253,7 +253,11 @@ public:
     }
 
     virtual EngineState poll() override {
-        return EngineState::READY;  // Always "ready" (does nothing)
+        return EngineState(EngineState::READY);  // Always "ready" (does nothing)
+    }
+
+    virtual Capabilities getCapabilities() const override {
+        return Capabilities(true, true);  // Stub accepts both clockless and SPI
     }
 };
 

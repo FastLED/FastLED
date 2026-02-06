@@ -523,6 +523,15 @@ The package installation daemon is a singleton background process that ensures P
 - **🚫 NEVER push code to remote**: Do NOT run `git push` or any command that pushes to remote repository
 - **User controls all git operations**: All git commit and push decisions are made by the user
 
+### Error Fixing Policy (ALL AGENTS)
+- **✅ ALWAYS fix encountered errors immediately**: When running tests or linting, fix ALL errors you encounter, even if they are pre-existing issues unrelated to your current task
+- **Rationale**: Leaving broken tests or linting errors creates technical debt and makes the codebase less maintainable
+- **Examples**:
+  - If a test suite shows 2 failing tests, fix them before completing your work
+  - If linting reveals errors in files you didn't modify, fix those errors
+  - If compilation fails due to pre-existing bugs, investigate and fix them
+- **Exception**: Only skip fixing errors if they are clearly outside the scope of the codebase (e.g., external dependency issues requiring upstream fixes)
+
 ### Command Execution (ALL AGENTS)
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories

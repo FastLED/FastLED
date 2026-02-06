@@ -251,6 +251,13 @@ public:
     /// @return "SPI"
     const char* getName() const override { return "SPI"; }
 
+    /// @brief Get engine capabilities (CLOCKLESS protocols only)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    /// @note This is a clockless-over-SPI driver, not a true SPI LED driver
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
     /// @brief Check if this engine can handle the given channel data
     /// @param data Channel data to check
     /// @return true for CLOCKLESS chipsets (WS2812, SK6812, etc.), false for true SPI chipsets

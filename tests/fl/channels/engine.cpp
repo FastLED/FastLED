@@ -67,6 +67,10 @@ public:
 
     const char* getName() const override { return "MOCK"; }
 
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, true);  // Mock accepts both clockless and SPI
+    }
+
 private:
     void beginTransmission(fl::span<const ChannelDataPtr> channels) {
         transmitCount++;
@@ -147,7 +151,7 @@ TEST_CASE("FastLED.show() with channels") {
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
-    FastLED.addLedChannel(channel);
+    FastLED.addChannel(channel);
 
     int before = mockEngine->transmitCount;
     int enqueueBefore = mockEngine->enqueueCount;

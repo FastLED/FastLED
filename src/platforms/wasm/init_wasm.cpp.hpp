@@ -13,6 +13,9 @@
 // Include engine listener header
 #include "platforms/wasm/engine_listener.h"
 
+// Include channel engine initialization
+#include "platforms/wasm/init_channel_engine.h"
+
 namespace fl {
 namespace platforms {
 
@@ -32,6 +35,10 @@ void init() {
     // Initialize engine listener system
     // This connects FastLED engine events to the JavaScript runtime
     EngineListener::Init();
+
+    // Initialize channel engines for WASM platform
+    // This registers the stub engine with ChannelBusManager
+    platforms::initChannelEngines();
 
     initialized = true;
     FL_DBG("WASM: Platform initialization complete");

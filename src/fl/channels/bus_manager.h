@@ -27,6 +27,7 @@
 #include "fl/engine_events.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/string.h"
 
 namespace fl {
 
@@ -65,6 +66,13 @@ public:
     /// @note Engines are automatically sorted by priority on each insertion
     /// @note Empty name or nullptr engine will be ignored
     void addEngine(int priority, fl::shared_ptr<IChannelEngine> engine, const char* name = nullptr);
+
+    /// @brief Remove an engine from the manager
+    /// @param engine Shared pointer to the engine to remove
+    /// @return true if engine was found and removed, false if not found
+    /// @note Emits FL_WARN if engine is not found
+    /// @note Useful for test cleanup
+    bool removeEngine(fl::shared_ptr<IChannelEngine> engine);
 
     /// @brief Enable or disable a driver by name at runtime
     /// @param name Driver name to control (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
@@ -105,7 +113,12 @@ public:
     /// @param name Engine name to look up (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
     /// @return Pointer to engine if found and enabled, nullptr otherwise
     /// @note Used by Channel affinity system to bind channels to specific engines
-    IChannelEngine* getEngineByName(const char* name) const;
+    IChannelEngine* getEngineByName(const fl::string& name) const;
+
+    /// @brief Get capabilities of all registered engines (OR'd together)
+    /// @return Capabilities struct with bool flags set if ANY engine supports that protocol
+    /// @note Bus manager aggregates capabilities from all engines
+    Capabilities getCapabilities() const override;
 
     /// @brief Check if manager can handle channel data (always true - proxy pattern)
     /// @param data Channel data to check (unused)
@@ -129,8 +142,8 @@ public:
     /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
     void onBeginFrame() override;
 
-    /// @brief Reset to highest priority engine for next frame
-    /// @note Called at frame boundaries to allow engine re-evaluation
+    /// @brief Trigger transmission of batched channel data
+    /// @note Called at frame boundaries to flush enqueued channels
     void onEndFrame() override;
 
 private:
@@ -161,20 +174,9 @@ private:
     /// @note If data is nullptr, selects based on priority only (no predicate filtering)
     IChannelEngine* selectEngine(const ChannelDataPtr& data = nullptr);
 
-    /// @brief Get next lower priority engine for fallback
-    /// @return Pointer to next engine, or nullptr if none available
-    /// @note Searches for engine with lower priority value than current active engine
-    IChannelEngine* getNextLowerPriorityEngine();
-
     /// @brief Shared engines sorted by priority descending (higher values first)
     /// @note Each entry contains priority value and shared_ptr to engine
     fl::vector<EngineEntry> mEngines;
-
-    /// @brief Currently active engine (cached for performance)
-    IChannelEngine* mActiveEngine = nullptr;
-
-    /// @brief Priority of active engine (for fallback logic)
-    int mActiveEnginePriority = -1;
 
     /// @brief Internal state management for IChannelEngine interface
     fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()

@@ -223,6 +223,10 @@ public:
         return data->isSpi();
     }
 
+    Capabilities getCapabilities() const override {
+        return Capabilities(false, true);  // SPI only
+    }
+
 private:
     void beginTransmission(fl::span<const ChannelDataPtr> channels) {
         mTransmitCount++;
@@ -269,7 +273,7 @@ TEST_CASE("SPI chipset - mock engine integration") {
     CHECK_EQ(channel->getChannelEngine(), mockEngine.get());
 
     // Add channel to FastLED
-    FastLED.addLedChannel(channel);
+    FastLED.addChannel(channel);
 
     // Trigger FastLED.show() - should enqueue and transmit data
     FastLED.show();

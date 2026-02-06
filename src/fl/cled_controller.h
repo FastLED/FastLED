@@ -41,13 +41,32 @@ class CLEDController {
 protected:
     friend class CFastLED;
     fl::span<CRGB> m_Leds;     ///< span of LED data used by this controller
-    CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
+    CLEDController *m_pNext = nullptr;   ///< pointer to the next LED controller in the linked list
     ChannelOptions mSettings;  ///< Optional channel settings (correction, temperature, dither, rgbw, affinity)
     bool m_enabled = true;
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
 
+    /// @brief Registration mode for constructor
+    enum class RegistrationMode {
+        AutoRegister,   ///< Automatically add to linked list (default, backward compatible)
+        DeferRegister   ///< Defer registration until addToList() is called
+    };
+
+    /// @brief Protected constructor with registration mode
+    /// @param mode Registration mode (AutoRegister or DeferRegister)
+    /// @note Subclasses can use DeferRegister to control when they join the linked list
+    CLEDController(RegistrationMode mode);
+
 public:
+    /// @brief Add this controller to the linked list
+    /// @note Used with DeferRegister mode to explicitly add controller to list
+    /// @note Safe to call multiple times - won't add if already in list
+    void addToList();
+
+    /// @brief Check if this controller is in the linked list
+    /// @return true if controller is in the list, false otherwise
+    bool isInList() const;
 
     /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to

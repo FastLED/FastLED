@@ -510,7 +510,7 @@ public:
 
 	/// @brief Add a Channel-based LED controller to the world
 	///
-	/// This method registers a Channel instance (created via Channel::create<ENGINE>(config))
+	/// This method registers a Channel instance (created via Channel::create(config))
 	/// with the FastLED controller list. Channels provide hardware-accelerated parallel LED output
 	/// using platform-specific engines (e.g., ESP32 PARLIO, Teensy FlexIO).
 	///
@@ -519,17 +519,25 @@ public:
 	/// // Create channel configuration
 	/// ChannelConfig config(pin, timing, leds, RGB);
 	///
-	/// // Create and register channel with specific engine
-	/// ChannelPtr channel = FastLED.addLedChannel(Channel::create<fl::ChannelEnginePARLIO>(config));
+	/// // Create and register channel (automatic engine selection)
+	/// ChannelPtr channel = fl::Channel::create(config);
+	/// FastLED.addChannel(channel);
 	/// @endcode
 	///
 	/// @param channel Shared pointer to a Channel instance
 	/// @returns The same ChannelPtr for chaining or storage
-	static fl::ChannelPtr addLedChannel(fl::ChannelPtr channel) {
-		// Channel inherits from CLEDController, so it's already in the linked list
-		// No additional registration needed beyond what Channel::create() does
-		return channel;
-	}
+	static void addChannel(fl::ChannelPtr channel);
+
+	/// @brief Remove a channel from the LED controller list
+	///
+	/// Removes the channel from the active controller list so it will no longer
+	/// be updated by FastLED.show(). The channel object itself remains valid
+	/// and can be re-added later if needed.
+	///
+	/// @param channel Shared pointer to a Channel instance
+	/// @note Safe to call multiple times - no error if channel not in list
+	/// @note The channel object is not destroyed, only removed from the list
+	static void removeChannel(fl::ChannelPtr channel);
 
 	/// @name Runtime LED Channel Management
 	/// @{

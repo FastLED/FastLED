@@ -101,6 +101,12 @@ public:
     /// @return Engine name (e.g., "SPI_SINGLE")
     const char* getName() const override { return mName.c_str(); }
 
+    /// @brief Get engine capabilities (SPI protocols only)
+    /// @return Capabilities with supportsSpi=true, supportsClockless=false
+    Capabilities getCapabilities() const override {
+        return Capabilities(false, true);  // SPI only
+    }
+
     /// @brief Get maximum priority among all controllers
     /// @return Highest priority (5-9 for true SPI adapters)
     int getPriority() const;

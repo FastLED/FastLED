@@ -7,6 +7,7 @@
 #include "cled_controller.h"
 
 #include "fl/stl/cstring.h"
+#include "fl/sketch_macros.h"
 
 
 CLEDController::~CLEDController() {
@@ -21,13 +22,39 @@ CLEDController::~CLEDController() {
 
 /// Create an led controller object, add it to the chain of controllers
 CLEDController::CLEDController() : m_Leds(), mSettings() {
-    m_pNext = nullptr;
+    addToList();
+}
+
+CLEDController::CLEDController(RegistrationMode mode) : m_Leds(), mSettings() {
+    if (mode == RegistrationMode::AutoRegister) {
+        addToList();
+    }
+}
+
+void CLEDController::addToList() {
+    // Don't add if already in list
+    #if SKETCH_HAS_LOTS_OF_MEMORY // Mostly for AVR, the isInList() check adds memory overhead on these tight platforms.
+    if (isInList()) {
+        return;
+    }
+    #endif
+
+    // Add to linked list
     if(m_pHead==nullptr) { m_pHead = this; }
     if(m_pTail != nullptr) { m_pTail->m_pNext = this; }
     m_pTail = this;
 }
 
-
+bool CLEDController::isInList() const {
+    CLEDController* curr = m_pHead;
+    while (curr != nullptr) {
+        if (curr == this) {
+            return true;
+        }
+        curr = curr->m_pNext;
+    }
+    return false;
+}
 
 void CLEDController::clearLedDataInternal(int nLeds) {
     // On common code that runs on avr, every byte counts.

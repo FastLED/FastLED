@@ -9,7 +9,14 @@
 ///
 /// **Migration Path:**
 /// - Old: `FastLED.addClocklessLeds<WS2812, GRB, RMT>({...})`
-/// - New: `FastLED.addLedChannel(Channel::create<ParlioEngine>(config))`
+/// - New (automatic engine selection): `FastLED.addChannel(config)`
+/// - New (with engine affinity):
+///   ```cpp
+///   fl::ChannelOptions options;
+///   options.mAffinity = "PARLIO";  // or "RMT", "SPI", etc.
+///   fl::ChannelConfig config(pin, timing, leds, RGB, options);
+///   auto channel = FastLED.addChannel(config);
+///   ```
 ///
 /// See `src/fl/channels/` for the new Channel API implementation.
 ///
