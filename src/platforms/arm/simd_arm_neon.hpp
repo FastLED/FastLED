@@ -21,7 +21,7 @@
 
 namespace fl {
 namespace simd {
-namespace platform {
+namespace platforms {
 
 //==============================================================================
 // SIMD Register Types (NEON)
@@ -230,7 +230,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
     return vmaxq_f32(a, b);
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace simd
 }  // namespace fl
 
@@ -242,7 +242,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
 
 namespace fl {
 namespace simd {
-namespace platform {
+namespace platforms {
 
 //==============================================================================
 // SIMD Register Types (Scalar Fallback)
@@ -493,7 +493,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
     return result;
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace simd
 }  // namespace fl
 

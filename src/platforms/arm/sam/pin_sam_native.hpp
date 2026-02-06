@@ -24,7 +24,7 @@
 #if defined(__SAM3X8E__)
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // Make enum types from fl namespace visible
 using ::fl::PinMode;
@@ -122,7 +122,7 @@ inline void setAdcRange(AdcRange /*range*/) {
     // This function does nothing on the Due platform
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // __SAM3X8E__

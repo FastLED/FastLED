@@ -29,7 +29,7 @@
 #endif
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 #if defined(FL_IS_STM32) || defined(FL_IS_TEENSY_4X) || \
     defined(FL_IS_RP2040) || defined(FL_IS_RP2350) || \
@@ -56,5 +56,5 @@ inline void initSpiHardware() {
 
 #endif
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

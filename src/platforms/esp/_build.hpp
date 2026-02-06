@@ -2,4 +2,5 @@
 /// @brief Unity build header for platforms\esp/ directory
 /// Includes all implementation files in alphabetical order
 
-#include "platforms/esp/io_esp.cpp.hpp"
+#include "platforms/esp/8266/_build.hpp"
+#include "platforms/esp/32/_build.hpp"

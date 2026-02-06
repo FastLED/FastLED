@@ -5,6 +5,7 @@
 
 
 #include "fl/int.h"
+#include "fl/has_include.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cctype.h"
@@ -32,6 +33,16 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+// Protect against Arduino macros (e.g., String) that might conflict
+// This include also conditionally includes <Arduino.h> if available
+#include "fl/stl/arduino_before.h"
+
+// Test for Arduino String class (must be after includes)
+#if defined(String_class_h)
+#define FL_STRING_NEEDS_ARDUINO_CONVERSION 1
+#else
+#define FL_STRING_NEEDS_ARDUINO_CONVERSION 0
+#endif
 
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
@@ -2363,6 +2374,22 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 #endif
 
+#if FL_STRING_NEEDS_ARDUINO_CONVERSION
+    // Arduino String conversion support
+    string(const ::String &str) {
+        copy(str.c_str(), strlen(str.c_str()));
+    }
+    string &operator=(const ::String &str) {
+        copy(str.c_str(), strlen(str.c_str()));
+        return *this;
+    }
+    // append
+    string &append(const ::String &str) {
+        write(str.c_str(), strlen(str.c_str()));
+        return *this;
+    }
+#endif
+
 
 
 
@@ -2428,6 +2455,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
             return '\0';
         }
         return c_str()[size() - 1];
+    }
+
+    char charAt(fl::size index) const {
+        if (index >= size()) {
+            return '\0';
+        }
+        return c_str()[index];
     }
 
     // Push ASCII character without numeric conversion for display

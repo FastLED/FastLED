@@ -33,7 +33,7 @@
 
 namespace fl {
 namespace simd {
-namespace platform {
+namespace platforms {
 
 #if FASTLED_X86_HAS_SSE2
 
@@ -462,7 +462,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
 
 #endif
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace simd
 }  // namespace fl
 

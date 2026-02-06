@@ -31,7 +31,7 @@ void init() {
     // Initialize channel bus manager (PARLIO, SPI, RMT, UART engines)
     // Note: This is actually called lazily on first access to ChannelBusManager::instance()
     // but we ensure it's initialized here for predictable behavior
-    fl::platform::initChannelEngines();
+    fl::platforms::initChannelEngines();
 
     // Initialize SPI bus manager
     // Note: The SPIBusManager is lazily initialized on first use, but we can

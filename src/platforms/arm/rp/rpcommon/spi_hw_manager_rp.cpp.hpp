@@ -81,7 +81,7 @@ static void addSpiHw8IfPossible() {
 
 }  // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Unified RP2040/RP2350 SPI hardware initialization entry point
 ///
@@ -107,7 +107,7 @@ void initSpiHardware() {
     FL_DBG("RP2040/RP2350: SPI hardware initialized");
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // PICO_RP2040 || PICO_RP2350 || ARDUINO_ARCH_RP2040 || ARDUINO_ARCH_RP2350

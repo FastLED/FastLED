@@ -3,3 +3,4 @@
 /// Includes all implementation files in alphabetical order
 
 #include "platforms/arm/mgm240/fastpin_arm_mgm240.cpp.hpp"
+#include "platforms/arm/mgm240/io_mgm240.cpp.hpp"

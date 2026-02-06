@@ -46,6 +46,7 @@
 #include "fl/rpc.cpp.hpp"
 #include "fl/rx_device.cpp.hpp"
 #include "fl/screenmap.cpp.hpp"
+#include "fl/serial.cpp.hpp"
 #include "fl/sin32.cpp.hpp"
 #include "fl/spi.cpp.hpp"
 #include "fl/splat.cpp.hpp"

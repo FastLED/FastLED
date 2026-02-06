@@ -300,6 +300,8 @@ void setup() {
     // fl::watchdog_setup(5000);
     while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
 
+    FL_WARN("[SETUP] Validation sketch starting - serial output active");
+
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     rx_buffer.resize(RX_BUFFER_SIZE);
 

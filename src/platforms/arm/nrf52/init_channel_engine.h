@@ -7,7 +7,7 @@
 /// for NRF52. It is called lazily on first access to ChannelBusManager.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for NRF52
 ///
@@ -17,5 +17,5 @@ namespace platform {
 /// @note Implementation is in src/platforms/arm/nrf52/init_channel_engine_nrf52.cpp.hpp
 void initChannelEngines();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

@@ -2,6 +2,7 @@
 /// @brief Unit tests for UartPeripheralMock
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
+#include "platforms/esp/32/drivers/uart_esp32.h"
 #include "fl/stl/cstddef.h" // ok include
 #include "fl/stl/cstdint.h"
 #include "fl/stl/thread.h"

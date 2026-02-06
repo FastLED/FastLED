@@ -33,7 +33,7 @@
 #include <sam.h>  // SAMD register definitions
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // Pin Mapping Structures
@@ -221,7 +221,7 @@ inline void setAdcRange(AdcRange /*range*/) {
     // For now, no-op as stub.
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // SAMD21/SAMD51 platform guards

@@ -7,7 +7,7 @@
 /// for Teensy 4.x (IMXRT1062). It is called lazily on first access to ChannelBusManager.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for Teensy 4.x
 ///
@@ -17,5 +17,5 @@ namespace platform {
 /// @note Implementation is in src/platforms/arm/teensy/teensy4_common/init_channel_engine_mxrt1062.cpp.hpp
 void initChannelEngines();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

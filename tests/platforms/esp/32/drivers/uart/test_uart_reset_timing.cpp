@@ -7,6 +7,7 @@
 /// which UART cannot send as zeros due to start/stop bit framing.
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
+#include "platforms/esp/32/drivers/uart_esp32.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"

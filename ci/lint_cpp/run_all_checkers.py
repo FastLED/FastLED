@@ -29,6 +29,7 @@ from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
+from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
@@ -120,6 +121,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         PlatformIncludesChecker(),
         WeakAttributeChecker(),
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
+        # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]
 
     # Src-only checkers
@@ -133,6 +135,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     # Platforms-specific checkers
     checkers_by_scope["platforms"] = [
         PlatformsFlNamespaceChecker(),
+        NamespacePlatformsChecker(),
     ]
 
     # Include paths checker (for fl/ and platforms/ directories)

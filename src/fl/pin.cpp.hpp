@@ -40,37 +40,37 @@ namespace fl {
 
 void pinMode(int pin, PinMode mode) {
     // Forward to platform-specific inline implementation
-    platform::pinMode(pin, mode);
+    platforms::pinMode(pin, mode);
 }
 
 void digitalWrite(int pin, PinValue val) {
     // Forward to platform-specific inline implementation
-    platform::digitalWrite(pin, val);
+    platforms::digitalWrite(pin, val);
 }
 
 PinValue digitalRead(int pin) {
     // Forward to platform-specific inline implementation
-    return platform::digitalRead(pin);
+    return platforms::digitalRead(pin);
 }
 
 uint16_t analogRead(int pin) {
     // Forward to platform-specific inline implementation
-    return platform::analogRead(pin);
+    return platforms::analogRead(pin);
 }
 
 void analogWrite(int pin, uint16_t val) {
     // Forward to platform-specific inline implementation
-    platform::analogWrite(pin, val);
+    platforms::analogWrite(pin, val);
 }
 
 void setPwm16(int pin, uint16_t val) {
     // Forward to platform-specific inline implementation
-    platform::setPwm16(pin, val);
+    platforms::setPwm16(pin, val);
 }
 
 void setAdcRange(AdcRange range) {
     // Forward to platform-specific inline implementation
-    platform::setAdcRange(range);
+    platforms::setAdcRange(range);
 }
 
 }  // namespace fl

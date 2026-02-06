@@ -117,7 +117,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
 
 } // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for RP2040/RP2350
 ///
@@ -134,7 +134,7 @@ void initChannelEngines() {
     FL_DBG("RP2040/RP2350: Channel engines initialized");
 }
 
-} // namespace platform
+} // namespace platforms
 
 } // namespace fl
 

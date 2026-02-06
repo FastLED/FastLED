@@ -74,12 +74,12 @@ fl::u32 millis() {
 #endif
 
     // Use platform-specific implementation
-    return fl::platform::millis();
+    return fl::platforms::millis();
 }
 
 fl::u32 micros() {
     // Note: micros() does not support time injection
-    return fl::platform::micros();
+    return fl::platforms::micros();
 }
 
 namespace {

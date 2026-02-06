@@ -23,7 +23,7 @@ extern "C" {
 FL_EXTERN_C_END
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // GPIO Register Access Macros (ESP8266)
@@ -214,7 +214,7 @@ inline uint16_t analogRead(int pin) {
 
     // For non-ADC pins, return digital read scaled to ADC range
     // This matches Arduino ESP8266 core behavior
-    return static_cast<uint16_t>(platform::digitalRead(pin) == PinValue::High ? 1023 : 0);
+    return static_cast<uint16_t>(platforms::digitalRead(pin) == PinValue::High ? 1023 : 0);
 }
 
 inline void analogWrite(int pin, uint16_t val) {
@@ -240,10 +240,10 @@ inline void analogWrite(int pin, uint16_t val) {
 
     if (val == 0) {
         // Fully off
-        platform::digitalWrite(pin, PinValue::Low);
+        platforms::digitalWrite(pin, PinValue::Low);
     } else if (val >= 255) {
         // Fully on (assuming 8-bit PWM range 0-255)
-        platform::digitalWrite(pin, PinValue::High);
+        platforms::digitalWrite(pin, PinValue::High);
     }
     // For intermediate values (0 < val < 255), do nothing
     // True PWM would require timer-based implementation
@@ -259,13 +259,13 @@ inline void setPwm16(int pin, uint16_t val) {
 
     // Scale 16-bit to midpoint for on/off decision
     if (val == 0) {
-        platform::digitalWrite(pin, PinValue::Low);
+        platforms::digitalWrite(pin, PinValue::Low);
     } else if (val >= 65535) {
-        platform::digitalWrite(pin, PinValue::High);
+        platforms::digitalWrite(pin, PinValue::High);
     } else if (val >= 32768) {
-        platform::digitalWrite(pin, PinValue::High);  // Above 50% → on
+        platforms::digitalWrite(pin, PinValue::High);  // Above 50% → on
     } else {
-        platform::digitalWrite(pin, PinValue::Low);   // Below 50% → off
+        platforms::digitalWrite(pin, PinValue::Low);   // Below 50% → off
     }
     // True 16-bit PWM would require TIMER1-based implementation
 }
@@ -285,5 +285,5 @@ inline void setAdcRange(AdcRange range) {
     (void)range;  // Parameter unused - no-op
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

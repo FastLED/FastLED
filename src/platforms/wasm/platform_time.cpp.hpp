@@ -14,7 +14,7 @@ extern "C" {
 }
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 void delay(fl::u32 ms) {
     if (ms == 0) return;
@@ -41,7 +41,7 @@ fl::u32 micros() {
     return ::micros();
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // __EMSCRIPTEN__

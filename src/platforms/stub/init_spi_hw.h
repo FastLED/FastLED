@@ -8,7 +8,7 @@
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize stub SPI hardware instances for testing
 ///
@@ -18,21 +18,21 @@ namespace platform {
 /// Implementation is in spi_hw_manager_stub.cpp.hpp
 void initSpiHardware();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #else
 
 // When not in testing mode, provide no-op implementation
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief No-op SPI hardware initialization for non-testing platforms
 inline void initSpiHardware() {
     // No-op: Not in testing mode
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

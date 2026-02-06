@@ -28,7 +28,7 @@
 
 namespace fl {
 namespace simd {
-namespace platform {
+namespace platforms {
 
 //==============================================================================
 // SIMD Register Types
@@ -303,7 +303,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
 }
 
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace simd
 }  // namespace fl
 

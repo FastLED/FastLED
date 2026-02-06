@@ -26,7 +26,7 @@
 #include <Arduino.h>
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // Pin Mapping Helper
@@ -178,7 +178,7 @@ inline void setAdcRange(AdcRange /*range*/) {
     // For now, no-op as stub.
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // ARDUINO_ARCH_RENESAS || FL_IS_RENESAS

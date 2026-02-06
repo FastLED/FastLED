@@ -47,7 +47,7 @@ FL_EXTERN_C_END
 
 namespace fl {
 namespace isr {
-namespace platform {
+namespace platforms {
 
 // =============================================================================
 // Platform-Specific Handle Storage
@@ -516,7 +516,7 @@ bool requires_assembly_handler(uint8_t priority) {
     return false;
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 } // namespace fl
 

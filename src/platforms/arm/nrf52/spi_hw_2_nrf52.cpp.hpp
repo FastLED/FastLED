@@ -468,7 +468,7 @@ void SPIDualNRF52::startTransmission() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize nRF52 SpiHw2 instances
 ///
@@ -481,7 +481,7 @@ void initSpiHw2Instances() {
     SpiHw2::registerInstance(controller0);
 }
 
-}  // namespace platform
+}  // namespace platforms
 
 }  // namespace fl
 

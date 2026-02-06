@@ -3,24 +3,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
 
-// Platform-specific I/O implementations
-#ifdef __EMSCRIPTEN__
-#include "platforms/wasm/io_wasm.h" // ok platform headers
-#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-#include "platforms/io_native.h"
-#elif defined(ESP32) || defined(ESP8266)
-#include "platforms/esp/io_esp.h" // ok platform headers
-#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-#include "platforms/avr/io_avr.h" // ok platform headers
-#elif defined(__MKL26Z64__)
-// Teensy LC has special handling to avoid _write linker issues
-#include "platforms/io_teensy_lc.h"
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-// All other Teensy platforms use lightweight implementation to avoid Serial library bloat
-#include "platforms/io_teensy.h"
-#else
-#include "platforms/io_arduino.h"
-#endif
+// Platform-specific I/O function declarations
+// Each platform provides implementations in their .cpp.hpp files
+#include "platforms/io.h"
 
 // =============================================================================
 // Global Log Level Storage and API
@@ -42,6 +27,10 @@ void setLogLevel(uint8_t level) {
 } // namespace fl
 
 namespace fl {
+
+// =============================================================================
+// Print Functions
+// =============================================================================
 
 #ifdef FASTLED_TESTING
 // Static storage for injected handlers using lazy initialization to avoid global constructors
@@ -79,27 +68,8 @@ void print(const char* str) {
     }
 #endif
 
-#ifdef __EMSCRIPTEN__
-    print_wasm(str);
-#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-    print_native(str);
-#elif defined(ESP32) || defined(ESP8266)
-    print_esp(str);
-#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-    print_avr(str);
-#elif defined(__MKL26Z64__)
-    // Teensy LC uses special no-op functions to avoid _write linker issues
-    print_teensy_lc(str);
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use lightweight implementation 
-    print_teensy(str);
-#else
-    // Use generic Arduino print for all other platforms including:
-    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
-    // - All other Arduino-compatible platforms
-    print_arduino(str);
-#endif
+    // Delegate to platform implementation
+    platforms::print(str);
 }
 
 void println(const char* str) {
@@ -115,27 +85,8 @@ void println(const char* str) {
     }
 #endif
 
-#ifdef __EMSCRIPTEN__
-    println_wasm(str);
-#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-    println_native(str);
-#elif defined(ESP32) || defined(ESP8266)
-    println_esp(str);
-#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-    println_avr(str);
-#elif defined(__MKL26Z64__)
-    // Teensy LC uses special no-op functions to avoid _write linker issues
-    println_teensy_lc(str);
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use lightweight implementation
-    println_teensy(str);
-#else
-    // Use generic Arduino print for all other platforms including:
-    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)  
-    // - All other Arduino-compatible platforms
-    println_arduino(str);
-#endif
+    // Delegate to platform implementation
+    platforms::println(str);
 }
 
 int available() {
@@ -146,27 +97,12 @@ int available() {
     }
 #endif
 
-#ifdef __EMSCRIPTEN__
-    return available_wasm();
-#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-    return available_native();
-#elif defined(ESP32) || defined(ESP8266)
-    return available_esp();
-#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-    return available_avr();
-#elif defined(__MKL26Z64__)
-    // Teensy LC uses special no-op functions to avoid _write linker issues
-    return available_teensy_lc();
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use lightweight implementation
-    return available_teensy();
-#else
-    // Use generic Arduino input for all other platforms including:
-    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
-    // - All other Arduino-compatible platforms
-    return available_arduino();
-#endif
+    // Delegate to platform implementation
+    return platforms::available();
+}
+
+int peek() {
+    return platforms::peek();
 }
 
 int read() {
@@ -177,27 +113,25 @@ int read() {
     }
 #endif
 
-#ifdef __EMSCRIPTEN__
-    return read_wasm();
-#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-    return read_native();
-#elif defined(ESP32) || defined(ESP8266)
-    return read_esp();
-#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-    return read_avr();
-#elif defined(__MKL26Z64__)
-    // Teensy LC uses special no-op functions to avoid _write linker issues
-    return read_teensy_lc();
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use lightweight implementation
-    return read_teensy();
-#else
-    // Use generic Arduino input for all other platforms including:
-    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
-    // - All other Arduino-compatible platforms
-    return read_arduino();
-#endif
+    // Delegate to platform implementation
+    return platforms::read();
+}
+
+bool flush(uint32_t timeoutMs) {
+    return platforms::flush(timeoutMs);
+}
+
+size_t write_bytes(const uint8_t* buffer, size_t size) {
+    if (!buffer || size == 0) return 0;
+    return platforms::write_bytes(buffer, size);
+}
+
+void serial_begin(uint32_t baudRate) {
+    platforms::begin(baudRate);
+}
+
+bool serial_ready() {
+    return platforms::serial_ready();
 }
 
 #ifdef FASTLED_TESTING

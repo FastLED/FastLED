@@ -74,7 +74,7 @@ double get_time_since_epoch() {
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
-// These extern "C" functions are accessed via fl::platform::millis() and fl::platform::micros()
+// These extern "C" functions are accessed via fl::platforms::millis() and fl::platforms::micros()
 extern "C" {
 
 // Replacement for 'millis' in WebAssembly context

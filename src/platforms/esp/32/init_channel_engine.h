@@ -7,7 +7,7 @@
 /// for ESP32. It is called lazily on first access to ChannelBusManager.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for ESP32
 ///
@@ -17,5 +17,5 @@ namespace platform {
 /// @note Implementation is in src/platforms/esp/32/drivers/channel_bus_manager_esp32.cpp
 void initChannelEngines();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

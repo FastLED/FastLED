@@ -75,7 +75,7 @@ static void addSpiHw4IfPossible() {
 
 }  // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Unified Teensy 4.x SPI hardware initialization entry point
 ///
@@ -98,7 +98,7 @@ void initSpiHardware() {
     FL_DBG("Teensy 4.x: SPI hardware initialized");
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // FL_IS_TEENSY_4X

@@ -14,7 +14,7 @@
 
 namespace fl {
 namespace isr {
-namespace platform {
+namespace platforms {
 
 // Platform ID for STM32
 // Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
@@ -87,7 +87,7 @@ bool requires_assembly_handler(uint8_t priority) {
     return false;
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 } // namespace fl
 

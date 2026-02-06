@@ -49,7 +49,7 @@
 #endif
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // Pin mode control
@@ -174,5 +174,5 @@ inline void setAdcRange(fl::AdcRange range) {
 #endif
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

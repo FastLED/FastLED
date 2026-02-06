@@ -54,11 +54,12 @@ namespace fl {
 // Configuration Structures
 //=============================================================================
 
-/// @brief UART peripheral configuration
+/// @brief UART peripheral configuration (for LED driver)
 ///
 /// Encapsulates all parameters needed to initialize the UART hardware.
 /// Maps directly to ESP-IDF's uart_config_t structure.
-struct UartConfig {
+/// Note: This is separate from the general-purpose UartPeripheralConfig in uart_esp32.h
+struct UartPeripheralConfig {
     uint32_t mBaudRate;          ///< Baud rate (e.g., 3200000 for 3.2 Mbps)
     int mTxPin;                  ///< GPIO pin for TX output
     int mRxPin;                  ///< GPIO pin for RX (typically -1 for TX-only)
@@ -68,7 +69,7 @@ struct UartConfig {
     int mUartNum;                ///< UART peripheral number (0, 1, or 2)
 
     /// @brief Default constructor (for mock testing)
-    UartConfig()
+    UartPeripheralConfig()
         : mBaudRate(0),
           mTxPin(-1),
           mRxPin(-1),
@@ -78,13 +79,13 @@ struct UartConfig {
           mUartNum(0) {}
 
     /// @brief Constructor with all parameters
-    UartConfig(uint32_t baud_rate,
-               int tx_pin,
-               int rx_pin,
-               uint32_t tx_buffer_size,
-               uint32_t rx_buffer_size,
-               uint8_t stop_bits,
-               int uart_num)
+    UartPeripheralConfig(uint32_t baud_rate,
+                         int tx_pin,
+                         int rx_pin,
+                         uint32_t tx_buffer_size,
+                         uint32_t rx_buffer_size,
+                         uint8_t stop_bits,
+                         int uart_num)
         : mBaudRate(baud_rate),
           mTxPin(tx_pin),
           mRxPin(rx_pin),
@@ -111,7 +112,7 @@ struct UartConfig {
 /// IUartPeripheral* peripheral = new UartPeripheralEsp();
 ///
 /// // Configure
-/// UartConfig config = {
+/// UartPeripheralConfig config = {
 ///     .mBaudRate = 3200000,    // 3.2 Mbps
 ///     .mTxPin = 17,
 ///     .mRxPin = -1,
@@ -155,7 +156,7 @@ public:
     ///
     /// Call once during initialization. Must succeed before any other
     /// methods can be used.
-    virtual bool initialize(const UartConfig& config) = 0;
+    virtual bool initialize(const UartPeripheralConfig& config) = 0;
 
     /// @brief Deinitialize UART peripheral and release resources
     ///
@@ -229,7 +230,7 @@ public:
     ///
     /// Returns the configuration passed to initialize(). Useful for
     /// debugging and validation.
-    virtual const UartConfig& getConfig() const = 0;
+    virtual const UartPeripheralConfig& getConfig() const = 0;
 };
 
 } // namespace fl

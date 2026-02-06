@@ -4,6 +4,7 @@
 
 #include "platforms/arm/d51/init_channel_engine_samd51.cpp.hpp"
 #include "platforms/arm/d51/init_samd51.cpp.hpp"
+#include "platforms/arm/d51/io_samd51.cpp.hpp"
 #include "platforms/arm/d51/spi_hw_2_samd51.cpp.hpp"
 #include "platforms/arm/d51/spi_hw_4_samd51.cpp.hpp"
 #include "platforms/arm/d51/spi_hw_manager_samd51.cpp.hpp"

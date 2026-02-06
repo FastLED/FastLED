@@ -25,7 +25,7 @@
 /// UartPeripheralMock mock;
 ///
 /// // Configure
-/// UartConfig config = {
+/// UartPeripheralConfig config = {
 ///     .mBaudRate = 3200000,
 ///     .mTxPin = 17,
 ///     .mRxPin = -1,
@@ -102,13 +102,13 @@ public:
     // IUartPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const UartConfig& config) override;
+    bool initialize(const UartPeripheralConfig& config) override;
     void deinitialize() override;
     bool isInitialized() const override;
     bool writeBytes(const uint8_t* data, size_t length) override;
     bool waitTxDone(uint32_t timeout_ms) override;
     bool isBusy() const override;
-    const UartConfig& getConfig() const override;
+    const UartPeripheralConfig& getConfig() const override;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -270,7 +270,7 @@ private:
     // Internal State
     //=========================================================================
 
-    UartConfig mConfig;                    ///< Current configuration
+    UartPeripheralConfig mConfig;                    ///< Current configuration
     bool mInitialized;                     ///< Initialization state
     bool mBusy;                            ///< Transmission in progress
     fl::vector<uint8_t> mCapturedData;     ///< Captured byte history

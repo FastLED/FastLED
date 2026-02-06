@@ -34,7 +34,7 @@ FL_EXTERN_C_END
 
 namespace fl {
 namespace isr {
-namespace platform {
+namespace platforms {
 
 // Spinlock for protecting GPIO ISR service installation (multi-core safety)
 static portMUX_TYPE gpio_isr_service_mutex_idf4 = portMUX_INITIALIZER_UNLOCKED;
@@ -560,7 +560,7 @@ inline bool requires_assembly_handler(uint8_t priority) {
 #endif
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 
 // =============================================================================

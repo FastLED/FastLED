@@ -8,7 +8,7 @@
 /// should override this by providing their own init_spi_hw.h header.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize SPI hardware instances (no-op for platforms without SPI hardware)
 ///
@@ -18,5 +18,5 @@ inline void initSpiHardware() {
     // No-op: This platform doesn't have SPI hardware
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

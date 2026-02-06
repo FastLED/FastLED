@@ -102,7 +102,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
 
 } // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for Teensy 4.x
 ///
@@ -119,7 +119,7 @@ void initChannelEngines() {
     FL_DBG("Teensy 4.x: Channel engines initialized");
 }
 
-} // namespace platform
+} // namespace platforms
 
 } // namespace fl
 

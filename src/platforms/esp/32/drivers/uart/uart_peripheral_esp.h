@@ -69,7 +69,7 @@ public:
     /// @return true on success, false on error
     ///
     /// Maps to ESP-IDF: uart_param_config() + uart_driver_install() + uart_set_pin()
-    bool initialize(const UartConfig& config) override;
+    bool initialize(const UartPeripheralConfig& config) override;
 
     /// @brief Deinitialize UART peripheral and release resources
     ///
@@ -101,10 +101,10 @@ public:
 
     /// @brief Get current UART configuration
     /// @return Reference to current configuration
-    const UartConfig& getConfig() const override;
+    const UartPeripheralConfig& getConfig() const override;
 
 private:
-    UartConfig mConfig;        ///< Stored configuration
+    UartPeripheralConfig mConfig;        ///< Stored configuration
     bool mInitialized;         ///< Initialization state
     uint64_t mResetExpireTime; ///< Timestamp when reset period ends (microseconds)
 };

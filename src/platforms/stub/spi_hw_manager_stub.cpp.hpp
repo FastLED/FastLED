@@ -14,7 +14,7 @@
 #include "platforms/shared/spi_hw_16.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // Forward declare stub initialization functions from spi_*_stub.cpp.hpp
 void initSpiHw1Instances();
@@ -46,7 +46,7 @@ void initSpiHardware() {
     initSpiHw16Instances();
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

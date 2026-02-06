@@ -112,7 +112,7 @@ static void addSpiHw8IfPossible() {
 
 #endif  // Hardware SPI available
 
-namespace platform {
+namespace platforms {
 
 /// @brief Unified STM32 SPI hardware initialization entry point
 ///
@@ -152,7 +152,7 @@ inline void initSpiHardware() {
 }
 #endif  // Hardware SPI available
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // FL_IS_STM32

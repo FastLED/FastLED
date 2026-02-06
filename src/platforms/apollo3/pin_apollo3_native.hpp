@@ -30,7 +30,7 @@ FL_EXTERN_C_END
 #include "fl/pin.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // Internal State for ADC and PWM
@@ -297,8 +297,8 @@ inline void analogWrite(int pin, uint16_t val) {
         case 19: timer_num = 3; segment = AM_HAL_CTIMER_TIMERA; output_cfg = AM_HAL_CTIMER_OUTPUT_NORMAL; break;
         default:
             // Pin doesn't support PWM - fall back to digital write
-            fl::platform::pinMode(pin, PinMode::Output);
-            fl::platform::digitalWrite(pin, clamped_val >= 128 ? PinValue::High : PinValue::Low);
+            fl::platforms::pinMode(pin, PinMode::Output);
+            fl::platforms::digitalWrite(pin, clamped_val >= 128 ? PinValue::High : PinValue::Low);
             return;
     }
 
@@ -430,5 +430,5 @@ inline void setAdcRange(AdcRange range) {
     g_adc_state.reference = adc_ref;
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

@@ -7,7 +7,7 @@
 /// platform-specific channel engines. Currently, only ESP32 has channel engines.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines (no-op for non-ESP32 platforms)
 ///
@@ -17,5 +17,5 @@ inline void initChannelEngines() {
     // No-op: Non-ESP32 platforms don't have channel engines
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

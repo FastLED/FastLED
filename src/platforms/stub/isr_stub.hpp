@@ -461,7 +461,7 @@ inline bool stub_requires_assembly_handler(uint8_t priority) {
 
 // fl::isr::platform namespace wrappers (call fl::isr:: functions)
 namespace isr {
-namespace platform {
+namespace platforms {
 
 inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return stub_attach_timer_handler(config, handle);
@@ -511,7 +511,7 @@ inline bool requires_assembly_handler(uint8_t priority) {
     return stub_requires_assembly_handler(priority);
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 
 // =============================================================================

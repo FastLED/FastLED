@@ -102,7 +102,7 @@ bool sam_requires_assembly_handler(uint8_t priority) {
 }
 
 // fl::isr::platform namespace wrappers
-namespace platform {
+namespace platforms {
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return sam_attach_timer_handler(config, handle);
@@ -152,7 +152,7 @@ bool requires_assembly_handler(uint8_t priority) {
     return sam_requires_assembly_handler(priority);
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 
 // =============================================================================

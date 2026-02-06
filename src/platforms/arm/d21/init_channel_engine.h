@@ -7,7 +7,7 @@
 /// for SAMD21. It is called lazily on first access to ChannelBusManager.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for SAMD21
 ///
@@ -17,5 +17,5 @@ namespace platform {
 /// @note Implementation is in src/platforms/arm/d21/init_channel_engine_samd21.cpp.hpp
 void initChannelEngines();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

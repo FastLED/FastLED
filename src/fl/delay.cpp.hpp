@@ -32,7 +32,7 @@ namespace fl {
 // ============================================================================
 // Internal platform-specific delay helpers
 // ============================================================================
-// (Moved to fl::platform::delay() - no longer needed here)
+// (Moved to fl::platforms::delay() - no longer needed here)
 
 // ============================================================================
 // Runtime delayNanoseconds implementations
@@ -175,7 +175,7 @@ void delay(u32 ms, bool run_async) {
   // When override is active, skip async pumping and use platform delay directly
 #if defined(FASTLED_STUB_IMPL) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
   if (isDelayOverrideActive()) {
-    fl::platform::delay(ms);  // Use platform override directly
+    fl::platforms::delay(ms);  // Use platform override directly
     return;
   }
 #endif
@@ -185,14 +185,14 @@ void delay(u32 ms, bool run_async) {
     u32 start = fl::millis();
     while (fl::millis() - start < ms) {
       async_yield();
-      fl::platform::delay(1);  // Use platform layer for raw 1ms delay
+      fl::platforms::delay(1);  // Use platform layer for raw 1ms delay
     }
   } else {
-    fl::platform::delay(ms);  // Use platform layer for raw delay
+    fl::platforms::delay(ms);  // Use platform layer for raw delay
   }
 #else
   (void)run_async;  // Suppress unused parameter warning
-  fl::platform::delay(ms);  // Use platform layer for raw delay
+  fl::platforms::delay(ms);  // Use platform layer for raw delay
 #endif
 }
 
@@ -203,7 +203,7 @@ void delayMillis(u32 ms) {
 
 void delayMicroseconds(u32 us) {
   // Direct pass-through to platform layer (no async pumping for microsecond precision)
-  fl::platform::delayMicroseconds(us);
+  fl::platforms::delayMicroseconds(us);
 }
 
 

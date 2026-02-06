@@ -3,7 +3,7 @@
 ///
 /// This file provides lazy initialization of ESP32-specific SPI hardware drivers
 /// (SpiHw1, SpiHw16) in priority order. Drivers are registered on first access
-/// via platform::initSpiHardware().
+/// via platforms::initSpiHardware().
 ///
 /// Priority Order:
 /// - SpiHw16 (9): Highest priority, 16-lane I2S parallel mode (ESP32, ESP32-S2 only)
@@ -83,7 +83,7 @@ static void addSpiHw16IfPossible() {
 
 }  // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize SPI hardware for ESP32
 ///
@@ -109,7 +109,7 @@ void initSpiHardware() {
     FL_DBG("ESP32: SPI hardware initialized");
 }
 
-}  // namespace platform
+}  // namespace platforms
 
 }  // namespace fl
 

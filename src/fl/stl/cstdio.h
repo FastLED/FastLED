@@ -89,6 +89,13 @@ private:
 };
 
 // =============================================================================
+// Serial Initialization
+// =============================================================================
+// Initialize serial communication with specified baud rate
+// Note: On some platforms (host), this is a no-op
+void serial_begin(uint32_t baudRate = 115200);
+
+// =============================================================================
 // Low-Level Print Functions
 // =============================================================================
 // These functions avoid printf/sprintf dependencies and use the most efficient
@@ -97,12 +104,16 @@ private:
 // Print a string without newline
 void print(const char* str);
 
-// Print a string with newline  
+// Print a string with newline
 #ifndef FL_DBG_PRINTLN_DECLARED
 void println(const char* str);
 #else
 // Declaration already exists from fl/dbg.h
 #endif
+
+// Write raw bytes (binary data)
+// Returns number of bytes written
+size_t write_bytes(const uint8_t* buffer, size_t size);
 
 // Low-level input functions that provide Serial-style read functionality
 // These use the most efficient input method for each platform
@@ -111,10 +122,26 @@ void println(const char* str);
 // Returns 0 if no data is available
 int available();
 
+// Peeks at the next byte without removing it from input stream
+// Returns the byte value (0-255) if data is available
+// Returns -1 if no data is available
+// Note: Not all platforms support peek (may return -1 always)
+int peek();
+
 // Reads the next byte from input stream
 // Returns the byte value (0-255) if data is available
 // Returns -1 if no data is available
 int read();
+
+// Flush serial output buffer
+// Waits for all buffered data to be transmitted
+// Returns true if flush completed successfully, false on timeout
+// Note: On platforms without buffering, this returns immediately
+bool flush(uint32_t timeoutMs = 1000);
+
+// Check if serial port is ready for I/O
+// Returns true if serial is initialized and available
+bool serial_ready();
 
 #ifdef FASTLED_TESTING
 

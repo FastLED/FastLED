@@ -1240,6 +1240,7 @@ extern CFastLED FastLED;
 #include "fl/error.h"
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
 #include "fl/log.h"  // FL_PRINT("message" << value), FL_LOG_*() category-specific logging
+#include "fl/serial.h"  // Arduino-compatible Serial API: fl::Serial.print(), fl::Serial.read(), etc.
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
 #include "fl/stl/sstream.h"  // fl::sstream for string stream operations

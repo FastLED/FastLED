@@ -2332,14 +2332,13 @@ bool ValidationRemoteControl::processSerialInput() {
 
     // Read any available serial data
     while (Serial.available() > 0) {
-        String input = Serial.readStringUntil('\n');
+        fl::string input = Serial.readStringUntil('\n');
         input.trim();
 
         // JSON RPC command (starts with '{')
-        if (input.length() > 0 && input[0] == '{') {
+        if (!input.empty() && input[0] == '{') {
             fl::Json result;
-            fl::string jsonStr(input.c_str());
-            auto err = mRemote->processRpc(jsonStr, result);
+            auto err = mRemote->processRpc(input, result);
 
             FL_PRINT("[RPC] processRpc() returned, error code: " << static_cast<int>(err));
             FL_PRINT("[RPC] result.has_value(): " << result.has_value());

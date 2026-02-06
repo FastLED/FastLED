@@ -7,7 +7,7 @@
 #include "Arduino.h"  // okay banned header
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 void delay(fl::u32 ms) {
     ::delay((unsigned long)ms);
@@ -25,7 +25,7 @@ fl::u32 micros() {
     return static_cast<fl::u32>(::micros());
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // ARDUINO && !FASTLED_STUB_IMPL && !__EMSCRIPTEN__

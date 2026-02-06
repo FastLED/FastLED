@@ -15,7 +15,7 @@
 #include "is_avr.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // Pin mode constants (matching Arduino API)
 #ifndef INPUT
@@ -500,14 +500,14 @@ inline void analogWrite(int pin, uint16_t val) {
     // Full implementation would require timer configuration per pin
     // For now, treat as digital output for edge cases
     if (val == 0) {
-        platform::digitalWrite(pin, PinValue::Low);
+        platforms::digitalWrite(pin, PinValue::Low);
     } else if (val >= 255) {
-        platform::digitalWrite(pin, PinValue::High);
+        platforms::digitalWrite(pin, PinValue::High);
     } else {
         // PWM requires timer setup which is platform-specific
         // This is a basic no-op for intermediate values
         // A full implementation would configure OCRnx registers
-        platform::pinMode(pin, PinMode::Output);
+        platforms::pinMode(pin, PinMode::Output);
 
         // Placeholder: In a real implementation, this would:
         // 1. Determine which timer channel controls this pin
@@ -516,7 +516,7 @@ inline void analogWrite(int pin, uint16_t val) {
         // 4. Enable PWM output on the pin
 
         // For now, just set digital high if val > 127
-        platform::digitalWrite(pin, val > 127 ? PinValue::High : PinValue::Low);
+        platforms::digitalWrite(pin, val > 127 ? PinValue::High : PinValue::Low);
     }
 }
 
@@ -528,7 +528,7 @@ inline void setPwm16(int pin, uint16_t val) {
     // ATmega328P (Arduino Uno/Nano): Timer1 controls pins 9 (OC1A) and 10 (OC1B)
     if (pin == 9 || pin == 10) {
         // Set pins as output
-        platform::pinMode(pin, PinMode::Output);
+        platforms::pinMode(pin, PinMode::Output);
 
         // Configure Timer1 for Fast PWM mode 14 (ICR1 = TOP)
         // WGM13:0 = 1110 (Fast PWM, TOP = ICR1)
@@ -559,7 +559,7 @@ inline void setPwm16(int pin, uint16_t val) {
 #elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
     // ATmega2560 (Arduino Mega): Timer1 controls pins 11 (OC1A) and 12 (OC1B)
     if (pin == 11 || pin == 12) {
-        platform::pinMode(pin, PinMode::Output);
+        platforms::pinMode(pin, PinMode::Output);
 
         ICR1 = 0xFFFF;
         TCCR1A = _BV(WGM11);
@@ -578,7 +578,7 @@ inline void setPwm16(int pin, uint16_t val) {
 #endif
 
     // Fallback for non-Timer1 pins: scale 16-bit to 8-bit
-    platform::analogWrite(pin, val >> 8);
+    platforms::analogWrite(pin, val >> 8);
 }
 
 inline void setAdcRange(AdcRange range) {
@@ -609,5 +609,5 @@ inline void setAdcRange(AdcRange range) {
     analog_reference = ref_mode;
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

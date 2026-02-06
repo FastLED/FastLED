@@ -63,7 +63,7 @@ static void addSpiHw4IfPossible() {
 
 }  // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Unified SAMD51 SPI hardware initialization entry point
 ///
@@ -86,7 +86,7 @@ void initSpiHardware() {
     FL_DBG("SAMD51: SPI hardware initialized");
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // SAMD51 platform guards

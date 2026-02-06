@@ -51,7 +51,7 @@ const fl::vector<fl::shared_ptr<SpiHw1>>& SpiHw1::getAll() {
     static bool sInitialized = false;
     if (!sInitialized) {
         sInitialized = true;
-        platform::initSpiHardware();  // Unified initialization (replaces initSpiHw1Instances)
+        platforms::initSpiHardware();  // Unified initialization (replaces initSpiHw1Instances)
     }
     return getRegistrySpiHw1();
 }

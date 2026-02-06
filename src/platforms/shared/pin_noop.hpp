@@ -13,7 +13,7 @@
 /// functions in fl/pin.cpp.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // ============================================================================
 // Pin mode control
@@ -57,5 +57,5 @@ inline void setAdcRange(AdcRange /*range*/) {
     // No-op: Host builds don't have physical pins
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

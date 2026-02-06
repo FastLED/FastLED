@@ -98,7 +98,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
 
 } // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for SAMD51
 ///
@@ -115,7 +115,7 @@ void initChannelEngines() {
     FL_DBG("SAMD51: Channel engines initialized");
 }
 
-} // namespace platform
+} // namespace platforms
 
 } // namespace fl
 

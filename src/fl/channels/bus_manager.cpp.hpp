@@ -21,7 +21,7 @@ ChannelBusManager& ChannelBusManager::instance() {
     static bool sInitialized = false; // okay static in header
     if (!sInitialized) {
         sInitialized = true;
-        platform::initChannelEngines();
+        platforms::initChannelEngines();
     }
     return out;
 }

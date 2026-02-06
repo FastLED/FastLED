@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// Raw platform delay without async task pumping
 /// @param ms Milliseconds to delay
@@ -21,5 +21,5 @@ fl::u32 millis();
 /// @return Microseconds since system startup
 fl::u32 micros();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

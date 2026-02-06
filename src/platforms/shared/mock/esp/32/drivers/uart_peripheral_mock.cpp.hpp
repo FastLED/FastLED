@@ -37,7 +37,7 @@ UartPeripheralMock::~UartPeripheralMock() {
 // IUartPeripheral Interface Implementation
 //=============================================================================
 
-bool UartPeripheralMock::initialize(const UartConfig& config) {
+bool UartPeripheralMock::initialize(const UartPeripheralConfig& config) {
     if (mInitialized) {
         // Already initialized - deinitialize first
         deinitialize();
@@ -47,12 +47,7 @@ bool UartPeripheralMock::initialize(const UartConfig& config) {
     if (config.mBaudRate == 0) {
         return false;  // Invalid baud rate
     }
-    if (config.mTxPin < 0) {
-        return false;  // Invalid TX pin
-    }
-    if (config.mStopBits == 0 || config.mStopBits > 2) {
-        return false;  // Invalid stop bits (must be 1 or 2)
-    }
+    // Pin config and stopBits are structs/enums, type-safe - no validation needed
 
     // Store configuration
     mConfig = config;
@@ -177,7 +172,7 @@ bool UartPeripheralMock::isBusy() const {
     return false;
 }
 
-const UartConfig& UartPeripheralMock::getConfig() const {
+const UartPeripheralConfig& UartPeripheralMock::getConfig() const {
     return mConfig;
 }
 
@@ -206,7 +201,7 @@ void UartPeripheralMock::reset() {
     mLastCalculatedResetDuration = 0;
     mVirtualTimeEnabled = false;
     mVirtualTime = 0;
-    mConfig = UartConfig();
+    mConfig = UartPeripheralConfig();
 }
 
 fl::vector<uint8_t> UartPeripheralMock::getCapturedBytes() const {

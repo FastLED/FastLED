@@ -27,7 +27,7 @@
 #include <core_pins.h>
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 inline void pinMode(int pin, fl::PinMode mode) {
     // Translate PinMode to Teensy core constants
@@ -107,7 +107,7 @@ inline void setAdcRange(fl::AdcRange range) {
 #endif
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // ARDUINO

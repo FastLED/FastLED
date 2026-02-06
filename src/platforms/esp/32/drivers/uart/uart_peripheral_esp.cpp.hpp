@@ -60,7 +60,7 @@ UartPeripheralEsp::~UartPeripheralEsp() {
 // Lifecycle Methods
 //=============================================================================
 
-bool UartPeripheralEsp::initialize(const UartConfig& config) {
+bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) {
     FL_DBG("UART_PERIPH: initialize() called - uart_num=" << config.mUartNum
            << " baud=" << config.mBaudRate);
 
@@ -290,7 +290,7 @@ bool UartPeripheralEsp::isBusy() const {
 // State Queries
 //=============================================================================
 
-const UartConfig& UartPeripheralEsp::getConfig() const {
+const UartPeripheralConfig& UartPeripheralEsp::getConfig() const {
     return mConfig;
 }
 

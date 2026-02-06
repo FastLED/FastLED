@@ -28,7 +28,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 inline void pinMode(int pin, PinMode mode) {
     switch (mode) {
@@ -121,5 +121,5 @@ inline void setAdcRange(AdcRange range) {
 #endif
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

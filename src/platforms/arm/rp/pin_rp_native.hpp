@@ -12,7 +12,7 @@
 #include "fl/pin.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Configure a GPIO pin mode
 /// @param pin GPIO pin number (0-29 for RP2040, 0-47 for RP2350)
@@ -165,5 +165,5 @@ inline void setAdcRange(AdcRange /*range*/) {
     // No-op: RP2040/RP2350 ADC uses fixed 3.3V reference
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

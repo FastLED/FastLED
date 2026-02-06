@@ -251,7 +251,7 @@ void ChannelEngineUART::beginTransmission(
         // TODO: Make baud rate configurable based on timing requirements
         uint32_t baud_rate = 3200000; // 3.2 Mbps
 
-        UartConfig config(
+        UartPeripheralConfig config(
             baud_rate,         // mBaudRate
             pin,               // mTxPin
             -1,                // mRxPin (not used)

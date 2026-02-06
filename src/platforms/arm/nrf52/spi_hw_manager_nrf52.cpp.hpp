@@ -65,7 +65,7 @@ static void addSpiHw4IfPossible() {
 
 }  // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Unified nRF52 SPI hardware initialization entry point
 ///
@@ -91,7 +91,7 @@ inline void initSpiHardware() {
     FL_DBG("nRF52: SPI hardware initialized");
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // FL_IS_NRF52

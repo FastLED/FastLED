@@ -6,6 +6,7 @@
 
 #include "platforms/arm/stm32/init_channel_engine_stm32.cpp.hpp"
 #include "platforms/arm/stm32/init_stm32.cpp.hpp"
+#include "platforms/arm/stm32/io_stm32.cpp.hpp"
 #include "platforms/arm/stm32/mutex_stm32.cpp.hpp"
 #include "platforms/arm/stm32/semaphore_stm32.cpp.hpp"
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.cpp.hpp"

@@ -7,7 +7,7 @@
 /// for RP2040/RP2350. It is called lazily on first access to ChannelBusManager.
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for RP2040/RP2350
 ///
@@ -17,5 +17,5 @@ namespace platform {
 /// @note Implementation is in src/platforms/arm/rp/rpcommon/init_channel_engine_rp.cpp.hpp
 void initChannelEngines();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl

@@ -120,7 +120,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
 
 } // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for STM32
 ///
@@ -138,7 +138,7 @@ void initChannelEngines() {
     FL_DBG("STM32: Channel engines initialized");
 }
 
-} // namespace platform
+} // namespace platforms
 
 } // namespace fl
 

@@ -2,7 +2,7 @@
   FastLED — Cross-Platform ISR Platform Dispatch Header
   -----------------------------------------------------
   Dispatches ISR implementation to platform-specific headers.
-  Each platform header provides inline implementations that call fl::platform::* functions.
+  Each platform header provides inline implementations that call fl::platforms::* functions.
 
   Uses standardized FL_IS_* macros from is_platform.h for platform detection.
 

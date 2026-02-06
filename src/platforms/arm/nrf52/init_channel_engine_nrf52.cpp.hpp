@@ -96,7 +96,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
 
 } // namespace detail
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize channel engines for NRF52
 ///
@@ -113,7 +113,7 @@ void initChannelEngines() {
     FL_DBG("NRF52: Channel engines initialized");
 }
 
-} // namespace platform
+} // namespace platforms
 
 } // namespace fl
 

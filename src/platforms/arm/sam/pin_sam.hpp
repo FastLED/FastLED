@@ -36,7 +36,7 @@
 #include <chip.h>
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // Make enum types from fl namespace visible
 using ::fl::PinMode;
@@ -262,7 +262,7 @@ inline Pio* getPioController(int pin, uint32_t& mask) {
 
 } // namespace detail
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // ARDUINO

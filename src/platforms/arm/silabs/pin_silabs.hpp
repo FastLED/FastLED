@@ -19,7 +19,7 @@
 #include "em_cmu.h"
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 // GPIO clock initialization - required for Silicon Labs devices
 inline void _silabs_gpio_init() {
@@ -133,7 +133,7 @@ inline void setAdcRange(AdcRange range) {
     (void)range;
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // ARDUINO_ARCH_SILABS

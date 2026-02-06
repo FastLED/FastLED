@@ -8,6 +8,7 @@
 #include "platforms/wasm/entry_point.cpp.hpp"
 #include "platforms/wasm/fs_wasm.cpp.hpp"
 #include "platforms/wasm/init_wasm.cpp.hpp"
+#include "platforms/wasm/io_wasm.cpp.hpp"
 #include "platforms/wasm/js.cpp.hpp"
 #include "platforms/wasm/js_bindings.cpp.hpp"
 #include "platforms/wasm/js_fetch.cpp.hpp"

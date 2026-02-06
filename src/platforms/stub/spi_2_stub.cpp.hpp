@@ -222,7 +222,7 @@ fl::shared_ptr<SpiHw2Stub>& getController1_Spi2() {
 
 // Platform-specific initialization for stub SPI hardware
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize stub SpiHw2 instances for testing
 ///
@@ -235,7 +235,7 @@ void initSpiHw2Instances() {
     FL_WARN("SpiHw2 stub instances registered!");
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

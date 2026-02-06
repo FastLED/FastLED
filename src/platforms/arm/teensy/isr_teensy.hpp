@@ -289,7 +289,7 @@ bool teensy_requires_assembly_handler(uint8_t priority) {
 }
 
 // fl::isr::platform namespace wrappers (call fl::isr:: functions)
-namespace platform {
+namespace platforms {
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return teensy_attach_timer_handler(config, handle);
@@ -339,7 +339,7 @@ bool requires_assembly_handler(uint8_t priority) {
     return teensy_requires_assembly_handler(priority);
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 
 // =============================================================================

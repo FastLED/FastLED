@@ -21,7 +21,7 @@ namespace {
 }
 
 namespace fl {
-namespace platform {
+namespace platforms {
 
 void delay(fl::u32 ms) {
     // Check for test override first (for fast testing)
@@ -51,7 +51,7 @@ fl::u32 micros() {
     return static_cast<fl::u32>(elapsed.count());
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // FASTLED_STUB_IMPL && !__EMSCRIPTEN__

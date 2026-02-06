@@ -105,7 +105,7 @@ inline bool null_requires_assembly_handler(uint8_t priority) {
 // The dispatch header (platforms/isr.h) controls when this file is included,
 // so we unconditionally define the platform namespace here.
 namespace isr {
-namespace platform {
+namespace platforms {
 
 inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return null_attach_timer_handler(config, handle);
@@ -155,7 +155,7 @@ inline bool requires_assembly_handler(uint8_t priority) {
     return null_requires_assembly_handler(priority);
 }
 
-} // namespace platform
+} // namespace platforms
 } // namespace isr
 
 // =============================================================================

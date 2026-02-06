@@ -15,7 +15,7 @@
 
 // Declaration only - implementation in spi_hw_manager_esp32.cpp.hpp
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize SPI hardware for ESP32
 ///
@@ -23,21 +23,21 @@ namespace platform {
 /// Implementation is in platforms/esp/32/drivers/spi_hw_manager_esp32.cpp.hpp
 void initSpiHardware();
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #else
 
 // For non-ESP32 platforms, use the default no-op implementation
 namespace fl {
-namespace platform {
+namespace platforms {
 
 /// @brief No-op SPI hardware initialization for non-ESP32 platforms
 inline void initSpiHardware() {
     // No-op: This platform doesn't have ESP32 SPI hardware
 }
 
-}  // namespace platform
+}  // namespace platforms
 }  // namespace fl
 
 #endif  // FL_IS_ESP32

@@ -566,7 +566,7 @@ void SPIQuadSAMD51::cleanup() {
 // Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-namespace platform {
+namespace platforms {
 
 /// @brief Initialize SAMD51 SpiHw4 instances
 ///
@@ -578,7 +578,7 @@ void initSpiHw4Instances() {
     SpiHw4::registerInstance(controller0);
 }
 
-}  // namespace platform
+}  // namespace platforms
 
 }  // namespace fl
 
