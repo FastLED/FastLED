@@ -108,8 +108,10 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxDevice> rx_channel,
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
+// - timing: Chipset timing configuration for RX decoder
+// - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing) {
+size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name) {
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;
@@ -124,6 +126,18 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // Calculate buffer size needed: For WS2812B, each LED requires 24 bits = 24 symbols
     // rx_buffer holds decoded bytes (3 bytes per LED), so buffer_size = rx_buffer.size() * 8 symbols
     rx_config.buffer_size = rx_buffer.size() * 8;  // Convert bytes to symbols (1 byte = 8 bits = 8 symbols)
+
+    // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
+    // When driver_name == "RMT", enable io_loop_back to route RMT TX output to RMT RX internally
+    // This is REQUIRED for ESP32-S3 because TX GPIO output stops when RX is active on different GPIO
+    // For other drivers (PARLIO, SPI, UART, I2S), disable io_loop_back (use external GPIO wire)
+    bool is_rmt_driver = (fl::strcmp(driver_name, "RMT") == 0);
+    rx_config.io_loop_back = is_rmt_driver;
+    if (is_rmt_driver) {
+        FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
+    } else {
+        FL_WARN("[CAPTURE] " << driver_name << " TX -> RMT RX: External GPIO wire (io_loop_back=false)");
+    }
 
     // ESP32-S3 WORKAROUND EXPERIMENT:
     // On ESP32-S3, RMT TX GPIO output is blocked when RMT RX is active.
@@ -209,7 +223,8 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         ss << "\n⚠️  TROUBLESHOOTING:\n";
         ss << "   1. Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
         ss << "   2. Check that both TX and RX pins are correctly configured\n";
-        ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)";
+        ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)\n";
+        ss << "   4. For RMT TX → RMT RX: Ensure io_loop_back=true in RxConfig";
         FL_WARN(ss.str());
         return 0;
     }
@@ -288,7 +303,7 @@ void runTest(const char* test_name,
             continue;
         }
 
-        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
+        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
 
         if (bytes_captured == 0) {
             FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
@@ -300,13 +315,16 @@ void runTest(const char* test_name,
 
         size_t bytes_expected = num_leds * 3;
 
-        // Phase 1 Iteration 9: Account for front padding in RX buffer
+        // Phase 1 Iteration 9: Account for front padding in RX buffer (PARLIO ONLY)
         // PARLIO TX sends: [front_pad (8 bytes)] + [LED_data] + [back_pad (8 bytes)] + [reset]
         // RX decoder captures EVERYTHING, so rx_buffer layout is:
         //   rx_buffer[0-7] = front padding (decoded to zeros)
         //   rx_buffer[8...] = actual LED data
         // We need to skip the first 8 bytes (1 Wave8Byte per lane) when validating
-        const size_t front_padding_bytes = 8; // 1 Wave8Byte = 8 bytes per lane
+        //
+        // RMT/SPI/UART/I2S do NOT use front padding - data starts at offset 0
+        const bool is_parlio = (fl::strcmp(ctx.driver_name, "PARLIO") == 0);
+        const size_t front_padding_bytes = is_parlio ? 8 : 0; // 1 Wave8Byte = 8 bytes per lane (PARLIO only)
         const size_t rx_buffer_offset = front_padding_bytes;
 
         if (bytes_captured > bytes_expected + front_padding_bytes) {
@@ -405,7 +423,7 @@ void runMultiTest(const char* test_name,
             result.total_leds = num_leds;
 
             // Capture RX data
-            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing);
+            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
 
             if (bytes_captured == 0) {
                 FL_WARN("[Run " << run << "] Capture failed");
@@ -416,11 +434,25 @@ void runMultiTest(const char* test_name,
             // Validate pixel data
             int mismatches = 0;
             size_t bytes_expected = num_leds * 3;
-            size_t bytes_to_check = bytes_captured < bytes_expected ? bytes_captured : bytes_expected;
+
+            // Determine front padding offset (PARLIO only)
+            const bool is_parlio = (fl::strcmp(config.driver_name, "PARLIO") == 0);
+            const size_t rx_buffer_offset = is_parlio ? 8 : 0;
+
+            // DEBUG: Print first 24 bytes of captured data (first LED)
+            FL_WARN("[RUN " << run << "] Driver=" << config.driver_name << ", offset=" << rx_buffer_offset << ", bytes_captured=" << bytes_captured);
+            FL_WARN("[RUN " << run << "] First 24 bytes:");
+            for (size_t i = 0; i < 24 && i < bytes_captured; i++) {
+                FL_WARN("  [" << i << "] = 0x" << fl::hex << static_cast<int>(config.rx_buffer[i]) << fl::dec);
+            }
+
+            size_t bytes_to_check = (bytes_captured < bytes_expected + rx_buffer_offset) ?
+                                     (bytes_captured > rx_buffer_offset ? bytes_captured - rx_buffer_offset : 0) :
+                                     bytes_expected;
 
             for (size_t i = 0; i < num_leds; i++) {
-                size_t byte_offset = i * 3;
-                if (byte_offset + 2 >= bytes_to_check) {
+                size_t byte_offset = rx_buffer_offset + i * 3; // Apply offset for PARLIO front padding
+                if (byte_offset + 2 >= bytes_captured) { // Check against total captured bytes
                     break;
                 }
 

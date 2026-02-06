@@ -19,6 +19,9 @@
 // Enable debug logging for RX decoder analysis (only effective if VALIDATION_VERBOSE=1)
 // #define FASTLED_FORCE_DBG 1  // DISABLED: Testing hypothesis that debug logging affects timing
 
+// Enable RMT RX debug logging for iteration 2 debugging
+// #define FASTLED_RX_LOG_ENABLED 1  // DISABLED: Issue resolved (memory allocation fallback added)
+
 // ============================================================================
 // Iteration 10: Testing with 10 LEDs (2 lanes) - Debug logging hypothesis
 // ============================================================================

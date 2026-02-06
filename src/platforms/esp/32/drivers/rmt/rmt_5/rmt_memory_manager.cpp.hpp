@@ -165,6 +165,66 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) {
     // Select strategy based on network activity
     size_t requested_blocks = networkActive ? networkBlocks : idleBlocks;
 
+    // ITERATION 3 FIX: Adaptive allocation based on available TX memory
+    // Problem: ESP32-S3 has only 192 words total TX memory (4 × 48-word blocks)
+    // With 2 blocks/channel (96 words), only 2 channels fit before exhaustion.
+    // Solution: Detect memory pressure and reduce to 1 block/channel when needed.
+    //
+    // Memory pressure detection:
+    // - Count already-allocated TX channels (not RX, which uses separate pool)
+    // - Calculate remaining TX memory after this allocation
+    // - If insufficient for 4+ total channels, switch to single-buffering
+    //
+    // Example ESP32-S3 (192 words total):
+    // - Channel 0: 96 words (2 blocks) → 96 remaining → only 2 channels fit ✗
+    // - With adaptive: Channel 0: 48 words → 144 remaining → 4 channels fit ✓
+    size_t total_memory = mgr.mLedger.is_global_pool ? mgr.mLedger.total_words : mgr.mLedger.total_tx_words;
+    size_t allocated_memory = mgr.mLedger.is_global_pool ? mgr.mLedger.allocated_words : mgr.mLedger.allocated_tx_words;
+    size_t available_memory = (total_memory > allocated_memory) ? (total_memory - allocated_memory) : 0;
+
+    // Count ONLY TX channels (RX channels use separate pool on S3/C3/C6)
+    size_t allocated_tx_channels = 0;
+    for (const auto& alloc : mgr.mLedger.allocations) {
+        if (alloc.is_tx) {
+            allocated_tx_channels++;
+        }
+    }
+
+    // Adaptive logic: Maximize TX channel count by detecting memory constraints
+    // ESP32-S3 constraint: 192 words TX memory = 4 channels × 48 words (single-buffer)
+    //                                          or 2 channels × 96 words (double-buffer)
+    //
+    // Strategy: Always use single-buffering (1 block) on ESP32-S3 to maximize channel count
+    // Threshold: If available memory can't fit 4+ total TX channels at requested rate, use 1 block
+    //
+    // Example ESP32-S3 scenarios:
+    // - First TX allocation (192 available, 2 blocks requested = 96 words):
+    //   192 / 96 = 2 channels → NOT enough for 4+ channels → use 1 block
+    // - After 1 TX channel allocated (144 available, 2 blocks requested = 96 words):
+    //   144 / 96 = 1.5 channels → NOT enough for 3+ more channels → use 1 block
+    //
+    // This ensures we can allocate 4 TX channels on ESP32-S3 (192 / 48 = 4)
+    size_t words_per_block = SOC_RMT_MEM_WORDS_PER_CHANNEL;
+    size_t requested_words = requested_blocks * words_per_block;
+
+    // Calculate how many TX channels we could fit at the requested rate
+    size_t channels_at_requested_rate = (requested_words > 0) ? (available_memory / requested_words) : 0;
+
+    // Memory pressure: If we can't fit at least 4 TX channels total (including this one),
+    // switch to single-buffering to maximize channel density
+    bool memory_pressure = (requested_blocks > 1 && channels_at_requested_rate < 4);
+
+    if (memory_pressure) {
+        FL_LOG_RMT("Adaptive RMT allocation: Memory pressure detected");
+        FL_LOG_RMT("  Total TX: " << total_memory << " words, Allocated TX: " << allocated_memory
+                << " words (" << allocated_tx_channels << " TX channels)");
+        FL_LOG_RMT("  Available: " << available_memory << " words");
+        FL_LOG_RMT("  Requested: " << requested_blocks << " blocks (" << requested_words << " words)");
+        FL_LOG_RMT("  → At this rate, only " << channels_at_requested_rate << " TX channel(s) would fit");
+        FL_LOG_RMT("  → Reducing to 1 block (" << words_per_block << " words) for better channel density");
+        requested_blocks = 1;
+    }
+
     // Platform constraint enforcement
 #if SOC_RMT_TX_CANDIDATES_PER_GROUP < 3
     // Insufficient TX memory for triple-buffering (C3/C6/H2/C5: 2 TX channels)
@@ -194,7 +254,8 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) {
 
     FL_DBG("calculateMemoryBlocks(networkActive=" << networkActive
            << "): using " << requested_blocks << " blocks (idle=" << idleBlocks
-           << ", network=" << networkBlocks << ", max=" << max_blocks << ")");
+           << ", network=" << networkBlocks << ", max=" << max_blocks
+           << ", allocated_tx_channels=" << allocated_tx_channels << ")");
 
     return requested_blocks;
 }
@@ -286,7 +347,35 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
 
     // Try to allocate from appropriate pool
     if (!tryAllocateWords(words_needed, true)) {
-        // Calculate detailed memory breakdown for diagnostic message
+        // ITERATION 2 FIX: Progressive fallback for multi-channel scenarios
+        // When double-buffering (2 blocks) fails, try single-buffering (1 block)
+        // This allows more channels to coexist on memory-constrained platforms like ESP32-S3
+        // where total TX memory is only 192 words (4 × 48-word blocks).
+        //
+        // Example: ESP32-S3 with 8 lanes:
+        // - 2 blocks/channel: 2 × 96 = 192 words → only 2 channels fit
+        // - 1 block/channel: 1 × 48 = 48 words → 4 channels fit
+        //
+        // Trade-off: Single-buffering reduces performance slightly but enables multi-lane validation
+        if (mem_blocks > 1) {
+            size_t fallback_blocks = 1;  // Minimum: single-buffer
+            size_t fallback_words = fallback_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL;
+
+            FL_LOG_RMT("RMT TX allocation failed with " << mem_blocks << "× buffering (" << words_needed << " words)");
+            FL_LOG_RMT("  Attempting fallback to " << fallback_blocks << "× buffering (" << fallback_words << " words)...");
+
+            if (tryAllocateWords(fallback_words, true)) {
+                FL_LOG_RMT("  ✓ Fallback successful: allocated " << fallback_words << " words (single-buffer mode)");
+                mLedger.allocations.push_back(ChannelAllocation(channel_id, fallback_words, true, false));
+                FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
+                           << " allocated (non-DMA, " << fallback_words << " words, single-buffer)");
+                return Result<size_t, RmtMemoryError>::success(fallback_words);
+            }
+
+            FL_LOG_RMT("  ✗ Fallback failed: insufficient memory even for single-buffer");
+        }
+
+        // Fallback failed or not attempted - provide detailed diagnostic message
         size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_tx_words;
         size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_tx_words;
         size_t reserved = mLedger.reserved_tx_words;
@@ -459,7 +548,7 @@ size_t RmtMemoryManager::getAllocatedWords(uint8_t channel_id, bool is_tx) const
 }
 
 void RmtMemoryManager::reset() {
-    FL_WARN("RMT Memory Manager reset - clearing all allocations");
+    FL_LOG_RMT("RMT Memory Manager reset - clearing all allocations");
 
     // Reset appropriate fields based on pool architecture
     if (mLedger.is_global_pool) {
