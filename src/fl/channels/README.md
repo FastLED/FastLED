@@ -44,8 +44,10 @@ The Channels API automatically selects the best available hardware engine for yo
 
 **Engine Priority (ESP32 platforms):**
 1. **PARLIO** (Highest) - ESP32-P4, C6, H2: Parallel I/O with hardware timing
-2. **SPI** (Medium) - ESP32, S2, S3: DMA-based SPI transmission
-3. **RMT** (Fallback) - All ESP32 variants: Remote control peripheral
+2. **RMT** (High) - All ESP32 variants: Remote control peripheral (recommended default)
+3. **I2S** (Medium) - ESP32-S3: LCD_CAM via I80 bus (experimental)
+4. **SPI** (Low) - ESP32, S2, S3: DMA-based SPI transmission (deprioritized due to reliability issues)
+5. **UART** (Lowest) - All ESP32 variants: Wave8 encoding (broken, not recommended)
 
 **Driver Control:**
 
@@ -127,7 +129,7 @@ void loop() {
   options.mAffinity = "PARLIO";  // or "RMT", "SPI", etc.
   fl::ChannelConfig config(pin, timing, leds, RGB, options);
   ```
-- Available engines: PARLIO (ESP32-P4/C6/H2), SPI (ESP32/S2/S3), RMT (all ESP32 variants)
+- Available engines: PARLIO (ESP32-P4/C6/H2), RMT (all ESP32 variants, recommended), I2S (ESP32-S3, experimental), SPI (ESP32/S2/S3, low priority), UART (all variants, broken)
 - See `setExclusiveDriver()` for forcing specific engines globally
 
 **Note:** This advanced API is primarily for runtime configuration or testing. Most users should use `FastLED.addLeds<>()` which automatically selects the best engine and uses static storage.

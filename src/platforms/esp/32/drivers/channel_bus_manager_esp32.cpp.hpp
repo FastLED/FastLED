@@ -2,17 +2,16 @@
 /// @brief ESP32-specific channel engine initialization
 ///
 /// This file provides lazy initialization of ESP32-specific channel engines
-/// (LCD_RGB, PARLIO, SPI, RMT, UART, I2S) in priority order. Engines are registered
+/// (LCD_RGB, PARLIO, RMT, I2S, SPI, UART) in priority order. Engines are registered
 /// on first access to ChannelBusManager::instance().
 ///
 /// Priority Order:
 /// - PARLIO (4): Highest priority, best timing (ESP32-P4, C6, H2, C5)
 /// - LCD_RGB (3): High performance, parallel LED output via LCD peripheral (ESP32-P4 only)
-/// - SPI (2): Good performance, reliable (ESP32-S3, others)
-/// - RMT (1): Fallback, lower performance (all ESP32 variants)
-/// - UART (0): Efficient wave8 encoding, automatic start/stop bits
-///             (all ESP32 variants, lowest priority because it's unused)
-/// - I2S (-1): Experimental, LCD_CAM via I80 bus (ESP32-S3 only)
+/// - RMT (2): Good performance, reliable (all ESP32 variants, recommended default)
+/// - I2S (1): Experimental, LCD_CAM via I80 bus (ESP32-S3 only)
+/// - SPI (0): Deprioritized due to reliability issues (ESP32-S3, others)
+/// - UART (-1): Lowest priority, broken (all ESP32 variants, not recommended)
 
 #include "fl/compiler_control.h"
 #ifdef ESP32
@@ -64,13 +63,13 @@ namespace fl {
 namespace detail {
 
 /// @brief Engine priority constants for ESP32
-/// @note Higher values = higher precedence (PARLIO 4 > LCD_RGB 3 > SPI 2 > RMT 1 > UART 0)
+/// @note Higher values = higher precedence (PARLIO 4 > LCD_RGB 3 > RMT 2 > I2S 1 > SPI 0 > UART -1)
 constexpr int PRIORITY_PARLIO = 4;   ///< Highest priority (PARLIO engine - ESP32-P4/C6/H2/C5)
 constexpr int PRIORITY_LCD_RGB = 3;  ///< High priority (LCD RGB engine - ESP32-P4 only, parallel LED output via LCD peripheral)
-constexpr int PRIORITY_SPI = 2;      ///< Medium priority (SPI engine)
-constexpr int PRIORITY_RMT = 1;      ///< Low priority (Fallback RMT engine - all ESP32 variants)
-constexpr int PRIORITY_UART = 0;     ///< Lowest priority (Beta - UART engine with wave8 encoding)
-constexpr int PRIORITY_I2S = -1;     ///< Experimental priority (I2S LCD_CAM engine - ESP32-S3 only)
+constexpr int PRIORITY_RMT = 2;      ///< Medium priority (RMT engine - all ESP32 variants, recommended default)
+constexpr int PRIORITY_I2S = 1;      ///< Low priority (I2S LCD_CAM engine - ESP32-S3 only, experimental)
+constexpr int PRIORITY_SPI = 0;      ///< Lower priority (SPI engine - deprioritized due to reliability issues)
+constexpr int PRIORITY_UART = -1;    ///< Lowest priority (UART engine - broken, not recommended)
 
 /// @brief Add HW SPI engines if supported by platform (UNIFIED VERSION)
 static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
