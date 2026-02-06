@@ -325,16 +325,30 @@ def get_best_match_or_prompt(
             print("  - Use a longer query string")
             if filter_type == "unit_test":
                 print("  - Use path-based query (e.g., 'tests/fl/async')")
-                print("  - Run 'uv run test.py --cpp' to see all unit tests")
+                print(
+                    "  - Run 'uv run test.py --list-tests' to see all available tests"
+                )
+                print(
+                    "  - Run 'uv run test.py --list-tests --cpp' to see only unit tests"
+                )
             elif filter_type == "example":
                 print("  - Use path-based query (e.g., 'examples/Blink')")
-                print("  - Run 'uv run test.py --examples' to see all examples")
+                print(
+                    "  - Run 'uv run test.py --list-tests --examples' to see all examples"
+                )
             else:
                 print(
                     "  - Use path-based query (e.g., 'tests/fl/async' or 'examples/Blink')"
                 )
-                print("  - Run 'uv run test.py --examples' to see all examples")
-                print("  - Run 'uv run test.py --cpp' to see all unit tests")
+                print(
+                    "  - Run 'uv run test.py --list-tests' to see all available tests"
+                )
+                print(
+                    "  - Run 'uv run test.py --list-tests --cpp' to see only unit tests"
+                )
+                print(
+                    "  - Run 'uv run test.py --list-tests --examples' to see only examples"
+                )
             return None
 
         # Multiple matches - need disambiguation
@@ -363,3 +377,28 @@ def get_best_match_or_prompt(
         return None
 
     return None
+
+
+def discover_all_tests(
+    project_dir: Path | None = None,
+) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+    """Discover all available unit tests and examples.
+
+    Args:
+        project_dir: Project root directory (defaults to current directory)
+
+    Returns:
+        Tuple of (unit_tests, examples) where each is a list of (name, path) tuples
+    """
+    if project_dir is None:
+        project_dir = Path.cwd()
+
+    # Find all tests and examples
+    unit_tests = _find_unit_tests(project_dir)
+    examples = _find_examples(project_dir)
+
+    # Convert to (name, path) tuples
+    unit_test_tuples = [(m.name, m.path) for m in unit_tests]
+    example_tuples = [(m.name, m.path) for m in examples]
+
+    return (unit_test_tuples, example_tuples)

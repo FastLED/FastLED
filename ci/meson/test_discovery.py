@@ -127,3 +127,57 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hash: {e}")
         return ("", [])
+
+
+def list_all_tests(
+    filter_pattern: str | None = None, filter_type: str | None = None
+) -> None:
+    """
+    List all available tests (unit tests and examples).
+
+    Args:
+        filter_pattern: Optional pattern to filter test names
+        filter_type: Optional filter type ("unit_test" or "example")
+    """
+    from ci.util.smart_selector import discover_all_tests
+
+    # Discover all available tests
+    unit_tests, examples = discover_all_tests()
+
+    # Apply filters
+    if filter_pattern:
+        filter_pattern_lower = filter_pattern.lower()
+        unit_tests = [
+            (name, path)
+            for name, path in unit_tests
+            if filter_pattern_lower in name.lower()
+        ]
+        examples = [
+            (name, path)
+            for name, path in examples
+            if filter_pattern_lower in name.lower()
+        ]
+
+    if filter_type == "unit_test":
+        examples = []
+    elif filter_type == "example":
+        unit_tests = []
+
+    # Print results
+    _ts_print("Available tests:")
+    _ts_print("")
+
+    if unit_tests:
+        _ts_print(f"Unit tests ({len(unit_tests)}):")
+        for name, path in sorted(unit_tests):
+            _ts_print(f"  {name:30} ({path})")
+        _ts_print("")
+
+    if examples:
+        _ts_print(f"Examples ({len(examples)}):")
+        for name, path in sorted(examples):
+            _ts_print(f"  {name:30} ({path})")
+        _ts_print("")
+
+    total = len(unit_tests) + len(examples)
+    _ts_print(f"Total: {total} tests")

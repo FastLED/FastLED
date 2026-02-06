@@ -99,6 +99,7 @@ class TestArgs:
         False  # Run tests inside Docker container (implies --debug unless overridden)
     )
     default_mode: bool = False  # True when no specific test flags were provided
+    list_tests: bool = False  # List available tests without running them
 
 
 @typechecked

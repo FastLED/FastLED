@@ -171,6 +171,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Run tests inside Docker container (Linux environment). Implies --debug unless --quick or --release is specified.",
     )
+    parser.add_argument(
+        "--list-tests",
+        action="store_true",
+        help="List all available tests without running them",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -205,6 +210,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         build=parsed_args.build,
         no_unity=parsed_args.no_unity,
         docker=parsed_args.docker,
+        list_tests=parsed_args.list_tests,
     )
 
     # Handle --docker flag: implies --debug unless --quick or --release is specified

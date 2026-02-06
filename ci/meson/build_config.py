@@ -1139,7 +1139,7 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             env=os.environ.copy(),
             output_formatter=TimestampFormatter(),
         )
-        returncode = repair_proc.wait(echo=False)
+        returncode = repair_proc.wait(echo=True)
 
         if returncode == 0:
             _ts_print(

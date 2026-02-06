@@ -99,6 +99,13 @@ def main() -> None:
         # Parse and process arguments
         args = parse_args()
 
+        # Handle --list-tests flag: list available tests and exit
+        if args.list_tests:
+            from ci.meson.test_discovery import list_all_tests
+
+            list_all_tests(filter_pattern=args.test, filter_type=None)
+            sys.exit(0)
+
         # Handle --no-unity flag
         if args.no_unity:
             ts_print("(--no-unity is assumed by default now)")

@@ -38,6 +38,7 @@ from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
+from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
@@ -205,6 +206,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
             banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
         ),
         StdNamespaceChecker(),
+        TestPathStructureChecker(),
     ]
 
     return checkers_by_scope
