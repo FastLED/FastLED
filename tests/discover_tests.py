@@ -33,6 +33,12 @@ def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[
             rel_path = f.relative_to(tests_dir)
             test_files.append(rel_path.as_posix())
 
+    # Also find *.cpp files directly in the root tests directory
+    for f in sorted(tests_dir.glob("*.cpp")):
+        if f.name not in excluded:
+            rel_path = f.relative_to(tests_dir)
+            test_files.append(rel_path.as_posix())
+
     # Also find *.cpp files directly in specified subdirectories
     for subdir in test_subdirs:
         subdir_path = tests_dir / subdir

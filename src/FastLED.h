@@ -1211,6 +1211,14 @@ public:
 	CRGB *leds();
 };
 
+/// Alias of the FastLED instance for legacy purposes
+#define FastSPI_LED FastLED
+/// Alias of the FastLED instance for legacy purposes
+#define FastSPI_LED2 FastLED
+#ifndef LEDS
+/// Alias of the FastLED instance for legacy purposes
+#define LEDS FastLED
+#endif
 
 /// Global LED strip management instance
 extern CFastLED FastLED;
