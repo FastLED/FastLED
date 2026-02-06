@@ -77,6 +77,11 @@ bool serial_ready() {
     return true;
 }
 
+bool serial_is_buffered() {
+    // POSIX stderr is always "buffered" (not ROM UART - that's ESP32-specific)
+    return true;
+}
+
 } // namespace platforms
 } // namespace fl
 

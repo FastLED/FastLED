@@ -47,7 +47,12 @@ bool UartPeripheralMock::initialize(const UartPeripheralConfig& config) {
     if (config.mBaudRate == 0) {
         return false;  // Invalid baud rate
     }
-    // Pin config and stopBits are structs/enums, type-safe - no validation needed
+    if (config.mTxPin < 0) {
+        return false;  // Invalid TX pin (must be >= 0)
+    }
+    if (config.mStopBits == 0) {
+        return false;  // Invalid stop bits (must be 1 or 2)
+    }
 
     // Store configuration
     mConfig = config;

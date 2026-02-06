@@ -2,9 +2,9 @@
 #pragma once
 
 
-// Use ESP-IDF UART driver via fl::platforms wrapper
-// Note: uart_esp32_idf.hpp is included via drivers/_build.hpp
-#include "platforms/esp/32/detail/io_uart.hpp"
+// Use ESP-IDF UART + USB-Serial JTAG driver via fl::platforms wrapper
+// Note: Implementation files are included via drivers/_build.hpp
+#include "platforms/esp/32/detail/io_esp_jtag_or_uart.hpp"
 
 namespace fl {
 namespace platforms {
@@ -44,6 +44,11 @@ size_t write_bytes(const uint8_t* buffer, size_t size) {
 
 bool serial_ready() {
     return EspIO::instance().isReady();
+}
+
+// Test/diagnostic helper: Check if using buffered mode (not ROM UART fallback)
+bool serial_is_buffered() {
+    return EspIO::instance().isBufferedMode();
 }
 
 }  // namespace platforms

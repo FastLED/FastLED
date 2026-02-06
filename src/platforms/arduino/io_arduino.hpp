@@ -43,6 +43,15 @@ bool serial_ready() {
     return (bool)ArduinoSerial_Save;
 }
 
+// Binary write function
+size_t write_bytes(const uint8_t* buffer, size_t size) {
+    return ArduinoSerial_Save.write(buffer, size);
+}
+
+// Test/diagnostic helper: Arduino Serial is always "buffered" (not ROM UART)
+bool serial_is_buffered() {
+    return true;  // Arduino Serial is always buffered
+}
+
 } // namespace platforms
 } // namespace fl
-

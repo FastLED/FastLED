@@ -11,6 +11,10 @@
 #include "fl/compiler_control.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
+#if FL_STRING_NEEDS_ARDUINO_CONVERSION
+#include <Arduino.h>  // ok header
+#endif
+
 namespace fl {
 
 // Define static constexpr member for npos (required for ODR-uses)
@@ -127,5 +131,21 @@ string &string::append(const Json& val) {
     append(")");
     return *this;
 }
+
+#if FL_STRING_NEEDS_ARDUINO_CONVERSION
+string::string(const ::String &str) {
+    copy(str.c_str(), strlen(str.c_str()));
+}
+
+string &string::operator=(const ::String &str) {
+    copy(str.c_str(), strlen(str.c_str()));
+    return *this;
+}
+
+string &string::append(const ::String &str) {
+    write(str.c_str(), strlen(str.c_str()));
+    return *this;
+}
+#endif
 
 } // namespace fl

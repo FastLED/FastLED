@@ -1,9 +1,17 @@
+#pragma once
+
+#ifdef ESP32
 
 // ok no namespace fl
 
 // FL_ESP_USE_IDF_SERIAL controls whether to use ESP-IDF UART driver or Arduino Serial
+// Auto-detect: Use IDF if Arduino is not available, otherwise default to Arduino
 #ifndef FL_ESP_USE_IDF_SERIAL
-#define FL_ESP_USE_IDF_SERIAL 0
+    #if !__has_include(<Arduino.h>)
+        #define FL_ESP_USE_IDF_SERIAL 1  // Arduino not available - use ESP-IDF
+    #else
+        #define FL_ESP_USE_IDF_SERIAL 0  // Arduino available - use Arduino Serial by default
+    #endif
 #endif
 
 #if FL_ESP_USE_IDF_SERIAL
@@ -14,3 +22,5 @@
 // Use Arduino Serial interface
 #include "platforms/arduino/io_arduino.hpp"
 #endif
+
+#endif // ESP32

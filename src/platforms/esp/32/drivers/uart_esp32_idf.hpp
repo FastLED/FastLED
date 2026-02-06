@@ -1,5 +1,7 @@
 // ESP32 UART Driver Implementation - Full Feature Support
 
+#ifdef ESP32
+
 #include "uart_esp32.h"
 #include "fl/stl/assert.h"
 #include "fl/singleton.h"
@@ -9,6 +11,8 @@
 FL_EXTERN_C_BEGIN
 #include "driver/uart.h"
 #include "esp_rom_uart.h"
+#include "freertos/FreeRTOS.h"  // For vTaskDelay
+#include "freertos/task.h"       // For portTICK_PERIOD_MS
 FL_EXTERN_C_END
 
 namespace fl {
@@ -232,13 +236,17 @@ UartEsp32& UartEsp32::operator=(UartEsp32&& other) noexcept {
 bool UartEsp32::initDriver() {
     uart_port_t port = static_cast<uart_port_t>(mPortInt);
 
-    // Test if driver already installed (Arduino compatibility)
-    // uart_write_bytes returns ESP_OK if driver is installed
-    esp_err_t err = uart_write_bytes(port, "", 0);
-    if (err == ESP_OK) {
+    // ROBUST DRIVER DETECTION:
+    // Use uart_get_buffered_data_len() as the definitive test for driver installation.
+    // This is more reliable than uart_write_bytes(port, "", 0) which can succeed even
+    // without a driver installed (0-byte write is a no-op).
+    size_t buffered_len = 0;
+    esp_err_t check_err = uart_get_buffered_data_len(port, &buffered_len);
+
+    if (check_err == ESP_OK) {
+        // Driver is installed and working - use it
         mBuffered = true;
-        // TODO: Try to get existing event queue handle if any
-        return true;  // Driver already installed
+        return true;  // Success: driver is installed and functional
     }
 
     // Driver not installed - install it ourselves
@@ -258,7 +266,7 @@ bool UartEsp32::initDriver() {
 #endif
     // IDF 3.x: source_clk field doesn't exist - skip it
 
-    err = uart_param_config(port, &uart_config);
+    esp_err_t err = uart_param_config(port, &uart_config);
     if (err != ESP_OK) {
         return false;  // Failed - mBuffered remains false, will use ROM UART
     }
@@ -317,6 +325,12 @@ bool UartEsp32::initDriver() {
         // ESP_ERR_INVALID_STATE means already installed - OK
         mBuffered = true;
 
+        // CRITICAL FIX: Add delay after driver installation
+        // ESP-IDF UART driver requires a delay after installation before transmitting
+        // Without this, uart_write_bytes() will succeed but data won't transmit
+        // Reference: https://esp32.com/viewtopic.php?t=2319
+        vTaskDelay(100 / portTICK_PERIOD_MS);  // 100ms delay
+
         // Configure RS485 mode if enabled
         if (mConfig.rs485Config.enabled) {
             // Note: RS485 mode configuration varies by ESP-IDF version
@@ -343,7 +357,9 @@ void UartEsp32::write(const char* str) {
         size_t len = 0;
         const char* p = str;
         while (*p++) len++;
-        uart_write_bytes(port, str, len);
+
+        int written = uart_write_bytes(port, str, len);
+        (void)written;  // Suppress unused variable warning in release builds
     } else {
         // Fallback to ROM UART (direct FIFO writes, blocks if full)
         while (*str) {
@@ -442,3 +458,5 @@ bool UartEsp32::flush(uint32_t timeoutMs) {
 }
 
 } // namespace fl
+
+#endif // ESP32

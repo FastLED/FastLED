@@ -21,8 +21,8 @@ using namespace fl;
 namespace {
 
 /// @brief Create a default test configuration
-UartConfig createDefaultConfig() {
-    return UartConfig(
+UartPeripheralConfig createDefaultConfig() {
+    return UartPeripheralConfig(
         3200000,  // 3.2 Mbps baud rate
         17,       // TX pin (GPIO 17)
         -1,       // RX pin (not used)
@@ -38,7 +38,7 @@ UartConfig createDefaultConfig() {
 TEST_CASE("UART Waveform Alignment - Pattern 0b00") {
     // Create and configure mock UART
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_REQUIRE(mock.initialize(config));
 
     // Encode pattern 0b00 using the LUT
@@ -78,7 +78,7 @@ TEST_CASE("UART Waveform Alignment - Pattern 0b00") {
 
 TEST_CASE("UART Waveform Alignment - All patterns") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_REQUIRE(mock.initialize(config));
 
     SUBCASE("Pattern 0b00 → 0x11") {
@@ -191,7 +191,7 @@ TEST_CASE("UART Waveform - Original patterns (pre-rotation)") {
     // This helps us understand WHY the rotation was needed.
 
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_REQUIRE(mock.initialize(config));
 
     SUBCASE("Original 0x88 (before rotation)") {

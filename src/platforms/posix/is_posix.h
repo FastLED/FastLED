@@ -38,6 +38,9 @@
 // ============================================================================
 // FL_IS_POSIX - General POSIX-compliant platform detection
 // ============================================================================
+// Exclude WASM from POSIX detection (WASM has its own platform-specific implementation)
+#if !defined(__EMSCRIPTEN__) && !defined(__wasm__) && !defined(EMSCRIPTEN)
 #if defined(FL_IS_POSIX_LINUX) || defined(FL_IS_POSIX_MACOS) || defined(FL_IS_POSIX_BSD) || defined(__unix__) || defined(_POSIX_VERSION)
 #define FL_IS_POSIX
+#endif
 #endif

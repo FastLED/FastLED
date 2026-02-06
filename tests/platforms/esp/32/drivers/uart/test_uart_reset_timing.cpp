@@ -21,8 +21,8 @@ using namespace fl;
 namespace {
 
 /// @brief Create a default test configuration
-UartConfig createDefaultConfig() {
-    return UartConfig(
+UartPeripheralConfig createDefaultConfig() {
+    return UartPeripheralConfig(
         3200000,  // 3.2 Mbps baud rate
         17,       // TX pin (GPIO 17)
         -1,       // RX pin (not used)
@@ -37,7 +37,7 @@ UartConfig createDefaultConfig() {
 
 TEST_CASE("UartPeripheralMock - Reset timing behavior") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     // Enable virtual time mode for deterministic testing
@@ -204,7 +204,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
 
 TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     // Enable virtual time mode for deterministic testing

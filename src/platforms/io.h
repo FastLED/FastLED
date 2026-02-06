@@ -25,5 +25,9 @@ bool flush(uint32_t timeoutMs = 1000);
 size_t write_bytes(const uint8_t* buffer, size_t size);
 bool serial_ready();
 
+// Test/diagnostic helper: Check if using buffered mode (not ROM UART fallback)
+// Returns true if using buffered UART driver, false if using ROM UART
+bool serial_is_buffered();
+
 } // namespace platforms
 } // namespace fl

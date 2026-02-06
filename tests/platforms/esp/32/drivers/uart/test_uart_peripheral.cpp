@@ -16,8 +16,8 @@ using namespace fl;
 namespace {
 
 /// @brief Create a default test configuration
-UartConfig createDefaultConfig() {
-    return UartConfig(
+UartPeripheralConfig createDefaultConfig() {
+    return UartPeripheralConfig(
         3200000,  // 3.2 Mbps baud rate
         17,       // TX pin (GPIO 17)
         -1,       // RX pin (not used)
@@ -40,7 +40,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 
     SUBCASE("Initialize and deinitialize") {
-        UartConfig config = createDefaultConfig();
+        UartPeripheralConfig config = createDefaultConfig();
 
         FL_CHECK(mock.initialize(config));
         FL_CHECK(mock.isInitialized());
@@ -53,7 +53,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 
     SUBCASE("Double initialization") {
-        UartConfig config = createDefaultConfig();
+        UartPeripheralConfig config = createDefaultConfig();
 
         FL_CHECK(mock.initialize(config));
         FL_CHECK(mock.isInitialized());
@@ -64,7 +64,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 
     SUBCASE("Invalid configuration - zero baud rate") {
-        UartConfig config = createDefaultConfig();
+        UartPeripheralConfig config = createDefaultConfig();
         config.mBaudRate = 0;
 
         FL_CHECK_FALSE(mock.initialize(config));
@@ -72,7 +72,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 
     SUBCASE("Invalid configuration - invalid TX pin") {
-        UartConfig config = createDefaultConfig();
+        UartPeripheralConfig config = createDefaultConfig();
         config.mTxPin = -1;
 
         FL_CHECK_FALSE(mock.initialize(config));
@@ -80,7 +80,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 
     SUBCASE("Invalid configuration - invalid stop bits") {
-        UartConfig config = createDefaultConfig();
+        UartPeripheralConfig config = createDefaultConfig();
         config.mStopBits = 0;
 
         FL_CHECK_FALSE(mock.initialize(config));
@@ -90,7 +90,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
 
 TEST_CASE("UartPeripheralMock - Single byte transmission") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     SUBCASE("Write and verify single byte") {
@@ -138,7 +138,7 @@ TEST_CASE("UartPeripheralMock - Single byte transmission") {
 
 TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     SUBCASE("Write byte array") {
@@ -188,7 +188,7 @@ TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
 
 TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     config.mStopBits = 1;  // 8N1
     FL_CHECK(mock.initialize(config));
 
@@ -241,7 +241,7 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
 
 TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     config.mStopBits = 2;  // 8N2
     FL_CHECK(mock.initialize(config));
 
@@ -272,7 +272,7 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
 
 TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
 
     SUBCASE("Valid 8N1 frames") {
         config.mStopBits = 1;
@@ -304,7 +304,7 @@ TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
 
 TEST_CASE("UartPeripheralMock - Transmission timing") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     SUBCASE("Automatic transmission timing (deterministic)") {
@@ -366,7 +366,7 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
 
 TEST_CASE("UartPeripheralMock - State management") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     SUBCASE("Reset captured data") {
@@ -413,7 +413,7 @@ TEST_CASE("UartPeripheralMock - State management") {
 
 TEST_CASE("UartPeripheralMock - Edge cases") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
     SUBCASE("All zeros byte") {
@@ -463,7 +463,7 @@ TEST_CASE("UartPeripheralMock - Edge cases") {
 
 TEST_CASE("UartPeripheralMock - Virtual time control") {
     UartPeripheralMock mock;
-    UartConfig config = createDefaultConfig();
+    UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
     mock.setVirtualTimeMode(true);
 

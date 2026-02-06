@@ -33,15 +33,18 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-// Protect against Arduino macros (e.g., String) that might conflict
-// This include also conditionally includes <Arduino.h> if available
-#include "fl/stl/arduino_before.h"
 
 // Test for Arduino String class (must be after includes)
 #if defined(String_class_h)
 #define FL_STRING_NEEDS_ARDUINO_CONVERSION 1
 #else
 #define FL_STRING_NEEDS_ARDUINO_CONVERSION 0
+#endif
+
+// Forward declare Arduino String class in global namespace (when Arduino is defined)
+// This allows fl::string to declare conversion methods without including Arduino.h
+#if FL_STRING_NEEDS_ARDUINO_CONVERSION
+class String;  // Arduino String class
 #endif
 
 namespace fl { // Mandatory namespace for this class since it has name
@@ -2375,19 +2378,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 #endif
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
-    // Arduino String conversion support
-    string(const ::String &str) {
-        copy(str.c_str(), strlen(str.c_str()));
-    }
-    string &operator=(const ::String &str) {
-        copy(str.c_str(), strlen(str.c_str()));
-        return *this;
-    }
-    // append
-    string &append(const ::String &str) {
-        write(str.c_str(), strlen(str.c_str()));
-        return *this;
-    }
+    // Arduino String conversion support (implementation in string.cpp.hpp)
+    // Note: ::String is from Arduino.h, which is included in string.cpp.hpp
+    string(const ::String &str);
+    string &operator=(const ::String &str);
+    string &append(const ::String &str);
 #endif
 
 

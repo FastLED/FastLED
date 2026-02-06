@@ -302,9 +302,9 @@ extern FL_MAYBE_UNUSED SerialPort fl_serial;
 
 } // namespace fl
 
-// Redefine Serial to use fl::fl_serial
-// NOTE: arduino_before.h pushed and undefined any Serial macro from Arduino.h.
-// We don't restore it - instead we redefine Serial to point to fl::fl_serial.
-// Users who need the original Arduino Serial can access it directly
-// (e.g., HWCDCSerial on ESP32-S3, Serial0 on other platforms).
+// Define Serial as fl::fl_serial ONLY when Arduino is not available
+// When Arduino.h exists, Serial remains the Arduino Serial object
+// When Arduino.h doesn't exist, Serial is defined as fl::fl_serial for convenience
+#if !FL_HAS_INCLUDE(<Arduino.h>)
 #define Serial fl::fl_serial
+#endif
