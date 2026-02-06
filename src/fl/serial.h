@@ -8,9 +8,6 @@
 #include "fl/compiler_control.h"
 #include "fl/stl/stdio.h"  // for fl::snprintf
 
-// Protect against Arduino macros (e.g., Serial) that might conflict
-#include "fl/stl/arduino_before.h"
-
 namespace fl {
 
 /**

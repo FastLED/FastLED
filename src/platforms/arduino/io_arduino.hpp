@@ -1,51 +1,52 @@
 #pragma once
 
 // arduino_before.h saves Serial macro as ArduinoSerial_Save before undefining it
-#include "fl/stl/arduino_before.h"
+#include <Arduino.h>
 
 namespace fl {
 namespace platforms {
 
 // Serial initialization
 void begin(uint32_t baudRate) {
-    ArduinoSerial_Save.begin(baudRate);
+    Serial.begin(baudRate);
 }
 
 // Print functions
 void print(const char* str) {
-    ArduinoSerial_Save.print(str);
+    Serial.print(str);
 }
 
 void println(const char* str) {
-    ArduinoSerial_Save.println(str);
+    Serial.println(str);
 }
 
 // Input functions
 int available() {
-    return ArduinoSerial_Save.available();
+    return Serial.available();
 }
 
 int peek() {
-    return ArduinoSerial_Save.peek();
+    return Serial.peek();
 }
 
 int read() {
-    return ArduinoSerial_Save.read();
+    return Serial.read();
 }
 
 // Utility functions
 bool flush(uint32_t timeoutMs) {
-    ArduinoSerial_Save.flush();
+    Serial.flush();
     return true;
 }
 
 bool serial_ready() {
-    return (bool)ArduinoSerial_Save;
+    return (bool)Serial;
 }
 
 // Binary write function
 size_t write_bytes(const uint8_t* buffer, size_t size) {
-    return ArduinoSerial_Save.write(buffer, size);
+    return Serial.write(buffer, size);
+    //return 0;
 }
 
 // Test/diagnostic helper: Arduino Serial is always "buffered" (not ROM UART)

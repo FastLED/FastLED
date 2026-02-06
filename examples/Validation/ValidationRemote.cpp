@@ -2332,7 +2332,8 @@ bool ValidationRemoteControl::processSerialInput() {
 
     // Read any available serial data
     while (Serial.available() > 0) {
-        fl::string input = Serial.readStringUntil('\n');
+        String _input = Serial.readStringUntil('\n');
+        fl::string input = _input.c_str();
         input.trim();
 
         // JSON RPC command (starts with '{')

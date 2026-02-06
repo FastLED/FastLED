@@ -177,6 +177,7 @@
 
 // Configuration is now in ValidationConfig.h (included above)
 // Includes:
+#include <Arduino.h>
 #include <FastLED.h>
 #include "fl/stl/sstream.h"
 #include "Common.h"
