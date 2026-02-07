@@ -1,0 +1,66 @@
+# Valgrind suppression file for FastLED tests
+# Suppresses known false positives from doctest and standard library
+
+# Doctest internal allocations (test framework overhead)
+{
+   doctest_internal_alloc
+   Memcheck:Leak
+   ...
+   fun:*doctest*
+}
+
+# Standard library static initialization (one-time allocations)
+{
+   std_locale_init
+   Memcheck:Leak
+   ...
+   fun:*locale*
+}
+
+# C++ iostream initialization (one-time allocations)
+{
+   std_iostream_init
+   Memcheck:Leak
+   ...
+   fun:*iostream*
+}
+
+# Standard library string operations
+{
+   std_string_internal
+   Memcheck:Leak
+   ...
+   fun:*basic_string*
+}
+
+# Standard library allocator initialization
+{
+   std_allocator_init
+   Memcheck:Leak
+   ...
+   fun:*allocator*
+}
+
+# GCC libstdc++ internal allocations
+{
+   libstdcpp_internal
+   Memcheck:Leak
+   ...
+   obj:*/libstdc++*
+}
+
+# GNU C library (glibc) internal allocations
+{
+   glibc_internal
+   Memcheck:Leak
+   ...
+   obj:*/libc-*.so
+}
+
+# Thread-local storage initialization
+{
+   tls_init
+   Memcheck:Leak
+   ...
+   fun:*tls*
+}
