@@ -17,9 +17,9 @@
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
 #pragma GCC diagnostic push
-#if defined(__GNUC__) && (__GNUC__ >= 6)
+#if defined(FL_IS_GCC)
   #pragma GCC diagnostic ignored "-Wstack-usage="
-#elif defined(__clang__)
+#elif defined(FL_IS_CLANG)
   #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #endif
 

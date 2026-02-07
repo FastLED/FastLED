@@ -13,7 +13,8 @@
 #include "fl/stl/algorithm.h"  // For fl::replace in path conversion
 #include <cstdio>     // For file operations (remove, etc.)
 #include <errno.h>    // For errno
-#ifdef _WIN32
+#include "platforms/win/is_win.h"
+#ifdef FL_IS_WIN
   #include <direct.h>
   #include <io.h>
   #include <sys/stat.h>  // For _stat
@@ -119,7 +120,7 @@ public:
     // Static test utility functions for file/directory management
     // These are only available on the stub/test platform
     static bool createDirectory(const fl::string& path) {
-#ifdef _WIN32
+#ifdef FL_IS_WIN
         return _mkdir(path.c_str()) == 0 || errno == EEXIST;
 #else
         return mkdir(path.c_str(), 0755) == 0 || errno == EEXIST;
@@ -127,7 +128,7 @@ public:
     }
 
     static bool removeDirectory(const fl::string& path) {
-#ifdef _WIN32
+#ifdef FL_IS_WIN
         return _rmdir(path.c_str()) == 0;
 #else
         return rmdir(path.c_str()) == 0;
@@ -145,7 +146,7 @@ public:
     static void forceRemoveDirectory(const fl::string& path) {
         // Synchronously and recursively remove directory and all contents
         // This ensures cleanup completes before proceeding
-#ifdef _WIN32
+#ifdef FL_IS_WIN
         // Windows implementation using _findfirst/_findnext (avoids windows.h conflicts)
         fl::string search_path = path;
         search_path.append("\\*");
@@ -241,12 +242,12 @@ public:
         full_path.append(path);
 
         // Convert forward slashes to platform-appropriate separators
-#ifdef _WIN32
+#ifdef FL_IS_WIN
         fl::replace(full_path.begin(), full_path.end(), '/', '\\');
 #endif
 
         // Check if file exists
-#ifdef _WIN32
+#ifdef FL_IS_WIN
         if (_access(full_path.c_str(), 0) != 0) {
 #else
         if (access(full_path.c_str(), F_OK) != 0) {

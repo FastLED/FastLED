@@ -300,7 +300,7 @@ bool SpiHwI2SESP32::validate_pins(int clock_pin, const fl::vector<int>& data_pin
 uint8_t* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
     uint8_t* buffer = nullptr;
 
-#if FL_IS_ESP_32S3 || defined(FL_IS_ESP_32S3)
+#if defined(FL_IS_ESP_32S3)
     // ESP32-S3: EDMA supports PSRAM directly
     buffer = static_cast<uint8_t*>(heap_caps_aligned_alloc(
         4,  // 4-byte alignment for DMA

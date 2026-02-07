@@ -10,13 +10,16 @@
 //
 // See individual platform files for details.
 
-#if defined(__APPLE__)
+#include "platforms/posix/is_posix.h"
+#include "platforms/win/is_win.h"
+
+#if defined(FL_IS_APPLE)
     // macOS (all versions)
     #include "platforms/shared/int_macos.h"
-#elif defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER)
+#elif defined(FL_IS_WIN)
     // Windows (all versions)
     #include "platforms/shared/int_windows.h"
-#elif defined(__linux__) && (defined(__LP64__) || defined(_LP64))
+#elif defined(FL_IS_LINUX) && (defined(__LP64__) || defined(_LP64))
     // Linux LP64 (64-bit Linux)
     #include "platforms/shared/int_linux.h"
 #else

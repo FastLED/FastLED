@@ -41,9 +41,11 @@ from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
-from ci.lint_cpp.stdint_type_checker import StdintTypeChecker  # noqa: F401 - disabled, will be enabled later
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
+from ci.lint_cpp.stdint_type_checker import (
+    StdintTypeChecker,  # noqa: F401 - disabled, will be enabled later
+)
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (

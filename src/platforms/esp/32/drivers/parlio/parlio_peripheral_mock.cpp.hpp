@@ -3,7 +3,8 @@
 
 // This mock is only for host testing (uses std::thread which is not available on embedded platforms)
 // Compile for stub platform testing OR non-Arduino host platforms
-#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
+#include "platforms/is_platform.h"
+#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "parlio_peripheral_mock.h"
 #include "parlio_engine.h"
@@ -490,7 +491,7 @@ uint8_t* ParlioPeripheralMockImpl::allocateDmaBuffer(size_t size) {
     // Use aligned_alloc for 64-byte alignment (matches real hardware)
     void* buffer = nullptr;
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
     // Windows: Use _aligned_malloc
     buffer = _aligned_malloc(aligned_size, 64);
 #else
@@ -507,7 +508,7 @@ uint8_t* ParlioPeripheralMockImpl::allocateDmaBuffer(size_t size) {
 
 void ParlioPeripheralMockImpl::freeDmaBuffer(uint8_t* buffer) {
     if (buffer != nullptr) {
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
         _aligned_free(buffer);
 #else
         free(buffer);

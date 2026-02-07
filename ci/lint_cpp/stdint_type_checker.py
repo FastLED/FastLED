@@ -8,6 +8,7 @@ in src/platforms/esp/32/** to maintain consistency.
 from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
+
 # Target directory for this checker
 ESP32_ROOT = PROJECT_ROOT / "platforms" / "esp" / "32"
 ESP32_ROOT_SRC = PROJECT_ROOT / "src" / "platforms" / "esp" / "32"
@@ -23,7 +24,9 @@ STDINT_TO_FL: dict[str, str] = {
 }
 
 # Word boundary characters for manual boundary checking
-_WORD_CHARS = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+_WORD_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+)
 
 
 def _normalize_path(path: str) -> str:
@@ -59,7 +62,11 @@ def _find_stdint_matches(code_part: str) -> list[str]:
 
         if after < cp_len:
             c = code_part[after]
-            if c == "8" and after + 3 <= cp_len and code_part[after:after + 3] == "8_t":
+            if (
+                c == "8"
+                and after + 3 <= cp_len
+                and code_part[after : after + 3] == "8_t"
+            ):
                 # int8_t (6 chars) or uint8_t (7 chars)
                 if idx > 0 and code_part[idx - 1] == "u":
                     start = idx - 1
@@ -68,7 +75,11 @@ def _find_stdint_matches(code_part: str) -> list[str]:
                 else:
                     end = idx + 6
                     matched_type = "int8_t"
-            elif c == "1" and after + 4 <= cp_len and code_part[after:after + 4] == "16_t":
+            elif (
+                c == "1"
+                and after + 4 <= cp_len
+                and code_part[after : after + 4] == "16_t"
+            ):
                 # int16_t (7 chars) or uint16_t (8 chars)
                 if idx > 0 and code_part[idx - 1] == "u":
                     start = idx - 1
@@ -77,7 +88,11 @@ def _find_stdint_matches(code_part: str) -> list[str]:
                 else:
                     end = idx + 7
                     matched_type = "int16_t"
-            elif c == "3" and after + 4 <= cp_len and code_part[after:after + 4] == "32_t":
+            elif (
+                c == "3"
+                and after + 4 <= cp_len
+                and code_part[after : after + 4] == "32_t"
+            ):
                 # int32_t (7 chars) or uint32_t (8 chars)
                 if idx > 0 and code_part[idx - 1] == "u":
                     start = idx - 1

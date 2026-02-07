@@ -12,7 +12,10 @@
 ///
 /// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#include "platforms/posix/is_posix.h"
+#include "platforms/win/is_win.h"
+
+#if !defined(FL_IS_WIN) && !defined(FL_IS_APPLE)
 
 #include <dlfcn.h>  // For dlopen, dlsym, dlclose
 #include <unistd.h> // For readlink
@@ -115,4 +118,4 @@ int main(int argc, char** argv) {
     return test_result;
 }
 
-#endif // !_WIN32 && !__APPLE__
+#endif // !FL_IS_WIN && !FL_IS_APPLE

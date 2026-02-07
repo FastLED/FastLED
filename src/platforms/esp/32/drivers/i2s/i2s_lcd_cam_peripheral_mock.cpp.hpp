@@ -3,7 +3,8 @@
 
 // This mock is only for host testing (uses std::thread which is not available on embedded platforms)
 // Compile for stub platform testing OR non-Arduino host platforms
-#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
+#include "platforms/is_platform.h"
+#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "i2s_lcd_cam_peripheral_mock.h"
 #include "fl/warn.h"
@@ -202,7 +203,7 @@ uint16_t* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) {
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
     void* buffer = nullptr;
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
     buffer = _aligned_malloc(aligned_size, 64);
 #else
     buffer = aligned_alloc(64, aligned_size);
@@ -217,7 +218,7 @@ uint16_t* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) {
 
 void I2sLcdCamPeripheralMockImpl::freeBuffer(uint16_t* buffer) {
     if (buffer != nullptr) {
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
         _aligned_free(buffer);
 #else
         free(buffer);

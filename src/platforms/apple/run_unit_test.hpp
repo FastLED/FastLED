@@ -12,7 +12,9 @@
 ///
 /// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
-#ifdef __APPLE__
+#include "platforms/posix/is_posix.h"
+
+#ifdef FL_IS_APPLE
 
 #include <dlfcn.h>       // For dlopen, dlsym, dlclose
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
@@ -113,4 +115,4 @@ int main(int argc, char** argv) {
     return test_result;
 }
 
-#endif // __APPLE__
+#endif // FL_IS_APPLE

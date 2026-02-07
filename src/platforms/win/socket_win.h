@@ -1,7 +1,9 @@
 #pragma once
 
+#include "platforms/win/is_win.h"
+
 #ifdef FASTLED_HAS_NETWORKING && 0
-#ifdef _WIN32
+#ifdef FL_IS_WIN
 
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
@@ -205,5 +207,5 @@ int get_errno();
 
 } // namespace fl
 
-#endif // _WIN32
+#endif // FL_IS_WIN
 #endif // FASTLED_HAS_NETWORKING 

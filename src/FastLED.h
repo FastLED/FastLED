@@ -9,7 +9,7 @@
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
 
-#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
 

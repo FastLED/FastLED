@@ -3,7 +3,8 @@
 
 // This mock is only for host testing
 // Compile for stub platform testing OR non-Arduino host platforms
-#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
+#include "platforms/is_platform.h"
+#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "rmt5_peripheral_mock.h"
 #include "fl/warn.h"
@@ -13,7 +14,7 @@
 #include "fl/singleton.h"
 #include "fl/stl/unordered_map.h"
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
 #include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
 #else
 #include <stdlib.h>  // For aligned_alloc on POSIX
@@ -470,7 +471,7 @@ uint8_t* Rmt5PeripheralMockImpl::allocateDmaBuffer(size_t size) {
     size_t aligned_size = (size + alignment - 1) & ~(alignment - 1);
 
     // Allocate aligned memory
-    #if defined(_WIN32) || defined(_WIN64)
+    #ifdef FL_IS_WIN
     uint8_t* buffer = static_cast<uint8_t*>(_aligned_malloc(aligned_size, alignment));
     #else
     uint8_t* buffer = static_cast<uint8_t*>(aligned_alloc(alignment, aligned_size));
@@ -491,7 +492,7 @@ void Rmt5PeripheralMockImpl::freeDmaBuffer(uint8_t* buffer) {
         return;  // Safe no-op
     }
 
-    #if defined(_WIN32) || defined(_WIN64)
+    #ifdef FL_IS_WIN
     _aligned_free(buffer);
     #else
     free(buffer);

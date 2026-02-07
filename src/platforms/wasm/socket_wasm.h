@@ -10,6 +10,7 @@
 // WASM provides some basic socket types but limited functionality
 #include <sys/types.h>    // For ssize_t, socklen_t if available
 #include "is_wasm.h"
+#include "platforms/win/is_win.h"
 
 #ifdef FL_IS_WASM
     #include <sys/socket.h>   // Basic socket definitions if available
@@ -21,7 +22,7 @@
     #ifndef TCP_NODELAY
     #define TCP_NODELAY 1
     #endif
-#elif defined(_WIN32)
+#elif defined(FL_IS_WIN)
     // When testing on Windows, use Windows headers - don't define our own types
     #include <winsock2.h>
     #include <ws2tcpip.h>

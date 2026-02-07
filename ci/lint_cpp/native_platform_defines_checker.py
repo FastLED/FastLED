@@ -7,9 +7,11 @@ Two-phase scanning:
      on #if/#ifdef/#ifndef/#elif lines.
 
 Scope:
-  - Checks all files under src/ (fl/, platforms/, third_party/, lib8tion/, etc.)
+  - Checks all files under src/ (fl/, platforms/, lib8tion/, etc.)
+  - Covers: hardware platform, OS, and compiler detection defines.
   - Excludes: is_*.h detection headers, root dispatch headers,
-    compile test files, and platform-level dispatch headers.
+    compile test files, platform-level dispatch headers,
+    third_party/ (external code), and compiler abstraction files.
 """
 
 import re
@@ -36,6 +38,19 @@ _ROOT_DISPATCH_HEADERS: set[str] = {
 # implementations at the architecture level (e.g., AVR asm vs ARM vs C).
 _DISPATCH_CONFIG_FILES: set[str] = {
     "config.h",  # lib8tion/config.h — selects ASM vs C math implementations
+}
+
+# Compiler abstraction files that MUST use raw compiler defines (__clang__,
+# __GNUC__, _MSC_VER) because they define macros wrapping compiler-specific
+# features like pragmas, attributes, builtins, and export/import decorators.
+_COMPILER_ABSTRACTION_FILES: set[str] = {
+    "compiler_control.h",  # Compiler pragma/warning abstraction
+    "deprecated.h",  # Compiler-specific [[deprecated]] attributes
+    "align.h",  # Compiler-specific alignment (__attribute__, __declspec)
+    "export.h",  # DLL export/import (__declspec(dllexport), __attribute__((visibility)))
+    "fltest.h",  # Test framework — compiler-specific type demangling
+    "type_traits.h",  # Compiler builtins (__is_base_of, __builtin_*)
+    "m0clockless_c.h",  # ARM inline asm — compiler-specific asm syntax
 }
 
 # Mapping of native compiler defines to their FL_IS_* equivalents.
@@ -243,6 +258,26 @@ NATIVE_TO_MODERN_DEFINES: dict[str, str] = {
     # ── NRF51 legacy ─────────────────────────────────────────────────
     "__RFduino__": "FL_IS_NRF52",
     "__Simblee__": "FL_IS_NRF52",
+    # ── OS detection — desktop/host platforms ──────────────────────
+    "__APPLE__": "FL_IS_APPLE",
+    "__linux__": "FL_IS_LINUX",
+    "__unix__": "FL_IS_POSIX",
+    "_WIN32": "FL_IS_WIN",
+    "_WIN64": "FL_IS_WIN",
+    "__CYGWIN__": "FL_IS_WIN",
+    "__MINGW32__": "FL_IS_WIN_MINGW",
+    "__MINGW64__": "FL_IS_WIN_MINGW",
+    "_MSC_VER": "FL_IS_WIN_MSVC",
+    "__FreeBSD__": "FL_IS_BSD",
+    "__OpenBSD__": "FL_IS_BSD",
+    "__NetBSD__": "FL_IS_BSD",
+    "__DragonFly__": "FL_IS_BSD",
+    "__wasm__": "FL_IS_WASM",
+    "EMSCRIPTEN": "FL_IS_WASM",
+    # ── Compiler detection ────────────────────────────────────────
+    "__clang__": "FL_IS_CLANG",
+    "__GNUC__": "FL_IS_GCC",
+    "__GNUG__": "FL_IS_GCC",
 }
 
 # Regex matching preprocessor conditional directives:
@@ -284,13 +319,15 @@ def _is_in_platforms_dir(path_obj: Path) -> bool:
 class NativePlatformDefinesChecker(FileContentChecker):
     """Checker for native platform defines across all src/ directories.
 
-    Scans all C++ files under src/ (including third_party/) for legacy platform
+    Scans all C++ files under src/ for native platform, OS, and compiler
     defines in preprocessor conditionals and suggests FL_IS_* equivalents.
 
     Exclusions:
+      - third_party/ (external code we don't control)
       - is_*.h detection headers (they define FL_IS_* from native defines)
       - Root dispatch headers (platforms.h, led_sysdefs.h, etc.)
       - Platform-level dispatch headers (fastpin_*.h, led_sysdefs_*.h, etc.)
+      - Compiler abstraction files (compiler_control.h, deprecated.h, etc.)
       - Compile test files
       - core_detection.h
       - lib8tion/config.h (architecture-level dispatch for ASM vs C)
@@ -312,6 +349,15 @@ class NativePlatformDefinesChecker(FileContentChecker):
         path_obj = Path(file_path)
         file_name = path_obj.name
 
+        # ── Third-party exclusion ────────────────────────────────────
+        # External libraries use raw compiler/OS defines appropriately;
+        # we don't control their code.
+        try:
+            path_obj.relative_to(SRC_ROOT / "third_party")
+            return False
+        except ValueError:
+            pass
+
         # Skip the is_*.h detection headers — they MUST use native defines
         # These files convert native compiler defines into FL_IS_* defines
         if file_name.startswith("is_"):
@@ -323,6 +369,13 @@ class NativePlatformDefinesChecker(FileContentChecker):
 
         # Skip compile test files
         if "compile_test" in file_name.lower():
+            return False
+
+        # ── Compiler abstraction files ───────────────────────────────
+        # These files define macros wrapping compiler-specific features
+        # (pragmas, attributes, builtins, DLL export/import).
+        # They MUST use raw compiler defines.
+        if file_name in _COMPILER_ABSTRACTION_FILES:
             return False
 
         # ── Root-level src/ dispatch headers ──────────────────────────

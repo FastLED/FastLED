@@ -11,8 +11,9 @@
 // Standard library includes must be OUTSIDE namespaces
 #include <thread>  // ok include
 #include "fl/stl/chrono.h"
+#include "platforms/win/is_win.h"
 
-#ifdef _WIN32
+#ifdef FL_IS_WIN
     // Forward declare Windows Sleep function to avoid including windows.h
     // which pulls in GDI headers that define ERROR macro
     extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long dwMilliseconds);
@@ -40,7 +41,7 @@ inline void native_sleep(const fl::chrono::duration<Rep, Period>& sleep_duration
         return;
     }
 
-#ifdef _WIN32
+#ifdef FL_IS_WIN
     // Windows: Sleep takes milliseconds
     // Convert nanoseconds to milliseconds (round up)
     unsigned long ms = static_cast<unsigned long>((ns + 999999) / 1000000);

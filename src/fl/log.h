@@ -154,7 +154,7 @@ const char *fastled_file_offset(const char *file);
 // Debug Macros (FL_DBG)
 // =============================================================================
 
-#if FL_IS_WASM || !defined(RELEASE) || defined(FASTLED_TESTING)
+#if defined(FL_IS_WASM) || !defined(RELEASE) || defined(FASTLED_TESTING)
 #define FASTLED_FORCE_DBG 1
 #endif
 

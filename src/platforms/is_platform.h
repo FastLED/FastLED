@@ -98,16 +98,22 @@
 /// Stub/Testing Platforms:
 /// - FL_IS_STUB: Stub platform (native builds, unit tests, host environments)
 ///
-/// POSIX Platforms:
+/// OS Identity (orthogonal to POSIX capability):
+/// - FL_IS_LINUX: Linux systems
+/// - FL_IS_APPLE: macOS/Darwin systems
+/// - FL_IS_BSD: BSD variants (FreeBSD, OpenBSD, NetBSD)
+///
+/// POSIX Capability:
 /// - FL_IS_POSIX: General POSIX-compliant platform (Linux, macOS, BSD, etc.)
-/// - FL_IS_POSIX_LINUX: Linux systems
-/// - FL_IS_POSIX_MACOS: macOS/Darwin systems
-/// - FL_IS_POSIX_BSD: BSD variants (FreeBSD, OpenBSD, NetBSD)
 ///
 /// Windows Platforms:
 /// - FL_IS_WIN: General Windows platform (any toolchain)
 /// - FL_IS_WIN_MSVC: Microsoft Visual C++ compiler
 /// - FL_IS_WIN_MINGW: MinGW/MinGW-w64 GCC toolchain (native Win32, not POSIX)
+///
+/// Compiler Detection:
+/// - FL_IS_CLANG: Clang/LLVM compiler (including Apple Clang)
+/// - FL_IS_GCC: GCC compiler (excludes Clang)
 ///
 /// Usage:
 /// @code
@@ -147,3 +153,20 @@
 #include "platforms/stub/is_stub.h"
 #include "platforms/wasm/is_wasm.h"
 #include "platforms/win/is_win.h"
+
+// ============================================================================
+// Compiler Detection
+// ============================================================================
+// FL_IS_CLANG - Clang/LLVM compiler (including Apple Clang)
+// Note: Clang also defines __GNUC__ for GCC compatibility, so check __clang__
+// first and use it to distinguish Clang from actual GCC.
+#if defined(__clang__)
+#define FL_IS_CLANG
+#endif
+
+// FL_IS_GCC - GCC compiler (excludes Clang)
+// Clang defines __GNUC__ for compatibility, so we must exclude it.
+// This define means "actually GCC, not Clang pretending to be GCC".
+#if defined(__GNUC__) && !defined(__clang__)
+#define FL_IS_GCC
+#endif

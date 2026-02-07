@@ -5,14 +5,15 @@
 /// simulateTransactionComplete(). No background threads are used.
 
 // Compile for stub platform testing OR non-Arduino host platforms
-#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
+#include "platforms/is_platform.h"
+#if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "spi_peripheral_mock.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 #include "fl/singleton.h"
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
 #include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
 #else
 #include <stdlib.h>  // For aligned_alloc on POSIX
@@ -338,7 +339,7 @@ uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
     // and POSIX alignment constraints on 64-bit systems
     constexpr size_t kAlignment = sizeof(void*) >= 4 ? sizeof(void*) : 4;
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
     // Windows: Use _aligned_malloc
     buffer = _aligned_malloc(aligned_size, kAlignment);
 #else
@@ -357,7 +358,7 @@ uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
 
 void SpiPeripheralMockImpl::freeDma(uint8_t* buffer) {
     if (buffer != nullptr) {
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef FL_IS_WIN
         _aligned_free(buffer);
 #else
         free(buffer);

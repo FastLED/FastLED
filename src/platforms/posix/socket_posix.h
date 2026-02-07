@@ -1,7 +1,9 @@
 #pragma once
 
+#include "platforms/win/is_win.h"
+
 #ifdef FASTLED_HAS_NETWORKING
-#if !defined(_WIN32)
+#if !defined(FL_IS_WIN)
 
 #include "fl/networking.h"  // For SocketError enum
 #include "fl/stl/string.h"
@@ -102,5 +104,5 @@ int get_errno();
 
 } // namespace fl
 
-#endif // !defined(_WIN32)
+#endif // !defined(FL_IS_WIN)
 #endif // FASTLED_HAS_NETWORKING 

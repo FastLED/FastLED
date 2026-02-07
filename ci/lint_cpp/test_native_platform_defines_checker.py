@@ -524,12 +524,13 @@ class TestFastSlowConsistency(unittest.TestCase):
 class TestMappingIntegrity(unittest.TestCase):
     """Verify the NATIVE_TO_MODERN_DEFINES mapping is well-formed."""
 
-    def test_all_modern_defines_start_with_FL_IS_AVR(self):
+    def test_all_modern_defines_start_with_FL_IS(self):
+        """All FL_IS_* targets must start with FL_IS_ prefix."""
         for native, modern in NATIVE_TO_MODERN_DEFINES.items():
             with self.subTest(native=native):
                 self.assertTrue(
-                    modern.startswith("FL_IS_AVR"),
-                    f"{native} → {modern} does not start with FL_IS_AVR",
+                    modern.startswith("FL_IS_"),
+                    f"{native} → {modern} does not start with FL_IS_",
                 )
 
     def test_no_modern_defines_in_native_keys(self):
@@ -541,14 +542,32 @@ class TestMappingIntegrity(unittest.TestCase):
             )
 
     def test_mapping_has_expected_families(self):
-        """Verify all expected FL_IS_AVR_* families are represented."""
+        """Verify all expected FL_IS_* families are represented."""
         modern_values = set(NATIVE_TO_MODERN_DEFINES.values())
         expected = {
+            # Hardware platforms
             "FL_IS_AVR",
             "FL_IS_AVR_ATMEGA",
             "FL_IS_AVR_ATMEGA_328P",
             "FL_IS_AVR_MEGAAVR",
             "FL_IS_AVR_ATTINY",
+            "FL_IS_ESP32",
+            "FL_IS_STM32_F1",
+            "FL_IS_NRF52",
+            "FL_IS_SAMD21",
+            "FL_IS_TEENSY_3X",
+            # OS detection
+            "FL_IS_WIN",
+            "FL_IS_WIN_MSVC",
+            "FL_IS_WIN_MINGW",
+            "FL_IS_APPLE",
+            "FL_IS_LINUX",
+            "FL_IS_BSD",
+            "FL_IS_POSIX",
+            "FL_IS_WASM",
+            # Compiler detection
+            "FL_IS_CLANG",
+            "FL_IS_GCC",
         }
         for family in expected:
             with self.subTest(family=family):
@@ -556,8 +575,8 @@ class TestMappingIntegrity(unittest.TestCase):
 
     def test_mapping_count(self):
         """Sanity check: we have a reasonable number of entries."""
-        # is_avr.h has ~73 unique native defines
-        self.assertGreaterEqual(len(NATIVE_TO_MODERN_DEFINES), 70)
+        # Hardware + OS + compiler defines
+        self.assertGreaterEqual(len(NATIVE_TO_MODERN_DEFINES), 100)
 
 
 if __name__ == "__main__":

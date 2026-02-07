@@ -12,7 +12,9 @@
 ///
 /// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
-#ifdef _WIN32
+#include "platforms/win/is_win.h"
+
+#ifdef FL_IS_WIN
 
 #include <windef.h>
 #include <libloaderapi.h>
@@ -105,4 +107,4 @@ int main(int argc, char** argv) {
     return test_result;
 }
 
-#endif // _WIN32
+#endif // FL_IS_WIN

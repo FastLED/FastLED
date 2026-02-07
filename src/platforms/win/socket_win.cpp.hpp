@@ -1,5 +1,7 @@
+#include "platforms/win/is_win.h"
+
 #if defined(FASTLED_HAS_NETWORKING) && 0
-#ifdef _WIN32
+#ifdef FL_IS_WIN
 
 #include "socket_win.h"
 
@@ -314,5 +316,5 @@ bool platform_supports_socket_reuse() {
 
 } // namespace fl
 
-#endif // _WIN32
+#endif // FL_IS_WIN
 #endif // FASTLED_HAS_NETWORKING 

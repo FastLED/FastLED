@@ -275,9 +275,9 @@ void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) {
     rmt_channel_t channel = state->channel;
 
     // Disable TX interrupts for this channel (platform-specific)
-#if FL_IS_ESP_32C3 || FL_IS_ESP_32H2 || FL_IS_ESP_32S3 || FL_IS_ESP_32C6
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6)
     RMT.int_ena.val &= ~(1 << channel);
-#elif FL_IS_ESP_32S2 || FL_IS_ESP_32DEV
+#elif defined(FL_IS_ESP_32S2) || defined(FL_IS_ESP_32DEV)
     RMT.int_ena.val &= ~(1 << (channel * 3));
 #else
     // Fallback to API call for unknown platforms

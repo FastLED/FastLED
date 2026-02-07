@@ -6,7 +6,7 @@
 
 // Conditional stack array support includes - must be before namespace
 #ifndef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
-#if defined(__clang__) || defined(FL_IS_STM32_H7)
+#if defined(FL_IS_CLANG) || defined(FL_IS_STM32_H7)
 // Clang doesn't have variable length arrays. Therefore we need to emulate them
 // using alloca. It's been found that Arduino Giga M7 also doesn't support
 // variable length arrays for some reason so we force it to emulate them as well
