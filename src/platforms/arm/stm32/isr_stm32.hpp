@@ -2,6 +2,7 @@
 /// @brief STM32 ISR timer implementation using STM32 HAL
 
 #pragma once
+#include "is_stm32.h"
 
 #ifdef FL_IS_STM32
 
@@ -11,7 +12,6 @@
 
 // Global Interrupt Control (interruptsDisable/interruptsEnable)
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
-
 namespace fl {
 namespace isr {
 namespace platforms {

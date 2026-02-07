@@ -55,7 +55,7 @@ namespace platforms {
 
 // Pin mapping tables for ATmega328P (Arduino UNO/Nano pinout)
 // These map Arduino pin numbers to AVR ports and bit masks
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega168__)
+#if defined(FL_IS_AVR_ATMEGA_328P)
 
 // Maps Arduino digital pin numbers to port identifiers (PB, PC, PD)
 static const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
@@ -144,7 +144,7 @@ static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
     7, // A7 (internal only on some variants)
 };
 
-#elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+#elif defined(FL_IS_AVR_ATMEGA_2560)
 
 // ATmega2560 (Arduino MEGA) pin mapping
 // Note: This is a simplified subset - full MEGA has 70 digital pins
@@ -216,7 +216,7 @@ static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
     8, 9, 10, 11, 12, 13, 14, 15, // A8-A15
 };
 
-#elif defined(__AVR_ATmega4809__) || defined(ARDUINO_AVR_NANO_EVERY)
+#elif defined(FL_IS_AVR_MEGAAVR) || defined(ARDUINO_AVR_NANO_EVERY)
 
 // ATmega4809 (Arduino Nano Every) - megaAVR architecture
 // This chip uses a different port register structure: PORTB.DIR instead of DDRB
@@ -355,8 +355,7 @@ static const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
     7, // A7 (internal only on some variants)
 };
 
-#elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__) || \
-      defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny3216__) || defined(__AVR_ATtiny3217__)
+#elif defined(FL_IS_AVR_ATTINY_MODERN)
 
 // megaAVR 0-series / tinyAVR 0/1/2-series (ATtiny1604, ATtiny1616, etc.)
 // These use PORTA.DIR/OUT/IN style registers instead of DDRB/PORTB/PINB
@@ -524,7 +523,7 @@ inline void setPwm16(int pin, uint16_t val) {
     // AVR 16-bit PWM using Timer1 (pins 9, 10 on Uno)
     // Provides true 16-bit resolution at ~244 Hz (16 MHz / 65536)
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega168__)
+#if defined(FL_IS_AVR_ATMEGA_328P)
     // ATmega328P (Arduino Uno/Nano): Timer1 controls pins 9 (OC1A) and 10 (OC1B)
     if (pin == 9 || pin == 10) {
         // Set pins as output
@@ -556,7 +555,7 @@ inline void setPwm16(int pin, uint16_t val) {
 
         return;
     }
-#elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+#elif defined(FL_IS_AVR_ATMEGA_2560)
     // ATmega2560 (Arduino Mega): Timer1 controls pins 11 (OC1A) and 12 (OC1B)
     if (pin == 11 || pin == 12) {
         platforms::pinMode(pin, PinMode::Output);

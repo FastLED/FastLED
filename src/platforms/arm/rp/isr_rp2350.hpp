@@ -33,6 +33,7 @@
 */
 
 #pragma once
+#include "is_rp.h"
 
 #if defined(FL_IS_RP2350)
 

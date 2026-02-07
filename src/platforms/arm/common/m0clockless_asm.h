@@ -34,6 +34,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/chipsets/timing_traits.h"
+#include "platforms/arm/is_arm.h"
 
 FL_EXTERN_C_BEGIN
 

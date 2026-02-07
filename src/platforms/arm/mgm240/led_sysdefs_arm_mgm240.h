@@ -14,6 +14,7 @@
 /// - FreeRTOS compatibility with automatic detection
 
 #include "fl/stl/stdint.h"
+#include "platforms/arm/is_arm.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
 

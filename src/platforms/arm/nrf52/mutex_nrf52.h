@@ -28,6 +28,7 @@
 */
 
 #pragma once
+#include "is_nrf52.h"
 
 #if defined(FL_IS_NRF52) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "fl/compiler_control.h"
+#include "is_avr.h"
 // Defines a timer_millis for led_sysdefs_avr.h
 
 // Please don't use this code, it's mostly to make certain platforms compile.
@@ -18,7 +19,7 @@
 #warning "CLOCK_SOURCE=0 that the interrupt timer may not even work."
 #endif
 
-#if defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6)
+#if defined(FL_IS_AVR_ATTINY_MODERN) || defined(ARDUINO_attinyxy6)
 #define DEFINE_AVR_TIMER_SOURCE_USES_TIMER0
 #endif
 

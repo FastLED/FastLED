@@ -38,6 +38,7 @@
     // AVR 8-bit microcontrollers (Arduino UNO, Nano, etc.)
     #include "platforms/generic_pin.h"
     #include "platforms/avr/fastpin_avr.h"
+#include "platforms/arm/is_arm.h"
 
 #elif defined(FL_IS_ARM)
     // ARM microcontroller family (Teensy, Arduino GIGA, Pico, etc.)
@@ -53,5 +54,4 @@
     // Fallback: no specific platform detected
     // Use generic PINMAP-based Pin class and default FastPin<> template
     #include "platforms/generic_pin.h"
-
 #endif

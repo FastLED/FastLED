@@ -15,6 +15,8 @@
 // priority.
 #ifdef ARDUINO
 #include <Arduino.h> // ok include
+#include "platforms/arm/is_arm.h"
+
 #endif
 
 #ifndef FL_IS_ARM

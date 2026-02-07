@@ -1,5 +1,6 @@
 // ok no namespace fl
 #pragma once
+#include "teensy/is_teensy.h"
 
 // ARM placement new operator - in global namespace
 // Most ARM platforms have <new> header available

@@ -1,3 +1,5 @@
+#include "platforms/arm/is_arm.h"
+
 // ok no namespace fl
 #ifndef __INC_LED_SYSDEFS_ARM_SAM_H
 #define __INC_LED_SYSDEFS_ARM_SAM_H

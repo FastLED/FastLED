@@ -5,6 +5,8 @@
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
 #include "fl/compiler_control.h"
+#include "is_stm32.h"
+
 #ifdef FL_IS_STM32
 
 #include "platforms/arm/stm32/init_stm32.h"
@@ -15,7 +17,6 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
-
 namespace fl {
 namespace platforms {
 

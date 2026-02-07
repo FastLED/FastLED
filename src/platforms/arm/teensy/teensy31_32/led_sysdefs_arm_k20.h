@@ -3,6 +3,8 @@
 #define __INC_LED_SYSDEFS_ARM_K20_H
 
 #define FASTLED_TEENSY3
+#include "platforms/arm/is_arm.h"
+
 #ifndef FL_IS_ARM
 #error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
 #endif
@@ -27,7 +29,6 @@
 // Get some system include files
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
-
 // Define the register types
 #if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */

@@ -16,6 +16,8 @@
 
 #include "fl/compiler_control.h"
 
+#include "platforms/arm/teensy/is_teensy.h"
+
 #if defined(FL_IS_TEENSY_4X)
 
 #include "fl/channels/bus_manager.h"
@@ -26,7 +28,6 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/arm/teensy/teensy4_common/init_channel_engine.h"
-
 namespace fl {
 
 namespace detail {

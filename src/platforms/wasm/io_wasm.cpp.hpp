@@ -1,8 +1,7 @@
 #pragma once
-
-#ifdef FL_IS_WASM
 #include "platforms/wasm/is_wasm.h"
 
+#ifdef FL_IS_WASM
 /// WASM I/O implementation
 /// Consolidates print and input functions for the WASM platform.
 /// Print functions use printf to output to JavaScript console.

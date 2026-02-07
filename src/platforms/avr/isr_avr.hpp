@@ -34,7 +34,7 @@
 // Global Interrupt Control (noInterrupts/interrupts) - All AVR variants
 // =============================================================================
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 
 #include <avr/interrupt.h>
 

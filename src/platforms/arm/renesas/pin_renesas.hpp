@@ -1,4 +1,5 @@
 #pragma once
+#include "is_renesas.h"
 
 /// @file platforms/arm/renesas/pin_renesas.hpp
 /// Renesas (Arduino UNO R4, etc.) native pin implementation using FSP IOPORT API
@@ -24,7 +25,6 @@
 // - r_ioport.h: IOPORT driver implementation
 // - variant.h: PinMuxCfg_t type and g_pin_cfg[] array declaration
 #include <Arduino.h>
-
 namespace fl {
 namespace platforms {
 

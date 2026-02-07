@@ -28,8 +28,10 @@ from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
+from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
+from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
@@ -137,6 +139,8 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     checkers_by_scope["platforms"] = [
         PlatformsFlNamespaceChecker(),
         NamespacePlatformsChecker(),
+        NativePlatformDefinesChecker(),
+        IsHeaderIncludeChecker(),
     ]
 
     # Include paths checker (for fl/ and platforms/ directories)

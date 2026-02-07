@@ -8,6 +8,7 @@
 */
 
 #pragma once
+#include "platforms/wasm/is_wasm.h"
 
 // Only compile this implementation for stub/host/WASM platform builds
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)

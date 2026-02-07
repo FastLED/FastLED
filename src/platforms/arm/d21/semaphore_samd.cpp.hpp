@@ -1,6 +1,8 @@
 /// @file semaphore_samd.cpp
 /// @brief SAMD21/SAMD51 interrupt-based semaphore platform implementation
 
+#include "platforms/arm/samd/is_samd.h"
+
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "semaphore_samd.h"

@@ -5,6 +5,8 @@
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
 #include "fl/compiler_control.h"
+#include "platforms/arm/samd/is_samd.h"
+
 #ifdef FL_IS_SAMD51
 
 #include "platforms/arm/d51/init_samd51.h"
@@ -13,7 +15,6 @@
 // Include SPI hardware controller headers
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
-
 namespace fl {
 namespace platforms {
 

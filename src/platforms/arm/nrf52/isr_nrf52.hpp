@@ -39,6 +39,8 @@ FL_EXTERN_C_BEGIN
 #include "nrf_timer.h"
 #include "nrf_gpiote.h"
 #include "nrf_gpio.h"
+#include "is_nrf52.h"
+
 FL_EXTERN_C_END
 
 namespace fl {

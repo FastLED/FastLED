@@ -49,6 +49,14 @@
 #endif
 
 // ============================================================================
+// FL_IS_AVR_ATMEGA_2560 - ATmega2560/1280 family detection (Arduino Mega)
+// Includes: ATmega2560, ATmega1280
+// ============================================================================
+#if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+#define FL_IS_AVR_ATMEGA_2560
+#endif
+
+// ============================================================================
 // FL_IS_AVR_MEGAAVR - megaAVR 0-series/1-series detection
 // These are modern AVR chips with different peripherals (TCB timers, no Timer1)
 // Includes: ATmega4809 (Nano Every), ATmega4808, ATmega3209, etc.
@@ -85,6 +93,24 @@
     defined(ARDUINO_AVR_DIGISPARK) || defined(ARDUINO_AVR_DIGISPARKPRO) || \
     defined(IS_BEAN)
 #define FL_IS_AVR_ATTINY
+#endif
+
+// ============================================================================
+// FL_IS_AVR_ATTINY_MODERN - Modern tinyAVR 0/1/2-series with PORT_t registers
+// These chips use PORTA.OUT/DIR/IN style port access (not classic PORTB/DDRB)
+// Includes: ATtinyxy2, ATtinyxy4, ATtinyxy6, ATtinyxy7 wildcards and specific
+// modern chips (ATtiny202-ATtiny1616)
+// ============================================================================
+#if defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || \
+    defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__) || \
+    defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || \
+    defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || \
+    defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || \
+    defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__) || \
+    defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny1616__) || \
+    defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy6__) || \
+    defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy2__)
+#define FL_IS_AVR_ATTINY_MODERN
 #endif
 
 // ============================================================================

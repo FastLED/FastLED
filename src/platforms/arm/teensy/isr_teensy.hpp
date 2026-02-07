@@ -15,13 +15,13 @@
 /// - Teensy 3.x (Kinetis): Each timer has separate NVIC slot, individual priorities work
 
 #pragma once
+#include "is_teensy.h"
 
 #if defined(FL_IS_TEENSY)
 
 #include "fl/isr.h"
 #include "fl/warn.h"
 #include <IntervalTimer.h>
-
 namespace fl {
 namespace isr {
 

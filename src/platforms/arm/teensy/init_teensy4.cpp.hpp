@@ -5,6 +5,8 @@
 /// It initializes the ObjectFLED registry for parallel LED output support.
 
 #include "fl/compiler_control.h"
+#include "is_teensy.h"
+
 #ifdef FL_IS_TEENSY_4X
 
 #include "platforms/arm/teensy/init_teensy4.h"
@@ -13,7 +15,6 @@
 // ObjectFLED registry is accessed via singleton pattern
 // We include the header to access the getInstance() function
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
-
 namespace fl {
 namespace platforms {
 

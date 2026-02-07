@@ -5,6 +5,9 @@
 
 #if defined(ESP32)
     #include "platforms/esp/32/init_channel_engine.h"
+#include "platforms/arm/stm32/is_stm32.h"
+#include "platforms/arm/teensy/is_teensy.h"
+
 #elif defined(FL_IS_STM32)
     #include "platforms/arm/stm32/init_channel_engine.h"
 #elif defined(FL_IS_TEENSY_4X)

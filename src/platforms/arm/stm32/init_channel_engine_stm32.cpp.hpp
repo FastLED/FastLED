@@ -19,6 +19,8 @@
 
 #include "fl/compiler_control.h"
 
+#include "is_stm32.h"
+
 #if defined(FL_IS_STM32)
 
 #include "fl/channels/bus_manager.h"
@@ -30,7 +32,6 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/arm/stm32/init_channel_engine.h"
-
 namespace fl {
 
 namespace detail {

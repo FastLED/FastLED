@@ -1,6 +1,8 @@
 /// @file mutex_stm32.cpp
 /// @brief STM32 FreeRTOS mutex platform implementation
 
+#include "is_stm32.h"
+
 #if defined(FL_IS_STM32)
 
 // Only compile if FreeRTOS is available

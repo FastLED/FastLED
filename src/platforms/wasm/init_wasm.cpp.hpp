@@ -5,6 +5,8 @@
 /// It initializes the engine listener system for JavaScript runtime integration.
 
 #include "fl/compiler_control.h"
+#include "is_wasm.h"
+
 #ifdef FL_IS_WASM
 
 #include "platforms/wasm/init_wasm.h"

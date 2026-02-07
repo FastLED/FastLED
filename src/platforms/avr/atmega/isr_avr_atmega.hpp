@@ -385,16 +385,10 @@ const char* get_error_string(int error_code) {
 }
 
 const char* get_platform_name() {
-#if defined(__AVR_ATmega328P__)
-    return "AVR ATmega328P (Uno/Nano)";
-#elif defined(__AVR_ATmega2560__)
-    return "AVR ATmega2560 (Mega)";
-#elif defined(__AVR_ATmega32U4__)
-    return "AVR ATmega32U4 (Leonardo/Micro)";
-#elif defined(__AVR_ATmega1280__)
-    return "AVR ATmega1280";
-#elif defined(__AVR_ATmega168__)
-    return "AVR ATmega168";
+#if defined(FL_IS_AVR_ATMEGA_328P)
+    return "AVR ATmega328P family (Uno/Nano)";
+#elif defined(FL_IS_AVR_ATMEGA_2560)
+    return "AVR ATmega2560 family (Mega)";
 #elif defined(FL_IS_AVR_ATMEGA)
     return "AVR ATmega (generic)";
 #else

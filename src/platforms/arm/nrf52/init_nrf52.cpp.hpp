@@ -5,6 +5,8 @@
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
 #include "fl/compiler_control.h"
+#include "is_nrf52.h"
+
 #ifdef FL_IS_NRF52
 
 #include "platforms/arm/nrf52/init_nrf52.h"
@@ -13,7 +15,6 @@
 // Include SPI hardware controller headers
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
-
 namespace fl {
 namespace platforms {
 

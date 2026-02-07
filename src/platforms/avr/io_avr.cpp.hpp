@@ -1,11 +1,13 @@
 #pragma once
 // ok no namespace fl
+#include "is_avr.h"
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 
 // For Arduino AVR builds, use Arduino's I/O implementation
 #ifdef ARDUINO
 #include "platforms/arduino/io_arduino.hpp"
+
 #else
 // For bare-metal AVR builds (no Arduino framework), we would need
 // direct UART register access implementations here

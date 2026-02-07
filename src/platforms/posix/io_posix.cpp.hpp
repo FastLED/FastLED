@@ -1,8 +1,7 @@
 #pragma once
-
-#ifdef FL_IS_POSIX
 #include "platforms/posix/is_posix.h"
 
+#ifdef FL_IS_POSIX
 #include <unistd.h>  // for write and fsync
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"

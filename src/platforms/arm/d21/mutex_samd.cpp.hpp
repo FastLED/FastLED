@@ -1,6 +1,8 @@
 /// @file mutex_samd.cpp
 /// @brief SAMD21/SAMD51 interrupt-based mutex platform implementation
 
+#include "platforms/arm/samd/is_samd.h"
+
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "mutex_samd.h"

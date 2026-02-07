@@ -10,6 +10,8 @@
 /// - SpiHw1 (5): Standard single-lane SPI (all ESP32 variants)
 
 #include "fl/compiler_control.h"
+#include "platforms/esp/is_esp.h"
+
 #ifdef FL_IS_ESP32
 
 #include "fl/dbg.h"

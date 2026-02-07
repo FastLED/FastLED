@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/int.h"
+#include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP32)
 

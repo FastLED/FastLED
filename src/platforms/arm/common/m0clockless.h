@@ -54,6 +54,8 @@
 #elif defined(__ARM_ARCH_6M__)
     // Cortex-M0: Use assembly for best performance
     #define __USE_M0_C_VERSION__ 0
+#include "platforms/arm/is_arm.h"
+
 #elif defined(FL_IS_ARM_M0_PLUS) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
     // Cortex-M0+, M3, M4, M7: C++ version can leverage faster hardware
     #define __USE_M0_C_VERSION__ 0  // not enabled yet though.
@@ -73,7 +75,6 @@
 #else
     // Using assembly implementation
     #include "m0clockless_asm.h"
-
 #endif
 
 // Clean up internal macro

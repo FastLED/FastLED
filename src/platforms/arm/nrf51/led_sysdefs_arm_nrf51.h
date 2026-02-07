@@ -12,6 +12,8 @@
 
 #define FASTLED_SPI_BYTE_ONLY
 
+#include "platforms/arm/is_arm.h"
+
 #ifndef FL_IS_ARM
 #error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
 #endif
@@ -24,7 +26,6 @@
 #include "fl/stl/stdint.h"
 #include <nrf51.h>
 #include <core_cm0.h>
-
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 typedef uint32_t prog_uint32_t;

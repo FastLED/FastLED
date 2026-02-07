@@ -304,11 +304,11 @@ protected:
 #define USE_ASM_MACROS
 
 
-#if defined(__AVR_ATmega4809__)
+#if defined(FL_IS_AVR_MEGAAVR)
 // Not used - place holder so existing ASM_VARS macro can remain the same
 #define ASM_VAR_PORT "r" (*FastPin<DATA_PIN>::port())
 
-#elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
+#elif defined(FL_IS_AVR_ATTINY_MODERN)
 // Probably unused - place holder so existing ASM_VARS macro can remain the same
 #define ASM_VAR_PORT "r" (((PORT_t*)FastPin<DATA_PIN>::port())->OUT)
 
@@ -415,7 +415,7 @@ protected:
 #define QLO2SEI
 #endif
 
-#if defined(__AVR_ATmega4809__)
+#if defined(FL_IS_AVR_MEGAAVR)
 
 // ATmega4809: Direct memory access for newer AVR architecture
 // 1 cycle, write hi to the port (sets data line HIGH)

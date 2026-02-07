@@ -36,6 +36,7 @@
 #include "color.h"
 #include "fastled_config.h"
 #include "fl/chipsets/timing_traits.h"
+#include "platforms/avr/is_avr.h"
 
 namespace fl {
 
@@ -46,7 +47,7 @@ struct NeoPixelBusMethodSelector {
     using DefaultMethod = NeoEsp32Rmt0800KbpsMethod;
 #elif defined(ESP8266)  
     using DefaultMethod = NeoEsp8266Uart1800KbpsMethod;
-#elif defined(__AVR__)
+#elif defined(FL_IS_AVR)
     using DefaultMethod = NeoAvr800KbpsMethod;
 #elif defined(__arm__)
     using DefaultMethod = NeoArm800KbpsMethod;

@@ -4,6 +4,8 @@
 
 #include "fl/force_inline.h"
 
+#include "platforms/arm/is_arm.h"
+
 #ifndef FL_IS_ARM
 #error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
 #endif

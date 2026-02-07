@@ -1,6 +1,8 @@
 /// @file semaphore_stm32.cpp
 /// @brief STM32 FreeRTOS semaphore platform implementation
 
+#include "is_stm32.h"
+
 #if defined(FL_IS_STM32)
 
 // Only compile if FreeRTOS is available
@@ -17,7 +19,6 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include <chrono>  // ok include - for std::chrono
-
 namespace fl {
 namespace platforms {
 
