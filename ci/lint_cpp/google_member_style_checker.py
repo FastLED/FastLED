@@ -63,6 +63,31 @@ def convert_google_to_m_prefix(var_name: str) -> str:
 class GoogleMemberStyleChecker(FileContentChecker):
     """Checker for Google-style member variables (trailing underscore)."""
 
+    # Pre-compiled regex for member variable declarations with trailing underscore.
+    # Matches: type_name var_name_; or type_name var_name_ = ...;
+    # Also matches: type_name* var_name_; or type_name& var_name_;
+    # Requires at least 2 characters before the trailing underscore.
+    _MEMBER_VAR_PATTERN = re.compile(
+        r"\b"  # Word boundary
+        r"(?:const\s+)?"  # Optional const
+        r"(?:static\s+)?"  # Optional static
+        r"(?:volatile\s+)?"  # Optional volatile
+        r"(?:mutable\s+)?"  # Optional mutable
+        r"[\w:]+(?:<[^>]+>)?"  # Type name (with optional template args)
+        r"\s+"  # Required whitespace after type
+        r"[*&]*"  # Optional pointer/reference symbols
+        r"\s*"  # Optional whitespace
+        r"(\w{2,}_)"  # Variable name with trailing underscore (capture group 1)
+        r"\s*"  # Optional whitespace
+        r"[;=,)]"  # Followed by semicolon, equals, comma, or closing paren
+    )
+
+    # Pre-compiled regex for removing string literals before checking
+    _STRING_LITERAL_PATTERN = re.compile(r'"[^"]*"')
+
+    # Pre-compiled set of excluded files for O(1) suffix lookups
+    _EXCLUDED_SET = frozenset(EXCLUDED_FILES)
+
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
@@ -73,7 +98,7 @@ class GoogleMemberStyleChecker(FileContentChecker):
             return False
 
         # Check if file is in excluded list
-        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
+        if any(file_path.endswith(excluded) for excluded in self._EXCLUDED_SET):
             return False
 
         # Exclude third_party directory (contains external code)
@@ -86,25 +111,6 @@ class GoogleMemberStyleChecker(FileContentChecker):
         """Check file for Google-style member variables."""
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
-
-        # Pattern to detect member variable declarations with trailing underscore
-        # Matches: type_name var_name_; or type_name var_name_ = ...;
-        # Also matches: type_name* var_name_; or type_name& var_name_;
-        # Requires at least 2 characters before the trailing underscore to avoid single letters
-        member_var_pattern = re.compile(
-            r"\b"  # Word boundary
-            r"(?:const\s+)?"  # Optional const
-            r"(?:static\s+)?"  # Optional static
-            r"(?:volatile\s+)?"  # Optional volatile
-            r"(?:mutable\s+)?"  # Optional mutable
-            r"[\w:]+(?:<[^>]+>)?"  # Type name (with optional template args)
-            r"\s+"  # Required whitespace after type
-            r"[*&]*"  # Optional pointer/reference symbols
-            r"\s*"  # Optional whitespace
-            r"(\w{2,}_)"  # Variable name with trailing underscore - at least 2 chars (capture group 1)
-            r"\s*"  # Optional whitespace
-            r"[;=,)]"  # Followed by semicolon, equals, comma, or closing paren
-        )
 
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
@@ -135,10 +141,10 @@ class GoogleMemberStyleChecker(FileContentChecker):
             # This is a simple heuristic - may need refinement
             if '"' in code_part:
                 # Remove string literals before checking
-                code_part = re.sub(r'"[^"]*"', '""', code_part)
+                code_part = self._STRING_LITERAL_PATTERN.sub('""', code_part)
 
             # Find all matches
-            for match in member_var_pattern.finditer(code_part):
+            for match in self._MEMBER_VAR_PATTERN.finditer(code_part):
                 var_name = match.group(1)
 
                 # Skip common false positives

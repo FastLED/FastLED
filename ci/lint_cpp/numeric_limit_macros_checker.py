@@ -58,6 +58,48 @@ NUMERIC_LIMIT_MACROS = [
 class NumericLimitMacroChecker(FileContentChecker):
     """Checker class for numeric limit macro usage."""
 
+    # Pre-compiled regex matching any numeric limit macro as a whole word.
+    # Built once at class load time instead of per-file for performance.
+    _MACRO_REGEX = re.compile(r"\b(" + "|".join(NUMERIC_LIMIT_MACROS) + r")\b")
+
+    # Pre-computed type suggestion map (avoid rebuilding per call)
+    _TYPE_MAP: dict[str, str] = {
+        "UINT8_MAX": "fl::numeric_limits<uint8_t>::max()",
+        "UINT16_MAX": "fl::numeric_limits<uint16_t>::max()",
+        "UINT32_MAX": "fl::numeric_limits<uint32_t>::max()",
+        "UINT64_MAX": "fl::numeric_limits<uint64_t>::max()",
+        "INT8_MAX": "fl::numeric_limits<int8_t>::max()",
+        "INT8_MIN": "fl::numeric_limits<int8_t>::min()",
+        "INT16_MAX": "fl::numeric_limits<int16_t>::max()",
+        "INT16_MIN": "fl::numeric_limits<int16_t>::min()",
+        "INT32_MAX": "fl::numeric_limits<int32_t>::max()",
+        "INT32_MIN": "fl::numeric_limits<int32_t>::min()",
+        "INT64_MAX": "fl::numeric_limits<int64_t>::max()",
+        "INT64_MIN": "fl::numeric_limits<int64_t>::min()",
+        "SIZE_MAX": "fl::numeric_limits<size_t>::max()",
+        "UINTMAX_MAX": "fl::numeric_limits<uintmax_t>::max()",
+        "UINTPTR_MAX": "fl::numeric_limits<uintptr_t>::max()",
+        "INTMAX_MAX": "fl::numeric_limits<intmax_t>::max()",
+        "INTMAX_MIN": "fl::numeric_limits<intmax_t>::min()",
+        "INTPTR_MAX": "fl::numeric_limits<intptr_t>::max()",
+        "INTPTR_MIN": "fl::numeric_limits<intptr_t>::min()",
+        "UCHAR_MAX": "fl::numeric_limits<unsigned char>::max()",
+        "USHRT_MAX": "fl::numeric_limits<unsigned short>::max()",
+        "UINT_MAX": "fl::numeric_limits<unsigned int>::max()",
+        "ULONG_MAX": "fl::numeric_limits<unsigned long>::max()",
+        "ULLONG_MAX": "fl::numeric_limits<unsigned long long>::max()",
+        "CHAR_MAX": "fl::numeric_limits<char>::max()",
+        "CHAR_MIN": "fl::numeric_limits<char>::min()",
+        "SHRT_MAX": "fl::numeric_limits<short>::max()",
+        "SHRT_MIN": "fl::numeric_limits<short>::min()",
+        "INT_MAX": "fl::numeric_limits<int>::max()",
+        "INT_MIN": "fl::numeric_limits<int>::min()",
+        "LONG_MAX": "fl::numeric_limits<long>::max()",
+        "LONG_MIN": "fl::numeric_limits<long>::min()",
+        "LLONG_MAX": "fl::numeric_limits<long long>::max()",
+        "LLONG_MIN": "fl::numeric_limits<long long>::min()",
+    }
+
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
@@ -91,11 +133,6 @@ class NumericLimitMacroChecker(FileContentChecker):
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
 
-        # Create a regex pattern to match any of the macros as whole words
-        # Use word boundaries to avoid matching UINT32_MAX_VALUE or similar
-        macro_pattern = r"\b(" + "|".join(NUMERIC_LIMIT_MACROS) + r")\b"
-        macro_regex = re.compile(macro_pattern)
-
         # Check each line
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
@@ -123,7 +160,7 @@ class NumericLimitMacroChecker(FileContentChecker):
             if "// okay numeric limit macro" in line:
                 continue
 
-            match = macro_regex.search(code_part)
+            match = self._MACRO_REGEX.search(code_part)
             if match:
                 macro_name = match.group(1)
                 # Determine the suggested fl::numeric_limits type
@@ -140,46 +177,7 @@ class NumericLimitMacroChecker(FileContentChecker):
 
     def _suggest_numeric_limits_type(self, macro_name: str) -> str:
         """Suggest the appropriate fl::numeric_limits<T> replacement for a macro."""
-        # Map common macros to their type equivalents
-        type_map = {
-            "UINT8_MAX": "fl::numeric_limits<uint8_t>::max()",
-            "UINT16_MAX": "fl::numeric_limits<uint16_t>::max()",
-            "UINT32_MAX": "fl::numeric_limits<uint32_t>::max()",
-            "UINT64_MAX": "fl::numeric_limits<uint64_t>::max()",
-            "INT8_MAX": "fl::numeric_limits<int8_t>::max()",
-            "INT8_MIN": "fl::numeric_limits<int8_t>::min()",
-            "INT16_MAX": "fl::numeric_limits<int16_t>::max()",
-            "INT16_MIN": "fl::numeric_limits<int16_t>::min()",
-            "INT32_MAX": "fl::numeric_limits<int32_t>::max()",
-            "INT32_MIN": "fl::numeric_limits<int32_t>::min()",
-            "INT64_MAX": "fl::numeric_limits<int64_t>::max()",
-            "INT64_MIN": "fl::numeric_limits<int64_t>::min()",
-            "SIZE_MAX": "fl::numeric_limits<size_t>::max()",
-            "UINTMAX_MAX": "fl::numeric_limits<uintmax_t>::max()",
-            "UINTPTR_MAX": "fl::numeric_limits<uintptr_t>::max()",
-            "INTMAX_MAX": "fl::numeric_limits<intmax_t>::max()",
-            "INTMAX_MIN": "fl::numeric_limits<intmax_t>::min()",
-            "INTPTR_MAX": "fl::numeric_limits<intptr_t>::max()",
-            "INTPTR_MIN": "fl::numeric_limits<intptr_t>::min()",
-            # Legacy limits.h macros
-            "UCHAR_MAX": "fl::numeric_limits<unsigned char>::max()",
-            "USHRT_MAX": "fl::numeric_limits<unsigned short>::max()",
-            "UINT_MAX": "fl::numeric_limits<unsigned int>::max()",
-            "ULONG_MAX": "fl::numeric_limits<unsigned long>::max()",
-            "ULLONG_MAX": "fl::numeric_limits<unsigned long long>::max()",
-            "CHAR_MAX": "fl::numeric_limits<char>::max()",
-            "CHAR_MIN": "fl::numeric_limits<char>::min()",
-            "SHRT_MAX": "fl::numeric_limits<short>::max()",
-            "SHRT_MIN": "fl::numeric_limits<short>::min()",
-            "INT_MAX": "fl::numeric_limits<int>::max()",
-            "INT_MIN": "fl::numeric_limits<int>::min()",
-            "LONG_MAX": "fl::numeric_limits<long>::max()",
-            "LONG_MIN": "fl::numeric_limits<long>::min()",
-            "LLONG_MAX": "fl::numeric_limits<long long>::max()",
-            "LLONG_MIN": "fl::numeric_limits<long long>::min()",
-        }
-
-        return type_map.get(macro_name, "fl::numeric_limits<T>::max/min()")
+        return self._TYPE_MAP.get(macro_name, "fl::numeric_limits<T>::max/min()")
 
 
 def main() -> None:

@@ -10,6 +10,9 @@ from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 class CppIncludeChecker(FileContentChecker):
     """Checker class for .cpp file includes."""
 
+    # Pre-compiled regex for #include with .cpp extension (class-level)
+    _CPP_INCLUDE_PATTERN = re.compile(r'#include\s+[<"]([^>"]+\.cpp)[>"]')
+
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
@@ -29,10 +32,6 @@ class CppIncludeChecker(FileContentChecker):
         """Check file content for .cpp file includes."""
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
-
-        # Regex pattern to match #include "..." or #include <...> with .cpp extension
-        # Matches both quotes and angle brackets
-        cpp_include_pattern = re.compile(r'#include\s+[<"]([^>"]+\.cpp)[>"]')
 
         # Check each line for .cpp includes
         for line_number, line in enumerate(file_content.lines, 1):
@@ -57,7 +56,7 @@ class CppIncludeChecker(FileContentChecker):
             code_part = line.split("//")[0]
 
             # Check for .cpp includes in code portion
-            match = cpp_include_pattern.search(code_part)
+            match = self._CPP_INCLUDE_PATTERN.search(code_part)
             if match:
                 cpp_file = match.group(1)
                 violations.append((line_number, f'#include "{cpp_file}"'))

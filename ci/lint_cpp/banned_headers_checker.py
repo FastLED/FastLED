@@ -435,6 +435,16 @@ class BannedHeadersChecker(FileContentChecker):
         self.strict_mode = strict_mode
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
+        # Pre-compile a single regex that matches any banned header in an #include.
+        # This replaces the O(H) per-line string search with a single O(1) regex match,
+        # where H is the number of banned headers (~35).
+        if banned_headers_list:
+            escaped = [re.escape(h) for h in banned_headers_list]
+            pattern = r'#include\s+[<"](' + "|".join(escaped) + r')[>"]'
+            self._banned_header_regex: re.Pattern[str] | None = re.compile(pattern)
+        else:
+            self._banned_header_regex = None
+
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for banned headers."""
         # Check file extension
@@ -526,23 +536,16 @@ class BannedHeadersChecker(FileContentChecker):
         """
         return file_path.endswith(".cpp") or file_path.endswith(".cc")
 
+    # Pre-compiled regex for private libc++ headers (class-level, shared by all instances).
+    # Matches: #include "__anything" or #include <__anything>
+    # But NOT triple underscores (e.g., ___pixeltypes.h).
+    _PRIVATE_HEADER_PATTERN = re.compile(r'#include\s+["<](__[^_][^">]*)[">]')
+
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for banned headers and private libc++ headers."""
         violations: list[tuple[int, str]] = []
-
-        # Determine file type and if bypass is allowed
-        self._should_allow_bypass(file_content.path)
         file_ext = file_content.path.split(".")[-1]
-
-        # Pattern to detect private libc++ headers
-        # Matches: #include "__anything" or #include <__anything>
-        # But NOT triple underscores or more (e.g., ___pixeltypes.h)
-        # Examples:
-        #   #include "__algorithm/min.h"  ✓ Match
-        #   #include "__atomic/atomic.h"  ✓ Match
-        #   #include <__algorithm/min.h>  ✓ Match
-        #   #include "___pixeltypes.h"    ✗ No match (triple underscore)
-        private_header_pattern = re.compile(r'#include\s+["<](__[^_][^">]*)[">]')
+        banned_regex = self._banned_header_regex
 
         # Check each line for banned headers and private libc++ headers
         for line_number, line in enumerate(file_content.lines, 1):
@@ -552,7 +555,7 @@ class BannedHeadersChecker(FileContentChecker):
                 continue
 
             # Check for private libc++ headers (these are always banned)
-            match = private_header_pattern.search(line)
+            match = self._PRIVATE_HEADER_PATTERN.search(line)
             if match:
                 header_name = match.group(1)
                 public_header = self._get_private_libcpp_header_recommendation(
@@ -567,16 +570,19 @@ class BannedHeadersChecker(FileContentChecker):
                     )
                 )
 
-            # Check for regular banned headers (only if list is not empty)
-            if len(self.banned_headers_list) == 0:
+            # Check for regular banned headers using pre-compiled regex (single match
+            # instead of iterating through all ~35 banned headers per line)
+            if banned_regex is None:
                 continue
 
-            for header in self.banned_headers_list:
-                if f"#include <{header}>" in line or f'#include "{header}"' in line:
-                    # Check if this is an allowed exception
-                    if self._is_allowed_exception(file_content.path, header):
-                        continue
+            banned_match = banned_regex.search(line)
+            if banned_match:
+                header = banned_match.group(1)
 
+                # Check if this is an allowed exception
+                if self._is_allowed_exception(file_content.path, header):
+                    pass  # Exception granted
+                else:
                     # Check if bypass is allowed and present
                     has_bypass_comment = (
                         "// ok include" in line or "// OK include" in line

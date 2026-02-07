@@ -43,6 +43,20 @@ from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
 class StaticInHeaderChecker(FileContentChecker):
     """Checker for function-local static variables in header files."""
 
+    # Pre-compiled regexes (class-level to avoid re-compilation per file)
+    _INLINE_FUNC_PATTERN = re.compile(r"\w+\s*\([^)]*\)\s*\{")
+    _TEMPLATE_PATTERN = re.compile(r"^\s*template\s*<")
+    _STATIC_VAR_PATTERN = re.compile(
+        r"\bstatic\s+"  # "static" keyword
+        r"(?:const\s+)?"  # optional "const"
+        r"[\w:]+(?:<[^>]+>)?\s+"  # type (with optional template args)
+        r"\w+\s*"  # variable name
+        r"[=({]"  # followed by =, (, or {
+    )
+    _STATIC_FUNC_PATTERN = re.compile(
+        r"static\s+[\w:]+(?:<[^>]+>)?\s+\w+\s*\([^)]*\)\s*\{"
+    )
+
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
@@ -70,13 +84,6 @@ class StaticInHeaderChecker(FileContentChecker):
         in_function = False  # Are we inside a function implementation?
         in_template_function = False  # Are we inside a template function?
 
-        # Pattern to detect inline function implementations with bodies
-        # We specifically look for getAll() pattern which is the problem case
-        inline_func_pattern = re.compile(r"\w+\s*\([^)]*\)\s*\{")
-
-        # Pattern to detect template declarations (template<...>)
-        template_pattern = re.compile(r"^\s*template\s*<")
-
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
 
@@ -103,11 +110,11 @@ class StaticInHeaderChecker(FileContentChecker):
             close_braces = code_part.count("}")
 
             # Detect template declaration - next function will be a template function
-            if template_pattern.search(code_part):
+            if self._TEMPLATE_PATTERN.search(code_part):
                 in_template_function = True
 
             # Detect entering a function body (inline implementation)
-            if inline_func_pattern.search(code_part) and "{" in code_part:
+            if self._INLINE_FUNC_PATTERN.search(code_part) and "{" in code_part:
                 in_function = True
                 brace_depth = open_braces - close_braces
             elif in_function:
@@ -120,29 +127,12 @@ class StaticInHeaderChecker(FileContentChecker):
                 brace_depth = 0
 
             # Look for "static" keyword followed by variable declaration inside functions
-            # Specifically targeting patterns like: static vector<Type> var = ...
-            # or: static Type var = ...
             # But NOT: static Type func() { ... } (static member functions)
-            # EXCEPTION: Allow statics inside template functions (they are instantiated per template instance)
+            # EXCEPTION: Allow statics inside template functions
             if in_function and brace_depth > 0 and not in_template_function:
-                # Match: static <type> <identifier> = or ( or {
-                # But exclude lines that are just function calls to static methods
-                static_var_match = re.search(
-                    r"\bstatic\s+"  # "static" keyword
-                    r"(?:const\s+)?"  # optional "const"
-                    r"[\w:]+(?:<[^>]+>)?\s+"  # type (with optional template args)
-                    r"\w+\s*"  # variable name
-                    r"[=({]",  # followed by =, (, or {
-                    code_part,
-                )
-
-                if static_var_match:
-                    # Skip if line contains function definition pattern (to avoid false positives)
-                    # e.g., "static void foo() {" or "static fl::size foo() {" should not be flagged
-                    # Updated to handle namespace-qualified types like fl::size
-                    if not re.search(
-                        r"static\s+[\w:]+(?:<[^>]+>)?\s+\w+\s*\([^)]*\)\s*\{", code_part
-                    ):
+                if self._STATIC_VAR_PATTERN.search(code_part):
+                    # Skip if line contains function definition pattern (false positive)
+                    if not self._STATIC_FUNC_PATTERN.search(code_part):
                         # Allow suppression
                         if "// okay static in header" not in line:
                             violations.append((line_number, stripped))

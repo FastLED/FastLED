@@ -200,40 +200,62 @@ if [ "$JS_ONLY" = false ]; then
         echo "-------------------------------"
         echo "Running unified C++ checker (all content-based linters in one pass)"
         if uv run python ci/lint_cpp/run_all_checkers.py; then
-            # Unity build enforcement (src/fl/ only _build.cpp allowed)
+            # Run the three standalone checks in parallel for speed.
+            # Each is independent and takes 0.5-1.5s; parallel saves ~2s.
             echo ""
-            echo "Running unity build checker (src/fl/ must use .cpp.hpp files)"
-            if ! uv run python ci/lint_cpp/test_no_cpp_in_fl.py; then
-                # Invalidate cache on failure so it reruns next time
+            echo "Running standalone C++ checks in parallel..."
+
+            # Create temp files for capturing output
+            TMPDIR_LINT=$(mktemp -d)
+            trap "rm -rf $TMPDIR_LINT" EXIT
+
+            # Launch all three checks in background
+            uv run python ci/lint_cpp/test_no_cpp_in_fl.py > "$TMPDIR_LINT/no_cpp.out" 2>&1 &
+            PID_NO_CPP=$!
+
+            uv run python ci/lint_cpp/test_unity_build.py > "$TMPDIR_LINT/unity.out" 2>&1 &
+            PID_UNITY=$!
+
+            uv run python cpp_lint.py src/ > "$TMPDIR_LINT/cpp_lint.out" 2>&1 &
+            PID_CPP_LINT=$!
+
+            # Wait for all and collect exit codes
+            FAIL=0
+
+            wait $PID_NO_CPP
+            RC_NO_CPP=$?
+            cat "$TMPDIR_LINT/no_cpp.out"
+            if [ $RC_NO_CPP -ne 0 ]; then
                 uv run python ci/cpp_lint_cache.py failure
                 echo "❌ Unity build check failed"
-                exit 1
+                FAIL=1
             fi
 
-            # Unity build completeness (all .cpp.hpp in _build.hpp)
-            echo ""
-            echo "Running unity build completeness checker (all .cpp.hpp must be in _build.hpp)"
-            if ! uv run python ci/lint_cpp/test_unity_build.py; then
-                # Invalidate cache on failure so it reruns next time
+            wait $PID_UNITY
+            RC_UNITY=$?
+            cat "$TMPDIR_LINT/unity.out"
+            if [ $RC_UNITY -ne 0 ]; then
                 uv run python ci/cpp_lint_cache.py failure
                 echo "❌ Unity build completeness check failed"
+                FAIL=1
+            fi
+
+            wait $PID_CPP_LINT
+            RC_CPP_LINT=$?
+            cat "$TMPDIR_LINT/cpp_lint.out"
+            if [ $RC_CPP_LINT -ne 0 ]; then
+                uv run python ci/cpp_lint_cache.py failure
+                echo "❌ cpp_lint.py failed: Found relative includes in src/"
+                FAIL=1
+            fi
+
+            if [ $FAIL -ne 0 ]; then
                 exit 1
             fi
 
-            # Check for relative includes (paths with "..")
-            # Only enforce strict no-relative-includes rule for src/, not examples/
-            echo ""
-            echo "Running cpp_lint.py (relative includes check for src/ only)"
-            if uv run python cpp_lint.py src/; then
-                # Mark C++ linting as successful
-                uv run python ci/cpp_lint_cache.py success
-                echo "✅ C++ linting passed"
-            else
-                # Invalidate cache on failure so it reruns next time
-                uv run python ci/cpp_lint_cache.py failure
-                echo "❌ cpp_lint.py failed: Found relative includes in src/"
-                exit 1
-            fi
+            # Mark C++ linting as successful
+            uv run python ci/cpp_lint_cache.py success
+            echo "✅ C++ linting passed"
         else
             # Invalidate cache on failure so it reruns next time
             uv run python ci/cpp_lint_cache.py failure

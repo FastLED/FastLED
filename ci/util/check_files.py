@@ -148,10 +148,34 @@ class FileContentChecker(ABC):
 
 
 class MultiCheckerFileProcessor:
-    """Processor that can run multiple checkers on files."""
+    """Processor that can run multiple checkers on files.
+
+    Caches file content across process_files_with_checkers() calls so that
+    files read in one scope are not re-read when processed in another scope.
+    """
 
     def __init__(self):
-        pass
+        self._file_cache: dict[str, FileContent] = {}
+
+    def _get_file_content(self, file_path: str) -> FileContent:
+        """Read file content, using cache to avoid redundant I/O.
+
+        Args:
+            file_path: Path to the file to read
+
+        Returns:
+            Cached or freshly-read FileContent object
+
+        Raises:
+            OSError: If the file cannot be read
+        """
+        if file_path not in self._file_cache:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            self._file_cache[file_path] = FileContent(
+                path=file_path, content=content, lines=content.splitlines()
+            )
+        return self._file_cache[file_path]
 
     def process_files_with_checkers(
         self, file_paths: list[str], checkers: list[FileContentChecker]
@@ -180,16 +204,10 @@ class MultiCheckerFileProcessor:
                 if checker.should_process_file(file_path)
             ]
 
-            # If any checker is interested, read the file once
+            # If any checker is interested, read the file once (or use cache)
             if interested_checkers:
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-
-                    # Create FileContent object with lines split
-                    file_content = FileContent(
-                        path=file_path, content=content, lines=content.splitlines()
-                    )
+                    file_content = self._get_file_content(file_path)
 
                     # Pass the file content to all interested checkers
                     for checker in interested_checkers:
