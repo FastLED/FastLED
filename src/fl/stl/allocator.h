@@ -1,5 +1,6 @@
 #pragma once
 
+#include "platforms/is_platform.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/type_traits.h"
@@ -83,7 +84,7 @@ void PSRamDeallocate(void *ptr);
 void* Malloc(fl::size size);
 void Free(void *ptr);
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 // ESP32-specific memory allocation functions for RMT buffer pooling
 void* InternalAlloc(fl::size size);      // MALLOC_CAP_INTERNAL - fast DRAM
 void* InternalRealloc(void* ptr, fl::size size);  // Realloc for DRAM

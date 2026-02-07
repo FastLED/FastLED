@@ -1,4 +1,6 @@
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ESP8266)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP8266)
 
 #include "fastled_esp8266_uart.h"
 namespace fl {
@@ -12,4 +14,4 @@ template class UARTController_ESP8266<RBG>;
 template class UARTController_ESP8266<GBR>;
 template class UARTController_ESP8266<BGR>;
 }  // namespace fl
-#endif // ARDUINO_ARCH_ESP8266 || ESP8266
+#endif // FL_IS_ESP8266

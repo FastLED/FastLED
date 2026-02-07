@@ -1,5 +1,6 @@
 
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+#ifdef FL_IS_WASM
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript FILE SYSTEM BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
@@ -336,4 +337,4 @@ namespace fl {
 FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_shared<FsImplWasm>(); }
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

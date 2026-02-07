@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 #include "platforms/wasm/ui_audio_wasm.h"
 #include "platforms/wasm/audio_input_wasm.hpp"
@@ -96,4 +98,4 @@ void WasmAudioImpl::setGroup(const fl::string& groupName) {
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

@@ -5,7 +5,8 @@
 /// It initializes the channel bus manager and SPI system on first call.
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/init_esp32.h"
 #include "platforms/esp/32/init_channel_engine.h"
@@ -45,4 +46,4 @@ void init() {
 } // namespace platforms
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

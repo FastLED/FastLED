@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "fl/stl/stdint.h"
+#include "platforms/is_platform.h"
 
 namespace fl {
 
@@ -119,7 +120,7 @@ namespace detail {
 }
 
 // Only declare PROGMEM functions on platforms that support them
-#if defined(ARDUINO) && defined(__AVR__)
+#if defined(ARDUINO) && defined(FL_IS_AVR)
 
 // fl::strlen_P - strlen for PROGMEM strings
 size_t strlen_P(detail::pgm_p s) noexcept;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/arm/teensy/is_teensy.h"
+
 /// @file platforms/arm/teensy/teensy4_common/clockless.h
 /// @brief Teensy 4.0/4.1 platform-specific clockless controller dispatch
 ///
@@ -9,7 +11,7 @@
 /// Default: Uses ObjectFLED driver for high-performance parallel output (up to 42 strips)
 /// Fallback: Traditional bit-banging controller available in clockless_arm_mxrt1062.h
 
-#if defined(__IMXRT1062__)  // Teensy 4.0/4.1
+#if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1
 
 // Include ObjectFLED-based proxy controller
 #include "clockless_objectfled.h"
@@ -25,4 +27,4 @@ using ClocklessController = ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PI
 
 }  // namespace fl
 
-#endif  // __IMXRT1062__
+#endif  // FL_IS_TEENSY_4X

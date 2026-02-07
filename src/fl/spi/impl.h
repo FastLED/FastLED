@@ -4,6 +4,7 @@
 /// @brief Private implementation details for fl::spi::Device
 /// @note This header is for internal use only (pImpl pattern)
 
+#include "platforms/is_platform.h"
 #include "fl/spi.h"
 #include "platforms/shared/spi_bus_manager.h"  // ok platform headers
 #include "platforms/shared/spi_types.h"  // ok platform headers
@@ -69,7 +70,7 @@ struct Transaction::Impl {
     uint32_t timeout_ms;                ///< Timeout value in milliseconds
 
     // Platform-specific completion tracking
-#ifdef ESP32
+#ifdef FL_IS_ESP32
     void* notify_task;                  ///< FreeRTOS task handle (TaskHandle_t)
 #endif
 
@@ -80,7 +81,7 @@ struct Transaction::Impl {
         , cancelled(false)
         , result(fl::nullopt)  // nullopt = success
         , timeout_ms((fl::numeric_limits<uint32_t>::max)())
-#ifdef ESP32
+#ifdef FL_IS_ESP32
         , notify_task(nullptr)
 #endif
     {}

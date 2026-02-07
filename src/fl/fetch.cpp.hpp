@@ -7,7 +7,7 @@
 #include "fl/async.h"
 #include "fl/stl/unique_ptr.h"  // For make_unique
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 #include <emscripten.h>
 #include <emscripten/val.h>
 #endif
@@ -17,7 +17,7 @@
 
 namespace fl {
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 // ========== WASM Implementation using JavaScript fetch ==========
 
 

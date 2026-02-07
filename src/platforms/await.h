@@ -81,7 +81,7 @@ fl::result<T> await(fl::promise<T> promise) {
         : fl::result<T>(promise.error());
 }
 
-#endif // ESP32
+#endif // FL_IS_ESP32
 
 // ============================================================================
 // Host/Stub: True Blocking Await using fl::condition_variable

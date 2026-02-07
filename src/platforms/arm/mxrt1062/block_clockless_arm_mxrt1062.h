@@ -2,10 +2,13 @@
 #define __INC_BLOCK_CLOCKLESS_ARM_MXRT1062_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "is_teensy.h"
+
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
 // See clockless.h for detailed info on how the template parameters are used.
-#if defined(FASTLED_TEENSY4)
+
+#if defined(FL_IS_TEENSY_4X)
 
 #define __FL_T4_MASK ((1<<(LANES))-1)
 template <uint8_t LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>

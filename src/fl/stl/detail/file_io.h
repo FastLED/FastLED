@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/int.h"
+#include "platforms/is_platform.h"
 #include "fl/stl/cerrno.h"    // For fl::get_errno()
 #include "fl/stl/cstring.h"   // For fl::strerror()
 
@@ -95,7 +96,7 @@ int fflush(FILE* file);
 // On some platforms (e.g., AVR), feof, ferror, and clearerr are macros
 // Save them only if they exist, undefine temporarily to declare our functions
 // Only needed on platforms where they are actually macros (AVR)
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 #ifdef feof
 #define FL_MACRO_NEEDS_RESTORE_feof
 #pragma push_macro("feof")
@@ -111,12 +112,12 @@ int fflush(FILE* file);
 #pragma push_macro("clearerr")
 #undef clearerr
 #endif
-#endif // __AVR__
+#endif // FL_IS_AVR
 
 /// Check for end-of-file
 /// @param file File handle
 /// @return Non-zero if EOF, 0 otherwise
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 int (feof)(FILE* file);
 #else
 int feof(FILE* file);
@@ -125,7 +126,7 @@ int feof(FILE* file);
 /// Check for file error
 /// @param file File handle
 /// @return Non-zero if error, 0 otherwise
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 int (ferror)(FILE* file);
 #else
 int ferror(FILE* file);
@@ -133,7 +134,7 @@ int ferror(FILE* file);
 
 /// Clear file error indicators
 /// @param file File handle
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 void (clearerr)(FILE* file);
 #else
 void clearerr(FILE* file);
@@ -190,7 +191,7 @@ inline int fflush(FILE* file) {
     return ::fflush(static_cast<::FILE*>(file));
 }
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline int (feof)(FILE* file) {
     return ::feof(static_cast<::FILE*>(file));
 }
@@ -200,7 +201,7 @@ inline int feof(FILE* file) {
 }
 #endif
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline int (ferror)(FILE* file) {
     return ::ferror(static_cast<::FILE*>(file));
 }
@@ -210,7 +211,7 @@ inline int ferror(FILE* file) {
 }
 #endif
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline void (clearerr)(FILE* file) {
     ::clearerr(static_cast<::FILE*>(file));
 }
@@ -268,7 +269,7 @@ inline int fflush(FILE* /*file*/) {
     return -1;
 }
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline int (feof)(FILE* /*file*/) {
     return 0;
 }
@@ -278,7 +279,7 @@ inline int feof(FILE* /*file*/) {
 }
 #endif
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline int (ferror)(FILE* /*file*/) {
     return 1;
 }
@@ -288,7 +289,7 @@ inline int ferror(FILE* /*file*/) {
 }
 #endif
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 inline void (clearerr)(FILE* /*file*/) {
 }
 #else

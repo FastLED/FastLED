@@ -1,6 +1,7 @@
 // ESP32 USB-Serial JTAG Driver Implementation - Full Feature Support
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "usb_serial_jtag_esp32.h"
 #include "fl/stl/assert.h"
@@ -11,7 +12,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_rom_uart.h"
 
 // USB-Serial JTAG driver is only available on ESP32-S3, C3, C6, H2 with IDF 4.4+
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || \
+#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
 #define FL_HAS_USB_SERIAL_JTAG 1
@@ -286,4 +287,4 @@ bool UsbSerialJtagEsp32::isConnected() const {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

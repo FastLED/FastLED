@@ -11,10 +11,9 @@
 
 #pragma once
 
-#if defined(__SAMD21__) || defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || \
-    defined(__SAMD21J18A__) || defined(__SAMD51__) || defined(__SAMD51G19A__) || \
-    defined(__SAMD51J19A__) || defined(__SAMD51J20A__) || defined(__SAMD51P19A__) || \
-    defined(__SAMD51P20A__) || defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
@@ -63,11 +62,11 @@ struct samd_isr_handle_data {
 constexpr uint8_t SAMD_PLATFORM_ID = 7;
 
 // Timer configuration
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
 // SAMD21: TC3, TC4, TC5 (sometimes TC6, TC7)
 constexpr uint8_t MIN_TIMER_INDEX = 3;
 constexpr uint8_t MAX_TIMER_INDEX = 5;  // Conservative, some boards have TC6/TC7
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
 // SAMD51: TC0-TC7
 constexpr uint8_t MIN_TIMER_INDEX = 0;
 constexpr uint8_t MAX_TIMER_INDEX = 7;
@@ -224,12 +223,12 @@ static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
 
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     // SAMD21 has 4 priority levels (0-3)
     // Map ISR 1-7 to NVIC 3-0
     if (isr_priority > 4) isr_priority = 4;
     return 4 - isr_priority;
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     // SAMD51 has 8 priority levels (0-7)
     // Map ISR 1-7 to NVIC 7-0
     if (isr_priority > 7) isr_priority = 7;
@@ -243,9 +242,9 @@ static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
 
 // Check if timer is syncing (required for SAMD register writes)
 static bool tc_is_syncing(Tc* tc) {
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     return tc->COUNT16.STATUS.reg & TC_STATUS_SYNCBUSY;
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     return tc->COUNT16.SYNCBUSY.reg != 0;
 #else
     return tc->COUNT16.STATUS.reg & TC_STATUS_SYNCBUSY;
@@ -405,7 +404,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     timer_handles[timer_idx] = handle_data;
 
     // Enable clock for timer
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     // SAMD21: Use GCLK to route clock to TC peripheral
     // Most SAMD21 boards use GCLK_CLKCTRL_ID_TCC2_TC3 for TC3/TC4/TC5
     uint16_t gclk_id;
@@ -419,7 +418,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     while (GCLK->STATUS.bit.SYNCBUSY) {
         // Wait for sync
     }
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     // SAMD51: Use GCLK to route clock to TC peripheral
     GCLK->PCHCTRL[timer_idx + TC0_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0 | GCLK_PCHCTRL_CHEN;
     while (!(GCLK->PCHCTRL[timer_idx + TC0_GCLK_ID].reg & GCLK_PCHCTRL_CHEN)) {
@@ -435,11 +434,11 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     tc_wait_sync(timer);
 
     // Set match frequency waveform mode
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     // SAMD21: Waveform generation mode is part of CTRLA register
     timer->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
     tc_wait_sync(timer);
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     // SAMD51: Separate WAVE register
     timer->COUNT16.WAVE.reg = TC_WAVE_WAVEGEN_MFRQ;
     tc_wait_sync(timer);
@@ -544,12 +543,12 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     eic_handles[eic_ch] = handle_data;
 
     // Enable EIC clock
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     GCLK->CLKCTRL.reg = (uint16_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID_EIC);
     while (GCLK->STATUS.bit.SYNCBUSY) {
         // Wait for sync
     }
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     GCLK->PCHCTRL[EIC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0 | GCLK_PCHCTRL_CHEN;
     while (!(GCLK->PCHCTRL[EIC_GCLK_ID].reg & GCLK_PCHCTRL_CHEN)) {
         // Wait for enable
@@ -572,7 +571,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     }
 
     // Enable EIC if not already enabled
-#if defined(__SAMD21__)
+#if defined(FL_IS_SAMD21)
     // SAMD21 uses CTRL instead of CTRLA, and STATUS.SYNCBUSY instead of SYNCBUSY
     if (!EIC->CTRL.bit.ENABLE) {
         EIC->CTRL.bit.ENABLE = 0;
@@ -586,7 +585,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
             // Wait for sync
         }
     }
-#elif defined(__SAMD51__)
+#elif defined(FL_IS_SAMD51)
     // SAMD51 uses CTRLA and dedicated SYNCBUSY register
     if (!EIC->CTRLA.bit.ENABLE) {
         EIC->CTRLA.bit.ENABLE = 0;
@@ -762,9 +761,9 @@ const char* get_error_string(int error_code) {
 }
 
 const char* get_platform_name() {
-#if defined(__SAMD51__)
+#if defined(FL_IS_SAMD51)
     return "SAMD51";
-#elif defined(__SAMD21__)
+#elif defined(FL_IS_SAMD21)
     return "SAMD21";
 #else
     return "SAMD";
@@ -772,9 +771,9 @@ const char* get_platform_name() {
 }
 
 uint32_t get_max_timer_frequency() {
-#if defined(__SAMD51__)
+#if defined(FL_IS_SAMD51)
     return 120000000;  // 120 MHz (SAMD51 max clock)
-#elif defined(__SAMD21__)
+#elif defined(FL_IS_SAMD21)
     return 48000000;   // 48 MHz (SAMD21 max clock)
 #else
     return 48000000;   // Conservative default
@@ -786,9 +785,9 @@ uint32_t get_min_timer_frequency() {
 }
 
 uint8_t get_max_priority() {
-#if defined(__SAMD51__)
+#if defined(FL_IS_SAMD51)
     return 7;  // SAMD51 has 8 levels (0-7)
-#elif defined(__SAMD21__)
+#elif defined(FL_IS_SAMD21)
     return 3;  // SAMD21 has 4 levels (0-3)
 #else
     return 3;  // Conservative default

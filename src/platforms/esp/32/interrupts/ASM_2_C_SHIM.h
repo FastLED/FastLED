@@ -48,7 +48,9 @@
  *     See: src/platforms/esp/32/interrupts/LOOP.md
  */
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 FL_EXTERN_C_BEGIN
 
@@ -56,13 +58,13 @@ FL_EXTERN_C_BEGIN
 // ARCHITECTURE DETECTION AND VALIDATION
 //=============================================================================
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
     #define FASTLED_XTENSA_LX6 1
     #define FASTLED_NMI_ARCH_NAME "Xtensa LX6"
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#elif defined(FL_IS_ESP_32S2)
     #define FASTLED_XTENSA_LX7 1
     #define FASTLED_NMI_ARCH_NAME "Xtensa LX7"
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(FL_IS_ESP_32S3)
     #define FASTLED_XTENSA_LX7 1
     #define FASTLED_NMI_ARCH_NAME "Xtensa LX7"
 #else
@@ -70,7 +72,7 @@ FL_EXTERN_C_BEGIN
 #endif
 
 // Verify this is not RISC-V (C3/C6/H2)
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
     #error "ASM_2_C_SHIM.h: RISC-V platforms (ESP32-C3/C6/H2) not supported. Use RISC-V-specific interrupt handling."
 #endif
 
@@ -423,13 +425,13 @@ FL_EXTERN_C_BEGIN
 
 FL_EXTERN_C_END
 
-#endif // ESP32
+#endif // FL_IS_ESP32
 
 //=============================================================================
 // COMPILATION GUARDS AND ERROR MESSAGES
 //=============================================================================
 
-#ifndef ESP32
+#ifndef FL_IS_ESP32
     // If not ESP32, provide helpful error message
     #warning "ASM_2_C_SHIM.h: This file is only for ESP32 Xtensa platforms. Macros will not be available."
 #endif

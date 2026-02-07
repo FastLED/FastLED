@@ -1,10 +1,11 @@
 
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include "fl/has_include.h"
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
 
 #if !FL_HAS_INCLUDE("esp_memory_utils.h")
 #warning                                                                       \
@@ -196,4 +197,4 @@ InternalI2SDriver *InternalI2SDriver::create() {
 
 #endif // FL_HAS_INCLUDE("esp_memory_utils.h")
 
-#endif // ESP32
+#endif // FL_IS_ESP32

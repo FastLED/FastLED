@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/is_platform.h"
+
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x
 #define FL_STRINGIFY(x) FL_STRINGIFY2(x)
@@ -78,7 +80,7 @@
   // GCC doesn't have shorten-64-to-32 warning, use no-op
   #define FL_DISABLE_WARNING_SHORTEN_64_TO_32
   // volatile warning requires GCC >= 10.0 (added in GCC 10)
-  #if defined(__AVR__) || ((__GNUC__*100 + __GNUC_MINOR__) < 1000)
+  #if defined(FL_IS_AVR) || ((__GNUC__*100 + __GNUC_MINOR__) < 1000)
     #define FL_DISABLE_WARNING_VOLATILE
   #else
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)
@@ -245,7 +247,7 @@
 // Usage: FL_UNROLL(8) for (int i = 0; i < n; i++) { ... }
 // Note: Some compilers (e.g., AVR-GCC, older GCC versions) may not support
 // this pragma and will emit warnings. The macro expands to nothing on unsupported compilers.
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
   // AVR-GCC does not support #pragma GCC unroll
   #define FL_UNROLL(N)
 #elif defined(__GNUC__) && !defined(__clang__)
@@ -283,7 +285,7 @@
 //   - Functions containing multiple divisions (AVR has no hardware divide)
 //   - Template functions with many intermediate variables
 //   - Functions called from multiple instantiation sites with LTO enabled
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
   #define FL_NO_INLINE_IF_AVR __attribute__((noinline))
 #else
   #define FL_NO_INLINE_IF_AVR
@@ -304,7 +306,7 @@
 // Prevent linker from discarding symbols (functions/variables)
 // Used to ensure static constructors and other "unused" symbols are retained
 #ifndef FL_KEEP_ALIVE
-  #if defined(__EMSCRIPTEN__)
+  #if defined(FL_IS_WASM)
     // Emscripten: Use EMSCRIPTEN_KEEPALIVE to export symbols to JavaScript
     #include <emscripten.h>
     #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE

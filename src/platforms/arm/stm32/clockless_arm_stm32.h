@@ -5,6 +5,7 @@
 #include "fastled_delay.h"
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
 #include "platforms/arm/stm32/core_detection.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 // Get CMSIS DWT/CoreDebug registers from framework or fallback
 #if __has_include("stm32_def.h")
@@ -21,7 +22,7 @@ namespace fl {
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-#if defined(STM32F2XX)
+#if defined(FL_IS_STM32_F2)
 // The photon runs faster than the others
 #define ADJ 8
 #else

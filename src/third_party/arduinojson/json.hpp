@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "platforms/avr/is_avr.h"
 
 #ifndef FASTLED_JSON_GUARD
 #error "You must include json.h instead of json.hpp"
@@ -147,7 +148,7 @@
 #    define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
 #  endif
 #  ifndef ARDUINOJSON_ENABLE_PROGMEM
-#    ifdef __AVR__
+#    ifdef FL_IS_AVR
 #      define ARDUINOJSON_ENABLE_PROGMEM 1
 #    else
 #      define ARDUINOJSON_ENABLE_PROGMEM 0

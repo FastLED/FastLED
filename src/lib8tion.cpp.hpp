@@ -3,6 +3,7 @@
 /// designed for high-performance LED programming. 
 
 #include "fl/stl/stdint.h"
+#include "platforms/is_platform.h"
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
@@ -37,7 +38,7 @@ uint16_t rand16seed = RAND16_SEED;
 //  than standard avr-libc, at a cost of a few extra
 //  bytes of code.
 
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
 extern "C" {
 //__attribute__ ((noinline))
 void * memset8 ( void * ptr, uint8_t val, uint16_t num )
@@ -133,7 +134,7 @@ void * memmove8 ( void * dst, const void* src, uint16_t num )
 
 } /* end extern "C" */
 
-#endif /* AVR */
+#endif /* FL_IS_AVR */
 
 
 

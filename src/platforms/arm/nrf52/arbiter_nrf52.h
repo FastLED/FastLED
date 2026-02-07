@@ -2,7 +2,9 @@
 #ifndef __INC_ARBITER_NRF52
 #define __INC_ARBITER_NRF52
 
-#if defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#if defined(FL_IS_NRF52)
 
 #include "led_sysdefs_arm_nrf52.h"
 
@@ -107,5 +109,5 @@ template <uint32_t _PWM_ID> IRQn_Type    const                            PWM_Ar
 template <uint32_t _PWM_ID> uint32_t                                      PWM_Arbiter<_PWM_ID>::s_PwmInUse  = 0;
 template <uint32_t _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = nullptr;
 
-#endif // NRF52_SERIES
+#endif // FL_IS_NRF52
 #endif // __INC_ARBITER_NRF52

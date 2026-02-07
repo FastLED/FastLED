@@ -12,7 +12,7 @@
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2
 // ESP32-S3: Use LCD_CAM peripheral instead (see lcd_driver_i80.h in FastLED)
 // ESP32-C3, C2, C5, C6, H2, P4: Have completely different I2S peripheral architecture (no parallel mode)
-#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 
 // Compatibility for ESP-IDF 3.3: heap_caps_aligned_alloc was added in IDF 4.1
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR <= 3
@@ -300,7 +300,7 @@ bool SpiHwI2SESP32::validate_pins(int clock_pin, const fl::vector<int>& data_pin
 uint8_t* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
     uint8_t* buffer = nullptr;
 
-#if CONFIG_IDF_TARGET_ESP32S3 || defined(ESP32S3)
+#if FL_IS_ESP_32S3 || defined(FL_IS_ESP_32S3)
     // ESP32-S3: EDMA supports PSRAM directly
     buffer = static_cast<uint8_t*>(heap_caps_aligned_alloc(
         4,  // 4-byte alignment for DMA
@@ -395,4 +395,4 @@ fl::vector<int> SpiHwI2SESP32::extract_data_pins(const Config& config) {
 
 } // namespace fl
 
-#endif // defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) etc.
+#endif // defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) etc.

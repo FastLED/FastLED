@@ -30,7 +30,7 @@
       // ESP-IDF 3.3 and older - audio input not supported
       #define FASTLED_HAS_AUDIO_INPUT 0
     #endif
-  #endif  // ESP32
+  #endif  // FL_IS_ESP32
 #endif
 
 // Default to 0 if not set

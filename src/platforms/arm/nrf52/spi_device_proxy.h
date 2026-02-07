@@ -25,7 +25,9 @@
 /// - GPIOTE for GPIO control via tasks
 /// - PPI to route TIMER events to GPIOTE tasks (hardware-level sync)
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+#include "is_nrf52.h"
+
+#if defined(FL_IS_NRF52)
 
 #include "fl/stl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
@@ -339,4 +341,4 @@ private:
 
 }  // namespace fl
 
-#endif  // NRF52 variants
+#endif  // FL_IS_NRF52

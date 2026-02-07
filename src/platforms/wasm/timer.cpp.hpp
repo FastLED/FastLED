@@ -1,5 +1,7 @@
 // ok no namespace fl
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript TIMING BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
@@ -115,4 +117,4 @@ EMSCRIPTEN_KEEPALIVE void yield() {
 }
 }
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

@@ -37,7 +37,7 @@ void esp8266_compile_tests() {
 #error "FASTLED_HAS_MILLIS should be defined for ESP8266"
 #endif
 }
-#endif // ESP8266
+#endif // FL_IS_ESP8266
 
 #ifdef ESP32
 void esp32_compile_tests() {
@@ -102,5 +102,5 @@ void esp32_compile_tests() {
     #endif
 #endif
 }
-#endif // ESP32
+#endif // FL_IS_ESP32
 }  // namespace fl

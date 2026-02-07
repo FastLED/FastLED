@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "fl/warn.h"
 #include "fl/audio_input.h"
 
@@ -8,7 +10,7 @@
 #include "platforms/esp/esp_version.h"
 
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
-    #if defined(CONFIG_IDF_TARGET_ESP32C2)
+    #if defined(FL_IS_ESP_32C2)
         #define FASTLED_ESP32_I2S_SUPPORTED 0
     #endif
 #endif

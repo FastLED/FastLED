@@ -1,7 +1,8 @@
 // ok no namespace fl
 #pragma once
 
-#if defined(__EMSCRIPTEN__)
+#include "platforms/wasm/is_wasm.h"
+#if defined(FL_IS_WASM)
 #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL)
 // Use channel-based controller for stub platform (mirrors ESP32 architecture)

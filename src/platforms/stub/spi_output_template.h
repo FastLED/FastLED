@@ -7,7 +7,9 @@
 #define __INC_PLATFORMS_STUB_SPI_OUTPUT_TEMPLATE_H
 
 #include "fl/int.h"
-#ifndef __EMSCRIPTEN__
+#include "platforms/wasm/is_wasm.h"
+
+#ifndef FL_IS_WASM
 #include "fastspi_stub_generic.h"
 #else
 #include "platforms/wasm/fastspi_wasm.h"

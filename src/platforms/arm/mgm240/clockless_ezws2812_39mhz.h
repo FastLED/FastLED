@@ -14,7 +14,8 @@
 #include "fl/fastpin.h"
 
 // Check if we're on the right platform
-#if !defined(ARDUINO_ARCH_SILABS)
+#include "platforms/arm/silabs/is_silabs.h"
+#if !defined(FL_IS_SILABS)
 #error "ezWS2812 GPIO 39MHz controller is only available for Silicon Labs MGM240/MG24 platforms"
 #endif
 namespace fl {

@@ -30,7 +30,8 @@
 
 #pragma once
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -96,4 +97,4 @@ protected:
 } // namespace fl
 
 #endif // FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#endif // ESP32
+#endif // FL_IS_ESP32

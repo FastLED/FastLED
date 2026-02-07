@@ -3,8 +3,9 @@
 
 // ok no namespace fl
 #include "platforms/cycle_type.h"
+#include "platforms/arm/rp/is_rp.h"
 
-#ifdef ARDUINO_ARCH_RP2040
+#ifdef FL_IS_RP2040
 #include "Arduino.h"  // Include Arduino.h here for busy_wait_at_least_cycles
 
 /// RP2040: Pico SDK provides busy_wait_at_least_cycles as a static inline in pico/platform.h
@@ -12,4 +13,4 @@
 void delay_cycles_pico(fl::u32 cycles) {
   busy_wait_at_least_cycles(cycles);
 }
-#endif  // ARDUINO_ARCH_RP2040
+#endif  // FL_IS_RP2040

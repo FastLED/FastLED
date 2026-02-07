@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // This file should only be included from isr_esp32.hpp (which does the version check)
 // Do not include this file directly - use isr_esp32.hpp instead
 
@@ -454,15 +456,15 @@ inline const char* get_error_string(int error_code) {
 }
 
 inline const char* get_platform_name() {
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
     return "ESP32 (IDF5)";
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#elif defined(FL_IS_ESP_32S2)
     return "ESP32-S2 (IDF5)";
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(FL_IS_ESP_32S3)
     return "ESP32-S3 (IDF5)";
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
     return "ESP32-C3 (IDF5)";
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#elif defined(FL_IS_ESP_32C6)
     return "ESP32-C6 (IDF5)";
 #else
     return "ESP32 (IDF5, unknown variant)";
@@ -478,7 +480,7 @@ inline uint32_t get_min_timer_frequency() {
 }
 
 inline uint8_t get_max_priority() {
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6)
     // RISC-V: Priority 1-7 (but 4-7 may have limitations)
     return 7;
 #else
@@ -488,7 +490,7 @@ inline uint8_t get_max_priority() {
 }
 
 inline bool requires_assembly_handler(uint8_t priority) {
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6)
     // RISC-V: All priority levels can use C handlers
     return false;
 #else

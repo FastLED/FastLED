@@ -6,13 +6,14 @@
 
 #pragma once
 
+#include "platforms/is_platform.h"
 #include "fl/compiler_control.h"
 #include "fl/unused.h"
 #include "fl/register.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 // Get rid of the endless volatile warnings in ESP32
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
@@ -39,7 +40,7 @@ struct ValidPinBase {
 /// Abstract class for "selectable" things
 class Selectable {
 public:
-	#ifndef __AVR__
+	#ifndef FL_IS_AVR
 	virtual ~Selectable() {}
 	#endif
 	virtual void select() = 0;      ///< Select this object

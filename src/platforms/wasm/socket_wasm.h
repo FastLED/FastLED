@@ -9,7 +9,9 @@
 // Minimal socket includes for function declarations
 // WASM provides some basic socket types but limited functionality
 #include <sys/types.h>    // For ssize_t, socklen_t if available
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
     #include <sys/socket.h>   // Basic socket definitions if available
     #include <netinet/in.h>   // For sockaddr_in 
     #include <arpa/inet.h>    // For inet_pton/ntop

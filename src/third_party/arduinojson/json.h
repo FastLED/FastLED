@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/wasm/is_wasm.h"
+
 // Arduino JSON may be included by the user, so we need to save the current state
 // of the macros and restore them after including the library
 #pragma push_macro("ARDUINO")
@@ -30,7 +32,7 @@
 #undef ARDUINOJSON_ENABLE_STD_STRING
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 #define ARDUINOJSON_ENABLE_STD_STRING 1
 #else
 #define ARDUINOJSON_ENABLE_STD_STRING 0

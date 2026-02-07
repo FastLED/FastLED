@@ -1,11 +1,12 @@
 /// @file lcd_rgb_peripheral_esp.cpp
 /// @brief ESP32-P4 LCD RGB peripheral implementation
 
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
 
 #include "lcd_rgb_peripheral_esp.h"
 #include "fl/singleton.h"
@@ -317,4 +318,4 @@ void LcdRgbPeripheralEsp::delay(uint32_t ms) {
 } // namespace fl
 
 #endif // CONFIG_IDF_TARGET_ESP32P4 && esp_lcd_panel_rgb.h
-#endif // ESP32
+#endif // FL_IS_ESP32

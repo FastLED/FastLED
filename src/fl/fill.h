@@ -184,7 +184,7 @@ void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
         sat88 += satdelta87;
         val88 += valdelta87;
     }
-#endif // defined(__AVR__)
+#endif // defined(FL_IS_AVR)
 }
 
 /// Fill a range of LEDs with a smooth HSV gradient between two HSV colors.

@@ -9,7 +9,9 @@
 // Only compile this file for ESP32-C3/C6 RISC-V platforms
 
 // ok no namespace fl
-#if defined(ESP32) && (defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6))
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32) && (defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6))
 
 #include "riscv.hpp"
 #include "esp_err.h"
@@ -225,4 +227,4 @@ void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) {
     (void)arg;
 }
 
-#endif // ESP32 && (ESP32-C3 || ESP32-C6)
+#endif // FL_IS_ESP32 && (ESP32-C3 || ESP32-C6)

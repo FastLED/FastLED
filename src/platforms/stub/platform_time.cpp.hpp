@@ -1,7 +1,9 @@
 #pragma once
 
 // Only compile for stub platform (exclude WASM which has its own implementation)
-#if defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+#include "platforms/wasm/is_wasm.h"
+
+#if defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 
 #include "platforms/time_platform.h"
 #include "fl/stl/thread.h"

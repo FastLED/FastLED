@@ -23,11 +23,9 @@
 /// - This implementation uses a simple lookup table approach
 /// - Board-specific mappings can be extended as needed
 
-#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || \
-    defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || \
-    defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || \
-    defined(__SAMD51P20A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "fl/pin.h"
 #include <sam.h>  // SAMD register definitions

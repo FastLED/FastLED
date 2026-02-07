@@ -2,7 +2,8 @@
 /// @brief Concrete no-op implementation of TaskCoroutineNull
 
 // Only compile this file when not using stub or ESP32 implementation
-#if !defined(FASTLED_STUB_IMPL) && !defined(ESP32)
+#include "platforms/is_platform.h"
+#if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32)
 
 #include "task_coroutine_null.h"
 
@@ -78,4 +79,4 @@ void ITaskCoroutine::exitCurrent() {
 } // namespace platforms
 } // namespace fl
 
-#endif // !defined(FASTLED_STUB_IMPL) && !defined(ESP32)
+#endif // !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32)

@@ -1,5 +1,7 @@
 
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
+#include "platforms/arm/rp/is_rp.h"
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
@@ -416,4 +418,4 @@ void RP2040_PIO_Parallel::endShowLeds() {
 
 }  // namespace fl
 
-#endif  // defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
+#endif  // defined(FL_IS_RP2040) || defined(FL_IS_RP2350)

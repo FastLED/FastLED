@@ -3,19 +3,19 @@
 
 // Includes must come before all namespace declarations
 #include "fastspi_types.h"
+#include "platforms/arm/sam/is_sam.h"
+#include "platforms/arm/samd/is_samd.h"
 
-#if defined(__SAM3X8E__)
+#if defined(FL_IS_SAM)
 #endif
 
-#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 #include <Arduino.h>
 #include <SPI.h>
 #include <wiring_private.h>
 #endif
 
-#if defined(__SAM3X8E__)
+#if defined(FL_IS_SAM)
 namespace fl {
 #define m_SPI ((Spi*)SPI0)
 
@@ -184,9 +184,7 @@ public:
 #endif
 
 // SAMD21/SAMD51 SERCOM-based SPI implementation
-#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 namespace fl {
 
@@ -232,13 +230,11 @@ public:
 		// - Feather M4: SERCOM1
 		// We rely on Arduino core's pin definitions
 
-		#if defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-		    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+		#if defined(FL_IS_SAMD51)
 		// SAMD51 - Arduino core typically uses SERCOM1 or specific board SERCOM
 		// Use the SPI peripheral that Arduino configured
 		m_SPI = &(::SPI);
-		#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || \
-		      defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
+		#elif defined(FL_IS_SAMD21)
 		// SAMD21 - Arduino core typically uses SERCOM4
 		m_SPI = &(::SPI);
 		#endif
@@ -381,6 +377,6 @@ public:
 };
 
 }  // namespace fl
-#endif  // SAMD21/SAMD51
+#endif  // FL_IS_SAMD21 || FL_IS_SAMD51
 
 #endif

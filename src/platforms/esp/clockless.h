@@ -11,7 +11,9 @@
 ///
 /// This keeps platform-specific #ifdef logic out of the main chipsets.h file.
 
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 // Include ESP32 driver availability checks
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -57,6 +59,6 @@ namespace fl {
 
 }  // namespace fl
 
-#elif defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
+#elif defined(FL_IS_ESP8266)
 
-#endif  // ESP32 || ARDUINO_ARCH_ESP32 || ESP8266 || ARDUINO_ARCH_ESP8266
+#endif  // FL_IS_ESP32 || FL_IS_ESP8266

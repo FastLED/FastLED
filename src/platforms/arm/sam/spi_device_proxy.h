@@ -15,9 +15,9 @@
 /// Note: Currently operates in single-SPI mode. Dual/Quad-SPI support requires
 /// additional hardware driver implementation and bus manager integration.
 
-#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "fl/stl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"

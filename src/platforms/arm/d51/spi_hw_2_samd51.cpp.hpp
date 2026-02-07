@@ -35,8 +35,9 @@
 /// - Implement dual-SERCOM synchronized mode for true dual-lane
 /// - Add interrupt-driven completion notification
 
-#if defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
-    defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD51)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
@@ -556,4 +557,4 @@ void SPIDualSAMD51::cleanup() {
 
 }  // namespace fl
 
-#endif  // __SAMD51G19A__ || __SAMD51J19A__ || ...
+#endif  // FL_IS_SAMD51

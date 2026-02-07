@@ -10,7 +10,8 @@
 
 #pragma once
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 //=============================================================================
 // ESP32 Memory Barriers
@@ -37,4 +38,4 @@
     "Unsupported architecture for ESP32 memory barrier (expected __XTENSA__ or __riscv)"
 #endif
 
-#endif // ESP32
+#endif // FL_IS_ESP32

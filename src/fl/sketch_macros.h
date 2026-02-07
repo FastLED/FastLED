@@ -6,7 +6,7 @@
 
 #include "platforms/is_platform.h"
 
-#if defined(__AVR__) \
+#if defined(FL_IS_AVR) \
   || defined(__AVR_ATtiny85__) \
   || defined(__AVR_ATtiny88__) \
   || defined(__AVR_ATmega32U4__) \
@@ -16,10 +16,10 @@
   || defined(FL_IS_TEENSY_30) \
   || defined(FL_IS_TEENSY_31) \
   || defined(FL_IS_TEENSY_32) \
-  || defined(__MK20DX128__) \
-  || defined(__MK20DX256__) \
-  || defined(STM32F1) \
-  || defined(ESP8266) \
+  || defined(FL_IS_TEENSY_30) \
+  || defined(FL_IS_TEENSY_3X) \
+  || defined(FL_IS_STM32_F1) \
+  || defined(FL_IS_ESP8266) \
   || defined(ARDUINO_ARCH_RENESAS_UNO) \
   || defined(ARDUINO_BLUEPILL_F103C8)
 #define SKETCH_HAS_LOTS_OF_MEMORY 0

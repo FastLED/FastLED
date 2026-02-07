@@ -6,15 +6,16 @@
 #include "fl/compiler_control.h"
 
 // Allow compilation on both ESP32 hardware and stub platforms (for testing)
-#if defined(ESP32) || defined(FASTLED_STUB_IMPL)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) || defined(FASTLED_STUB_IMPL)
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/feature_flags/enabled.h"
 #endif
 
 // On ESP32: Check FASTLED_RMT5 flag
 // On stub platforms: Always allow compilation (no feature flag check)
-#if !defined(ESP32) || FASTLED_RMT5  // Must check BEFORE including any RMT5 headers to prevent symbol conflicts
+#if !defined(FL_IS_ESP32) || FASTLED_RMT5  // Must check BEFORE including any RMT5 headers to prevent symbol conflicts
 
 #include "fl/channels/engine.h"
 #include "fl/channels/data.h"
@@ -104,4 +105,4 @@ protected:
 
 #endif // FASTLED_RMT5 or FASTLED_STUB_IMPL
 
-#endif // ESP32 or FASTLED_STUB_IMPL
+#endif // FL_IS_ESP32 or FASTLED_STUB_IMPL

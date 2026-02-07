@@ -1,6 +1,7 @@
 #include "gpio_isr_rx.h"
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -568,9 +569,9 @@ public:
         if (done) {
             // Memory barrier: ensure all ISR writes are visible
             __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-            #if CONFIG_IDF_TARGET_ARCH_XTENSA
+            #if FL_IS_ESP32_XTENSA
             asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-            #elif CONFIG_IDF_TARGET_ARCH_RISCV
+            #elif FL_IS_ESP32_RISCV
             asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
             #endif
         }
@@ -620,9 +621,9 @@ public:
 
         // Memory barrier: ensure all ISR writes are visible to main thread
         __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-        #if CONFIG_IDF_TARGET_ARCH_XTENSA
+        #if FL_IS_ESP32_XTENSA
         asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-        #elif CONFIG_IDF_TARGET_ARCH_RISCV
+        #elif FL_IS_ESP32_RISCV
         asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
         #endif
 
@@ -939,4 +940,4 @@ fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) {
 } // namespace fl
 
 #endif // FASTLED_RMT5
-#endif // ESP32
+#endif // FL_IS_ESP32

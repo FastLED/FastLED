@@ -1,6 +1,7 @@
 
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include <math.h>  // ok include
 #include "sound_util.h"
@@ -63,4 +64,4 @@ float SoundUtil::rms(const i16 *samples, size_t num_samples) {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

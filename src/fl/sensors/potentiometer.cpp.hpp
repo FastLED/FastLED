@@ -1,4 +1,5 @@
 #include "fl/stl/stdint.h"
+#include "platforms/is_platform.h"
 #include "fl/ui.h"
 #include "fl/stl/assert.h"
 #include "fl/sensors/potentiometer.h"
@@ -109,7 +110,7 @@ void Potentiometer::setRange(uint16_t min, uint16_t max) {
 uint16_t Potentiometer::getAdcMaxValue() const {
     // Platform detection for ADC resolution
     // Stub and AVR platforms use 10-bit (0-1023), modern platforms use 12-bit (0-4095)
-#if defined(__AVR__) || defined(STUB_PLATFORM) || defined(FASTLED_USE_STUB_ARDUINO)
+#if defined(FL_IS_AVR) || defined(STUB_PLATFORM) || defined(FASTLED_USE_STUB_ARDUINO)
     return 1023;  // 10-bit ADC
 #else
     return 4095;  // 12-bit ADC (ESP32, ESP8266, SAMD, STM32, etc.)

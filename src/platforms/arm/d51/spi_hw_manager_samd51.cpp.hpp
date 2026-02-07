@@ -14,9 +14,9 @@
 ///
 // allow-include-after-namespace
 
-#if defined(ARDUINO_SAMD51) || defined(__SAMD51__) || defined(__SAMD51J19A__) || \
-    defined(__SAMD51J20A__) || defined(__SAMD51G19A__) || \
-    defined(ADAFRUIT_FEATHER_M4_EXPRESS) || defined(ADAFRUIT_METRO_M4_EXPRESS)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD51)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
@@ -89,4 +89,4 @@ void initSpiHardware() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // SAMD51 platform guards
+#endif  // FL_IS_SAMD51

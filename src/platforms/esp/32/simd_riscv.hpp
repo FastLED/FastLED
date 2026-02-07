@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 /// @file simd_riscv.hpp
 /// ESP32 RISC-V-specific SIMD implementations
 ///
@@ -8,7 +10,7 @@
 
 #include "fl/stl/stdint.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32C2) || defined(CONFIG_IDF_TARGET_ESP32C3) || \
+#if defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
     defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
 
@@ -315,4 +317,4 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
 }  // namespace simd
 }  // namespace fl
 
-#endif  // ESP32 RISC-V variants
+#endif  // FL_IS_ESP32_RISCV

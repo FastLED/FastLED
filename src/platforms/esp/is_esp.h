@@ -23,6 +23,8 @@
 /// - FL_IS_ESP_32C6: ESP32-C6 (RISC-V)
 /// - FL_IS_ESP_32H2: ESP32-H2 (RISC-V)
 /// - FL_IS_ESP_32P4: ESP32-P4 (dual-core RISC-V)
+/// - FL_IS_ESP32_XTENSA: ESP32 with Xtensa cores
+/// - FL_IS_ESP32_RISCV: ESP32 with RISC-V cores
 /// - FL_IS_IDF_4_OR_HIGHER: ESP-IDF 4.x or higher
 /// - FL_IS_IDF_5_OR_HIGHER: ESP-IDF 5.x or higher
 
@@ -102,6 +104,20 @@
 // FL_IS_ESP_32P4 - ESP32-P4 (dual-core RISC-V)
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 #define FL_IS_ESP_32P4
+#endif
+
+// ============================================================================
+// ESP32 Architecture Detection - Xtensa vs RISC-V
+// ============================================================================
+
+// FL_IS_ESP32_XTENSA - ESP32 with Xtensa cores (ESP32, ESP32-S2, ESP32-S3)
+#if defined(FL_IS_ESP32) && defined(CONFIG_IDF_TARGET_ARCH_XTENSA)
+#define FL_IS_ESP32_XTENSA
+#endif
+
+// FL_IS_ESP32_RISCV - ESP32 with RISC-V cores (ESP32-C2/C3/C5/C6/H2/P4)
+#if defined(FL_IS_ESP32) && defined(CONFIG_IDF_TARGET_ARCH_RISCV)
+#define FL_IS_ESP32_RISCV
 #endif
 
 // ============================================================================

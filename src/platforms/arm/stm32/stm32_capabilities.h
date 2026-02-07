@@ -341,7 +341,7 @@
     // stm32_def.h not found - STM32duino HAL not available
     // This is expected when using Arduino Mbed framework
     // Hardware SPI features will be disabled, falling back to software bitbang
-    #if !defined(ARDUINO_ARCH_MBED)
+    #if !defined(FL_IS_STM32_MBED)
         #warning "STM32 HAL not available (stm32_def.h not found) - hardware SPI disabled"
     #endif
 #endif
@@ -440,7 +440,7 @@
 // IMPORTANT: Hardware SPI implementation requires STM32duino HAL/LL drivers.
 // The Arduino Mbed framework does NOT provide compatible HAL/LL drivers.
 // Disable hardware SPI when using Mbed framework.
-#if !defined(ARDUINO_ARCH_MBED)
+#if !defined(FL_IS_STM32_MBED)
 
 // Dual-SPI (2 parallel data lanes) support
 // Currently implemented only for stream-based DMA platforms (F2/F4/F7/H7/L4)

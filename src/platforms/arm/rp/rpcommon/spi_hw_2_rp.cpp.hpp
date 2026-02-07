@@ -5,7 +5,9 @@
 /// Uses PIO (Programmable I/O) to implement true dual-lane SPI with DMA support.
 /// All class definition and implementation is contained in this single file.
 
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
+#include "platforms/arm/rp/is_rp.h"
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "hardware/clocks.h"
@@ -236,9 +238,9 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
     mData1Pin = config.data1_pin;
 
     // Find available PIO instance and state machine
-#if defined(PICO_RP2040)
+#if defined(FL_IS_RP2040)
     const PIO pios[NUM_PIOS] = { pio0, pio1 };
-#elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+#elif defined(FL_IS_RP2350)
     const PIO pios[NUM_PIOS] = { pio0, pio1, pio2 };
 #endif
 
@@ -519,4 +521,4 @@ void SPIDualRP2040::cleanup() {
 
 }  // namespace fl
 
-#endif  // PICO_RP2040 || PICO_RP2350 || ARDUINO_ARCH_RP2040 || ARDUINO_ARCH_RP2350
+#endif  // FL_IS_RP2040 || FL_IS_RP2350

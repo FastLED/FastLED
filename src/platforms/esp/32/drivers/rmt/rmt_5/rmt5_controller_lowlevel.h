@@ -1,7 +1,8 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -64,4 +65,4 @@ private:
 
 #endif // FASTLED_RMT5
 
-#endif // ESP32
+#endif // FL_IS_ESP32

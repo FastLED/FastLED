@@ -1,9 +1,7 @@
 /// @file hsv2rgb.cpp
 /// Functions to convert from the HSV colorspace to the RGB colorspace
 
-#if defined(__AVR__)
-#include "platforms/avr/is_avr.h"
-#endif
+#include "platforms/is_platform.h"
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
@@ -20,7 +18,7 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb);
 /// HSV to RGB implementation in raw C, for the AVR platform only
 void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb);
 
-#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
+#if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 {
     hsv2rgb_raw_avr( hsv, rgb);
@@ -139,7 +137,7 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
 
 
 
-#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
+#if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 {
     uint8_t hue, saturation, value;
@@ -298,7 +296,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // offset8 = offset * 8
     uint8_t offset8 = offset;
     {
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
         // Left to its own devices, gcc turns "x <<= 3" into a loop
         // It's much faster and smaller to just do three single-bit shifts
         // So this business is to force that.

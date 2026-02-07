@@ -16,6 +16,7 @@
 #include "lib8tion/memmove.h"
 #include "fl/compiler_control.h"
 #include "fl/warn.h"
+#include "platforms/is_platform.h"
 
 // #include "pixeltypes.h"  // pulls in FastLED.h, beware.
 
@@ -27,7 +28,7 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 FL_DISABLE_WARNING_SIGN_CONVERSION
 
 #if !defined(FASTLED_USE_32_BIT_GRADIENT_FILL)
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
 #define FASTLED_USE_32_BIT_GRADIENT_FILL 0
 #else
 #define FASTLED_USE_32_BIT_GRADIENT_FILL 1

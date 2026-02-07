@@ -12,7 +12,7 @@
 #include "fl/stl/new.h"
 
 // Platform-specific includes
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 extern "C" void emscripten_sleep(unsigned int ms);
 #endif
 
@@ -92,7 +92,7 @@ void async_yield() {
     async_run();
 
     // Platform-specific yielding behavior
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
     // WASM worker thread mode (PROXY_TO_PTHREAD): No explicit sleep needed.
     // The OS scheduler naturally handles thread yielding. Busy-waiting here
     // doesn't block the browser UI since we're on a background thread.

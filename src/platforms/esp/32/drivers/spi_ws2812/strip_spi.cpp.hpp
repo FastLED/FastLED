@@ -1,4 +1,5 @@
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -349,4 +350,4 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
 }  // namespace fl
 #endif  // FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
-#endif  // ESP32
+#endif  // FL_IS_ESP32

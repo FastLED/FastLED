@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // Only compile for ESP32-S3 with LCD I80 support
-#if defined(CONFIG_IDF_TARGET_ESP32S3) && __has_include("esp_lcd_panel_io.h")
+#if defined(FL_IS_ESP_32S3) && __has_include("esp_lcd_panel_io.h")
 
 #include "ii2s_lcd_cam_peripheral.h"
 #include "esp_lcd_panel_io.h"

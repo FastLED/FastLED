@@ -10,9 +10,11 @@
 //
 #include "fl/math_macros.h"
 #include "fastspi_types.h"
+#include "is_teensy.h"
 
 namespace fl {
-#if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
+
+#if defined(FL_IS_TEENSY_3X) && defined(CORE_TEENSY)
 
 // Version 1.20 renamed SPI_t to KINETISK_SPI_t
 #if TEENSYDUINO >= 120

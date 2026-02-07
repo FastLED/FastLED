@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef __AVR__
+#include "platforms/is_platform.h"
+
+#ifdef FL_IS_AVR
 #define AVR_DISALLOWED                                                         \
     [[deprecated("This function or class is deprecated on AVR.")]]
 #else

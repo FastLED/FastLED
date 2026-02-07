@@ -1,5 +1,7 @@
 #if defined(FASTLED_HAS_NETWORKING) && 0
-#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+#include "platforms/wasm/is_wasm.h"
+
+#if !defined(_WIN32) && !defined(FL_IS_WASM)
 
 #include "socket_posix.h"
 
@@ -148,5 +150,5 @@ int get_errno() {
 
 } // namespace fl
 
-#endif // !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+#endif // !defined(_WIN32) && !defined(FL_IS_WASM)
 #endif // FASTLED_HAS_NETWORKING 

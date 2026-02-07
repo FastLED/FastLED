@@ -4,11 +4,12 @@
 // Compile for:
 // 1. ESP32-S3 with LCD_CAM support (real hardware)
 // 2. Stub/host platform testing (FASTLED_STUB_IMPL or host OS)
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 #include "sdkconfig.h"
 #endif
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || \
+#if defined(FL_IS_ESP_32S3) || \
     defined(FASTLED_STUB_IMPL) || \
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
@@ -21,7 +22,7 @@
 #include "fl/channels/detail/wave8.hpp"
 
 // Include ESP implementation only on real hardware
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
 #include "i2s_lcd_cam_peripheral_esp.h"
 #endif
 
@@ -576,7 +577,7 @@ private:
 };
 
 fl::shared_ptr<IChannelEngine> createI2sEngine() {
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
     // Wrap singleton in shared_ptr (singleton manages its own lifetime)
     auto wrapper = fl::make_shared<I2sLcdCamPeripheralSingletonWrapper>(
         detail::I2sLcdCamPeripheralEsp::instance()

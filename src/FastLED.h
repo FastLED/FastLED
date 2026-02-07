@@ -4,6 +4,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/dll.h"  // Will optionally compile in.
+#include "platforms/is_platform.h"
 
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
@@ -42,7 +43,7 @@
 // This is only needed for ESP-IDF 5.x+ with legacy RMT4 driver, not earlier versions or RMT5 driver.
 // Only applies to platforms that actually have RMT hardware (excludes ESP32-C2 which lacks RMT).
 // Reference: https://github.com/espressif/arduino-esp32/issues/9866
-#if defined(ESP32)
+#if defined(FL_IS_ESP32)
 #include "platforms/esp/esp_version.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #if FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
@@ -52,7 +53,7 @@
 
 
 #if !defined(FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS)
-#if defined(__EMSCRIPTEN__)
+#if defined(FL_IS_WASM)
 #define FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS 1
 #else
 #define FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS 0
@@ -66,7 +67,7 @@
 #define __PROG_TYPES_COMPAT__
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 #include "platforms/wasm/js.h"
 #include "platforms/wasm/led_sysdefs_wasm.h"
 #include "platforms/wasm/compiler/Arduino.h"
@@ -1028,7 +1029,7 @@ public:
 	/// Configure platform-specific channel bus drivers
 	/// @{
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 	/// @platform ESP32
 	/// @note These methods control driver selection for RMT, SPI, and PARLIO engines
 	/// @note Only functional on ESP32 platforms with multi-engine architecture

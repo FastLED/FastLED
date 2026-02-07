@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "sdkconfig.h"
 
-#ifndef CONFIG_IDF_TARGET_ESP32S3
+#ifndef FL_IS_ESP_32S3
 #error "This file is only for ESP32-S3"
 #endif
 

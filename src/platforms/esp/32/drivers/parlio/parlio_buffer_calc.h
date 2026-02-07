@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "fl/compiler_control.h"
 #include "fl/log.h"
 
@@ -16,10 +18,10 @@ namespace detail {
 // Prevents OOM on constrained platforms while allowing streaming for large LED counts
 // Override via build flags: -DFASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES=<bytes>
 #ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES
-  #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32S3)
+  #if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32S3)
     // ESP32-C6/S3: 256 KB total (fits in ~512 KB SRAM, leaves room for other allocations)
     #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
-  #elif defined(CONFIG_IDF_TARGET_ESP32P4)
+  #elif defined(FL_IS_ESP_32P4)
     // ESP32-P4: 512 KB total (better performance, larger SRAM available)
     #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (512 * 1024)
   #else

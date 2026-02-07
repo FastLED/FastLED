@@ -14,7 +14,8 @@
 /// - UART (-1): Lowest priority, broken (all ESP32 variants, not recommended)
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "fl/channels/bus_manager.h"
 #include "fl/dbg.h"
@@ -27,7 +28,7 @@
 // ESP32-S3 and newer use LCD_CAM peripheral instead of I2S parallel mode
 #include "platforms/esp/is_esp.h"
 
-#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 #include "platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.h"
 #define FASTLED_HAS_SPI_HW_16 1
 #else
@@ -174,7 +175,7 @@ static void addLcdRgbIfPossible(ChannelBusManager& manager) {
 /// @brief Add SPI engine if supported by platform
 static void addSpiIfPossible(ChannelBusManager& manager) {
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    #if defined(CONFIG_IDF_TARGET_ESP32C6)
+    #if defined(FL_IS_ESP_32C6)
     // ESP32-C6 has SPI2 available, but only 1 host vs 2-3 on other ESP32 chips.
     // RMT5 provides better performance and scalability for LED control on this platform.
     // Note: SPI0/SPI1 are reserved for flash operations and cannot be used.
@@ -271,4 +272,4 @@ void initChannelEngines() {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

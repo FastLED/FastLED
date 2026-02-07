@@ -8,7 +8,8 @@
 #include "fl/singleton.h"
 #include "fl/stl/optional.h"
 
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+#ifdef FL_IS_WASM
 #include <emscripten.h>
 #include <emscripten/val.h>
 #endif
@@ -17,7 +18,7 @@ namespace fl {
 
 WasmFetch wasm_fetch;
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 // WASM version using JavaScript fetch API
 
 // Internal singleton class for managing WASM fetch callbacks
@@ -153,6 +154,6 @@ void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     callback(error_response);
 }
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM
 
 } // namespace fl 

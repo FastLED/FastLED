@@ -21,7 +21,9 @@
 /// - Arduino pin numbers must be converted to (PIO controller, pin_bit) pairs
 /// - This implementation uses stub functions for non-Arduino builds
 
-#if defined(__SAM3X8E__)
+#include "platforms/arm/sam/is_sam.h"
+
+#if defined(FL_IS_SAM)
 
 namespace fl {
 namespace platforms {
@@ -125,4 +127,4 @@ inline void setAdcRange(AdcRange /*range*/) {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // __SAM3X8E__
+#endif  // FL_IS_SAM

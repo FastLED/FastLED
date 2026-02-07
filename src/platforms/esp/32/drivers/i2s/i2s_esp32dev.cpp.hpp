@@ -1,6 +1,7 @@
 
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
@@ -8,7 +9,7 @@
 // CONFIG_IDF_TARGET_ESP32 was introduced in ESP-IDF v4.0
 // For v3.x (where the macro doesn't exist), compile for all ESP32 chips
 // For v4.0+, only compile when CONFIG_IDF_TARGET_ESP32 is defined (original ESP32 only)
-#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(CONFIG_IDF_TARGET_ESP32)
+#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
 
 #include "i2s_esp32dev.h"
 
@@ -555,4 +556,4 @@ void i2s_transpose_and_encode(int channel, uint32_t has_data_mask,
 }  // namespace fl
 #endif // !ESP_IDF_VERSION_4_OR_HIGHER || CONFIG_IDF_TARGET_ESP32
 
-#endif // ifdef ESP32
+#endif // ifdef FL_IS_ESP32

@@ -9,10 +9,9 @@
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via SERCOM)
 
 #include "fl/compiler_control.h"
+#include "platforms/arm/samd/is_samd.h"
 
-#if defined(ARDUINO_SAMD51) || defined(__SAMD51__) || defined(__SAMD51J19A__) || \
-    defined(__SAMD51J20A__) || defined(__SAMD51G19A__) || \
-    defined(ADAFRUIT_FEATHER_M4_EXPRESS) || defined(ADAFRUIT_METRO_M4_EXPRESS)
+#if defined(FL_IS_SAMD51)
 
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/adapters/spi_channel_adapter.h"
@@ -119,4 +118,4 @@ void initChannelEngines() {
 
 } // namespace fl
 
-#endif // SAMD51 platform guards
+#endif // FL_IS_SAMD51

@@ -1,11 +1,12 @@
 /// @file i2s_lcd_cam_peripheral_esp.cpp
 /// @brief ESP32-S3 I2S LCD_CAM peripheral implementation
 
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3) && __has_include("esp_lcd_panel_io.h")
+#if defined(FL_IS_ESP_32S3) && __has_include("esp_lcd_panel_io.h")
 
 #include "i2s_lcd_cam_peripheral_esp.h"
 #include "fl/singleton.h"
@@ -329,4 +330,4 @@ void I2sLcdCamPeripheralEsp::delay(uint32_t ms) {
 } // namespace fl
 
 #endif // CONFIG_IDF_TARGET_ESP32S3 && esp_lcd_panel_io.h
-#endif // ESP32
+#endif // FL_IS_ESP32

@@ -4,11 +4,12 @@
 // Compile for:
 // 1. ESP32-P4 with RGB LCD support (real hardware)
 // 2. Stub/host platform testing (FASTLED_STUB_IMPL or host OS)
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 #include "sdkconfig.h"
 #endif
 
-#if (defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")) || \
+#if (defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")) || \
     defined(FASTLED_STUB_IMPL) || \
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
@@ -17,7 +18,7 @@
 #include "fl/stl/cstring.h"
 
 // Include ESP implementation only on real hardware
-#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
 #include "lcd_rgb_peripheral_esp.h"
 #endif
 
@@ -406,7 +407,7 @@ private:
 };
 
 fl::shared_ptr<IChannelEngine> createLcdRgbEngine() {
-#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
     // Wrap singleton in shared_ptr (singleton manages its own lifetime)
     auto wrapper = fl::make_shared<LcdRgbPeripheralSingletonWrapper>(
         detail::LcdRgbPeripheralEsp::instance()

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "platforms/avr/is_avr.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/str.h"
@@ -41,7 +42,7 @@ private:
     struct EmbeddedTJpgState {
         // Workspace for TJpg decoder (must be aligned)
         // On AVR, alignment beyond 1 byte causes issues with new operator
-#ifdef __AVR__
+#ifdef FL_IS_AVR
         fl::u8 workspace[4096];
 #else
         fl::u8 workspace[4096] __attribute__((aligned(4)));

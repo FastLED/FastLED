@@ -4,7 +4,9 @@
 // Requires: #define FASTLED_ESP8266_UART before including <FastLED.h>
 // or add the controller explicitly via FastLED.addLeds<UARTController_ESP8266<GRB>>(...) .
 
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ESP8266)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP8266)
 
 #ifndef FASTLED_ESP8266_UART_BAUD
 #define FASTLED_ESP8266_UART_BAUD 3200000UL  // 3.2 Mbps (4 UART bits = 1.25us LED bit)
@@ -162,4 +164,4 @@ void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &p
     delayMicroseconds(mResetUs);
 }
 }  // namespace fl
-#endif // ARDUINO_ARCH_ESP8266 || ESP8266
+#endif // FL_IS_ESP8266

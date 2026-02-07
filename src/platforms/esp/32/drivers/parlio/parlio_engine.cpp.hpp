@@ -5,12 +5,13 @@
 /// from channel_engine_parlio.cpp. It handles all hardware-specific operations
 /// including ISR callbacks, DMA buffer generation, and ring buffer streaming.
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/feature_flags/enabled.h"
 #endif
 
 // Compile on ESP32 with PARLIO support OR on stub platform for testing
-#if (defined(ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
+#if (defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/compiler_control.h"
 #include "fl/unused.h"
@@ -29,7 +30,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/time.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 #else

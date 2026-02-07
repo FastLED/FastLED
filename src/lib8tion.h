@@ -9,6 +9,7 @@
 #include "fl/compiler_control.h"
 
 #include "led_sysdefs.h"
+#include "platforms/is_platform.h"
 
 
 /// @file lib8tion.h
@@ -24,9 +25,9 @@
 #include "fl/stl/time.h"
 
 
-#if !defined(__AVR__)
+#if !defined(FL_IS_AVR)
 // memmove, memcpy, and memset are defined in lib8tion/memmove.h and fl/memfill.h
-#endif // end of !defined(__AVR__)
+#endif // end of !defined(FL_IS_AVR)
 
 
 /// @defgroup lib8tion Fast Math Functions
@@ -668,7 +669,7 @@ LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
 ///
 /// @{
 
-#if ((defined(ARDUINO) || defined(SPARK) || defined(FASTLED_HAS_MILLIS)) && !defined(USE_GET_MILLISECOND_TIMER)) || defined(FASTLED_DOXYGEN)
+#if ((defined(ARDUINO) || defined(FL_IS_STM32_F2) || defined(FASTLED_HAS_MILLIS)) && !defined(USE_GET_MILLISECOND_TIMER)) || defined(FASTLED_DOXYGEN)
 // Forward declaration of Arduino function 'millis'.
 //uint32_t millis();
 
@@ -900,7 +901,7 @@ LIB8STATIC uint8_t hours8()
 LIB8STATIC uint16_t div1024_32_16( uint32_t in32)
 {
     uint16_t out16;
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     asm volatile (
         "  lsr %D[in]  \n\t"
         "  ror %C[in]  \n\t"

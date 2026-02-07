@@ -2,7 +2,8 @@
 
 // ok no namespace fl
 
-#if defined(__EMSCRIPTEN__)
+#include "is_wasm.h"
+#if defined(FL_IS_WASM)
     // Use channel-based controller for WASM platform (mirrors ESP32/stub architecture)
     // This allows legacy FastLED.addLeds<>() API to route through channel engines
     #include "platforms/wasm/clockless_channel_wasm.h"

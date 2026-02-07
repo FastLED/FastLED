@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "platforms/is_platform.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
@@ -27,7 +28,7 @@ FASTLED_SHARED_PTR(ByteStreamMemory);
 class Video : public Fx1d { // Fx1d because video can be irregular.
   public:
     static size_t DefaultFrameHistoryCount() {
-#ifdef __AVR__
+#ifdef FL_IS_AVR
         return 1;
 #else
         return 2; // Allow interpolation by default.

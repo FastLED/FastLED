@@ -10,6 +10,7 @@
 /// IMPORTANT: This file requires STM32 HAL to be available via STM32duino core headers.
 
 #include "fl/has_include.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 // STM32duino core headers - provides HAL includes and pin mapping functions
 // These headers provide: PinName, NC, digitalPinToPinName(), STM_PORT(), STM_GPIO_PIN(),
@@ -220,7 +221,7 @@ inline uint16_t analogRead(int pin) {
 
     // ADC initialization parameters (12-bit resolution, single conversion)
     // Note: STM32F1 has different ADC struct members than F2/F4/F7
-#if defined(STM32F1) || defined(STM32F1xx) || defined(STM32F10X_MD)
+#if defined(FL_IS_STM32_F1)
     // STM32F1 ADC configuration (no ClockPrescaler, Resolution, EOCSelection, etc.)
     AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
     AdcHandle.Init.ScanConvMode = DISABLE;

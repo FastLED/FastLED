@@ -1,7 +1,8 @@
 /// @file channel_engine_rmt4.cpp
 /// @brief RMT4 implementation of ChannelEngine for ESP32 (IDF 4.x)
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "fl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -9,7 +10,7 @@
 // Skip entirely if platform has no RMT hardware (ESP32-C2)
 #if !FASTLED_ESP32_HAS_RMT
 // No RMT hardware available
-#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+#elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32C5) || \
     defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
 // Skip RMT4 implementation for RMT5-only chips
 #elif !FASTLED_RMT5  // Only compile for RMT4 (IDF 4.x)
@@ -274,9 +275,9 @@ void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) {
     rmt_channel_t channel = state->channel;
 
     // Disable TX interrupts for this channel (platform-specific)
-#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C6
+#if FL_IS_ESP_32C3 || FL_IS_ESP_32H2 || FL_IS_ESP_32S3 || FL_IS_ESP_32C6
     RMT.int_ena.val &= ~(1 << channel);
-#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+#elif FL_IS_ESP_32S2 || FL_IS_ESP_32DEV
     RMT.int_ena.val &= ~(1 << (channel * 3));
 #else
     // Fallback to API call for unknown platforms
@@ -666,4 +667,4 @@ void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> cha
 } // namespace fl
 
 #endif // !FASTLED_RMT5 and not RMT5-only chip
-#endif // ESP32
+#endif // FL_IS_ESP32

@@ -1,4 +1,6 @@
-#if defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if defined(FL_IS_TEENSY_4X) // Teensy 4.0/4.1 only.
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
@@ -299,4 +301,4 @@ void ObjectFLEDGroupBase::writePixels(uint8_t pin, PixelIterator& pixel_iterator
 
 } // namespace fl
 
-#endif // defined(__IMXRT1062__)
+#endif // defined(FL_IS_TEENSY_4X)

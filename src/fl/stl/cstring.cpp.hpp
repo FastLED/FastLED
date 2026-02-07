@@ -8,12 +8,13 @@
 
 #include "cstring.h"
 #include "fl/stl/bit_cast.h"
+#include "platforms/is_platform.h"
 // Include C string headers for standard C library functions
 #include <string.h>  // okay banned header (STL wrapper implementation requires standard header)
 #include <stdlib.h>  // okay banned header (STL wrapper implementation requires standard header)
 
 // Include Arduino PROGMEM headers if on AVR
-#if defined(ARDUINO) && defined(__AVR__)
+#if defined(ARDUINO) && defined(FL_IS_AVR)
 #include <avr/pgmspace.h>
 #endif
 
@@ -130,7 +131,7 @@ const void* memchr(const void* s, int c, size_t n) noexcept {
 // ============================================================================
 // Only available on platforms that support PROGMEM (AVR, some ARM boards)
 
-#if defined(ARDUINO) && defined(__AVR__)
+#if defined(ARDUINO) && defined(FL_IS_AVR)
 
 size_t strlen_P(detail::pgm_p s) noexcept {
     return ::strlen_P(fl::bit_cast<const char*>(s));
@@ -148,6 +149,6 @@ void* memcpy_P(void* dest, detail::pgm_p src, size_t n) noexcept {
     return ::memcpy_P(dest, src, n);
 }
 
-#endif  // defined(ARDUINO) && defined(__AVR__)
+#endif  // defined(ARDUINO) && defined(FL_IS_AVR)
 
 }  // namespace fl

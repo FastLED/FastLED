@@ -3,7 +3,8 @@
 
 #include "rmt_memory_manager.h"
 
-#if defined(ESP32) && FASTLED_RMT5
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) && FASTLED_RMT5
 
 #include "fl/dbg.h"
 #include "common.h"
@@ -24,25 +25,25 @@ namespace fl {
 /// - ESP32/S2: Global pool (single shared memory for TX and RX)
 /// - ESP32-S3/C3/C6/H2: Dedicated pools (separate TX and RX memory)
 void RmtMemoryManager::initPlatformLimits(size_t& total_tx, size_t& total_rx) {
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
     // ESP32: 8 flexible channels × 64 words = 512 words SHARED global pool
     total_tx = 8 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 512 words (global pool)
     total_rx = 0;  // Not used for global pool
     FL_DBG("RMT Memory (ESP32): " << total_tx << " words GLOBAL POOL (shared TX/RX)");
 
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#elif defined(FL_IS_ESP_32S2)
     // ESP32-S2: 4 flexible channels × 64 words = 256 words SHARED global pool
     total_tx = 4 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 256 words (global pool)
     total_rx = 0;  // Not used for global pool
     FL_DBG("RMT Memory (ESP32-S2): " << total_tx << " words GLOBAL POOL (shared TX/RX)");
 
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(FL_IS_ESP_32S3)
     // ESP32-S3: 4 dedicated TX + 4 dedicated RX channels × 48 words
     total_tx = 4 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 192 words (dedicated TX pool)
     total_rx = 4 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 192 words (dedicated RX pool)
     FL_DBG("RMT Memory (ESP32-S3): TX=" << total_tx << " words, RX=" << total_rx << " words (DEDICATED pools)");
 
-#elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+#elif defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || \
       defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
     // ESP32-C3/C6/H2/C5: 2 dedicated TX + 2 dedicated RX channels × 48 words
     total_tx = 2 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 96 words (dedicated TX pool)
@@ -75,7 +76,7 @@ RmtMemoryManager::MemoryLedger::MemoryLedger()
     size_t tx_limit = 0, rx_limit = 0;
     initPlatformLimits(tx_limit, rx_limit);
 
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
     // Global pool platforms
     is_global_pool = true;
     total_words = tx_limit;  // tx_limit holds total pool size for global platforms
@@ -146,7 +147,7 @@ size_t RmtMemoryManager::getPlatformRxWords() {
 }
 
 bool RmtMemoryManager::isPlatformGlobalPool() {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
     return true;  // Global pool platforms
 #else
     return false;  // Dedicated pool platforms
@@ -317,7 +318,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
     // - https://github.com/espressif/esp-idf/issues/12564
     // - https://github.com/espressif/idf-extra-components/issues/466
     if (use_dma) {
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
         // ESP32-S3: DMA channel consumes 1 memory block (48 words)
         size_t dma_words = SOC_RMT_MEM_WORDS_PER_CHANNEL;
         if (!tryAllocateWords(dma_words, true)) {
@@ -641,7 +642,7 @@ bool RmtMemoryManager::isDMAAvailable() const {
     if (mDMAAllocation.allocated) {
         return false;  // DMA slot already in use
     }
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
     // ESP32-S3: DMA channel still requires 1 memory block (48 words) for descriptor
     // Check if there's enough on-chip memory for DMA descriptor
     if (getAvailableWords(true) < SOC_RMT_MEM_WORDS_PER_CHANNEL) {
@@ -826,4 +827,4 @@ void RmtMemoryManager::freeWords(size_t words, bool is_tx) {
 
 } // namespace fl
 
-#endif // ESP32 && FASTLED_RMT5
+#endif // FL_IS_ESP32 && FASTLED_RMT5

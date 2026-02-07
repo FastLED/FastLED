@@ -8,6 +8,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/gamma.h"
+#include "platforms/is_platform.h"
 
 namespace fl {
 
@@ -17,7 +18,7 @@ namespace fl {
 /// @note Ensures non-zero input maps to non-zero output (fixes issue #1908)
 /// @note Uses bit-shift approximation on AVR to avoid expensive division
 inline u8 mapBrightness8to5(u8 brightness_8bit) {
-    #if defined(__AVR__)
+    #if defined(FL_IS_AVR)
     // AVR-specific: Use bit shifts to avoid expensive division
     // Approximation: (value * 31) / 255 ≈ (value * 31) >> 8
     // Add rounding: ((value * 31) + 128) >> 8

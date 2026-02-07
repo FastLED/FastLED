@@ -1,7 +1,8 @@
 /// @file condition_variable_esp32.cpp
 /// @brief ESP32 FreeRTOS condition variable platform implementation
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "condition_variable_esp32.h"
 #include "mutex_esp32.h"
@@ -302,4 +303,4 @@ template cv_status ConditionVariableESP32::wait_until(
 } // namespace platforms
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "fl/stl/stdint.h"
 
 #include "fl/register.h"
@@ -89,51 +91,51 @@ public:
 // CONFIG_IDF_TARGET_ESP32 was introduced in ESP-IDF v4.0
 // For v3.x (where the macro doesn't exist), assume original ESP32
 // For v4.0+, only use these settings when CONFIG_IDF_TARGET_ESP32 is defined
-#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(CONFIG_IDF_TARGET_ESP32)
+#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
 // 40 GPIO pins. ESPIDF defined 24, 28-31 as invalid and 34-39 as readonly
 // GPIO 6-11 used by default for SPI flash.  GPIO 20 is invalid.
 // NOTE: GPIO 1 & 3 commonly used for UART and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(6) | _FL_BIT(7) | _FL_BIT(8) | _FL_BIT(9) | _FL_BIT(10) | _FL_BIT(11) | _FL_BIT(20))
 
-#elif CONFIG_IDF_TARGET_ESP32C3
+#elif FL_IS_ESP_32C3
 // 22 GPIO pins. ESPIDF defines all pins as valid
 // GPIO 11-17 used by default for SPI flash
 // NOTE: GPIO 20-21 commonly used for UART and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(11) | _FL_BIT(12) | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17))
 
-#elif CONFIG_IDF_TARGET_ESP32S2
+#elif FL_IS_ESP_32S2
 // 48 GPIO pins.  ESPIDF defines 22-25, 47 as invalid and 46-47 as readonly.s
 // GPIO 27-32 used by default for SPI flash.
 // NOTE: GPIO 37 & 38 commonly used for UART and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
 
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif FL_IS_ESP_32S3
 // 49 GPIO pins. ESPIDF defineds 22-25 as invalid.
 // GPIO 19-20 used for USB-JTAG and will break flashing if used.
 // GPIO 27-32 used by default for SPI flash.
 // NOTE: GPIO 43 & 44 commonly used for UART and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
 
-#elif CONFIG_IDF_TARGET_ESP32C5
+#elif FL_IS_ESP_32C5
 
 // GPIO 13,14 (USB_D*), 15-18,20-22 used by default for SPI flash.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(20) | _FL_BIT(21) | _FL_BIT(22))
 
-#elif CONFIG_IDF_TARGET_ESP32C6
+#elif FL_IS_ESP_32C6
 
 // GPIO 20-22, 24-26 used by default for SPI flash.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL |  _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
 
-#elif CONFIG_IDF_TARGET_ESP32P4
+#elif FL_IS_ESP_32P4
 // 55 GPIO pins. ESPIDF defines all pins as valid.
 // NOTE: GPIO 24 & 25 commonly used for USB and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(24) | _FL_BIT(25))
 
-#elif CONFIG_IDF_TARGET_ESP32H2
+#elif FL_IS_ESP_32H2
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
 // GPIO 15-21 are typically reserved for SPI0/1 flash communication.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(21))
-#elif CONFIG_IDF_TARGET_ESP32C2
+#elif FL_IS_ESP_32C2
 // 21 GPIO pins (GPIO 0-20). ESPIDF defines all pins as valid.
 // GPIO 11-17 are typically reserved for SPI flash and not recommended for other uses.
 // NOTE: ESP32-C2 is a low-memory device - complex examples may not compile

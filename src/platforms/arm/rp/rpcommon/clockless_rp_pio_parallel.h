@@ -66,9 +66,10 @@
 #include "pixel_controller.h"
 #include "parallel_transpose.h"
 #include "fastled_delay.h"
+#include "platforms/arm/rp/is_rp.h"
 
 // Hardware headers for RP2040/RP2350
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
@@ -165,7 +166,7 @@ public:
             return;
         }
 
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         // Initialize GPIO pins
         for (int i = 0; i < NUM_LANES; i++) {
             gpio_init(BASE_PIN + i);
@@ -173,9 +174,9 @@ public:
         }
 
         // Try to claim PIO and DMA on actual hardware
-        #if defined(PICO_RP2040)
+        #if defined(FL_IS_RP2040)
             mPio = pio0;  // Simplified: just use pio0
-        #elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+        #elif defined(FL_IS_RP2350)
             mPio = pio0;  // Simplified: just use pio0
         #endif
 
@@ -274,7 +275,7 @@ private:
 
     /// @brief Clean up resources
     void cleanup() {
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         if (mDmaChan != -1) {
             dma_channel_unclaim(mDmaChan);
             mDmaChan = -1;

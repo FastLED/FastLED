@@ -14,7 +14,7 @@
 /// - Uses R_IOPORT_PinRead() for digital input
 /// - Pin mapping via g_pin_cfg[] array (PinMuxCfg_t from Arduino variant)
 
-#if defined(ARDUINO_ARCH_RENESAS) || defined(FL_IS_RENESAS)
+#if defined(FL_IS_RENESAS)
 
 #include "fl/pin.h"
 
@@ -181,4 +181,4 @@ inline void setAdcRange(AdcRange /*range*/) {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // ARDUINO_ARCH_RENESAS || FL_IS_RENESAS
+#endif  // FL_IS_RENESAS

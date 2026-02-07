@@ -15,6 +15,7 @@
 #include "eorder.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"
+#include "platforms/is_platform.h"
 
 // Include centralized LED chipset timing definitions
 // These provide unified nanosecond-based T1, T2, T3 timing for all supported chipsets
@@ -22,7 +23,7 @@
 
 // Include legacy AVR-specific timing definitions (FMUL-based)
 // Used for backward compatibility with existing AVR clockless drivers
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 #include "platforms/avr/led_timing_legacy_avr.h"
 #endif
 
@@ -677,7 +678,7 @@ private:
 /// - EZWS2812_GPIO: Uses optimized GPIO timing (always available)
 /// @{
 
-#if defined(ARDUINO_ARCH_SILABS)
+#if defined(FL_IS_SILABS)
 
 #include "platforms/arm/mgm240/clockless_ezws2812_gpio.h"
 

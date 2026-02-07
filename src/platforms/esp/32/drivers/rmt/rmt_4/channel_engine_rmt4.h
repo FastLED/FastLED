@@ -7,7 +7,8 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -104,7 +105,7 @@ FL_EXTERN_C_END
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
 #define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
 #else
-#ifdef CONFIG_IDF_TARGET_ESP32S2
+#ifdef FL_IS_ESP_32S2
 #define FASTLED_RMT_MAX_CHANNELS 4
 #else
 #define FASTLED_RMT_MAX_CHANNELS 8
@@ -118,9 +119,9 @@ FL_EXTERN_C_END
 
 // Manual clock frequency override for ESP32-C6 and ESP32-H2 (40MHz vs 80MHz)
 #ifndef F_CPU_RMT_CLOCK_MANUALLY_DEFINED
-#if defined(CONFIG_IDF_TARGET_ESP32C6) && CONFIG_IDF_TARGET_ESP32C6 == 1
+#if defined(FL_IS_ESP_32C6) && FL_IS_ESP_32C6 == 1
 #define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
-#elif defined(CONFIG_IDF_TARGET_ESP32H2) && CONFIG_IDF_TARGET_ESP32H2 == 1
+#elif defined(FL_IS_ESP_32H2) && FL_IS_ESP_32H2 == 1
 #define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
 #endif
 
@@ -266,19 +267,19 @@ private:
 
         // Check each channel for interrupts
         for (uint8_t channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
-#if CONFIG_IDF_TARGET_ESP32S2
+#if FL_IS_ESP_32S2
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 12;
-#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
+#elif FL_IS_ESP_32S3 || FL_IS_ESP_32C3
             int tx_done_bit = channel;
             int tx_next_bit = channel + 8;
-#elif CONFIG_IDF_TARGET_ESP32H2
+#elif FL_IS_ESP_32H2
             int tx_done_bit = channel;
             int tx_next_bit = channel + 8;
-#elif CONFIG_IDF_TARGET_ESP32C6
+#elif FL_IS_ESP_32C6
             int tx_done_bit = channel;
             int tx_next_bit = channel + 8;
-#elif CONFIG_IDF_TARGET_ESP32
+#elif FL_IS_ESP_32DEV
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 24;
 #else
@@ -325,17 +326,17 @@ private:
         gpio_matrix_out(state->pin, SIG_GPIO_OUT_IDX, 0, 0);
 
         // Disable TX interrupts for this channel (platform-specific)
-#if CONFIG_IDF_TARGET_ESP32C3
+#if FL_IS_ESP_32C3
         RMT.int_ena.val &= ~(1 << channelNum);
-#elif CONFIG_IDF_TARGET_ESP32H2
+#elif FL_IS_ESP_32H2
         RMT.int_ena.val &= ~(1 << channelNum);
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif FL_IS_ESP_32S3
         RMT.int_ena.val &= ~(1 << channelNum);
-#elif CONFIG_IDF_TARGET_ESP32C6
+#elif FL_IS_ESP_32C6
         RMT.int_ena.val &= ~(1 << channelNum);
-#elif CONFIG_IDF_TARGET_ESP32S2
+#elif FL_IS_ESP_32S2
         RMT.int_ena.val &= ~(1 << (channelNum * 3));
-#elif CONFIG_IDF_TARGET_ESP32
+#elif FL_IS_ESP_32DEV
         RMT.int_ena.val &= ~(1 << (channelNum * 3));
 #else
 #error "Unknown ESP32 target for RMT interrupt disable"
@@ -435,7 +436,7 @@ private:
         rmt_channel_t channel = state->channel;
 
         // Platform-specific register access
-#if CONFIG_IDF_TARGET_ESP32C3
+#if FL_IS_ESP_32C3
         RMT.tx_conf[channel].mem_rd_rst = 1;
         RMT.tx_conf[channel].mem_rd_rst = 0;
         RMT.tx_conf[channel].mem_rst = 1;
@@ -445,7 +446,7 @@ private:
         RMT.tx_conf[channel].conf_update = 1;
         RMT.tx_conf[channel].tx_start = 1;
 
-#elif CONFIG_IDF_TARGET_ESP32H2
+#elif FL_IS_ESP_32H2
         RMT.chnconf0[channel].mem_rd_rst_chn = 1;
         RMT.chnconf0[channel].mem_rd_rst_chn = 0;
         RMT.chnconf0[channel].apb_mem_rst_chn = 1;
@@ -455,7 +456,7 @@ private:
         RMT.chnconf0[channel].conf_update_chn = 1;
         RMT.chnconf0[channel].tx_start_chn = 1;
 
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif FL_IS_ESP_32S3
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
         RMT.chnconf0[channel].mem_rd_rst_chn = 1;
         RMT.chnconf0[channel].mem_rd_rst_chn = 0;
@@ -476,7 +477,7 @@ private:
         RMT.chnconf0[channel].tx_start_n = 1;
 #endif
 
-#elif CONFIG_IDF_TARGET_ESP32C6
+#elif FL_IS_ESP_32C6
         RMT.chnconf0[channel].mem_rd_rst_chn = 1;
         RMT.chnconf0[channel].mem_rd_rst_chn = 0;
         RMT.chnconf0[channel].apb_mem_rst_chn = 1;
@@ -486,7 +487,7 @@ private:
         RMT.chnconf0[channel].conf_update_chn = 1;
         RMT.chnconf0[channel].tx_start_chn = 1;
 
-#elif CONFIG_IDF_TARGET_ESP32S2
+#elif FL_IS_ESP_32S2
         RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
         RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
         RMT.conf_ch[channel].conf1.apb_mem_rst = 1;
@@ -542,4 +543,4 @@ private:
 
 #endif // !FASTLED_RMT5 and not RMT5-only chip
 
-#endif // ESP32
+#endif // FL_IS_ESP32

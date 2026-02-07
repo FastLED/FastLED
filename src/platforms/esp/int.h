@@ -2,7 +2,9 @@
 
 // For ESP32 IDF < 4.0, we need to include system headers early to get __int32_t/__uint32_t
 // This must happen before we define fl:: types to avoid typedef conflicts
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
   #include "platforms/esp/esp_version.h"
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
     // IDF 3.3 defines __int32_t and __uint32_t in system headers
@@ -41,7 +43,7 @@
     PLATFORM_INT32_CONDITIONAL_CHOOSE
 
 // Helper macro for 32-bit type selection based on IDF version
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#if defined(FL_IS_ESP32)
   // esp_version.h already included above, use its definitions here
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
     // IDF 3.3: Use system __int32_t/__uint32_t types to match system's int32_t/uint32_t

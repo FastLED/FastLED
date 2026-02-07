@@ -14,7 +14,7 @@
 // Test filesystem implementation that maps to real hard drive
 #include "platforms/stub/fs_stub.hpp" // ok platform headers
 #define FASTLED_HAS_SDCARD 1
-#elif defined(__EMSCRIPTEN__)
+#elif defined(FL_IS_WASM)
 #include "platforms/wasm/fs_wasm.h" // ok platform headers
 #define FASTLED_HAS_SDCARD 1
 #elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)

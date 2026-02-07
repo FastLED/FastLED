@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // This I2S parallel mode driver only works on ESP32 and ESP32-S2
 // ESP32-S3, ESP32-P4: Use LCD_CAM peripheral instead (see lcd_driver_i80.h and bulk_lcd_i80.h)
 // ESP32-C3, C2, C5, C6, H2: Have completely different I2S peripheral architecture (no parallel mode)
@@ -14,7 +16,7 @@
 // dedicated LCD_CAM peripheral with different register structure and API. The register-level
 // i2s_dev_t struct fields (conf, conf2, sample_rate_conf, clkm_conf, etc.) are incompatible
 // with ESP32-S3/P4. FastLED provides LCD_CAM-based drivers for these chips that are more efficient.
-#if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32P4) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+#if !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32P4) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
 
 #include "esp_heap_caps.h"
 #include "soc/soc.h"
@@ -161,7 +163,7 @@ class I2SClockBasedLedDriver
     };
 
     // ESP32-S2 only has I2S0, not I2S1 (ESP32-S3 is excluded by outer platform guard)
-    #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32C2) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    #if defined(FL_IS_ESP_32S2) || defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
     const int deviceBaseIndex[1] = {I2S0O_DATA_OUT0_IDX};
     const int deviceClockIndex[1] = {I2S0O_BCK_OUT_IDX};
     const int deviceWordSelectIndex[1] = {I2S0O_WS_OUT_IDX};
@@ -289,7 +291,7 @@ public:
             interruptSource = ETS_I2S0_INTR_SOURCE;
             i2s_base_pin_index = I2S0O_DATA_OUT0_IDX;
         }
-        #if !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+        #if !defined(FL_IS_ESP_32S2) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
         // Only ESP32 (original) has I2S1 (ESP32-S3 excluded by outer platform guard)
         else
         {
@@ -317,7 +319,7 @@ public:
         i2s->clkm_conf.val = 0;
 
         // ESP32-S2 and newer chips have a different register structure without clka_en
-        #if !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+        #if !defined(FL_IS_ESP_32S2) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
         i2s->clkm_conf.clka_en = 0;
         #endif
 
@@ -1351,4 +1353,4 @@ static void IRAM_ATTR loadAndTranspose(uint8_t *ledt, int led_per_strip, int num
 #endif
 }
 
-#endif // !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32C3) && ...
+#endif // !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C3) && ...

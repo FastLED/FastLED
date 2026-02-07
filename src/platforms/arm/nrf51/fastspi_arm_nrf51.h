@@ -2,7 +2,9 @@
 #ifndef __INC_FASTSPI_NRF_H
 #define __INC_FASTSPI_NRF_H
 
-#ifdef NRF51
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#ifdef FL_IS_NRF52
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_ALL_PINS_HARDWARE_SPI

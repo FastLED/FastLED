@@ -55,4 +55,4 @@ inline void interruptsEnable() {
 // Prevent isr_null.hpp from defining these functions (would cause ODR violation)
 #define FL_ISR_GLOBAL_INTERRUPTS_DEFINED
 
-#endif // __AVR__
+#endif // FL_IS_AVR

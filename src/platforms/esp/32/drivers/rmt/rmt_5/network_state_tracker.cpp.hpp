@@ -3,7 +3,8 @@
 
 #include "network_state_tracker.h"
 
-#if defined(ESP32) && FASTLED_RMT5
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) && FASTLED_RMT5
 
 #include "network_detector.h"
 
@@ -28,4 +29,4 @@ bool NetworkStateTracker::isActive() const {
 
 } // namespace fl
 
-#endif // ESP32 && FASTLED_RMT5
+#endif // FL_IS_ESP32 && FASTLED_RMT5

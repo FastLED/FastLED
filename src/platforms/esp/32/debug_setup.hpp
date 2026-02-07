@@ -13,7 +13,8 @@
 /// }
 /// @endcode
 
-#if defined(ESP32) && defined(FASTLED_DEBUG)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) && defined(FASTLED_DEBUG)
 
 #include "esp_log.h"
 
@@ -39,4 +40,4 @@ inline void fastled_debug_init() {
 }  // namespace detail
 }  // namespace fl
 
-#endif  // defined(ESP32) && defined(FASTLED_DEBUG)
+#endif  // defined(FL_IS_ESP32) && defined(FASTLED_DEBUG)

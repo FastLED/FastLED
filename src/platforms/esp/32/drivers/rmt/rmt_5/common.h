@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // ok no namespace fl
 
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -178,7 +180,7 @@ FL_EXTERN_C_END
 // === Platform-Specific Signal Routing ===
 
 // RMT signal routing for GPIO matrix
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
+#if defined(FL_IS_ESP_32P4)
 #define RMT_SIG_PAD_IDX RMT_SIG_PAD_OUT0_IDX
 #else
 #define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
@@ -214,4 +216,4 @@ FL_EXTERN_C_END
 #endif
 
 
-#endif // ESP32
+#endif // FL_IS_ESP32

@@ -19,7 +19,7 @@
 // ============================================================================
 // CPU Frequency
 // ============================================================================
-#if defined(STM32F2XX)
+#if defined(FL_IS_STM32_F2)
 #ifndef F_CPU
 #define F_CPU 120000000
 #endif
@@ -33,7 +33,7 @@
 // Yield Function
 // ============================================================================
 // Photon doesn't provide yield - we need to define it
-#if defined(STM32F2XX)
+#if defined(FL_IS_STM32_F2)
 #define FASTLED_NEEDS_YIELD
 extern "C" void yield();
 #endif

@@ -2,11 +2,12 @@
 // Refactored to use cross-platform fl::isr API
 
 // ok no namespace fl
-#if defined(ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C2) || defined(ARDUINO_ESP32C3_DEV) || defined(ARDUINO_ESP32C2_DEV)
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C2) || defined(ARDUINO_ESP32C3_DEV) || defined(ARDUINO_ESP32C2_DEV)
 
 #include "fl/compiler_control.h"
 #include "fl/isr.h"
@@ -80,4 +81,4 @@ FL_EXTERN_C void fl_spi_platform_isr_stop(void) {
 }
 
 #endif // CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C2
-#endif // ESP32
+#endif // FL_IS_ESP32

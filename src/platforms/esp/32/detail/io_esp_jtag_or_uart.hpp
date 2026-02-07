@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "fl/compiler_control.h"
 #include "fl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
@@ -11,7 +13,7 @@
 // Note: Implementation files are included via _build.hpp, not here
 
 // Detect if USB-Serial JTAG is available at compile time
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || \
+#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
 #define FL_ESP_HAS_USB_SERIAL_JTAG 1
 #else

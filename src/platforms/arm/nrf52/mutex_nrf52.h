@@ -30,7 +30,7 @@
 #pragma once
 #include "is_nrf52.h"
 
-#if defined(FL_IS_NRF52) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+#if defined(FL_IS_NRF52)
 
 // Detect FreeRTOS availability by checking for FreeRTOS.h inclusion
 // The Adafruit nRF52 BSP includes FreeRTOS by default

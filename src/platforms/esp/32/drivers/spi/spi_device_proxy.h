@@ -12,7 +12,8 @@
 /// The proxy provides a transparent interface that mirrors ESP32SPIOutput,
 /// allowing chipset controllers to work without modification.
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include "fl/stl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
@@ -279,4 +280,4 @@ private:
 
 }  // namespace fl
 
-#endif  // ESP32 variants
+#endif  // FL_IS_ESP32

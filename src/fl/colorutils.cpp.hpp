@@ -6,6 +6,7 @@
 /// refactored.
 
 #include "fl/int.h"
+#include "platforms/is_platform.h"
 #include "fl/stl/math.h"
 #include "fl/stl/stdint.h"
 
@@ -239,7 +240,7 @@ CRGB HeatColor(fl::u8 temperature) {
 /// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
 inline fl::u8 lsrX4(fl::u8 dividend) __attribute__((always_inline));
 inline fl::u8 lsrX4(fl::u8 dividend) {
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     dividend /= 2;
     dividend /= 2;
     dividend /= 2;
@@ -526,7 +527,7 @@ CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index,
     }
 
     fl::u8 hi5 = index;
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     hi5 /= 2;
     hi5 /= 2;
     hi5 /= 2;
@@ -621,7 +622,7 @@ CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index,
     }
 
     fl::u8 hi5 = index;
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     hi5 /= 2;
     hi5 /= 2;
     hi5 /= 2;
@@ -864,7 +865,7 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index,
     }
 
     fl::u8 hi5 = index;
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     hi5 /= 2;
     hi5 /= 2;
     hi5 /= 2;

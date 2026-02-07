@@ -1,5 +1,7 @@
 #pragma once
 
+#include "is_teensy.h"
+
 /// @file platforms/arm/teensy/pin_teensy.hpp
 /// Teensy (3.x, 4.x, etc.) pin implementation (header-only)
 ///
@@ -80,7 +82,7 @@ inline void setPwm16(int pin, uint16_t val) {
 }
 
 inline void setAdcRange(fl::AdcRange range) {
-#if defined(__IMXRT1062__) || defined(__IMXRT1052__)
+#if defined(FL_IS_TEENSY_4X)
     // Teensy 4.x: ADC range is fixed at 3.3V, analogReference() not supported
     // No-op: These processors have a fixed 3.3V reference
     (void)range;  // Suppress unused parameter warning

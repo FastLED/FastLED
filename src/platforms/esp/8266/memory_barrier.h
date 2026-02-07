@@ -10,7 +10,9 @@
 
 #pragma once
 
-#ifdef ESP8266
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP8266
 
 //=============================================================================
 // ESP8266 Memory Barriers
@@ -47,4 +49,4 @@
 //
 #define FL_MEMORY_BARRIER asm volatile("memw" ::: "memory")
 
-#endif // ESP8266
+#endif // FL_IS_ESP8266

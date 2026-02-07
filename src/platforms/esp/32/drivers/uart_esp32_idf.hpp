@@ -1,6 +1,7 @@
 // ESP32 UART Driver Implementation - Full Feature Support
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "uart_esp32.h"
 #include "fl/stl/assert.h"
@@ -459,4 +460,4 @@ bool UartEsp32::flush(uint32_t timeoutMs) {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

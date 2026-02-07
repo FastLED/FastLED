@@ -1,6 +1,7 @@
 // Thread-local storage implementation for ClocklessI2S RGBW conversion buffer
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "fl/thread_local.h"
 #include "fl/stl/vector.h"
@@ -19,4 +20,4 @@ fl::vector<uint8_t>& get_rgbw_scratchpad() {
 
 } // namespace fl
 
-#endif // ifdef ESP32
+#endif // ifdef FL_IS_ESP32

@@ -3,7 +3,8 @@
 // ok no namespace fl
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -38,20 +39,20 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_RESET_MEMORY_READ_POINTER(channel_id) \
     RMT.conf_ch[channel_id].conf1.mem_rd_rst = 1; \
     RMT.conf_ch[channel_id].conf1.mem_rd_rst = 0; \
     RMT.conf_ch[channel_id].conf1.apb_mem_rst = 1; \
     RMT.conf_ch[channel_id].conf1.apb_mem_rst = 0
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_RESET_MEMORY_READ_POINTER(channel_id) \
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 1; \
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 0; \
     RMT.chnconf0[channel_id].apb_mem_rst_chn = 1; \
     RMT.chnconf0[channel_id].apb_mem_rst_chn = 0; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_RESET_MEMORY_READ_POINTER(channel_id) \
     RMT.tx_conf[channel_id].mem_rd_rst = 1; \
     RMT.tx_conf[channel_id].mem_rd_rst = 0; \
@@ -74,9 +75,9 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return Bit position in interrupt registers
  */
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
 #define RMT5_TX_DONE_BIT(channel_id) ((channel_id) * 3)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_TX_DONE_BIT(channel_id) (channel_id)
 #else
 #define RMT5_TX_DONE_BIT(channel_id) (channel_id)
@@ -94,11 +95,11 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return Bit position in interrupt registers
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 24)
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#elif defined(FL_IS_ESP_32S2)
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 12)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 8)
 #else
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 8)
@@ -182,15 +183,15 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_ENABLE_TX_CHANNEL(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_conti_mode = 0; \
     RMT.conf_ch[channel_id].conf1.mem_tx_wrap_en = 0
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_ENABLE_TX_CHANNEL(channel_id) \
     RMT.chnconf0[channel_id].mem_tx_wrap_en_chn = 0; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_ENABLE_TX_CHANNEL(channel_id) \
     RMT.tx_conf[channel_id].mem_tx_wrap_en = 0; \
     RMT.tx_conf[channel_id].conf_update = 1
@@ -204,14 +205,14 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_start = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.chnconf0[channel_id].tx_start_chn = 1; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.tx_conf[channel_id].conf_update = 1; \
     RMT.tx_conf[channel_id].tx_start = 1
@@ -225,14 +226,14 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_STOP_TRANSMISSION(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_start = 0
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_STOP_TRANSMISSION(channel_id) \
     RMT.chnconf0[channel_id].tx_start_chn = 0; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_STOP_TRANSMISSION(channel_id) \
     RMT.tx_conf[channel_id].tx_start = 0; \
     RMT.tx_conf[channel_id].conf_update = 1
@@ -247,13 +248,13 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_HARD_RESET_CHANNEL(channel_id) \
     do { \
         RMT.conf_ch[channel_id].conf1.mem_rd_rst = 1; \
         RMT.conf_ch[channel_id].conf1.mem_rd_rst = 0; \
     } while(0)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_HARD_RESET_CHANNEL(channel_id) \
     do { \
         RMT.chnconf0[channel_id].mem_rd_rst_chn = 1; \
@@ -261,7 +262,7 @@ FL_EXTERN_C_END
         RMT.chnconf0[channel_id].mem_rd_rst_chn = 0; \
         RMT.chnconf0[channel_id].conf_update_chn = 1; \
     } while(0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_HARD_RESET_CHANNEL(channel_id) \
     do { \
         RMT.tx_conf[channel_id].mem_rd_rst = 1; \
@@ -282,13 +283,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return State value (0-3)
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_GET_STATE(channel_id) \
     ((RMT.status_ch[channel_id] >> 22) & 0x7)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_GET_STATE(channel_id) \
     (RMT.chnstatus[channel_id].state_chn)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_GET_STATE(channel_id) \
     (RMT.tx_status[channel_id].state)
 #else
@@ -314,16 +315,16 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param threshold Threshold value (number of RMT items)
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.tx_lim_ch[channel_id].limit = (threshold)
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#elif defined(FL_IS_ESP_32S2)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.chn_tx_lim[channel_id].tx_lim_chn = (threshold)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.tx_lim[channel_id].limit = (threshold)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.chn_tx_lim[channel_id].tx_lim_chn = (threshold)
 #else
@@ -352,19 +353,19 @@ FL_EXTERN_C_END
  *| ESP32-C5 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 9 bits | 0-511 |
  *| ESP32-P4 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 10 bits | 0-1023 |
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 // ESP32 classic: status_ch is plain uint32_t, extract bits [21:12]
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     ((RMT.status_ch[channel_id] >> 12) & 0x3FF)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32P4)
 // ESP32-S3, ESP32-P4: chnstatus has mem_raddr_ex_chn field (10 bits)
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     (RMT.chnstatus[channel_id].mem_raddr_ex_chn)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 // ESP32-C3: tx_status has mem_raddr_ex field (9 bits)
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     (RMT.tx_status[channel_id].mem_raddr_ex)
-#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
+#elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5)
 // ESP32-C6, ESP32-H2, ESP32-C5: chnstatus has mem_raddr_ex_chn field (9 bits)
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     (RMT.chnstatus[channel_id].mem_raddr_ex_chn)
@@ -388,15 +389,15 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return true if buffer empty, false otherwise
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 // ESP32: Extract from status_ch bit 25 (mem_empty)
 #define RMT5_IS_MEM_EMPTY(channel_id) \
     (((RMT.status_ch[channel_id] >> 25) & 0x1) != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.mem_empty_chn
 #define RMT5_IS_MEM_EMPTY(channel_id) \
     (RMT.chnstatus[channel_id].mem_empty_chn != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 // ESP32-C3: tx_status.mem_empty
 #define RMT5_IS_MEM_EMPTY(channel_id) \
     (RMT.tx_status[channel_id].mem_empty != 0)
@@ -411,14 +412,14 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return true if write error occurred, false otherwise
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 // ESP32: Not available
 #define RMT5_HAS_MEM_WR_ERROR(channel_id) 0
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.apb_mem_wr_err_chn
 #define RMT5_HAS_MEM_WR_ERROR(channel_id) \
     (RMT.chnstatus[channel_id].apb_mem_wr_err_chn != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 // ESP32-C3: tx_status.apb_mem_wr_err
 #define RMT5_HAS_MEM_WR_ERROR(channel_id) \
     (RMT.tx_status[channel_id].apb_mem_wr_err != 0)
@@ -433,14 +434,14 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return true if read error occurred, false otherwise
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 // ESP32: Not available
 #define RMT5_HAS_MEM_RD_ERROR(channel_id) 0
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.apb_mem_rd_err_chn
 #define RMT5_HAS_MEM_RD_ERROR(channel_id) \
     (RMT.chnstatus[channel_id].apb_mem_rd_err_chn != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 // ESP32-C3: tx_status.apb_mem_rd_err
 #define RMT5_HAS_MEM_RD_ERROR(channel_id) \
     (RMT.tx_status[channel_id].apb_mem_rd_err != 0)
@@ -456,13 +457,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param level 0 or 1
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_IDLE_OUTPUT_LEVEL(channel_id, level) \
     RMT.conf_ch[channel_id].conf1.idle_out_lv = (level)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_IDLE_OUTPUT_LEVEL(channel_id, level) \
     RMT.chnconf0[channel_id].idle_out_lv_chn = (level)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_IDLE_OUTPUT_LEVEL(channel_id, level) \
     RMT.tx_conf[channel_id].idle_out_lv = (level)
 #else
@@ -475,13 +476,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param enable true to enable, false to disable
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_IDLE_OUTPUT_ENABLE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf1.idle_out_en = (enable)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_IDLE_OUTPUT_ENABLE(channel_id, enable) \
     RMT.chnconf0[channel_id].idle_out_en_chn = (enable)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_IDLE_OUTPUT_ENABLE(channel_id, enable) \
     RMT.tx_conf[channel_id].idle_out_en = (enable)
 #else
@@ -495,13 +496,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param divider Clock divider value (0-255)
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CLOCK_DIVIDER(channel_id, divider) \
     RMT.conf_ch[channel_id].conf0.div_cnt = (divider)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_CLOCK_DIVIDER(channel_id, divider) \
     RMT.chnconf0[channel_id].div_cnt_chn = (divider)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_CLOCK_DIVIDER(channel_id, divider) \
     RMT.tx_conf[channel_id].div_cnt = (divider)
 #else
@@ -515,13 +516,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param enable true to enable carrier, false to disable
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CARRIER_ENABLE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf0.carrier_en = (enable)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_CARRIER_ENABLE(channel_id, enable) \
     RMT.chnconf0[channel_id].carrier_en_chn = (enable)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_CARRIER_ENABLE(channel_id, enable) \
     RMT.tx_conf[channel_id].carrier_en = (enable)
 #else
@@ -534,13 +535,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param level 0 or 1
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CARRIER_OUTPUT_LEVEL(channel_id, level) \
     RMT.conf_ch[channel_id].conf0.carrier_out_lv = (level)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_CARRIER_OUTPUT_LEVEL(channel_id, level) \
     RMT.chnconf0[channel_id].carrier_out_lv_chn = (level)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_CARRIER_OUTPUT_LEVEL(channel_id, level) \
     RMT.tx_conf[channel_id].carrier_out_lv = (level)
 #else
@@ -556,13 +557,13 @@ FL_EXTERN_C_END
  *
  * @param channel_id Hardware RMT channel
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 // ESP32: No-op (not required)
 #define RMT5_UPDATE_CONFIG(channel_id) ((void)0)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_UPDATE_CONFIG(channel_id) \
     RMT.chnconf0[channel_id].conf_update_chn = 1
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_UPDATE_CONFIG(channel_id) \
     RMT.tx_conf[channel_id].conf_update = 1
 #else
@@ -618,13 +619,13 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @return true if continuous mode enabled, false otherwise
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_GET_CONTINUOUS_MODE(channel_id) \
     (RMT.conf_ch[channel_id].conf1.tx_conti_mode != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_GET_CONTINUOUS_MODE(channel_id) \
     (RMT.chnconf0[channel_id].tx_conti_mode_chn != 0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_GET_CONTINUOUS_MODE(channel_id) \
     (RMT.tx_conf[channel_id].tx_conti_mode != 0)
 #else
@@ -638,16 +639,16 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param enable true to enable continuous mode, false for one-shot
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CONTINUOUS_MODE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf1.tx_conti_mode = (enable)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_CONTINUOUS_MODE(channel_id, enable) \
     do { \
         RMT.chnconf0[channel_id].tx_conti_mode_chn = (enable); \
         RMT.chnconf0[channel_id].conf_update_chn = 1; \
     } while(0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_CONTINUOUS_MODE(channel_id, enable) \
     do { \
         RMT.tx_conf[channel_id].tx_conti_mode = (enable); \
@@ -663,16 +664,16 @@ FL_EXTERN_C_END
  * @param channel_id Hardware RMT channel
  * @param always_on true for APB clock, false for REF_TICK
  */
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_REF_ALWAYS_ON(channel_id, always_on) \
     RMT.conf_ch[channel_id].conf1.ref_always_on = (always_on)
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
 #define RMT5_SET_REF_ALWAYS_ON(channel_id, always_on) \
     do { \
         RMT.chnconf0[channel_id].ref_always_on_chn = (always_on); \
         RMT.chnconf0[channel_id].conf_update_chn = 1; \
     } while(0)
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_REF_ALWAYS_ON(channel_id, always_on) \
     do { \
         RMT.tx_conf[channel_id].ref_always_on = (always_on); \
@@ -684,4 +685,4 @@ FL_EXTERN_C_END
 
 #endif // FASTLED_RMT5
 
-#endif // ESP32
+#endif // FL_IS_ESP32

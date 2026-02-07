@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 // ================================================================================================
 // FASTLED WASM ENTRY POINT
@@ -167,4 +169,4 @@ EMSCRIPTEN_KEEPALIVE int extern_loop() {
 
 }
 
-#endif // __EMSCRIPTEN__ 
+#endif // FL_IS_WASM

@@ -1,12 +1,14 @@
 #pragma once
 
+#include "platforms/is_platform.h"
+
 /// @file align.h
 /// Alignment macros for FastLED
 ///
 /// Provides platform-independent alignment control with special handling
 /// for GCC 4.8.3 (Roger Clark STM32 core) and 8-bit AVR platforms.
 
-#if defined(FASTLED_TESTING) || defined(__EMSCRIPTEN__)
+#if defined(FASTLED_TESTING) || defined(FL_IS_WASM)
 // alignof is a built-in keyword in C++11, no header needed
 // max_align_t is not used in this file
 #endif
@@ -16,7 +18,7 @@
 // ============================================================================
 // Aligns storage to N bytes (must be a power of 2).
 // Usage: struct FL_ALIGNAS(8) AlignedStruct { char data[10]; };
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     // AVR (8-bit): No alignment required - make it a no-op to save RAM
     #define FL_ALIGNAS(N) /* nothing */
 #elif defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
@@ -30,7 +32,7 @@
 // ============================================================================
 // FL_ALIGN - Fixed alignment (Emscripten: 8 bytes, others: no-op)
 // ============================================================================
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
     #define FL_ALIGN_BYTES 8
     #define FL_ALIGN FL_ALIGNAS(FL_ALIGN_BYTES)
 #else
@@ -43,7 +45,7 @@
 // ============================================================================
 // Aligns storage to match the alignment requirements of type T.
 // Usage: struct FL_ALIGN_AS(int) AlignedStruct { char data[10]; };
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     // AVR (8-bit): No alignment required - make it a no-op to save RAM
     #define FL_ALIGN_AS(T) /* nothing */
 #elif defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
@@ -61,7 +63,7 @@
 // Aligns storage to the maximum alignment requirement on the platform.
 // Suitable for generic type-erased storage that may hold any type.
 // Usage: struct FL_ALIGN_MAX GenericStorage { char bytes[64]; };
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
     // AVR (8-bit): No alignment required - make it a no-op to save RAM
     #define FL_ALIGN_MAX /* nothing */
 #elif defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
@@ -83,7 +85,7 @@
 // Usage: class FL_ALIGN_AS_T(max_align<Types...>::value) variant {};
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ * 100 + __GNUC_MINOR__) < 500
     // GCC 4.x has alignas() bug with template-dependent expressions
-    #if defined(__AVR__)
+    #if defined(FL_IS_AVR)
         // AVR (8-bit): No alignment required, make it a no-op to save RAM
         #define FL_ALIGN_AS_T(expr) /* nothing */
     #else

@@ -3,7 +3,8 @@
 
 #include "platforms/esp/32/drivers/cled.h"
 
-#if defined(ESP32) || defined(ESP_PLATFORM)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 
 #include <Arduino.h>
 
@@ -148,4 +149,4 @@ uint32_t CLED::mapToDutyCycle(uint16_t val16) const {
 }  // namespace esp32
 }  // namespace fl
 
-#endif  // ESP32
+#endif  // FL_IS_ESP32

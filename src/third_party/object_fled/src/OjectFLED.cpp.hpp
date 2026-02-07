@@ -57,7 +57,9 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 * Added wait for prior xmission to complete in destructor
 */
 
-#ifndef __IMXRT1062__
+#include "platforms/arm/teensy/is_teensy.h"
+
+#ifndef FL_IS_TEENSY_4X
 // Do nothing for other platforms.
 #else
 #include "ObjectFLED.h"
@@ -720,4 +722,4 @@ uint32_t ObjectFLED::getBalance() {
 } // namespace fl
 
 
-#endif // __IMXRT1062__
+#endif // FL_IS_TEENSY_4X

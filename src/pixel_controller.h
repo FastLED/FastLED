@@ -11,6 +11,7 @@
 
 
 #include "lib8tion/intmap.h"
+#include "platforms/is_platform.h"
 
 #include "rgbw.h"
 #include "fl/five_bit_hd_gamma.h"
@@ -586,7 +587,7 @@ struct PixelController {
 
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, uint8_t *b0_out, uint8_t *b1_out,
                                                uint8_t *b2_out, uint8_t *b3_out) {
-#ifdef __AVR__
+#ifdef FL_IS_AVR
         // Don't do RGBW conversion for AVR, just set the W pixel to black.
         uint8_t out[4] = {
             // Get the pixels in native order.

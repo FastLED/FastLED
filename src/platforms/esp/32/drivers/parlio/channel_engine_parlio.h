@@ -177,7 +177,8 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "fl/channels/data.h"
 #include "fl/channels/engine.h"
@@ -660,4 +661,4 @@ fl::shared_ptr<IChannelEngine> createParlioEngine();
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

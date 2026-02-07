@@ -1,9 +1,7 @@
 /// @file noise.cpp
 /// Functions to generate and fill arrays with noise.
 
-#if defined(__AVR__)
-#include "platforms/avr/is_avr.h"
-#endif
+#include "platforms/is_platform.h"
 
 #include <string.h>  // ok include
 #include "fl/stl/array.h"
@@ -60,7 +58,7 @@ FL_PROGMEM static uint8_t const p[] = {
 #define AVG15(U,V) (((U)+(V)) >> 1)
 #else
 // See if we should use the inlined avg15 for AVR with MUL instruction
-#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
+#if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 #define AVG15(U,V) (noise_detail::avg15_inline_avr_mul((U),(V)))
 // inlined copy of avg15 for AVR with MUL instruction; cloned from math8.h
 // Forcing this inline in the 3-D 16bit noise produces a 12% speedup overall,
@@ -171,7 +169,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
 // (and probably not worth including in lib8tion)
 static int8_t inline __attribute__((always_inline)) __attribute__((unused)) selectBasedOnHashBit(uint8_t hash, uint8_t bitnumber, int8_t a, int8_t b) {
 	int8_t result;
-#if !defined(__AVR__)
+#if !defined(FL_IS_AVR)
 	result = (hash & (1<<bitnumber)) ? a : b;
 #else
 	asm volatile(

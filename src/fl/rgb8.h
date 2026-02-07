@@ -11,6 +11,7 @@
 #include "fl/force_inline.h"
 #include "fl/stl/type_traits.h"
 #include "fl/ease.h"
+#include "platforms/is_platform.h"
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared
 #include "color.h"
@@ -105,7 +106,7 @@ struct CRGB {
         return raw[x];
     }
 
-    #if defined(__AVR__)
+    #if defined(FL_IS_AVR)
     // Saves a surprising amount of memory on AVR devices.
     CRGB() = default;
     #else

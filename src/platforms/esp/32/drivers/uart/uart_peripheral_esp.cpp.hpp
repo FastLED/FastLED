@@ -4,7 +4,8 @@
 /// Thin wrapper around ESP-IDF UART driver APIs. This implementation
 /// contains ZERO business logic - all methods delegate directly to ESP-IDF.
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "uart_peripheral_esp.h"
 #include "fl/log.h"
@@ -296,4 +297,4 @@ const UartPeripheralConfig& UartPeripheralEsp::getConfig() const {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

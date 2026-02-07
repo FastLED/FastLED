@@ -1,7 +1,8 @@
 // ok no namespace fl
 #pragma once
 
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
@@ -24,7 +25,7 @@ FL_EXTERN_C_END
 #endif
 
 #if !defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI)
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0) || defined(CONFIG_IDF_TARGET_ESP8266)
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0) || defined(FL_IS_ESP8266)
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #else
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
@@ -40,7 +41,7 @@ FL_EXTERN_C_END
 
 // Helper macro: Platforms that ONLY support RMT5 (no RMT4 fallback)
 // These chips have newer RMT architecture incompatible with legacy RMT4 driver
-#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+#if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32C5) || \
     defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
 #define FASTLED_ESP32_RMT5_ONLY_PLATFORM 1
 #else
@@ -87,7 +88,7 @@ FL_EXTERN_C_END
 // LCD RGB peripheral is only available on ESP32-P4 (uses RGB LCD peripheral for parallel LED driving)
 // Requires ESP-IDF 5.0+ and esp_lcd_panel_rgb.h header
 #if !defined(FASTLED_ESP32_HAS_LCD_RGB)
-#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
 #define FASTLED_ESP32_HAS_LCD_RGB 1
 #else
 #define FASTLED_ESP32_HAS_LCD_RGB 0
@@ -99,11 +100,11 @@ FL_EXTERN_C_END
 // Note: This is EXPERIMENTAL and lower priority than other drivers
 // The LCD_CAM peripheral is ESP32-S3 specific - it does NOT exist on other ESP32 variants
 #if !defined(FASTLED_ESP32_HAS_I2S_LCD_CAM)
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(FL_IS_ESP_32S3)
 #define FASTLED_ESP32_HAS_I2S_LCD_CAM 1
 #else
 #define FASTLED_ESP32_HAS_I2S_LCD_CAM 0
 #endif
 #endif
 
-#endif  // ESP32 || ARDUINO_ARCH_ESP32
+#endif  // FL_IS_ESP32

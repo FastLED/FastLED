@@ -9,7 +9,8 @@
 #include <sched.h>
 #endif
 
-#ifndef __EMSCRIPTEN__
+#include "platforms/wasm/is_wasm.h"
+#ifndef FL_IS_WASM
 #include <thread>
 #endif
 
@@ -18,7 +19,7 @@ fl::function<void(uint32_t)> g_delay_override;
 
 extern "C" {
 
-#if !defined(__EMSCRIPTEN__) && !defined(FASTLED_NO_ARDUINO_STUBS)
+#if !defined(FL_IS_WASM) && !defined(FASTLED_NO_ARDUINO_STUBS)
 // STUB timing functions - excluded for WASM builds which provide their own implementations
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 
@@ -41,7 +42,7 @@ void yield() {
 #endif
 }
 
-#endif // !__EMSCRIPTEN__ && !FASTLED_NO_ARDUINO_STUBS
+#endif // !FL_IS_WASM && !FASTLED_NO_ARDUINO_STUBS
 
 } // extern "C"
 

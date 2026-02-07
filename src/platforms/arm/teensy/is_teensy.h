@@ -63,6 +63,11 @@
     #define FL_IS_TEENSY_41
 #endif
 
+// Teensy MicroMod (ARM Cortex-M7, 600 MHz, IMXRT1052)
+#if defined(__IMXRT1052__) && !defined(FL_IS_TEENSY_40) && !defined(FL_IS_TEENSY_41)
+    #define FL_IS_TEENSY_40
+#endif
+
 // Teensy 3.x family umbrella (all 3.x boards)
 #if defined(FL_IS_TEENSY_30) || defined(FL_IS_TEENSY_31) || defined(FL_IS_TEENSY_32) || \
     defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36)

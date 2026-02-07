@@ -1,6 +1,7 @@
 #pragma once
 
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+#ifdef FL_IS_WASM
 
 #include "fl/stl/string.h"
 #include "fl/audio.h"
@@ -37,4 +38,4 @@ class WasmAudioImpl {
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

@@ -30,7 +30,9 @@
     THE SOFTWARE.
 */
 
-#ifndef __IMXRT1062__
+#include "platforms/arm/teensy/is_teensy.h"
+
+#ifndef FL_IS_TEENSY_4X
 #error "Sorry, ObjectFLED only works on Teensy 4.x boards."
 #endif
 #if TEENSYDUINO < 121

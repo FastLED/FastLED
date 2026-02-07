@@ -2,6 +2,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 namespace fl {
 
@@ -34,7 +35,7 @@ public:
     inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
     inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
-#if defined(STM32F2XX)
+#if defined(FL_IS_STM32_F2)
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRRL = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRRH = _MASK; }
 #else
@@ -55,7 +56,7 @@ public:
     inline static port_t loval() __attribute__ ((always_inline)) { return _GPIO::r()->ODR & ~_MASK; }
     inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_GPIO::r()->ODR; }
 
-#if defined(STM32F2XX)
+#if defined(FL_IS_STM32_F2)
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRL; }
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRH; }
 #else

@@ -265,6 +265,6 @@ _FL_DEFPIN(36, 1, D);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif // STM32F1 or STM32F4
+#endif // FL_IS_STM32_F1 or FL_IS_STM32_F4
 
 }  // namespace fl

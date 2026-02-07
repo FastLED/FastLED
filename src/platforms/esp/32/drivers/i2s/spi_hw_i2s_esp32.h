@@ -4,7 +4,8 @@
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2
 // ESP32-S3: Use LCD_CAM peripheral instead (see lcd_driver_i80.h in FastLED)
 // ESP32-C3, C2, C5, C6, H2, P4: Have completely different I2S peripheral architecture (no parallel mode)
-#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 
 /// @file spi_hw_i2s_esp32.h
 /// @brief ESP32 I2S-based 16-lane SPI hardware implementation
@@ -73,7 +74,7 @@
 #include "third_party/yves/I2SClockBasedLedDriver/I2SClockBasedLedDriver.h"
 
 // ESP32 SDK headers
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
@@ -212,4 +213,4 @@ private:
 
 } // namespace fl
 
-#endif // ESP32 (excluding S3/C3/C2/C5/C6/H2)
+#endif // FL_IS_ESP32 (excluding S3/C3/C2/C5/C6/H2)

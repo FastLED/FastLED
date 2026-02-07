@@ -15,4 +15,4 @@
 #error "Bare-metal AVR (without Arduino framework) is not currently supported for I/O operations"
 #endif
 
-#endif // __AVR__
+#endif // FL_IS_AVR

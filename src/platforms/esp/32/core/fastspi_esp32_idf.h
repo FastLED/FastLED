@@ -1,4 +1,7 @@
 #pragma once
+
+#include "platforms/esp/is_esp.h"
+
 // ESP32 Hardware SPI implementation using native ESP-IDF driver
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
 
@@ -17,7 +20,7 @@ FL_EXTERN_C_END
 namespace fl {
 
 // Determine default SPI host based on chip variant
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3 || \
+#if FL_IS_ESP_32S2 || FL_IS_ESP_32S3 || \
     CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3 || \
     CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32C6 || \
     CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32P4

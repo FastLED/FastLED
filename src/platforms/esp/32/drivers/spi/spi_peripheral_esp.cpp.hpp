@@ -4,7 +4,8 @@
 /// Thin wrapper around ESP-IDF SPI Master driver APIs. This implementation
 /// contains ZERO business logic - all methods delegate directly to ESP-IDF.
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
@@ -346,4 +347,4 @@ uint64_t SpiPeripheralESPImpl::getMicroseconds() {
 } // namespace fl
 
 #endif // FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#endif // ESP32
+#endif // FL_IS_ESP32

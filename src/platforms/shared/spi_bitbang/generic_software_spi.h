@@ -12,6 +12,7 @@
 #define __INC_PLATFORMS_SHARED_SPI_BITBANG_GENERIC_SOFTWARE_SPI_H
 
 #include "fl/fastled.h"
+#include "platforms/is_platform.h"
 
 #include "fastled_delay.h"
 #include "fl/force_inline.h"
@@ -141,7 +142,7 @@ private:
 
 public:
 
-#if defined(FASTLED_TEENSY4)
+#if defined(FL_IS_TEENSY_4X)
 	#define DELAY_NS (1000 / (SPI_SPEED/1000000))
 	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
@@ -162,7 +163,7 @@ public:
 		//cli();
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi();
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 			// try to ensure we never have adjacent write opcodes to the same register
 			fl::FastPin<CLOCK_PIN>::lo();
 			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
@@ -174,7 +175,7 @@ public:
 		} else {
 			fl::FastPin<DATA_PIN>::lo();
 			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 			// try to ensure we never have adjacent write opcodes to the same register
 			fl::FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY;
 #else

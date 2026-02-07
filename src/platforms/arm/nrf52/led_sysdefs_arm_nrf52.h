@@ -5,6 +5,7 @@
 #include "fl/force_inline.h"
 
 #include "platforms/arm/is_arm.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 #ifndef FL_IS_ARM
 #error "FL_IS_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
@@ -74,7 +75,7 @@ typedef __IO uint32_t RwReg;
     #define FASTLED_FORCE_NRF52_WRAP_MALLOC 1
 #endif
 
-#if FASTLED_FORCE_NRF52_WRAP_MALLOC && (defined(ARDUINO_NRF52_ADAFRUIT) || defined(NRF52_SERIES))
+#if FASTLED_FORCE_NRF52_WRAP_MALLOC && defined(FL_IS_NRF52)
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -109,6 +110,6 @@ static volatile void* fastled_nrf52_force_malloc_wrappers_link(void) {
 #ifdef __cplusplus
 }
 #endif
-#endif // FASTLED_FORCE_NRF52_WRAP_MALLOC && (ARDUINO_NRF52_ADAFRUIT || NRF52_SERIES)
+#endif // FASTLED_FORCE_NRF52_WRAP_MALLOC && FL_IS_NRF52
 
 #endif // __LED_SYSDEFS_ARM_NRF52

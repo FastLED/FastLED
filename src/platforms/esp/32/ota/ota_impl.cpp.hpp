@@ -1,7 +1,9 @@
 /// @file platforms/esp/32/ota/ota_impl.cpp
 /// ESP32-specific OTA implementation
 
-#if defined(ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/ota.h"
 #include "platforms/esp/esp_version.h"
@@ -11,7 +13,7 @@
 // OTA requires IDF 4.0+ for HTTP server and OTA APIs
 // ESP32-H2 and ESP32-P4 lack WiFi hardware
 // Arduino framework uses different OTA implementation
-#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(CONFIG_IDF_TARGET_ESP32H2) && !defined(CONFIG_IDF_TARGET_ESP32P4) && !defined(ARDUINO)
+#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4) && !defined(ARDUINO)
 #define FL_ESP_OTA_SUPPORTED
 #endif
 
@@ -1425,4 +1427,4 @@ fl::shared_ptr<IOTA> platform_create_ota() {
 
 #endif  // FL_ESP_OTA_SUPPORTED
 
-#endif  // ESP32
+#endif  // FL_IS_ESP32

@@ -6,7 +6,7 @@
 /// @def FASTLED_ALL_PINS_VALID
 /// For stub platforms (testing, native compilation, WebAssembly), all pins are considered valid.
 /// This is automatically defined when FASTLED_STUB_IMPL or __EMSCRIPTEN__ is set.
-#if defined(FASTLED_STUB_IMPL) || defined(__EMSCRIPTEN__)
+#if defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)
     #define FASTLED_ALL_PINS_VALID
 #endif
 

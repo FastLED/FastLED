@@ -48,15 +48,17 @@
 #include "coder.h"
 #include "fl/stl/stdint.h"
 #include "assembly.h"
+#include "platforms/arm/is_arm.h"
+#include "platforms/avr/is_avr.h"
 
 namespace fl {
 namespace third_party {
 
 // Compile C++ polyphase implementation unless ARM32 assembly is available
-// ARM assembly (asmpoly_gcc.S) compiles only on: __GNUC__ && __arm__ && !__thumb__ && !__thumb2__ && !__AVR__
+// ARM assembly (asmpoly_gcc.S) compiles only on: __GNUC__ && FL_IS_ARM && !__thumb__ && !__thumb2__ && !FL_IS_AVR
 // This matches: ARM Cortex-A (full ARM32 instruction set)
 // Does NOT match: ARM Cortex-M (Thumb-2 only), AVR, or other non-ARM32 platforms
-#if !(defined(__GNUC__) && defined(__arm__) && !defined(__thumb__) && !defined(__thumb2__) && !defined(__AVR__))
+#if !(defined(__GNUC__) && defined(FL_IS_ARM) && !defined(__thumb__) && !defined(__thumb2__) && !defined(FL_IS_AVR))
 #define COMPILE_CPP_POLYPHASE
 #endif
 

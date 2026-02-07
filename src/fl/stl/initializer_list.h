@@ -2,14 +2,15 @@
 
 #pragma once
 
+#include "platforms/is_platform.h"
 
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists
-#if !defined(__AVR__)
+#if !defined(FL_IS_AVR)
 #include <initializer_list>
 #endif
 
-#if defined(__AVR__)
+#if defined(FL_IS_AVR)
 // Emulated initializer_list for AVR platforms
 // MUST be in std namespace for compiler's brace-initialization magic to work
 

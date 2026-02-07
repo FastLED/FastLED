@@ -10,17 +10,18 @@
 /// abstraction).
 
 // Allow compilation on both ESP32 hardware and stub platforms (for testing)
-#if defined(ESP32) || defined(FASTLED_STUB_IMPL)
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/compiler_control.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/feature_flags/enabled.h"
 #endif
 
 // On ESP32: Check FASTLED_RMT5 flag
 // On stub platforms: Always allow compilation (no feature flag check)
-#if !defined(ESP32) || FASTLED_RMT5
+#if !defined(FL_IS_ESP32) || FASTLED_RMT5
 
 #include "channel_engine_rmt.h"
 #include "fl/chipsets/led_timing.h"
@@ -1035,13 +1036,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     size_t calculateTargetChannelCount(bool networkActive) {
         if (!networkActive) {
             // No network: Use maximum channels for platform (2× memory blocks)
-            #if defined(CONFIG_IDF_TARGET_ESP32)
+            #if defined(FL_IS_ESP_32DEV)
                 return 4;  // 512 words ÷ 128 = 4 channels
-            #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+            #elif defined(FL_IS_ESP_32S2)
                 return 2;  // 256 words ÷ 128 = 2 channels
-            #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+            #elif defined(FL_IS_ESP_32S3)
                 return 3;  // 1 DMA + 2 on-chip (192 ÷ 96 = 2)
-            #elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+            #elif defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || \
                   defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
                 return 1;  // C3/C6/H2/C5: Only 96 words
             #else
@@ -1049,13 +1050,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             #endif
         } else {
             // Network active: Reduce channels to allow 3× buffering (except C3/C6/H2/C5)
-            #if defined(CONFIG_IDF_TARGET_ESP32)
+            #if defined(FL_IS_ESP_32DEV)
                 return 2;  // 512 words ÷ 192 = 2 channels (3× buffering)
-            #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+            #elif defined(FL_IS_ESP_32S2)
                 return 1;  // 256 words ÷ 192 = 1 channel (3× buffering)
-            #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+            #elif defined(FL_IS_ESP_32S3)
                 return 2;  // 1 DMA + 1 on-chip (192 words ÷ 144 = 1 on-chip with 3×)
-            #elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+            #elif defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || \
                   defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
                 return 1;  // C3/C6/H2/C5: Cannot use 3× (insufficient memory), keep 1 channel
             #else
@@ -1512,4 +1513,4 @@ fl::shared_ptr<ChannelEngineRMT> ChannelEngineRMT::create() {
 
 #endif // FASTLED_RMT5 or FASTLED_STUB_IMPL
 
-#endif // ESP32 or FASTLED_STUB_IMPL
+#endif // FL_IS_ESP32 or FASTLED_STUB_IMPL

@@ -13,24 +13,25 @@
 #include "fl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep
 #include "fl/channels/config.h"  // for ChannelConfig
+#include "platforms/is_platform.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
 
 #ifndef MAX_CLED_CONTROLLERS
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 // if mega or leonardo, allow more controllers
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega32U4__)
+#if defined(FL_IS_AVR_ATMEGA_2560) || defined(FL_IS_AVR_ATMEGA)
 #define MAX_CLED_CONTROLLERS 16
 #else
 #define MAX_CLED_CONTROLLERS 8
 #endif
 #else
 #define MAX_CLED_CONTROLLERS 64
-#endif  // __AVR__
+#endif  // FL_IS_AVR
 #endif  // MAX_CLED_CONTROLLERS
 
-#if defined(__SAM3X8E__)
+#if defined(FL_IS_SAM)
 volatile fl::u32 fuckit;
 #endif
 
@@ -453,7 +454,7 @@ void delay_at_max_brightness_for_power(uint16_t ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	manager.setDriverEnabled(name, enabled);
@@ -546,7 +547,7 @@ fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConf
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
-	#if !defined(ESP8266) && !defined(ESP32)
+	#if !defined(FL_IS_ESP8266) && !defined(FL_IS_ESP32)
 	extern "C" void __cxa_pure_virtual (void) {}
 	#endif
 

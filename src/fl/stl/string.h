@@ -12,7 +12,7 @@
 #include "fl/stl/charconv.h"
 #include "fl/stl/not_null.h"
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
 #include <string>
 #endif
 
@@ -2362,7 +2362,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-#ifdef __EMSCRIPTEN__
+#ifdef FL_IS_WASM
     string(const std::string &str) {  // okay std namespace
         copy(str.c_str(), str.size());
     }

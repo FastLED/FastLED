@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
@@ -48,4 +50,4 @@ void EngineListener::onCanvasUiSet(CLEDController *strip,
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

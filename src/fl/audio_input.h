@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "platforms/is_platform.h"
 #include "fl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/variant.h"
@@ -98,10 +99,10 @@ namespace TeensyI2S {
 
     // Get LRCLK (WS) pin for given I2S port
     constexpr int getPinWS(I2SPort port) {
-#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36)
         // Teensy 3.x - only I2S1 available
         return (port == I2S1) ? 23 : -1;
-#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+#elif defined(FL_IS_TEENSY_4X)
         // Teensy 4.x - I2S1 and I2S2 available
         return (port == I2S1) ? 20 : 3;
 #else
@@ -112,10 +113,10 @@ namespace TeensyI2S {
 
     // Get RX (SD) pin for given I2S port
     constexpr int getPinSD(I2SPort port) {
-#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36)
         // Teensy 3.x
         return (port == I2S1) ? 13 : -1;
-#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+#elif defined(FL_IS_TEENSY_4X)
         // Teensy 4.x
         return (port == I2S1) ? 8 : 5;
 #else
@@ -126,10 +127,10 @@ namespace TeensyI2S {
 
     // Get BCLK pin for given I2S port
     constexpr int getPinCLK(I2SPort port) {
-#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36)
         // Teensy 3.x
         return (port == I2S1) ? 9 : -1;
-#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+#elif defined(FL_IS_TEENSY_4X)
         // Teensy 4.x
         return (port == I2S1) ? 21 : 4;
 #else

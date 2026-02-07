@@ -1,12 +1,13 @@
 /// @file rx_device.cpp
 /// @brief Implementation of RxDevice factory
 
+#include "platforms/is_platform.h"
 #include "rx_device.h"
 #include "platforms/shared/rx_device_dummy.h" // ok platform headers
 #include "fl/chipsets/led_timing.h"
 #include "fl/str.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
 #endif
@@ -62,7 +63,7 @@ ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
 // ESP32-specific explicit template specializations
 namespace fl {
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 
 // RMT device specialization for ESP32
 template <>
@@ -100,6 +101,6 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
     return RxDevice::createDummy();
 }
 
-#endif // ESP32
+#endif // FL_IS_ESP32
 
 } // namespace fl

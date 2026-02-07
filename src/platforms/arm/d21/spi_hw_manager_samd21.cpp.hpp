@@ -13,9 +13,9 @@
 ///
 // allow-include-after-namespace
 
-#if defined(ARDUINO_SAMD_ZERO) || defined(ADAFRUIT_FEATHER_M0) || \
-    defined(ARDUINO_SAMD_FEATHER_M0) || defined(ARDUINO_SAM_ZERO) || \
-    defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E18A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD21)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/dbg.h"
@@ -64,4 +64,4 @@ void initSpiHardware() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // SAMD21 platform guards
+#endif  // FL_IS_SAMD21

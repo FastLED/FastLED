@@ -24,6 +24,7 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "fastled_delay.h"
+#include "platforms/avr/is_avr.h"
 
 namespace fl {
 
@@ -108,7 +109,8 @@ protected:
 
         // Disable interrupts to ensure timing accuracy
         // (LED protocols are very timing-sensitive on most platforms)
-#if defined(ARDUINO_ARCH_AVR)
+
+#if defined(FL_IS_AVR)
         cli();  // Disable interrupts on AVR
 #endif
 
@@ -118,7 +120,7 @@ protected:
         }
 
         // Re-enable interrupts
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(FL_IS_AVR)
         sei();  // Re-enable interrupts on AVR
 #endif
 

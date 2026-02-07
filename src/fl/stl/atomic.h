@@ -1,5 +1,6 @@
 #pragma once
 
+#include "platforms/is_platform.h"
 #include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED (no circular deps)
 #include "fl/int.h"
 
@@ -7,7 +8,7 @@
 // 1. Multi-threaded mode (pthread support)
 // 2. ESP32 platforms (ISRs require atomic operations, and ESP32 has fast hardware atomics)
 // Note: ESP8266 excluded - lacks native atomic support, would require linking libatomic
-#if FASTLED_MULTITHREADED || defined(ESP32)
+#if FASTLED_MULTITHREADED || defined(FL_IS_ESP32)
 #define FASTLED_USE_REAL_ATOMICS 1
 #include "platforms/atomic.h"  // IWYU pragma: keep
 #else

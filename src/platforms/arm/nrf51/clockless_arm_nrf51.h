@@ -2,7 +2,9 @@
 #ifndef __INC_CLOCKLESS_ARM_NRF51
 #define __INC_CLOCKLESS_ARM_NRF51
 
-#if defined(NRF51)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#if defined(FL_IS_NRF52)
 
 #include <nrf51_bitfields.h>
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
@@ -87,5 +89,5 @@ public:
 };
 
 
-#endif // NRF51
+#endif // FL_IS_NRF52
 #endif // __INC_CLOCKLESS_ARM_NRF51

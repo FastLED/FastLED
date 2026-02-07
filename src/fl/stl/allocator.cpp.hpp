@@ -1,3 +1,4 @@
+#include "platforms/is_platform.h"
 #include "fl/stl/allocator.h"
 #include "fl/int.h"
 #include "fl/thread_local.h"
@@ -7,7 +8,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/compiler_control.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "platforms/esp/esp_version.h" // ok platform headers
@@ -31,7 +32,7 @@ constexpr bool allocator_traits<Allocator>::has_allocate_at_least_v;
 
 namespace {
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 // On esp32, attempt to always allocate in psram first.
 void *DefaultAlloc(fl::size size) {
     void *out = heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
@@ -169,7 +170,7 @@ void Free(void *ptr) {
     Dealloc(ptr);
 }
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 // ESP32-specific memory allocation for RMT buffer pooling
 // These functions provide direct access to specific memory regions for performance
 

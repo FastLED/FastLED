@@ -30,7 +30,9 @@
 
 #pragma once
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 #include "iuart_peripheral.h"
 
@@ -111,4 +113,4 @@ private:
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

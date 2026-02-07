@@ -19,7 +19,9 @@
 
 #include "watchdog_esp32.h"
 
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/esp/esp_version.h"
 
@@ -30,4 +32,4 @@
     #include "watchdog_esp32_idf4.hpp"
 #endif
 
-#endif // ESP32
+#endif // FL_IS_ESP32

@@ -36,20 +36,20 @@
 #include "color.h"
 #include "fastled_config.h"
 #include "fl/chipsets/timing_traits.h"
-#include "platforms/avr/is_avr.h"
+#include "platforms/is_platform.h"
 
 namespace fl {
 
 // Forward declarations for method selection
 template<int DATA_PIN>
 struct NeoPixelBusMethodSelector {
-#if defined(ESP32)
+#if defined(FL_IS_ESP32)
     using DefaultMethod = NeoEsp32Rmt0800KbpsMethod;
-#elif defined(ESP8266)  
+#elif defined(FL_IS_ESP8266)
     using DefaultMethod = NeoEsp8266Uart1800KbpsMethod;
 #elif defined(FL_IS_AVR)
     using DefaultMethod = NeoAvr800KbpsMethod;
-#elif defined(__arm__)
+#elif defined(FL_IS_ARM)
     using DefaultMethod = NeoArm800KbpsMethod;
 #else
     using DefaultMethod = NeoBitBangMethod;

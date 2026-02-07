@@ -3,7 +3,9 @@
 #ifndef __INC_LIB8TION_RANDOM_H
 #define __INC_LIB8TION_RANDOM_H
 
-#if defined(__AVR__)
+#include "platforms/is_platform.h"
+
+#if defined(FL_IS_AVR)
 #include "platforms/avr/is_avr.h"  // ok platform headers
 #endif
 

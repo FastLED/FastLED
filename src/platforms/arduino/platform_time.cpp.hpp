@@ -1,7 +1,9 @@
 #pragma once
 
 // Only compile for real Arduino platforms (not stub, not WASM)
-#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+#include "platforms/wasm/is_wasm.h"
+
+#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 
 #include "platforms/time_platform.h"
 #include "Arduino.h"  // okay banned header
@@ -28,4 +30,4 @@ fl::u32 micros() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // ARDUINO && !FASTLED_STUB_IMPL && !__EMSCRIPTEN__
+#endif  // ARDUINO && !FASTLED_STUB_IMPL && !FL_IS_WASM

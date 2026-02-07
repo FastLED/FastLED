@@ -13,9 +13,10 @@
 
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
+#include "platforms/arm/sam/is_sam.h"
 
 // Platform guard - only compile for SAM platforms
-#if defined(__SAM3X8E__) || defined(ARDUINO_SAM_DUE)
+#if defined(FL_IS_SAM)
 
 namespace fl {
 namespace isr {
@@ -171,4 +172,4 @@ inline void interruptsEnable() {
 
 } // namespace fl
 
-#endif // __SAM3X8E__ || ARDUINO_SAM_DUE
+#endif // FL_IS_SAM

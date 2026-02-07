@@ -15,8 +15,9 @@
 /// 3. Register unified adapter with ChannelBusManager
 
 #include "fl/compiler_control.h"
+#include "platforms/arm/rp/is_rp.h"
 
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/adapters/spi_channel_adapter.h"
@@ -138,4 +139,4 @@ void initChannelEngines() {
 
 } // namespace fl
 
-#endif // PICO_RP2040 || PICO_RP2350 || ARDUINO_ARCH_RP2040 || ARDUINO_ARCH_RP2350
+#endif // FL_IS_RP2040 || FL_IS_RP2350

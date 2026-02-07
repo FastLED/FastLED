@@ -1,8 +1,9 @@
 #pragma once
 
 #include "fl/compiler_control.h"
+#include "platforms/is_platform.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
@@ -258,4 +259,4 @@ protected:
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

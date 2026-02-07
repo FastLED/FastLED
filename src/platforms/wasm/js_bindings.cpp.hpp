@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript PURE ARCHITECTURE BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
@@ -438,4 +440,4 @@ uint8_t* getStripPixelData(int stripIndex, int* outSize) {
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

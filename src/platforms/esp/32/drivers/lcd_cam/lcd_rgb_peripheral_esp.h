@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // Only compile for ESP32-P4 with RGB LCD support
-#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
 
 #include "ilcd_rgb_peripheral.h"
 #include "esp_lcd_panel_ops.h"

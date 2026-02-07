@@ -8,7 +8,9 @@
 ///
 /// IMPORTANT: Uses fl::PinMode, fl::PinValue, fl::AdcRange enum classes.
 
-#if defined(ARDUINO_ARCH_SILABS)
+#include "platforms/arm/silabs/is_silabs.h"
+
+#if defined(FL_IS_SILABS)
 
 // ============================================================================
 // Native Silicon Labs EMLIB GPIO Implementation
@@ -136,4 +138,4 @@ inline void setAdcRange(AdcRange range) {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // ARDUINO_ARCH_SILABS
+#endif  // FL_IS_SILABS

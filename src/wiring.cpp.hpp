@@ -32,7 +32,7 @@ LIB8STATIC void  __attribute__((always_inline)) fastinc32 (volatile uint32_t & _
   }
 }
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
+#if defined(FL_IS_AVR_ATTINY)
 ISR(TIM0_OVF_vect)
 #else
 ISR(TIMER0_OVF_vect)
@@ -113,7 +113,7 @@ void init()
 #endif
 
   // set timer 0 prescale factor to 64
-#if defined(__AVR_ATmega128__)
+#if defined(FL_IS_AVR_ATMEGA)
   // CPU specific: different values for the ATmega128
   sbi(TCCR0, CS02);
 #elif defined(TCCR0) && defined(CS01) && defined(CS00)

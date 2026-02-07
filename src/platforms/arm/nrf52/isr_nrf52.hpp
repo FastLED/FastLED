@@ -25,8 +25,9 @@
 
 #pragma once
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
-    defined(FL_IS_NRF52) || defined(FL_IS_NRF52832) || defined(FL_IS_NRF52833) || defined(FL_IS_NRF52840)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#if defined(FL_IS_NRF52)
 
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
@@ -660,11 +661,11 @@ const char* get_error_string(int error_code) {
 }
 
 const char* get_platform_name() {
-#if defined(FL_IS_NRF52840) || defined(NRF52840_XXAA)
+#if defined(FL_IS_NRF52840)
     return "NRF52840";
-#elif defined(FL_IS_NRF52833) || defined(NRF52833_XXAA)
+#elif defined(FL_IS_NRF52833)
     return "NRF52833";
-#elif defined(FL_IS_NRF52832) || defined(NRF52832_XXAA)
+#elif defined(FL_IS_NRF52832)
     return "NRF52832";
 #else
     return "NRF52";
@@ -710,4 +711,4 @@ inline void interruptsEnable() {
 
 } // namespace fl
 
-#endif // NRF52 platform guards
+#endif // FL_IS_NRF52

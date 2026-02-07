@@ -1,4 +1,6 @@
-#if defined(__EMSCRIPTEN__)
+#include "is_wasm.h"
+
+#if defined(FL_IS_WASM)
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript ASYNC UI BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
@@ -200,4 +202,4 @@ extern "C" {
     }
 }
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

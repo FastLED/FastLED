@@ -11,6 +11,7 @@
 #endif
 
 #include "fastspi_types.h"
+#include "is_stm32.h"
 
 namespace fl {
 
@@ -38,7 +39,8 @@ private:
 #if FASTLED_STM32_USE_HAL
     // Arduino Mbed framework: SPIClass is abstract, use concrete MbedSPI
     // MbedSPI requires pin parameters (MISO, MOSI, SCK) in constructor
-    #ifdef ARDUINO_ARCH_MBED
+
+    #ifdef FL_IS_STM32_MBED
         arduino::MbedSPI* m_spi;
     #else
         SPIClass m_spi;
@@ -55,7 +57,7 @@ public:
     STM32SPIOutput()
         : m_pSelect(nullptr)
 #if FASTLED_STM32_USE_HAL
-        #ifdef ARDUINO_ARCH_MBED
+        #ifdef FL_IS_STM32_MBED
             , m_spi(nullptr)
         #endif
         , m_initialized(false)
@@ -66,7 +68,7 @@ public:
     STM32SPIOutput(Selectable* pSelect)
         : m_pSelect(pSelect)
 #if FASTLED_STM32_USE_HAL
-        #ifdef ARDUINO_ARCH_MBED
+        #ifdef FL_IS_STM32_MBED
             , m_spi(nullptr)
         #endif
         , m_initialized(false)
@@ -74,7 +76,7 @@ public:
     {
     }
 
-#if FASTLED_STM32_USE_HAL && defined(ARDUINO_ARCH_MBED)
+#if FASTLED_STM32_USE_HAL && defined(FL_IS_STM32_MBED)
     // Destructor for Arduino Mbed - clean up allocated SPIClass
     ~STM32SPIOutput() {
         if (m_spi) {
@@ -96,7 +98,7 @@ public:
             // Initialize SPI with specified pins
             // Note: STM32duino's SPI.begin() uses the default SPI pins
             // For custom pins, we rely on the board's pin mapping
-            #ifdef ARDUINO_ARCH_MBED
+            #ifdef FL_IS_STM32_MBED
                 if (!m_spi) {
                     // Arduino Mbed requires MbedSPI with pin parameters
                     // SPIClass is abstract, so we use MbedSPI(MISO, MOSI, SCK)
@@ -155,7 +157,7 @@ public:
     // Write a single byte via SPI
     void writeByte(uint8_t b) {
 #if FASTLED_STM32_USE_HAL
-        #ifdef ARDUINO_ARCH_MBED
+        #ifdef FL_IS_STM32_MBED
             if (m_spi) {
                 m_spi->transfer(b);
             }
@@ -185,7 +187,7 @@ public:
         uint32_t spi_speed = SPI_SPEED;
         if (spi_speed > 36000000) spi_speed = 36000000; // Cap at 36 MHz
 
-        #ifdef ARDUINO_ARCH_MBED
+        #ifdef FL_IS_STM32_MBED
             if (m_spi) {
                 m_spi->beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
             }
@@ -204,7 +206,7 @@ public:
             m_pSelect->release();
         }
 #if FASTLED_STM32_USE_HAL
-        #ifdef ARDUINO_ARCH_MBED
+        #ifdef FL_IS_STM32_MBED
             if (m_spi) {
                 m_spi->endTransaction();
             }
@@ -229,7 +231,7 @@ public:
     void writeBytesValueRaw(uint8_t value, int len) {
         while (len--) {
 #if FASTLED_STM32_USE_HAL
-            #ifdef ARDUINO_ARCH_MBED
+            #ifdef FL_IS_STM32_MBED
                 if (m_spi) {
                     m_spi->transfer(value);
                 }

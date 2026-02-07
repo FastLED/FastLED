@@ -10,7 +10,9 @@
 
 #include "watchdog_esp32.h"
 
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
@@ -20,7 +22,7 @@
 #include "platforms/esp/esp_version.h"
 
 // USB Serial JTAG registers - only available on ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || \
+#if FL_IS_ESP_32S3 || FL_IS_ESP_32C3 || \
     CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
     #include "soc/usb_serial_jtag_reg.h"
     #define HAS_USB_SERIAL_JTAG 1
@@ -167,4 +169,4 @@ void watchdog_setup(uint32_t timeout_ms,
 
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

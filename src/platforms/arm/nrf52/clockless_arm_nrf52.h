@@ -1,7 +1,9 @@
 #ifndef __INC_CLOCKLESS_ARM_NRF52
 #define __INC_CLOCKLESS_ARM_NRF52
 
-#if defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/is_nrf52.h"
+
+#if defined(FL_IS_NRF52)
 
 #include "fl/chipsets/timing_traits.h"
 
@@ -387,5 +389,5 @@ CMinWait<_WAIT_TIME_MICROSECONDS> ClocklessController<_DATA_PIN, TIMING, _RGB_OR
 */
 
 }  // namespace fl
-#endif // #ifdef NRF52_SERIES
+#endif // FL_IS_NRF52
 #endif // __INC_CLOCKLESS_ARM_NRF52

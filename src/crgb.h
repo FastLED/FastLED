@@ -6,15 +6,16 @@
 
 #include "fl/rgb8.h"
 #include "chsv.h"
+#include "platforms/is_platform.h"
 
 // Whether to allow HD_COLOR_MIXING
 #ifndef FASTLED_HD_COLOR_MIXING
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 // Saves some memory on these constrained devices.
 #define FASTLED_HD_COLOR_MIXING 0
 #else
 #define FASTLED_HD_COLOR_MIXING 1
-#endif  // __AVR__
+#endif  // FL_IS_AVR
 #endif  // FASTLED_HD_COLOR_MIXING
 
 

@@ -16,7 +16,9 @@
 
 // ok no namespace fl - dispatch header includes platform-specific implementations
 
-#if defined(ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "fl/compiler_control.h"
 
@@ -35,4 +37,4 @@
     #include "platforms/esp/32/isr_esp32_idf3.hpp"
 #endif
 
-#endif // ESP32
+#endif // FL_IS_ESP32

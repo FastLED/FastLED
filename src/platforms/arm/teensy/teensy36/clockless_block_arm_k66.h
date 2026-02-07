@@ -8,7 +8,9 @@
 
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.
-#if defined(FASTLED_TEENSY3)
+#include "is_teensy.h"
+
+#if defined(FL_IS_TEENSY_3X)
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORTB_FIRST_PIN 0

@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 // ================================================================================================
 // FASTLED WASM JAVASCRIPT UTILITY FUNCTIONS
@@ -52,4 +54,4 @@ namespace fl {
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

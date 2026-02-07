@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 // The WS2812 family of chipsets is special! Why?
 // Because it's super cheap. So we optimize it heavily.
 //
@@ -30,7 +32,7 @@ class WS2812I2S:
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 using WS2812Controller800Khz = WS2812I2S<DATA_PIN, RGB_ORDER>;
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
-#elif defined(FASTLED_ESP32_LCD_DRIVER) && defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(FASTLED_ESP32_LCD_DRIVER) && defined(FL_IS_ESP_32S3)
 #include "platforms/esp/32/drivers/lcd_cam/clockless_lcd_i80_esp32.h"
 // Explicit name for LCD I80-based WS2812 controller (ESP32-S3)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>

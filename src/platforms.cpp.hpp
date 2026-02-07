@@ -4,6 +4,7 @@
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "fl/compiler_control.h"
+#include "platforms/is_platform.h"
 
 // Removed duplicate weak definition of timer_millis for ATtiny1604.
 // The variable is already defined in avr_millis_timer_null_counter.hpp when needed,
@@ -12,8 +13,8 @@
 // Provide a single consolidated weak timer_millis symbol for AVR tiny/x-y parts
 // whose cores do not export it, satisfying MS_COUNTER binding in led_sysdefs_avr.h.
 // This complements avr_millis_timer_null_counter.hpp when that TU is not built.
-#if defined(__AVR__)
-#  if defined(__AVR_ATtiny1604__) || defined(ARDUINO_attinyxy6) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtiny1616__)
+#if defined(FL_IS_AVR)
+#  if defined(FL_IS_AVR_ATTINY_MODERN) || defined(ARDUINO_attinyxy6)
 #    ifdef __cplusplus
 extern "C" {
 #    endif
@@ -28,7 +29,7 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
 // They must be defined as C functions, or they won't
 // be found (due to name mangling), and thus won't
 // override any default weak definition.
-#if defined(NRF52_SERIES)
+#if defined(FL_IS_NRF52)
 
     #include "platforms/arm/is_arm.h"
     #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
@@ -52,4 +53,4 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
             #endif
     FL_EXTERN_C_END
 
-#endif // defined(NRF52_SERIES)
+#endif // defined(FL_IS_NRF52)

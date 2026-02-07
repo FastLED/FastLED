@@ -1,7 +1,9 @@
 /// @file task_coroutine_esp32.cpp
 /// @brief ESP32 FreeRTOS TaskCoroutine platform implementation
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 #include "task_coroutine_esp32.h"
 #include "fl/warn.h"
@@ -104,4 +106,4 @@ void ITaskCoroutine::exitCurrent() {
 } // namespace platforms
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

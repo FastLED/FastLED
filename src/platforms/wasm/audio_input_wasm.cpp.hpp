@@ -1,4 +1,6 @@
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 #include "audio_input_wasm.hpp"
 #include "fl/dbg.h"
@@ -180,4 +182,4 @@ void pushAudioSamples(const int16_t* samples, int count, uint32_t timestamp) {
 
 } // extern "C"
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

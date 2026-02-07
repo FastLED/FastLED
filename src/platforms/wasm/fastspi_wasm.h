@@ -1,6 +1,7 @@
 #pragma once
 
-#ifndef __EMSCRIPTEN__
+#include "is_wasm.h"
+#ifndef FL_IS_WASM
 #error "This file should only be included in an Emscripten build"
 #endif
 

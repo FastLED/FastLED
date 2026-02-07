@@ -8,7 +8,9 @@
 /// - Xtensa (ESP32, S2, S3): simd_xtensa.hpp
 /// - RISC-V (C2, C3, C5, C6, H2, P4): simd_riscv.hpp
 
-#if defined(ESP32)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 // Dispatch to architecture-specific implementation
 #if defined(__XTENSA__)
@@ -21,4 +23,4 @@
     #error "Unknown ESP32 architecture (expected __XTENSA__ or __riscv)"
 #endif
 
-#endif  // defined(ESP32)
+#endif  // defined(FL_IS_ESP32)

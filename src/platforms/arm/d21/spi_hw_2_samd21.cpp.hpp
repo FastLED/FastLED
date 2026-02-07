@@ -9,8 +9,9 @@
 /// uses SERCOM for single-lane SPI combined with GPIO bit-banging or TCC
 /// timer-based parallel output for the second lane.
 
-#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || \
-    defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD21)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
@@ -492,4 +493,4 @@ void SPIDualSAMD21::cleanup() {
 
 }  // namespace fl
 
-#endif  // __SAMD21G18A__ || __SAMD21J18A__ || ...
+#endif  // FL_IS_SAMD21

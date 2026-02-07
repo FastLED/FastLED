@@ -2,9 +2,7 @@
 #ifndef __LED_SYSDEFS_ARM_NRF51
 #define __LED_SYSDEFS_ARM_NRF51
 
-#ifndef NRF51
-#define NRF51
-#endif
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 #define LED_TIMER NRF_TIMER1
 #define FASTLED_NO_PINMAP

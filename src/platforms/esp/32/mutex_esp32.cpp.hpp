@@ -1,7 +1,9 @@
 /// @file mutex_esp32.cpp
 /// @brief ESP32 FreeRTOS mutex platform implementation
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 #include "mutex_esp32.h"
 #include "fl/warn.h"
@@ -132,4 +134,4 @@ bool RecursiveMutexESP32::try_lock() {
 } // namespace platforms
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

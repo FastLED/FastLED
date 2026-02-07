@@ -1,4 +1,7 @@
-#if defined (ESP32) || defined (ARDUINO_ARCH_ESP8266) || defined (ARDUINO_ARCH_RP2040)
+#include "platforms/esp/is_esp.h"
+#include "platforms/arm/rp/is_rp2040.h"
+
+#if defined(FL_IS_ESP32) || defined(FL_IS_ESP8266) || defined(FL_IS_RP2040)
   #define TJPGD_LOAD_FFS
 #endif
 

@@ -35,4 +35,4 @@
 #endif  // FASTLED_DEFINE_TIMER_WEAK_SYMBOL
 #endif  // FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL
 
-#endif  // __AVR__
+#endif  // FL_IS_AVR

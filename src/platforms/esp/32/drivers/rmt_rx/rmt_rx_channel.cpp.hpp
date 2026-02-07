@@ -1,6 +1,7 @@
 #include "rmt_rx_channel.h"
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -1461,4 +1462,4 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) {
 } // namespace fl
 
 #endif // FASTLED_RMT5
-#endif // ESP32
+#endif // FL_IS_ESP32

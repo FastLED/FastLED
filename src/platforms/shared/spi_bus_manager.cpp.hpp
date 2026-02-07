@@ -1,4 +1,5 @@
 #include "spi_bus_manager.h"
+#include "platforms/is_platform.h"
 
 #include "fastled_config.h"  // For FASTLED_FORCE_SOFTWARE_SPI
 #include "fl/stl/vector.h"
@@ -937,15 +938,15 @@ uint32_t SPIBusManager::selectBusSpeed(const SPIBusInfo& bus) {
 
 uint32_t SPIBusManager::getPlatformDefaultSpeed() {
     // Platform-specific defaults based on hardware capabilities
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+    #if defined(FL_IS_ESP32)
         return 40000000;  // ESP32: 40 MHz default (can do up to 80 MHz)
-    #elif defined(__SAMD51__)
+    #elif defined(FL_IS_SAMD51)
         return 40000000;  // SAMD51: 40 MHz (can do 60 MHz)
-    #elif defined(NRF52) || defined(NRF52832) || defined(NRF52840)
+    #elif defined(FL_IS_NRF52) || defined(FL_IS_NRF52832) || defined(FL_IS_NRF52840)
         return 8000000;   // NRF52: 8 MHz maximum
-    #elif defined(__SAMD21G18A__) || defined(__SAMD21__)
+    #elif defined(FL_IS_SAMD21)
         return 12000000;  // SAMD21: 12 MHz safe default (max 24 MHz)
-    #elif defined(__IMXRT1062__) || defined(TEENSY40) || defined(TEENSY41)
+    #elif defined(FL_IS_TEENSY_4X) || defined(TEENSY40) || defined(TEENSY41)
         return 30000000;  // Teensy 4.x: 30 MHz default
     #else
         return 12000000;  // Conservative default for unknown platforms
@@ -954,15 +955,15 @@ uint32_t SPIBusManager::getPlatformDefaultSpeed() {
 
 uint32_t SPIBusManager::getPlatformMaxSpeed() {
     // Platform-specific maximums based on hardware datasheets
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+    #if defined(FL_IS_ESP32)
         return 80000000;  // ESP32: 80 MHz maximum with IO_MUX pins
-    #elif defined(__SAMD51__)
+    #elif defined(FL_IS_SAMD51)
         return 60000000;  // SAMD51: 60 MHz maximum
-    #elif defined(NRF52) || defined(NRF52832) || defined(NRF52840)
+    #elif defined(FL_IS_NRF52) || defined(FL_IS_NRF52832) || defined(FL_IS_NRF52840)
         return 8000000;   // NRF52: 8 MHz maximum (hardware limitation)
-    #elif defined(__SAMD21G18A__) || defined(__SAMD21__)
+    #elif defined(FL_IS_SAMD21)
         return 24000000;  // SAMD21: 24 MHz maximum (F_CPU/2)
-    #elif defined(__IMXRT1062__) || defined(TEENSY40) || defined(TEENSY41)
+    #elif defined(FL_IS_TEENSY_4X) || defined(TEENSY40) || defined(TEENSY41)
         return 50000000;  // Teensy 4.x: 50 MHz safe maximum
     #else
         return 25000000;  // Conservative maximum for unknown platforms
@@ -1026,7 +1027,7 @@ void SPIBusManager::releaseBusHardware(SPIBusInfo& bus) {
 }
 
 void SPIBusManager::softwareSPIWrite(uint8_t clock_pin, uint8_t data_pin, const uint8_t* data, size_t length) {
-#if !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+#if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
     // Real hardware implementation using Pin class for bit-banging
     // At this point in the header (after class definition), Pin should be available
     // if the user included FastLED.h before using SPIBusManager.

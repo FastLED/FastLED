@@ -1,7 +1,9 @@
 #pragma once
 
 // Only compile for WASM platform
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 #include "platforms/time_platform.h"
 #include "fl/stl/stdint.h"
@@ -44,4 +46,4 @@ fl::u32 micros() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // __EMSCRIPTEN__
+#endif  // FL_IS_WASM

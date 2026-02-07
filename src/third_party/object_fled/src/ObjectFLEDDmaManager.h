@@ -1,6 +1,8 @@
 #pragma once
 
-#if defined(__IMXRT1062__)  // Teensy 4.0/4.1 only
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1 only
 
 #include <Arduino.h>
 #include "DMAChannel.h"
@@ -58,4 +60,4 @@ class ObjectFLEDDmaManager {
 
 } // namespace fl
 
-#endif // __IMXRT1062__
+#endif // FL_IS_TEENSY_4X

@@ -13,7 +13,8 @@
 /// This file now contains only channel management logic. All hardware-specific
 /// operations have been moved to parlio_engine.{h,cpp}.
 
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "fl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -484,4 +485,4 @@ void ChannelEnginePARLIO::beginTransmission(
 } // namespace fl
 
 #endif // FASTLED_ESP32_HAS_PARLIO
-#endif // ESP32
+#endif // FL_IS_ESP32

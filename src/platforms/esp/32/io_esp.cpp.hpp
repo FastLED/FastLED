@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 // ok no namespace fl
 
@@ -23,4 +25,4 @@
 #include "platforms/arduino/io_arduino.hpp"
 #endif
 
-#endif // ESP32
+#endif // FL_IS_ESP32

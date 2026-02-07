@@ -1,6 +1,7 @@
 
+#include "platforms/is_platform.h"
 
-#ifdef __AVR__
+#ifdef FL_IS_AVR
 
 // do nothing
 
@@ -296,4 +297,4 @@ bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
 
 } // namespace fl
 
-#endif // __AVR__
+#endif // FL_IS_AVR

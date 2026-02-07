@@ -1,7 +1,9 @@
 /// @file semaphore_esp32.cpp
 /// @brief ESP32 FreeRTOS semaphore platform implementation
 
-#ifdef ESP32
+#include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 
 #include "semaphore_esp32.h"
 #include "fl/warn.h"
@@ -156,4 +158,4 @@ template bool CountingSemaphoreESP32<1>::try_acquire_until(const std::chrono::ti
 } // namespace platforms
 } // namespace fl
 
-#endif // ESP32
+#endif // FL_IS_ESP32

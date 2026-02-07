@@ -4,7 +4,7 @@
 /// Cross-platform export macros for FastLED dynamic library support
 
 #ifndef FASTLED_EXPORT
-    #if defined(__EMSCRIPTEN__)
+    #if defined(FL_IS_WASM)
         #include <emscripten.h>
         #define FASTLED_EXPORT EMSCRIPTEN_KEEPALIVE
     #elif defined(_WIN32) || defined(_WIN64)

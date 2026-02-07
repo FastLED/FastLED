@@ -1,8 +1,10 @@
 #ifndef __INC_CLOCKLESS_ARM_SAM_H
 #define __INC_CLOCKLESS_ARM_SAM_H
 
+#include "platforms/arm/sam/is_sam.h"
+
 // SAM/Due platform: Set this FIRST before any includes to prevent generic controller alias
-#if defined(__SAM3X8E__)
+#if defined(FL_IS_SAM)
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #endif
 
@@ -12,7 +14,7 @@ namespace fl {
 // Definition for a single channel clockless controller for the sam family of arm chips, like that used in the due and rfduino
 // See clockless.h for detailed info on how the template parameters are used.
 
-#if defined(__SAM3X8E__)
+#if defined(FL_IS_SAM)
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessSAMHardware : public CPixelLEDController<RGB_ORDER> {
@@ -128,7 +130,7 @@ protected:
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 using ClocklessController = ClocklessSAMHardware<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
 
-#endif  // defined(__SAM3X8E__)
+#endif  // defined(FL_IS_SAM)
 
 }  // namespace fl
 #endif  // __INC_CLOCKLESS_ARM_SAM_H

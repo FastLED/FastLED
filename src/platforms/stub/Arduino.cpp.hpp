@@ -1,5 +1,6 @@
 
-#if (defined(FASTLED_USE_STUB_ARDUINO) || defined(__EMSCRIPTEN__)) && !defined(FASTLED_NO_ARDUINO_STUBS)
+#include "platforms/wasm/is_wasm.h"
+#if (defined(FASTLED_USE_STUB_ARDUINO) || defined(FL_IS_WASM)) && !defined(FASTLED_NO_ARDUINO_STUBS)
 // STUB platform implementation - excluded for WASM builds which provide their own Arduino.cpp
 // Also excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
 

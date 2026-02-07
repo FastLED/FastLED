@@ -1,4 +1,6 @@
-#if defined(__IMXRT1062__)  // Teensy 4.0/4.1 only
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1 only
 
 #include "ObjectFLEDDmaManager.h"
 #include "fl/delay.h"
@@ -41,4 +43,4 @@ bool ObjectFLEDDmaManager::isBusy() {
 
 } // namespace fl
 
-#endif // __IMXRT1062__
+#endif // FL_IS_TEENSY_4X

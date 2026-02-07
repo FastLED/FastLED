@@ -3,12 +3,15 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "is_teensy.h"
+
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
 // This is a fallback bit-banging implementation. The default ClocklessController
 // for Teensy 4.x now uses ObjectFLED (see clockless.h dispatch header).
 // See clockless.h for detailed info on how the template parameters are used.
-#if defined(FASTLED_TEENSY4)
+
+#if defined(FL_IS_TEENSY_4X)
 
 // Note: FL_CLOCKLESS_CONTROLLER_DEFINED is now set in the clockless.h dispatch header
 

@@ -9,8 +9,9 @@
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via Timer/PPI)
 
 #include "fl/compiler_control.h"
+#include "is_nrf52.h"
 
-#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(ARDUINO_NRF52_ADAFRUIT)
+#if defined(FL_IS_NRF52)
 
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/adapters/spi_channel_adapter.h"
@@ -117,4 +118,4 @@ void initChannelEngines() {
 
 } // namespace fl
 
-#endif // NRF52 platform guards
+#endif // FL_IS_NRF52

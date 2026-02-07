@@ -5,6 +5,11 @@ Two-phase scanning:
   1. Fast scan: skip files that don't contain any preprocessor conditionals
   2. Slow scan: line-by-line parse with comment tracking, only flags defines
      on #if/#ifdef/#ifndef/#elif lines.
+
+Scope:
+  - Checks all files under src/ (fl/, platforms/, third_party/, lib8tion/, etc.)
+  - Excludes: is_*.h detection headers, root dispatch headers,
+    compile test files, and platform-level dispatch headers.
 """
 
 import re
@@ -14,11 +19,28 @@ from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
 
-PLATFORMS_ROOT = PROJECT_ROOT / "src" / "platforms"
+SRC_ROOT = PROJECT_ROOT / "src"
+PLATFORMS_ROOT = SRC_ROOT / "platforms"
+
+# Root-level dispatch headers that MUST use native defines for coarse
+# platform routing. These are the entry points that route to platform-specific
+# code based on compiler-defined macros.
+_ROOT_DISPATCH_HEADERS: set[str] = {
+    "platforms.h",  # Routes to platform-specific FastLED headers
+    "led_sysdefs.h",  # Routes to platform-specific system definitions
+    "fastspi.h",  # Routes to platform-specific SPI implementations
+    "fastled_progmem.h",  # Routes to platform-specific PROGMEM definitions
+}
+
+# Files that act as dispatch/config headers selecting platform-specific
+# implementations at the architecture level (e.g., AVR asm vs ARM vs C).
+_DISPATCH_CONFIG_FILES: set[str] = {
+    "config.h",  # lib8tion/config.h — selects ASM vs C math implementations
+}
 
 # Mapping of native compiler defines to their FL_IS_* equivalents.
 # Each native define maps to the most specific FL_IS_* group it belongs to.
-# Source: src/platforms/avr/is_avr.h
+# Sources: src/platforms/*/is_*.h detection headers
 NATIVE_TO_MODERN_DEFINES: dict[str, str] = {
     # ── General AVR ──────────────────────────────────────────────────
     "__AVR__": "FL_IS_AVR",
@@ -108,6 +130,119 @@ NATIVE_TO_MODERN_DEFINES: dict[str, str] = {
     "ARDUINO_AVR_DIGISPARK": "FL_IS_AVR_ATTINY",
     "ARDUINO_AVR_DIGISPARKPRO": "FL_IS_AVR_ATTINY",
     "IS_BEAN": "FL_IS_AVR_ATTINY",
+    # ── ESP platforms ────────────────────────────────────────────────
+    "ESP32": "FL_IS_ESP32",
+    "ESP8266": "FL_IS_ESP8266",
+    "ESP_PLATFORM": "FL_IS_ESP32",
+    "ARDUINO_ARCH_ESP32": "FL_IS_ESP32",
+    "ARDUINO_ARCH_ESP8266": "FL_IS_ESP8266",
+    # ESP-IDF target defines (CONFIG_IDF_TARGET_*)
+    "CONFIG_IDF_TARGET_ESP32": "FL_IS_ESP_32DEV",
+    "CONFIG_IDF_TARGET_ESP32S2": "FL_IS_ESP_32S2",
+    "CONFIG_IDF_TARGET_ESP32S3": "FL_IS_ESP_32S3",
+    "CONFIG_IDF_TARGET_ESP32C2": "FL_IS_ESP_32C2",
+    "CONFIG_IDF_TARGET_ESP32C3": "FL_IS_ESP_32C3",
+    "CONFIG_IDF_TARGET_ESP32C5": "FL_IS_ESP_32C5",
+    "CONFIG_IDF_TARGET_ESP32C6": "FL_IS_ESP_32C6",
+    "CONFIG_IDF_TARGET_ESP32H2": "FL_IS_ESP_32H2",
+    "CONFIG_IDF_TARGET_ESP32P4": "FL_IS_ESP_32P4",
+    "CONFIG_IDF_TARGET_ESP8266": "FL_IS_ESP8266",
+    # ESP-IDF architecture defines
+    "CONFIG_IDF_TARGET_ARCH_XTENSA": "FL_IS_ESP32_XTENSA",
+    "CONFIG_IDF_TARGET_ARCH_RISCV": "FL_IS_ESP32_RISCV",
+    # Bare ESP32 variant defines (without CONFIG_IDF_TARGET_ prefix)
+    "ESP32S3": "FL_IS_ESP_32S3",
+    "ESP32C3": "FL_IS_ESP_32C3",
+    "ESP32C6": "FL_IS_ESP_32C6",
+    # ── Teensy platforms ─────────────────────────────────────────────
+    "__MK20DX128__": "FL_IS_TEENSY_30",
+    "__MK20DX256__": "FL_IS_TEENSY_3X",
+    "__MKL26Z64__": "FL_IS_TEENSY_LC",
+    "__MK64FX512__": "FL_IS_TEENSY_35",
+    "__MK66FX1M0__": "FL_IS_TEENSY_36",
+    "__IMXRT1062__": "FL_IS_TEENSY_4X",
+    "__IMXRT1052__": "FL_IS_TEENSY_4X",
+    # ── ARM general ──────────────────────────────────────────────────
+    "__arm__": "FL_IS_ARM",
+    "__SAM3X8E__": "FL_IS_SAM",
+    # ── STM32 platforms ──────────────────────────────────────────────
+    "STM32F10X_MD": "FL_IS_STM32_F1",
+    "__STM32F1__": "FL_IS_STM32_F1",
+    "STM32F1": "FL_IS_STM32_F1",
+    "STM32F1xx": "FL_IS_STM32_F1",
+    "STM32F2XX": "FL_IS_STM32_F2",
+    "STM32F2xx": "FL_IS_STM32_F2",
+    "STM32F4": "FL_IS_STM32_F4",
+    "STM32F4xx": "FL_IS_STM32_F4",
+    "STM32F7": "FL_IS_STM32_F7",
+    "STM32F7xx": "FL_IS_STM32_F7",
+    "STM32L4": "FL_IS_STM32_L4",
+    "STM32L4xx": "FL_IS_STM32_L4",
+    "STM32H7": "FL_IS_STM32_H7",
+    "STM32H7xx": "FL_IS_STM32_H7",
+    "STM32G4": "FL_IS_STM32_G4",
+    "STM32G4xx": "FL_IS_STM32_G4",
+    "STM32U5": "FL_IS_STM32_U5",
+    "STM32U5xx": "FL_IS_STM32_U5",
+    # ── NRF platforms ────────────────────────────────────────────────
+    "NRF51": "FL_IS_NRF52",
+    "NRF52_SERIES": "FL_IS_NRF52",
+    "NRF52840_XXAA": "FL_IS_NRF52840",
+    "NRF52833_XXAA": "FL_IS_NRF52833",
+    "NRF52832_XXAA": "FL_IS_NRF52832",
+    # Bare NRF variant defines (without _XXAA suffix)
+    "NRF52": "FL_IS_NRF52",
+    "NRF52840": "FL_IS_NRF52840",
+    "NRF52833": "FL_IS_NRF52833",
+    "NRF52832": "FL_IS_NRF52832",
+    # ── SAMD platforms ───────────────────────────────────────────────
+    "__SAMD21G18A__": "FL_IS_SAMD21",
+    "__SAMD21J18A__": "FL_IS_SAMD21",
+    "__SAMD21E17A__": "FL_IS_SAMD21",
+    "__SAMD21E18A__": "FL_IS_SAMD21",
+    "__SAMD21__": "FL_IS_SAMD21",
+    "__SAMD51G19A__": "FL_IS_SAMD51",
+    "__SAMD51J19A__": "FL_IS_SAMD51",
+    "__SAME51J19A__": "FL_IS_SAMD51",
+    "__SAMD51P19A__": "FL_IS_SAMD51",
+    "__SAMD51P20A__": "FL_IS_SAMD51",
+    "__SAMD51J20A__": "FL_IS_SAMD51",
+    "__SAMD51__": "FL_IS_SAMD51",
+    # ── RP2040/RP2350 platforms ──────────────────────────────────────
+    "TARGET_RP2040": "FL_IS_RP2040",
+    "ARDUINO_ARCH_RP2040": "FL_IS_RP2040",
+    "PICO_RP2040": "FL_IS_RP2040",
+    "ARDUINO_ARCH_RP2350": "FL_IS_RP2350",
+    "PICO_RP2350": "FL_IS_RP2350",
+    # ── Other Arduino architecture defines ───────────────────────────
+    "ARDUINO_ARCH_SAMD": "FL_IS_SAMD",
+    "ARDUINO_ARCH_STM32": "FL_IS_STM32",
+    "ARDUINO_ARCH_NRF52": "FL_IS_NRF52",
+    "ARDUINO_ARCH_APOLLO3": "FL_IS_APOLLO3",
+    "ARDUINO_ARCH_RENESAS": "FL_IS_RENESAS",
+    "ARDUINO_ARCH_RENESAS_UNO": "FL_IS_RENESAS",
+    "ARDUINO_ARCH_RENESAS_PORTENTA": "FL_IS_RENESAS",
+    "ARDUINO_ARCH_SILABS": "FL_IS_SILABS",
+    "ARDUINO_ARCH_AVR": "FL_IS_AVR",
+    "ARDUINO_ARCH_MBED": "FL_IS_STM32_MBED",
+    "ARDUINO_SAM_DUE": "FL_IS_SAM",
+    # ── Arduino board-level defines ─────────────────────────────────
+    "ARDUINO_GIGA": "FL_IS_STM32_H7",
+    "ARDUINO_GIGA_M7": "FL_IS_STM32_H7",
+    "ARDUINO_NRF52_ADAFRUIT": "FL_IS_NRF52",
+    # ── WASM / Emscripten ───────────────────────────────────────────
+    "__EMSCRIPTEN__": "FL_IS_WASM",
+    # ── Particle / Spark ────────────────────────────────────────────
+    "SPARK": "FL_IS_STM32_F2",
+    # ── Apollo3 bare define ─────────────────────────────────────────
+    "APOLLO3": "FL_IS_APOLLO3",
+    # ── FastLED Teensy convenience defines ──────────────────────────
+    "FASTLED_TEENSY3": "FL_IS_TEENSY_3X",
+    "FASTLED_TEENSY4": "FL_IS_TEENSY_4X",
+    "FASTLED_TEENSYLC": "FL_IS_TEENSY_LC",
+    # ── NRF51 legacy ─────────────────────────────────────────────────
+    "__RFduino__": "FL_IS_NRF52",
+    "__Simblee__": "FL_IS_NRF52",
 }
 
 # Regex matching preprocessor conditional directives:
@@ -137,16 +272,37 @@ def _fast_scan_dominated(content: str) -> bool:
     return False
 
 
+def _is_in_platforms_dir(path_obj: Path) -> bool:
+    """Check if a file is under src/platforms/."""
+    try:
+        path_obj.relative_to(PLATFORMS_ROOT)
+        return True
+    except ValueError:
+        return False
+
+
 class NativePlatformDefinesChecker(FileContentChecker):
-    """Checker class for native platform defines in platform-specific directories."""
+    """Checker for native platform defines across all src/ directories.
+
+    Scans all C++ files under src/ (including third_party/) for legacy platform
+    defines in preprocessor conditionals and suggests FL_IS_* equivalents.
+
+    Exclusions:
+      - is_*.h detection headers (they define FL_IS_* from native defines)
+      - Root dispatch headers (platforms.h, led_sysdefs.h, etc.)
+      - Platform-level dispatch headers (fastpin_*.h, led_sysdefs_*.h, etc.)
+      - Compile test files
+      - core_detection.h
+      - lib8tion/config.h (architecture-level dispatch for ASM vs C)
+    """
 
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for native platform defines."""
-        # Check files in src/platforms directory and its subdirectories
-        if not file_path.startswith(str(PLATFORMS_ROOT)):
+        # Must be under src/
+        if not file_path.startswith(str(SRC_ROOT)):
             return False
 
         # Check file extension - .h, .cpp, .hpp files
@@ -156,36 +312,47 @@ class NativePlatformDefinesChecker(FileContentChecker):
         path_obj = Path(file_path)
         file_name = path_obj.name
 
-        # Skip the is_*.h detection headers - they MUST use native defines
+        # Skip the is_*.h detection headers — they MUST use native defines
         # These files convert native compiler defines into FL_IS_* defines
-        if path_obj.name.startswith("is_"):
+        if file_name.startswith("is_"):
             return False
 
-        # Skip core detection headers - they detect which Arduino core is in use
+        # Skip core detection headers — they detect which Arduino core is in use
         if "core_detection" in file_name.lower():
             return False
 
-        # Skip dispatch headers at src/platforms/*.h root level
-        if path_obj.parent == PLATFORMS_ROOT:
-            return False
-
-        # Skip platform-level dispatch headers
-
-        # Pattern 1: fastpin_*.h — all fastpin files are pin dispatch headers
-        if file_name.startswith("fastpin_"):
-            return False
-
-        # Pattern 2: led_sysdefs_<platform>.h
-        if file_name.startswith("led_sysdefs_") and file_name.count("_") <= 2:
-            return False
-
-        # Pattern 3: Explicit dispatcher files
-        if "dispatch" in file_name.lower() or file_name == "fastpin_legacy.h":
-            return False
-
-        # Pattern 4: Compile test files
+        # Skip compile test files
         if "compile_test" in file_name.lower():
             return False
+
+        # ── Root-level src/ dispatch headers ──────────────────────────
+        # These files at src/*.h route to platform-specific implementations
+        if path_obj.parent == SRC_ROOT and file_name in _ROOT_DISPATCH_HEADERS:
+            return False
+
+        # ── lib8tion/config.h — architecture-level dispatch ──────────
+        if file_name in _DISPATCH_CONFIG_FILES:
+            # Only skip if it's directly in lib8tion/
+            if path_obj.parent.name == "lib8tion":
+                return False
+
+        # ── Platform-specific exclusions (for files under src/platforms/) ─
+        if _is_in_platforms_dir(path_obj):
+            # Skip dispatch headers at src/platforms/*.h root level
+            if path_obj.parent == PLATFORMS_ROOT:
+                return False
+
+            # Pattern 1: fastpin_*.h — all fastpin files are pin dispatch headers
+            if file_name.startswith("fastpin_"):
+                return False
+
+            # Pattern 2: led_sysdefs_<platform>.h
+            if file_name.startswith("led_sysdefs_") and file_name.count("_") <= 2:
+                return False
+
+            # Pattern 3: Explicit dispatcher files
+            if "dispatch" in file_name.lower() or file_name == "fastpin_legacy.h":
+                return False
 
         return True
 
@@ -251,8 +418,8 @@ def main() -> None:
     checker = NativePlatformDefinesChecker()
     run_checker_standalone(
         checker,
-        [str(PLATFORMS_ROOT)],
-        "Found native platform defines in src/platforms",
+        [str(SRC_ROOT)],
+        "Found native platform defines in src/",
     )
 
 

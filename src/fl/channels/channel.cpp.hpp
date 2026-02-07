@@ -1,6 +1,7 @@
 /// @file channel.cpp
 /// @brief LED channel implementation
 
+#include "platforms/is_platform.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/chipset_helpers.h"
 #include "fl/channels/config.h"
@@ -16,7 +17,7 @@
 #include "pixel_controller.h"
 #include "fl/trace.h"
 
-#ifdef ESP32
+#ifdef FL_IS_ESP32
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 FL_EXTERN_C_END
@@ -77,7 +78,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
     , mId(nextId()) {
-#ifdef ESP32
+#ifdef FL_IS_ESP32
     // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     // This prevents RX from capturing noise/glitches on uninitialized pins
     // Must happen before any engine initialization
@@ -112,7 +113,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
     , mId(nextId()) {
-#ifdef ESP32
+#ifdef FL_IS_ESP32
     // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     gpio_set_pull_mode(static_cast<gpio_num_t>(pin), GPIO_PULLDOWN_ONLY);
 #endif

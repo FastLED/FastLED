@@ -28,8 +28,9 @@
 /// Uses INTFLAG register for proper synchronization (DRE, TXC, INSTREND flags).
 /// Suitable for proof-of-concept but SERCOM SPI is preferred for production.
 
-#if defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
-    defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/samd/is_samd.h"
+
+#if defined(FL_IS_SAMD51)
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
@@ -582,4 +583,4 @@ void initSpiHw4Instances() {
 
 }  // namespace fl
 
-#endif  // __SAMD51G19A__ || __SAMD51J19A__ || ...
+#endif  // FL_IS_SAMD51

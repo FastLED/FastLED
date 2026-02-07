@@ -145,8 +145,14 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     checkers_by_scope["platforms"] = [
         PlatformsFlNamespaceChecker(),
         NamespacePlatformsChecker(),
-        NativePlatformDefinesChecker(),
         IsHeaderIncludeChecker(),
+    ]
+
+    # Native platform defines checker — runs on ALL src/ files (including third_party/)
+    # (the checker internally filters to src/ and excludes dispatch headers,
+    # is_*.h detection headers, etc.)
+    checkers_by_scope["native_platform_defines"] = [
+        NativePlatformDefinesChecker(),
     ]
 
     # Include paths checker (for fl/ and platforms/ directories)
@@ -255,6 +261,12 @@ def run_checkers(
     platforms_checkers = checkers_by_scope.get("platforms", [])
     if platforms_files and platforms_checkers:
         processor.process_files_with_checkers(platforms_files, platforms_checkers)
+
+    # Run native platform defines checker on ALL src/ files
+    # (checker internally filters to relevant files and excludes dispatch headers)
+    native_defines_checkers = checkers_by_scope.get("native_platform_defines", [])
+    if src_files and native_defines_checkers:
+        processor.process_files_with_checkers(src_files, native_defines_checkers)
 
     # Run src root checkers
     src_root_checkers = checkers_by_scope.get("src_root", [])

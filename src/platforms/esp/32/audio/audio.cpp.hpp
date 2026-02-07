@@ -1,5 +1,6 @@
 // ok no namespace fl
-#ifdef ESP32
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
 
 #include "platforms/esp/esp_version.h"
 #include "fl/sketch_macros.h"

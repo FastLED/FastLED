@@ -2,6 +2,7 @@
 
 
 
+#include "platforms/is_platform.h"
 #include "fl/sketch_macros.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
@@ -24,9 +25,9 @@
 #endif
 
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
-  #if defined(ESP32) && !defined(ESP8266)
+  #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
-  #elif defined(__EMSCRIPTEN__)
+  #elif defined(FL_IS_WASM)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif FASTLED_USES_TEENSY_AUDIO_INPUT
     // Teensy uses its own audio implementation, not generic Arduino
@@ -39,7 +40,7 @@
 #endif
 
 #if !FASTLED_USES_ARDUINO_AUDIO_INPUT
-#if defined(ESP32) && !defined(ESP8266)
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
 #define FASTLED_USES_ESP32_AUDIO_INPUT 1
 #else
 #define FASTLED_USES_ESP32_AUDIO_INPUT 0
@@ -50,7 +51,7 @@
 
 // Determine WASM audio input support
 #if !FASTLED_USES_ARDUINO_AUDIO_INPUT && !FASTLED_USES_ESP32_AUDIO_INPUT
-#if defined(__EMSCRIPTEN__)
+#if defined(FL_IS_WASM)
 #define FASTLED_USES_WASM_AUDIO_INPUT 1
 #else
 #define FASTLED_USES_WASM_AUDIO_INPUT 0

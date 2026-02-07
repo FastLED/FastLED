@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+#include "platforms/esp/is_esp.h"
+
 #include "fl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-C3/C6 (RISC-V)
 //
@@ -99,11 +101,11 @@ FL_EXTERN_C_BEGIN
  * Reference: ESP-IDF Interrupt Allocation API documentation
  */
 
-#ifdef CONFIG_IDF_TARGET_ESP32C3
+#ifdef FL_IS_ESP_32C3
   #define FASTLED_RISCV_MAX_EXT_INTERRUPTS 31
   #define FASTLED_RISCV_MAX_PRIORITY       7   // Corrected: ESP32-C3 max is 7, not 15
   #define FASTLED_RISCV_CHIP_NAME         "ESP32-C3"
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#elif defined(FL_IS_ESP_32C6)
   #define FASTLED_RISCV_MAX_EXT_INTERRUPTS 28
   #define FASTLED_RISCV_MAX_PRIORITY       7   // Corrected: ESP32-C6 max is 7, not 15
   #define FASTLED_RISCV_CHIP_NAME         "ESP32-C6"
@@ -250,12 +252,12 @@ void FL_IRAM fastled_riscv_experimental_handler(void *arg);
 
 #if 0  // DISABLED - ESP32-C3/C6 do not use PLIC
 // INVALID: These addresses are incorrect for ESP32-C3/C6
-#ifdef CONFIG_IDF_TARGET_ESP32C3
+#ifdef FL_IS_ESP_32C3
   #define FASTLED_PLIC_PRIORITY_BASE    0x600C0000      // INVALID
   #define FASTLED_PLIC_ENABLE_BASE      0x600C2000      // INVALID
   #define FASTLED_PLIC_CLAIM_BASE       0x600C200004ULL // INVALID - 40-bit address on 32-bit arch
   #define FASTLED_PLIC_COMPLETE_BASE    0x600C200004ULL // INVALID - 40-bit address on 32-bit arch
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#elif defined(FL_IS_ESP_32C6)
   #define FASTLED_PLIC_PRIORITY_BASE    0x600C0000      // INVALID
   #define FASTLED_PLIC_ENABLE_BASE      0x600C2000      // INVALID
   #define FASTLED_PLIC_CLAIM_BASE       0x600C200004ULL // INVALID - 40-bit address on 32-bit arch
@@ -373,9 +375,9 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
  */
 
 // RMT interrupt source for ESP32-C3/C6
-#ifdef CONFIG_IDF_TARGET_ESP32C3
+#ifdef FL_IS_ESP_32C3
   #define FASTLED_RISCV_RMT_INTR_SOURCE ETS_RMT_INTR_SOURCE
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#elif defined(FL_IS_ESP_32C6)
   #define FASTLED_RISCV_RMT_INTR_SOURCE ETS_RMT_INTR_SOURCE
 #endif
 
@@ -696,10 +698,10 @@ extern void riscv_critical_isr(void);  // Optional assembly handler
  */
 
 // RMT peripheral interrupts
-#ifdef CONFIG_IDF_TARGET_ESP32C3
+#ifdef FL_IS_ESP_32C3
   #define FASTLED_INTR_RMT_CH0  ETS_RMT_INTR_SOURCE
   // C3 has shared RMT interrupt for all channels
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#elif defined(FL_IS_ESP_32C6)
   #define FASTLED_INTR_RMT_CH0  ETS_RMT_INTR_SOURCE
   // C6 RMT interrupt mapping (verify from TRM)
 #endif

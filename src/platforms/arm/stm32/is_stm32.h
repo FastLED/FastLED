@@ -17,6 +17,7 @@
 /// - FL_IS_STM32_H7: STM32H7 family (Giga R1, high-performance)
 /// - FL_IS_STM32_G4: STM32G4 family (motor control)
 /// - FL_IS_STM32_U5: STM32U5 family (ultra-low-power)
+/// - FL_IS_STM32_MBED: Arduino Mbed OS framework for STM32
 ///
 /// Used by platforms/arm/is_arm.h for platform dispatching and by STM32 platform
 /// headers for validation that STM32 detection has occurred.
@@ -107,4 +108,15 @@
 // FL_IS_STM32_U5 - STM32U5 Family (160 MHz, 256-2496 KB RAM, 512-4096 KB Flash, Ultra-low-power)
 #if defined(STM32U5) || defined(STM32U5xx)
 #define FL_IS_STM32_U5
+#endif
+
+// ============================================================================
+// STM32 Framework Detection - MBED vs STM32duino
+// ============================================================================
+
+// FL_IS_STM32_MBED - Arduino Mbed OS framework for STM32
+// Some STM32 boards (e.g., Giga R1, Portenta H7) use the Arduino Mbed framework
+// which has a different API (MbedSPI vs SPIClass, etc.)
+#if defined(FL_IS_STM32) && defined(ARDUINO_ARCH_MBED)
+#define FL_IS_STM32_MBED
 #endif

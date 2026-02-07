@@ -2,8 +2,9 @@
 /// @brief Mock UART peripheral implementation for unit testing
 
 #include "uart_peripheral_mock.h"
+#include "platforms/is_platform.h"
 
-#if defined(ARDUINO) || defined(ESP_PLATFORM) || defined(ESP32)
+#if defined(ARDUINO) || defined(FL_IS_ESP32)
 #include <Arduino.h>  // ok include - For fl::micros() on Arduino/ESP platforms
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() on host tests

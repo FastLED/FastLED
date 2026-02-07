@@ -1,7 +1,9 @@
 
 
 // ok no namespace fl
-#ifdef __EMSCRIPTEN__
+#include "is_wasm.h"
+
+#ifdef FL_IS_WASM
 
 // ⚠️⚠️⚠️ WASM-SPECIFIC ACTIVE STRIP DATA WRAPPER ⚠️⚠️⚠️
 //
@@ -37,4 +39,4 @@ void __init_ActiveStripData() {
     fl::ActiveStripData::Instance();
 }
 
-#endif // __EMSCRIPTEN__
+#endif // FL_IS_WASM

@@ -406,7 +406,7 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
     // Check RCC prescaler bits to determine if 2x multiplier applies
     uint32_t timer_freq = apb_freq;
 
-#if defined(STM32F1xx) || defined(STM32F2xx) || defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(FL_IS_STM32_F1) || defined(FL_IS_STM32_F2) || defined(FL_IS_STM32_F4) || defined(FL_IS_STM32_F7)
     // F1/F2/F4/F7: Check PPRE bits in RCC->CFGR
     if (is_apb1) {
         // Check APB1 prescaler (PPRE1 bits [10:8])
@@ -421,7 +421,7 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
             timer_freq = apb_freq * 2;
         }
     }
-#elif defined(STM32H7xx)
+#elif defined(FL_IS_STM32_H7)
     // H7: Check D2PPRE bits in RCC->D2CFGR (more complex clock tree)
     if (is_apb1) {
         uint32_t d2ppre1 = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
@@ -434,7 +434,7 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
             timer_freq = apb_freq * 2;
         }
     }
-#elif defined(STM32L4xx) || defined(STM32G4xx)
+#elif defined(FL_IS_STM32_L4) || defined(FL_IS_STM32_G4)
     // L4/G4: Similar to F4 but with different register names
     if (is_apb1) {
         uint32_t ppre1 = (RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos;
