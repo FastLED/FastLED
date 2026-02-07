@@ -206,7 +206,10 @@ def compile_meson(
         # This appears as "Build directory has been generated with Meson version X.Y.Z, which is incompatible with the current version A.B.C"
         # When detected, suggest reconfiguration (setup_meson_build handles auto-healing)
         output = proc.stdout  # RunningProcess combines stdout and stderr
-        if "build directory has been generated with meson version" in output.lower() and "incompatible" in output.lower():
+        if (
+            "build directory has been generated with meson version" in output.lower()
+            and "incompatible" in output.lower()
+        ):
             _ts_print(
                 "[MESON] ⚠️  Detected Meson version incompatibility",
                 file=sys.stderr,

@@ -176,7 +176,7 @@ TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     CHECK(!channel->isInList());
 
     // Step 4: Add to FastLED
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
 
     // Verify channel IS NOW in controller list (explicit registration)
     CHECK(channel->isInList());
@@ -206,7 +206,7 @@ TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
 }
 
 TEST_CASE("Channel API: Double add protection") {
-    // Verify that calling addChannel() multiple times doesn't create duplicates
+    // Verify that calling add() multiple times doesn't create duplicates
     auto mockEngine = fl::make_shared<ChannelEngineMock>();
     mockEngine->reset();
 
@@ -229,15 +229,15 @@ TEST_CASE("Channel API: Double add protection") {
     CHECK(!channel->isInList());
 
     // First add
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
     CHECK(channel->isInList());
 
     // Second add (should be safe, no duplicate)
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
     CHECK(channel->isInList());
 
     // Third add (should still be safe)
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
     CHECK(channel->isInList());
 
     // Walk the list and count occurrences of this channel
@@ -259,7 +259,7 @@ TEST_CASE("Channel API: Double add protection") {
 }
 
 TEST_CASE("Channel API: Add and remove symmetry") {
-    // Verify that addChannel() and removeChannel() work symmetrically
+    // Verify that add() and remove() work symmetrically
     auto mockEngine = fl::make_shared<ChannelEngineMock>();
     mockEngine->reset();
 
@@ -282,11 +282,11 @@ TEST_CASE("Channel API: Add and remove symmetry") {
     CHECK(!channel->isInList());
 
     // Add to list
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
     CHECK(channel->isInList());
 
     // Remove from list
-    FastLED.removeChannel(channel);
+    FastLED.remove(channel);
     CHECK(!channel->isInList());
 
     // Verify channel object is still valid (not destroyed)
@@ -295,16 +295,16 @@ TEST_CASE("Channel API: Add and remove symmetry") {
     CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Can re-add if needed
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
     CHECK(channel->isInList());
 
     // Remove again
-    FastLED.removeChannel(channel);
+    FastLED.remove(channel);
     CHECK(!channel->isInList());
 
     // Safe to call remove multiple times
-    FastLED.removeChannel(channel);
-    FastLED.removeChannel(channel);
+    FastLED.remove(channel);
+    FastLED.remove(channel);
     CHECK(!channel->isInList());
 
     // Clean up

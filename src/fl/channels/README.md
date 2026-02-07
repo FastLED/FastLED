@@ -108,10 +108,10 @@ void setup() {
 
     // Option 1: Create channel (automatic engine selection)
     auto channel = fl::Channel::create(config);
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
 
     // Option 2: Create and register in one call (preferred)
-    auto channel2 = FastLED.addChannel(config);
+    auto channel2 = FastLED.add(config);
 }
 
 void loop() {
@@ -281,16 +281,16 @@ fl::ChannelOptions ws2812_opts;
 ws2812_opts.mAffinity = "RMT";
 auto timing_ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
 
-FastLED.addChannel(fl::ChannelConfig(16, timing_ws2812, ws2812_strip1, RGB, ws2812_opts));
-FastLED.addChannel(fl::ChannelConfig(17, timing_ws2812, ws2812_strip2, RGB, ws2812_opts));
+FastLED.add(fl::ChannelConfig(16, timing_ws2812, ws2812_strip1, RGB, ws2812_opts));
+FastLED.add(fl::ChannelConfig(17, timing_ws2812, ws2812_strip2, RGB, ws2812_opts));
 
 // WS2816 strips bound to SPI engine (parallel with RMT)
 fl::ChannelOptions ws2816_opts;
 ws2816_opts.mAffinity = "SPI";
 auto timing_ws2816 = fl::makeTimingConfig<fl::TIMING_WS2816>();
 
-FastLED.addChannel(fl::ChannelConfig(18, timing_ws2816, ws2816_strip1, RGB, ws2816_opts));
-FastLED.addChannel(fl::ChannelConfig(19, timing_ws2816, ws2816_strip2, RGB, ws2816_opts));
+FastLED.add(fl::ChannelConfig(18, timing_ws2816, ws2816_strip1, RGB, ws2816_opts));
+FastLED.add(fl::ChannelConfig(19, timing_ws2816, ws2816_strip2, RGB, ws2816_opts));
 
 // All strips update: RMT engine handles WS2812 strips in parallel with SPI engine handling WS2816
 FastLED.show();

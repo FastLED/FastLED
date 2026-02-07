@@ -151,7 +151,7 @@ TEST_CASE("FastLED.show() with channels") {
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
 
     int before = mockEngine->transmitCount;
     int enqueueBefore = mockEngine->enqueueCount;

@@ -109,6 +109,7 @@
 
 #include "fl/channels/channel.h"
 #include "fl/channels/bus_manager.h"
+#include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
@@ -508,25 +509,106 @@ public:
 	/// @returns a reference to the added controller
 	static ::CLEDController &addLeds(::CLEDController *pLed, CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
-	/// @brief Add a Channel-based LED controller to the world
+	/// @name Channel API
+	/// @{
+
+	/// @brief Add a Channel-based LED controller (from ChannelPtr)
 	///
-	/// This method registers a Channel instance (created via Channel::create(config))
-	/// with the FastLED controller list. Channels provide hardware-accelerated parallel LED output
-	/// using platform-specific engines (e.g., ESP32 PARLIO, Teensy FlexIO).
-	///
-	/// Example usage:
-	/// @code
-	/// // Create channel configuration
-	/// ChannelConfig config(pin, timing, leds, RGB);
-	///
-	/// // Create and register channel (automatic engine selection)
-	/// ChannelPtr channel = fl::Channel::create(config);
-	/// FastLED.addChannel(channel);
-	/// @endcode
+	/// Registers a pre-created Channel instance with the FastLED controller list.
+	/// Channels provide hardware-accelerated parallel LED output using platform-specific engines.
 	///
 	/// @param channel Shared pointer to a Channel instance
-	/// @returns The same ChannelPtr for chaining or storage
-	static void addChannel(fl::ChannelPtr channel);
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// fl::ChannelConfig config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+	/// fl::ChannelPtr channel = fl::Channel::create(config);
+	/// FastLED.add(channel);
+	/// @endcode
+	static void add(fl::ChannelPtr channel);
+
+	/// @brief Add LED channel with runtime configuration (from ChannelConfig)
+	///
+	/// Creates and registers a Channel-based LED controller with runtime-configurable timing.
+	/// Returns a shared_ptr for lifetime control - controller auto-removes on destruction.
+	///
+	/// @param config Channel configuration (pin, timing, leds, rgb order, settings)
+	/// @returns Shared pointer to Channel (extends CLEDController), or nullptr if unsupported
+	/// @note Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4
+	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// fl::ChannelConfig config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+	/// auto channel = FastLED.add(config);
+	/// fill_solid(leds, NUM_LEDS, CRGB::Red);
+	/// FastLED.show();
+	/// channel.reset();  // Destroy controller
+	/// @endcode
+	FL_NODISCARD static fl::ChannelPtr add(const fl::ChannelConfig& config);
+
+	/// @brief Add multiple LED channels from a config array
+	///
+	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.
+	/// Returns a vector of shared_ptrs for lifetime control.
+	///
+	/// @param configs Span of ChannelConfig objects
+	/// @returns Vector of ChannelPtrs (one per config), or empty elements if unsupported
+	/// @note Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4
+	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// fl::ChannelConfig configs[] = {
+	///     fl::ChannelConfig(PIN1, timing, leds1, RGB),
+	///     fl::ChannelConfig(PIN2, timing, leds2, RGB)
+	/// };
+	/// auto channels = FastLED.add(fl::span<const fl::ChannelConfig>(configs, 2));
+	/// @endcode
+	FL_NODISCARD static fl::vector<fl::ChannelPtr> add(fl::span<const fl::ChannelConfig> configs);
+
+	/// @brief Add multiple LED channels from an initializer list
+	///
+	/// Creates and registers multiple Channel-based LED controllers from a brace-enclosed list.
+	/// Returns a vector of shared_ptrs for lifetime control.
+	///
+	/// @param configs Initializer list of ChannelConfig objects
+	/// @returns Vector of ChannelPtrs (one per config)
+	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// auto channels = FastLED.add({
+	///     fl::ChannelConfig(PIN1, timing, leds1, RGB),
+	///     fl::ChannelConfig(PIN2, timing, leds2, RGB)
+	/// });
+	/// @endcode
+	FL_NODISCARD static fl::vector<fl::ChannelPtr> add(fl::initializer_list<fl::ChannelConfig> configs);
+
+	/// @brief Add multiple LED channels from a MultiChannelConfig
+	///
+	/// Creates and registers multiple Channel-based LED controllers from a MultiChannelConfig.
+	/// Returns a vector of shared_ptrs for lifetime control.
+	///
+	/// @param multiConfig MultiChannelConfig containing multiple channel configurations
+	/// @returns Vector of ChannelPtrs (one per config), or empty elements if unsupported
+	/// @note Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4
+	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
+	///
+	/// Example:
+	/// @code
+	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+	/// fl::MultiChannelConfig multiConfig = {
+	///     fl::ChannelConfig(PIN1, timing, leds1, RGB),
+	///     fl::ChannelConfig(PIN2, timing, leds2, RGB)
+	/// };
+	/// auto channels = FastLED.add(multiConfig);
+	/// @endcode
+	FL_NODISCARD static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
 
 	/// @brief Remove a channel from the LED controller list
 	///
@@ -537,34 +619,14 @@ public:
 	/// @param channel Shared pointer to a Channel instance
 	/// @note Safe to call multiple times - no error if channel not in list
 	/// @note The channel object is not destroyed, only removed from the list
-	static void removeChannel(fl::ChannelPtr channel);
-
-	/// @name Runtime LED Channel Management
-	/// @{
-
-	/// Add LED channel with runtime configuration
-	///
-	/// Creates a Channel-based LED controller with runtime-configurable timing.
-	/// Unlike the template-based addLeds<>() which uses static storage, this
-	/// function returns a shared_ptr that allows the controller to be destroyed
-	/// and recreated with different configurations.
-	///
-	/// @param config Channel configuration (pin, timing, leds, rgb order, settings)
-	/// @returns Shared pointer to Channel (extends CLEDController), or nullptr if unsupported
-	/// @note Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4
-	/// @note Controller auto-registers on creation, auto-removes on destruction
-	/// @note MUST store return value to control lifetime - marked [[nodiscard]]
 	///
 	/// Example:
 	/// @code
-	/// auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-	/// fl::ChannelConfig config(PIN_DATA, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
-	/// auto channel = FastLED.addChannel(config);
-	/// fill_solid(leds, NUM_LEDS, CRGB::Red);
-	/// FastLED.show();
-	/// channel.reset();  // Destroy controller
+	/// auto channel = FastLED.add(config);
+	/// // ... use channel ...
+	/// FastLED.remove(channel);  // Remove from controller list
 	/// @endcode
-	FL_NODISCARD static fl::ChannelPtr addChannel(const fl::ChannelConfig& config);
+	static void remove(fl::ChannelPtr channel);
 
 	/// @}
 

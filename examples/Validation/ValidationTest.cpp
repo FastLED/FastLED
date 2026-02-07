@@ -587,7 +587,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
         // Create channel config with runtime timing
         fl::ChannelConfig channel_config(config.tx_configs[i].pin, config.timing, config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order);
 
-        auto channel = FastLED.addChannel(channel_config);
+        auto channel = FastLED.add(channel_config);
         if (!channel) {
             FL_ERROR("Failed to create channel " << i << " (pin " << config.tx_configs[i].pin << ") - platform not supported");
             // Clean up previously created channels

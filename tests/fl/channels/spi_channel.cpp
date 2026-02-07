@@ -273,7 +273,7 @@ TEST_CASE("SPI chipset - mock engine integration") {
     CHECK_EQ(channel->getChannelEngine(), mockEngine.get());
 
     // Add channel to FastLED
-    FastLED.addChannel(channel);
+    FastLED.add(channel);
 
     // Trigger FastLED.show() - should enqueue and transmit data
     FastLED.show();

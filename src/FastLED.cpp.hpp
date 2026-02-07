@@ -114,7 +114,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
-void CFastLED::addChannel(fl::ChannelPtr channel) {
+void CFastLED::add(fl::ChannelPtr channel) {
 	// Add channel to the CLEDController linked list
 	// Channel uses DeferRegister mode, so explicit addToList() call is required
 	if (channel) {
@@ -122,7 +122,7 @@ void CFastLED::addChannel(fl::ChannelPtr channel) {
 	}
 }
 
-void CFastLED::removeChannel(fl::ChannelPtr channel) {
+void CFastLED::remove(fl::ChannelPtr channel) {
 	if (channel) {
 		channel->removeFromDrawList();
 	}
@@ -497,13 +497,48 @@ void CFastLED::wait() {
 // Runtime Channel API Implementation
 // ============================================================================
 
-fl::ChannelPtr CFastLED::addChannel(const fl::ChannelConfig& config) {
+fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     fl::ChannelBusManager& manager = fl::channelBusManager();
     FL_ASSERT(manager.getDriverCount() > 0,
               "No channel drivers available - channel API requires at least one registered driver");
     auto channel = fl::Channel::create(config);
-    addChannel(channel);
+    add(channel);
     return channel;
+}
+
+fl::vector<fl::ChannelPtr> CFastLED::add(fl::span<const fl::ChannelConfig> configs) {
+    fl::vector<fl::ChannelPtr> channels;
+    channels.reserve(configs.size());
+
+    for (const auto& config : configs) {
+        channels.push_back(add(config));
+    }
+
+    return channels;
+}
+
+fl::vector<fl::ChannelPtr> CFastLED::add(fl::initializer_list<fl::ChannelConfig> configs) {
+    fl::vector<fl::ChannelPtr> channels;
+    channels.reserve(configs.size());
+
+    for (const auto& config : configs) {
+        channels.push_back(add(config));
+    }
+
+    return channels;
+}
+
+fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConfig) {
+    fl::vector<fl::ChannelPtr> channels;
+    channels.reserve(multiConfig.mChannels.size());
+
+    for (const auto& configPtr : multiConfig.mChannels) {
+        if (configPtr) {
+            channels.push_back(add(*configPtr));
+        }
+    }
+
+    return channels;
 }
 
 // ============================================================================

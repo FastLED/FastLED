@@ -9,7 +9,7 @@
 // that transmitted LED data matches received data.
 //
 // DEMONSTRATES:
-// 1. Runtime Channel API (FastLED.addChannel) for iterating through all available
+// 1. Runtime Channel API (FastLED.add) for iterating through all available
 //    drivers (RMT, SPI, PARLIO) and testing multiple chipset timings dynamically
 //    by creating and destroying controllers for each driver.
 // 2. Multi-channel validation support: Pass span<const ChannelConfig> to validate

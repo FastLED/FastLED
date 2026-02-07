@@ -217,7 +217,9 @@ def setup_meson_build(
         )
         if not is_compatible:
             _ts_print("=" * 80)
-            _ts_print("[MESON] ⚠️  MESON VERSION INCOMPATIBILITY DETECTED - AUTO-HEALING")
+            _ts_print(
+                "[MESON] ⚠️  MESON VERSION INCOMPATIBILITY DETECTED - AUTO-HEALING"
+            )
             _ts_print("=" * 80)
             _ts_print(f"[MESON] {compatibility_message}")
             _ts_print("[MESON]")
@@ -225,7 +227,9 @@ def setup_meson_build(
             _ts_print("[MESON]   1. Using a system meson instead of the venv meson")
             _ts_print("[MESON]   2. The pyproject.toml meson version was upgraded")
             _ts_print("[MESON]")
-            _ts_print("[MESON] 🔧 Auto-fix: Forcing reconfiguration with current meson version")
+            _ts_print(
+                "[MESON] 🔧 Auto-fix: Forcing reconfiguration with current meson version"
+            )
             _ts_print("=" * 80)
             # Auto-heal: Force reconfigure instead of failing
             force_reconfigure = True

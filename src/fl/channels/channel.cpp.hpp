@@ -70,7 +70,7 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
-    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until addChannel()
+    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
     , mPin(getDataPinFromChipset(chipset))
     , mTiming(getTimingFromChipset(chipset))
@@ -105,7 +105,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
 // Backwards-compatible constructor (deprecated)
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
                  EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
-    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until addChannel()
+    : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mPin(pin)
     , mTiming(timing)
