@@ -43,9 +43,6 @@ dependencies = [
     "running-process>=1.0.6",
     "daemoniker>=0.2.3",
     "colorama>=0.4.6",
-    "flake8>=7.0.0",
-    "isort>=5.13.0",
-    "black>=24.0.0",
 ]
 
 [build-system]
@@ -58,13 +55,6 @@ packages = ["ci"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
-
-[project.entry-points."flake8.extension"]
-KBI = "lint_plugins.flake8.keyboard_interrupt_checker:KeyboardInterruptChecker"
-
-# Force include lint_plugins without path rewriting
-[tool.hatch.build.force-include]
-"lint_plugins" = "lint_plugins"
 
 [tool.ruff]
 exclude = ["ci/tmp", "ci/wasm", "scripts", "native", "**/.fbuild", "**/.pio"]
