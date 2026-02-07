@@ -28,6 +28,7 @@ License CC BY-NC 3.0
 
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
+#include "fl/stl/optional.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/time.h"
 #include "fl/math_macros.h"
@@ -109,34 +110,39 @@ struct render_parameters {
     // TODO float center_y = (num_y / 2) - 0.5;
     float center_x = (999 / 2) - 0.5; // center of the matrix
     float center_y = (999 / 2) - 0.5;
-    float dist, angle;
+    float dist = 0.0f;
+    float angle = 0.0f;
     float scale_x = 0.1; // smaller values = zoom in
     float scale_y = 0.1;
     float scale_z = 0.1;
-    float offset_x, offset_y, offset_z;
-    float z;
+    float offset_x = 0.0f;
+    float offset_y = 0.0f;
+    float offset_z = 0.0f;
+    float z = 0.0f;
     float low_limit = 0; // getting contrast by highering the black point
     float high_limit = 1;
 };
 
 struct oscillators {
 
-    float master_speed; // global transition speed
+    float master_speed = 0.0f; // global transition speed
     float
-        offset[num_oscillators];  // oscillators can be shifted by a time offset
-    float ratio[num_oscillators]; // speed ratios for the individual oscillators
+        offset[num_oscillators] = {};  // oscillators can be shifted by a time offset
+    float ratio[num_oscillators] = {}; // speed ratios for the individual oscillators
 };
 
 struct modulators {
 
-    float linear[num_oscillators];      // returns 0 to FLT_MAX
-    float radial[num_oscillators];      // returns 0 to 2*PI
-    float directional[num_oscillators]; // returns -1 to 1
-    float noise_angle[num_oscillators]; // returns 0 to 2*PI
+    float linear[num_oscillators] = {};      // returns 0 to FLT_MAX
+    float radial[num_oscillators] = {};      // returns 0 to 2*PI
+    float directional[num_oscillators] = {}; // returns -1 to 1
+    float noise_angle[num_oscillators] = {}; // returns 0 to 2*PI
 };
 
 struct rgb {
-    float red, green, blue;
+    float red = 0.0f;
+    float green = 0.0f;
+    float blue = 0.0f;
 };
 
 static const uint8_t PERLIN_NOISE[] = {
@@ -168,14 +174,14 @@ FASTLED_FORCE_INLINE uint8_t P(uint8_t x) {
 class ANIMartRIX {
 
   public:
-    int num_x; // how many LEDs are in one row?
-    int num_y; // how many rows?
+    int num_x = 0; // how many LEDs are in one row?
+    int num_y = 0; // how many rows?
 
     float speed_factor = 1; // 0.1 to 10
 
     float radial_filter_radius = 23.0; // on 32x32, use 11 for 16x16
 
-    bool serpentine;
+    bool serpentine = false;
 
     render_parameters animation; // all animation parameters in one place
     oscillators timings;         // all speed settings in one place
@@ -187,9 +193,20 @@ class ANIMartRIX {
     fl::vector<fl::vector<float>>
         distance; // look-up table for polar distances
 
-    unsigned long a, b, c; // for time measurements
+    unsigned long a = 0;
+    unsigned long b = 0;
+    unsigned long c = 0; // for time measurements
 
-    float show1, show2, show3, show4, show5, show6, show7, show8, show9, show0;
+    float show1 = 0.0f;
+    float show2 = 0.0f;
+    float show3 = 0.0f;
+    float show4 = 0.0f;
+    float show5 = 0.0f;
+    float show6 = 0.0f;
+    float show7 = 0.0f;
+    float show8 = 0.0f;
+    float show9 = 0.0f;
+    float show0 = 0.0f;
 
     ANIMartRIX() {}
 
@@ -199,9 +216,9 @@ class ANIMartRIX {
 
     virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
 
-    fl::u32 currentTime = 0;
+    fl::optional<fl::u32> currentTime;
     void setTime(fl::u32 t) { currentTime = t; }
-    fl::u32 getTime() { return currentTime ? currentTime : fl::millis(); }
+    fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
 
     void init(int w, int h) {
         animation = render_parameters();
