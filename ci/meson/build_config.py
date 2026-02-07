@@ -210,14 +210,14 @@ def setup_meson_build(
     # ============================================================================
     # Meson 1.9.x and 1.10.x create INCOMPATIBLE build directories!
     # A build directory created by one version cannot be used by another version.
-    # If we detect a version mismatch, warn the user and suggest solutions.
+    # If we detect a version mismatch, auto-reconfigure (self-healing).
     if already_configured:
         is_compatible, compatibility_message = check_meson_version_compatibility(
             build_dir
         )
         if not is_compatible:
             _ts_print("=" * 80)
-            _ts_print("[MESON] ❌ MESON VERSION INCOMPATIBILITY DETECTED!")
+            _ts_print("[MESON] ⚠️  MESON VERSION INCOMPATIBILITY DETECTED - AUTO-HEALING")
             _ts_print("=" * 80)
             _ts_print(f"[MESON] {compatibility_message}")
             _ts_print("[MESON]")
@@ -225,13 +225,13 @@ def setup_meson_build(
             _ts_print("[MESON]   1. Using a system meson instead of the venv meson")
             _ts_print("[MESON]   2. The pyproject.toml meson version was upgraded")
             _ts_print("[MESON]")
-            _ts_print("[MESON] Solutions:")
-            _ts_print(f"[MESON]   1. Delete the build directory: rm -rf {build_dir}")
-            _ts_print("[MESON]   2. Always use 'uv run test.py' or 'uv run meson'")
-            _ts_print("[MESON]   3. Never run bare 'meson' commands from the terminal")
+            _ts_print("[MESON] 🔧 Auto-fix: Forcing reconfiguration with current meson version")
             _ts_print("=" * 80)
-            # Don't raise - let it fail naturally so user sees the full error
-            # This warning helps them understand WHY it's failing
+            # Auto-heal: Force reconfigure instead of failing
+            force_reconfigure = True
+            force_reconfigure_reason = "meson version mismatch (auto-healing)"
+            # Clean build artifacts to ensure clean slate
+            cleanup_build_artifacts(build_dir, "Meson version mismatch")
 
     # ============================================================================
     # THIN ARCHIVES: ENABLED FOR CLANG-TOOL-CHAIN

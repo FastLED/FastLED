@@ -202,10 +202,29 @@ def compile_meson(
 
         returncode = proc.wait()
 
+        # Check for Meson version incompatibility
+        # This appears as "Build directory has been generated with Meson version X.Y.Z, which is incompatible with the current version A.B.C"
+        # When detected, suggest reconfiguration (setup_meson_build handles auto-healing)
+        output = proc.stdout  # RunningProcess combines stdout and stderr
+        if "build directory has been generated with meson version" in output.lower() and "incompatible" in output.lower():
+            _ts_print(
+                "[MESON] ⚠️  Detected Meson version incompatibility",
+                file=sys.stderr,
+            )
+            _ts_print(
+                "[MESON] 💡 Solution: Run 'uv run test.py --clean' to force reconfiguration",
+                file=sys.stderr,
+            )
+            _ts_print(
+                "[MESON] 💡 Or: setup_meson_build() will auto-heal on next run",
+                file=sys.stderr,
+            )
+            # Return failure - caller should trigger reconfiguration
+            return False
+
         # Check for Ninja dependency database corruption
         # This appears as "ninja: warning: premature end of file; recovering"
         # When detected, automatically repair the .ninja_deps file
-        output = proc.stdout  # RunningProcess combines stdout and stderr
         if "premature end of file" in output.lower():
             _ts_print(
                 "[MESON] ⚠️  Detected corrupted Ninja dependency database (.ninja_deps)",
