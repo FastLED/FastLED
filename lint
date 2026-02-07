@@ -194,65 +194,12 @@ if [ "$JS_ONLY" = false ]; then
           uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
         done
 
-        # C++ custom linters - unified runner
+        # C++ custom linters - unified runner (includes all checks in one pass)
         echo ""
         echo "🔍 C++ CUSTOM LINTERS (UNIFIED)"
         echo "-------------------------------"
-        echo "Running unified C++ checker (all content-based linters in one pass)"
+        echo "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
         if uv run python ci/lint_cpp/run_all_checkers.py; then
-            # Run the three standalone checks in parallel for speed.
-            # Each is independent and takes 0.5-1.5s; parallel saves ~2s.
-            echo ""
-            echo "Running standalone C++ checks in parallel..."
-
-            # Create temp files for capturing output
-            TMPDIR_LINT=$(mktemp -d)
-            trap "rm -rf $TMPDIR_LINT" EXIT
-
-            # Launch all three checks in background
-            uv run python ci/lint_cpp/test_no_cpp_in_fl.py > "$TMPDIR_LINT/no_cpp.out" 2>&1 &
-            PID_NO_CPP=$!
-
-            uv run python ci/lint_cpp/test_unity_build.py > "$TMPDIR_LINT/unity.out" 2>&1 &
-            PID_UNITY=$!
-
-            uv run python cpp_lint.py src/ > "$TMPDIR_LINT/cpp_lint.out" 2>&1 &
-            PID_CPP_LINT=$!
-
-            # Wait for all and collect exit codes
-            FAIL=0
-
-            wait $PID_NO_CPP
-            RC_NO_CPP=$?
-            cat "$TMPDIR_LINT/no_cpp.out"
-            if [ $RC_NO_CPP -ne 0 ]; then
-                uv run python ci/cpp_lint_cache.py failure
-                echo "❌ Unity build check failed"
-                FAIL=1
-            fi
-
-            wait $PID_UNITY
-            RC_UNITY=$?
-            cat "$TMPDIR_LINT/unity.out"
-            if [ $RC_UNITY -ne 0 ]; then
-                uv run python ci/cpp_lint_cache.py failure
-                echo "❌ Unity build completeness check failed"
-                FAIL=1
-            fi
-
-            wait $PID_CPP_LINT
-            RC_CPP_LINT=$?
-            cat "$TMPDIR_LINT/cpp_lint.out"
-            if [ $RC_CPP_LINT -ne 0 ]; then
-                uv run python ci/cpp_lint_cache.py failure
-                echo "❌ cpp_lint.py failed: Found relative includes in src/"
-                FAIL=1
-            fi
-
-            if [ $FAIL -ne 0 ]; then
-                exit 1
-            fi
-
             # Mark C++ linting as successful
             uv run python ci/cpp_lint_cache.py success
             echo "✅ C++ linting passed"

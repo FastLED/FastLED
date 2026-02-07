@@ -24,6 +24,7 @@ from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
@@ -32,15 +33,18 @@ from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
 from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
+from ci.lint_cpp.no_cpp_in_fl_checker import NoCppInFlChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
+from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
+from ci.lint_cpp.test_unity_build import check as check_unity_build
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
@@ -133,6 +137,8 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         StdNamespaceChecker(),
         NamespaceIncludesChecker(),
         ReinterpretCastChecker(),
+        RelativeIncludeChecker(),
+        FastLEDHeaderUsageChecker(),
     ]
 
     # Platforms-specific checkers
@@ -163,6 +169,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     # fl/ directory checkers with STRICT enforcement
     checkers_by_scope["fl"] = [
         BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
+        NoCppInFlChecker(),
     ]
 
     # lib8tion/ directory checkers with STRICT enforcement
@@ -409,6 +416,16 @@ def format_and_print_results(results: dict[str, CheckerResults]) -> int:
         return 0
 
 
+def run_unity_build_check() -> tuple[int, list[str]]:
+    """Run unity build structure check (formerly standalone test_unity_build.py).
+
+    Returns:
+        (violation_count, violation_messages)
+    """
+    result = check_unity_build()
+    return (len(result.violations), result.violations)
+
+
 def main() -> int:
     """Main entry point for unified C++ linting."""
     print("Running unified C++ linting checks...")
@@ -423,6 +440,14 @@ def main() -> int:
 
     # Run all checkers in a single pass per scope
     results = run_checkers(files_by_dir, checkers_by_scope)
+
+    # Run unity build structure check (formerly standalone subprocess)
+    unity_violation_count, unity_violations = run_unity_build_check()
+    if unity_violation_count > 0:
+        unity_results = CheckerResults()
+        for violation in unity_violations:
+            unity_results.add_violation("unity_build_structure", 0, violation)
+        results["UnityBuildChecker"] = unity_results
 
     # Format and print results
     exit_code = format_and_print_results(results)

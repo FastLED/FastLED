@@ -45,22 +45,22 @@ class TestBannedHeadersChecker(unittest.TestCase):
         return checker.violations.get(path, [])
 
     def test_detects_banned_vector(self):
-        violations = self._check('#include <vector>\nint x;')
+        violations = self._check("#include <vector>\nint x;")
         self.assertEqual(len(violations), 1)
         self.assertIn("vector", violations[0][1])
 
     def test_detects_banned_iostream(self):
-        violations = self._check('#include <iostream>\nint x;')
+        violations = self._check("#include <iostream>\nint x;")
         self.assertEqual(len(violations), 1)
         self.assertIn("iostream", violations[0][1])
 
     def test_detects_banned_stdint_h(self):
-        violations = self._check('#include <stdint.h>\nint x;')
+        violations = self._check("#include <stdint.h>\nint x;")
         self.assertEqual(len(violations), 1)
         self.assertIn("stdint.h", violations[0][1])
 
     def test_detects_banned_string_h(self):
-        violations = self._check('#include <string.h>\nint x;')
+        violations = self._check("#include <string.h>\nint x;")
         self.assertEqual(len(violations), 1)
         self.assertIn("string.h", violations[0][1])
 
@@ -73,7 +73,7 @@ class TestBannedHeadersChecker(unittest.TestCase):
         self.assertEqual(len(violations), 0)
 
     def test_comment_line_ignored(self):
-        violations = self._check('// #include <vector>\nint x;')
+        violations = self._check("// #include <vector>\nint x;")
         self.assertEqual(len(violations), 0)
 
     def test_detects_private_libcpp_header(self):
@@ -87,12 +87,12 @@ class TestBannedHeadersChecker(unittest.TestCase):
         )
         path = "src/platforms/test.cpp"
         checker.check_file_content(
-            _make('#include <vector>  // ok include\nint x;', path)
+            _make("#include <vector>  // ok include\nint x;", path)
         )
         self.assertEqual(len(checker.violations.get(path, [])), 0)
 
     def test_multiple_banned_on_different_lines(self):
-        content = '#include <vector>\n#include <map>\nint x;'
+        content = "#include <vector>\n#include <map>\nint x;"
         violations = self._check(content)
         self.assertEqual(len(violations), 2)
 
@@ -183,9 +183,7 @@ class TestNumericLimitMacroChecker(unittest.TestCase):
         self.assertEqual(len(violations), 1)
 
     def test_fl_numeric_limits_passes(self):
-        violations = self._check(
-            "int x = fl::numeric_limits<uint32_t>::max();"
-        )
+        violations = self._check("int x = fl::numeric_limits<uint32_t>::max();")
         self.assertEqual(len(violations), 0)
 
     def test_comment_ignored(self):
@@ -193,9 +191,7 @@ class TestNumericLimitMacroChecker(unittest.TestCase):
         self.assertEqual(len(violations), 0)
 
     def test_suppression_comment(self):
-        violations = self._check(
-            "int x = UINT32_MAX;  // okay numeric limit macro"
-        )
+        violations = self._check("int x = UINT32_MAX;  // okay numeric limit macro")
         self.assertEqual(len(violations), 0)
 
 
@@ -216,10 +212,7 @@ class TestStaticInHeaderChecker(unittest.TestCase):
 
     def test_detects_static_local_in_header(self):
         content = (
-            "int getAll() {\n"
-            "    static int instances = 0;\n"
-            "    return instances;\n"
-            "}"
+            "int getAll() {\n    static int instances = 0;\n    return instances;\n}"
         )
         violations = self._check(content)
         self.assertEqual(len(violations), 1)
