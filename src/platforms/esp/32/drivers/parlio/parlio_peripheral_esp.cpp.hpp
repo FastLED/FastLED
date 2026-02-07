@@ -234,32 +234,15 @@ bool ParlioPeripheralESPImpl::isInitialized() const {
 // Transmission Methods
 //=============================================================================
 
-bool ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
+bool FL_IRAM ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
+    // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED ⚠️
+    // This function is called from FL_IRAM txDoneCallback via virtual dispatch.
     if (mTxUnit == nullptr) {
-        FL_WARN("ParlioPeripheralESP: Cannot transmit - not initialized");
         return false;
     }
 
     if (buffer == nullptr) {
-        FL_WARN("ParlioPeripheralESP: Cannot transmit - null buffer");
         return false;
-    }
-
-    // CRITICAL: Flush CPU cache to memory before DMA reads buffer
-    // This is the ONLY place cache sync happens (before DMA submission)
-    // Calculate buffer size in bytes (bit_count / 8)
-    size_t buffer_size = (bit_count + 7) / 8;
-
-    // DIAGNOSTIC: Dump first 16 bytes of buffer to verify content before transmission
-    // ONLY log on first 2 transmissions to avoid watchdog timeout from excessive logging
-    static int tx_count = 0;
-    if (tx_count < 2) {
-        FL_LOG_PARLIO("PARLIO_TX_BUF [" << tx_count << "]: " << buffer_size << " bytes, idle=" << idle_value);
-        FL_LOG_PARLIO("PARLIO_TX_BUF [" << tx_count << "]: First 8 bytes:");
-        for (size_t i = 0; i < 8 && i < buffer_size; i++) {
-            FL_DBG("  [" << i << "] = 0x" << fl::to_hex(buffer[i]));
-        }
-        tx_count++;
     }
 
     // Memory barrier: Ensure all preceding writes complete before DMA submission
