@@ -41,8 +41,8 @@ FL_EXTERN_C_END
     #endif
 #endif
 
-// Platform memory barrier
-#include "platforms/memory_barrier.h"
+// FL_MEMORY_BARRIER for ISR synchronization
+#include "fl/compiler_control.h"
 
 namespace fl {
 namespace detail {

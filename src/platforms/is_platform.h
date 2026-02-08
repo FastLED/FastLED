@@ -170,3 +170,12 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #define FL_IS_GCC
 #endif
+
+// FL_GCC_VERSION - Encoded GCC version number (major*100 + minor)
+// Only meaningful when FL_IS_GCC is defined. Evaluates to 0 otherwise,
+// which is safe in #if expressions (e.g., FL_GCC_VERSION >= 700).
+#ifdef FL_IS_GCC
+  #define FL_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
+#else
+  #define FL_GCC_VERSION 0
+#endif

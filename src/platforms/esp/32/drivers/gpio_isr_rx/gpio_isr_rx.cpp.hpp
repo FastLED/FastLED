@@ -15,6 +15,7 @@
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
 #include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros
+#include "fl/compiler_control.h"  // For FL_MEMORY_BARRIER
 
 // RX device logging: Disabled by default to reduce noise
 // Enable with: #define FASTLED_RX_LOG_ENABLED 1
@@ -568,12 +569,7 @@ public:
         bool done = mIsrCtx.receiveDone;
         if (done) {
             // Memory barrier: ensure all ISR writes are visible
-            __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-            #if defined(FL_IS_ESP32_XTENSA)
-            asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-            #elif defined(FL_IS_ESP32_RISCV)
-            asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
-            #endif
+            FL_MEMORY_BARRIER;
         }
         return done;
     }
@@ -620,12 +616,7 @@ public:
         }
 
         // Memory barrier: ensure all ISR writes are visible to main thread
-        __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-        #if defined(FL_IS_ESP32_XTENSA)
-        asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-        #elif defined(FL_IS_ESP32_RISCV)
-        asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
-        #endif
+        FL_MEMORY_BARRIER;
 
         // Convert cycles to nanoseconds in-place (only once, when needed)
         if (mNeedsConversion) {

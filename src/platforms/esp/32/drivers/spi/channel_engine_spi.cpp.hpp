@@ -37,7 +37,7 @@
 #include "fl/stl/time.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
-#include "platforms/memory_barrier.h" // FL_MEMORY_BARRIER for cache coherence
+#include "fl/compiler_control.h" // FL_MEMORY_BARRIER for cache coherence
 
 FL_EXTERN_C_BEGIN
 #include "freertos/FreeRTOS.h"  // portMAX_DELAY, pdMS_TO_TICKS
@@ -70,6 +70,20 @@ vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>
     ChannelEngineSpi::sSpiHostUsage;
 
 namespace {
+
+// ============================================================================
+// Math helpers
+// ============================================================================
+
+/// @brief Greatest common divisor (Euclidean algorithm)
+inline u32 gcd(u32 a, u32 b) {
+    while (b != 0) {
+        u32 t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
 
 // ============================================================================
 // Wave8 encoding constants
@@ -998,6 +1012,10 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     state->ledBytesRemaining = 0;
     state->transAInFlight = false;
     state->transBInFlight = false;
+    state->hasNewData = false;
+    state->isShuttingDown = false;
+    state->debugTxCaptured = false;
+    fl::memset(state->debugTxBuffer, 0, sizeof(state->debugTxBuffer));
 
     // CRITICAL: Zero-initialize transaction structures to avoid stale data
     fl::memset(&state->transA, 0, sizeof(spi_transaction_t));

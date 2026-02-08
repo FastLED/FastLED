@@ -119,9 +119,9 @@ FL_EXTERN_C_END
 
 // Manual clock frequency override for ESP32-C6 and ESP32-H2 (40MHz vs 80MHz)
 #ifndef F_CPU_RMT_CLOCK_MANUALLY_DEFINED
-#if defined(FL_IS_ESP_32C6) && FL_IS_ESP_32C6 == 1
+#if defined(FL_IS_ESP_32C6)
 #define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
-#elif defined(FL_IS_ESP_32H2) && FL_IS_ESP_32H2 == 1
+#elif defined(FL_IS_ESP_32H2)
 #define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
 #endif
 

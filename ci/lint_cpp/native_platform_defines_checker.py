@@ -44,7 +44,6 @@ _DISPATCH_CONFIG_FILES: set[str] = {
 # __GNUC__, _MSC_VER) because they define macros wrapping compiler-specific
 # features like pragmas, attributes, builtins, and export/import decorators.
 _COMPILER_ABSTRACTION_FILES: set[str] = {
-    "compiler_control.h",  # Compiler pragma/warning abstraction
     "deprecated.h",  # Compiler-specific [[deprecated]] attributes
     "align.h",  # Compiler-specific alignment (__attribute__, __declspec)
     "export.h",  # DLL export/import (__declspec(dllexport), __attribute__((visibility)))
@@ -454,7 +453,10 @@ class NativePlatformDefinesChecker(FileContentChecker):
                     message = (
                         f"Native platform define '{native_define}' found in "
                         f"preprocessor conditional. "
-                        f"Use '{modern_define}' instead."
+                        f"Use '#ifdef {modern_define}' or "
+                        f"'#if defined({modern_define})' instead "
+                        f"(FL_IS_* macros are defined/undefined, never use bare "
+                        f"'#if {modern_define}')."
                     )
                     violations.append((line_number, message))
 

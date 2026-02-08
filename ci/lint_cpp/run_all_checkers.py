@@ -25,6 +25,7 @@ from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
+from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
@@ -131,6 +132,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         LoggingInIramChecker(),
         PlatformIncludesChecker(),
         WeakAttributeChecker(),
+        FlIsDefinedChecker(),
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]

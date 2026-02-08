@@ -47,6 +47,6 @@
 // - ESP8266 uses same Xtensa instruction set as ESP32 for memory barriers
 // - Instruction encoding: 0x0020c0 (MEMW)
 //
-#define FL_MEMORY_BARRIER asm volatile("memw" ::: "memory")
+#define FL_PLATFORMS_MEMORY_BARRIER asm volatile("memw" ::: "memory")
 
 #endif // FL_IS_ESP8266

@@ -117,6 +117,46 @@ struct MultiLanePinConfig {
     }
 };
 
+/// @brief SPI timing configuration for clockless LED encoding
+///
+/// Describes the bit patterns and clock frequency for encoding LED data
+/// via SPI hardware. Built from chipset timing (T1/T2/T3) using
+/// calculateSpiTiming().
+struct SpiTimingConfig {
+    enum Protocol { WS2812, SK6812, CUSTOM };
+
+    Protocol protocol;             ///< Protocol type
+    u32 clock_hz;                  ///< SPI clock frequency in Hz
+    u8 bits_per_led_bit;           ///< Number of SPI bits per LED bit
+    u32 reset_time_us;             ///< Reset time in microseconds
+    u32 bit0_pattern;              ///< SPI bit pattern for LED bit '0'
+    u8 bit0_count;                 ///< Number of valid bits in bit0_pattern
+    u32 bit1_pattern;              ///< SPI bit pattern for LED bit '1'
+    u8 bit1_count;                 ///< Number of valid bits in bit1_pattern
+    u32 achieved_t0h_ns;           ///< Actual T0H timing achieved
+    u32 achieved_t0l_ns;           ///< Actual T0L timing achieved
+    u32 achieved_t1h_ns;           ///< Actual T1H timing achieved
+    u32 achieved_t1l_ns;           ///< Actual T1L timing achieved
+
+    /// @brief Create default WS2812 timing config
+    static SpiTimingConfig ws2812(u32 reset_us = 280) {
+        SpiTimingConfig cfg = {};
+        cfg.protocol = WS2812;
+        cfg.clock_hz = 6400000;
+        cfg.bits_per_led_bit = 8;
+        cfg.reset_time_us = reset_us;
+        cfg.bit0_pattern = 0b11000000;
+        cfg.bit0_count = 8;
+        cfg.bit1_pattern = 0b11111100;
+        cfg.bit1_count = 8;
+        cfg.achieved_t0h_ns = 312;
+        cfg.achieved_t0l_ns = 938;
+        cfg.achieved_t1h_ns = 938;
+        cfg.achieved_t1l_ns = 312;
+        return cfg;
+    }
+};
+
 /// @brief Clockless-over-SPI IChannelEngine implementation
 ///
 /// ⚠️ This is a CLOCKLESS LED driver using SPI hardware, NOT a true SPI chipset driver!
@@ -240,6 +280,14 @@ private:
         // Wave8 encoding LUT (built once from chipset timing)
         Wave8BitExpansionLut wave8Lut;     ///< Wave8 expansion lookup table (64 bytes)
         bool wave8LutInitialized;          ///< LUT has been built from timing
+
+        // ISR coordination flags
+        volatile bool hasNewData;          ///< Set by post-transaction callback to trigger encoding
+        volatile bool isShuttingDown;      ///< Set during teardown to prevent ISR access
+
+        // Debug capture (diagnostics)
+        bool debugTxCaptured;              ///< First TX buffer bytes captured for diagnostics
+        u8 debugTxBuffer[8];               ///< Captured first 8 bytes of TX buffer
     };
 
     /// @brief DMA pipeline state for poll()-driven async transmission
@@ -295,6 +343,12 @@ private:
 
     /// @brief Start the first DMA transaction for the active channel
     void startFirstDma();
+
+    /// @brief SPI post-transaction callback (ISR context)
+    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans);
+
+    /// @brief Timer encoding ISR callback
+    static void IRAM_ATTR timerEncodingISR(void *user_data);
 
     /// @brief Poll channel states for cleanup
     EngineState pollChannels();
@@ -374,6 +428,39 @@ private:
     ///   3. Wait for A to complete, queue B, encode into A
     ///   ... until all LED data is transmitted.
     void transmitStreaming(SpiChannelState* channel);
+
+    /// @brief Blocking polled transmission of pre-encoded staging buffer
+    /// @param channel Channel state with encoded data in staging buffer
+    void transmitBlockingPolled(SpiChannelState* channel);
+
+    /// @brief Encode LED data into SPI buffer using dynamic timing config
+    /// @param ledData Input LED data bytes
+    /// @param spiBuffer Output SPI buffer (resized internally)
+    /// @param timing SPI timing configuration
+    /// @return true if encoding succeeded
+    bool encodeLedData(const fl::span<const u8>& ledData,
+                       fl::vector<u8>& spiBuffer,
+                       const SpiTimingConfig& timing);
+
+    /// @brief Encode a single LED byte into SPI bit patterns
+    /// @param data LED byte to encode
+    /// @param buf Output buffer
+    /// @param timing SPI timing configuration
+    /// @param output_bit_offset Bit offset into output buffer
+    /// @return Number of bits written
+    u32 encodeLedByte(u8 data, u8* buf,
+                      const SpiTimingConfig& timing,
+                      u32 output_bit_offset);
+
+    /// @brief Calculate SPI timing from chipset timing configuration
+    /// @param chipsetTiming Chipset timing (T1/T2/T3)
+    /// @return SPI timing configuration
+    static SpiTimingConfig calculateSpiTiming(const ChipsetTimingConfig& chipsetTiming);
+
+    /// @brief Get SPI timing from channel data
+    /// @param data Channel data
+    /// @return SPI timing configuration
+    static SpiTimingConfig getSpiTimingFromChannel(const ChannelDataPtr& data);
 
     /// @brief Acquire SPI host for new channel
     /// @return SPI host, or SPI_HOST_MAX on failure

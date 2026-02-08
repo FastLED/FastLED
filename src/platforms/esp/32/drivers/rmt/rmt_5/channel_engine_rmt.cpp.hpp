@@ -39,7 +39,7 @@
 #include "fl/stl/time.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/trace.h"
-#include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
+#include "fl/compiler_control.h" // For FL_MEMORY_BARRIER
 
 // Peripheral interface includes
 #include "irmt5_peripheral.h"

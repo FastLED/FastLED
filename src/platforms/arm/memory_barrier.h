@@ -77,13 +77,13 @@
     // "dmb" defaults to "dmb sy" (full system barrier)
     // The "memory" clobber tells compiler that memory is modified, preventing
     // reordering of memory accesses across the barrier
-    #define FL_MEMORY_BARRIER __asm__ __volatile__ ("dmb" ::: "memory")
+    #define FL_PLATFORMS_MEMORY_BARRIER __asm__ __volatile__ ("dmb" ::: "memory")
 #else
     // ARMv6-M (Cortex-M0/M0+) or unknown ARM architecture
     // No DMB instruction available - use compiler barrier only
     // This prevents compiler reordering but provides no hardware memory barrier
     // The volatile qualifier on ISR variables provides the primary synchronization
-    #define FL_MEMORY_BARRIER __asm__ __volatile__ ("" ::: "memory")
+    #define FL_PLATFORMS_MEMORY_BARRIER __asm__ __volatile__ ("" ::: "memory")
 #endif
 
 #endif // FL_IS_ARM

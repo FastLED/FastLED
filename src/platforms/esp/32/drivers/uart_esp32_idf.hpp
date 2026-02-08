@@ -97,18 +97,27 @@ static uart_sclk_t convertClockSource(UartClockSource source) {
 #else
             return UART_SCLK_APB;
 #endif
-        case UartClockSource::CLK_APB:      return UART_SCLK_APB;
+        case UartClockSource::CLK_APB:
+#if defined(UART_SCLK_APB)
+            return UART_SCLK_APB;
+#else
+            return UART_SCLK_DEFAULT;  // ESP32-C6/H2 don't have UART_SCLK_APB
+#endif
         case UartClockSource::CLK_REF_TICK:
 #if defined(UART_SCLK_REF_TICK)
             return UART_SCLK_REF_TICK;
-#else
+#elif defined(UART_SCLK_APB)
             return UART_SCLK_APB;  // Fallback if REF_TICK not supported
+#else
+            return UART_SCLK_DEFAULT;
 #endif
         case UartClockSource::CLK_XTAL:
 #if defined(UART_SCLK_XTAL)
             return UART_SCLK_XTAL;
-#else
+#elif defined(UART_SCLK_APB)
             return UART_SCLK_APB;  // Fallback if XTAL not supported
+#else
+            return UART_SCLK_DEFAULT;
 #endif
         default:
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)

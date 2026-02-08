@@ -1,19 +1,20 @@
 #pragma once
 
 #include "platforms/is_platform.h"
+#include "platforms/memory_barrier.h"
 
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x
 #define FL_STRINGIFY(x) FL_STRINGIFY2(x)
 
 // BEGIN BASE MACROS
-#if defined(__clang__)
+#if defined(FL_IS_CLANG)
   #define FL_DISABLE_WARNING_PUSH         _Pragma("clang diagnostic push")
   #define FL_DISABLE_WARNING_POP          _Pragma("clang diagnostic pop")
   // Usage: FL_DISABLE_WARNING(float-equal)
   #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(clang diagnostic ignored "-W" #warning))
 
-#elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
+#elif defined(FL_IS_GCC) && FL_GCC_VERSION >= 406
   #define FL_DISABLE_WARNING_PUSH         _Pragma("GCC diagnostic push")
   #define FL_DISABLE_WARNING_POP          _Pragma("GCC diagnostic pop")
   // Usage: FL_DISABLE_WARNING(float-equal)
@@ -26,7 +27,7 @@
 // END BASE MACROS
 
 // WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.
-#if defined(__clang__)
+#if defined(FL_IS_CLANG)
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
     FL_DISABLE_WARNING(global-constructors)
   #define FL_DISABLE_WARNING_SELF_ASSIGN \
@@ -51,7 +52,7 @@
   // C++14/17 extension warnings (for compatibility when using SIMD intrinsic headers)
   #define FL_DISABLE_WARNING_C14_EXTENSIONS FL_DISABLE_WARNING(c++14-extensions)
   #define FL_DISABLE_WARNING_C17_EXTENSIONS FL_DISABLE_WARNING(c++17-extensions)
-#elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
+#elif defined(FL_IS_GCC) && FL_GCC_VERSION >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   // GCC doesn't have self-assign warning, use no-op
@@ -68,7 +69,7 @@
     FL_DISABLE_WARNING(return-type)
 
   // implicit-fallthrough warning requires GCC >= 7.0
-  #if (__GNUC__*100 + __GNUC_MINOR__) >= 700
+  #if FL_GCC_VERSION >= 700
     #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH FL_DISABLE_WARNING(implicit-fallthrough)
   #else
     #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH
@@ -80,14 +81,14 @@
   // GCC doesn't have shorten-64-to-32 warning, use no-op
   #define FL_DISABLE_WARNING_SHORTEN_64_TO_32
   // volatile warning requires GCC >= 10.0 (added in GCC 10)
-  #if defined(FL_IS_AVR) || ((__GNUC__*100 + __GNUC_MINOR__) < 1000)
+  #if defined(FL_IS_AVR) || (FL_GCC_VERSION < 1000)
     #define FL_DISABLE_WARNING_VOLATILE
   #else
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
   #endif
   // GCC has subobject-linkage warning (requires GCC >= 5.0)
-  #if (__GNUC__*100 + __GNUC_MINOR__) >= 500
+  #if FL_GCC_VERSION >= 500
     #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
   #else
     #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
@@ -125,14 +126,14 @@
 #define FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS FL_DISABLE_WARNING_C14_EXTENSIONS
 
 // Fast math optimization controls with additional aggressive flags
-#if defined(__clang__)
+#if defined(FL_IS_CLANG)
   #define FL_FAST_MATH_BEGIN \
     _Pragma("clang diagnostic push") \
     _Pragma("STDC FP_CONTRACT ON")
 
   #define FL_FAST_MATH_END   _Pragma("clang diagnostic pop")
 
-#elif defined(__GNUC__)
+#elif defined(FL_IS_GCC)
   #define FL_FAST_MATH_BEGIN \
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"fast-math\")") \
@@ -141,7 +142,7 @@
 
   #define FL_FAST_MATH_END   _Pragma("GCC pop_options")
 
-#elif defined(_MSC_VER)
+#elif defined(FL_IS_WIN_MSVC)
   #define FL_FAST_MATH_BEGIN __pragma(float_control(precise, off))
   #define FL_FAST_MATH_END   __pragma(float_control(precise, on))
 #else
@@ -150,13 +151,13 @@
 #endif
 
 // Optimization Level O3
-#if defined(__clang__)
+#if defined(FL_IS_CLANG)
   #define FL_OPTIMIZATION_LEVEL_O3_BEGIN \
     _Pragma("clang diagnostic push")
 
   #define FL_OPTIMIZATION_LEVEL_O3_END   _Pragma("clang diagnostic pop")
 
-#elif defined(__GNUC__)
+#elif defined(FL_IS_GCC)
   #define FL_OPTIMIZATION_LEVEL_O3_BEGIN \
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"O3\")")
@@ -168,13 +169,13 @@
 #endif
 
 // Optimization Level O0 (Debug/No optimization)
-#if defined(__clang__)
+#if defined(FL_IS_CLANG)
   #define FL_OPTIMIZATION_LEVEL_O0_BEGIN \
     _Pragma("clang diagnostic push")
 
   #define FL_OPTIMIZATION_LEVEL_O0_END   _Pragma("clang diagnostic pop")
 
-#elif defined(__GNUC__)
+#elif defined(FL_IS_GCC)
   #define FL_OPTIMIZATION_LEVEL_O0_BEGIN \
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"O0\")")
@@ -193,7 +194,7 @@
 #define FL_TIMING_OPT_LEVEL 2
 #endif
 
-#if defined(__GNUC__)
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // Note: _Pragma requires a single string literal, so we can't use token pasting
   // to build the optimization level string. Instead, we use conditional compilation.
   #if FL_TIMING_OPT_LEVEL == 0
@@ -228,10 +229,10 @@
 // Function-level optimization attributes
 // GCC supports per-function optimization attributes
 // Clang doesn't support optimize("O3"), but supports hot attribute for aggressive optimization
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(FL_IS_GCC)
   #define FL_OPTIMIZE_FUNCTION __attribute__((optimize("O3")))
   #define FL_OPTIMIZE_O2 __attribute__((optimize("O2")))
-#elif defined(__clang__)
+#elif defined(FL_IS_CLANG)
   #define FL_OPTIMIZE_FUNCTION __attribute__((hot))
   #define FL_OPTIMIZE_O2 __attribute__((hot))
 #else
@@ -250,15 +251,15 @@
 #if defined(FL_IS_AVR)
   // AVR-GCC does not support #pragma GCC unroll
   #define FL_UNROLL(N)
-#elif defined(__GNUC__) && !defined(__clang__)
+#elif defined(FL_IS_GCC)
   // GCC supports #pragma GCC unroll N since GCC 8.0
-  #if (__GNUC__*100 + __GNUC_MINOR__) >= 800
+  #if FL_GCC_VERSION >= 800
     #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(GCC unroll N))
   #else
     // Older GCC versions don't support #pragma GCC unroll - use no-op
     #define FL_UNROLL(N)
   #endif
-#elif defined(__clang__)
+#elif defined(FL_IS_CLANG)
   // Clang supports #pragma unroll N (or #pragma clang loop unroll_count(N))
   #define FL_UNROLL(N) _Pragma(FL_STRINGIFY(unroll N))
 #else
@@ -267,7 +268,7 @@
 #endif
 
 // Mark functions/variables as maybe unused (for compile-time test functions)
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   #define FL_MAYBE_UNUSED __attribute__((unused))
 #else
   #define FL_MAYBE_UNUSED
@@ -293,9 +294,9 @@
 
 // Mark functions to run during C++ static initialization (before main())
 // Used for auto-registration of platform-specific implementations
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   #define FL_CONSTRUCTOR __attribute__((constructor))
-#elif defined(_MSC_VER)
+#elif defined(FL_IS_WIN_MSVC)
   // MSVC requires different approach - use #pragma init_seg
   #define FL_CONSTRUCTOR
   #pragma message("Warning: FL_CONSTRUCTOR not fully supported on MSVC")
@@ -310,10 +311,10 @@
     // Emscripten: Use EMSCRIPTEN_KEEPALIVE to export symbols to JavaScript
     #include <emscripten.h>
     #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE
-  #elif defined(__GNUC__) || defined(__clang__)
+  #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
     // GCC/Clang: Mark symbol as used to prevent linker optimization
     #define FL_KEEP_ALIVE __attribute__((used))
-  #elif defined(_MSC_VER)
+  #elif defined(FL_IS_WIN_MSVC)
     // MSVC: Force symbol retention through optimization pragma
     // Note: MSVC's linker will still strip unreferenced symbols even with this,
     // so static constructors may need explicit references or /OPT:NOREF linker flag
@@ -346,7 +347,7 @@
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 
-#if defined(_MSC_VER)
+#if defined(FL_IS_WIN_MSVC)
   #pragma section(".CRT$XCU", read)
 
   #define FL_INIT(wrapper_name, func) \
@@ -356,7 +357,7 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
       static void (*wrapper_name##_ptr)(void) = wrapper_name; \
     }
 
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   #define FL_INIT(wrapper_name, func) \
     namespace static_init { \
       FL_CONSTRUCTOR FL_KEEP_ALIVE \
@@ -457,10 +458,10 @@ FL_DISABLE_WARNING_POP
 #if __cplusplus >= 201703L
   // C++17+: Use standard [[nodiscard]] attribute
   #define FL_NODISCARD [[nodiscard]]
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang: Use warn_unused_result attribute
   #define FL_NODISCARD __attribute__((warn_unused_result))
-#elif defined(_MSC_VER)
+#elif defined(FL_IS_WIN_MSVC)
   // MSVC: Use SAL annotation
   #define FL_NODISCARD _Check_return_
 #else
@@ -478,9 +479,9 @@ FL_DISABLE_WARNING_POP
 // overlapping memory), allowing the compiler to optimize more aggressively.
 #if defined(__cplusplus)
   // C++ doesn't have 'restrict' keyword, use compiler-specific extensions
-  #if defined(__GNUC__) || defined(__clang__)
+  #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
     #define FL_RESTRICT_PARAM __restrict__
-  #elif defined(_MSC_VER)
+  #elif defined(FL_IS_WIN_MSVC)
     #define FL_RESTRICT_PARAM __restrict
   #else
     #define FL_RESTRICT_PARAM
@@ -505,10 +506,10 @@ FL_DISABLE_WARNING_POP
 #if defined(__cplusplus)
   // C++11 standard: __func__ is a predefined identifier
   #define FL_FUNCTION __func__
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang C: Use __FUNCTION__ extension
   #define FL_FUNCTION __FUNCTION__
-#elif defined(_MSC_VER)
+#elif defined(FL_IS_WIN_MSVC)
   // MSVC: __FUNCTION__ is supported
   #define FL_FUNCTION __FUNCTION__
 #else
@@ -531,3 +532,4 @@ FL_DISABLE_WARNING_POP
 #ifndef FL_HAS_SANITIZER_LSAN
 #  define FL_HAS_SANITIZER_LSAN 0
 #endif
+
