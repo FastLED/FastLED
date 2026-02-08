@@ -520,7 +520,11 @@ def run_meson_build_and_test(
                 path_qualified = []
                 for candidate in targets_to_try:
                     qualified = f"tests/{candidate}"
-                    if candidate and "/" not in candidate and qualified not in targets_to_try:
+                    if (
+                        candidate
+                        and "/" not in candidate
+                        and qualified not in targets_to_try
+                    ):
                         path_qualified.append(qualified)
                 targets_to_try.extend(path_qualified)
 
@@ -545,7 +549,9 @@ def run_meson_build_and_test(
                         compile_target = candidate
                         # Strip path prefix for executable lookup: meson_test_name is used
                         # to find binaries in build_dir/tests/, so "tests/fastled" → "fastled"
-                        meson_test_name = candidate.removeprefix("tests/") if candidate else candidate
+                        meson_test_name = (
+                            candidate.removeprefix("tests/") if candidate else candidate
+                        )
                         break
                     last_error_output = result.error_output
 

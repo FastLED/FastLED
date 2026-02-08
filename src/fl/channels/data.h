@@ -142,8 +142,8 @@ private:
     ChannelData& operator=(const ChannelData&) = delete;
 
     ChipsetVariant mChipset;                ///< Chipset configuration (clockless or SPI)
-    const int mPin;                         ///< GPIO pin number (extracted from chipset for convenience)
-    const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset) - backwards compatibility, clockless only
+    int mPin;                               ///< GPIO pin number (extracted from chipset for convenience)
+    ChipsetTimingConfig mTiming;            ///< Chipset timing (T0H, T1H, T0L, reset) - backwards compatibility, clockless only
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)

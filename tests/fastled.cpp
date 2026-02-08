@@ -608,3 +608,92 @@ TEST_CASE("FastLED.add nullptr is safe") {
 }
 
 } // namespace channel_add_remove_test
+
+TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
+    // Create initial channel with known settings
+    static CRGB leds1[8];
+    fl::fill_solid(leds1, 8, CRGB::Red);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions opts;
+    opts.mCorrection = TypicalSMD5050;
+    opts.mDitherMode = BINARY_DITHER;
+    opts.mRgbw = fl::RgbwInvalid::value();
+
+    fl::ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 8), GRB, opts);
+    auto channel = fl::Channel::create(config1);
+    REQUIRE(channel != nullptr);
+
+    fl::i32 originalId = channel->id();
+    int originalPin = channel->getPin();
+
+    // Verify initial state
+    CHECK(channel->getRgbOrder() == GRB);
+    CHECK(channel->size() == 8);
+    CHECK(channel->getCorrection() == CRGB(TypicalSMD5050));
+    CHECK(channel->getDither() == BINARY_DITHER);
+
+    // Build new config with different values
+    static CRGB leds2[16];
+    fl::fill_solid(leds2, 16, CRGB::Blue);
+
+    fl::ChannelOptions opts2;
+    opts2.mCorrection = Typical8mmPixel;
+    opts2.mTemperature = CRGB(200, 180, 160);
+    opts2.mDitherMode = DISABLE_DITHER;
+    opts2.mRgbw = fl::Rgbw(fl::kRGBWExactColors);
+
+    fl::ChannelConfig config2(99, timing, fl::span<CRGB>(leds2, 16), BGR, opts2);
+
+    // Apply new config
+    channel->applyConfig(config2);
+
+    // Verify reconfigurable fields changed
+    CHECK(channel->getRgbOrder() == BGR);
+    CHECK(channel->size() == 16);
+    CHECK(channel->leds() == leds2);
+    CHECK(channel->getCorrection() == CRGB(Typical8mmPixel));
+    CHECK(channel->getTemperature() == CRGB(200, 180, 160));
+    CHECK(channel->getDither() == DISABLE_DITHER);
+    CHECK(channel->getRgbw().active());
+
+    // Verify structural members are unchanged
+    CHECK(channel->id() == originalId);
+    CHECK(channel->getPin() == originalPin);
+}
+
+TEST_CASE("Channel LED span tracks underlying array correctly") {
+    // Channel stores a span (non-owning view) into an LED array.
+    // Verify that:
+    //  1) Writes through channel->leds() modify the original array
+    //  2) applyConfig with a new array disconnects from the old one
+    //  3) The old array is unaffected after switching
+
+    static CRGB leds1[4] = {CRGB::Black, CRGB::Black, CRGB::Black, CRGB::Black};
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 4), GRB);
+    auto channel = fl::Channel::create(config1);
+    REQUIRE(channel != nullptr);
+
+    // Write through channel — should modify leds1 directly (span is a view)
+    channel->leds()[0] = CRGB::Red;
+    channel->leds()[1] = CRGB::Green;
+    CHECK(leds1[0] == CRGB::Red);
+    CHECK(leds1[1] == CRGB::Green);
+
+    // Switch to a different LED array via applyConfig
+    static CRGB leds2[6] = {CRGB::Black, CRGB::Black, CRGB::Black,
+                            CRGB::Black, CRGB::Black, CRGB::Black};
+    fl::ChannelConfig config2(5, timing, fl::span<CRGB>(leds2, 6), GRB);
+    channel->applyConfig(config2);
+
+    CHECK(channel->size() == 6);
+    CHECK(channel->leds() == leds2);
+
+    // Writes now go to leds2, not leds1
+    channel->leds()[0] = CRGB::Blue;
+    CHECK(leds2[0] == CRGB::Blue);
+    // leds1 retains its last state — channel no longer points to it
+    CHECK(leds1[0] == CRGB::Red);
+    CHECK(leds1[1] == CRGB::Green);
+}

@@ -133,6 +133,15 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
 
 Channel::~Channel() {}
 
+void Channel::applyConfig(const ChannelConfig& config) {
+    mRgbOrder = config.rgb_order;
+    setLeds(config.mLeds);
+    setCorrection(config.options.mCorrection);
+    setTemperature(config.options.mTemperature);
+    setDither(config.options.mDitherMode);
+    setRgbw(config.options.mRgbw);
+}
+
 int Channel::getClockPin() const {
     if (const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>()) {
         return spi->clockPin;

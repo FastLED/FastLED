@@ -69,6 +69,10 @@ public:
     /// @return ChipsetVariant reference
     const ChipsetVariant& getChipset() const { return mChipset; }
 
+    /// @brief Get the RGB channel ordering
+    /// @return EOrder value
+    EOrder getRgbOrder() const { return mRgbOrder; }
+
     /// @brief Check if this is a clockless chipset
     bool isClockless() const { return mChipset.is<ClocklessChipset>(); }
 
@@ -82,6 +86,11 @@ public:
     /// @brief Set the channel engine this channel belongs to
     /// @param engine Pointer to the IChannelEngine (singleton, not owned)
     void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
+
+    /// @brief Apply reconfigurable settings from a ChannelConfig
+    /// @param config The configuration to apply
+    /// @note Does NOT change: mPin, mTiming, mChipset, mEngine, mId
+    void applyConfig(const ChannelConfig& config);
 
 private:
     // CPixelLEDController interface implementation
@@ -115,9 +124,9 @@ private:
     static i32 nextId();
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
-    const int mPin;                  // Data pin (backwards compatibility)
-    const ChipsetTimingConfig mTiming; // Timing (backwards compatibility, clockless only)
-    const EOrder mRgbOrder;
+    int mPin;                        // Data pin (backwards compatibility)
+    ChipsetTimingConfig mTiming;     // Timing (backwards compatibility, clockless only)
+    EOrder mRgbOrder;
     IChannelEngine* mEngine;         // Singleton pointer, not owned
     const i32 mId;
     ChannelDataPtr mChannelData;
