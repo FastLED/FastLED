@@ -69,7 +69,7 @@ def generate_lane_configs(
     Returns:
         List of lane size configurations to test
     """
-    configs = []
+    configs: list[list[int]] = []
 
     # Add preset configurations
     if presets:
@@ -150,7 +150,7 @@ def run_validation_loop(
             agent.set_strip_sizes_enabled(small=True, large=True)
 
         # Results accumulator
-        all_results = []
+        all_results: list[dict[str, Any]] = []
         total_passed = 0
         total_failed = 0
 

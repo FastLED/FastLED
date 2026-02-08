@@ -466,7 +466,7 @@ def run_package_install_with_retry(
         # Log subprocess PID
         logging.debug(f"Subprocess PID: {proc.pid}")
 
-        output_lines = []
+        output_lines: list[str] = []
         assert proc.stdout is not None
         for line in proc.stdout:
             line_stripped = line.strip()
@@ -925,7 +925,7 @@ def main() -> int:
     # Use daemoniker to properly daemonize
     try:
         daemonizer_context = Daemonizer()
-        with daemonizer_context as (is_setup, daemonizer):
+        with daemonizer_context as (is_setup, daemonizer):  # type: ignore[misc]
             if is_setup:
                 # Pre-daemon setup (runs as parent process)
                 logging.info("Initializing daemon")

@@ -261,7 +261,7 @@ def kill_port_users(port: str) -> None:
     # Find processes using the port
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            proc_info: dict[str, Any] = proc.as_dict(attrs=["pid", "name", "cmdline"])
+            proc_info: dict[str, Any] = proc.as_dict(attrs=["pid", "name", "cmdline"])  # type: ignore[misc]
             proc_pid: int = proc_info["pid"]
             proc_name: str = proc_info["name"]
             cmdline: list[str] | None = proc_info["cmdline"]

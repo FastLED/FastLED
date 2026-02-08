@@ -181,7 +181,7 @@ def diagnose_port(port_name: str) -> None:
             try:
                 proc_info = cast(
                     dict[str, Any],
-                    proc.as_dict(attrs=["pid", "name", "cmdline"]),
+                    proc.as_dict(attrs=["pid", "name", "cmdline"]),  # type: ignore[misc]
                 )
                 print(f"  PID {proc_info['pid']}: {proc_info['name']}")
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
@@ -212,7 +212,7 @@ def diagnose_port(port_name: str) -> None:
         try:
             proc_info = cast(
                 dict[str, Any],
-                proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"]),
+                proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"]),  # type: ignore[misc]
             )
             matches, patterns = check_matches_kill_patterns(
                 proc_info["name"], proc_info["cmdline"], port_name
@@ -235,7 +235,7 @@ def diagnose_port(port_name: str) -> None:
                             indent = "      " + "  " * i
                             ancestor_info = cast(
                                 dict[str, Any],
-                                ancestor.as_dict(attrs=["pid", "name"]),
+                                ancestor.as_dict(attrs=["pid", "name"]),  # type: ignore[misc]
                             )
                             print(
                                 f"{indent}└─ PID {ancestor_info['pid']}: {ancestor_info['name']}"
@@ -271,7 +271,7 @@ def diagnose_port(port_name: str) -> None:
     found_any = False
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])
+            proc_info = proc.as_dict(attrs=["pid", "name", "cmdline"])  # type: ignore[misc]
             proc_name_lower = proc_info["name"].lower()
 
             if any(keyword in proc_name_lower for keyword in serial_keywords):

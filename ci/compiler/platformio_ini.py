@@ -317,7 +317,7 @@ class FrameworkInfo:
     description: Optional[str] = None
     url: Optional[str] = None
     homepage: Optional[str] = None
-    platforms: list[str] = field(default_factory=list)
+    platforms: list[str] = field(default_factory=lambda: [])
     version: Optional[str] = None
 
     @classmethod
@@ -366,8 +366,8 @@ class ResolvedUrlsCache:
     Strongly typed representation of the complete resolved URLs cache.
     """
 
-    platforms: dict[str, PlatformCacheEntry] = field(default_factory=dict)
-    frameworks: dict[str, FrameworkCacheEntry] = field(default_factory=dict)
+    platforms: dict[str, PlatformCacheEntry] = field(default_factory=lambda: {})
+    frameworks: dict[str, FrameworkCacheEntry] = field(default_factory=lambda: {})
 
 
 @dataclass
@@ -1493,13 +1493,13 @@ class PlatformIOIni:
                 continue
 
             package = PackageInfo(
-                name=str(pkg_data.get("name", "")),
-                type=str(pkg_data.get("type", "")),
-                requirements=str(pkg_data.get("requirements", "")),
-                url=str(pkg_data.get("url", "")),
-                optional=bool(pkg_data.get("optional", True)),
-                version=pkg_data.get("version"),
-                description=pkg_data.get("description"),
+                name=str(pkg_data.get("name", "")),  # type: ignore[arg-type]
+                type=str(pkg_data.get("type", "")),  # type: ignore[arg-type]
+                requirements=str(pkg_data.get("requirements", "")),  # type: ignore[arg-type]
+                url=str(pkg_data.get("url", "")),  # type: ignore[arg-type]
+                optional=bool(pkg_data.get("optional", True)),  # type: ignore[arg-type]
+                version=pkg_data.get("version"),  # type: ignore[arg-type]
+                description=pkg_data.get("description"),  # type: ignore[arg-type]
             )
             packages.append(package)
 
@@ -1516,13 +1516,13 @@ class PlatformIOIni:
                 continue
 
             package = PackageInfo(
-                name=str(pkg_data.get("name", "")),
-                type=str(pkg_data.get("type", "")),
-                requirements=str(pkg_data.get("requirements", "")),
-                url=str(pkg_data.get("url", "")),
-                optional=bool(pkg_data.get("optional", True)),
-                version=pkg_data.get("version"),
-                description=pkg_data.get("description"),
+                name=str(pkg_data.get("name", "")),  # type: ignore[arg-type]
+                type=str(pkg_data.get("type", "")),  # type: ignore[arg-type]
+                requirements=str(pkg_data.get("requirements", "")),  # type: ignore[arg-type]
+                url=str(pkg_data.get("url", "")),  # type: ignore[arg-type]
+                optional=bool(pkg_data.get("optional", True)),  # type: ignore[arg-type]
+                version=pkg_data.get("version"),  # type: ignore[arg-type]
+                description=pkg_data.get("description"),  # type: ignore[arg-type]
             )
             packages.append(package)
 

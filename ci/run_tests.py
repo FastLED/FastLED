@@ -40,7 +40,7 @@ class TestResult:
     success: bool
     duration: float
     output: str
-    captured_lines: list[str] = field(default_factory=list)
+    captured_lines: list[str] = field(default_factory=lambda: [])
     return_code: Optional[int] = None
 
 

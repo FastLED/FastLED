@@ -106,7 +106,8 @@ def main():
         print(f"Output: {output}")
         sys.exit(1)
 
-    size_str = size_match.group(1)
+    size_str = size_match.group(1)  # type: ignore[misc]
+    assert isinstance(size_str, str), "Size group must be a string"
     if not size_str:
         print("Error: Size group is empty")
         sys.exit(1)

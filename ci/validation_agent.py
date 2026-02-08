@@ -345,7 +345,7 @@ class ValidationAgent:
             state = response.get("testState", {})
             results = state.get("results", {})
 
-            lane_results = []
+            lane_results: list[LaneResult] = []
             for detail in results.get("details", []):
                 lane_idx = detail["lane"]
                 lane_results.append(

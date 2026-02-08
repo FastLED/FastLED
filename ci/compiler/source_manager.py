@@ -7,7 +7,7 @@ import time
 import warnings
 from pathlib import Path
 
-from dirsync import sync
+from dirsync import sync  # type: ignore[import-untyped]
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 

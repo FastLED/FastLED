@@ -88,7 +88,7 @@ def create_pio_process(
 
         # Also register with process killer for atexit cleanup
         register_pio_process(popen)
-        atexit.register(lambda p=popen: unregister_pio_process(p))
+        atexit.register(lambda p=popen: unregister_pio_process(p))  # type: ignore[arg-type,misc]
 
     return proc
 

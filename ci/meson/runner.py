@@ -517,7 +517,7 @@ def run_meson_build_and_test(
                 # Add path-qualified variants for disambiguation.
                 # Meson supports "subdir/target" format to resolve ambiguous names
                 # (e.g., "tests/fastled" disambiguates from the library "fastled").
-                path_qualified = []
+                path_qualified: list[str] = []
                 for candidate in targets_to_try:
                     qualified = f"tests/{candidate}"
                     if (

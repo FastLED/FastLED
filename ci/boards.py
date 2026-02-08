@@ -158,7 +158,7 @@ class Board:
             field_value: Any = getattr(self, field_name)
             # Create deep copy for mutable types to avoid shared references
             if isinstance(field_value, (list, dict)):
-                field_value = deepcopy(field_value)
+                field_value = deepcopy(field_value)  # type: ignore[arg-type]
             setattr(out, field_name, field_value)
         return out
 

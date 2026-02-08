@@ -103,12 +103,12 @@ def get_docker_env() -> dict[str, str]:
 
 def run_subprocess_safe(
     cmd: list[str], **kwargs: Any
-) -> subprocess.CompletedProcess[Any]:
+) -> subprocess.CompletedProcess[str]:
     """Run subprocess with safe UTF-8 handling and error replacement."""
     kwargs.setdefault("encoding", "utf-8")
     kwargs.setdefault("errors", "replace")
     kwargs.setdefault("env", get_docker_env())
-    return subprocess.run(cmd, **kwargs)
+    return subprocess.run(cmd, **kwargs)  # type: ignore[return-value]
 
 
 def run_docker_command_streaming(cmd: list[str]) -> int:
