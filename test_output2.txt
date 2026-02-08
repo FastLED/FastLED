@@ -1,0 +1,61 @@
+Found: animartrix2 (tests/fx/animartrix2.cpp) [unit]
+Config: clang
+[MESON] Cleaning build directory: C:\Users\niteris\dev\fastled\.build\meson-quick
+Preparing build (quick mode)...
+[MESON] Setting up build directory: C:\Users\niteris\dev\fastled\.build\meson-quick
+[MESON] Regenerated native file: C:\Users\niteris\dev\fastled\.build\meson-quick\meson_native.txt
+── ⚙️ MESON CONFIGURATION ──────────────────────────
+0.46 The Meson build system
+0.46 Version: 1.10.0
+0.46 Source dir: C:\Users\niteris\dev\fastled
+0.46 Build dir: C:\Users\niteris\dev\fastled\.build\meson-quick
+0.46 Build type: native build
+0.55 Project name: fastled
+0.55 Project version: 6.0.0
+8.44 C++ compiler for the host machine: C:\Users\niteris\dev\fastled\.venv\Scripts\clang-tool-chain-sccache-cpp.EXE (clang 21.1.5 "clang version 21.1.5")
+8.44 C++ linker for the host machine: C:\Users\niteris\dev\fastled\.venv\Scripts\clang-tool-chain-sccache-cpp.EXE ld.lld 21.1.5
+20.64 Host machine cpu family: x86_64
+20.64 Host machine cpu: x86_64
+20.64 Program uv found: YES (C:\Users\niteris\dev\fastled\.venv\Scripts\uv.EXE)
+20.75 Message: Running source file discovery (cache invalid or missing)
+21.12 Message: libunwind enabled for Unix platforms - enhanced stack traces enabled
+21.14 Program uv found: YES (C:\Users\niteris\dev\fastled\.venv\Scripts\uv.EXE)
+21.27 Message: Running test discovery (cache invalid or missing)
+22.83 Message: Individual test DLL build enabled: 194 test DLLs + runners
+23.09 Message: Running example discovery (cache invalid or missing)
+24.76 Message: Host-based example compilation: 52/92 examples (66 platform-specific examples skipped)
+24.77 Program uv found: YES (C:\Users\niteris\dev\fastled\.venv\Scripts\uv.EXE)
+24.79 Message: PlatformIO example compilation targets configured:
+24.79 Message:   - Individual: example-<name>-<board> (e.g., example-blink-uno)
+24.79 Message:   - All examples: examples-all-<board> (e.g., examples-all-uno)
+24.79 Message:   - Single example, all boards: examples-<name>-all-boards (e.g., examples-blink-all-boards)
+24.79 Message:   - Default: examples-default
+24.79 Message:   Available boards: uno, esp32dev, esp8266, esp32s3, teensy41
+24.79 Message:   Available examples: Blink, DemoReel100, ColorPalette, Cylon, Fire2012
+24.79 Build targets in project: 486
+24.79 fastled 6.0.0
+24.79   User defined options
+24.79     Native files: C:\Users\niteris\dev\fastled\.build\meson-quick\meson_native.txt
+24.79     build_mode  : quick
+24.89 Found ninja-1.13.0.git.kitware.jobserver-pipe-1 at C:\Users\niteris\dev\fastled\.venv\Scripts\ninja.EXE
+30.71 Generating targets:   0%|          | 0/486 eta ?
+32.28 Generating targets:   0%|          | 1/486 eta 46:57
+32.38 Generating targets:   1%|▏         | 7/486 eta 06:42
+32.48 Generating targets:  14%|█▍        | 67/486 eta 00:26
+32.58 Generating targets:  27%|██▋       | 129/486 eta 00:09
+32.68 Generating targets:  42%|████▏     | 205/486 eta 00:04
+32.78 Generating targets:  56%|█████▌    | 272/486 eta 00:01
+32.88 Generating targets:  70%|███████   | 342/486 eta 00:00
+32.99 Generating targets:  85%|████████▌ | 414/486 eta 00:00
+32.99 Generating targets:  99%|█████████▉| 481/486 eta 00:00
+35.57 Writing build.ninja:   0%|          | 0/1002 eta ?
+35.60 Writing build.ninja:  77%|███████▋  | 772/1002 eta 00:00
+[MESON] Setup successful
+[MESON] ✅ Saved thin archive configuration: True
+[MESON] ✅ Saved debug configuration: False
+[MESON] ✅ Saved check configuration: False
+[MESON] ✅ Saved build_mode configuration: quick
+[MESON] ✅ Saved source/test files hash (1451 files)
+[MESON] ✅ Saved compiler version: clang version 21.1.5
+[MESON] 🔧 Performing periodic Ninja dependency database maintenance...
+[MESON] ✓ Dependency database maintenance completed successfully

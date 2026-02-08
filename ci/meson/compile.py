@@ -194,9 +194,13 @@ def compile_meson(
                     continue  # Skip no-work ninja message (already up to date)
 
                 # Suppress output unless verbose mode enabled
-                # In quiet or non-verbose mode: only collect output for error checking, don't print
+                # In quiet or non-verbose mode: still print error/failure lines to stderr
                 # In verbose mode: show full compilation output for detailed debugging
                 if quiet or not verbose:
+                    # Print error and failure lines so compiler errors are never silently swallowed
+                    stripped_lower = stripped.lower()
+                    if 'error:' in stripped_lower or 'FAILED:' in stripped:
+                        _ts_print(line, file=sys.stderr)
                     continue
 
                 # Rewrite Ninja paths to show full build-relative paths for clarity
@@ -359,13 +363,9 @@ def _create_error_context_filter(
     Returns:
         Filter function that takes a line and returns None (consumes line)
     """
-    # Smart context sizing:
-    # - Reduced to 5 lines for Bash tool 30KB output limit
-    # - When many errors occur (e.g., 80+ examples failing), keeping output minimal
-    #   prevents the Bash tool from truncating with "... [N chars truncated] ..."
-    # - 5 lines is enough to show file location + error + immediate context
-    if context_lines > 5:
-        context_lines = 5  # Minimal context to fit under 30KB Bash tool limit
+    # Context sizing: use caller's requested amount (default 20).
+    # The max_unique_errors limit already prevents output explosion when many
+    # errors occur; capping context_lines to 5 was hiding short compiler errors.
 
     # Circular buffer for context before errors
     pre_error_buffer: deque[str] = deque(maxlen=context_lines)
