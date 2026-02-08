@@ -88,7 +88,7 @@ EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
     fl::jsFillInMissingScreenMaps(active_strips);
     
     // Serialize to JSON
-    fl::Str json_str = active_strips.infoJsonString();
+    fl::string json_str = active_strips.infoJsonString();
     
     // Allocate and return data pointer
     char* buffer = (char*)fl::malloc(json_str.length() + 1);
@@ -150,7 +150,7 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     }
 
     // Serialize to JSON
-    fl::Str json_str = root.to_string();
+    fl::string json_str = root.to_string();
 
     // Allocate and return data pointer
     char* buffer = (char*)fl::malloc(json_str.length() + 1);
@@ -222,7 +222,7 @@ EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     doc.set("event", "strip_update");
     doc.set("timestamp", static_cast<int>(fl::millis()));
 
-    fl::Str jsonBuffer = doc.to_string();
+    fl::string jsonBuffer = doc.to_string();
 
     // Allocate and return data pointer
     char* buffer = (char*)fl::malloc(jsonBuffer.length() + 1);
@@ -251,7 +251,7 @@ EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     doc.set("event", "ui_update");
     doc.set("timestamp", static_cast<int>(fl::millis()));
 
-    fl::Str jsonBuffer = doc.to_string();
+    fl::string jsonBuffer = doc.to_string();
 
     // Allocate and return data pointer
     char* buffer = (char*)fl::malloc(jsonBuffer.length() + 1);
@@ -316,7 +316,7 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     }
 
     // Serialize to JSON
-    fl::Str jsonBuffer = root.to_string();
+    fl::string jsonBuffer = root.to_string();
 
     // Push the complete screenmap data to JavaScript
     // JavaScript worker will cache this and avoid per-frame polling

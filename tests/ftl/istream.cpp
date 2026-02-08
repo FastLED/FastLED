@@ -56,7 +56,7 @@ TEST_CASE("fl::istream input operators compile") {
     fl::istream test_stream;
     
     // Test all input operator overloads compile
-    fl::Str str_val;
+    fl::string str_val;
     char char_val;
     int8_t int8_val;
     uint8_t uint8_val;
@@ -103,7 +103,7 @@ TEST_CASE("fl::istream chaining operations compile") {
     
     // Test that chaining input operations compiles
     int32_t a, b, c;
-    fl::Str str1, str2;
+    fl::string str1, str2;
     
     // This should compile (chain of >> operators)
     test_stream >> a >> b >> c;
@@ -124,7 +124,7 @@ TEST_CASE("fl::istream additional methods compile") {
     fl::istream test_stream;
     
     // Test getline method compiles
-    fl::Str line;
+    fl::string line;
     test_stream.getline(line);
     
     // Test get/peek/putback methods compile
@@ -142,7 +142,7 @@ TEST_CASE("fl::istream additional methods compile") {
 
 TEST_CASE("fl::cin global instance compiles") {
     // Test that we can use the global fl::cin instance
-    fl::Str test_str;
+    fl::string test_str;
     int32_t test_int;
     char test_char;
     
@@ -162,7 +162,7 @@ TEST_CASE("fl::cin global instance compiles") {
     fl::cin.clear();
     
     // Test getline with global cin
-    fl::Str line;
+    fl::string line;
     fl::cin.getline(line);
     
     // Suppress unused variable warnings
@@ -201,7 +201,7 @@ TEST_CASE("fl::istream types match expected interfaces") {
     
     // Test return type of operators is istream& (for chaining)
     fl::istream test_stream;
-    fl::Str str;
+    fl::string str;
     int32_t num;
     
     // This tests that >> returns istream& by allowing chaining
@@ -230,7 +230,7 @@ TEST_CASE("fl::istream types match expected interfaces") {
 // Helper class to mock input data for testing
 class InputMocker {
 private:
-    fl::Str mData;
+    fl::string mData;
     fl::size mPos;
 
 public:
@@ -295,7 +295,7 @@ TEST_CASE("fl::istream simple debug test") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str word;
+        fl::string word;
         
         test_stream >> word;
         
@@ -325,7 +325,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int32_t number = 0;
         
         test_stream >> label >> number;
@@ -342,7 +342,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int32_t number = 0;
         
         test_stream >> label >> number;
@@ -359,7 +359,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         uint32_t number = 0;
         
         test_stream >> label >> number;
@@ -376,7 +376,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int8_t number = 0;
         
         test_stream >> label >> number;
@@ -393,7 +393,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int16_t number = 0;
         
         test_stream >> label >> number;
@@ -418,7 +418,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         float number = 0.0f;
         
         test_stream >> label >> number;
@@ -435,7 +435,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         float number = 0.0f;
         
         test_stream >> label >> number;
@@ -452,7 +452,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         float number = 0.0f;
         
         test_stream >> label >> number;
@@ -469,7 +469,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         double number = 0.0;
         
         test_stream >> label >> number;
@@ -494,7 +494,7 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label, value;
+        fl::string label, value;
         
         test_stream >> label >> value;
         
@@ -510,7 +510,7 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         char ch = 0;
         
         test_stream >> label >> ch;
@@ -527,7 +527,7 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str word1, word2, word3;
+        fl::string word1, word2, word3;
         int32_t number = 0;
         
         test_stream >> word1 >> word2 >> word3 >> number;
@@ -554,7 +554,7 @@ TEST_CASE("fl::istream mixed data type parsing") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str led_label, strip_label, bright_label, enabled_label;
+        fl::string led_label, strip_label, bright_label, enabled_label;
         int32_t count = 0;
         float brightness = 0.0f;
         char enabled = 0;
@@ -578,7 +578,7 @@ TEST_CASE("fl::istream mixed data type parsing") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str width_label, height_label, fps_label;
+        fl::string width_label, height_label, fps_label;
         uint16_t width = 0, height = 0;
         float fps = 0.0f;
         
@@ -608,7 +608,7 @@ TEST_CASE("fl::istream error handling with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int32_t number = 0;
         
         test_stream >> label >> number;
@@ -625,7 +625,7 @@ TEST_CASE("fl::istream error handling with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label;
+        fl::string label;
         int32_t number = 0;
         
         test_stream >> label >> number;
@@ -642,7 +642,7 @@ TEST_CASE("fl::istream error handling with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str label1, label2;
+        fl::string label1, label2;
         int32_t number1 = 0, number2 = 0;
         
         // First read should fail
@@ -676,7 +676,7 @@ TEST_CASE("fl::istream getline with mock input") {
         fl::inject_read_handler([&mocker]() { return mocker.read(); });
         
         fl::istream test_stream;
-        fl::Str line1, line2;
+        fl::string line1, line2;
         
         test_stream.getline(line1);
         test_stream.getline(line2);

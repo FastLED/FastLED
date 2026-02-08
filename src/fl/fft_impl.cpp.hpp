@@ -140,7 +140,7 @@ class FFTContext {
     fl::string info() const {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "FFTImpl Frequency Bands: ";
 
         for (int i = 0; i < m_cq_cfg.bands; ++i) {

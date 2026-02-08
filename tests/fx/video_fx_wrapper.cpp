@@ -37,7 +37,7 @@ class Fake2d : public fl::Fx2d {
         return true;
     }
 
-    fl::Str fxName() const override { return "Fake2d"; }
+    fl::string fxName() const override { return "Fake2d"; }
     uint8_t mFrameCounter = 0;
     fl::FixedVector<CRGB, 5> mColors;
 };

@@ -38,7 +38,7 @@ TEST_CASE("Single insert, lookup & operator[]") {
     FL_REQUIRE_EQ(*v, 20);
 
     // operator[] default-construct & assignment
-    fl::unordered_map<int, fl::Str> ms;
+    fl::unordered_map<int, fl::string> ms;
     auto &ref = ms[5];
     FL_REQUIRE(ref.empty()); // default-constructed
     FL_REQUIRE_EQ(ms.size(), 1u);
@@ -52,7 +52,7 @@ TEST_CASE("Single insert, lookup & operator[]") {
 }
 
 TEST_CASE("Insert duplicate key overwrites without growing") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(1, "foo");
     FL_REQUIRE_EQ(m.size(), 1u);
     FL_REQUIRE_EQ(*m.find_value(1), "foo");
@@ -228,7 +228,7 @@ TEST_CASE("HashMap with standard iterator access") {
 }
 
 TEST_CASE("at() method - bounds-checked access") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(5, "hello");
     m.insert(10, "world");
 
@@ -237,7 +237,7 @@ TEST_CASE("at() method - bounds-checked access") {
     FL_REQUIRE_EQ(m.at(10), "world");
 
     // const version
-    const fl::unordered_map<int, fl::Str>& cm = m;
+    const fl::unordered_map<int, fl::string>& cm = m;
     FL_REQUIRE_EQ(cm.at(5), "hello");
 
     // Invalid access should trigger assertion (would fail in debug builds)
@@ -311,7 +311,7 @@ TEST_CASE("hash_function() and key_eq() observers") {
 }
 
 TEST_CASE("insert() returns pair<iterator, bool> - new elements") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // First insert of a new key should return {iterator, true}
     auto result1 = m.insert(5, "hello");
@@ -331,7 +331,7 @@ TEST_CASE("insert() returns pair<iterator, bool> - new elements") {
 }
 
 TEST_CASE("insert() returns pair<iterator, bool> - duplicate keys") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // First insert
     auto result1 = m.insert(5, "hello");
@@ -348,10 +348,10 @@ TEST_CASE("insert() returns pair<iterator, bool> - duplicate keys") {
 }
 
 TEST_CASE("insert() move version returns pair<iterator, bool>") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Move insert of new key
-    fl::Str s1 = "movable";
+    fl::string s1 = "movable";
     auto result1 = m.insert(7, fl::move(s1));
     FL_REQUIRE(result1.second == true);
     FL_REQUIRE(result1.first != m.end());
@@ -359,7 +359,7 @@ TEST_CASE("insert() move version returns pair<iterator, bool>") {
     FL_REQUIRE_EQ((*result1.first).second, "movable");
 
     // Move insert of duplicate key
-    fl::Str s2 = "replaced";
+    fl::string s2 = "replaced";
     auto result2 = m.insert(7, fl::move(s2));
     FL_REQUIRE(result2.second == false);  // not inserted (updated)
     FL_REQUIRE_EQ((*result2.first).second, "replaced");
@@ -384,10 +384,10 @@ TEST_CASE("insert() return iterator is usable") {
 }
 
 TEST_CASE("insert(pair) - const pair insert") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert using pair
-    fl::pair<int, Str> p1(5, "hello");
+    fl::pair<int, string> p1(5, "hello");
     auto result1 = m.insert(p1);
     FL_REQUIRE(result1.second == true);  // was inserted
     FL_REQUIRE(result1.first != m.end());
@@ -396,14 +396,14 @@ TEST_CASE("insert(pair) - const pair insert") {
     FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with pair
-    fl::pair<int, Str> p2(5, "world");
+    fl::pair<int, string> p2(5, "world");
     auto result2 = m.insert(p2);
     FL_REQUIRE(result2.second == false);  // not inserted (updated)
     FL_REQUIRE_EQ((*result2.first).second, "world");
     FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert new key with pair
-    fl::pair<int, Str> p3(10, "foo");
+    fl::pair<int, string> p3(10, "foo");
     auto result3 = m.insert(p3);
     FL_REQUIRE(result3.second == true);  // was inserted
     FL_REQUIRE_EQ((*result3.first).first, 10);
@@ -412,10 +412,10 @@ TEST_CASE("insert(pair) - const pair insert") {
 }
 
 TEST_CASE("insert(pair) - move pair insert") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert using moved pair
-    fl::pair<int, Str> p1(7, "movable");
+    fl::pair<int, string> p1(7, "movable");
     auto result1 = m.insert(fl::move(p1));
     FL_REQUIRE(result1.second == true);
     FL_REQUIRE(result1.first != m.end());
@@ -424,7 +424,7 @@ TEST_CASE("insert(pair) - move pair insert") {
     FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with moved pair
-    fl::pair<int, Str> p2(7, "replaced");
+    fl::pair<int, string> p2(7, "replaced");
     auto result2 = m.insert(fl::move(p2));
     FL_REQUIRE(result2.second == false);  // not inserted (updated)
     FL_REQUIRE_EQ((*result2.first).second, "replaced");
@@ -448,14 +448,14 @@ TEST_CASE("insert(pair) - inline pair creation") {
 }
 
 TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Create a vector of pairs to insert
-    fl::vector<fl::pair<int, Str>> pairs;
-    pairs.push_back(fl::pair<int, Str>(1, "one"));
-    pairs.push_back(fl::pair<int, Str>(2, "two"));
-    pairs.push_back(fl::pair<int, Str>(3, "three"));
-    pairs.push_back(fl::pair<int, Str>(4, "four"));
+    fl::vector<fl::pair<int, string>> pairs;
+    pairs.push_back(fl::pair<int, string>(1, "one"));
+    pairs.push_back(fl::pair<int, string>(2, "two"));
+    pairs.push_back(fl::pair<int, string>(3, "three"));
+    pairs.push_back(fl::pair<int, string>(4, "four"));
 
     // Insert range of pairs
     m.insert(pairs.begin(), pairs.end());
@@ -468,9 +468,9 @@ TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
     FL_REQUIRE_EQ(m[4], "four");
 
     // Insert range with duplicate keys (should update values)
-    fl::vector<fl::pair<int, Str>> more_pairs;
-    more_pairs.push_back(fl::pair<int, Str>(2, "TWO"));  // duplicate
-    more_pairs.push_back(fl::pair<int, Str>(5, "five")); // new
+    fl::vector<fl::pair<int, string>> more_pairs;
+    more_pairs.push_back(fl::pair<int, string>(2, "TWO"));  // duplicate
+    more_pairs.push_back(fl::pair<int, string>(5, "five")); // new
 
     m.insert(more_pairs.begin(), more_pairs.end());
 
@@ -493,7 +493,7 @@ TEST_CASE("insert(InputIt first, InputIt last) - empty range") {
 }
 
 TEST_CASE("insert(initializer_list) - basic usage") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert using initializer list syntax
     m.insert({{1, "one"}, {2, "two"}, {3, "three"}});
@@ -533,7 +533,7 @@ TEST_CASE("insert(initializer_list) - empty list") {
 }
 
 TEST_CASE("insert(initializer_list) - complex types") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert complex string types
     m.insert({{10, "hello"}, {20, "world"}, {30, "fastled"}});
@@ -545,10 +545,10 @@ TEST_CASE("insert(initializer_list) - complex types") {
 }
 
 TEST_CASE("insert_or_assign() - insert new elements") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert new element
-    fl::Str val1 = "hello";
+    fl::string val1 = "hello";
     auto result1 = m.insert_or_assign(5, fl::move(val1));
     FL_REQUIRE(result1.second == true);  // was inserted
     FL_REQUIRE(result1.first != m.end());
@@ -557,7 +557,7 @@ TEST_CASE("insert_or_assign() - insert new elements") {
     FL_REQUIRE_EQ(m.size(), 1u);
 
     // Insert another new element
-    fl::Str val2 = "world";
+    fl::string val2 = "world";
     auto result2 = m.insert_or_assign(10, fl::move(val2));
     FL_REQUIRE(result2.second == true);
     FL_REQUIRE_EQ((*result2.first).first, 10);
@@ -566,16 +566,16 @@ TEST_CASE("insert_or_assign() - insert new elements") {
 }
 
 TEST_CASE("insert_or_assign() - update existing elements") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert initial value
-    fl::Str val1 = "hello";
+    fl::string val1 = "hello";
     auto result1 = m.insert_or_assign(5, fl::move(val1));
     FL_REQUIRE(result1.second == true);
     FL_REQUIRE_EQ(m[5], "hello");
 
     // Update with insert_or_assign
-    fl::Str val2 = "goodbye";
+    fl::string val2 = "goodbye";
     auto result2 = m.insert_or_assign(5, fl::move(val2));
     FL_REQUIRE(result2.second == false);  // not inserted (updated)
     FL_REQUIRE(result2.first != m.end());
@@ -585,11 +585,11 @@ TEST_CASE("insert_or_assign() - update existing elements") {
 }
 
 TEST_CASE("insert_or_assign() - move key version") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Insert with moved key and value
     int key1 = 42;
-    fl::Str val1 = "answer";
+    fl::string val1 = "answer";
     auto result1 = m.insert_or_assign(fl::move(key1), fl::move(val1));
     FL_REQUIRE(result1.second == true);
     FL_REQUIRE_EQ((*result1.first).first, 42);
@@ -597,7 +597,7 @@ TEST_CASE("insert_or_assign() - move key version") {
 
     // Update with moved key and value
     int key2 = 42;
-    fl::Str val2 = "new answer";
+    fl::string val2 = "new answer";
     auto result2 = m.insert_or_assign(fl::move(key2), fl::move(val2));
     FL_REQUIRE(result2.second == false);
     FL_REQUIRE_EQ((*result2.first).second, "new answer");
@@ -605,7 +605,7 @@ TEST_CASE("insert_or_assign() - move key version") {
 }
 
 TEST_CASE("emplace() - basic usage") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Emplace with key and value arguments
     auto result1 = m.emplace(5, "hello");
@@ -624,7 +624,7 @@ TEST_CASE("emplace() - basic usage") {
 }
 
 TEST_CASE("emplace() - duplicate key") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // First emplace
     auto result1 = m.emplace(5, "hello");
@@ -657,7 +657,7 @@ TEST_CASE("emplace() - with POD types") {
 }
 
 TEST_CASE("emplace_hint() - basic usage") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // emplace_hint with hint (hint is ignored in hash maps)
     auto it1 = m.emplace_hint(m.end(), 5, "hello");
@@ -689,7 +689,7 @@ TEST_CASE("emplace_hint() - hint is ignored") {
 }
 
 TEST_CASE("try_emplace() - insert new elements") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // try_emplace with new key
     auto result1 = m.try_emplace(5, "hello");
@@ -708,7 +708,7 @@ TEST_CASE("try_emplace() - insert new elements") {
 }
 
 TEST_CASE("try_emplace() - does not modify existing key") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // First try_emplace
     auto result1 = m.try_emplace(5, "hello");
@@ -725,7 +725,7 @@ TEST_CASE("try_emplace() - does not modify existing key") {
 }
 
 TEST_CASE("try_emplace() - move key version") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // try_emplace with moved key for new element
     int key1 = 42;
@@ -759,7 +759,7 @@ TEST_CASE("try_emplace() - with POD types") {
 }
 
 TEST_CASE("try_emplace() - constructs value in place") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // try_emplace constructs value from args
     auto result = m.try_emplace(1, "constructed");
@@ -773,7 +773,7 @@ TEST_CASE("try_emplace() - constructs value in place") {
 }
 
 TEST_CASE("try_emplace() vs emplace() - behavior difference") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
 
     // Both insert new keys similarly
     m.try_emplace(1, "one");
@@ -795,14 +795,14 @@ TEST_CASE("try_emplace() vs emplace() - behavior difference") {
 // Phase 3: Constructors & Assignment Operators Tests
 
 TEST_CASE("Copy constructor - basic usage") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
     FL_REQUIRE_EQ(m1.size(), 3u);
 
     // Copy construct
-    fl::unordered_map<int, fl::Str> m2(m1);
+    fl::unordered_map<int, fl::string> m2(m1);
 
     // Verify m2 has same contents
     FL_REQUIRE_EQ(m2.size(), 3u);
@@ -851,14 +851,14 @@ TEST_CASE("Copy constructor - with tombstones") {
 }
 
 TEST_CASE("Move constructor - basic usage") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
     FL_REQUIRE_EQ(m1.size(), 3u);
 
     // Move construct
-    fl::unordered_map<int, fl::Str> m2(fl::move(m1));
+    fl::unordered_map<int, fl::string> m2(fl::move(m1));
 
     // Verify m2 has the contents
     FL_REQUIRE_EQ(m2.size(), 3u);
@@ -885,13 +885,13 @@ TEST_CASE("Move constructor - empty map") {
 }
 
 TEST_CASE("Range constructor - from vector") {
-    fl::vector<fl::pair<int, Str>> pairs;
-    pairs.push_back(fl::pair<int, Str>(1, "one"));
-    pairs.push_back(fl::pair<int, Str>(2, "two"));
-    pairs.push_back(fl::pair<int, Str>(3, "three"));
+    fl::vector<fl::pair<int, string>> pairs;
+    pairs.push_back(fl::pair<int, string>(1, "one"));
+    pairs.push_back(fl::pair<int, string>(2, "two"));
+    pairs.push_back(fl::pair<int, string>(3, "three"));
 
     // Construct from range
-    fl::unordered_map<int, fl::Str> m(pairs.begin(), pairs.end());
+    fl::unordered_map<int, fl::string> m(pairs.begin(), pairs.end());
 
     FL_REQUIRE_EQ(m.size(), 3u);
     FL_REQUIRE_EQ(m[1], "one");
@@ -922,7 +922,7 @@ TEST_CASE("Range constructor - with duplicates") {
 }
 
 TEST_CASE("Initializer list constructor - basic usage") {
-    fl::unordered_map<int, fl::Str> m({{1, "one"}, {2, "two"}, {3, "three"}});
+    fl::unordered_map<int, fl::string> m({{1, "one"}, {2, "two"}, {3, "three"}});
 
     FL_REQUIRE_EQ(m.size(), 3u);
     FL_REQUIRE_EQ(m[1], "one");
@@ -950,7 +950,7 @@ TEST_CASE("Constructor with hash and equal parameters") {
     fl::Hash<int> custom_hash;
     fl::EqualTo<int> custom_equal;
 
-    fl::unordered_map<int, fl::Str> m(16, custom_hash, custom_equal);
+    fl::unordered_map<int, fl::string> m(16, custom_hash, custom_equal);
 
     // Verify it's usable
     m.insert(1, "one");
@@ -968,12 +968,12 @@ TEST_CASE("Constructor with hash and equal parameters") {
 }
 
 TEST_CASE("Copy assignment operator - basic usage") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
 
-    fl::unordered_map<int, fl::Str> m2;
+    fl::unordered_map<int, fl::string> m2;
     m2.insert(99, "old");
 
     // Copy assign
@@ -997,7 +997,7 @@ TEST_CASE("Copy assignment operator - basic usage") {
 }
 
 TEST_CASE("Copy assignment operator - self assignment") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(1, "one");
     m.insert(2, "two");
 
@@ -1040,12 +1040,12 @@ TEST_CASE("Copy assignment operator - from empty map") {
 }
 
 TEST_CASE("Move assignment operator - basic usage") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
 
-    fl::unordered_map<int, fl::Str> m2;
+    fl::unordered_map<int, fl::string> m2;
     m2.insert(99, "old");
 
     // Move assign
@@ -1064,7 +1064,7 @@ TEST_CASE("Move assignment operator - basic usage") {
 }
 
 TEST_CASE("Move assignment operator - self assignment") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(1, "one");
     m.insert(2, "two");
 
@@ -1089,7 +1089,7 @@ TEST_CASE("Move assignment operator - from empty map") {
 }
 
 TEST_CASE("Initializer list assignment operator - basic usage") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(99, "old");
     FL_REQUIRE_EQ(m.size(), 1u);
 
@@ -1129,12 +1129,12 @@ TEST_CASE("Initializer list assignment operator - with duplicates") {
 }
 
 TEST_CASE("Chained assignments") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
 
-    fl::unordered_map<int, fl::Str> m2;
-    fl::unordered_map<int, fl::Str> m3;
+    fl::unordered_map<int, fl::string> m2;
+    fl::unordered_map<int, fl::string> m3;
 
     // Chained copy assignment
     m3 = m2 = m1;
@@ -1150,7 +1150,7 @@ TEST_CASE("Chained assignments") {
 // Phase 4: Erase & Swap Tests
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - basic range") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(1, "one");
     m.insert(2, "two");
     m.insert(3, "three");
@@ -1198,7 +1198,7 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - empty range") {
 }
 
 TEST_CASE("erase(const_iterator first, const_iterator last) - single element") {
-    fl::unordered_map<int, fl::Str> m;
+    fl::unordered_map<int, fl::string> m;
     m.insert(1, "one");
     m.insert(2, "two");
     m.insert(3, "three");
@@ -1235,12 +1235,12 @@ TEST_CASE("erase(const_iterator first, const_iterator last) - after erase") {
 }
 
 TEST_CASE("swap() - basic usage") {
-    fl::unordered_map<int, fl::Str> m1;
+    fl::unordered_map<int, fl::string> m1;
     m1.insert(1, "one");
     m1.insert(2, "two");
     m1.insert(3, "three");
 
-    fl::unordered_map<int, fl::Str> m2;
+    fl::unordered_map<int, fl::string> m2;
     m2.insert(10, "ten");
     m2.insert(20, "twenty");
 

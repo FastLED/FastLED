@@ -516,19 +516,19 @@ void SerialReporter::testRunEnd(const TestStats& stats) {
     print("\n====== FL TEST: Results ======\n");
 
     // Format stats using snprintf-style approach
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "Passed: " << stats.mTestCasesPassed
        << "/" << stats.mTestCasesRun << " tests\n";
     print(ss.str().c_str());
 
     if (stats.mTestCasesSkipped > 0) {
-        fl::StrStream ss_skip;
+        fl::sstream ss_skip;
         ss_skip << "Skipped: " << stats.mTestCasesSkipped << "\n";
         print(ss_skip.str().c_str());
     }
 
     if (stats.mAssertsFailed > 0) {
-        fl::StrStream ss2;
+        fl::sstream ss2;
         ss2 << "Failed assertions: " << stats.mAssertsFailed << "\n";
         print(ss2.str().c_str());
     }
@@ -541,7 +541,7 @@ void SerialReporter::testRunEnd(const TestStats& stats) {
 }
 
 void SerialReporter::testCaseStart(const char* name) {
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "\n[TEST] " << name << "\n";
     print(ss.str().c_str());
 }
@@ -549,7 +549,7 @@ void SerialReporter::testCaseStart(const char* name) {
 void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
     if (passed) {
         if (durationMs > 0) {
-            fl::StrStream ss;
+            fl::sstream ss;
             ss << "[PASS] (" << durationMs << " ms)\n";
             print(ss.str().c_str());
         } else {
@@ -557,7 +557,7 @@ void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
         }
     } else {
         if (durationMs > 0) {
-            fl::StrStream ss;
+            fl::sstream ss;
             ss << "[FAIL] (" << durationMs << " ms)\n";
             print(ss.str().c_str());
         } else {
@@ -567,7 +567,7 @@ void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
 }
 
 void SerialReporter::subcaseStart(const char* name) {
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "  [SUBCASE] " << name << "\n";
     print(ss.str().c_str());
 }
@@ -578,7 +578,7 @@ void SerialReporter::subcaseEnd() {
 
 void SerialReporter::assertResult(const AssertResult& result) {
     if (!result.mPassed) {
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "  FAIL: " << result.mLocation.mFile
            << ":" << result.mLocation.mLine << "\n";
         ss << "  Expr: " << result.mExpression << "\n";
@@ -617,7 +617,7 @@ void XMLReporter::testRunStart() {
 void XMLReporter::testRunEnd(const TestStats& stats) {
     if (!mOutput) return;
 
-    fl::StrStream ss;
+    fl::sstream ss;
 
     // XML header
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -646,7 +646,7 @@ void XMLReporter::testCaseStart(const char* name) {
 }
 
 void XMLReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "  <testcase name=\"" << escapeXml(mCurrentTestName.c_str()) << "\"";
 
     // Add time attribute if duration is available (convert ms to seconds)
@@ -682,7 +682,7 @@ void XMLReporter::assertResult(const AssertResult& result) {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << result.mLocation.mFile << ":" << result.mLocation.mLine << "\n";
         ss << "  Expression: " << result.mExpression << "\n";
         if (!result.mExpanded.empty()) {
@@ -734,7 +734,7 @@ void JSONReporter::testRunStart() {
 void JSONReporter::testRunEnd(const TestStats& stats) {
     if (!mOutput) return;
 
-    fl::StrStream ss;
+    fl::sstream ss;
 
     ss << "{\n";
     ss << "  \"summary\": {\n";
@@ -768,7 +768,7 @@ void JSONReporter::testCaseStart(const char* name) {
 }
 
 void JSONReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "    {\n";
     ss << "      \"name\": \"" << escapeJson(mCurrentTestName.c_str()) << "\",\n";
     ss << "      \"passed\": " << (passed ? "true" : "false");
@@ -811,7 +811,7 @@ void JSONReporter::assertResult(const AssertResult& result) {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "{\n";
         ss << "          \"file\": \"" << escapeJson(result.mLocation.mFile) << "\",\n";
         ss << "          \"line\": " << result.mLocation.mLine << ",\n";
@@ -850,7 +850,7 @@ void TAPReporter::testRunStart() {
 
     // If we know the total, output the plan at the start
     if (mTotalTests > 0) {
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "1.." << mTotalTests;
         output(ss.str().c_str());
     }
@@ -859,13 +859,13 @@ void TAPReporter::testRunStart() {
 void TAPReporter::testRunEnd(const TestStats& stats) {
     // If we didn't know the total, output the plan at the end
     if (mTotalTests == 0) {
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "1.." << stats.mTestCasesRun;
         output(ss.str().c_str());
     }
 
     // Output summary as diagnostics
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "# Tests: " << stats.mTestCasesRun
        << ", Passed: " << stats.mTestCasesPassed
        << ", Failed: " << stats.mTestCasesFailed;
@@ -888,7 +888,7 @@ void TAPReporter::testCaseStart(const char* name) {
 }
 
 void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
-    fl::StrStream ss;
+    fl::sstream ss;
 
     if (passed) {
         ss << "ok " << mTestNumber << " - " << mCurrentTestName;
@@ -904,7 +904,7 @@ void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
 
     // Output diagnostics for failed tests
     for (fl::size i = 0; i < mDiagnostics.size(); ++i) {
-        fl::StrStream diag;
+        fl::sstream diag;
         diag << "# " << mDiagnostics[i];
         output(diag.str().c_str());
     }
@@ -912,7 +912,7 @@ void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) {
 
 void TAPReporter::subcaseStart(const char* name) {
     // TAP doesn't have native subcase support, but we can add diagnostics
-    fl::StrStream ss;
+    fl::sstream ss;
     ss << "  Subcase: " << (name ? name : "unknown");
     mDiagnostics.push_back(ss.str());
 }
@@ -925,16 +925,16 @@ void TAPReporter::assertResult(const AssertResult& result) {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << "  Failed at " << result.mLocation.mFile << ":" << result.mLocation.mLine;
         mDiagnostics.push_back(ss.str());
 
-        fl::StrStream ss2;
+        fl::sstream ss2;
         ss2 << "    Expression: " << result.mExpression;
         mDiagnostics.push_back(ss2.str());
 
         if (!result.mExpanded.empty()) {
-            fl::StrStream ss3;
+            fl::sstream ss3;
             ss3 << "    Expanded: " << result.mExpanded;
             mDiagnostics.push_back(ss3.str());
         }

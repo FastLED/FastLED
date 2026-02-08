@@ -32,15 +32,15 @@ using namespace fl;
 
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
-        fl::Str s1;
+        fl::string s1;
         FL_CHECK(s1.size() == 0);
         FL_CHECK(s1.c_str()[0] == '\0');
 
-        fl::Str s2("hello");
+        fl::string s2("hello");
         FL_CHECK(s2.size() == 5);
         FL_CHECK(fl::strcmp(s2.c_str(), "hello") == 0);
 
-        fl::Str s3 = s2;
+        fl::string s3 = s2;
         FL_CHECK(s3.size() == 5);
         FL_CHECK(fl::strcmp(s3.c_str(), "hello") == 0);
 
@@ -50,23 +50,23 @@ TEST_CASE("Str basic operations") {
     }
 
     SUBCASE("Comparison operators") {
-        fl::Str s1("hello");
-        fl::Str s2("hello");
-        fl::Str s3("world");
+        fl::string s1("hello");
+        fl::string s2("hello");
+        fl::string s3("world");
 
         FL_CHECK(s1 == s2);
         FL_CHECK(s1 != s3);
     }
 
     SUBCASE("Indexing") {
-        fl::Str s("hello");
+        fl::string s("hello");
         FL_CHECK(s[0] == 'h');
         FL_CHECK(s[4] == 'o');
         FL_CHECK(s[5] == '\0');  // Null terminator
     }
 
     SUBCASE("Append") {
-        fl::Str s("hello");
+        fl::string s("hello");
         s.append(" world");
         FL_CHECK(s.size() == 11);
         FL_CHECK(fl::strcmp(s.c_str(), "hello world") == 0);
@@ -74,13 +74,13 @@ TEST_CASE("Str basic operations") {
 
     SUBCASE("CRGB to Str") {
         CRGB c(255, 0, 0);
-        fl::Str s = c.toString();
+        fl::string s = c.toString();
         FL_CHECK_EQ(s, "CRGB(255,0,0)");
     }
 
     SUBCASE("Copy-on-write behavior") {
-        fl::Str s1("hello");
-        fl::Str s2 = s1;
+        fl::string s1("hello");
+        fl::string s2 = s1;
         s2.append(" world");
         FL_CHECK(fl::strcmp(s1.c_str(), "hello") == 0);
         FL_CHECK(fl::strcmp(s2.c_str(), "hello world") == 0);
@@ -89,7 +89,7 @@ TEST_CASE("Str basic operations") {
 
 
 TEST_CASE("Str::reserve") {
-    fl::Str s;
+    fl::string s;
     s.reserve(10);
     FL_CHECK(s.size() == 0);
     FL_CHECK(s.capacity() >= 10);
@@ -108,9 +108,9 @@ TEST_CASE("Str::reserve") {
 }
 
 TEST_CASE("Str with fl::FixedVector") {
-    fl::FixedVector<fl::Str, 10> vec;
-    vec.push_back(fl::Str("hello"));
-    vec.push_back(fl::Str("world"));
+    fl::FixedVector<fl::string, 10> vec;
+    vec.push_back(fl::string("hello"));
+    vec.push_back(fl::string("world"));
 
     FL_CHECK(vec.size() == 2);
     FL_CHECK(fl::strcmp(vec[0].c_str(), "hello") == 0);
@@ -119,11 +119,11 @@ TEST_CASE("Str with fl::FixedVector") {
 
 TEST_CASE("Str with long strings") {
     const char* long_string = "This is a very long string that exceeds the inline buffer size and should be allocated on the heap";
-    fl::Str s(long_string);
+    fl::string s(long_string);
     FL_CHECK(s.size() == fl::strlen(long_string));
     FL_CHECK(fl::strcmp(s.c_str(), long_string) == 0);
 
-    fl::Str s2 = s;
+    fl::string s2 = s;
     FL_CHECK(s2.size() == fl::strlen(long_string));
     FL_CHECK(fl::strcmp(s2.c_str(), long_string) == 0);
 
@@ -134,13 +134,13 @@ TEST_CASE("Str with long strings") {
 TEST_CASE("Str overflowing inline data") {
     SUBCASE("Construction with long string") {
         fl::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer
-        fl::Str s(long_string.c_str());
+        fl::string s(long_string.c_str());
         FL_CHECK(s.size() == long_string.length());
         FL_CHECK(fl::strcmp(s.c_str(), long_string.c_str()) == 0);
     }
 
     SUBCASE("Appending to overflow") {
-        fl::Str s("Short string");
+        fl::string s("Short string");
         fl::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow
         s.append(append_string.c_str());
         FL_CHECK(s.size() == fl::strlen("Short string") + append_string.length());
@@ -150,8 +150,8 @@ TEST_CASE("Str overflowing inline data") {
 
     SUBCASE("Copy on write with long string") {
         fl::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');
-        fl::Str s1(long_string.c_str());
-        fl::Str s2 = s1;
+        fl::string s1(long_string.c_str());
+        fl::string s2 = s1;
         FL_CHECK(s1.size() == s2.size());
         FL_CHECK(fl::strcmp(s1.c_str(), s2.c_str()) == 0);
 
@@ -3529,7 +3529,7 @@ TEST_CASE("fl::string - Stream Operations") {
         fl::string test_str("http");
         
         // Test stream output - should show characters, not ASCII values
-        fl::StrStream oss;
+        fl::sstream oss;
         oss << test_str;
         fl::string result = oss.str();
         
@@ -3538,7 +3538,7 @@ TEST_CASE("fl::string - Stream Operations") {
         
         // Test with special characters
         fl::string special("://");
-        fl::StrStream oss2;
+        fl::sstream oss2;
         oss2 << special;
         fl::string result2 = oss2.str();
         FL_CHECK(fl::strcmp(result2.c_str(), "://") == 0);
@@ -3550,7 +3550,7 @@ TEST_CASE("fl::string - Stream Operations") {
         fl::string host("192.0.2.0");
         fl::string path("/test");
         
-        fl::StrStream oss;
+        fl::sstream oss;
         oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
         fl::string full_output = oss.str();
         FL_CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
@@ -3857,7 +3857,7 @@ TEST_CASE("fl::string - Comprehensive Integration Tests") {
         FL_CHECK(path == "/test");
         
         // Stream output test
-        fl::StrStream oss;
+        fl::sstream oss;
         oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
         fl::string full_output = oss.str();
         FL_CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);

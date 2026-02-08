@@ -41,11 +41,11 @@ FL_DISABLE_WARNING(unused-parameter)
 
 namespace fl {
 
-// Test that StrStream and FakeStrStream can accept all fundamental integer types
+// Test that sstream and sstream_noop can accept all fundamental integer types
 // This ensures SFINAE collision prevention works across all platforms
 FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
-    fl::StrStream ss;
-    fl::FakeStrStream fss;
+    fl::sstream ss;
+    fl::sstream_noop fss;
 
     // Test all fundamental integer types - ensures no ambiguous overloads
     char c = 'a'; ss << c; fss << c;
@@ -100,7 +100,7 @@ FL_MAYBE_UNUSED static void compile_tests() {
     static_assert(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
     static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
 
-    // Test StrStream integer operator overloads
+    // Test sstream integer operator overloads
     test_strstream_integer_operators();
 
     // Size assertions for FastLED integer types

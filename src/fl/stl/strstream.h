@@ -27,13 +27,13 @@ class bitset_dynamic;
 template <fl::u32 N> class BitsetInlined;
 
 // Note: int_cast_detail::cast_target is now defined in fl/stl/type_traits.h
-// and shared between StrStream and StrN for consistent integer formatting
+// and shared between sstream and StrN for consistent integer formatting
 
 
-class StrStream {
+class sstream {
   public:
-    StrStream() = default;
-    StrStream(const string &str) : mStr(str) {}
+    sstream() = default;
+    sstream(const string &str) : mStr(str) {}
 
     void setTreatCharAsInt(bool treatCharAsInt) {
         mTreatCharAsInt = treatCharAsInt;
@@ -42,24 +42,24 @@ class StrStream {
     string str() const { return mStr; }
     const char *c_str() const { return mStr.c_str(); }
 
-    StrStream &operator<<(const CRGB &rgb) {
+    sstream &operator<<(const CRGB &rgb) {
         mStr.append(rgb);
         return *this;
     }
-    StrStream &operator<<(const StrStream &strStream) {
+    sstream &operator<<(const sstream &strStream) {
         mStr.append(strStream.str());
         return *this;
     }
 
-    StrStream &operator<<(const Tile2x2_u8 &subpixel);
-    StrStream &operator<<(const Tile2x2_u8_wrap &tile);  // New overload for wrapped tiles
+    sstream &operator<<(const Tile2x2_u8 &subpixel);
+    sstream &operator<<(const Tile2x2_u8_wrap &tile);  // New overload for wrapped tiles
 
     // FFTBins support - implemented in strstream.cpp.hpp
-    StrStream &operator<<(const FFTBins &bins);
+    sstream &operator<<(const FFTBins &bins);
 
     // vec2<T> support - format as (x,y)
     template<typename T>
-    StrStream &operator<<(const vec2<T> &v) {
+    sstream &operator<<(const vec2<T> &v) {
         mStr.append("(");
         mStr.append(v.x);
         mStr.append(",");
@@ -70,7 +70,7 @@ class StrStream {
 
     // rect<T> support - format as rect((minx,miny), (maxx,maxy))
     template<typename T>
-    StrStream &operator<<(const rect<T> &r) {
+    sstream &operator<<(const rect<T> &r) {
         mStr.append("rect(");
         (*this) << r.mMin;
         mStr.append(", ");
@@ -81,7 +81,7 @@ class StrStream {
 
     // Optional<T> support - format as nullopt or optional(value)
     template<typename T>
-    StrStream &operator<<(const Optional<T> &opt) {
+    sstream &operator<<(const Optional<T> &opt) {
         if (!opt.has_value()) {
             mStr.append("nullopt");
         } else {
@@ -94,7 +94,7 @@ class StrStream {
 
     // vector<T, Alloc> support - format as [item1, item2, ...]
     template<typename T, typename Alloc>
-    StrStream &operator<<(const fl::vector<T, Alloc> &vec) {
+    sstream &operator<<(const fl::vector<T, Alloc> &vec) {
         mStr.append("[");
         for (fl::size i = 0; i < vec.size(); ++i) {
             if (i > 0) {
@@ -108,7 +108,7 @@ class StrStream {
 
     // unordered_set<Key, Hash, KeyEqual> support - format as {item1, item2, ...}
     template<typename Key, typename Hash, typename KeyEqual>
-    StrStream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &set) {
+    sstream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &set) {
         mStr.append("{");
         bool first = true;
         for (auto it = set.begin(); it != set.end(); ++it) {
@@ -124,7 +124,7 @@ class StrStream {
 
     // unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
-    StrStream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &map) {
+    sstream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &map) {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -142,7 +142,7 @@ class StrStream {
 
     // FixedMap<Key, Value, N> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, fl::size N>
-    StrStream &operator<<(const fl::FixedMap<Key, Value, N> &map) {
+    sstream &operator<<(const fl::FixedMap<Key, Value, N> &map) {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -160,7 +160,7 @@ class StrStream {
 
     // SortedHeapMap<Key, Value, Less, Allocator> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, typename Less, typename Allocator>
-    StrStream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &map) {
+    sstream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &map) {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -179,7 +179,7 @@ class StrStream {
     // span<T, Extent> support - format as span[item1, item2, ...]
     // Uses same format as vector but with "span" prefix for clarity
     template<typename T, fl::size Extent>
-    StrStream &operator<<(const fl::span<T, Extent> &s) {
+    sstream &operator<<(const fl::span<T, Extent> &s) {
         mStr.append("span[");
         for (fl::size i = 0; i < s.size(); ++i) {
             if (i > 0) {
@@ -193,7 +193,7 @@ class StrStream {
 
     // pair<T1, T2> support - format as (first, second)
     template<typename T1, typename T2>
-    StrStream &operator<<(const fl::pair<T1, T2> &p) {
+    sstream &operator<<(const fl::pair<T1, T2> &p) {
         mStr.append("(");
         (*this) << p.first;
         mStr.append(", ");
@@ -202,51 +202,51 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator=(const fl::u16 &n) {
+    sstream &operator=(const fl::u16 &n) {
         mStr.clear();
         (*this) << n;
         return *this;
     }
 
-    StrStream &operator=(const fl::u8 &n) {
+    sstream &operator=(const fl::u8 &n) {
         mStr.clear();
         (*this) << n;
         return *this;
     }
 
-    StrStream &operator=(char c) {
+    sstream &operator=(char c) {
         mStr.clear();
         (*this) << c;
         return *this;
     }
 
     // << operator section
-    StrStream &operator<<(const string &str) {
+    sstream &operator<<(const string &str) {
         mStr.append(str);
         return *this;
     }
 
-    StrStream &operator<<(const char *str) {
+    sstream &operator<<(const char *str) {
         if (str) {
             mStr.append(str);
         }
         return *this;
     }
 
-    StrStream &operator<<(const float &f) {
+    sstream &operator<<(const float &f) {
         // multiply by 100 and round to get 2 decimal places
         mStr.append(f);
         return *this;
     }
 
-    StrStream &operator<<(const double &f) {
+    sstream &operator<<(const double &f) {
         // multiply by 100 and round to get 2 decimal places
         mStr.append(f);
         return *this;
     }
 
     // Non-template overload for char - takes by value to ensure priority over templates
-    StrStream &operator<<(char c) {
+    sstream &operator<<(char c) {
         if (mTreatCharAsInt) {
             mStr.append(fl::i32(c));
         } else {
@@ -256,44 +256,44 @@ class StrStream {
     }
 
     // Non-template overloads for signed/unsigned char to avoid template resolution issues
-    StrStream &operator<<(signed char n) {
+    sstream &operator<<(signed char n) {
         using target_t = typename int_cast_detail::cast_target<signed char>::type;
         appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
-    StrStream &operator<<(unsigned char n) {
+    sstream &operator<<(unsigned char n) {
         using target_t = typename int_cast_detail::cast_target<unsigned char>::type;
         appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
     template<fl::size N>
-    StrStream &operator<<(const char (&str)[N]) {
+    sstream &operator<<(const char (&str)[N]) {
         mStr.append(str);
         return *this;
     }
 
     template<fl::u32 N>
-    StrStream &operator<<(const BitsetFixed<N> &bs) {
+    sstream &operator<<(const BitsetFixed<N> &bs) {
         // mStr.append(bs);
         bs.to_string(&mStr);
         return *this;
     }
 
-    StrStream &operator<<(const bitset_dynamic &bs) {
+    sstream &operator<<(const bitset_dynamic &bs) {
         bs.to_string(&mStr);
         return *this;
     }
 
     template<fl::u32 N>
-    StrStream &operator<<(const BitsetInlined<N> &bs) {
+    sstream &operator<<(const BitsetInlined<N> &bs) {
         bs.to_string(&mStr);
         return *this;
     }
 
     // bool support - output as "true"/"false" for readability
-    StrStream &operator<<(bool b) {
+    sstream &operator<<(bool b) {
         mStr.append(b ? "true" : "false");
         return *this;
     }
@@ -302,7 +302,7 @@ class StrStream {
     // Enum support - converts enum class and regular enums to their underlying integer type
     //-------------------------------------------------------------------------
     template<typename T>
-    typename fl::enable_if<fl::is_enum<T>::value, StrStream&>::type
+    typename fl::enable_if<fl::is_enum<T>::value, sstream&>::type
     operator<<(T e) {
         using underlying_t = typename fl::underlying_type<T>::type;
         return (*this) << static_cast<underlying_t>(e);
@@ -314,7 +314,7 @@ class StrStream {
     // Handles all multi-byte integer types (excludes char types which are handled separately)
     // Uses is_multi_byte_integer trait to select only non-char integer types
     template<typename T>
-    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, StrStream&>::type
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, sstream&>::type
     operator<<(T val) {
         using target_t = typename int_cast_detail::cast_target<T>::type;
         appendFormatted(static_cast<target_t>(val));
@@ -322,12 +322,12 @@ class StrStream {
     }
 
     // assignment operator completely replaces the current string
-    StrStream &operator=(const string &str) {
+    sstream &operator=(const string &str) {
         mStr = str;
         return *this;
     }
 
-    StrStream &operator=(const char *str) {
+    sstream &operator=(const char *str) {
         mStr.clear();
         mStr.append(str);
         return *this;
@@ -335,7 +335,7 @@ class StrStream {
     
 
     // crgb
-    StrStream &operator=(const CRGB &rgb) {
+    sstream &operator=(const CRGB &rgb) {
         mStr.clear();
         (*this) << rgb;
         return *this;
@@ -347,9 +347,9 @@ class StrStream {
     int getBase() const { return mBase; }
 
     // Friend operators for manipulators
-    friend StrStream& operator<<(StrStream&, const hex_t&);
-    friend StrStream& operator<<(StrStream&, const dec_t&);
-    friend StrStream& operator<<(StrStream&, const oct_t&);
+    friend sstream& operator<<(sstream&, const hex_t&);
+    friend sstream& operator<<(sstream&, const dec_t&);
+    friend sstream& operator<<(sstream&, const oct_t&);
 
   private:
     string mStr;
@@ -366,110 +366,110 @@ class StrStream {
     void appendFormatted(fl::u64 val);
 };
 
-class FakeStrStream {
+class sstream_noop {
   public:
-    FakeStrStream &operator<<(const char *) { return *this; }
+    sstream_noop &operator<<(const char *) { return *this; }
 
     template<fl::size N>
-    FakeStrStream &operator<<(const char (&)[N]) { return *this; }
+    sstream_noop &operator<<(const char (&)[N]) { return *this; }
 
-    template <typename T> FakeStrStream &operator=(const T &) { return *this; }
+    template <typename T> sstream_noop &operator=(const T &) { return *this; }
 
-    FakeStrStream &operator<<(const CRGB &) { return *this; }
-    FakeStrStream &operator<<(const string &) { return *this; }
-    FakeStrStream &operator<<(char) { return *this; }
-    FakeStrStream &operator<<(signed char) { return *this; }
-    FakeStrStream &operator<<(unsigned char) { return *this; }
+    sstream_noop &operator<<(const CRGB &) { return *this; }
+    sstream_noop &operator<<(const string &) { return *this; }
+    sstream_noop &operator<<(char) { return *this; }
+    sstream_noop &operator<<(signed char) { return *this; }
+    sstream_noop &operator<<(unsigned char) { return *this; }
 
-    // bool support to match StrStream interface
-    FakeStrStream &operator<<(bool) { return *this; }
+    // bool support to match sstream interface
+    sstream_noop &operator<<(bool) { return *this; }
 
-    // Enum support to match StrStream interface
+    // Enum support to match sstream interface
     template<typename T>
-    typename fl::enable_if<fl::is_enum<T>::value, FakeStrStream&>::type
+    typename fl::enable_if<fl::is_enum<T>::value, sstream_noop&>::type
     operator<<(T) { return *this; }
 
-    FakeStrStream &operator<<(float) { return *this; }
-    FakeStrStream &operator<<(double) { return *this; }
+    sstream_noop &operator<<(float) { return *this; }
+    sstream_noop &operator<<(double) { return *this; }
 
     //-------------------------------------------------------------------------
     // Generic integer type overload using SFINAE
     //-------------------------------------------------------------------------
-    // Mirror StrStream's integer handling for API compatibility
+    // Mirror sstream's integer handling for API compatibility
     // Handles all multi-byte integer types (excludes char types which are handled separately)
     template<typename T>
-    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, FakeStrStream&>::type
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value, sstream_noop&>::type
     operator<<(T) { return *this; }
 
     // Generic pointer and other type support for compatibility
-    FakeStrStream &operator<<(const void*) { return *this; }
+    sstream_noop &operator<<(const void*) { return *this; }
 
     // Support for strings/characters in arrays
     template<fl::size N>
-    FakeStrStream &operator<<(const StrStream (&)[N]) { return *this; }
+    sstream_noop &operator<<(const sstream (&)[N]) { return *this; }
 
-    FakeStrStream &operator<<(const StrStream &) { return *this; }
-    FakeStrStream &operator<<(const Tile2x2_u8 &) { return *this; }
-    FakeStrStream &operator<<(const Tile2x2_u8_wrap &) { return *this; }
-    FakeStrStream &operator<<(const FFTBins &) { return *this; }
+    sstream_noop &operator<<(const sstream &) { return *this; }
+    sstream_noop &operator<<(const Tile2x2_u8 &) { return *this; }
+    sstream_noop &operator<<(const Tile2x2_u8_wrap &) { return *this; }
+    sstream_noop &operator<<(const FFTBins &) { return *this; }
 
     // Vector support
     template<typename T>
-    FakeStrStream &operator<<(const vec2<T> &) { return *this; }
+    sstream_noop &operator<<(const vec2<T> &) { return *this; }
 
     // rect support
     template<typename T>
-    FakeStrStream &operator<<(const rect<T> &) { return *this; }
+    sstream_noop &operator<<(const rect<T> &) { return *this; }
 
     // Optional support
     template<typename T>
-    FakeStrStream &operator<<(const Optional<T> &) { return *this; }
+    sstream_noop &operator<<(const Optional<T> &) { return *this; }
 
     // vector support
     template<typename T, typename Alloc>
-    FakeStrStream &operator<<(const fl::vector<T, Alloc> &) { return *this; }
+    sstream_noop &operator<<(const fl::vector<T, Alloc> &) { return *this; }
 
     // unordered_set support
     template<typename Key, typename Hash, typename KeyEqual>
-    FakeStrStream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &) { return *this; }
+    sstream_noop &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &) { return *this; }
 
     // unordered_map support
     template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
-    FakeStrStream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) { return *this; }
+    sstream_noop &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) { return *this; }
 
     // FixedMap support
     template<typename Key, typename Value, fl::size N>
-    FakeStrStream &operator<<(const fl::FixedMap<Key, Value, N> &) { return *this; }
+    sstream_noop &operator<<(const fl::FixedMap<Key, Value, N> &) { return *this; }
 
     // SortedHeapMap support
     template<typename Key, typename Value, typename Less, typename Allocator>
-    FakeStrStream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &) { return *this; }
+    sstream_noop &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &) { return *this; }
 
     // span support
     template<typename T, fl::size Extent>
-    FakeStrStream &operator<<(const fl::span<T, Extent> &) { return *this; }
+    sstream_noop &operator<<(const fl::span<T, Extent> &) { return *this; }
 
     // pair support
     template<typename T1, typename T2>
-    FakeStrStream &operator<<(const fl::pair<T1, T2> &) { return *this; }
+    sstream_noop &operator<<(const fl::pair<T1, T2> &) { return *this; }
 
     // Bitset support
     template<fl::u32 N>
-    FakeStrStream &operator<<(const BitsetFixed<N> &) { return *this; }
+    sstream_noop &operator<<(const BitsetFixed<N> &) { return *this; }
 
-    FakeStrStream &operator<<(const bitset_dynamic &) { return *this; }
+    sstream_noop &operator<<(const bitset_dynamic &) { return *this; }
 
     template<fl::u32 N>
-    FakeStrStream &operator<<(const BitsetInlined<N> &) { return *this; }
+    sstream_noop &operator<<(const BitsetInlined<N> &) { return *this; }
 
     // Support for hex and dec formatters
-    FakeStrStream &operator<<(const hex_t &) { return *this; }
-    FakeStrStream &operator<<(const dec_t &) { return *this; }
-    FakeStrStream &operator<<(const oct_t &) { return *this; }
+    sstream_noop &operator<<(const hex_t &) { return *this; }
+    sstream_noop &operator<<(const dec_t &) { return *this; }
+    sstream_noop &operator<<(const oct_t &) { return *this; }
 
-    FakeStrStream &operator=(const string &) { return *this; }
-    FakeStrStream &operator=(const CRGB &) { return *this; }
-    FakeStrStream &operator=(char) { return *this; }
+    sstream_noop &operator=(const string &) { return *this; }
+    sstream_noop &operator=(const CRGB &) { return *this; }
+    sstream_noop &operator=(char) { return *this; }
 };
 
 

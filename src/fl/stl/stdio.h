@@ -132,8 +132,8 @@ inline FormatSpec parse_format_spec(const char*& format) {
 // Format floating point with specified precision
 inline fl::string format_float(float value, int precision) {
     if (precision < 0) {
-        // Default precision - use StrStream's default behavior
-        StrStream stream;
+        // Default precision - use sstream's default behavior
+        sstream stream;
         stream << value;
         return stream.str();
     }
@@ -142,7 +142,7 @@ inline fl::string format_float(float value, int precision) {
     // This is a basic implementation - could be enhanced
     if (precision == 0) {
         int int_part = static_cast<int>(value + 0.5f); // Round
-        StrStream stream;
+        sstream stream;
         stream << int_part;
         return stream.str();
     }
@@ -170,7 +170,7 @@ inline fl::string format_float(float value, int precision) {
         frac_part = -frac_part;
     }
 
-    StrStream stream;
+    sstream stream;
     stream << int_part;
     stream << ".";
 
@@ -189,7 +189,7 @@ inline fl::string format_float(float value, int precision) {
 
 // Format a single argument based on format specifier with better type handling
 template<typename T>
-void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
+void format_arg(sstream& stream, const FormatSpec& spec, const T& arg) {
     switch (spec.type) {
         case 'd':
         case 'i':
@@ -202,7 +202,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
             
         case 'u':
             if (fl::is_integral<T>::value) {
-                // Convert unsigned manually since StrStream treats all as signed
+                // Convert unsigned manually since sstream treats all as signed
                 unsigned int val = static_cast<unsigned int>(arg);
                 if (val == 0) {
                     stream << "0";
@@ -239,7 +239,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
         case 'c':
             if (fl::is_integral<T>::value) {
                 char ch = static_cast<char>(arg);
-                // Convert char to string since StrStream treats char as number
+                // Convert char to string since sstream treats char as number
                 char temp_str[2] = {ch, '\0'};
                 stream << temp_str;
             } else {
@@ -252,7 +252,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
             break;
             
         case 's':
-            stream << arg; // StrStream handles string conversion
+            stream << arg; // sstream handles string conversion
             break;
             
         default:
@@ -262,7 +262,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
 }
 
 // Specialized format_arg for const char* (string literals)
-inline void format_arg(StrStream& stream, const FormatSpec& spec, const char* arg) {
+inline void format_arg(sstream& stream, const FormatSpec& spec, const char* arg) {
     switch (spec.type) {
         case 's':
             if (arg) {
@@ -289,12 +289,12 @@ inline void format_arg(StrStream& stream, const FormatSpec& spec, const char* ar
 
 // Specialized format_arg for char arrays (string literals like "hello")
 template<fl::size N>
-void format_arg(StrStream& stream, const FormatSpec& spec, const char (&arg)[N]) {
+void format_arg(sstream& stream, const FormatSpec& spec, const char (&arg)[N]) {
     format_arg(stream, spec, static_cast<const char*>(arg));
 }
 
 // Base case: no more arguments
-inline void format_impl(StrStream& stream, const char* format) {
+inline void format_impl(sstream& stream, const char* format) {
     while (*format) {
         if (*format == '%') {
             FormatSpec spec = parse_format_spec(format);
@@ -307,7 +307,7 @@ inline void format_impl(StrStream& stream, const char* format) {
                 continue;
             }
         } else {
-            // Create a single-character string since StrStream treats char as number
+            // Create a single-character string since sstream treats char as number
             char temp_str[2] = {*format, '\0'};
             stream << temp_str;
             ++format;
@@ -317,7 +317,7 @@ inline void format_impl(StrStream& stream, const char* format) {
 
 // Recursive case: process one argument and continue
 template<typename T, typename... Args>
-void format_impl(StrStream& stream, const char* format, const T& first, const Args&... rest) {
+void format_impl(sstream& stream, const char* format, const T& first, const Args&... rest) {
     while (*format) {
         if (*format == '%') {
             FormatSpec spec = parse_format_spec(format);
@@ -331,7 +331,7 @@ void format_impl(StrStream& stream, const char* format, const T& first, const Ar
                 return;
             }
         } else {
-            // Create a single-character string since StrStream treats char as number
+            // Create a single-character string since sstream treats char as number
             char temp_str[2] = {*format, '\0'};
             stream << temp_str;
             ++format;
@@ -365,7 +365,7 @@ void format_impl(StrStream& stream, const char* format, const T& first, const Ar
 /// @endcode
 template<typename... Args>
 void printf(const char* format, const Args&... args) {
-    StrStream stream;
+    sstream stream;
     printf_detail::format_impl(stream, format, args...);
     fl::print(stream.str().c_str());
 }
@@ -400,7 +400,7 @@ int snprintf(char* buffer, fl::size size, const char* format, const Args&... arg
     }
     
     // Format to internal string stream
-    StrStream stream;
+    sstream stream;
     printf_detail::format_impl(stream, format, args...);
     fl::string result = stream.str();
     

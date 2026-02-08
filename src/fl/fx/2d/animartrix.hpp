@@ -106,7 +106,7 @@ class Animartrix : public Fx2d {
     int fxNum() const { return NUM_ANIMATIONS; }
     void fxSet(int fx);
     int fxGet() const { return static_cast<int>(current_animation); }
-    Str fxName() const override { return "Animartrix:"; }
+    string fxName() const override { return "Animartrix:"; }
     void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
     void setColorOrder(EOrder order) { color_order = order; }
     EOrder getColorOrder() const { return color_order; }

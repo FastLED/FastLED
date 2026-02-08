@@ -150,8 +150,8 @@ template <> struct StringMaker<CRGB> {
     }
 };
 
-template <> struct StringMaker<fl::Str> {
-    static String convert(const fl::Str &value) { return value.c_str(); }
+template <> struct StringMaker<fl::string> {
+    static String convert(const fl::string &value) { return value.c_str(); }
 };
 
 template <typename T> struct StringMaker<fl::optional<T>> {
@@ -187,7 +187,7 @@ template <typename T> struct StringMaker<fl::vec2<T>> {
 
 template <> struct StringMaker<fl::Tile2x2_u8> {
     static String convert(const fl::Tile2x2_u8 &value) {
-        fl::StrStream out;
+        fl::sstream out;
         out << "Tile2x2_u8(" << value.origin() << ")";
         return out.c_str();
     }

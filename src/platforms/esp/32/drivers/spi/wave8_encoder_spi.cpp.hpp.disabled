@@ -100,8 +100,8 @@ size_t wave8EncodeSingleLane(
     // Validate output buffer size
     const size_t required_size = input.size() * 8;
     if (output.size() < required_size) {
-        using ::fl::StrStream; using ::fl::println; using ::fl::fastled_file_offset;
-        println((StrStream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
+        using ::fl::sstream; using ::fl::println; using ::fl::fastled_file_offset;
+        println((sstream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
                 << "wave8EncodeSingleLane: Output buffer too small (need "
                 << required_size << " bytes, have " << output.size() << " bytes)").c_str());
         return 0;
@@ -129,8 +129,8 @@ size_t wave8EncodeDualLane(
 
     // Validate lane sizes match
     if (lane0.size() != lane1.size()) {
-        using ::fl::StrStream; using ::fl::println; using ::fl::fastled_file_offset;
-        println((StrStream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
+        using ::fl::sstream; using ::fl::println; using ::fl::fastled_file_offset;
+        println((sstream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
                 << "wave8EncodeDualLane: Lane sizes mismatch (lane0="
                 << lane0.size() << " bytes, lane1=" << lane1.size() << " bytes)").c_str());
         return 0;
@@ -139,8 +139,8 @@ size_t wave8EncodeDualLane(
     // Validate output buffer size
     const size_t required_size = lane0.size() * 16;  // 2 Wave8Byte structures per byte
     if (output.size() < required_size) {
-        using ::fl::StrStream; using ::fl::println; using ::fl::fastled_file_offset;
-        println((StrStream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
+        using ::fl::sstream; using ::fl::println; using ::fl::fastled_file_offset;
+        println((sstream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
                 << "wave8EncodeDualLane: Output buffer too small (need "
                 << required_size << " bytes, have " << output.size() << " bytes)").c_str());
         return 0;
@@ -176,8 +176,8 @@ size_t wave8EncodeQuadLane(
     const size_t lane_size = lanes[0].size();
     for (int i = 1; i < 4; i++) {
         if (lanes[i].size() != lane_size) {
-            using ::fl::StrStream; using ::fl::println; using ::fl::fastled_file_offset;
-            println((StrStream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
+            using ::fl::sstream; using ::fl::println; using ::fl::fastled_file_offset;
+            println((sstream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
                     << "wave8EncodeQuadLane: Lane size mismatch (lane0="
                     << lane_size << " bytes, lane" << i << "=" << lanes[i].size() << " bytes)").c_str());
             return 0;
@@ -187,8 +187,8 @@ size_t wave8EncodeQuadLane(
     // Validate output buffer size
     const size_t required_size = lane_size * 32;  // 4 Wave8Byte structures per byte set
     if (output.size() < required_size) {
-        using ::fl::StrStream; using ::fl::println; using ::fl::fastled_file_offset;
-        println((StrStream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
+        using ::fl::sstream; using ::fl::println; using ::fl::fastled_file_offset;
+        println((sstream() << (fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: "
                 << "wave8EncodeQuadLane: Output buffer too small (need "
                 << required_size << " bytes, have " << output.size() << " bytes)").c_str());
         return 0;

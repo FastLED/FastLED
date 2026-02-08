@@ -23,7 +23,7 @@ Blend2d::Blend2d(const XYMap &xymap) : Fx2d(xymap) {
     mFrameTransform = fl::make_shared<Frame>(mXyMap.getTotal());
 }
 
-Str Blend2d::fxName() const {
+string Blend2d::fxName() const {
     fl::string out = "LayeredFx2d(";
     for (size_t i = 0; i < mLayers.size(); ++i) {
         out += mLayers[i].fx->fxName();

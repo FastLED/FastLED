@@ -38,18 +38,18 @@ const char *fastled_file_offset(const char *file);
 
 #ifndef FASTLED_ERROR
 // FASTLED_ERROR: Supports stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FASTLED_ERROR(MSG) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << MSG).c_str())
+#define FASTLED_ERROR(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << MSG).c_str())
 #define FASTLED_ERROR_IF(COND, MSG) do { if (COND) FASTLED_ERROR(MSG); } while(0)
 #endif
 
 #ifndef FL_ERROR
 #if SKETCH_HAS_LOTS_OF_MEMORY
 // FL_ERROR: Supports both string literals and stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FL_ERROR(X) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << X).c_str())
+#define FL_ERROR(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << X).c_str())
 #define FL_ERROR_IF(COND, MSG) do { if (COND) FL_ERROR(MSG); } while(0)
 #else
 // No-op macros for memory-constrained platforms
@@ -64,18 +64,18 @@ const char *fastled_file_offset(const char *file);
 
 #ifndef FASTLED_WARN
 // FASTLED_WARN: Supports stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FASTLED_WARN(MSG) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << MSG).c_str())
+#define FASTLED_WARN(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << MSG).c_str())
 #define FASTLED_WARN_IF(COND, MSG) do { if (COND) FASTLED_WARN(MSG); } while(0)
 #endif
 
 #ifndef FL_WARN
 #if SKETCH_HAS_LOTS_OF_MEMORY
 // FL_WARN: Supports both string literals and stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FL_WARN(X) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << X).c_str())
+#define FL_WARN(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << X).c_str())
 #define FL_WARN_IF(COND, MSG) do { if (COND) FL_WARN(MSG); } while(0)
 
 // FL_WARN_ONCE: Emits warning only once per unique location (static flag per call site)
@@ -105,7 +105,7 @@ const char *fastled_file_offset(const char *file);
 #else
 // No-op macros for memory-constrained platforms
 #define FL_WARN(X) do { } while(0)
-#define FL_WARN_IF(COND, MSG) if(false) { void(fl::FakeStrStream() << MSG); }
+#define FL_WARN_IF(COND, MSG) if(false) { void(fl::sstream_noop() << MSG); }
 #define FL_WARN_ONCE(X) do { } while(0)
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
@@ -119,18 +119,18 @@ const char *fastled_file_offset(const char *file);
 
 #ifndef FASTLED_INFO
 // FASTLED_INFO: Supports stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FASTLED_INFO(MSG) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << MSG).c_str())
+#define FASTLED_INFO(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << MSG).c_str())
 #define FASTLED_INFO_IF(COND, MSG) do { if (COND) FASTLED_INFO(MSG); } while(0)
 #endif
 
 #ifndef FL_INFO
 #if SKETCH_HAS_LOTS_OF_MEMORY
 // FL_INFO: Supports both string literals and stream-style formatting with << operator
-// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
-#define FL_INFO(X) fl::println((fl::StrStream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << X).c_str())
+#define FL_INFO(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << X).c_str())
 #define FL_INFO_IF(COND, MSG) do { if (COND) FL_INFO(MSG); } while(0)
 
 // FL_INFO_ONCE: Emits info only once per unique location (static flag per call site)
@@ -159,7 +159,7 @@ const char *fastled_file_offset(const char *file);
 #endif
 
 // Reusable no-op macro for disabled debug output - avoids linker symbol pollution
-#define FL_DBG_NO_OP(X) do { if (false) { fl::FakeStrStream() << X; } } while(0)
+#define FL_DBG_NO_OP(X) do { if (false) { fl::sstream_noop() << X; } } while(0)
 
 // Debug printing control:
 // - FASTLED_DISABLE_DBG=1: Explicitly disable FL_DBG output (highest priority)
@@ -180,7 +180,7 @@ const char *fastled_file_offset(const char *file);
 #define FASTLED_HAS_DBG 1
 #define _FASTLED_DGB(X)                                                        \
     fl::println(                                                               \
-        (fl::StrStream() << (fl::fastled_file_offset(__FILE__))                \
+        (fl::sstream() << (fl::fastled_file_offset(__FILE__))                \
                          << "(" << int(__LINE__) << "): " << X)                     \
             .c_str())
 #endif
@@ -242,7 +242,7 @@ const char *fastled_file_offset(const char *file);
 // =============================================================================
 
 /// @brief Print without prefix (like FL_WARN but without "WARN: " prefix)
-/// Uses StrStream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
+/// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 /// Supports stream-style formatting with << operator
 ///
 /// Example:
@@ -250,7 +250,7 @@ const char *fastled_file_offset(const char *file);
 ///   FL_PRINT(ss.str());
 #ifndef FL_PRINT
 #if SKETCH_HAS_LOTS_OF_MEMORY
-#define FL_PRINT(X) fl::println((fl::StrStream() << X).c_str())
+#define FL_PRINT(X) fl::println((fl::sstream() << X).c_str())
 
 // FL_PRINT_EVERY: Rate-limited print that outputs at most once per interval
 // Uses static timestamp to track last print time - throttles output in tight loops
@@ -362,7 +362,7 @@ const char *fastled_file_offset(const char *file);
 /// @see FL_LOG_ASYNC_ISR for ISR-safe const char* only variant
 #define FL_LOG_ASYNC(logger, X) \
     do { \
-        (logger).push((fl::StrStream() << X).str()); \
+        (logger).push((fl::sstream() << X).str()); \
     } while(0)
 
 /// @brief ISR-safe async logging macro (const char* literals only, zero heap allocation)

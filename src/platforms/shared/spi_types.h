@@ -8,7 +8,7 @@
 namespace fl {
 
 // Forward declaration for streaming support
-class StrStream;
+class sstream;
 
 // Forward declaration
 struct DMABufferInternalData;
@@ -32,7 +32,7 @@ enum class SPIError : uint8_t {
 
 /// @brief Stream operator for SPIError (enables use with FL_DBG/FL_WARN macros)
 /// @note Defined in spi_types.cpp
-StrStream& operator<<(StrStream& s, SPIError err);
+sstream& operator<<(sstream& s, SPIError err);
 
 /// @brief Result type for DMA buffer acquisition
 /// @details Returns either a valid buffer span or an error code

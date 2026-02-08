@@ -16,7 +16,6 @@ namespace fl {
 // Forward declarations for string types
 class string;
 template <fl::size N> class StrN;
-using Str = fl::string;  // backwards compatibility
 
 class StringHolder;
 

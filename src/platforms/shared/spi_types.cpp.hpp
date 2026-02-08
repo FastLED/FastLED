@@ -126,7 +126,7 @@ const fl::string& SPITransmitResult::message() const {
 }
 
 // Stream operator for SPIError
-StrStream& operator<<(StrStream& s, SPIError err) {
+sstream& operator<<(sstream& s, SPIError err) {
     return s << static_cast<int>(err);
 }
 

@@ -437,9 +437,9 @@ FL_TEST_CASE("FL_SKIP test") {
 }
 #endif
 
-// Test fl::optional with StrStream
-FL_TEST_CASE("StrStream optional support") {
-    fl::StrStream ss;
+// Test fl::optional with sstream
+FL_TEST_CASE("sstream optional support") {
+    fl::sstream ss;
 
     // Test nullopt output
     fl::optional<int> emptyOpt;
@@ -454,9 +454,9 @@ FL_TEST_CASE("StrStream optional support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "42");
 }
 
-// Test fl::rect with StrStream
-FL_TEST_CASE("StrStream rect support") {
-    fl::StrStream ss;
+// Test fl::rect with sstream
+FL_TEST_CASE("sstream rect support") {
+    fl::sstream ss;
 
     fl::rect<int> r(1, 2, 10, 20);
     ss << r;
@@ -468,9 +468,9 @@ FL_TEST_CASE("StrStream rect support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "20");
 }
 
-// Test fl::vector with StrStream
-FL_TEST_CASE("StrStream vector support") {
-    fl::StrStream ss;
+// Test fl::vector with sstream
+FL_TEST_CASE("sstream vector support") {
+    fl::sstream ss;
 
     fl::vector<int> vec;
     vec.push_back(1);
@@ -486,15 +486,15 @@ FL_TEST_CASE("StrStream vector support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "]");
 
     // Test empty vector
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::vector<int> emptyVec;
     ss2 << emptyVec;
     FL_CHECK_STR_EQ(ss2.str(), "[]");
 }
 
-// Test CRGB with StrStream
-FL_TEST_CASE("StrStream CRGB support") {
-    fl::StrStream ss;
+// Test CRGB with sstream
+FL_TEST_CASE("sstream CRGB support") {
+    fl::sstream ss;
 
     CRGB color(255, 128, 64);
     ss << color;
@@ -505,9 +505,9 @@ FL_TEST_CASE("StrStream CRGB support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "64");
 }
 
-// Test fl::unordered_set with StrStream
-FL_TEST_CASE("StrStream unordered_set support") {
-    fl::StrStream ss;
+// Test fl::unordered_set with sstream
+FL_TEST_CASE("sstream unordered_set support") {
+    fl::sstream ss;
 
     fl::unordered_set<int> set;
     set.insert(42);
@@ -519,15 +519,15 @@ FL_TEST_CASE("StrStream unordered_set support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "}");
 
     // Test empty set
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::unordered_set<int> emptySet;
     ss2 << emptySet;
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }
 
-// Test fl::unordered_map with StrStream
-FL_TEST_CASE("StrStream unordered_map support") {
-    fl::StrStream ss;
+// Test fl::unordered_map with sstream
+FL_TEST_CASE("sstream unordered_map support") {
+    fl::sstream ss;
 
     fl::unordered_map<int, int> map;
     map.insert(1, 100);
@@ -541,15 +541,15 @@ FL_TEST_CASE("StrStream unordered_map support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "}");
 
     // Test empty map
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::unordered_map<int, int> emptyMap;
     ss2 << emptyMap;
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }
 
-// Test fl::FixedMap with StrStream
-FL_TEST_CASE("StrStream FixedMap support") {
-    fl::StrStream ss;
+// Test fl::FixedMap with sstream
+FL_TEST_CASE("sstream FixedMap support") {
+    fl::sstream ss;
 
     fl::FixedMap<int, int, 8> map;
     map.insert(1, 100);
@@ -564,15 +564,15 @@ FL_TEST_CASE("StrStream FixedMap support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "}");
 
     // Test empty map
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::FixedMap<int, int, 8> emptyMap;
     ss2 << emptyMap;
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }
 
-// Test fl::SortedHeapMap with StrStream
-FL_TEST_CASE("StrStream SortedHeapMap support") {
-    fl::StrStream ss;
+// Test fl::SortedHeapMap with sstream
+FL_TEST_CASE("sstream SortedHeapMap support") {
+    fl::sstream ss;
 
     fl::SortedHeapMap<int, int> map;
     map.insert(1, 100);
@@ -587,18 +587,18 @@ FL_TEST_CASE("StrStream SortedHeapMap support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "}");
 
     // Test empty map
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::SortedHeapMap<int, int> emptyMap;
     ss2 << emptyMap;
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }
 
-// Test fl::span with StrStream
+// Test fl::span with sstream
 #include "fl/slice.h"
 #include "fl/stl/pair.h"
 
-FL_TEST_CASE("StrStream span support") {
-    fl::StrStream ss;
+FL_TEST_CASE("sstream span support") {
+    fl::sstream ss;
 
     int arr[] = {10, 20, 30};
     fl::span<int> s(arr, 3);
@@ -612,15 +612,15 @@ FL_TEST_CASE("StrStream span support") {
     FL_CHECK_STR_CONTAINS(ss.str(), "]");
 
     // Test empty span
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::span<int> emptySpan;
     ss2 << emptySpan;
     FL_CHECK_STR_EQ(ss2.str(), "span[]");
 }
 
-// Test fl::pair with StrStream
-FL_TEST_CASE("StrStream pair support") {
-    fl::StrStream ss;
+// Test fl::pair with sstream
+FL_TEST_CASE("sstream pair support") {
+    fl::sstream ss;
 
     fl::pair<int, int> p1(42, 100);
     ss << p1;
@@ -633,7 +633,7 @@ FL_TEST_CASE("StrStream pair support") {
     FL_CHECK_STR_CONTAINS(ss.str(), ")");
 
     // Test pair with different types
-    fl::StrStream ss2;
+    fl::sstream ss2;
     fl::pair<fl::string, int> p2("key", 123);
     ss2 << p2;
     FL_CHECK_STR_CONTAINS(ss2.str(), "key");

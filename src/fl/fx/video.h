@@ -51,7 +51,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
 
     // Fx Api
     void draw(DrawContext context) override;
-    Str fxName() const override;
+    string fxName() const override;
 
     // Api
     bool begin(fl::FileHandlePtr h);
@@ -63,8 +63,8 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     bool rewind();
     void setTimeScale(float timeScale);
     float timeScale() const;
-    Str error() const;
-    void setError(const Str &error) { mError = error; }
+    string error() const;
+    void setError(const string &error) { mError = error; }
     size_t pixelsPerFrame() const;
     void pause(fl::u32 now) override;
     void resume(fl::u32 now) override;
@@ -77,8 +77,8 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
   private:
     bool mFinished = false;
     VideoImplPtr mImpl;
-    Str mError;
-    Str mName;
+    string mError;
+    string mName;
 };
 
 // Wraps an Fx and stores a history of video frames. This allows
@@ -91,7 +91,7 @@ class VideoFxWrapper : public Fx1d {
     VideoFxWrapper(FxPtr fx);
     ~VideoFxWrapper() override;
     void draw(DrawContext context) override;
-    Str fxName() const override;
+    string fxName() const override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
 
   private:

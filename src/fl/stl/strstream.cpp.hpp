@@ -9,7 +9,7 @@
 namespace fl {
 
 
-StrStream &StrStream::operator<<(const Tile2x2_u8 &subpixel) {
+sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
     mStr.append("Tile2x2_u8(");
     mStr.append(subpixel.bounds());
     mStr.append(" => ");
@@ -25,7 +25,7 @@ StrStream &StrStream::operator<<(const Tile2x2_u8 &subpixel) {
 }
 
 // FFTBins support - show both raw and db bins  
-StrStream &StrStream::operator<<(const FFTBins &bins) {
+sstream &sstream::operator<<(const FFTBins &bins) {
     mStr.append("FFTBins(size=");
     mStr.append(bins.size());
     mStr.append(", raw=");
@@ -37,43 +37,43 @@ StrStream &StrStream::operator<<(const FFTBins &bins) {
 }
 
 // Tile2x2_u8_wrap support - delegates to fl::string::append which already knows how to format it
-StrStream &StrStream::operator<<(const Tile2x2_u8_wrap &tile) {
+sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
     mStr.append(tile);
     return *this;
 }
 
-// Manipulator operator implementations (declared as friends in StrStream)
-StrStream& operator<<(StrStream& ss, const hex_t&) {
+// Manipulator operator implementations (declared as friends in sstream)
+sstream& operator<<(sstream& ss, const hex_t&) {
     ss.mBase = 16;
     return ss;
 }
 
-StrStream& operator<<(StrStream& ss, const dec_t&) {
+sstream& operator<<(sstream& ss, const dec_t&) {
     ss.mBase = 10;
     return ss;
 }
 
-StrStream& operator<<(StrStream& ss, const oct_t&) {
+sstream& operator<<(sstream& ss, const oct_t&) {
     ss.mBase = 8;
     return ss;
 }
 
 // Helper method implementations for formatted integer output
-void StrStream::appendFormatted(fl::i8 val) {
+void sstream::appendFormatted(fl::i8 val) {
     appendFormatted(fl::i16(val));
 }
 
-void StrStream::appendFormatted(fl::i16 val) {
+void sstream::appendFormatted(fl::i16 val) {
     appendFormatted(fl::i32(val));
 }
 
-void StrStream::appendFormatted(fl::i32 val) {
+void sstream::appendFormatted(fl::i32 val) {
     char buf[64] = {0};
     int len = fl::itoa(val, buf, mBase);
     mStr.append(buf, len);
 }
 
-void StrStream::appendFormatted(fl::i64 val) {
+void sstream::appendFormatted(fl::i64 val) {
     char buf[64] = {0};
     int len;
     if (mBase == 16 || mBase == 8) {
@@ -91,17 +91,17 @@ void StrStream::appendFormatted(fl::i64 val) {
     mStr.append(buf, len);
 }
 
-void StrStream::appendFormatted(fl::u16 val) {
+void sstream::appendFormatted(fl::u16 val) {
     appendFormatted(fl::u32(val));
 }
 
-void StrStream::appendFormatted(fl::u32 val) {
+void sstream::appendFormatted(fl::u32 val) {
     char buf[64] = {0};
     int len = fl::utoa32(val, buf, mBase);
     mStr.append(buf, len);
 }
 
-void StrStream::appendFormatted(fl::u64 val) {
+void sstream::appendFormatted(fl::u64 val) {
     char buf[64] = {0};
     int len = fl::utoa64(val, buf, mBase);
     mStr.append(buf, len);

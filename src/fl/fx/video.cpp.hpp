@@ -104,7 +104,7 @@ int32_t Video::durationMicros() const {
     return mImpl->durationMicros();
 }
 
-Str Video::fxName() const { return "Video"; }
+string Video::fxName() const { return "Video"; }
 
 bool Video::draw(fl::u32 now, Frame *frame) {
     if (!mImpl) {
@@ -133,7 +133,7 @@ float Video::timeScale() const {
     return mImpl->timeScale();
 }
 
-Str Video::error() const { return mError; }
+string Video::error() const { return mError; }
 
 size_t Video::pixelsPerFrame() const {
     if (!mImpl) {
@@ -169,8 +169,8 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
 
 VideoFxWrapper::~VideoFxWrapper() = default;
 
-Str VideoFxWrapper::fxName() const {
-    Str out = "video_fx_wrapper: ";
+string VideoFxWrapper::fxName() const {
+    string out = "video_fx_wrapper: ";
     out.append(mFx->fxName());
     return out;
 }

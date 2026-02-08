@@ -307,7 +307,7 @@ struct ExpressionValue {
     fl::string mStringified;
 
     ExpressionValue(const T& value) : mValue(value) {
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << value;
         mStringified = ss.str();
     }
@@ -358,12 +358,12 @@ bool binaryAssert(const L& lhs, const R& rhs, Cmp cmp,
     AssertResult ar(result);
     ar.mLocation = SourceLocation(file, line);
 
-    fl::StrStream exprSS;
+    fl::sstream exprSS;
     exprSS << lhsExpr << " " << op << " " << rhsExpr;
     ar.mExpression = exprSS.str();
 
     if (!result) {
-        fl::StrStream expandedSS;
+        fl::sstream expandedSS;
         expandedSS << lhs << " " << op << " " << rhs;
         ar.mExpanded = expandedSS.str();
     }
@@ -477,7 +477,7 @@ private:
 };
 
 // Stringify Approx for output
-inline fl::StrStream& operator<<(fl::StrStream& os, const Approx& approx) {
+inline fl::sstream& operator<<(fl::sstream& os, const Approx& approx) {
     os << "Approx(" << approx.value() << ")";
     return os;
 }
@@ -830,7 +830,7 @@ bool isTestSkipped();
 // FL_MESSAGE - output a message during test execution (non-failing)
 #define FL_MESSAGE(msg)                                                         \
     do {                                                                         \
-        fl::StrStream FLTEST_UNIQUE(ss_);                                       \
+        fl::sstream FLTEST_UNIQUE(ss_);                                       \
         FLTEST_UNIQUE(ss_) << msg;                                              \
         fl::test::outputMessage(FLTEST_UNIQUE(ss_).str().c_str(), __FILE__, __LINE__); \
     } while (0)
@@ -844,7 +844,7 @@ bool isTestSkipped();
 // FL_CAPTURE - capture and print a variable's value
 #define FL_CAPTURE(x)                                                           \
     do {                                                                         \
-        fl::StrStream FLTEST_UNIQUE(ss_);                                       \
+        fl::sstream FLTEST_UNIQUE(ss_);                                       \
         FLTEST_UNIQUE(ss_) << (x);                                              \
         fl::test::outputCapture(#x, FLTEST_UNIQUE(ss_).str().c_str(), __FILE__, __LINE__); \
     } while (0)
@@ -852,7 +852,7 @@ bool isTestSkipped();
 // FL_FAIL - explicit failure (fatal, stops test)
 #define FL_FAIL(msg)                                                            \
     do {                                                                         \
-        fl::StrStream FLTEST_UNIQUE(ss_);                                       \
+        fl::sstream FLTEST_UNIQUE(ss_);                                       \
         FLTEST_UNIQUE(ss_) << msg;                                              \
         fl::test::fail(FLTEST_UNIQUE(ss_).str().c_str(), __FILE__, __LINE__, true); \
         return;                                                                  \
@@ -861,7 +861,7 @@ bool isTestSkipped();
 // FL_FAIL_CHECK - explicit failure (non-fatal, test continues)
 #define FL_FAIL_CHECK(msg)                                                      \
     do {                                                                         \
-        fl::StrStream FLTEST_UNIQUE(ss_);                                       \
+        fl::sstream FLTEST_UNIQUE(ss_);                                       \
         FLTEST_UNIQUE(ss_) << msg;                                              \
         fl::test::fail(FLTEST_UNIQUE(ss_).str().c_str(), __FILE__, __LINE__, false); \
     } while (0)
@@ -893,7 +893,7 @@ bool isTestSkipped();
 #define FL_WARN_EQ(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) == (rhs))) {                                                 \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " == " << #rhs                 \
                        << " failed: " << (lhs) << " != " << (rhs);               \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -903,7 +903,7 @@ bool isTestSkipped();
 #define FL_WARN_NE(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) != (rhs))) {                                                 \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " != " << #rhs                 \
                        << " failed: both equal " << (lhs);                       \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -913,7 +913,7 @@ bool isTestSkipped();
 #define FL_WARN_LT(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) < (rhs))) {                                                  \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " < " << #rhs                  \
                        << " failed: " << (lhs) << " >= " << (rhs);               \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -923,7 +923,7 @@ bool isTestSkipped();
 #define FL_WARN_GT(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) > (rhs))) {                                                  \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " > " << #rhs                  \
                        << " failed: " << (lhs) << " <= " << (rhs);               \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -933,7 +933,7 @@ bool isTestSkipped();
 #define FL_WARN_LE(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) <= (rhs))) {                                                 \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " <= " << #rhs                 \
                        << " failed: " << (lhs) << " > " << (rhs);                \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -943,7 +943,7 @@ bool isTestSkipped();
 #define FL_WARN_GE(lhs, rhs)                                                    \
     do {                                                                         \
         if (!((lhs) >= (rhs))) {                                                 \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " << #lhs << " >= " << #rhs                 \
                        << " failed: " << (lhs) << " < " << (rhs);                \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -967,7 +967,7 @@ bool isTestSkipped();
 #define FL_CHECK_MESSAGE(expr, msg)                                             \
     do {                                                                         \
         if (!(expr)) {                                                           \
-            fl::StrStream FLTEST_UNIQUE(ss_);                                   \
+            fl::sstream FLTEST_UNIQUE(ss_);                                   \
             FLTEST_UNIQUE(ss_) << msg;                                          \
             fl::test::AssertResult ar(false);                                    \
             ar.mExpression = #expr;                                              \
@@ -985,7 +985,7 @@ bool isTestSkipped();
 #define FL_REQUIRE_MESSAGE(expr, msg)                                           \
     do {                                                                         \
         if (!(expr)) {                                                           \
-            fl::StrStream FLTEST_UNIQUE(ss_);                                   \
+            fl::sstream FLTEST_UNIQUE(ss_);                                   \
             FLTEST_UNIQUE(ss_) << msg;                                          \
             fl::test::AssertResult ar(false);                                    \
             ar.mExpression = #expr;                                              \
@@ -1085,11 +1085,11 @@ namespace detail {
         bool _fl_result = _fl_diff <= (epsilon);                                 \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream ss;                                                         \
+        fl::sstream ss;                                                         \
         ss << #a << " ~= " << #b << " (eps=" << (epsilon) << ")";                \
         ar.mExpression = ss.str();                                               \
         if (!_fl_result) {                                                       \
-            fl::StrStream ess;                                                    \
+            fl::sstream ess;                                                    \
             ess << _fl_a << " ~= " << _fl_b << " (diff=" << _fl_diff << ")";     \
             ar.mExpanded = ess.str();                                            \
         }                                                                        \
@@ -1105,11 +1105,11 @@ namespace detail {
         bool _fl_result = _fl_diff <= (epsilon);                                 \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream ss;                                                         \
+        fl::sstream ss;                                                         \
         ss << #a << " ~= " << #b << " (eps=" << (epsilon) << ")";                \
         ar.mExpression = ss.str();                                               \
         if (!_fl_result) {                                                       \
-            fl::StrStream ess;                                                    \
+            fl::sstream ess;                                                    \
             ess << _fl_a << " ~= " << _fl_b << " (diff=" << _fl_diff << ")";     \
             ar.mExpanded = ess.str();                                            \
             fl::test::TestContext::instance().reportAssert(ar);                  \
@@ -1160,11 +1160,11 @@ namespace detail {
         bool _fl_result = (_fl_a_str == _fl_b_str);                             \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream ss;                                                         \
+        fl::sstream ss;                                                         \
         ss << #a << " == " << #b;                                                \
         ar.mExpression = ss.str();                                               \
         if (!_fl_result) {                                                       \
-            fl::StrStream ess;                                                    \
+            fl::sstream ess;                                                    \
             ess << "\"" << _fl_a_str << "\" != \"" << _fl_b_str << "\"";         \
             ar.mExpanded = ess.str();                                            \
         }                                                                        \
@@ -1178,11 +1178,11 @@ namespace detail {
         bool _fl_result = (_fl_a_str != _fl_b_str);                             \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream ss;                                                         \
+        fl::sstream ss;                                                         \
         ss << #a << " != " << #b;                                                \
         ar.mExpression = ss.str();                                               \
         if (!_fl_result) {                                                       \
-            fl::StrStream ess;                                                    \
+            fl::sstream ess;                                                    \
             ess << "Both equal: \"" << _fl_a_str << "\"";                        \
             ar.mExpanded = ess.str();                                            \
         }                                                                        \
@@ -1197,11 +1197,11 @@ namespace detail {
         bool _fl_result = (_fl_haystack.find(_fl_needle) != fl::string::npos);  \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_ss;                                                    \
+        fl::sstream _fl_ss;                                                    \
         _fl_ss << #haystack << " contains " << #needle;                          \
         ar.mExpression = _fl_ss.str();                                           \
         if (!_fl_result) {                                                       \
-            fl::StrStream _fl_ess;                                               \
+            fl::sstream _fl_ess;                                               \
             _fl_ess << "\"" << _fl_haystack << "\" does not contain \"" << _fl_needle << "\""; \
             ar.mExpanded = _fl_ess.str();                                        \
         }                                                                        \
@@ -1215,11 +1215,11 @@ namespace detail {
         bool _fl_result = (_fl_a_str == _fl_b_str);                             \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream ss;                                                         \
+        fl::sstream ss;                                                         \
         ss << #a << " == " << #b;                                                \
         ar.mExpression = ss.str();                                               \
         if (!_fl_result) {                                                       \
-            fl::StrStream ess;                                                    \
+            fl::sstream ess;                                                    \
             ess << "\"" << _fl_a_str << "\" != \"" << _fl_b_str << "\"";         \
             ar.mExpanded = ess.str();                                            \
             fl::test::TestContext::instance().reportAssert(ar);                  \
@@ -1235,11 +1235,11 @@ namespace detail {
         bool _fl_result = (_fl_haystack.find(_fl_needle) != fl::string::npos);  \
         fl::test::AssertResult ar(_fl_result);                                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_ss;                                                    \
+        fl::sstream _fl_ss;                                                    \
         _fl_ss << #haystack << " contains " << #needle;                          \
         ar.mExpression = _fl_ss.str();                                           \
         if (!_fl_result) {                                                       \
-            fl::StrStream _fl_ess;                                               \
+            fl::sstream _fl_ess;                                               \
             _fl_ess << "\"" << _fl_haystack << "\" does not contain \"" << _fl_needle << "\""; \
             ar.mExpanded = _fl_ess.str();                                        \
             fl::test::TestContext::instance().reportAssert(ar);                  \
@@ -1274,11 +1274,11 @@ namespace detail {
         }                                                                        \
         fl::test::AssertResult _fl_arr_ar(_fl_arr_match);                        \
         _fl_arr_ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);     \
-        fl::StrStream _fl_arr_ss;                                                \
+        fl::sstream _fl_arr_ss;                                                \
         _fl_arr_ss << #actual << " == " << #expected << " (size=" << (arrsize) << ")"; \
         _fl_arr_ar.mExpression = _fl_arr_ss.str();                               \
         if (!_fl_arr_match) {                                                    \
-            fl::StrStream _fl_arr_ess;                                           \
+            fl::sstream _fl_arr_ess;                                           \
             _fl_arr_ess << "Mismatch at index " << _fl_arr_mismatch_idx          \
                     << ": " << (actual)[_fl_arr_mismatch_idx]                    \
                     << " != " << (expected)[_fl_arr_mismatch_idx];               \
@@ -1305,11 +1305,11 @@ namespace detail {
         }                                                                        \
         fl::test::AssertResult _fl_arr_ar(_fl_arr_match);                        \
         _fl_arr_ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);     \
-        fl::StrStream _fl_arr_ss;                                                \
+        fl::sstream _fl_arr_ss;                                                \
         _fl_arr_ss << #actual << " == " << #expected << " (size=" << (arrsize) << ")"; \
         _fl_arr_ar.mExpression = _fl_arr_ss.str();                               \
         if (!_fl_arr_match) {                                                    \
-            fl::StrStream _fl_arr_ess;                                           \
+            fl::sstream _fl_arr_ess;                                           \
             _fl_arr_ess << "Mismatch at index " << _fl_arr_mismatch_idx          \
                     << ": " << (actual)[_fl_arr_mismatch_idx]                    \
                     << " != " << (expected)[_fl_arr_mismatch_idx];               \
@@ -1410,7 +1410,7 @@ namespace detail {
         catch (...) { _fl_threw_any = true; }                                    \
         fl::test::AssertResult ar(_fl_threw_correct);                            \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_expr_ss;                                               \
+        fl::sstream _fl_expr_ss;                                               \
         _fl_expr_ss << #expr << " throws " << #exType;                           \
         ar.mExpression = _fl_expr_ss.str();                                      \
         if (!_fl_threw_correct) {                                                \
@@ -1432,7 +1432,7 @@ namespace detail {
         catch (...) { _fl_threw_any = true; }                                    \
         fl::test::AssertResult ar(_fl_threw_correct);                            \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_expr_ss;                                               \
+        fl::sstream _fl_expr_ss;                                               \
         _fl_expr_ss << #expr << " throws " << #exType;                           \
         ar.mExpression = _fl_expr_ss.str();                                      \
         if (!_fl_threw_correct) {                                                \
@@ -1463,13 +1463,13 @@ namespace detail {
         catch (...) { _fl_threw = true; }                                        \
         fl::test::AssertResult ar(_fl_threw && _fl_msg_match);                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_expr_ss;                                               \
+        fl::sstream _fl_expr_ss;                                               \
         _fl_expr_ss << #expr << " throws with \"" << msg << "\"";                \
         ar.mExpression = _fl_expr_ss.str();                                      \
         if (!_fl_threw) {                                                        \
             ar.mExpanded = "No exception was thrown";                            \
         } else if (!_fl_msg_match) {                                             \
-            fl::StrStream _fl_exp_ss;                                            \
+            fl::sstream _fl_exp_ss;                                            \
             _fl_exp_ss << "Exception message: \"" << _fl_actual_msg << "\"";     \
             ar.mExpanded = _fl_exp_ss.str();                                     \
         }                                                                        \
@@ -1490,13 +1490,13 @@ namespace detail {
         catch (...) { _fl_threw = true; }                                        \
         fl::test::AssertResult ar(_fl_threw && _fl_msg_match);                   \
         ar.mLocation = fl::test::SourceLocation(__FILE__, __LINE__);             \
-        fl::StrStream _fl_expr_ss;                                               \
+        fl::sstream _fl_expr_ss;                                               \
         _fl_expr_ss << #expr << " throws with \"" << msg << "\"";                \
         ar.mExpression = _fl_expr_ss.str();                                      \
         if (!_fl_threw) {                                                        \
             ar.mExpanded = "No exception was thrown";                            \
         } else if (!_fl_msg_match) {                                             \
-            fl::StrStream _fl_exp_ss;                                            \
+            fl::sstream _fl_exp_ss;                                            \
             _fl_exp_ss << "Exception message: \"" << _fl_actual_msg << "\"";     \
             ar.mExpanded = _fl_exp_ss.str();                                     \
         }                                                                        \
@@ -1560,7 +1560,7 @@ namespace detail {
         if (!_fl_threw) {                                                        \
             fl::test::outputMessage("Warning: " #expr " did not throw", __FILE__, __LINE__); \
         } else if (!_fl_msg_match) {                                             \
-            fl::StrStream _fl_warn_ss;                                           \
+            fl::sstream _fl_warn_ss;                                           \
             _fl_warn_ss << "Warning: " #expr " threw but message \"" << _fl_actual_msg \
                        << "\" does not contain \"" << msg << "\"";               \
             fl::test::outputMessage(_fl_warn_ss.str().c_str(), __FILE__, __LINE__); \
@@ -1820,7 +1820,7 @@ template <typename T, typename... Rest, typename TestFunc>
 struct TypeIterator<TypeList<T, Rest...>, TestFunc> {
     static void iterate(const char* baseName, const char* file, int line, int index) {
         // Build the test name: "baseName<TypeName>"
-        fl::StrStream ss;
+        fl::sstream ss;
         ss << baseName << "<" << TypeNameHolder<T>::name() << ">";
         fl::string testName = ss.str();
 

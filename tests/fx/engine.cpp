@@ -36,7 +36,7 @@ public:
         }
     }
 
-    fl::Str fxName() const override { return "MockFx"; }
+    fl::string fxName() const override { return "MockFx"; }
 
 private:
     CRGB mColor;
@@ -66,7 +66,7 @@ TEST_CASE("test_fx_engine") {
             // FL_CHECK(leds[i] == CRGB::Red);
             bool is_red = leds[i] == CRGB::Red;
             if (!is_red) {
-                Str err = leds[i].toString();
+                fl::string err = leds[i].toString();
                 printf("leds[%d] is not red, was instead: %s\n", i, err.c_str());
                 FL_CHECK(is_red);
             }
@@ -196,7 +196,7 @@ class Fake2dEngine : public Fx2d {
         return true;
     }
 
-    fl::Str fxName() const override { return "Fake2d"; }
+    fl::string fxName() const override { return "Fake2d"; }
     uint8_t mFrameCounter = 0;
     FixedVector<CRGB, 5> mColors;
 };

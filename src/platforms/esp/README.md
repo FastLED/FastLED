@@ -4,7 +4,7 @@ ESP platform support covering ESP8266 and ESP32 (Xtensa and RISC‑V variants), 
 
 ## Top‑level files (quick pass)
 - `compile_test.hpp`: Compile‑time assertions for ESP8266/ESP32 flags (PROGMEM usage, interrupts policy, F_CPU, architecture guards, millis availability, driver feature checks).
-- `esp_assert.h`: Lightweight `FASTLED_ASSERT` macro that prints via `fl::StrStream` without pulling heavy logging.
+- `esp_assert.h`: Lightweight `FASTLED_ASSERT` macro that prints via `fl::sstream` without pulling heavy logging.
 - `esp_version.h`: IDF version detection/fallback macros for toolchains lacking `esp_idf_version.h`.
 - `int.h`: ESP‑friendly integer/pointer typedefs in `fl::`.
 - `io_esp.h`: Minimal I/O helpers; on ESP32 uses direct `fputs` to stdout to avoid heavy logging.

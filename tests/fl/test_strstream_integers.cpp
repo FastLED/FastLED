@@ -6,8 +6,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
-TEST_CASE("StrStream handles all integer types generically") {
-    fl::StrStream ss;
+TEST_CASE("sstream handles all integer types generically") {
+    fl::sstream ss;
 
     SUBCASE("signed char types") {
         signed char sc = -42;
@@ -207,7 +207,7 @@ TEST_CASE("string append handles all integer types generically") {
 }
 
 TEST_CASE("char types are handled correctly") {
-    fl::StrStream ss;
+    fl::sstream ss;
 
     SUBCASE("char is treated as character by default") {
         char c = 'A';

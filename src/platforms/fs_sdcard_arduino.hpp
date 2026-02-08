@@ -27,7 +27,7 @@ FASTLED_SHARED_PTR(FsArduino);
 class SdFatFileHandle : public FileHandle {
 private:
     SdFile _file;
-    Str _path;  // Changed to Str for proper memory management
+    string _path;
 
 public:
     SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
@@ -70,7 +70,7 @@ public:
 class SDFileHandle : public FileHandle {
 private:
     File _file;
-    Str _path;  // Changed to Str for proper memory management
+    string _path;
 
 public:
     SDFileHandle(File file, const char* path) : _file(file), _path(path) {}

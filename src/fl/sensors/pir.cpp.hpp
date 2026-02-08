@@ -14,15 +14,15 @@ namespace fl {
 
 namespace {
 int g_counter = 0;
-Str getButtonName(const char *button_name) {
+string getButtonName(const char *button_name) {
     if (button_name) {
-        return Str(button_name);
+        return string(button_name);
     }
     int count = g_counter++;
     if (count == 0) {
-        return Str("PIR");
+        return string("PIR");
     }
-    StrStream s;
+    sstream s;
     s << "PirLowLevel " << g_counter++;
     return s.str();
 }

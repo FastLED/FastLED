@@ -109,7 +109,7 @@ class FileData {
     mutable fl::mutex mMutex;
 };
 
-typedef std::map<Str, FileDataPtr> FileMap;  // okay std namespace
+typedef std::map<string, FileDataPtr> FileMap;  // okay std namespace
 static FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
@@ -121,10 +121,10 @@ class WasmFileHandle : public fl::FileHandle {
   private:
     FileDataPtr mData;
     size_t mPos;
-    Str mPath;
+    string mPath;
 
   public:
-    WasmFileHandle(const Str &path, const FileDataPtr data)
+    WasmFileHandle(const string &path, const FileDataPtr data)
         : mData(data), mPos(0), mPath(path) {}
 
     virtual ~WasmFileHandle() override {}
@@ -208,7 +208,7 @@ class FsImplWasm : public fl::FsImpl {
 
     fl::FileHandlePtr openRead(const char *_path) override {
         // FASTLED_DBG("Opening file: " << _path);
-        Str path(_path);
+        string path(_path);
         FileHandlePtr out;
         {
             fl::unique_lock<fl::mutex> lock(gFileMapMutex);
@@ -226,7 +226,7 @@ class FsImplWasm : public fl::FsImpl {
     }
 };
 
-FileDataPtr _findIfExists(const Str &path) {
+FileDataPtr _findIfExists(const string &path) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -235,7 +235,7 @@ FileDataPtr _findIfExists(const Str &path) {
     return FileDataPtr();
 }
 
-FileDataPtr _findOrCreate(const Str &path, size_t len) {
+FileDataPtr _findOrCreate(const string &path, size_t len) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -246,7 +246,7 @@ FileDataPtr _findOrCreate(const Str &path, size_t len) {
     return entry;
 }
 
-FileDataPtr _createIfNotExists(const Str &path, size_t len) {
+FileDataPtr _createIfNotExists(const string &path, size_t len) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -264,7 +264,7 @@ extern "C" {
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
                                        size_t len) {
 
-    auto inserted = _createIfNotExists(Str(path), len);
+    auto inserted = _createIfNotExists(string(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be injected once.");
         return false;
@@ -275,7 +275,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
                                        size_t len) {
-    auto entry = _findIfExists(Str(path));
+    auto entry = _findIfExists(string(path));
     if (!entry) {
         FASTLED_WARN("File must be declared before it can be appended.");
         return false;
@@ -286,7 +286,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
-    auto inserted = _createIfNotExists(Str(path), len);
+    auto inserted = _createIfNotExists(string(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be declared once.");
         return false;

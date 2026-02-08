@@ -51,7 +51,6 @@ namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
 
 class string;
-using Str = fl::string;  // backwards compatibility
 class Tile2x2_u8_wrap;
 class JsonUiInternal;
 
