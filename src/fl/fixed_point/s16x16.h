@@ -242,6 +242,9 @@ class s16x16 {
     }
 
     // Fixed-point log base 2 for positive values.
+    // Uses 4-term minimax polynomial for log2(1+t), t in [0,1).
+    // Horner evaluation uses i64 intermediates (24 frac bits) to minimize
+    // rounding error, then converts back to 16 frac bits.
     static FASTLED_FORCE_INLINE s16x16 log2_fp(s16x16 x) {
         u32 val = static_cast<u32>(x.mValue);
         int msb = highest_bit(val);
@@ -254,15 +257,29 @@ class s16x16 {
             t = static_cast<i32>(
                 (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
         }
-        s16x16 tf = from_raw(t);
-        constexpr s16x16 c0(1.4284f);
-        constexpr s16x16 c1(-0.5765f);
-        constexpr s16x16 c2(0.1481f);
-        s16x16 frac_part = tf * (c0 + tf * (c1 + tf * c2));
-        return from_raw((int_part << FRAC_BITS) + frac_part.mValue);
+        // 4-term minimax coefficients for log2(1+t), t in [0,1).
+        // Stored as i64 with 24 fractional bits. Max product ~2^49, fits i64.
+        constexpr int IFRAC = 24;
+        constexpr int64_t c0 = 24189248LL;  // 1.44179 * 2^24
+        constexpr int64_t c1 = -11728384LL; // -0.69907 * 2^24
+        constexpr int64_t c2 = 6098176LL;   // 0.36348 * 2^24
+        constexpr int64_t c3 = -1788416LL;  // -0.10660 * 2^24
+        // Extend t from 16 to 24 frac bits.
+        int64_t t24 = static_cast<int64_t>(t) << (IFRAC - FRAC_BITS);
+        // Horner: t * (c0 + t * (c1 + t * (c2 + t * c3)))
+        int64_t acc = c3;
+        acc = c2 + ((acc * t24) >> IFRAC);
+        acc = c1 + ((acc * t24) >> IFRAC);
+        acc = c0 + ((acc * t24) >> IFRAC);
+        int64_t frac_part = (acc * t24) >> IFRAC;
+        // Convert from 24 frac bits back to 16.
+        i32 frac16 = static_cast<i32>(frac_part >> (IFRAC - FRAC_BITS));
+        return from_raw((int_part << FRAC_BITS) + frac16);
     }
 
-    // Fixed-point 2^x.
+    // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).
+    // Horner evaluation uses i64 intermediates (24 frac bits) to minimize
+    // rounding error, then converts back to 16 frac bits.
     static FASTLED_FORCE_INLINE s16x16 exp2_fp(s16x16 x) {
         s16x16 fl_val = floor(x);
         s16x16 fr = x - fl_val;
@@ -275,13 +292,26 @@ class s16x16 {
         } else {
             int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
         }
-        constexpr s16x16 one(1.0f);
-        constexpr s16x16 d0(0.69314718f);
-        constexpr s16x16 d1(0.24022651f);
-        constexpr s16x16 d2(0.05550411f);
-        s16x16 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
+        // 4-term minimax coefficients for 2^t - 1, t in [0,1).
+        // Stored as i64 with 24 fractional bits. Max product ~2^48, fits i64.
+        constexpr int IFRAC = 24;
+        constexpr int64_t d0 = 11629376LL;  // 0.69316 * 2^24
+        constexpr int64_t d1 = 4038400LL;   // 0.24071 * 2^24
+        constexpr int64_t d2 = 895232LL;    // 0.05336 * 2^24
+        constexpr int64_t d3 = 214016LL;    // 0.01276 * 2^24
+        // Extend fr from 16 to 24 frac bits.
+        int64_t fr24 = static_cast<int64_t>(fr.mValue) << (IFRAC - FRAC_BITS);
+        // Horner: 1 + fr * (d0 + fr * (d1 + fr * (d2 + fr * d3)))
+        int64_t acc = d3;
+        acc = d2 + ((acc * fr24) >> IFRAC);
+        acc = d1 + ((acc * fr24) >> IFRAC);
+        acc = d0 + ((acc * fr24) >> IFRAC);
+        constexpr int64_t one24 = 1LL << IFRAC;
+        int64_t frac_pow24 = one24 + ((acc * fr24) >> IFRAC);
+        // Convert from 24 frac bits to 16 frac bits, then scale by int_pow.
+        i32 frac_pow16 = static_cast<i32>(frac_pow24 >> (IFRAC - FRAC_BITS));
         int64_t result =
-            (static_cast<int64_t>(int_pow) * frac_pow.mValue) >> FRAC_BITS;
+            (static_cast<int64_t>(int_pow) * frac_pow16) >> FRAC_BITS;
         return from_raw(static_cast<i32>(result));
     }
 
@@ -294,13 +324,15 @@ class s16x16 {
     }
 
     // Polynomial atan for t in [0, 1]. Returns [0, π/4].
-    // atan(t) ≈ (π/4)·t − t·(t−1)·(0.2447 + 0.0663·t)
+    // 7th-order minimax: atan(t) ≈ t * (c0 + t² * (c1 + t² * (c2 + t² * c3)))
+    // Coefficients optimized via coordinate descent on s16x16 quantization grid.
     static FASTLED_FORCE_INLINE s16x16 atan_unit(s16x16 t) {
-        constexpr s16x16 pi_over_4(0.7853981f);
-        constexpr s16x16 c1(0.2447f);
-        constexpr s16x16 c2(0.0663f);
-        constexpr s16x16 one(1.0f);
-        return pi_over_4 * t - t * (t - one) * (c1 + c2 * t);
+        constexpr s16x16 c0(0.9998779297f);
+        constexpr s16x16 c1(-0.3269348145f);
+        constexpr s16x16 c2(0.1594085693f);
+        constexpr s16x16 c3(-0.0472106934f);
+        s16x16 t2 = t * t;
+        return t * (c0 + t2 * (c1 + t2 * (c2 + t2 * c3)));
     }
 };
 

@@ -374,6 +374,52 @@ TEST_CASE("fl::sin32 and cos32 pythagorean identity") {
     }
 }
 
+TEST_CASE("fl::sincos32") {
+    SUBCASE("matches separate sin32 and cos32") {
+        // sincos32 must produce identical results to calling sin32+cos32 separately
+        for (u32 angle = 0; angle < 16777216; angle += 7919) {
+            SinCos32 sc = sincos32(angle);
+            i32 s = sin32(angle);
+            i32 c = cos32(angle);
+            FL_CHECK_EQ(sc.sin_val, s);
+            FL_CHECK_EQ(sc.cos_val, c);
+        }
+    }
+
+    SUBCASE("key angles") {
+        // 0 degrees: sin=0, cos=max
+        SinCos32 sc0 = sincos32(0);
+        FL_CHECK_EQ(sc0.sin_val, 0);
+        FL_CHECK(sc0.cos_val > 2147000000);
+
+        // 90 degrees (4194304): sin=max, cos=0
+        SinCos32 sc90 = sincos32(4194304);
+        FL_CHECK(sc90.sin_val > 2147000000);
+        FL_CHECK(abs_helper(sc90.cos_val) < 100000);
+
+        // 180 degrees (8388608): sin=0, cos=-max
+        SinCos32 sc180 = sincos32(8388608);
+        FL_CHECK(abs_helper(sc180.sin_val) < 100000);
+        FL_CHECK(sc180.cos_val < -2147000000);
+
+        // 270 degrees (12582912): sin=-max, cos=0
+        SinCos32 sc270 = sincos32(12582912);
+        FL_CHECK(sc270.sin_val < -2147000000);
+        FL_CHECK(abs_helper(sc270.cos_val) < 100000);
+    }
+
+    SUBCASE("pythagorean identity") {
+        for (u32 angle = 0; angle < 16777216; angle += 100000) {
+            SinCos32 sc = sincos32(angle);
+            double sn = static_cast<double>(sc.sin_val) / 2147418112.0;
+            double cn = static_cast<double>(sc.cos_val) / 2147418112.0;
+            double sum = sn * sn + cn * cn;
+            FL_CHECK(sum > 0.99);
+            FL_CHECK(sum < 1.01);
+        }
+    }
+}
+
 TEST_CASE("fl::sin16lut and cos16lut pythagorean identity") {
     SUBCASE("sin^2 + cos^2 should approximately equal 1") {
         // Test at various angles (avoid u16 overflow)

@@ -242,6 +242,9 @@ class s24x8 {
     }
 
     // Fixed-point log base 2 for positive values.
+    // Uses 4-term minimax polynomial for log2(1+t), t in [0,1).
+    // Horner evaluation uses i64 intermediates (16 frac bits) to minimize
+    // rounding error, then converts back to 8 frac bits.
     static FASTLED_FORCE_INLINE s24x8 log2_fp(s24x8 x) {
         u32 val = static_cast<u32>(x.mValue);
         int msb = highest_bit(val);
@@ -254,15 +257,29 @@ class s24x8 {
             t = static_cast<i32>(
                 (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
         }
-        s24x8 tf = from_raw(t);
-        constexpr s24x8 c0(1.4284f);
-        constexpr s24x8 c1(-0.5765f);
-        constexpr s24x8 c2(0.1481f);
-        s24x8 frac_part = tf * (c0 + tf * (c1 + tf * c2));
-        return from_raw((int_part << FRAC_BITS) + frac_part.mValue);
+        // 4-term minimax coefficients for log2(1+t), t in [0,1).
+        // Stored as i64 with 16 fractional bits.
+        constexpr int IFRAC = 16;
+        constexpr i64 c0 = 94528LL;    // 1.44179 * 2^16
+        constexpr i64 c1 = -45814LL;   // -0.69907 * 2^16
+        constexpr i64 c2 = 23821LL;    // 0.36348 * 2^16
+        constexpr i64 c3 = -6986LL;    // -0.10660 * 2^16
+        // Extend t from 8 to 16 frac bits.
+        i64 t16 = static_cast<i64>(t) << (IFRAC - FRAC_BITS);
+        // Horner: t * (c0 + t * (c1 + t * (c2 + t * c3)))
+        i64 acc = c3;
+        acc = c2 + ((acc * t16) >> IFRAC);
+        acc = c1 + ((acc * t16) >> IFRAC);
+        acc = c0 + ((acc * t16) >> IFRAC);
+        i64 frac_part = (acc * t16) >> IFRAC;
+        // Convert from 16 frac bits back to 8.
+        i32 frac8 = static_cast<i32>(frac_part >> (IFRAC - FRAC_BITS));
+        return from_raw((int_part << FRAC_BITS) + frac8);
     }
 
-    // Fixed-point 2^x.
+    // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).
+    // Horner evaluation uses i64 intermediates (16 frac bits) to minimize
+    // rounding error, then converts back to 8 frac bits.
     static FASTLED_FORCE_INLINE s24x8 exp2_fp(s24x8 x) {
         s24x8 fl_val = floor(x);
         s24x8 fr = x - fl_val;
@@ -275,13 +292,26 @@ class s24x8 {
         } else {
             int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
         }
-        constexpr s24x8 one(1.0f);
-        constexpr s24x8 d0(0.69314718f);
-        constexpr s24x8 d1(0.24022651f);
-        constexpr s24x8 d2(0.05550411f);
-        s24x8 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
+        // 4-term minimax coefficients for 2^t - 1, t in [0,1).
+        // Stored as i64 with 16 fractional bits.
+        constexpr int IFRAC = 16;
+        constexpr i64 d0 = 45427LL;    // 0.69316 * 2^16
+        constexpr i64 d1 = 15775LL;    // 0.24071 * 2^16
+        constexpr i64 d2 = 3497LL;     // 0.05336 * 2^16
+        constexpr i64 d3 = 836LL;      // 0.01276 * 2^16
+        // Extend fr from 8 to 16 frac bits.
+        i64 fr16 = static_cast<i64>(fr.mValue) << (IFRAC - FRAC_BITS);
+        // Horner: 1 + fr * (d0 + fr * (d1 + fr * (d2 + fr * d3)))
+        i64 acc = d3;
+        acc = d2 + ((acc * fr16) >> IFRAC);
+        acc = d1 + ((acc * fr16) >> IFRAC);
+        acc = d0 + ((acc * fr16) >> IFRAC);
+        constexpr i64 one16 = 1LL << IFRAC;
+        i64 frac_pow16 = one16 + ((acc * fr16) >> IFRAC);
+        // Convert from 16 frac bits to 8 frac bits, then scale by int_pow.
+        i32 frac_pow8 = static_cast<i32>(frac_pow16 >> (IFRAC - FRAC_BITS));
         i64 result =
-            (static_cast<i64>(int_pow) * frac_pow.mValue) >> FRAC_BITS;
+            (static_cast<i64>(int_pow) * frac_pow8) >> FRAC_BITS;
         return from_raw(static_cast<i32>(result));
     }
 
@@ -294,12 +324,15 @@ class s24x8 {
     }
 
     // Polynomial atan for t in [0, 1]. Returns [0, π/4].
+    // 7th-order minimax: atan(t) ≈ t * (c0 + t² * (c1 + t² * (c2 + t² * c3)))
+    // Coefficients optimized via coordinate descent on s16x16 quantization grid.
     static FASTLED_FORCE_INLINE s24x8 atan_unit(s24x8 t) {
-        constexpr s24x8 pi_over_4(0.7853981f);
-        constexpr s24x8 c1(0.2447f);
-        constexpr s24x8 c2(0.0663f);
-        constexpr s24x8 one(1.0f);
-        return pi_over_4 * t - t * (t - one) * (c1 + c2 * t);
+        constexpr s24x8 c0(0.9998779297f);
+        constexpr s24x8 c1(-0.3269348145f);
+        constexpr s24x8 c2(0.1594085693f);
+        constexpr s24x8 c3(-0.0472106934f);
+        s24x8 t2 = t * t;
+        return t * (c0 + t2 * (c1 + t2 * (c2 + t2 * c3)));
     }
 };
 

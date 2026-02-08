@@ -242,6 +242,9 @@ class s12x4 {
     }
 
     // Fixed-point log base 2 for positive values.
+    // Uses 4-term minimax polynomial for log2(1+t), t in [0,1).
+    // Horner evaluation uses i32 intermediates (12 frac bits) to minimize
+    // rounding error, then converts back to 4 frac bits.
     static FASTLED_FORCE_INLINE s12x4 log2_fp(s12x4 x) {
         u32 val = static_cast<u32>(x.mValue);
         int msb = highest_bit(val);
@@ -254,16 +257,29 @@ class s12x4 {
             t = static_cast<i32>(
                 (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
         }
-        s12x4 tf = from_raw(static_cast<i16>(t));
-        constexpr s12x4 c0(1.4284f);
-        constexpr s12x4 c1(-0.5765f);
-        constexpr s12x4 c2(0.1481f);
-        s12x4 frac_part = tf * (c0 + tf * (c1 + tf * c2));
-        return from_raw(static_cast<i16>(
-            (int_part << FRAC_BITS) + frac_part.mValue));
+        // 4-term minimax coefficients for log2(1+t), t in [0,1).
+        // Stored as i32 with 12 fractional bits. Max product ~2^21, fits i32 comfortably.
+        constexpr int IFRAC = 12;
+        constexpr i32 c0 = 5907;    // 1.44179 * 2^12
+        constexpr i32 c1 = -2864;   // -0.69907 * 2^12
+        constexpr i32 c2 = 1489;    // 0.36348 * 2^12
+        constexpr i32 c3 = -437;    // -0.10660 * 2^12
+        // Extend t from 4 to 12 frac bits.
+        i32 t12 = static_cast<i32>(t) << (IFRAC - FRAC_BITS);
+        // Horner: t * (c0 + t * (c1 + t * (c2 + t * c3)))
+        i32 acc = c3;
+        acc = c2 + ((acc * t12) >> IFRAC);
+        acc = c1 + ((acc * t12) >> IFRAC);
+        acc = c0 + ((acc * t12) >> IFRAC);
+        i32 frac_part = (acc * t12) >> IFRAC;
+        // Convert from 12 frac bits back to 4.
+        i16 frac4 = static_cast<i16>(frac_part >> (IFRAC - FRAC_BITS));
+        return from_raw(static_cast<i16>((int_part << FRAC_BITS) + frac4));
     }
 
-    // Fixed-point 2^x.
+    // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).
+    // Horner evaluation uses i32 intermediates (12 frac bits) to minimize
+    // rounding error, then converts back to 4 frac bits.
     static FASTLED_FORCE_INLINE s12x4 exp2_fp(s12x4 x) {
         s12x4 fl_val = floor(x);
         s12x4 fr = x - fl_val;
@@ -276,13 +292,26 @@ class s12x4 {
         } else {
             int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
         }
-        constexpr s12x4 one(1.0f);
-        constexpr s12x4 d0(0.69314718f);
-        constexpr s12x4 d1(0.24022651f);
-        constexpr s12x4 d2(0.05550411f);
-        s12x4 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
+        // 4-term minimax coefficients for 2^t - 1, t in [0,1).
+        // Stored as i32 with 12 fractional bits.
+        constexpr int IFRAC = 12;
+        constexpr i32 d0 = 2839;    // 0.69316 * 2^12
+        constexpr i32 d1 = 986;     // 0.24071 * 2^12
+        constexpr i32 d2 = 219;     // 0.05336 * 2^12
+        constexpr i32 d3 = 52;      // 0.01276 * 2^12
+        // Extend fr from 4 to 12 frac bits.
+        i32 fr12 = static_cast<i32>(fr.mValue) << (IFRAC - FRAC_BITS);
+        // Horner: 1 + fr * (d0 + fr * (d1 + fr * (d2 + fr * d3)))
+        i32 acc = d3;
+        acc = d2 + ((acc * fr12) >> IFRAC);
+        acc = d1 + ((acc * fr12) >> IFRAC);
+        acc = d0 + ((acc * fr12) >> IFRAC);
+        constexpr i32 one12 = 1 << IFRAC;
+        i32 frac_pow12 = one12 + ((acc * fr12) >> IFRAC);
+        // Convert from 12 frac bits to 4 frac bits, then scale by int_pow.
+        i32 frac_pow4 = frac_pow12 >> (IFRAC - FRAC_BITS);
         i32 result =
-            (int_pow * static_cast<i32>(frac_pow.mValue)) >> FRAC_BITS;
+            (int_pow * frac_pow4) >> FRAC_BITS;
         return from_raw(static_cast<i16>(result));
     }
 
@@ -291,16 +320,19 @@ class s12x4 {
         // 256/(2*PI) in s16x16 — converts radians to sin32/cos32 format.
         static constexpr i32 RAD_TO_24 = 2670177;
         return static_cast<u32>(
-            (static_cast<int64_t>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
+            (static_cast<i64>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
     }
 
     // Polynomial atan for t in [0, 1]. Returns [0, π/4].
+    // 7th-order minimax: atan(t) ≈ t * (c0 + t² * (c1 + t² * (c2 + t² * c3)))
+    // Coefficients optimized via coordinate descent on s16x16 quantization grid.
     static FASTLED_FORCE_INLINE s12x4 atan_unit(s12x4 t) {
-        constexpr s12x4 pi_over_4(0.7853981f);
-        constexpr s12x4 c1(0.2447f);
-        constexpr s12x4 c2(0.0663f);
-        constexpr s12x4 one(1.0f);
-        return pi_over_4 * t - t * (t - one) * (c1 + c2 * t);
+        constexpr s12x4 c0(0.9998779297f);
+        constexpr s12x4 c1(-0.3269348145f);
+        constexpr s12x4 c2(0.1594085693f);
+        constexpr s12x4 c3(-0.0472106934f);
+        s12x4 t2 = t * t;
+        return t * (c0 + t2 * (c1 + t2 * (c2 + t2 * c3)));
     }
 };
 
