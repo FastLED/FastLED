@@ -264,7 +264,7 @@ extern "C" {
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
                                        size_t len) {
 
-    auto inserted = fl::_createIfNotExists(fl::Str(path), len);
+    auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be injected once.");
         return false;
@@ -275,7 +275,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
                                        size_t len) {
-    auto entry = fl::_findIfExists(fl::Str(path));
+    auto entry = fl::_findIfExists(fl::string(path));
     if (!entry) {
         FASTLED_WARN("File must be declared before it can be appended.");
         return false;
@@ -286,7 +286,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
-    auto inserted = fl::_createIfNotExists(fl::Str(path), len);
+    auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be declared once.");
         return false;
