@@ -76,10 +76,10 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
 
 def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
     """
-    Get hash of all .cpp/.h source and test files in src/ and tests/ directories.
+    Get hash of all .cpp/.h/.hpp source and test files in src/ and tests/ directories.
 
-    This detects when source or test files are added or removed, which requires
-    Meson reconfiguration to update the build graph (especially for test discovery).
+    This detects when source or test files are added, removed, or renamed (including
+    .h -> .hpp renames), which requires Meson reconfiguration to update the build graph.
 
     Args:
         source_dir: Project root directory
@@ -88,7 +88,8 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         Tuple of (hash_string, sorted_file_list)
     """
     try:
-        # Recursively discover all .cpp and .h files in src/ directory
+        # Recursively discover all .cpp, .h, and .hpp files in src/ directory
+        # NOTE: .hpp is included to detect .h -> .hpp renames that require reconfiguration
         src_path = source_dir / "src"
         source_files = sorted(
             str(p.relative_to(source_dir)) for p in src_path.rglob("*.cpp")
@@ -96,8 +97,11 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         source_files.extend(
             sorted(str(p.relative_to(source_dir)) for p in src_path.rglob("*.h"))
         )
+        source_files.extend(
+            sorted(str(p.relative_to(source_dir)) for p in src_path.rglob("*.hpp"))
+        )
 
-        # Recursively discover all .cpp and .h files in tests/ directory
+        # Recursively discover all .cpp, .h, and .hpp files in tests/ directory
         # This is CRITICAL for detecting when tests are added or removed
         tests_path = source_dir / "tests"
         if tests_path.exists():
@@ -108,6 +112,11 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
             )
             source_files.extend(
                 sorted(str(p.relative_to(source_dir)) for p in tests_path.rglob("*.h"))
+            )
+            source_files.extend(
+                sorted(
+                    str(p.relative_to(source_dir)) for p in tests_path.rglob("*.hpp")
+                )
             )
 
         # Re-sort the combined list for consistent ordering

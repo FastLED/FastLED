@@ -18,6 +18,26 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
+# Error patterns that indicate stale build state recoverable by reconfiguration
+STALE_BUILD_PATTERNS = [
+    "file not found",
+    "no such file or directory",
+    "missing and no known rule to make it",
+    "does not exist",
+]
+
+
+def is_stale_build_error(output: str) -> bool:
+    """Check if compilation output indicates a stale build state error.
+
+    These errors typically occur when source/header files are renamed or deleted
+    but the build system still references the old paths. They are recoverable
+    by cleaning stale deps and reconfiguring.
+    """
+    output_lower = output.lower()
+    return any(pattern in output_lower for pattern in STALE_BUILD_PATTERNS)
+
+
 def compile_meson(
     build_dir: Path,
     target: Optional[str] = None,

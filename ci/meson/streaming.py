@@ -26,7 +26,7 @@ def stream_compile_and_run_tests(
     target: Optional[str] = None,
     verbose: bool = False,
     compile_timeout: int = 600,
-) -> tuple[bool, int, int]:
+) -> tuple[bool, int, int, str]:
     """
     Stream test compilation and execution in parallel.
 
@@ -42,7 +42,8 @@ def stream_compile_and_run_tests(
         compile_timeout: Timeout in seconds for compilation (default: 600)
 
     Returns:
-        Tuple of (overall_success, num_passed, num_failed)
+        Tuple of (overall_success, num_passed, num_failed, compile_output)
+        compile_output contains the compilation stdout/stderr for error analysis
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
@@ -64,6 +65,7 @@ def stream_compile_and_run_tests(
 
     # Track compilation success and test results
     compilation_failed = False
+    compilation_output = ""  # Capture compilation output for error analysis
     num_passed = 0
     num_failed = 0
     tests_run = 0
@@ -76,7 +78,7 @@ def stream_compile_and_run_tests(
 
     def producer_thread() -> None:
         """Parse Ninja output and queue completed test executables"""
-        nonlocal compilation_failed
+        nonlocal compilation_failed, compilation_output
 
         try:
             # Use RunningProcess for streaming output
@@ -153,6 +155,7 @@ def stream_compile_and_run_tests(
 
             # Check compilation result
             returncode = proc.wait()
+            compilation_output = proc.stdout  # Capture for error analysis
             if returncode != 0:
                 _ts_print(
                     f"[MESON] Compilation failed with return code {returncode}",
@@ -163,7 +166,7 @@ def stream_compile_and_run_tests(
                 error_filter: Callable[[str], None] = _create_error_context_filter(
                     context_lines=20
                 )
-                output_lines = proc.stdout.splitlines()
+                output_lines = compilation_output.splitlines()
                 for line in output_lines:
                     error_filter(line)
 
@@ -264,4 +267,4 @@ def stream_compile_and_run_tests(
         else:
             _print_success(f"  Compilation: ✓ OK")
 
-    return overall_success, num_passed, num_failed
+    return overall_success, num_passed, num_failed, compilation_output

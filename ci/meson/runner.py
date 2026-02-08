@@ -12,8 +12,12 @@ from typing import Optional
 from clang_tool_chain import prepare_sanitizer_environment
 from running_process import RunningProcess
 
-from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
-from ci.meson.compile import compile_meson
+from ci.meson.build_config import (
+    cleanup_build_artifacts,
+    perform_ninja_maintenance,
+    setup_meson_build,
+)
+from ci.meson.compile import compile_meson, is_stale_build_error
 from ci.meson.compiler import check_meson_installed, get_meson_executable
 from ci.meson.output import _print_banner, _print_error, _print_info, _print_success
 from ci.meson.streaming import stream_compile_and_run_tests
@@ -23,6 +27,120 @@ from ci.util.build_lock import libfastled_build_lock
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+def _recover_stale_build(
+    source_dir: Path,
+    build_dir: Path,
+    debug: bool,
+    check: bool,
+    build_mode: str,
+    verbose: bool,
+) -> bool:
+    """
+    Attempt to recover from a stale build state.
+
+    This is called when compilation fails due to missing/renamed/deleted files.
+    It cleans stale Ninja deps, clears metadata caches, and forces Meson
+    reconfiguration so the next compilation attempt has a fresh build graph.
+
+    Args:
+        source_dir: Project root directory
+        build_dir: Meson build directory
+        debug: Debug mode flag
+        check: IWYU check flag
+        build_mode: Build mode string
+        verbose: Verbose output flag
+
+    Returns:
+        True if recovery setup succeeded (caller should retry compilation),
+        False if recovery failed
+    """
+    _ts_print("=" * 80)
+    _ts_print("[MESON] 🔧 SELF-HEALING: Stale build state detected - auto-recovering")
+    _ts_print("=" * 80)
+    _ts_print("[MESON] This typically happens when files are renamed or deleted.")
+    _ts_print("[MESON] Cleaning stale dependencies and reconfiguring...")
+
+    try:
+        # Step 1: Clean stale ninja deps using ninja -t cleandead
+        ninja_exe = shutil.which("ninja") or str(
+            Path(sys.prefix) / "Scripts" / "ninja.EXE"
+        )
+        try:
+            import subprocess
+
+            result = subprocess.run(
+                [ninja_exe, "-C", str(build_dir), "-t", "cleandead"],
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            if result.returncode == 0:
+                _ts_print(
+                    f"[MESON] 🗑️  Cleaned stale Ninja outputs: {result.stdout.strip()}"
+                )
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except Exception as e:
+            _ts_print(f"[MESON] Warning: ninja cleandead failed: {e}")
+
+        # Step 2: Delete .ninja_deps to force full dependency re-scan
+        ninja_deps = build_dir / ".ninja_deps"
+        if ninja_deps.exists():
+            try:
+                ninja_deps.unlink()
+                _ts_print("[MESON] 🗑️  Deleted stale .ninja_deps")
+            except OSError as e:
+                _ts_print(f"[MESON] Warning: Could not delete .ninja_deps: {e}")
+
+        # Step 3: Clear metadata caches
+        cache_files = [
+            build_dir / "src_metadata.cache",
+            build_dir / "test_list_cache.txt",
+            build_dir / ".source_files_hash",
+            build_dir / "tests" / "test_metadata.cache",
+        ]
+        for cache_file in cache_files:
+            if cache_file.exists():
+                try:
+                    cache_file.unlink()
+                    _ts_print(f"[MESON] 🗑️  Deleted cache: {cache_file.name}")
+                except OSError as e:
+                    _ts_print(
+                        f"[MESON] Warning: Could not delete {cache_file.name}: {e}"
+                    )
+
+        # Step 4: Clean build artifacts (stale .obj files referencing old headers)
+        cleanup_build_artifacts(build_dir, "Stale build recovery")
+
+        # Step 5: Force Meson reconfiguration
+        _ts_print("[MESON] 🔄 Forcing Meson reconfiguration...")
+        success = setup_meson_build(
+            source_dir,
+            build_dir,
+            reconfigure=True,
+            debug=debug,
+            check=check,
+            build_mode=build_mode,
+            verbose=verbose,
+        )
+
+        if success:
+            _ts_print("[MESON] ✅ Self-healing reconfiguration complete")
+            _ts_print("[MESON] 🔄 Retrying compilation...")
+        else:
+            _ts_print("[MESON] ❌ Self-healing reconfiguration failed")
+
+        return success
+
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        _ts_print(f"[MESON] ❌ Self-healing failed with exception: {e}")
+        return False
 
 
 def run_meson_build_and_test(
@@ -254,28 +372,78 @@ def run_meson_build_and_test(
                 compile_timeout = 2700 if use_debug else 600
 
                 # Run streaming compilation and testing for UNIT TESTS
-                overall_success_tests, num_passed_tests, num_failed_tests = (
-                    stream_compile_and_run_tests(
-                        build_dir=build_dir,
-                        test_callback=test_callback,
-                        target=None,  # Build all default test targets (unit tests)
-                        verbose=verbose,
-                        compile_timeout=compile_timeout,
-                    )
+                (
+                    overall_success_tests,
+                    num_passed_tests,
+                    num_failed_tests,
+                    compile_output_tests,
+                ) = stream_compile_and_run_tests(
+                    build_dir=build_dir,
+                    test_callback=test_callback,
+                    target=None,  # Build all default test targets (unit tests)
+                    verbose=verbose,
+                    compile_timeout=compile_timeout,
                 )
+
+                # SELF-HEALING: If compilation failed due to stale build state,
+                # recover and retry once
+                if not overall_success_tests and is_stale_build_error(
+                    compile_output_tests
+                ):
+                    if _recover_stale_build(
+                        source_dir, build_dir, use_debug, check, build_mode, verbose
+                    ):
+                        # Retry compilation after recovery
+                        (
+                            overall_success_tests,
+                            num_passed_tests,
+                            num_failed_tests,
+                            compile_output_tests,
+                        ) = stream_compile_and_run_tests(
+                            build_dir=build_dir,
+                            test_callback=test_callback,
+                            target=None,
+                            verbose=verbose,
+                            compile_timeout=compile_timeout,
+                        )
 
                 # Run streaming compilation and testing for EXAMPLES
                 if verbose:
                     _ts_print("[MESON] Starting examples compilation and execution...")
-                overall_success_examples, num_passed_examples, num_failed_examples = (
-                    stream_compile_and_run_tests(
-                        build_dir=build_dir,
-                        test_callback=test_callback,
-                        target="examples-host",  # Build examples explicitly
-                        verbose=verbose,
-                        compile_timeout=compile_timeout,
-                    )
+                (
+                    overall_success_examples,
+                    num_passed_examples,
+                    num_failed_examples,
+                    compile_output_examples,
+                ) = stream_compile_and_run_tests(
+                    build_dir=build_dir,
+                    test_callback=test_callback,
+                    target="examples-host",  # Build examples explicitly
+                    verbose=verbose,
+                    compile_timeout=compile_timeout,
                 )
+
+                # SELF-HEALING: If examples compilation failed due to stale build state,
+                # recover and retry once
+                if not overall_success_examples and is_stale_build_error(
+                    compile_output_examples
+                ):
+                    if _recover_stale_build(
+                        source_dir, build_dir, use_debug, check, build_mode, verbose
+                    ):
+                        # Retry compilation after recovery
+                        (
+                            overall_success_examples,
+                            num_passed_examples,
+                            num_failed_examples,
+                            compile_output_examples,
+                        ) = stream_compile_and_run_tests(
+                            build_dir=build_dir,
+                            test_callback=test_callback,
+                            target="examples-host",
+                            verbose=verbose,
+                            compile_timeout=compile_timeout,
+                        )
 
                 # Combine results
                 overall_success = overall_success_tests and overall_success_examples
