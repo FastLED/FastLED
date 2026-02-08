@@ -26,9 +26,10 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 #include "fl/warn.h"
+#include "platforms/esp/is_esp.h"
 
 // ESP32-specific: check feature flag for clockless SPI support
-#if defined(ESP32)
+#if defined(FL_IS_ESP32)
 #include "platforms/esp/32/feature_flags/enabled.h"
 #endif
 
@@ -43,8 +44,8 @@ namespace fl {
 /// @param lut Wave8 expansion lookup table (built from timing)
 /// @return Number of bytes written to output (input.size() * 8)
 inline size_t wave8EncodeSingleLane(
-    fl::span<const uint8_t> input,
-    fl::span<uint8_t> output,
+    fl::span<const u8> input,
+    fl::span<u8> output,
     const Wave8BitExpansionLut& lut) {
 
     const size_t required_size = input.size() * 8;
@@ -76,9 +77,9 @@ inline size_t wave8EncodeSingleLane(
 /// @param lut Wave8 expansion lookup table
 /// @return Number of bytes written to output (lane0.size() * 16)
 inline size_t wave8EncodeDualLane(
-    fl::span<const uint8_t> lane0,
-    fl::span<const uint8_t> lane1,
-    fl::span<uint8_t> output,
+    fl::span<const u8> lane0,
+    fl::span<const u8> lane1,
+    fl::span<u8> output,
     const Wave8BitExpansionLut& lut) {
 
     if (lane0.size() != lane1.size()) {
@@ -101,7 +102,7 @@ inline size_t wave8EncodeDualLane(
         detail::wave8_convert_byte_to_wave8byte(lane1[i], lut, &wave8_lane1);
 
         Wave8Byte lane_array[2] = {wave8_lane0, wave8_lane1};
-        uint8_t transposed[2 * sizeof(Wave8Byte)];
+        u8 transposed[2 * sizeof(Wave8Byte)];
         detail::wave8_transpose_2(lane_array, transposed);
 
         fl::memcpy(output.data() + output_idx, transposed, sizeof(transposed));
@@ -121,8 +122,8 @@ inline size_t wave8EncodeDualLane(
 /// @param lut Wave8 expansion lookup table
 /// @return Number of bytes written to output (lanes[0].size() * 32)
 inline size_t wave8EncodeQuadLane(
-    fl::span<const uint8_t> lanes[4],
-    fl::span<uint8_t> output,
+    fl::span<const u8> lanes[4],
+    fl::span<u8> output,
     const Wave8BitExpansionLut& lut) {
 
     const size_t lane_size = lanes[0].size();
@@ -148,7 +149,7 @@ inline size_t wave8EncodeQuadLane(
             detail::wave8_convert_byte_to_wave8byte(lanes[lane][i], lut, &wave8_lanes[lane]);
         }
 
-        uint8_t transposed[4 * sizeof(Wave8Byte)];
+        u8 transposed[4 * sizeof(Wave8Byte)];
         detail::wave8_transpose_4(wave8_lanes, transposed);
 
         fl::memcpy(output.data() + output_idx, transposed, sizeof(transposed));
@@ -168,7 +169,7 @@ inline size_t wave8EncodeQuadLane(
 /// @param input_bytes Number of input LED bytes
 /// @param num_lanes Number of SPI lanes (1, 2, or 4)
 /// @return Required output buffer size in bytes
-constexpr size_t wave8CalculateOutputSize(size_t input_bytes, uint8_t num_lanes) {
+constexpr size_t wave8CalculateOutputSize(size_t input_bytes, u8 num_lanes) {
     return input_bytes * 8 * num_lanes;
 }
 
