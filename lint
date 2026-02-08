@@ -133,7 +133,7 @@ if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
     fi
 
     if [ "$NEEDS_PYRIGHT" = true ]; then
-        if uv run pyright; then
+        if uv run pyright --threads; then
             # Mark pyright as successful
             uv run python ci/python_lint_cache.py success
             echo "✅ pyright passed"
