@@ -135,7 +135,7 @@ class CompilationArgumentParser:
                 ):
                     parsed.positional_examples = []
                 # Type ignore for argparse.Namespace attribute which is dynamically set
-                parsed.positional_examples.extend(extra_examples)  # type: ignore[union-attr]
+                parsed.positional_examples.extend(extra_examples)
 
         # Build configuration
         config = self._build_config(parsed)

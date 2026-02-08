@@ -7,6 +7,10 @@ declare -a LINT_STAGES=()
 declare -a LINT_DURATIONS=()
 declare -a LINT_SKIPPED=()
 
+# Temp files for parallel lint output
+PARALLEL_TMPDIR=$(mktemp -d)
+trap "rm -rf $PARALLEL_TMPDIR" EXIT
+
 # Function to record a linting stage's duration
 record_stage() {
     local stage_name="$1"
@@ -30,6 +34,7 @@ CPP_ONLY=false
 NO_FINGERPRINT=false
 RUN_IWYU=false
 RUN_FULL=false
+RUN_PYRIGHT=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --help|-h)
@@ -42,9 +47,11 @@ while [[ $# -gt 0 ]]; do
             echo "  --no-fingerprint  Force re-run all linters (skip timestamp checks)"
             echo "  --full            Run all linters including IWYU (Include-What-You-Use)"
             echo "  --iwyu            Run IWYU (Include-What-You-Use) analysis only"
+            echo "  --strict          Also run pyright (slow strict type checker, ~12s)"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
-            echo "Python linting includes: ruff (lint + format) + KBI checker + pyright."
+            echo "Python linting includes: ruff (lint + format) + KBI checker + ty."
+            echo "Use --strict to also run pyright (strict type checking, adds ~12s)."
             echo "C++ linting includes: clang-format and custom checkers."
             echo "IWYU (Include-What-You-Use) runs ONLY with --full or --iwyu flags."
             echo "JavaScript linting: FAST ONLY (skips if not available)."
@@ -68,6 +75,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --iwyu)
             RUN_IWYU=true
+            shift
+            ;;
+        --strict)
+            RUN_PYRIGHT=true
             shift
             ;;
         *)
@@ -97,217 +108,412 @@ else
     echo "=============================================="
 fi
 
-if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
-    # Python linting
-    echo ""
-    echo "📝 PYTHON LINTING"
-    echo "------------------"
-    PYTHON_LINT_START=$(date +%s)
-    echo "Running ruff check (linting + import sorting)"
-    uv run ruff check --fix test.py
-    uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-    echo "Running ruff format (formatting)"
-    uv run ruff format test.py
-    uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
-    # Note: ruff handles both import sorting (via lint.isort) and formatting (via ruff.format)
-    # We no longer run standalone isort/black as they can conflict with ruff's output
-    echo "Running KeyboardInterrupt handler checks"
-    uv run python ci/lint_python/keyboard_interrupt_checker.py test.py ci --exclude ci/tmp ci/wasm .pio
-    PYTHON_LINT_DURATION=$(get_elapsed_seconds $PYTHON_LINT_START)
+# ============================================================================
+# Helper functions for parallel lint stages
+# ============================================================================
 
-    # Check if pyright needs to run using fingerprint cache
-    PYRIGHT_START=$(date +%s)
-    PYRIGHT_SKIPPED=false
+# Run C++ lint stage (called as background job or inline)
+run_cpp_lint_stage() {
+    local logfile="$1"
+    local no_fingerprint="$2"
+    local run_full="$3"
+    local run_iwyu="$4"
+    local start_time=$(date +%s)
+    local skipped=false
 
-    if [ "$NO_FINGERPRINT" = true ]; then
-        echo "Running pyright (--no-fingerprint flag set)"
-        NEEDS_PYRIGHT=true
-    else
-        # Use Python fingerprint cache to check if files changed
-        # Exit code 0 = needs run, Exit code 1 = skip
-        if uv run python ci/python_lint_cache.py check; then
-            NEEDS_PYRIGHT=true
-        else
-            NEEDS_PYRIGHT=false
-        fi
-    fi
+    {
+        export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
-    if [ "$NEEDS_PYRIGHT" = true ]; then
-        if uv run pyright --threads; then
-            # Mark pyright as successful
-            uv run python ci/python_lint_cache.py success
-            echo "✅ pyright passed"
-        else
-            # Invalidate cache on failure so it reruns next time
-            uv run python ci/python_lint_cache.py failure
-            echo "❌ pyright failed"
-            exit 1
-        fi
-    else
-        PYRIGHT_SKIPPED=true
-    fi
-    PYRIGHT_DURATION=$(get_elapsed_seconds $PYRIGHT_START)
-
-    # Record Python linting stages
-    record_stage "ruff" "$PYTHON_LINT_DURATION" false
-    record_stage "pyright" "$PYRIGHT_DURATION" "$PYRIGHT_SKIPPED"
-fi
-
-if [ "$JS_ONLY" = false ]; then
-    export CLANG_FORMAT_STYLE="{SortIncludes: false}"
-
-    # C++ linting with fingerprint cache
-    echo ""
-    echo "🔧 C++ LINTING"
-    echo "---------------"
-
-    CPP_LINT_START=$(date +%s)
-    CPP_LINT_SKIPPED=false
-
-    if [ "$NO_FINGERPRINT" = true ]; then
-        echo "Running C++ linting (--no-fingerprint flag set)"
-        NEEDS_CPP_LINT=true
-    else
-        # Use C++ fingerprint cache to check if files changed
-        # Exit code 0 = needs run, Exit code 1 = skip
-        if uv run python ci/cpp_lint_cache.py check; then
-            NEEDS_CPP_LINT=true
-        else
-            NEEDS_CPP_LINT=false
-        fi
-    fi
-
-    if [ "$NEEDS_CPP_LINT" = true ]; then
-        folders=(
-            #"src/lib8tion"
-            #"src/platforms/stub"
-            #"src/platforms/apollo3"  # clang-format breaks apollo3
-            #"src/platforms/esp/8266"  # clang-format breaks esp8266
-            #"src/platforms/arm" # clang-format breaks arm
-            #"src/fx"
-            #"src/fl"
-            #"src/platforms/wasm"
-        )
-
-        for folder in "${folders[@]}"; do
-          echo "Running clang-format on $folder"
-          uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
-        done
-
-        # C++ custom linters - unified runner (includes all checks in one pass)
         echo ""
-        echo "🔍 C++ CUSTOM LINTERS (UNIFIED)"
-        echo "-------------------------------"
-        echo "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
-        if uv run python ci/lint_cpp/run_all_checkers.py; then
-            # Mark C++ linting as successful
-            uv run python ci/cpp_lint_cache.py success
-            echo "✅ C++ linting passed"
+        echo "🔧 C++ LINTING"
+        echo "---------------"
+
+        local needs_cpp_lint=false
+        if [ "$no_fingerprint" = true ]; then
+            echo "Running C++ linting (--no-fingerprint flag set)"
+            needs_cpp_lint=true
         else
-            # Invalidate cache on failure so it reruns next time
-            uv run python ci/cpp_lint_cache.py failure
-            echo "❌ Unified C++ linter failed"
-            exit 1
+            if uv run python ci/cpp_lint_cache.py check; then
+                needs_cpp_lint=true
+            else
+                needs_cpp_lint=false
+            fi
         fi
-    else
-        CPP_LINT_SKIPPED=true
-    fi
-    CPP_LINT_DURATION=$(get_elapsed_seconds $CPP_LINT_START)
 
-    # Record C++ linting stage
-    record_stage "cpp_linting" "$CPP_LINT_DURATION" "$CPP_LINT_SKIPPED"
+        if [ "$needs_cpp_lint" = true ]; then
+            folders=(
+                #"src/lib8tion"
+                #"src/platforms/stub"
+                #"src/platforms/apollo3"  # clang-format breaks apollo3
+                #"src/platforms/esp/8266"  # clang-format breaks esp8266
+                #"src/platforms/arm" # clang-format breaks arm
+                #"src/fx"
+                #"src/fl"
+                #"src/platforms/wasm"
+            )
 
-    # IWYU analysis - separate stage with its own timing
-    # Only runs when --full or --iwyu flags are set
-    echo ""
-    echo "🔍 INCLUDE-WHAT-YOU-USE ANALYSIS"
-    echo "---------------------------------"
+            for folder in "${folders[@]}"; do
+              echo "Running clang-format on $folder"
+              uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
+            done
 
-    IWYU_START=$(date +%s)
-    IWYU_SKIPPED=false
-
-    # Check if IWYU should run (--full or --iwyu flags)
-    if [ "$RUN_FULL" = true ] || [ "$RUN_IWYU" = true ]; then
-        echo "Running IWYU on C++ test suite..."
-        if uv run python ci/ci-iwyu.py --quiet; then
-            echo "✅ IWYU analysis passed"
-        else
-            echo "❌ IWYU analysis failed"
-            exit 1
-        fi
-    else
-        IWYU_SKIPPED=true
-        echo "⏭️  IWYU skipped (use --full or --iwyu to enable)"
-    fi
-    IWYU_DURATION=$(get_elapsed_seconds $IWYU_START)
-
-    # Record IWYU stage
-    record_stage "iwyu" "$IWYU_DURATION" "$IWYU_SKIPPED"
-fi
-
-if [ "$CPP_ONLY" = false ]; then
-    # JavaScript linting and enhanced checking (now included by default)
-    echo ""
-    echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
-    echo "--------------------------------------"
-
-# Colors for JavaScript linting output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Note: JavaScript linting uses ci/lint-js-fast which handles its own cache checking
-# Monitors: src/platforms/wasm/compiler/** + ci/docker_utils/avr8js/**
-
-# Export environment variable for lint-js-fast if --no-fingerprint is set
-if [ "$NO_FINGERPRINT" = true ]; then
-    export FASTLED_NO_FINGERPRINT=1
-fi
-
-# Check if fast linting is available
-ESLINT_EXE=""
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
-else
-    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
-fi
-
-JS_LINT_START=$(date +%s)
-if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
-    echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
-    # Note: lint-js-fast handles its own cache checking and success/failure marking
-    if ! bash ci/lint-js-fast; then
-        echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
-        exit 1
-    fi
-else
-    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
-    # Auto-setup JavaScript linting
-    if uv run ci/setup-js-linting-fast.py; then
-        echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
-        # Now run the linting
-        if [ -f "ci/lint-js-fast" ]; then
-            echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
-            # Note: lint-js-fast handles its own cache checking and success/failure marking
-            if ! bash ci/lint-js-fast; then
-                echo -e "${RED}❌ JavaScript linting failed${NC}"
+            echo ""
+            echo "🔍 C++ CUSTOM LINTERS (UNIFIED)"
+            echo "-------------------------------"
+            echo "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
+            if uv run python ci/lint_cpp/run_all_checkers.py; then
+                if [ "$no_fingerprint" != true ]; then
+                    uv run python ci/cpp_lint_cache.py success
+                fi
+                echo "✅ C++ linting passed"
+            else
+                if [ "$no_fingerprint" != true ]; then
+                    uv run python ci/cpp_lint_cache.py failure
+                fi
+                echo "❌ Unified C++ linter failed"
                 exit 1
             fi
         else
-            echo -e "${RED}❌ Failed to create lint script${NC}"
-            exit 1
+            skipped=true
         fi
-    else
-        echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
-        echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
-        # Don't exit with error, just skip JS linting
-    fi
-fi
-    JS_LINT_DURATION=$(get_elapsed_seconds $JS_LINT_START)
 
-    # Record JavaScript linting stage
-    record_stage "javascript_linting" "$JS_LINT_DURATION" false
+        local cpp_duration=$(( $(date +%s) - start_time ))
+        echo "DURATION:${cpp_duration}" >> "$logfile.meta"
+        echo "SKIPPED:${skipped}" >> "$logfile.meta"
+
+        # IWYU analysis
+        echo ""
+        echo "🔍 INCLUDE-WHAT-YOU-USE ANALYSIS"
+        echo "---------------------------------"
+
+        local iwyu_start=$(date +%s)
+        local iwyu_skipped=false
+
+        if [ "$run_full" = true ] || [ "$run_iwyu" = true ]; then
+            echo "Running IWYU on C++ test suite..."
+            if uv run python ci/ci-iwyu.py --quiet; then
+                echo "✅ IWYU analysis passed"
+            else
+                echo "❌ IWYU analysis failed"
+                exit 1
+            fi
+        else
+            iwyu_skipped=true
+            echo "⏭️  IWYU skipped (use --full or --iwyu to enable)"
+        fi
+
+        local iwyu_duration=$(( $(date +%s) - iwyu_start ))
+        echo "IWYU_DURATION:${iwyu_duration}" >> "$logfile.meta"
+        echo "IWYU_SKIPPED:${iwyu_skipped}" >> "$logfile.meta"
+    } > "$logfile" 2>&1
+}
+
+# Run JavaScript lint stage (called as background job or inline)
+run_js_lint_stage() {
+    local logfile="$1"
+    local no_fingerprint="$2"
+    local start_time=$(date +%s)
+
+    {
+        echo ""
+        echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
+        echo "--------------------------------------"
+
+        RED='\033[0;31m'
+        GREEN='\033[0;32m'
+        BLUE='\033[0;34m'
+        NC='\033[0m'
+
+        if [ "$no_fingerprint" = true ]; then
+            export FASTLED_NO_FINGERPRINT=1
+        fi
+
+        ESLINT_EXE=""
+        if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+            ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
+        else
+            ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
+        fi
+
+        if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
+            echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
+            if ! bash ci/lint-js-fast; then
+                echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
+            if uv run ci/setup-js-linting-fast.py; then
+                echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
+                if [ -f "ci/lint-js-fast" ]; then
+                    echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
+                    if ! bash ci/lint-js-fast; then
+                        echo -e "${RED}❌ JavaScript linting failed${NC}"
+                        exit 1
+                    fi
+                else
+                    echo -e "${RED}❌ Failed to create lint script${NC}"
+                    exit 1
+                fi
+            else
+                echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
+                echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
+            fi
+        fi
+
+        local duration=$(( $(date +%s) - start_time ))
+        echo "DURATION:${duration}" >> "$logfile.meta"
+    } > "$logfile" 2>&1
+}
+
+# ============================================================================
+# Parallel execution strategy:
+#   - Full lint: C++ and JS start immediately in parallel with ruff+ty+pyright
+#     (C++/JS are independent of Python files, only pyright depends on ruff)
+#   - Single-mode (--cpp/--js): Run that stage inline
+# ============================================================================
+
+# Determine which stages to run
+RUN_PYTHON=false
+RUN_CPP=false
+RUN_JS=false
+
+if [ "$JS_ONLY" = false ] && [ "$CPP_ONLY" = false ]; then
+    RUN_PYTHON=true
+fi
+if [ "$JS_ONLY" = false ]; then
+    RUN_CPP=true
+fi
+if [ "$CPP_ONLY" = false ]; then
+    RUN_JS=true
+fi
+
+# Count how many parallel stages will run (C++ and JS can overlap with Python)
+PARALLEL_COUNT=0
+[ "$RUN_PYTHON" = true ] && ((PARALLEL_COUNT++)) || true
+[ "$RUN_CPP" = true ] && ((PARALLEL_COUNT++)) || true
+[ "$RUN_JS" = true ] && ((PARALLEL_COUNT++)) || true
+
+if [ $PARALLEL_COUNT -gt 1 ]; then
+    echo ""
+    echo "⚡ PARALLEL LINTING (${PARALLEL_COUNT} stages)"
+    echo "================================"
+
+    PARALLEL_START=$(date +%s)
+    PARALLEL_PIDS=()
+    PARALLEL_NAMES=()
+
+    # Launch C++ and JS immediately - they're independent of Python files
+    if [ "$RUN_CPP" = true ]; then
+        run_cpp_lint_stage "$PARALLEL_TMPDIR/cpp.log" "$NO_FINGERPRINT" "$RUN_FULL" "$RUN_IWYU" &
+        PARALLEL_PIDS+=($!)
+        PARALLEL_NAMES+=("cpp_linting")
+        echo "  Started C++ linting (PID $!)"
+    fi
+
+    if [ "$RUN_JS" = true ]; then
+        run_js_lint_stage "$PARALLEL_TMPDIR/js.log" "$NO_FINGERPRINT" &
+        PARALLEL_PIDS+=($!)
+        PARALLEL_NAMES+=("javascript_linting")
+        echo "  Started JavaScript linting (PID $!)"
+    fi
+
+    # Run Python pipeline: ruff+ty (sequential), then optionally pyright (--strict)
+    if [ "$RUN_PYTHON" = true ]; then
+        # ruff+ty run as a single background pipeline, pyright only with --strict
+        (
+            PYTHON_LOGFILE="$PARALLEL_TMPDIR/python.log"
+            {
+                # Phase A: ruff (fixes Python files)
+                RUFF_START=$(date +%s)
+                echo "Running ruff check (linting + import sorting)"
+                uv run ruff check --fix test.py
+                uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+                echo "Running ruff format (formatting)"
+                uv run ruff format test.py
+                uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
+                echo "Running KeyboardInterrupt handler checks"
+                uv run python ci/lint_python/keyboard_interrupt_checker.py test.py ci --exclude ci/tmp ci/wasm .pio
+                echo "Running sys.path.insert/append checks"
+                uv run python ci/lint_python/sys_path_checker.py test.py ci --exclude ci/tmp ci/wasm .pio
+                RUFF_DURATION=$(( $(date +%s) - RUFF_START ))
+                echo "RUFF_DURATION:${RUFF_DURATION}" >> "$PYTHON_LOGFILE.meta"
+                echo "✅ ruff passed (${RUFF_DURATION}s)"
+
+                # Phase B: ty (fast type check, runs after ruff fixes)
+                TY_START=$(date +%s)
+                echo "Running ty (fast type check)"
+                if uv run ty check --output-format concise; then
+                    echo "✅ ty passed"
+                else
+                    echo "❌ ty failed"
+                    exit 1
+                fi
+                TY_DURATION=$(( $(date +%s) - TY_START ))
+                echo "TY_DURATION:${TY_DURATION}" >> "$PYTHON_LOGFILE.meta"
+
+                # Phase C: pyright (only with --strict flag)
+                PYRIGHT_START=$(date +%s)
+                PYRIGHT_SKIPPED=false
+                if [ "$RUN_PYRIGHT" = true ]; then
+                    if [ "$NO_FINGERPRINT" = true ]; then
+                        echo "Running pyright (--no-fingerprint flag set)"
+                        NEEDS_PYRIGHT=true
+                    else
+                        if uv run python ci/python_lint_cache.py check; then
+                            NEEDS_PYRIGHT=true
+                        else
+                            NEEDS_PYRIGHT=false
+                        fi
+                    fi
+
+                    if [ "$NEEDS_PYRIGHT" = true ]; then
+                        if uv run pyright --threads; then
+                            if [ "$NO_FINGERPRINT" != true ]; then
+                                uv run python ci/python_lint_cache.py success
+                            fi
+                            echo "✅ pyright passed"
+                        else
+                            if [ "$NO_FINGERPRINT" != true ]; then
+                                uv run python ci/python_lint_cache.py failure
+                            fi
+                            echo "❌ pyright failed"
+                            exit 1
+                        fi
+                    else
+                        PYRIGHT_SKIPPED=true
+                    fi
+                else
+                    PYRIGHT_SKIPPED=true
+                    echo "⏭️  pyright skipped (use --strict to enable)"
+                fi
+                PYRIGHT_DURATION=$(( $(date +%s) - PYRIGHT_START ))
+                echo "PYRIGHT_DURATION:${PYRIGHT_DURATION}" >> "$PYTHON_LOGFILE.meta"
+                echo "PYRIGHT_SKIPPED:${PYRIGHT_SKIPPED}" >> "$PYTHON_LOGFILE.meta"
+            } > "$PYTHON_LOGFILE" 2>&1
+        ) &
+        PARALLEL_PIDS+=($!)
+        PARALLEL_NAMES+=("python_pipeline")
+        if [ "$RUN_PYRIGHT" = true ]; then
+            echo "  Started Python pipeline: ruff → ty → pyright (PID $!)"
+        else
+            echo "  Started Python pipeline: ruff → ty (PID $!)"
+        fi
+    fi
+
+    echo ""
+
+    # Wait for all parallel stages and collect results
+    PARALLEL_FAILED=false
+    for i in "${!PARALLEL_PIDS[@]}"; do
+        pid="${PARALLEL_PIDS[$i]}"
+        name="${PARALLEL_NAMES[$i]}"
+        if wait "$pid"; then
+            echo "  ✅ ${name} completed"
+        else
+            echo "  ❌ ${name} FAILED"
+            PARALLEL_FAILED=true
+        fi
+    done
+
+    PARALLEL_DURATION=$(get_elapsed_seconds $PARALLEL_START)
+    echo ""
+    echo "  Parallel phase completed in ${PARALLEL_DURATION}s"
+
+    # Print captured output from each stage
+    for i in "${!PARALLEL_NAMES[@]}"; do
+        name="${PARALLEL_NAMES[$i]}"
+        logbase="$PARALLEL_TMPDIR"
+        case "$name" in
+            python_pipeline) logfile="$logbase/python.log" ;;
+            cpp_linting) logfile="$logbase/cpp.log" ;;
+            javascript_linting) logfile="$logbase/js.log" ;;
+        esac
+        if [ -f "$logfile" ]; then
+            echo ""
+            echo "--- ${name} output ---"
+            cat "$logfile"
+        fi
+    done
+
+    # Record durations from meta files
+    if [ "$RUN_PYTHON" = true ]; then
+        RUFF_DURATION=0
+        TY_DURATION=0
+        PYRIGHT_DURATION=0
+        PYRIGHT_SKIPPED=false
+        if [ -f "$PARALLEL_TMPDIR/python.log.meta" ]; then
+            RUFF_DURATION=$(grep "^RUFF_DURATION:" "$PARALLEL_TMPDIR/python.log.meta" | head -1 | cut -d: -f2)
+            TY_DURATION=$(grep "^TY_DURATION:" "$PARALLEL_TMPDIR/python.log.meta" | head -1 | cut -d: -f2)
+            PYRIGHT_DURATION=$(grep "^PYRIGHT_DURATION:" "$PARALLEL_TMPDIR/python.log.meta" | head -1 | cut -d: -f2)
+            PYRIGHT_SKIPPED=$(grep "^PYRIGHT_SKIPPED:" "$PARALLEL_TMPDIR/python.log.meta" | head -1 | cut -d: -f2)
+        fi
+        record_stage "ruff" "${RUFF_DURATION:-0}" false
+        record_stage "ty" "${TY_DURATION:-0}" false
+        record_stage "pyright" "${PYRIGHT_DURATION:-0}" "${PYRIGHT_SKIPPED:-false}"
+    fi
+
+    if [ "$RUN_CPP" = true ]; then
+        CPP_LINT_DURATION=0
+        CPP_LINT_SKIPPED=false
+        IWYU_DURATION=0
+        IWYU_SKIPPED=false
+        if [ -f "$PARALLEL_TMPDIR/cpp.log.meta" ]; then
+            CPP_LINT_DURATION=$(grep "^DURATION:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            CPP_LINT_SKIPPED=$(grep "^SKIPPED:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            IWYU_DURATION=$(grep "^IWYU_DURATION:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            IWYU_SKIPPED=$(grep "^IWYU_SKIPPED:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+        fi
+        record_stage "cpp_linting" "${CPP_LINT_DURATION:-0}" "${CPP_LINT_SKIPPED:-false}"
+        record_stage "iwyu" "${IWYU_DURATION:-0}" "${IWYU_SKIPPED:-false}"
+    fi
+
+    if [ "$RUN_JS" = true ]; then
+        JS_LINT_DURATION=0
+        if [ -f "$PARALLEL_TMPDIR/js.log.meta" ]; then
+            JS_LINT_DURATION=$(grep "^DURATION:" "$PARALLEL_TMPDIR/js.log.meta" | head -1 | cut -d: -f2)
+        fi
+        record_stage "javascript_linting" "${JS_LINT_DURATION:-0}" false
+    fi
+
+    # Fail if any parallel stage failed
+    if [ "$PARALLEL_FAILED" = true ]; then
+        echo ""
+        echo "❌ One or more parallel lint stages failed"
+        exit 1
+    fi
+
+else
+    # Only one stage to run - run it inline (no parallelization needed)
+
+    if [ "$RUN_CPP" = true ] && [ "$RUN_PYTHON" = false ] && [ "$RUN_JS" = false ]; then
+        # Only C++ (--cpp flag)
+        run_cpp_lint_stage "$PARALLEL_TMPDIR/cpp.log" "$NO_FINGERPRINT" "$RUN_FULL" "$RUN_IWYU"
+        cat "$PARALLEL_TMPDIR/cpp.log"
+        CPP_LINT_DURATION=0
+        CPP_LINT_SKIPPED=false
+        IWYU_DURATION=0
+        IWYU_SKIPPED=false
+        if [ -f "$PARALLEL_TMPDIR/cpp.log.meta" ]; then
+            CPP_LINT_DURATION=$(grep "^DURATION:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            CPP_LINT_SKIPPED=$(grep "^SKIPPED:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            IWYU_DURATION=$(grep "^IWYU_DURATION:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+            IWYU_SKIPPED=$(grep "^IWYU_SKIPPED:" "$PARALLEL_TMPDIR/cpp.log.meta" | head -1 | cut -d: -f2)
+        fi
+        record_stage "cpp_linting" "${CPP_LINT_DURATION:-0}" "${CPP_LINT_SKIPPED:-false}"
+        record_stage "iwyu" "${IWYU_DURATION:-0}" "${IWYU_SKIPPED:-false}"
+    fi
+
+    if [ "$RUN_JS" = true ] && [ "$RUN_PYTHON" = false ] && [ "$RUN_CPP" = false ]; then
+        # Only JS (--js flag)
+        run_js_lint_stage "$PARALLEL_TMPDIR/js.log" "$NO_FINGERPRINT"
+        cat "$PARALLEL_TMPDIR/js.log"
+        JS_LINT_DURATION=0
+        if [ -f "$PARALLEL_TMPDIR/js.log.meta" ]; then
+            JS_LINT_DURATION=$(grep "^DURATION:" "$PARALLEL_TMPDIR/js.log.meta" | head -1 | cut -d: -f2)
+        fi
+        record_stage "javascript_linting" "${JS_LINT_DURATION:-0}" false
+    fi
 fi
 
 echo ""
@@ -368,11 +574,13 @@ echo "$separator"
 echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"
+echo "  - Use 'bash lint --strict' to also run pyright (strict type checking, adds ~12s)"
 echo "  - Use 'bash lint --js' for JavaScript linting only"
 echo "  - Use 'bash lint --cpp' for C++ linting only"
 echo "  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis"
 echo "  - Use 'bash lint --iwyu' to run IWYU analysis only"
-echo "  - Python linting includes: ruff (lint + format) + KBI checker + pyright"
+echo "  - Python linting includes: ruff (lint + format) + KBI checker + ty"
+echo "  - Use --strict to also run pyright (strict type checking)"
 echo "  - C++ linting includes: clang-format and custom checkers"
 echo "  - IWYU runs ONLY with --full or --iwyu flags"
 echo "  - JavaScript linting: FAST ONLY (no slow fallback)"

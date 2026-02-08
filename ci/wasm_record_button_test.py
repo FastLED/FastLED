@@ -104,7 +104,7 @@ def install_playwright_browsers():
 
 def start_http_server(port: int, directory: Path):
     """Start HTTP server for serving WASM files"""
-    from fastled import Test  # type: ignore
+    from fastled import Test
 
     server_process = Test.spawn_http_server(
         directory=directory, port=port, open_browser=False

@@ -106,11 +106,11 @@ def main():
         print(f"Output: {output}")
         sys.exit(1)
 
-    size_str = size_match.group(1)  # type: ignore
+    size_str = size_match.group(1)
     if not size_str:
         print("Error: Size group is empty")
         sys.exit(1)
-    size = int(size_str)  # type: ignore
+    size = int(size_str)
 
     if args.max_size is not None and args.max_size > 0:
         max_size = args.max_size

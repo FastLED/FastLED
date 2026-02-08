@@ -467,10 +467,11 @@ def run_package_install_with_retry(
         logging.debug(f"Subprocess PID: {proc.pid}")
 
         output_lines = []
-        for line in proc.stdout:  # type: ignore
+        assert proc.stdout is not None
+        for line in proc.stdout:
             line_stripped = line.strip()
             if line_stripped:
-                output_lines.append(line)  # type: ignore[reportUnknownMemberType]
+                output_lines.append(line)
                 logging.info(f"PlatformIO: {line_stripped}")
 
                 # Extract operation details for better status visibility
@@ -514,7 +515,7 @@ def run_package_install_with_retry(
                 "Check if kill_lingering_processes() killed the daemon subprocess."
             )
 
-        full_output = "".join(output_lines)  # type: ignore[reportUnknownArgumentType]
+        full_output = "".join(output_lines)
 
         if returncode == 0:
             return returncode, full_output
@@ -924,7 +925,7 @@ def main() -> int:
     # Use daemoniker to properly daemonize
     try:
         daemonizer_context = Daemonizer()
-        with daemonizer_context as (is_setup, daemonizer):  # type: ignore[reportUnknownVariableType]
+        with daemonizer_context as (is_setup, daemonizer):
             if is_setup:
                 # Pre-daemon setup (runs as parent process)
                 logging.info("Initializing daemon")

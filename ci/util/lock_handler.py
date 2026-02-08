@@ -63,7 +63,7 @@ def find_processes_locking_path(
     priority_names = {"python.exe", "python3.exe", "python", "uv.exe", "uv"}
 
     # Get all processes and sort by priority
-    all_procs = list(psutil.process_iter(["pid", "name"]))  # type: ignore[misc]
+    all_procs = list(psutil.process_iter(["pid", "name"]))
 
     # Sort processes: priority names first, then others
     def sort_key(proc: Any) -> int:
@@ -121,7 +121,7 @@ def find_processes_locking_path(
                             f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}"
                         )
                         # Verify process still exists
-                        if not psutil.pid_exists(proc.info["pid"]):  # type: ignore[misc]
+                        if not psutil.pid_exists(proc.info["pid"]):
                             print(
                                 f"  Warning: Process {proc.info['pid']} no longer exists (stale)"
                             )

@@ -1164,25 +1164,22 @@ def main() -> int:
             if args.check_usage and sketch_name.lower() == "validation":
                 # Display red banner error
                 print()
-                print(Fore.RED + "=" * 60)
-                print(Fore.RED + "⚠️  ERROR: DO NOT USE 'bash debug Validation'")
-                print(Fore.RED + "=" * 60)
+                print(f"{Fore.RED}{'=' * 60}")
+                print(f"{Fore.RED}⚠️  ERROR: DO NOT USE 'bash debug Validation'")
+                print(f"{Fore.RED}{'=' * 60}")
                 print(
-                    Fore.RED
-                    + "The Validation sketch requires specific --expect and --fail-on"
+                    f"{Fore.RED}The Validation sketch requires specific --expect and --fail-on"
                 )
                 print(
-                    Fore.RED
-                    + "patterns to work correctly. Use the dedicated wrapper instead:"
+                    f"{Fore.RED}patterns to work correctly. Use the dedicated wrapper instead:"
                 )
                 print()
-                print(Fore.YELLOW + "  bash validate" + Style.RESET_ALL)
+                print(f"{Fore.YELLOW}  bash validate{Style.RESET_ALL}")
                 print()
                 print(
-                    Fore.RED
-                    + "This ensures proper pattern matching and prevents false positives."
+                    f"{Fore.RED}This ensures proper pattern matching and prevents false positives."
                 )
-                print(Fore.RED + "=" * 60 + Style.RESET_ALL)
+                print(f"{Fore.RED}{'=' * 60}{Style.RESET_ALL}")
                 print()
                 return 1
 
@@ -1239,9 +1236,9 @@ def main() -> int:
         result = auto_detect_upload_port()
         if not result.ok:
             # Port detection failed - display detailed error and exit
-            print(Fore.RED + "=" * 60)
-            print(Fore.RED + "⚠️  FATAL ERROR: PORT DETECTION FAILED")
-            print(Fore.RED + "=" * 60)
+            print(f"{Fore.RED}{'=' * 60}")
+            print(f"{Fore.RED}⚠️  FATAL ERROR: PORT DETECTION FAILED")
+            print(f"{Fore.RED}{'=' * 60}")
             print(f"\n{Fore.RED}{result.error_message}{Style.RESET_ALL}\n")
 
             # Display all scanned ports for diagnostics

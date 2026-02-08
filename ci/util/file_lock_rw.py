@@ -54,7 +54,8 @@ def is_process_alive(pid: int) -> bool:
             # Windows: Try to open process handle
             import ctypes
 
-            kernel32 = ctypes.windll.kernel32
+            windll = getattr(ctypes, "windll")
+            kernel32 = windll.kernel32
             PROCESS_QUERY_INFORMATION = 0x0400
             handle = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, False, pid)
             if handle:

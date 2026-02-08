@@ -13,7 +13,7 @@ import warnings
 from pathlib import Path
 from typing import Optional
 
-from download import download  # type: ignore
+from download import download
 
 
 # Configs

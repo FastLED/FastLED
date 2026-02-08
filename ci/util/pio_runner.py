@@ -76,18 +76,19 @@ def create_pio_process(
         )
 
     # Register process for orphan cleanup by daemon and for atexit killing
-    if auto_run and hasattr(proc, "pid") and proc.pid:  # type: ignore[reportUnknownMemberType]
+    if auto_run and proc.proc is not None and isinstance(proc.proc, subprocess.Popen):
+        popen: subprocess.Popen[Any] = proc.proc
+        pid = popen.pid
         register_build_process(
-            root_pid=proc.pid,  # type: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+            root_pid=pid,
             project_dir=str(cwd),
         )
         # Unregister on normal exit
         atexit.register(unregister_build_process)
 
         # Also register with process killer for atexit cleanup
-        if hasattr(proc, "proc") and proc.proc is not None:  # type: ignore[reportUnknownMemberType]
-            register_pio_process(proc.proc)  # type: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-            atexit.register(lambda p=proc.proc: unregister_pio_process(p))  # type: ignore[reportUnknownMemberType, reportUnknownArgumentType, reportUnknownLambdaType]
+        register_pio_process(popen)
+        atexit.register(lambda p=popen: unregister_pio_process(p))
 
     return proc
 

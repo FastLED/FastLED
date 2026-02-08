@@ -158,7 +158,7 @@ class Board:
             field_value: Any = getattr(self, field_name)
             # Create deep copy for mutable types to avoid shared references
             if isinstance(field_value, (list, dict)):
-                field_value = deepcopy(field_value)  # type: ignore[misc]
+                field_value = deepcopy(field_value)
             setattr(out, field_name, field_value)
         return out
 
@@ -1072,7 +1072,7 @@ def create_board(board_name: str, no_project_options: bool = False) -> Board:
         board = _BOARD_MAP[board_name]
     else:
         # Try reverse lookup by real_board_name (alias support)
-        board = None  # type: ignore[assignment]
+        board = None
         for candidate in ALL:
             if candidate.real_board_name == board_name:
                 board = candidate

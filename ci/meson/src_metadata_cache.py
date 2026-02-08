@@ -174,6 +174,7 @@ def main() -> None:
         if cache is None:
             # Cache miss - exit with failure, no output
             sys.exit(1)
+        assert cache is not None
 
         # Compute current hash
         current_hash = compute_src_files_hash(args.src_dir, args.pattern)

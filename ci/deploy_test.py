@@ -12,10 +12,7 @@ import sys
 import time
 from pathlib import Path
 
-
-# Import kill_file_lock utility
-sys.path.insert(0, str(Path(__file__).parent))  # noqa: SPI001
-from util.kill_file_lock import kill_process_holding_file
+from ci.util.kill_file_lock import kill_process_holding_file
 
 
 def safe_copy(src: Path, dest: Path, max_retries: int = 3) -> None:

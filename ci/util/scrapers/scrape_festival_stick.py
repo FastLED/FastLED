@@ -6,7 +6,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from playwright.async_api import async_playwright  # type: ignore
+from playwright.async_api import async_playwright
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 

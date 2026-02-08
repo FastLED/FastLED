@@ -374,7 +374,7 @@ class TwoLayerFingerprintCache:
                 data: Any = json.load(f)
                 # Ensure data is a dict (backward compatibility)
                 if isinstance(data, dict) and "files" in data:
-                    files_value: Any = data["files"]  # type: ignore[reportUnknownVariableType]
+                    files_value: Any = data["files"]
                     if isinstance(files_value, dict):
                         return cast(dict[str, dict[str, float | str]], files_value)
                 if isinstance(data, dict):
@@ -561,9 +561,7 @@ class TwoLayerFingerprintCache:
             files_data_raw: Any = fingerprint_data.get("files", {})
             # Type-safe extraction - ensure it's the right type
             if isinstance(files_data_raw, dict):
-                self._write_cache_data(
-                    cast(dict[str, dict[str, float | str]], files_data_raw)
-                )
+                self._write_cache_data(files_data_raw)
 
         # Clear pending data (both file and memory)
         self._clear_pending_fingerprint()
@@ -658,9 +656,9 @@ class HashFingerprintCache:
         hasher = hashlib.sha256()
 
         # Sort paths for consistent ordering
-        sorted_paths = sorted(file_paths, key=str)
+        file_paths.sort(key=str)
 
-        for file_path in sorted_paths:
+        for file_path in file_paths:
             if file_path.exists() and file_path.is_file():
                 # Include file path and modification time
                 hasher.update(str(file_path.resolve()).encode("utf-8"))

@@ -29,7 +29,7 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
 import fasteners
 import httpx
@@ -692,7 +692,7 @@ def install_with_platformio(
 
         # Stream output in real-time
         for line in process.line_iter(timeout=300):
-            line_str = cast(str, line)
+            line_str = line
             print(f"PIO: {line_str}")
 
         # Wait for completion and check result

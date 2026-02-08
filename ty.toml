@@ -1,0 +1,39 @@
+# ty type checker configuration
+# ty is the primary fast type checker (~0.6s vs pyright's ~12s)
+# pyright available via `bash lint --strict` for thorough checking
+# See: https://docs.astral.sh/ty/
+
+[environment]
+python-version = "3.11"
+python-platform = "all"
+
+[src]
+# Match pyright's include/exclude patterns
+include = ["ci", "test.py"]
+exclude = [
+    "ci/tmp/**",
+    "ci/wasm/**",
+    "ci/native/**",
+    "ci/tests/**",
+    "ci/util/test_*.py",
+    "ci/compiler/packages.py",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.ruff_cache",
+    "**/node_modules",
+    "**/.git",
+    "**/.venv",
+    "**/.build",
+    "**/.pio",
+    "**/.pio_cache",
+    "**/build",
+    "**/dist",
+    "**/*.egg-info",
+]
+
+# All 103 ty rules are active - zero suppressions.
+# Previously 11 rules were suppressed due to ty beta limitations.
+# All false positives resolved via:
+# - Code fixes (colorama f-strings, assert narrowing)
+# - Targeted # ty: ignore comments for genuine beta inference gaps
+# - Removal of 91 redundant # type: ignore comments (pyright-only)

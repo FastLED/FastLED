@@ -8,8 +8,7 @@ Tests the conversion between datasheet format (T0H, T0L, T1H, T1L) and
 
 import unittest
 
-# Import the timing conversion module
-from tools.led_timing_conversions import (
+from ci.tools.led_timing_conversions import (
     Timing3Phase,
     TimingDatasheet,
     datasheet_to_phase3,

@@ -101,6 +101,7 @@ def main():
         print("ERROR: include-what-you-use binary not found", file=sys.stderr)
         print("Install via: pip install clang-tool-chain", file=sys.stderr)
         sys.exit(1)
+    assert iwyu_binary is not None
 
     # Parse arguments
     # Format: iwyu_wrapper.py [iwyu-specific-args] -- compiler [compiler-args] source.cpp

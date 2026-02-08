@@ -379,7 +379,7 @@ def analyze_function_calls(
     symbol_output = run_command(cmd)
 
     # Build symbol address map for function symbols
-    symbol_map: dict[str, str] = {}  # address -> symbol_name
+    symbol_map: dict[str, dict[str, str]] = {}  # address -> {name, demangled}
     function_symbols: set[str] = set()  # set of function names
 
     for line in symbol_output.strip().split("\n"):
@@ -397,7 +397,11 @@ def analyze_function_calls(
                 # Demangle the symbol name
                 demangled_name = demangle_symbol(symbol_name, cppfilt_path)
 
-                symbol_map[address] = {"name": symbol_name, "demangled": demangled_name}
+                entry: dict[str, str] = {
+                    "name": symbol_name,
+                    "demangled": demangled_name,
+                }
+                symbol_map[address] = entry
                 function_symbols.add(demangled_name)
             except (ValueError, IndexError):
                 continue
@@ -609,8 +613,8 @@ def generate_report(
             )
 
     # Initialize variables for enhanced mode data
-    most_called = []
-    most_calling = []
+    most_called_stats: list[tuple[str, int]] = []
+    most_calling_stats: list[tuple[str, int]] = []
 
     # Enhanced function call analysis
     if enhanced_mode and call_graph and reverse_call_graph:
@@ -622,6 +626,7 @@ def generate_report(
         most_called = sorted(
             reverse_call_graph.items(), key=lambda x: len(x[1]), reverse=True
         )
+        most_called_stats = [(name, len(callers)) for name, callers in most_called]
         print("\nMOST CALLED FUNCTIONS (functions called by many others):")
         for i, (func_name, callers) in enumerate(most_called[:15]):
             short_name = func_name[:60] + "..." if len(func_name) > 60 else func_name
@@ -640,6 +645,7 @@ def generate_report(
 
         # Functions that call many others
         most_calling = sorted(call_graph.items(), key=lambda x: len(x[1]), reverse=True)
+        most_calling_stats = [(name, len(callees)) for name, callees in most_calling]
         print("\nFUNCTIONS THAT CALL MANY OTHERS:")
         for i, (func_name, callees) in enumerate(most_calling[:10]):
             short_name = func_name[:60] + "..." if len(func_name) > 60 else func_name
@@ -696,8 +702,8 @@ def generate_report(
         report_data.call_stats = CallStats(
             functions_with_calls=len(call_graph),
             functions_called_by_others=len(reverse_call_graph),
-            most_called=most_called[:10],
-            most_calling=most_calling[:10],
+            most_called=most_called_stats[:10],
+            most_calling=most_calling_stats[:10],
         )
 
     return report_data
@@ -728,6 +734,8 @@ def find_board_build_info(
     if not build_dir:
         print("Error: Could not find build directory (.build)")
         sys.exit(1)
+
+    assert build_dir is not None
 
     # If specific board requested, look for it
     if board_name:

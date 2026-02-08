@@ -14,12 +14,6 @@ Usage:
 import sys
 from pathlib import Path
 
-
-# Add project root to sys.path for imports
-project_root = Path(__file__).resolve().parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))  # noqa: SPI001
-
 from ci.boards import Board
 from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch
 

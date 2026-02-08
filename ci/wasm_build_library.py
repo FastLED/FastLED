@@ -488,7 +488,7 @@ def load_metadata() -> dict[str, Any]:
 
     try:
         with open(LIBRARY_METADATA) as f:
-            return json.load(f)  # type: ignore[no-any-return]
+            return json.load(f)
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise

@@ -159,6 +159,7 @@ def execute_direct(config: XCacheConfig, args: list[str]) -> int:
         )
 
         # Manually pump output until process finishes
+        assert process.stdout is not None
         while True:
             output = process.stdout.readline()
             if output == "" and process.poll() is not None:
@@ -245,6 +246,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
         )
 
         # Manually pump output until process finishes
+        assert process.stdout is not None
         while True:
             output = process.stdout.readline()
             if output == "" and process.poll() is not None:

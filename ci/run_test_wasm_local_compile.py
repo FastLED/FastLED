@@ -12,7 +12,7 @@ class ApiTester(unittest.TestCase):
 
     def test_build_all_examples(self) -> None:
         """Test command line interface (CLI)."""
-        from fastled import Api, Test  # type: ignore
+        from fastled import Api, Test
 
         with Api.server(auto_updates=True) as server:
             exception_map = Test.test_examples(host=server)

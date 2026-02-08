@@ -317,7 +317,7 @@ class FrameworkInfo:
     description: Optional[str] = None
     url: Optional[str] = None
     homepage: Optional[str] = None
-    platforms: list[str] = field(default_factory=list)  # type: ignore
+    platforms: list[str] = field(default_factory=list)
     version: Optional[str] = None
 
     @classmethod
@@ -366,8 +366,8 @@ class ResolvedUrlsCache:
     Strongly typed representation of the complete resolved URLs cache.
     """
 
-    platforms: dict[str, PlatformCacheEntry] = field(default_factory=dict)  # type: ignore
-    frameworks: dict[str, FrameworkCacheEntry] = field(default_factory=dict)  # type: ignore
+    platforms: dict[str, PlatformCacheEntry] = field(default_factory=dict)
+    frameworks: dict[str, FrameworkCacheEntry] = field(default_factory=dict)
 
 
 @dataclass
@@ -1493,13 +1493,13 @@ class PlatformIOIni:
                 continue
 
             package = PackageInfo(
-                name=str(pkg_data.get("name", "")),  # type: ignore
-                type=str(pkg_data.get("type", "")),  # type: ignore
-                requirements=str(pkg_data.get("requirements", "")),  # type: ignore
-                url=str(pkg_data.get("url", "")),  # type: ignore
-                optional=bool(pkg_data.get("optional", True)),  # type: ignore
-                version=pkg_data.get("version"),  # type: ignore
-                description=pkg_data.get("description"),  # type: ignore
+                name=str(pkg_data.get("name", "")),
+                type=str(pkg_data.get("type", "")),
+                requirements=str(pkg_data.get("requirements", "")),
+                url=str(pkg_data.get("url", "")),
+                optional=bool(pkg_data.get("optional", True)),
+                version=pkg_data.get("version"),
+                description=pkg_data.get("description"),
             )
             packages.append(package)
 
@@ -1516,13 +1516,13 @@ class PlatformIOIni:
                 continue
 
             package = PackageInfo(
-                name=str(pkg_data.get("name", "")),  # type: ignore
-                type=str(pkg_data.get("type", "")),  # type: ignore
-                requirements=str(pkg_data.get("requirements", "")),  # type: ignore
-                url=str(pkg_data.get("url", "")),  # type: ignore
-                optional=bool(pkg_data.get("optional", True)),  # type: ignore
-                version=pkg_data.get("version"),  # type: ignore
-                description=pkg_data.get("description"),  # type: ignore
+                name=str(pkg_data.get("name", "")),
+                type=str(pkg_data.get("type", "")),
+                requirements=str(pkg_data.get("requirements", "")),
+                url=str(pkg_data.get("url", "")),
+                optional=bool(pkg_data.get("optional", True)),
+                version=pkg_data.get("version"),
+                description=pkg_data.get("description"),
             )
             packages.append(package)
 
@@ -1619,7 +1619,7 @@ class PlatformIOIni:
         )
         if raw_data and isinstance(raw_data, dict):
             try:
-                return PlatformShowResponse.from_dict(raw_data)  # type: ignore
+                return PlatformShowResponse.from_dict(raw_data)
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise

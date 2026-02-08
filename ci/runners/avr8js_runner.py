@@ -17,6 +17,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
     if not args.run or len(args.run) < 1:
         ts_print("Error: --run requires a board (e.g., uno)")
         sys.exit(1)
+    assert args.run is not None
 
     board = args.run[0].lower()
     supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]

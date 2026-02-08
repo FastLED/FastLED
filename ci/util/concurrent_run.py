@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from ci.boards import Board  # type: ignore
+from ci.boards import Board
 from ci.compiler.compile_for_board import compile_examples, errors_happened
 from ci.util.cpu_count import cpu_count
 from ci.util.create_build_dir import create_build_dir

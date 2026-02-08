@@ -346,9 +346,9 @@ class ValidationAgent:
             results = state.get("results", {})
 
             lane_results = []
-            for detail in results.get("details", []):  # type: ignore[reportUnknownMemberType]
+            for detail in results.get("details", []):
                 lane_idx = detail["lane"]
-                lane_results.append(  # type: ignore[reportUnknownMemberType]
+                lane_results.append(
                     LaneResult(
                         lane=lane_idx,
                         led_count=detail.get("ledCount", 0),
@@ -367,7 +367,7 @@ class ValidationAgent:
                 passed_tests=results["passedTests"],
                 failed_tests=results["failedTests"],
                 duration_ms=state.get("timing", {}).get("durationMs", 0),
-                lane_results=lane_results,  # type: ignore[reportUnknownArgumentType]
+                lane_results=lane_results,
             )
 
         # Streaming mode - parse RESULT: prefixed JSONL events

@@ -540,6 +540,7 @@ def handle_interactive() -> None:
                     "\nERROR: Invalid timing (produces negative values in datasheet format)"
                 )
                 sys.exit(1)
+            assert ds is not None
 
             print()
             print("Results:")
@@ -598,6 +599,7 @@ def handle_fastled(T1: int, T2: int, T3: int, verbose: bool) -> None:
     if ds is None:
         print("ERROR: Invalid timing (negative values in datasheet format)")
         sys.exit(1)
+    assert ds is not None
 
     if verbose:
         print(f"3-Phase Format:   {fl}")

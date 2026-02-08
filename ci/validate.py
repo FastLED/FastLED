@@ -80,7 +80,7 @@ from ci.util.port_utils import (
 # Try to import fbuild ledger for cached chip detection
 try:
     from fbuild.ledger import (  # pyright: ignore[reportMissingImports]
-        detect_and_cache as fbuild_detect_and_cache,  # type: ignore[import-not-found]
+        detect_and_cache as fbuild_detect_and_cache,
     )
 
     FBUILD_LEDGER_AVAILABLE = True
@@ -786,9 +786,9 @@ def run(args: Args | None = None) -> int:
 
     # MANDATORY: At least one driver OR --simd must be specified
     if not drivers and not simd_test_mode:
-        print(Fore.RED + "=" * 60)
-        print(Fore.RED + "ERROR: No LED driver specified.")
-        print(Fore.RED + "=" * 60)
+        print(f"{Fore.RED}{'=' * 60}")
+        print(f"{Fore.RED}ERROR: No LED driver specified.")
+        print(f"{Fore.RED}{'=' * 60}")
         print(
             f"\n{Fore.RED}You must specify at least one driver to test.{Style.RESET_ALL}\n"
         )
@@ -1050,9 +1050,9 @@ def run(args: Args | None = None) -> int:
         result = auto_detect_upload_port()
         if not result.ok:
             # Port detection failed - display detailed error and exit
-            print(Fore.RED + "=" * 60)
-            print(Fore.RED + "⚠️  FATAL ERROR: PORT DETECTION FAILED")
-            print(Fore.RED + "=" * 60)
+            print(f"{Fore.RED}{'=' * 60}")
+            print(f"{Fore.RED}⚠️  FATAL ERROR: PORT DETECTION FAILED")
+            print(f"{Fore.RED}{'=' * 60}")
             print(f"\n{Fore.RED}{result.error_message}{Style.RESET_ALL}\n")
 
             # Display all scanned ports for diagnostics
@@ -1165,9 +1165,9 @@ def run(args: Args | None = None) -> int:
 
     default_env = get_default_environment(str(build_dir))
     if detected_environment and default_env and detected_environment != default_env:
-        print(Fore.YELLOW + "=" * 60)
-        print(Fore.YELLOW + "⚠️  PLATFORM MISMATCH WARNING")
-        print(Fore.YELLOW + "=" * 60)
+        print(f"{Fore.YELLOW}{'=' * 60}")
+        print(f"{Fore.YELLOW}⚠️  PLATFORM MISMATCH WARNING")
+        print(f"{Fore.YELLOW}{'=' * 60}")
         print(
             f"{Fore.YELLOW}Detected chip: {detected_chip_type} ({detected_environment})"
         )
@@ -1178,7 +1178,7 @@ def run(args: Args | None = None) -> int:
         print(
             f"{Fore.YELLOW}To make this permanent, update platformio.ini: default_envs = {detected_environment}"
         )
-        print(Fore.YELLOW + "=" * 60 + Style.RESET_ALL)
+        print(f"{Fore.YELLOW}{'=' * 60}{Style.RESET_ALL}")
         print()
 
     # ============================================================

@@ -29,6 +29,7 @@ class GlobalInterruptHandler:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = cls()
+        assert cls._instance is not None
         return cls._instance
 
     def is_interrupted(self) -> bool:

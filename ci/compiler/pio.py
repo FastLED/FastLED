@@ -919,7 +919,10 @@ class PioCompiler(Compiler):
         try:
             import os
 
-            return os.geteuid() == 0
+            geteuid = getattr(os, "geteuid", None)
+            if geteuid is not None:
+                return geteuid() == 0
+            return False
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
             raise

@@ -11,7 +11,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Optional
 
-from ci.boards import Board  # type: ignore
+from ci.boards import Board
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.locked_print import locked_print
 

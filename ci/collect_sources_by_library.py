@@ -9,7 +9,7 @@ Example: LIBRARY:fl:src/fl/algorithm.cpp
 
 import sys
 
-from discover_sources import discover_sources
+from ci.discover_sources import discover_sources
 
 
 # Source directories organized by library

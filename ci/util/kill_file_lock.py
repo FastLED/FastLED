@@ -43,7 +43,7 @@ def kill_process_holding_file(file_path: Path) -> bool:
 
     # Strategy 1: Kill processes by matching executable name
     # This is the most reliable approach on Windows
-    for proc in psutil.process_iter(["pid", "name", "exe"]):  # type: ignore[reportUnknownMemberType]
+    for proc in psutil.process_iter(["pid", "name", "exe"]):
         try:
             proc_name = proc.info["name"]
             if proc_name and proc_name.lower() == exe_name.lower():
@@ -72,7 +72,7 @@ def kill_process_holding_file(file_path: Path) -> bool:
 
     # Strategy 2: Try to find by open file handles (may not work on Windows without admin)
     if not killed:
-        for proc in psutil.process_iter(["pid", "name"]):  # type: ignore[reportUnknownMemberType]
+        for proc in psutil.process_iter(["pid", "name"]):
             try:
                 # Get open files for this process
                 open_files = proc.open_files()

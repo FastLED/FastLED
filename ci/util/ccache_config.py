@@ -53,7 +53,7 @@ def get_ccache_path() -> Optional[str]:
     return None
 
 
-def configure_ccache(env: PlatformIOEnv) -> None:  # type: ignore # env is provided by PlatformIO
+def configure_ccache(env: PlatformIOEnv) -> None:  # env is provided by PlatformIO
     """Configure CCACHE for the build environment."""
     if not is_ccache_available():
         print("CCACHE is not available. Skipping CCACHE configuration.")

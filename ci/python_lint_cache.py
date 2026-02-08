@@ -47,7 +47,8 @@ def get_python_files() -> list[Path]:
     if pyproject.exists():
         files.append(pyproject)
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files
 
 
 def _get_python_lint_cache() -> TwoLayerFingerprintCache:

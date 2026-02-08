@@ -374,10 +374,10 @@ def run_checker_standalone(
         results = CheckerResults()
         for file_path, violation_list in violations.items():
             if isinstance(violation_list, list):
-                for item in violation_list:  # type: ignore[misc]
-                    if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[arg-type]
-                        line_num: int = int(item[0])  # type: ignore[misc]
-                        content: str = str(item[1])  # type: ignore[misc]
+                for item in violation_list:
+                    if isinstance(item, tuple) and len(item) >= 2:
+                        line_num: int = int(item[0])
+                        content: str = str(item[1])
                         results.add_violation(file_path, line_num, content)
             elif isinstance(violation_list, str):
                 results.add_violation(file_path, 0, violation_list)

@@ -108,7 +108,7 @@ def run_subprocess_safe(
     kwargs.setdefault("encoding", "utf-8")
     kwargs.setdefault("errors", "replace")
     kwargs.setdefault("env", get_docker_env())
-    return subprocess.run(cmd, **kwargs)  # type: ignore[misc]
+    return subprocess.run(cmd, **kwargs)
 
 
 def run_docker_command_streaming(cmd: list[str]) -> int:

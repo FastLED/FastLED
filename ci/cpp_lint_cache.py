@@ -70,7 +70,8 @@ def get_cpp_files() -> list[Path]:
             if py_file.is_file():
                 files.append(py_file)
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files
 
 
 def _get_cpp_lint_cache() -> TwoLayerFingerprintCache:

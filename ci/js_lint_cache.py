@@ -35,7 +35,8 @@ def get_directory_files(directory: Path) -> list[Path]:
         if file_path.is_file():
             all_files.append(file_path)
 
-    return sorted(all_files, key=str)
+    all_files.sort(key=str)
+    return all_files
 
 
 def _get_js_lint_cache() -> TwoLayerFingerprintCache:

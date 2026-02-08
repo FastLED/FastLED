@@ -25,7 +25,7 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.boards import Board, create_board  # type: ignore
+from ci.boards import Board, create_board
 from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.util.locked_print import locked_print
 

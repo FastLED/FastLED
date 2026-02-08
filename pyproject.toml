@@ -43,6 +43,7 @@ dependencies = [
     "running-process>=1.0.6",
     "daemoniker>=0.2.3",
     "colorama>=0.4.6",
+    "ty>=0.0.15",
 ]
 
 [build-system]

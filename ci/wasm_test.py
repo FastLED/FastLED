@@ -8,7 +8,7 @@ import sys
 import time
 from pathlib import Path
 
-from playwright.async_api import ConsoleMessage, async_playwright  # type: ignore
+from playwright.async_api import ConsoleMessage, async_playwright
 from rich.console import Console
 from rich.panel import Panel
 

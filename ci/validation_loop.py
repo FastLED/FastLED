@@ -20,9 +20,11 @@ import json
 import sys
 from typing import Any, Callable
 
-from validation_agent import TestConfig, ValidationAgent
-
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.validation_agent import (
+    TestConfig,
+    ValidationAgent,
+)
 
 
 # Predefined lane size configurations for testing
@@ -73,19 +75,19 @@ def generate_lane_configs(
     if presets:
         for preset_name in presets:
             if preset_name in LANE_SIZE_PRESETS:
-                configs.append(LANE_SIZE_PRESETS[preset_name](lane_count))  # type: ignore[reportUnknownMemberType]
+                configs.append(LANE_SIZE_PRESETS[preset_name](lane_count))
 
     # Add custom configurations
     if custom_configs:
         for custom in custom_configs:
             if len(custom) == lane_count:
-                configs.append(custom)  # type: ignore[reportUnknownMemberType]
+                configs.append(custom)
 
     # Default: uniform medium if nothing specified
     if not configs:
-        configs.append([100] * lane_count)  # type: ignore[reportUnknownMemberType]
+        configs.append([100] * lane_count)
 
-    return configs  # type: ignore[reportUnknownVariableType]
+    return configs
 
 
 def run_validation_loop(
@@ -175,7 +177,7 @@ def run_validation_loop(
                     config_response = agent.configure(config)
                     if not config_response.get("success"):
                         print(f"  Config failed: {config_response.get('error')}")
-                        all_results.append(  # type: ignore[reportUnknownMemberType]
+                        all_results.append(
                             {
                                 "config": {
                                     "driver": config.driver,
@@ -208,7 +210,7 @@ def run_validation_loop(
                                 print(f" - {lr.bit_errors} bit errors", end="")
                             print()
 
-                        all_results.append(  # type: ignore[reportUnknownMemberType]
+                        all_results.append(
                             {
                                 "config": {
                                     "driver": config.driver,
@@ -245,7 +247,7 @@ def run_validation_loop(
                         raise
                     except Exception as e:
                         print(f"  Error: {e}")
-                        all_results.append(  # type: ignore[reportUnknownMemberType]
+                        all_results.append(
                             {
                                 "config": {
                                     "driver": config.driver,

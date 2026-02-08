@@ -37,7 +37,7 @@ def is_fbuild_available() -> bool:
         True if fbuild can be imported, False otherwise.
     """
     try:
-        import fbuild  # type: ignore[import-not-found]
+        import fbuild
 
         return fbuild.is_available()
     except ImportError:
@@ -51,9 +51,9 @@ def get_fbuild_version() -> str | None:
         Version string if available, None otherwise.
     """
     try:
-        import fbuild  # type: ignore[import-not-found]
+        import fbuild
 
-        return fbuild.__version__  # type: ignore[no-any-return]
+        return fbuild.__version__
     except ImportError:
         return None
 
@@ -82,9 +82,9 @@ def fbuild_build_and_upload(
         Tuple of (success: bool, message: str)
     """
     try:
-        from fbuild import connect_daemon  # type: ignore[import-not-found]
+        from fbuild import connect_daemon
         from fbuild.daemon import (
-            ensure_daemon_running,  # type: ignore[import-not-found]
+            ensure_daemon_running,
         )
     except ImportError as e:
         return False, f"fbuild not available: {e}"
@@ -136,9 +136,9 @@ def fbuild_build_only(
         Tuple of (success: bool, message: str)
     """
     try:
-        from fbuild import connect_daemon  # type: ignore[import-not-found]
+        from fbuild import connect_daemon
         from fbuild.daemon import (
-            ensure_daemon_running,  # type: ignore[import-not-found]
+            ensure_daemon_running,
         )
     except ImportError as e:
         return False, f"fbuild not available: {e}"

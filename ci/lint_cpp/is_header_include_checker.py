@@ -36,7 +36,9 @@ FL_IS_PREFIX_TO_HEADER: dict[str, str] = {
 }
 
 # Pre-sorted list of prefixes, longest first (for longest-prefix matching)
-_SORTED_PREFIXES = sorted(FL_IS_PREFIX_TO_HEADER.keys(), key=len, reverse=True)
+_PREFIX_LIST: list[str] = list(FL_IS_PREFIX_TO_HEADER.keys())
+_PREFIX_LIST.sort(key=len, reverse=True)
+_SORTED_PREFIXES: list[str] = _PREFIX_LIST
 
 # Regex to find FL_IS_* macro names
 _FL_IS_RE = re.compile(r"\bFL_IS_\w+")

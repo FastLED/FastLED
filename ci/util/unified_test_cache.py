@@ -82,7 +82,8 @@ def get_src_code_files() -> list[Path]:
         for pattern in ("**/*.h", "**/*.hpp", "**/*.cpp", "**/*.c"):
             files.extend(src_dir.glob(pattern))
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files
 
 
 def get_cpp_test_files() -> list[Path]:
@@ -98,7 +99,8 @@ def get_cpp_test_files() -> list[Path]:
     # Also include source files as dependencies
     files.extend(get_src_code_files())
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files
 
 
 def get_examples_files() -> list[Path]:
@@ -114,7 +116,8 @@ def get_examples_files() -> list[Path]:
     # Also include source files as dependencies
     files.extend(get_src_code_files())
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files
 
 
 def get_python_test_files() -> list[Path]:
@@ -130,4 +133,5 @@ def get_python_test_files() -> list[Path]:
     if pyproject.exists():
         files.append(pyproject)
 
-    return sorted(files, key=str)
+    files.sort(key=str)
+    return files

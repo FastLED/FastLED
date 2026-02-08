@@ -40,7 +40,7 @@ class TestResult:
     success: bool
     duration: float
     output: str
-    captured_lines: list[str] = field(default_factory=list)  # type: ignore
+    captured_lines: list[str] = field(default_factory=list)
     return_code: Optional[int] = None
 
 
@@ -203,6 +203,7 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> list
     if not test_dir:
         print(f"Error: No test directory found. Checked: {possible_test_dirs}")
         sys.exit(1)
+    assert test_dir is not None
 
     test_files: list[Path] = []
     for pattern in _get_test_patterns():

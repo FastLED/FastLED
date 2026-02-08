@@ -16,6 +16,7 @@ def run_qemu_tests(args: TestArgs) -> None:
     if not args.qemu or len(args.qemu) < 1:
         ts_print("Error: --qemu requires a platform (e.g., esp32s3)")
         sys.exit(1)
+    assert args.qemu is not None
 
     platform = args.qemu[0].lower()
     supported_platforms = ["esp32dev", "esp32c3", "esp32s3"]
