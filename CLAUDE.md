@@ -20,7 +20,7 @@ This project uses directory-specific agent guidelines. See:
 - `uv run test.py` - Run all tests
 - `uv run test.py --cpp` - Run C++ tests only
 - `uv run test.py TestName` - Run specific C++ test (e.g., `uv run test.py xypath`)
-- `uv run test.py --no-fingerprint` - Disable fingerprint caching (force rebuild/rerun) ⚠️ **Avoid unless necessary - very slow**
+- `uv run test.py --no-fingerprint` - ⚠️ **LAST RESORT ONLY**: Disable fingerprint caching when debugging Meson framework issues (very slow, bypasses build cache)
 - `bash lint` - Run code formatting/linting
 - `bash validate` - 🎯 **AI agents: Use this for live device testing** (hardware-in-the-loop validation)
 - `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
@@ -693,7 +693,7 @@ The package installation daemon is a singleton background process that ensures P
   - Consider enabling BLE001 with `--select BLE001` for automatic detection
 
 ### JavaScript Code Standards
-- **After modifying any JavaScript files**: Always run `bash lint --js --no-fingerprint` to ensure proper formatting
+- **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
 
 ### Meson Build System Standards
 **Critical Information for Working with meson.build Files**:
